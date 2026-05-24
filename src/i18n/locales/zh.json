@@ -26,7 +26,11 @@
     "spotsRemaining": "空位剩余",
     "attendees": "人参加",
     "pinOrders": "{{count}} 个拼单",
-    "pinOrdersActive": "{{count}} 个拼单进行中"
+    "pinOrdersActive": "{{count}} 个拼单进行中",
+    "loading": "加载中…",
+    "loadError": "加载失败，请稍后重试",
+    "empty": "暂无数据",
+    "retry": "重试"
   },
   "language": {
     "title": "语言",
@@ -48,7 +52,21 @@
       "placeholder": "告诉我你想拼什么…"
     },
     "hot": {
-      "title": "正在热拼活动"
+      "title": "正在热拼",
+      "live": "实时"
+    },
+    "signup": {
+      "title": "活动报名",
+      "attendees": "{{count}} 人参加",
+      "pinOrders": "{{count}} 拼单",
+      "wantGo": "我要去",
+      "going": "已报名",
+      "findBuddy": "找搭子拼"
+    },
+    "heat": {
+      "title": "今日热度",
+      "people": "{{count}} 人",
+      "pinOrders": "{{count}} 拼单"
     },
     "package": {
       "tag": "省钱新玩法",
@@ -60,8 +78,12 @@
       "stats": "目前 <1>{{count}}</1> 人正在参与拼单"
     },
     "ticket": {
-      "title": "门票收 / 出票专区",
+      "title": "门票市场",
       "guarantee": "官方担保",
+      "postTitle": "发布门票",
+      "postSub": "收票 / 出票，平台安全担保",
+      "postAction": "+ 发布",
+      "escrowNote": "所有交易由平台托管，安全无忧",
       "tabs": {
         "all": "全部",
         "sell": "出票",
@@ -71,11 +93,90 @@
       "contact": "联系他"
     },
     "nearEvents": "最近活动",
-    "fabLabel": "快速发布"
+    "fabLabel": "快速发布",
+    "notificationsComingSoon": "消息通知即将上线"
   },
   "profile": {
     "title": "我的",
-    "developing": "个人主页开发中..."
+    "editAvatar": "更换头像",
+    "avatarUpdated": "头像已更新",
+    "stats": {
+      "events": "参加活动",
+      "pinSuccess": "拼单成功",
+      "buddies": "搭子"
+    },
+    "level": {
+      "title": "拼单等级 · Lv.{{level}}",
+      "xpToNext": "距离 Lv.{{nextLevel}} 还需 {{xp}} XP",
+      "xpProgress": "{{current}} / {{max}} XP"
+    },
+    "tabs": {
+      "participated": "参加过",
+      "pindan": "拼单"
+    },
+    "eventStatus": {
+      "upcoming": "即将参加",
+      "registered": "已报名",
+      "completed": "已结束"
+    },
+    "pindanInProgress": "拼单中",
+    "myPindan": {
+      "title": "我的拼单",
+      "more": "更多拼单",
+      "joinedBadge": "已拼",
+      "joinedAt": "{{time}} 加入",
+      "exit": "退出拼单",
+      "viewDetail": "查看详情",
+      "empty": "暂无拼单，去首页看看吧",
+      "exitConfirmTitle": "退出拼单",
+      "exitConfirmMessage": "确定退出「{{title}}」吗？",
+      "exitSuccess": "已退出拼单",
+      "category": {
+        "package": "套餐拼单",
+        "hotel": "酒店拼单",
+        "transport": "交通拼单"
+      }
+    },
+    "settings": {
+      "title": "设置",
+      "notifications": "消息通知",
+      "privacy": "隐私设置",
+      "help": "帮助与反馈",
+      "logout": "退出登录",
+      "enabled": "已开启",
+      "disabled": "已关闭",
+      "notificationsTitle": "消息通知",
+      "privacyTitle": "隐私设置",
+      "helpTitle": "帮助与反馈",
+      "pushNotifications": "推送通知",
+      "pushNotificationsDesc": "接收活动提醒、拼单匹配等消息",
+      "activityReminders": "活动提醒",
+      "activityRemindersDesc": "活动开始前 24 小时提醒",
+      "privacyOptions": {
+        "public": "公开",
+        "friends": "仅好友",
+        "private": "私密"
+      },
+      "privacyDesc": {
+        "public": "所有人可见你的主页和活动记录",
+        "friends": "仅互相关注的用户可见",
+        "private": "仅自己可见"
+      },
+      "saved": "已保存",
+      "submitFeedback": "提交反馈",
+      "feedbackSent": "反馈已提交，感谢！",
+      "logoutConfirmTitle": "退出登录",
+      "logoutConfirmMessage": "确定要退出当前账号吗？",
+      "logoutSuccess": "已退出登录",
+      "faq": {
+        "q1": "如何发起拼单？",
+        "a1": "在首页点击「我要拼单」，或在 AI 搭子助手中说出需求，系统会帮你匹配搭子。",
+        "q2": "门票交易如何保障？",
+        "a2": "平台提供实名认证、资金托管和真票保障，交易全程受官方担保。",
+        "q3": "如何提升拼单等级？",
+        "a3": "参与拼单、成功匹配搭子、完成活动均可获得 XP，累计 XP 即可升级。"
+      }
+    }
   },
   "events": {
     "developing": "活动页面开发中..."
@@ -150,6 +251,7 @@
       },
       "buyTicket": "立即购票",
       "contact": "联系他",
+      "eventNotFound": "未找到匹配活动，请检查活动名称",
       "modal": {
         "subtitleSell": "填写关键信息，发布后立即可见",
         "subtitleBuy": "发布求购，有票的人会主动联系你",
@@ -199,6 +301,21 @@
     },
     "packageIncludes": "套餐包含",
     "join": "我要加入",
-    "joinPackage": "加入套餐拼单"
+    "joined": "已加入",
+    "joinPackage": "加入套餐拼单",
+    "joinSuccess": {
+      "title": "拼单成功"
+    },
+    "create": {
+      "title": "发起拼单",
+      "subtitle": "找到志同道合的搭子一起去",
+      "activity": "活动",
+      "pinType": "拼单类型",
+      "typePackage": "套餐拼 (酒店+交通)",
+      "typeHotel": "酒店拼房",
+      "typeTransport": "交通拼车",
+      "remark": "备注 (选填)",
+      "remarkPlaceholder": "如：只找女生、需有车..."
+    }
   }
 }

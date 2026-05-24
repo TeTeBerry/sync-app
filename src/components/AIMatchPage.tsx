@@ -27,99 +27,12 @@ import {
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAiChatStream } from "../hooks/useAiChatStream";
+import { useEventList, usePinDanList } from "../hooks/useSyncApi";
+import type { PinDanCategory } from "../utils/apiMappers";
 
 type MainTab = "ai" | "pindan" | "ticket" | "events";
-type PinDanCategory = "hotel" | "transport";
 
 const pinDanCategoryKeys: PinDanCategory[] = ["hotel", "transport"];
-
-const activePinDans = [
-  {
-    id: 2,
-    category: "hotel" as PinDanCategory,
-    title: `三亚亚特兰蒂斯`,
-    desc: `海景大床房 · 4人均摊`,
-    price: 450,
-    originalPrice: 1800,
-    joined: 2,
-    total: 4,
-    date: `06/27-30`,
-    location: `三亚`,
-    image: `https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=400&q=80`,
-    tags: [`海景房`, `含早餐`],
-    urgent: false,
-  },
-  {
-    id: 3,
-    category: "transport" as PinDanCategory,
-    title: `上海→三亚 商务舱拼`,
-    desc: `浦东出发 · 4座同飞`,
-    price: 1200,
-    originalPrice: 4800,
-    joined: 2,
-    total: 4,
-    date: `06/27`,
-    location: `PVG→SYX`,
-    image: `https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=400&q=80`,
-    tags: [`商务舱`, `含行李`],
-    urgent: true,
-  },
-];
-
-const eventsList = [
-  {
-    id: 1,
-    title: `S2O 三亚电音节`,
-    date: `06/28–29 14:00`,
-    location: `三亚海棠湾`,
-    distance: `2.5 km`,
-    image: `https://images.unsplash.com/photo-1540039155732-d674d4e3f421?w=400&q=80`,
-    attendees: 238,
-    pinCount: 12,
-    category: `户外电音`,
-    hot: true,
-    going: false,
-  },
-  {
-    id: 2,
-    title: `EDC China 2025`,
-    date: `07/12–13 16:00`,
-    location: `苏州阳澄湖`,
-    distance: `15 km`,
-    image: `https://images.unsplash.com/photo-1470229722913-7c090be5c520?w=400&q=80`,
-    attendees: 512,
-    pinCount: 35,
-    category: `EDM节`,
-    hot: true,
-    going: true,
-  },
-  {
-    id: 3,
-    title: `Tomorrowland 预热派对`,
-    date: `06/20 22:00`,
-    location: `上海静安区`,
-    distance: `5.0 km`,
-    image: `https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=400&q=80`,
-    attendees: 89,
-    pinCount: 8,
-    category: `Club 派对`,
-    hot: false,
-    going: false,
-  },
-  {
-    id: 4,
-    title: `Ultra Shanghai`,
-    date: `08/02–03 14:00`,
-    location: `上海世博公园`,
-    distance: `8.3 km`,
-    image: `https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&q=80`,
-    attendees: 320,
-    pinCount: 27,
-    category: `大型节日`,
-    hot: false,
-    going: true,
-  },
-];
 
 const quickReplyKeys = [`findBuddy`, `pinTicket`, `sellTicket`, `nearEvents`] as const;
 
@@ -241,9 +154,18 @@ const AIMatchPage: FC = () => {
   const [activeTab, setActiveTab] = useState<MainTab>(`ai`);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [createCategory, setCreateCategory] = useState<PinDanCategory>(`hotel`);
-  const [goingIds, setGoingIds] = useState<number[]>([2, 4]);
+  const [goingIds, setGoingIds] = useState<string[]>([]);
 
-  const toggleGoing = (id: number) => {
+  const { events: eventsList, isLoading: eventsLoading, isError: eventsError, refetch: refetchEvents } =
+    useEventList();
+  const {
+    items: activePinDans,
+    isLoading: pindanLoading,
+    isError: pindanError,
+    refetch: refetchPindan,
+  } = usePinDanList(createCategory);
+
+  const toggleGoing = (id: string) => {
     setGoingIds((prev) => (prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]));
   };
 
@@ -328,10 +250,21 @@ const AIMatchPage: FC = () => {
           <span className="s-aim-pin-list-head__sub">{t("common.liveUpdate")}</span>
         </div>
 
+        {pindanLoading ? <p className="s-aim-panel-hint">{t("common.loading")}</p> : null}
+        {pindanError ? (
+          <p className="s-aim-panel-hint s-aim-panel-hint--error">
+            {t("common.loadError")}{" "}
+            <button type="button" className="s-aim-panel-hint__retry" onClick={() => void refetchPindan()}>
+              {t("common.retry")}
+            </button>
+          </p>
+        ) : null}
+
         <div className="s-aim-pin-card-wrap">
-          {activePinDans
-            .filter((p) => p.category === createCategory)
-            .map((item) => {
+          {!pindanLoading && activePinDans.length === 0 ? (
+            <p className="s-aim-panel-hint">{t("common.empty")}</p>
+          ) : (
+            activePinDans.map((item) => {
               const pct = Math.round((item.joined / item.total) * 100);
               return (
                 <div key={item.id} className={`s-aim-pin-card s-aim-pin-card--${item.category}`}>
@@ -390,7 +323,8 @@ const AIMatchPage: FC = () => {
                   </div>
                 </div>
               );
-            })}
+            })
+          )}
         </div>
       </div>
 
@@ -411,6 +345,18 @@ const AIMatchPage: FC = () => {
         </div>
 
         <div className="s-aim-events__list">
+          {eventsLoading ? <p className="s-aim-panel-hint">{t("common.loading")}</p> : null}
+          {eventsError ? (
+            <p className="s-aim-panel-hint s-aim-panel-hint--error">
+              {t("common.loadError")}{" "}
+              <button type="button" className="s-aim-panel-hint__retry" onClick={() => void refetchEvents()}>
+                {t("common.retry")}
+              </button>
+            </p>
+          ) : null}
+          {!eventsLoading && eventsList.length === 0 ? (
+            <p className="s-aim-panel-hint">{t("common.empty")}</p>
+          ) : null}
           {eventsList.map((ev) => (
             <div key={ev.id} className="s-aim-ev-card">
               <div className="s-aim-ev-card__media">

@@ -2,6 +2,8 @@
 
 declare namespace NodeJS {
   interface ProcessEnv {
+    TARO_APP_API_BASE_URL?: string;
+    TARO_APP_AI_CHAT_URL?: string;
     TARO_ENV?:
       | "weapp"
       | "swan"

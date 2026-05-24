@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { AI_CHAT_STREAM_URL } from "../constants/api";
 import type { AiChatMessage, ChatUiMessage } from "../types/aiChat";
 import { mockAiChatStream, streamAiChatRequest } from "../utils/aiChatStream";
+import { getOrCreateSessionId } from "../utils/session";
 
 function createMessageId() {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
@@ -13,6 +14,7 @@ export interface UseAiChatStreamOptions {
   mockReply: (query: string) => string;
   streamErrorText: string;
   apiUrl?: string;
+  sessionId?: string;
   getAuthHeaders?: () => Record<string, string>;
 }
 
@@ -22,8 +24,11 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
     mockReply,
     streamErrorText,
     apiUrl = AI_CHAT_STREAM_URL,
+    sessionId: sessionIdOption,
     getAuthHeaders,
   } = options;
+
+  const sessionIdRef = useRef(sessionIdOption ?? getOrCreateSessionId());
 
   const [messages, setMessages] = useState<ChatUiMessage[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
@@ -85,6 +90,7 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
           ? streamAiChatRequest({
               url: apiUrl,
               messages: history,
+              sessionId: sessionIdRef.current,
               signal: controller.signal,
               headers: getAuthHeaders?.(),
             })

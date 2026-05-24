@@ -7,3 +7,10 @@ export const miniTagToneClass: Record<TagTone, string> = {
   amber: `s-ticket-row__mini-tag--amber`,
   cyan: `s-ticket-row__mini-tag--cyan`,
 };
+
+export const categoryToneClass: Record<TagTone, string> = {
+  primary: `s-hot-row__category--primary`,
+  secondary: `s-hot-row__category--secondary`,
+  amber: `s-hot-row__category--amber`,
+  cyan: `s-hot-row__category--cyan`,
+};

@@ -26,7 +26,7 @@ export const SectionChevronLink: FC<SectionChevronLinkProps> = ({ label, labelKe
   if (onNavigate) {
     return (
       <div
-        className="s-hot-section__link"
+        className="s-home-section__link"
         role="button"
         tabIndex={0}
         onClick={onNavigate}
@@ -42,5 +42,5 @@ export const SectionChevronLink: FC<SectionChevronLinkProps> = ({ label, labelKe
     );
   }
 
-  return <div className="s-hot-section__link">{content}</div>;
+  return <div className="s-home-section__link">{content}</div>;
 };

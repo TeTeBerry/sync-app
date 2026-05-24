@@ -6,6 +6,7 @@ export default {
     "pages/events/index",
     "pages/explore/index",
     "pages/profile/index",
+    "pages/settings/index",
     "pages/chat/index",
     "pages/pindan/index",
     "pages/aimatch/index",

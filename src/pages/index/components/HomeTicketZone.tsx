@@ -1,4 +1,4 @@
-import { ArrowDownLeftIcon, ArrowUpRightIcon, TagIcon, TicketIcon } from "lucide-react";
+import { ArrowDownLeftIcon, ArrowUpRightIcon, BadgeCheckIcon, ShieldIcon, TagIcon, TicketIcon, ZapIcon } from "lucide-react";
 import { memo, useMemo, useState, type FC } from "react";
 import { useTranslation } from "react-i18next";
 import { Button, cn } from "../../../components/ui";
@@ -35,6 +35,7 @@ const TicketRow = memo(function TicketRow({ ticket }: { ticket: TicketListingIte
         <div className="s-ticket-row__title-line">
           <span>{ticket.event}</span>
           <span className={`s-ticket-row__mini-tag ${miniTagToneClass[ticket.tone]}`}>{ticket.tag}</span>
+          {ticket.verified && <BadgeCheckIcon size={14} className="s-ticket-row__verified" />}
         </div>
         <div className="s-ticket-row__seat">
           <TagIcon size={10} />
@@ -70,9 +71,6 @@ const TicketRow = memo(function TicketRow({ ticket }: { ticket: TicketListingIte
   );
 });
 
-/**
- * 门票专区：tabs + 列表；过滤逻辑内聚，`TicketRow` 使用 `memo` 减轻无谓重渲染。
- */
 export const HomeTicketZone: FC<HomeTicketZoneProps> = ({ listings }) => {
   const { t } = useTranslation();
   const [ticketTab, setTicketTab] = useState<TicketTabKey>(`all`);
@@ -87,13 +85,26 @@ export const HomeTicketZone: FC<HomeTicketZoneProps> = ({ listings }) => {
 
   return (
     <section className="s-ticket-zone">
-      <div className="s-ticket-zone__top">
-        <div className="s-ticket-zone__lead">
+      <div className="s-home-section__top">
+        <div className="s-home-section__heading">
           <TicketIcon size={15} />
           <span>{t("home.ticket.title")}</span>
           <small>{t("home.ticket.guarantee")}</small>
         </div>
         <SectionChevronLink labelKey="common.all" onNavigate={goTickets} />
+      </div>
+
+      <div className="s-ticket-zone__post">
+        <div className="s-ticket-zone__post-left">
+          <ZapIcon size={18} className="s-ticket-zone__post-icon" />
+          <div>
+            <div className="s-ticket-zone__post-title">{t("home.ticket.postTitle")}</div>
+            <div className="s-ticket-zone__post-sub">{t("home.ticket.postSub")}</div>
+          </div>
+        </div>
+        <button type="button" className="s-ticket-zone__post-btn" onClick={goTickets}>
+          {t("home.ticket.postAction")}
+        </button>
       </div>
 
       <div className="s-ticket-zone__tabs">
@@ -113,6 +124,11 @@ export const HomeTicketZone: FC<HomeTicketZoneProps> = ({ listings }) => {
           <TicketRow key={ticket.id} ticket={ticket} />
         ))}
       </div>
+
+      <p className="s-ticket-zone__footer">
+        <ShieldIcon size={12} />
+        {t("home.ticket.escrowNote")}
+      </p>
     </section>
   );
 };

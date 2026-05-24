@@ -3,7 +3,7 @@ export type TicketTagTone = `primary` | `secondary` | `amber` | `cyan`;
 export type TicketFilterKey = `all` | `sell` | `buy`;
 
 export interface TicketListing {
-  id: number;
+  id: string | number;
   type: TicketListingType;
   event: string;
   seat: string;

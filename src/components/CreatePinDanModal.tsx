@@ -1,6 +1,6 @@
 import "./CreatePinDanModal.scss";
 import React, { type ComponentType, useEffect, useMemo, useState } from "react";
-import { MapPinIcon, PackageIcon, SparklesIcon, XIcon, ZapIcon } from "lucide-react";
+import { BuildingIcon, CalendarIcon, CarIcon, FlameIcon, MapPinIcon, PackageIcon, SparklesIcon, XIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { getMockHotelAddressSuggestions, type HotelAddressSuggestion } from "../data/mockHotelAddresses";
 import { Button, Input } from "./ui";
@@ -8,18 +8,33 @@ import MiniCalendar, { formatDate, type MiniCalendarAccent } from "./MiniCalenda
 
 export type PinDanCreateCategory = `package` | `hotel` | `transport`;
 
+export type PinDanActivityBrief = {
+  id: number;
+  title: string;
+  date: string;
+  location: string;
+  image: string;
+  hot?: boolean;
+};
+
 const DEFAULT_CATEGORY_OPTIONS: PinDanCreateCategory[] = [`hotel`, `transport`];
 
 const categoryIcons: Record<PinDanCreateCategory, ComponentType<{ size?: number | string }>> = {
   package: PackageIcon,
-  hotel: MapPinIcon,
-  transport: ZapIcon,
+  hotel: BuildingIcon,
+  transport: CarIcon,
 };
 
 const groupLabelKey: Record<PinDanCreateCategory, string> = {
   package: `pindan.tabs.package`,
   hotel: `aimatch.pindan.hotelGroup`,
   transport: `aimatch.pindan.transportGroup`,
+};
+
+const createTypeLabelKey: Record<PinDanCreateCategory, string> = {
+  package: `pindan.create.typePackage`,
+  hotel: `pindan.create.typeHotel`,
+  transport: `pindan.create.typeTransport`,
 };
 
 const accentMap: Record<PinDanCreateCategory, MiniCalendarAccent> = {
@@ -34,6 +49,8 @@ export interface CreatePinDanModalProps {
   categoryOptions?: PinDanCreateCategory[];
   defaultCategory?: PinDanCreateCategory;
   initialEventName?: string;
+  /** 拼单页传入当前活动，展示活动卡片并启用备注等样式 */
+  activity?: PinDanActivityBrief | null;
 }
 
 function parsePositiveInt(v: string): number | null {
@@ -52,6 +69,7 @@ const CreatePinDanModal: React.FC<CreatePinDanModalProps> = ({
   categoryOptions = DEFAULT_CATEGORY_OPTIONS,
   defaultCategory,
   initialEventName = ``,
+  activity = null,
 }) => {
   const { t } = useTranslation();
   const optionsKey = categoryOptions.join(`,`);
@@ -59,7 +77,10 @@ const CreatePinDanModal: React.FC<CreatePinDanModalProps> = ({
     () => (categoryOptions.length > 0 ? categoryOptions : DEFAULT_CATEGORY_OPTIONS),
     [optionsKey, categoryOptions],
   );
-  const showTypePicker = options.length > 1;
+  const showTypeGrid = options.length > 1;
+  const showSingleType = options.length === 1;
+  const hasActivityContext = Boolean(activity);
+  const isPindanContext = options.length === 1;
 
   const [category, setCategory] = useState<PinDanCreateCategory>(options[0]);
   const [eventDate, setEventDate] = useState(() => formatDate(new Date()));
@@ -71,10 +92,11 @@ const CreatePinDanModal: React.FC<CreatePinDanModalProps> = ({
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
   const [totalPrice, setTotalPrice] = useState(``);
   const [groupSize, setGroupSize] = useState(``);
+  const [remark, setRemark] = useState(``);
 
   const resetFormFields = () => {
     setEventDate(formatDate(new Date()));
-    setEventName(initialEventName);
+    setEventName(activity?.title ?? initialEventName);
     setLocation(``);
     setHotelName(``);
     setAddressLoading(false);
@@ -82,6 +104,7 @@ const CreatePinDanModal: React.FC<CreatePinDanModalProps> = ({
     setSelectedAddressId(null);
     setTotalPrice(``);
     setGroupSize(``);
+    setRemark(``);
   };
 
   useEffect(() => {
@@ -90,7 +113,7 @@ const CreatePinDanModal: React.FC<CreatePinDanModalProps> = ({
       defaultCategory && options.includes(defaultCategory) ? defaultCategory : options[0];
     setCategory(next);
     resetFormFields();
-  }, [open, defaultCategory, initialEventName, options]);
+  }, [open, defaultCategory, initialEventName, options, activity?.title]);
 
   useEffect(() => {
     if (category === `hotel`) {
@@ -137,19 +160,62 @@ const CreatePinDanModal: React.FC<CreatePinDanModalProps> = ({
         ? t(`aimatch.pindan.modal.transportRoute`)
         : t(`aimatch.pindan.modal.location`);
 
+  const modalTitle = isPindanContext ? t(`pindan.create.title`) : t(`aimatch.pindan.modal.title`);
+
   return (
     <div className={`s-aim-modal${open ? `` : ` s-aim-modal--off`}`}>
       <div className="s-aim-modal__backdrop" onClick={onClose} />
 
       <div className="s-aim-modal__sheet">
         <div className="s-aim-modal__head">
-          <h2>{t("aimatch.pindan.modal.title")}</h2>
+          <div className="s-aim-modal__head-text">
+            <h2>{modalTitle}</h2>
+            {isPindanContext && <p className="s-aim-modal__subtitle">{t(`pindan.create.subtitle`)}</p>}
+          </div>
           <Button block="s-aim-modal" element="close" onClick={onClose}>
             <XIcon size={14} />
           </Button>
         </div>
 
-        {showTypePicker && (
+        {hasActivityContext && activity && (
+          <div className="s-aim-modal__activity-block">
+            <span className="s-aim-modal__label">{t(`pindan.create.activity`)}</span>
+            <div className="s-aim-modal__activity">
+              <img className="s-aim-modal__activity-img" src={activity.image} alt="" />
+              <div className="s-aim-modal__activity-body">
+                <div className="s-aim-modal__activity-title">{activity.title}</div>
+                <div className="s-aim-modal__activity-meta">
+                  <span>
+                    <CalendarIcon size={11} />
+                    {activity.date}
+                  </span>
+                  <span>
+                    <MapPinIcon size={11} />
+                    {activity.location}
+                  </span>
+                </div>
+              </div>
+              {activity.hot && (
+                <span className="s-aim-modal__activity-hot">
+                  <FlameIcon size={10} />
+                  {t(`common.hot`)}
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+
+        {showSingleType && (
+          <div className="s-aim-modal__type-block">
+            <span className="s-aim-modal__label">{t(`pindan.create.pinType`)}</span>
+            <div className={`s-aim-modal__type-row s-aim-modal__type-row--${category}`}>
+              <span className="s-aim-modal__type-row-label">{t(createTypeLabelKey[category])}</span>
+              <span className="s-aim-modal__type-radio s-aim-modal__type-radio--checked" aria-hidden />
+            </div>
+          </div>
+        )}
+
+        {showTypeGrid && (
           <>
             <span className="s-aim-modal__label">{t("aimatch.pindan.modal.selectType")}</span>
             <div className="s-aim-modal__type-grid">
@@ -173,12 +239,14 @@ const CreatePinDanModal: React.FC<CreatePinDanModalProps> = ({
         )}
 
         <div className="s-aim-modal__fields">
-          <Input
-            variant="aim-modal-full"
-            value={eventName}
-            onChange={(e) => setEventName(e.target.value)}
-            placeholder={t("aimatch.pindan.modal.eventName")}
-          />
+          {!activity && (
+            <Input
+              variant="aim-modal-full"
+              value={eventName}
+              onChange={(e) => setEventName(e.target.value)}
+              placeholder={t("aimatch.pindan.modal.eventName")}
+            />
+          )}
           <span className="s-aim-modal__label">{t("aimatch.pindan.modal.eventDate")}</span>
           <MiniCalendar value={eventDate} onChange={setEventDate} accent={accentMap[category]} />
 
@@ -250,6 +318,19 @@ const CreatePinDanModal: React.FC<CreatePinDanModalProps> = ({
             <p className={`s-aim-modal__per-person s-aim-modal__per-person--${category}`}>
               {t("aimatch.pindan.modal.perPersonPreview", { amount: perPersonPrice })}
             </p>
+          )}
+
+          {isPindanContext && (
+            <>
+              <span className="s-aim-modal__label">{t(`pindan.create.remark`)}</span>
+              <textarea
+                className="s-aim-modal__remark"
+                value={remark}
+                onChange={(e) => setRemark(e.target.value)}
+                placeholder={t(`pindan.create.remarkPlaceholder`)}
+                rows={3}
+              />
+            </>
           )}
         </div>
 

@@ -1,6 +1,6 @@
 import "./pindan.scss";
 import Taro, { useDidShow } from "@tarojs/taro";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   BuildingIcon,
   CalendarIcon,
@@ -16,9 +16,13 @@ import {
 import { useTranslation } from "react-i18next";
 import BottomNav from "../../components/BottomNav";
 import CreatePinDanModal, { type PinDanCreateCategory } from "../../components/CreatePinDanModal";
+import JoinSuccessToast from "../../components/JoinSuccessToast";
 import PageNavigation from "../../components/PageNavigation";
 import { Button } from "../../components/ui";
 import { getActivityById } from "../../data/activities";
+import type { ProfilePinDanItem } from "../profile/mockData";
+import { formatJoinedAt, saveJoinedPindanItem } from "../../utils/myPindanStorage";
+import { goProfilePindan } from "../../utils/route";
 import { sharePinDanItem } from "../../utils/share";
 
 type TabType = `package` | `hotel` | `transport`;
@@ -285,25 +289,64 @@ const includeIcons = {
   transport: PlaneIcon,
 };
 
+const tabTypes: TabType[] = [`package`, `hotel`, `transport`];
+
+function parseRouteParams() {
+  const params = Taro.getCurrentInstance().router?.params;
+  const activityId = Number(params?.activityId);
+  const highlightId = Number(params?.highlightId);
+  const typeParam = params?.type as TabType | undefined;
+
+  return {
+    activityId: activityId && !Number.isNaN(activityId) ? activityId : null,
+    highlightId: highlightId && !Number.isNaN(highlightId) ? highlightId : null,
+    type: typeParam && tabTypes.includes(typeParam) ? typeParam : null,
+  };
+}
+
 const PinDan: React.FC = () => {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<TabType>(`package`);
   const [routeActivityId, setRouteActivityId] = useState<number | null>(null);
+  const [highlightItemId, setHighlightItemId] = useState<number | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [joinedIds, setJoinedIds] = useState<Set<number>>(() => new Set());
+  const [joinToast, setJoinToast] = useState<{ visible: boolean; title: string; profileId: number | null }>({
+    visible: false,
+    title: ``,
+    profileId: null,
+  });
 
-  const applyRouteActivity = useCallback(() => {
-    const params = Taro.getCurrentInstance().router?.params;
-    const activityId = Number(params?.activityId);
-    if (!activityId || Number.isNaN(activityId)) {
-      setRouteActivityId(null);
-      return;
-    }
-
+  const applyRouteParams = useCallback(() => {
+    const { activityId, highlightId, type } = parseRouteParams();
     setRouteActivityId(activityId);
-    setActiveTab(`package`);
+    if (type) {
+      setActiveTab(type);
+    } else if (activityId) {
+      setActiveTab(`package`);
+    }
+    setHighlightItemId(highlightId);
   }, []);
 
-  useDidShow(applyRouteActivity);
+  useDidShow(applyRouteParams);
+
+  useEffect(() => {
+    if (highlightItemId == null) return;
+
+    const scrollTimer = window.setTimeout(() => {
+      document.getElementById(`pindan-item-${highlightItemId}`)?.scrollIntoView({
+        behavior: `smooth`,
+        block: `center`,
+      });
+    }, 180);
+
+    const clearTimer = window.setTimeout(() => setHighlightItemId(null), 2800);
+
+    return () => {
+      window.clearTimeout(scrollTimer);
+      window.clearTimeout(clearTimer);
+    };
+  }, [highlightItemId, activeTab, routeActivityId]);
 
   const filtered = mockData.filter((item) => {
     if (item.type !== activeTab) return false;
@@ -328,6 +371,35 @@ const PinDan: React.FC = () => {
     },
     [t],
   );
+
+  const handleJoin = useCallback((item: PinDanItem) => {
+    const profileItem: ProfilePinDanItem = {
+      id: item.id,
+      activityId: item.activityId,
+      category: item.type,
+      title: item.title,
+      subtitle: item.subtitle,
+      date: item.date,
+      location: item.location,
+      price: item.price,
+      image: item.image,
+      joinedAt: formatJoinedAt(),
+    };
+
+    saveJoinedPindanItem(profileItem);
+    setJoinedIds((prev) => new Set(prev).add(item.id));
+    setJoinToast({ visible: true, title: item.title, profileId: item.id });
+  }, []);
+
+  const dismissJoinToast = useCallback(() => {
+    setJoinToast((prev) => ({ ...prev, visible: false }));
+  }, []);
+
+  const handleViewJoinedPindan = useCallback(() => {
+    const profileId = joinToast.profileId;
+    setJoinToast({ visible: false, title: ``, profileId: null });
+    if (profileId != null) goProfilePindan(profileId);
+  }, [joinToast.profileId]);
 
   const heroTitleKey =
     activeTab === `package` ? `pindan.hero.package` : activeTab === `hotel` ? `pindan.hero.hotel` : `pindan.hero.transport`;
@@ -400,7 +472,11 @@ const PinDan: React.FC = () => {
           const isPackage = item.type === `package`;
 
           return (
-            <div key={item.id} id={`pindan-item-${item.id}`} className="s-pindan__card">
+            <div
+              key={item.id}
+              id={`pindan-item-${item.id}`}
+              className={`s-pindan__card${highlightItemId === item.id ? ` s-pindan__card--focused` : ``}`}
+            >
               <div className="s-pindan__media">
                 <img src={item.image} alt={item.title} />
                 <div className="s-pindan__media-grad" />
@@ -477,8 +553,16 @@ const PinDan: React.FC = () => {
                 </div>
 
                 <div className="s-pindan__actions">
-                  <Button className="s-pindan__join-btn">
-                    {isPackage ? t("pindan.joinPackage") : t("pindan.join")}
+                  <Button
+                    className="s-pindan__join-btn"
+                    disabled={joinedIds.has(item.id)}
+                    onClick={() => handleJoin(item)}
+                  >
+                    {joinedIds.has(item.id)
+                      ? t("pindan.joined")
+                      : isPackage
+                        ? t("pindan.joinPackage")
+                        : t("pindan.join")}
                   </Button>
                   <Button className="s-pindan__share-btn" onClick={(e) => handleShare(item, e)}>
                     {t("common.share")}
@@ -496,6 +580,25 @@ const PinDan: React.FC = () => {
         categoryOptions={[activeTab as PinDanCreateCategory]}
         defaultCategory={activeTab as PinDanCreateCategory}
         initialEventName={activityName ?? ``}
+        activity={
+          routeActivity
+            ? {
+                id: routeActivity.id,
+                title: activityName ?? t(routeActivity.nameKey),
+                date: routeActivity.date,
+                location: routeActivity.location,
+                image: routeActivity.image,
+                hot: routeActivity.hot,
+              }
+            : null
+        }
+      />
+
+      <JoinSuccessToast
+        visible={joinToast.visible}
+        title={joinToast.title}
+        onView={handleViewJoinedPindan}
+        onDismiss={dismissJoinToast}
       />
 
       <BottomNav />

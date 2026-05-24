@@ -26,7 +26,11 @@
     "spotsRemaining": "ที่ว่างเหลือ",
     "attendees": " คนเข้าร่วม",
     "pinOrders": "{{count}} กลุ่มซื้อร่วม",
-    "pinOrdersActive": "{{count}} กลุ่มกำลังดำเนินการ"
+    "pinOrdersActive": "{{count}} กลุ่มกำลังดำเนินการ",
+    "loading": "กำลังโหลด…",
+    "loadError": "โหลดไม่สำเร็จ กรุณาลองใหม่",
+    "empty": "ยังไม่มีข้อมูล",
+    "retry": "ลองอีกครั้ง"
   },
   "language": {
     "title": "ภาษา",
@@ -48,7 +52,21 @@
       "placeholder": "บอกว่าอยากซื้อร่วมอะไร…"
     },
     "hot": {
-      "title": "กำลังฮิต"
+      "title": "กำลังฮิต",
+      "live": "สด"
+    },
+    "signup": {
+      "title": "ลงทะเบียนกิจกรรม",
+      "attendees": "{{count}} คนเข้าร่วม",
+      "pinOrders": "{{count}} กลุ่ม",
+      "wantGo": "ฉันจะไป",
+      "going": "ลงทะเบียนแล้ว",
+      "findBuddy": "หาเพื่อนร่วม"
+    },
+    "heat": {
+      "title": "ความฮิตวันนี้",
+      "people": "{{count}} คน",
+      "pinOrders": "{{count}} กลุ่ม"
     },
     "package": {
       "tag": "ประหยัดใหม่",
@@ -60,8 +78,12 @@
       "stats": "ขณะนี้มี <1>{{count}}</1> คนกำลังซื้อร่วม"
     },
     "ticket": {
-      "title": "ซื้อ / ขายตั๋ว",
+      "title": "ตลาดตั๋ว",
       "guarantee": "รับประกันอย่างเป็นทางการ",
+      "postTitle": "โพสต์ตั๋ว",
+      "postSub": "ซื้อ / ขาย ปลอดภัยด้วยแพลตฟอร์ม",
+      "postAction": "+ โพสต์",
+      "escrowNote": "ธุรกรรมทั้งหมดอยู่ภายใต้การดูแลของแพลตฟอร์ม",
       "tabs": {
         "all": "ทั้งหมด",
         "sell": "ขาย",
@@ -71,11 +93,90 @@
       "contact": "ติดต่อ"
     },
     "nearEvents": "กิจกรรมใกล้เคียง",
-    "fabLabel": "โพสต์ด่วน"
+    "fabLabel": "โพสต์ด่วน",
+    "notificationsComingSoon": "การแจ้งเตือนเร็วๆ นี้"
   },
   "profile": {
     "title": "โปรไฟล์",
-    "developing": "หน้าโปรไฟล์กำลังพัฒนา..."
+    "editAvatar": "เปลี่ยนรูปโปรไฟล์",
+    "avatarUpdated": "อัปเดตรูปแล้ว",
+    "stats": {
+      "events": "กิจกรรมที่เข้าร่วม",
+      "pinSuccess": "ซื้อร่วมสำเร็จ",
+      "buddies": "เพื่อนร่วม"
+    },
+    "level": {
+      "title": "ระดับซื้อร่วม · Lv.{{level}}",
+      "xpToNext": "อีก {{xp}} XP ถึง Lv.{{nextLevel}}",
+      "xpProgress": "{{current}} / {{max}} XP"
+    },
+    "tabs": {
+      "participated": "เข้าร่วมแล้ว",
+      "pindan": "ซื้อร่วม"
+    },
+    "eventStatus": {
+      "upcoming": "กำลังจะไป",
+      "registered": "ลงทะเบียนแล้ว",
+      "completed": "จบแล้ว"
+    },
+    "pindanInProgress": "กำลังซื้อร่วม",
+    "myPindan": {
+      "title": "ซื้อร่วมของฉัน",
+      "more": "ดูเพิ่ม",
+      "joinedBadge": "เข้าร่วมแล้ว",
+      "joinedAt": "เข้าร่วม {{time}}",
+      "exit": "ออกจากกลุ่ม",
+      "viewDetail": "ดูรายละเอียด",
+      "empty": "ยังไม่มีการซื้อร่วม",
+      "exitConfirmTitle": "ออกจากกลุ่ม",
+      "exitConfirmMessage": "ออกจาก \"{{title}}\"?",
+      "exitSuccess": "ออกจากกลุ่มแล้ว",
+      "category": {
+        "package": "แพ็กเกจ",
+        "hotel": "โรงแรม",
+        "transport": "การเดินทาง"
+      }
+    },
+    "settings": {
+      "title": "การตั้งค่า",
+      "notifications": "การแจ้งเตือน",
+      "privacy": "ความเป็นส่วนตัว",
+      "help": "ช่วยเหลือและข้อเสนอแนะ",
+      "logout": "ออกจากระบบ",
+      "enabled": "เปิด",
+      "disabled": "ปิด",
+      "notificationsTitle": "การแจ้งเตือน",
+      "privacyTitle": "ความเป็นส่วนตัว",
+      "helpTitle": "ช่วยเหลือและข้อเสนอแนะ",
+      "pushNotifications": "การแจ้งเตือนแบบพุช",
+      "pushNotificationsDesc": "รับการแจ้งเตือนกิจกรรมและการจับคู่ซื้อร่วม",
+      "activityReminders": "เตือนกิจกรรม",
+      "activityRemindersDesc": "เตือนก่อนกิจกรรม 24 ชั่วโมง",
+      "privacyOptions": {
+        "public": "สาธารณะ",
+        "friends": "เฉพาะเพื่อน",
+        "private": "ส่วนตัว"
+      },
+      "privacyDesc": {
+        "public": "ทุกคนเห็นโปรไฟล์และกิจกรรมของคุณ",
+        "friends": "เฉพาะผู้ติดตามซึ่งกันและกัน",
+        "private": "เฉพาะคุณเท่านั้น"
+      },
+      "saved": "บันทึกแล้ว",
+      "submitFeedback": "ส่งข้อเสนอแนะ",
+      "feedbackSent": "ขอบคุณสำหรับข้อเสนอแนะ!",
+      "logoutConfirmTitle": "ออกจากระบบ",
+      "logoutConfirmMessage": "ต้องการออกจากระบบหรือไม่?",
+      "logoutSuccess": "ออกจากระบบแล้ว",
+      "faq": {
+        "q1": "เริ่มซื้อร่วมอย่างไร?",
+        "a1": "แตะ \"ซื้อร่วมกัน\" ที่หน้าแรก หรือบอก AI ว่าต้องการอะไร",
+        "q2": "การซื้อขายตั๋วปลอดภัยอย่างไร?",
+        "a2": "มีการยืนยันตัวตน เงินค้ำประกัน และรับประกันตั๋วจริง",
+        "q3": "เลเวลอัพอย่างไร?",
+        "a3": "เข้าร่วมซื้อร่วม จับคู่เพื่อน และเข้าร่วมกิจกรรมเพื่อรับ XP"
+      }
+    }
   },
   "events": {
     "developing": "หน้ากิจกรรมกำลังพัฒนา..."
@@ -150,6 +251,7 @@
       },
       "buyTicket": "ซื้อเลย",
       "contact": "ติดต่อ",
+      "eventNotFound": "ไม่พบกิจกรรมที่ตรงกัน กรุณาตรวจสอบชื่อกิจกรรม",
       "modal": {
         "subtitleSell": "กรอกข้อมูลสำคัญ — โพสต์แล้วเห็นทันที",
         "subtitleBuy": "โพสต์คำขอ — คนมีตั๋วจะติดต่อคุณ",
@@ -199,6 +301,21 @@
     },
     "packageIncludes": "แพ็กเกจรวม",
     "join": "เข้าร่วม",
-    "joinPackage": "เข้าร่วมแพ็กเกจ"
+    "joined": "เข้าร่วมแล้ว",
+    "joinPackage": "เข้าร่วมแพ็กเกจ",
+    "joinSuccess": {
+      "title": "ซื้อร่วมสำเร็จ"
+    },
+    "create": {
+      "title": "เริ่มซื้อร่วม",
+      "subtitle": "หาเพื่อนร่วมที่มีความสนใจเดียวกัน",
+      "activity": "กิจกรรม",
+      "pinType": "ประเภทซื้อร่วม",
+      "typePackage": "แพ็กเกจ (โรงแรม+เดินทาง)",
+      "typeHotel": "แชร์ห้องพัก",
+      "typeTransport": "แชร์รถ",
+      "remark": "หมายเหตุ (ไม่บังคับ)",
+      "remarkPlaceholder": "เช่น หาเฉพาะผู้หญิง ต้องมีรถ..."
+    }
   }
 }

@@ -26,7 +26,11 @@
     "spotsRemaining": "Spots left",
     "attendees": " attending",
     "pinOrders": "{{count}} group orders",
-    "pinOrdersActive": "{{count}} active orders"
+    "pinOrdersActive": "{{count}} active orders",
+    "loading": "Loading…",
+    "loadError": "Failed to load. Please try again.",
+    "empty": "No data yet",
+    "retry": "Retry"
   },
   "language": {
     "title": "Language",
@@ -48,7 +52,21 @@
       "placeholder": "Tell me what you want to group buy…"
     },
     "hot": {
-      "title": "Trending Groups"
+      "title": "Trending",
+      "live": "Live"
+    },
+    "signup": {
+      "title": "Events",
+      "attendees": "{{count}} attending",
+      "pinOrders": "{{count}} groups",
+      "wantGo": "I'm going",
+      "going": "Registered",
+      "findBuddy": "Find buddies"
+    },
+    "heat": {
+      "title": "Today's heat",
+      "people": "{{count}} people",
+      "pinOrders": "{{count}} groups"
     },
     "package": {
       "tag": "Save More",
@@ -60,8 +78,12 @@
       "stats": "<1>{{count}}</1> people are group buying now"
     },
     "ticket": {
-      "title": "Ticket Buy / Sell",
+      "title": "Ticket Market",
       "guarantee": "Official guarantee",
+      "postTitle": "Post ticket",
+      "postSub": "Buy / sell with platform escrow",
+      "postAction": "+ Post",
+      "escrowNote": "All transactions are escrowed by the platform",
       "tabs": {
         "all": "All",
         "sell": "Selling",
@@ -71,11 +93,90 @@
       "contact": "Contact"
     },
     "nearEvents": "Nearby Events",
-    "fabLabel": "Quick post"
+    "fabLabel": "Quick post",
+    "notificationsComingSoon": "Notifications coming soon"
   },
   "profile": {
     "title": "Profile",
-    "developing": "Profile page coming soon..."
+    "editAvatar": "Change avatar",
+    "avatarUpdated": "Avatar updated",
+    "stats": {
+      "events": "Events joined",
+      "pinSuccess": "Group buys",
+      "buddies": "Buddies"
+    },
+    "level": {
+      "title": "Group level · Lv.{{level}}",
+      "xpToNext": "{{xp}} XP to Lv.{{nextLevel}}",
+      "xpProgress": "{{current}} / {{max}} XP"
+    },
+    "tabs": {
+      "participated": "Joined",
+      "pindan": "Group buys"
+    },
+    "eventStatus": {
+      "upcoming": "Upcoming",
+      "registered": "Registered",
+      "completed": "Completed"
+    },
+    "pindanInProgress": "In progress",
+    "myPindan": {
+      "title": "My group buys",
+      "more": "More",
+      "joinedBadge": "Joined",
+      "joinedAt": "Joined {{time}}",
+      "exit": "Leave",
+      "viewDetail": "Details",
+      "empty": "No group buys yet",
+      "exitConfirmTitle": "Leave group buy",
+      "exitConfirmMessage": "Leave \"{{title}}\"?",
+      "exitSuccess": "Left group buy",
+      "category": {
+        "package": "Package",
+        "hotel": "Hotel",
+        "transport": "Transport"
+      }
+    },
+    "settings": {
+      "title": "Settings",
+      "notifications": "Notifications",
+      "privacy": "Privacy",
+      "help": "Help & Feedback",
+      "logout": "Log out",
+      "enabled": "On",
+      "disabled": "Off",
+      "notificationsTitle": "Notifications",
+      "privacyTitle": "Privacy",
+      "helpTitle": "Help & Feedback",
+      "pushNotifications": "Push notifications",
+      "pushNotificationsDesc": "Activity reminders, group match alerts, etc.",
+      "activityReminders": "Activity reminders",
+      "activityRemindersDesc": "Remind you 24 hours before an event",
+      "privacyOptions": {
+        "public": "Public",
+        "friends": "Friends only",
+        "private": "Private"
+      },
+      "privacyDesc": {
+        "public": "Everyone can see your profile and activity",
+        "friends": "Only mutual followers can see",
+        "private": "Only you can see"
+      },
+      "saved": "Saved",
+      "submitFeedback": "Submit feedback",
+      "feedbackSent": "Thanks for your feedback!",
+      "logoutConfirmTitle": "Log out",
+      "logoutConfirmMessage": "Are you sure you want to log out?",
+      "logoutSuccess": "Logged out",
+      "faq": {
+        "q1": "How do I start a group buy?",
+        "a1": "Tap \"Group Buy\" on the home page, or tell the AI assistant what you need.",
+        "q2": "How are ticket trades protected?",
+        "a2": "We offer verified sellers, escrow, and official ticket guarantees.",
+        "q3": "How do I level up?",
+        "a3": "Join group buys, match with buddies, and complete events to earn XP."
+      }
+    }
   },
   "events": {
     "developing": "Events page coming soon..."
@@ -150,6 +251,7 @@
       },
       "buyTicket": "Buy Now",
       "contact": "Contact",
+      "eventNotFound": "No matching event. Check the event name.",
       "modal": {
         "subtitleSell": "Fill in key details — visible right after posting",
         "subtitleBuy": "Post your request — sellers will reach out",
@@ -199,6 +301,21 @@
     },
     "packageIncludes": "Package includes",
     "join": "Join",
-    "joinPackage": "Join Package"
+    "joined": "Joined",
+    "joinPackage": "Join Package",
+    "joinSuccess": {
+      "title": "Group buy successful"
+    },
+    "create": {
+      "title": "Start Group Buy",
+      "subtitle": "Find like-minded buddies to go together",
+      "activity": "Event",
+      "pinType": "Group type",
+      "typePackage": "Package (hotel + transport)",
+      "typeHotel": "Hotel share",
+      "typeTransport": "Ride share",
+      "remark": "Note (optional)",
+      "remarkPlaceholder": "e.g. women only, need a car..."
+    }
   }
 }

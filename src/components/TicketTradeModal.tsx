@@ -15,17 +15,36 @@ import { Button, Input } from "./ui";
 
 export type TicketTradeMode = `sell` | `buy`;
 
+export interface TicketTradeFormValues {
+  eventName: string;
+  seat: string;
+  quantity: number;
+  unitPrice: number;
+  contact: string;
+  mode: TicketTradeMode;
+}
+
 export interface TicketTradeModalProps {
   open: boolean;
   mode: TicketTradeMode;
   onClose: () => void;
+  onSubmit?: (values: TicketTradeFormValues) => Promise<void>;
+  isSubmitting?: boolean;
+  submitError?: string | null;
 }
 
 function clampInt(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
 }
 
-const TicketTradeModal: React.FC<TicketTradeModalProps> = ({ open, mode, onClose }) => {
+const TicketTradeModal: React.FC<TicketTradeModalProps> = ({
+  open,
+  mode,
+  onClose,
+  onSubmit,
+  isSubmitting = false,
+  submitError,
+}) => {
   const { t } = useTranslation();
   const [eventName, setEventName] = useState(``);
   const [seat, setSeat] = useState(``);
@@ -59,6 +78,19 @@ const TicketTradeModal: React.FC<TicketTradeModalProps> = ({ open, mode, onClose
   const eventPlaceholder = isSell
     ? t(`aimatch.ticket.modal.eventNameSell`)
     : t(`aimatch.ticket.modal.eventNameBuy`);
+
+  const handleSubmit = async () => {
+    if (!onSubmit || isSubmitting) return;
+
+    await onSubmit({
+      eventName: eventName.trim(),
+      seat: seat.trim(),
+      quantity,
+      unitPrice,
+      contact: contact.trim(),
+      mode,
+    });
+  };
 
   return (
     <div className={`s-ticket-modal${open ? `` : ` s-ticket-modal--off`}`}>
@@ -170,10 +202,20 @@ const TicketTradeModal: React.FC<TicketTradeModalProps> = ({ open, mode, onClose
             onChange={(e) => setContact(e.target.value)}
             placeholder={t(`aimatch.ticket.modal.contact`)}
           />
+
+          {submitError ? <p className="s-ticket-modal__error">{submitError}</p> : null}
         </div>
 
-        <Button block="s-ticket-modal" element="submit" modifiers={[mode]} onClick={onClose}>
-          {t(isSell ? `aimatch.ticket.modal.submitSell` : `aimatch.ticket.modal.submitBuy`)}
+        <Button
+          block="s-ticket-modal"
+          element="submit"
+          modifiers={[mode]}
+          disabled={isSubmitting || !eventName.trim()}
+          onClick={() => void handleSubmit()}
+        >
+          {isSubmitting
+            ? t(`common.loading`)
+            : t(isSell ? `aimatch.ticket.modal.submitSell` : `aimatch.ticket.modal.submitBuy`)}
         </Button>
       </div>
     </div>

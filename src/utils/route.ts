@@ -6,6 +6,7 @@ export const ROUTES = {
   EVENTS: "/pages/events/index",
   EXPLORE: "/pages/explore/index",
   PROFILE: "/pages/profile/index",
+  SETTINGS: "/pages/settings/index",
   CHAT: "/pages/chat/index",
   PINDAN: "/pages/pindan/index",
   AIMATCH: "/pages/aimatch/index",
@@ -35,9 +36,40 @@ export function go(url: RoutePath | string) {
   void Taro.navigateTo({ url });
 }
 
-export function goPindan(activityId?: number) {
-  const url = activityId ? `${ROUTES.PINDAN}?activityId=${activityId}` : ROUTES.PINDAN;
-  void Taro.navigateTo({ url });
+export type PinDanTabType = "package" | "hotel" | "transport";
+
+export type GoPindanOptions = {
+  activityId?: number;
+  type?: PinDanTabType;
+  highlightId?: number;
+};
+
+function buildPindanUrl(options?: number | GoPindanOptions): string {
+  if (options == null) return ROUTES.PINDAN;
+
+  const params =
+    typeof options === "number"
+      ? { activityId: String(options) }
+      : Object.entries(options).reduce<Record<string, string>>(
+          (acc, [key, value]) => {
+            if (value != null) acc[key] = String(value);
+            return acc;
+          },
+          {},
+        );
+
+  const query = new URLSearchParams(params).toString();
+  return query ? `${ROUTES.PINDAN}?${query}` : ROUTES.PINDAN;
+}
+
+export function goPindan(options?: number | GoPindanOptions) {
+  void Taro.navigateTo({ url: buildPindanUrl(options) });
+}
+
+export function goProfilePindan(highlightId?: number) {
+  const params = new URLSearchParams({ tab: `pindan` });
+  if (highlightId != null) params.set(`highlightId`, String(highlightId));
+  reLaunchTo(`${ROUTES.PROFILE}?${params.toString()}` as RoutePath);
 }
 
 export function goTickets() {

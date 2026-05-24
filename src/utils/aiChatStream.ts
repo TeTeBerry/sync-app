@@ -64,6 +64,8 @@ async function* readSseBody(body: ReadableStream<Uint8Array>): AsyncGenerator<Ai
 export interface StreamAiChatOptions {
   url: string;
   messages: AiChatMessage[];
+  sessionId?: string;
+  userId?: string;
   signal?: AbortSignal;
   headers?: Record<string, string>;
 }
@@ -79,7 +81,11 @@ export async function* streamAiChatRequest(
       Accept: "text/event-stream",
       ...options.headers,
     },
-    body: JSON.stringify({ messages: options.messages }),
+    body: JSON.stringify({
+      messages: options.messages,
+      sessionId: options.sessionId,
+      userId: options.userId,
+    }),
     signal: options.signal,
   });
 
