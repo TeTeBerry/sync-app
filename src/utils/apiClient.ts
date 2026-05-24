@@ -13,8 +13,16 @@ export class ApiError extends Error {
 
 function buildUrl(path: string, params?: Record<string, string | undefined>): string {
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-  const base = API_BASE_URL.endsWith("/") ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
-  const url = new URL(`${base}${normalizedPath}`);
+  const base = API_BASE_URL.replace(/\/$/, "");
+  const combined = `${base}${normalizedPath}`;
+
+  const url =
+    base.startsWith("http://") || base.startsWith("https://")
+      ? new URL(combined)
+      : new URL(
+          combined,
+          typeof window !== "undefined" ? window.location.origin : "http://localhost",
+        );
 
   if (params) {
     for (const [key, value] of Object.entries(params)) {
