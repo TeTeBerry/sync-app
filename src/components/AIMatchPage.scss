@@ -135,6 +135,17 @@
       border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
+    &--streaming span::after {
+      content: "";
+      display: inline-block;
+      width: 2px;
+      height: 1em;
+      margin-left: 2px;
+      vertical-align: text-bottom;
+      background: var(--primary);
+      animation: s-aim-ai-cursor-blink 1s step-end infinite;
+    }
+
     &--from-user {
       background: var(--primary);
       color: #fff;
@@ -211,6 +222,16 @@
   }
 }
 
+@keyframes s-aim-ai-cursor-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  }
+}
 /* ---- Pindan block ---- */
 
 .s-aim-pin.s-aim-pin--ticket {

@@ -106,6 +106,7 @@
         "nearEvents": "查最近活动"
       },
       "searching": "正在为你搜索「{{query}}」相关内容 🔍 已找到 {{count}} 位高匹配度用户，点击下方卡片查看详情！",
+      "streamError": "抱歉，回复出错了，请稍后再试。",
       "placeholder": "说出需求，比如「想拼 EDC 门票」"
     },
     "pindan": {

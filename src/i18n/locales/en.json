@@ -106,6 +106,7 @@
         "nearEvents": "Nearby events"
       },
       "searching": "Searching for \"{{query}}\" 🔍 Found {{count}} high-match users — tap a card for details!",
+      "streamError": "Sorry, something went wrong. Please try again.",
       "placeholder": "Say what you need, e.g. \"Group buy EDC tickets\""
     },
     "pindan": {

@@ -26,6 +26,7 @@ import {
   ZapIcon,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useAiChatStream } from "../hooks/useAiChatStream";
 
 type MainTab = "ai" | "pindan" | "ticket" | "events";
 type PinDanCategory = "hotel" | "transport";
@@ -120,8 +121,6 @@ const eventsList = [
   },
 ];
 
-type ChatMsg = { from: "ai" | "user"; text: string };
-
 const quickReplyKeys = [`findBuddy`, `pinTicket`, `sellTicket`, `nearEvents`] as const;
 
 const tabAccentCls: Record<MainTab, string> = {
@@ -132,39 +131,37 @@ const tabAccentCls: Record<MainTab, string> = {
 };
 
 function AiChat() {
-  const { t, i18n } = useTranslation();
-  const [messages, setMessages] = useState<ChatMsg[]>([]);
+  const { t } = useTranslation();
   const [input, setInput] = useState(``);
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    setMessages([{ from: `ai`, text: t(`aimatch.ai.welcome`) }]);
-  }, [i18n.language, t]);
+  const mockReply = useCallback(
+    (query: string) =>
+      t(`aimatch.ai.searching`, {
+        query,
+        count: Math.floor(Math.random() * 5 + 3),
+      }),
+    [t],
+  );
+
+  const { messages, isStreaming, send } = useAiChatStream({
+    welcomeText: t(`aimatch.ai.welcome`),
+    mockReply,
+    streamErrorText: t(`aimatch.ai.streamError`),
+  });
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: `smooth` });
   }, [messages]);
 
-  const send = useCallback(
+  const submit = useCallback(
     (text: string) => {
       const trimmed = text.trim();
-      if (!trimmed) return;
-      setMessages((prev) => [...prev, { from: `user`, text: trimmed }]);
+      if (!trimmed || isStreaming) return;
       setInput(``);
-      setTimeout(() => {
-        setMessages((prev) => [
-          ...prev,
-          {
-            from: `ai`,
-            text: t(`aimatch.ai.searching`, {
-              query: trimmed,
-              count: Math.floor(Math.random() * 5 + 3),
-            }),
-          },
-        ]);
-      }, 800);
+      void send(trimmed);
     },
-    [t],
+    [isStreaming, send],
   );
 
   const onChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -175,24 +172,29 @@ function AiChat() {
     (e: KeyboardEvent<HTMLInputElement>) => {
       if (e.key === `Enter`) {
         e.preventDefault();
-        send(input);
+        submit(input);
       }
     },
-    [input, send],
+    [input, submit],
   );
 
   return (
     <div className="s-aim-ai">
       <div className="s-aim-ai__scroll">
-        {messages.map((msg, i) => (
-          <div key={i} className={`s-aim-ai__row${msg.from === `user` ? ` s-aim-ai__row--from-user` : ``}`}>
+        {messages.map((msg) => (
+          <div
+            key={msg.id}
+            className={`s-aim-ai__row${msg.from === `user` ? ` s-aim-ai__row--from-user` : ``}`}
+          >
             <div className={`s-aim-ai__avatar${msg.from === `ai` ? `` : ` s-aim-ai__avatar--hidden`}`}>
               <SparklesIcon size={13} />
             </div>
             <div
-              className={`s-aim-ai__bubble ${
-                msg.from === `ai` ? `s-aim-ai__bubble--from-ai` : `s-aim-ai__bubble--from-user`
-              }`}
+              className={cn(
+                `s-aim-ai__bubble`,
+                msg.from === `ai` ? `s-aim-ai__bubble--from-ai` : `s-aim-ai__bubble--from-user`,
+                msg.streaming && `s-aim-ai__bubble--streaming`,
+              )}
             >
               <span>{msg.text}</span>
             </div>
@@ -206,7 +208,8 @@ function AiChat() {
           <Button
             key={key}
             className="s-aim-ai__quick-chip"
-            onClick={() => send(t(`aimatch.ai.quickReplies.${key}`))}
+            disabled={isStreaming}
+            onClick={() => submit(t(`aimatch.ai.quickReplies.${key}`))}
           >
             {t(`aimatch.ai.quickReplies.${key}`)}
           </Button>
@@ -219,11 +222,12 @@ function AiChat() {
             variant="aim-chat"
             type="text"
             value={input}
+            disabled={isStreaming}
             placeholder={t(`aimatch.ai.placeholder`)}
             onChange={onChange}
             onKeyDown={onKeyDown}
           />
-          <Button className="s-aim-ai__send" onClick={() => send(input)}>
+          <Button className="s-aim-ai__send" disabled={isStreaming} onClick={() => submit(input)}>
             <SendIcon size={14} color="#fff" />
           </Button>
         </div>
