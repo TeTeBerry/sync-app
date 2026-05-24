@@ -11,6 +11,7 @@
     "view": "View",
     "share": "Share",
     "shareCopied": "Share link copied",
+    "requestFailed": "Request failed, please try again",
     "liveUpdate": "Live",
     "agent": "Agent",
     "verified": "Verified",

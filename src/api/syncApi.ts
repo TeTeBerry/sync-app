@@ -1,10 +1,11 @@
-import { apiGet, apiPost } from "../utils/apiClient";
+import { apiDelete, apiGet, apiPost } from "../utils/apiClient";
 import type {
   BackendActivity,
   BackendPindan,
   BackendTicket,
   CreateTicketPayload,
   HomeSummary,
+  ProfilePinDanItem,
 } from "../types/backend";
 
 export function fetchActivities() {
@@ -40,6 +41,18 @@ export function fetchPindanList(params?: {
 
 export function fetchHomeSummary() {
   return apiGet<HomeSummary>("/home");
+}
+
+export function fetchProfilePindan(userId?: string) {
+  return apiGet<ProfilePinDanItem[]>("/profile/pindan", { userId });
+}
+
+export function joinPindan(legacyId: number, userId?: string) {
+  return apiPost<ProfilePinDanItem>(`/pindan/${legacyId}/join`, { userId });
+}
+
+export function leavePindan(legacyId: number, userId?: string) {
+  return apiDelete<{ ok: true }>(`/pindan/${legacyId}/join`, { userId });
 }
 
 export function fetchActivityByLegacyId(legacyId: number) {

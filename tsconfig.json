@@ -3,7 +3,6 @@
     "target": "ES2019",
     "experimentalDecorators": true,
     "jsx": "react-jsx",
-    "jsxFragmentFactory": "Fragment",
     "module": "ESNext",
     "moduleResolution": "node",
     "resolveJsonModule": true,
@@ -17,7 +16,7 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    "types": ["webpack-env", "node", "@types/react"],
+    "types": ["webpack-env", "node", "react"],
     "typeRoots": ["./node_modules/@types"]
   },
   "include": ["./src/**/*", "./config/**/*", "./types/**/*"],

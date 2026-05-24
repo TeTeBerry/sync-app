@@ -100,6 +100,33 @@ export interface HomeSummary {
     categoryTone: "primary" | "amber" | "cyan";
     people: number;
     pinType: "package" | "hotel" | "transport";
-    pinItemId: number | string;
+    pinItemId: number;
   }>;
+  ticketListings: Array<{
+    id: string | number;
+    type: "sell" | "buy";
+    event: string;
+    seat: string;
+    price: number;
+    originalPrice: number;
+    seller: string;
+    avatar: string;
+    tag: string;
+    tone: "primary" | "secondary" | "amber" | "cyan";
+    time: string;
+    verified: boolean;
+  }>;
+}
+
+export interface ProfilePinDanItem {
+  id: number;
+  activityId: number;
+  category: "package" | "hotel" | "transport";
+  title: string;
+  subtitle: string;
+  date: string;
+  location: string;
+  price: number;
+  image: string;
+  joinedAt: string;
 }

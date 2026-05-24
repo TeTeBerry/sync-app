@@ -75,3 +75,20 @@ export async function apiPost<T>(
 
   return parseResponse<T>(response);
 }
+
+export async function apiDelete<T>(
+  path: string,
+  params?: Record<string, string | undefined>,
+  init?: RequestInit,
+): Promise<T> {
+  const response = await fetch(buildUrl(path, params), {
+    method: "DELETE",
+    headers: {
+      Accept: "application/json",
+      ...init?.headers,
+    },
+    ...init,
+  });
+
+  return parseResponse<T>(response);
+}

@@ -1,16 +1,32 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { fetchActivities, fetchPindanList, fetchTickets } from "../api/syncApi";
+import {
+  fetchActivities,
+  fetchHomeSummary,
+  fetchPindanList,
+  fetchProfilePindan,
+  fetchTickets,
+} from "../api/syncApi";
 import { isApiEnabled } from "../constants/api";
 import { ticketListings as mockTicketListings, type TicketFilterKey } from "../data/ticketListings";
+import {
+  eventSignupItems,
+  homeHeatStats,
+  hotPinItems,
+  ticketListings as homeMockTicketListings,
+  type HotPinItem,
+} from "../pages/index/mockData";
 import type { BackendActivity } from "../types/backend";
+import { getClientUserId } from "../utils/session";
 import {
   buildActivityNameMap,
   mapActivitiesToEvents,
   mapPindanToCards,
+  mapPindanToPageItems,
   mapTicketsToListings,
   type EventCardUi,
   type PinDanCardUi,
+  type PindanPageItem,
 } from "../utils/apiMappers";
 
 const MOCK_EVENTS: EventCardUi[] = [
@@ -166,4 +182,77 @@ export function useTicketList(filter: TicketFilterKey) {
     refetch: ticketsQuery.refetch,
     usingMock: !enabled,
   };
+}
+
+export function useHomeSummary() {
+  const enabled = isApiEnabled();
+
+  const query = useQuery({
+    queryKey: ["home"],
+    queryFn: fetchHomeSummary,
+    enabled,
+    staleTime: 60_000,
+  });
+
+  const hotPins: HotPinItem[] = enabled
+    ? (query.data?.hotPins ?? []).map((item) => ({
+        id: item.id,
+        rank: item.rank,
+        title: item.title,
+        badge: item.badge,
+        category: item.category,
+        categoryTone: item.categoryTone,
+        people: item.people,
+        pinType: item.pinType,
+        pinItemId: Number(item.pinItemId),
+      }))
+    : hotPinItems;
+
+  return {
+    heat: enabled ? query.data?.heat ?? homeHeatStats : homeHeatStats,
+    signupEvents: enabled ? query.data?.signupEvents ?? [] : eventSignupItems,
+    hotPins,
+    ticketListings: enabled ? query.data?.ticketListings ?? [] : homeMockTicketListings,
+    isLoading: query.isLoading,
+    isError: query.isError,
+    refetch: query.refetch,
+    usingMock: !enabled,
+  };
+}
+
+export function usePindanPageItems() {
+  const activitiesQuery = useActivitiesQuery();
+  const enabled = isApiEnabled();
+
+  const pindanQuery = useQuery({
+    queryKey: ["pindan", "page"],
+    queryFn: () => fetchPindanList(),
+    enabled,
+    staleTime: 30_000,
+  });
+
+  const items = useMemo((): PindanPageItem[] => {
+    if (!enabled || !pindanQuery.data) return [];
+    return mapPindanToPageItems(pindanQuery.data);
+  }, [enabled, pindanQuery.data]);
+
+  return {
+    items,
+    isLoading: pindanQuery.isLoading || activitiesQuery.isLoading,
+    isError: pindanQuery.isError,
+    refetch: pindanQuery.refetch,
+    usingMock: !enabled,
+  };
+}
+
+export function useProfilePindanQuery() {
+  const enabled = isApiEnabled();
+  const userId = getClientUserId();
+
+  return useQuery({
+    queryKey: ["profile", "pindan", userId],
+    queryFn: () => fetchProfilePindan(userId),
+    enabled,
+    staleTime: 15_000,
+  });
 }

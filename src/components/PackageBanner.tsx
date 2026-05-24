@@ -1,6 +1,6 @@
 import "./PackageBanner.scss";
 import React from "react";
-import { ChevronRightIcon, BuildingIcon, TruckIcon, UsersIcon, PackageIcon } from "lucide-react";
+import { ChevronRightIcon, BuildingIcon, TruckIcon, UsersIcon, PackageIcon, type LucideIcon } from "lucide-react";
 import { Trans, useTranslation } from "react-i18next";
 import { go, ROUTES } from "../utils/route";
 
@@ -11,7 +11,7 @@ interface PackageBannerProps {
 interface CatMeta {
   id: string;
   labelKey: string;
-  icon: React.ComponentType<{ size?: number; className?: string; strokeWidth?: number }>;
+  icon: LucideIcon;
   mod: "hotel" | "transport" | "combo";
 }
 

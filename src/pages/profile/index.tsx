@@ -19,6 +19,9 @@ import {
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import BottomNav from "../../components/BottomNav";
+import { useProfilePindanQuery } from "../../hooks/useSyncApi";
+import { leavePindan } from "../../api/syncApi";
+import { isApiEnabled } from "../../constants/api";
 import { go, ROUTES } from "../../utils/route";
 import {
   participatedEvents,
@@ -27,7 +30,8 @@ import {
   type ProfileEventItem,
 } from "./mockData";
 import ProfilePinDanList from "./components/ProfilePinDanList";
-import { loadMyPindanItems } from "../../utils/myPindanStorage";
+import { loadMyPindanItems, removeJoinedPindanItem } from "../../utils/myPindanStorage";
+import { getClientUserId } from "../../utils/session";
 
 type ProfileTab = "participated" | "pindan";
 
@@ -57,6 +61,7 @@ function parseProfileRouteParams() {
 
 const Profile: React.FC = () => {
   const { t } = useTranslation();
+  const profilePindanQuery = useProfilePindanQuery();
   const settingsRef = useRef<HTMLDivElement>(null);
   const [activeTab, setActiveTab] = useState<ProfileTab>("participated");
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
@@ -73,9 +78,18 @@ const Profile: React.FC = () => {
   useDidShow(() => {
     setNotificationsEnabled(readStorage(STORAGE_KEYS.notifications, true));
     setPrivacyLevel(readStorage<string>(STORAGE_KEYS.privacy, "public"));
-    setMyPindanItems(loadMyPindanItems(myPinDanEvents));
+    if (isApiEnabled()) {
+      void profilePindanQuery.refetch();
+    } else {
+      setMyPindanItems(loadMyPindanItems(myPinDanEvents));
+    }
     applyRouteParams();
   });
+
+  useEffect(() => {
+    if (!isApiEnabled() || !profilePindanQuery.data) return;
+    setMyPindanItems(profilePindanQuery.data);
+  }, [profilePindanQuery.data]);
 
   useEffect(() => {
     if (highlightPindanId == null || activeTab !== `pindan`) return;
@@ -122,9 +136,23 @@ const Profile: React.FC = () => {
     void Taro.showToast({ title: item.title, icon: "none" });
   }, []);
 
-  const handleExitPindan = useCallback((id: number) => {
-    setMyPindanItems((prev) => prev.filter((item) => item.id !== id));
-  }, []);
+  const handleExitPindan = useCallback(
+    async (id: number) => {
+      if (isApiEnabled()) {
+        try {
+          await leavePindan(id, getClientUserId());
+          setMyPindanItems((prev) => prev.filter((item) => item.id !== id));
+        } catch {
+          void Taro.showToast({ title: t("common.requestFailed"), icon: "none" });
+        }
+        return;
+      }
+
+      removeJoinedPindanItem(id);
+      setMyPindanItems((prev) => prev.filter((item) => item.id !== id));
+    },
+    [t],
+  );
 
   const openSettings = useCallback(
     (section: "notifications" | "privacy" | "help") => {

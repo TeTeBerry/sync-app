@@ -32,7 +32,7 @@ import type { PinDanCategory } from "../utils/apiMappers";
 
 type MainTab = "ai" | "pindan" | "ticket" | "events";
 
-const pinDanCategoryKeys: PinDanCategory[] = ["hotel", "transport"];
+const pinDanCategoryKeys: PinDanCategory[] = ["package", "hotel", "transport"];
 
 const quickReplyKeys = [`findBuddy`, `pinTicket`, `sellTicket`, `nearEvents`] as const;
 
@@ -179,6 +179,7 @@ const AIMatchPage: FC = () => {
   const eventFilterKeys = [`all`, `outdoor`, `edm`, `club`, `festival`] as const;
 
   const pinDanTabLabelKey: Record<PinDanCategory, string> = {
+    package: `pindan.tabs.package`,
     hotel: `aimatch.pindan.hotel`,
     transport: `aimatch.pindan.transport`,
   };

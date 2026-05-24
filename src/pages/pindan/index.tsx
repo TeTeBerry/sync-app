@@ -20,10 +20,14 @@ import JoinSuccessToast from "../../components/JoinSuccessToast";
 import PageNavigation from "../../components/PageNavigation";
 import { Button } from "../../components/ui";
 import { getActivityById } from "../../data/activities";
+import { usePindanPageItems, useProfilePindanQuery } from "../../hooks/useSyncApi";
+import { joinPindan } from "../../api/syncApi";
+import { isApiEnabled } from "../../constants/api";
 import type { ProfilePinDanItem } from "../profile/mockData";
 import { formatJoinedAt, saveJoinedPindanItem } from "../../utils/myPindanStorage";
 import { goProfilePindan } from "../../utils/route";
 import { sharePinDanItem } from "../../utils/share";
+import { getClientUserId } from "../../utils/session";
 
 type TabType = `package` | `hotel` | `transport`;
 
@@ -306,6 +310,8 @@ function parseRouteParams() {
 
 const PinDan: React.FC = () => {
   const { t } = useTranslation();
+  const { items: apiItems, usingMock } = usePindanPageItems();
+  const profilePindanQuery = useProfilePindanQuery();
   const [activeTab, setActiveTab] = useState<TabType>(`package`);
   const [routeActivityId, setRouteActivityId] = useState<number | null>(null);
   const [highlightItemId, setHighlightItemId] = useState<number | null>(null);
@@ -331,6 +337,11 @@ const PinDan: React.FC = () => {
   useDidShow(applyRouteParams);
 
   useEffect(() => {
+    if (!isApiEnabled() || !profilePindanQuery.data) return;
+    setJoinedIds(new Set(profilePindanQuery.data.map((item) => item.id)));
+  }, [profilePindanQuery.data]);
+
+  useEffect(() => {
     if (highlightItemId == null) return;
 
     const scrollTimer = window.setTimeout(() => {
@@ -348,7 +359,9 @@ const PinDan: React.FC = () => {
     };
   }, [highlightItemId, activeTab, routeActivityId]);
 
-  const filtered = mockData.filter((item) => {
+  const sourceItems = usingMock ? mockData : apiItems;
+
+  const filtered = sourceItems.filter((item) => {
     if (item.type !== activeTab) return false;
     if (routeActivityId == null) return true;
     return item.activityId === routeActivityId;
@@ -372,24 +385,38 @@ const PinDan: React.FC = () => {
     [t],
   );
 
-  const handleJoin = useCallback((item: PinDanItem) => {
-    const profileItem: ProfilePinDanItem = {
-      id: item.id,
-      activityId: item.activityId,
-      category: item.type,
-      title: item.title,
-      subtitle: item.subtitle,
-      date: item.date,
-      location: item.location,
-      price: item.price,
-      image: item.image,
-      joinedAt: formatJoinedAt(),
-    };
+  const handleJoin = useCallback(
+    async (item: PinDanItem) => {
+      if (isApiEnabled()) {
+        try {
+          await joinPindan(item.id, getClientUserId());
+          setJoinedIds((prev) => new Set(prev).add(item.id));
+          setJoinToast({ visible: true, title: item.title, profileId: item.id });
+        } catch {
+          void Taro.showToast({ title: t("common.requestFailed"), icon: "none" });
+        }
+        return;
+      }
 
-    saveJoinedPindanItem(profileItem);
-    setJoinedIds((prev) => new Set(prev).add(item.id));
-    setJoinToast({ visible: true, title: item.title, profileId: item.id });
-  }, []);
+      const profileItem: ProfilePinDanItem = {
+        id: item.id,
+        activityId: item.activityId,
+        category: item.type,
+        title: item.title,
+        subtitle: item.subtitle,
+        date: item.date,
+        location: item.location,
+        price: item.price,
+        image: item.image,
+        joinedAt: formatJoinedAt(),
+      };
+
+      saveJoinedPindanItem(profileItem);
+      setJoinedIds((prev) => new Set(prev).add(item.id));
+      setJoinToast({ visible: true, title: item.title, profileId: item.id });
+    },
+    [t],
+  );
 
   const dismissJoinToast = useCallback(() => {
     setJoinToast((prev) => ({ ...prev, visible: false }));

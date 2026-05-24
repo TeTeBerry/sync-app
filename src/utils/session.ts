@@ -14,3 +14,8 @@ export function getOrCreateSessionId(): string {
   sessionStorage.setItem(SESSION_KEY, id);
   return id;
 }
+
+/** 客户端用户标识，用于拼单加入/退出等接口 */
+export function getClientUserId(): string {
+  return getOrCreateSessionId();
+}

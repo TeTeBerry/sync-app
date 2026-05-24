@@ -65,10 +65,13 @@ H5 开发态也可只配 `TARO_APP_API_BASE_URL=/api`，由 `config/index.ts` de
 | GET | `/api/activities/match?keyword=edc` | 活动匹配 |
 | GET | `/api/tickets?activityId=&type=` | 门票挂单 |
 | POST | `/api/tickets` | 创建门票挂单 |
-| GET | `/api/home` | 首页聚合（热度条 / 活动报名 / 热拼排行） |
+| GET | `/api/home` | 首页聚合（热度条 / 活动报名 / 热拼排行 / 票区） |
 | GET | `/api/activities/:legacyId` | 按前端 activityId 查活动 |
 | GET | `/api/pindan?activityId=&type=&keyword=` | 拼单列表（type: package/hotel/transport） |
 | POST | `/api/pindan` | 创建拼单 |
+| POST | `/api/pindan/:legacyId/join` | 加入拼单（body: `{ userId? }`，返回 ProfilePinDanItem） |
+| DELETE | `/api/pindan/:legacyId/join?userId=` | 退出拼单 |
+| GET | `/api/profile/pindan?userId=` | 我的拼单列表 |
 
 ### SSE 对话
 

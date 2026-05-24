@@ -26,6 +26,11 @@ export function saveJoinedPindanItem(item: ProfilePinDanItem): void {
   Taro.setStorageSync(STORAGE_KEY, [item, ...stored]);
 }
 
+export function removeJoinedPindanItem(id: number): void {
+  const stored = readStored().filter((item) => item.id !== id);
+  Taro.setStorageSync(STORAGE_KEY, stored);
+}
+
 export function formatJoinedAt(date = new Date()): string {
   const pad = (n: number) => String(n).padStart(2, `0`);
   return `${pad(date.getMonth() + 1)}/${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;

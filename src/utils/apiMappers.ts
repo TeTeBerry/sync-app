@@ -33,6 +33,24 @@ export interface EventCardUi {
   going: boolean;
 }
 
+export interface PindanPageItem {
+  id: number;
+  activityId: number;
+  type: PinDanCategory;
+  title: string;
+  subtitle: string;
+  image: string;
+  price: number;
+  originalPrice: number;
+  date: string;
+  location: string;
+  joined: number;
+  total: number;
+  tags: string[];
+  rating: number;
+  includes?: Array<{ kind: "hotel" | "transport"; title: string; detail: string }>;
+}
+
 const ACTIVITY_EVENT_PRESETS: Record<
   string,
   Pick<EventCardUi, "date" | "location" | "distance" | "image" | "category" | "hot" | "attendees" | "pinCount">
@@ -155,6 +173,34 @@ export function mapPindanToCards(
       urgent: joined >= total - 1,
     };
   });
+}
+
+export function mapPindanToPageItems(items: BackendPindan[]): PindanPageItem[] {
+  return items
+    .filter((item) => item.legacyId != null)
+    .map((item) => {
+      const type = inferPinDanCategory(item.title, item.type);
+      const joined = item.joined ?? (item.memberUserIds?.length ?? 0) + 1;
+      const total = item.total ?? Math.max(4, joined + 1);
+
+      return {
+        id: item.legacyId as number,
+        activityId: item.activityLegacyId ?? 0,
+        type,
+        title: item.title,
+        subtitle: item.subtitle ?? "",
+        image: item.image ?? PINDAN_IMAGES[type],
+        price: item.price ?? 0,
+        originalPrice: item.originalPrice ?? 0,
+        date: item.date ?? "",
+        location: item.location ?? "",
+        joined,
+        total,
+        tags: item.tags ?? [],
+        rating: item.rating ?? 4.8,
+        includes: item.includes,
+      };
+    });
 }
 
 export function mapTicketsToListings(
