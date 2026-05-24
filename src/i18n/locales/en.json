@@ -1,0 +1,174 @@
+{
+  "nav": {
+    "home": "Home",
+    "events": "Events",
+    "explore": "Explore",
+    "profile": "Profile"
+  },
+  "common": {
+    "all": "All",
+    "more": "More",
+    "view": "View",
+    "share": "Share",
+    "liveUpdate": "Live",
+    "agent": "Agent",
+    "verified": "Verified",
+    "hot": "Hot",
+    "urgent": "Urgent",
+    "peopleJoining": "{{count}} joining",
+    "joinedCount": "{{joined}}/{{total}} joined",
+    "peopleJoined": "{{count}} joined",
+    "spotsLeft": "{{count}} spots left",
+    "full": "Full",
+    "inProgress": "Active",
+    "joined": "Joined",
+    "spotsRemaining": "Spots left",
+    "attendees": " attending",
+    "pinOrders": "{{count}} group orders",
+    "pinOrdersActive": "{{count}} active orders"
+  },
+  "language": {
+    "title": "Language",
+    "zh": "中文",
+    "en": "English",
+    "th": "ไทย"
+  },
+  "activities": {
+    "tomorrowland": "Tomorrowland Warm-up Party",
+    "edc": "EDC China",
+    "s2o": "S2O Sanya",
+    "ultra": "Ultra Shanghai"
+  },
+  "home": {
+    "ai": {
+      "title": "AI Buddy Assistant",
+      "online": "Online · Served 12,400+ festival goers",
+      "summon": "Summon",
+      "placeholder": "Tell me what you want to group buy…"
+    },
+    "hot": {
+      "title": "Trending Groups"
+    },
+    "package": {
+      "tag": "Save More",
+      "title": "Group Buy",
+      "subtitle": "Hotels · Transport · Packages — save 50%+ per person",
+      "hotel": "Hotel",
+      "transport": "Transport",
+      "combo": "Package",
+      "stats": "<1>{{count}}</1> people are group buying now"
+    },
+    "ticket": {
+      "title": "Ticket Buy / Sell",
+      "guarantee": "Official guarantee",
+      "tabs": {
+        "all": "All",
+        "sell": "Selling",
+        "buy": "Buying"
+      },
+      "buyNow": "Buy Now",
+      "contact": "Contact"
+    },
+    "nearEvents": "Nearby Events",
+    "fabLabel": "Quick post"
+  },
+  "profile": {
+    "title": "Profile",
+    "developing": "Profile page coming soon..."
+  },
+  "events": {
+    "developing": "Events page coming soon..."
+  },
+  "explore": {
+    "developing": "Explore page coming soon..."
+  },
+  "chat": {
+    "name": "SYNC AI Buddy",
+    "status": "Matching for you...",
+    "welcome": "Hey! Heard you're going to S2O this weekend? Want me to match you with buddies for tickets or VIP tables?",
+    "placeholder": "Tell me which party you want to go to..."
+  },
+  "aimatch": {
+    "tabs": {
+      "ai": "AI Match",
+      "pindan": "Create Group",
+      "ticket": "Tickets",
+      "events": "Events"
+    },
+    "ai": {
+      "welcome": "👋 I'm your AI festival buddy — find crew, group buy, buy/sell tickets. Just tell me what you need!",
+      "quickReplies": {
+        "findBuddy": "Find a buddy",
+        "pinTicket": "Group buy tickets",
+        "sellTicket": "Sell my tickets",
+        "nearEvents": "Nearby events"
+      },
+      "searching": "Searching for \"{{query}}\" 🔍 Found {{count}} high-match users — tap a card for details!",
+      "placeholder": "Say what you need, e.g. \"Group buy EDC tickets\""
+    },
+    "pindan": {
+      "createNew": "Start a new group order",
+      "hotel": "Hotel",
+      "transport": "Transport",
+      "hotelGroup": "Hotel Group",
+      "transportGroup": "Transport Group",
+      "currentOrders": "Active Orders",
+      "join": "Join",
+      "modal": {
+        "title": "New Group Order",
+        "selectType": "Select type",
+        "eventName": "Event name, e.g. \"EDC China 2025\"",
+        "date": "Date",
+        "location": "Location",
+        "pricePerPerson": "Price per person",
+        "groupSize": "Group size",
+        "submit": "Publish"
+      }
+    },
+    "ticket": {
+      "sell": "Sell Tickets",
+      "buy": "Buy Tickets",
+      "guaranteeTitle": "Official escrow protection",
+      "guaranteeSub": "Verified ID · Escrow · Authentic tickets",
+      "tabs": {
+        "all": "All",
+        "selling": "Selling",
+        "buying": "Buying"
+      },
+      "buyTicket": "Buy Now",
+      "contact": "Contact"
+    },
+    "events": {
+      "filters": {
+        "all": "All",
+        "outdoor": "Outdoor EDM",
+        "edm": "EDM Festival",
+        "club": "Club Party",
+        "festival": "Major Festival"
+      },
+      "going": "I'm Going",
+      "registered": "Registered",
+      "findBuddy": "Find Buddies"
+    }
+  },
+  "pindan": {
+    "title": "Package Groups",
+    "currentActivity": "Current event",
+    "popular": "Most Popular",
+    "hero": {
+      "package": "Hotel + Transport Bundle",
+      "packageSubtitle": "Combo packages save more — up to 60% off per person",
+      "hotel": "Shared Hotel Rooms",
+      "transport": "Shared Transport",
+      "subtitle": "More people, lower cost per person"
+    },
+    "tabs": {
+      "package": "Packages",
+      "hotel": "Hotels",
+      "transport": "Transport"
+    },
+    "packageIncludes": "Package includes",
+    "join": "Join",
+    "joinPackage": "Join Package"
+  }
+}

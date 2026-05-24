@@ -1,0 +1,51 @@
+// Design tokens — keep in sync across H5 + 小程序（CSS vars 可被原生引用）
+:root {
+  --fontSans: "Inter", "Helvetica", sans-serif;
+  --radius-xl: 20px;
+  --radius-2xl: 16px;
+  --radius-3xl: 24px;
+  --radius-full: 9999px;
+
+  --background: rgb(15, 15, 15);
+  --foreground: rgb(255, 255, 255);
+
+  --card: rgba(30, 30, 30, 0.8);
+  --card-foreground: rgb(255, 255, 255);
+
+  --popover: rgb(23, 23, 23);
+  --popover-foreground: rgb(255, 255, 255);
+
+  --primary: rgb(255, 0, 102);
+  --primary-rgb: 255, 0, 102;
+  --primary-foreground: rgb(255, 255, 255);
+
+  --secondary: rgb(76, 201, 240);
+  --secondary-rgb: 76, 201, 240;
+  --secondary-foreground: rgb(255, 255, 255);
+
+  --muted: rgb(30, 30, 30);
+  --muted-foreground: rgb(176, 176, 176);
+
+  --accent: rgb(255, 0, 102);
+  --accent-foreground: rgb(255, 255, 255);
+
+  --destructive: rgb(255, 100, 103);
+  --destructive-foreground: rgb(255, 255, 255);
+
+  --border: rgba(255, 255, 255, 0.1);
+  --input-border: rgba(255, 255, 255, 0.15);
+  --ring: rgb(255, 0, 102);
+
+  --cyan-400: rgb(34, 211, 238);
+  --cyan-400-rgb: 34, 211, 238;
+  --amber-400: rgb(251, 191, 36);
+  --amber-400-rgb: 251, 191, 36;
+  --purple-500: rgb(168, 85, 247);
+  --purple-500-rgb: 168, 85, 247;
+
+  --shadow-y: 4px;
+  --shadow-spread: 0px;
+  --shadow-blur: 12px;
+  --shadow-color: rgba(0, 0, 0, 0.5);
+  --shadow-x: 0px;
+}

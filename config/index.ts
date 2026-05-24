@@ -1,0 +1,54 @@
+import { defineConfig } from "@tarojs/cli";
+
+/** 微信小程序使用 HTML 标签映射；H5 使用原生浏览器标签 */
+const plugins: (string | [string, Record<string, unknown>])[] = ["@tarojs/plugin-framework-react"];
+if (process.env.TARO_ENV === "weapp") {
+  plugins.push(["@tarojs/plugin-html", {}]);
+}
+
+// https://docs.taro.zone/docs/config-detail
+export default defineConfig({
+  projectName: "sync-app",
+  date: "2026-5-24",
+  designWidth: 375,
+  deviceRatio: {
+    640: 2.34 / 2,
+    750: 1,
+    828: 1.81 / 2,
+    375: 2,
+  },
+  sourceRoot: "src",
+  outputRoot: "dist",
+  plugins,
+  compiler: {
+    type: "webpack5",
+    prebundle: {
+      enable: false,
+    },
+  },
+  framework: "react",
+  mini: {
+    postcss: {
+      pxtransform: {
+        enable: true,
+        config: {},
+      },
+    },
+  },
+  h5: {
+    publicPath: "/",
+    staticDirectory: "static",
+    /** 根路径 `/` 即首页（hash 模式需 `#/pages/...`，否则空白） */
+    router: {
+      mode: "browser",
+    },
+    postcss: {
+      autoprefixer: {
+        enable: true,
+      },
+    },
+    devServer: {
+      historyApiFallback: true,
+    },
+  },
+});

@@ -1,0 +1,31 @@
+.s-avatar-group {
+  display: flex;
+  align-items: center;
+}
+
+.s-avatar-group__pile {
+  display: flex;
+
+  img {
+    margin-left: -12px;
+
+    &:first-child {
+      margin-left: 0;
+    }
+  }
+}
+
+.s-avatar-group__avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 9999px;
+  border: 2px solid var(--background);
+  object-fit: cover;
+}
+
+.s-avatar-group__count {
+  margin-left: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--muted-foreground);
+}

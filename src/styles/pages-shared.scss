@@ -1,0 +1,16 @@
+/* 通用页面壳（占位页等） */
+.s-page-shell {
+  width: 100%;
+  min-height: 100vh;
+  background-color: var(--background);
+  display: flex;
+  flex-direction: column;
+}
+
+.s-page-shell__muted-center {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted-foreground);
+}

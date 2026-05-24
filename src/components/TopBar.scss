@@ -1,0 +1,35 @@
+.s-top-bar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 15, 15, 0.9);
+  backdrop-filter: blur(12px);
+}
+
+.s-top-bar__actions {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.s-top-bar__inner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.s-top-bar__icon {
+  color: var(--secondary);
+}
+
+.s-top-bar__title {
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: 0.06em;
+  color: var(--foreground);
+}

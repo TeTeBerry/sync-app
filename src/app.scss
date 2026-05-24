@@ -1,0 +1,21 @@
+@use "./styles/globals.scss";
+@use "./styles/pages-shared.scss";
+
+/* 375 栅外层 */
+.s-app-shell {
+  min-height: 100vh;
+  background: #000;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.s-app-shell__viewport {
+  width: 100%;
+  max-width: 375px;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+  background-color: var(--background);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.45);
+}

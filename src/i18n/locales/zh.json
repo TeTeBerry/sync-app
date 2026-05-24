@@ -1,0 +1,174 @@
+{
+  "nav": {
+    "home": "首页",
+    "events": "活动",
+    "explore": "探索",
+    "profile": "我的"
+  },
+  "common": {
+    "all": "全部",
+    "more": "更多",
+    "view": "查看",
+    "share": "分享",
+    "liveUpdate": "实时更新",
+    "agent": "Agent",
+    "verified": "已认证",
+    "hot": "热门",
+    "urgent": "急拼",
+    "peopleJoining": "{{count}} 人在拼",
+    "joinedCount": "{{joined}}/{{total}} 人已拼",
+    "peopleJoined": "{{count}} 人已加入",
+    "spotsLeft": "还差 {{count}} 人",
+    "full": "已满员",
+    "inProgress": "进行中",
+    "joined": "已加入",
+    "spotsRemaining": "空位剩余",
+    "attendees": "人参加",
+    "pinOrders": "{{count}} 个拼单",
+    "pinOrdersActive": "{{count}} 个拼单进行中"
+  },
+  "language": {
+    "title": "语言",
+    "zh": "中文",
+    "en": "English",
+    "th": "ไทย"
+  },
+  "activities": {
+    "tomorrowland": "Tomorrowland 预热派对",
+    "edc": "EDC China 电音节",
+    "s2o": "S2O 三亚水上电音",
+    "ultra": "Ultra Shanghai"
+  },
+  "home": {
+    "ai": {
+      "title": "AI 搭子助手",
+      "online": "在线 · 已服务 12,400+ 音乐节玩家",
+      "summon": "唤起",
+      "placeholder": "告诉我你想拼什么…"
+    },
+    "hot": {
+      "title": "正在热拼活动"
+    },
+    "package": {
+      "tag": "省钱新玩法",
+      "title": "我要拼单",
+      "subtitle": "酒店·交通·套餐 人均立省50%+",
+      "hotel": "酒店拼",
+      "transport": "交通拼",
+      "combo": "套餐拼",
+      "stats": "目前 <1>{{count}}</1> 人正在参与拼单"
+    },
+    "ticket": {
+      "title": "门票收 / 出票专区",
+      "guarantee": "官方担保",
+      "tabs": {
+        "all": "全部",
+        "sell": "出票",
+        "buy": "收票"
+      },
+      "buyNow": "立即购",
+      "contact": "联系他"
+    },
+    "nearEvents": "附近活动",
+    "fabLabel": "快速发布"
+  },
+  "profile": {
+    "title": "我的",
+    "developing": "个人主页开发中..."
+  },
+  "events": {
+    "developing": "活动页面开发中..."
+  },
+  "explore": {
+    "developing": "探索页面开发中..."
+  },
+  "chat": {
+    "name": "SYNC 智能搭子",
+    "status": "在线为你匹配...",
+    "welcome": "Hey！听说你想去周末的 S2O 电音节？需要我帮你匹配拼门票还是卡座的搭子？",
+    "placeholder": "告诉我想去哪场派对..."
+  },
+  "aimatch": {
+    "tabs": {
+      "ai": "AI匹配",
+      "pindan": "创建拼单",
+      "ticket": "门票出/收",
+      "events": "查看活动"
+    },
+    "ai": {
+      "welcome": "👋 我是你的 AI 全能搭子助手，帮你搞定音乐节的一切 —— 找搭子、拼单、出/收票，说出需求，我来搞定。",
+      "quickReplies": {
+        "findBuddy": "帮我找搭子",
+        "pinTicket": "我要拼门票",
+        "sellTicket": "我有票要出",
+        "nearEvents": "查附近活动"
+      },
+      "searching": "正在为你搜索「{{query}}」相关内容 🔍 已找到 {{count}} 位高匹配度用户，点击下方卡片查看详情！",
+      "placeholder": "说出需求，比如「想拼 EDC 门票」"
+    },
+    "pindan": {
+      "createNew": "发起一个新拼单",
+      "hotel": "酒店",
+      "transport": "交通",
+      "hotelGroup": "酒店拼",
+      "transportGroup": "交通拼",
+      "currentOrders": "当前拼单",
+      "join": "我要加入",
+      "modal": {
+        "title": "发起新拼单",
+        "selectType": "选择拼单类型",
+        "eventName": "活动名称，如「EDC China 2025」",
+        "date": "日期",
+        "location": "地点",
+        "pricePerPerson": "人均价格",
+        "groupSize": "拼单人数",
+        "submit": "发布拼单"
+      }
+    },
+    "ticket": {
+      "sell": "我要出票",
+      "buy": "我要收票",
+      "guaranteeTitle": "官方平台担保交易",
+      "guaranteeSub": "实名认证 · 资金托管 · 真票保障",
+      "tabs": {
+        "all": "全部",
+        "selling": "出票中",
+        "buying": "收票中"
+      },
+      "buyTicket": "立即购票",
+      "contact": "联系他"
+    },
+    "events": {
+      "filters": {
+        "all": "全部",
+        "outdoor": "户外电音",
+        "edm": "EDM节",
+        "club": "Club 派对",
+        "festival": "大型节日"
+      },
+      "going": "我要去",
+      "registered": "已报名",
+      "findBuddy": "找搭子拼"
+    }
+  },
+  "pindan": {
+    "title": "套餐拼单",
+    "currentActivity": "当前活动",
+    "popular": "当前最受欢迎",
+    "hero": {
+      "package": "酒店 + 交通一站拼",
+      "packageSubtitle": "组合套餐更划算，人均直降60%",
+      "hotel": "酒店拼房入住",
+      "transport": "同行交通共享",
+      "subtitle": "拼单人数越多，人均费用越低"
+    },
+    "tabs": {
+      "package": "套餐拼单",
+      "hotel": "酒店拼单",
+      "transport": "交通拼单"
+    },
+    "packageIncludes": "套餐包含",
+    "join": "我要加入",
+    "joinPackage": "加入套餐拼单"
+  }
+}

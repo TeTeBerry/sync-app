@@ -1,0 +1,174 @@
+{
+  "nav": {
+    "home": "หน้าแรก",
+    "events": "กิจกรรม",
+    "explore": "สำรวจ",
+    "profile": "โปรไฟล์"
+  },
+  "common": {
+    "all": "ทั้งหมด",
+    "more": "เพิ่มเติม",
+    "view": "ดู",
+    "share": "แชร์",
+    "liveUpdate": "อัปเดตสด",
+    "agent": "Agent",
+    "verified": "ยืนยันแล้ว",
+    "hot": "ยอดนิยม",
+    "urgent": "ด่วน",
+    "peopleJoining": "{{count}} คนกำลังร่วม",
+    "joinedCount": "{{joined}}/{{total}} คนร่วมแล้ว",
+    "peopleJoined": "{{count}} คนเข้าร่วม",
+    "spotsLeft": "เหลืออีก {{count}} คน",
+    "full": "เต็มแล้ว",
+    "inProgress": "กำลังดำเนินการ",
+    "joined": "เข้าร่วมแล้ว",
+    "spotsRemaining": "ที่ว่างเหลือ",
+    "attendees": " คนเข้าร่วม",
+    "pinOrders": "{{count}} กลุ่มซื้อร่วม",
+    "pinOrdersActive": "{{count}} กลุ่มกำลังดำเนินการ"
+  },
+  "language": {
+    "title": "ภาษา",
+    "zh": "中文",
+    "en": "English",
+    "th": "ไทย"
+  },
+  "activities": {
+    "tomorrowland": "Tomorrowland Warm-up Party",
+    "edc": "EDC China",
+    "s2o": "S2O Sanya",
+    "ultra": "Ultra Shanghai"
+  },
+  "home": {
+    "ai": {
+      "title": "ผู้ช่วย AI หาเพื่อน",
+      "online": "ออนไลน์ · ให้บริการผู้เล่นเทศกาลดนตรี 12,400+ คน",
+      "summon": "เรียกใช้",
+      "placeholder": "บอกว่าอยากซื้อร่วมอะไร…"
+    },
+    "hot": {
+      "title": "กำลังฮิต"
+    },
+    "package": {
+      "tag": "ประหยัดใหม่",
+      "title": "ซื้อร่วมกัน",
+      "subtitle": "โรงแรม · การเดินทาง · แพ็กเกจ ประหยัด 50%+ ต่อคน",
+      "hotel": "โรงแรม",
+      "transport": "การเดินทาง",
+      "combo": "แพ็กเกจ",
+      "stats": "ขณะนี้มี <1>{{count}}</1> คนกำลังซื้อร่วม"
+    },
+    "ticket": {
+      "title": "ซื้อ / ขายตั๋ว",
+      "guarantee": "รับประกันอย่างเป็นทางการ",
+      "tabs": {
+        "all": "ทั้งหมด",
+        "sell": "ขาย",
+        "buy": "ซื้อ"
+      },
+      "buyNow": "ซื้อเลย",
+      "contact": "ติดต่อ"
+    },
+    "nearEvents": "กิจกรรมใกล้เคียง",
+    "fabLabel": "โพสต์ด่วน"
+  },
+  "profile": {
+    "title": "โปรไฟล์",
+    "developing": "หน้าโปรไฟล์กำลังพัฒนา..."
+  },
+  "events": {
+    "developing": "หน้ากิจกรรมกำลังพัฒนา..."
+  },
+  "explore": {
+    "developing": "หน้าสำรวจกำลังพัฒนา..."
+  },
+  "chat": {
+    "name": "SYNC AI Buddy",
+    "status": "กำลังจับคู่ให้คุณ...",
+    "welcome": "เฮ้! ได้ยินว่าอยากไป S2O สุดสัปดาห์นี้? ให้ช่วยหาเพื่อนซื้อตั๋วหรือโต๊ะ VIP ไหม?",
+    "placeholder": "บอกว่าอยากไปปาร์ตี้ไหน..."
+  },
+  "aimatch": {
+    "tabs": {
+      "ai": "AI จับคู่",
+      "pindan": "สร้างกลุ่ม",
+      "ticket": "ตั๋ว",
+      "events": "กิจกรรม"
+    },
+    "ai": {
+      "welcome": "👋 ฉันคือผู้ช่วย AI สำหรับเทศกาลดนตรี — หาเพื่อน ซื้อร่วม ซื้อ/ขายตั๋ว บอกความต้องการมาได้เลย!",
+      "quickReplies": {
+        "findBuddy": "หาเพื่อน",
+        "pinTicket": "ซื้อตั๋วร่วม",
+        "sellTicket": "ขายตั๋ว",
+        "nearEvents": "กิจกรรมใกล้เคียง"
+      },
+      "searching": "กำลังค้นหา \"{{query}}\" 🔍 พบ {{count}} คนที่ตรงกัน — แตะการ์ดเพื่อดูรายละเอียด!",
+      "placeholder": "บอกความต้องการ เช่น \"อยากซื้อตั๋ว EDC ร่วม\""
+    },
+    "pindan": {
+      "createNew": "เริ่มกลุ่มซื้อร่วมใหม่",
+      "hotel": "โรงแรม",
+      "transport": "การเดินทาง",
+      "hotelGroup": "กลุ่มโรงแรม",
+      "transportGroup": "กลุ่มการเดินทาง",
+      "currentOrders": "กลุ่มปัจจุบัน",
+      "join": "เข้าร่วม",
+      "modal": {
+        "title": "สร้างกลุ่มซื้อร่วม",
+        "selectType": "เลือกประเภท",
+        "eventName": "ชื่อกิจกรรม เช่น \"EDC China 2025\"",
+        "date": "วันที่",
+        "location": "สถานที่",
+        "pricePerPerson": "ราคาต่อคน",
+        "groupSize": "จำนวนคน",
+        "submit": "เผยแพร่"
+      }
+    },
+    "ticket": {
+      "sell": "ขายตั๋ว",
+      "buy": "ซื้อตั๋ว",
+      "guaranteeTitle": "ธุรกรรมรับประกันอย่างเป็นทางการ",
+      "guaranteeSub": "ยืนยันตัวตน · เงินฝาก · ตั๋วแท้",
+      "tabs": {
+        "all": "ทั้งหมด",
+        "selling": "กำลังขาย",
+        "buying": "กำลังซื้อ"
+      },
+      "buyTicket": "ซื้อเลย",
+      "contact": "ติดต่อ"
+    },
+    "events": {
+      "filters": {
+        "all": "ทั้งหมด",
+        "outdoor": "EDM กลางแจ้ง",
+        "edm": "เทศกาล EDM",
+        "club": "ปาร์ตี้คลับ",
+        "festival": "เทศกาลใหญ่"
+      },
+      "going": "ฉันจะไป",
+      "registered": "ลงทะเบียนแล้ว",
+      "findBuddy": "หาเพื่อนร่วม"
+    }
+  },
+  "pindan": {
+    "title": "แพ็กเกจซื้อร่วม",
+    "currentActivity": "กิจกรรมปัจจุบัน",
+    "popular": "ยอดนิยมที่สุด",
+    "hero": {
+      "package": "โรงแรม + การเดินทางครบจบ",
+      "packageSubtitle": "แพ็กเกจรวมคุ้มกว่า ประหยัดได้ถึง 60% ต่อคน",
+      "hotel": "แชร์ห้องโรงแรม",
+      "transport": "แชร์การเดินทาง",
+      "subtitle": "ยิ่งคนมาก ยิ่งถูกต่อคน"
+    },
+    "tabs": {
+      "package": "แพ็กเกจ",
+      "hotel": "โรงแรม",
+      "transport": "การเดินทาง"
+    },
+    "packageIncludes": "แพ็กเกจรวม",
+    "join": "เข้าร่วม",
+    "joinPackage": "เข้าร่วมแพ็กเกจ"
+  }
+}
