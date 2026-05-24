@@ -10,7 +10,7 @@ export type HomeNearEventsProps = {
 };
 
 /**
- * 「附近活动」列表：复用卡片组件，右上角链式入口后续可对接路由。
+ * 「最近活动」列表：复用卡片组件，右上角链式入口后续可对接路由。
  */
 export const HomeNearEvents: FC<HomeNearEventsProps> = ({ events }) => {
   const { t } = useTranslation();

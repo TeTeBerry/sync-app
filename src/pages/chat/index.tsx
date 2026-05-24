@@ -3,6 +3,7 @@ import React from "react";
 import { ArrowLeftIcon, SendIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { goBack } from "../../utils/route";
+import { Button, Input } from "../../components/ui";
 
 const AIChat: React.FC = () => {
   const { t } = useTranslation();
@@ -10,9 +11,9 @@ const AIChat: React.FC = () => {
   return (
     <div className="s-chat s-pb-safe">
       <div className="s-chat__header">
-        <button type="button" onClick={() => goBack()} className="s-chat__back">
+        <Button className="s-chat__back" onClick={() => goBack()}>
           <ArrowLeftIcon size={24} />
-        </button>
+        </Button>
         <div className="s-chat__head-main">
           <div className="s-chat__avatar-wrap">
             <span className="s-chat__online" />
@@ -38,14 +39,10 @@ const AIChat: React.FC = () => {
 
       <div className="s-chat__footer">
         <div className="s-chat__input-row">
-          <input
-            type="text"
-            placeholder={t("chat.placeholder")}
-            className="s-chat__field"
-          />
-          <button type="button" className="s-chat__send">
+          <Input variant="chat" type="text" placeholder={t("chat.placeholder")} />
+          <Button className="s-chat__send">
             <SendIcon size={14} style={{ marginLeft: 2 }} />
-          </button>
+          </Button>
         </div>
       </div>
     </div>

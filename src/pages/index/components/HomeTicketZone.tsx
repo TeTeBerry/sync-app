@@ -1,6 +1,8 @@
 import { ArrowDownLeftIcon, ArrowUpRightIcon, TagIcon, TicketIcon } from "lucide-react";
 import { memo, useMemo, useState, type FC } from "react";
 import { useTranslation } from "react-i18next";
+import { Button, cn } from "../../../components/ui";
+import { goTickets } from "../../../utils/route";
 import { miniTagToneClass } from "../home.styles";
 import type { TicketListingItem, TicketTabKey } from "../mockData";
 import { SectionChevronLink } from "./SectionChevronLink";
@@ -32,7 +34,7 @@ const TicketRow = memo(function TicketRow({ ticket }: { ticket: TicketListingIte
       <div className="s-ticket-row__mid">
         <div className="s-ticket-row__title-line">
           <span>{ticket.event}</span>
-          <span className={`s-ticket-row__mini-tag ${miniTagToneClass[ticket.tagTone]}`}>{ticket.tag}</span>
+          <span className={`s-ticket-row__mini-tag ${miniTagToneClass[ticket.tone]}`}>{ticket.tag}</span>
         </div>
         <div className="s-ticket-row__seat">
           <TagIcon size={10} />
@@ -60,9 +62,9 @@ const TicketRow = memo(function TicketRow({ ticket }: { ticket: TicketListingIte
         {isSell && ticket.originalPrice > 0 && (
           <span className="s-ticket-row__was">¥{ticket.originalPrice}</span>
         )}
-        <button type="button" className={isSell ? `s-ticket-row__btn-sell` : `s-ticket-row__btn-buy`}>
+        <Button className={isSell ? `s-ticket-row__btn-sell` : `s-ticket-row__btn-buy`}>
           {isSell ? t("home.ticket.buyNow") : t("home.ticket.contact")}
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -91,19 +93,18 @@ export const HomeTicketZone: FC<HomeTicketZoneProps> = ({ listings }) => {
           <span>{t("home.ticket.title")}</span>
           <small>{t("home.ticket.guarantee")}</small>
         </div>
-        <SectionChevronLink labelKey="common.all" />
+        <SectionChevronLink labelKey="common.all" onNavigate={goTickets} />
       </div>
 
       <div className="s-ticket-zone__tabs">
         {ticketTabKeys.map((key) => (
-          <button
+          <Button
             key={key}
-            type="button"
-            className={`s-ticket-zone__tab${ticketTab === key ? ` s-ticket-zone__tab--active` : ``}`}
+            className={cn(`s-ticket-zone__tab`, ticketTab === key && `s-ticket-zone__tab--active`)}
             onClick={() => setTicketTab(key)}
           >
             {t(`home.ticket.tabs.${key}`)}
-          </button>
+          </Button>
         ))}
       </div>
 

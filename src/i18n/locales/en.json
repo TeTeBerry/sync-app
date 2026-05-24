@@ -10,6 +10,7 @@
     "more": "More",
     "view": "View",
     "share": "Share",
+    "shareCopied": "Share link copied",
     "liveUpdate": "Live",
     "agent": "Agent",
     "verified": "Verified",
@@ -89,6 +90,7 @@
     "placeholder": "Tell me which party you want to go to..."
   },
   "aimatch": {
+    "title": "AI Buddy",
     "tabs": {
       "ai": "AI Match",
       "pindan": "Create Group",
@@ -108,8 +110,10 @@
     },
     "pindan": {
       "createNew": "Start a new group order",
+      "ticket": "Ticket",
       "hotel": "Hotel",
       "transport": "Transport",
+      "ticketGroup": "Ticket Group",
       "hotelGroup": "Hotel Group",
       "transportGroup": "Transport Group",
       "currentOrders": "Active Orders",
@@ -118,9 +122,17 @@
         "title": "New Group Order",
         "selectType": "Select type",
         "eventName": "Event name, e.g. \"EDC China 2025\"",
+        "eventDate": "Event date",
+        "pickDate": "Select event date",
         "date": "Date",
         "location": "Location",
+        "hotelName": "Hotel name, e.g. \"Atlantis Sanya\"",
+        "transportRoute": "Route, e.g. \"Shanghai Hongqiao → Suzhou\"",
+        "aiAddress": "AI suggested addresses",
+        "aiAddressLoading": "AI is matching addresses…",
+        "totalPrice": "Total price (CNY)",
         "pricePerPerson": "Price per person",
+        "perPersonPreview": "About ¥{{amount}} per person",
         "groupSize": "Group size",
         "submit": "Publish"
       }
@@ -136,7 +148,24 @@
         "buying": "Buying"
       },
       "buyTicket": "Buy Now",
-      "contact": "Contact"
+      "contact": "Contact",
+      "modal": {
+        "subtitleSell": "Fill in key details — visible right after posting",
+        "subtitleBuy": "Post your request — sellers will reach out",
+        "eventNameSell": "Event name, e.g. \"EDC China 2025\"",
+        "eventNameBuy": "Event name, e.g. \"Ultra Shanghai\"",
+        "seatSell": "Section / seat",
+        "seatBuy": "Section needed",
+        "quantity": "Qty",
+        "unitPriceSell": "Asking price (CNY / ticket)",
+        "unitPriceBuy": "Offer budget (CNY / ticket)",
+        "perTicket": "/ticket",
+        "contact": "Contact (WeChat / phone)",
+        "submitSell": "Post listing",
+        "submitBuy": "Post request",
+        "increase": "Increase",
+        "decrease": "Decrease"
+      }
     },
     "events": {
       "filters": {

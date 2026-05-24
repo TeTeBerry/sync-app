@@ -10,6 +10,7 @@
     "more": "เพิ่มเติม",
     "view": "ดู",
     "share": "แชร์",
+    "shareCopied": "คัดลอกลิงก์แชร์แล้ว",
     "liveUpdate": "อัปเดตสด",
     "agent": "Agent",
     "verified": "ยืนยันแล้ว",
@@ -89,6 +90,7 @@
     "placeholder": "บอกว่าอยากไปปาร์ตี้ไหน..."
   },
   "aimatch": {
+    "title": "ผู้ช่วย AI",
     "tabs": {
       "ai": "AI จับคู่",
       "pindan": "สร้างกลุ่ม",
@@ -108,8 +110,10 @@
     },
     "pindan": {
       "createNew": "เริ่มกลุ่มซื้อร่วมใหม่",
+      "ticket": "ตั๋ว",
       "hotel": "โรงแรม",
       "transport": "การเดินทาง",
+      "ticketGroup": "กลุ่มตั๋ว",
       "hotelGroup": "กลุ่มโรงแรม",
       "transportGroup": "กลุ่มการเดินทาง",
       "currentOrders": "กลุ่มปัจจุบัน",
@@ -118,9 +122,17 @@
         "title": "สร้างกลุ่มซื้อร่วม",
         "selectType": "เลือกประเภท",
         "eventName": "ชื่อกิจกรรม เช่น \"EDC China 2025\"",
+        "eventDate": "วันที่กิจกรรม",
+        "pickDate": "เลือกวันที่กิจกรรม",
         "date": "วันที่",
         "location": "สถานที่",
+        "hotelName": "ชื่อโรงแรม เช่น \"Atlantis Sanya\"",
+        "transportRoute": "เส้นทาง เช่น \"Shanghai Hongqiao → Suzhou\"",
+        "aiAddress": "ที่อยู่ที่ AI แนะนำ",
+        "aiAddressLoading": "AI กำลังจับคู่ที่อยู่…",
+        "totalPrice": "ราคารวม (CNY)",
         "pricePerPerson": "ราคาต่อคน",
+        "perPersonPreview": "ประมาณ ¥{{amount}} ต่อคน",
         "groupSize": "จำนวนคน",
         "submit": "เผยแพร่"
       }
@@ -136,7 +148,24 @@
         "buying": "กำลังซื้อ"
       },
       "buyTicket": "ซื้อเลย",
-      "contact": "ติดต่อ"
+      "contact": "ติดต่อ",
+      "modal": {
+        "subtitleSell": "กรอกข้อมูลสำคัญ — โพสต์แล้วเห็นทันที",
+        "subtitleBuy": "โพสต์คำขอ — คนมีตั๋วจะติดต่อคุณ",
+        "eventNameSell": "ชื่องาน เช่น \"EDC China 2025\"",
+        "eventNameBuy": "ชื่องาน เช่น \"Ultra Shanghai\"",
+        "seatSell": "โซน / ที่นั่ง",
+        "seatBuy": "โซนที่ต้องการ",
+        "quantity": "จำนวน",
+        "unitPriceSell": "ราคาขาย (CNY / ใบ)",
+        "unitPriceBuy": "งบเสนอราคา (CNY / ใบ)",
+        "perTicket": "/ใบ",
+        "contact": "ติดต่อ (WeChat / เบอร์โทร)",
+        "submitSell": "โพสต์ขาย",
+        "submitBuy": "โพสต์ซื้อ",
+        "increase": "เพิ่ม",
+        "decrease": "ลด"
+      }
     },
     "events": {
       "filters": {

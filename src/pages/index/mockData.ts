@@ -1,5 +1,13 @@
 import type { TagTone } from "./home.types";
 
+export type {
+  TicketListing as TicketListingItem,
+  TicketFilterKey as TicketTabKey,
+  TicketTagTone,
+} from "../../data/ticketListings";
+
+export { ticketListings } from "../../data/ticketListings";
+
 export type HotEventItem = {
   id: number;
   title: string;
@@ -8,21 +16,14 @@ export type HotEventItem = {
   image: string;
 };
 
-export type TicketListingItem = {
-  id: number;
-  type: "sell" | "buy";
-  event: string;
-  seat: string;
-  price: number;
-  originalPrice: number;
-  seller: string;
-  avatar: string;
-  tag: string;
-  tagTone: TagTone;
-  time: string;
-};
+/** @deprecated Use TicketTagTone from data/ticketListings */
+export type { TagTone };
 
-export type TicketTabKey = "all" | "sell" | "buy";
+export const ticketTabs: { key: import("../../data/ticketListings").TicketFilterKey; labelKey: string }[] = [
+  { key: `all`, labelKey: `home.ticket.tabs.all` },
+  { key: `sell`, labelKey: `home.ticket.tabs.sell` },
+  { key: `buy`, labelKey: `home.ticket.tabs.buy` },
+];
 
 export const hotEvents: HotEventItem[] = [
   {
@@ -53,67 +54,6 @@ export const hotEvents: HotEventItem[] = [
     people: 181,
     image: `https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&q=80`,
   },
-];
-
-export const ticketListings: TicketListingItem[] = [
-  {
-    id: 1,
-    type: `sell`,
-    event: `Tomorrowland 2025`,
-    seat: `VIP B区 · 2张`,
-    price: 880,
-    originalPrice: 1200,
-    seller: `Mia`,
-    avatar: `https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=60&q=80`,
-    tag: `急出`,
-    tagTone: `primary`,
-    time: `1小时前`,
-  },
-  {
-    id: 2,
-    type: `buy`,
-    event: `EDC China 2025`,
-    seat: `普通区 · 1张`,
-    price: 560,
-    originalPrice: 0,
-    seller: `Leo`,
-    avatar: `https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=60&q=80`,
-    tag: `求购`,
-    tagTone: `cyan`,
-    time: `3小时前`,
-  },
-  {
-    id: 3,
-    type: `sell`,
-    event: `S2O 三亚电音节`,
-    seat: `水上区 · 4张`,
-    price: 420,
-    originalPrice: 680,
-    seller: `Zara`,
-    avatar: `https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=60&q=80`,
-    tag: `9折`,
-    tagTone: `amber`,
-    time: `5小时前`,
-  },
-  {
-    id: 4,
-    type: `buy`,
-    event: `Ultra Shanghai`,
-    seat: `Front Stage · 2张`,
-    price: 1100,
-    originalPrice: 0,
-    seller: `Jake`,
-    avatar: `https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=60&q=80`,
-    tag: `高价求`,
-    tagTone: `secondary`,
-    time: `8小时前`,
-  },
-];
-
-export const ticketTabs: { key: TicketTabKey; labelKey: string }[] = [
-  { key: `all`, labelKey: `home.ticket.tabs.all` },
-  { key: `sell`, labelKey: `home.ticket.tabs.sell` },
-  { key: `buy`, labelKey: `home.ticket.tabs.buy` },
 ];
 
 export interface NearEventBrief {

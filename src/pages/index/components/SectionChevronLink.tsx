@@ -10,7 +10,7 @@ type SectionChevronLinkProps = {
 };
 
 /**
- * 分区右侧「文案 + chevron」；有回调时用 button 语义，便于无障碍与小屏触控。
+ * 分区右侧「文案 + chevron」；有回调时保持 div 样式，避免 button 默认背景。
  */
 export const SectionChevronLink: FC<SectionChevronLinkProps> = ({ label, labelKey, onNavigate }) => {
   const { t } = useTranslation();
@@ -25,9 +25,20 @@ export const SectionChevronLink: FC<SectionChevronLinkProps> = ({ label, labelKe
 
   if (onNavigate) {
     return (
-      <button type="button" className="s-hot-section__link" onClick={onNavigate}>
+      <div
+        className="s-hot-section__link"
+        role="button"
+        tabIndex={0}
+        onClick={onNavigate}
+        onKeyDown={(e) => {
+          if (e.key === `Enter` || e.key === ` `) {
+            e.preventDefault();
+            onNavigate();
+          }
+        }}
+      >
         {content}
-      </button>
+      </div>
     );
   }
 

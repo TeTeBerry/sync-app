@@ -2,12 +2,10 @@ import "./pindan.scss";
 import Taro, { useDidShow } from "@tarojs/taro";
 import React, { useCallback, useState } from "react";
 import {
-  ArrowRightIcon,
   BuildingIcon,
   CalendarIcon,
   CarIcon,
   CheckCircleIcon,
-  ChevronLeftIcon,
   MapPinIcon,
   PackageIcon,
   PlaneIcon,
@@ -17,8 +15,11 @@ import {
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import BottomNav from "../../components/BottomNav";
+import CreatePinDanModal, { type PinDanCreateCategory } from "../../components/CreatePinDanModal";
+import PageNavigation from "../../components/PageNavigation";
+import { Button } from "../../components/ui";
 import { getActivityById } from "../../data/activities";
-import { goBack } from "../../utils/route";
+import { sharePinDanItem } from "../../utils/share";
 
 type TabType = `package` | `hotel` | `transport`;
 
@@ -288,6 +289,7 @@ const PinDan: React.FC = () => {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<TabType>(`package`);
   const [routeActivityId, setRouteActivityId] = useState<number | null>(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   const applyRouteActivity = useCallback(() => {
     const params = Taro.getCurrentInstance().router?.params;
@@ -311,6 +313,22 @@ const PinDan: React.FC = () => {
 
   const progressPercent = (joined: number, total: number) => Math.round((joined / total) * 100);
 
+  const handleShare = useCallback(
+    (item: PinDanItem, e: React.MouseEvent) => {
+      e.stopPropagation();
+      void sharePinDanItem(
+        {
+          title: item.title,
+          price: item.price,
+          activityId: item.activityId,
+          itemId: item.id,
+        },
+        t(`common.shareCopied`),
+      );
+    },
+    [t],
+  );
+
   const heroTitleKey =
     activeTab === `package` ? `pindan.hero.package` : activeTab === `hotel` ? `pindan.hero.hotel` : `pindan.hero.transport`;
 
@@ -321,15 +339,19 @@ const PinDan: React.FC = () => {
 
   return (
     <div data-cmp="PinDan" className={`s-pindan s-pindan--${activeTab}`}>
-      <div className="s-pindan__top">
-        <button type="button" onClick={() => goBack()} className="s-pindan__icon-btn s-pindan__icon-btn--muted">
-          <ChevronLeftIcon size={20} />
-        </button>
-        <h1 className="s-pindan__title s-line-clamp-1">{activityName ?? t("pindan.title")}</h1>
-        <button type="button" className="s-pindan__icon-btn s-pindan__icon-btn--primary-tint" onClick={() => { }}>
-          <PlusIcon size={18} />
-        </button>
-      </div>
+      <PageNavigation
+        title={activityName ?? t("pindan.title")}
+        trailing={
+          <Button
+            block="s-page-nav"
+            element="icon-btn"
+            modifiers={[`accent-tint`]}
+            onClick={() => setShowCreateModal(true)}
+          >
+            <PlusIcon size={18} />
+          </Button>
+        }
+      />
 
       <div className="s-pindan__hero">
         <div className="s-pindan__hero-grad" />
@@ -454,15 +476,27 @@ const PinDan: React.FC = () => {
                   <div className="s-pindan__prog-fill" style={{ width: `${pct}%` }} />
                 </div>
 
-                <button type="button" className="s-pindan__join-btn">
-                  <span>{isPackage ? t("pindan.joinPackage") : t("pindan.join")}</span>
-                  <ArrowRightIcon size={14} />
-                </button>
+                <div className="s-pindan__actions">
+                  <Button className="s-pindan__join-btn">
+                    {isPackage ? t("pindan.joinPackage") : t("pindan.join")}
+                  </Button>
+                  <Button className="s-pindan__share-btn" onClick={(e) => handleShare(item, e)}>
+                    {t("common.share")}
+                  </Button>
+                </div>
               </div>
             </div>
           );
         })}
       </div>
+
+      <CreatePinDanModal
+        open={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        categoryOptions={[activeTab as PinDanCreateCategory]}
+        defaultCategory={activeTab as PinDanCreateCategory}
+        initialEventName={activityName ?? ``}
+      />
 
       <BottomNav />
     </div>

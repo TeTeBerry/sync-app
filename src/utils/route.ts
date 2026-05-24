@@ -9,6 +9,7 @@ export const ROUTES = {
   CHAT: "/pages/chat/index",
   PINDAN: "/pages/pindan/index",
   AIMATCH: "/pages/aimatch/index",
+  TICKETS: "/pages/tickets/index",
 } as const;
 
 export type RoutePath = (typeof ROUTES)[keyof typeof ROUTES];
@@ -19,9 +20,15 @@ function currentRoutePath(): string {
   return route ? `/${route}` : "";
 }
 
+function resolveFallback(fallback: RoutePath | unknown): RoutePath {
+  return typeof fallback === `string` ? (fallback as RoutePath) : ROUTES.HOME;
+}
+
 /** Bottom tabs: replace route without stacking history like the old SPA Router. */
 export function reLaunchTo(url: RoutePath) {
-  void Taro.reLaunch({ url });
+  void Taro.reLaunch({ url }).catch(() => {
+    void Taro.navigateTo({ url }).catch(() => {});
+  });
 }
 
 export function go(url: RoutePath | string) {
@@ -33,8 +40,27 @@ export function goPindan(activityId?: number) {
   void Taro.navigateTo({ url });
 }
 
-export function goBack() {
-  void Taro.navigateBack();
+export function goTickets() {
+  void Taro.navigateTo({ url: ROUTES.TICKETS });
+}
+
+export function goBack(fallback: RoutePath = ROUTES.HOME) {
+  const target = resolveFallback(fallback);
+  const pages = Taro.getCurrentPages();
+  // H5 SPA：栈深为 1 时 Taro 内部会 history.go(0)，返回无效
+  if (pages.length <= 1) {
+    reLaunchTo(target);
+    return;
+  }
+
+  void Taro.navigateBack({
+    delta: 1,
+    fail: () => {
+      reLaunchTo(target);
+    },
+  }).catch(() => {
+    reLaunchTo(target);
+  });
 }
 
 export function useActiveRoutePath(): string {

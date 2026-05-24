@@ -2,6 +2,7 @@ import "./EventCard.scss";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import AvatarGroup from "./AvatarGroup";
+import { Button } from "./ui";
 import { MapPinIcon } from "lucide-react";
 
 interface EventCardProps {
@@ -43,9 +44,7 @@ const EventCard: React.FC<EventCardProps> = ({
 
         <div className="s-event-card__footer">
           <AvatarGroup total={attendees} />
-          <button type="button" className="s-event-card__btn">
-            {t("common.view")}
-          </button>
+          <Button className="s-event-card__btn">{t("common.view")}</Button>
         </div>
       </div>
     </div>

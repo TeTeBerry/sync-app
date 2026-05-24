@@ -3,7 +3,6 @@ import { memo, type FC } from "react";
 import { useTranslation } from "react-i18next";
 import { goPindan } from "../../../utils/route";
 import type { HotEventItem } from "../mockData";
-import { SectionChevronLink } from "./SectionChevronLink";
 
 export type HomeHotSectionProps = {
   items: HotEventItem[];
@@ -44,7 +43,6 @@ export const HomeHotSection: FC<HomeHotSectionProps> = ({ items }) => {
           <span>{t("home.hot.title")}</span>
           <small>{t("common.liveUpdate")}</small>
         </div>
-        <SectionChevronLink labelKey="common.all" />
       </div>
 
       <div className="s-hot-section__tracks s-scrollbar-none">

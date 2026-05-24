@@ -9,34 +9,26 @@ import React, {
   useState,
 } from "react";
 import BottomNav from "./BottomNav";
+import CreatePinDanModal from "./CreatePinDanModal";
+import PageNavigation from "./PageNavigation";
+import TicketMarketPanel from "./TicketMarketPanel";
+import { Button, Input, cn } from "./ui";
 import {
-  ArrowDownLeftIcon,
-  ArrowUpRightIcon,
   CalendarIcon,
   CheckCircleIcon,
-  ChevronRightIcon,
-  ClockIcon,
   FlameIcon,
   MapPinIcon,
   PlusIcon,
   SendIcon,
-  ShieldCheckIcon,
   SparklesIcon,
-  TagIcon,
   TicketIcon,
   UsersIcon,
-  XIcon,
   ZapIcon,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 type MainTab = "ai" | "pindan" | "ticket" | "events";
 type PinDanCategory = "hotel" | "transport";
-
-const pinDanCategoryIcons: Record<PinDanCategory, ComponentType<{ size?: number | string }>> = {
-  hotel: MapPinIcon,
-  transport: ZapIcon,
-};
 
 const pinDanCategoryKeys: PinDanCategory[] = ["hotel", "transport"];
 
@@ -70,65 +62,6 @@ const activePinDans = [
     image: `https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=400&q=80`,
     tags: [`商务舱`, `含行李`],
     urgent: true,
-  },
-];
-
-const ticketListings = [
-  {
-    id: 1,
-    type: "sell" as const,
-    event: `Tomorrowland 2025`,
-    seat: `VIP B区 · 2张`,
-    price: 880,
-    originalPrice: 1200,
-    seller: `Mia`,
-    avatar: `https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=60&q=80`,
-    tag: `急出`,
-    tone: `primary` as const,
-    time: `1小时前`,
-    verified: true,
-  },
-  {
-    id: 2,
-    type: "buy" as const,
-    event: `EDC China 2025`,
-    seat: `普通区 · 1张`,
-    price: 560,
-    originalPrice: 0,
-    seller: `Leo`,
-    avatar: `https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=60&q=80`,
-    tag: `求购`,
-    tone: `secondary` as const,
-    time: `3小时前`,
-    verified: true,
-  },
-  {
-    id: 3,
-    type: "sell" as const,
-    event: `S2O 三亚电音节`,
-    seat: `水上区 · 4张`,
-    price: 420,
-    originalPrice: 680,
-    seller: `Zara`,
-    avatar: `https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=60&q=80`,
-    tag: `9折`,
-    tone: `amber` as const,
-    time: `5小时前`,
-    verified: false,
-  },
-  {
-    id: 4,
-    type: "buy" as const,
-    event: `Ultra Shanghai`,
-    seat: `Front Stage · 2张`,
-    price: 1100,
-    originalPrice: 0,
-    seller: `Jake`,
-    avatar: `https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=60&q=80`,
-    tag: `高价求`,
-    tone: `cyan` as const,
-    time: `8小时前`,
-    verified: true,
   },
 ];
 
@@ -270,30 +203,29 @@ function AiChat() {
 
       <div className="s-aim-ai__quick-row s-scrollbar-none">
         {quickReplyKeys.map((key) => (
-          <button
+          <Button
             key={key}
-            type="button"
-            onClick={() => send(t(`aimatch.ai.quickReplies.${key}`))}
             className="s-aim-ai__quick-chip"
+            onClick={() => send(t(`aimatch.ai.quickReplies.${key}`))}
           >
             {t(`aimatch.ai.quickReplies.${key}`)}
-          </button>
+          </Button>
         ))}
       </div>
 
       <div className="s-aim-ai__composer">
         <div className="s-aim-ai__composer-inner">
-          <input
+          <Input
+            variant="aim-chat"
             type="text"
             value={input}
             placeholder={t(`aimatch.ai.placeholder`)}
-            className="s-aim-ai__input"
             onChange={onChange}
             onKeyDown={onKeyDown}
           />
-          <button type="button" onClick={() => send(input)} className="s-aim-ai__send">
+          <Button className="s-aim-ai__send" onClick={() => send(input)}>
             <SendIcon size={14} color="#fff" />
-          </button>
+          </Button>
         </div>
       </div>
     </div>
@@ -303,7 +235,6 @@ function AiChat() {
 const AIMatchPage: FC = () => {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<MainTab>(`ai`);
-  const [ticketFilter, setTicketFilter] = useState<"all" | "sell" | "buy">(`all`);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [createCategory, setCreateCategory] = useState<PinDanCategory>(`hotel`);
   const [goingIds, setGoingIds] = useState<number[]>([2, 4]);
@@ -312,11 +243,6 @@ const AIMatchPage: FC = () => {
     setGoingIds((prev) => (prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]));
   };
 
-  const filteredTickets = ticketListings.filter((t) => {
-    if (ticketFilter === `all`) return true;
-    return t.type === ticketFilter;
-  });
-
   const tabs: { key: MainTab; labelKey: string; Icon: ComponentType<{ size?: number | string }> }[] = [
     { key: `ai`, labelKey: `aimatch.tabs.ai`, Icon: SparklesIcon },
     { key: `pindan`, labelKey: `aimatch.tabs.pindan`, Icon: PlusIcon },
@@ -324,18 +250,7 @@ const AIMatchPage: FC = () => {
     { key: `events`, labelKey: `aimatch.tabs.events`, Icon: CalendarIcon },
   ];
 
-  const ticketFilterKeys = [
-    { key: `all` as const, labelKey: `aimatch.ticket.tabs.all` },
-    { key: `sell` as const, labelKey: `aimatch.ticket.tabs.selling` },
-    { key: `buy` as const, labelKey: `aimatch.ticket.tabs.buying` },
-  ];
-
   const eventFilterKeys = [`all`, `outdoor`, `edm`, `club`, `festival`] as const;
-
-  const pinDanGroupLabelKey: Record<PinDanCategory, string> = {
-    hotel: `aimatch.pindan.hotelGroup`,
-    transport: `aimatch.pindan.transportGroup`,
-  };
 
   const pinDanTabLabelKey: Record<PinDanCategory, string> = {
     hotel: `aimatch.pindan.hotel`,
@@ -344,17 +259,18 @@ const AIMatchPage: FC = () => {
 
   return (
     <div data-cmp="AIMatch" className="s-aim">
+      <PageNavigation title={t("aimatch.title")} />
+
       <div className="s-aim-top-tabs">
         {tabs.map(({ key, labelKey, Icon }) => (
-          <button
+          <Button
             key={key}
-            type="button"
+            className={cn(`s-aim-tab`, activeTab === key && `s-aim-tab--active`, activeTab === key && tabAccentCls[key])}
             onClick={() => setActiveTab(key)}
-            className={`s-aim-tab${activeTab === key ? ` s-aim-tab--active ${tabAccentCls[key]}` : ``}`}
           >
             <Icon size={15} />
             {t(labelKey)}
-          </button>
+          </Button>
         ))}
       </div>
 
@@ -364,22 +280,21 @@ const AIMatchPage: FC = () => {
 
       <div className={`s-aim-panel-block s-aim-pin s-aim-pin--${createCategory}${activeTab === `pindan` ? `` : ` s-aim-panel--hidden`}`}>
         <div className="s-aim-cta-banner">
-          <button type="button" className="s-aim-cta-banner__btn" onClick={() => setShowCreateModal(true)}>
+          <Button className="s-aim-cta-banner__btn" onClick={() => setShowCreateModal(true)}>
             <PlusIcon size={18} />
             {t("aimatch.pindan.createNew")}
-          </button>
+          </Button>
         </div>
 
         <div className="s-aim-pin-cat-tabs">
           {pinDanCategoryKeys.map((key) => (
-            <button
+            <Button
               key={key}
-              type="button"
-              className={`s-aim-pin-cat-tabs__btn${createCategory === key ? ` s-aim-pin-cat-tabs__btn--active` : ``}`}
+              className={cn(`s-aim-pin-cat-tabs__btn`, createCategory === key && `s-aim-pin-cat-tabs__btn--active`)}
               onClick={() => setCreateCategory(key)}
             >
               {t(pinDanTabLabelKey[key])}
-            </button>
+            </Button>
           ))}
         </div>
 
@@ -465,12 +380,8 @@ const AIMatchPage: FC = () => {
                     </div>
 
                     <div className="s-aim-pin-card__actions">
-                      <button type="button" className="s-aim-pin-card__cta">
-                        {t("aimatch.pindan.join")}
-                      </button>
-                      <button type="button" className="s-aim-pin-card__ghost">
-                        {t("common.share")}
-                      </button>
+                      <Button className="s-aim-pin-card__cta">{t("aimatch.pindan.join")}</Button>
+                      <Button className="s-aim-pin-card__ghost">{t("common.share")}</Button>
                     </div>
                   </div>
                 </div>
@@ -480,126 +391,18 @@ const AIMatchPage: FC = () => {
       </div>
 
       <div className={`s-aim-ticket s-aim-panel-block${activeTab === `ticket` ? `` : ` s-aim-panel--hidden`}`}>
-        <div className="s-aim-action-row">
-          <button type="button" className="s-aim-action-row__btn s-aim-action-row__btn--sell s-aim-action-row__btn--shadowed">
-            <ArrowUpRightIcon size={15} />
-            {t("aimatch.ticket.sell")}
-          </button>
-          <button type="button" className="s-aim-action-row__btn s-aim-action-row__btn--buy s-aim-action-row__btn--shadowed">
-            <ArrowDownLeftIcon size={15} />
-            {t("aimatch.ticket.buy")}
-          </button>
-        </div>
-
-        <div className="s-aim-banner-row">
-          <div className="s-aim-banner-row__icon-bg">
-            <ShieldCheckIcon size={18} />
-          </div>
-          <div className="s-aim-banner-row__titles">
-            <p>{t("aimatch.ticket.guaranteeTitle")}</p>
-            <small>{t("aimatch.ticket.guaranteeSub")}</small>
-          </div>
-          <ChevronRightIcon size={14} className="s-aim-banner-row__chev" />
-        </div>
-
-        <div className="s-aim-filter-row s-scrollbar-none">
-          {ticketFilterKeys.map((tab) => (
-            <button
-              key={tab.key}
-              type="button"
-              onClick={() => setTicketFilter(tab.key)}
-              className={`s-aim-mini-tab${ticketFilter === tab.key ? ` s-aim-mini-tab--active` : ``}`}
-            >
-              {t(tab.labelKey)}
-            </button>
-          ))}
-          <span className="s-aim-filter-row__extra">
-            <ClockIcon size={10} />
-            {t("common.liveUpdate")}
-          </span>
-        </div>
-
-        <div className="s-aim-ticket-list">
-          {filteredTickets.map((ticket) => (
-            <div key={ticket.id} className={`s-aim-ticket-card${ticket.type === `buy` ? ` s-aim-ticket-card--buy` : ``}`}>
-              <div className="s-aim-ticket-card__row">
-                <div
-                  className={`s-aim-ticket-card__icon-shell${
-                    ticket.type === `sell` ? ` s-aim-ticket-card__icon-shell--sell` : ` s-aim-ticket-card__icon-shell--buy`
-                  }`}
-                >
-                  {ticket.type === `sell` ? (
-                    <ArrowUpRightIcon size={20} strokeWidth={2.5} />
-                  ) : (
-                    <ArrowDownLeftIcon size={20} strokeWidth={2.5} />
-                  )}
-                </div>
-
-                <div className="s-aim-ticket-card__main">
-                  <div className="s-aim-ticket-card__title-row">
-                    <span className="s-aim-ticket-card__event-title">{ticket.event}</span>
-                    <span className={`s-aim-ticket-card__tag s-aim-ticket-card__tag--${ticket.tone}`}>{ticket.tag}</span>
-                  </div>
-                  <div className="s-aim-ticket-card__mid">
-                    <TagIcon size={10} />
-                    <span>{ticket.seat}</span>
-                  </div>
-                  <div className="s-aim-ticket-card__seller-row">
-                    <img src={ticket.avatar} alt={ticket.seller} />
-                    <span>{ticket.seller}</span>
-                    {ticket.verified && (
-                      <span className="s-aim-ticket-card__verified">
-                        <CheckCircleIcon size={9} />
-                        {t("common.verified")}
-                      </span>
-                    )}
-                    <span className="s-aim-ticket-card__time">{ticket.time}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="s-aim-ticket-card__foot">
-                <div className="s-aim-ticket-card__deal">
-                  <span className="s-aim-ticket-card__deal-prefix">¥</span>
-                  <span
-                    className={
-                      ticket.type === `sell`
-                        ? `s-aim-ticket-card__deal-num s-aim-ticket-card__deal-num--sell`
-                        : `s-aim-ticket-card__deal-num s-aim-ticket-card__deal-num--buy`
-                    }
-                  >
-                    {ticket.price}
-                  </span>
-                  {ticket.type === `sell` && ticket.originalPrice > 0 && (
-                    <span className="s-aim-ticket-card__deal-was">¥{ticket.originalPrice}</span>
-                  )}
-                </div>
-                <button
-                  type="button"
-                  className={
-                    ticket.type === `sell`
-                      ? `s-aim-ticket-card__cta s-aim-ticket-card__cta--sell`
-                      : `s-aim-ticket-card__cta s-aim-ticket-card__cta--buy`
-                  }
-                >
-                  {ticket.type === `sell` ? t("aimatch.ticket.buyTicket") : t("aimatch.ticket.contact")}
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+        <TicketMarketPanel />
       </div>
 
       <div className={`s-aim-events s-aim-panel-block${activeTab === `events` ? `` : ` s-aim-panel--hidden`}`}>
         <div className="s-aim-events__chips s-scrollbar-none">
           {eventFilterKeys.map((f) => (
-            <button
+            <Button
               key={f}
-              type="button"
-              className={`s-aim-events__chip${f === `all` ? ` s-aim-events__chip--all` : ``}`}
+              className={cn(`s-aim-events__chip`, f === `all` && `s-aim-events__chip--all`)}
             >
               {t(`aimatch.events.filters.${f}`)}
-            </button>
+            </Button>
           ))}
         </div>
 
@@ -645,8 +448,7 @@ const AIMatchPage: FC = () => {
               </div>
 
               <div className="s-aim-ev-card__btns-row">
-                <button
-                  type="button"
+                <Button
                   onClick={() => toggleGoing(ev.id)}
                   className={
                     goingIds.includes(ev.id)
@@ -656,65 +458,22 @@ const AIMatchPage: FC = () => {
                 >
                   <CheckCircleIcon size={13} />
                   {goingIds.includes(ev.id) ? t("aimatch.events.registered") : t("aimatch.events.going")}
-                </button>
-                <button type="button" className="s-aim-ev-card__btn-buddy">
+                </Button>
+                <Button className="s-aim-ev-card__btn-buddy">
                   <UsersIcon size={13} />
                   {t("aimatch.events.findBuddy")}
-                </button>
+                </Button>
               </div>
             </div>
           ))}
         </div>
       </div>
 
-      <div className={`s-aim-modal${showCreateModal ? `` : ` s-aim-modal--off`}`}>
-        <div className="s-aim-modal__backdrop" onClick={() => setShowCreateModal(false)} />
-
-        <div className="s-aim-modal__sheet">
-          <div className="s-aim-modal__head">
-            <h2>{t("aimatch.pindan.modal.title")}</h2>
-            <button type="button" className="s-aim-modal__close" onClick={() => setShowCreateModal(false)}>
-              <XIcon size={14} />
-            </button>
-          </div>
-
-          <span className="s-aim-modal__label">{t("aimatch.pindan.modal.selectType")}</span>
-          <div className="s-aim-modal__type-grid">
-            {pinDanCategoryKeys.map((key) => {
-              const CatIcon = pinDanCategoryIcons[key];
-              return (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => setCreateCategory(key)}
-                  className={`s-aim-modal__type-opt s-aim-modal__type-opt--${key}${
-                    createCategory === key ? ` s-aim-modal__type-opt--selected` : ``
-                  }`}
-                >
-                  <CatIcon size={20} />
-                  <span className="s-aim-modal__type-opt-label">{t(pinDanGroupLabelKey[key])}</span>
-                </button>
-              );
-            })}
-          </div>
-
-          <div className="s-aim-modal__fields">
-            <input placeholder={t("aimatch.pindan.modal.eventName")} className="s-aim-modal__field-full" />
-            <div className="s-aim-modal__row2">
-              <input placeholder={t("aimatch.pindan.modal.date")} className="s-aim-modal__field-half" />
-              <input placeholder={t("aimatch.pindan.modal.location")} className="s-aim-modal__field-half" />
-            </div>
-            <div className="s-aim-modal__row2">
-              <input placeholder={t("aimatch.pindan.modal.pricePerPerson")} className="s-aim-modal__field-half" />
-              <input placeholder={t("aimatch.pindan.modal.groupSize")} className="s-aim-modal__field-half" />
-            </div>
-          </div>
-
-          <button type="button" className="s-aim-modal__submit" onClick={() => setShowCreateModal(false)}>
-            {t("aimatch.pindan.modal.submit")}
-          </button>
-        </div>
-      </div>
+      <CreatePinDanModal
+        open={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        defaultCategory={createCategory}
+      />
 
       <BottomNav />
     </div>

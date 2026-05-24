@@ -10,6 +10,7 @@
     "more": "更多",
     "view": "查看",
     "share": "分享",
+    "shareCopied": "分享链接已复制",
     "liveUpdate": "实时更新",
     "agent": "Agent",
     "verified": "已认证",
@@ -69,7 +70,7 @@
       "buyNow": "立即购",
       "contact": "联系他"
     },
-    "nearEvents": "附近活动",
+    "nearEvents": "最近活动",
     "fabLabel": "快速发布"
   },
   "profile": {
@@ -89,6 +90,7 @@
     "placeholder": "告诉我想去哪场派对..."
   },
   "aimatch": {
+    "title": "AI 搭子助手",
     "tabs": {
       "ai": "AI匹配",
       "pindan": "创建拼单",
@@ -101,15 +103,17 @@
         "findBuddy": "帮我找搭子",
         "pinTicket": "我要拼门票",
         "sellTicket": "我有票要出",
-        "nearEvents": "查附近活动"
+        "nearEvents": "查最近活动"
       },
       "searching": "正在为你搜索「{{query}}」相关内容 🔍 已找到 {{count}} 位高匹配度用户，点击下方卡片查看详情！",
       "placeholder": "说出需求，比如「想拼 EDC 门票」"
     },
     "pindan": {
       "createNew": "发起一个新拼单",
+      "ticket": "门票",
       "hotel": "酒店",
       "transport": "交通",
+      "ticketGroup": "门票拼",
       "hotelGroup": "酒店拼",
       "transportGroup": "交通拼",
       "currentOrders": "当前拼单",
@@ -118,9 +122,17 @@
         "title": "发起新拼单",
         "selectType": "选择拼单类型",
         "eventName": "活动名称，如「EDC China 2025」",
+        "eventDate": "活动日期",
+        "pickDate": "请选择活动日期",
         "date": "日期",
         "location": "地点",
+        "hotelName": "酒店名称，如「三亚亚特兰蒂斯」",
+        "transportRoute": "路线，如「上海虹桥 → 苏州阳澄湖」",
+        "aiAddress": "AI 推荐地址",
+        "aiAddressLoading": "AI 正在匹配地址…",
+        "totalPrice": "总价（元）",
         "pricePerPerson": "人均价格",
+        "perPersonPreview": "人均约 ¥{{amount}}",
         "groupSize": "拼单人数",
         "submit": "发布拼单"
       }
@@ -136,7 +148,24 @@
         "buying": "收票中"
       },
       "buyTicket": "立即购票",
-      "contact": "联系他"
+      "contact": "联系他",
+      "modal": {
+        "subtitleSell": "填写关键信息，发布后立即可见",
+        "subtitleBuy": "发布求购，有票的人会主动联系你",
+        "eventNameSell": "活动名称，如「EDC China 2025」",
+        "eventNameBuy": "活动名称，如「Ultra Shanghai」",
+        "seatSell": "票区/座位",
+        "seatBuy": "票区需求",
+        "quantity": "张数",
+        "unitPriceSell": "出售单价（元 / 张）",
+        "unitPriceBuy": "出价预算（元 / 张）",
+        "perTicket": "/张",
+        "contact": "联系方式（微信 / 手机号）",
+        "submitSell": "发布出票",
+        "submitBuy": "发布求购",
+        "increase": "增加",
+        "decrease": "减少"
+      }
     },
     "events": {
       "filters": {

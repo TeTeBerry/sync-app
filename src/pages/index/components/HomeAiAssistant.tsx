@@ -1,6 +1,7 @@
 import { SendIcon, SparklesIcon, ZapIcon } from "lucide-react";
 import { type FC, useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Button, Input } from "../../../components/ui";
 
 type HomeAiAssistantProps = {
   onSummon: () => void;
@@ -34,28 +35,26 @@ export const HomeAiAssistant: FC<HomeAiAssistantProps> = ({ onSummon }) => {
           </div>
           <p className="s-home-ai__sub">{t("home.ai.online")}</p>
         </div>
-        <button type="button" className="s-home-ai__cta" onClick={onSummon}>
+        <Button className="s-home-ai__cta" onClick={onSummon}>
           <ZapIcon size={12} />
           {t("home.ai.summon")}
-        </button>
+        </Button>
       </div>
 
       <div className="s-home-ai__field-row">
-        <div className="s-home-ai__input-shell">
-          <SparklesIcon size={13} />
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === `Enter`) submit();
-            }}
-            placeholder={t("home.ai.placeholder")}
-            className="s-home-ai__field"
-          />
-        </div>
-        <button type="button" className="s-home-ai__send" onClick={submit}>
+        <Input
+          variant="home-ai"
+          icon={<SparklesIcon size={13} />}
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === `Enter`) submit();
+          }}
+          placeholder={t("home.ai.placeholder")}
+        />
+        <Button className="s-home-ai__send" onClick={submit}>
           <SendIcon size={15} />
-        </button>
+        </Button>
       </div>
     </section>
   );

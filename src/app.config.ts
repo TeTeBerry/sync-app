@@ -9,6 +9,7 @@ export default {
     "pages/chat/index",
     "pages/pindan/index",
     "pages/aimatch/index",
+    "pages/tickets/index",
   ],
   window: {
     navigationStyle: "custom",

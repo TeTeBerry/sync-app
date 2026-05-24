@@ -2,18 +2,24 @@
   --pin-accent-rgb: 255, 0, 102;
   --pin-accent: var(--primary);
   --pin-grad-from: rgba(255, 0, 102, 0.2);
+  --page-accent-rgb: 255, 0, 102;
+  --page-accent: var(--primary);
 }
 
 .s-pindan.s-pindan--hotel {
   --pin-accent-rgb: 76, 201, 240;
   --pin-accent: var(--secondary);
   --pin-grad-from: rgba(76, 201, 240, 0.2);
+  --page-accent-rgb: 76, 201, 240;
+  --page-accent: var(--secondary);
 }
 
 .s-pindan.s-pindan--transport {
   --pin-accent-rgb: 251, 191, 36;
   --pin-accent: var(--amber-400);
   --pin-grad-from: rgba(251, 191, 36, 0.2);
+  --page-accent-rgb: 251, 191, 36;
+  --page-accent: var(--amber-400);
 }
 
 .s-pindan {
@@ -23,44 +29,6 @@
   display: flex;
   flex-direction: column;
   background-color: var(--background);
-}
-
-.s-pindan__top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 48px 16px 16px;
-}
-
-.s-pindan__icon-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 9999px;
-  background: var(--card);
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-}
-
-.s-pindan__icon-btn--muted {
-  color: #fff;
-}
-
-.s-pindan__icon-btn--primary-tint {
-  background: rgba(var(--pin-accent-rgb), 0.2);
-  color: var(--pin-accent);
-}
-
-.s-pindan__title {
-  flex: 1;
-  min-width: 0;
-  text-align: center;
-  font-size: 18px;
-  font-weight: 700;
-  color: #fff;
-  margin: 0 8px;
 }
 
 .s-pindan__hero {
@@ -462,8 +430,13 @@
   transition: width 0.5s ease;
 }
 
+.s-pindan__actions {
+  display: flex;
+  gap: 8px;
+}
+
 .s-pindan__join-btn {
-  width: 100%;
+  flex: 1;
   border: none;
   cursor: pointer;
   background: var(--pin-accent);
@@ -472,13 +445,26 @@
   font-size: 14px;
   padding: 12px;
   border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
   transition: transform 0.15s ease;
+
+  &:active {
+    transform: scale(0.97);
+  }
 }
 
-.s-pindan__join-btn:active {
-  transform: scale(0.97);
+.s-pindan__share-btn {
+  flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--muted-foreground);
+  font-weight: 600;
+  cursor: pointer;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 14px;
+  transition: transform 0.15s ease;
+
+  &:active {
+    transform: scale(0.97);
+  }
 }
