@@ -10,6 +10,7 @@
     "more": "更多",
     "view": "查看",
     "cancel": "取消",
+    "close": "关闭",
     "share": "分享",
     "shareCopied": "分享链接已复制",
     "requestFailed": "请求失败，请稍后重试",
@@ -114,7 +115,8 @@
     },
     "tabs": {
       "participated": "参加过",
-      "pindan": "拼单"
+      "pindan": "拼单",
+      "tickets": "出收票"
     },
     "eventStatus": {
       "upcoming": "即将参加",
@@ -126,7 +128,9 @@
       "title": "我的拼单",
       "more": "更多拼单",
       "joinedBadge": "已拼",
+      "ownerBadge": "我发起",
       "joinedAt": "{{time}} 加入",
+      "createdAt": "{{time}} 发起",
       "exit": "退出拼单",
       "viewDetail": "查看详情",
       "empty": "暂无拼单，去首页看看吧",
@@ -137,6 +141,19 @@
         "package": "套餐拼单",
         "hotel": "酒店拼单",
         "transport": "交通拼单"
+      }
+    },
+    "myTickets": {
+      "title": "我的出收票",
+      "more": "门票市场",
+      "empty": "暂无出收票记录，可通过 AI 对话发布挂单",
+      "createdAt": "{{time}} 发布",
+      "quantity": "{{count}} 张",
+      "perTicket": "/ 张",
+      "datePending": "日期待定",
+      "type": {
+        "sell": "出票",
+        "buy": "收票"
       }
     },
     "settings": {
@@ -211,7 +228,12 @@
       "searching": "正在为你搜索「{{query}}」相关内容 🔍 已找到 {{count}} 位高匹配度用户，点击下方卡片查看详情！",
       "streamError": "抱歉，回复出错了，请稍后再试。",
       "thinking": "AI 正在思考",
-      "placeholder": "说出需求，比如「查 EDC 门票」或「我要出票」"
+      "placeholder": "说出需求，或上传门票/套餐/酒店截图",
+      "uploadImage": "上传门票图片",
+      "uploadedTicketAlt": "已上传的门票图片",
+      "viewImage": "查看大图",
+      "removeImage": "移除图片",
+      "imageTooLarge": "图片过大，请压缩至 10MB 以内"
     },
     "pindan": {
       "createNew": "发起一个新拼单",
@@ -224,6 +246,11 @@
       "currentOrders": "当前拼单",
       "join": "我要加入",
       "joinedCardTitle": "查看拼单",
+      "myCreatedCardTitle": "我发起的拼单",
+      "tapToEdit": "点击可修改",
+      "editTitle": "修改拼单",
+      "saveEdit": "保存修改",
+      "updated": "拼单已更新",
       "activityCardTitle": "查看活动拼单",
       "modal": {
         "title": "发起新拼单",
@@ -312,6 +339,12 @@
     "join": "我要加入",
     "joined": "已加入",
     "joinPackage": "加入套餐拼单",
+    "edit": "修改",
+    "delete": "删除",
+    "deleteConfirmTitle": "删除拼单",
+    "deleteConfirmMessage": "确定删除「{{title}}」吗？此操作不可撤销。",
+    "deleted": "拼单已删除",
+    "created": "拼单已发布",
     "joinSuccess": {
       "title": "拼单成功"
     },

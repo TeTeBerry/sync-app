@@ -2,7 +2,7 @@ import type { PinDanCategory } from "../utils/apiMappers";
 
 export type PindanTabType = "package" | "hotel" | "transport";
 
-export type ProfileTab = "participated" | "pindan";
+export type ProfileTab = "participated" | "pindan" | "tickets";
 
 export type AimatchTab = "ai" | "pindan" | "ticket" | "events";
 
@@ -13,8 +13,9 @@ export type PindanNavIntent = {
 };
 
 export type ProfileNavIntent = {
-  tab?: "pindan";
+  tab?: "pindan" | "tickets";
   highlightId?: number;
+  highlightTicketId?: string;
 };
 
 export type AimatchNavIntent = {

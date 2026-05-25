@@ -292,6 +292,7 @@ export function usePindanPageItems() {
 
   return {
     items,
+    activities: activitiesQuery.data ?? [],
     isLoading: pindanQuery.isLoading || activitiesQuery.isLoading,
     isError: pindanQuery.isError,
     refetch: pindanQuery.refetch,

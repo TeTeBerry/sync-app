@@ -1,6 +1,6 @@
 import "./pindan.scss";
 import Taro, { useDidShow } from "@tarojs/taro";
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import {
   BuildingIcon,
   CalendarIcon,
@@ -11,18 +11,23 @@ import {
   PlaneIcon,
   PlusIcon,
   StarIcon,
+  Trash2Icon,
   UsersIcon,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useQueryClient } from "@tanstack/react-query";
 import BottomNav from "../../components/BottomNav";
-import CreatePinDanModal, { type PinDanCreateCategory } from "../../components/CreatePinDanModal";
+import ConfirmDialog from "../../components/ConfirmDialog";
+import CreatePinDanModal, { type PinDanCreateCategory, type PinDanSavedResult } from "../../components/CreatePinDanModal";
 import JoinSuccessToast from "../../components/JoinSuccessToast";
 import PageNavigation from "../../components/PageNavigation";
 import { Button } from "../../components/ui";
+import { deletePindan, joinPindan } from "../../api/syncApi";
 import { getActivityById } from "../../data/activities";
-import { usePindanPageItems } from "../../hooks/useSyncApi";
-import { joinPindan } from "../../api/syncApi";
+import { invalidatePindanQueries, usePindanPageItems } from "../../hooks/useSyncApi";
 import { isApiEnabled } from "../../constants/api";
+import { findBackendActivityByLegacyId } from "../../utils/apiMappers";
+import type { PindanJoinCard } from "../../types/aiChat";
 import type { ProfilePinDanItem } from "../profile/mockData";
 import { formatJoinedAt, saveJoinedPindanItem } from "../../utils/myPindanStorage";
 import { goProfilePindan } from "../../utils/route";
@@ -59,7 +64,30 @@ interface PinDanItem {
   total: number;
   tags: string[];
   rating: number;
+  leaderUserId?: string;
+  remark?: string;
   includes?: PackageInclude[];
+}
+
+function isPindanOwner(item: PinDanItem, userId: string): boolean {
+  return Boolean(item.leaderUserId && item.leaderUserId === userId);
+}
+
+function toEditPindanCard(item: PinDanItem): PindanJoinCard {
+  return {
+    legacyId: item.id,
+    activityLegacyId: item.activityId,
+    category: item.type,
+    title: item.title,
+    subtitle: item.subtitle,
+    remark: item.remark,
+    date: item.date,
+    location: item.location,
+    price: item.price,
+    pricePerPerson: item.price,
+    total: item.total,
+    isOwner: true,
+  };
 }
 
 const mockData: PinDanItem[] = [
@@ -317,7 +345,12 @@ function parseRouteParams() {
 
 const PinDan: React.FC = () => {
   const { t } = useTranslation();
-  const { items: apiItems, usingMock } = usePindanPageItems();
+  const queryClient = useQueryClient();
+  const clientUserId = useMemo(() => getClientUserId(), []);
+  const [editPindanCard, setEditPindanCard] = useState<PindanJoinCard | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<PinDanItem | null>(null);
+  const { items: apiItems, activities: apiActivities, usingMock, refetch: refetchPindan } =
+    usePindanPageItems();
   const activeTab = usePindanPageStore((state) => state.activeTab);
   const routeActivityId = usePindanPageStore((state) => state.routeActivityId);
   const highlightItemId = usePindanPageStore((state) => state.highlightItemId);
@@ -449,13 +482,93 @@ const PinDan: React.FC = () => {
     if (profileId != null) goProfilePindan(profileId);
   }, [joinToast.profileId, resetJoinToastProfileId]);
 
+  const handleEditPindan = useCallback((item: PinDanItem) => {
+    setEditPindanCard(toEditPindanCard(item));
+  }, []);
+
+  const handleDeletePindan = useCallback((item: PinDanItem) => {
+    setPendingDelete(item);
+  }, []);
+
+  const handleDeleteCancel = useCallback(() => {
+    setPendingDelete(null);
+  }, []);
+
+  const handleDeleteConfirm = useCallback(async () => {
+    if (!pendingDelete) return;
+
+    const item = pendingDelete;
+    setPendingDelete(null);
+
+    if (!isApiEnabled()) {
+      void Taro.showToast({ title: t("pindan.deleted"), icon: "success" });
+      return;
+    }
+
+    try {
+      await deletePindan(item.id, clientUserId);
+      await invalidatePindanQueries(queryClient);
+      void refetchPindan();
+      void Taro.showToast({ title: t("pindan.deleted"), icon: "success" });
+    } catch {
+      void Taro.showToast({ title: t("common.requestFailed"), icon: "none" });
+    }
+  }, [clientUserId, pendingDelete, queryClient, refetchPindan, t]);
+
+  const handlePindanSaved = useCallback(
+    (result?: PinDanSavedResult) => {
+      setEditPindanCard(null);
+      closeCreateModal();
+      void invalidatePindanQueries(queryClient);
+      void refetchPindan();
+
+      if (result && !result.isEdit) {
+        applyRoute({
+          activityId: result.activityLegacyId ?? routeActivityId,
+          highlightId: result.legacyId,
+          type: result.category,
+        });
+      }
+    },
+    [applyRoute, closeCreateModal, queryClient, refetchPindan, routeActivityId],
+  );
+
   const heroTitleKey =
     activeTab === `package` ? `pindan.hero.package` : activeTab === `hotel` ? `pindan.hero.hotel` : `pindan.hero.transport`;
 
   const heroSubKey = activeTab === `package` ? `pindan.hero.packageSubtitle` : `pindan.hero.subtitle`;
 
-  const routeActivity = routeActivityId != null ? getActivityById(routeActivityId) : undefined;
-  const activityName = routeActivity ? t(routeActivity.nameKey) : null;
+  const resolvedActivity = useMemo(() => {
+    if (routeActivityId == null) return null;
+
+    if (isApiEnabled()) {
+      const backendActivity = findBackendActivityByLegacyId(apiActivities, routeActivityId);
+      if (backendActivity) {
+        return {
+          id: backendActivity.legacyId,
+          title: backendActivity.name,
+          date: backendActivity.date ?? ``,
+          location: backendActivity.location ?? ``,
+          image: backendActivity.image ?? ``,
+          hot: backendActivity.hot,
+        };
+      }
+    }
+
+    const staticActivity = getActivityById(routeActivityId);
+    if (!staticActivity) return null;
+
+    return {
+      id: staticActivity.id,
+      title: t(staticActivity.nameKey),
+      date: staticActivity.date,
+      location: staticActivity.location,
+      image: staticActivity.image,
+      hot: staticActivity.hot,
+    };
+  }, [apiActivities, routeActivityId, t]);
+
+  const activityName = resolvedActivity?.title ?? null;
 
   return (
     <div data-cmp="PinDan" className={`s-pindan s-pindan--${activeTab}`}>
@@ -518,7 +631,10 @@ const PinDan: React.FC = () => {
           const pct = progressPercent(item.joined, item.total);
           const spotsLeft = item.total - item.joined;
           const isPackage = item.type === `package`;
-          const joinState = getPindanJoinUiState(item, joinedIds, item.id);
+          const isOwner = isPindanOwner(item, clientUserId);
+          const joinState = isOwner
+            ? (`joined` as const)
+            : getPindanJoinUiState(item, joinedIds, item.id);
           const joinLabel =
             joinState === `joined`
               ? t(`pindan.joined`)
@@ -601,7 +717,12 @@ const PinDan: React.FC = () => {
                 <div className="s-pindan__prog-header">
                   <div className="s-pindan__prog-lead">
                     <UsersIcon size={11} />
-                    <span>{t("common.joinedCount", { joined: item.joined, total: item.total })}</span>
+                    <span>
+                      {t("common.joinedCount", { joined: item.joined, total: item.total })}
+                      {spotsLeft === 0
+                        ? ` · ${t("common.full")}`
+                        : ` · ${t("common.spotsLeft", { count: spotsLeft })}`}
+                    </span>
                   </div>
                   <span className="s-pindan__prog-pct">{pct}%</span>
                 </div>
@@ -609,17 +730,42 @@ const PinDan: React.FC = () => {
                   <div className="s-pindan__prog-fill" style={{ width: `${pct}%` }} />
                 </div>
 
-                <div className="s-pindan__actions">
-                  <Button
-                    className="s-pindan__join-btn"
-                    disabled={isPindanJoinDisabled(joinState)}
-                    onClick={() => handleJoin(item)}
-                  >
-                    {joinLabel}
-                  </Button>
-                  <Button className="s-pindan__share-btn" onClick={(e) => handleShare(item, e)}>
-                    {t("common.share")}
-                  </Button>
+                <div className={`s-pindan__actions${isOwner ? ` s-pindan__actions--owner` : ``}`}>
+                  {isOwner ? (
+                    <>
+                      <div className="s-pindan__owner-btns">
+                        <Button
+                          className="s-pindan__owner-btn s-pindan__owner-btn--edit"
+                          onClick={() => handleEditPindan(item)}
+                        >
+                          {t("pindan.edit")}
+                        </Button>
+                        <Button
+                          className="s-pindan__owner-btn s-pindan__owner-btn--delete"
+                          onClick={() => handleDeletePindan(item)}
+                        >
+                          <Trash2Icon size={12} />
+                          {t("pindan.delete")}
+                        </Button>
+                      </div>
+                      <Button className="s-pindan__share-btn s-pindan__share-btn--compact" onClick={(e) => handleShare(item, e)}>
+                        {t("common.share")}
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button
+                        className="s-pindan__join-btn"
+                        disabled={isPindanJoinDisabled(joinState)}
+                        onClick={() => handleJoin(item)}
+                      >
+                        {joinLabel}
+                      </Button>
+                      <Button className="s-pindan__share-btn" onClick={(e) => handleShare(item, e)}>
+                        {t("common.share")}
+                      </Button>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -627,24 +773,32 @@ const PinDan: React.FC = () => {
         })}
       </div>
 
-      <CreatePinDanModal
-        open={showCreateModal}
-        onClose={closeCreateModal}
-        categoryOptions={[activeTab as PinDanCreateCategory]}
-        defaultCategory={activeTab as PinDanCreateCategory}
-        initialEventName={activityName ?? ``}
-        activity={
-          routeActivity
-            ? {
-                id: routeActivity.id,
-                title: activityName ?? t(routeActivity.nameKey),
-                date: routeActivity.date,
-                location: routeActivity.location,
-                image: routeActivity.image,
-                hot: routeActivity.hot,
-              }
-            : null
+      <ConfirmDialog
+        open={pendingDelete !== null}
+        title={t("pindan.deleteConfirmTitle")}
+        message={
+          pendingDelete
+            ? t("pindan.deleteConfirmMessage", { title: pendingDelete.title })
+            : ""
         }
+        confirmText={t("pindan.delete")}
+        cancelText={t("common.cancel")}
+        onConfirm={() => void handleDeleteConfirm()}
+        onCancel={handleDeleteCancel}
+      />
+
+      <CreatePinDanModal
+        open={showCreateModal || editPindanCard != null}
+        onClose={() => {
+          closeCreateModal();
+          setEditPindanCard(null);
+        }}
+        categoryOptions={[activeTab as PinDanCreateCategory]}
+        defaultCategory={editPindanCard?.category ?? (activeTab as PinDanCreateCategory)}
+        initialEventName={activityName ?? ``}
+        editPindan={editPindanCard}
+        onSaved={handlePindanSaved}
+        activity={resolvedActivity}
       />
 
       <JoinSuccessToast

@@ -327,6 +327,14 @@
       --pindan-accent-rgb: 251, 191, 36;
     }
 
+    &--joined {
+      border-color: rgba(var(--secondary-rgb), 0.45);
+    }
+
+    &--owner {
+      border-color: rgba(var(--primary-rgb), 0.5);
+    }
+
     &__icon {
       width: 36px;
       height: 36px;
@@ -367,6 +375,21 @@
     &__subtitle {
       font-size: 11px;
       color: var(--muted-foreground);
+    }
+
+    &__remark {
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.72);
+      line-height: 1.35;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    &__edit-hint {
+      font-size: 10px;
+      color: rgb(var(--primary-rgb));
     }
 
     &__meta {
@@ -414,6 +437,53 @@
     background: var(--background);
   }
 
+  &__attach-preview {
+    position: relative;
+    width: 72px;
+    margin-bottom: 8px;
+  }
+
+  &__attach-preview-btn {
+    display: block;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: box-shadow 200ms ease;
+
+    img {
+      width: 72px;
+      height: 72px;
+      border-radius: 12px;
+      object-fit: cover;
+      display: block;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      transition: border-color 200ms ease;
+    }
+
+    &:hover img {
+      border-color: rgba(255, 255, 255, 0.35);
+    }
+  }
+
+  &__attach-remove {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 22px;
+    height: 22px;
+    border-radius: 9999px;
+    border: none;
+    background: rgba(0, 0, 0, 0.75);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
   &__composer-inner {
     display: flex;
     align-items: center;
@@ -421,7 +491,50 @@
     background: var(--card);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 16px;
-    padding: 10px 16px;
+    padding: 10px 12px 10px 10px;
+  }
+
+  &__attach-btn {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    border: none;
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+
+    &:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+  }
+
+  &__bubble-image-btn {
+    display: block;
+    padding: 0;
+    margin-bottom: 6px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: box-shadow 200ms ease;
+
+    &:hover {
+      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.28);
+    }
+  }
+
+  &__bubble-image {
+    display: block;
+    max-width: 180px;
+    max-height: 180px;
+    border-radius: 12px;
+    object-fit: cover;
   }
 
   &__input {

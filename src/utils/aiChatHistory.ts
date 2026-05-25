@@ -11,6 +11,8 @@ export function mapHistoryToUiMessages(
       id: `${sessionId}-${index}`,
       from: message.role === "user" ? "user" : "ai",
       text: message.content,
+      pindanCard: message.pindanCard,
+      ticketCard: message.ticketCard,
     }));
 }
 
@@ -19,8 +21,11 @@ export function buildApiChatHistory(
   uiMessages: ChatUiMessage[],
   welcomeText: string,
   pendingUserText?: string,
+  pendingImage?: string,
 ): AiChatMessage[] {
-  const settled = uiMessages.filter((message) => !message.streaming && message.text);
+  const settled = uiMessages.filter(
+    (message) => !message.streaming && (message.text || message.imagePreview),
+  );
   const apiMessages: AiChatMessage[] = [];
 
   for (let index = 0; index < settled.length; index += 1) {
@@ -30,12 +35,17 @@ export function buildApiChatHistory(
     }
     apiMessages.push({
       role: message.from === "user" ? "user" : "assistant",
-      content: message.text,
+      content:
+        message.text ||
+        (message.imagePreview ? "[门票图片]" : ""),
     });
   }
 
-  if (pendingUserText) {
-    apiMessages.push({ role: "user", content: pendingUserText });
+  if (pendingUserText || pendingImage) {
+    apiMessages.push({
+      role: "user",
+      content: pendingUserText?.trim() || (pendingImage ? "[门票图片]" : ""),
+    });
   }
 
   return apiMessages;

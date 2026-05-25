@@ -64,6 +64,7 @@ export interface BackendPindan {
   tags?: string[];
   rating?: number;
   includes?: BackendPindanInclude[];
+  remark?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -85,6 +86,7 @@ export interface ProfileTicketItem {
   id: string;
   type: "sell" | "buy";
   activityId: string;
+  displayEventName: string;
   skuCode: string;
   quantity: number;
   price: number;
@@ -138,6 +140,33 @@ export interface HomeSummary {
   }>;
 }
 
+export interface CreatePindanPayload {
+  title: string;
+  subtitle?: string;
+  type: "package" | "hotel" | "transport";
+  activityLegacyId?: number;
+  leaderUserId?: string;
+  image?: string;
+  price?: number;
+  originalPrice?: number;
+  date?: string;
+  location?: string;
+  total?: number;
+  remark?: string;
+}
+
+export interface UpdatePindanPayload {
+  title?: string;
+  subtitle?: string;
+  remark?: string;
+  price?: number;
+  originalPrice?: number;
+  date?: string;
+  location?: string;
+  total?: number;
+  userId?: string;
+}
+
 export interface ProfilePinDanItem {
   id: number;
   activityId: number;
@@ -149,4 +178,7 @@ export interface ProfilePinDanItem {
   price: number;
   image: string;
   joinedAt: string;
+  isOwner?: boolean;
+  remark?: string;
+  total?: number;
 }

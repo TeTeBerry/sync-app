@@ -452,6 +452,11 @@
 .s-pindan__actions {
   display: flex;
   gap: 8px;
+
+  &--owner {
+    align-items: center;
+    justify-content: space-between;
+  }
 }
 
 .s-pindan__join-btn {
@@ -490,7 +495,48 @@
   font-size: 14px;
   transition: transform 0.15s ease;
 
+  &--compact {
+    padding: 6px 12px;
+    font-size: 12px;
+    border-radius: 8px;
+  }
+
   &:active {
     transform: scale(0.97);
+  }
+}
+
+.s-pindan__owner-btns {
+  display: flex;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+
+.s-pindan__owner-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+
+  &:active {
+    transform: scale(0.97);
+  }
+
+  &--edit {
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--muted-foreground);
+  }
+
+  &--delete {
+    border: 1px solid rgba(255, 0, 102, 0.28);
+    background: rgba(255, 0, 102, 0.08);
+    color: #ff4d8d;
   }
 }

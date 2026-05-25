@@ -84,6 +84,25 @@ export async function apiPost<T>(
   return parseResponse<T>(response);
 }
 
+export async function apiPatch<T>(
+  path: string,
+  body: unknown,
+  init?: RequestInit,
+): Promise<T> {
+  const response = await fetch(buildUrl(path), {
+    method: "PATCH",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      ...init?.headers,
+    },
+    body: JSON.stringify(body),
+    ...init,
+  });
+
+  return parseResponse<T>(response);
+}
+
 export async function apiDelete<T>(
   path: string,
   params?: Record<string, string | undefined>,

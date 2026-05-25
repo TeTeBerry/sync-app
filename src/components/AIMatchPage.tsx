@@ -9,7 +9,8 @@ import React, {
   useState,
 } from "react";
 import BottomNav from "./BottomNav";
-import CreatePinDanModal from "./CreatePinDanModal";
+import CreatePinDanModal, { type PinDanSavedResult } from "./CreatePinDanModal";
+import ImagePreviewLightbox from "./ImagePreviewLightbox";
 import PageNavigation from "./PageNavigation";
 import TicketMarketPanel from "./TicketMarketPanel";
 import { Button, Input, cn } from "./ui";
@@ -18,6 +19,7 @@ import {
   CheckCircleIcon,
   ChevronRightIcon,
   FlameIcon,
+  ImagePlusIcon,
   MapPinIcon,
   PlusIcon,
   SendIcon,
@@ -25,17 +27,21 @@ import {
   TicketIcon,
   PackageIcon,
   UsersIcon,
+  XIcon,
   ZapIcon,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import Taro from "@tarojs/taro";
 import { useQueryClient } from "@tanstack/react-query";
+import type { ChatUiMessage, PindanJoinCard } from "../types/aiChat";
 import { useAiChatStream } from "../hooks/useAiChatStream";
 import { invalidatePindanQueries, invalidateTicketQueries, useEventList, usePinDanList } from "../hooks/useSyncApi";
 import type { PinDanCategory } from "../utils/apiMappers";
 import { joinPindan } from "../api/syncApi";
 import { isApiEnabled } from "../constants/api";
 import { getClientUserId } from "../utils/session";
+import { goPindan } from "../utils/route";
+import { ChatImageTooLargeError, pickAndCompressChatImage } from "../utils/chatImage";
 import { getPindanJoinUiState, isPindanJoinDisabled } from "../utils/pindanJoinState";
 import type { PinDanCardUi } from "../utils/apiMappers";
 import {
@@ -65,15 +71,13 @@ function AiChat({
 }: {
   onTicketCreated?: (ticketId: string) => void;
   onTicketCardClick?: (ticketId: string) => void;
-  onPindanCardClick?: (
-    legacyId: number,
-    category: PinDanCategory,
-    activityLegacyId?: number,
-  ) => void;
+  onPindanCardClick?: (card: PindanJoinCard) => void;
   onPindanJoined?: () => void;
 }) {
   const { t } = useTranslation();
   const [input, setInput] = useState(``);
+  const [pendingImage, setPendingImage] = useState<string | null>(null);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const mockReply = useCallback(
@@ -106,14 +110,42 @@ function AiChat({
   }, [messages]);
 
   const submit = useCallback(
-    (text: string) => {
+    (text: string, image?: string | null) => {
       const trimmed = text.trim();
-      if (!trimmed || isStreaming) return;
+      const attachment = image ?? pendingImage;
+      if ((!trimmed && !attachment) || isStreaming) return;
       setInput(``);
-      void send(trimmed);
+      setPendingImage(null);
+      void send({ text: trimmed, image: attachment ?? undefined });
     },
-    [isStreaming, send],
+    [isStreaming, pendingImage, send],
   );
+
+  const handlePickImage = useCallback(async () => {
+    if (isStreaming) return;
+    try {
+      const dataUrl = await pickAndCompressChatImage();
+      if (dataUrl) setPendingImage(dataUrl);
+    } catch (error) {
+      if (error instanceof ChatImageTooLargeError) {
+        void Taro.showToast({ title: t("aimatch.ai.imageTooLarge"), icon: "none" });
+        return;
+      }
+      void Taro.showToast({ title: t("common.requestFailed"), icon: "none" });
+    }
+  }, [isStreaming, t]);
+
+  const handleRemoveImage = useCallback(() => {
+    setPendingImage(null);
+  }, []);
+
+  const openImagePreview = useCallback((src: string) => {
+    setPreviewImage(src);
+  }, []);
+
+  const closeImagePreview = useCallback(() => {
+    setPreviewImage(null);
+  }, []);
 
   const onChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setInput(e.target.value);
@@ -129,13 +161,15 @@ function AiChat({
     [input, submit],
   );
 
+  const canSend = Boolean(input.trim() || pendingImage) && !isStreaming;
+
   return (
     <div className="s-aim-ai">
       <div className="s-aim-ai__scroll">
         {isLoadingHistory ? (
           <p className="s-aim-panel-hint">{t(`common.loading`)}</p>
         ) : null}
-        {messages.map((msg) => (
+        {messages.map((msg: ChatUiMessage) => (
           <div
             key={msg.id}
             className={`s-aim-ai__row${msg.from === `user` ? ` s-aim-ai__row--from-user` : ``}`}
@@ -159,7 +193,23 @@ function AiChat({
                     <span />
                   </span>
                 ) : (
-                  <span>{msg.text}</span>
+                  <>
+                    {msg.imagePreview ? (
+                      <button
+                        type="button"
+                        className="s-aim-ai__bubble-image-btn"
+                        aria-label={t("aimatch.ai.viewImage")}
+                        onClick={() => openImagePreview(msg.imagePreview!)}
+                      >
+                        <img
+                          className="s-aim-ai__bubble-image"
+                          src={msg.imagePreview}
+                          alt={t("aimatch.ai.uploadedTicketAlt")}
+                        />
+                      </button>
+                    ) : null}
+                    {msg.text ? <span>{msg.text}</span> : null}
+                  </>
                 )}
               </div>
               {msg.pindanCard ? (
@@ -168,32 +218,44 @@ function AiChat({
                   className={cn(
                     `s-aim-ai__pindan-card`,
                     `s-aim-ai__pindan-card--${msg.pindanCard.category}`,
+                    msg.pindanCard.userJoined && `s-aim-ai__pindan-card--joined`,
+                    msg.pindanCard.isOwner && `s-aim-ai__pindan-card--owner`,
                   )}
-                  onClick={() =>
-                    onPindanCardClick?.(
-                      msg.pindanCard!.legacyId,
-                      msg.pindanCard!.category,
-                      msg.pindanCard!.activityLegacyId,
-                    )
-                  }
+                  onClick={() => onPindanCardClick?.(msg.pindanCard!)}
                 >
                   <div className="s-aim-ai__pindan-card__icon">
                     <PackageIcon size={16} />
                   </div>
                   <div className="s-aim-ai__pindan-card__body">
                     <span className="s-aim-ai__pindan-card__label">
-                      {msg.pindanCard.activityLegacyId
-                        ? t(`aimatch.pindan.activityCardTitle`)
-                        : t(`aimatch.pindan.joinedCardTitle`)}
+                      {msg.pindanCard.isOwner
+                        ? t(`aimatch.pindan.myCreatedCardTitle`)
+                        : msg.pindanCard.userJoined
+                          ? t(`aimatch.pindan.joinedCardTitle`)
+                          : msg.pindanCard.activityLegacyId
+                            ? t(`aimatch.pindan.activityCardTitle`)
+                            : t(`aimatch.pindan.joinedCardTitle`)}
                     </span>
                     <span className="s-aim-ai__pindan-card__title">{msg.pindanCard.title}</span>
                     {msg.pindanCard.subtitle ? (
                       <span className="s-aim-ai__pindan-card__subtitle">{msg.pindanCard.subtitle}</span>
                     ) : null}
+                    {msg.pindanCard.remark ? (
+                      <span className="s-aim-ai__pindan-card__remark">{msg.pindanCard.remark}</span>
+                    ) : null}
                     <span className="s-aim-ai__pindan-card__meta">
                       {[msg.pindanCard.date, msg.pindanCard.location].filter(Boolean).join(` · `)}
                     </span>
-                    <span className="s-aim-ai__pindan-card__price">¥{msg.pindanCard.price}</span>
+                    <span className="s-aim-ai__pindan-card__price">
+                      {t(`aimatch.pindan.modal.perPersonPreview`, {
+                        amount: msg.pindanCard.pricePerPerson ?? msg.pindanCard.price,
+                      })}
+                    </span>
+                    {msg.pindanCard.isOwner ? (
+                      <span className="s-aim-ai__pindan-card__edit-hint">
+                        {t(`aimatch.pindan.tapToEdit`)}
+                      </span>
+                    ) : null}
                   </div>
                   <ChevronRightIcon size={16} className="s-aim-ai__pindan-card__chev" />
                 </button>
@@ -241,7 +303,36 @@ function AiChat({
       </div>
 
       <div className="s-aim-ai__composer">
+        {pendingImage ? (
+          <div className="s-aim-ai__attach-preview">
+            <button
+              type="button"
+              className="s-aim-ai__attach-preview-btn"
+              aria-label={t("aimatch.ai.viewImage")}
+              onClick={() => openImagePreview(pendingImage)}
+            >
+              <img src={pendingImage} alt={t("aimatch.ai.uploadedTicketAlt")} />
+            </button>
+            <button
+              type="button"
+              className="s-aim-ai__attach-remove"
+              aria-label={t("aimatch.ai.removeImage")}
+              onClick={handleRemoveImage}
+            >
+              <XIcon size={14} />
+            </button>
+          </div>
+        ) : null}
         <div className="s-aim-ai__composer-inner">
+          <button
+            type="button"
+            className="s-aim-ai__attach-btn"
+            disabled={isStreaming}
+            aria-label={t("aimatch.ai.uploadImage")}
+            onClick={() => void handlePickImage()}
+          >
+            <ImagePlusIcon size={18} />
+          </button>
           <Input
             variant="aim-chat"
             type="text"
@@ -251,11 +342,22 @@ function AiChat({
             onChange={onChange}
             onKeyDown={onKeyDown}
           />
-          <Button className="s-aim-ai__send" disabled={isStreaming} onClick={() => submit(input)}>
+          <Button
+            className="s-aim-ai__send"
+            disabled={!canSend}
+            onClick={() => submit(input)}
+          >
             <SendIcon size={14} color="#fff" />
           </Button>
         </div>
       </div>
+
+      <ImagePreviewLightbox
+        open={previewImage != null}
+        src={previewImage}
+        alt={t("aimatch.ai.uploadedTicketAlt")}
+        onClose={closeImagePreview}
+      />
     </div>
   );
 }
@@ -265,18 +367,14 @@ const AIMatchPage: FC = () => {
   const queryClient = useQueryClient();
   const activeTab = useAimatchPageStore((state) => state.activeTab);
   const createCategory = useAimatchPageStore((state) => state.createCategory);
-  const filterActivityLegacyId = useAimatchPageStore((state) => state.filterActivityLegacyId);
   const highlightTicketId = useAimatchPageStore((state) => state.highlightTicketId);
   const highlightPindanId = useAimatchPageStore((state) => state.highlightPindanId);
   const showCreateModal = useAimatchPageStore((state) => state.showCreateModal);
   const goingIds = useAimatchPageStore((state) => state.goingIds);
   const setActiveTab = useAimatchPageStore((state) => state.setActiveTab);
   const setCreateCategory = useAimatchPageStore((state) => state.setCreateCategory);
-  const focusPindanCard = useAimatchPageStore((state) => state.focusPindanCard);
-  const focusActivityPindan = useAimatchPageStore((state) => state.focusActivityPindan);
   const focusTicket = useAimatchPageStore((state) => state.focusTicket);
   const clearPindanHighlight = useAimatchPageStore((state) => state.clearPindanHighlight);
-  const clearActivityFilter = useAimatchPageStore((state) => state.clearActivityFilter);
   const clearTicketHighlight = useAimatchPageStore((state) => state.clearTicketHighlight);
   const openCreateModal = useAimatchPageStore((state) => state.openCreateModal);
   const closeCreateModal = useAimatchPageStore((state) => state.closeCreateModal);
@@ -299,39 +397,29 @@ const AIMatchPage: FC = () => {
     [queryClient],
   );
 
-  const handlePindanCardClick = useCallback(
-    (legacyId: number, category: PinDanCategory, activityLegacyId?: number) => {
-      if (activityLegacyId != null) {
-        focusActivityPindan(
-          activityLegacyId,
-          category,
-          legacyId > 0 ? legacyId : undefined,
-        );
-      } else {
-        focusPindanCard(legacyId, category);
-      }
-      void invalidatePindanQueries(queryClient);
-    },
-    [focusActivityPindan, focusPindanCard, queryClient],
-  );
+  const handlePindanCardClick = useCallback((card: PindanJoinCard) => {
+    if (card.activityLegacyId != null) {
+      goPindan({
+        activityId: card.activityLegacyId,
+        type: card.category,
+        highlightId: card.legacyId > 0 ? card.legacyId : undefined,
+      });
+      return;
+    }
+
+    goPindan({
+      type: card.category,
+      highlightId: card.legacyId > 0 ? card.legacyId : undefined,
+    });
+  }, []);
 
   const handlePindanJoined = useCallback(() => {
     void invalidatePindanQueries(queryClient);
   }, [queryClient]);
 
   const categoryPinDans = React.useMemo(
-    () =>
-      activePinDans.filter((item) => {
-        if (item.category !== createCategory) return false;
-        if (
-          filterActivityLegacyId != null &&
-          item.activityLegacyId !== filterActivityLegacyId
-        ) {
-          return false;
-        }
-        return true;
-      }),
-    [activePinDans, createCategory, filterActivityLegacyId],
+    () => activePinDans.filter((item) => item.category === createCategory),
+    [activePinDans, createCategory],
   );
 
   const handleJoinPindan = useCallback(
@@ -365,10 +453,7 @@ const AIMatchPage: FC = () => {
     ready: categoryPinDans.some((item) => item.id === highlightPindanId),
     scrollDelayMs: 120,
     clearDelayMs: 3200,
-    onClear: () => {
-      clearPindanHighlight();
-      clearActivityFilter();
-    },
+    onClear: clearPindanHighlight,
   });
 
   const handleTicketCardClick = useCallback(
@@ -672,6 +757,17 @@ const AIMatchPage: FC = () => {
         open={showCreateModal}
         onClose={closeCreateModal}
         defaultCategory={createCategory}
+        onSaved={(result?: PinDanSavedResult) => {
+          closeCreateModal();
+          void invalidatePindanQueries(queryClient);
+          if (result && !result.isEdit) {
+            goPindan({
+              activityId: result.activityLegacyId,
+              type: result.category,
+              highlightId: result.legacyId,
+            });
+          }
+        }}
       />
 
       <BottomNav />

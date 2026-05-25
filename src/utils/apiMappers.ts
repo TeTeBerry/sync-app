@@ -49,6 +49,8 @@ export interface PindanPageItem {
   total: number;
   tags: string[];
   rating: number;
+  leaderUserId?: string;
+  remark?: string;
   includes?: Array<{ kind: "hotel" | "transport"; title: string; detail: string }>;
 }
 
@@ -129,6 +131,13 @@ export function buildActivityNameMap(activities: BackendActivity[]): Map<string,
   return new Map(activities.map((item) => [item.code, item.name]));
 }
 
+export function findBackendActivityByLegacyId(
+  activities: BackendActivity[],
+  legacyId: number,
+): BackendActivity | undefined {
+  return activities.find((activity) => activity.legacyId === legacyId);
+}
+
 export function mapActivitiesToEvents(activities: BackendActivity[]): EventCardUi[] {
   return activities.map((activity) => {
     const preset = ACTIVITY_EVENT_PRESETS[activity.code] ?? DEFAULT_EVENT_PRESET;
@@ -180,6 +189,12 @@ export function mapPindanToCards(
 export function mapPindanToPageItems(items: BackendPindan[]): PindanPageItem[] {
   return items
     .filter((item) => item.legacyId != null)
+    .sort((a, b) => {
+      const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      if (aTime !== bTime) return bTime - aTime;
+      return (b.legacyId ?? 0) - (a.legacyId ?? 0);
+    })
     .map((item) => {
       const type = inferPinDanCategory(item.title, item.type);
       const joined = item.joined ?? (item.memberUserIds?.length ?? 0) + 1;
@@ -200,6 +215,8 @@ export function mapPindanToPageItems(items: BackendPindan[]): PindanPageItem[] {
         total,
         tags: item.tags ?? [],
         rating: item.rating ?? 4.8,
+        leaderUserId: item.leaderUserId,
+        remark: item.remark,
         includes: item.includes,
       };
     });

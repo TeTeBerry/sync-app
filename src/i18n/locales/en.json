@@ -10,6 +10,7 @@
     "more": "More",
     "view": "View",
     "cancel": "Cancel",
+    "close": "Close",
     "share": "Share",
     "shareCopied": "Share link copied",
     "requestFailed": "Request failed, please try again",
@@ -114,19 +115,21 @@
     },
     "tabs": {
       "participated": "Joined",
-      "pindan": "Group buys"
+      "pindan": "Group buys",
+      "tickets": "Tickets"
     },
     "eventStatus": {
       "upcoming": "Upcoming",
       "registered": "Registered",
       "completed": "Completed"
     },
-    "pindanInProgress": "In progress",
     "myPindan": {
       "title": "My group buys",
       "more": "More",
       "joinedBadge": "Joined",
+      "ownerBadge": "Created",
       "joinedAt": "Joined {{time}}",
+      "createdAt": "Created {{time}}",
       "exit": "Leave",
       "viewDetail": "Details",
       "empty": "No group buys yet",
@@ -137,6 +140,19 @@
         "package": "Package",
         "hotel": "Hotel",
         "transport": "Transport"
+      }
+    },
+    "myTickets": {
+      "title": "My ticket listings",
+      "more": "Ticket market",
+      "empty": "No listings yet — try AI chat to sell or buy tickets",
+      "createdAt": "Posted {{time}}",
+      "quantity": "{{count}} ticket(s)",
+      "perTicket": "/ ticket",
+      "datePending": "Date TBD",
+      "type": {
+        "sell": "Selling",
+        "buy": "Buying"
       }
     },
     "settings": {
@@ -211,7 +227,12 @@
       "searching": "Searching for \"{{query}}\" 🔍 Found {{count}} high-match users — tap a card for details!",
       "streamError": "Sorry, something went wrong. Please try again.",
       "thinking": "AI is thinking",
-      "placeholder": "Say what you need, e.g. \"Search EDC tickets\" or \"Sell my ticket\""
+      "placeholder": "Say what you need, or upload ticket/package/hotel screenshots",
+      "uploadImage": "Upload ticket image",
+      "uploadedTicketAlt": "Uploaded ticket image",
+      "viewImage": "View full image",
+      "removeImage": "Remove image",
+      "imageTooLarge": "Image too large — please compress to under 10MB"
     },
     "pindan": {
       "createNew": "Start a new group order",
@@ -224,6 +245,11 @@
       "currentOrders": "Active Orders",
       "join": "Join",
       "joinedCardTitle": "View group buy",
+      "myCreatedCardTitle": "My group buy",
+      "tapToEdit": "Tap to edit",
+      "editTitle": "Edit group buy",
+      "saveEdit": "Save changes",
+      "updated": "Group buy updated",
       "activityCardTitle": "View activity groups",
       "modal": {
         "title": "New Group Order",
@@ -312,6 +338,12 @@
     "join": "Join",
     "joined": "Joined",
     "joinPackage": "Join Package",
+    "edit": "Edit",
+    "delete": "Delete",
+    "deleteConfirmTitle": "Delete group buy",
+    "deleteConfirmMessage": "Delete \"{{title}}\"? This cannot be undone.",
+    "deleted": "Group buy deleted",
+    "created": "Group buy published",
     "joinSuccess": {
       "title": "Group buy successful"
     },

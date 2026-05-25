@@ -87,6 +87,8 @@ export interface StreamAiChatOptions {
   sessionId?: string;
   userId?: string;
   userName?: string;
+  userPhone?: string;
+  image?: string;
   signal?: AbortSignal;
   headers?: Record<string, string>;
 }
@@ -107,6 +109,8 @@ export async function* streamAiChatRequest(
       sessionId: options.sessionId,
       userId: options.userId,
       userName: options.userName,
+      userPhone: options.userPhone,
+      image: options.image,
     }),
     signal: options.signal,
   });

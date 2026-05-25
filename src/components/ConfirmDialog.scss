@@ -73,8 +73,9 @@
     }
 
     &--cancel {
-      background: rgba(255, 255, 255, 0.08);
-      color: var(--muted-foreground);
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      color: rgba(255, 255, 255, 0.78);
     }
 
     &--confirm {

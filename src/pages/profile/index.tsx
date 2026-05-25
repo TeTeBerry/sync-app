@@ -19,17 +19,19 @@ import {
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import BottomNav from "../../components/BottomNav";
-import { useProfilePindanQuery } from "../../hooks/useSyncApi";
+import { useProfilePindanQuery, useProfileTicketsQuery } from "../../hooks/useSyncApi";
 import { leavePindan } from "../../api/syncApi";
 import { isApiEnabled } from "../../constants/api";
 import { go, ROUTES } from "../../utils/route";
 import {
   participatedEvents,
   myPinDanEvents,
+  myTicketEvents,
   profileUser,
   type ProfileEventItem,
 } from "./mockData";
 import ProfilePinDanList from "./components/ProfilePinDanList";
+import ProfileTicketList from "./components/ProfileTicketList";
 import { loadMyPindanItems, removeJoinedPindanItem } from "../../utils/myPindanStorage";
 import { getClientUserId, persistUserName } from "../../utils/session";
 import {
@@ -39,7 +41,7 @@ import {
   useScrollHighlight,
 } from "../../stores";
 
-type ProfileTab = "participated" | "pindan";
+type ProfileTab = "participated" | "pindan" | "tickets";
 
 const STORAGE_KEYS = {
   notifications: "profile.notificationsEnabled",
@@ -57,20 +59,26 @@ function readStorage<T>(key: string, fallback: T): T {
 
 function parseProfileRouteParams() {
   const params = Taro.getCurrentInstance().router?.params;
-  const tab = params?.tab === `pindan` ? `pindan` : null;
+  const tabParam = params?.tab;
+  const tab: ProfileTab | null =
+    tabParam === "pindan" || tabParam === "tickets" ? tabParam : null;
   const highlightId = Number(params?.highlightId);
+  const highlightTicketId = params?.highlightTicketId?.trim() || null;
   return {
     tab,
     highlightId: highlightId && !Number.isNaN(highlightId) ? highlightId : null,
+    highlightTicketId,
   };
 }
 
 const Profile: React.FC = () => {
   const { t } = useTranslation();
   const profilePindanQuery = useProfilePindanQuery();
+  const profileTicketsQuery = useProfileTicketsQuery();
   const settingsRef = useRef<HTMLDivElement>(null);
   const activeTab = useProfilePageStore((state) => state.activeTab);
   const highlightPindanId = useProfilePageStore((state) => state.highlightPindanId);
+  const highlightTicketId = useProfilePageStore((state) => state.highlightTicketId);
   const notificationsEnabled = useProfilePageStore((state) => state.notificationsEnabled);
   const privacyLevel = useProfilePageStore((state) => state.privacyLevel);
   const setActiveTab = useProfilePageStore((state) => state.setActiveTab);
@@ -81,6 +89,7 @@ const Profile: React.FC = () => {
   const removeJoinedId = usePindanSessionStore((state) => state.removeJoinedId);
   const consumeProfileIntent = useNavigationStore((state) => state.consumeProfileIntent);
   const [myPindanItems, setMyPindanItems] = useState(() => loadMyPindanItems(myPinDanEvents));
+  const [myTicketItems, setMyTicketItems] = useState(myTicketEvents);
 
   const applyRouteParams = useCallback(() => {
     const urlParams = parseProfileRouteParams();
@@ -88,6 +97,7 @@ const Profile: React.FC = () => {
     applyRoute({
       tab: navIntent?.tab ?? urlParams.tab,
       highlightId: navIntent?.highlightId ?? urlParams.highlightId,
+      highlightTicketId: navIntent?.highlightTicketId ?? urlParams.highlightTicketId,
     });
   }, [applyRoute, consumeProfileIntent]);
 
@@ -96,8 +106,10 @@ const Profile: React.FC = () => {
     setPrivacyLevel(readStorage<string>(STORAGE_KEYS.privacy, "public"));
     if (isApiEnabled()) {
       void profilePindanQuery.refetch();
+      void profileTicketsQuery.refetch();
     } else {
       setMyPindanItems(loadMyPindanItems(myPinDanEvents));
+      setMyTicketItems(myTicketEvents);
     }
     applyRouteParams();
   });
@@ -111,11 +123,27 @@ const Profile: React.FC = () => {
     setMyPindanItems(profilePindanQuery.data);
   }, [profilePindanQuery.data]);
 
+  useEffect(() => {
+    if (!isApiEnabled() || !profileTicketsQuery.data) return;
+    setMyTicketItems(profileTicketsQuery.data);
+  }, [profileTicketsQuery.data]);
+
   useScrollHighlight({
     highlightId: highlightPindanId,
     elementId: (id) => `profile-pindan-${id}`,
     enabled: activeTab === "pindan",
     ready: highlightPindanId == null || myPindanItems.some((item) => item.id === highlightPindanId),
+    scrollDelayMs: 200,
+    onClear: clearHighlight,
+  });
+
+  useScrollHighlight({
+    highlightId: highlightTicketId,
+    elementId: (id) => `profile-ticket-${id}`,
+    enabled: activeTab === "tickets",
+    ready:
+      highlightTicketId == null ||
+      myTicketItems.some((item) => item.id === highlightTicketId),
     scrollDelayMs: 200,
     onClear: clearHighlight,
   });
@@ -166,6 +194,10 @@ const Profile: React.FC = () => {
     },
     [removeJoinedId, t],
   );
+
+  const handleDeletePindan = useCallback((id: number) => {
+    setMyPindanItems((prev) => prev.filter((item) => item.id !== id));
+  }, []);
 
   const openSettings = useCallback(
     (section: "notifications" | "privacy" | "help") => {
@@ -288,6 +320,15 @@ const Profile: React.FC = () => {
           >
             {t("profile.tabs.pindan")}
           </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === "tickets"}
+            className={`s-profile__tab${activeTab === "tickets" ? " s-profile__tab--active" : ""}`}
+            onClick={() => setActiveTab("tickets")}
+          >
+            {t("profile.tabs.tickets")}
+          </button>
         </div>
 
         <div className="s-profile__events">
@@ -305,11 +346,24 @@ const Profile: React.FC = () => {
                 <span className={statusClass(event.status)}>{t(`profile.eventStatus.${event.status}`)}</span>
               </button>
             ))
-          ) : (
+          ) : activeTab === "pindan" ? (
             <ProfilePinDanList
               items={myPindanItems}
               highlightId={highlightPindanId}
+              isLoading={isApiEnabled() && profilePindanQuery.isLoading}
+              isError={isApiEnabled() && profilePindanQuery.isError}
+              onRetry={() => void profilePindanQuery.refetch()}
               onExit={handleExitPindan}
+              onDeleted={handleDeletePindan}
+              onRefresh={() => void profilePindanQuery.refetch()}
+            />
+          ) : (
+            <ProfileTicketList
+              items={myTicketItems}
+              highlightId={highlightTicketId}
+              isLoading={isApiEnabled() && profileTicketsQuery.isLoading}
+              isError={isApiEnabled() && profileTicketsQuery.isError}
+              onRetry={() => void profileTicketsQuery.refetch()}
             />
           )}
         </div>

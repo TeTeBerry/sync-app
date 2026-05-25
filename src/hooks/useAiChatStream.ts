@@ -3,7 +3,7 @@ import { useDidShow } from "@tarojs/taro";
 import { useQueryClient } from "@tanstack/react-query";
 import { fetchChatSession } from "../api/syncApi";
 import { AI_CHAT_STREAM_URL } from "../constants/api";
-import type { ChatUiMessage } from "../types/aiChat";
+import type { ChatUiMessage, SendChatOptions } from "../types/aiChat";
 import { invalidateTicketQueries } from "./useSyncApi";
 import {
   buildApiChatHistory,
@@ -14,6 +14,7 @@ import { createTypewriterReveal } from "../utils/typewriterReveal";
 import {
   getClientUserId,
   getClientUserName,
+  getClientUserPhone,
   getOrCreateSessionId,
   persistSessionId,
 } from "../utils/session";
@@ -33,6 +34,7 @@ export interface UseAiChatStreamOptions {
   sessionId?: string;
   userId?: string;
   userName?: string;
+  userPhone?: string;
   getAuthHeaders?: () => Record<string, string>;
   /** Called when backend confirms a ticket listing was created */
   onTicketCreated?: (ticketId: string) => void;
@@ -49,6 +51,7 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
     sessionId: sessionIdOption,
     userId: userIdOption,
     userName: userNameOption,
+    userPhone: userPhoneOption,
     getAuthHeaders,
     onTicketCreated,
     onPindanJoined,
@@ -59,6 +62,7 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
   const sessionIdRef = useRef(sessionIdOption ?? getOrCreateSessionId());
   const userIdRef = useRef(userIdOption ?? getClientUserId());
   const userNameRef = useRef(userNameOption ?? getClientUserName());
+  const userPhoneRef = useRef(userPhoneOption ?? getClientUserPhone());
 
   const [messages, setMessages] = useState<ChatUiMessage[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
@@ -94,6 +98,8 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
     setIsLoadingHistory(true);
     try {
       const session = await fetchChatSession(sessionIdRef.current);
+      if (isStreamingRef.current) return;
+
       if (session.history?.length) {
         setMessages(
           mapHistoryToUiMessages(session.history, sessionIdRef.current),
@@ -102,7 +108,9 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
         showWelcome();
       }
     } catch {
-      showWelcome();
+      if (!isStreamingRef.current) {
+        showWelcome();
+      }
     } finally {
       setIsLoadingHistory(false);
     }
@@ -117,20 +125,24 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
   }, []);
 
   const send = useCallback(
-    async (text: string) => {
+    async (payload: string | SendChatOptions) => {
+      const text = typeof payload === "string" ? payload : payload.text;
+      const image = typeof payload === "string" ? undefined : payload.image;
       const trimmed = text.trim();
-      if (!trimmed || isStreaming) return;
+      if ((!trimmed && !image) || isStreaming) return;
 
       const userMsg: ChatUiMessage = {
         id: createMessageId(),
         from: "user",
         text: trimmed,
+        imagePreview: image,
       };
       const aiMsgId = createMessageId();
       const history = buildApiChatHistory(
         messagesRef.current,
         welcomeText,
         trimmed,
+        image,
       );
 
       setMessages((prev) => [
@@ -168,6 +180,8 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
               sessionId: sessionIdRef.current,
               userId: userIdRef.current,
               userName: userNameRef.current,
+              userPhone: userPhoneRef.current,
+              image,
               signal: controller.signal,
               headers: getAuthHeaders?.(),
             })
@@ -190,6 +204,12 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
           }
 
           if (event.type === "done") {
+            finishAiMessage((message) => ({
+              ...message,
+              streaming: false,
+              ticketCard: event.ticketCard ?? message.ticketCard,
+              pindanCard: event.pindanCard ?? message.pindanCard,
+            }));
             await typewriter.waitUntilComplete();
             finishAiMessage((message) => ({
               ...message,

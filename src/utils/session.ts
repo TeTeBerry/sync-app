@@ -1,6 +1,8 @@
 const SESSION_KEY = "sync_ai_session";
 const USER_NAME_KEY = "sync_user_name";
+const USER_PHONE_KEY = "sync_user_phone";
 const DEFAULT_USER_NAME = "Zara";
+const DEFAULT_USER_PHONE = "17610941208";
 
 export function getOrCreateSessionId(): string {
   if (typeof sessionStorage === "undefined") {
@@ -30,6 +32,21 @@ export function getClientUserName(): string {
 
   const stored = localStorage.getItem(USER_NAME_KEY)?.trim();
   return stored || DEFAULT_USER_NAME;
+}
+
+/** 客户端绑定手机号，出票时回复「手机」自动填入 */
+export function getClientUserPhone(): string {
+  if (typeof localStorage === "undefined") {
+    return DEFAULT_USER_PHONE;
+  }
+
+  const stored = localStorage.getItem(USER_PHONE_KEY)?.trim();
+  return stored || DEFAULT_USER_PHONE;
+}
+
+export function persistUserPhone(phone: string): void {
+  if (typeof localStorage === "undefined" || !phone.trim()) return;
+  localStorage.setItem(USER_PHONE_KEY, phone.trim());
 }
 
 export function persistUserName(name: string): void {

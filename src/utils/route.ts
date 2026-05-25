@@ -91,6 +91,19 @@ export function goProfilePindan(highlightId?: number) {
   reLaunchTo(`${ROUTES.PROFILE}?${params.toString()}` as RoutePath);
 }
 
+export function goProfileTickets(highlightTicketId?: string) {
+  if (highlightTicketId) {
+    useNavigationStore.getState().setProfileIntent({
+      tab: "tickets",
+      highlightTicketId,
+    });
+  }
+
+  const params = new URLSearchParams({ tab: `tickets` });
+  if (highlightTicketId) params.set(`highlightTicketId`, highlightTicketId);
+  reLaunchTo(`${ROUTES.PROFILE}?${params.toString()}` as RoutePath);
+}
+
 export function goTickets() {
   void Taro.navigateTo({ url: ROUTES.TICKETS });
 }

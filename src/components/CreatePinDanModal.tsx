@@ -2,6 +2,11 @@ import "./CreatePinDanModal.scss";
 import React, { type ComponentType, useEffect, useMemo, useState } from "react";
 import { BuildingIcon, CalendarIcon, CarIcon, FlameIcon, MapPinIcon, PackageIcon, SparklesIcon, XIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import Taro from "@tarojs/taro";
+import { createPindan, updatePindan } from "../api/syncApi";
+import { isApiEnabled } from "../constants/api";
+import type { PindanJoinCard } from "../types/aiChat";
+import { getClientUserId } from "../utils/session";
 import { getMockHotelAddressSuggestions, type HotelAddressSuggestion } from "../data/mockHotelAddresses";
 import { Button, Input } from "./ui";
 import MiniCalendar, { formatDate, type MiniCalendarAccent } from "./MiniCalendar";
@@ -43,6 +48,13 @@ const accentMap: Record<PinDanCreateCategory, MiniCalendarAccent> = {
   transport: `amber`,
 };
 
+export type PinDanSavedResult = {
+  legacyId: number;
+  activityLegacyId?: number;
+  category: PinDanCreateCategory;
+  isEdit: boolean;
+};
+
 export interface CreatePinDanModalProps {
   open: boolean;
   onClose: () => void;
@@ -51,6 +63,9 @@ export interface CreatePinDanModalProps {
   initialEventName?: string;
   /** 拼单页传入当前活动，展示活动卡片并启用备注等样式 */
   activity?: PinDanActivityBrief | null;
+  /** AI 聊天中编辑自己创建的拼单 */
+  editPindan?: PindanJoinCard | null;
+  onSaved?: (result?: PinDanSavedResult) => void;
 }
 
 function parsePositiveInt(v: string): number | null {
@@ -70,8 +85,11 @@ const CreatePinDanModal: React.FC<CreatePinDanModalProps> = ({
   defaultCategory,
   initialEventName = ``,
   activity = null,
+  editPindan = null,
+  onSaved,
 }) => {
   const { t } = useTranslation();
+  const isEditMode = Boolean(editPindan?.legacyId);
   const optionsKey = categoryOptions.join(`,`);
   const options = useMemo(
     () => (categoryOptions.length > 0 ? categoryOptions : DEFAULT_CATEGORY_OPTIONS),
@@ -112,8 +130,22 @@ const CreatePinDanModal: React.FC<CreatePinDanModalProps> = ({
     const next =
       defaultCategory && options.includes(defaultCategory) ? defaultCategory : options[0];
     setCategory(next);
+
+    if (editPindan) {
+      setCategory(editPindan.category);
+      setEventName(editPindan.title);
+      setLocation(editPindan.location ?? ``);
+      setRemark(editPindan.remark ?? ``);
+      setGroupSize(String(editPindan.total ?? 2));
+      const perPerson = editPindan.pricePerPerson ?? editPindan.price ?? 0;
+      const total = editPindan.total ?? 2;
+      setTotalPrice(perPerson > 0 ? String(Math.round(perPerson * total)) : ``);
+      setEventDate(editPindan.date || formatDate(new Date()));
+      return;
+    }
+
     resetFormFields();
-  }, [open, defaultCategory, initialEventName, options, activity?.title]);
+  }, [open, defaultCategory, initialEventName, options, activity?.title, editPindan]);
 
   useEffect(() => {
     if (category === `hotel`) {
@@ -160,7 +192,99 @@ const CreatePinDanModal: React.FC<CreatePinDanModalProps> = ({
         ? t(`aimatch.pindan.modal.transportRoute`)
         : t(`aimatch.pindan.modal.location`);
 
-  const modalTitle = isPindanContext ? t(`pindan.create.title`) : t(`aimatch.pindan.modal.title`);
+  const modalTitle = isEditMode
+    ? t(`aimatch.pindan.editTitle`)
+    : isPindanContext
+      ? t(`pindan.create.title`)
+      : t(`aimatch.pindan.modal.title`);
+
+  const handleSubmit = async () => {
+    if (isEditMode && editPindan) {
+      if (!isApiEnabled()) {
+        onSaved?.({ legacyId: editPindan.legacyId, activityLegacyId: editPindan.activityLegacyId, category: editPindan.category, isEdit: true });
+        return;
+      }
+      try {
+        const size = parsePositiveInt(groupSize) ?? editPindan.total ?? 2;
+        const total = parsePositiveAmount(totalPrice);
+        const pricePerPerson =
+          total != null && size > 0
+            ? Math.round(total / size)
+            : (editPindan.pricePerPerson ?? editPindan.price);
+
+        await updatePindan(editPindan.legacyId, {
+          title: eventName.trim() || editPindan.title,
+          remark: remark.trim(),
+          price: pricePerPerson,
+          originalPrice: total ?? undefined,
+          total: size,
+          location: location.trim() || editPindan.location,
+          userId: getClientUserId(),
+        });
+        void Taro.showToast({ title: t(`aimatch.pindan.updated`), icon: `success` });
+        onSaved?.({
+          legacyId: editPindan.legacyId,
+          activityLegacyId: editPindan.activityLegacyId,
+          category: editPindan.category,
+          isEdit: true,
+        });
+      } catch {
+        void Taro.showToast({ title: t(`common.requestFailed`), icon: `none` });
+      }
+      return;
+    }
+
+    const size = parsePositiveInt(groupSize);
+    const total = parsePositiveAmount(totalPrice);
+    const title = eventName.trim() || activity?.title || initialEventName.trim();
+    const resolvedLocation =
+      category === `hotel`
+        ? (addressOptions.find((opt) => opt.id === selectedAddressId)?.address ??
+          hotelName.trim())
+        : location.trim();
+
+    if (!size || !total || !title) {
+      void Taro.showToast({ title: t(`common.requestFailed`), icon: `none` });
+      return;
+    }
+
+    if (!isApiEnabled()) {
+      onClose();
+      return;
+    }
+
+    try {
+      const pricePerPerson = Math.round(total / size);
+      const created = await createPindan({
+        title,
+        type: category,
+        activityLegacyId: activity?.id,
+        leaderUserId: getClientUserId(),
+        price: pricePerPerson,
+        originalPrice: total,
+        date: eventDate,
+        location: resolvedLocation,
+        total: size,
+        remark: remark.trim() || undefined,
+        image: activity?.image,
+      });
+
+      if (!created.legacyId) {
+        throw new Error(`Missing legacyId`);
+      }
+
+      void Taro.showToast({ title: t(`pindan.created`), icon: `success` });
+      onSaved?.({
+        legacyId: created.legacyId,
+        activityLegacyId: created.activityLegacyId ?? activity?.id,
+        category,
+        isEdit: false,
+      });
+      onClose();
+    } catch {
+      void Taro.showToast({ title: t(`common.requestFailed`), icon: `none` });
+    }
+  };
 
   return (
     <div className={`s-aim-modal${open ? `` : ` s-aim-modal--off`}`}>
@@ -320,7 +444,7 @@ const CreatePinDanModal: React.FC<CreatePinDanModalProps> = ({
             </p>
           )}
 
-          {isPindanContext && (
+          {(isPindanContext || isEditMode) && (
             <>
               <span className="s-aim-modal__label">{t(`pindan.create.remark`)}</span>
               <textarea
@@ -334,8 +458,8 @@ const CreatePinDanModal: React.FC<CreatePinDanModalProps> = ({
           )}
         </div>
 
-        <Button block="s-aim-modal" element="submit" modifiers={[category]} onClick={onClose}>
-          {t("aimatch.pindan.modal.submit")}
+        <Button block="s-aim-modal" element="submit" modifiers={[category]} onClick={() => void handleSubmit()}>
+          {isEditMode ? t(`aimatch.pindan.saveEdit`) : t("aimatch.pindan.modal.submit")}
         </Button>
       </div>
     </div>
