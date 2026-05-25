@@ -1,5 +1,6 @@
 import Taro, { useDidShow } from "@tarojs/taro";
 import { useCallback, useState } from "react";
+import { useNavigationStore } from "../stores/navigationStore";
 
 export const ROUTES = {
   HOME: "/pages/index/index",
@@ -63,10 +64,28 @@ function buildPindanUrl(options?: number | GoPindanOptions): string {
 }
 
 export function goPindan(options?: number | GoPindanOptions) {
+  const intent: GoPindanOptions | null =
+    options == null
+      ? null
+      : typeof options === "number"
+        ? { activityId: options }
+        : options;
+
+  if (intent && (intent.activityId != null || intent.type || intent.highlightId != null)) {
+    useNavigationStore.getState().setPindanIntent(intent);
+  }
+
   void Taro.navigateTo({ url: buildPindanUrl(options) });
 }
 
 export function goProfilePindan(highlightId?: number) {
+  if (highlightId != null) {
+    useNavigationStore.getState().setProfileIntent({
+      tab: "pindan",
+      highlightId,
+    });
+  }
+
   const params = new URLSearchParams({ tab: `pindan` });
   if (highlightId != null) params.set(`highlightId`, String(highlightId));
   reLaunchTo(`${ROUTES.PROFILE}?${params.toString()}` as RoutePath);

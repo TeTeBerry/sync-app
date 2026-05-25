@@ -15,6 +15,18 @@ export interface TicketCreatedCard {
   eventDate?: string;
 }
 
+export interface PindanJoinCard {
+  legacyId: number;
+  activityLegacyId?: number;
+  category: "package" | "hotel" | "transport";
+  title: string;
+  subtitle?: string;
+  date: string;
+  location: string;
+  price: number;
+  activityId?: string;
+}
+
 export type AiChatStreamEvent =
   | { type: "delta"; content: string }
   | {
@@ -23,6 +35,7 @@ export type AiChatStreamEvent =
       sessionId?: string;
       ticketId?: string;
       ticketCard?: TicketCreatedCard;
+      pindanCard?: PindanJoinCard;
     }
   | { type: "error"; message: string };
 
@@ -33,6 +46,7 @@ export type ChatUiMessage = {
   /** True while tokens are still arriving */
   streaming?: boolean;
   ticketCard?: TicketCreatedCard;
+  pindanCard?: PindanJoinCard;
 };
 
 export interface ChatSessionRecord {

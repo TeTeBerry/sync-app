@@ -14,7 +14,7 @@ import { HomeTicketZone } from "./components/HomeTicketZone";
 
 const Home = () => {
   const { t } = useTranslation();
-  const { heat, signupEvents, hotPins, ticketListings } = useHomeSummary();
+  const { heat, signupEvents, hotPins } = useHomeSummary();
   const openAiMatch = useCallback(() => go(ROUTES.AIMATCH), []);
 
   const handleNotification = useCallback(() => {
@@ -34,7 +34,7 @@ const Home = () => {
 
         <HomeHeatBar stats={heat} />
 
-        <HomeTicketZone listings={ticketListings} />
+        <HomeTicketZone />
       </main>
 
       <BottomNav />

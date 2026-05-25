@@ -1,19 +1,17 @@
 import { ArrowDownLeftIcon, ArrowUpRightIcon, BadgeCheckIcon, ShieldIcon, TagIcon, TicketIcon, ZapIcon } from "lucide-react";
-import { memo, useMemo, useState, type FC } from "react";
+import { memo, useState, type FC } from "react";
 import { useTranslation } from "react-i18next";
 import { Button, cn } from "../../../components/ui";
+import type { TicketListing } from "../../../data/ticketListings";
+import { useTicketList } from "../../../hooks/useSyncApi";
 import { goTickets } from "../../../utils/route";
 import { miniTagToneClass } from "../home.styles";
-import type { TicketListingItem, TicketTabKey } from "../mockData";
+import type { TicketTabKey } from "../mockData";
 import { SectionChevronLink } from "./SectionChevronLink";
-
-export type HomeTicketZoneProps = {
-  listings: TicketListingItem[];
-};
 
 const ticketTabKeys: TicketTabKey[] = [`all`, `sell`, `buy`];
 
-const TicketRow = memo(function TicketRow({ ticket }: { ticket: TicketListingItem }) {
+const TicketRow = memo(function TicketRow({ ticket }: { ticket: TicketListing }) {
   const { t } = useTranslation();
   const isSell = ticket.type === `sell`;
 
@@ -71,17 +69,10 @@ const TicketRow = memo(function TicketRow({ ticket }: { ticket: TicketListingIte
   );
 });
 
-export const HomeTicketZone: FC<HomeTicketZoneProps> = ({ listings }) => {
+export const HomeTicketZone: FC = () => {
   const { t } = useTranslation();
   const [ticketTab, setTicketTab] = useState<TicketTabKey>(`all`);
-
-  const filteredTickets = useMemo(() => {
-    return listings.filter((item) => {
-      if (ticketTab === `all`) return true;
-      if (ticketTab === `sell`) return item.type === `sell`;
-      return item.type === `buy`;
-    });
-  }, [listings, ticketTab]);
+  const { listings, isLoading, isError } = useTicketList(ticketTab);
 
   return (
     <section className="s-ticket-zone">
@@ -120,7 +111,12 @@ export const HomeTicketZone: FC<HomeTicketZoneProps> = ({ listings }) => {
       </div>
 
       <div className="s-ticket-zone__list">
-        {filteredTickets.map((ticket) => (
+        {isLoading ? <p className="s-ticket-zone__hint">{t("common.loading")}</p> : null}
+        {isError ? <p className="s-ticket-zone__hint">{t("common.loadError")}</p> : null}
+        {!isLoading && listings.length === 0 ? (
+          <p className="s-ticket-zone__hint">{t("common.empty")}</p>
+        ) : null}
+        {listings.map((ticket) => (
           <TicketRow key={ticket.id} ticket={ticket} />
         ))}
       </div>

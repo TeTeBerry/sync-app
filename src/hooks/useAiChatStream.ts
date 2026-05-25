@@ -5,9 +5,18 @@ import { fetchChatSession } from "../api/syncApi";
 import { AI_CHAT_STREAM_URL } from "../constants/api";
 import type { ChatUiMessage } from "../types/aiChat";
 import { invalidateTicketQueries } from "./useSyncApi";
-import { buildApiChatHistory, mapHistoryToUiMessages } from "../utils/aiChatHistory";
+import {
+  buildApiChatHistory,
+  mapHistoryToUiMessages,
+} from "../utils/aiChatHistory";
 import { mockAiChatStream, streamAiChatRequest } from "../utils/aiChatStream";
-import { getClientUserId, getClientUserName, getOrCreateSessionId, persistSessionId } from "../utils/session";
+import { createTypewriterReveal } from "../utils/typewriterReveal";
+import {
+  getClientUserId,
+  getClientUserName,
+  getOrCreateSessionId,
+  persistSessionId,
+} from "../utils/session";
 
 function createMessageId() {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
@@ -15,6 +24,8 @@ function createMessageId() {
 
 export interface UseAiChatStreamOptions {
   welcomeText: string;
+  /** 打字机每字间隔（毫秒） */
+  typewriterCharDelayMs?: number;
   /** Used when `TARO_APP_AI_CHAT_URL` is unset */
   mockReply: (query: string) => string;
   streamErrorText: string;
@@ -25,6 +36,8 @@ export interface UseAiChatStreamOptions {
   getAuthHeaders?: () => Record<string, string>;
   /** Called when backend confirms a ticket listing was created */
   onTicketCreated?: (ticketId: string) => void;
+  /** Called when user joins a pindan via AI chat */
+  onPindanJoined?: () => void;
 }
 
 export function useAiChatStream(options: UseAiChatStreamOptions) {
@@ -38,6 +51,8 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
     userName: userNameOption,
     getAuthHeaders,
     onTicketCreated,
+    onPindanJoined,
+    typewriterCharDelayMs = 22,
   } = options;
 
   const queryClient = useQueryClient();
@@ -80,7 +95,9 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
     try {
       const session = await fetchChatSession(sessionIdRef.current);
       if (session.history?.length) {
-        setMessages(mapHistoryToUiMessages(session.history, sessionIdRef.current));
+        setMessages(
+          mapHistoryToUiMessages(session.history, sessionIdRef.current),
+        );
       } else {
         showWelcome();
       }
@@ -110,7 +127,11 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
         text: trimmed,
       };
       const aiMsgId = createMessageId();
-      const history = buildApiChatHistory(messagesRef.current, welcomeText, trimmed);
+      const history = buildApiChatHistory(
+        messagesRef.current,
+        welcomeText,
+        trimmed,
+      );
 
       setMessages((prev) => [
         ...prev,
@@ -132,6 +153,13 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
         );
       };
 
+      const typewriter = createTypewriterReveal({
+        charDelayMs: typewriterCharDelayMs,
+        onUpdate: (visible) => {
+          finishAiMessage((message) => ({ ...message, text: visible }));
+        },
+      });
+
       try {
         const stream = apiUrl
           ? streamAiChatRequest({
@@ -147,14 +175,12 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
 
         for await (const event of stream) {
           if (event.type === "delta") {
-            finishAiMessage((message) => ({
-              ...message,
-              text: message.text + event.content,
-            }));
+            typewriter.append(event.content);
             continue;
           }
 
           if (event.type === "error") {
+            typewriter.flush();
             finishAiMessage((message) => ({
               ...message,
               text: message.text || event.message,
@@ -164,10 +190,13 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
           }
 
           if (event.type === "done") {
+            await typewriter.waitUntilComplete();
             finishAiMessage((message) => ({
               ...message,
+              text: typewriter.getTarget() || message.text,
               streaming: false,
               ticketCard: event.ticketCard ?? message.ticketCard,
+              pindanCard: event.pindanCard ?? message.pindanCard,
             }));
             if (event.sessionId) {
               sessionIdRef.current = event.sessionId;
@@ -177,12 +206,19 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
               onTicketCreated?.(event.ticketId);
               void invalidateTicketQueries(queryClient);
             }
+            if (event.pindanCard) {
+              onPindanJoined?.();
+            }
             break;
           }
         }
       } catch (error) {
-        if ((error as Error).name === "AbortError") return;
+        if ((error as Error).name === "AbortError") {
+          typewriter.stop();
+          return;
+        }
 
+        typewriter.flush();
         finishAiMessage((message) => ({
           ...message,
           text: message.text || streamErrorText,
@@ -200,8 +236,10 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
       isStreaming,
       mockReply,
       onTicketCreated,
+      onPindanJoined,
       queryClient,
       streamErrorText,
+      typewriterCharDelayMs,
       welcomeText,
     ],
   );

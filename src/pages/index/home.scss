@@ -826,6 +826,14 @@
   gap: 12px;
 }
 
+.s-ticket-zone__hint {
+  margin: 0;
+  padding: 8px 4px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.55);
+  text-align: center;
+}
+
 .s-ticket-row {
   display: flex;
   align-items: center;

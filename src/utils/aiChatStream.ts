@@ -1,4 +1,9 @@
-import type { AiChatMessage, AiChatStreamEvent, TicketCreatedCard } from "../types/aiChat";
+import type {
+  AiChatMessage,
+  AiChatStreamEvent,
+  PindanJoinCard,
+  TicketCreatedCard,
+} from "../types/aiChat";
 
 function parseSseDataLine(line: string): AiChatStreamEvent | null {
   if (!line.startsWith("data:")) return null;
@@ -10,7 +15,13 @@ function parseSseDataLine(line: string): AiChatStreamEvent | null {
     const json = JSON.parse(payload) as Record<string, unknown>;
 
     if (json.type === "error") {
-      return { type: "error", message: String(json.message ?? "Unknown error") };
+      return {
+        type: "error",
+        message: String(json.message ?? "Unknown error"),
+      };
+    }
+    if (json.type === "delta" && typeof json.content === "string") {
+      return { type: "delta", content: json.content };
     }
     if (json.type === "done") {
       return {
@@ -19,6 +30,7 @@ function parseSseDataLine(line: string): AiChatStreamEvent | null {
         sessionId: json.sessionId as string | undefined,
         ticketId: json.ticketId as string | undefined,
         ticketCard: json.ticketCard as TicketCreatedCard | undefined,
+        pindanCard: json.pindanCard as PindanJoinCard | undefined,
       };
     }
     if (typeof json.content === "string") {
@@ -34,7 +46,9 @@ function parseSseDataLine(line: string): AiChatStreamEvent | null {
   return null;
 }
 
-async function* readSseBody(body: ReadableStream<Uint8Array>): AsyncGenerator<AiChatStreamEvent> {
+async function* readSseBody(
+  body: ReadableStream<Uint8Array>,
+): AsyncGenerator<AiChatStreamEvent> {
   const reader = body.getReader();
   const decoder = new TextDecoder();
   let buffer = "";
@@ -107,22 +121,12 @@ export async function* streamAiChatRequest(
   yield* readSseBody(response.body);
 }
 
-/** Dev fallback: simulate token stream until backend is ready. */
+/** Dev fallback: one delta; typewriter animation runs on the client. */
 export async function* mockAiChatStream(
   fullText: string,
-  options?: { charDelayMs?: number },
 ): AsyncGenerator<AiChatStreamEvent> {
-  const delayMs = options?.charDelayMs ?? 28;
-
-  for (let i = 0; i < fullText.length; ) {
-    const chunkSize = Math.min(1 + Math.floor(Math.random() * 2), fullText.length - i);
-    yield { type: "delta", content: fullText.slice(i, i + chunkSize) };
-    i += chunkSize;
-
-    if (i < fullText.length) {
-      await new Promise((resolve) => setTimeout(resolve, delayMs));
-    }
+  if (fullText) {
+    yield { type: "delta", content: fullText };
   }
-
   yield { type: "done" };
 }

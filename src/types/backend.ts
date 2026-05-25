@@ -31,6 +31,7 @@ export interface BackendTicket {
     price?: number;
     eventDate?: string;
     contact?: string;
+    displayEventName?: string;
   };
   createdAt?: string;
   updatedAt?: string;
@@ -77,6 +78,7 @@ export interface CreateTicketPayload {
   contact: string;
   userId?: string;
   userName?: string;
+  displayEventName?: string;
 }
 
 export interface ProfileTicketItem {

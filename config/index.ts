@@ -53,6 +53,12 @@ export default defineConfig({
         "/api": {
           target: "http://localhost:3000",
           changeOrigin: true,
+          onProxyRes: (proxyRes, req) => {
+            if (req.url?.includes("/ai/chat")) {
+              proxyRes.headers["cache-control"] = "no-cache";
+              proxyRes.headers["x-accel-buffering"] = "no";
+            }
+          },
         },
       },
     },

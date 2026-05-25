@@ -9,6 +9,7 @@
     "all": "All",
     "more": "More",
     "view": "View",
+    "cancel": "Cancel",
     "share": "Share",
     "shareCopied": "Share link copied",
     "requestFailed": "Request failed, please try again",
@@ -222,6 +223,8 @@
       "transportGroup": "Transport Group",
       "currentOrders": "Active Orders",
       "join": "Join",
+      "joinedCardTitle": "View group buy",
+      "activityCardTitle": "View activity groups",
       "modal": {
         "title": "New Group Order",
         "selectType": "Select type",

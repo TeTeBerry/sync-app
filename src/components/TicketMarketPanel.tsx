@@ -111,6 +111,7 @@ const TicketMarketPanel: React.FC<TicketMarketPanelProps> = ({
           price: values.unitPrice,
           eventDate: values.eventDate,
           contact: values.contact,
+          displayEventName: values.eventName.trim() || undefined,
           userId: getClientUserId(),
           userName: getClientUserName(),
         });

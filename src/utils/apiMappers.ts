@@ -5,6 +5,7 @@ export type PinDanCategory = "package" | "hotel" | "transport";
 
 export interface PinDanCardUi {
   id: string;
+  activityLegacyId?: number;
   category: PinDanCategory;
   title: string;
   desc: string;
@@ -159,6 +160,7 @@ export function mapPindanToCards(
 
     return {
       id: String(item.legacyId ?? item._id),
+      activityLegacyId: item.activityLegacyId,
       category,
       title: item.title,
       desc: item.subtitle ?? (activityLabel ? `${activityLabel} · 开放拼单` : "开放拼单"),
@@ -217,7 +219,11 @@ export function mapTicketsToListings(
     return {
       id: ticket._id,
       type,
-      event: activityNames.get(ticket.activityId ?? "") ?? ticket.activityId ?? "未知活动",
+      event:
+        slot.displayEventName ??
+        activityNames.get(ticket.activityId ?? "") ??
+        ticket.activityId ??
+        "未知活动",
       seat: `${ticket.skuCode ?? "GA"} · ${quantity}张`,
       price,
       originalPrice: type === "sell" ? Math.round(price * 1.35) : 0,

@@ -9,6 +9,7 @@
     "all": "全部",
     "more": "更多",
     "view": "查看",
+    "cancel": "取消",
     "share": "分享",
     "shareCopied": "分享链接已复制",
     "requestFailed": "请求失败，请稍后重试",
@@ -222,6 +223,8 @@
       "transportGroup": "交通拼",
       "currentOrders": "当前拼单",
       "join": "我要加入",
+      "joinedCardTitle": "查看拼单",
+      "activityCardTitle": "查看活动拼单",
       "modal": {
         "title": "发起新拼单",
         "selectType": "选择拼单类型",

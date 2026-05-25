@@ -23,6 +23,7 @@ import {
   SendIcon,
   SparklesIcon,
   TicketIcon,
+  PackageIcon,
   UsersIcon,
   ZapIcon,
 } from "lucide-react";
@@ -30,8 +31,18 @@ import { useTranslation } from "react-i18next";
 import Taro from "@tarojs/taro";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAiChatStream } from "../hooks/useAiChatStream";
-import { invalidateTicketQueries, useEventList, usePinDanList } from "../hooks/useSyncApi";
+import { invalidatePindanQueries, invalidateTicketQueries, useEventList, usePinDanList } from "../hooks/useSyncApi";
 import type { PinDanCategory } from "../utils/apiMappers";
+import { joinPindan } from "../api/syncApi";
+import { isApiEnabled } from "../constants/api";
+import { getClientUserId } from "../utils/session";
+import { getPindanJoinUiState, isPindanJoinDisabled } from "../utils/pindanJoinState";
+import type { PinDanCardUi } from "../utils/apiMappers";
+import {
+  useAimatchPageStore,
+  usePindanSessionStore,
+  useScrollHighlight,
+} from "../stores";
 
 type MainTab = "ai" | "pindan" | "ticket" | "events";
 
@@ -49,9 +60,17 @@ const tabAccentCls: Record<MainTab, string> = {
 function AiChat({
   onTicketCreated,
   onTicketCardClick,
+  onPindanCardClick,
+  onPindanJoined,
 }: {
   onTicketCreated?: (ticketId: string) => void;
   onTicketCardClick?: (ticketId: string) => void;
+  onPindanCardClick?: (
+    legacyId: number,
+    category: PinDanCategory,
+    activityLegacyId?: number,
+  ) => void;
+  onPindanJoined?: () => void;
 }) {
   const { t } = useTranslation();
   const [input, setInput] = useState(``);
@@ -79,6 +98,7 @@ function AiChat({
     mockReply,
     streamErrorText: t(`aimatch.ai.streamError`),
     onTicketCreated: handleTicketCreated,
+    onPindanJoined,
   });
 
   useEffect(() => {
@@ -142,6 +162,42 @@ function AiChat({
                   <span>{msg.text}</span>
                 )}
               </div>
+              {msg.pindanCard ? (
+                <button
+                  type="button"
+                  className={cn(
+                    `s-aim-ai__pindan-card`,
+                    `s-aim-ai__pindan-card--${msg.pindanCard.category}`,
+                  )}
+                  onClick={() =>
+                    onPindanCardClick?.(
+                      msg.pindanCard!.legacyId,
+                      msg.pindanCard!.category,
+                      msg.pindanCard!.activityLegacyId,
+                    )
+                  }
+                >
+                  <div className="s-aim-ai__pindan-card__icon">
+                    <PackageIcon size={16} />
+                  </div>
+                  <div className="s-aim-ai__pindan-card__body">
+                    <span className="s-aim-ai__pindan-card__label">
+                      {msg.pindanCard.activityLegacyId
+                        ? t(`aimatch.pindan.activityCardTitle`)
+                        : t(`aimatch.pindan.joinedCardTitle`)}
+                    </span>
+                    <span className="s-aim-ai__pindan-card__title">{msg.pindanCard.title}</span>
+                    {msg.pindanCard.subtitle ? (
+                      <span className="s-aim-ai__pindan-card__subtitle">{msg.pindanCard.subtitle}</span>
+                    ) : null}
+                    <span className="s-aim-ai__pindan-card__meta">
+                      {[msg.pindanCard.date, msg.pindanCard.location].filter(Boolean).join(` · `)}
+                    </span>
+                    <span className="s-aim-ai__pindan-card__price">¥{msg.pindanCard.price}</span>
+                  </div>
+                  <ChevronRightIcon size={16} className="s-aim-ai__pindan-card__chev" />
+                </button>
+              ) : null}
               {msg.ticketCard ? (
                 <button
                   type="button"
@@ -207,11 +263,25 @@ function AiChat({
 const AIMatchPage: FC = () => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState<MainTab>(`ai`);
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [createCategory, setCreateCategory] = useState<PinDanCategory>(`hotel`);
-  const [goingIds, setGoingIds] = useState<string[]>([]);
-  const [highlightTicketId, setHighlightTicketId] = useState<string | null>(null);
+  const activeTab = useAimatchPageStore((state) => state.activeTab);
+  const createCategory = useAimatchPageStore((state) => state.createCategory);
+  const filterActivityLegacyId = useAimatchPageStore((state) => state.filterActivityLegacyId);
+  const highlightTicketId = useAimatchPageStore((state) => state.highlightTicketId);
+  const highlightPindanId = useAimatchPageStore((state) => state.highlightPindanId);
+  const showCreateModal = useAimatchPageStore((state) => state.showCreateModal);
+  const goingIds = useAimatchPageStore((state) => state.goingIds);
+  const setActiveTab = useAimatchPageStore((state) => state.setActiveTab);
+  const setCreateCategory = useAimatchPageStore((state) => state.setCreateCategory);
+  const focusPindanCard = useAimatchPageStore((state) => state.focusPindanCard);
+  const focusActivityPindan = useAimatchPageStore((state) => state.focusActivityPindan);
+  const focusTicket = useAimatchPageStore((state) => state.focusTicket);
+  const clearPindanHighlight = useAimatchPageStore((state) => state.clearPindanHighlight);
+  const clearActivityFilter = useAimatchPageStore((state) => state.clearActivityFilter);
+  const clearTicketHighlight = useAimatchPageStore((state) => state.clearTicketHighlight);
+  const openCreateModal = useAimatchPageStore((state) => state.openCreateModal);
+  const closeCreateModal = useAimatchPageStore((state) => state.closeCreateModal);
+  const toggleGoing = useAimatchPageStore((state) => state.toggleGoing);
+  const joinedPindanIds = usePindanSessionStore((state) => state.joinedIds);
 
   const { events: eventsList, isLoading: eventsLoading, isError: eventsError, refetch: refetchEvents } =
     useEventList({ enabled: activeTab === `events` });
@@ -222,10 +292,6 @@ const AIMatchPage: FC = () => {
     refetch: refetchPindan,
   } = usePinDanList(createCategory, { enabled: activeTab === `pindan` });
 
-  const toggleGoing = (id: string) => {
-    setGoingIds((prev) => (prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]));
-  };
-
   const handleTicketCreated = useCallback(
     (_ticketId: string) => {
       void invalidateTicketQueries(queryClient);
@@ -233,13 +299,84 @@ const AIMatchPage: FC = () => {
     [queryClient],
   );
 
+  const handlePindanCardClick = useCallback(
+    (legacyId: number, category: PinDanCategory, activityLegacyId?: number) => {
+      if (activityLegacyId != null) {
+        focusActivityPindan(
+          activityLegacyId,
+          category,
+          legacyId > 0 ? legacyId : undefined,
+        );
+      } else {
+        focusPindanCard(legacyId, category);
+      }
+      void invalidatePindanQueries(queryClient);
+    },
+    [focusActivityPindan, focusPindanCard, queryClient],
+  );
+
+  const handlePindanJoined = useCallback(() => {
+    void invalidatePindanQueries(queryClient);
+  }, [queryClient]);
+
+  const categoryPinDans = React.useMemo(
+    () =>
+      activePinDans.filter((item) => {
+        if (item.category !== createCategory) return false;
+        if (
+          filterActivityLegacyId != null &&
+          item.activityLegacyId !== filterActivityLegacyId
+        ) {
+          return false;
+        }
+        return true;
+      }),
+    [activePinDans, createCategory, filterActivityLegacyId],
+  );
+
+  const handleJoinPindan = useCallback(
+    async (item: PinDanCardUi) => {
+      const legacyId = Number(item.id);
+      if (!Number.isFinite(legacyId)) return;
+
+      const joinState = getPindanJoinUiState(item, joinedPindanIds, legacyId);
+      if (joinState !== `join`) return;
+
+      if (!isApiEnabled()) {
+        void Taro.showToast({ title: t(`pindan.joined`), icon: `success` });
+        return;
+      }
+
+      try {
+        await joinPindan(legacyId, getClientUserId());
+        void invalidatePindanQueries(queryClient);
+        void Taro.showToast({ title: t(`pindan.joined`), icon: `success` });
+      } catch {
+        void Taro.showToast({ title: t(`common.requestFailed`), icon: `none` });
+      }
+    },
+    [joinedPindanIds, queryClient, t],
+  );
+
+  useScrollHighlight({
+    highlightId: highlightPindanId,
+    elementId: (id) => `aim-pindan-item-${id}`,
+    enabled: activeTab === "pindan" && highlightPindanId != null,
+    ready: categoryPinDans.some((item) => item.id === highlightPindanId),
+    scrollDelayMs: 120,
+    clearDelayMs: 3200,
+    onClear: () => {
+      clearPindanHighlight();
+      clearActivityFilter();
+    },
+  });
+
   const handleTicketCardClick = useCallback(
     (ticketId: string) => {
-      setActiveTab(`ticket`);
-      setHighlightTicketId(ticketId);
+      focusTicket(ticketId);
       void invalidateTicketQueries(queryClient);
     },
-    [queryClient],
+    [focusTicket, queryClient],
   );
 
   const tabs: { key: MainTab; labelKey: string; Icon: ComponentType<{ size?: number | string }> }[] = [
@@ -278,12 +415,17 @@ const AIMatchPage: FC = () => {
 
       <div className="s-aim-body">
       <div className={activeTab === `ai` ? `s-aim-ai-panel` : `s-aim-panel--hidden`}>
-        <AiChat onTicketCreated={handleTicketCreated} onTicketCardClick={handleTicketCardClick} />
+        <AiChat
+          onTicketCreated={handleTicketCreated}
+          onTicketCardClick={handleTicketCardClick}
+          onPindanCardClick={handlePindanCardClick}
+          onPindanJoined={handlePindanJoined}
+        />
       </div>
 
       <div className={`s-aim-panel-block s-aim-pin s-aim-pin--${createCategory}${activeTab === `pindan` ? `` : ` s-aim-panel--hidden`}`}>
         <div className="s-aim-cta-banner">
-          <Button className="s-aim-cta-banner__btn" onClick={() => setShowCreateModal(true)}>
+          <Button className="s-aim-cta-banner__btn" onClick={openCreateModal}>
             <PlusIcon size={18} />
             {t("aimatch.pindan.createNew")}
           </Button>
@@ -303,20 +445,20 @@ const AIMatchPage: FC = () => {
 
         <div className="s-aim-stats-card">
           <div className="s-aim-stats-item">
-            <strong>{activePinDans.filter((p) => p.category === createCategory).length}</strong>
+            <strong>{categoryPinDans.length}</strong>
             <span>{t("common.inProgress")}</span>
           </div>
           <div className="s-aim-stats-sep" />
           <div className="s-aim-stats-item">
             <strong>
-              {activePinDans.filter((p) => p.category === createCategory).reduce((a, b) => a + b.joined, 0)}
+              {categoryPinDans.reduce((a, b) => a + b.joined, 0)}
             </strong>
             <span>{t("common.joined")}</span>
           </div>
           <div className="s-aim-stats-sep" />
           <div className="s-aim-stats-item">
             <strong>
-              {activePinDans.filter((p) => p.category === createCategory).reduce((a, b) => a + (b.total - b.joined), 0)}
+              {categoryPinDans.reduce((a, b) => a + (b.total - b.joined), 0)}
             </strong>
             <span>{t("common.spotsRemaining")}</span>
           </div>
@@ -338,13 +480,29 @@ const AIMatchPage: FC = () => {
         ) : null}
 
         <div className="s-aim-pin-card-wrap">
-          {!pindanLoading && activePinDans.length === 0 ? (
+          {!pindanLoading && categoryPinDans.length === 0 ? (
             <p className="s-aim-panel-hint">{t("common.empty")}</p>
           ) : (
-            activePinDans.map((item) => {
+            categoryPinDans.map((item) => {
               const pct = Math.round((item.joined / item.total) * 100);
+              const legacyId = Number(item.id);
+              const joinState = getPindanJoinUiState(item, joinedPindanIds, legacyId);
+              const joinLabel =
+                joinState === `joined`
+                  ? t(`pindan.joined`)
+                  : joinState === `full`
+                    ? t(`common.full`)
+                    : t(`aimatch.pindan.join`);
+
               return (
-                <div key={item.id} className={`s-aim-pin-card s-aim-pin-card--${item.category}`}>
+                <div
+                  key={item.id}
+                  id={`aim-pindan-item-${item.id}`}
+                  className={cn(
+                    `s-aim-pin-card s-aim-pin-card--${item.category}`,
+                    highlightPindanId === item.id && `s-aim-pin-card--focused`,
+                  )}
+                >
                   <div className="s-aim-pin-card__media">
                     <img src={item.image} alt={item.title} />
                     {item.urgent && (
@@ -394,7 +552,16 @@ const AIMatchPage: FC = () => {
                     </div>
 
                     <div className="s-aim-pin-card__actions">
-                      <Button className="s-aim-pin-card__cta">{t("aimatch.pindan.join")}</Button>
+                      <Button
+                        className={cn(
+                          `s-aim-pin-card__cta`,
+                          isPindanJoinDisabled(joinState) && `s-aim-pin-card__cta--inactive`,
+                        )}
+                        disabled={isPindanJoinDisabled(joinState)}
+                        onClick={() => void handleJoinPindan(item)}
+                      >
+                        {joinLabel}
+                      </Button>
                       <Button className="s-aim-pin-card__ghost">{t("common.share")}</Button>
                     </div>
                   </div>
@@ -409,7 +576,7 @@ const AIMatchPage: FC = () => {
         <TicketMarketPanel
           fetchEnabled={activeTab === `ticket`}
           highlightTicketId={highlightTicketId}
-          onHighlightDone={() => setHighlightTicketId(null)}
+          onHighlightDone={clearTicketHighlight}
         />
       </div>
 
@@ -503,7 +670,7 @@ const AIMatchPage: FC = () => {
 
       <CreatePinDanModal
         open={showCreateModal}
-        onClose={() => setShowCreateModal(false)}
+        onClose={closeCreateModal}
         defaultCategory={createCategory}
       />
 

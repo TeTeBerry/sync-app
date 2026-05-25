@@ -41,3 +41,9 @@ export function persistSessionId(sessionId: string): void {
   if (typeof sessionStorage === "undefined" || !sessionId.trim()) return;
   sessionStorage.setItem(SESSION_KEY, sessionId.trim());
 }
+
+/** 清除本地 AI session，配合后端 db:reset 重新开始测试 */
+export function clearClientSessionId(): void {
+  if (typeof sessionStorage === "undefined") return;
+  sessionStorage.removeItem(SESSION_KEY);
+}

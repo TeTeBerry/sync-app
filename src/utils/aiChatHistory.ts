@@ -1,5 +1,6 @@
 import type { AiChatMessage, ChatUiMessage } from "../types/aiChat";
 
+/** 将 MongoDB 完整历史映射为 UI 消息（不做截断） */
 export function mapHistoryToUiMessages(
   history: AiChatMessage[],
   sessionId: string,
@@ -13,7 +14,7 @@ export function mapHistoryToUiMessages(
     }));
 }
 
-/** 构建发给后端的对话上下文（排除 UI 欢迎语） */
+/** 构建发给后端的完整对话（排除 UI 欢迎语；后端自行截断 LLM 上下文） */
 export function buildApiChatHistory(
   uiMessages: ChatUiMessage[],
   welcomeText: string,

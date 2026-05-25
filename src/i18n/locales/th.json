@@ -9,6 +9,7 @@
     "all": "ทั้งหมด",
     "more": "เพิ่มเติม",
     "view": "ดู",
+    "cancel": "ยกเลิก",
     "share": "แชร์",
     "shareCopied": "คัดลอกลิงก์แชร์แล้ว",
     "requestFailed": "คำขอล้มเหลว โปรดลองอีกครั้ง",
@@ -222,6 +223,8 @@
       "transportGroup": "กลุ่มการเดินทาง",
       "currentOrders": "กลุ่มปัจจุบัน",
       "join": "เข้าร่วม",
+      "joinedCardTitle": "ดูกลุ่มซื้อร่วม",
+      "activityCardTitle": "ดูกลุ่มซื้อร่วมของกิจกรรม",
       "modal": {
         "title": "สร้างกลุ่มซื้อร่วม",
         "selectType": "เลือกประเภท",

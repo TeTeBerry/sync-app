@@ -32,6 +32,12 @@ import {
 import ProfilePinDanList from "./components/ProfilePinDanList";
 import { loadMyPindanItems, removeJoinedPindanItem } from "../../utils/myPindanStorage";
 import { getClientUserId, persistUserName } from "../../utils/session";
+import {
+  useNavigationStore,
+  useProfilePageStore,
+  usePindanSessionStore,
+  useScrollHighlight,
+} from "../../stores";
 
 type ProfileTab = "participated" | "pindan";
 
@@ -63,17 +69,27 @@ const Profile: React.FC = () => {
   const { t } = useTranslation();
   const profilePindanQuery = useProfilePindanQuery();
   const settingsRef = useRef<HTMLDivElement>(null);
-  const [activeTab, setActiveTab] = useState<ProfileTab>("participated");
-  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-  const [privacyLevel, setPrivacyLevel] = useState("public");
+  const activeTab = useProfilePageStore((state) => state.activeTab);
+  const highlightPindanId = useProfilePageStore((state) => state.highlightPindanId);
+  const notificationsEnabled = useProfilePageStore((state) => state.notificationsEnabled);
+  const privacyLevel = useProfilePageStore((state) => state.privacyLevel);
+  const setActiveTab = useProfilePageStore((state) => state.setActiveTab);
+  const applyRoute = useProfilePageStore((state) => state.applyRoute);
+  const clearHighlight = useProfilePageStore((state) => state.clearHighlight);
+  const setNotificationsEnabled = useProfilePageStore((state) => state.setNotificationsEnabled);
+  const setPrivacyLevel = useProfilePageStore((state) => state.setPrivacyLevel);
+  const removeJoinedId = usePindanSessionStore((state) => state.removeJoinedId);
+  const consumeProfileIntent = useNavigationStore((state) => state.consumeProfileIntent);
   const [myPindanItems, setMyPindanItems] = useState(() => loadMyPindanItems(myPinDanEvents));
-  const [highlightPindanId, setHighlightPindanId] = useState<number | null>(null);
 
   const applyRouteParams = useCallback(() => {
-    const { tab, highlightId } = parseProfileRouteParams();
-    if (tab === `pindan`) setActiveTab(`pindan`);
-    if (highlightId) setHighlightPindanId(highlightId);
-  }, []);
+    const urlParams = parseProfileRouteParams();
+    const navIntent = consumeProfileIntent();
+    applyRoute({
+      tab: navIntent?.tab ?? urlParams.tab,
+      highlightId: navIntent?.highlightId ?? urlParams.highlightId,
+    });
+  }, [applyRoute, consumeProfileIntent]);
 
   useDidShow(() => {
     setNotificationsEnabled(readStorage(STORAGE_KEYS.notifications, true));
@@ -95,23 +111,14 @@ const Profile: React.FC = () => {
     setMyPindanItems(profilePindanQuery.data);
   }, [profilePindanQuery.data]);
 
-  useEffect(() => {
-    if (highlightPindanId == null || activeTab !== `pindan`) return;
-
-    const scrollTimer = window.setTimeout(() => {
-      document.getElementById(`profile-pindan-${highlightPindanId}`)?.scrollIntoView({
-        behavior: `smooth`,
-        block: `center`,
-      });
-    }, 200);
-
-    const clearTimer = window.setTimeout(() => setHighlightPindanId(null), 2800);
-
-    return () => {
-      window.clearTimeout(scrollTimer);
-      window.clearTimeout(clearTimer);
-    };
-  }, [highlightPindanId, activeTab, myPindanItems]);
+  useScrollHighlight({
+    highlightId: highlightPindanId,
+    elementId: (id) => `profile-pindan-${id}`,
+    enabled: activeTab === "pindan",
+    ready: highlightPindanId == null || myPindanItems.some((item) => item.id === highlightPindanId),
+    scrollDelayMs: 200,
+    onClear: clearHighlight,
+  });
 
   const { level } = profileUser;
   const progressPercent = useMemo(
@@ -146,6 +153,7 @@ const Profile: React.FC = () => {
         try {
           await leavePindan(id, getClientUserId());
           setMyPindanItems((prev) => prev.filter((item) => item.id !== id));
+          removeJoinedId(id);
         } catch {
           void Taro.showToast({ title: t("common.requestFailed"), icon: "none" });
         }
@@ -154,8 +162,9 @@ const Profile: React.FC = () => {
 
       removeJoinedPindanItem(id);
       setMyPindanItems((prev) => prev.filter((item) => item.id !== id));
+      removeJoinedId(id);
     },
-    [t],
+    [removeJoinedId, t],
   );
 
   const openSettings = useCallback(

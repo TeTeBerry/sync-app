@@ -1,6 +1,6 @@
 import "./pindan.scss";
 import Taro, { useDidShow } from "@tarojs/taro";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useMemo } from "react";
 import {
   BuildingIcon,
   CalendarIcon,
@@ -20,7 +20,7 @@ import JoinSuccessToast from "../../components/JoinSuccessToast";
 import PageNavigation from "../../components/PageNavigation";
 import { Button } from "../../components/ui";
 import { getActivityById } from "../../data/activities";
-import { usePindanPageItems, useProfilePindanQuery } from "../../hooks/useSyncApi";
+import { usePindanPageItems } from "../../hooks/useSyncApi";
 import { joinPindan } from "../../api/syncApi";
 import { isApiEnabled } from "../../constants/api";
 import type { ProfilePinDanItem } from "../profile/mockData";
@@ -28,6 +28,13 @@ import { formatJoinedAt, saveJoinedPindanItem } from "../../utils/myPindanStorag
 import { goProfilePindan } from "../../utils/route";
 import { sharePinDanItem } from "../../utils/share";
 import { getClientUserId } from "../../utils/session";
+import { getPindanJoinUiState, isPindanJoinDisabled } from "../../utils/pindanJoinState";
+import {
+  useNavigationStore,
+  usePindanPageStore,
+  usePindanSessionStore,
+  useScrollHighlight,
+} from "../../stores";
 
 type TabType = `package` | `hotel` | `transport`;
 
@@ -311,60 +318,75 @@ function parseRouteParams() {
 const PinDan: React.FC = () => {
   const { t } = useTranslation();
   const { items: apiItems, usingMock } = usePindanPageItems();
-  const profilePindanQuery = useProfilePindanQuery();
-  const [activeTab, setActiveTab] = useState<TabType>(`package`);
-  const [routeActivityId, setRouteActivityId] = useState<number | null>(null);
-  const [highlightItemId, setHighlightItemId] = useState<number | null>(null);
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [joinedIds, setJoinedIds] = useState<Set<number>>(() => new Set());
-  const [joinToast, setJoinToast] = useState<{ visible: boolean; title: string; profileId: number | null }>({
-    visible: false,
-    title: ``,
-    profileId: null,
-  });
+  const activeTab = usePindanPageStore((state) => state.activeTab);
+  const routeActivityId = usePindanPageStore((state) => state.routeActivityId);
+  const highlightItemId = usePindanPageStore((state) => state.highlightItemId);
+  const showCreateModal = usePindanPageStore((state) => state.showCreateModal);
+  const joinToast = usePindanPageStore((state) => state.joinToast);
+  const setActiveTab = usePindanPageStore((state) => state.setActiveTab);
+  const applyRoute = usePindanPageStore((state) => state.applyRoute);
+  const clearHighlight = usePindanPageStore((state) => state.clearHighlight);
+  const openCreateModal = usePindanPageStore((state) => state.openCreateModal);
+  const closeCreateModal = usePindanPageStore((state) => state.closeCreateModal);
+  const showJoinSuccess = usePindanPageStore((state) => state.showJoinSuccess);
+  const dismissJoinToast = usePindanPageStore((state) => state.dismissJoinToast);
+  const resetJoinToastProfileId = usePindanPageStore((state) => state.resetJoinToastProfileId);
+  const joinedIds = usePindanSessionStore((state) => state.joinedIds);
+  const addJoinedId = usePindanSessionStore((state) => state.addJoinedId);
+  const consumePindanIntent = useNavigationStore((state) => state.consumePindanIntent);
 
   const applyRouteParams = useCallback(() => {
-    const { activityId, highlightId, type } = parseRouteParams();
-    setRouteActivityId(activityId);
-    if (type) {
-      setActiveTab(type);
-    } else if (activityId) {
-      setActiveTab(`package`);
+    const urlParams = parseRouteParams();
+    const navIntent = consumePindanIntent();
+    const activityId = navIntent?.activityId ?? urlParams.activityId;
+    const highlightId = navIntent?.highlightId ?? urlParams.highlightId;
+    const type = navIntent?.type ?? urlParams.type;
+
+    let resolvedType = type;
+    if (!resolvedType && highlightId) {
+      const matched = (usingMock ? mockData : apiItems).find(
+        (item) => item.id === highlightId,
+      );
+      if (matched) {
+        resolvedType = matched.type;
+      } else if (activityId) {
+        resolvedType = `package`;
+      }
+    } else if (!resolvedType && activityId) {
+      resolvedType = `package`;
     }
-    setHighlightItemId(highlightId);
-  }, []);
+
+    applyRoute({
+      activityId,
+      highlightId,
+      type: resolvedType,
+    });
+  }, [apiItems, applyRoute, consumePindanIntent, usingMock]);
 
   useDidShow(applyRouteParams);
 
-  useEffect(() => {
-    if (!isApiEnabled() || !profilePindanQuery.data) return;
-    setJoinedIds(new Set(profilePindanQuery.data.map((item) => item.id)));
-  }, [profilePindanQuery.data]);
-
-  useEffect(() => {
-    if (highlightItemId == null) return;
-
-    const scrollTimer = window.setTimeout(() => {
-      document.getElementById(`pindan-item-${highlightItemId}`)?.scrollIntoView({
-        behavior: `smooth`,
-        block: `center`,
-      });
-    }, 180);
-
-    const clearTimer = window.setTimeout(() => setHighlightItemId(null), 2800);
-
-    return () => {
-      window.clearTimeout(scrollTimer);
-      window.clearTimeout(clearTimer);
-    };
-  }, [highlightItemId, activeTab, routeActivityId]);
-
   const sourceItems = usingMock ? mockData : apiItems;
 
-  const filtered = sourceItems.filter((item) => {
-    if (item.type !== activeTab) return false;
-    if (routeActivityId == null) return true;
-    return item.activityId === routeActivityId;
+  const filtered = useMemo(
+    () =>
+      sourceItems.filter((item) => {
+        if (item.type !== activeTab) return false;
+        if (routeActivityId == null) return true;
+        if (highlightItemId != null && item.id === highlightItemId) return true;
+        return item.activityId === routeActivityId;
+      }),
+    [activeTab, highlightItemId, routeActivityId, sourceItems],
+  );
+
+  const highlightReady =
+    highlightItemId != null &&
+    filtered.some((item) => item.id === highlightItemId);
+
+  useScrollHighlight({
+    highlightId: highlightItemId,
+    elementId: (id) => `pindan-item-${id}`,
+    ready: highlightReady,
+    onClear: clearHighlight,
   });
 
   const progressPercent = (joined: number, total: number) => Math.round((joined / total) * 100);
@@ -387,11 +409,14 @@ const PinDan: React.FC = () => {
 
   const handleJoin = useCallback(
     async (item: PinDanItem) => {
+      const joinState = getPindanJoinUiState(item, joinedIds, item.id);
+      if (joinState !== `join`) return;
+
       if (isApiEnabled()) {
         try {
           await joinPindan(item.id, getClientUserId());
-          setJoinedIds((prev) => new Set(prev).add(item.id));
-          setJoinToast({ visible: true, title: item.title, profileId: item.id });
+          addJoinedId(item.id);
+          showJoinSuccess(item.title, item.id);
         } catch {
           void Taro.showToast({ title: t("common.requestFailed"), icon: "none" });
         }
@@ -412,21 +437,17 @@ const PinDan: React.FC = () => {
       };
 
       saveJoinedPindanItem(profileItem);
-      setJoinedIds((prev) => new Set(prev).add(item.id));
-      setJoinToast({ visible: true, title: item.title, profileId: item.id });
+      addJoinedId(item.id);
+      showJoinSuccess(item.title, item.id);
     },
-    [t],
+    [addJoinedId, showJoinSuccess, t],
   );
-
-  const dismissJoinToast = useCallback(() => {
-    setJoinToast((prev) => ({ ...prev, visible: false }));
-  }, []);
 
   const handleViewJoinedPindan = useCallback(() => {
     const profileId = joinToast.profileId;
-    setJoinToast({ visible: false, title: ``, profileId: null });
+    resetJoinToastProfileId();
     if (profileId != null) goProfilePindan(profileId);
-  }, [joinToast.profileId]);
+  }, [joinToast.profileId, resetJoinToastProfileId]);
 
   const heroTitleKey =
     activeTab === `package` ? `pindan.hero.package` : activeTab === `hotel` ? `pindan.hero.hotel` : `pindan.hero.transport`;
@@ -445,7 +466,7 @@ const PinDan: React.FC = () => {
             block="s-page-nav"
             element="icon-btn"
             modifiers={[`accent-tint`]}
-            onClick={() => setShowCreateModal(true)}
+            onClick={() => openCreateModal()}
           >
             <PlusIcon size={18} />
           </Button>
@@ -497,6 +518,15 @@ const PinDan: React.FC = () => {
           const pct = progressPercent(item.joined, item.total);
           const spotsLeft = item.total - item.joined;
           const isPackage = item.type === `package`;
+          const joinState = getPindanJoinUiState(item, joinedIds, item.id);
+          const joinLabel =
+            joinState === `joined`
+              ? t(`pindan.joined`)
+              : joinState === `full`
+                ? t(`common.full`)
+                : isPackage
+                  ? t(`pindan.joinPackage`)
+                  : t(`pindan.join`);
 
           return (
             <div
@@ -582,14 +612,10 @@ const PinDan: React.FC = () => {
                 <div className="s-pindan__actions">
                   <Button
                     className="s-pindan__join-btn"
-                    disabled={joinedIds.has(item.id)}
+                    disabled={isPindanJoinDisabled(joinState)}
                     onClick={() => handleJoin(item)}
                   >
-                    {joinedIds.has(item.id)
-                      ? t("pindan.joined")
-                      : isPackage
-                        ? t("pindan.joinPackage")
-                        : t("pindan.join")}
+                    {joinLabel}
                   </Button>
                   <Button className="s-pindan__share-btn" onClick={(e) => handleShare(item, e)}>
                     {t("common.share")}
@@ -603,7 +629,7 @@ const PinDan: React.FC = () => {
 
       <CreatePinDanModal
         open={showCreateModal}
-        onClose={() => setShowCreateModal(false)}
+        onClose={closeCreateModal}
         categoryOptions={[activeTab as PinDanCreateCategory]}
         defaultCategory={activeTab as PinDanCreateCategory}
         initialEventName={activityName ?? ``}

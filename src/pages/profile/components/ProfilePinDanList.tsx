@@ -1,5 +1,5 @@
 import Taro from "@tarojs/taro";
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import {
   ArrowRightIcon,
   BuildingIcon,
@@ -11,6 +11,7 @@ import {
   PackageIcon,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import ConfirmDialog from "../../../components/ConfirmDialog";
 import { goPindan } from "../../../utils/route";
 import type { ProfilePinDanCategory, ProfilePinDanItem } from "../mockData";
 
@@ -28,35 +29,53 @@ const categoryIcons: Record<ProfilePinDanCategory, typeof PackageIcon> = {
 
 const ProfilePinDanList: React.FC<ProfilePinDanListProps> = ({ items, highlightId = null, onExit }) => {
   const { t } = useTranslation();
+  const [pendingExit, setPendingExit] = useState<ProfilePinDanItem | null>(null);
 
   const handleMore = useCallback(() => {
     goPindan();
   }, []);
 
   const handleViewDetail = useCallback((item: ProfilePinDanItem) => {
-    goPindan(item.activityId);
+    goPindan({
+      type: item.category,
+      highlightId: item.id,
+      ...(item.activityId ? { activityId: item.activityId } : {}),
+    });
   }, []);
 
-  const handleExit = useCallback(
-    (item: ProfilePinDanItem) => {
-      void Taro.showModal({
-        title: t("profile.myPindan.exitConfirmTitle"),
-        content: t("profile.myPindan.exitConfirmMessage", { title: item.title }),
-        confirmText: t("profile.myPindan.exit"),
-        confirmColor: "#ff0066",
-        success: (res) => {
-          if (res.confirm) {
-            onExit(item.id);
-            void Taro.showToast({ title: t("profile.myPindan.exitSuccess"), icon: "success" });
-          }
-        },
-      });
-    },
-    [onExit, t],
-  );
+  const handleExitClick = useCallback((item: ProfilePinDanItem) => {
+    setPendingExit(item);
+  }, []);
+
+  const handleExitCancel = useCallback(() => {
+    setPendingExit(null);
+  }, []);
+
+  const handleExitConfirm = useCallback(() => {
+    if (!pendingExit) return;
+
+    onExit(pendingExit.id);
+    setPendingExit(null);
+    void Taro.showToast({ title: t("profile.myPindan.exitSuccess"), icon: "success" });
+  }, [onExit, pendingExit, t]);
 
   return (
-    <div className="s-profile-pindan">
+    <>
+      <ConfirmDialog
+        open={pendingExit !== null}
+        title={t("profile.myPindan.exitConfirmTitle")}
+        message={
+          pendingExit
+            ? t("profile.myPindan.exitConfirmMessage", { title: pendingExit.title })
+            : ""
+        }
+        confirmText={t("profile.myPindan.exit")}
+        cancelText={t("common.cancel")}
+        onConfirm={handleExitConfirm}
+        onCancel={handleExitCancel}
+      />
+
+      <div className="s-profile-pindan">
       <div className="s-profile-pindan__head">
         <div className="s-profile-pindan__head-left">
           <span className="s-profile-pindan__head-icon" aria-hidden>
@@ -129,7 +148,7 @@ const ProfilePinDanList: React.FC<ProfilePinDanListProps> = ({ items, highlightI
                   </span>
 
                   <div className="s-profile-pindan__actions">
-                    <button type="button" className="s-profile-pindan__btn s-profile-pindan__btn--ghost" onClick={() => handleExit(item)}>
+                    <button type="button" className="s-profile-pindan__btn s-profile-pindan__btn--ghost" onClick={() => handleExitClick(item)}>
                       {t("profile.myPindan.exit")}
                     </button>
                     <button type="button" className="s-profile-pindan__btn s-profile-pindan__btn--primary" onClick={() => handleViewDetail(item)}>
@@ -143,7 +162,8 @@ const ProfilePinDanList: React.FC<ProfilePinDanListProps> = ({ items, highlightI
           })
         )}
       </div>
-    </div>
+      </div>
+    </>
   );
 };
 

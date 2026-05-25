@@ -14,7 +14,6 @@ import {
   eventSignupItems,
   homeHeatStats,
   hotPinItems,
-  ticketListings as homeMockTicketListings,
   type HotPinItem,
 } from "../pages/index/mockData";
 import type { BackendActivity } from "../types/backend";
@@ -99,6 +98,16 @@ export function invalidateTicketQueries(queryClient: QueryClient) {
     queryClient.invalidateQueries({ queryKey: ["profile", "tickets"] }),
   ]).then(() =>
     queryClient.refetchQueries({ queryKey: ["tickets"], type: "all" }),
+  );
+}
+
+export function invalidatePindanQueries(queryClient: QueryClient) {
+  return Promise.all([
+    queryClient.invalidateQueries({ queryKey: ["home"] }),
+    queryClient.invalidateQueries({ queryKey: ["pindan"] }),
+    queryClient.invalidateQueries({ queryKey: ["profile", "pindan"] }),
+  ]).then(() =>
+    queryClient.refetchQueries({ queryKey: ["pindan"], type: "all" }),
   );
 }
 
@@ -258,7 +267,6 @@ export function useHomeSummary() {
     heat: enabled ? query.data?.heat ?? homeHeatStats : homeHeatStats,
     signupEvents: enabled ? query.data?.signupEvents ?? [] : eventSignupItems,
     hotPins,
-    ticketListings: enabled ? query.data?.ticketListings ?? [] : homeMockTicketListings,
     isLoading: query.isLoading,
     isError: query.isError,
     refetch: query.refetch,
