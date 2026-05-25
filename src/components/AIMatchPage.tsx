@@ -31,7 +31,7 @@ import {
   ZapIcon,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import Taro from "@tarojs/taro";
+import Taro, { useDidShow } from "@tarojs/taro";
 import { useQueryClient } from "@tanstack/react-query";
 import type { ChatUiMessage, PindanJoinCard } from "../types/aiChat";
 import { useAiChatStream } from "../hooks/useAiChatStream";
@@ -43,9 +43,11 @@ import { getClientUserId } from "../utils/session";
 import { goPindan } from "../utils/route";
 import { ChatImageTooLargeError, pickAndCompressChatImage } from "../utils/chatImage";
 import { getPindanJoinUiState, isPindanJoinDisabled } from "../utils/pindanJoinState";
+import { isBudgetModePindan, resolvePindanBudgetRangeLabel } from "../utils/pindanBudget";
 import type { PinDanCardUi } from "../utils/apiMappers";
 import {
   useAimatchPageStore,
+  useNavigationStore,
   usePindanSessionStore,
   useScrollHighlight,
 } from "../stores";
@@ -64,11 +66,15 @@ const tabAccentCls: Record<MainTab, string> = {
 };
 
 function AiChat({
+  initialMessage,
+  onInitialMessageSent,
   onTicketCreated,
   onTicketCardClick,
   onPindanCardClick,
   onPindanJoined,
 }: {
+  initialMessage?: string | null;
+  onInitialMessageSent?: () => void;
   onTicketCreated?: (ticketId: string) => void;
   onTicketCardClick?: (ticketId: string) => void;
   onPindanCardClick?: (card: PindanJoinCard) => void;
@@ -79,6 +85,7 @@ function AiChat({
   const [pendingImage, setPendingImage] = useState<string | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const initialMessageSentRef = useRef<string | null>(null);
 
   const mockReply = useCallback(
     (query: string) =>
@@ -108,6 +115,21 @@ function AiChat({
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: `smooth` });
   }, [messages]);
+
+  useEffect(() => {
+    if (!initialMessage) {
+      initialMessageSentRef.current = null;
+      return;
+    }
+
+    const trimmed = initialMessage.trim();
+    if (!trimmed || isLoadingHistory || isStreaming) return;
+    if (initialMessageSentRef.current === trimmed) return;
+
+    initialMessageSentRef.current = trimmed;
+    void send({ text: trimmed });
+    onInitialMessageSent?.();
+  }, [initialMessage, isLoadingHistory, isStreaming, onInitialMessageSent, send]);
 
   const submit = useCallback(
     (text: string, image?: string | null) => {
@@ -240,17 +262,32 @@ function AiChat({
                     {msg.pindanCard.subtitle ? (
                       <span className="s-aim-ai__pindan-card__subtitle">{msg.pindanCard.subtitle}</span>
                     ) : null}
-                    {msg.pindanCard.remark ? (
-                      <span className="s-aim-ai__pindan-card__remark">{msg.pindanCard.remark}</span>
+                    {msg.pindanCard.remark?.trim() ? (
+                      <span className="s-aim-ai__pindan-card__remark">{msg.pindanCard.remark.trim()}</span>
                     ) : null}
                     <span className="s-aim-ai__pindan-card__meta">
                       {[msg.pindanCard.date, msg.pindanCard.location].filter(Boolean).join(` · `)}
                     </span>
-                    <span className="s-aim-ai__pindan-card__price">
-                      {t(`aimatch.pindan.modal.perPersonPreview`, {
-                        amount: msg.pindanCard.pricePerPerson ?? msg.pindanCard.price,
-                      })}
-                    </span>
+                    {(() => {
+                      const range = resolvePindanBudgetRangeLabel(msg.pindanCard);
+                      if (range) {
+                        return (
+                          <span className="s-aim-ai__pindan-card__price s-aim-ai__pindan-card__price--budget">
+                            <span className="s-aim-ai__pindan-card__price-label">
+                              {t(`aimatch.pindan.budgetLabel`)}
+                            </span>
+                            <span className="s-aim-ai__pindan-card__price-amount">{range}</span>
+                          </span>
+                        );
+                      }
+                      return (
+                        <span className="s-aim-ai__pindan-card__price">
+                          {t(`aimatch.pindan.modal.perPersonPreview`, {
+                            amount: msg.pindanCard.pricePerPerson ?? msg.pindanCard.price,
+                          })}
+                        </span>
+                      );
+                    })()}
                     {msg.pindanCard.isOwner ? (
                       <span className="s-aim-ai__pindan-card__edit-hint">
                         {t(`aimatch.pindan.tapToEdit`)}
@@ -365,6 +402,7 @@ function AiChat({
 const AIMatchPage: FC = () => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const [pendingInitialMessage, setPendingInitialMessage] = useState<string | null>(null);
   const activeTab = useAimatchPageStore((state) => state.activeTab);
   const createCategory = useAimatchPageStore((state) => state.createCategory);
   const highlightTicketId = useAimatchPageStore((state) => state.highlightTicketId);
@@ -380,6 +418,22 @@ const AIMatchPage: FC = () => {
   const closeCreateModal = useAimatchPageStore((state) => state.closeCreateModal);
   const toggleGoing = useAimatchPageStore((state) => state.toggleGoing);
   const joinedPindanIds = usePindanSessionStore((state) => state.joinedIds);
+  const consumeAimatchIntent = useNavigationStore((state) => state.consumeAimatchIntent);
+
+  const applyAimatchIntent = useCallback(() => {
+    const intent = consumeAimatchIntent();
+    if (!intent) return;
+
+    if (intent.tab) setActiveTab(intent.tab);
+    if (intent.createCategory) setCreateCategory(intent.createCategory);
+    if (intent.highlightTicketId) focusTicket(intent.highlightTicketId);
+    if (intent.initialMessage?.trim()) {
+      setActiveTab(`ai`);
+      setPendingInitialMessage(intent.initialMessage.trim());
+    }
+  }, [consumeAimatchIntent, focusTicket, setActiveTab, setCreateCategory]);
+
+  useDidShow(applyAimatchIntent);
 
   const { events: eventsList, isLoading: eventsLoading, isError: eventsError, refetch: refetchEvents } =
     useEventList({ enabled: activeTab === `events` });
@@ -499,258 +553,275 @@ const AIMatchPage: FC = () => {
       </header>
 
       <div className="s-aim-body">
-      <div className={activeTab === `ai` ? `s-aim-ai-panel` : `s-aim-panel--hidden`}>
-        <AiChat
-          onTicketCreated={handleTicketCreated}
-          onTicketCardClick={handleTicketCardClick}
-          onPindanCardClick={handlePindanCardClick}
-          onPindanJoined={handlePindanJoined}
-        />
-      </div>
-
-      <div className={`s-aim-panel-block s-aim-pin s-aim-pin--${createCategory}${activeTab === `pindan` ? `` : ` s-aim-panel--hidden`}`}>
-        <div className="s-aim-cta-banner">
-          <Button className="s-aim-cta-banner__btn" onClick={openCreateModal}>
-            <PlusIcon size={18} />
-            {t("aimatch.pindan.createNew")}
-          </Button>
+        <div className={activeTab === `ai` ? `s-aim-ai-panel` : `s-aim-panel--hidden`}>
+          <AiChat
+            initialMessage={pendingInitialMessage}
+            onInitialMessageSent={() => setPendingInitialMessage(null)}
+            onTicketCreated={handleTicketCreated}
+            onTicketCardClick={handleTicketCardClick}
+            onPindanCardClick={handlePindanCardClick}
+            onPindanJoined={handlePindanJoined}
+          />
         </div>
 
-        <div className="s-aim-pin-cat-tabs">
-          {pinDanCategoryKeys.map((key) => (
-            <Button
-              key={key}
-              className={cn(`s-aim-pin-cat-tabs__btn`, createCategory === key && `s-aim-pin-cat-tabs__btn--active`)}
-              onClick={() => setCreateCategory(key)}
-            >
-              {t(pinDanTabLabelKey[key])}
+        <div className={`s-aim-panel-block s-aim-pin s-aim-pin--${createCategory}${activeTab === `pindan` ? `` : ` s-aim-panel--hidden`}`}>
+          <div className="s-aim-cta-banner">
+            <Button className="s-aim-cta-banner__btn" onClick={openCreateModal}>
+              <PlusIcon size={18} />
+              {t("aimatch.pindan.createNew")}
             </Button>
-          ))}
-        </div>
-
-        <div className="s-aim-stats-card">
-          <div className="s-aim-stats-item">
-            <strong>{categoryPinDans.length}</strong>
-            <span>{t("common.inProgress")}</span>
           </div>
-          <div className="s-aim-stats-sep" />
-          <div className="s-aim-stats-item">
-            <strong>
-              {categoryPinDans.reduce((a, b) => a + b.joined, 0)}
-            </strong>
-            <span>{t("common.joined")}</span>
+
+          <div className="s-aim-pin-cat-tabs">
+            {pinDanCategoryKeys.map((key) => (
+              <Button
+                key={key}
+                className={cn(`s-aim-pin-cat-tabs__btn`, createCategory === key && `s-aim-pin-cat-tabs__btn--active`)}
+                onClick={() => setCreateCategory(key)}
+              >
+                {t(pinDanTabLabelKey[key])}
+              </Button>
+            ))}
           </div>
-          <div className="s-aim-stats-sep" />
-          <div className="s-aim-stats-item">
-            <strong>
-              {categoryPinDans.reduce((a, b) => a + (b.total - b.joined), 0)}
-            </strong>
-            <span>{t("common.spotsRemaining")}</span>
+
+          <div className="s-aim-stats-card">
+            <div className="s-aim-stats-item">
+              <strong>{categoryPinDans.length}</strong>
+              <span>{t("common.inProgress")}</span>
+            </div>
+            <div className="s-aim-stats-sep" />
+            <div className="s-aim-stats-item">
+              <strong>
+                {categoryPinDans.reduce((a, b) => a + b.joined, 0)}
+              </strong>
+              <span>{t("common.joined")}</span>
+            </div>
+            <div className="s-aim-stats-sep" />
+            <div className="s-aim-stats-item">
+              <strong>
+                {categoryPinDans.reduce((a, b) => a + (b.total - b.joined), 0)}
+              </strong>
+              <span>{t("common.spotsRemaining")}</span>
+            </div>
           </div>
-        </div>
 
-        <div className="s-aim-pin-list-head">
-          <span className="s-aim-pin-list-head__title">{t("aimatch.pindan.currentOrders")}</span>
-          <span className="s-aim-pin-list-head__sub">{t("common.liveUpdate")}</span>
-        </div>
+          <div className="s-aim-pin-list-head">
+            <span className="s-aim-pin-list-head__title">{t("aimatch.pindan.currentOrders")}</span>
+            <span className="s-aim-pin-list-head__sub">{t("common.liveUpdate")}</span>
+          </div>
 
-        {pindanLoading ? <p className="s-aim-panel-hint">{t("common.loading")}</p> : null}
-        {pindanError ? (
-          <p className="s-aim-panel-hint s-aim-panel-hint--error">
-            {t("common.loadError")}{" "}
-            <button type="button" className="s-aim-panel-hint__retry" onClick={() => void refetchPindan()}>
-              {t("common.retry")}
-            </button>
-          </p>
-        ) : null}
-
-        <div className="s-aim-pin-card-wrap">
-          {!pindanLoading && categoryPinDans.length === 0 ? (
-            <p className="s-aim-panel-hint">{t("common.empty")}</p>
-          ) : (
-            categoryPinDans.map((item) => {
-              const pct = Math.round((item.joined / item.total) * 100);
-              const legacyId = Number(item.id);
-              const joinState = getPindanJoinUiState(item, joinedPindanIds, legacyId);
-              const joinLabel =
-                joinState === `joined`
-                  ? t(`pindan.joined`)
-                  : joinState === `full`
-                    ? t(`common.full`)
-                    : t(`aimatch.pindan.join`);
-
-              return (
-                <div
-                  key={item.id}
-                  id={`aim-pindan-item-${item.id}`}
-                  className={cn(
-                    `s-aim-pin-card s-aim-pin-card--${item.category}`,
-                    highlightPindanId === item.id && `s-aim-pin-card--focused`,
-                  )}
-                >
-                  <div className="s-aim-pin-card__media">
-                    <img src={item.image} alt={item.title} />
-                    {item.urgent && (
-                      <div className="s-aim-pin-card__urgent">
-                        <ZapIcon size={8} />
-                        {t("common.urgent")}
-                      </div>
-                    )}
-                    <div className="s-aim-pin-card__price-col">
-                      <span className="s-aim-pin-card__price">¥{item.price}</span>
-                      <span className="s-aim-pin-card__price-was">¥{item.originalPrice}</span>
-                    </div>
-                    <div className="s-aim-pin-card__bottom">
-                      <div className="s-aim-pin-card__title-t">{item.title}</div>
-                      <div className="s-aim-pin-card__desc-t">{item.desc}</div>
-                    </div>
-                  </div>
-
-                  <div className="s-aim-pin-card__body">
-                    <div className="s-aim-pin-card__meta">
-                      <span className="s-aim-pin-card__meta-el">
-                        <CalendarIcon size={11} />
-                        {item.date}
-                      </span>
-                      <span className="s-aim-pin-card__meta-el">
-                        <MapPinIcon size={11} />
-                        {item.location}
-                      </span>
-                    </div>
-
-                    <div className="s-aim-pin-card__tags">
-                      {item.tags.map((t) => (
-                        <span key={t} className="s-aim-pin-card__tag">
-                          {t}
-                        </span>
-                      ))}
-                    </div>
-
-                    <div className="s-aim-pin-card__prog-labels">
-                      <span className="s-aim-pin-card__prog-text">
-                        {t("common.joinedCount", { joined: item.joined, total: item.total })}
-                      </span>
-                      <span className="s-aim-pin-card__prog-pct">{pct}%</span>
-                    </div>
-                    <div className="s-aim-pin-card__prog-track">
-                      <div className="s-aim-pin-card__prog-fill" style={{ width: `${pct}%` }} />
-                    </div>
-
-                    <div className="s-aim-pin-card__actions">
-                      <Button
-                        className={cn(
-                          `s-aim-pin-card__cta`,
-                          isPindanJoinDisabled(joinState) && `s-aim-pin-card__cta--inactive`,
-                        )}
-                        disabled={isPindanJoinDisabled(joinState)}
-                        onClick={() => void handleJoinPindan(item)}
-                      >
-                        {joinLabel}
-                      </Button>
-                      <Button className="s-aim-pin-card__ghost">{t("common.share")}</Button>
-                    </div>
-                  </div>
-                </div>
-              );
-            })
-          )}
-        </div>
-      </div>
-
-      <div className={`s-aim-ticket s-aim-panel-block${activeTab === `ticket` ? `` : ` s-aim-panel--hidden`}`}>
-        <TicketMarketPanel
-          fetchEnabled={activeTab === `ticket`}
-          highlightTicketId={highlightTicketId}
-          onHighlightDone={clearTicketHighlight}
-        />
-      </div>
-
-      <div className={`s-aim-events s-aim-panel-block${activeTab === `events` ? `` : ` s-aim-panel--hidden`}`}>
-        <div className="s-aim-events__chips s-scrollbar-none">
-          {eventFilterKeys.map((f) => (
-            <Button
-              key={f}
-              className={cn(`s-aim-events__chip`, f === `all` && `s-aim-events__chip--all`)}
-            >
-              {t(`aimatch.events.filters.${f}`)}
-            </Button>
-          ))}
-        </div>
-
-        <div className="s-aim-events__list">
-          {eventsLoading ? <p className="s-aim-panel-hint">{t("common.loading")}</p> : null}
-          {eventsError ? (
+          {pindanLoading ? <p className="s-aim-panel-hint">{t("common.loading")}</p> : null}
+          {pindanError ? (
             <p className="s-aim-panel-hint s-aim-panel-hint--error">
               {t("common.loadError")}{" "}
-              <button type="button" className="s-aim-panel-hint__retry" onClick={() => void refetchEvents()}>
+              <button type="button" className="s-aim-panel-hint__retry" onClick={() => void refetchPindan()}>
                 {t("common.retry")}
               </button>
             </p>
           ) : null}
-          {!eventsLoading && eventsList.length === 0 ? (
-            <p className="s-aim-panel-hint">{t("common.empty")}</p>
-          ) : null}
-          {eventsList.map((ev) => (
-            <div key={ev.id} className="s-aim-ev-card">
-              <div className="s-aim-ev-card__media">
-                <img src={ev.image} alt={ev.title} />
-                {ev.hot && (
-                  <div className="s-aim-ev-card__media-hot">
-                    <FlameIcon size={9} />
-                    {t("common.hot")}
-                  </div>
-                )}
-                <div className="s-aim-ev-card__media-cat">{ev.category}</div>
-                <div className="s-aim-ev-card__media-content">
-                  <h3>{ev.title}</h3>
-                  <div className="s-aim-ev-card__media-meta-row">
-                    <div className="s-aim-ev-card__media-meta-el">
-                      <CalendarIcon size={10} />
-                      <span>{ev.date}</span>
-                    </div>
-                    <div className="s-aim-ev-card__media-meta-el">
-                      <MapPinIcon size={10} />
-                      <span>{ev.location}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
 
-              <div className="s-aim-ev-card__stats-row">
-                <div className="s-aim-ev-card__stat-primary">
-                  <UsersIcon size={11} />
-                  <span className="s-aim-ev-card__stat-num">{ev.attendees}</span>
-                  <span className="s-aim-ev-card__stat-lbl">{t("common.attendees")}</span>
-                </div>
-                <span className="s-aim-ev-card__stat-dot">·</span>
-                <span className="s-aim-ev-card__stat-soft">{t("common.pinOrders", { count: ev.pinCount })}</span>
-                <div className="s-aim-ev-card__dist-pill">
-                  <MapPinIcon size={10} />
-                  <span className="s-aim-ev-card__dist-text">{ev.distance}</span>
-                </div>
-              </div>
+          <div className="s-aim-pin-card-wrap">
+            {!pindanLoading && categoryPinDans.length === 0 ? (
+              <p className="s-aim-panel-hint">{t("common.empty")}</p>
+            ) : (
+              categoryPinDans.map((item) => {
+                const pct = Math.round((item.joined / item.total) * 100);
+                const legacyId = Number(item.id);
+                const joinState = getPindanJoinUiState(item, joinedPindanIds, legacyId);
+                const joinLabel =
+                  joinState === `joined`
+                    ? t(`pindan.joined`)
+                    : joinState === `full`
+                      ? t(`common.full`)
+                      : t(`aimatch.pindan.join`);
 
-              <div className="s-aim-ev-card__btns-row">
-                <Button
-                  onClick={() => toggleGoing(ev.id)}
-                  className={
-                    goingIds.includes(ev.id)
-                      ? `s-aim-ev-card__btn-going`
-                      : `s-aim-ev-card__btn-going s-aim-ev-card__btn-going--idle`
-                  }
-                >
-                  <CheckCircleIcon size={13} />
-                  {goingIds.includes(ev.id) ? t("aimatch.events.registered") : t("aimatch.events.going")}
-                </Button>
-                <Button className="s-aim-ev-card__btn-buddy">
-                  <UsersIcon size={13} />
-                  {t("aimatch.events.findBuddy")}
-                </Button>
-              </div>
-            </div>
-          ))}
+                return (
+                  <div
+                    key={item.id}
+                    id={`aim-pindan-item-${item.id}`}
+                    className={cn(
+                      `s-aim-pin-card s-aim-pin-card--${item.category}`,
+                      highlightPindanId === item.id && `s-aim-pin-card--focused`,
+                    )}
+                  >
+                    <div className="s-aim-pin-card__media">
+                      <img src={item.image} alt={item.title} />
+                      {item.urgent && (
+                        <div className="s-aim-pin-card__urgent">
+                          <ZapIcon size={8} />
+                          {t("common.urgent")}
+                        </div>
+                      )}
+                      <div className="s-aim-pin-card__price-col">
+                        {isBudgetModePindan(item) && resolvePindanBudgetRangeLabel(item) ? (
+                          <>
+                            <span className="s-aim-pin-card__price-label">
+                              {t(`aimatch.pindan.budgetLabel`)}
+                            </span>
+                            <span className="s-aim-pin-card__price-amount">
+                              {resolvePindanBudgetRangeLabel(item)}
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            <span className="s-aim-pin-card__price">¥{item.price}</span>
+                            {item.originalPrice > 0 ? (
+                              <span className="s-aim-pin-card__price-was">¥{item.originalPrice}</span>
+                            ) : null}
+                          </>
+                        )}
+                      </div>
+                      <div className="s-aim-pin-card__bottom">
+                        <div className="s-aim-pin-card__title-t">{item.title}</div>
+                        <div className="s-aim-pin-card__desc-t">{item.desc}</div>
+                      </div>
+                    </div>
+
+                    <div className="s-aim-pin-card__body">
+                      <div className="s-aim-pin-card__meta">
+                        <span className="s-aim-pin-card__meta-el">
+                          <CalendarIcon size={11} />
+                          {item.date}
+                        </span>
+                        <span className="s-aim-pin-card__meta-el">
+                          <MapPinIcon size={11} />
+                          {item.location}
+                        </span>
+                      </div>
+
+                      <div className="s-aim-pin-card__tags">
+                        {item.tags.map((t) => (
+                          <span key={t} className="s-aim-pin-card__tag">
+                            {t}
+                          </span>
+                        ))}
+                      </div>
+
+                      <div className="s-aim-pin-card__prog-labels">
+                        <span className="s-aim-pin-card__prog-text">
+                          {t("common.joinedCount", { joined: item.joined, total: item.total })}
+                        </span>
+                        <span className="s-aim-pin-card__prog-pct">{pct}%</span>
+                      </div>
+                      <div className="s-aim-pin-card__prog-track">
+                        <div className="s-aim-pin-card__prog-fill" style={{ width: `${pct}%` }} />
+                      </div>
+
+                      <div className="s-aim-pin-card__actions">
+                        <Button
+                          className={cn(
+                            `s-aim-pin-card__cta`,
+                            isPindanJoinDisabled(joinState) && `s-aim-pin-card__cta--inactive`,
+                          )}
+                          disabled={isPindanJoinDisabled(joinState)}
+                          onClick={() => void handleJoinPindan(item)}
+                        >
+                          {joinLabel}
+                        </Button>
+                        <Button className="s-aim-pin-card__ghost">{t("common.share")}</Button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
         </div>
-      </div>
+
+        <div className={`s-aim-ticket s-aim-panel-block${activeTab === `ticket` ? `` : ` s-aim-panel--hidden`}`}>
+          <TicketMarketPanel
+            fetchEnabled={activeTab === `ticket`}
+            highlightTicketId={highlightTicketId}
+            onHighlightDone={clearTicketHighlight}
+          />
+        </div>
+
+        <div className={`s-aim-events s-aim-panel-block${activeTab === `events` ? `` : ` s-aim-panel--hidden`}`}>
+          <div className="s-aim-events__chips s-scrollbar-none">
+            {eventFilterKeys.map((f) => (
+              <Button
+                key={f}
+                className={cn(`s-aim-events__chip`, f === `all` && `s-aim-events__chip--all`)}
+              >
+                {t(`aimatch.events.filters.${f}`)}
+              </Button>
+            ))}
+          </div>
+
+          <div className="s-aim-events__list">
+            {eventsLoading ? <p className="s-aim-panel-hint">{t("common.loading")}</p> : null}
+            {eventsError ? (
+              <p className="s-aim-panel-hint s-aim-panel-hint--error">
+                {t("common.loadError")}{" "}
+                <button type="button" className="s-aim-panel-hint__retry" onClick={() => void refetchEvents()}>
+                  {t("common.retry")}
+                </button>
+              </p>
+            ) : null}
+            {!eventsLoading && eventsList.length === 0 ? (
+              <p className="s-aim-panel-hint">{t("common.empty")}</p>
+            ) : null}
+            {eventsList.map((ev) => (
+              <div key={ev.id} className="s-aim-ev-card">
+                <div className="s-aim-ev-card__media">
+                  <img src={ev.image} alt={ev.title} />
+                  {ev.hot && (
+                    <div className="s-aim-ev-card__media-hot">
+                      <FlameIcon size={9} />
+                      {t("common.hot")}
+                    </div>
+                  )}
+                  <div className="s-aim-ev-card__media-cat">{ev.category}</div>
+                  <div className="s-aim-ev-card__media-content">
+                    <h3>{ev.title}</h3>
+                    <div className="s-aim-ev-card__media-meta-row">
+                      <div className="s-aim-ev-card__media-meta-el">
+                        <CalendarIcon size={10} />
+                        <span>{ev.date}</span>
+                      </div>
+                      <div className="s-aim-ev-card__media-meta-el">
+                        <MapPinIcon size={10} />
+                        <span>{ev.location}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="s-aim-ev-card__stats-row">
+                  <div className="s-aim-ev-card__stat-primary">
+                    <UsersIcon size={11} />
+                    <span className="s-aim-ev-card__stat-num">{ev.attendees}</span>
+                    <span className="s-aim-ev-card__stat-lbl">{t("common.attendees")}</span>
+                  </div>
+                  <span className="s-aim-ev-card__stat-dot">·</span>
+                  <span className="s-aim-ev-card__stat-soft">{t("common.pinOrders", { count: ev.pinCount })}</span>
+                  <div className="s-aim-ev-card__dist-pill">
+                    <MapPinIcon size={10} />
+                    <span className="s-aim-ev-card__dist-text">{ev.distance}</span>
+                  </div>
+                </div>
+
+                <div className="s-aim-ev-card__btns-row">
+                  <Button
+                    onClick={() => toggleGoing(ev.id)}
+                    className={
+                      goingIds.includes(ev.id)
+                        ? `s-aim-ev-card__btn-going`
+                        : `s-aim-ev-card__btn-going s-aim-ev-card__btn-going--idle`
+                    }
+                  >
+                    <CheckCircleIcon size={13} />
+                    {goingIds.includes(ev.id) ? t("aimatch.events.registered") : t("aimatch.events.going")}
+                  </Button>
+                  <Button className="s-aim-ev-card__btn-buddy">
+                    <UsersIcon size={13} />
+                    {t("aimatch.events.findBuddy")}
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
       <CreatePinDanModal

@@ -8,6 +8,7 @@ export interface TicketListing {
   event: string;
   seat: string;
   price: number;
+  priceMax?: number;
   originalPrice: number;
   seller: string;
   avatar: string;

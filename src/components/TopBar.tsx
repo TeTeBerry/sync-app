@@ -8,6 +8,7 @@ type TopBarProps = {
   variant?: "default" | "home";
   onAgentClick?: () => void;
   onNotificationClick?: () => void;
+  notificationCount?: number;
 };
 
 const TopBar: React.FC<TopBarProps> = ({
@@ -15,8 +16,10 @@ const TopBar: React.FC<TopBarProps> = ({
   variant = "default",
   onAgentClick,
   onNotificationClick,
+  notificationCount = 0,
 }) => {
   const isHome = variant === "home";
+  const badgeLabel = notificationCount > 99 ? "99+" : String(notificationCount);
 
   return (
     <div data-cmp="TopBar" className={`s-top-bar${isHome ? " s-top-bar--home" : ""}`}>
@@ -32,6 +35,9 @@ const TopBar: React.FC<TopBarProps> = ({
           </button>
           <button type="button" className="s-top-bar__bell-btn" aria-label="Notifications" onClick={onNotificationClick}>
             <BellIcon size={20} />
+            {notificationCount > 0 && (
+              <span className="s-top-bar__bell-badge">{badgeLabel}</span>
+            )}
           </button>
         </div>
       )}

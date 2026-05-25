@@ -1,6 +1,7 @@
 import Taro, { useDidShow } from "@tarojs/taro";
 import { useCallback, useState } from "react";
 import { useNavigationStore } from "../stores/navigationStore";
+import type { AimatchNavIntent } from "../stores/types";
 
 export const ROUTES = {
   HOME: "/pages/index/index",
@@ -12,6 +13,7 @@ export const ROUTES = {
   PINDAN: "/pages/pindan/index",
   AIMATCH: "/pages/aimatch/index",
   TICKETS: "/pages/tickets/index",
+  NOTIFICATIONS: "/pages/notifications/index",
 } as const;
 
 export type RoutePath = (typeof ROUTES)[keyof typeof ROUTES];
@@ -35,6 +37,16 @@ export function reLaunchTo(url: RoutePath) {
 
 export function go(url: RoutePath | string) {
   void Taro.navigateTo({ url });
+}
+
+export type GoAiMatchOptions = AimatchNavIntent;
+
+export function goAiMatch(options?: GoAiMatchOptions) {
+  if (options && Object.values(options).some((value) => value != null && value !== ``)) {
+    useNavigationStore.getState().setAimatchIntent(options);
+  }
+
+  void Taro.navigateTo({ url: ROUTES.AIMATCH });
 }
 
 export type PinDanTabType = "package" | "hotel" | "transport";

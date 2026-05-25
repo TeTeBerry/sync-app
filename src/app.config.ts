@@ -11,6 +11,7 @@ export default {
     "pages/pindan/index",
     "pages/aimatch/index",
     "pages/tickets/index",
+    "pages/notifications/index",
   ],
   window: {
     navigationStyle: "custom",

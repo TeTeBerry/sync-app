@@ -19,17 +19,17 @@ import {
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import BottomNav from "../../components/BottomNav";
-import { useProfilePindanQuery, useProfileTicketsQuery } from "../../hooks/useSyncApi";
+import ConfirmDialog from "../../components/ConfirmDialog";
+import {
+  useProfileParticipatedItems,
+  useProfilePindanQuery,
+  useProfileTicketsQuery,
+} from "../../hooks/useSyncApi";
 import { leavePindan } from "../../api/syncApi";
 import { isApiEnabled } from "../../constants/api";
 import { go, ROUTES } from "../../utils/route";
-import {
-  participatedEvents,
-  myPinDanEvents,
-  myTicketEvents,
-  profileUser,
-  type ProfileEventItem,
-} from "./mockData";
+import { myPinDanEvents, myTicketEvents, profileUser } from "./mockData";
+import ProfileParticipatedList from "./components/ProfileParticipatedList";
 import ProfilePinDanList from "./components/ProfilePinDanList";
 import ProfileTicketList from "./components/ProfileTicketList";
 import { loadMyPindanItems, removeJoinedPindanItem } from "../../utils/myPindanStorage";
@@ -90,6 +90,14 @@ const Profile: React.FC = () => {
   const consumeProfileIntent = useNavigationStore((state) => state.consumeProfileIntent);
   const [myPindanItems, setMyPindanItems] = useState(() => loadMyPindanItems(myPinDanEvents));
   const [myTicketItems, setMyTicketItems] = useState(myTicketEvents);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+
+  const participated = useProfileParticipatedItems(myPindanItems, myTicketItems, {
+    pindanLoading: isApiEnabled() && profilePindanQuery.isLoading,
+    ticketsLoading: isApiEnabled() && profileTicketsQuery.isLoading,
+    pindanError: isApiEnabled() && profilePindanQuery.isError,
+    ticketsError: isApiEnabled() && profileTicketsQuery.isError,
+  });
 
   const applyRouteParams = useCallback(() => {
     const urlParams = parseProfileRouteParams();
@@ -171,8 +179,8 @@ const Profile: React.FC = () => {
     }).catch(() => {});
   }, [t]);
 
-  const handleEventTap = useCallback((item: ProfileEventItem) => {
-    void Taro.showToast({ title: item.title, icon: "none" });
+  const handleParticipatedTap = useCallback((title: string) => {
+    void Taro.showToast({ title, icon: "none" });
   }, []);
 
   const handleExitPindan = useCallback(
@@ -207,21 +215,17 @@ const Profile: React.FC = () => {
   );
 
   const handleLogout = useCallback(() => {
-    void Taro.showModal({
-      title: t("profile.settings.logoutConfirmTitle"),
-      content: t("profile.settings.logoutConfirmMessage"),
-      confirmText: t("profile.settings.logout"),
-      confirmColor: "#ff0066",
-      success: (res) => {
-        if (res.confirm) {
-          void Taro.showToast({ title: t("profile.settings.logoutSuccess"), icon: "success" });
-        }
-      },
-    });
-  }, [t]);
+    setShowLogoutConfirm(true);
+  }, []);
 
-  const statusClass = (status: ProfileEventItem["status"]) =>
-    `s-profile__event-status s-profile__event-status--${status}`;
+  const handleLogoutCancel = useCallback(() => {
+    setShowLogoutConfirm(false);
+  }, []);
+
+  const handleLogoutConfirm = useCallback(() => {
+    setShowLogoutConfirm(false);
+    void Taro.showToast({ title: t("profile.settings.logoutSuccess"), icon: "success" });
+  }, [t]);
 
   return (
     <div data-cmp="Profile" className="s-profile">
@@ -333,19 +337,19 @@ const Profile: React.FC = () => {
 
         <div className="s-profile__events">
           {activeTab === "participated" ? (
-            participatedEvents.map((event) => (
-              <button key={event.id} type="button" className="s-profile__event-row" onClick={() => handleEventTap(event)}>
-                <img className="s-profile__event-thumb" src={event.image} alt="" />
-                <div className="s-profile__event-info">
-                  <div className="s-profile__event-title">{event.title}</div>
-                  <div className="s-profile__event-date">
-                    <CalendarIcon size={12} />
-                    <span>{event.date}</span>
-                  </div>
-                </div>
-                <span className={statusClass(event.status)}>{t(`profile.eventStatus.${event.status}`)}</span>
-              </button>
-            ))
+            <ProfileParticipatedList
+              items={participated.items}
+              isLoading={participated.isLoading}
+              isError={participated.isError}
+              onRetry={() => {
+                if (isApiEnabled()) {
+                  void profilePindanQuery.refetch();
+                  void profileTicketsQuery.refetch();
+                }
+                void participated.refetch();
+              }}
+              onItemTap={(item) => handleParticipatedTap(item.title)}
+            />
           ) : activeTab === "pindan" ? (
             <ProfilePinDanList
               items={myPindanItems}
@@ -413,6 +417,16 @@ const Profile: React.FC = () => {
           </div>
         </section>
       </main>
+
+      <ConfirmDialog
+        open={showLogoutConfirm}
+        title={t("profile.settings.logoutConfirmTitle")}
+        message={t("profile.settings.logoutConfirmMessage")}
+        confirmText={t("profile.settings.logout")}
+        cancelText={t("common.cancel")}
+        onConfirm={handleLogoutConfirm}
+        onCancel={handleLogoutCancel}
+      />
 
       <BottomNav />
     </div>

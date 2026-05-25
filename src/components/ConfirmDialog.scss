@@ -81,6 +81,11 @@
     &--confirm {
       background: var(--primary);
       color: #fff;
+
+      &.s-confirm-dialog__btn--danger {
+        background: #ff0066;
+        box-shadow: 0 8px 20px rgba(255, 0, 102, 0.28);
+      }
     }
   }
 }

@@ -1,5 +1,6 @@
 import type { TicketListing, TicketTagTone } from "../data/ticketListings";
 import type { BackendActivity, BackendPindan, BackendTicket } from "../types/backend";
+import { ensureBudgetLabelHasYuan, formatPindanBudgetRangeLabel } from "./pindanBudget";
 
 export type PinDanCategory = "package" | "hotel" | "transport";
 
@@ -11,6 +12,9 @@ export interface PinDanCardUi {
   desc: string;
   price: number;
   originalPrice: number;
+  budgetMin?: number;
+  budgetMax?: number;
+  budgetRangeLabel?: string;
   joined: number;
   total: number;
   date: string;
@@ -43,6 +47,9 @@ export interface PindanPageItem {
   image: string;
   price: number;
   originalPrice: number;
+  budgetMin?: number;
+  budgetMax?: number;
+  budgetRangeLabel?: string;
   date: string;
   location: string;
   joined: number;
@@ -167,6 +174,17 @@ export function mapPindanToCards(
     const total = item.total ?? Math.max(4, joined + 1);
     const activityLabel = item.activityId ? activityNames.get(item.activityId) ?? item.activityId : "";
 
+    const rawBudgetRangeLabel =
+      item.budgetRangeLabel ??
+      formatPindanBudgetRangeLabel({
+        budgetMin: item.budgetMin,
+        budgetMax: item.budgetMax,
+        budget: item.price,
+      });
+    const budgetRangeLabel = rawBudgetRangeLabel
+      ? ensureBudgetLabelHasYuan(rawBudgetRangeLabel)
+      : undefined;
+
     return {
       id: String(item.legacyId ?? item._id),
       activityLegacyId: item.activityLegacyId,
@@ -175,6 +193,9 @@ export function mapPindanToCards(
       desc: item.subtitle ?? (activityLabel ? `${activityLabel} · 开放拼单` : "开放拼单"),
       price: item.price ?? (category === "transport" ? 1200 : 450),
       originalPrice: item.originalPrice ?? (category === "transport" ? 4800 : 1800),
+      budgetMin: item.budgetMin,
+      budgetMax: item.budgetMax,
+      budgetRangeLabel,
       joined,
       total,
       date: item.date ?? "06/27-30",
@@ -200,6 +221,17 @@ export function mapPindanToPageItems(items: BackendPindan[]): PindanPageItem[] {
       const joined = item.joined ?? (item.memberUserIds?.length ?? 0) + 1;
       const total = item.total ?? Math.max(4, joined + 1);
 
+      const rawBudgetRangeLabel =
+        item.budgetRangeLabel ??
+        formatPindanBudgetRangeLabel({
+          budgetMin: item.budgetMin,
+          budgetMax: item.budgetMax,
+          budget: item.price,
+        });
+      const budgetRangeLabel = rawBudgetRangeLabel
+        ? ensureBudgetLabelHasYuan(rawBudgetRangeLabel)
+        : undefined;
+
       return {
         id: item.legacyId as number,
         activityId: item.activityLegacyId ?? 0,
@@ -209,6 +241,9 @@ export function mapPindanToPageItems(items: BackendPindan[]): PindanPageItem[] {
         image: item.image ?? PINDAN_IMAGES[type],
         price: item.price ?? 0,
         originalPrice: item.originalPrice ?? 0,
+        budgetMin: item.budgetMin,
+        budgetMax: item.budgetMax,
+        budgetRangeLabel,
         date: item.date ?? "",
         location: item.location ?? "",
         joined,
@@ -231,7 +266,9 @@ export function mapTicketsToListings(
     const type = slot.type === "buy" ? "buy" : "sell";
     const quantity = slot.quantity ?? 1;
     const price = slot.price ?? (type === "sell" ? 880 : 560);
-    const { tag, tone } = ticketTag(type, price);
+    const priceMax =
+      slot.priceMax != null && slot.priceMax > price ? slot.priceMax : undefined;
+    const { tag, tone } = ticketTag(type, priceMax ?? price);
 
     return {
       id: ticket._id,
@@ -243,6 +280,7 @@ export function mapTicketsToListings(
         "未知活动",
       seat: `${ticket.skuCode ?? "GA"} · ${quantity}张`,
       price,
+      priceMax,
       originalPrice: type === "sell" ? Math.round(price * 1.35) : 0,
       seller: resolveTicketSellerName(ticket),
       avatar: AVATAR_POOL[index % AVATAR_POOL.length],

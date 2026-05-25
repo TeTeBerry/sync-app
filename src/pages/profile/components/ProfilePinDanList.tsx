@@ -24,6 +24,7 @@ import { invalidatePindanQueries } from "../../../hooks/useSyncApi";
 import type { PindanJoinCard } from "../../../types/aiChat";
 import { goPindan } from "../../../utils/route";
 import { getClientUserId } from "../../../utils/session";
+import { isBudgetModePindan, resolvePindanBudgetRangeLabel } from "../../../utils/pindanBudget";
 import type { ProfilePinDanCategory, ProfilePinDanItem } from "../mockData";
 
 export type ProfilePinDanListProps = {
@@ -55,6 +56,9 @@ function toEditPindanCard(item: ProfilePinDanItem): PindanJoinCard {
     location: item.location,
     price: item.price,
     pricePerPerson: item.price,
+    budgetMin: item.budgetMin,
+    budgetMax: item.budgetMax,
+    budgetRangeLabel: item.budgetRangeLabel,
     total: item.total,
     isOwner: true,
   };
@@ -191,6 +195,7 @@ const ProfilePinDanList: React.FC<ProfilePinDanListProps> = ({
         }
         confirmText={t("pindan.delete")}
         cancelText={t("common.cancel")}
+        danger
         onConfirm={() => void handleDeleteConfirm()}
         onCancel={handleDeleteCancel}
       />
@@ -269,9 +274,32 @@ const ProfilePinDanList: React.FC<ProfilePinDanListProps> = ({
                         </span>
                       </div>
 
-                      <div className="s-profile-pindan__price">
-                        <span className="s-profile-pindan__price-currency">¥</span>
-                        <span className="s-profile-pindan__price-value">{item.price}</span>
+                      {item.remark?.trim() ? (
+                        <p className="s-profile-pindan__remark">{item.remark.trim()}</p>
+                      ) : null}
+
+                      <div
+                        className={`s-profile-pindan__price${
+                          isBudgetModePindan(item) && resolvePindanBudgetRangeLabel(item)
+                            ? ` s-profile-pindan__price--budget`
+                            : ``
+                        }`}
+                      >
+                        {isBudgetModePindan(item) && resolvePindanBudgetRangeLabel(item) ? (
+                          <>
+                            <span className="s-profile-pindan__price-label">
+                              {t(`aimatch.pindan.budgetLabel`)}
+                            </span>
+                            <span className="s-profile-pindan__price-amount">
+                              {resolvePindanBudgetRangeLabel(item)}
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            <span className="s-profile-pindan__price-currency">¥</span>
+                            <span className="s-profile-pindan__price-value">{item.price}</span>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>

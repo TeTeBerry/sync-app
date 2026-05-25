@@ -34,6 +34,7 @@ import { goProfilePindan } from "../../utils/route";
 import { sharePinDanItem } from "../../utils/share";
 import { getClientUserId } from "../../utils/session";
 import { getPindanJoinUiState, isPindanJoinDisabled } from "../../utils/pindanJoinState";
+import { isBudgetModePindan, resolvePindanBudgetRangeLabel } from "../../utils/pindanBudget";
 import {
   useNavigationStore,
   usePindanPageStore,
@@ -58,6 +59,9 @@ interface PinDanItem {
   image: string;
   price: number;
   originalPrice: number;
+  budgetMin?: number;
+  budgetMax?: number;
+  budgetRangeLabel?: string;
   date: string;
   location: string;
   joined: number;
@@ -85,6 +89,9 @@ function toEditPindanCard(item: PinDanItem): PindanJoinCard {
     location: item.location,
     price: item.price,
     pricePerPerson: item.price,
+    budgetMin: item.budgetMin,
+    budgetMax: item.budgetMax,
+    budgetRangeLabel: item.budgetRangeLabel,
     total: item.total,
     isOwner: true,
   };
@@ -654,9 +661,28 @@ const PinDan: React.FC = () => {
                 <img src={item.image} alt={item.title} />
                 <div className="s-pindan__media-grad" />
 
-                <div className="s-pindan__price-pill">
-                  <strong>¥{item.price}</strong>
-                  <span className="s-pindan__price-was">¥{item.originalPrice}</span>
+                <div
+                  className={`s-pindan__price-pill${
+                    isBudgetModePindan(item) && resolvePindanBudgetRangeLabel(item)
+                      ? ` s-pindan__price-pill--budget`
+                      : ``
+                  }`}
+                >
+                  {isBudgetModePindan(item) && resolvePindanBudgetRangeLabel(item) ? (
+                    <>
+                      <span className="s-pindan__price-label">{t(`aimatch.pindan.budgetLabel`)}</span>
+                      <span className="s-pindan__price-amount">
+                        {resolvePindanBudgetRangeLabel(item)}
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <strong>¥{item.price}</strong>
+                      {item.originalPrice > 0 ? (
+                        <span className="s-pindan__price-was">¥{item.originalPrice}</span>
+                      ) : null}
+                    </>
+                  )}
                 </div>
 
                 <div className="s-pindan__rate-pill">
@@ -687,6 +713,10 @@ const PinDan: React.FC = () => {
                     <span>{item.location}</span>
                   </div>
                 </div>
+
+                {item.remark?.trim() ? (
+                  <p className="s-pindan__remark">{item.remark.trim()}</p>
+                ) : null}
 
                 {isPackage && item.includes && item.includes.length > 0 && (
                   <div className="s-pindan__includes">
@@ -783,6 +813,7 @@ const PinDan: React.FC = () => {
         }
         confirmText={t("pindan.delete")}
         cancelText={t("common.cancel")}
+        danger
         onConfirm={() => void handleDeleteConfirm()}
         onCancel={handleDeleteCancel}
       />

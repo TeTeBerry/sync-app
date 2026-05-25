@@ -246,7 +246,9 @@ const TicketMarketPanel: React.FC<TicketMarketPanelProps> = ({
                           : `s-aim-ticket-card__deal-num s-aim-ticket-card__deal-num--buy`
                       }
                     >
-                      {ticket.price}
+                      {ticket.priceMax && ticket.priceMax > ticket.price
+                        ? `${ticket.price}-${ticket.priceMax}`
+                        : ticket.price}
                     </span>
                     {ticket.type === `sell` && ticket.originalPrice > 0 && (
                       <span className="s-aim-ticket-card__deal-was">¥{ticket.originalPrice}</span>

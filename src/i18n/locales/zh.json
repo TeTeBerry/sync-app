@@ -99,6 +99,31 @@
     "fabLabel": "快速发布",
     "notificationsComingSoon": "消息通知即将上线"
   },
+  "notifications": {
+    "title": "消息通知",
+    "markAllRead": "全部已读",
+    "emptyTitle": "暂无消息",
+    "emptyDesc": "有人加入你的拼单或出现匹配票务时，会在这里通知你。",
+    "someone": "有人",
+    "pindanFallback": "拼单",
+    "eventFallback": "活动",
+    "ticketSell": "出售",
+    "ticketBuy": "求购",
+    "types": {
+      "pindanJoinLeader": {
+        "title": "拼单有新成员",
+        "body": "{{actor}} 加入了你的拼单「{{title}}」"
+      },
+      "pindanJoinMember": {
+        "title": "拼单有新成员",
+        "body": "你参与的拼单「{{title}}」有新成员加入"
+      },
+      "ticketMatch": {
+        "title": "有新的匹配票务",
+        "body": "「{{event}}」有新的{{type}}信息，可能与你的挂单匹配"
+      }
+    }
+  },
   "profile": {
     "title": "我的",
     "editAvatar": "更换头像",
@@ -122,6 +147,9 @@
       "upcoming": "即将参加",
       "registered": "已报名",
       "completed": "已结束"
+    },
+    "participated": {
+      "empty": "暂无已报名活动，去首页看看吧"
     },
     "pindanInProgress": "拼单中",
     "myPindan": {
@@ -248,6 +276,8 @@
       "joinedCardTitle": "查看拼单",
       "myCreatedCardTitle": "我发起的拼单",
       "tapToEdit": "点击可修改",
+      "budgetLabel": "预算",
+      "budgetRangePreview": "预算 {{range}}",
       "editTitle": "修改拼单",
       "saveEdit": "保存修改",
       "updated": "拼单已更新",

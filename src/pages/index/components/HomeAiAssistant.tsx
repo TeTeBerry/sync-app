@@ -4,20 +4,22 @@ import { useTranslation } from "react-i18next";
 import { Button, Input } from "../../../components/ui";
 
 type HomeAiAssistantProps = {
-  onSummon: () => void;
+  onOpenAiMatch: (message?: string) => void;
 };
 
 /**
  * 首页 AI 搭子助手：输入与会话跳转由上层控制路由。
  */
-export const HomeAiAssistant: FC<HomeAiAssistantProps> = ({ onSummon }) => {
+export const HomeAiAssistant: FC<HomeAiAssistantProps> = ({ onOpenAiMatch }) => {
   const { t } = useTranslation();
   const [query, setQuery] = useState(``);
 
   const submit = useCallback(() => {
-    if (!query.trim()) return;
-    onSummon();
-  }, [onSummon, query]);
+    const trimmed = query.trim();
+    if (!trimmed) return;
+    setQuery(``);
+    onOpenAiMatch(trimmed);
+  }, [onOpenAiMatch, query]);
 
   return (
     <section className="s-home-ai">
@@ -35,7 +37,7 @@ export const HomeAiAssistant: FC<HomeAiAssistantProps> = ({ onSummon }) => {
           </div>
           <p className="s-home-ai__sub">{t("home.ai.online")}</p>
         </div>
-        <Button className="s-home-ai__cta" onClick={onSummon}>
+        <Button className="s-home-ai__cta" onClick={() => onOpenAiMatch()}>
           <ZapIcon size={12} />
           {t("home.ai.summon")}
         </Button>

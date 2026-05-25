@@ -4,6 +4,18 @@ const USER_PHONE_KEY = "sync_user_phone";
 const DEFAULT_USER_NAME = "Zara";
 const DEFAULT_USER_PHONE = "17610941208";
 
+function createSessionId(): string {
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+}
+
+export function createFreshSessionId(): string {
+  const id = createSessionId();
+  if (typeof sessionStorage !== "undefined") {
+    sessionStorage.setItem(SESSION_KEY, id);
+  }
+  return id;
+}
+
 export function getOrCreateSessionId(): string {
   if (typeof sessionStorage === "undefined") {
     return `guest-${Date.now()}`;
@@ -14,7 +26,7 @@ export function getOrCreateSessionId(): string {
     return existing;
   }
 
-  const id = `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+  const id = createSessionId();
   sessionStorage.setItem(SESSION_KEY, id);
   return id;
 }

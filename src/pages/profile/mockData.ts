@@ -1,17 +1,13 @@
 import type { ProfilePinDanItem } from "../../types/backend";
+import { buildParticipatedActivities } from "../../utils/profileParticipated";
 
-export type ProfileEventStatus = "upcoming" | "registered" | "completed";
 export type ProfilePinDanCategory = "package" | "hotel" | "transport";
 
 export type { ProfilePinDanItem };
-
-export interface ProfileEventItem {
-  id: number;
-  title: string;
-  date: string;
-  image: string;
-  status: ProfileEventStatus;
-}
+export type {
+  ProfileEventStatus,
+  ProfileParticipatedItem as ProfileEventItem,
+} from "../../utils/profileParticipated";
 
 export const profileUser = {
   name: "Zara",
@@ -32,30 +28,6 @@ export const profileUser = {
     xpToNext: 380,
   },
 };
-
-export const participatedEvents: ProfileEventItem[] = [
-  {
-    id: 1,
-    title: "Tomorrowland 预热派对",
-    date: "07月18日",
-    image: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=200&q=80",
-    status: "upcoming",
-  },
-  {
-    id: 2,
-    title: "EDC China 2025",
-    date: "07月26日",
-    image: "https://images.unsplash.com/photo-1470229722913-7c090be5c520?w=200&q=80",
-    status: "registered",
-  },
-  {
-    id: 3,
-    title: "S2O 水上电音节",
-    date: "06月27日",
-    image: "https://images.unsplash.com/photo-1540039155732-d674d4e3f421?w=200&q=80",
-    status: "completed",
-  },
-];
 
 export const myPinDanEvents: ProfilePinDanItem[] = [
   {
@@ -126,3 +98,8 @@ export const myTicketEvents = [
     createdAt: "05/24 09:15",
   },
 ];
+
+export const participatedEvents = buildParticipatedActivities(
+  myPinDanEvents,
+  myTicketEvents,
+);

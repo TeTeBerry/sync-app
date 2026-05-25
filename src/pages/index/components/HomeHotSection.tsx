@@ -72,7 +72,7 @@ export const HomeHotSection: FC<HomeHotSectionProps> = ({ items }) => {
 
       <div className="s-hot-section__list">
         {items.map((item) => (
-          <HotRow key={item.id} item={item} />
+          <HotRow key={item.pinItemId} item={item} />
         ))}
       </div>
     </section>

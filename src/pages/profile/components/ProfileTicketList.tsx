@@ -108,7 +108,11 @@ const ProfileTicketList: React.FC<ProfileTicketListProps> = ({
                 </div>
                 <div className="s-profile-tickets__price">
                   <span className="s-profile-tickets__price-currency">¥</span>
-                  <span className="s-profile-tickets__price-value">{item.price}</span>
+                  <span className="s-profile-tickets__price-value">
+                    {item.priceMax && item.priceMax > item.price
+                      ? `${item.price}-${item.priceMax}`
+                      : item.price}
+                  </span>
                   <span className="s-profile-tickets__price-unit">
                     {t("profile.myTickets.perTicket")}
                   </span>

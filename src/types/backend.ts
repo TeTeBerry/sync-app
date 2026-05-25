@@ -29,6 +29,7 @@ export interface BackendTicket {
     type?: "sell" | "buy";
     quantity?: number;
     price?: number;
+    priceMax?: number;
     eventDate?: string;
     contact?: string;
     displayEventName?: string;
@@ -57,6 +58,9 @@ export interface BackendPindan {
   image?: string;
   price?: number;
   originalPrice?: number;
+  budgetMin?: number;
+  budgetMax?: number;
+  budgetRangeLabel?: string;
   date?: string;
   location?: string;
   joined?: number;
@@ -75,6 +79,7 @@ export interface CreateTicketPayload {
   type: "sell" | "buy";
   skuCode: string;
   price: number;
+  priceMax?: number;
   eventDate: string;
   contact: string;
   userId?: string;
@@ -90,6 +95,7 @@ export interface ProfileTicketItem {
   skuCode: string;
   quantity: number;
   price: number;
+  priceMax?: number;
   eventDate: string;
   contact: string;
   createdAt: string;
@@ -176,9 +182,39 @@ export interface ProfilePinDanItem {
   date: string;
   location: string;
   price: number;
+  budgetMin?: number;
+  budgetMax?: number;
+  budgetRangeLabel?: string;
   image: string;
   joinedAt: string;
   isOwner?: boolean;
   remark?: string;
   total?: number;
+}
+
+export type NotificationType =
+  | "pindan_join_leader"
+  | "pindan_join_member"
+  | "ticket_match";
+
+export interface NotificationMeta {
+  pindanLegacyId?: number;
+  ticketId?: string;
+  activityId?: string;
+  actorUserId?: string;
+  actorUserName?: string;
+  pindanTitle?: string;
+  ticketType?: "sell" | "buy";
+  displayEventName?: string;
+}
+
+export interface AppNotification {
+  id: string;
+  userId: string;
+  type: NotificationType;
+  title: string;
+  body: string;
+  read: boolean;
+  meta?: NotificationMeta;
+  createdAt: string;
 }

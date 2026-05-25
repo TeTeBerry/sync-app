@@ -55,7 +55,9 @@ const TicketRow = memo(function TicketRow({ ticket }: { ticket: TicketListing })
               isSell ? `s-ticket-row__price-value s-ticket-row__price-value--sell` : `s-ticket-row__price-value s-ticket-row__price-value--buy`
             }
           >
-            {ticket.price}
+            {ticket.priceMax && ticket.priceMax > ticket.price
+              ? `${ticket.price}-${ticket.priceMax}`
+              : ticket.price}
           </strong>
         </div>
         {isSell && ticket.originalPrice > 0 && (

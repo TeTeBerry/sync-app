@@ -99,6 +99,31 @@
     "fabLabel": "โพสต์ด่วน",
     "notificationsComingSoon": "การแจ้งเตือนเร็วๆ นี้"
   },
+  "notifications": {
+    "title": "ข้อความ",
+    "markAllRead": "อ่านทั้งหมด",
+    "emptyTitle": "ยังไม่มีข้อความ",
+    "emptyDesc": "คุณจะได้รับแจ้งเมื่อมีคนเข้าร่วมการซื้อร่วมหรือมีตั๋วที่ตรงกับของคุณ",
+    "someone": "มีคน",
+    "pindanFallback": "การซื้อร่วม",
+    "eventFallback": "กิจกรรม",
+    "ticketSell": "ขาย",
+    "ticketBuy": "ซื้อ",
+    "types": {
+      "pindanJoinLeader": {
+        "title": "มีสมาชิกใหม่ในการซื้อร่วม",
+        "body": "{{actor}} เข้าร่วมการซื้อร่วม \"{{title}}\" ของคุณ"
+      },
+      "pindanJoinMember": {
+        "title": "มีสมาชิกใหม่ในกลุ่ม",
+        "body": "มีสมาชิกใหม่เข้าร่วม \"{{title}}\""
+      },
+      "ticketMatch": {
+        "title": "ตั๋วที่อาจตรงกัน",
+        "body": "มีรายการ{{type}}ใหม่สำหรับ \"{{event}}\" ที่อาจตรงกับของคุณ"
+      }
+    }
+  },
   "profile": {
     "title": "โปรไฟล์",
     "editAvatar": "เปลี่ยนรูปโปรไฟล์",
@@ -122,6 +147,9 @@
       "upcoming": "กำลังจะไป",
       "registered": "ลงทะเบียนแล้ว",
       "completed": "จบแล้ว"
+    },
+    "participated": {
+      "empty": "ยังไม่มีกิจกรรมที่ลงทะเบียน — ไปดูหน้าแรกกัน"
     },
     "pindanInProgress": "กำลังซื้อร่วม",
     "myPindan": {
@@ -248,6 +276,8 @@
       "joinedCardTitle": "ดูกลุ่มซื้อร่วม",
       "myCreatedCardTitle": "กลุ่มที่ฉันสร้าง",
       "tapToEdit": "แตะเพื่อแก้ไข",
+      "budgetLabel": "งบประมาณ",
+      "budgetRangePreview": "งบประมาณ {{range}}",
       "editTitle": "แก้ไขกลุ่มซื้อ",
       "saveEdit": "บันทึกการแก้ไข",
       "updated": "อัปเดตกลุ่มซื้อแล้ว",

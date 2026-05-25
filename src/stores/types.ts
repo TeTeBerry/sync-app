@@ -20,6 +20,7 @@ export type ProfileNavIntent = {
 
 export type AimatchNavIntent = {
   tab?: AimatchTab;
+  initialMessage?: string;
   highlightPindanId?: string;
   highlightTicketId?: string;
   createCategory?: PinDanCategory;

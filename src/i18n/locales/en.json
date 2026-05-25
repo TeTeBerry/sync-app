@@ -99,6 +99,31 @@
     "fabLabel": "Quick post",
     "notificationsComingSoon": "Notifications coming soon"
   },
+  "notifications": {
+    "title": "Messages",
+    "markAllRead": "Mark all read",
+    "emptyTitle": "No messages yet",
+    "emptyDesc": "You'll be notified when someone joins your group buy or matches your ticket listing.",
+    "someone": "Someone",
+    "pindanFallback": "group buy",
+    "eventFallback": "event",
+    "ticketSell": "sell",
+    "ticketBuy": "buy",
+    "types": {
+      "pindanJoinLeader": {
+        "title": "New group buy member",
+        "body": "{{actor}} joined your group buy \"{{title}}\""
+      },
+      "pindanJoinMember": {
+        "title": "New member in your group",
+        "body": "A new member joined \"{{title}}\""
+      },
+      "ticketMatch": {
+        "title": "Matching ticket listing",
+        "body": "New {{type}} listing for \"{{event}}\" may match yours"
+      }
+    }
+  },
   "profile": {
     "title": "Profile",
     "editAvatar": "Change avatar",
@@ -122,6 +147,9 @@
       "upcoming": "Upcoming",
       "registered": "Registered",
       "completed": "Completed"
+    },
+    "participated": {
+      "empty": "No registered events yet — explore the home feed"
     },
     "myPindan": {
       "title": "My group buys",
@@ -247,6 +275,8 @@
       "joinedCardTitle": "View group buy",
       "myCreatedCardTitle": "My group buy",
       "tapToEdit": "Tap to edit",
+      "budgetLabel": "Budget",
+      "budgetRangePreview": "Budget {{range}}",
       "editTitle": "Edit group buy",
       "saveEdit": "Save changes",
       "updated": "Group buy updated",

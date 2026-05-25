@@ -1,4 +1,13 @@
-import type { AiChatMessage, ChatUiMessage } from "../types/aiChat";
+import type { AiChatImageContext, AiChatMessage, ChatUiMessage } from "../types/aiChat";
+
+function resolveImageContext(message: ChatUiMessage, pendingImage?: string): AiChatImageContext | undefined {
+  const source = message.imagePreview || pendingImage;
+  if (!source && !message.ocrText) return undefined;
+  return {
+    source,
+    ocrText: message.ocrText,
+  };
+}
 
 /** 将 MongoDB 完整历史映射为 UI 消息（不做截断） */
 export function mapHistoryToUiMessages(
@@ -11,6 +20,8 @@ export function mapHistoryToUiMessages(
       id: `${sessionId}-${index}`,
       from: message.role === "user" ? "user" : "ai",
       text: message.content,
+      imagePreview: message.imageContext?.source,
+      ocrText: message.imageContext?.ocrText,
       pindanCard: message.pindanCard,
       ticketCard: message.ticketCard,
     }));
@@ -24,7 +35,7 @@ export function buildApiChatHistory(
   pendingImage?: string,
 ): AiChatMessage[] {
   const settled = uiMessages.filter(
-    (message) => !message.streaming && (message.text || message.imagePreview),
+    (message) => !message.streaming && (message.text || message.imagePreview || message.ocrText),
   );
   const apiMessages: AiChatMessage[] = [];
 
@@ -35,16 +46,18 @@ export function buildApiChatHistory(
     }
     apiMessages.push({
       role: message.from === "user" ? "user" : "assistant",
-      content:
-        message.text ||
-        (message.imagePreview ? "[门票图片]" : ""),
+      content: message.text || message.ocrText || "",
+      imageContext: resolveImageContext(message),
     });
   }
 
   if (pendingUserText || pendingImage) {
     apiMessages.push({
       role: "user",
-      content: pendingUserText?.trim() || (pendingImage ? "[门票图片]" : ""),
+      content: pendingUserText?.trim() || "",
+      imageContext: pendingImage
+        ? { source: pendingImage }
+        : undefined,
     });
   }
 

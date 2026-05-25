@@ -1,11 +1,9 @@
 import "./home.scss";
-import Taro from "@tarojs/taro";
 import { useCallback } from "react";
-import { useTranslation } from "react-i18next";
 import BottomNav from "../../components/BottomNav";
 import TopBar from "../../components/TopBar";
-import { useHomeSummary } from "../../hooks/useSyncApi";
-import { go, ROUTES } from "../../utils/route";
+import { useHomeSummary, useNotificationUnreadCount } from "../../hooks/useSyncApi";
+import { go, goAiMatch, ROUTES } from "../../utils/route";
 import { HomeAiAssistant } from "./components/HomeAiAssistant";
 import { HomeEventSignup } from "./components/HomeEventSignup";
 import { HomeHeatBar } from "./components/HomeHeatBar";
@@ -13,20 +11,31 @@ import { HomeHotSection } from "./components/HomeHotSection";
 import { HomeTicketZone } from "./components/HomeTicketZone";
 
 const Home = () => {
-  const { t } = useTranslation();
   const { heat, signupEvents, hotPins } = useHomeSummary();
-  const openAiMatch = useCallback(() => go(ROUTES.AIMATCH), []);
+  const { data: unreadCount = 0 } = useNotificationUnreadCount();
+  const openAiMatch = useCallback((message?: string) => {
+    if (message?.trim()) {
+      goAiMatch({ tab: `ai`, initialMessage: message.trim() });
+      return;
+    }
+    go(ROUTES.AIMATCH);
+  }, []);
 
   const handleNotification = useCallback(() => {
-    void Taro.showToast({ title: t("home.notificationsComingSoon"), icon: "none" });
-  }, [t]);
+    go(ROUTES.NOTIFICATIONS);
+  }, []);
 
   return (
     <div data-cmp="Home" className="s-home">
-      <TopBar variant="home" onAgentClick={openAiMatch} onNotificationClick={handleNotification} />
+      <TopBar
+        variant="home"
+        onAgentClick={openAiMatch}
+        onNotificationClick={handleNotification}
+        notificationCount={unreadCount}
+      />
 
       <main className="s-home__main s-scrollbar-none">
-        <HomeAiAssistant onSummon={openAiMatch} />
+        <HomeAiAssistant onOpenAiMatch={openAiMatch} />
 
         <HomeEventSignup items={signupEvents} />
 

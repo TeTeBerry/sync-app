@@ -1,8 +1,16 @@
 export type AiChatRole = "user" | "assistant" | "system";
 
+export interface AiChatImageContext {
+  /** 可重放的图片引用，优先 URL，其次 base64/data URL */
+  source?: string;
+  /** OCR 识别结果，便于恢复会话时重建上下文 */
+  ocrText?: string;
+}
+
 export interface AiChatMessage {
   role: AiChatRole;
   content: string;
+  imageContext?: AiChatImageContext;
   pindanCard?: PindanJoinCard;
   ticketCard?: TicketCreatedCard;
 }
@@ -28,6 +36,9 @@ export interface PindanJoinCard {
   location: string;
   price: number;
   pricePerPerson?: number;
+  budgetMin?: number;
+  budgetMax?: number;
+  budgetRangeLabel?: string;
   activityId?: string;
   userJoined?: boolean;
   isOwner?: boolean;
@@ -53,6 +64,8 @@ export type ChatUiMessage = {
   text: string;
   /** 用户上传的门票截图预览 */
   imagePreview?: string;
+  /** OCR 结果，恢复会话时可重建上下文 */
+  ocrText?: string;
   /** True while tokens are still arriving */
   streaming?: boolean;
   ticketCard?: TicketCreatedCard;
@@ -62,6 +75,7 @@ export type ChatUiMessage = {
 export interface SendChatOptions {
   text: string;
   image?: string;
+  freshSession?: boolean;
 }
 
 export interface ChatSessionRecord {

@@ -8,6 +8,8 @@ export interface ConfirmDialogProps {
   message: string;
   confirmText: string;
   cancelText: string;
+  /** Destructive actions (delete) use pink/red confirm styling */
+  danger?: boolean;
   onConfirm: () => void;
   onCancel: () => void;
 }
@@ -18,6 +20,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   message,
   confirmText,
   cancelText,
+  danger = false,
   onConfirm,
   onCancel,
 }) => {
@@ -41,7 +44,12 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
           <Button block="s-confirm-dialog" element="btn" modifiers={["cancel"]} onClick={onCancel}>
             {cancelText}
           </Button>
-          <Button block="s-confirm-dialog" element="btn" modifiers={["confirm"]} onClick={onConfirm}>
+          <Button
+            block="s-confirm-dialog"
+            element="btn"
+            modifiers={["confirm", danger && "danger"]}
+            onClick={onConfirm}
+          >
             {confirmText}
           </Button>
         </div>

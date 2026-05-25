@@ -3,10 +3,14 @@ import { useQuery, useQueryClient, type QueryClient } from "@tanstack/react-quer
 import {
   fetchActivities,
   fetchHomeSummary,
+  fetchNotificationUnreadCount,
+  fetchNotifications,
   fetchPindanList,
   fetchProfilePindan,
   fetchProfileTickets,
   fetchTickets,
+  markAllNotificationsRead,
+  markNotificationRead,
 } from "../api/syncApi";
 import { isApiEnabled } from "../constants/api";
 import { ticketListings as mockTicketListings, type TicketFilterKey } from "../data/ticketListings";
@@ -18,6 +22,7 @@ import {
 } from "../pages/index/mockData";
 import type { BackendActivity } from "../types/backend";
 import { getClientUserId } from "../utils/session";
+import type { ProfilePinDanItem, ProfileTicketItem } from "../types/backend";
 import {
   buildActivityNameMap,
   mapActivitiesToEvents,
@@ -28,6 +33,10 @@ import {
   type PinDanCardUi,
   type PindanPageItem,
 } from "../utils/apiMappers";
+import {
+  buildParticipatedActivities,
+  type ProfileParticipatedItem,
+} from "../utils/profileParticipated";
 
 const MOCK_EVENTS: EventCardUi[] = [
   {
@@ -96,6 +105,7 @@ export function invalidateTicketQueries(queryClient: QueryClient) {
     queryClient.invalidateQueries({ queryKey: ["home"] }),
     queryClient.invalidateQueries({ queryKey: ["tickets"] }),
     queryClient.invalidateQueries({ queryKey: ["profile", "tickets"] }),
+    queryClient.invalidateQueries({ queryKey: ["notifications"] }),
   ]).then(() =>
     queryClient.refetchQueries({ queryKey: ["tickets"], type: "all" }),
   );
@@ -106,6 +116,7 @@ export function invalidatePindanQueries(queryClient: QueryClient) {
     queryClient.invalidateQueries({ queryKey: ["home"] }),
     queryClient.invalidateQueries({ queryKey: ["pindan"] }),
     queryClient.invalidateQueries({ queryKey: ["profile", "pindan"] }),
+    queryClient.invalidateQueries({ queryKey: ["notifications"] }),
   ]).then(() =>
     queryClient.refetchQueries({ queryKey: ["pindan"], type: "all" }),
   );
@@ -114,6 +125,55 @@ export function invalidatePindanQueries(queryClient: QueryClient) {
 export function useInvalidateTicketQueries() {
   const queryClient = useQueryClient();
   return useCallback(() => invalidateTicketQueries(queryClient), [queryClient]);
+}
+
+export function invalidateNotificationQueries(queryClient: QueryClient) {
+  return Promise.all([
+    queryClient.invalidateQueries({ queryKey: ["notifications"] }),
+  ]);
+}
+
+export function useInvalidateNotificationQueries() {
+  const queryClient = useQueryClient();
+  return useCallback(() => invalidateNotificationQueries(queryClient), [queryClient]);
+}
+
+export function useNotificationsQuery() {
+  const enabled = isApiEnabled();
+  const userId = getClientUserId();
+
+  return useQuery({
+    queryKey: ["notifications", "list", userId],
+    queryFn: () => fetchNotifications(userId),
+    enabled,
+    staleTime: 30_000,
+    refetchOnWindowFocus: true,
+  });
+}
+
+export function useNotificationUnreadCount() {
+  const enabled = isApiEnabled();
+  const userId = getClientUserId();
+
+  return useQuery({
+    queryKey: ["notifications", "unread", userId],
+    queryFn: () => fetchNotificationUnreadCount(userId),
+    enabled,
+    staleTime: 30_000,
+    refetchOnWindowFocus: true,
+  });
+}
+
+export async function markNotificationAsRead(id: string, queryClient: QueryClient) {
+  const userId = getClientUserId();
+  await markNotificationRead(id, userId);
+  await invalidateNotificationQueries(queryClient);
+}
+
+export async function markAllNotificationsAsRead(queryClient: QueryClient) {
+  const userId = getClientUserId();
+  await markAllNotificationsRead(userId);
+  await invalidateNotificationQueries(queryClient);
 }
 
 export function useProfileTicketsQuery() {
@@ -310,4 +370,43 @@ export function useProfilePindanQuery() {
     enabled,
     staleTime: 15_000,
   });
+}
+
+export function useProfileParticipatedItems(
+  pindans: ProfilePinDanItem[],
+  tickets: ProfileTicketItem[],
+  options?: { pindanLoading?: boolean; ticketsLoading?: boolean; pindanError?: boolean; ticketsError?: boolean },
+) {
+  const activitiesQuery = useActivitiesQuery();
+  const enabled = isApiEnabled();
+
+  const items = useMemo((): ProfileParticipatedItem[] => {
+    if (!enabled) {
+      return buildParticipatedActivities(pindans, tickets);
+    }
+    return buildParticipatedActivities(pindans, tickets, activitiesQuery.data ?? []);
+  }, [enabled, pindans, tickets, activitiesQuery.data]);
+
+  const isLoading =
+    enabled &&
+    (Boolean(options?.pindanLoading) ||
+      Boolean(options?.ticketsLoading) ||
+      (activitiesQuery.isLoading && !activitiesQuery.data));
+
+  const isError =
+    enabled &&
+    (Boolean(options?.pindanError) || Boolean(options?.ticketsError) || activitiesQuery.isError);
+
+  const refetch = useCallback(async () => {
+    if (!enabled) return;
+    await Promise.all([activitiesQuery.refetch()]);
+  }, [activitiesQuery, enabled]);
+
+  return {
+    items,
+    isLoading,
+    isError,
+    refetch,
+    usingMock: !enabled,
+  };
 }
