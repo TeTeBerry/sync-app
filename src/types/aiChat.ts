@@ -75,7 +75,6 @@ export type ChatUiMessage = {
 export interface SendChatOptions {
   text: string;
   image?: string;
-  freshSession?: boolean;
 }
 
 export interface ChatSessionRecord {

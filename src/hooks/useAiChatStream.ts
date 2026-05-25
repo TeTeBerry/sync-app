@@ -12,7 +12,6 @@ import {
 import { mockAiChatStream, streamAiChatRequest } from "../utils/aiChatStream";
 import { createTypewriterReveal } from "../utils/typewriterReveal";
 import {
-  createFreshSessionId,
   getClientUserId,
   getClientUserName,
   getClientUserPhone,
@@ -128,13 +127,9 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
   const send = useCallback(
     async (payload: string | SendChatOptions) => {
       const options = typeof payload === "string" ? { text: payload } : payload;
-      const { text, image, freshSession } = options;
+      const { text, image } = options;
       const trimmed = text.trim();
       if ((!trimmed && !image) || isStreaming) return;
-
-      if (freshSession) {
-        sessionIdRef.current = createFreshSessionId();
-      }
 
       const userMsg: ChatUiMessage = {
         id: createMessageId(),
@@ -144,9 +139,7 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
         ocrText: image ? trimmed : undefined,
       };
       const aiMsgId = createMessageId();
-      const baseMessages = freshSession
-        ? [{ id: createMessageId(), from: "ai" as const, text: welcomeText }]
-        : messagesRef.current;
+      const baseMessages = messagesRef.current;
       const history = buildApiChatHistory(
         baseMessages,
         welcomeText,
