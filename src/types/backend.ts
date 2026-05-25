@@ -22,12 +22,15 @@ export interface BackendTicket {
   _id: string;
   activityId?: string;
   userId?: string;
+  userName?: string;
   skuCode?: string;
   status?: string;
   seatOrSlot?: {
     type?: "sell" | "buy";
     quantity?: number;
     price?: number;
+    eventDate?: string;
+    contact?: string;
   };
   createdAt?: string;
   updatedAt?: string;
@@ -68,9 +71,24 @@ export interface CreateTicketPayload {
   activityId: string;
   quantity: number;
   type: "sell" | "buy";
+  skuCode: string;
+  price: number;
+  eventDate: string;
+  contact: string;
   userId?: string;
-  skuCode?: string;
-  price?: number;
+  userName?: string;
+}
+
+export interface ProfileTicketItem {
+  id: string;
+  type: "sell" | "buy";
+  activityId: string;
+  skuCode: string;
+  quantity: number;
+  price: number;
+  eventDate: string;
+  contact: string;
+  createdAt: string;
 }
 
 export interface HomeSummary {

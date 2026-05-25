@@ -188,7 +188,7 @@
   "chat": {
     "name": "SYNC 智能搭子",
     "status": "在线为你匹配...",
-    "welcome": "Hey！听说你想去周末的 S2O 电音节？需要我帮你匹配拼门票还是卡座的搭子？",
+    "welcome": "Hey！听说你想去周末的 S2O 电音节？需要我帮你找搭子，或查门票出/收吗？",
     "placeholder": "告诉我想去哪场派对..."
   },
   "aimatch": {
@@ -200,16 +200,17 @@
       "events": "查看活动"
     },
     "ai": {
-      "welcome": "👋 我是你的 AI 全能搭子助手，帮你搞定音乐节的一切 —— 找搭子、拼单、出/收票，说出需求，我来搞定。",
+      "welcome": "👋 我是你的 AI 全能搭子助手，帮你搞定音乐节的一切 —— 找搭子、拼单、门票出/收，说出需求，我来搞定。",
       "quickReplies": {
         "findBuddy": "帮我找搭子",
-        "pinTicket": "我要拼门票",
+        "buyTicket": "我要收票",
         "sellTicket": "我有票要出",
         "nearEvents": "查最近活动"
       },
       "searching": "正在为你搜索「{{query}}」相关内容 🔍 已找到 {{count}} 位高匹配度用户，点击下方卡片查看详情！",
       "streamError": "抱歉，回复出错了，请稍后再试。",
-      "placeholder": "说出需求，比如「想拼 EDC 门票」"
+      "thinking": "AI 正在思考",
+      "placeholder": "说出需求，比如「查 EDC 门票」或「我要出票」"
     },
     "pindan": {
       "createNew": "发起一个新拼单",
@@ -253,11 +254,15 @@
       "buyTicket": "立即购票",
       "contact": "联系他",
       "eventNotFound": "未找到匹配活动，请检查活动名称",
+      "published": "出票信息已发布",
+      "createdCardTitle": "查看挂单",
+      "viewListing": "点击查看门票详情",
       "modal": {
         "subtitleSell": "填写关键信息，发布后立即可见",
         "subtitleBuy": "发布求购，有票的人会主动联系你",
         "eventNameSell": "活动名称，如「EDC China 2025」",
         "eventNameBuy": "活动名称，如「Ultra Shanghai」",
+        "eventDate": "演出日期，如 2025-03-02",
         "seatSell": "票区/座位",
         "seatBuy": "票区需求",
         "quantity": "张数",

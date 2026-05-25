@@ -1,4 +1,4 @@
-import type { AiChatMessage, AiChatStreamEvent } from "../types/aiChat";
+import type { AiChatMessage, AiChatStreamEvent, TicketCreatedCard } from "../types/aiChat";
 
 function parseSseDataLine(line: string): AiChatStreamEvent | null {
   if (!line.startsWith("data:")) return null;
@@ -13,7 +13,13 @@ function parseSseDataLine(line: string): AiChatStreamEvent | null {
       return { type: "error", message: String(json.message ?? "Unknown error") };
     }
     if (json.type === "done") {
-      return { type: "done", messageId: json.messageId as string | undefined };
+      return {
+        type: "done",
+        messageId: json.messageId as string | undefined,
+        sessionId: json.sessionId as string | undefined,
+        ticketId: json.ticketId as string | undefined,
+        ticketCard: json.ticketCard as TicketCreatedCard | undefined,
+      };
     }
     if (typeof json.content === "string") {
       return { type: "delta", content: json.content };
@@ -66,6 +72,7 @@ export interface StreamAiChatOptions {
   messages: AiChatMessage[];
   sessionId?: string;
   userId?: string;
+  userName?: string;
   signal?: AbortSignal;
   headers?: Record<string, string>;
 }
@@ -85,6 +92,7 @@ export async function* streamAiChatRequest(
       messages: options.messages,
       sessionId: options.sessionId,
       userId: options.userId,
+      userName: options.userName,
     }),
     signal: options.signal,
   });

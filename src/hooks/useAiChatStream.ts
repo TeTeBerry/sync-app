@@ -1,8 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useDidShow } from "@tarojs/taro";
+import { useQueryClient } from "@tanstack/react-query";
+import { fetchChatSession } from "../api/syncApi";
 import { AI_CHAT_STREAM_URL } from "../constants/api";
-import type { AiChatMessage, ChatUiMessage } from "../types/aiChat";
+import type { ChatUiMessage } from "../types/aiChat";
+import { invalidateTicketQueries } from "./useSyncApi";
+import { buildApiChatHistory, mapHistoryToUiMessages } from "../utils/aiChatHistory";
 import { mockAiChatStream, streamAiChatRequest } from "../utils/aiChatStream";
-import { getOrCreateSessionId } from "../utils/session";
+import { getClientUserId, getClientUserName, getOrCreateSessionId, persistSessionId } from "../utils/session";
 
 function createMessageId() {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
@@ -15,7 +20,11 @@ export interface UseAiChatStreamOptions {
   streamErrorText: string;
   apiUrl?: string;
   sessionId?: string;
+  userId?: string;
+  userName?: string;
   getAuthHeaders?: () => Record<string, string>;
+  /** Called when backend confirms a ticket listing was created */
+  onTicketCreated?: (ticketId: string) => void;
 }
 
 export function useAiChatStream(options: UseAiChatStreamOptions) {
@@ -25,31 +34,66 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
     streamErrorText,
     apiUrl = AI_CHAT_STREAM_URL,
     sessionId: sessionIdOption,
+    userId: userIdOption,
+    userName: userNameOption,
     getAuthHeaders,
+    onTicketCreated,
   } = options;
 
+  const queryClient = useQueryClient();
   const sessionIdRef = useRef(sessionIdOption ?? getOrCreateSessionId());
+  const userIdRef = useRef(userIdOption ?? getClientUserId());
+  const userNameRef = useRef(userNameOption ?? getClientUserName());
 
   const [messages, setMessages] = useState<ChatUiMessage[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const messagesRef = useRef<ChatUiMessage[]>(messages);
+  const isStreamingRef = useRef(isStreaming);
 
   useEffect(() => {
     messagesRef.current = messages;
   }, [messages]);
 
   useEffect(() => {
+    isStreamingRef.current = isStreaming;
+  }, [isStreaming]);
+
+  useEffect(() => {
     return () => abortRef.current?.abort();
   }, []);
 
-  const setWelcome = useCallback((text: string) => {
-    setMessages([{ id: createMessageId(), from: "ai", text }]);
-  }, []);
+  const showWelcome = useCallback(() => {
+    setMessages([{ id: createMessageId(), from: "ai", text: welcomeText }]);
+  }, [welcomeText]);
 
-  useEffect(() => {
-    setWelcome(welcomeText);
-  }, [welcomeText, setWelcome]);
+  const loadSessionHistory = useCallback(async () => {
+    if (isStreamingRef.current) return;
+
+    if (!apiUrl) {
+      showWelcome();
+      return;
+    }
+
+    setIsLoadingHistory(true);
+    try {
+      const session = await fetchChatSession(sessionIdRef.current);
+      if (session.history?.length) {
+        setMessages(mapHistoryToUiMessages(session.history, sessionIdRef.current));
+      } else {
+        showWelcome();
+      }
+    } catch {
+      showWelcome();
+    } finally {
+      setIsLoadingHistory(false);
+    }
+  }, [apiUrl, showWelcome]);
+
+  useDidShow(() => {
+    void loadSessionHistory();
+  });
 
   const abort = useCallback(() => {
     abortRef.current?.abort();
@@ -60,16 +104,13 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
       const trimmed = text.trim();
       if (!trimmed || isStreaming) return;
 
-      const userMsg: ChatUiMessage = { id: createMessageId(), from: "user", text: trimmed };
+      const userMsg: ChatUiMessage = {
+        id: createMessageId(),
+        from: "user",
+        text: trimmed,
+      };
       const aiMsgId = createMessageId();
-
-      const history: AiChatMessage[] = messagesRef.current
-        .filter((message) => !message.streaming && message.text)
-        .map((message) => ({
-          role: message.from === "user" ? "user" : "assistant",
-          content: message.text,
-        }));
-      history.push({ role: "user", content: trimmed });
+      const history = buildApiChatHistory(messagesRef.current, welcomeText, trimmed);
 
       setMessages((prev) => [
         ...prev,
@@ -81,8 +122,14 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
       const controller = new AbortController();
       abortRef.current = controller;
 
-      const finishAiMessage = (updater: (current: ChatUiMessage) => ChatUiMessage) => {
-        setMessages((prev) => prev.map((message) => (message.id === aiMsgId ? updater(message) : message)));
+      const finishAiMessage = (
+        updater: (current: ChatUiMessage) => ChatUiMessage,
+      ) => {
+        setMessages((prev) =>
+          prev.map((message) =>
+            message.id === aiMsgId ? updater(message) : message,
+          ),
+        );
       };
 
       try {
@@ -91,6 +138,8 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
               url: apiUrl,
               messages: history,
               sessionId: sessionIdRef.current,
+              userId: userIdRef.current,
+              userName: userNameRef.current,
               signal: controller.signal,
               headers: getAuthHeaders?.(),
             })
@@ -115,7 +164,19 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
           }
 
           if (event.type === "done") {
-            finishAiMessage((message) => ({ ...message, streaming: false }));
+            finishAiMessage((message) => ({
+              ...message,
+              streaming: false,
+              ticketCard: event.ticketCard ?? message.ticketCard,
+            }));
+            if (event.sessionId) {
+              sessionIdRef.current = event.sessionId;
+              persistSessionId(event.sessionId);
+            }
+            if (event.ticketId) {
+              onTicketCreated?.(event.ticketId);
+              void invalidateTicketQueries(queryClient);
+            }
             break;
           }
         }
@@ -133,8 +194,24 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
         finishAiMessage((message) => ({ ...message, streaming: false }));
       }
     },
-    [apiUrl, getAuthHeaders, isStreaming, mockReply, streamErrorText],
+    [
+      apiUrl,
+      getAuthHeaders,
+      isStreaming,
+      mockReply,
+      onTicketCreated,
+      queryClient,
+      streamErrorText,
+      welcomeText,
+    ],
   );
 
-  return { messages, isStreaming, send, abort, setWelcome };
+  return {
+    messages,
+    isStreaming,
+    isLoadingHistory,
+    send,
+    abort,
+    reloadHistory: loadSessionHistory,
+  };
 }

@@ -16,6 +16,7 @@ import { Button, Input, cn } from "./ui";
 import {
   CalendarIcon,
   CheckCircleIcon,
+  ChevronRightIcon,
   FlameIcon,
   MapPinIcon,
   PlusIcon,
@@ -26,15 +27,17 @@ import {
   ZapIcon,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import Taro from "@tarojs/taro";
+import { useQueryClient } from "@tanstack/react-query";
 import { useAiChatStream } from "../hooks/useAiChatStream";
-import { useEventList, usePinDanList } from "../hooks/useSyncApi";
+import { invalidateTicketQueries, useEventList, usePinDanList } from "../hooks/useSyncApi";
 import type { PinDanCategory } from "../utils/apiMappers";
 
 type MainTab = "ai" | "pindan" | "ticket" | "events";
 
 const pinDanCategoryKeys: PinDanCategory[] = ["package", "hotel", "transport"];
 
-const quickReplyKeys = [`findBuddy`, `pinTicket`, `sellTicket`, `nearEvents`] as const;
+const quickReplyKeys = [`findBuddy`, `buyTicket`, `sellTicket`, `nearEvents`] as const;
 
 const tabAccentCls: Record<MainTab, string> = {
   ai: `s-aim-tab--accent-ai`,
@@ -43,7 +46,13 @@ const tabAccentCls: Record<MainTab, string> = {
   events: `s-aim-tab--accent-events`,
 };
 
-function AiChat() {
+function AiChat({
+  onTicketCreated,
+  onTicketCardClick,
+}: {
+  onTicketCreated?: (ticketId: string) => void;
+  onTicketCardClick?: (ticketId: string) => void;
+}) {
   const { t } = useTranslation();
   const [input, setInput] = useState(``);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -57,10 +66,19 @@ function AiChat() {
     [t],
   );
 
-  const { messages, isStreaming, send } = useAiChatStream({
+  const handleTicketCreated = useCallback(
+    (ticketId: string) => {
+      onTicketCreated?.(ticketId);
+      void Taro.showToast({ title: t(`aimatch.ticket.published`), icon: `success` });
+    },
+    [onTicketCreated, t],
+  );
+
+  const { messages, isStreaming, isLoadingHistory, send } = useAiChatStream({
     welcomeText: t(`aimatch.ai.welcome`),
     mockReply,
     streamErrorText: t(`aimatch.ai.streamError`),
+    onTicketCreated: handleTicketCreated,
   });
 
   useEffect(() => {
@@ -94,6 +112,9 @@ function AiChat() {
   return (
     <div className="s-aim-ai">
       <div className="s-aim-ai__scroll">
+        {isLoadingHistory ? (
+          <p className="s-aim-panel-hint">{t(`common.loading`)}</p>
+        ) : null}
         {messages.map((msg) => (
           <div
             key={msg.id}
@@ -102,14 +123,48 @@ function AiChat() {
             <div className={`s-aim-ai__avatar${msg.from === `ai` ? `` : ` s-aim-ai__avatar--hidden`}`}>
               <SparklesIcon size={13} />
             </div>
-            <div
-              className={cn(
-                `s-aim-ai__bubble`,
-                msg.from === `ai` ? `s-aim-ai__bubble--from-ai` : `s-aim-ai__bubble--from-user`,
-                msg.streaming && `s-aim-ai__bubble--streaming`,
-              )}
-            >
-              <span>{msg.text}</span>
+            <div className={cn(`s-aim-ai__content`, msg.from === `user` && `s-aim-ai__content--from-user`)}>
+              <div
+                className={cn(
+                  `s-aim-ai__bubble`,
+                  msg.from === `ai` ? `s-aim-ai__bubble--from-ai` : `s-aim-ai__bubble--from-user`,
+                  msg.streaming && `s-aim-ai__bubble--streaming`,
+                  msg.streaming && !msg.text && `s-aim-ai__bubble--waiting`,
+                )}
+              >
+                {msg.streaming && !msg.text ? (
+                  <span className="s-aim-ai__typing" aria-label={t(`aimatch.ai.thinking`)}>
+                    <span />
+                    <span />
+                    <span />
+                  </span>
+                ) : (
+                  <span>{msg.text}</span>
+                )}
+              </div>
+              {msg.ticketCard ? (
+                <button
+                  type="button"
+                  className={cn(
+                    `s-aim-ai__ticket-card`,
+                    msg.ticketCard.type === `buy` && `s-aim-ai__ticket-card--buy`,
+                  )}
+                  onClick={() => onTicketCardClick?.(msg.ticketCard!.id)}
+                >
+                  <div className="s-aim-ai__ticket-card__icon">
+                    <TicketIcon size={16} />
+                  </div>
+                  <div className="s-aim-ai__ticket-card__body">
+                    <span className="s-aim-ai__ticket-card__label">
+                      {t(`aimatch.ticket.createdCardTitle`)}
+                    </span>
+                    <span className="s-aim-ai__ticket-card__event">{msg.ticketCard.event}</span>
+                    <span className="s-aim-ai__ticket-card__meta">{msg.ticketCard.seat}</span>
+                    <span className="s-aim-ai__ticket-card__price">¥{msg.ticketCard.price}</span>
+                  </div>
+                  <ChevronRightIcon size={16} className="s-aim-ai__ticket-card__chev" />
+                </button>
+              ) : null}
             </div>
           </div>
         ))}
@@ -151,23 +206,41 @@ function AiChat() {
 
 const AIMatchPage: FC = () => {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<MainTab>(`ai`);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [createCategory, setCreateCategory] = useState<PinDanCategory>(`hotel`);
   const [goingIds, setGoingIds] = useState<string[]>([]);
+  const [highlightTicketId, setHighlightTicketId] = useState<string | null>(null);
 
   const { events: eventsList, isLoading: eventsLoading, isError: eventsError, refetch: refetchEvents } =
-    useEventList();
+    useEventList({ enabled: activeTab === `events` });
   const {
     items: activePinDans,
     isLoading: pindanLoading,
     isError: pindanError,
     refetch: refetchPindan,
-  } = usePinDanList(createCategory);
+  } = usePinDanList(createCategory, { enabled: activeTab === `pindan` });
 
   const toggleGoing = (id: string) => {
     setGoingIds((prev) => (prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]));
   };
+
+  const handleTicketCreated = useCallback(
+    (_ticketId: string) => {
+      void invalidateTicketQueries(queryClient);
+    },
+    [queryClient],
+  );
+
+  const handleTicketCardClick = useCallback(
+    (ticketId: string) => {
+      setActiveTab(`ticket`);
+      setHighlightTicketId(ticketId);
+      void invalidateTicketQueries(queryClient);
+    },
+    [queryClient],
+  );
 
   const tabs: { key: MainTab; labelKey: string; Icon: ComponentType<{ size?: number | string }> }[] = [
     { key: `ai`, labelKey: `aimatch.tabs.ai`, Icon: SparklesIcon },
@@ -186,23 +259,26 @@ const AIMatchPage: FC = () => {
 
   return (
     <div data-cmp="AIMatch" className="s-aim">
-      <PageNavigation title={t("aimatch.title")} />
+      <header className="s-aim-header">
+        <PageNavigation title={t("aimatch.title")} />
 
-      <div className="s-aim-top-tabs">
-        {tabs.map(({ key, labelKey, Icon }) => (
-          <Button
-            key={key}
-            className={cn(`s-aim-tab`, activeTab === key && `s-aim-tab--active`, activeTab === key && tabAccentCls[key])}
-            onClick={() => setActiveTab(key)}
-          >
-            <Icon size={15} />
-            {t(labelKey)}
-          </Button>
-        ))}
-      </div>
+        <div className="s-aim-top-tabs">
+          {tabs.map(({ key, labelKey, Icon }) => (
+            <Button
+              key={key}
+              className={cn(`s-aim-tab`, activeTab === key && `s-aim-tab--active`, activeTab === key && tabAccentCls[key])}
+              onClick={() => setActiveTab(key)}
+            >
+              <Icon size={15} />
+              {t(labelKey)}
+            </Button>
+          ))}
+        </div>
+      </header>
 
+      <div className="s-aim-body">
       <div className={activeTab === `ai` ? `s-aim-ai-panel` : `s-aim-panel--hidden`}>
-        <AiChat />
+        <AiChat onTicketCreated={handleTicketCreated} onTicketCardClick={handleTicketCardClick} />
       </div>
 
       <div className={`s-aim-panel-block s-aim-pin s-aim-pin--${createCategory}${activeTab === `pindan` ? `` : ` s-aim-panel--hidden`}`}>
@@ -330,7 +406,11 @@ const AIMatchPage: FC = () => {
       </div>
 
       <div className={`s-aim-ticket s-aim-panel-block${activeTab === `ticket` ? `` : ` s-aim-panel--hidden`}`}>
-        <TicketMarketPanel />
+        <TicketMarketPanel
+          fetchEnabled={activeTab === `ticket`}
+          highlightTicketId={highlightTicketId}
+          onHighlightDone={() => setHighlightTicketId(null)}
+        />
       </div>
 
       <div className={`s-aim-events s-aim-panel-block${activeTab === `events` ? `` : ` s-aim-panel--hidden`}`}>
@@ -418,6 +498,7 @@ const AIMatchPage: FC = () => {
             </div>
           ))}
         </div>
+      </div>
       </div>
 
       <CreatePinDanModal

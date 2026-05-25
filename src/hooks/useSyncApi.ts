@@ -1,10 +1,11 @@
-import { useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useCallback, useMemo } from "react";
+import { useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 import {
   fetchActivities,
   fetchHomeSummary,
   fetchPindanList,
   fetchProfilePindan,
+  fetchProfileTickets,
   fetchTickets,
 } from "../api/syncApi";
 import { isApiEnabled } from "../constants/api";
@@ -91,8 +92,38 @@ const MOCK_PINDAN: PinDanCardUi[] = [
   },
 ];
 
-export function useActivitiesQuery() {
+export function invalidateTicketQueries(queryClient: QueryClient) {
+  return Promise.all([
+    queryClient.invalidateQueries({ queryKey: ["home"] }),
+    queryClient.invalidateQueries({ queryKey: ["tickets"] }),
+    queryClient.invalidateQueries({ queryKey: ["profile", "tickets"] }),
+  ]).then(() =>
+    queryClient.refetchQueries({ queryKey: ["tickets"], type: "all" }),
+  );
+}
+
+export function useInvalidateTicketQueries() {
+  const queryClient = useQueryClient();
+  return useCallback(() => invalidateTicketQueries(queryClient), [queryClient]);
+}
+
+export function useProfileTicketsQuery() {
   const enabled = isApiEnabled();
+  const userId = getClientUserId();
+
+  return useQuery({
+    queryKey: ["profile", "tickets", userId],
+    queryFn: () => fetchProfileTickets(userId),
+    enabled,
+    staleTime: 15_000,
+  });
+}
+
+type QueryEnableOptions = { enabled?: boolean };
+
+export function useActivitiesQuery(options?: QueryEnableOptions) {
+  const tabEnabled = options?.enabled ?? true;
+  const enabled = isApiEnabled() && tabEnabled;
 
   return useQuery({
     queryKey: ["activities"],
@@ -102,27 +133,34 @@ export function useActivitiesQuery() {
   });
 }
 
-export function useEventList() {
-  const query = useActivitiesQuery();
+export function useEventList(options?: QueryEnableOptions) {
+  const tabEnabled = options?.enabled ?? true;
+  const query = useActivitiesQuery({ enabled: tabEnabled });
 
   const events = useMemo(() => {
-    if (!isApiEnabled()) return MOCK_EVENTS;
+    if (!isApiEnabled()) {
+      return tabEnabled ? MOCK_EVENTS : [];
+    }
     if (!query.data) return [];
     return mapActivitiesToEvents(query.data);
-  }, [query.data]);
+  }, [query.data, tabEnabled]);
 
   return {
     events,
-    isLoading: query.isLoading,
-    isError: query.isError,
+    isLoading: tabEnabled && query.isLoading,
+    isError: tabEnabled && query.isError,
     refetch: query.refetch,
     usingMock: !isApiEnabled(),
   };
 }
 
-export function usePinDanList(category?: "package" | "hotel" | "transport") {
-  const activitiesQuery = useActivitiesQuery();
-  const enabled = isApiEnabled();
+export function usePinDanList(
+  category?: "package" | "hotel" | "transport",
+  options?: QueryEnableOptions,
+) {
+  const tabEnabled = options?.enabled ?? true;
+  const activitiesQuery = useActivitiesQuery({ enabled: tabEnabled });
+  const enabled = isApiEnabled() && tabEnabled;
 
   const pindanQuery = useQuery({
     queryKey: ["pindan", category],
@@ -133,27 +171,31 @@ export function usePinDanList(category?: "package" | "hotel" | "transport") {
 
   const items = useMemo(() => {
     if (!enabled) {
-      return category ? MOCK_PINDAN.filter((item) => item.category === category) : MOCK_PINDAN;
+      if (!isApiEnabled() && tabEnabled) {
+        return category ? MOCK_PINDAN.filter((item) => item.category === category) : MOCK_PINDAN;
+      }
+      return [];
     }
     if (!pindanQuery.data) return [];
 
     const nameMap = buildActivityNameMap(activitiesQuery.data ?? []);
     const cards = mapPindanToCards(pindanQuery.data, nameMap);
     return category ? cards.filter((item) => item.category === category) : cards;
-  }, [activitiesQuery.data, category, enabled, pindanQuery.data]);
+  }, [activitiesQuery.data, category, enabled, pindanQuery.data, tabEnabled]);
 
   return {
     items,
-    isLoading: pindanQuery.isLoading || activitiesQuery.isLoading,
-    isError: pindanQuery.isError,
+    isLoading: tabEnabled && (pindanQuery.isLoading || activitiesQuery.isLoading),
+    isError: tabEnabled && pindanQuery.isError,
     refetch: pindanQuery.refetch,
-    usingMock: !enabled,
+    usingMock: !isApiEnabled(),
   };
 }
 
-export function useTicketList(filter: TicketFilterKey) {
-  const activitiesQuery = useActivitiesQuery();
-  const enabled = isApiEnabled();
+export function useTicketList(filter: TicketFilterKey, options?: QueryEnableOptions) {
+  const tabEnabled = options?.enabled ?? true;
+  const activitiesQuery = useActivitiesQuery({ enabled: tabEnabled });
+  const enabled = isApiEnabled() && tabEnabled;
 
   const ticketsQuery = useQuery({
     queryKey: ["tickets", filter],
@@ -161,26 +203,30 @@ export function useTicketList(filter: TicketFilterKey) {
       fetchTickets(filter === "all" ? undefined : { type: filter }),
     enabled,
     staleTime: 30_000,
+    refetchOnMount: enabled ? "always" : false,
   });
 
   const listings = useMemo(() => {
     if (!enabled) {
-      if (filter === "all") return mockTicketListings;
-      return mockTicketListings.filter((item) => item.type === filter);
+      if (!isApiEnabled() && tabEnabled) {
+        if (filter === "all") return mockTicketListings;
+        return mockTicketListings.filter((item) => item.type === filter);
+      }
+      return [];
     }
     if (!ticketsQuery.data) return [];
 
     const nameMap = buildActivityNameMap(activitiesQuery.data ?? []);
     return mapTicketsToListings(ticketsQuery.data, nameMap);
-  }, [activitiesQuery.data, enabled, filter, ticketsQuery.data]);
+  }, [activitiesQuery.data, enabled, filter, ticketsQuery.data, tabEnabled]);
 
   return {
     listings,
     activities: activitiesQuery.data ?? ([] as BackendActivity[]),
-    isLoading: ticketsQuery.isLoading || activitiesQuery.isLoading,
-    isError: ticketsQuery.isError,
+    isLoading: tabEnabled && (ticketsQuery.isLoading || activitiesQuery.isLoading),
+    isError: tabEnabled && ticketsQuery.isError,
     refetch: ticketsQuery.refetch,
-    usingMock: !enabled,
+    usingMock: !isApiEnabled(),
   };
 }
 

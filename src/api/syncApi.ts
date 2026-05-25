@@ -1,4 +1,5 @@
 import { apiDelete, apiGet, apiPost } from "../utils/apiClient";
+import type { ChatSessionRecord } from "../types/aiChat";
 import type {
   BackendActivity,
   BackendPindan,
@@ -6,6 +7,7 @@ import type {
   CreateTicketPayload,
   HomeSummary,
   ProfilePinDanItem,
+  ProfileTicketItem,
 } from "../types/backend";
 
 export function fetchActivities() {
@@ -16,7 +18,10 @@ export function matchActivity(keyword: string) {
   return apiGet<BackendActivity | null>("/activities/match", { keyword });
 }
 
-export function fetchTickets(params?: { activityId?: string; type?: "sell" | "buy" }) {
+export function fetchTickets(params?: {
+  activityId?: string;
+  type?: "sell" | "buy";
+}) {
   return apiGet<BackendTicket[]>("/tickets", {
     activityId: params?.activityId,
     type: params?.type,
@@ -47,6 +52,10 @@ export function fetchProfilePindan(userId?: string) {
   return apiGet<ProfilePinDanItem[]>("/profile/pindan", { userId });
 }
 
+export function fetchProfileTickets(userId?: string) {
+  return apiGet<ProfileTicketItem[]>("/profile/tickets", { userId });
+}
+
 export function joinPindan(legacyId: number, userId?: string) {
   return apiPost<ProfilePinDanItem>(`/pindan/${legacyId}/join`, { userId });
 }
@@ -57,4 +66,8 @@ export function leavePindan(legacyId: number, userId?: string) {
 
 export function fetchActivityByLegacyId(legacyId: number) {
   return apiGet<BackendActivity | null>(`/activities/${legacyId}`);
+}
+
+export function fetchChatSession(sessionId: string) {
+  return apiGet<ChatSessionRecord>(`/chat/sessions/${sessionId}`);
 }

@@ -21,10 +21,27 @@
 
 .s-aim {
   width: 100%;
-  min-height: 100vh;
+  height: 100vh;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
   background-color: var(--background);
+}
+
+.s-aim-header {
+  flex-shrink: 0;
+  z-index: 30;
+  background-color: var(--background);
+  padding-bottom: 12px;
+}
+
+.s-aim-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .s-aim-top-tabs {
@@ -88,8 +105,12 @@
 }
 
 .s-aim-panel-block {
-  margin-top: 16px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   padding-bottom: 96px;
+  box-sizing: border-box;
 }
 
 /* ---- AI Chat ---- */
@@ -101,6 +122,7 @@
   min-height: 0;
   padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
   box-sizing: border-box;
+  overflow: hidden;
 
   &__scroll {
     flex: 1;
@@ -142,7 +164,7 @@
   }
 
   &__bubble {
-    max-width: 76%;
+    max-width: 100%;
     padding: 10px 16px;
     border-radius: 16px;
     font-size: 14px;
@@ -156,7 +178,11 @@
       border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
-    &--streaming span::after {
+    &--waiting {
+      min-width: 52px;
+    }
+
+    &--streaming:not(&--waiting) span::after {
       content: "";
       display: inline-block;
       width: 2px;
@@ -172,6 +198,103 @@
       color: #fff;
       border-radius: 16px;
       border-top-right-radius: 6px;
+    }
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-width: 76%;
+    align-items: flex-start;
+
+    &--from-user {
+      align-items: flex-end;
+    }
+  }
+
+  &__ticket-card {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    border-radius: 14px;
+    border: 1px solid rgba(var(--primary-rgb), 0.35);
+    background: rgba(var(--primary-rgb), 0.08);
+    cursor: pointer;
+    text-align: left;
+    transition: border-color 200ms ease, background 200ms ease, transform 120ms ease;
+
+    &:active {
+      transform: scale(0.98);
+    }
+
+    &--buy {
+      border-color: rgba(var(--secondary-rgb), 0.35);
+      background: rgba(var(--secondary-rgb), 0.08);
+    }
+
+    &__icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      background: rgba(var(--primary-rgb), 0.15);
+      color: var(--primary);
+
+      .s-aim-ai__ticket-card--buy & {
+        background: rgba(var(--secondary-rgb), 0.15);
+        color: var(--secondary);
+      }
+    }
+
+    &__body {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    &__label {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--muted-foreground);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    &__event {
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    &__meta {
+      font-size: 11px;
+      color: var(--muted-foreground);
+    }
+
+    &__price {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--primary);
+
+      .s-aim-ai__ticket-card--buy & {
+        color: var(--secondary);
+      }
+    }
+
+    &__chev {
+      flex-shrink: 0;
+      color: var(--muted-foreground);
     }
   }
 
@@ -241,6 +364,29 @@
     justify-content: center;
     color: #fff;
   }
+
+  &__typing {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    height: 20px;
+
+    span {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--muted-foreground);
+      animation: s-aim-ai-typing 1.4s ease-in-out infinite;
+
+      &:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+
+      &:nth-child(3) {
+        animation-delay: 0.4s;
+      }
+    }
+  }
 }
 
 @keyframes s-aim-ai-cursor-blink {
@@ -251,6 +397,20 @@
 
   50% {
     opacity: 0;
+  }
+}
+
+@keyframes s-aim-ai-typing {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.35;
+  }
+
+  30% {
+    transform: translateY(-4px);
+    opacity: 1;
   }
 }
 /* ---- Pindan block ---- */

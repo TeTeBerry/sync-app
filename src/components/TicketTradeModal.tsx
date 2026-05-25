@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import {
   ArrowDownLeftIcon,
   ArrowUpRightIcon,
+  CalendarIcon,
   MinusIcon,
   PhoneIcon,
   PlusIcon,
@@ -17,6 +18,7 @@ export type TicketTradeMode = `sell` | `buy`;
 
 export interface TicketTradeFormValues {
   eventName: string;
+  eventDate: string;
   seat: string;
   quantity: number;
   unitPrice: number;
@@ -47,6 +49,7 @@ const TicketTradeModal: React.FC<TicketTradeModalProps> = ({
 }) => {
   const { t } = useTranslation();
   const [eventName, setEventName] = useState(``);
+  const [eventDate, setEventDate] = useState(``);
   const [seat, setSeat] = useState(``);
   const [quantity, setQuantity] = useState(1);
   const [unitPrice, setUnitPrice] = useState(0);
@@ -54,6 +57,7 @@ const TicketTradeModal: React.FC<TicketTradeModalProps> = ({
 
   const resetForm = () => {
     setEventName(``);
+    setEventDate(``);
     setSeat(``);
     setQuantity(1);
     setUnitPrice(0);
@@ -84,6 +88,7 @@ const TicketTradeModal: React.FC<TicketTradeModalProps> = ({
 
     await onSubmit({
       eventName: eventName.trim(),
+      eventDate: eventDate.trim(),
       seat: seat.trim(),
       quantity,
       unitPrice,
@@ -91,6 +96,13 @@ const TicketTradeModal: React.FC<TicketTradeModalProps> = ({
       mode,
     });
   };
+
+  const canSubmit =
+    eventName.trim() &&
+    eventDate.trim() &&
+    seat.trim() &&
+    unitPrice > 0 &&
+    contact.trim();
 
   return (
     <div className={`s-ticket-modal${open ? `` : ` s-ticket-modal--off`}`}>
@@ -119,6 +131,14 @@ const TicketTradeModal: React.FC<TicketTradeModalProps> = ({
             value={eventName}
             onChange={(e) => setEventName(e.target.value)}
             placeholder={eventPlaceholder}
+          />
+
+          <Input
+            variant="ticket-field"
+            icon={<CalendarIcon size={16} />}
+            value={eventDate}
+            onChange={(e) => setEventDate(e.target.value)}
+            placeholder={t(`aimatch.ticket.modal.eventDate`)}
           />
 
           <div className="s-ticket-modal__row">
@@ -210,7 +230,7 @@ const TicketTradeModal: React.FC<TicketTradeModalProps> = ({
           block="s-ticket-modal"
           element="submit"
           modifiers={[mode]}
-          disabled={isSubmitting || !eventName.trim()}
+          disabled={isSubmitting || !canSubmit}
           onClick={() => void handleSubmit()}
         >
           {isSubmitting

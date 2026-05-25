@@ -200,16 +200,17 @@
       "events": "Events"
     },
     "ai": {
-      "welcome": "👋 I'm your AI festival buddy — find crew, group buy, buy/sell tickets. Just tell me what you need!",
+      "welcome": "👋 I'm your AI festival buddy — find crew, group orders, buy/sell tickets. Just tell me what you need!",
       "quickReplies": {
         "findBuddy": "Find a buddy",
-        "pinTicket": "Group buy tickets",
+        "buyTicket": "Buy tickets",
         "sellTicket": "Sell my tickets",
         "nearEvents": "Nearby events"
       },
       "searching": "Searching for \"{{query}}\" 🔍 Found {{count}} high-match users — tap a card for details!",
       "streamError": "Sorry, something went wrong. Please try again.",
-      "placeholder": "Say what you need, e.g. \"Group buy EDC tickets\""
+      "thinking": "AI is thinking",
+      "placeholder": "Say what you need, e.g. \"Search EDC tickets\" or \"Sell my ticket\""
     },
     "pindan": {
       "createNew": "Start a new group order",
@@ -253,11 +254,15 @@
       "buyTicket": "Buy Now",
       "contact": "Contact",
       "eventNotFound": "No matching event. Check the event name.",
+      "published": "Ticket listing published",
+      "createdCardTitle": "View listing",
+      "viewListing": "Tap to view ticket details",
       "modal": {
         "subtitleSell": "Fill in key details — visible right after posting",
         "subtitleBuy": "Post your request — sellers will reach out",
         "eventNameSell": "Event name, e.g. \"EDC China 2025\"",
         "eventNameBuy": "Event name, e.g. \"Ultra Shanghai\"",
+        "eventDate": "Show date, e.g. 2025-03-02",
         "seatSell": "Section / seat",
         "seatBuy": "Section needed",
         "quantity": "Qty",

@@ -31,7 +31,7 @@ import {
 } from "./mockData";
 import ProfilePinDanList from "./components/ProfilePinDanList";
 import { loadMyPindanItems, removeJoinedPindanItem } from "../../utils/myPindanStorage";
-import { getClientUserId } from "../../utils/session";
+import { getClientUserId, persistUserName } from "../../utils/session";
 
 type ProfileTab = "participated" | "pindan";
 
@@ -85,6 +85,10 @@ const Profile: React.FC = () => {
     }
     applyRouteParams();
   });
+
+  useEffect(() => {
+    persistUserName(profileUser.name);
+  }, []);
 
   useEffect(() => {
     if (!isApiEnabled() || !profilePindanQuery.data) return;

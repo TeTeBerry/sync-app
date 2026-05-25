@@ -1,5 +1,5 @@
 import "./TicketMarketPanel.scss";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ArrowDownLeftIcon,
   ArrowUpRightIcon,
@@ -18,24 +18,48 @@ import {
   type TicketFilterKey,
   type TicketListing,
 } from "../data/ticketListings";
-import { useTicketList } from "../hooks/useSyncApi";
+import { invalidateTicketQueries, useTicketList } from "../hooks/useSyncApi";
+import { getClientUserId, getClientUserName } from "../utils/session";
 import TicketTradeModal, { type TicketTradeFormValues, type TicketTradeMode } from "./TicketTradeModal";
 import { Button, cn } from "./ui";
+import { useQueryClient } from "@tanstack/react-query";
 
 export interface TicketMarketPanelProps {
   listings?: TicketListing[];
   className?: string;
+  /** 为 false 时不请求门票接口（如 AI 页未切到门票 tab） */
+  fetchEnabled?: boolean;
+  /** 从 AI 聊天卡片跳转时高亮对应挂单 */
+  highlightTicketId?: string | null;
+  onHighlightDone?: () => void;
 }
 
-const TicketMarketPanel: React.FC<TicketMarketPanelProps> = ({ listings: listingsProp, className }) => {
+const TicketMarketPanel: React.FC<TicketMarketPanelProps> = ({
+  listings: listingsProp,
+  className,
+  fetchEnabled = true,
+  highlightTicketId = null,
+  onHighlightDone,
+}) => {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const [ticketFilter, setTicketFilter] = useState<TicketFilterKey>(`all`);
   const [ticketModalMode, setTicketModalMode] = useState<TicketTradeMode | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const apiQuery = useTicketList(ticketFilter);
+  const apiQuery = useTicketList(ticketFilter, { enabled: fetchEnabled });
   const listings = listingsProp ?? apiQuery.listings ?? defaultListings;
+
+  useEffect(() => {
+    if (!fetchEnabled || listingsProp || !isApiEnabled()) return;
+    void apiQuery.refetch();
+  }, [apiQuery.refetch, fetchEnabled, listingsProp, ticketFilter]);
+
+  useEffect(() => {
+    if (!highlightTicketId) return;
+    setTicketFilter(`all`);
+  }, [highlightTicketId]);
 
   const filteredTickets = useMemo(() => {
     if (listingsProp) {
@@ -44,6 +68,24 @@ const TicketMarketPanel: React.FC<TicketMarketPanelProps> = ({ listings: listing
     }
     return listings;
   }, [listings, listingsProp, ticketFilter]);
+
+  useEffect(() => {
+    if (!highlightTicketId || !fetchEnabled) return;
+
+    const scrollTimer = window.setTimeout(() => {
+      document.getElementById(`aim-ticket-item-${highlightTicketId}`)?.scrollIntoView({
+        behavior: `smooth`,
+        block: `center`,
+      });
+    }, 280);
+
+    const clearTimer = window.setTimeout(() => onHighlightDone?.(), 2800);
+
+    return () => {
+      window.clearTimeout(scrollTimer);
+      window.clearTimeout(clearTimer);
+    };
+  }, [fetchEnabled, filteredTickets, highlightTicketId, onHighlightDone]);
 
   const handleTicketSubmit = useCallback(
     async (values: TicketTradeFormValues) => {
@@ -66,10 +108,14 @@ const TicketMarketPanel: React.FC<TicketMarketPanelProps> = ({ listings: listing
           quantity: values.quantity,
           type: values.mode,
           skuCode: values.seat || "GA",
-          price: values.unitPrice || undefined,
+          price: values.unitPrice,
+          eventDate: values.eventDate,
+          contact: values.contact,
+          userId: getClientUserId(),
+          userName: getClientUserName(),
         });
 
-        await apiQuery.refetch();
+        await Promise.all([apiQuery.refetch(), invalidateTicketQueries(queryClient)]);
         setTicketModalMode(null);
       } catch (error) {
         setSubmitError(error instanceof Error ? error.message : t(`common.loadError`));
@@ -77,7 +123,7 @@ const TicketMarketPanel: React.FC<TicketMarketPanelProps> = ({ listings: listing
         setIsSubmitting(false);
       }
     },
-    [apiQuery, t],
+    [apiQuery, queryClient, t],
   );
 
   const openModal = (mode: TicketTradeMode) => {
@@ -144,7 +190,15 @@ const TicketMarketPanel: React.FC<TicketMarketPanelProps> = ({ listings: listing
             <p className="s-aim-panel-hint">{t(`common.empty`)}</p>
           ) : (
             filteredTickets.map((ticket) => (
-              <div key={ticket.id} className={`s-aim-ticket-card${ticket.type === `buy` ? ` s-aim-ticket-card--buy` : ``}`}>
+              <div
+                key={ticket.id}
+                id={`aim-ticket-item-${ticket.id}`}
+                className={cn(
+                  `s-aim-ticket-card`,
+                  ticket.type === `buy` && `s-aim-ticket-card--buy`,
+                  highlightTicketId === ticket.id && `s-aim-ticket-card--focused`,
+                )}
+              >
                 <div className="s-aim-ticket-card__row">
                   <div
                     className={`s-aim-ticket-card__icon-shell${

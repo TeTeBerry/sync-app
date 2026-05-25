@@ -221,7 +221,7 @@ export function mapTicketsToListings(
       seat: `${ticket.skuCode ?? "GA"} · ${quantity}张`,
       price,
       originalPrice: type === "sell" ? Math.round(price * 1.35) : 0,
-      seller: ticket.userId ?? "用户",
+      seller: resolveTicketSellerName(ticket),
       avatar: AVATAR_POOL[index % AVATAR_POOL.length],
       tag,
       tone,
@@ -229,4 +229,20 @@ export function mapTicketsToListings(
       verified: true,
     };
   });
+}
+
+function resolveTicketSellerName(ticket: BackendTicket): string {
+  if (ticket.userName?.trim()) {
+    return ticket.userName.trim();
+  }
+
+  const userId = ticket.userId?.trim();
+  if (!userId) return "用户";
+
+  // 旧种子数据把展示名写在 userId；新数据 session id 形如 1747654321-abc1234
+  if (!/^\d{10,}-/.test(userId)) {
+    return userId;
+  }
+
+  return "用户";
 }

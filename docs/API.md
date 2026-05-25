@@ -17,7 +17,7 @@ Authorization: Bearer <token>   # 可选
 {
   "messages": [
     { "role": "assistant", "content": "欢迎语…" },
-    { "role": "user", "content": "想拼 EDC 门票" }
+    { "role": "user", "content": "查 EDC 门票" }
   ],
   "sessionId": "optional-session-id",
   "userId": "optional-user-id"
@@ -41,8 +41,31 @@ data: {"type":"done","messageId":"msg_abc"}
 | `type` | 字段 | 说明 |
 |--------|------|------|
 | `delta` | `content: string` | 增量文本，前端 append |
-| `done` | `messageId?: string` | 流结束 |
+| `done` | `messageId?: string`, `sessionId?: string`, `ticketId?: string` | 流结束 |
 | `error` | `message: string` | 错误，前端展示并停止 |
+
+### GET `/api/chat/sessions/:sessionId`
+
+按 `sessionId` 读取 MongoDB 中的完整对话历史，进入 AI 页时用于恢复 UI。
+
+```json
+{
+  "code": 200,
+  "data": {
+    "sessionId": "1730-abc",
+    "history": [
+      { "role": "user", "content": "想出一票 EDC" },
+      { "role": "assistant", "content": "好的，请补充…" }
+    ]
+  }
+}
+```
+
+服务端在 `POST /api/ai/chat` 时会将 MongoDB 历史与本次用户消息合并后传给通义千问，并在回复完成后写回完整对话。
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | `/api/chat/sessions/:sessionId` | AI 对话历史 |
 
 也支持 `data: [DONE]` 或纯文本 `data: 片段` 作为 delta。
 
