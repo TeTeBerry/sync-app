@@ -10,7 +10,7 @@ export type EventTeamPost = {
   likes: number;
   comments: number;
   avatar: string;
-  status: "招募中" | "已成团";
+  status: "招募中" | "已组队";
 };
 
 export type EventDetail = {
@@ -32,7 +32,8 @@ const postsByEventId: Record<number, EventTeamPost[]> = {
       tags: ["#住宿", "#上海", "#女生优先"],
       likes: 47,
       comments: 2,
-      avatar: "https://images.unsplash.com/photo-1534751516642-a1af1ef26a56?w=120&q=80&fit=crop&crop=face",
+      avatar:
+        "https://images.unsplash.com/photo-1534751516642-a1af1ef26a56?w=120&q=80&fit=crop&crop=face",
       status: "招募中",
     },
     {
@@ -44,7 +45,8 @@ const postsByEventId: Record<number, EventTeamPost[]> = {
       tags: ["#组队", "#凌晨场", "#上海场"],
       likes: 18,
       comments: 5,
-      avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&q=80&fit=crop&crop=face",
+      avatar:
+        "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&q=80&fit=crop&crop=face",
       status: "招募中",
     },
     {
@@ -56,7 +58,8 @@ const postsByEventId: Record<number, EventTeamPost[]> = {
       tags: ["#住宿", "#上海", "#女生"],
       likes: 12,
       comments: 1,
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&q=80&fit=crop&crop=face",
+      avatar:
+        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&q=80&fit=crop&crop=face",
       status: "招募中",
     },
     {
@@ -68,8 +71,9 @@ const postsByEventId: Record<number, EventTeamPost[]> = {
       tags: ["#已满员", "#上海"],
       likes: 8,
       comments: 0,
-      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=120&q=80&fit=crop&crop=face",
-      status: "已成团",
+      avatar:
+        "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=120&q=80&fit=crop&crop=face",
+      status: "已组队",
     },
   ],
   2: [
@@ -82,7 +86,8 @@ const postsByEventId: Record<number, EventTeamPost[]> = {
       tags: ["#组队", "#北京", "#套票"],
       likes: 31,
       comments: 4,
-      avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120&q=80&fit=crop&crop=face",
+      avatar:
+        "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120&q=80&fit=crop&crop=face",
       status: "招募中",
     },
     {
@@ -94,7 +99,8 @@ const postsByEventId: Record<number, EventTeamPost[]> = {
       tags: ["#组队", "#北京"],
       likes: 24,
       comments: 3,
-      avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&q=80&fit=crop&crop=face",
+      avatar:
+        "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&q=80&fit=crop&crop=face",
       status: "招募中",
     },
   ],

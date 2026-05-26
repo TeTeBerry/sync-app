@@ -1,0 +1,151 @@
+.s-post-comments {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.s-post-comments__list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.s-post-comments__status {
+  margin: 0;
+  padding: 8px 0;
+  text-align: center;
+  color: #8e8e93;
+  font-size: 12px;
+}
+
+.s-post-comments__item {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.s-post-comments__avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.s-post-comments__body-wrap {
+  flex: 1;
+  min-width: 0;
+}
+
+.s-post-comments__meta {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 6px;
+
+  strong {
+    font-size: 13px;
+    font-weight: 800;
+    color: #fff;
+  }
+
+  span {
+    font-size: 11px;
+    color: #8e8e93;
+  }
+}
+
+.s-post-comments__bubble {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 13px;
+  line-height: 1.45;
+  word-break: break-word;
+}
+
+.s-post-comments__like {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #8e8e93;
+  font-size: 11px;
+  cursor: pointer;
+
+  &--active {
+    color: var(--primary);
+  }
+}
+
+.s-post-comments__composer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.s-post-comments__input-wrap {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 6px 6px 14px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.s-post-comments__input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: none;
+  color: #fff;
+  font-size: 13px;
+  outline: none;
+
+  &::placeholder {
+    color: #8e8e93;
+  }
+}
+
+.s-post-comments__send {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  border: none;
+  background: var(--primary);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: default;
+  }
+}
+
+.s-post-comments__toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #8e8e93;
+  font-size: 12px;
+  cursor: pointer;
+}

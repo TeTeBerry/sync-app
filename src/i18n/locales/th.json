@@ -47,9 +47,11 @@
     "th": "ไทย"
   },
   "activities": {
-    "tomorrowland": "Tomorrowland Warm-up Party",
+    "tomorrowland": "Tomorrowland Thailand 2026",
     "edc": "EDC China",
-    "ultra": "Ultra Chengdu"
+    "storm": "STORM Shenzhen",
+    "edcThailand": "EDC Thailand 2026",
+    "vac": "VAC Zhuhai 2026"
   },
   "home": {
     "ai": {
@@ -103,7 +105,21 @@
       "contact": "ติดต่อ"
     },
     "feed": {
-      "title": "โพสต์ยอดนิยมเพิ่มเติม"
+      "title": "โพสต์ยอดนิยมเพิ่มเติม",
+      "allPosts": "โพสต์ทั้งหมด",
+      "seeAll": "ดูทั้งหมด",
+      "comment": "แสดงความคิดเห็น",
+      "loading": "กำลังโหลด…",
+      "empty": "ยังไม่มีโพสต์",
+      "deleteConfirmTitle": "ยืนยันการลบ",
+      "deleteConfirmMessage": "ลบแล้วไม่สามารถกู้คืนได้ ต้องการลบโพสต์นี้หรือไม่?",
+      "deleted": "ลบแล้ว",
+      "deleteFailed": "ลบไม่สำเร็จ",
+      "liked": "ถูกใจแล้ว",
+      "apiRequired": "โปรดเปิดใช้งาน API",
+      "commentPrompt": "เขียนความคิดเห็น",
+      "commentSuccess": "แสดงความคิดเห็นสำเร็จ",
+      "commentFailed": "แสดงความคิดเห็นไม่สำเร็จ"
     },
     "nearEvents": "กิจกรรมใกล้เคียง",
     "fabLabel": "โพสต์ด่วน",
@@ -201,6 +217,7 @@
     "eventStatus": {
       "upcoming": "กำลังจะไป",
       "registered": "ลงทะเบียนแล้ว",
+      "attended": "เข้าร่วมแล้ว",
       "completed": "จบแล้ว"
     },
     "participated": {
@@ -305,6 +322,15 @@
     "ai": {
       "title": "บอกความต้องการของคุณ — AI จับคู่แม่นยำ",
       "placeholder": "บอกความต้องการของคุณ..."
+    },
+    "comments": {
+      "sectionLabel": "ความคิดเห็นโพสต์",
+      "collapse": "ซ่อนความคิดเห็น",
+      "placeholder": "พิมพ์อะไรสักอย่าง...",
+      "send": "ส่งความคิดเห็น",
+      "like": "ถูกใจ",
+      "empty": "ยังไม่มีความคิดเห็น — มาเป็นคนแรก",
+      "loadError": "โหลดความคิดเห็นไม่สำเร็จ"
     }
   },
   "aiAssistant": {

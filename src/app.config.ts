@@ -10,6 +10,7 @@ export default {
     "pages/ai-assistant/index",
     "pages/event-detail/index",
     "pages/notifications/index",
+    "pages/posts/index",
   ],
   window: {
     navigationStyle: "custom",

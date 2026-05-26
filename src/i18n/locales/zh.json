@@ -47,9 +47,11 @@
     "th": "ไทย"
   },
   "activities": {
-    "tomorrowland": "Tomorrowland 预热派对",
+    "tomorrowland": "Tomorrowland Thailand 2026",
     "edc": "EDC China 电音节",
-    "ultra": "Ultra 成都"
+    "storm": "风暴电音节 深圳站",
+    "edcThailand": "EDC Thailand 2026",
+    "vac": "2026横琴VAC电音节"
   },
   "home": {
     "ai": {
@@ -63,7 +65,21 @@
       "people": "{{count}} 人"
     },
     "feed": {
-      "title": "更多热门帖子"
+      "title": "更多热门帖子",
+      "allPosts": "所有帖子",
+      "seeAll": "查看全部",
+      "comment": "评论",
+      "loading": "加载中…",
+      "empty": "暂无帖子",
+      "deleteConfirmTitle": "确认删除",
+      "deleteConfirmMessage": "删除后无法恢复，确定要删除这条帖子吗？",
+      "deleted": "已删除",
+      "deleteFailed": "删除失败",
+      "liked": "已点赞",
+      "apiRequired": "请开启 API 模式",
+      "commentPrompt": "写评论",
+      "commentSuccess": "评论成功",
+      "commentFailed": "评论失败"
     },
     "nearEvents": "最近活动",
     "featured": {
@@ -145,6 +161,7 @@
     "eventStatus": {
       "upcoming": "即将参加",
       "registered": "已报名",
+      "attended": "已参加",
       "completed": "已结束"
     },
     "participated": {
@@ -216,6 +233,15 @@
     "ai": {
       "title": "告诉我你的需求 ai精准匹配",
       "placeholder": "告诉我你的需求..."
+    },
+    "comments": {
+      "sectionLabel": "帖子评论",
+      "collapse": "收起评论",
+      "placeholder": "说点什么...",
+      "send": "发送评论",
+      "like": "赞",
+      "empty": "暂无评论，来抢沙发吧",
+      "loadError": "评论加载失败"
     }
   },
   "aiAssistant": {

@@ -1,19 +1,29 @@
 /** Backend/API post status labels (Chinese from post.mapper). */
-export type BackendPostStatusLabel = "招募中" | "已成团";
+export type BackendPostStatusLabel = "招募中" | "已组队";
+
+export function isRecruitingPostStatus(status: BackendPostStatusLabel): boolean {
+  return status === "招募中";
+}
 
 /** Activity page post card shows only recruiting vs full. */
 export type EventPostCardStatus = "recruiting" | "full";
 
-export function toEventPostCardStatus(status: BackendPostStatusLabel): EventPostCardStatus {
-  return status === "已成团" ? "full" : "recruiting";
+export function toEventPostCardStatus(
+  status: BackendPostStatusLabel,
+): EventPostCardStatus {
+  return status === "已组队" ? "full" : "recruiting";
 }
 
-export function eventPostStatusClass(status: EventPostCardStatus): string {
+export function postStatusBadgeClass(status: EventPostCardStatus): string {
   return status === "full"
-    ? "s-event-post__status s-event-post__status--full"
-    : "s-event-post__status";
+    ? "s-post-status-badge s-post-status-badge--full"
+    : "s-post-status-badge s-post-status-badge--recruiting";
 }
 
-export function eventPostStatusI18nKey(status: EventPostCardStatus): "eventDetail.postStatus.recruiting" | "common.full" {
-  return status === "full" ? "common.full" : "eventDetail.postStatus.recruiting";
+export function eventPostStatusI18nKey(
+  status: EventPostCardStatus,
+): "eventDetail.postStatus.recruiting" | "common.full" {
+  return status === "full"
+    ? "common.full"
+    : "eventDetail.postStatus.recruiting";
 }

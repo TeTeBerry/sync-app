@@ -1,0 +1,28 @@
+.s-posts-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #000;
+  color: var(--foreground);
+}
+
+.s-posts-page__main {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.s-posts-page__state {
+  padding: 48px 16px;
+  text-align: center;
+  color: var(--muted-foreground);
+  font-size: 14px;
+}
+
+.s-posts-page__retry {
+  margin-top: 12px;
+  color: var(--primary);
+  background: none;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+}

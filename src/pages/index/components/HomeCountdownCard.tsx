@@ -1,25 +1,21 @@
 import type { FC } from "react";
-import { useMemo } from "react";
 import { useCountdown } from "../../../hooks/useCountdown";
-import { getTomorrowlandChinaCountdownTarget } from "../../../utils/countdown";
 
 type HomeCountdownCardProps = {
   eventName?: string;
-  targetAt?: Date;
+  targetAt?: Date | null;
 };
 
 export const HomeCountdownCard: FC<HomeCountdownCardProps> = ({
-  eventName = "Tomorrowland China",
+  eventName,
   targetAt,
 }) => {
-  const target = useMemo(
-    () => targetAt ?? getTomorrowlandChinaCountdownTarget(),
-    [targetAt],
-  );
-  const parts = useCountdown(target);
+  const hasTarget = targetAt != null && eventName != null && eventName.length > 0;
+  const parts = useCountdown(hasTarget ? targetAt : null);
+  const ariaLabel = hasTarget ? `${eventName} countdown` : "Upcoming activity countdown";
 
   return (
-    <section className="s-home-countdown" aria-label={`${eventName} countdown`}>
+    <section className="s-home-countdown" aria-label={ariaLabel}>
       <div className="s-home-countdown__timer">
         {parts.map((part, index) => (
           <div key={part.unit} className="s-home-countdown__part">
@@ -36,7 +32,13 @@ export const HomeCountdownCard: FC<HomeCountdownCardProps> = ({
         ))}
       </div>
       <p className="s-home-countdown__copy">
-        距<span>{eventName}</span>开场还有
+        {hasTarget ? (
+          <>
+            距<span>{eventName}</span>开场还有
+          </>
+        ) : (
+          "暂无即将开始的活动"
+        )}
       </p>
     </section>
   );

@@ -4,13 +4,12 @@ function pad2(n: number): string {
   return String(Math.max(0, n)).padStart(2, "0");
 }
 
-/** Tomorrowland China 开场：当前日期 + 3 天，下午 14:00（本地时区） */
-export function getTomorrowlandChinaCountdownTarget(): Date {
-  const target = new Date();
-  target.setDate(target.getDate() + 3);
-  target.setHours(14, 0, 0, 0);
-  return target;
-}
+export const EMPTY_COUNTDOWN_PARTS: CountdownPart[] = [
+  { value: "--", unit: "d" },
+  { value: "--", unit: "h" },
+  { value: "--", unit: "m" },
+  { value: "--", unit: "s", accent: true },
+];
 
 export function getCountdownParts(target: Date, now = new Date()): CountdownPart[] {
   const diffMs = Math.max(0, target.getTime() - now.getTime());

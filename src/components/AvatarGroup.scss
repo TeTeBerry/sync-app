@@ -16,16 +16,16 @@
 }
 
 .s-avatar-group__avatar {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border-radius: 9999px;
-  border: 2px solid var(--background);
+  border: 2px solid rgba(28, 28, 30, 0.96);
   object-fit: cover;
 }
 
 .s-avatar-group__count {
-  margin-left: 8px;
-  font-size: 14px;
+  margin-left: 6px;
+  font-size: 13px;
   font-weight: 500;
-  color: var(--muted-foreground);
+  color: #8e8e93;
 }

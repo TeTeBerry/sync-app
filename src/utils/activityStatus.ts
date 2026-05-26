@@ -19,7 +19,7 @@ export function extractYearFromText(text?: string): string | undefined {
   return match?.[1];
 }
 
-/** Parse catalog-style activity date strings (e.g. 07/12-13, 08/01-03, 2025-07-12). */
+/** Parse catalog-style activity date strings (e.g. 06/13-14, 12/11-13, 2025-07-12). */
 export function parseActivityDateRange(
   dateStr: string,
   yearHint?: string,
@@ -75,6 +75,9 @@ export function parseActivityDateRange(
   return null;
 }
 
+/** 开场前 1.5 个月（45 天）起视为进行中，便于组队/预热 */
+const PRE_EVENT_WINDOW_MS = 45 * 24 * 60 * 60 * 1000;
+
 export function getActivityStatus(
   dateStr?: string,
   options?: { yearHint?: string; now?: Date },
@@ -85,8 +88,11 @@ export function getActivityStatus(
   if (!parsed) return "not_started";
 
   const now = options?.now ?? new Date();
-  if (now < parsed.start) return "not_started";
   if (now > parsed.end) return "ended";
+
+  const preStart = new Date(parsed.start.getTime() - PRE_EVENT_WINDOW_MS);
+  if (now < preStart) return "not_started";
+
   return "in_progress";
 }
 
@@ -122,4 +128,57 @@ export function activityStatusI18nKey(
     default:
       return "activityStatus.notStarted";
   }
+}
+
+export function getActivitySortTimestamp(date?: string, title?: string): number {
+  const yearHint = extractYearFromText(title) ?? extractYearFromText(date);
+  const parsed = date?.trim() ? parseActivityDateRange(date, yearHint) : null;
+  return parsed?.start.getTime() ?? 0;
+}
+
+export function compareActivityDateDesc(
+  a: { date?: string; title?: string },
+  b: { date?: string; title?: string },
+): number {
+  return getActivitySortTimestamp(b.date, b.title) - getActivitySortTimestamp(a.date, a.title);
+}
+
+export function compareActivityDateAsc(
+  a: { date?: string; title?: string },
+  b: { date?: string; title?: string },
+): number {
+  return getActivitySortTimestamp(a.date, a.title) - getActivitySortTimestamp(b.date, b.title);
+}
+
+export type ActivityDateFields = {
+  date?: string;
+  title?: string;
+  name?: string;
+};
+
+function activityTitleFromFields(item: ActivityDateFields): string | undefined {
+  return item.title ?? item.name;
+}
+
+/** Nearest activity that has not ended and whose start is still in the future. */
+export function findNearestUpcomingActivity<T extends ActivityDateFields>(
+  activities: T[],
+  now = new Date(),
+): (T & { startAt: Date }) | null {
+  const nowMs = now.getTime();
+  let nearest: { item: T; startAt: Date; startMs: number } | null = null;
+
+  for (const item of activities) {
+    const title = activityTitleFromFields(item);
+    if (getActivityStatusFromActivity(item.date, title, now) === "ended") continue;
+
+    const startMs = getActivitySortTimestamp(item.date, title);
+    if (startMs <= 0 || startMs <= nowMs) continue;
+
+    if (!nearest || startMs < nearest.startMs) {
+      nearest = { item, startAt: new Date(startMs), startMs };
+    }
+  }
+
+  return nearest ? { ...nearest.item, startAt: nearest.startAt } : null;
 }

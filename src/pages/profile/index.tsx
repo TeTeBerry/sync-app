@@ -1,6 +1,6 @@
 import "./profile.scss";
 import Taro, { useDidShow } from "@tarojs/taro";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   BellIcon,
@@ -12,9 +12,8 @@ import {
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import BottomNav from "../../components/BottomNav";
-import ConfirmDialog from "../../components/ConfirmDialog";
 import { go, ROUTES } from "../../utils/route";
-import { profileActivities, profilePosts, profileUser } from "./mockData";
+import { profilePosts, profileUser } from "./mockData";
 import ProfileActivitiesSection from "./components/ProfileActivitiesSection";
 import ProfilePostsSection from "./components/ProfilePostsSection";
 import type { ProfilePostItem } from "./mockData";
@@ -29,6 +28,7 @@ import {
 } from "../../hooks/useSyncApi";
 import { isApiEnabled } from "../../constants/api";
 import { promptText } from "../../utils/promptText";
+import { useConfirmDialog } from "../../hooks/useConfirmDialog";
 
 const STORAGE_KEYS = {
   notifications: "profile.notificationsEnabled",
@@ -52,7 +52,9 @@ const Profile: React.FC = () => {
   const setNotificationsEnabled = useProfilePageStore((state) => state.setNotificationsEnabled);
   const setPrivacyLevel = useProfilePageStore((state) => state.setPrivacyLevel);
   const consumeProfileIntent = useNavigationStore((state) => state.consumeProfileIntent);
-  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const { confirm, confirmDialog } = useConfirmDialog({
+    cancelText: t("common.cancel"),
+  });
 
   const summaryQuery = useProfileSummaryQuery();
   const activitiesQuery = useProfileActivitiesQuery();
@@ -63,9 +65,7 @@ const Profile: React.FC = () => {
     ? summaryQuery.data
     : profileUser;
 
-  const activities = apiEnabled && activitiesQuery.data
-    ? activitiesQuery.data
-    : profileActivities;
+  const activities = activitiesQuery.data ?? [];
 
   const posts = apiEnabled && postsQuery.data
     ? postsQuery.data
@@ -97,23 +97,22 @@ const Profile: React.FC = () => {
   }, []);
 
   const handleCompletePost = useCallback(
-    (item: ProfilePostItem) => {
+    async (item: ProfilePostItem) => {
       if (!apiEnabled) {
         handlePostAction(t("profile.myPosts.complete"), item);
         return;
       }
-      void Taro.showModal({
+      const ok = await confirm({
         title: t("profile.myPosts.complete"),
-        content: "确认将该帖子标记为已成团？",
-        success: (res) => {
-          if (!res.confirm) return;
-          void updatePostAndInvalidate(queryClient, item.id, { status: "completed" })
-            .then(() => void Taro.showToast({ title: "已更新", icon: "success" }))
-            .catch(() => void Taro.showToast({ title: "更新失败", icon: "none" }));
-        },
+        message: "确认将该帖子标记为已组队？",
+        confirmText: t("profile.myPosts.complete"),
       });
+      if (!ok) return;
+      void updatePostAndInvalidate(queryClient, item.id, { status: "completed" })
+        .then(() => void Taro.showToast({ title: "已更新", icon: "success" }))
+        .catch(() => void Taro.showToast({ title: "更新失败", icon: "none" }));
     },
-    [apiEnabled, handlePostAction, queryClient, t],
+    [apiEnabled, confirm, handlePostAction, queryClient, t],
   );
 
   const handleEditPost = useCallback(
@@ -132,30 +131,28 @@ const Profile: React.FC = () => {
   );
 
   const handleDeletePost = useCallback(
-    (item: ProfilePostItem) => {
-      void Taro.showModal({
+    async (item: ProfilePostItem) => {
+      const ok = await confirm({
         title: t("profile.myPosts.delete"),
-        content: "删除后无法恢复，确定要删除这条帖子吗？",
+        message: "删除后无法恢复，确定要删除这条帖子吗？",
         confirmText: t("profile.myPosts.delete"),
-        cancelText: t("common.cancel"),
-        success: (res) => {
-          if (!res.confirm) return;
-          if (!apiEnabled) {
-            handlePostAction(t("profile.myPosts.delete"), item);
-            return;
-          }
-          void deletePostAndInvalidate(queryClient, item.id)
-            .then(() => {
-              void Taro.showToast({ title: "已删除", icon: "success" });
-            })
-            .catch(() => {
-              void postsQuery.refetch();
-              void Taro.showToast({ title: "删除失败", icon: "none" });
-            });
-        },
+        danger: true,
       });
+      if (!ok) return;
+      if (!apiEnabled) {
+        handlePostAction(t("profile.myPosts.delete"), item);
+        return;
+      }
+      void deletePostAndInvalidate(queryClient, item.id)
+        .then(() => {
+          void Taro.showToast({ title: "已删除", icon: "success" });
+        })
+        .catch(() => {
+          void postsQuery.refetch();
+          void Taro.showToast({ title: "删除失败", icon: "none" });
+        });
     },
-    [apiEnabled, handlePostAction, postsQuery, queryClient, t],
+    [apiEnabled, confirm, handlePostAction, postsQuery, queryClient, t],
   );
 
   const openSettings = useCallback(
@@ -165,18 +162,16 @@ const Profile: React.FC = () => {
     [],
   );
 
-  const handleLogout = useCallback(() => {
-    setShowLogoutConfirm(true);
-  }, []);
-
-  const handleLogoutCancel = useCallback(() => {
-    setShowLogoutConfirm(false);
-  }, []);
-
-  const handleLogoutConfirm = useCallback(() => {
-    setShowLogoutConfirm(false);
+  const handleLogout = useCallback(async () => {
+    const ok = await confirm({
+      title: t("profile.settings.logoutConfirmTitle"),
+      message: t("profile.settings.logoutConfirmMessage"),
+      confirmText: t("profile.settings.logout"),
+      danger: true,
+    });
+    if (!ok) return;
     void Taro.showToast({ title: t("profile.settings.logoutSuccess"), icon: "success" });
-  }, [t]);
+  }, [confirm, t]);
 
   const profileSubtext = `${profileUserData.handle} · ${profileUserData.location} · ${profileUserData.bio}`;
 
@@ -184,7 +179,6 @@ const Profile: React.FC = () => {
     <div data-cmp="Profile" className="s-profile">
       <main className="s-profile__main s-scrollbar-none">
         <header className="s-profile__header">
-          <h1 className="s-profile__title">{t("profile.title")}</h1>
           <button
             type="button"
             className="s-profile__settings-btn"
@@ -280,15 +274,7 @@ const Profile: React.FC = () => {
         </section>
       </main>
 
-      <ConfirmDialog
-        open={showLogoutConfirm}
-        title={t("profile.settings.logoutConfirmTitle")}
-        message={t("profile.settings.logoutConfirmMessage")}
-        confirmText={t("profile.settings.logout")}
-        cancelText={t("common.cancel")}
-        onConfirm={handleLogoutConfirm}
-        onCancel={handleLogoutCancel}
-      />
+      {confirmDialog}
 
       <BottomNav />
     </div>

@@ -15,16 +15,8 @@
 .s-profile__header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   padding: 16px 16px 12px;
-}
-
-.s-profile__title {
-  font-size: 28px;
-  font-weight: 800;
-  color: #fff;
-  letter-spacing: -0.02em;
-  margin: 0;
 }
 
 .s-profile__settings-btn {
@@ -288,6 +280,18 @@
   flex-shrink: 0;
 }
 
+.s-profile-activity__thumb--placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(var(--primary-rgb), 0.15);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
 .s-profile-activity__content {
   flex: 1;
   min-width: 0;
@@ -337,20 +341,6 @@
   svg {
     flex-shrink: 0;
   }
-}
-
-.s-profile-activity__foot {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin-top: auto;
-}
-
-.s-profile-activity__price {
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--primary);
 }
 
 .s-profile-post {

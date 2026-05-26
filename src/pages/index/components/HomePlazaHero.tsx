@@ -1,4 +1,4 @@
-import { BellIcon, SparklesIcon } from "lucide-react";
+import { AudioWaveformIcon, BellIcon, SparklesIcon } from "lucide-react";
 import type { FC } from "react";
 import { Button } from "../../../components/ui";
 
@@ -14,8 +14,9 @@ export const HomePlazaHero: FC<HomePlazaHeroProps> = ({
   onNotificationClick,
 }) => (
   <header className="s-home-hero">
-    <div>
-      <p className="s-home-hero__kicker">发现 · 探索 · 出发</p>
+    <div className="s-home-hero__brand">
+      <AudioWaveformIcon size={24} className="s-home-hero__icon" />
+      <span className="s-home-hero__logo">SYNC</span>
     </div>
 
     <div className="s-home-hero__actions">

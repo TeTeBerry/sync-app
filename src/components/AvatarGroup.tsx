@@ -1,5 +1,6 @@
 import "./AvatarGroup.scss";
 import React from "react";
+import { ACTIVITY_GUEST_AVATARS } from "../constants/activityGuestAvatars";
 
 interface AvatarGroupProps {
   avatars?: string[];
@@ -8,12 +9,11 @@ interface AvatarGroupProps {
 }
 
 const AvatarGroup: React.FC<AvatarGroupProps> = ({
-  avatars = ["https://i.pravatar.cc/150?u=1", "https://i.pravatar.cc/150?u=2", "https://i.pravatar.cc/150?u=3"],
+  avatars = ACTIVITY_GUEST_AVATARS,
   max = 3,
   total = 70,
 }) => {
   const displayAvatars = avatars.slice(0, max);
-  const remaining = total - displayAvatars.length;
 
   return (
     <div data-cmp="AvatarGroup" className="s-avatar-group">
@@ -22,11 +22,11 @@ const AvatarGroup: React.FC<AvatarGroupProps> = ({
           <img key={url + i} src={url} alt="" className="s-avatar-group__avatar" />
         ))}
       </div>
-      {remaining > 0 && (
+      {total > 0 ? (
         <span className="s-avatar-group__count">
-          {total} 参与
+          {total.toLocaleString()} 参与
         </span>
-      )}
+      ) : null}
     </div>
   );
 };

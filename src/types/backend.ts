@@ -76,16 +76,15 @@ export interface ProfileActivityItem {
   title: string;
   date: string;
   location: string;
-  price: number;
   image: string;
-  status: "registered";
+  status: "registered" | "attended";
 }
 
 export interface ProfilePostItem {
   id: string;
   title: string;
   content: string;
-  status: "招募中" | "已成团" | "已隐藏";
+  status: "招募中" | "已组队" | "已隐藏";
   likes: number;
   comments: number;
   date: string;
@@ -101,8 +100,19 @@ export interface HomeFeedPost {
   body: string;
   time: string;
   likes: number;
+  liked?: boolean;
+  comments: number;
   avatar: string;
-  status: "招募中" | "已成团" | "已隐藏";
+  status: "招募中" | "已组队" | "已隐藏";
+}
+
+export interface PostCommentItem {
+  id: string;
+  userId: string;
+  authorName: string;
+  avatar: string;
+  body: string;
+  time: string;
 }
 
 export interface EventDetailPost {
@@ -110,13 +120,16 @@ export interface EventDetailPost {
   userId?: string;
   name: string;
   location: string;
+  /** @deprecated Prefer createdAt; kept for backward compatibility. */
   time: string;
+  createdAt?: string;
   body: string;
   tags: string[];
   likes: number;
+  liked?: boolean;
   comments: number;
   avatar: string;
-  status: "招募中" | "已成团" | "已隐藏";
+  status: "招募中" | "已组队" | "已隐藏";
 }
 
 export interface CreatePostPayload {

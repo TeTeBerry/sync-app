@@ -3,6 +3,7 @@ import React, { useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import BottomNav from "../../components/BottomNav";
 import EventCard from "../../components/EventCard";
+import { ListState } from "../../components/ListState";
 import TopBar from "../../components/TopBar";
 import { useEventList } from "../../hooks/useSyncApi";
 import { goEventDetail } from "../../utils/route";
@@ -23,18 +24,18 @@ const Events: React.FC = () => {
       <TopBar />
       <div className="s-events">
         <main className="s-events__main s-scrollbar-none">
-          {isLoading ? (
-            <p className="s-events__state">{t("events.loading")}</p>
-          ) : isError ? (
-            <div className="s-events__state">
-              <p>{t("events.error")}</p>
-              <button type="button" className="s-events__retry" onClick={() => void refetch()}>
-                {t("common.retry")}
-              </button>
-            </div>
-          ) : events.length === 0 ? (
-            <p className="s-events__state">{t("events.empty")}</p>
-          ) : (
+          <ListState
+            isLoading={isLoading}
+            isError={isError}
+            isEmpty={!isLoading && !isError && events.length === 0}
+            loadingText={t("events.loading")}
+            errorText={t("events.error")}
+            emptyText={t("events.empty")}
+            onRetry={() => void refetch()}
+            retryText={t("common.retry")}
+            stateClassName="s-events__state"
+            retryClassName="s-events__retry"
+          >
             <div className="s-events__list">
               {events.map((event) => (
                 <button
@@ -47,14 +48,15 @@ const Events: React.FC = () => {
                     title={event.title}
                     date={event.date}
                     location={event.location}
-                    distance={event.distance}
                     image={event.image}
                     attendees={event.attendees}
+                    hot={event.hot}
+                    variant="list"
                   />
                 </button>
               ))}
             </div>
-          )}
+          </ListState>
         </main>
       </div>
       <BottomNav />

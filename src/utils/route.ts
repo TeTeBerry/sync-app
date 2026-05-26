@@ -13,6 +13,7 @@ export const ROUTES = {
   AI_ASSISTANT: "/pages/ai-assistant/index",
   EVENT_DETAIL: "/pages/event-detail/index",
   NOTIFICATIONS: "/pages/notifications/index",
+  ALL_POSTS: "/pages/posts/index",
 } as const;
 
 export type RoutePath = (typeof ROUTES)[keyof typeof ROUTES];

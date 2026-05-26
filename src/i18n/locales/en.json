@@ -47,9 +47,11 @@
     "th": "ไทย"
   },
   "activities": {
-    "tomorrowland": "Tomorrowland Warm-up Party",
+    "tomorrowland": "Tomorrowland Thailand 2026",
     "edc": "EDC China",
-    "ultra": "Ultra Chengdu"
+    "storm": "STORM Shenzhen",
+    "edcThailand": "EDC Thailand 2026",
+    "vac": "VAC Zhuhai 2026"
   },
   "home": {
     "ai": {
@@ -103,7 +105,21 @@
       "contact": "Contact"
     },
     "feed": {
-      "title": "More Popular Posts"
+      "title": "More Popular Posts",
+      "allPosts": "All Posts",
+      "seeAll": "See all",
+      "comment": "Comment",
+      "loading": "Loading…",
+      "empty": "No posts yet",
+      "deleteConfirmTitle": "Delete post",
+      "deleteConfirmMessage": "This cannot be undone. Delete this post?",
+      "deleted": "Deleted",
+      "deleteFailed": "Delete failed",
+      "liked": "Liked",
+      "apiRequired": "Enable API mode",
+      "commentPrompt": "Write a comment",
+      "commentSuccess": "Comment posted",
+      "commentFailed": "Comment failed"
     },
     "nearEvents": "Nearby Events",
     "fabLabel": "Quick post",
@@ -201,6 +217,7 @@
     "eventStatus": {
       "upcoming": "Upcoming",
       "registered": "Registered",
+      "attended": "Attended",
       "completed": "Completed"
     },
     "participated": {
@@ -304,6 +321,15 @@
     "ai": {
       "title": "Tell me your needs — AI precision matching",
       "placeholder": "Tell me what you need..."
+    },
+    "comments": {
+      "sectionLabel": "Post comments",
+      "collapse": "Hide comments",
+      "placeholder": "Say something...",
+      "send": "Send comment",
+      "like": "Like",
+      "empty": "No comments yet — be the first",
+      "loadError": "Failed to load comments"
     }
   },
   "aiAssistant": {

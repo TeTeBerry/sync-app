@@ -9,6 +9,7 @@ import type {
   CurrentUser,
   EventDetailPost,
   HomeFeedPost,
+  PostCommentItem,
   HomeSummary,
   PostActionResult,
   ProfileActivityItem,
@@ -66,12 +67,20 @@ export function updateCurrentUser(payload: UpdateCurrentUserPayload) {
 }
 
 export function fetchPopularPosts(limit = 20) {
-  return apiGet<HomeFeedPost[]>("/posts/popular", { limit: String(limit) });
+  return apiGet<HomeFeedPost[]>("/posts/popular", {
+    limit: String(limit),
+    ...ownerParams(),
+  });
+}
+
+export function fetchAllPosts() {
+  return apiGet<HomeFeedPost[]>("/posts/all", ownerParams());
 }
 
 export function fetchPostsByActivity(activityLegacyId: number) {
   return apiGet<EventDetailPost[]>("/posts", {
     activityLegacyId: String(activityLegacyId),
+    ...ownerParams(),
   });
 }
 
@@ -105,6 +114,10 @@ export function likePost(postId: string) {
 
 export function applyToPost(postId: string) {
   return apiPost<PostActionResult>(`/posts/${postId}/applications`, {}, ownerParams());
+}
+
+export function fetchPostComments(postId: string) {
+  return apiGet<PostCommentItem[]>(`/posts/${postId}/comments`);
 }
 
 export function addPostComment(postId: string, body: string, parentCommentId?: string) {

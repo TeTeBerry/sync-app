@@ -7,12 +7,14 @@ import {
   deletePost,
   fetchActivities,
   fetchActivityByLegacyId,
+  fetchAllPosts,
   fetchCurrentUser,
   fetchHomeSummary,
   fetchNotificationUnreadCount,
   fetchNotifications,
   fetchPopularPosts,
   fetchPostsByActivity,
+  fetchPostComments,
   fetchProfileActivities,
   fetchProfilePosts,
   fetchProfileSummary,
@@ -23,45 +25,20 @@ import {
   updateCurrentUser,
   updatePost,
 } from "../api/syncApi";
-import type { UpdateCurrentUserPayload } from "../types/backend";
+import type { EventDetailPost, HomeFeedPost, HomeSummary, UpdateCurrentUserPayload } from "../types/backend";
 import { isApiEnabled } from "../constants/api";
-import { eventSignupItems, homeHeatStats } from "../pages/index/mockData";
-import { activityPosts, type ActivityPost } from "../pages/index/homeData";
 import { getClientUserId } from "../utils/session";
 import {
   mapActivitiesToEvents,
   pickHomeFeaturedEvents,
   type EventCardUi,
+  type FeaturedEvent,
 } from "../utils/apiMappers";
-import { featuredEvents, type FeaturedEvent } from "../pages/index/homeData";
-import { getActivityStatusFromActivity } from "../utils/activityStatus";
-
-const MOCK_EVENTS: EventCardUi[] = [
-  {
-    id: "1",
-    title: "Tomorrowland 预热派对",
-    date: "06/18–19 22:00",
-    location: "CLUB SPACE · 上海",
-    distance: "5.0 km",
-    image: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=400&q=80",
-    attendees: 238,
-    category: "户外电音",
-    hot: true,
-    going: false,
-  },
-  {
-    id: "2",
-    title: "EDC China 2025",
-    date: "07/12–13 16:00",
-    location: "苏州阳澄湖",
-    distance: "15 km",
-    image: "https://image.electricdaisycarnival.cn/sites/7/2024/12/edccn_2025_mk_an_fest_site_mh_1534x1360_r01.jpg",
-    attendees: 512,
-    category: "EDM节",
-    hot: true,
-    going: true,
-  },
-];
+import {
+  findNearestUpcomingActivity,
+  getActivityStatusFromActivity,
+  type ActivityDateFields,
+} from "../utils/activityStatus";
 
 export function invalidateNotificationQueries(queryClient: QueryClient) {
   return Promise.all([
@@ -130,20 +107,16 @@ export function useEventList(options?: QueryEnableOptions) {
   const tabEnabled = options?.enabled ?? true;
   const query = useActivitiesQuery({ enabled: tabEnabled });
 
-  const events = useMemo(() => {
-    if (!isApiEnabled()) {
-      return tabEnabled ? MOCK_EVENTS : [];
-    }
+  const events = useMemo((): EventCardUi[] => {
     if (!query.data) return [];
     return mapActivitiesToEvents(query.data);
-  }, [query.data, tabEnabled]);
+  }, [query.data]);
 
   return {
     events,
     isLoading: tabEnabled && query.isLoading,
     isError: tabEnabled && query.isError,
     refetch: query.refetch,
-    usingMock: !isApiEnabled(),
   };
 }
 
@@ -157,15 +130,12 @@ export function useHomeSummary() {
     staleTime: 60_000,
   });
 
-  const heat = enabled ? query.data?.heat ?? homeHeatStats : homeHeatStats;
-
   return {
-    heat,
-    signupEvents: enabled ? query.data?.signupEvents ?? [] : eventSignupItems,
+    heat: query.data?.heat ?? { people: 0, growthPercent: 0 },
+    signupEvents: query.data?.signupEvents ?? [],
     isLoading: query.isLoading,
     isError: query.isError,
     refetch: query.refetch,
-    usingMock: !enabled,
   };
 }
 
@@ -174,21 +144,57 @@ function isInProgressFeaturedEvent(item: { date: string; title: string }): boole
 }
 
 export function useFeaturedEvents() {
-  const { signupEvents, isLoading, usingMock } = useHomeSummary();
+  const { signupEvents, isLoading } = useHomeSummary();
 
   const items = useMemo((): FeaturedEvent[] => {
-    if (usingMock) {
-      return featuredEvents.filter(isInProgressFeaturedEvent);
-    }
     const inProgress = signupEvents.filter(isInProgressFeaturedEvent);
     return pickHomeFeaturedEvents(inProgress);
-  }, [signupEvents, usingMock]);
+  }, [signupEvents]);
 
   return {
     items,
-    isLoading: !usingMock && isLoading,
-    usingMock,
+    isLoading,
   };
+}
+
+function mergeHomeCountdownCandidates(
+  signupEvents: HomeSummary["signupEvents"],
+  activities: import("../types/backend").BackendActivity[] | undefined,
+): ActivityDateFields[] {
+  const seen = new Set<string>();
+  const candidates: ActivityDateFields[] = [];
+
+  const add = (title: string, date?: string) => {
+    const key = `${title}|${date ?? ""}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    candidates.push({ title, date });
+  };
+
+  for (const event of signupEvents) {
+    add(event.title, event.date);
+  }
+  for (const activity of activities ?? []) {
+    add(activity.name, activity.date);
+  }
+
+  return candidates;
+}
+
+export function useNearestUpcomingForCountdown() {
+  const { signupEvents } = useHomeSummary();
+  const activitiesQuery = useActivitiesQuery();
+
+  return useMemo(() => {
+    const candidates = mergeHomeCountdownCandidates(signupEvents, activitiesQuery.data);
+    const nearest = findNearestUpcomingActivity(candidates);
+    if (!nearest) return null;
+
+    const title = nearest.title ?? nearest.name;
+    if (!title) return null;
+
+    return { title, startAt: nearest.startAt };
+  }, [signupEvents, activitiesQuery.data]);
 }
 
 export function useActivityDetailQuery(legacyId?: number) {
@@ -205,9 +211,10 @@ export function useActivityDetailQuery(legacyId?: number) {
 
 export function usePopularPostsQuery() {
   const enabled = isApiEnabled();
+  const userId = getClientUserId();
 
   return useQuery({
-    queryKey: ["posts", "popular"],
+    queryKey: ["posts", "popular", userId],
     queryFn: () => fetchPopularPosts(),
     enabled,
     staleTime: 30_000,
@@ -216,40 +223,75 @@ export function usePopularPostsQuery() {
 
 export function usePopularPosts() {
   const query = usePopularPostsQuery();
-  const enabled = isApiEnabled();
 
-  const posts: ActivityPost[] = enabled
-    ? (query.data ?? []).map((item) => ({
-        id: item.id,
-        name: item.name,
-        handle: item.handle,
-        event: item.event,
-        location: item.location,
-        body: item.body,
-        time: item.time,
-        likes: item.likes,
-        avatar: item.avatar,
-        status: item.status,
-      }))
-    : activityPosts;
+  const posts: HomeFeedPost[] = (query.data ?? []).map(mapHomeFeedPost);
 
   return {
     posts,
-    isLoading: enabled && query.isLoading,
-    isError: enabled && query.isError,
+    isLoading: query.isLoading,
+    isError: query.isError,
     refetch: query.refetch,
-    usingMock: !enabled,
+  };
+}
+
+function mapHomeFeedPost(item: HomeFeedPost): HomeFeedPost {
+  return {
+    id: item.id,
+    name: item.name,
+    handle: item.handle,
+    event: item.event,
+    location: item.location,
+    body: item.body,
+    time: item.time,
+    likes: item.likes,
+    liked: item.liked,
+    comments: item.comments ?? 0,
+    avatar: item.avatar,
+    status: item.status,
+  };
+}
+
+export function useAllPostsQuery() {
+  const enabled = isApiEnabled();
+  const userId = getClientUserId();
+
+  const query = useQuery({
+    queryKey: ["posts", "all", userId],
+    queryFn: fetchAllPosts,
+    enabled,
+    staleTime: 30_000,
+  });
+
+  const posts: HomeFeedPost[] = (query.data ?? []).map(mapHomeFeedPost);
+
+  return {
+    posts,
+    isLoading: query.isLoading,
+    isError: query.isError,
+    refetch: query.refetch,
   };
 }
 
 export function useEventPostsQuery(activityLegacyId?: number) {
   const enabled = isApiEnabled() && activityLegacyId != null && !Number.isNaN(activityLegacyId);
+  const userId = getClientUserId();
 
   return useQuery({
-    queryKey: ["posts", "activity", activityLegacyId],
+    queryKey: ["posts", "activity", activityLegacyId, userId],
     queryFn: () => fetchPostsByActivity(activityLegacyId as number),
     enabled,
     staleTime: 30_000,
+  });
+}
+
+export function usePostCommentsQuery(postId: string, enabled: boolean) {
+  const apiEnabled = isApiEnabled();
+
+  return useQuery({
+    queryKey: ["posts", postId, "comments"],
+    queryFn: () => fetchPostComments(postId),
+    enabled: apiEnabled && enabled && Boolean(postId),
+    staleTime: 10_000,
   });
 }
 
@@ -349,12 +391,47 @@ export async function deletePostAndInvalidate(queryClient: QueryClient, postId: 
   await invalidatePostQueries(queryClient);
 }
 
+function patchLikedPostInCaches(
+  queryClient: QueryClient,
+  updated: Pick<EventDetailPost, "id" | "likes" | "liked" | "comments">,
+) {
+  const patchFeedPosts = (posts: HomeFeedPost[] | undefined) =>
+    posts?.map((post) =>
+      post.id === updated.id
+        ? {
+            ...post,
+            likes: updated.likes,
+            liked: updated.liked ?? true,
+            comments: updated.comments ?? post.comments,
+          }
+        : post,
+    );
+
+  const patchEventPosts = (posts: EventDetailPost[] | undefined) =>
+    posts?.map((post) =>
+      post.id === updated.id
+        ? {
+            ...post,
+            likes: updated.likes,
+            liked: updated.liked ?? true,
+            comments: updated.comments ?? post.comments,
+          }
+        : post,
+    );
+
+  queryClient.setQueriesData<HomeFeedPost[]>({ queryKey: ["posts", "popular"] }, patchFeedPosts);
+  queryClient.setQueriesData<HomeFeedPost[]>({ queryKey: ["posts", "all"] }, patchFeedPosts);
+  queryClient.setQueriesData<EventDetailPost[]>({ queryKey: ["posts", "activity"] }, patchEventPosts);
+}
+
 export async function likePostAndInvalidate(queryClient: QueryClient, postId: string) {
-  await likePost(postId);
+  const updated = await likePost(postId);
+  patchLikedPostInCaches(queryClient, updated);
   await Promise.all([
     invalidatePostQueries(queryClient),
     invalidateNotificationQueries(queryClient),
   ]);
+  return updated;
 }
 
 export async function commentPostAndInvalidate(
@@ -367,6 +444,7 @@ export async function commentPostAndInvalidate(
   await Promise.all([
     invalidatePostQueries(queryClient),
     invalidateNotificationQueries(queryClient),
+    queryClient.invalidateQueries({ queryKey: ["posts", postId, "comments"] }),
   ]);
 }
 
