@@ -1,18 +1,23 @@
 import "./home.scss";
 import { useCallback } from "react";
 import BottomNav from "../../components/BottomNav";
-import TopBar from "../../components/TopBar";
 import { useHomeSummary, useNotificationUnreadCount } from "../../hooks/useSyncApi";
 import { go, goAiMatch, ROUTES } from "../../utils/route";
-import { HomeAiAssistant } from "./components/HomeAiAssistant";
-import { HomeEventSignup } from "./components/HomeEventSignup";
-import { HomeHeatBar } from "./components/HomeHeatBar";
-import { HomeHotSection } from "./components/HomeHotSection";
-import { HomeTicketZone } from "./components/HomeTicketZone";
+import { HomeActivityFeed } from "./components/HomeActivityFeed";
+import { HomeCountdownCard } from "./components/HomeCountdownCard";
+import { HomeFeaturedEvents } from "./components/HomeFeaturedEvents";
+import { HomeMarketHero } from "./components/HomeMarketHero";
+import {
+  activityPosts,
+  countdownParts,
+  featuredEvents,
+  type FeaturedMarketEvent,
+} from "./homeMarketData";
 
 const Home = () => {
-  const { heat, signupEvents, hotPins } = useHomeSummary();
+  const { heat } = useHomeSummary();
   const { data: unreadCount = 0 } = useNotificationUnreadCount();
+
   const openAiMatch = useCallback((message?: string) => {
     if (message?.trim()) {
       goAiMatch({ tab: `ai`, initialMessage: message.trim() });
@@ -25,25 +30,41 @@ const Home = () => {
     go(ROUTES.NOTIFICATIONS);
   }, []);
 
+  const openFeaturedEvent = useCallback(() => {
+    go(ROUTES.EVENTS);
+  }, []);
+
+  const startTeamMatch = useCallback((event: FeaturedMarketEvent) => {
+    goAiMatch({
+      tab: `ai`,
+      initialMessage: `我想参加 ${event.title}，帮我找一起去的队友。`,
+    });
+  }, []);
+
+  const activeTeamCount = heat.teamOrders;
+
   return (
     <div data-cmp="Home" className="s-home">
-      <TopBar
-        variant="home"
-        onAgentClick={openAiMatch}
-        onNotificationClick={handleNotification}
-        notificationCount={unreadCount}
-      />
-
       <main className="s-home__main s-scrollbar-none">
-        <HomeAiAssistant onOpenAiMatch={openAiMatch} />
+        <HomeMarketHero
+          unreadCount={unreadCount}
+          onAgentClick={() => openAiMatch()}
+          onNotificationClick={handleNotification}
+        />
 
-        <HomeEventSignup items={signupEvents} />
+        <HomeCountdownCard eventName="Tomorrowland China" parts={countdownParts} />
 
-        <HomeHotSection items={hotPins} />
+        <HomeFeaturedEvents
+          items={featuredEvents}
+          onEventClick={openFeaturedEvent}
+          onJoinClick={startTeamMatch}
+        />
 
-        <HomeHeatBar stats={heat} />
+        <HomeActivityFeed items={activityPosts} onSeeAll={() => go(ROUTES.EVENTS)} />
 
-        <HomeTicketZone />
+        <div className="s-home__heat" aria-label="Today heat">
+          {heat.people} 人正在发现 · {activeTeamCount} 个组队进行中
+        </div>
       </main>
 
       <BottomNav />

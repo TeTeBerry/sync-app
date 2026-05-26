@@ -323,8 +323,13 @@ export function useHomeSummary() {
       }))
     : hotPinItems;
 
+  const heat = enabled ? query.data?.heat ?? homeHeatStats : homeHeatStats;
+
   return {
-    heat: enabled ? query.data?.heat ?? homeHeatStats : homeHeatStats,
+    heat: {
+      ...heat,
+      teamOrders: heat.pinOrders,
+    },
     signupEvents: enabled ? query.data?.signupEvents ?? [] : eventSignupItems,
     hotPins,
     isLoading: query.isLoading,
