@@ -95,6 +95,9 @@
       "buyNow": "立即购",
       "contact": "联系他"
     },
+    "feed": {
+      "title": "更多热门帖子"
+    },
     "nearEvents": "最近活动",
     "fabLabel": "快速发布",
     "notificationsComingSoon": "消息通知即将上线"
@@ -130,8 +133,23 @@
     "avatarUpdated": "头像已更新",
     "stats": {
       "events": "参加活动",
-      "pinSuccess": "拼单成功",
+      "pinSuccess": "结伴成功",
+      "likes": "获赞数",
+      "posts": "我的帖子",
       "buddies": "搭子"
+    },
+    "myActivities": {
+      "title": "我的活动"
+    },
+    "myPosts": {
+      "title": "我的帖子",
+      "complete": "标记成团",
+      "edit": "编辑",
+      "delete": "删除"
+    },
+    "pagination": {
+      "prev": "上一页",
+      "next": "下一页"
     },
     "level": {
       "title": "拼单等级 · Lv.{{level}}",
@@ -186,8 +204,8 @@
     },
     "settings": {
       "title": "设置",
-      "notifications": "消息通知",
-      "privacy": "隐私设置",
+      "notifications": "通知设置",
+      "privacy": "隐私与安全",
       "help": "帮助与反馈",
       "logout": "退出登录",
       "enabled": "已开启",
@@ -236,6 +254,13 @@
     "status": "在线为你匹配...",
     "welcome": "Hey！听说你想去周末的 S2O 电音节？需要我帮你找搭子，或查门票出/收吗？",
     "placeholder": "告诉我想去哪场派对..."
+  },
+  "eventDetail": {
+    "ai": {
+      "title": "告诉我你的需求 ai精准匹配",
+      "prompt": "👋 你想找什么类型的搭子？",
+      "placeholder": "告诉我你的需求..."
+    }
   },
   "aiAssistant": {
     "title": "AI 搭子助手",

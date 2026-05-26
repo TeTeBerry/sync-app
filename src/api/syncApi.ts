@@ -1,6 +1,23 @@
-import { apiGet, apiPatch, apiPost } from "../utils/apiClient";
+import { apiDelete, apiGet, apiPatch, apiPost } from "../utils/apiClient";
 import type { ChatSessionRecord } from "../types/aiChat";
-import type { AppNotification, BackendActivity, HomeSummary } from "../types/backend";
+import type {
+  AppNotification,
+  BackendActivity,
+  EventDetailPost,
+  HomeFeedPost,
+  HomeSummary,
+  ProfileActivityItem,
+  ProfilePostItem,
+  ProfileSummary,
+} from "../types/backend";
+import { getClientUserId, getClientUserName } from "../utils/session";
+
+function ownerParams() {
+  return {
+    userId: getClientUserId(),
+    authorName: getClientUserName(),
+  };
+}
 
 export function fetchActivities() {
   return apiGet<BackendActivity[]>("/activities");
@@ -16,6 +33,32 @@ export function fetchHomeSummary() {
 
 export function fetchActivityByLegacyId(legacyId: number) {
   return apiGet<BackendActivity | null>(`/activities/${legacyId}`);
+}
+
+export function fetchPopularPosts(limit = 20) {
+  return apiGet<HomeFeedPost[]>("/posts/popular", { limit: String(limit) });
+}
+
+export function fetchPostsByActivity(activityLegacyId: number) {
+  return apiGet<EventDetailPost[]>("/posts", {
+    activityLegacyId: String(activityLegacyId),
+  });
+}
+
+export function fetchProfileSummary() {
+  return apiGet<ProfileSummary>("/profile", ownerParams());
+}
+
+export function fetchProfileActivities() {
+  return apiGet<ProfileActivityItem[]>("/profile/activities", ownerParams());
+}
+
+export function fetchProfilePosts() {
+  return apiGet<ProfilePostItem[]>("/profile/posts", ownerParams());
+}
+
+export function deletePost(postId: string) {
+  return apiDelete<{ ok: true }>(`/posts/${postId}`, ownerParams());
 }
 
 export function fetchChatSession(sessionId: string) {

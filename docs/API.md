@@ -102,6 +102,12 @@ H5 开发态也可只配 `TARO_APP_API_BASE_URL=/api`，由 `config/index.ts` de
 | POST | `/api/pindan/:legacyId/join` | 加入拼单（body: `{ userId? }`，返回 ProfilePinDanItem） |
 | DELETE | `/api/pindan/:legacyId/join?userId=` | 退出拼单 |
 | GET | `/api/profile/pindan?userId=` | 我的拼单列表 |
+| GET | `/api/profile?userId=&authorName=` | 个人资料与统计 |
+| GET | `/api/profile/activities?userId=&authorName=` | 我的活动报名 |
+| GET | `/api/profile/posts?userId=&authorName=` | 我的帖子 |
+| GET | `/api/posts/popular?limit=` | 首页热门帖子流 |
+| GET | `/api/posts?activityLegacyId=` | 活动详情页组队帖 |
+| DELETE | `/api/posts/:id?userId=&authorName=` | 删除自己的帖子 |
 
 ### SSE 对话
 

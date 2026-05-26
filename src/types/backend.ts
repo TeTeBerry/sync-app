@@ -101,6 +101,68 @@ export interface ProfileTicketItem {
   createdAt: string;
 }
 
+export interface ProfileSummary {
+  name: string;
+  handle: string;
+  location: string;
+  bio: string;
+  avatar: string;
+  stats: {
+    events: number;
+    pinSuccess: number;
+    likes: number;
+    posts: number;
+  };
+}
+
+export interface ProfileActivityItem {
+  id: string;
+  title: string;
+  date: string;
+  location: string;
+  price: number;
+  image: string;
+  status: "registered";
+}
+
+export interface ProfilePostItem {
+  id: string;
+  title: string;
+  content: string;
+  status: "招募中" | "已成团";
+  likes: number;
+  comments: number;
+  date: string;
+}
+
+export interface HomeFeedPost {
+  id: string;
+  userId?: string;
+  name: string;
+  handle: string;
+  event: string;
+  location: string;
+  body: string;
+  time: string;
+  likes: number;
+  avatar: string;
+  status: "招募中" | "已成团";
+}
+
+export interface EventDetailPost {
+  id: string;
+  userId?: string;
+  name: string;
+  location: string;
+  time: string;
+  body: string;
+  tags: string[];
+  likes: number;
+  comments: number;
+  avatar: string;
+  status: "招募中" | "已成团";
+}
+
 export interface HomeSummary {
   heat: {
     people: number;

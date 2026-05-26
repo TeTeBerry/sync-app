@@ -1,15 +1,22 @@
 import { useCallback, useMemo } from "react";
 import { useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 import {
+  deletePost,
   fetchActivities,
   fetchHomeSummary,
   fetchNotificationUnreadCount,
   fetchNotifications,
+  fetchPopularPosts,
+  fetchPostsByActivity,
+  fetchProfileActivities,
+  fetchProfilePosts,
+  fetchProfileSummary,
   markAllNotificationsRead,
   markNotificationRead,
 } from "../api/syncApi";
 import { isApiEnabled } from "../constants/api";
 import { eventSignupItems, homeHeatStats, hotPinItems, type HotPinItem } from "../pages/index/mockData";
+import { activityPosts, type ActivityPost } from "../pages/index/homeData";
 import { getClientUserId } from "../utils/session";
 import { mapActivitiesToEvents, type EventCardUi } from "../utils/apiMappers";
 import { buildParticipatedActivities, type ProfileParticipatedItem } from "../utils/profileParticipated";
@@ -193,4 +200,96 @@ export function useProfileParticipatedItems() {
     refetch,
     usingMock: !enabled,
   };
+}
+
+export function usePopularPostsQuery() {
+  const enabled = isApiEnabled();
+
+  return useQuery({
+    queryKey: ["posts", "popular"],
+    queryFn: () => fetchPopularPosts(),
+    enabled,
+    staleTime: 30_000,
+  });
+}
+
+export function usePopularPosts() {
+  const query = usePopularPostsQuery();
+  const enabled = isApiEnabled();
+
+  const posts: ActivityPost[] = enabled
+    ? (query.data ?? []).map((item) => ({
+        id: item.id,
+        name: item.name,
+        handle: item.handle,
+        event: item.event,
+        location: item.location,
+        body: item.body,
+        time: item.time,
+        likes: item.likes,
+        avatar: item.avatar,
+        status: item.status,
+      }))
+    : activityPosts;
+
+  return {
+    posts,
+    isLoading: enabled && query.isLoading,
+    isError: enabled && query.isError,
+    refetch: query.refetch,
+    usingMock: !enabled,
+  };
+}
+
+export function useEventPostsQuery(activityLegacyId?: number) {
+  const enabled = isApiEnabled() && activityLegacyId != null && !Number.isNaN(activityLegacyId);
+
+  return useQuery({
+    queryKey: ["posts", "activity", activityLegacyId],
+    queryFn: () => fetchPostsByActivity(activityLegacyId as number),
+    enabled,
+    staleTime: 30_000,
+  });
+}
+
+export function useProfileSummaryQuery() {
+  const enabled = isApiEnabled();
+
+  return useQuery({
+    queryKey: ["profile", "summary"],
+    queryFn: fetchProfileSummary,
+    enabled,
+    staleTime: 60_000,
+  });
+}
+
+export function useProfileActivitiesQuery() {
+  const enabled = isApiEnabled();
+
+  return useQuery({
+    queryKey: ["profile", "activities"],
+    queryFn: fetchProfileActivities,
+    enabled,
+    staleTime: 60_000,
+  });
+}
+
+export function useProfilePostsQuery() {
+  const enabled = isApiEnabled();
+
+  return useQuery({
+    queryKey: ["profile", "posts"],
+    queryFn: fetchProfilePosts,
+    enabled,
+    staleTime: 30_000,
+  });
+}
+
+export async function deletePostAndInvalidate(queryClient: QueryClient, postId: string) {
+  await deletePost(postId);
+  await Promise.all([
+    queryClient.invalidateQueries({ queryKey: ["posts"] }),
+    queryClient.invalidateQueries({ queryKey: ["profile", "posts"] }),
+    queryClient.invalidateQueries({ queryKey: ["profile", "summary"] }),
+  ]);
 }

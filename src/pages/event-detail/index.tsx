@@ -1,7 +1,9 @@
 import "./event-detail.scss";
 import Taro from "@tarojs/taro";
 import { useCallback, useMemo, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import {
+  CheckIcon,
   ChevronDownIcon,
   ChevronLeftIcon,
   HeartIcon,
@@ -10,20 +12,81 @@ import {
   SendIcon,
   Share2Icon,
   SparklesIcon,
+  Trash2Icon,
   UserPlusIcon,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { goAiAssistant, goBack, ROUTES } from "../../utils/route";
+import BottomNav from "../../components/BottomNav";
+import { deletePostAndInvalidate, useEventPostsQuery } from "../../hooks/useSyncApi";
+import { isApiEnabled } from "../../constants/api";
+import { isCurrentUserPostAuthor } from "../../utils/postOwnership";
 import { getEventDetail, type EventTeamPost } from "./eventDetailData";
 
 const aiTags = ["组队队友", "拼房搭子", "拼车同行", "拼套票"];
 
-const statusClass = (status: EventTeamPost["status"]) =>
-  status === "已成团" ? "s-event-post__status s-event-post__status--done" : "s-event-post__status";
-
 const EventDetailPage = () => {
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const eventId = Number(Taro.getCurrentInstance().router?.params?.id);
   const detail = useMemo(() => getEventDetail(eventId), [eventId]);
+  const postsQuery = useEventPostsQuery(eventId);
   const [prompt, setPrompt] = useState("");
+  const [appliedPostIds, setAppliedPostIds] = useState<Set<string>>(() => new Set());
+
+  const posts: EventTeamPost[] = useMemo(() => {
+    if (isApiEnabled() && postsQuery.data) {
+      return postsQuery.data.map((item) => ({
+        id: item.id,
+        name: item.name,
+        location: item.location,
+        time: item.time,
+        body: item.body,
+        tags: item.tags,
+        likes: item.likes,
+        comments: item.comments,
+        avatar: item.avatar,
+        status: item.status,
+      }));
+    }
+    return detail?.posts ?? [];
+  }, [detail?.posts, postsQuery.data]);
+
+  const handleApply = useCallback((postId: string) => {
+    setAppliedPostIds((prev) => {
+      if (prev.has(postId)) return prev;
+      const next = new Set(prev);
+      next.add(postId);
+      return next;
+    });
+  }, []);
+
+  const handleDeletePost = useCallback(
+    (post: EventTeamPost) => {
+      void Taro.showModal({
+        title: "确认删除",
+        content: "删除后无法恢复，确定要删除这条帖子吗？",
+        confirmText: "删除",
+        cancelText: "取消",
+        success: (res) => {
+          if (!res.confirm) return;
+          if (!isApiEnabled()) {
+            void Taro.showToast({ title: "已删除", icon: "success" });
+            return;
+          }
+          void deletePostAndInvalidate(queryClient, post.id)
+            .then(() => {
+              void Taro.showToast({ title: "已删除", icon: "success" });
+            })
+            .catch(() => {
+              void postsQuery.refetch();
+              void Taro.showToast({ title: "删除失败", icon: "none" });
+            });
+        },
+      });
+    },
+    [postsQuery, queryClient],
+  );
 
   const openAi = useCallback(
     (message?: string) => {
@@ -38,6 +101,7 @@ const EventDetailPage = () => {
     return (
       <div className="s-event-detail">
         <div className="s-event-detail__fallback">活动不存在</div>
+        <BottomNav />
       </div>
     );
   }
@@ -47,11 +111,10 @@ const EventDetailPage = () => {
       <main className="s-event-detail__main s-scrollbar-none">
         <header className="s-event-detail__header">
           <button type="button" className="s-event-detail__back" aria-label="返回" onClick={() => goBack(ROUTES.HOME)}>
-            <ChevronLeftIcon size={20} />
+            <ChevronLeftIcon size={22} />
           </button>
           <div className="s-event-detail__head-main">
             <h1>{detail.title}</h1>
-            <p>{detail.posts.length} 条组队帖</p>
           </div>
           <button type="button" className="s-event-detail__map-btn" aria-label="地图">
             <MapIcon size={18} />
@@ -61,9 +124,9 @@ const EventDetailPage = () => {
         <section className="s-event-detail__ai">
           <div className="s-event-detail__ai-head">
             <SparklesIcon size={14} />
-            <span>告诉我你要D什么，精准匹配</span>
+            <span>{t("eventDetail.ai.title")}</span>
           </div>
-          <p className="s-event-detail__ai-bubble">👋 你想找什么类型的搭子？</p>
+          <p className="s-event-detail__ai-bubble">{t("eventDetail.ai.prompt")}</p>
           <div className="s-event-detail__ai-tags">
             {aiTags.map((tag) => (
               <button key={tag} type="button" className="s-event-detail__ai-tag" onClick={() => openAi(tag)}>
@@ -73,8 +136,9 @@ const EventDetailPage = () => {
           </div>
           <div className="s-event-detail__ai-input">
             <input
+              className="s-event-detail__ai-input__field"
               value={prompt}
-              placeholder="告诉我你的需求..."
+              placeholder={t("eventDetail.ai.placeholder")}
               onChange={(e) => setPrompt(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && prompt.trim()) openAi(prompt);
@@ -87,10 +151,15 @@ const EventDetailPage = () => {
         </section>
 
         <div className="s-event-detail__posts">
-          {detail.posts.length === 0 ? (
+          {postsQuery.isLoading ? (
+            <p className="s-event-detail__empty">加载中...</p>
+          ) : posts.length === 0 ? (
             <p className="s-event-detail__empty">暂无组队帖，来发布第一条吧</p>
           ) : (
-            detail.posts.map((post) => (
+            posts.map((post) => {
+              const isOwn = isCurrentUserPostAuthor(post.name);
+
+              return (
               <article key={post.id} className="s-event-post">
                 <div className="s-event-post__header">
                   <img className="s-event-post__avatar" src={post.avatar} alt="" />
@@ -102,7 +171,6 @@ const EventDetailPage = () => {
                           {post.location} · {post.time}
                         </span>
                       </p>
-                      <span className={statusClass(post.status)}>{post.status}</span>
                     </div>
                   </div>
                 </div>
@@ -130,11 +198,28 @@ const EventDetailPage = () => {
                     <button type="button" className="s-event-post__action">
                       <Share2Icon size={16} />
                     </button>
+                    {isOwn ? (
+                      <button
+                        type="button"
+                        className="s-event-post__action s-event-post__action--delete"
+                        aria-label="删除"
+                        onClick={() => handleDeletePost(post)}
+                      >
+                        <Trash2Icon size={16} />
+                      </button>
+                    ) : null}
                   </div>
-                  <button type="button" className="s-event-post__apply">
-                    <UserPlusIcon size={14} />
-                    申请加入
-                  </button>
+                  {appliedPostIds.has(post.id) ? (
+                    <button type="button" className="s-event-post__apply s-event-post__apply--done" disabled>
+                      <CheckIcon size={14} />
+                      已申请
+                    </button>
+                  ) : (
+                    <button type="button" className="s-event-post__apply" onClick={() => handleApply(post.id)}>
+                      <UserPlusIcon size={14} />
+                      申请加入
+                    </button>
+                  )}
                 </div>
 
                 {post.comments > 0 ? (
@@ -144,12 +229,14 @@ const EventDetailPage = () => {
                   </button>
                 ) : null}
               </article>
-            ))
+              );
+            })
           )}
         </div>
 
-        {detail.posts.length > 0 ? <p className="s-event-detail__end">已经到底啦 ~</p> : null}
+        {posts.length > 0 ? <p className="s-event-detail__end">已经到底啦 ~</p> : null}
       </main>
+      <BottomNav />
     </div>
   );
 };

@@ -1,31 +1,32 @@
 import "./profile.scss";
 import Taro, { useDidShow } from "@tarojs/taro";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import {
-  AwardIcon,
   BellIcon,
-  CalendarIcon,
-  CameraIcon,
   ChevronRightIcon,
-  FlameIcon,
   HelpCircleIcon,
   LogOutIcon,
-  MapPinIcon,
   SettingsIcon,
   ShieldIcon,
-  TrendingUpIcon,
-  UsersIcon,
-  ZapIcon,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import BottomNav from "../../components/BottomNav";
 import ConfirmDialog from "../../components/ConfirmDialog";
-import { useProfileParticipatedItems } from "../../hooks/useSyncApi";
 import { go, ROUTES } from "../../utils/route";
-import { profileUser } from "./mockData";
-import ProfileParticipatedList from "./components/ProfileParticipatedList";
+import { profileActivities, profilePosts, profileUser } from "./mockData";
+import ProfileActivitiesSection from "./components/ProfileActivitiesSection";
+import ProfilePostsSection from "./components/ProfilePostsSection";
+import type { ProfilePostItem } from "./mockData";
 import { persistUserName } from "../../utils/session";
 import { useNavigationStore, useProfilePageStore } from "../../stores";
+import {
+  deletePostAndInvalidate,
+  useProfileActivitiesQuery,
+  useProfilePostsQuery,
+  useProfileSummaryQuery,
+} from "../../hooks/useSyncApi";
+import { isApiEnabled } from "../../constants/api";
 
 const STORAGE_KEYS = {
   notifications: "profile.notificationsEnabled",
@@ -43,15 +44,30 @@ function readStorage<T>(key: string, fallback: T): T {
 
 const Profile: React.FC = () => {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const settingsRef = useRef<HTMLDivElement>(null);
   const notificationsEnabled = useProfilePageStore((state) => state.notificationsEnabled);
-  const privacyLevel = useProfilePageStore((state) => state.privacyLevel);
   const setNotificationsEnabled = useProfilePageStore((state) => state.setNotificationsEnabled);
   const setPrivacyLevel = useProfilePageStore((state) => state.setPrivacyLevel);
   const consumeProfileIntent = useNavigationStore((state) => state.consumeProfileIntent);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
-  const participated = useProfileParticipatedItems();
+  const summaryQuery = useProfileSummaryQuery();
+  const activitiesQuery = useProfileActivitiesQuery();
+  const postsQuery = useProfilePostsQuery();
+  const apiEnabled = isApiEnabled();
+
+  const profileUserData = apiEnabled && summaryQuery.data
+    ? summaryQuery.data
+    : profileUser;
+
+  const activities = apiEnabled && activitiesQuery.data
+    ? activitiesQuery.data
+    : profileActivities;
+
+  const posts = apiEnabled && postsQuery.data
+    ? postsQuery.data
+    : profilePosts;
 
   const applyRouteParams = useCallback(() => {
     consumeProfileIntent();
@@ -64,35 +80,43 @@ const Profile: React.FC = () => {
   });
 
   useEffect(() => {
-    persistUserName(profileUser.name);
-  }, []);
-
-  const { level } = profileUser;
-  const progressPercent = useMemo(
-    () => Math.round((level.xp / level.xpMax) * 100),
-    [level.xp, level.xpMax],
-  );
-
-  const privacyLabel = t(`profile.settings.privacyOptions.${privacyLevel}`);
+    persistUserName(profileUserData.name);
+  }, [profileUserData.name]);
 
   const scrollToSettings = useCallback(() => {
     settingsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, []);
 
-  const handleAvatarEdit = useCallback(() => {
-    void Taro.chooseImage({
-      count: 1,
-      sizeType: ["compressed"],
-      sourceType: ["album", "camera"],
-      success: () => {
-        void Taro.showToast({ title: t("profile.avatarUpdated"), icon: "success" });
-      },
-    }).catch(() => {});
-  }, [t]);
-
-  const handleParticipatedTap = useCallback((title: string) => {
-    void Taro.showToast({ title, icon: "none" });
+  const handlePostAction = useCallback((action: string, item: ProfilePostItem) => {
+    void Taro.showToast({ title: `${action}: ${item.title}`, icon: "none" });
   }, []);
+
+  const handleDeletePost = useCallback(
+    (item: ProfilePostItem) => {
+      void Taro.showModal({
+        title: t("profile.myPosts.delete"),
+        content: "删除后无法恢复，确定要删除这条帖子吗？",
+        confirmText: t("profile.myPosts.delete"),
+        cancelText: t("common.cancel"),
+        success: (res) => {
+          if (!res.confirm) return;
+          if (!apiEnabled) {
+            handlePostAction(t("profile.myPosts.delete"), item);
+            return;
+          }
+          void deletePostAndInvalidate(queryClient, item.id)
+            .then(() => {
+              void Taro.showToast({ title: "已删除", icon: "success" });
+            })
+            .catch(() => {
+              void postsQuery.refetch();
+              void Taro.showToast({ title: "删除失败", icon: "none" });
+            });
+        },
+      });
+    },
+    [apiEnabled, handlePostAction, postsQuery, queryClient, t],
+  );
 
   const openSettings = useCallback(
     (section: "notifications" | "privacy" | "help") => {
@@ -114,12 +138,19 @@ const Profile: React.FC = () => {
     void Taro.showToast({ title: t("profile.settings.logoutSuccess"), icon: "success" });
   }, [t]);
 
+  const profileSubtext = `${profileUserData.handle} · ${profileUserData.location} · ${profileUserData.bio}`;
+
   return (
     <div data-cmp="Profile" className="s-profile">
       <main className="s-profile__main s-scrollbar-none">
         <header className="s-profile__header">
           <h1 className="s-profile__title">{t("profile.title")}</h1>
-          <button type="button" className="s-profile__settings-btn" aria-label={t("profile.settings.title")} onClick={scrollToSettings}>
+          <button
+            type="button"
+            className="s-profile__settings-btn"
+            aria-label={t("profile.settings.title")}
+            onClick={scrollToSettings}
+          >
             <SettingsIcon size={20} />
           </button>
         </header>
@@ -127,91 +158,46 @@ const Profile: React.FC = () => {
         <section className="s-profile__card">
           <div className="s-profile__card-top">
             <div className="s-profile__avatar-wrap">
-              <img className="s-profile__avatar" src={profileUser.avatar} alt={profileUser.name} />
-              {profileUser.isOnline && <span className="s-profile__online-dot" aria-hidden />}
-              <button type="button" className="s-profile__avatar-edit" aria-label={t("profile.editAvatar")} onClick={handleAvatarEdit}>
-                <CameraIcon size={12} />
-              </button>
+              <img className="s-profile__avatar" src={profileUserData.avatar} alt={profileUserData.name} />
             </div>
 
             <div className="s-profile__info">
-              <div className="s-profile__name-row">
-                <span className="s-profile__name">{profileUser.name}</span>
-                {profileUser.isVip && <span className="s-profile__vip-badge">VIP</span>}
-                <span className="s-profile__medal" aria-hidden>
-                  <AwardIcon size={18} />
-                </span>
-              </div>
-              <div className="s-profile__location">
-                <MapPinIcon size={14} />
-                <span>{profileUser.location}</span>
-              </div>
+              <span className="s-profile__name">{profileUserData.name}</span>
+              <span className="s-profile__subtext">{profileSubtext}</span>
             </div>
           </div>
 
           <div className="s-profile__stats">
             <div className="s-profile__stat">
-              <CalendarIcon size={16} className="s-profile__stat-icon" />
-              <span className="s-profile__stat-value">{profileUser.stats.events}</span>
+              <span className="s-profile__stat-value">{profileUserData.stats.events}</span>
               <span className="s-profile__stat-label">{t("profile.stats.events")}</span>
             </div>
             <div className="s-profile__stat">
-              <UsersIcon size={16} className="s-profile__stat-icon" />
-              <span className="s-profile__stat-value">{profileUser.stats.pinSuccess}</span>
+              <span className="s-profile__stat-value">{profileUserData.stats.pinSuccess}</span>
               <span className="s-profile__stat-label">{t("profile.stats.pinSuccess")}</span>
             </div>
             <div className="s-profile__stat">
-              <TrendingUpIcon size={16} className="s-profile__stat-icon" />
-              <span className="s-profile__stat-value">{profileUser.stats.buddies}</span>
-              <span className="s-profile__stat-label">{t("profile.stats.buddies")}</span>
+              <span className="s-profile__stat-value">{profileUserData.stats.likes}</span>
+              <span className="s-profile__stat-label">{t("profile.stats.likes")}</span>
+            </div>
+            <div className="s-profile__stat">
+              <span className="s-profile__stat-value">{profileUserData.stats.posts}</span>
+              <span className="s-profile__stat-label">{t("profile.stats.posts")}</span>
             </div>
           </div>
         </section>
 
-        <section className="s-profile__level-card">
-          <div className="s-profile__level-head">
-            <div className="s-profile__level-title">
-              <FlameIcon size={18} />
-              <span>{t("profile.level.title", { level: level.current })}</span>
-            </div>
-            <div className="s-profile__level-xp-hint">
-              <ZapIcon size={14} />
-              <span>
-                {t("profile.level.xpToNext", { xp: level.xpToNext, nextLevel: level.current + 1 })}
-              </span>
-            </div>
-          </div>
-          <div className="s-profile__progress-track">
-            <div className="s-profile__progress-fill" style={{ width: `${progressPercent}%` }} />
-          </div>
-          <div className="s-profile__level-foot">
-            <span>
-              {t("profile.level.xpProgress", { current: level.xp.toLocaleString(), max: level.xpMax.toLocaleString() })}
-            </span>
-            <span>{progressPercent}%</span>
-          </div>
-        </section>
-
-        <div className="s-profile__section-head">
-          <h2>{t("profile.tabs.participated")}</h2>
-        </div>
-
-        <div className="s-profile__events">
-          <ProfileParticipatedList
-            items={participated.items}
-            isLoading={participated.isLoading}
-            isError={participated.isError}
-            onRetry={() => void participated.refetch()}
-            onItemTap={(item) => handleParticipatedTap(item.title)}
+        <div className="s-profile__sections">
+          <ProfileActivitiesSection items={activities} />
+          <ProfilePostsSection
+            items={posts}
+            onComplete={(item) => handlePostAction(t("profile.myPosts.complete"), item)}
+            onEdit={(item) => handlePostAction(t("profile.myPosts.edit"), item)}
+            onDelete={handleDeletePost}
           />
         </div>
 
         <section ref={settingsRef} className="s-profile__settings-section">
-          <div className="s-profile__settings-head">
-            <SettingsIcon size={16} />
-            <span>{t("profile.settings.title")}</span>
-          </div>
-
           <div className="s-profile__settings-card">
             <button type="button" className="s-profile__settings-row" onClick={() => openSettings("notifications")}>
               <span className="s-profile__settings-icon s-profile__settings-icon--bell">
@@ -229,7 +215,6 @@ const Profile: React.FC = () => {
                 <ShieldIcon size={18} />
               </span>
               <span className="s-profile__settings-label">{t("profile.settings.privacy")}</span>
-              <span className="s-profile__settings-value">{privacyLabel}</span>
               <ChevronRightIcon size={18} className="s-profile__settings-chevron" />
             </button>
 
@@ -241,12 +226,15 @@ const Profile: React.FC = () => {
               <ChevronRightIcon size={18} className="s-profile__settings-chevron" />
             </button>
 
-            <button type="button" className="s-profile__settings-row s-profile__settings-row--logout" onClick={handleLogout}>
+            <button
+              type="button"
+              className="s-profile__settings-row s-profile__settings-row--logout"
+              onClick={handleLogout}
+            >
               <span className="s-profile__settings-icon s-profile__settings-icon--logout">
                 <LogOutIcon size={18} />
               </span>
               <span className="s-profile__settings-label">{t("profile.settings.logout")}</span>
-              <ChevronRightIcon size={18} className="s-profile__settings-chevron" />
             </button>
           </div>
         </section>

@@ -95,6 +95,9 @@
       "buyNow": "Buy Now",
       "contact": "Contact"
     },
+    "feed": {
+      "title": "More Popular Posts"
+    },
     "nearEvents": "Nearby Events",
     "fabLabel": "Quick post",
     "notificationsComingSoon": "Notifications coming soon"
@@ -130,8 +133,23 @@
     "avatarUpdated": "Avatar updated",
     "stats": {
       "events": "Events joined",
-      "pinSuccess": "Group buys",
+      "pinSuccess": "Pairings",
+      "likes": "Likes",
+      "posts": "My posts",
       "buddies": "Buddies"
+    },
+    "myActivities": {
+      "title": "My activities"
+    },
+    "myPosts": {
+      "title": "My posts",
+      "complete": "Mark complete",
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "pagination": {
+      "prev": "Previous page",
+      "next": "Next page"
     },
     "level": {
       "title": "Group level · Lv.{{level}}",
@@ -186,7 +204,7 @@
     "settings": {
       "title": "Settings",
       "notifications": "Notifications",
-      "privacy": "Privacy",
+      "privacy": "Privacy & security",
       "help": "Help & Feedback",
       "logout": "Log out",
       "enabled": "On",
@@ -235,6 +253,13 @@
     "status": "Matching for you...",
     "welcome": "Hey! Heard you're going to S2O this weekend? Want me to match you with buddies for tickets or VIP tables?",
     "placeholder": "Tell me which party you want to go to..."
+  },
+  "eventDetail": {
+    "ai": {
+      "title": "Tell me your needs — AI precision matching",
+      "prompt": "👋 What kind of buddy are you looking for?",
+      "placeholder": "Tell me what you need..."
+    }
   },
   "aiAssistant": {
     "title": "AI Buddy",
