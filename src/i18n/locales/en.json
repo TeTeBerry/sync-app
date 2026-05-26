@@ -236,157 +236,23 @@
     "welcome": "Hey! Heard you're going to S2O this weekend? Want me to match you with buddies for tickets or VIP tables?",
     "placeholder": "Tell me which party you want to go to..."
   },
-  "aimatch": {
+  "aiAssistant": {
     "title": "AI Buddy",
-    "tabs": {
-      "ai": "AI Match",
-      "pindan": "Create Group",
-      "ticket": "Tickets",
-      "events": "Events"
-    },
-    "ai": {
-      "welcome": "👋 I'm your AI festival buddy — find crew, group orders, buy/sell tickets. Just tell me what you need!",
+    "chat": {
+      "welcome": "👋 I'm your AI festival buddy — discover events, find crew, and plan your trip. Just tell me what you need!",
       "quickReplies": {
         "findBuddy": "Find a buddy",
-        "buyTicket": "Buy tickets",
-        "sellTicket": "Sell my tickets",
         "nearEvents": "Nearby events"
       },
-      "searching": "Searching for \"{{query}}\" 🔍 Found {{count}} high-match users — tap a card for details!",
+      "searching": "Searching for \"{{query}}\" 🔍 Found {{count}} relevant results.",
       "streamError": "Sorry, something went wrong. Please try again.",
       "thinking": "AI is thinking",
-      "placeholder": "Say what you need, or upload ticket/package/hotel screenshots",
-      "uploadImage": "Upload ticket image",
-      "uploadedTicketAlt": "Uploaded ticket image",
+      "placeholder": "Tell me where you want to go or what kind of crew you're looking for…",
+      "uploadImage": "Upload image",
+      "uploadedImageAlt": "Uploaded image",
       "viewImage": "View full image",
       "removeImage": "Remove image",
       "imageTooLarge": "Image too large — please compress to under 10MB"
-    },
-    "pindan": {
-      "createNew": "Start a new group order",
-      "ticket": "Ticket",
-      "hotel": "Hotel",
-      "transport": "Transport",
-      "ticketGroup": "Ticket Group",
-      "hotelGroup": "Hotel Group",
-      "transportGroup": "Transport Group",
-      "currentOrders": "Active Orders",
-      "join": "Join",
-      "joinedCardTitle": "View group buy",
-      "myCreatedCardTitle": "My group buy",
-      "tapToEdit": "Tap to edit",
-      "budgetLabel": "Budget",
-      "budgetRangePreview": "Budget {{range}}",
-      "editTitle": "Edit group buy",
-      "saveEdit": "Save changes",
-      "updated": "Group buy updated",
-      "activityCardTitle": "View activity groups",
-      "modal": {
-        "title": "New Group Order",
-        "selectType": "Select type",
-        "eventName": "Event name, e.g. \"EDC China 2025\"",
-        "eventDate": "Event date",
-        "pickDate": "Select event date",
-        "date": "Date",
-        "location": "Location",
-        "hotelName": "Hotel name, e.g. \"Atlantis Sanya\"",
-        "transportRoute": "Route, e.g. \"Shanghai Hongqiao → Suzhou\"",
-        "aiAddress": "AI suggested addresses",
-        "aiAddressLoading": "AI is matching addresses…",
-        "totalPrice": "Total price (CNY)",
-        "pricePerPerson": "Price per person",
-        "perPersonPreview": "About ¥{{amount}} per person",
-        "groupSize": "Group size",
-        "submit": "Publish"
-      }
-    },
-    "ticket": {
-      "sell": "Sell Tickets",
-      "buy": "Buy Tickets",
-      "guaranteeTitle": "Official escrow protection",
-      "guaranteeSub": "Verified ID · Escrow · Authentic tickets",
-      "tabs": {
-        "all": "All",
-        "selling": "Selling",
-        "buying": "Buying"
-      },
-      "buyTicket": "Buy Now",
-      "contact": "Contact",
-      "eventNotFound": "No matching event. Check the event name.",
-      "published": "Ticket listing published",
-      "createdCardTitle": "View listing",
-      "viewListing": "Tap to view ticket details",
-      "modal": {
-        "subtitleSell": "Fill in key details — visible right after posting",
-        "subtitleBuy": "Post your request — sellers will reach out",
-        "eventNameSell": "Event name, e.g. \"EDC China 2025\"",
-        "eventNameBuy": "Event name, e.g. \"Ultra Shanghai\"",
-        "eventDate": "Show date, e.g. 2025-03-02",
-        "seatSell": "Section / seat",
-        "seatBuy": "Section needed",
-        "quantity": "Qty",
-        "unitPriceSell": "Asking price (CNY / ticket)",
-        "unitPriceBuy": "Offer budget (CNY / ticket)",
-        "perTicket": "/ticket",
-        "contact": "Contact (WeChat / phone)",
-        "submitSell": "Post listing",
-        "submitBuy": "Post request",
-        "increase": "Increase",
-        "decrease": "Decrease"
-      }
-    },
-    "events": {
-      "filters": {
-        "all": "All",
-        "outdoor": "Outdoor EDM",
-        "edm": "EDM Festival",
-        "club": "Club Party",
-        "festival": "Major Festival"
-      },
-      "going": "I'm Going",
-      "registered": "Registered",
-      "findBuddy": "Find Buddies"
-    }
-  },
-  "pindan": {
-    "title": "Package Groups",
-    "currentActivity": "Current event",
-    "popular": "Most Popular",
-    "hero": {
-      "package": "Hotel + Transport Bundle",
-      "packageSubtitle": "Combo packages save more — up to 60% off per person",
-      "hotel": "Shared Hotel Rooms",
-      "transport": "Shared Transport",
-      "subtitle": "More people, lower cost per person"
-    },
-    "tabs": {
-      "package": "Packages",
-      "hotel": "Hotels",
-      "transport": "Transport"
-    },
-    "packageIncludes": "Package includes",
-    "join": "Join",
-    "joined": "Joined",
-    "joinPackage": "Join Package",
-    "edit": "Edit",
-    "delete": "Delete",
-    "deleteConfirmTitle": "Delete group buy",
-    "deleteConfirmMessage": "Delete \"{{title}}\"? This cannot be undone.",
-    "deleted": "Group buy deleted",
-    "created": "Group buy published",
-    "joinSuccess": {
-      "title": "Group buy successful"
-    },
-    "create": {
-      "title": "Start Group Buy",
-      "subtitle": "Find like-minded buddies to go together",
-      "activity": "Event",
-      "pinType": "Group type",
-      "typePackage": "Package (hotel + transport)",
-      "typeHotel": "Hotel share",
-      "typeTransport": "Ride share",
-      "remark": "Note (optional)",
-      "remarkPlaceholder": "e.g. women only, need a car..."
     }
   }
 }

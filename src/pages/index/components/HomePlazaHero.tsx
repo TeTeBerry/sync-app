@@ -2,13 +2,13 @@ import { BellIcon, SparklesIcon } from "lucide-react";
 import type { FC } from "react";
 import { Button } from "../../../components/ui";
 
-type HomeMarketHeroProps = {
+type HomePlazaHeroProps = {
   unreadCount: number;
   onAgentClick: () => void;
   onNotificationClick: () => void;
 };
 
-export const HomeMarketHero: FC<HomeMarketHeroProps> = ({
+export const HomePlazaHero: FC<HomePlazaHeroProps> = ({
   unreadCount,
   onAgentClick,
   onNotificationClick,

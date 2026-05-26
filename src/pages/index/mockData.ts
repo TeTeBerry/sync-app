@@ -1,16 +1,4 @@
-import type { PinDanTabType } from "../../utils/route";
 import type { TagTone } from "./home.types";
-
-export type {
-  TicketListing as TicketListingItem,
-  TicketFilterKey as TicketTabKey,
-  TicketTagTone,
-} from "../../data/ticketListings";
-
-export { ticketListings } from "../../data/ticketListings";
-
-/** @deprecated Use TicketTagTone from data/ticketListings */
-export type { TagTone };
 
 export type EventSignupItem = {
   id: number;
@@ -26,7 +14,6 @@ export type EventSignupItem = {
 };
 
 export type HotPinItem = {
-  /** 活动 ID，对应拼单页 activityId */
   id: number;
   rank: number;
   title: string;
@@ -34,8 +21,7 @@ export type HotPinItem = {
   category: string;
   categoryTone: TagTone;
   people: number;
-  pinType: PinDanTabType;
-  /** 拼单页 mock 数据中的卡片 ID，用于滚动定位与高亮 */
+  pinType: string;
   pinItemId: number;
 };
 
@@ -136,12 +122,6 @@ export const hotPinItems: HotPinItem[] = [
     pinItemId: 12,
   },
 ];
-
-/** @deprecated use hotPinItems */
-export type HotEventItem = HotPinItem;
-
-/** @deprecated use hotPinItems */
-export const hotEvents = hotPinItems;
 
 export interface NearEventBrief {
   title: string;

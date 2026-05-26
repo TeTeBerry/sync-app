@@ -1,29 +1,18 @@
 import { create } from "zustand";
-import type { AimatchNavIntent, PindanNavIntent, ProfileNavIntent } from "./types";
+import type { AiAssistantNavIntent, ProfileNavIntent } from "./types";
 
 interface NavigationState {
-  pindanIntent: PindanNavIntent | null;
   profileIntent: ProfileNavIntent | null;
-  aimatchIntent: AimatchNavIntent | null;
-  setPindanIntent: (intent: PindanNavIntent | null) => void;
-  consumePindanIntent: () => PindanNavIntent | null;
+  aiAssistantIntent: AiAssistantNavIntent | null;
   setProfileIntent: (intent: ProfileNavIntent | null) => void;
   consumeProfileIntent: () => ProfileNavIntent | null;
-  setAimatchIntent: (intent: AimatchNavIntent | null) => void;
-  consumeAimatchIntent: () => AimatchNavIntent | null;
+  setAiAssistantIntent: (intent: AiAssistantNavIntent | null) => void;
+  consumeAiAssistantIntent: () => AiAssistantNavIntent | null;
 }
 
 export const useNavigationStore = create<NavigationState>((set, get) => ({
-  pindanIntent: null,
   profileIntent: null,
-  aimatchIntent: null,
-
-  setPindanIntent: (intent) => set({ pindanIntent: intent }),
-  consumePindanIntent: () => {
-    const intent = get().pindanIntent;
-    if (intent) set({ pindanIntent: null });
-    return intent;
-  },
+  aiAssistantIntent: null,
 
   setProfileIntent: (intent) => set({ profileIntent: intent }),
   consumeProfileIntent: () => {
@@ -32,10 +21,10 @@ export const useNavigationStore = create<NavigationState>((set, get) => ({
     return intent;
   },
 
-  setAimatchIntent: (intent) => set({ aimatchIntent: intent }),
-  consumeAimatchIntent: () => {
-    const intent = get().aimatchIntent;
-    if (intent) set({ aimatchIntent: null });
+  setAiAssistantIntent: (intent) => set({ aiAssistantIntent: intent }),
+  consumeAiAssistantIntent: () => {
+    const intent = get().aiAssistantIntent;
+    if (intent) set({ aiAssistantIntent: null });
     return intent;
   },
 }));

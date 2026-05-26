@@ -1,5 +1,5 @@
 import type { FC } from "react";
-import type { CountdownPart } from "../homeMarketData";
+import type { CountdownPart } from "../homeData";
 
 type HomeCountdownCardProps = {
   eventName: string;

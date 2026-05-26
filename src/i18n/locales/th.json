@@ -237,157 +237,23 @@
     "welcome": "เฮ้! ได้ยินว่าอยากไป S2O สุดสัปดาห์นี้? ให้ช่วยหาเพื่อนซื้อตั๋วหรือโต๊ะ VIP ไหม?",
     "placeholder": "บอกว่าอยากไปปาร์ตี้ไหน..."
   },
-  "aimatch": {
-    "title": "ผู้ช่วย AI",
-    "tabs": {
-      "ai": "AI จับคู่",
-      "pindan": "สร้างกลุ่ม",
-      "ticket": "ตั๋ว",
-      "events": "กิจกรรม"
-    },
-    "ai": {
-      "welcome": "👋 ฉันคือผู้ช่วย AI สำหรับเทศกรรมดนตรี — หาเพื่อน สร้างกลุ่ม ซื้อ/ขายตั๋ว บอกความต้องการมาได้เลย!",
+  "aiAssistant": {
+    "title": "AI ผู้ช่วยเพื่อน",
+    "chat": {
+      "welcome": "👋 ฉันคือ AI ผู้ช่วยเพื่อนของคุณ — ค้นหากิจกรรม หาเพื่อนร่วมทาง และวางแผนทริป บอกความต้องการได้เลย!",
       "quickReplies": {
-        "findBuddy": "หาเพื่อน",
-        "buyTicket": "ต้องการซื้อตั๋ว",
-        "sellTicket": "ขายตั๋ว",
-        "nearEvents": "กิจกรรมใกล้เคียง"
+        "findBuddy": "หาเพื่อนร่วมทาง",
+        "nearEvents": "กิจกรรมใกล้ๆ"
       },
-      "searching": "กำลังค้นหา \"{{query}}\" 🔍 พบ {{count}} คนที่ตรงกัน — แตะการ์ดเพื่อดูรายละเอียด!",
-      "streamError": "ขออภัย เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง",
+      "searching": "กำลังค้นหา \"{{query}}\" 🔍 พบ {{count}} รายการที่เกี่ยวข้อง",
+      "streamError": "ขออภัย เกิดข้อผิดพลาด กรุณาลองใหม่",
       "thinking": "AI กำลังคิด",
-      "placeholder": "บอกความต้องการ หรืออัปโหลดภาพตั๋ว/แพ็กเกจ/โรงแรม",
-      "uploadImage": "อัปโหลดภาพตั๋ว",
-      "uploadedTicketAlt": "ภาพตั๋วที่อัปโหลด",
-      "viewImage": "ดูภาพขนาดเต็ม",
-      "removeImage": "ลบภาพ",
-      "imageTooLarge": "ภาพใหญ่เกินไป กรุณาบีบอัดให้ต่ำกว่า 10MB"
-    },
-    "pindan": {
-      "createNew": "เริ่มกลุ่มซื้อร่วมใหม่",
-      "ticket": "ตั๋ว",
-      "hotel": "โรงแรม",
-      "transport": "การเดินทาง",
-      "ticketGroup": "กลุ่มตั๋ว",
-      "hotelGroup": "กลุ่มโรงแรม",
-      "transportGroup": "กลุ่มการเดินทาง",
-      "currentOrders": "กลุ่มปัจจุบัน",
-      "join": "เข้าร่วม",
-      "joinedCardTitle": "ดูกลุ่มซื้อร่วม",
-      "myCreatedCardTitle": "กลุ่มที่ฉันสร้าง",
-      "tapToEdit": "แตะเพื่อแก้ไข",
-      "budgetLabel": "งบประมาณ",
-      "budgetRangePreview": "งบประมาณ {{range}}",
-      "editTitle": "แก้ไขกลุ่มซื้อ",
-      "saveEdit": "บันทึกการแก้ไข",
-      "updated": "อัปเดตกลุ่มซื้อแล้ว",
-      "activityCardTitle": "ดูกลุ่มซื้อร่วมของกิจกรรม",
-      "modal": {
-        "title": "สร้างกลุ่มซื้อร่วม",
-        "selectType": "เลือกประเภท",
-        "eventName": "ชื่อกิจกรรม เช่น \"EDC China 2025\"",
-        "eventDate": "วันที่กิจกรรม",
-        "pickDate": "เลือกวันที่กิจกรรม",
-        "date": "วันที่",
-        "location": "สถานที่",
-        "hotelName": "ชื่อโรงแรม เช่น \"Atlantis Sanya\"",
-        "transportRoute": "เส้นทาง เช่น \"Shanghai Hongqiao → Suzhou\"",
-        "aiAddress": "ที่อยู่ที่ AI แนะนำ",
-        "aiAddressLoading": "AI กำลังจับคู่ที่อยู่…",
-        "totalPrice": "ราคารวม (CNY)",
-        "pricePerPerson": "ราคาต่อคน",
-        "perPersonPreview": "ประมาณ ¥{{amount}} ต่อคน",
-        "groupSize": "จำนวนคน",
-        "submit": "เผยแพร่"
-      }
-    },
-    "ticket": {
-      "sell": "ขายตั๋ว",
-      "buy": "ซื้อตั๋ว",
-      "guaranteeTitle": "ธุรกรรมรับประกันอย่างเป็นทางการ",
-      "guaranteeSub": "ยืนยันตัวตน · เงินฝาก · ตั๋วแท้",
-      "tabs": {
-        "all": "ทั้งหมด",
-        "selling": "กำลังขาย",
-        "buying": "กำลังซื้อ"
-      },
-      "buyTicket": "ซื้อเลย",
-      "contact": "ติดต่อ",
-      "eventNotFound": "ไม่พบกิจกรรมที่ตรงกัน กรุณาตรวจสอบชื่อกิจกรรม",
-      "published": "ประกาศขายตั๋วแล้ว",
-      "createdCardTitle": "ดูรายการ",
-      "viewListing": "แตะเพื่อดูรายละเอียดตั๋ว",
-      "modal": {
-        "subtitleSell": "กรอกข้อมูลสำคัญ — โพสต์แล้วเห็นทันที",
-        "subtitleBuy": "โพสต์คำขอ — คนมีตั๋วจะติดต่อคุณ",
-        "eventNameSell": "ชื่องาน เช่น \"EDC China 2025\"",
-        "eventNameBuy": "ชื่องาน เช่น \"Ultra Shanghai\"",
-        "eventDate": "วันที่แสดง เช่น 2025-03-02",
-        "seatSell": "โซน / ที่นั่ง",
-        "seatBuy": "โซนที่ต้องการ",
-        "quantity": "จำนวน",
-        "unitPriceSell": "ราคาขาย (CNY / ใบ)",
-        "unitPriceBuy": "งบเสนอราคา (CNY / ใบ)",
-        "perTicket": "/ใบ",
-        "contact": "ติดต่อ (WeChat / เบอร์โทร)",
-        "submitSell": "โพสต์ขาย",
-        "submitBuy": "โพสต์ซื้อ",
-        "increase": "เพิ่ม",
-        "decrease": "ลด"
-      }
-    },
-    "events": {
-      "filters": {
-        "all": "ทั้งหมด",
-        "outdoor": "EDM กลางแจ้ง",
-        "edm": "เทศกาล EDM",
-        "club": "ปาร์ตี้คลับ",
-        "festival": "เทศกาลใหญ่"
-      },
-      "going": "ฉันจะไป",
-      "registered": "ลงทะเบียนแล้ว",
-      "findBuddy": "หาเพื่อนร่วม"
-    }
-  },
-  "pindan": {
-    "title": "แพ็กเกจซื้อร่วม",
-    "currentActivity": "กิจกรรมปัจจุบัน",
-    "popular": "ยอดนิยมที่สุด",
-    "hero": {
-      "package": "โรงแรม + การเดินทางครบจบ",
-      "packageSubtitle": "แพ็กเกจรวมคุ้มกว่า ประหยัดได้ถึง 60% ต่อคน",
-      "hotel": "แชร์ห้องโรงแรม",
-      "transport": "แชร์การเดินทาง",
-      "subtitle": "ยิ่งคนมาก ยิ่งถูกต่อคน"
-    },
-    "tabs": {
-      "package": "แพ็กเกจ",
-      "hotel": "โรงแรม",
-      "transport": "การเดินทาง"
-    },
-    "packageIncludes": "แพ็กเกจรวม",
-    "join": "เข้าร่วม",
-    "joined": "เข้าร่วมแล้ว",
-    "joinPackage": "เข้าร่วมแพ็กเกจ",
-    "edit": "แก้ไข",
-    "delete": "ลบ",
-    "deleteConfirmTitle": "ลบกลุ่มซื้อ",
-    "deleteConfirmMessage": "ลบ \"{{title}}\" หรือไม่? ไม่สามารถยกเลิกได้",
-    "deleted": "ลบกลุ่มซื้อแล้ว",
-    "created": "เผยแพร่กลุ่มซื้อแล้ว",
-    "joinSuccess": {
-      "title": "ซื้อร่วมสำเร็จ"
-    },
-    "create": {
-      "title": "เริ่มซื้อร่วม",
-      "subtitle": "หาเพื่อนร่วมที่มีความสนใจเดียวกัน",
-      "activity": "กิจกรรม",
-      "pinType": "ประเภทซื้อร่วม",
-      "typePackage": "แพ็กเกจ (โรงแรม+เดินทาง)",
-      "typeHotel": "แชร์ห้องพัก",
-      "typeTransport": "แชร์รถ",
-      "remark": "หมายเหตุ (ไม่บังคับ)",
-      "remarkPlaceholder": "เช่น หาเฉพาะผู้หญิง ต้องมีรถ..."
+      "placeholder": "บอกว่าอยากไปที่ไหน หรืออยากหาเพื่อนแบบไหน…",
+      "uploadImage": "อัปโหลดรูป",
+      "uploadedImageAlt": "รูปที่อัปโหลด",
+      "viewImage": "ดูรูปเต็ม",
+      "removeImage": "ลบรูป",
+      "imageTooLarge": "รูปใหญ่เกินไป กรุณาบีบอัดให้ต่ำกว่า 10MB"
     }
   }
 }

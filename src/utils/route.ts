@@ -1,7 +1,7 @@
 import Taro, { useDidShow } from "@tarojs/taro";
 import { useCallback, useState } from "react";
 import { useNavigationStore } from "../stores/navigationStore";
-import type { AimatchNavIntent } from "../stores/types";
+import type { AiAssistantNavIntent } from "../stores/types";
 
 export const ROUTES = {
   HOME: "/pages/index/index",
@@ -9,10 +9,8 @@ export const ROUTES = {
   EXPLORE: "/pages/explore/index",
   PROFILE: "/pages/profile/index",
   SETTINGS: "/pages/settings/index",
-  CHAT: "/pages/chat/index",
-  PINDAN: "/pages/pindan/index",
-  AIMATCH: "/pages/aimatch/index",
-  TICKETS: "/pages/tickets/index",
+  AI_ASSISTANT: "/pages/ai-assistant/index",
+  EVENT_DETAIL: "/pages/event-detail/index",
   NOTIFICATIONS: "/pages/notifications/index",
 } as const;
 
@@ -39,91 +37,23 @@ export function go(url: RoutePath | string) {
   void Taro.navigateTo({ url });
 }
 
-export type GoAiMatchOptions = AimatchNavIntent;
+export function goEventDetail(eventId: number) {
+  void Taro.navigateTo({ url: `${ROUTES.EVENT_DETAIL}?id=${eventId}` });
+}
 
-export function goAiMatch(options?: GoAiMatchOptions) {
-  if (options && Object.values(options).some((value) => value != null && value !== ``)) {
-    useNavigationStore.getState().setAimatchIntent(options);
+export type GoAiAssistantOptions = Pick<AiAssistantNavIntent, "initialMessage">;
+
+export function goAiAssistant(options?: GoAiAssistantOptions) {
+  if (options?.initialMessage?.trim()) {
+    useNavigationStore.getState().setAiAssistantIntent({ initialMessage: options.initialMessage.trim() });
   }
 
-  void Taro.navigateTo({ url: ROUTES.AIMATCH });
-}
-
-export type PinDanTabType = "package" | "hotel" | "transport";
-
-export type GoPindanOptions = {
-  activityId?: number;
-  type?: PinDanTabType;
-  highlightId?: number;
-};
-
-function buildPindanUrl(options?: number | GoPindanOptions): string {
-  if (options == null) return ROUTES.PINDAN;
-
-  const params =
-    typeof options === "number"
-      ? { activityId: String(options) }
-      : Object.entries(options).reduce<Record<string, string>>(
-          (acc, [key, value]) => {
-            if (value != null) acc[key] = String(value);
-            return acc;
-          },
-          {},
-        );
-
-  const query = new URLSearchParams(params).toString();
-  return query ? `${ROUTES.PINDAN}?${query}` : ROUTES.PINDAN;
-}
-
-export function goPindan(options?: number | GoPindanOptions) {
-  const intent: GoPindanOptions | null =
-    options == null
-      ? null
-      : typeof options === "number"
-        ? { activityId: options }
-        : options;
-
-  if (intent && (intent.activityId != null || intent.type || intent.highlightId != null)) {
-    useNavigationStore.getState().setPindanIntent(intent);
-  }
-
-  void Taro.navigateTo({ url: buildPindanUrl(options) });
-}
-
-export function goProfilePindan(highlightId?: number) {
-  if (highlightId != null) {
-    useNavigationStore.getState().setProfileIntent({
-      tab: "pindan",
-      highlightId,
-    });
-  }
-
-  const params = new URLSearchParams({ tab: `pindan` });
-  if (highlightId != null) params.set(`highlightId`, String(highlightId));
-  reLaunchTo(`${ROUTES.PROFILE}?${params.toString()}` as RoutePath);
-}
-
-export function goProfileTickets(highlightTicketId?: string) {
-  if (highlightTicketId) {
-    useNavigationStore.getState().setProfileIntent({
-      tab: "tickets",
-      highlightTicketId,
-    });
-  }
-
-  const params = new URLSearchParams({ tab: `tickets` });
-  if (highlightTicketId) params.set(`highlightTicketId`, highlightTicketId);
-  reLaunchTo(`${ROUTES.PROFILE}?${params.toString()}` as RoutePath);
-}
-
-export function goTickets() {
-  void Taro.navigateTo({ url: ROUTES.TICKETS });
+  void Taro.navigateTo({ url: ROUTES.AI_ASSISTANT });
 }
 
 export function goBack(fallback: RoutePath = ROUTES.HOME) {
   const target = resolveFallback(fallback);
   const pages = Taro.getCurrentPages();
-  // H5 SPA：栈深为 1 时 Taro 内部会 history.go(0)，返回无效
   if (pages.length <= 1) {
     reLaunchTo(target);
     return;

@@ -1,9 +1,4 @@
-import type {
-  BackendActivity,
-  ProfilePinDanItem,
-  ProfileTicketItem,
-} from "../types/backend";
-import { findBackendActivityByLegacyId } from "./apiMappers";
+import type { BackendActivity } from "../types/backend";
 
 export type ProfileEventStatus = "upcoming" | "registered" | "completed";
 
@@ -121,45 +116,6 @@ export function inferParticipatedEventStatus(dateStr?: string): ProfileEventStat
   return "registered";
 }
 
-function resolveLegacyId(
-  activityRef: string | number | undefined,
-  activities: BackendActivity[],
-): number | null {
-  if (activityRef == null || activityRef === "") return null;
-
-  if (typeof activityRef === "number" && activityRef > 0) {
-    return activityRef;
-  }
-
-  const normalized = String(activityRef).trim().toLowerCase();
-  if (!normalized) return null;
-
-  const asNumber = Number(normalized);
-  if (!Number.isNaN(asNumber) && asNumber > 0) {
-    return asNumber;
-  }
-
-  const byCode = activities.find((item) => item.code.toLowerCase() === normalized);
-  if (byCode?.legacyId) return byCode.legacyId;
-
-  const byAlias = activities.find((item) =>
-    item.alias?.some((alias) => alias.toLowerCase() === normalized),
-  );
-  return byAlias?.legacyId ?? null;
-}
-
-function buildActivityLookup(activities: BackendActivity[]) {
-  const codeToLegacyId = new Map<string, number>();
-  for (const activity of activities) {
-    if (activity.legacyId == null) continue;
-    codeToLegacyId.set(activity.code.toLowerCase(), activity.legacyId);
-    for (const alias of activity.alias ?? []) {
-      codeToLegacyId.set(alias.toLowerCase(), activity.legacyId);
-    }
-  }
-  return codeToLegacyId;
-}
-
 function sortParticipatedItems(items: ProfileParticipatedItem[]): ProfileParticipatedItem[] {
   const statusOrder: Record<ProfileEventStatus, number> = {
     upcoming: 0,
@@ -178,71 +134,18 @@ function sortParticipatedItems(items: ProfileParticipatedItem[]): ProfilePartici
 }
 
 export function buildParticipatedActivities(
-  pindans: ProfilePinDanItem[],
-  tickets: ProfileTicketItem[],
   activities: BackendActivity[] = MOCK_PROFILE_ACTIVITIES,
 ): ProfileParticipatedItem[] {
-  const lookup = buildActivityLookup(activities);
-  const byLegacyId = new Map<number, ProfileParticipatedItem>();
-
-  const upsert = (
-    legacyId: number,
-    fallback: {
-      title?: string;
-      date?: string;
-      location?: string;
-      image?: string;
-    },
-  ) => {
-    const activity = findBackendActivityByLegacyId(activities, legacyId);
-    const date = activity?.date || fallback.date || "";
-    const existing = byLegacyId.get(legacyId);
-
-    if (existing) {
-      if (!existing.date && date) existing.date = date;
-      if (!existing.location && (activity?.location || fallback.location)) {
-        existing.location = activity?.location || fallback.location || "";
-      }
-      if (!existing.image && (activity?.image || fallback.image)) {
-        existing.image = activity?.image || fallback.image || DEFAULT_IMAGE;
-      }
-      existing.status = inferParticipatedEventStatus(existing.date);
-      return;
-    }
-
-    byLegacyId.set(legacyId, {
-      id: legacyId,
-      title: activity?.name || fallback.title || `活动 #${legacyId}`,
-      date,
-      location: activity?.location || fallback.location || "",
-      image: activity?.image || fallback.image || DEFAULT_IMAGE,
-      status: inferParticipatedEventStatus(date),
-    });
-  };
-
-  for (const pindan of pindans) {
-    const legacyId = resolveLegacyId(pindan.activityId, activities);
-    if (!legacyId) continue;
-
-    upsert(legacyId, {
-      date: pindan.date,
-      location: pindan.location,
-      image: pindan.image,
-    });
-  }
-
-  for (const ticket of tickets) {
-    const normalizedActivityId = ticket.activityId?.trim().toLowerCase() ?? "";
-    const legacyId =
-      resolveLegacyId(ticket.activityId, activities) ??
-      (normalizedActivityId ? lookup.get(normalizedActivityId) ?? null : null);
-    if (!legacyId) continue;
-
-    upsert(legacyId, {
-      title: ticket.displayEventName,
-      date: ticket.eventDate,
-    });
-  }
-
-  return sortParticipatedItems([...byLegacyId.values()]);
+  return sortParticipatedItems(
+    activities
+      .filter((activity) => activity.legacyId != null)
+      .map((activity) => ({
+        id: activity.legacyId!,
+        title: activity.name,
+        date: activity.date ?? "",
+        location: activity.location ?? "",
+        image: activity.image ?? DEFAULT_IMAGE,
+        status: inferParticipatedEventStatus(activity.date),
+      })),
+  );
 }

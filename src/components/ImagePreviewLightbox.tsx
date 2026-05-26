@@ -58,7 +58,7 @@ const ImagePreviewLightbox: React.FC<ImagePreviewLightboxProps> = ({
         <img
           className="s-image-preview__img"
           src={src}
-          alt={alt ?? t("aimatch.ai.uploadedTicketAlt")}
+          alt={alt ?? t("aiAssistant.chat.uploadedImageAlt")}
           onClick={(event) => event.stopPropagation()}
         />
       </div>

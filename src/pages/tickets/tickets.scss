@@ -1,9 +1,0 @@
-.s-tickets-page {
-  min-height: 100vh;
-  background-color: var(--background);
-
-  &__panel {
-    padding-top: 8px;
-    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
-  }
-}

@@ -2,43 +2,40 @@ import "./home.scss";
 import { useCallback } from "react";
 import BottomNav from "../../components/BottomNav";
 import { useHomeSummary, useNotificationUnreadCount } from "../../hooks/useSyncApi";
-import { go, goAiMatch, ROUTES } from "../../utils/route";
+import { go, goAiAssistant, goEventDetail, ROUTES } from "../../utils/route";
 import { HomeActivityFeed } from "./components/HomeActivityFeed";
 import { HomeCountdownCard } from "./components/HomeCountdownCard";
 import { HomeFeaturedEvents } from "./components/HomeFeaturedEvents";
-import { HomeMarketHero } from "./components/HomeMarketHero";
+import { HomePlazaHero } from "./components/HomePlazaHero";
 import {
   activityPosts,
   countdownParts,
   featuredEvents,
-  type FeaturedMarketEvent,
-} from "./homeMarketData";
+  type FeaturedEvent,
+} from "./homeData";
 
 const Home = () => {
   const { heat } = useHomeSummary();
   const { data: unreadCount = 0 } = useNotificationUnreadCount();
 
-  const openAiMatch = useCallback((message?: string) => {
+  const openAiAssistant = useCallback((message?: string) => {
     if (message?.trim()) {
-      goAiMatch({ tab: `ai`, initialMessage: message.trim() });
+      goAiAssistant({ initialMessage: message.trim() });
       return;
     }
-    go(ROUTES.AIMATCH);
+    go(ROUTES.AI_ASSISTANT);
   }, []);
 
   const handleNotification = useCallback(() => {
     go(ROUTES.NOTIFICATIONS);
   }, []);
 
-  const openFeaturedEvent = useCallback(() => {
-    go(ROUTES.EVENTS);
+  const openEventDetail = useCallback((event: FeaturedEvent) => {
+    goEventDetail(event.id);
   }, []);
 
-  const startTeamMatch = useCallback((event: FeaturedMarketEvent) => {
-    goAiMatch({
-      tab: `ai`,
-      initialMessage: `我想参加 ${event.title}，帮我找一起去的队友。`,
-    });
+  const joinEvent = useCallback((event: FeaturedEvent) => {
+    goEventDetail(event.id);
   }, []);
 
   const activeTeamCount = heat.teamOrders;
@@ -46,9 +43,9 @@ const Home = () => {
   return (
     <div data-cmp="Home" className="s-home">
       <main className="s-home__main s-scrollbar-none">
-        <HomeMarketHero
+        <HomePlazaHero
           unreadCount={unreadCount}
-          onAgentClick={() => openAiMatch()}
+          onAgentClick={() => openAiAssistant()}
           onNotificationClick={handleNotification}
         />
 
@@ -56,8 +53,8 @@ const Home = () => {
 
         <HomeFeaturedEvents
           items={featuredEvents}
-          onEventClick={openFeaturedEvent}
-          onJoinClick={startTeamMatch}
+          onEventClick={openEventDetail}
+          onJoinClick={joinEvent}
         />
 
         <HomeActivityFeed items={activityPosts} onSeeAll={() => go(ROUTES.EVENTS)} />

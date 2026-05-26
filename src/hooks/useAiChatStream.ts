@@ -1,10 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useDidShow } from "@tarojs/taro";
-import { useQueryClient } from "@tanstack/react-query";
 import { fetchChatSession } from "../api/syncApi";
 import { AI_CHAT_STREAM_URL } from "../constants/api";
 import type { ChatUiMessage, SendChatOptions } from "../types/aiChat";
-import { invalidateTicketQueries } from "./useSyncApi";
 import {
   buildApiChatHistory,
   mapHistoryToUiMessages,
@@ -36,10 +34,6 @@ export interface UseAiChatStreamOptions {
   userName?: string;
   userPhone?: string;
   getAuthHeaders?: () => Record<string, string>;
-  /** Called when backend confirms a ticket listing was created */
-  onTicketCreated?: (ticketId: string) => void;
-  /** Called when user joins a pindan via AI chat */
-  onPindanJoined?: () => void;
 }
 
 export function useAiChatStream(options: UseAiChatStreamOptions) {
@@ -53,12 +47,9 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
     userName: userNameOption,
     userPhone: userPhoneOption,
     getAuthHeaders,
-    onTicketCreated,
-    onPindanJoined,
     typewriterCharDelayMs = 22,
   } = options;
 
-  const queryClient = useQueryClient();
   const sessionIdRef = useRef(sessionIdOption ?? getOrCreateSessionId());
   const userIdRef = useRef(userIdOption ?? getClientUserId());
   const userNameRef = useRef(userNameOption ?? getClientUserName());
@@ -211,27 +202,16 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
             finishAiMessage((message) => ({
               ...message,
               streaming: false,
-              ticketCard: event.ticketCard ?? message.ticketCard,
-              pindanCard: event.pindanCard ?? message.pindanCard,
             }));
             await typewriter.waitUntilComplete();
             finishAiMessage((message) => ({
               ...message,
               text: typewriter.getTarget() || message.text,
               streaming: false,
-              ticketCard: event.ticketCard ?? message.ticketCard,
-              pindanCard: event.pindanCard ?? message.pindanCard,
             }));
             if (event.sessionId) {
               sessionIdRef.current = event.sessionId;
               persistSessionId(event.sessionId);
-            }
-            if (event.ticketId) {
-              onTicketCreated?.(event.ticketId);
-              void invalidateTicketQueries(queryClient);
-            }
-            if (event.pindanCard) {
-              onPindanJoined?.();
             }
             break;
           }
@@ -259,9 +239,6 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
       getAuthHeaders,
       isStreaming,
       mockReply,
-      onTicketCreated,
-      onPindanJoined,
-      queryClient,
       streamErrorText,
       typewriterCharDelayMs,
       welcomeText,

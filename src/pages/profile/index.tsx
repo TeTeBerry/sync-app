@@ -20,28 +20,12 @@ import {
 import { useTranslation } from "react-i18next";
 import BottomNav from "../../components/BottomNav";
 import ConfirmDialog from "../../components/ConfirmDialog";
-import {
-  useProfileParticipatedItems,
-  useProfilePindanQuery,
-  useProfileTicketsQuery,
-} from "../../hooks/useSyncApi";
-import { leavePindan } from "../../api/syncApi";
-import { isApiEnabled } from "../../constants/api";
+import { useProfileParticipatedItems } from "../../hooks/useSyncApi";
 import { go, ROUTES } from "../../utils/route";
-import { myPinDanEvents, myTicketEvents, profileUser } from "./mockData";
+import { profileUser } from "./mockData";
 import ProfileParticipatedList from "./components/ProfileParticipatedList";
-import ProfilePinDanList from "./components/ProfilePinDanList";
-import ProfileTicketList from "./components/ProfileTicketList";
-import { loadMyPindanItems, removeJoinedPindanItem } from "../../utils/myPindanStorage";
-import { getClientUserId, persistUserName } from "../../utils/session";
-import {
-  useNavigationStore,
-  useProfilePageStore,
-  usePindanSessionStore,
-  useScrollHighlight,
-} from "../../stores";
-
-type ProfileTab = "participated" | "pindan" | "tickets";
+import { persistUserName } from "../../utils/session";
+import { useNavigationStore, useProfilePageStore } from "../../stores";
 
 const STORAGE_KEYS = {
   notifications: "profile.notificationsEnabled",
@@ -57,104 +41,31 @@ function readStorage<T>(key: string, fallback: T): T {
   }
 }
 
-function parseProfileRouteParams() {
-  const params = Taro.getCurrentInstance().router?.params;
-  const tabParam = params?.tab;
-  const tab: ProfileTab | null =
-    tabParam === "pindan" || tabParam === "tickets" ? tabParam : null;
-  const highlightId = Number(params?.highlightId);
-  const highlightTicketId = params?.highlightTicketId?.trim() || null;
-  return {
-    tab,
-    highlightId: highlightId && !Number.isNaN(highlightId) ? highlightId : null,
-    highlightTicketId,
-  };
-}
-
 const Profile: React.FC = () => {
   const { t } = useTranslation();
-  const profilePindanQuery = useProfilePindanQuery();
-  const profileTicketsQuery = useProfileTicketsQuery();
   const settingsRef = useRef<HTMLDivElement>(null);
-  const activeTab = useProfilePageStore((state) => state.activeTab);
-  const highlightPindanId = useProfilePageStore((state) => state.highlightPindanId);
-  const highlightTicketId = useProfilePageStore((state) => state.highlightTicketId);
   const notificationsEnabled = useProfilePageStore((state) => state.notificationsEnabled);
   const privacyLevel = useProfilePageStore((state) => state.privacyLevel);
-  const setActiveTab = useProfilePageStore((state) => state.setActiveTab);
-  const applyRoute = useProfilePageStore((state) => state.applyRoute);
-  const clearHighlight = useProfilePageStore((state) => state.clearHighlight);
   const setNotificationsEnabled = useProfilePageStore((state) => state.setNotificationsEnabled);
   const setPrivacyLevel = useProfilePageStore((state) => state.setPrivacyLevel);
-  const removeJoinedId = usePindanSessionStore((state) => state.removeJoinedId);
   const consumeProfileIntent = useNavigationStore((state) => state.consumeProfileIntent);
-  const [myPindanItems, setMyPindanItems] = useState(() => loadMyPindanItems(myPinDanEvents));
-  const [myTicketItems, setMyTicketItems] = useState(myTicketEvents);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
-  const participated = useProfileParticipatedItems(myPindanItems, myTicketItems, {
-    pindanLoading: isApiEnabled() && profilePindanQuery.isLoading,
-    ticketsLoading: isApiEnabled() && profileTicketsQuery.isLoading,
-    pindanError: isApiEnabled() && profilePindanQuery.isError,
-    ticketsError: isApiEnabled() && profileTicketsQuery.isError,
-  });
+  const participated = useProfileParticipatedItems();
 
   const applyRouteParams = useCallback(() => {
-    const urlParams = parseProfileRouteParams();
-    const navIntent = consumeProfileIntent();
-    applyRoute({
-      tab: navIntent?.tab ?? urlParams.tab,
-      highlightId: navIntent?.highlightId ?? urlParams.highlightId,
-      highlightTicketId: navIntent?.highlightTicketId ?? urlParams.highlightTicketId,
-    });
-  }, [applyRoute, consumeProfileIntent]);
+    consumeProfileIntent();
+  }, [consumeProfileIntent]);
 
   useDidShow(() => {
     setNotificationsEnabled(readStorage(STORAGE_KEYS.notifications, true));
     setPrivacyLevel(readStorage<string>(STORAGE_KEYS.privacy, "public"));
-    if (isApiEnabled()) {
-      void profilePindanQuery.refetch();
-      void profileTicketsQuery.refetch();
-    } else {
-      setMyPindanItems(loadMyPindanItems(myPinDanEvents));
-      setMyTicketItems(myTicketEvents);
-    }
     applyRouteParams();
   });
 
   useEffect(() => {
     persistUserName(profileUser.name);
   }, []);
-
-  useEffect(() => {
-    if (!isApiEnabled() || !profilePindanQuery.data) return;
-    setMyPindanItems(profilePindanQuery.data);
-  }, [profilePindanQuery.data]);
-
-  useEffect(() => {
-    if (!isApiEnabled() || !profileTicketsQuery.data) return;
-    setMyTicketItems(profileTicketsQuery.data);
-  }, [profileTicketsQuery.data]);
-
-  useScrollHighlight({
-    highlightId: highlightPindanId,
-    elementId: (id) => `profile-pindan-${id}`,
-    enabled: activeTab === "pindan",
-    ready: highlightPindanId == null || myPindanItems.some((item) => item.id === highlightPindanId),
-    scrollDelayMs: 200,
-    onClear: clearHighlight,
-  });
-
-  useScrollHighlight({
-    highlightId: highlightTicketId,
-    elementId: (id) => `profile-ticket-${id}`,
-    enabled: activeTab === "tickets",
-    ready:
-      highlightTicketId == null ||
-      myTicketItems.some((item) => item.id === highlightTicketId),
-    scrollDelayMs: 200,
-    onClear: clearHighlight,
-  });
 
   const { level } = profileUser;
   const progressPercent = useMemo(
@@ -181,30 +92,6 @@ const Profile: React.FC = () => {
 
   const handleParticipatedTap = useCallback((title: string) => {
     void Taro.showToast({ title, icon: "none" });
-  }, []);
-
-  const handleExitPindan = useCallback(
-    async (id: number) => {
-      if (isApiEnabled()) {
-        try {
-          await leavePindan(id, getClientUserId());
-          setMyPindanItems((prev) => prev.filter((item) => item.id !== id));
-          removeJoinedId(id);
-        } catch {
-          void Taro.showToast({ title: t("common.requestFailed"), icon: "none" });
-        }
-        return;
-      }
-
-      removeJoinedPindanItem(id);
-      setMyPindanItems((prev) => prev.filter((item) => item.id !== id));
-      removeJoinedId(id);
-    },
-    [removeJoinedId, t],
-  );
-
-  const handleDeletePindan = useCallback((id: number) => {
-    setMyPindanItems((prev) => prev.filter((item) => item.id !== id));
   }, []);
 
   const openSettings = useCallback(
@@ -305,71 +192,18 @@ const Profile: React.FC = () => {
           </div>
         </section>
 
-        <div className="s-profile__tabs" role="tablist">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={activeTab === "participated"}
-            className={`s-profile__tab${activeTab === "participated" ? " s-profile__tab--active" : ""}`}
-            onClick={() => setActiveTab("participated")}
-          >
-            {t("profile.tabs.participated")}
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={activeTab === "pindan"}
-            className={`s-profile__tab${activeTab === "pindan" ? " s-profile__tab--active" : ""}`}
-            onClick={() => setActiveTab("pindan")}
-          >
-            {t("profile.tabs.pindan")}
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={activeTab === "tickets"}
-            className={`s-profile__tab${activeTab === "tickets" ? " s-profile__tab--active" : ""}`}
-            onClick={() => setActiveTab("tickets")}
-          >
-            {t("profile.tabs.tickets")}
-          </button>
+        <div className="s-profile__section-head">
+          <h2>{t("profile.tabs.participated")}</h2>
         </div>
 
         <div className="s-profile__events">
-          {activeTab === "participated" ? (
-            <ProfileParticipatedList
-              items={participated.items}
-              isLoading={participated.isLoading}
-              isError={participated.isError}
-              onRetry={() => {
-                if (isApiEnabled()) {
-                  void profilePindanQuery.refetch();
-                  void profileTicketsQuery.refetch();
-                }
-                void participated.refetch();
-              }}
-              onItemTap={(item) => handleParticipatedTap(item.title)}
-            />
-          ) : activeTab === "pindan" ? (
-            <ProfilePinDanList
-              items={myPindanItems}
-              highlightId={highlightPindanId}
-              isLoading={isApiEnabled() && profilePindanQuery.isLoading}
-              isError={isApiEnabled() && profilePindanQuery.isError}
-              onRetry={() => void profilePindanQuery.refetch()}
-              onExit={handleExitPindan}
-              onDeleted={handleDeletePindan}
-              onRefresh={() => void profilePindanQuery.refetch()}
-            />
-          ) : (
-            <ProfileTicketList
-              items={myTicketItems}
-              highlightId={highlightTicketId}
-              isLoading={isApiEnabled() && profileTicketsQuery.isLoading}
-              isError={isApiEnabled() && profileTicketsQuery.isError}
-              onRetry={() => void profileTicketsQuery.refetch()}
-            />
-          )}
+          <ProfileParticipatedList
+            items={participated.items}
+            isLoading={participated.isLoading}
+            isError={participated.isError}
+            onRetry={() => void participated.refetch()}
+            onItemTap={(item) => handleParticipatedTap(item.title)}
+          />
         </div>
 
         <section ref={settingsRef} className="s-profile__settings-section">
@@ -422,8 +256,8 @@ const Profile: React.FC = () => {
         open={showLogoutConfirm}
         title={t("profile.settings.logoutConfirmTitle")}
         message={t("profile.settings.logoutConfirmMessage")}
-        confirmText={t("profile.settings.logout")}
-        cancelText={t("common.cancel")}
+        confirmLabel={t("profile.settings.logout")}
+        cancelLabel={t("common.cancel")}
         onConfirm={handleLogoutConfirm}
         onCancel={handleLogoutCancel}
       />

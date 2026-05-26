@@ -271,6 +271,17 @@
   color: var(--amber-400);
 }
 
+.s-profile__section-head {
+  margin: 0 16px 12px;
+
+  h2 {
+    margin: 0;
+    color: #fff;
+    font-size: 18px;
+    font-weight: 900;
+  }
+}
+
 .s-profile__tabs {
   display: flex;
   margin: 0 16px 16px;

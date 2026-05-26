@@ -7,10 +7,8 @@ export default {
     "pages/explore/index",
     "pages/profile/index",
     "pages/settings/index",
-    "pages/chat/index",
-    "pages/pindan/index",
-    "pages/aimatch/index",
-    "pages/tickets/index",
+    "pages/ai-assistant/index",
+    "pages/event-detail/index",
     "pages/notifications/index",
   ],
   window: {

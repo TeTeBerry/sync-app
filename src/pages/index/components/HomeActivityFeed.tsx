@@ -1,7 +1,7 @@
 import { ChevronRightIcon, MapPinIcon, MessageCircleIcon, Share2Icon, ThumbsUpIcon } from "lucide-react";
 import type { FC } from "react";
 import { Button } from "../../../components/ui";
-import type { ActivityPost } from "../homeMarketData";
+import type { ActivityPost } from "../homeData";
 
 type HomeActivityFeedProps = {
   items: ActivityPost[];
@@ -16,7 +16,7 @@ export const HomeActivityFeed: FC<HomeActivityFeedProps> = ({ items, onSeeAll })
     <div className="s-home-feed__head">
       <h2>更多热门活动</h2>
       <Button className="s-home-feed__link" onClick={onSeeAll}>
-        See All
+        查看全部
         <ChevronRightIcon size={16} />
       </Button>
     </div>
@@ -24,34 +24,40 @@ export const HomeActivityFeed: FC<HomeActivityFeedProps> = ({ items, onSeeAll })
     <div className="s-home-feed__list">
       {items.map((post) => (
         <article key={post.id} className="s-home-post">
-          <img className="s-home-post__avatar" src={post.avatar} alt="" />
-          <div className="s-home-post__body">
-            <div className="s-home-post__top">
-              <p>
-                <strong>{post.name}</strong>
-                <span>{post.handle} to</span>
-              </p>
-              <span className={statusClass(post.status)}>{post.status}</span>
+          <div className="s-home-post__header">
+            <img className="s-home-post__avatar" src={post.avatar} alt="" />
+            <div className="s-home-post__head-main">
+              <div className="s-home-post__top">
+                <p>
+                  <strong>{post.name}</strong>
+                  <span>{post.handle}</span>
+                </p>
+                <span className={statusClass(post.status)}>{post.status}</span>
+              </div>
+              <h3>{post.event}</h3>
+              <small className="s-home-post__location">
+                <MapPinIcon size={13} />
+                {post.location}
+              </small>
             </div>
-            <h3>{post.event}</h3>
-            <small className="s-home-post__location">
-              <MapPinIcon size={14} />
-              {post.location}
-            </small>
-            <p className="s-home-post__text">{post.body}</p>
+          </div>
+
+          <p className="s-home-post__text">{post.body}</p>
+
+          <div className="s-home-post__footer">
+            <span className="s-home-post__time">{post.time}</span>
             <div className="s-home-post__actions">
-              <span>{post.time}</span>
               <Button className="s-home-post__action">
                 <ThumbsUpIcon size={16} />
                 {post.likes}
               </Button>
               <Button className="s-home-post__action">
                 <MessageCircleIcon size={16} />
-                Comment
+                评论
               </Button>
               <Button className="s-home-post__action">
                 <Share2Icon size={16} />
-                Share
+                分享
               </Button>
             </div>
           </div>

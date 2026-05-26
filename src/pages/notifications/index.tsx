@@ -2,15 +2,15 @@ import "./notifications.scss";
 import React, { useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useQueryClient } from "@tanstack/react-query";
-import { BellIcon, TicketIcon, UsersIcon } from "lucide-react";
+import { BellIcon } from "lucide-react";
 import PageNavigation from "../../components/PageNavigation";
 import {
   markAllNotificationsAsRead,
   markNotificationAsRead,
   useNotificationsQuery,
 } from "../../hooks/useSyncApi";
-import type { AppNotification, NotificationType } from "../../types/backend";
-import { goPindan, goTickets, ROUTES } from "../../utils/route";
+import type { AppNotification } from "../../types/backend";
+import { ROUTES } from "../../utils/route";
 
 function formatTimeAgo(iso: string, locale: string): string {
   const date = new Date(iso);
@@ -44,15 +44,12 @@ function formatTimeAgo(iso: string, locale: string): string {
       : `${days}d ago`;
 }
 
-function notificationIcon(type: NotificationType) {
-  if (type.startsWith("pindan")) return UsersIcon;
-  return TicketIcon;
+function notificationIcon() {
+  return BellIcon;
 }
 
-function notificationIconClass(type: NotificationType): string {
-  return type.startsWith("pindan")
-    ? "s-notifications__icon s-notifications__icon--pindan"
-    : "s-notifications__icon s-notifications__icon--ticket";
+function notificationIconClass(): string {
+  return "s-notifications__icon";
 }
 
 function resolveNotificationText(
@@ -115,15 +112,6 @@ const NotificationsPage: React.FC = () => {
       if (!item.read) {
         await markNotificationAsRead(item.id, queryClient);
       }
-
-      if (item.meta?.pindanLegacyId != null) {
-        goPindan({ highlightId: item.meta.pindanLegacyId });
-        return;
-      }
-
-      if (item.meta?.activityId || item.type === "ticket_match") {
-        goTickets();
-      }
     },
     [queryClient],
   );
@@ -156,7 +144,7 @@ const NotificationsPage: React.FC = () => {
         ) : (
           <div className="s-notifications__list">
             {notifications.map((item) => {
-              const Icon = notificationIcon(item.type);
+              const Icon = notificationIcon();
               const text = resolveNotificationText(item, t);
               return (
                 <button
@@ -165,7 +153,7 @@ const NotificationsPage: React.FC = () => {
                   className={`s-notifications__item${item.read ? "" : " s-notifications__item--unread"}`}
                   onClick={() => void handleItemClick(item)}
                 >
-                  <div className={notificationIconClass(item.type)}>
+                  <div className={notificationIconClass()}>
                     <Icon size={20} />
                   </div>
                   <div className="s-notifications__content">

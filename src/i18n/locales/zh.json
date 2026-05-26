@@ -237,157 +237,23 @@
     "welcome": "Hey！听说你想去周末的 S2O 电音节？需要我帮你找搭子，或查门票出/收吗？",
     "placeholder": "告诉我想去哪场派对..."
   },
-  "aimatch": {
+  "aiAssistant": {
     "title": "AI 搭子助手",
-    "tabs": {
-      "ai": "AI匹配",
-      "pindan": "创建拼单",
-      "ticket": "门票出/收",
-      "events": "查看活动"
-    },
-    "ai": {
-      "welcome": "👋 我是你的 AI 全能搭子助手，帮你搞定音乐节的一切 —— 找搭子、拼单、门票出/收，说出需求，我来搞定。",
+    "chat": {
+      "welcome": "👋 我是你的 AI 搭子助手，帮你发现活动、找队友、规划行程，说出需求，我来搞定。",
       "quickReplies": {
         "findBuddy": "帮我找搭子",
-        "buyTicket": "我要收票",
-        "sellTicket": "我有票要出",
         "nearEvents": "查最近活动"
       },
-      "searching": "正在为你搜索「{{query}}」相关内容 🔍 已找到 {{count}} 位高匹配度用户，点击下方卡片查看详情！",
+      "searching": "正在为你搜索「{{query}}」相关内容 🔍 已找到 {{count}} 条相关信息。",
       "streamError": "抱歉，回复出错了，请稍后再试。",
       "thinking": "AI 正在思考",
-      "placeholder": "说出需求，或上传门票/套餐/酒店截图",
-      "uploadImage": "上传门票图片",
-      "uploadedTicketAlt": "已上传的门票图片",
+      "placeholder": "说说你想去哪、想找什么样的搭子…",
+      "uploadImage": "上传图片",
+      "uploadedImageAlt": "已上传的图片",
       "viewImage": "查看大图",
       "removeImage": "移除图片",
       "imageTooLarge": "图片过大，请压缩至 10MB 以内"
-    },
-    "pindan": {
-      "createNew": "发起一个新拼单",
-      "ticket": "门票",
-      "hotel": "酒店",
-      "transport": "交通",
-      "ticketGroup": "门票拼",
-      "hotelGroup": "酒店拼",
-      "transportGroup": "交通拼",
-      "currentOrders": "当前拼单",
-      "join": "我要加入",
-      "joinedCardTitle": "查看拼单",
-      "myCreatedCardTitle": "我发起的拼单",
-      "tapToEdit": "点击可修改",
-      "budgetLabel": "预算",
-      "budgetRangePreview": "预算 {{range}}",
-      "editTitle": "修改拼单",
-      "saveEdit": "保存修改",
-      "updated": "拼单已更新",
-      "activityCardTitle": "查看活动拼单",
-      "modal": {
-        "title": "发起新拼单",
-        "selectType": "选择拼单类型",
-        "eventName": "活动名称，如「EDC China 2025」",
-        "eventDate": "活动日期",
-        "pickDate": "请选择活动日期",
-        "date": "日期",
-        "location": "地点",
-        "hotelName": "酒店名称，如「三亚亚特兰蒂斯」",
-        "transportRoute": "路线，如「上海虹桥 → 苏州阳澄湖」",
-        "aiAddress": "AI 推荐地址",
-        "aiAddressLoading": "AI 正在匹配地址…",
-        "totalPrice": "总价（元）",
-        "pricePerPerson": "人均价格",
-        "perPersonPreview": "人均约 ¥{{amount}}",
-        "groupSize": "拼单人数",
-        "submit": "发布拼单"
-      }
-    },
-    "ticket": {
-      "sell": "我要出票",
-      "buy": "我要收票",
-      "guaranteeTitle": "官方平台担保交易",
-      "guaranteeSub": "实名认证 · 资金托管 · 真票保障",
-      "tabs": {
-        "all": "全部",
-        "selling": "出票中",
-        "buying": "收票中"
-      },
-      "buyTicket": "立即购票",
-      "contact": "联系他",
-      "eventNotFound": "未找到匹配活动，请检查活动名称",
-      "published": "出票信息已发布",
-      "createdCardTitle": "查看挂单",
-      "viewListing": "点击查看门票详情",
-      "modal": {
-        "subtitleSell": "填写关键信息，发布后立即可见",
-        "subtitleBuy": "发布求购，有票的人会主动联系你",
-        "eventNameSell": "活动名称，如「EDC China 2025」",
-        "eventNameBuy": "活动名称，如「Ultra Shanghai」",
-        "eventDate": "演出日期，如 2025-03-02",
-        "seatSell": "票区/座位",
-        "seatBuy": "票区需求",
-        "quantity": "张数",
-        "unitPriceSell": "出售单价（元 / 张）",
-        "unitPriceBuy": "出价预算（元 / 张）",
-        "perTicket": "/张",
-        "contact": "联系方式（微信 / 手机号）",
-        "submitSell": "发布出票",
-        "submitBuy": "发布求购",
-        "increase": "增加",
-        "decrease": "减少"
-      }
-    },
-    "events": {
-      "filters": {
-        "all": "全部",
-        "outdoor": "户外电音",
-        "edm": "EDM节",
-        "club": "Club 派对",
-        "festival": "大型节日"
-      },
-      "going": "我要去",
-      "registered": "已报名",
-      "findBuddy": "找搭子拼"
-    }
-  },
-  "pindan": {
-    "title": "套餐拼单",
-    "currentActivity": "当前活动",
-    "popular": "当前最受欢迎",
-    "hero": {
-      "package": "酒店 + 交通一站拼",
-      "packageSubtitle": "组合套餐更划算，人均直降60%",
-      "hotel": "酒店拼房入住",
-      "transport": "同行交通共享",
-      "subtitle": "拼单人数越多，人均费用越低"
-    },
-    "tabs": {
-      "package": "套餐拼单",
-      "hotel": "酒店拼单",
-      "transport": "交通拼单"
-    },
-    "packageIncludes": "套餐包含",
-    "join": "我要加入",
-    "joined": "已加入",
-    "joinPackage": "加入套餐拼单",
-    "edit": "修改",
-    "delete": "删除",
-    "deleteConfirmTitle": "删除拼单",
-    "deleteConfirmMessage": "确定删除「{{title}}」吗？此操作不可撤销。",
-    "deleted": "拼单已删除",
-    "created": "拼单已发布",
-    "joinSuccess": {
-      "title": "拼单成功"
-    },
-    "create": {
-      "title": "发起拼单",
-      "subtitle": "找到志同道合的搭子一起去",
-      "activity": "活动",
-      "pinType": "拼单类型",
-      "typePackage": "套餐拼 (酒店+交通)",
-      "typeHotel": "酒店拼房",
-      "typeTransport": "交通拼车",
-      "remark": "备注 (选填)",
-      "remarkPlaceholder": "如：只找女生、需有车..."
     }
   }
 }
