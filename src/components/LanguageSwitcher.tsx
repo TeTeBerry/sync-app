@@ -4,6 +4,7 @@ import { GlobeIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { type AppLocale, setAppLocale, SUPPORTED_LOCALES } from "../i18n";
 import ActionSheet from "./ActionSheet";
+import { cn } from "./ui";
 
 type LanguageSwitcherProps = {
   variant?: "panel" | "header" | "icon";
@@ -92,13 +93,16 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ variant = "panel" }
         </button>
 
         {open && (
-          <div className="s-lang-switch__menu" role="menu">
+          <div className="s-overlay-popover" role="menu">
             {SUPPORTED_LOCALES.map((locale) => (
               <button
                 key={locale}
                 type="button"
                 role="menuitem"
-                className={`s-lang-switch__menu-item${current === locale ? " s-lang-switch__menu-item--active" : ""}`}
+                className={cn(
+                  "s-overlay-popover__item",
+                  current === locale && "s-overlay-popover__item--active",
+                )}
                 onClick={() => selectLocale(locale)}
               >
                 {t(localeLabels[locale])}

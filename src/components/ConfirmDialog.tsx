@@ -1,4 +1,3 @@
-import "../styles/_overlay.scss";
 import React from "react";
 import { useOverlayLock } from "../hooks/useOverlayLock";
 import { Button, cn } from "./ui";
@@ -9,7 +8,7 @@ export interface ConfirmDialogProps {
   message: string;
   confirmText: string;
   cancelText: string;
-  /** Destructive actions (delete, logout) use theme destructive styling */
+  /** Use primary confirm styling; set true only for legacy destructive styling */
   danger?: boolean;
   onConfirm: () => void;
   onCancel: () => void;

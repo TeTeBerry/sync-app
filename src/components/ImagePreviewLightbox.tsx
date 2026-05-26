@@ -1,8 +1,8 @@
-import "../styles/_overlay.scss";
 import "./ImagePreviewLightbox.scss";
 import React, { useCallback, useEffect } from "react";
 import { XIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useOverlayLock } from "../hooks/useOverlayLock";
 import { cn } from "./ui";
 
 export interface ImagePreviewLightboxProps {
@@ -19,6 +19,7 @@ const ImagePreviewLightbox: React.FC<ImagePreviewLightboxProps> = ({
   onClose,
 }) => {
   const { t } = useTranslation();
+  useOverlayLock(open);
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
@@ -29,15 +30,8 @@ const ImagePreviewLightbox: React.FC<ImagePreviewLightboxProps> = ({
 
   useEffect(() => {
     if (!open) return;
-
     document.addEventListener("keydown", handleKeyDown);
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = prevOverflow;
-    };
+    return () => document.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown, open]);
 
   if (!src) return null;
@@ -51,7 +45,7 @@ const ImagePreviewLightbox: React.FC<ImagePreviewLightboxProps> = ({
       <div className="s-overlay__backdrop s-image-preview__backdrop" onClick={onClose} />
       <button
         type="button"
-        className="s-image-preview__close"
+        className="s-overlay__icon-btn s-image-preview__close"
         aria-label={t("common.close")}
         onClick={onClose}
       >

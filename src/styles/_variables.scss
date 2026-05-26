@@ -48,4 +48,17 @@
   --shadow-blur: 12px;
   --shadow-color: rgba(0, 0, 0, 0.5);
   --shadow-x: 0px;
+
+  /* Overlay / dialog / sheet / popover */
+  --overlay-backdrop: rgba(0, 0, 0, 0.72);
+  --overlay-backdrop-heavy: rgba(0, 0, 0, 0.88);
+  --overlay-blur: 8px;
+  --overlay-panel: var(--popover);
+  --overlay-panel-foreground: var(--popover-foreground);
+  --overlay-muted-surface: rgba(255, 255, 255, 0.06);
+  --overlay-muted-surface-hover: rgba(255, 255, 255, 0.1);
+  --overlay-z-popover: 100;
+  --overlay-z-sheet: 105;
+  --overlay-z-dialog: 110;
+  --overlay-z-lightbox: 120;
 }

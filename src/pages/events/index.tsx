@@ -44,9 +44,9 @@ const Events: React.FC = () => {
                   role="button"
                   tabIndex={0}
                   onClick={() => openDetail(event.id)}
-                  onKeyDown={(event) => {
-                    if (event.key !== "Enter" && event.key !== " ") return;
-                    event.preventDefault();
+                  onKeyDown={(e) => {
+                    if (e.key !== "Enter" && e.key !== " ") return;
+                    e.preventDefault();
                     openDetail(event.id);
                   }}
                 >

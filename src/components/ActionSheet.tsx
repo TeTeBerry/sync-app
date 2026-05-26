@@ -1,4 +1,3 @@
-import "../styles/_overlay.scss";
 import "./ActionSheet.scss";
 import React from "react";
 import { useOverlayLock } from "../hooks/useOverlayLock";

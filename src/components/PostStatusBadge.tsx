@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import {
   type BackendPostStatusLabel,
   eventPostStatusI18nKey,
+  isHiddenPostStatus,
   isRecruitingPostStatus,
   postStatusBadgeClass,
   toEventPostCardStatus,
@@ -17,7 +18,7 @@ export type PostStatusBadgeProps = {
 export const PostStatusBadge: React.FC<PostStatusBadgeProps> = ({ status, variant }) => {
   const { t } = useTranslation();
 
-  if (isRecruitingPostStatus(status)) {
+  if (isRecruitingPostStatus(status) || isHiddenPostStatus(status)) {
     return null;
   }
 

@@ -1,14 +1,7 @@
 @use "variables" as *;
 
-// Shared overlay / dialog / sheet tokens and primitives.
-// Import in ConfirmDialog, ImagePreviewLightbox, ActionSheet, etc.
-
-:root {
-  --overlay-backdrop: rgba(0, 0, 0, 0.72);
-  --overlay-z-dialog: 110;
-  --overlay-z-lightbox: 120;
-  --overlay-z-sheet: 105;
-}
+// Shared overlay / dialog / sheet / popover primitives.
+// Tokens live in styles/_variables.scss (--overlay-*).
 
 .s-overlay {
   position: fixed;
@@ -26,7 +19,7 @@
     position: absolute;
     inset: 0;
     background: var(--overlay-backdrop);
-    backdrop-filter: blur(8px);
+    backdrop-filter: blur(var(--overlay-blur));
     opacity: 0;
     transition: opacity 300ms ease;
   }
@@ -35,8 +28,8 @@
     position: relative;
     width: 100%;
     max-width: 320px;
-    background: var(--popover);
-    color: var(--popover-foreground);
+    background: var(--overlay-panel);
+    color: var(--overlay-panel-foreground);
     border-radius: var(--radius-2xl);
     padding: 24px;
     box-shadow:
@@ -97,12 +90,39 @@
     &--confirm {
       background: var(--primary);
       color: var(--primary-foreground);
+      box-shadow: 0 0 12px rgba(var(--primary-rgb), 0.55);
     }
 
     &--danger {
       background: var(--destructive);
       color: var(--destructive-foreground);
       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.28);
+    }
+  }
+
+  &__icon-btn {
+    position: absolute;
+    z-index: 2;
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: var(--radius-full);
+    background: var(--overlay-muted-surface);
+    color: var(--foreground);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    opacity: 0;
+    transform: scale(0.92);
+    transition:
+      opacity 220ms ease,
+      transform 220ms ease,
+      background 160ms ease;
+
+    &:active {
+      opacity: 0.85;
     }
   }
 
@@ -114,9 +134,14 @@
     transform: scale(1) translateY(0);
     opacity: 1;
   }
+
+  &:not(.s-overlay--off) .s-overlay__icon-btn {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
-// Bottom sheet variant (language picker, etc.)
+// Bottom sheet (language picker, etc.)
 .s-overlay--sheet {
   z-index: var(--overlay-z-sheet);
   align-items: flex-end;
@@ -162,7 +187,7 @@
     transition: background 160ms ease, color 160ms ease;
 
     &:active {
-      background: rgba(255, 255, 255, 0.06);
+      background: var(--overlay-muted-surface-hover);
     }
 
     &--active {
@@ -178,7 +203,7 @@
     padding: 14px 16px;
     border: none;
     border-radius: var(--radius-xl);
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--overlay-muted-surface);
     color: var(--muted-foreground);
     font-family: var(--fontSans);
     font-size: 16px;
@@ -188,7 +213,46 @@
     transition: background 160ms ease;
 
     &:active {
-      background: rgba(255, 255, 255, 0.1);
+      background: var(--overlay-muted-surface-hover);
+    }
+  }
+}
+
+// Anchored popover (header dropdowns, etc.)
+.s-overlay-popover {
+  position: absolute;
+  min-width: 120px;
+  padding: 6px;
+  border-radius: var(--radius-2xl);
+  background: var(--overlay-panel);
+  color: var(--overlay-panel-foreground);
+  box-shadow:
+    inset 0 0 0 1px var(--border),
+    0 12px 32px rgba(0, 0, 0, 0.45);
+  z-index: var(--overlay-z-popover);
+
+  &__item {
+    display: block;
+    width: 100%;
+    padding: 10px 12px;
+    border: none;
+    border-radius: var(--radius-xl);
+    background: transparent;
+    color: var(--muted-foreground);
+    font-family: var(--fontSans);
+    font-size: 13px;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+    transition: background 160ms ease, color 160ms ease;
+
+    &:active {
+      background: var(--overlay-muted-surface-hover);
+    }
+
+    &--active {
+      color: var(--primary);
+      background: rgba(var(--primary-rgb), 0.12);
     }
   }
 }

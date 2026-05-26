@@ -1,8 +1,12 @@
 /** Backend/API post status labels (Chinese from post.mapper). */
-export type BackendPostStatusLabel = "招募中" | "已组队";
+export type BackendPostStatusLabel = "招募中" | "已组队" | "已隐藏";
 
 export function isRecruitingPostStatus(status: BackendPostStatusLabel): boolean {
   return status === "招募中";
+}
+
+export function isHiddenPostStatus(status: BackendPostStatusLabel): boolean {
+  return status === "已隐藏";
 }
 
 /** Activity page post card shows only recruiting vs full. */

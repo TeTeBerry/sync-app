@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { ProfileCollapsibleSection } from "../../../components/profile/ProfileCollapsibleSection";
-import type { ProfilePostItem } from "../../types/backend";
+import type { ProfilePostItem } from "../../../types/backend";
 
 const POST_BODY_MAX = 200;
 

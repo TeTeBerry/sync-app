@@ -57,7 +57,6 @@ const Home = () => {
         title: "确认删除",
         message: "删除后无法恢复，确定要删除这条帖子吗？",
         confirmText: t("profile.myPosts.delete"),
-        danger: true,
       });
       if (!ok) return;
       void deletePostAndInvalidate(queryClient, post.id)

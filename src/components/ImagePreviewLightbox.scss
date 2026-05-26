@@ -1,4 +1,4 @@
-// Lightbox-specific layout; backdrop uses shared s-overlay tokens.
+// Lightbox layout; shared overlay tokens from styles/_overlay.scss (via globals).
 
 .s-image-preview {
   padding: 16px;
@@ -6,39 +6,13 @@
   padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
 
   &__backdrop {
-    background: rgba(0, 0, 0, 0.88);
-    backdrop-filter: blur(6px);
+    background: var(--overlay-backdrop-heavy);
+    backdrop-filter: blur(var(--overlay-blur));
   }
 
   &__close {
-    position: absolute;
     top: calc(12px + env(safe-area-inset-top, 0px));
     right: 12px;
-    z-index: 2;
-    width: 40px;
-    height: 40px;
-    border: none;
-    border-radius: var(--radius-full);
-    background: rgba(255, 255, 255, 0.1);
-    color: var(--foreground);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    opacity: 0;
-    transform: scale(0.92);
-    transition:
-      opacity 220ms ease,
-      transform 220ms ease,
-      background 160ms ease;
-
-    &:hover {
-      background: rgba(255, 255, 255, 0.16);
-    }
-
-    &:active {
-      opacity: 0.85;
-    }
   }
 
   &__stage {
@@ -67,11 +41,6 @@
     touch-action: pinch-zoom;
     user-select: none;
     -webkit-user-drag: none;
-  }
-
-  &:not(.s-overlay--off) .s-image-preview__close {
-    opacity: 1;
-    transform: scale(1);
   }
 
   &:not(.s-overlay--off) .s-image-preview__stage {

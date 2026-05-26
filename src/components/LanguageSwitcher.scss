@@ -3,14 +3,14 @@
   padding: 16px;
   border-radius: var(--radius-2xl);
   background: var(--card);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+  box-shadow: inset 0 0 0 1px var(--border);
 }
 
 .s-lang-switch__title {
   display: block;
   font-size: 14px;
   font-weight: 600;
-  color: #fff;
+  color: var(--foreground);
   margin-bottom: 12px;
 }
 
@@ -22,18 +22,21 @@
 .s-lang-switch__btn {
   flex: 1;
   padding: 10px 8px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border);
+  background: var(--overlay-muted-surface);
   color: var(--muted-foreground);
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 200ms ease, color 200ms ease, border-color 200ms ease;
+  transition:
+    background 200ms ease,
+    color 200ms ease,
+    border-color 200ms ease;
 
   &--active {
-    background: rgba(var(--primary-rgb, 255, 0, 102), 0.15);
-    border-color: rgba(var(--primary-rgb, 255, 0, 102), 0.4);
+    background: rgba(var(--primary-rgb), 0.15);
+    border-color: rgba(var(--primary-rgb), 0.4);
     color: var(--primary);
   }
 }
@@ -44,9 +47,9 @@
   height: 39px;
   padding: 0;
   border-radius: var(--radius-full);
-  border: none;
-  background: #1c1c1e;
-  color: #fff;
+  border: 1px solid var(--border);
+  background: var(--overlay-panel);
+  color: var(--foreground);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -71,49 +74,25 @@
   align-items: center;
   gap: 4px;
   padding: 6px 10px;
-  border-radius: 9999px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border);
+  background: var(--overlay-muted-surface);
   color: var(--foreground);
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 200ms ease, border-color 200ms ease;
+  transition:
+    background 200ms ease,
+    border-color 200ms ease;
 
   svg {
     color: var(--secondary);
   }
 }
 
-.s-lang-switch__menu {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  min-width: 120px;
-  padding: 6px;
-  border-radius: 14px;
-  background: var(--card);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
-  z-index: 60;
-}
-
-.s-lang-switch__menu-item {
-  display: block;
-  width: 100%;
-  padding: 10px 12px;
-  border: none;
-  border-radius: 10px;
-  background: transparent;
-  color: var(--muted-foreground);
-  font-size: 13px;
-  font-weight: 600;
-  text-align: left;
-  cursor: pointer;
-  transition: background 200ms ease, color 200ms ease;
-
-  &--active {
-    background: rgba(var(--primary-rgb, 255, 0, 102), 0.12);
-    color: var(--primary);
+.s-lang-switch--header {
+  .s-overlay-popover {
+    top: calc(100% + 8px);
+    right: 0;
   }
 }

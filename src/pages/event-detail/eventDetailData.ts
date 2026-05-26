@@ -1,4 +1,14 @@
-import { featuredEvents } from "../index/homeData";
+type FeaturedEventStub = {
+  id: number;
+  title: string;
+  date?: string;
+  venue?: string;
+};
+
+const featuredEvents: FeaturedEventStub[] = [
+  { id: 1, title: "Tomorrowland Thailand 2026", date: "12/11-13", venue: "芭提雅" },
+  { id: 2, title: "EDC China 2025", date: "03/22-23", venue: "苏州" },
+];
 
 export type EventTeamPost = {
   id: string;
@@ -107,7 +117,7 @@ const postsByEventId: Record<number, EventTeamPost[]> = {
 };
 
 export function getEventDetail(eventId: number): EventDetail | null {
-  const event = featuredEvents.find((item) => item.id === eventId);
+  const event = featuredEvents.find((item: FeaturedEventStub) => item.id === eventId);
   if (!event) return null;
 
   return {

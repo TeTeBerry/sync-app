@@ -30,7 +30,6 @@ const AllPostsPage = () => {
         title: t("home.feed.deleteConfirmTitle"),
         message: t("home.feed.deleteConfirmMessage"),
         confirmText: t("profile.myPosts.delete"),
-        danger: true,
       });
       if (!ok) return;
       void deletePostAndInvalidate(queryClient, post.id)

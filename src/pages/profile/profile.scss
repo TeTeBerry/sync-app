@@ -488,8 +488,8 @@
   }
 
   &--delete {
-    background: rgba(255, 59, 48, 0.15);
-    color: #ff6b6b;
+    background: rgba(var(--destructive-rgb), 0.15);
+    color: var(--destructive);
   }
 }
 
@@ -774,7 +774,7 @@
 
   &--logout {
     .s-profile__settings-label {
-      color: #ff6b6b;
+      color: var(--primary);
     }
   }
 }
@@ -804,8 +804,8 @@
   }
 
   &--logout {
-    background: rgba(255, 59, 48, 0.15);
-    color: #ff6b6b;
+    background: rgba(var(--primary-rgb), 0.15);
+    color: var(--primary);
   }
 }
 
