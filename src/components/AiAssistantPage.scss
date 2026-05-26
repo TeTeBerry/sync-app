@@ -1,7 +1,10 @@
+@use "../styles/chat" as chat;
+
 .s-ai-assistant__hint {
   margin: 12px 16px 0;
   font-size: 12px;
   color: var(--muted-foreground, #888);
+  text-align: center;
 }
 
 .s-ai-assistant {
@@ -17,8 +20,145 @@
 .s-ai-assistant__header {
   flex-shrink: 0;
   z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 48px 16px 12px;
   background-color: var(--background);
-  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.s-ai-assistant__back-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 9999px;
+  border: none;
+  background: var(--card);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.s-ai-assistant__header-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.s-ai-assistant__header-avatar {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: linear-gradient(145deg, rgba(var(--primary-rgb), 0.22), rgba(30, 30, 30, 0.95));
+  border: 1px solid rgba(var(--primary-rgb), 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 0 16px rgba(var(--primary-rgb), 0.2);
+
+  svg {
+    color: var(--primary);
+  }
+}
+
+.s-ai-assistant__header-online {
+  position: absolute;
+  bottom: -1px;
+  right: -1px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #22c55e;
+  border: 2px solid var(--background);
+}
+
+.s-ai-assistant__header-text {
+  min-width: 0;
+}
+
+.s-ai-assistant__header-title-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.s-ai-assistant__header-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--foreground);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.s-ai-assistant__ai-badge {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 7px;
+  border-radius: 9999px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--secondary);
+  background: rgba(var(--secondary-rgb), 0.14);
+  border: 1px solid rgba(var(--secondary-rgb), 0.28);
+}
+
+.s-ai-assistant__header-status {
+  margin: 2px 0 0;
+  font-size: 11px;
+  color: #22c55e;
+  line-height: 1.2;
+}
+
+.s-ai-assistant__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.s-ai-assistant__message-count {
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--muted-foreground);
+  font-size: 11px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.s-ai-assistant__clear-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 9999px;
+  border: none;
+  background: var(--card);
+  color: var(--muted-foreground);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
 }
 
 .s-ai-assistant__body {
@@ -52,7 +192,15 @@
     padding: 16px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
+  }
+
+  &__timestamp {
+    margin: 4px 0;
+    text-align: center;
+    font-size: 11px;
+    color: var(--muted-foreground);
+    opacity: 0.75;
   }
 
   &__row {
@@ -69,35 +217,47 @@
     width: 28px;
     height: 28px;
     border-radius: 9999px;
-    background: var(--card);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0;
 
-    svg {
-      color: var(--primary);
+    &--ai {
+      border-radius: 10px;
+      @include chat.chat-ai-avatar-surface;
+
+      svg {
+        color: var(--primary);
+      }
     }
 
-    &--hidden {
-      visibility: hidden;
+    &--user {
+      object-fit: cover;
+      border: 1.5px solid rgba(var(--primary-rgb), 0.45);
+      background: var(--card);
+    }
+
+    &--fallback {
+      font-size: 11px;
+      font-weight: 700;
+      color: #fff;
+      @include chat.chat-gradient-avatar-fallback;
     }
   }
 
   &__bubble {
     max-width: 100%;
-    padding: 10px 16px;
-    border-radius: 16px;
+    padding: 10px 14px;
+    border-radius: 18px;
     font-size: 14px;
     line-height: 1.625;
+    word-break: break-word;
 
     &--from-ai {
-      background: var(--card);
+      background: rgb(44, 44, 46);
       color: var(--foreground);
-      border-radius: 16px;
       border-top-left-radius: 6px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.08);
     }
 
     &--waiting {
@@ -116,9 +276,7 @@
     }
 
     &--from-user {
-      background: var(--primary);
-      color: #fff;
-      border-radius: 16px;
+      @include chat.chat-gradient-user-bubble;
       border-top-right-radius: 6px;
     }
   }
@@ -135,6 +293,38 @@
     }
   }
 
+  &__post-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 8px;
+    width: 100%;
+  }
+
+  &__copy-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  &__copy-chip {
+    @include chat.chat-inline-chip;
+  }
+
+  &__degraded-banner {
+    flex-shrink: 0;
+    margin: 0 16px 4px;
+    padding: 6px 10px;
+    border-radius: 10px;
+    font-size: 11px;
+    line-height: 1.35;
+    text-align: center;
+    color: var(--amber-400);
+    background: rgba(var(--amber-400-rgb), 0.12);
+    border: 1px solid rgba(var(--amber-400-rgb), 0.28);
+  }
+
   &__quick-row {
     flex-shrink: 0;
     padding: 0 16px 8px;
@@ -145,22 +335,14 @@
   }
 
   &__quick-chip {
-    flex-shrink: 0;
-    padding: 6px 14px;
-    border-radius: 9999px;
-    border: none;
-    cursor: pointer;
-    font-size: 12px;
-    font-weight: 600;
-    background: var(--card);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: var(--muted-foreground);
+    @include chat.chat-pill-chip;
   }
 
   &__composer {
     flex-shrink: 0;
-    padding: 8px 16px 16px;
+    padding: 8px 16px 12px;
     background: var(--background);
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
   }
 
   &__attach-preview {
@@ -207,21 +389,17 @@
   &__composer-inner {
     display: flex;
     align-items: center;
-    gap: 8px;
-    background: var(--card);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
-    padding: 10px 12px 10px 10px;
+    gap: 10px;
   }
 
   &__attach-btn {
     flex-shrink: 0;
-    width: 32px;
-    height: 32px;
-    border-radius: 10px;
-    border: none;
-    background: rgba(255, 255, 255, 0.06);
-    color: var(--secondary);
+    width: 40px;
+    height: 40px;
+    border-radius: 9999px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgb(38, 38, 40);
+    color: var(--muted-foreground);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -256,11 +434,13 @@
     flex: 1;
     width: 100%;
     min-height: 20px;
-    background: transparent;
-    border: none;
+    background: rgb(38, 38, 40);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 9999px;
     outline: none;
     font-size: 14px;
     color: var(--foreground);
+    padding: 11px 16px;
   }
 
   &__input::placeholder {
@@ -271,14 +451,42 @@
     border: none;
     cursor: pointer;
     flex-shrink: 0;
-    width: 32px;
-    height: 32px;
-    border-radius: 12px;
-    background: var(--primary);
+    width: 40px;
+    height: 40px;
+    border-radius: 9999px;
+    background: rgb(38, 38, 40);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #fff;
+    color: var(--muted-foreground);
+    transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+
+    &--active {
+      @include chat.chat-send-active;
+    }
+
+    &:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+  }
+
+  &__disclaimer {
+    margin: 10px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    font-size: 11px;
+    color: var(--muted-foreground);
+    line-height: 1.3;
+    text-align: center;
+
+    svg {
+      flex-shrink: 0;
+      opacity: 0.75;
+    }
   }
 
   &__typing {

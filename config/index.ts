@@ -47,6 +47,46 @@ export default defineConfig({
         enable: true,
       },
     },
+    webpackChain(chain) {
+      chain.optimization.splitChunks({
+        chunks: "all",
+        maxInitialRequests: 25,
+        minSize: 20_000,
+        cacheGroups: {
+          taro: {
+            name: "taro-vendor",
+            test: /[\\/]node_modules[\\/]@tarojs[\\/]/,
+            priority: 20,
+          },
+          react: {
+            name: "react-vendor",
+            test: /[\\/]node_modules[\\/](react|react-dom|scheduler)[\\/]/,
+            priority: 20,
+          },
+          query: {
+            name: "query-vendor",
+            test: /[\\/]node_modules[\\/]@tanstack[\\/]/,
+            priority: 15,
+          },
+          lucide: {
+            name: "lucide-vendor",
+            test: /[\\/]node_modules[\\/]lucide-react[\\/]/,
+            priority: 15,
+          },
+          i18n: {
+            name: "i18n-vendor",
+            test: /[\\/]node_modules[\\/](i18next|react-i18next)[\\/]/,
+            priority: 15,
+          },
+          common: {
+            name: "common",
+            minChunks: 2,
+            priority: 5,
+            reuseExistingChunk: true,
+          },
+        },
+      });
+    },
     devServer: {
       historyApiFallback: true,
       proxy: {

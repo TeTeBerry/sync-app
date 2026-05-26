@@ -11,6 +11,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "./ui";
 import { MetaRow } from "./MetaRow";
 import { PostCommentSection } from "./PostCommentSection";
+import { PostActionMenu } from "./PostActionMenu";
 import { PostStatusBadge } from "./PostStatusBadge";
 import { useCurrentUserQuery } from "../hooks/useSyncApi";
 import { isCurrentUserPostAuthor } from "../utils/postOwnership";
@@ -63,7 +64,12 @@ export const FeedPostList: FC<FeedPostListProps> = ({
                     <strong>{post.name}</strong>
                     <span>{post.handle}</span>
                   </p>
-                  <PostStatusBadge status={post.status} variant="home" />
+                  <div className="s-home-post__head-actions">
+                    <PostStatusBadge status={post.status} variant="home" />
+                    {!isOwn ? (
+                      <PostActionMenu postId={post.id} authorUserId={post.userId} />
+                    ) : null}
+                  </div>
                 </div>
                 <h3>{post.event}</h3>
                 <small className="s-home-post__location">

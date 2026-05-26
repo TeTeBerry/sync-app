@@ -1,0 +1,23 @@
+.s-post-action-menu__trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  margin: -4px;
+  border: none;
+  background: transparent;
+  color: var(--muted-foreground);
+  cursor: pointer;
+
+  &:active {
+    opacity: 0.7;
+  }
+}
+
+.s-home-post__head-actions,
+.s-event-post__head-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}

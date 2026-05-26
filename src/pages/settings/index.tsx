@@ -54,12 +54,21 @@ const SettingsPage: React.FC = () => {
     readPrivacy(STORAGE_KEYS.privacy, "public"),
   );
 
+  const setStorePrivacyLevel = useProfilePageStore((state) => state.setPrivacyLevel);
+
   useEffect(() => {
     if (currentUser?.notificationsEnabled == null) return;
     setNotificationsEnabled(currentUser.notificationsEnabled);
     setStoreNotificationsEnabled(currentUser.notificationsEnabled);
     Taro.setStorageSync(STORAGE_KEYS.notifications, currentUser.notificationsEnabled);
   }, [currentUser?.notificationsEnabled, setStoreNotificationsEnabled]);
+
+  useEffect(() => {
+    if (!currentUser?.privacyLevel) return;
+    setPrivacyLevel(currentUser.privacyLevel);
+    setStorePrivacyLevel(currentUser.privacyLevel);
+    Taro.setStorageSync(STORAGE_KEYS.privacy, currentUser.privacyLevel);
+  }, [currentUser?.privacyLevel, setStorePrivacyLevel]);
 
   const titleKey = `profile.settings.${section}Title` as const;
 
@@ -95,9 +104,16 @@ const SettingsPage: React.FC = () => {
 
   const selectPrivacy = useCallback((level: PrivacyLevel) => {
     setPrivacyLevel(level);
+    setStorePrivacyLevel(level);
     Taro.setStorageSync(STORAGE_KEYS.privacy, level);
-    void Taro.showToast({ title: t("profile.settings.saved"), icon: "success" });
-  }, [t]);
+    void updateCurrentUserAndInvalidate(queryClient, { privacyLevel: level })
+      .then(() => {
+        void Taro.showToast({ title: t("profile.settings.saved"), icon: "success" });
+      })
+      .catch(() => {
+        void Taro.showToast({ title: t("common.requestFailed"), icon: "none" });
+      });
+  }, [queryClient, setStorePrivacyLevel, t]);
 
   const submitFeedback = useCallback(() => {
     void Taro.showToast({ title: t("profile.settings.feedbackSent"), icon: "success" });

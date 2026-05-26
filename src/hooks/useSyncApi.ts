@@ -19,13 +19,23 @@ import {
   fetchProfilePosts,
   fetchProfileSummary,
   likePost,
+  clearAllNotifications,
+  deleteNotification,
   markAllNotificationsRead,
   markNotificationRead,
   registerForActivity,
+  blockUser,
+  submitReport,
   updateCurrentUser,
   updatePost,
 } from "../api/syncApi";
-import type { EventDetailPost, HomeFeedPost, HomeSummary, UpdateCurrentUserPayload } from "../types/backend";
+import type {
+  EventDetailPost,
+  HomeFeedPost,
+  HomeSummary,
+  ReportPayload,
+  UpdateCurrentUserPayload,
+} from "../types/backend";
 import { isApiEnabled } from "../constants/api";
 import { getClientUserId } from "../utils/session";
 import {
@@ -86,6 +96,21 @@ export async function markNotificationAsRead(id: string, queryClient: QueryClien
 export async function markAllNotificationsAsRead(queryClient: QueryClient) {
   const userId = getClientUserId();
   await markAllNotificationsRead(userId);
+  await invalidateNotificationQueries(queryClient);
+}
+
+export async function deleteNotificationAndInvalidate(
+  queryClient: QueryClient,
+  id: string,
+) {
+  const userId = getClientUserId();
+  await deleteNotification(id, userId);
+  await invalidateNotificationQueries(queryClient);
+}
+
+export async function clearAllNotificationsAndInvalidate(queryClient: QueryClient) {
+  const userId = getClientUserId();
+  await clearAllNotifications(userId);
   await invalidateNotificationQueries(queryClient);
 }
 
@@ -182,9 +207,10 @@ function mergeHomeCountdownCandidates(
   return candidates;
 }
 
-export function useNearestUpcomingForCountdown() {
+export function useNearestUpcomingForCountdown(options?: QueryEnableOptions) {
   const { signupEvents } = useHomeSummary();
-  const activitiesQuery = useActivitiesQuery();
+  const tabEnabled = options?.enabled ?? true;
+  const activitiesQuery = useActivitiesQuery({ enabled: tabEnabled });
 
   return useMemo(() => {
     const candidates = mergeHomeCountdownCandidates(signupEvents, activitiesQuery.data);
@@ -210,8 +236,9 @@ export function useActivityDetailQuery(legacyId?: number) {
   });
 }
 
-export function usePopularPostsQuery() {
-  const enabled = isApiEnabled();
+export function usePopularPostsQuery(options?: QueryEnableOptions) {
+  const tabEnabled = options?.enabled ?? true;
+  const enabled = isApiEnabled() && tabEnabled;
   const userId = getClientUserId();
 
   return useQuery({
@@ -222,8 +249,8 @@ export function usePopularPostsQuery() {
   });
 }
 
-export function usePopularPosts() {
-  const query = usePopularPostsQuery();
+export function usePopularPosts(options?: QueryEnableOptions) {
+  const query = usePopularPostsQuery(options);
 
   const posts: HomeFeedPost[] = (query.data ?? []).map(mapHomeFeedPost);
 
@@ -238,6 +265,7 @@ export function usePopularPosts() {
 function mapHomeFeedPost(item: HomeFeedPost): HomeFeedPost {
   return {
     id: item.id,
+    userId: item.userId,
     name: item.name,
     handle: item.handle,
     event: item.event,
@@ -358,6 +386,30 @@ export async function updateCurrentUserAndInvalidate(
     queryClient.invalidateQueries({ queryKey: ["profile", "summary"] }),
   ]);
   return user;
+}
+
+async function invalidatePostFeedQueries(queryClient: QueryClient) {
+  await Promise.all([
+    queryClient.invalidateQueries({ queryKey: ["posts", "popular"] }),
+    queryClient.invalidateQueries({ queryKey: ["posts", "all"] }),
+    queryClient.invalidateQueries({ queryKey: ["posts", "activity"] }),
+  ]);
+}
+
+export async function blockUserAndInvalidate(
+  queryClient: QueryClient,
+  blockedUserId: string,
+) {
+  const result = await blockUser(blockedUserId);
+  await invalidatePostFeedQueries(queryClient);
+  return result;
+}
+
+export async function submitReportAndInvalidate(
+  queryClient: QueryClient,
+  payload: ReportPayload,
+) {
+  return submitReport(payload);
 }
 
 export function useProfileSummaryQuery() {

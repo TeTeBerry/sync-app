@@ -17,6 +17,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { goAiAssistant, goBack, ROUTES } from "../../utils/route";
 import BottomNav from "../../components/BottomNav";
+import { PostActionMenu } from "../../components/PostActionMenu";
 import { PostCommentSection } from "../../components/PostCommentSection";
 import { PostStatusBadge } from "../../components/PostStatusBadge";
 import { useConfirmDialog } from "../../hooks/useConfirmDialog";
@@ -90,6 +91,7 @@ const EventDetailPage = () => {
   const posts: EventDetailPost[] = useMemo(() => {
     return (postsQuery.data ?? []).map((item) => ({
       id: item.id,
+      userId: item.userId,
       name: item.name,
       location: item.location,
       time: item.time,
@@ -334,7 +336,12 @@ const EventDetailPage = () => {
                             {post.location} · {formatPublishTime(post)}
                           </span>
                         </p>
-                        <PostStatusBadge status={post.status} variant="event" />
+                        <div className="s-event-post__head-actions">
+                          <PostStatusBadge status={post.status} variant="event" />
+                          {!isOwn ? (
+                            <PostActionMenu postId={post.id} authorUserId={post.userId} />
+                          ) : null}
+                        </div>
                       </div>
                     </div>
                   </div>

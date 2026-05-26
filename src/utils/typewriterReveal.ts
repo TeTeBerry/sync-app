@@ -6,6 +6,8 @@ export interface TypewriterRevealOptions {
 
 export interface TypewriterReveal {
   append: (chunk: string) => void;
+  /** Replace target and show full text immediately (e.g. message_complete SSE). */
+  setFullText: (text: string) => void;
   flush: () => void;
   stop: () => void;
   waitUntilComplete: () => Promise<void>;
@@ -47,21 +49,27 @@ export function createTypewriterReveal(
     }
   };
 
+  const flushNow = () => {
+    if (timer) {
+      clearTimeout(timer);
+      timer = null;
+    }
+    visible = target;
+    options.onUpdate(visible);
+    notifyWaiters();
+  };
+
   return {
     append(chunk: string) {
       if (!chunk) return;
       target += chunk;
       ensureRunning();
     },
-    flush() {
-      if (timer) {
-        clearTimeout(timer);
-        timer = null;
-      }
-      visible = target;
-      options.onUpdate(visible);
-      notifyWaiters();
+    setFullText(text: string) {
+      target = text;
+      flushNow();
     },
+    flush: flushNow,
     stop() {
       if (timer) {
         clearTimeout(timer);

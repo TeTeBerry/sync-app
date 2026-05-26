@@ -97,6 +97,19 @@
   "notifications": {
     "title": "消息通知",
     "markAllRead": "全部已读",
+    "clearAll": "清空全部",
+    "delete": "删除",
+    "clearAllConfirmTitle": "清空全部消息",
+    "clearAllConfirmMessage": "确定要删除所有消息吗？此操作不可撤销。",
+    "deleteConfirmTitle": "删除消息",
+    "deleteConfirmMessage": "确定要删除这条消息吗？",
+    "categories": {
+      "all": "全部",
+      "comment": "评论",
+      "like": "点赞",
+      "system": "系统",
+      "match": "搭子推荐"
+    },
     "emptyTitle": "暂无消息",
     "emptyDesc": "评论、点赞、活动变更和搭子推荐会在这里显示。",
     "someone": "有人",
@@ -222,7 +235,35 @@
       }
     }
   },
+  "postActions": {
+    "more": "更多操作",
+    "title": "帖子操作",
+    "report": "举报",
+    "reportTitle": "选择举报原因",
+    "block": "拉黑",
+    "blockConfirmTitle": "拉黑该用户？",
+    "blockConfirmMessage": "拉黑后将不再看到对方的帖子，且无法互相匹配。",
+    "blocked": "已拉黑",
+    "blockFailed": "拉黑失败",
+    "blockUnavailable": "无法拉黑该用户",
+    "reported": "举报已提交",
+    "reportFailed": "举报失败",
+    "categories": {
+      "ads": "广告",
+      "scalper": "黄牛",
+      "vulgar": "低俗内容"
+    }
+  },
   "events": {
+    "subtitle": "电音活动日历",
+    "countLabel": "{{count}} 场活动",
+    "searchPlaceholder": "搜索活动、城市...",
+    "tabsLabel": "活动筛选",
+    "tabs": {
+      "upcoming": "即将开始"
+    },
+    "teamUp": "加入",
+    "teamPosts": "{{count}} 条组队帖",
     "loading": "加载活动中...",
     "error": "活动列表加载失败",
     "empty": "暂无活动"
@@ -282,7 +323,14 @@
       "removeImage": "移除图片",
       "imageTooLarge": "图片过大，请压缩至 10MB 以内",
       "postCreated": "组队帖已发布",
-      "existingPostHint": "你已有组队帖，请去「我的」编辑或在活动详情查看"
+      "existingPostHint": "你已有组队帖，请去「我的」编辑或在活动详情查看",
+      "clearConversation": "清空对话",
+      "viewPost": "查看帖子",
+      "onlineStatus": "在线 · 实时响应",
+      "aiBadge": "AI",
+      "footerDisclaimer": "AI 内容仅供参考",
+      "avatarFallbackInitial": "我",
+      "degradedMatchHint": "匹配结果可能不完整，已展示可用推荐"
     }
   }
 }

@@ -10,6 +10,8 @@ export type ImageWithFallbackProps = {
   fallback: React.ReactNode;
   wrapperClassName?: string;
   fallbackWrapperClassName?: string;
+  /** LCP / hero images: eager load + high fetch priority */
+  priority?: boolean;
 };
 
 export const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
@@ -22,6 +24,7 @@ export const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
   fallback,
   wrapperClassName,
   fallbackWrapperClassName,
+  priority = false,
 }) => {
   const [broken, setBroken] = useState(false);
 
@@ -30,6 +33,22 @@ export const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
   }, [src]);
 
   const showImage = Boolean(src) && !broken;
+  const imgLoading = priority ? "eager" : "lazy";
+  const imgDecoding = priority ? "sync" : "async";
+  const imgFetchPriority = priority ? ("high" as const) : undefined;
+
+  const renderImg = (className?: string) => (
+    <img
+      src={src}
+      alt={alt}
+      className={className}
+      referrerPolicy={referrerPolicy}
+      loading={imgLoading}
+      decoding={imgDecoding}
+      {...(imgFetchPriority ? { fetchPriority: imgFetchPriority } : {})}
+      onError={() => setBroken(true)}
+    />
+  );
 
   if (wrapperClassName) {
     const wrapperClass = showImage
@@ -38,31 +57,13 @@ export const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
 
     return (
       <div className={wrapperClass}>
-        {showImage ? (
-          <img
-            src={src}
-            alt={alt}
-            className={imageClassName}
-            referrerPolicy={referrerPolicy}
-            onError={() => setBroken(true)}
-          />
-        ) : (
-          fallback
-        )}
+        {showImage ? renderImg(imageClassName) : fallback}
       </div>
     );
   }
 
   if (showImage) {
-    return (
-      <img
-        src={src}
-        alt={alt}
-        className={imageClassName}
-        referrerPolicy={referrerPolicy}
-        onError={() => setBroken(true)}
-      />
-    );
+    return renderImg(imageClassName);
   }
 
   return (

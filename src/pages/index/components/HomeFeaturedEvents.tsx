@@ -33,7 +33,7 @@ export const HomeFeaturedEvents: FC<HomeFeaturedEventsProps> = ({
 
   return (
     <section className="s-home-featured" aria-label="Featured events">
-      {items.map((event) => {
+      {items.map((event, index) => {
         const status = getActivityStatusFromActivity(event.date, event.title);
 
         return (
@@ -44,6 +44,7 @@ export const HomeFeaturedEvents: FC<HomeFeaturedEventsProps> = ({
             <ImageWithFallback
               src={event.image}
               alt={event.title}
+              priority={index === 0}
               wrapperClassName="s-home-event__media"
               fallbackWrapperClassName="s-home-event__media s-home-event__media--logo"
               fallback={<span>{event.logo?.replace(/\n/g, " ")}</span>}
@@ -71,6 +72,8 @@ export const HomeFeaturedEvents: FC<HomeFeaturedEventsProps> = ({
                         key={guest}
                         src={guest}
                         alt=""
+                        loading="lazy"
+                        decoding="async"
                         style={{ zIndex: event.guests.length - index }}
                       />
                     ))}

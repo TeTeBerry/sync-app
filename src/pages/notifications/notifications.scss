@@ -10,13 +10,65 @@
   padding: 16px;
 }
 
+.s-notifications__tabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  margin-bottom: 12px;
+  padding-bottom: 4px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.s-notifications__tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: 9999px;
+  padding: 8px 14px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+
+  &--active {
+    background: rgba(255, 0, 102, 0.18);
+    color: var(--primary);
+    box-shadow: inset 0 0 0 1px rgba(255, 0, 102, 0.35);
+  }
+}
+
+.s-notifications__tab-count {
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.1);
+  font-size: 11px;
+  line-height: 18px;
+  text-align: center;
+
+  .s-notifications__tab--active & {
+    background: rgba(255, 0, 102, 0.25);
+  }
+}
+
 .s-notifications__toolbar {
   display: flex;
   justify-content: flex-end;
+  gap: 16px;
   margin-bottom: 12px;
 }
 
-.s-notifications__mark-all {
+.s-notifications__toolbar-btn {
   border: none;
   background: transparent;
   color: var(--primary);
@@ -25,6 +77,10 @@
   cursor: pointer;
   padding: 4px 0;
   -webkit-tap-highlight-color: transparent;
+
+  &--danger {
+    color: rgba(255, 120, 120, 0.92);
+  }
 
   &:disabled {
     opacity: 0.4;
@@ -40,17 +96,12 @@
 
 .s-notifications__item {
   display: flex;
-  gap: 12px;
-  align-items: flex-start;
+  gap: 4px;
+  align-items: stretch;
   width: 100%;
-  text-align: left;
-  padding: 14px 14px 14px 12px;
   border-radius: var(--radius-2xl);
-  border: none;
   background: rgba(30, 30, 30, 0.9);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
   position: relative;
 
   &--unread {
@@ -58,6 +109,20 @@
       inset 3px 0 0 var(--primary),
       inset 0 0 0 1px rgba(255, 255, 255, 0.06);
   }
+}
+
+.s-notifications__item-main {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  padding: 14px 8px 14px 12px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 
   &:active {
     opacity: 0.88;
@@ -147,6 +212,21 @@
   background: var(--primary);
   flex-shrink: 0;
   margin-top: 6px;
+}
+
+.s-notifications__delete {
+  flex-shrink: 0;
+  align-self: center;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.35);
+  padding: 14px 12px 14px 6px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+
+  &:active {
+    color: rgba(255, 120, 120, 0.92);
+  }
 }
 
 .s-notifications__empty {

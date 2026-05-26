@@ -134,6 +134,19 @@
   "notifications": {
     "title": "Messages",
     "markAllRead": "Mark all read",
+    "clearAll": "Clear all",
+    "delete": "Delete",
+    "clearAllConfirmTitle": "Clear all messages",
+    "clearAllConfirmMessage": "Delete all messages? This cannot be undone.",
+    "deleteConfirmTitle": "Delete message",
+    "deleteConfirmMessage": "Delete this message?",
+    "categories": {
+      "all": "All",
+      "comment": "Comments",
+      "like": "Likes",
+      "system": "System",
+      "match": "Buddy matches"
+    },
     "emptyTitle": "No messages yet",
     "emptyDesc": "Comments, likes, activity updates, and buddy matches will appear here.",
     "someone": "Someone",
@@ -310,7 +323,35 @@
       }
     }
   },
+  "postActions": {
+    "more": "More actions",
+    "title": "Post actions",
+    "report": "Report",
+    "reportTitle": "Report reason",
+    "block": "Block user",
+    "blockConfirmTitle": "Block this user?",
+    "blockConfirmMessage": "You will no longer see their posts and matching will be disabled.",
+    "blocked": "User blocked",
+    "blockFailed": "Could not block user",
+    "blockUnavailable": "Cannot block this user",
+    "reported": "Report submitted",
+    "reportFailed": "Report failed",
+    "categories": {
+      "ads": "Advertising",
+      "scalper": "Scalping",
+      "vulgar": "Vulgar content"
+    }
+  },
   "events": {
+    "subtitle": "Electronic music calendar",
+    "countLabel": "{{count}} events",
+    "searchPlaceholder": "Search events, cities...",
+    "tabsLabel": "Event filters",
+    "tabs": {
+      "upcoming": "Upcoming"
+    },
+    "teamUp": "Join",
+    "teamPosts": "{{count}} team posts",
     "loading": "Loading events...",
     "error": "Failed to load events",
     "empty": "No events yet"
@@ -370,7 +411,14 @@
       "removeImage": "Remove image",
       "imageTooLarge": "Image too large — please compress to under 10MB",
       "postCreated": "Group post published",
-      "existingPostHint": "You already have a group post — edit it under Profile or view it on the event page"
+      "existingPostHint": "You already have a group post — edit it under Profile or view it on the event page",
+      "clearConversation": "Clear chat",
+      "viewPost": "View post",
+      "onlineStatus": "Online · Real-time",
+      "aiBadge": "AI",
+      "footerDisclaimer": "AI content is for reference only · Platform-secured transactions",
+      "avatarFallbackInitial": "U",
+      "degradedMatchHint": "Match results may be incomplete — showing available recommendations"
     }
   }
 }

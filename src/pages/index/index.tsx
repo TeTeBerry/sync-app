@@ -1,10 +1,12 @@
 import "./home.scss";
 import Taro from "@tarojs/taro";
-import { useCallback } from "react";
+import { lazy, Suspense, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { useQueryClient } from "@tanstack/react-query";
 import BottomNav from "../../components/BottomNav";
+import PageLoadingFallback from "../../components/PageLoadingFallback";
 import { useConfirmDialog } from "../../hooks/useConfirmDialog";
+import { useDeferredMount } from "../../hooks/useDeferredMount";
 import {
   deletePostAndInvalidate,
   likePostAndInvalidate,
@@ -16,24 +18,29 @@ import {
 } from "../../hooks/useSyncApi";
 import { isApiEnabled } from "../../constants/api";
 import { go, goAiAssistant, goEventDetail, ROUTES } from "../../utils/route";
-import { HomeActivityFeed } from "./components/HomeActivityFeed";
 import { HomeCountdownCard } from "./components/HomeCountdownCard";
 import { HomeFeaturedEvents } from "./components/HomeFeaturedEvents";
 import { HomePlazaHero } from "./components/HomePlazaHero";
 import { type ActivityPost } from "./homeData";
 import { type FeaturedEvent } from "../../utils/apiMappers";
 
+const LazyHomeActivityFeed = lazy(async () => {
+  const mod = await import("./components/HomeActivityFeed");
+  return { default: mod.HomeActivityFeed };
+});
+
 const Home = () => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const belowFoldReady = useDeferredMount(120);
   const { confirm, confirmDialog } = useConfirmDialog({
     cancelText: t("common.cancel"),
   });
   const { heat } = useHomeSummary();
   const { items: featuredEvents } = useFeaturedEvents();
-  const nearestUpcoming = useNearestUpcomingForCountdown();
+  const nearestUpcoming = useNearestUpcomingForCountdown({ enabled: belowFoldReady });
   const { data: unreadCount = 0 } = useNotificationUnreadCount();
-  const { posts, refetch: refetchPosts } = usePopularPosts();
+  const { posts, refetch: refetchPosts } = usePopularPosts({ enabled: belowFoldReady });
 
   const openAiAssistant = useCallback((message?: string) => {
     if (message?.trim()) {
@@ -109,13 +116,19 @@ const Home = () => {
           onJoinClick={openEventDetail}
         />
 
-        <HomeActivityFeed
-          items={posts}
-          onSeeAll={() => go(ROUTES.ALL_POSTS)}
-          onDelete={handleDeletePost}
-          onLike={handleLikePost}
-          onCommentSubmitted={handleCommentSubmitted}
-        />
+        {belowFoldReady ? (
+          <Suspense fallback={<PageLoadingFallback minHeight={240} />}>
+            <LazyHomeActivityFeed
+              items={posts}
+              onSeeAll={() => go(ROUTES.ALL_POSTS)}
+              onDelete={handleDeletePost}
+              onLike={handleLikePost}
+              onCommentSubmitted={handleCommentSubmitted}
+            />
+          </Suspense>
+        ) : (
+          <PageLoadingFallback minHeight={240} />
+        )}
 
         <div className="s-home__heat" aria-label="Today heat">
           {activeTeamCount} 人正在发现活动

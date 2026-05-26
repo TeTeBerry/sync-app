@@ -8,6 +8,7 @@ export type { FeaturedEvent } from "../../utils/apiMappers";
 
 export type ActivityPost = {
   id: string;
+  userId?: string;
   name: string;
   handle: string;
   event: string;

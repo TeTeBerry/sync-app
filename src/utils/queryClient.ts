@@ -1,0 +1,15 @@
+import { QueryClient } from "@tanstack/react-query";
+
+/** Shared React Query defaults tuned for H5 first paint + fewer redundant refetches. */
+export function createQueryClient() {
+  return new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: 60_000,
+        gcTime: 5 * 60_000,
+        refetchOnWindowFocus: false,
+        retry: 1,
+      },
+    },
+  });
+}

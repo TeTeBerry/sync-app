@@ -1,4 +1,5 @@
-import type { AiChatMessage, AiChatStreamEvent } from "../types/aiChat";
+import type { AiChatMessage, AiChatStreamEvent, ChatUiMessage, RecommendedPostCard, BuddyCopyVariant } from "../types/aiChat";
+import type { ConversationState } from "../types/conversationState";
 
 function parseSseDataLine(line: string): AiChatStreamEvent | null {
   if (!line.startsWith("data:")) return null;
@@ -17,6 +18,14 @@ function parseSseDataLine(line: string): AiChatStreamEvent | null {
     }
     if (json.type === "delta" && typeof json.content === "string") {
       return { type: "delta", content: json.content };
+    }
+    if (json.type === "message_complete" && typeof json.content === "string") {
+      return {
+        type: "message_complete",
+        content: json.content,
+        requestId:
+          typeof json.requestId === "string" ? json.requestId : undefined,
+      };
     }
     if (json.type === "done") {
       return {
@@ -43,6 +52,32 @@ function parseSseDataLine(line: string): AiChatStreamEvent | null {
           typeof json.activityLegacyId === "number"
             ? json.activityLegacyId
             : undefined,
+      };
+    }
+    if (json.type === "post_recommendations" && Array.isArray(json.posts)) {
+      return {
+        type: "post_recommendations",
+        posts: json.posts as RecommendedPostCard[],
+        degraded:
+          typeof json.degraded === "boolean" ? json.degraded : undefined,
+      };
+    }
+    if (json.type === "suggested_replies" && Array.isArray(json.replies)) {
+      return {
+        type: "suggested_replies",
+        replies: json.replies.filter((item): item is string => typeof item === "string"),
+      };
+    }
+    if (json.type === "buddy_copy_variants" && Array.isArray(json.variants)) {
+      return {
+        type: "buddy_copy_variants",
+        variants: json.variants as BuddyCopyVariant[],
+      };
+    }
+    if (json.type === "conversation_patch" && json.state && typeof json.state === "object") {
+      return {
+        type: "conversation_patch",
+        state: json.state as ConversationState,
       };
     }
     if (typeof json.content === "string") {

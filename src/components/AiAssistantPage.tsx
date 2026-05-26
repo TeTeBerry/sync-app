@@ -1,79 +1,91 @@
 import "./AiAssistantPage.scss";
-import React, { type FC, type KeyboardEvent, useCallback, useEffect, useRef, useState } from "react";
+import React, { type FC, useCallback, useEffect, useState } from "react";
 import BottomNav from "./BottomNav";
 import ImagePreviewLightbox from "./ImagePreviewLightbox";
-import PageNavigation from "./PageNavigation";
-import { Button, Input, cn } from "./ui";
-import { ImagePlusIcon, SendIcon, SparklesIcon, XIcon } from "lucide-react";
+import {
+  ChevronLeftIcon,
+  SparklesIcon,
+  Trash2Icon,
+  ZapIcon,
+} from "lucide-react";
 import { useTranslation } from "react-i18next";
 import Taro, { useDidShow } from "@tarojs/taro";
 import { useQueryClient } from "@tanstack/react-query";
-import type { ChatUiMessage } from "../types/aiChat";
 import { useAiChatStream } from "../hooks/useAiChatStream";
+import { useResolvedProfile } from "../hooks/useResolvedProfile";
 import { invalidatePostQueries } from "../hooks/useSyncApi";
-import { ChatImageTooLargeError, pickAndCompressChatImage } from "../utils/chatImage";
 import { useNavigationStore } from "../stores";
-import { normalizeAiShortcutTag } from "../utils/aiShortcutTags";
 import { goBack, goEventDetail, ROUTES } from "../utils/route";
-
-const quickReplyKeys = [`findBuddy`, `nearEvents`] as const;
+import { ChatMessageList } from "./ai-chat/ChatMessageList";
+import { ChatComposer } from "./ai-chat/ChatComposer";
+import { DegradedMatchBanner } from "./ai-chat/DegradedMatchBanner";
 
 function AiAssistantChat({
   initialMessage,
   activityLegacyId,
   onInitialMessageSent,
+  onClearActivityContext,
+  onClearReady,
+  onMessageCountChange,
+  userAvatar,
+  userName,
 }: {
   initialMessage?: string | null;
   activityLegacyId?: number;
   onInitialMessageSent?: () => void;
+  onClearActivityContext?: () => void;
+  onClearReady?: (clear: () => Promise<void>, isBusy: boolean) => void;
+  onMessageCountChange?: (count: number) => void;
+  userAvatar?: string;
+  userName: string;
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [input, setInput] = useState(``);
+  const [input, setInput] = useState("");
   const [pendingImage, setPendingImage] = useState<string | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
-  const bottomRef = useRef<HTMLDivElement>(null);
-  const initialMessageSentRef = useRef<string | null>(null);
+  const initialMessageSentRef = React.useRef<string | null>(null);
 
   const mockReply = useCallback(
     (query: string) =>
-      t(`aiAssistant.chat.searching`, {
+      t("aiAssistant.chat.searching", {
         query,
         count: Math.floor(Math.random() * 5 + 3),
       }),
     [t],
   );
 
-  const { messages, isStreaming, isLoadingHistory, send } = useAiChatStream({
-    welcomeText: t(`aiAssistant.chat.welcome`),
-    mockReply,
-    streamErrorText: t(`aiAssistant.chat.streamError`),
-    activityLegacyId,
-    onPostCreated: async (event) => {
-      await invalidatePostQueries(queryClient);
-      const scopedId = event.activityLegacyId ?? activityLegacyId;
-      if (scopedId != null) {
-        await queryClient.invalidateQueries({
-          queryKey: ["posts", "activity", scopedId],
+  const { messages, isStreaming, isLoadingHistory, send, clearChat } =
+    useAiChatStream({
+      welcomeText: t("aiAssistant.chat.welcome"),
+      mockReply,
+      streamErrorText: t("aiAssistant.chat.streamError"),
+      activityLegacyId,
+      onPostCreated: async (event) => {
+        await invalidatePostQueries(queryClient);
+        const scopedId = event.activityLegacyId ?? activityLegacyId;
+        if (scopedId != null) {
+          await queryClient.invalidateQueries({
+            queryKey: ["posts", "activity", scopedId],
+          });
+        }
+        void Taro.showToast({
+          title: t("aiAssistant.chat.postCreated"),
+          icon: "success",
         });
-      }
-      void Taro.showToast({
-        title: t("aiAssistant.chat.postCreated"),
-        icon: "success",
-      });
-    },
-    onExistingPost: () => {
-      void Taro.showToast({
-        title: t("aiAssistant.chat.existingPostHint"),
-        icon: "none",
-        duration: 2500,
-      });
-    },
-  });
+      },
+      onExistingPost: () => {
+        void Taro.showToast({
+          title: t("aiAssistant.chat.existingPostHint"),
+          icon: "none",
+          duration: 2500,
+        });
+      },
+    });
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: `smooth` });
-  }, [messages]);
+    onMessageCountChange?.(messages.length);
+  }, [messages.length, onMessageCountChange]);
 
   useEffect(() => {
     if (!initialMessage) {
@@ -95,180 +107,68 @@ function AiAssistantChat({
       const trimmed = text.trim();
       const attachment = image ?? pendingImage;
       if ((!trimmed && !attachment) || isStreaming) return;
-      setInput(``);
+      setInput("");
       setPendingImage(null);
       void send({ text: trimmed, image: attachment ?? undefined });
     },
     [isStreaming, pendingImage, send],
   );
 
-  const handlePickImage = useCallback(async () => {
+  const handleClearChat = useCallback(async () => {
     if (isStreaming) return;
-    try {
-      const dataUrl = await pickAndCompressChatImage();
-      if (dataUrl) setPendingImage(dataUrl);
-    } catch (error) {
-      if (error instanceof ChatImageTooLargeError) {
-        void Taro.showToast({ title: t("aiAssistant.chat.imageTooLarge"), icon: "none" });
-        return;
-      }
-      void Taro.showToast({ title: t("common.requestFailed"), icon: "none" });
-    }
-  }, [isStreaming, t]);
+    await clearChat();
+    onClearActivityContext?.();
+  }, [clearChat, isStreaming, onClearActivityContext]);
 
-  const handleRemoveImage = useCallback(() => {
-    setPendingImage(null);
-  }, []);
+  useEffect(() => {
+    onClearReady?.(handleClearChat, isStreaming || isLoadingHistory);
+  }, [handleClearChat, isLoadingHistory, isStreaming, onClearReady]);
 
-  const openImagePreview = useCallback((src: string) => {
-    setPreviewImage(src);
-  }, []);
-
-  const closeImagePreview = useCallback(() => {
-    setPreviewImage(null);
-  }, []);
-
-  const onChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setInput(e.target.value);
-  }, []);
-
-  const onKeyDown = useCallback(
-    (e: KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === `Enter`) {
-        e.preventDefault();
-        submit(input);
-      }
+  const handleSelectCopyVariant = useCallback(
+    (label: string) => {
+      if (isStreaming) return;
+      void send({ text: `文案-${label}` });
     },
-    [input, submit],
+    [isStreaming, send],
   );
 
-  const canSend = Boolean(input.trim() || pendingImage) && !isStreaming;
+  const handleSelectSuggestedReply = useCallback(
+    (reply: string) => {
+      if (isStreaming) return;
+      void send({ text: reply });
+    },
+    [isStreaming, send],
+  );
 
   return (
     <div className="s-ai-assistant-chat">
-      <div className="s-ai-assistant-chat__scroll">
-        {isLoadingHistory ? (
-          <p className="s-ai-assistant__hint">{t(`common.loading`)}</p>
-        ) : null}
-        {messages.map((msg: ChatUiMessage) => (
-          <div
-            key={msg.id}
-            className={`s-ai-assistant-chat__row${msg.from === `user` ? ` s-ai-assistant-chat__row--from-user` : ``}`}
-          >
-            <div className={`s-ai-assistant-chat__avatar${msg.from === `ai` ? `` : ` s-ai-assistant-chat__avatar--hidden`}`}>
-              <SparklesIcon size={13} />
-            </div>
-            <div className={cn(`s-ai-assistant-chat__content`, msg.from === `user` && `s-ai-assistant-chat__content--from-user`)}>
-              <div
-                className={cn(
-                  `s-ai-assistant-chat__bubble`,
-                  msg.from === `ai` ? `s-ai-assistant-chat__bubble--from-ai` : `s-ai-assistant-chat__bubble--from-user`,
-                  msg.streaming && `s-ai-assistant-chat__bubble--streaming`,
-                  msg.streaming && !msg.text && `s-ai-assistant-chat__bubble--waiting`,
-                )}
-              >
-                {msg.streaming && !msg.text ? (
-                  <span className="s-ai-assistant-chat__typing" aria-label={t(`aiAssistant.chat.thinking`)}>
-                    <span />
-                    <span />
-                    <span />
-                  </span>
-                ) : (
-                  <>
-                    {msg.imagePreview ? (
-                      <button
-                        type="button"
-                        className="s-ai-assistant-chat__bubble-image-btn"
-                        aria-label={t("aiAssistant.chat.viewImage")}
-                        onClick={() => openImagePreview(msg.imagePreview!)}
-                      >
-                        <img
-                          className="s-ai-assistant-chat__bubble-image"
-                          src={msg.imagePreview}
-                          alt={t("aiAssistant.chat.uploadedImageAlt")}
-                        />
-                      </button>
-                    ) : null}
-                    {msg.text ? <span>{msg.text}</span> : null}
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-        ))}
-        <div ref={bottomRef} />
-      </div>
-
-      <div className="s-ai-assistant-chat__quick-row s-scrollbar-none">
-        {quickReplyKeys.map((key) => (
-          <Button
-            key={key}
-            className="s-ai-assistant-chat__quick-chip"
-            disabled={isStreaming}
-            onClick={() =>
-              submit(normalizeAiShortcutTag(t(`aiAssistant.chat.quickReplies.${key}`)))
-            }
-          >
-            {t(`aiAssistant.chat.quickReplies.${key}`)}
-          </Button>
-        ))}
-      </div>
-
-      <div className="s-ai-assistant-chat__composer">
-        {pendingImage ? (
-          <div className="s-ai-assistant-chat__attach-preview">
-            <button
-              type="button"
-              className="s-ai-assistant-chat__attach-preview-btn"
-              aria-label={t("aiAssistant.chat.viewImage")}
-              onClick={() => openImagePreview(pendingImage)}
-            >
-              <img src={pendingImage} alt={t("aiAssistant.chat.uploadedImageAlt")} />
-            </button>
-            <button
-              type="button"
-              className="s-ai-assistant-chat__attach-remove"
-              aria-label={t("aiAssistant.chat.removeImage")}
-              onClick={handleRemoveImage}
-            >
-              <XIcon size={14} />
-            </button>
-          </div>
-        ) : null}
-        <div className="s-ai-assistant-chat__composer-inner">
-          <button
-            type="button"
-            className="s-ai-assistant-chat__attach-btn"
-            disabled={isStreaming}
-            aria-label={t("aiAssistant.chat.uploadImage")}
-            onClick={() => void handlePickImage()}
-          >
-            <ImagePlusIcon size={18} />
-          </button>
-          <Input
-            variant="ai-assistant-chat"
-            type="text"
-            value={input}
-            disabled={isStreaming}
-            placeholder={t(`aiAssistant.chat.placeholder`)}
-            onChange={onChange}
-            onKeyDown={onKeyDown}
-          />
-          <Button
-            className="s-ai-assistant-chat__send"
-            disabled={!canSend}
-            onClick={() => submit(input)}
-          >
-            <SendIcon size={14} color="#fff" />
-          </Button>
-        </div>
-      </div>
-
+      {isLoadingHistory ? (
+        <p className="s-ai-assistant__hint">{t("common.loading")}</p>
+      ) : null}
+      <DegradedMatchBanner />
+      <ChatMessageList
+        messages={messages}
+        isStreaming={isStreaming}
+        userAvatar={userAvatar}
+        userName={userName}
+        onOpenImagePreview={setPreviewImage}
+        onSelectCopyVariant={handleSelectCopyVariant}
+        onSelectSuggestedReply={handleSelectSuggestedReply}
+      />
+      <ChatComposer
+        input={input}
+        pendingImage={pendingImage}
+        isStreaming={isStreaming}
+        onInputChange={setInput}
+        onSubmit={submit}
+        onPendingImageChange={setPendingImage}
+        onOpenImagePreview={setPreviewImage}
+      />
       <ImagePreviewLightbox
         open={previewImage != null}
         src={previewImage}
         alt={t("aiAssistant.chat.uploadedImageAlt")}
-        onClose={closeImagePreview}
+        onClose={() => setPreviewImage(null)}
       />
     </div>
   );
@@ -276,9 +176,39 @@ function AiAssistantChat({
 
 const AiAssistantPage: FC = () => {
   const { t } = useTranslation();
-  const [pendingInitialMessage, setPendingInitialMessage] = useState<string | null>(null);
-  const [activityLegacyId, setActivityLegacyId] = useState<number | undefined>(undefined);
-  const consumeAiAssistantIntent = useNavigationStore((state) => state.consumeAiAssistantIntent);
+  const [pendingInitialMessage, setPendingInitialMessage] = useState<
+    string | null
+  >(null);
+  const [clearChatFn, setClearChatFn] = useState<(() => Promise<void>) | null>(
+    null,
+  );
+  const [clearBusy, setClearBusy] = useState(false);
+  const [messageCount, setMessageCount] = useState(0);
+
+  const consumeAiAssistantIntent = useNavigationStore(
+    (state) => state.consumeAiAssistantIntent,
+  );
+  const activityLegacyId = useNavigationStore(
+    (state) => state.activeActivityLegacyId ?? undefined,
+  );
+  const setActiveActivityLegacyId = useNavigationStore(
+    (state) => state.setActiveActivityLegacyId,
+  );
+
+  const profileUserData = useResolvedProfile();
+
+  const handleClearActivityContext = useCallback(() => {
+    setActiveActivityLegacyId(null);
+    setPendingInitialMessage(null);
+  }, [setActiveActivityLegacyId]);
+
+  const handleClearReady = useCallback(
+    (clear: () => Promise<void>, isBusy: boolean) => {
+      setClearChatFn(() => clear);
+      setClearBusy(isBusy);
+    },
+    [],
+  );
 
   const applyAiAssistantIntent = useCallback(() => {
     const intent = consumeAiAssistantIntent();
@@ -286,9 +216,9 @@ const AiAssistantPage: FC = () => {
       setPendingInitialMessage(intent.initialMessage.trim());
     }
     if (intent?.activityLegacyId != null && !Number.isNaN(intent.activityLegacyId)) {
-      setActivityLegacyId(intent.activityLegacyId);
+      setActiveActivityLegacyId(intent.activityLegacyId);
     }
-  }, [consumeAiAssistantIntent]);
+  }, [consumeAiAssistantIntent, setActiveActivityLegacyId]);
 
   useDidShow(applyAiAssistantIntent);
 
@@ -308,7 +238,51 @@ const AiAssistantPage: FC = () => {
   return (
     <div data-cmp="AiAssistant" className="s-ai-assistant">
       <header className="s-ai-assistant__header">
-        <PageNavigation title={t("aiAssistant.title")} onBack={handleBack} />
+        <button
+          type="button"
+          className="s-ai-assistant__back-btn"
+          onClick={handleBack}
+        >
+          <ChevronLeftIcon size={20} />
+        </button>
+
+        <div className="s-ai-assistant__header-main">
+          <div className="s-ai-assistant__header-avatar" aria-hidden>
+            <SparklesIcon size={18} />
+            <span className="s-ai-assistant__header-online" />
+          </div>
+          <div className="s-ai-assistant__header-text">
+            <div className="s-ai-assistant__header-title-row">
+              <h1 className="s-ai-assistant__header-title">
+                {t("aiAssistant.title")}
+              </h1>
+              <span className="s-ai-assistant__ai-badge">
+                <ZapIcon size={10} aria-hidden />
+                {t("aiAssistant.chat.aiBadge")}
+              </span>
+            </div>
+            <p className="s-ai-assistant__header-status">
+              {t("aiAssistant.chat.onlineStatus")}
+            </p>
+          </div>
+        </div>
+
+        <div className="s-ai-assistant__header-actions">
+          {messageCount > 0 ? (
+            <span className="s-ai-assistant__message-count" aria-hidden>
+              {messageCount}
+            </span>
+          ) : null}
+          <button
+            type="button"
+            className="s-ai-assistant__clear-btn"
+            disabled={clearBusy || !clearChatFn}
+            aria-label={t("aiAssistant.chat.clearConversation")}
+            onClick={() => void clearChatFn?.()}
+          >
+            <Trash2Icon size={16} />
+          </button>
+        </div>
       </header>
 
       <div className="s-ai-assistant__body">
@@ -317,6 +291,11 @@ const AiAssistantPage: FC = () => {
             initialMessage={pendingInitialMessage}
             activityLegacyId={activityLegacyId}
             onInitialMessageSent={() => setPendingInitialMessage(null)}
+            onClearActivityContext={handleClearActivityContext}
+            onClearReady={handleClearReady}
+            onMessageCountChange={setMessageCount}
+            userAvatar={profileUserData.avatar}
+            userName={profileUserData.name}
           />
         </div>
       </div>

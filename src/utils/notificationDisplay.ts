@@ -8,7 +8,7 @@ export type NotificationCategory =
   | "match"
   | "general";
 
-function resolveCategory(meta?: NotificationMeta): NotificationCategory {
+export function getNotificationCategory(meta?: NotificationMeta): NotificationCategory {
   const type = meta?.type;
   if (type === "like") return "like";
   if (type === "comment" || type === "comment_reply") return "comment";
@@ -36,7 +36,7 @@ export function resolveNotificationText(
   item: AppNotification,
   t: TFunction,
 ): { title: string; body: string; category: NotificationCategory } {
-  const category = resolveCategory(item.meta);
+  const category = getNotificationCategory(item.meta);
   const templateKey = resolveTemplateKey(item.meta);
   const params = {
     actor: item.meta?.actorUserName?.trim() || t("notifications.someone"),

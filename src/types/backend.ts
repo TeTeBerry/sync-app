@@ -17,6 +17,12 @@ export interface BackendActivity {
   attendees?: number;
 }
 
+export type PrivacyLevel = "public" | "friends" | "private";
+
+export type ReportCategory = "ads" | "scalper" | "vulgar";
+
+export type ReportTargetType = "post" | "user" | "comment";
+
 export interface CurrentUser {
   id: string;
   name: string;
@@ -29,6 +35,7 @@ export interface CurrentUser {
   budgetLevel?: string;
   likeMate?: boolean;
   notificationsEnabled?: boolean;
+  privacyLevel?: PrivacyLevel;
 }
 
 export interface UpdateCurrentUserPayload {
@@ -42,6 +49,24 @@ export interface UpdateCurrentUserPayload {
   budgetLevel?: string;
   likeMate?: boolean;
   notificationsEnabled?: boolean;
+  privacyLevel?: PrivacyLevel;
+}
+
+export interface BlockListResult {
+  blockedUserIds: string[];
+}
+
+export interface ReportPayload {
+  targetType: ReportTargetType;
+  targetId: string;
+  targetUserId?: string;
+  category: ReportCategory;
+  reason?: string;
+}
+
+export interface ReportResult {
+  ok: true;
+  id: string;
 }
 
 export interface ActivityRegistrationResult {

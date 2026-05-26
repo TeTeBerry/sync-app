@@ -15,6 +15,9 @@ import type {
   ProfileActivityItem,
   ProfilePostItem,
   ProfileSummary,
+  BlockListResult,
+  ReportPayload,
+  ReportResult,
   UpdateCurrentUserPayload,
   UpdatePostPayload,
 } from "../types/backend";
@@ -64,6 +67,25 @@ export function fetchCurrentUser() {
 
 export function updateCurrentUser(payload: UpdateCurrentUserPayload) {
   return apiPatch<CurrentUser>("/users/me", payload, ownerParams());
+}
+
+export function fetchBlockedUserIds() {
+  return apiGet<BlockListResult>("/users/blocks", ownerParams());
+}
+
+export function blockUser(blockedUserId: string) {
+  return apiPost<{ ok: true }>("/users/blocks", { blockedUserId }, ownerParams());
+}
+
+export function unblockUser(blockedUserId: string) {
+  return apiDelete<{ ok: true }>(
+    `/users/blocks/${encodeURIComponent(blockedUserId)}`,
+    ownerParams(),
+  );
+}
+
+export function submitReport(payload: ReportPayload) {
+  return apiPost<ReportResult>("/reports", payload, ownerParams());
 }
 
 export function fetchPopularPosts(limit = 20) {
@@ -132,6 +154,10 @@ export function fetchChatSession(sessionId: string) {
   return apiGet<ChatSessionRecord>(`/chat/sessions/${sessionId}`);
 }
 
+export function clearChatSession(sessionId: string) {
+  return apiDelete<{ ok: true; sessionId: string }>(`/chat/sessions/${sessionId}`);
+}
+
 export function fetchNotifications(userId?: string) {
   return apiGet<AppNotification[]>("/notifications", { userId });
 }
@@ -148,4 +174,14 @@ export function markNotificationRead(id: string, userId?: string) {
 export function markAllNotificationsRead(userId?: string) {
   const query = userId ? `?userId=${encodeURIComponent(userId)}` : "";
   return apiPatch<{ ok: true }>(`/notifications/read-all${query}`, {});
+}
+
+export function deleteNotification(id: string, userId?: string) {
+  const query = userId ? `?userId=${encodeURIComponent(userId)}` : "";
+  return apiDelete<{ ok: true }>(`/notifications/${id}${query}`);
+}
+
+export function clearAllNotifications(userId?: string) {
+  const query = userId ? `?userId=${encodeURIComponent(userId)}` : "";
+  return apiDelete<{ ok: true }>(`/notifications${query}`);
 }
