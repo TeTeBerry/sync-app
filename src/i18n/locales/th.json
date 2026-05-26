@@ -35,6 +35,11 @@
     "empty": "ยังไม่มีข้อมูล",
     "retry": "ลองอีกครั้ง"
   },
+  "activityStatus": {
+    "notStarted": "ยังไม่เริ่ม",
+    "inProgress": "กำลังดำเนินการ",
+    "ended": "สิ้นสุดแล้ว"
+  },
   "language": {
     "title": "ภาษา",
     "zh": "中文",
@@ -44,8 +49,7 @@
   "activities": {
     "tomorrowland": "Tomorrowland Warm-up Party",
     "edc": "EDC China",
-    "s2o": "S2O Sanya",
-    "ultra": "Ultra Shanghai"
+    "ultra": "Ultra Chengdu"
   },
   "home": {
     "ai": {
@@ -57,6 +61,9 @@
     "hot": {
       "title": "กำลังฮิต",
       "live": "สด"
+    },
+    "featured": {
+      "empty": "ยังไม่มีกิจกรรมที่กำลังดำเนินอยู่"
     },
     "signup": {
       "title": "ลงทะเบียนกิจกรรม",
@@ -106,13 +113,43 @@
     "title": "ข้อความ",
     "markAllRead": "อ่านทั้งหมด",
     "emptyTitle": "ยังไม่มีข้อความ",
-    "emptyDesc": "คุณจะได้รับแจ้งเมื่อมีคนเข้าร่วมการซื้อร่วมหรือมีตั๋วที่ตรงกับของคุณ",
+    "emptyDesc": "ความคิดเห็น ไลก์ การอัปเดตกิจกรรม และการจับคู่เพื่อนร่วมทางจะแสดงที่นี่",
     "someone": "มีคน",
-    "pindanFallback": "การซื้อร่วม",
-    "eventFallback": "กิจกรรม",
-    "ticketSell": "ขาย",
-    "ticketBuy": "ซื้อ",
+    "time": {
+      "justNow": "เมื่อสักครู่",
+      "minutesAgo": "{{count}} นาทีที่แล้ว",
+      "hoursAgo": "{{count}} ชม. ที่แล้ว",
+      "daysAgo": "{{count}} วันที่แล้ว"
+    },
     "types": {
+      "like": {
+        "title": "มีคนกดไลก์โพสต์",
+        "body": "{{actor}} กดไลก์โพสต์ของคุณ"
+      },
+      "comment": {
+        "title": "มีความคิดเห็นใหม่",
+        "body": "{{actor}}: {{preview}}"
+      },
+      "commentReply": {
+        "title": "มีการตอบกลับความคิดเห็น",
+        "body": "{{actor}}: {{preview}}"
+      },
+      "postRejected": {
+        "title": "โพสต์ไม่ผ่านการตรวจสอบ",
+        "body": "{{reason}}"
+      },
+      "postHidden": {
+        "title": "โพสต์ถูกซ่อนอัตโนมัติ",
+        "body": "{{reason}}"
+      },
+      "activityUpdate": {
+        "title": "ข้อมูลกิจกรรมเปลี่ยนแปลง",
+        "body": "\"{{activityName}}\" {{changeSummary}}"
+      },
+      "matchRecommendation": {
+        "title": "พบเพื่อนร่วมทางใหม่",
+        "body": "พบ {{count}} โพสต์ที่ตรงกันใน \"{{activityName}}\""
+      },
       "pindanJoinLeader": {
         "title": "มีสมาชิกใหม่ในการซื้อร่วม",
         "body": "{{actor}} เข้าร่วมการซื้อร่วม \"{{title}}\" ของคุณ"
@@ -123,7 +160,7 @@
       },
       "ticketMatch": {
         "title": "ตั๋วที่อาจตรงกัน",
-        "body": "มีรายการ{{type}}ใหม่สำหรับ \"{{event}}\" ที่อาจตรงกับของคุณ"
+        "body": "มีรายการ{{type}}ใหม่สำหรับ \"{{event}}\" ที่ออาจตรงกับของคุณ"
       }
     }
   },
@@ -133,7 +170,7 @@
     "avatarUpdated": "อัปเดตรูปแล้ว",
     "stats": {
       "events": "กิจกรรมที่เข้าร่วม",
-      "pinSuccess": "จับคู่สำเร็จ",
+      "matchSuccess": "จับคู่สำเร็จ",
       "likes": "ไลก์ที่ได้รับ",
       "posts": "โพสต์ของฉัน",
       "buddies": "เพื่อนร่วม"
@@ -244,7 +281,9 @@
     }
   },
   "events": {
-    "developing": "หน้ากิจกรรมกำลังพัฒนา..."
+    "loading": "กำลังโหลดกิจกรรม...",
+    "error": "โหลดรายการกิจกรรมไม่สำเร็จ",
+    "empty": "ยังไม่มีกิจกรรม"
   },
   "explore": {
     "developing": "หน้าสำรวจกำลังพัฒนา..."
@@ -252,10 +291,17 @@
   "chat": {
     "name": "SYNC AI Assistant",
     "status": "กำลังจับคู่ให้คุณ...",
-    "welcome": "เฮ้! ได้ยินว่าอยากไป S2O สุดสัปดาห์นี้? ให้ช่วยหาเพื่อนซื้อตั๋วหรือโต๊ะ VIP ไหม?",
+    "welcome": "เฮ้! อยากไปเทศกาลไหน? ให้ช่วยหาเพื่อนร่วมทางหรือแนะนำกิจกรรมไหม?",
     "placeholder": "บอกว่าอยากไปปาร์ตี้ไหน..."
   },
   "eventDetail": {
+    "loading": "กำลังโหลด...",
+    "notFound": "ไม่พบกิจกรรม",
+    "loadError": "โหลดข้อมูลกิจกรรมไม่สำเร็จ",
+    "emptyPosts": "ยังไม่มีโพสต์หาทีม — มาโพสต์แรกกัน",
+    "postStatus": {
+      "recruiting": "กำลังรับสมัคร"
+    },
     "ai": {
       "title": "บอกความต้องการของคุณ — AI จับคู่แม่นยำ",
       "placeholder": "บอกความต้องการของคุณ..."
@@ -277,7 +323,8 @@
       "uploadedImageAlt": "รูปที่อัปโหลด",
       "viewImage": "ดูรูปเต็ม",
       "removeImage": "ลบรูป",
-      "imageTooLarge": "รูปใหญ่เกินไป กรุณาบีบอัดให้ต่ำกว่า 10MB"
+      "imageTooLarge": "รูปใหญ่เกินไป กรุณาบีบอัดให้ต่ำกว่า 10MB",
+      "postCreated": "โพสต์หาเพื่อนร่วมทางถูกเผยแพร่แล้ว"
     }
   }
 }

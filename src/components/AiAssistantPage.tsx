@@ -7,18 +7,26 @@ import { Button, Input, cn } from "./ui";
 import { ImagePlusIcon, SendIcon, SparklesIcon, XIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import Taro, { useDidShow } from "@tarojs/taro";
+import { useQueryClient } from "@tanstack/react-query";
 import type { ChatUiMessage } from "../types/aiChat";
 import { useAiChatStream } from "../hooks/useAiChatStream";
+import { invalidatePostQueries } from "../hooks/useSyncApi";
 import { ChatImageTooLargeError, pickAndCompressChatImage } from "../utils/chatImage";
 import { useNavigationStore } from "../stores";
 
 const quickReplyKeys = [`findBuddy`, `nearEvents`] as const;
 
-function AiAssistantChat({ initialMessage, onInitialMessageSent }: {
+function AiAssistantChat({
+  initialMessage,
+  activityLegacyId,
+  onInitialMessageSent,
+}: {
   initialMessage?: string | null;
+  activityLegacyId?: number;
   onInitialMessageSent?: () => void;
 }) {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const [input, setInput] = useState(``);
   const [pendingImage, setPendingImage] = useState<string | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
@@ -38,6 +46,20 @@ function AiAssistantChat({ initialMessage, onInitialMessageSent }: {
     welcomeText: t(`aiAssistant.chat.welcome`),
     mockReply,
     streamErrorText: t(`aiAssistant.chat.streamError`),
+    activityLegacyId,
+    onPostCreated: async (event) => {
+      await invalidatePostQueries(queryClient);
+      const scopedId = event.activityLegacyId ?? activityLegacyId;
+      if (scopedId != null) {
+        await queryClient.invalidateQueries({
+          queryKey: ["posts", "activity", scopedId],
+        });
+      }
+      void Taro.showToast({
+        title: t("aiAssistant.chat.postCreated"),
+        icon: "success",
+      });
+    },
   });
 
   useEffect(() => {
@@ -244,12 +266,16 @@ function AiAssistantChat({ initialMessage, onInitialMessageSent }: {
 const AiAssistantPage: FC = () => {
   const { t } = useTranslation();
   const [pendingInitialMessage, setPendingInitialMessage] = useState<string | null>(null);
+  const [activityLegacyId, setActivityLegacyId] = useState<number | undefined>(undefined);
   const consumeAiAssistantIntent = useNavigationStore((state) => state.consumeAiAssistantIntent);
 
   const applyAiAssistantIntent = useCallback(() => {
     const intent = consumeAiAssistantIntent();
     if (intent?.initialMessage?.trim()) {
       setPendingInitialMessage(intent.initialMessage.trim());
+    }
+    if (intent?.activityLegacyId != null && !Number.isNaN(intent.activityLegacyId)) {
+      setActivityLegacyId(intent.activityLegacyId);
     }
   }, [consumeAiAssistantIntent]);
 
@@ -265,6 +291,7 @@ const AiAssistantPage: FC = () => {
         <div className="s-ai-assistant__panel">
           <AiAssistantChat
             initialMessage={pendingInitialMessage}
+            activityLegacyId={activityLegacyId}
             onInitialMessageSent={() => setPendingInitialMessage(null)}
           />
         </div>

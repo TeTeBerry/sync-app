@@ -1,4 +1,13 @@
-import type { BackendActivity } from "../types/backend";
+import type { FeaturedEvent } from "../pages/index/homeData";
+import type { BackendActivity, HomeSummary } from "../types/backend";
+
+type SignupEvent = HomeSummary["signupEvents"][number];
+
+const FEATURED_GUEST_AVATARS = [
+  "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&q=80&fit=crop&crop=face",
+  "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&q=80&fit=crop&crop=face",
+  "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80&q=80&fit=crop&crop=face",
+];
 
 export interface EventCardUi {
   id: string;
@@ -8,7 +17,6 @@ export interface EventCardUi {
   distance: string;
   image: string;
   attendees: number;
-  pinCount: number;
   category: string;
   hot: boolean;
   going: boolean;
@@ -16,37 +24,43 @@ export interface EventCardUi {
 
 const ACTIVITY_EVENT_PRESETS: Record<
   string,
-  Pick<EventCardUi, "date" | "location" | "distance" | "image" | "category" | "hot" | "attendees" | "pinCount">
+  Pick<EventCardUi, "date" | "location" | "distance" | "image" | "category" | "hot" | "attendees">
 > = {
-  s2o: {
-    date: "06/28–29 14:00",
-    location: "三亚海棠湾",
-    distance: "2.5 km",
-    image: "https://images.unsplash.com/photo-1540039155732-d674d4e3f421?w=400&q=80",
+  tomorrowland: {
+    date: "06/18–19 22:00",
+    location: "CLUB SPACE · 上海",
+    distance: "5.0 km",
+    image: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=400&q=80",
     category: "户外电音",
     hot: true,
     attendees: 238,
-    pinCount: 12,
   },
   edc: {
-    date: "07/12–13 16:00",
+    date: "05/26–28 16:00",
     location: "苏州阳澄湖",
     distance: "15 km",
-    image: "https://images.unsplash.com/photo-1470229722913-7c090be5c520?w=400&q=80",
+    image: "https://image.electricdaisycarnival.cn/sites/7/2024/12/edccn_2025_mk_an_fest_site_mh_1534x1360_r01.jpg",
     category: "EDM节",
     hot: true,
     attendees: 512,
-    pinCount: 35,
   },
   ultra: {
     date: "08/02–03 14:00",
-    location: "上海世博公园",
+    location: "成都",
     distance: "8.3 km",
-    image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&q=80",
+    image: "https://xqimg.imedao.com/195407c76ec3d53a3fe41eda.jpeg",
     category: "大型节日",
     hot: false,
     attendees: 320,
-    pinCount: 27,
+  },
+  "vac-zhuhai": {
+    date: "04/18–19 20:00",
+    location: "珠海",
+    distance: "120 km",
+    image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&q=80",
+    category: "室内电音",
+    hot: false,
+    attendees: 96,
   },
 };
 
@@ -75,9 +89,43 @@ export function mapActivitiesToEvents(activities: BackendActivity[]): EventCardU
       image: activity.image ?? preset.image,
       hot: activity.hot ?? preset.hot,
       attendees: activity.attendees ?? preset.attendees,
-      pinCount: activity.pinCount ?? preset.pinCount,
       distance: preset.distance,
       category: preset.category,
     };
   });
+}
+
+export function mapSignupEventToFeaturedEvent(item: SignupEvent): FeaturedEvent {
+  return {
+    id: item.id,
+    title: item.title,
+    date: item.date,
+    venue: item.location,
+    distance: item.hot ? "热门" : item.category,
+    price: `${item.attendees}+`,
+    remaining: "",
+    guests: FEATURED_GUEST_AVATARS,
+    image: item.image || undefined,
+  };
+}
+
+export function mapBackendActivityToFeaturedEvent(activity: BackendActivity): FeaturedEvent {
+  return mapSignupEventToFeaturedEvent({
+    id: activity.legacyId,
+    title: activity.name,
+    date: activity.date ?? "",
+    location: activity.location ?? "",
+    image: activity.image ?? "",
+    category: activity.hot ? "户外电音" : "EDM节",
+    hot: Boolean(activity.hot),
+    attendees: activity.attendees ?? 0,
+    going: false,
+  });
+}
+
+/** 首页精选：优先 hot，最多 2 条 */
+export function pickHomeFeaturedEvents(signupEvents: SignupEvent[]): FeaturedEvent[] {
+  const hot = signupEvents.filter((item) => item.hot);
+  const rest = signupEvents.filter((item) => !item.hot);
+  return [...hot, ...rest].slice(0, 2).map(mapSignupEventToFeaturedEvent);
 }

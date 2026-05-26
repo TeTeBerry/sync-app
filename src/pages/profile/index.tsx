@@ -22,11 +22,13 @@ import { persistUserName } from "../../utils/session";
 import { useNavigationStore, useProfilePageStore } from "../../stores";
 import {
   deletePostAndInvalidate,
+  updatePostAndInvalidate,
   useProfileActivitiesQuery,
   useProfilePostsQuery,
   useProfileSummaryQuery,
 } from "../../hooks/useSyncApi";
 import { isApiEnabled } from "../../constants/api";
+import { promptText } from "../../utils/promptText";
 
 const STORAGE_KEYS = {
   notifications: "profile.notificationsEnabled",
@@ -77,6 +79,9 @@ const Profile: React.FC = () => {
     setNotificationsEnabled(readStorage(STORAGE_KEYS.notifications, true));
     setPrivacyLevel(readStorage<string>(STORAGE_KEYS.privacy, "public"));
     applyRouteParams();
+    if (apiEnabled) {
+      void queryClient.invalidateQueries({ queryKey: ["profile"] });
+    }
   });
 
   useEffect(() => {
@@ -90,6 +95,41 @@ const Profile: React.FC = () => {
   const handlePostAction = useCallback((action: string, item: ProfilePostItem) => {
     void Taro.showToast({ title: `${action}: ${item.title}`, icon: "none" });
   }, []);
+
+  const handleCompletePost = useCallback(
+    (item: ProfilePostItem) => {
+      if (!apiEnabled) {
+        handlePostAction(t("profile.myPosts.complete"), item);
+        return;
+      }
+      void Taro.showModal({
+        title: t("profile.myPosts.complete"),
+        content: "确认将该帖子标记为已成团？",
+        success: (res) => {
+          if (!res.confirm) return;
+          void updatePostAndInvalidate(queryClient, item.id, { status: "completed" })
+            .then(() => void Taro.showToast({ title: "已更新", icon: "success" }))
+            .catch(() => void Taro.showToast({ title: "更新失败", icon: "none" }));
+        },
+      });
+    },
+    [apiEnabled, handlePostAction, queryClient, t],
+  );
+
+  const handleEditPost = useCallback(
+    (item: ProfilePostItem) => {
+      if (!apiEnabled) {
+        handlePostAction(t("profile.myPosts.edit"), item);
+        return;
+      }
+      const body = promptText("编辑帖子内容", item.content);
+      if (!body) return;
+      void updatePostAndInvalidate(queryClient, item.id, { body })
+        .then(() => void Taro.showToast({ title: "已保存", icon: "success" }))
+        .catch(() => void Taro.showToast({ title: "保存失败", icon: "none" }));
+    },
+    [apiEnabled, handlePostAction, queryClient, t],
+  );
 
   const handleDeletePost = useCallback(
     (item: ProfilePostItem) => {
@@ -173,8 +213,8 @@ const Profile: React.FC = () => {
               <span className="s-profile__stat-label">{t("profile.stats.events")}</span>
             </div>
             <div className="s-profile__stat">
-              <span className="s-profile__stat-value">{profileUserData.stats.pinSuccess}</span>
-              <span className="s-profile__stat-label">{t("profile.stats.pinSuccess")}</span>
+              <span className="s-profile__stat-value">{profileUserData.stats.matchSuccess}</span>
+              <span className="s-profile__stat-label">{t("profile.stats.matchSuccess")}</span>
             </div>
             <div className="s-profile__stat">
               <span className="s-profile__stat-value">{profileUserData.stats.likes}</span>
@@ -191,8 +231,8 @@ const Profile: React.FC = () => {
           <ProfileActivitiesSection items={activities} />
           <ProfilePostsSection
             items={posts}
-            onComplete={(item) => handlePostAction(t("profile.myPosts.complete"), item)}
-            onEdit={(item) => handlePostAction(t("profile.myPosts.edit"), item)}
+            onComplete={handleCompletePost}
+            onEdit={handleEditPost}
             onDelete={handleDeletePost}
           />
         </div>
@@ -244,8 +284,8 @@ const Profile: React.FC = () => {
         open={showLogoutConfirm}
         title={t("profile.settings.logoutConfirmTitle")}
         message={t("profile.settings.logoutConfirmMessage")}
-        confirmLabel={t("profile.settings.logout")}
-        cancelLabel={t("common.cancel")}
+        confirmText={t("profile.settings.logout")}
+        cancelText={t("common.cancel")}
         onConfirm={handleLogoutConfirm}
         onCancel={handleLogoutCancel}
       />

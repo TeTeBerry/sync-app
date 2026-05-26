@@ -2,6 +2,7 @@ import Taro, { useDidShow } from "@tarojs/taro";
 import { useCallback, useState } from "react";
 import { useNavigationStore } from "../stores/navigationStore";
 import type { AiAssistantNavIntent } from "../stores/types";
+import type { NotificationMeta } from "../types/backend";
 
 export const ROUTES = {
   HOME: "/pages/index/index",
@@ -37,15 +38,66 @@ export function go(url: RoutePath | string) {
   void Taro.navigateTo({ url });
 }
 
-export function goEventDetail(eventId: number) {
-  void Taro.navigateTo({ url: `${ROUTES.EVENT_DETAIL}?id=${eventId}` });
+export function goEventDetail(eventId: number, options?: { postId?: string }) {
+  useNavigationStore.getState().setActiveActivityLegacyId(eventId);
+  const params = new URLSearchParams({ id: String(eventId) });
+  const postId = options?.postId?.trim();
+  if (postId) {
+    params.set("postId", postId);
+  }
+  void Taro.navigateTo({ url: `${ROUTES.EVENT_DETAIL}?${params.toString()}` });
 }
 
-export type GoAiAssistantOptions = Pick<AiAssistantNavIntent, "initialMessage">;
+function resolveActivityLegacyId(meta?: NotificationMeta): number | null {
+  if (meta?.activityLegacyId != null && !Number.isNaN(meta.activityLegacyId)) {
+    return meta.activityLegacyId;
+  }
+  const legacy = Number(meta?.activityId);
+  return Number.isFinite(legacy) && legacy > 0 ? legacy : null;
+}
+
+/** Navigate from notification meta; returns true when a route was opened. */
+export function navigateFromNotification(meta?: NotificationMeta): boolean {
+  if (meta?.type === "post_hidden") {
+    goProfile();
+    return true;
+  }
+
+  const legacyId = resolveActivityLegacyId(meta);
+  if (legacyId == null) {
+    return false;
+  }
+
+  if (meta?.type === "match_recommendation") {
+    goEventDetail(legacyId, meta?.postId ? { postId: meta.postId } : undefined);
+    return true;
+  }
+
+  if (meta?.type === "post_rejected") {
+    goAiAssistant({ activityLegacyId: legacyId });
+    return true;
+  }
+
+  goEventDetail(legacyId, meta?.postId ? { postId: meta.postId } : undefined);
+  return true;
+}
+
+export function goProfile() {
+  reLaunchTo(ROUTES.PROFILE);
+}
+
+export type GoAiAssistantOptions = Pick<AiAssistantNavIntent, "initialMessage" | "activityLegacyId">;
 
 export function goAiAssistant(options?: GoAiAssistantOptions) {
+  const intent: AiAssistantNavIntent = {};
   if (options?.initialMessage?.trim()) {
-    useNavigationStore.getState().setAiAssistantIntent({ initialMessage: options.initialMessage.trim() });
+    intent.initialMessage = options.initialMessage.trim();
+  }
+  if (options?.activityLegacyId != null && !Number.isNaN(options.activityLegacyId)) {
+    intent.activityLegacyId = options.activityLegacyId;
+  }
+  if (intent.initialMessage || intent.activityLegacyId != null) {
+    useNavigationStore.getState().setAiAssistantIntent(intent);
   }
 
   void Taro.navigateTo({ url: ROUTES.AI_ASSISTANT });

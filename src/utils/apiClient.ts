@@ -68,9 +68,10 @@ export async function apiGet<T>(
 export async function apiPost<T>(
   path: string,
   body: unknown,
+  params?: Record<string, string | undefined>,
   init?: RequestInit,
 ): Promise<T> {
-  const response = await fetch(buildUrl(path), {
+  const response = await fetch(buildUrl(path, params), {
     method: "POST",
     headers: {
       Accept: "application/json",
@@ -87,9 +88,10 @@ export async function apiPost<T>(
 export async function apiPatch<T>(
   path: string,
   body: unknown,
+  params?: Record<string, string | undefined>,
   init?: RequestInit,
 ): Promise<T> {
-  const response = await fetch(buildUrl(path), {
+  const response = await fetch(buildUrl(path, params), {
     method: "PATCH",
     headers: {
       Accept: "application/json",

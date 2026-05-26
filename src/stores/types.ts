@@ -1,9 +1,6 @@
-export type ProfileTab = "participated";
-
 export type AiAssistantNavIntent = {
   initialMessage?: string;
+  activityLegacyId?: number;
 };
 
-export type ProfileNavIntent = {
-  tab?: ProfileTab;
-};
+export type ProfileNavIntent = Record<string, never>;

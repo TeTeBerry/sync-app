@@ -1,8 +1,13 @@
 import { useCallback, useMemo } from "react";
 import { useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 import {
+  addPostComment,
+  applyToPost,
+  cancelActivityRegistration,
   deletePost,
   fetchActivities,
+  fetchActivityByLegacyId,
+  fetchCurrentUser,
   fetchHomeSummary,
   fetchNotificationUnreadCount,
   fetchNotifications,
@@ -11,26 +16,35 @@ import {
   fetchProfileActivities,
   fetchProfilePosts,
   fetchProfileSummary,
+  likePost,
   markAllNotificationsRead,
   markNotificationRead,
+  registerForActivity,
+  updateCurrentUser,
+  updatePost,
 } from "../api/syncApi";
+import type { UpdateCurrentUserPayload } from "../types/backend";
 import { isApiEnabled } from "../constants/api";
-import { eventSignupItems, homeHeatStats, hotPinItems, type HotPinItem } from "../pages/index/mockData";
+import { eventSignupItems, homeHeatStats } from "../pages/index/mockData";
 import { activityPosts, type ActivityPost } from "../pages/index/homeData";
 import { getClientUserId } from "../utils/session";
-import { mapActivitiesToEvents, type EventCardUi } from "../utils/apiMappers";
-import { buildParticipatedActivities, type ProfileParticipatedItem } from "../utils/profileParticipated";
+import {
+  mapActivitiesToEvents,
+  pickHomeFeaturedEvents,
+  type EventCardUi,
+} from "../utils/apiMappers";
+import { featuredEvents, type FeaturedEvent } from "../pages/index/homeData";
+import { getActivityStatusFromActivity } from "../utils/activityStatus";
 
 const MOCK_EVENTS: EventCardUi[] = [
   {
     id: "1",
-    title: "S2O 三亚电音节",
-    date: "06/28–29 14:00",
-    location: "三亚海棠湾",
-    distance: "2.5 km",
-    image: "https://images.unsplash.com/photo-1540039155732-d674d4e3f421?w=400&q=80",
+    title: "Tomorrowland 预热派对",
+    date: "06/18–19 22:00",
+    location: "CLUB SPACE · 上海",
+    distance: "5.0 km",
+    image: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=400&q=80",
     attendees: 238,
-    pinCount: 12,
     category: "户外电音",
     hot: true,
     going: false,
@@ -41,9 +55,8 @@ const MOCK_EVENTS: EventCardUi[] = [
     date: "07/12–13 16:00",
     location: "苏州阳澄湖",
     distance: "15 km",
-    image: "https://images.unsplash.com/photo-1470229722913-7c090be5c520?w=400&q=80",
+    image: "https://image.electricdaisycarnival.cn/sites/7/2024/12/edccn_2025_mk_an_fest_site_mh_1534x1360_r01.jpg",
     attendees: 512,
-    pinCount: 35,
     category: "EDM节",
     hot: true,
     going: true,
@@ -144,29 +157,11 @@ export function useHomeSummary() {
     staleTime: 60_000,
   });
 
-  const hotPins: HotPinItem[] = enabled
-    ? (query.data?.hotPins ?? []).map((item) => ({
-        id: item.id,
-        rank: item.rank,
-        title: item.title,
-        badge: item.badge,
-        category: item.category,
-        categoryTone: item.categoryTone,
-        people: item.people,
-        pinType: item.pinType,
-        pinItemId: Number(item.pinItemId),
-      }))
-    : hotPinItems;
-
   const heat = enabled ? query.data?.heat ?? homeHeatStats : homeHeatStats;
 
   return {
-    heat: {
-      ...heat,
-      teamOrders: heat.pinOrders,
-    },
+    heat,
     signupEvents: enabled ? query.data?.signupEvents ?? [] : eventSignupItems,
-    hotPins,
     isLoading: query.isLoading,
     isError: query.isError,
     refetch: query.refetch,
@@ -174,32 +169,38 @@ export function useHomeSummary() {
   };
 }
 
-export function useProfileParticipatedItems() {
-  const activitiesQuery = useActivitiesQuery();
-  const enabled = isApiEnabled();
+function isInProgressFeaturedEvent(item: { date: string; title: string }): boolean {
+  return getActivityStatusFromActivity(item.date, item.title) === "in_progress";
+}
 
-  const items = useMemo((): ProfileParticipatedItem[] => {
-    if (!enabled) {
-      return buildParticipatedActivities();
+export function useFeaturedEvents() {
+  const { signupEvents, isLoading, usingMock } = useHomeSummary();
+
+  const items = useMemo((): FeaturedEvent[] => {
+    if (usingMock) {
+      return featuredEvents.filter(isInProgressFeaturedEvent);
     }
-    return buildParticipatedActivities(activitiesQuery.data ?? []);
-  }, [activitiesQuery.data, enabled]);
-
-  const isLoading = enabled && activitiesQuery.isLoading && !activitiesQuery.data;
-  const isError = enabled && activitiesQuery.isError;
-
-  const refetch = useCallback(async () => {
-    if (!enabled) return;
-    await activitiesQuery.refetch();
-  }, [activitiesQuery, enabled]);
+    const inProgress = signupEvents.filter(isInProgressFeaturedEvent);
+    return pickHomeFeaturedEvents(inProgress);
+  }, [signupEvents, usingMock]);
 
   return {
     items,
-    isLoading,
-    isError,
-    refetch,
-    usingMock: !enabled,
+    isLoading: !usingMock && isLoading,
+    usingMock,
   };
+}
+
+export function useActivityDetailQuery(legacyId?: number) {
+  const enabled =
+    isApiEnabled() && legacyId != null && !Number.isNaN(legacyId) && legacyId > 0;
+
+  return useQuery({
+    queryKey: ["activities", "detail", legacyId],
+    queryFn: () => fetchActivityByLegacyId(legacyId as number),
+    enabled,
+    staleTime: 60_000,
+  });
 }
 
 export function usePopularPostsQuery() {
@@ -252,6 +253,56 @@ export function useEventPostsQuery(activityLegacyId?: number) {
   });
 }
 
+export function useCurrentUserQuery() {
+  const enabled = isApiEnabled();
+
+  return useQuery({
+    queryKey: ["users", "me"],
+    queryFn: fetchCurrentUser,
+    enabled,
+    staleTime: 60_000,
+  });
+}
+
+export async function invalidateRegistrationQueries(queryClient: QueryClient) {
+  await Promise.all([
+    queryClient.invalidateQueries({ queryKey: ["profile", "activities"] }),
+    queryClient.invalidateQueries({ queryKey: ["profile", "summary"] }),
+    queryClient.invalidateQueries({ queryKey: ["users", "me"] }),
+    queryClient.invalidateQueries({ queryKey: ["home"] }),
+  ]);
+}
+
+export async function registerForActivityAndInvalidate(
+  queryClient: QueryClient,
+  legacyId: number,
+) {
+  const result = await registerForActivity(legacyId);
+  await invalidateRegistrationQueries(queryClient);
+  return result;
+}
+
+export async function cancelActivityRegistrationAndInvalidate(
+  queryClient: QueryClient,
+  legacyId: number,
+) {
+  const result = await cancelActivityRegistration(legacyId);
+  await invalidateRegistrationQueries(queryClient);
+  return result;
+}
+
+export async function updateCurrentUserAndInvalidate(
+  queryClient: QueryClient,
+  payload: UpdateCurrentUserPayload,
+) {
+  const user = await updateCurrentUser(payload);
+  await Promise.all([
+    queryClient.invalidateQueries({ queryKey: ["users", "me"] }),
+    queryClient.invalidateQueries({ queryKey: ["profile", "summary"] }),
+  ]);
+  return user;
+}
+
 export function useProfileSummaryQuery() {
   const enabled = isApiEnabled();
 
@@ -285,11 +336,49 @@ export function useProfilePostsQuery() {
   });
 }
 
-export async function deletePostAndInvalidate(queryClient: QueryClient, postId: string) {
-  await deletePost(postId);
+export async function invalidatePostQueries(queryClient: QueryClient) {
   await Promise.all([
     queryClient.invalidateQueries({ queryKey: ["posts"] }),
     queryClient.invalidateQueries({ queryKey: ["profile", "posts"] }),
     queryClient.invalidateQueries({ queryKey: ["profile", "summary"] }),
   ]);
+}
+
+export async function deletePostAndInvalidate(queryClient: QueryClient, postId: string) {
+  await deletePost(postId);
+  await invalidatePostQueries(queryClient);
+}
+
+export async function likePostAndInvalidate(queryClient: QueryClient, postId: string) {
+  await likePost(postId);
+  await Promise.all([
+    invalidatePostQueries(queryClient),
+    invalidateNotificationQueries(queryClient),
+  ]);
+}
+
+export async function commentPostAndInvalidate(
+  queryClient: QueryClient,
+  postId: string,
+  body: string,
+  parentCommentId?: string,
+) {
+  await addPostComment(postId, body, parentCommentId);
+  await Promise.all([
+    invalidatePostQueries(queryClient),
+    invalidateNotificationQueries(queryClient),
+  ]);
+}
+
+export async function applyToPostAndInvalidate(queryClient: QueryClient, postId: string) {
+  return applyToPost(postId);
+}
+
+export async function updatePostAndInvalidate(
+  queryClient: QueryClient,
+  postId: string,
+  payload: Parameters<typeof updatePost>[1],
+) {
+  await updatePost(postId, payload);
+  await invalidatePostQueries(queryClient);
 }

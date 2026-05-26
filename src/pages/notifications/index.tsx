@@ -2,7 +2,13 @@ import "./notifications.scss";
 import React, { useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useQueryClient } from "@tanstack/react-query";
-import { BellIcon } from "lucide-react";
+import {
+  BellIcon,
+  HeartIcon,
+  MessageCircleIcon,
+  SparklesIcon,
+  MegaphoneIcon,
+} from "lucide-react";
 import PageNavigation from "../../components/PageNavigation";
 import {
   markAllNotificationsAsRead,
@@ -10,89 +16,36 @@ import {
   useNotificationsQuery,
 } from "../../hooks/useSyncApi";
 import type { AppNotification } from "../../types/backend";
-import { ROUTES } from "../../utils/route";
+import {
+  formatNotificationTimeAgo,
+  resolveNotificationText,
+  type NotificationCategory,
+} from "../../utils/notificationDisplay";
+import { navigateFromNotification, ROUTES } from "../../utils/route";
 
-function formatTimeAgo(iso: string, locale: string): string {
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return "";
+function NotificationIcon({
+  category,
+}: {
+  category: NotificationCategory;
+}) {
+  const iconProps = { size: 20 as const };
 
-  const diffMs = Date.now() - date.getTime();
-  const minutes = Math.floor(diffMs / 60_000);
-  if (minutes < 1) return locale.startsWith("zh") ? "刚刚" : locale.startsWith("th") ? "เมื่อสักครู่" : "Just now";
-  if (minutes < 60) {
-    return locale.startsWith("zh")
-      ? `${minutes} 分钟前`
-      : locale.startsWith("th")
-        ? `${minutes} นาทีที่แล้ว`
-        : `${minutes}m ago`;
-  }
-
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) {
-    return locale.startsWith("zh")
-      ? `${hours} 小时前`
-      : locale.startsWith("th")
-        ? `${hours} ชม. ที่แล้ว`
-        : `${hours}h ago`;
-  }
-
-  const days = Math.floor(hours / 24);
-  return locale.startsWith("zh")
-    ? `${days} 天前`
-    : locale.startsWith("th")
-      ? `${days} วันที่แล้ว`
-      : `${days}d ago`;
-}
-
-function notificationIcon() {
-  return BellIcon;
-}
-
-function notificationIconClass(): string {
-  return "s-notifications__icon";
-}
-
-function resolveNotificationText(
-  item: AppNotification,
-  t: (key: string, options?: Record<string, unknown>) => string,
-): { title: string; body: string } {
-  const meta = item.meta ?? {};
-  const actor = meta.actorUserName || meta.actorUserId || t("notifications.someone");
-
-  switch (item.type) {
-    case "pindan_join_leader":
-      return {
-        title: t("notifications.types.pindanJoinLeader.title"),
-        body: t("notifications.types.pindanJoinLeader.body", {
-          actor,
-          title: meta.pindanTitle ?? t("notifications.pindanFallback"),
-        }),
-      };
-    case "pindan_join_member":
-      return {
-        title: t("notifications.types.pindanJoinMember.title"),
-        body: t("notifications.types.pindanJoinMember.body", {
-          title: meta.pindanTitle ?? t("notifications.pindanFallback"),
-        }),
-      };
-    case "ticket_match":
-      return {
-        title: t("notifications.types.ticketMatch.title"),
-        body: t("notifications.types.ticketMatch.body", {
-          event: meta.displayEventName ?? meta.activityId ?? t("notifications.eventFallback"),
-          type:
-            meta.ticketType === "sell"
-              ? t("notifications.ticketSell")
-              : t("notifications.ticketBuy"),
-        }),
-      };
+  switch (category) {
+    case "like":
+      return <HeartIcon {...iconProps} />;
+    case "comment":
+      return <MessageCircleIcon {...iconProps} />;
+    case "match":
+      return <SparklesIcon {...iconProps} />;
+    case "system":
+      return <MegaphoneIcon {...iconProps} />;
     default:
-      return { title: item.title, body: item.body };
+      return <BellIcon {...iconProps} />;
   }
 }
 
 const NotificationsPage: React.FC = () => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { data: notifications = [], isLoading, refetch } = useNotificationsQuery();
 
@@ -111,6 +64,9 @@ const NotificationsPage: React.FC = () => {
     async (item: AppNotification) => {
       if (!item.read) {
         await markNotificationAsRead(item.id, queryClient);
+      }
+      if (!navigateFromNotification(item.meta)) {
+        return;
       }
     },
     [queryClient],
@@ -144,8 +100,7 @@ const NotificationsPage: React.FC = () => {
         ) : (
           <div className="s-notifications__list">
             {notifications.map((item) => {
-              const Icon = notificationIcon();
-              const text = resolveNotificationText(item, t);
+              const display = resolveNotificationText(item, t);
               return (
                 <button
                   key={item.id}
@@ -153,17 +108,19 @@ const NotificationsPage: React.FC = () => {
                   className={`s-notifications__item${item.read ? "" : " s-notifications__item--unread"}`}
                   onClick={() => void handleItemClick(item)}
                 >
-                  <div className={notificationIconClass()}>
-                    <Icon size={20} />
+                  <div
+                    className={`s-notifications__icon s-notifications__icon--${display.category}`}
+                  >
+                    <NotificationIcon category={display.category} />
                   </div>
                   <div className="s-notifications__content">
                     <div className="s-notifications__title-row">
-                      <span className="s-notifications__title">{text.title}</span>
+                      <span className="s-notifications__title">{display.title}</span>
                       <span className="s-notifications__time">
-                        {formatTimeAgo(item.createdAt, i18n.language)}
+                        {formatNotificationTimeAgo(item.createdAt, t)}
                       </span>
                     </div>
-                    <div className="s-notifications__body">{text.body}</div>
+                    <div className="s-notifications__body">{display.body}</div>
                   </div>
                   {!item.read && <span className="s-notifications__dot" aria-hidden />}
                 </button>

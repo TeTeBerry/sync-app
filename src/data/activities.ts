@@ -21,21 +21,14 @@ export const activities: Activity[] = [
     nameKey: `activities.edc`,
     date: `07/12-13`,
     location: `苏州阳澄湖`,
-    image: `https://images.unsplash.com/photo-1470229722913-7c090be5c520?w=200&q=80`,
-  },
-  {
-    id: 3,
-    nameKey: `activities.s2o`,
-    date: `06/28-29`,
-    location: `三亚海棠湾`,
-    image: `https://images.unsplash.com/photo-1540039155732-d674d4e3f421?w=200&q=80`,
+    image: `https://image.electricdaisycarnival.cn/sites/7/2024/12/edccn_2025_mk_an_fest_site_mh_1534x1360_r01.jpg`,
   },
   {
     id: 4,
     nameKey: `activities.ultra`,
     date: `08/01-03`,
-    location: `上海世博公园`,
-    image: `https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=200&q=80`,
+    location: `成都`,
+    image: `https://xqimg.imedao.com/195407c76ec3d53a3fe41eda.jpeg`,
   },
 ];
 

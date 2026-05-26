@@ -1,0 +1,46 @@
+.s-activity-status {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 11px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  line-height: 1.2;
+  font-weight: 800;
+}
+
+.s-activity-status--not-started {
+  background: rgba(255, 255, 255, 0.08);
+  color: #c7c7cc;
+}
+
+.s-activity-status--in-progress {
+  background: rgba(136, 17, 51, 0.75);
+  color: var(--primary);
+}
+
+.s-activity-status--ended {
+  background: rgba(255, 255, 255, 0.06);
+  color: #636366;
+}
+
+.s-activity-card--ended {
+  opacity: 0.62;
+
+  .s-event-card__img,
+  .s-home-event__media,
+  .s-home-event__media img {
+    filter: grayscale(1);
+  }
+
+  .s-event-card__title,
+  .s-home-event__main h2,
+  .s-event-detail__head-main h1 {
+    color: #8e8e93;
+  }
+
+  .s-event-card__btn,
+  .s-home-event__join {
+    opacity: 0.7;
+  }
+}

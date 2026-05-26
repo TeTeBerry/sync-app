@@ -21,10 +21,6 @@
       "src": "src/pages/AIChat.tsx"
     },
     {
-      "path": "/pindan",
-      "src": "src/pages/PinDan.tsx"
-    },
-    {
       "path": "/aimatch",
       "src": "src/pages/AIMatch.tsx"
     }

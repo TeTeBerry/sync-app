@@ -1,10 +1,14 @@
 import "./settings.scss";
 import Taro, { useRouter } from "@tarojs/taro";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { CheckIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useQueryClient } from "@tanstack/react-query";
 import PageNavigation from "../../components/PageNavigation";
 import { ROUTES } from "../../utils/route";
+import { updateCurrentUserAndInvalidate, useCurrentUserQuery } from "../../hooks/useSyncApi";
+import { saveEncryptedProfileSnapshot } from "../../utils/profileSnapshotStorage";
+import { useProfilePageStore } from "../../stores/profilePageStore";
 
 type SettingsSection = "notifications" | "privacy" | "help";
 type PrivacyLevel = "public" | "friends" | "private";
@@ -36,7 +40,12 @@ function readPrivacy(key: string, fallback: PrivacyLevel): PrivacyLevel {
 const SettingsPage: React.FC = () => {
   const { t } = useTranslation();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const section = (router.params.section ?? "notifications") as SettingsSection;
+  const { data: currentUser } = useCurrentUserQuery();
+  const setStoreNotificationsEnabled = useProfilePageStore(
+    (state) => state.setNotificationsEnabled,
+  );
 
   const [notificationsEnabled, setNotificationsEnabled] = useState(() =>
     readBool(STORAGE_KEYS.notifications, true),
@@ -45,15 +54,44 @@ const SettingsPage: React.FC = () => {
     readPrivacy(STORAGE_KEYS.privacy, "public"),
   );
 
+  useEffect(() => {
+    if (currentUser?.notificationsEnabled == null) return;
+    setNotificationsEnabled(currentUser.notificationsEnabled);
+    setStoreNotificationsEnabled(currentUser.notificationsEnabled);
+    Taro.setStorageSync(STORAGE_KEYS.notifications, currentUser.notificationsEnabled);
+  }, [currentUser?.notificationsEnabled, setStoreNotificationsEnabled]);
+
   const titleKey = `profile.settings.${section}Title` as const;
 
   const toggleNotifications = useCallback(() => {
     setNotificationsEnabled((prev) => {
       const next = !prev;
       Taro.setStorageSync(STORAGE_KEYS.notifications, next);
+      setStoreNotificationsEnabled(next);
+
+      void updateCurrentUserAndInvalidate(queryClient, {
+        notificationsEnabled: next,
+      }).catch(() => undefined);
+
+      void saveEncryptedProfileSnapshot({
+        notificationsEnabled: next,
+        city: currentUser?.city,
+        favorGenres: currentUser?.favorGenres,
+        likeMate: currentUser?.likeMate,
+        budgetLevel: currentUser?.budgetLevel,
+      });
+
       return next;
     });
-  }, []);
+  }, [
+    currentUser?.budgetLevel,
+    currentUser?.city,
+    currentUser?.favorGenres,
+    currentUser?.likeMate,
+    queryClient,
+    setStoreNotificationsEnabled,
+    t,
+  ]);
 
   const selectPrivacy = useCallback((level: PrivacyLevel) => {
     setPrivacyLevel(level);

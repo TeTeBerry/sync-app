@@ -2,6 +2,12 @@
 
 原 Vite 多端移动 UI 已迁移至 **Taro 4 + React**。样式使用 **`sass`**：全局设计令牌与工具类在 `src/styles/`，页面/组件旁的 **局部 `.scss`** 通过 `import "./xxx.scss"` 引入（H5 与小程序共用语义化 class，多端表现以各端运行时能力为准）。
 
+## 相关文档
+
+- API 契约：`docs/API.md`
+- 改造清单：`docs/FRONTEND-REFACTOR-CHECKLIST.md`
+- 后端架构：`../sync-app-backend/docs/ARCHITECTURE.md`
+
 ## 命令
 
 ```bash

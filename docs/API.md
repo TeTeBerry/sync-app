@@ -1,116 +1,211 @@
-# Sync App — API（AI 对话 SSE）
+# Sync App — API 契约（H5 先行）
 
-## POST `/api/ai/chat`
+> **开发策略**：先 H5 业务联调，**登录后置**；微信登录更晚。  
+> **当前身份**：Query `userId` / `authorName`（demo，与现后端一致）。  
+> **登录之后**：`POST /auth/dev` → `Authorization: Bearer`；再之后 `/auth/wechat`。  
+> 清单：`docs/FRONTEND-REFACTOR-CHECKLIST.md` / 后端 `docs/BACKEND-REFACTOR-CHECKLIST.md`  
+> 架构：`../sync-app-backend/docs/ARCHITECTURE.md`
 
-流式 AI 对话。客户端使用 **`fetch` + `response.body`（ReadableStream）** 读取 SSE，按 token 增量渲染打字机效果。
+---
 
-### Request
+## 当前期（无登录）
+
+个人页、删帖等继续传 Query：
 
 ```http
-POST /api/ai/chat
-Content-Type: application/json
-Accept: text/event-stream
-Authorization: Bearer <token>   # 可选
+GET /api/profile?userId=...&authorName=Zara
+DELETE /api/posts/:id?userId=...&authorName=Zara
+POST /api/posts?userId=...&authorName=Zara
 ```
+
+前端：`syncApi.ts` 中 `ownerParams()`。  
+AI 聊天 body 仍可带 `userId` / `userName` / `userPhone` / `activityLegacyId`。
+
+---
+
+## 环境变量（H5）
+
+```env
+TARO_APP_API_BASE_URL=/api
+TARO_APP_AI_CHAT_URL=/api/ai/chat
+```
+
+H5 devServer 将 `/api` 代理到 `http://localhost:3000/api`。  
+未配置 `TARO_APP_API_BASE_URL` 时前端走 mock，不请求后端。
+
+---
+
+## 鉴权（登录之后做，规划中）
+
+### POST `/api/auth/dev`（H5 开发，规划中）
 
 ```json
-{
-  "messages": [
-    { "role": "assistant", "content": "欢迎语…" },
-    { "role": "user", "content": "查 EDC 门票" }
-  ],
-  "sessionId": "optional-session-id",
-  "userId": "optional-user-id"
-}
+{ "displayName": "Zara" }
 ```
-
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| `messages` | `{ role, content }[]` | `role`: `user` \| `assistant` \| `system` |
-
-### Response
-
-`Content-Type: text/event-stream`，每条事件一行 `data:`：
-
-```
-data: {"type":"delta","content":"正在"}
-data: {"type":"delta","content":"为你搜索"}
-data: {"type":"done","messageId":"msg_abc"}
-```
-
-| `type` | 字段 | 说明 |
-|--------|------|------|
-| `delta` | `content: string` | 增量文本，前端 append |
-| `done` | `messageId?: string`, `sessionId?: string`, `ticketId?: string` | 流结束 |
-| `error` | `message: string` | 错误，前端展示并停止 |
-
-### GET `/api/chat/sessions/:sessionId`
-
-按 `sessionId` 读取 MongoDB 中的完整对话历史，进入 AI 页时用于恢复 UI。
 
 ```json
 {
   "code": 200,
   "data": {
-    "sessionId": "1730-abc",
-    "history": [
-      { "role": "user", "content": "想出一票 EDC" },
-      { "role": "assistant", "content": "好的，请补充…" }
-    ]
+    "accessToken": "eyJ...",
+    "user": { "id": "...", "name": "Zara Chen", "handle": "@zara" }
   }
 }
 ```
 
-服务端在 `POST /api/ai/chat` 时会：
+- 仅开发环境或 `AUTH_MODE=dev` 开启  
+- 生产不可用；微信上线后由 `/auth/wechat` 替代
 
-1. 将 MongoDB **完整历史**与本次请求 `messages` 合并
-2. **仅取最近 6 轮**（1 轮 = 用户消息 + 助手回复）传给通义千问
-3. 规则引擎 / 结构化回复仍可使用更长上下文
-4. 回复完成后将 **完整对话**（含本轮助手回复）写回 MongoDB
+### POST `/api/auth/wechat`（小程序，后置）
 
-前端进入 AI 页时通过 `GET /api/chat/sessions/:sessionId` 拉取**全部**历史渲染；发送时提交**全部**历史（不含 UI 欢迎语）。
+```json
+{ "code": "<wx.login code>" }
+```
+
+响应格式与 `/auth/dev` 相同。
+
+### 请求头
+
+```http
+Authorization: Bearer <token>
+X-Activity-Id: 2          # 可选，活动 legacyId（AI 聊天已发送；后端 middleware 登录期启用）
+```
+
+---
+
+## 响应格式（REST）
+
+```json
+{ "code": 200, "message": "ok", "data": { ... } }
+```
+
+---
+
+## AI 流式对话
+
+### POST `/api/ai/chat`
+
+```http
+POST /api/ai/chat
+Content-Type: application/json
+Accept: text/event-stream
+X-Activity-Id: 2
+```
+
+```json
+{
+  "messages": [
+    { "role": "user", "content": "帮我组队 EDC" }
+  ],
+  "sessionId": "optional",
+  "userId": "demo-zara",
+  "userName": "Zara Chen",
+  "activityLegacyId": 2,
+  "image": "data:image/jpeg;base64,..."
+}
+```
+
+SSE 事件类型：
+
+```
+data: {"type":"delta","content":"..."}
+data: {"type":"post_created","postId":"...","activityLegacyId":2}
+data: {"type":"done","messageId":"...","sessionId":"..."}
+data: {"type":"error","message":"..."}
+```
+
+- `post_created`：AI 闭环发帖成功，前端应刷新帖列表并 toast
+- 审核拒绝：`delta` 文案（含「组队帖暂未发布」），**不**发 `post_created`
+- `error`：请求失败或流异常
+
+### GET `/api/chat/sessions/:sessionId`
+
+恢复 AI 对话历史（进入 AI 页时调用）。
+
+---
+
+## REST 接口（当前已实现）
 
 | 方法 | 路径 | 说明 |
 |------|------|------|
-| GET | `/api/chat/sessions/:sessionId` | AI 对话历史 |
-
-也支持 `data: [DONE]` 或纯文本 `data: 片段` 作为 delta。
-
-## 前端接入
-
-环境变量（`.env`）：
-
-```
-TARO_APP_API_BASE_URL=http://localhost:3000/api
-TARO_APP_AI_CHAT_URL=http://localhost:3000/api/ai/chat
-```
-
-H5 开发态也可只配 `TARO_APP_API_BASE_URL=/api`，由 `config/index.ts` devServer 代理到 `localhost:3000`。
-
-### REST（响应格式 `{ code, message, data }`）
-
-| 方法 | 路径 | 说明 |
-|------|------|------|
+| GET | `/api/home` | 首页聚合（热度、报名活动列表；热度优先 Redis，Mongo 兜底） |
 | GET | `/api/activities` | 活动列表 |
-| GET | `/api/activities/match?keyword=edc` | 活动匹配 |
-| GET | `/api/tickets?activityId=&type=` | 门票挂单 |
-| POST | `/api/tickets` | 创建门票挂单 |
-| GET | `/api/home` | 首页聚合（热度条 / 活动报名 / 热拼排行 / 票区） |
-| GET | `/api/activities/:legacyId` | 按前端 activityId 查活动 |
-| GET | `/api/pindan?activityId=&type=&keyword=` | 拼单列表（type: package/hotel/transport） |
-| POST | `/api/pindan` | 创建拼单 |
-| POST | `/api/pindan/:legacyId/join` | 加入拼单（body: `{ userId? }`，返回 ProfilePinDanItem） |
-| DELETE | `/api/pindan/:legacyId/join?userId=` | 退出拼单 |
-| GET | `/api/profile/pindan?userId=` | 我的拼单列表 |
-| GET | `/api/profile?userId=&authorName=` | 个人资料与统计 |
-| GET | `/api/profile/activities?userId=&authorName=` | 我的活动报名 |
-| GET | `/api/profile/posts?userId=&authorName=` | 我的帖子 |
-| GET | `/api/posts/popular?limit=` | 首页热门帖子流 |
-| GET | `/api/posts?activityLegacyId=` | 活动详情页组队帖 |
-| DELETE | `/api/posts/:id?userId=&authorName=` | 删除自己的帖子 |
+| GET | `/api/activities/match?keyword=` | 活动关键词匹配 |
+| GET | `/api/activities/:legacyId` | 活动详情 |
+| GET | `/api/posts/popular?limit=` | 首页热门帖子 |
+| GET | `/api/posts?activityLegacyId=` | 活动下组队帖 |
+| GET | `/api/posts?userId=&authorName=` | 我的帖子（owner 过滤） |
+| POST | `/api/posts` | 创建组队帖（Query 身份；**前端 UI 不调用**，由 AI 闭环创建） |
+| PATCH | `/api/posts/:id` | 编辑帖子 / 更新 status |
+| DELETE | `/api/posts/:id` | 删除自己的帖子 |
+| POST | `/api/posts/:id/like` | 点赞 |
+| POST | `/api/posts/:id/comments` | 发表评论 `{ "body": "..." }` |
+| POST | `/api/posts/:id/applications` | 申请加入 |
+| GET | `/api/profile` | 个人资料摘要 |
+| GET | `/api/profile/activities` | 我的报名活动 |
+| GET | `/api/profile/posts` | 我的帖子 |
+| GET/PATCH | `/api/users/me` | 当前用户资料（Query 身份） |
+| POST/DELETE | `/api/activities/:legacyId/register` | 活动报名 / 取消 |
+| GET | `/api/notifications` | 通知列表 |
+| GET | `/api/notifications/unread-count` | 未读数 |
+| PATCH | `/api/notifications/:id/read` | 单条已读 |
+| PATCH | `/api/notifications/read-all` | 全部已读 |
 
-### SSE 对话
+通知 `meta`（深链，可选）：
 
-- 实现：`src/utils/aiChatStream.ts`、`src/hooks/useAiChatStream.ts`
-- 业务数据：`src/api/syncApi.ts`、`src/hooks/useSyncApi.ts`
-- 未配置 `TARO_APP_API_BASE_URL` 时使用 mock 数据（开发态）
+```json
+{
+  "activityLegacyId": 2,
+  "postId": "665a…",
+  "type": "like",
+  "actorUserId": "demo-zara",
+  "actorUserName": "Zara Chen"
+}
+```
+
+- `type`：`like` | `comment` | `application` | `activity`（客户端跳转活动详情；有 `postId` 时高亮对应帖子）
+- `activityLegacyId`：优先于已废弃的字符串 `activityId`
+
+---
+
+## REST 接口（登录期规划，未实现）
+
+| 方法 | 路径 | 模块 |
+|------|------|------|
+| POST | `/api/auth/dev` | Auth |
+| POST | `/api/auth/logout` | Auth |
+
+### `GET/PATCH /api/users/me`
+
+Query：`userId`、`authorName`（与 `/profile` 相同）。
+
+GET 响应 `data`：`{ id, name, handle, location, bio, avatar, city?, favorGenres?, budgetLevel?, likeMate? }`
+
+PATCH body（均可选）：`name`, `handle`, `location`, `bio`, `avatar`, `city`, `favorGenres`, `budgetLevel`, `likeMate`
+
+### `POST/DELETE /api/activities/:legacyId/register`
+
+Query：`userId`、`authorName`。
+
+POST 响应 `data`：`{ ok: true, activityLegacyId, status: "registered", alreadyRegistered?: boolean }`
+
+DELETE 响应 `data`：`{ ok: true, activityLegacyId, wasRegistered?: boolean }`
+
+---
+
+## 前端实现位置
+
+| 能力 | 路径 |
+|------|------|
+| REST | `src/api/syncApi.ts`、`src/hooks/useSyncApi.ts` |
+| SSE | `src/utils/aiChatStream.ts`、`src/hooks/useAiChatStream.ts` |
+| 身份（当前 demo） | `src/utils/session.ts` |
+| 身份（规划） | `src/utils/auth.ts` |
+| 活动上下文 | `src/stores/navigationStore.ts`（`activeActivityLegacyId`） |
+
+---
+
+## 已移除（勿再文档化）
+
+- `/api/tickets`、`/api/pindan` 及相关 profile 拼单接口（已从后端删除）
+- 探索 Tab 底栏入口（页面保留，未上线）

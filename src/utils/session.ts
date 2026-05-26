@@ -31,12 +31,12 @@ export function getOrCreateSessionId(): string {
   return id;
 }
 
-/** 客户端用户标识，用于拼单加入/退出等接口 */
+/** 客户端用户标识 */
 export function getClientUserId(): string {
   return getOrCreateSessionId();
 }
 
-/** 客户端展示名称，用于门票挂单等列表展示 */
+/** 客户端展示名称 */
 export function getClientUserName(): string {
   if (typeof localStorage === "undefined") {
     return DEFAULT_USER_NAME;

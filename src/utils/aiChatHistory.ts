@@ -22,8 +22,6 @@ export function mapHistoryToUiMessages(
       text: message.content,
       imagePreview: message.imageContext?.source,
       ocrText: message.imageContext?.ocrText,
-      pindanCard: message.pindanCard,
-      ticketCard: message.ticketCard,
     }));
 }
 

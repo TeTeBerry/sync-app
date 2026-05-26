@@ -4,6 +4,13 @@ import { useTranslation } from "react-i18next";
 import AvatarGroup from "./AvatarGroup";
 import { Button } from "./ui";
 import { MapPinIcon } from "lucide-react";
+import {
+  activityStatusBadgeClass,
+  activityStatusCardClass,
+  activityStatusI18nKey,
+  getActivityStatusFromActivity,
+  shouldShowActivityStatusBadge,
+} from "../utils/activityStatus";
 
 interface EventCardProps {
   title?: string;
@@ -23,16 +30,27 @@ const EventCard: React.FC<EventCardProps> = ({
   attendees = 70,
 }) => {
   const { t } = useTranslation();
+  const status = getActivityStatusFromActivity(date, title);
 
   return (
-    <div data-cmp="EventCard" className="s-event-card">
+    <div
+      data-cmp="EventCard"
+      className={["s-event-card", activityStatusCardClass(status)].filter(Boolean).join(" ")}
+    >
       <div className="s-event-card__blob" />
 
       <img src={image} alt={title} className="s-event-card__img" />
 
       <div className="s-event-card__body">
         <div>
-          <h3 className="s-event-card__title">{title}</h3>
+          <div className="s-event-card__title-row">
+            <h3 className="s-event-card__title">{title}</h3>
+            {shouldShowActivityStatusBadge(status) ? (
+              <span className={activityStatusBadgeClass(status)}>
+                {t(activityStatusI18nKey(status))}
+              </span>
+            ) : null}
+          </div>
           <p className="s-event-card__date s-line-clamp-1">{date}</p>
           <div className="s-event-card__row">
             <MapPinIcon size={12} className="s-event-card__row-icon" />

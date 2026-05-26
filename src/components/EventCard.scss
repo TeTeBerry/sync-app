@@ -52,11 +52,21 @@
   z-index: 1;
 }
 
+.s-event-card__title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
 .s-event-card__title {
+  flex: 1;
+  min-width: 0;
   font-size: 20px;
   font-weight: 700;
   line-height: 1.2;
-  margin-bottom: 4px;
+  margin: 0;
   color: #fff;
 }
 

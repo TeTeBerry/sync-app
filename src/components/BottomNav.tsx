@@ -2,7 +2,6 @@ import "./BottomNav.scss";
 import React from "react";
 import {
   CalendarDaysIcon,
-  GlobeIcon,
   HomeIcon,
   UserIcon,
 } from "lucide-react";
@@ -16,7 +15,6 @@ const BottomNav: React.FC = () => {
   const navItems = [
     { path: ROUTES.HOME, icon: HomeIcon, labelKey: "nav.home" },
     { path: ROUTES.EVENTS, icon: CalendarDaysIcon, labelKey: "nav.events" },
-    { path: ROUTES.EXPLORE, icon: GlobeIcon, labelKey: "nav.explore" },
     { path: ROUTES.PROFILE, icon: UserIcon, labelKey: "nav.profile" },
   ] as const;
 

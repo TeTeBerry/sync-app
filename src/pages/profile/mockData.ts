@@ -26,9 +26,9 @@ export const profileUser = {
   avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80",
   stats: {
     events: 12,
-    pinSuccess: 8,
+    matchSuccess: 8,
     likes: 156,
-    posts: 4,
+    posts: 3,
   },
 };
 
@@ -39,7 +39,7 @@ export const profileActivities: ProfileActivityItem[] = [
     date: "2025.07.18-19",
     location: "苏州市阳澄湖",
     price: 580,
-    image: "https://images.unsplash.com/photo-1470229722913-7c090be5c520?w=200&q=80",
+    image: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=200&q=80",
     status: "registered",
   },
   {
@@ -48,25 +48,16 @@ export const profileActivities: ProfileActivityItem[] = [
     date: "2025.07.12-13",
     location: "苏州 · 阳澄湖",
     price: 888,
-    image: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=200&q=80",
-    status: "registered",
-  },
-  {
-    id: "act-3",
-    title: "S2O 三亚水上电音",
-    date: "2025.06.28-29",
-    location: "三亚海棠湾",
-    price: 680,
-    image: "https://images.unsplash.com/photo-1540039155732-d674d4e3f421?w=200&q=80",
+    image: "https://image.electricdaisycarnival.cn/sites/7/2024/12/edccn_2025_mk_an_fest_site_mh_1534x1360_r01.jpg",
     status: "registered",
   },
   {
     id: "act-4",
-    title: "Ultra Shanghai",
+    title: "Ultra 成都",
     date: "2025.08.01-03",
-    location: "上海世博公园",
+    location: "成都",
     price: 1280,
-    image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=200&q=80",
+    image: "https://xqimg.imedao.com/195407c76ec3d53a3fe41eda.jpeg",
     status: "registered",
   },
 ];
@@ -81,15 +72,6 @@ export const profilePosts: ProfilePostItem[] = [
     likes: 24,
     comments: 8,
     date: "2025-06-20",
-  },
-  {
-    id: "post-2",
-    title: "S2O 水上电音节",
-    content: "成都S2O！求2个一起来的朋友，泼水节那天超爽！票我已经买好了，寻找同伴～",
-    status: "已成团",
-    likes: 12,
-    comments: 4,
-    date: "2025-05-15",
   },
   {
     id: "post-3",

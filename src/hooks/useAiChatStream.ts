@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useDidShow } from "@tarojs/taro";
 import { fetchChatSession } from "../api/syncApi";
 import { AI_CHAT_STREAM_URL } from "../constants/api";
-import type { ChatUiMessage, SendChatOptions } from "../types/aiChat";
+import type { AiChatStreamEvent, ChatUiMessage, SendChatOptions } from "../types/aiChat";
 import {
   buildApiChatHistory,
   mapHistoryToUiMessages,
@@ -33,7 +33,11 @@ export interface UseAiChatStreamOptions {
   userId?: string;
   userName?: string;
   userPhone?: string;
+  activityLegacyId?: number;
   getAuthHeaders?: () => Record<string, string>;
+  onPostCreated?: (
+    event: Extract<AiChatStreamEvent, { type: "post_created" }>,
+  ) => void;
 }
 
 export function useAiChatStream(options: UseAiChatStreamOptions) {
@@ -46,9 +50,13 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
     userId: userIdOption,
     userName: userNameOption,
     userPhone: userPhoneOption,
+    activityLegacyId,
     getAuthHeaders,
+    onPostCreated,
     typewriterCharDelayMs = 22,
   } = options;
+
+  const activityLegacyIdRef = useRef(activityLegacyId);
 
   const sessionIdRef = useRef(sessionIdOption ?? getOrCreateSessionId());
   const userIdRef = useRef(userIdOption ?? getClientUserId());
@@ -69,6 +77,10 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
   useEffect(() => {
     isStreamingRef.current = isStreaming;
   }, [isStreaming]);
+
+  useEffect(() => {
+    activityLegacyIdRef.current = activityLegacyId;
+  }, [activityLegacyId]);
 
   useEffect(() => {
     return () => abortRef.current?.abort();
@@ -168,6 +180,12 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
       });
 
       try {
+        const activityId = activityLegacyIdRef.current;
+        const activityHeaders =
+          activityId != null
+            ? { "X-Activity-Id": String(activityId) }
+            : undefined;
+
         const stream = apiUrl
           ? streamAiChatRequest({
               url: apiUrl,
@@ -176,15 +194,24 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
               userId: userIdRef.current,
               userName: userNameRef.current,
               userPhone: userPhoneRef.current,
+              activityLegacyId: activityId,
               image,
               signal: controller.signal,
-              headers: getAuthHeaders?.(),
+              headers: {
+                ...activityHeaders,
+                ...getAuthHeaders?.(),
+              },
             })
           : mockAiChatStream(mockReply(trimmed));
 
         for await (const event of stream) {
           if (event.type === "delta") {
             typewriter.append(event.content);
+            continue;
+          }
+
+          if (event.type === "post_created") {
+            onPostCreated?.(event);
             continue;
           }
 
@@ -239,6 +266,7 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
       getAuthHeaders,
       isStreaming,
       mockReply,
+      onPostCreated,
       streamErrorText,
       typewriterCharDelayMs,
       welcomeText,

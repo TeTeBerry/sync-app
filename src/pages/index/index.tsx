@@ -4,21 +4,29 @@ import { useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import BottomNav from "../../components/BottomNav";
 import {
+  commentPostAndInvalidate,
   deletePostAndInvalidate,
+  likePostAndInvalidate,
+  registerForActivityAndInvalidate,
+  useFeaturedEvents,
   useHomeSummary,
   useNotificationUnreadCount,
   usePopularPosts,
 } from "../../hooks/useSyncApi";
+import { isApiEnabled } from "../../constants/api";
+import { getActivityStatusFromActivity } from "../../utils/activityStatus";
+import { promptText } from "../../utils/promptText";
 import { go, goAiAssistant, goEventDetail, ROUTES } from "../../utils/route";
 import { HomeActivityFeed } from "./components/HomeActivityFeed";
 import { HomeCountdownCard } from "./components/HomeCountdownCard";
 import { HomeFeaturedEvents } from "./components/HomeFeaturedEvents";
 import { HomePlazaHero } from "./components/HomePlazaHero";
-import { countdownParts, featuredEvents, type ActivityPost, type FeaturedEvent } from "./homeData";
+import { type ActivityPost, type FeaturedEvent } from "./homeData";
 
 const Home = () => {
   const queryClient = useQueryClient();
   const { heat } = useHomeSummary();
+  const { items: featuredEvents } = useFeaturedEvents();
   const { data: unreadCount = 0 } = useNotificationUnreadCount();
   const { posts, refetch: refetchPosts } = usePopularPosts();
 
@@ -38,9 +46,27 @@ const Home = () => {
     goEventDetail(event.id);
   }, []);
 
-  const joinEvent = useCallback((event: FeaturedEvent) => {
-    goEventDetail(event.id);
-  }, []);
+  const joinEvent = useCallback(
+    (event: FeaturedEvent) => {
+      if (getActivityStatusFromActivity(event.date, event.title) === "ended") {
+        return;
+      }
+      if (!isApiEnabled()) {
+        goEventDetail(event.id);
+        return;
+      }
+      void registerForActivityAndInvalidate(queryClient, event.id)
+        .then((result) => {
+          const title = result.alreadyRegistered ? "已报名" : "报名成功";
+          void Taro.showToast({ title, icon: "success" });
+          goEventDetail(event.id);
+        })
+        .catch(() => {
+          void Taro.showToast({ title: "报名失败", icon: "none" });
+        });
+    },
+    [queryClient],
+  );
 
   const handleDeletePost = useCallback(
     (post: ActivityPost) => {
@@ -65,7 +91,38 @@ const Home = () => {
     [queryClient, refetchPosts],
   );
 
-  const activeTeamCount = heat.teamOrders;
+  const handleLikePost = useCallback(
+    (post: ActivityPost) => {
+      if (!isApiEnabled()) {
+        void Taro.showToast({ title: "已点赞", icon: "none" });
+        return;
+      }
+      void likePostAndInvalidate(queryClient, post.id)
+        .then(() => void refetchPosts())
+        .catch(() => void Taro.showToast({ title: "操作失败", icon: "none" }));
+    },
+    [queryClient, refetchPosts],
+  );
+
+  const handleCommentPost = useCallback(
+    (post: ActivityPost) => {
+      if (!isApiEnabled()) {
+        void Taro.showToast({ title: "请开启 API 模式", icon: "none" });
+        return;
+      }
+      const body = promptText("写评论");
+      if (!body) return;
+      void commentPostAndInvalidate(queryClient, post.id, body)
+        .then(() => {
+          void refetchPosts();
+          void Taro.showToast({ title: "评论成功", icon: "success" });
+        })
+        .catch(() => void Taro.showToast({ title: "评论失败", icon: "none" }));
+    },
+    [queryClient, refetchPosts],
+  );
+
+  const activeTeamCount = heat.people;
 
   return (
     <div data-cmp="Home" className="s-home">
@@ -76,7 +133,7 @@ const Home = () => {
           onNotificationClick={handleNotification}
         />
 
-        <HomeCountdownCard eventName="Tomorrowland China" parts={countdownParts} />
+        <HomeCountdownCard />
 
         <HomeFeaturedEvents
           items={featuredEvents}
@@ -84,10 +141,16 @@ const Home = () => {
           onJoinClick={joinEvent}
         />
 
-        <HomeActivityFeed items={posts} onSeeAll={() => go(ROUTES.EVENTS)} onDelete={handleDeletePost} />
+        <HomeActivityFeed
+          items={posts}
+          onSeeAll={() => go(ROUTES.EVENTS)}
+          onDelete={handleDeletePost}
+          onLike={handleLikePost}
+          onComment={handleCommentPost}
+        />
 
         <div className="s-home__heat" aria-label="Today heat">
-          {heat.people} 人正在发现 · {activeTeamCount} 个组队进行中
+          {activeTeamCount} 人正在发现活动
         </div>
       </main>
 

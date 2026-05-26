@@ -16,6 +16,8 @@ export type EventTeamPost = {
 export type EventDetail = {
   id: number;
   title: string;
+  date?: string;
+  location?: string;
   posts: EventTeamPost[];
 };
 
@@ -57,6 +59,18 @@ const postsByEventId: Record<number, EventTeamPost[]> = {
       avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&q=80&fit=crop&crop=face",
       status: "招募中",
     },
+    {
+      id: "maya-tmr",
+      name: "Maya",
+      location: "上海",
+      time: "1天前",
+      body: "队伍已满，感谢大家的申请！现场见～",
+      tags: ["#已满员", "#上海"],
+      likes: 8,
+      comments: 0,
+      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=120&q=80&fit=crop&crop=face",
+      status: "已成团",
+    },
   ],
   2: [
     {
@@ -93,6 +107,8 @@ export function getEventDetail(eventId: number): EventDetail | null {
   return {
     id: event.id,
     title: event.title,
+    date: event.date,
+    location: event.venue,
     posts: postsByEventId[eventId] ?? [],
   };
 }

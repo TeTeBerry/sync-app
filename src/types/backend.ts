@@ -15,90 +15,46 @@ export interface BackendActivity {
   image?: string;
   hot?: boolean;
   attendees?: number;
-  pinCount?: number;
 }
 
-export interface BackendTicket {
-  _id: string;
-  activityId?: string;
-  userId?: string;
-  userName?: string;
-  skuCode?: string;
-  status?: string;
-  seatOrSlot?: {
-    type?: "sell" | "buy";
-    quantity?: number;
-    price?: number;
-    priceMax?: number;
-    eventDate?: string;
-    contact?: string;
-    displayEventName?: string;
-  };
-  createdAt?: string;
-  updatedAt?: string;
-}
-
-export interface BackendPindanInclude {
-  kind: "hotel" | "transport";
-  title: string;
-  detail: string;
-}
-
-export interface BackendPindan {
-  _id: string;
-  legacyId?: number;
-  title: string;
-  subtitle?: string;
-  type?: "package" | "hotel" | "transport";
-  activityId?: string;
-  activityLegacyId?: number;
-  leaderUserId?: string;
-  memberUserIds?: string[];
-  status?: string;
-  image?: string;
-  price?: number;
-  originalPrice?: number;
-  budgetMin?: number;
-  budgetMax?: number;
-  budgetRangeLabel?: string;
-  date?: string;
-  location?: string;
-  joined?: number;
-  total?: number;
-  tags?: string[];
-  rating?: number;
-  includes?: BackendPindanInclude[];
-  remark?: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
-
-export interface CreateTicketPayload {
-  activityId: string;
-  quantity: number;
-  type: "sell" | "buy";
-  skuCode: string;
-  price: number;
-  priceMax?: number;
-  eventDate: string;
-  contact: string;
-  userId?: string;
-  userName?: string;
-  displayEventName?: string;
-}
-
-export interface ProfileTicketItem {
+export interface CurrentUser {
   id: string;
-  type: "sell" | "buy";
-  activityId: string;
-  displayEventName: string;
-  skuCode: string;
-  quantity: number;
-  price: number;
-  priceMax?: number;
-  eventDate: string;
-  contact: string;
-  createdAt: string;
+  name: string;
+  handle: string;
+  location: string;
+  bio: string;
+  avatar: string;
+  city?: string;
+  favorGenres?: string[];
+  budgetLevel?: string;
+  likeMate?: boolean;
+  notificationsEnabled?: boolean;
+}
+
+export interface UpdateCurrentUserPayload {
+  name?: string;
+  handle?: string;
+  location?: string;
+  bio?: string;
+  avatar?: string;
+  city?: string;
+  favorGenres?: string[];
+  budgetLevel?: string;
+  likeMate?: boolean;
+  notificationsEnabled?: boolean;
+}
+
+export interface ActivityRegistrationResult {
+  ok: true;
+  activityLegacyId: number;
+  status: "registered";
+  alreadyRegistered?: boolean;
+}
+
+export interface ActivityUnregisterResult {
+  ok: true;
+  activityLegacyId: number;
+  wasRegistered?: boolean;
 }
 
 export interface ProfileSummary {
@@ -109,7 +65,7 @@ export interface ProfileSummary {
   avatar: string;
   stats: {
     events: number;
-    pinSuccess: number;
+    matchSuccess: number;
     likes: number;
     posts: number;
   };
@@ -129,7 +85,7 @@ export interface ProfilePostItem {
   id: string;
   title: string;
   content: string;
-  status: "招募中" | "已成团";
+  status: "招募中" | "已成团" | "已隐藏";
   likes: number;
   comments: number;
   date: string;
@@ -146,7 +102,7 @@ export interface HomeFeedPost {
   time: string;
   likes: number;
   avatar: string;
-  status: "招募中" | "已成团";
+  status: "招募中" | "已成团" | "已隐藏";
 }
 
 export interface EventDetailPost {
@@ -160,13 +116,31 @@ export interface EventDetailPost {
   likes: number;
   comments: number;
   avatar: string;
-  status: "招募中" | "已成团";
+  status: "招募中" | "已成团" | "已隐藏";
+}
+
+export interface CreatePostPayload {
+  body: string;
+  activityLegacyId?: number;
+  eventTitle?: string;
+  location?: string;
+  tags?: string[];
+}
+
+export interface UpdatePostPayload {
+  body?: string;
+  eventTitle?: string;
+  status?: "recruiting" | "completed";
+}
+
+export interface PostActionResult {
+  ok: true;
+  alreadyApplied?: boolean;
 }
 
 export interface HomeSummary {
   heat: {
     people: number;
-    pinOrders: number;
     growthPercent: number;
   };
   signupEvents: Array<{
@@ -178,96 +152,37 @@ export interface HomeSummary {
     category: string;
     hot: boolean;
     attendees: number;
-    pinCount: number;
     going: boolean;
   }>;
-  hotPins: Array<{
-    id: number;
-    rank: number;
-    title: string;
-    badge: string;
-    category: string;
-    categoryTone: "primary" | "amber" | "cyan";
-    people: number;
-    pinType: "package" | "hotel" | "transport";
-    pinItemId: number;
-  }>;
-  ticketListings: Array<{
-    id: string | number;
-    type: "sell" | "buy";
-    event: string;
-    seat: string;
-    price: number;
-    originalPrice: number;
-    seller: string;
-    avatar: string;
-    tag: string;
-    tone: "primary" | "secondary" | "amber" | "cyan";
-    time: string;
-    verified: boolean;
-  }>;
 }
 
-export interface CreatePindanPayload {
-  title: string;
-  subtitle?: string;
-  type: "package" | "hotel" | "transport";
-  activityLegacyId?: number;
-  leaderUserId?: string;
-  image?: string;
-  price?: number;
-  originalPrice?: number;
-  date?: string;
-  location?: string;
-  total?: number;
-  remark?: string;
-}
+export type NotificationType = "general" | "interaction" | "system" | "match";
 
-export interface UpdatePindanPayload {
-  title?: string;
-  subtitle?: string;
-  remark?: string;
-  price?: number;
-  originalPrice?: number;
-  date?: string;
-  location?: string;
-  total?: number;
-  userId?: string;
-}
-
-export interface ProfilePinDanItem {
-  id: number;
-  activityId: number;
-  category: "package" | "hotel" | "transport";
-  title: string;
-  subtitle: string;
-  date: string;
-  location: string;
-  price: number;
-  budgetMin?: number;
-  budgetMax?: number;
-  budgetRangeLabel?: string;
-  image: string;
-  joinedAt: string;
-  isOwner?: boolean;
-  remark?: string;
-  total?: number;
-}
-
-export type NotificationType =
-  | "pindan_join_leader"
-  | "pindan_join_member"
-  | "ticket_match";
+export type NotificationInteractionType =
+  | "like"
+  | "comment"
+  | "comment_reply"
+  | "application"
+  | "activity"
+  | "activity_update"
+  | "post_rejected"
+  | "post_hidden"
+  | "match_recommendation";
 
 export interface NotificationMeta {
-  pindanLegacyId?: number;
-  ticketId?: string;
+  activityLegacyId?: number;
+  postId?: string;
+  type?: NotificationInteractionType;
+  /** @deprecated Prefer activityLegacyId (number). */
   activityId?: string;
   actorUserId?: string;
   actorUserName?: string;
-  pindanTitle?: string;
-  ticketType?: "sell" | "buy";
   displayEventName?: string;
+  templateKey?: string;
+  templateParams?: Record<string, string>;
+  matchPostIds?: string[];
+  rejectionReason?: string;
+  parentCommentId?: string;
 }
 
 export interface AppNotification {

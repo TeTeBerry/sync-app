@@ -8,7 +8,6 @@ export const AI_SHORTCUT_TAG_POOL = [
   "组队队友",
   "住宿同行",
   "拼车同行",
-  "拼套票",
 ] as const;
 
 export type AiShortcutTag = (typeof AI_SHORTCUT_TAG_POOL)[number];

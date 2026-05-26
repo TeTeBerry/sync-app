@@ -1,9 +1,4 @@
-import type {
-  AiChatMessage,
-  AiChatStreamEvent,
-  PindanJoinCard,
-  TicketCreatedCard,
-} from "../types/aiChat";
+import type { AiChatMessage, AiChatStreamEvent } from "../types/aiChat";
 
 function parseSseDataLine(line: string): AiChatStreamEvent | null {
   if (!line.startsWith("data:")) return null;
@@ -28,9 +23,16 @@ function parseSseDataLine(line: string): AiChatStreamEvent | null {
         type: "done",
         messageId: json.messageId as string | undefined,
         sessionId: json.sessionId as string | undefined,
-        ticketId: json.ticketId as string | undefined,
-        ticketCard: json.ticketCard as TicketCreatedCard | undefined,
-        pindanCard: json.pindanCard as PindanJoinCard | undefined,
+      };
+    }
+    if (json.type === "post_created" && typeof json.postId === "string") {
+      return {
+        type: "post_created",
+        postId: json.postId,
+        activityLegacyId:
+          typeof json.activityLegacyId === "number"
+            ? json.activityLegacyId
+            : undefined,
       };
     }
     if (typeof json.content === "string") {
@@ -88,12 +90,12 @@ export interface StreamAiChatOptions {
   userId?: string;
   userName?: string;
   userPhone?: string;
+  activityLegacyId?: number;
   image?: string;
   signal?: AbortSignal;
   headers?: Record<string, string>;
 }
 
-/** POST + fetch ReadableStream SSE reader (H5). */
 export async function* streamAiChatRequest(
   options: StreamAiChatOptions,
 ): AsyncGenerator<AiChatStreamEvent> {
@@ -110,6 +112,7 @@ export async function* streamAiChatRequest(
       userId: options.userId,
       userName: options.userName,
       userPhone: options.userPhone,
+      activityLegacyId: options.activityLegacyId,
       image: options.image,
     }),
     signal: options.signal,
@@ -125,7 +128,6 @@ export async function* streamAiChatRequest(
   yield* readSseBody(response.body);
 }
 
-/** Dev fallback: one delta; typewriter animation runs on the client. */
 export async function* mockAiChatStream(
   fullText: string,
 ): AsyncGenerator<AiChatStreamEvent> {

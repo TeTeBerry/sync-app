@@ -35,6 +35,11 @@
     "empty": "暂无数据",
     "retry": "重试"
   },
+  "activityStatus": {
+    "notStarted": "未开始",
+    "inProgress": "进行中",
+    "ended": "已结束"
+  },
   "language": {
     "title": "语言",
     "zh": "中文",
@@ -44,8 +49,7 @@
   "activities": {
     "tomorrowland": "Tomorrowland 预热派对",
     "edc": "EDC China 电音节",
-    "s2o": "S2O 三亚水上电音",
-    "ultra": "Ultra Shanghai"
+    "ultra": "Ultra 成都"
   },
   "home": {
     "ai": {
@@ -54,51 +58,17 @@
       "summon": "唤起",
       "placeholder": "告诉我你的需求…"
     },
-    "hot": {
-      "title": "正在热拼",
-      "live": "实时"
-    },
-    "signup": {
-      "title": "活动报名",
-      "attendees": "{{count}} 人参加",
-      "pinOrders": "{{count}} 拼单",
-      "wantGo": "我要去",
-      "going": "已报名",
-      "findBuddy": "结伴拼单"
-    },
     "heat": {
       "title": "今日热度",
-      "people": "{{count}} 人",
-      "pinOrders": "{{count}} 拼单"
-    },
-    "package": {
-      "tag": "省钱新玩法",
-      "title": "我要拼单",
-      "subtitle": "酒店·交通·套餐 人均立省50%+",
-      "hotel": "酒店拼",
-      "transport": "交通拼",
-      "combo": "套餐拼",
-      "stats": "目前 <1>{{count}}</1> 人正在参与拼单"
-    },
-    "ticket": {
-      "title": "门票市场",
-      "guarantee": "官方担保",
-      "postTitle": "发布门票",
-      "postSub": "收票 / 出票，平台安全担保",
-      "postAction": "+ 发布",
-      "escrowNote": "所有交易由平台托管，安全无忧",
-      "tabs": {
-        "all": "全部",
-        "sell": "出票",
-        "buy": "收票"
-      },
-      "buyNow": "立即购",
-      "contact": "联系他"
+      "people": "{{count}} 人"
     },
     "feed": {
       "title": "更多热门帖子"
     },
     "nearEvents": "最近活动",
+    "featured": {
+      "empty": "暂无进行中的活动"
+    },
     "fabLabel": "快速发布",
     "notificationsComingSoon": "消息通知即将上线"
   },
@@ -106,24 +76,42 @@
     "title": "消息通知",
     "markAllRead": "全部已读",
     "emptyTitle": "暂无消息",
-    "emptyDesc": "有人加入你的拼单或出现匹配票务时，会在这里通知你。",
+    "emptyDesc": "评论、点赞、活动变更和搭子推荐会在这里显示。",
     "someone": "有人",
-    "pindanFallback": "拼单",
-    "eventFallback": "活动",
-    "ticketSell": "出售",
-    "ticketBuy": "求购",
+    "time": {
+      "justNow": "刚刚",
+      "minutesAgo": "{{count}} 分钟前",
+      "hoursAgo": "{{count}} 小时前",
+      "daysAgo": "{{count}} 天前"
+    },
     "types": {
-      "pindanJoinLeader": {
-        "title": "拼单有新成员",
-        "body": "{{actor}} 加入了你的拼单「{{title}}」"
+      "like": {
+        "title": "帖子被点赞",
+        "body": "{{actor}} 赞了你的帖子"
       },
-      "pindanJoinMember": {
-        "title": "拼单有新成员",
-        "body": "你参与的拼单「{{title}}」有新成员加入"
+      "comment": {
+        "title": "帖子被评论",
+        "body": "{{actor}}：{{preview}}"
       },
-      "ticketMatch": {
-        "title": "有新的匹配票务",
-        "body": "「{{event}}」有新的{{type}}信息，可能与你的挂单匹配"
+      "commentReply": {
+        "title": "评论被回复",
+        "body": "{{actor}}：{{preview}}"
+      },
+      "postRejected": {
+        "title": "帖子审核未通过",
+        "body": "{{reason}}"
+      },
+      "postHidden": {
+        "title": "帖子已自动隐藏",
+        "body": "{{reason}}"
+      },
+      "activityUpdate": {
+        "title": "活动信息变更",
+        "body": "「{{activityName}}」{{changeSummary}}"
+      },
+      "matchRecommendation": {
+        "title": "为你找到新搭子",
+        "body": "在「{{activityName}}」下找到 {{count}} 条匹配的组队帖"
       }
     }
   },
@@ -133,7 +121,7 @@
     "avatarUpdated": "头像已更新",
     "stats": {
       "events": "参加活动",
-      "pinSuccess": "结伴成功",
+      "matchSuccess": "组队成功",
       "likes": "获赞数",
       "posts": "我的帖子",
       "buddies": "同行"
@@ -151,15 +139,8 @@
       "prev": "上一页",
       "next": "下一页"
     },
-    "level": {
-      "title": "拼单等级 · Lv.{{level}}",
-      "xpToNext": "距离 Lv.{{nextLevel}} 还需 {{xp}} XP",
-      "xpProgress": "{{current}} / {{max}} XP"
-    },
     "tabs": {
-      "participated": "参加过",
-      "pindan": "拼单",
-      "tickets": "出收票"
+      "participated": "参加过"
     },
     "eventStatus": {
       "upcoming": "即将参加",
@@ -168,39 +149,6 @@
     },
     "participated": {
       "empty": "暂无已报名活动，去首页看看吧"
-    },
-    "pindanInProgress": "拼单中",
-    "myPindan": {
-      "title": "我的拼单",
-      "more": "更多拼单",
-      "joinedBadge": "已拼",
-      "ownerBadge": "我发起",
-      "joinedAt": "{{time}} 加入",
-      "createdAt": "{{time}} 发起",
-      "exit": "退出拼单",
-      "viewDetail": "查看详情",
-      "empty": "暂无拼单，去首页看看吧",
-      "exitConfirmTitle": "退出拼单",
-      "exitConfirmMessage": "确定退出「{{title}}」吗？",
-      "exitSuccess": "已退出拼单",
-      "category": {
-        "package": "套餐拼单",
-        "hotel": "酒店拼单",
-        "transport": "交通拼单"
-      }
-    },
-    "myTickets": {
-      "title": "我的出收票",
-      "more": "门票市场",
-      "empty": "暂无出收票记录，可通过 AI 对话发布挂单",
-      "createdAt": "{{time}} 发布",
-      "quantity": "{{count}} 张",
-      "perTicket": "/ 张",
-      "datePending": "日期待定",
-      "type": {
-        "sell": "出票",
-        "buy": "收票"
-      }
     },
     "settings": {
       "title": "设置",
@@ -214,7 +162,7 @@
       "privacyTitle": "隐私设置",
       "helpTitle": "帮助与反馈",
       "pushNotifications": "推送通知",
-      "pushNotificationsDesc": "接收活动提醒、拼单匹配等消息",
+      "pushNotificationsDesc": "接收活动提醒、互动消息等",
       "activityReminders": "活动提醒",
       "activityRemindersDesc": "活动开始前 24 小时提醒",
       "privacyOptions": {
@@ -234,17 +182,19 @@
       "logoutConfirmMessage": "确定要退出当前账号吗？",
       "logoutSuccess": "已退出登录",
       "faq": {
-        "q1": "如何发起拼单？",
-        "a1": "在首页点击「我要拼单」，或在 AI 智能助手中说出需求，系统会帮你匹配同行伙伴。",
-        "q2": "门票交易如何保障？",
-        "a2": "平台提供实名认证、资金托管和真票保障，交易全程受官方担保。",
-        "q3": "如何提升拼单等级？",
-        "a3": "参与拼单、成功结伴、完成活动均可获得 XP，累计 XP 即可升级。"
+        "q1": "如何发布组队帖？",
+        "a1": "进入活动详情页，通过 AI 助手描述你的需求，或在「我的帖子」中管理已发布内容。",
+        "q2": "如何找到同行伙伴？",
+        "a2": "浏览热门帖子或在活动详情页使用 AI 精准匹配，找到志同道合的队友。",
+        "q3": "如何提升个人影响力？",
+        "a3": "参与活动、成功组队、发布优质帖子均可获得互动与认可。"
       }
     }
   },
   "events": {
-    "developing": "活动页面开发中..."
+    "loading": "加载活动中...",
+    "error": "活动列表加载失败",
+    "empty": "暂无活动"
   },
   "explore": {
     "developing": "探索页面开发中..."
@@ -252,10 +202,17 @@
   "chat": {
     "name": "SYNC 智能助手",
     "status": "在线为你匹配...",
-    "welcome": "Hey！听说你想去周末的 S2O 电音节？需要我帮你找同行、拼单，或查门票出/收吗？",
+    "welcome": "Hey！想去哪场电音节？需要我帮你找同行或推荐活动吗？",
     "placeholder": "告诉我想去哪场派对..."
   },
   "eventDetail": {
+    "loading": "加载中...",
+    "notFound": "活动不存在",
+    "loadError": "活动信息加载失败",
+    "emptyPosts": "暂无组队帖，来发布第一条吧",
+    "postStatus": {
+      "recruiting": "招募中"
+    },
     "ai": {
       "title": "告诉我你的需求 ai精准匹配",
       "placeholder": "告诉我你的需求..."
@@ -266,7 +223,7 @@
     "chat": {
       "welcome": "👋 我是你的 AI 智能助手，帮你发现活动、找队友、规划行程，说出需求，我来搞定。",
       "quickReplies": {
-        "findBuddy": "帮我结伴",
+        "findBuddy": "帮我dd",
         "nearEvents": "查最近活动"
       },
       "searching": "正在为你搜索「{{query}}」相关内容 🔍 已找到 {{count}} 条相关信息。",
@@ -277,7 +234,8 @@
       "uploadedImageAlt": "已上传的图片",
       "viewImage": "查看大图",
       "removeImage": "移除图片",
-      "imageTooLarge": "图片过大，请压缩至 10MB 以内"
+      "imageTooLarge": "图片过大，请压缩至 10MB 以内",
+      "postCreated": "组队帖已发布"
     }
   }
 }

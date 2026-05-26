@@ -30,13 +30,6 @@ export type ActivityPost = {
   status: "招募中" | "已成团";
 };
 
-export const countdownParts: CountdownPart[] = [
-  { value: "00", unit: "d" },
-  { value: "00", unit: "h" },
-  { value: "00", unit: "m" },
-  { value: "00", unit: "s", accent: true },
-];
-
 export const featuredEvents: FeaturedEvent[] = [
   {
     id: 1,
@@ -46,7 +39,7 @@ export const featuredEvents: FeaturedEvent[] = [
     distance: "12 km",
     price: "1,280",
     remaining: "35m",
-    image: "https://images.unsplash.com/photo-1470229722913-7c090be5c520?w=320&q=80",
+    image: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=320&q=80",
     guests: [
       "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&q=80&fit=crop&crop=face",
       "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&q=80&fit=crop&crop=face",
@@ -61,6 +54,7 @@ export const featuredEvents: FeaturedEvent[] = [
     distance: "21 km",
     price: "3,100",
     remaining: "1d",
+    image: "https://image.electricdaisycarnival.cn/sites/7/2024/12/edccn_2025_mk_an_fest_site_mh_1534x1360_r01.jpg",
     logo: "EDC\nChina 2025",
     guests: [
       "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&q=80&fit=crop&crop=face",
@@ -93,18 +87,6 @@ export const activityPosts: ActivityPost[] = [
     time: "32分钟前",
     likes: 31,
     avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120&q=80&fit=crop&crop=face",
-    status: "招募中",
-  },
-  {
-    id: "nova",
-    name: "Nova",
-    handle: "@nova_rave",
-    event: "S2O 水上电音节",
-    location: "成都",
-    body: "成都S2O！求2个一起来的朋友，泼水节那天超爽！票我已经买好了，寻找同伴～",
-    time: "1小时前",
-    likes: 24,
-    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&q=80&fit=crop&crop=face",
     status: "招募中",
   },
   {

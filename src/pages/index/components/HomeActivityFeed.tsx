@@ -16,12 +16,20 @@ type HomeActivityFeedProps = {
   items: ActivityPost[];
   onSeeAll: () => void;
   onDelete?: (post: ActivityPost) => void;
+  onLike?: (post: ActivityPost) => void;
+  onComment?: (post: ActivityPost) => void;
 };
 
 const statusClass = (status: ActivityPost["status"]) =>
   status === "已成团" ? "s-home-post__status s-home-post__status--done" : "s-home-post__status";
 
-export const HomeActivityFeed: FC<HomeActivityFeedProps> = ({ items, onSeeAll, onDelete }) => {
+export const HomeActivityFeed: FC<HomeActivityFeedProps> = ({
+  items,
+  onSeeAll,
+  onDelete,
+  onLike,
+  onComment,
+}) => {
   const { t } = useTranslation();
 
   return (
@@ -63,11 +71,11 @@ export const HomeActivityFeed: FC<HomeActivityFeedProps> = ({ items, onSeeAll, o
               <div className="s-home-post__footer">
                 <span className="s-home-post__time">{post.time}</span>
                 <div className="s-home-post__actions">
-                  <Button className="s-home-post__action">
+                  <Button className="s-home-post__action" onClick={() => onLike?.(post)}>
                     <ThumbsUpIcon size={16} />
                     {post.likes}
                   </Button>
-                  <Button className="s-home-post__action">
+                  <Button className="s-home-post__action" onClick={() => onComment?.(post)}>
                     <MessageCircleIcon size={16} />
                     评论
                   </Button>

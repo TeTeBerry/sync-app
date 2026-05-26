@@ -16,7 +16,6 @@ export const HomePlazaHero: FC<HomePlazaHeroProps> = ({
   <header className="s-home-hero">
     <div>
       <p className="s-home-hero__kicker">发现 · 探索 · 出发</p>
-      <h1 className="s-home-hero__title">活动广场</h1>
     </div>
 
     <div className="s-home-hero__actions">
