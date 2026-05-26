@@ -23,6 +23,11 @@ export type AiChatStreamEvent =
       postId: string;
       activityLegacyId?: number;
     }
+  | {
+      type: "existing_post";
+      postId: string;
+      activityLegacyId?: number;
+    }
   | { type: "error"; message: string };
 
 export type ChatUiMessage = {

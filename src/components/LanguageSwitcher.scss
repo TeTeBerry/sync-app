@@ -38,6 +38,26 @@
   }
 }
 
+.s-lang-switch__icon-btn {
+  position: relative;
+  width: 39px;
+  height: 39px;
+  padding: 0;
+  border-radius: var(--radius-full);
+  border: none;
+  background: #1c1c1e;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+
+  &:active {
+    opacity: 0.85;
+  }
+}
+
 .s-lang-switch--header {
   position: relative;
   margin: 0;

@@ -38,6 +38,9 @@ export interface UseAiChatStreamOptions {
   onPostCreated?: (
     event: Extract<AiChatStreamEvent, { type: "post_created" }>,
   ) => void;
+  onExistingPost?: (
+    event: Extract<AiChatStreamEvent, { type: "existing_post" }>,
+  ) => void;
 }
 
 export function useAiChatStream(options: UseAiChatStreamOptions) {
@@ -53,6 +56,7 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
     activityLegacyId,
     getAuthHeaders,
     onPostCreated,
+    onExistingPost,
     typewriterCharDelayMs = 22,
   } = options;
 
@@ -212,6 +216,11 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
 
           if (event.type === "post_created") {
             onPostCreated?.(event);
+            continue;
+          }
+
+          if (event.type === "existing_post") {
+            onExistingPost?.(event);
             continue;
           }
 

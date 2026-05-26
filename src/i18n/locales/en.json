@@ -65,7 +65,13 @@
       "live": "Live"
     },
     "featured": {
-      "empty": "No events in progress"
+      "empty": "No events in progress",
+      "join": "Join",
+      "joined": "Registered",
+      "joinSuccess": "Registered",
+      "joinAlready": "Already registered",
+      "joinFailed": "Registration failed",
+      "activityEnded": "This event has ended"
     },
     "signup": {
       "title": "Events",
@@ -198,7 +204,15 @@
       "title": "My posts",
       "complete": "Mark complete",
       "edit": "Edit",
-      "delete": "Delete"
+      "delete": "Delete",
+      "editTitle": "Edit post",
+      "statusLabel": "Post status",
+      "statusRecruiting": "Recruiting",
+      "statusGrouped": "Grouped",
+      "save": "Save changes",
+      "cancel": "Cancel",
+      "charCount": "{{current}} / {{max}}",
+      "dirtyHint": "You have unsaved changes"
     },
     "pagination": {
       "prev": "Previous page",
@@ -330,6 +344,12 @@
       "like": "Like",
       "empty": "No comments yet — be the first",
       "loadError": "Failed to load comments"
+    },
+    "apply": {
+      "join": "Apply to join",
+      "success": "Application submitted",
+      "alreadyApplied": "Already applied",
+      "failed": "Application failed"
     }
   },
   "aiAssistant": {
@@ -349,7 +369,8 @@
       "viewImage": "View full image",
       "removeImage": "Remove image",
       "imageTooLarge": "Image too large — please compress to under 10MB",
-      "postCreated": "Group post published"
+      "postCreated": "Group post published",
+      "existingPostHint": "You already have a group post — edit it under Profile or view it on the event page"
     }
   }
 }

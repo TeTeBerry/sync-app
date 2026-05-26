@@ -1,16 +1,6 @@
-import type { ProfileActivityItem } from "../../types/backend";
+import type { ProfileActivityItem, ProfilePostItem } from "../../types/backend";
 
-export type { ProfileActivityItem };
-
-export type ProfilePostItem = {
-  id: string;
-  title: string;
-  content: string;
-  status: "招募中" | "已组队";
-  likes: number;
-  comments: number;
-  date: string;
-};
+export type { ProfileActivityItem, ProfilePostItem };
 
 export const profileUser = {
   name: "Zara Chen",
@@ -37,6 +27,7 @@ export const profilePosts: ProfilePostItem[] = [
     likes: 24,
     comments: 8,
     date: "2026-05-20",
+    activityLegacyId: 1,
   },
   {
     id: "post-3",
@@ -46,6 +37,7 @@ export const profilePosts: ProfilePostItem[] = [
     likes: 31,
     comments: 6,
     date: "2026-05-18",
+    activityLegacyId: 4,
   },
   {
     id: "post-4",
@@ -55,5 +47,6 @@ export const profilePosts: ProfilePostItem[] = [
     likes: 18,
     comments: 3,
     date: "2026-04-20",
+    activityLegacyId: 6,
   },
 ];

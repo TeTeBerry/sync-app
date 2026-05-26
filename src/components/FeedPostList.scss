@@ -145,15 +145,10 @@
   border: 0;
 }
 
-.s-home-post__action--delete {
-  color: rgba(255, 100, 130, 0.9);
-}
-
-.s-home-post__action--active,
-.s-home-post__action--liked {
+.s-home-post__action--active {
   color: #64d2ff;
 }
 
 .s-home-post__action--liked {
-  color: #ff6b9d;
+  color: var(--primary);
 }

@@ -14,9 +14,19 @@ export type AiShortcutTag = (typeof AI_SHORTCUT_TAG_POOL)[number];
 
 type UsageMap = Record<string, number>;
 
+/** 展示文案别名 → 标准快捷标签 */
+export const AI_SHORTCUT_TAG_ALIASES: Record<string, AiShortcutTag> = {
+  帮我dd: "组队队友",
+};
+
 const LEGACY_TAG_ALIASES: Record<string, string> = {
   拼房同行: "住宿同行",
 };
+
+export function normalizeAiShortcutTag(tag: string): string {
+  const trimmed = tag.trim();
+  return AI_SHORTCUT_TAG_ALIASES[trimmed] ?? LEGACY_TAG_ALIASES[trimmed] ?? trimmed;
+}
 
 function readUsage(): UsageMap {
   try {
@@ -43,10 +53,10 @@ function writeUsage(usage: UsageMap): void {
 }
 
 export function isAiShortcutTag(tag: string): boolean {
-  const trimmed = tag.trim();
-  if (!trimmed) return false;
-  if (AI_SHORTCUT_TAG_POOL.includes(trimmed as AiShortcutTag)) return true;
-  return trimmed in readUsage();
+  const canonical = normalizeAiShortcutTag(tag);
+  if (!canonical) return false;
+  if (AI_SHORTCUT_TAG_POOL.includes(canonical as AiShortcutTag)) return true;
+  return canonical in readUsage();
 }
 
 /** 记录一次快捷标签使用 */

@@ -3,9 +3,10 @@ import React, { useEffect, useRef, useState } from "react";
 import { GlobeIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { type AppLocale, setAppLocale, SUPPORTED_LOCALES } from "../i18n";
+import ActionSheet from "./ActionSheet";
 
 type LanguageSwitcherProps = {
-  variant?: "panel" | "header";
+  variant?: "panel" | "header" | "icon";
 };
 
 const localeLabels: Record<AppLocale, string> = {
@@ -23,6 +24,7 @@ const localeShort: Record<AppLocale, string> = {
 const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ variant = "panel" }) => {
   const { t, i18n } = useTranslation();
   const [open, setOpen] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const current = (i18n.resolvedLanguage?.split(`-`)[0] ?? i18n.language.split(`-`)[0]) as AppLocale;
 
@@ -46,7 +48,34 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ variant = "panel" }
   const selectLocale = (locale: AppLocale) => {
     void setAppLocale(locale);
     setOpen(false);
+    setSheetOpen(false);
   };
+
+  if (variant === "icon") {
+    return (
+      <>
+        <button
+          type="button"
+          className="s-lang-switch__icon-btn"
+          aria-label={t("language.title")}
+          onClick={() => setSheetOpen(true)}
+        >
+          <GlobeIcon size={18} />
+        </button>
+        <ActionSheet
+          open={sheetOpen}
+          title={t("language.title")}
+          cancelLabel={t("common.cancel")}
+          onCancel={() => setSheetOpen(false)}
+          items={SUPPORTED_LOCALES.map((locale) => ({
+            label: t(localeLabels[locale]),
+            active: current === locale,
+            onSelect: () => selectLocale(locale),
+          }))}
+        />
+      </>
+    );
+  }
 
   if (variant === "header") {
     return (

@@ -38,11 +38,17 @@ const Events: React.FC = () => {
           >
             <div className="s-events__list">
               {events.map((event) => (
-                <button
+                <div
                   key={event.id}
-                  type="button"
                   className="s-events__card-wrap"
+                  role="button"
+                  tabIndex={0}
                   onClick={() => openDetail(event.id)}
+                  onKeyDown={(event) => {
+                    if (event.key !== "Enter" && event.key !== " ") return;
+                    event.preventDefault();
+                    openDetail(event.id);
+                  }}
                 >
                   <EventCard
                     title={event.title}
@@ -53,7 +59,7 @@ const Events: React.FC = () => {
                     hot={event.hot}
                     variant="list"
                   />
-                </button>
+                </div>
               ))}
             </div>
           </ListState>

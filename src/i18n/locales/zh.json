@@ -83,7 +83,13 @@
     },
     "nearEvents": "最近活动",
     "featured": {
-      "empty": "暂无进行中的活动"
+      "empty": "暂无进行中的活动",
+      "join": "加入",
+      "joined": "已报名",
+      "joinSuccess": "报名成功",
+      "joinAlready": "已报名",
+      "joinFailed": "报名失败",
+      "activityEnded": "活动已结束"
     },
     "fabLabel": "快速发布",
     "notificationsComingSoon": "消息通知即将上线"
@@ -147,9 +153,17 @@
     },
     "myPosts": {
       "title": "我的帖子",
-      "complete": "标记成团",
+      "complete": "标记已组队",
       "edit": "编辑",
-      "delete": "删除"
+      "delete": "删除",
+      "editTitle": "编辑帖子",
+      "statusLabel": "帖子状态",
+      "statusRecruiting": "招募中",
+      "statusGrouped": "已成团",
+      "save": "保存修改",
+      "cancel": "取消",
+      "charCount": "{{current}} / {{max}}",
+      "dirtyHint": "内容已修改，记得保存"
     },
     "pagination": {
       "prev": "上一页",
@@ -242,6 +256,12 @@
       "like": "赞",
       "empty": "暂无评论，来抢沙发吧",
       "loadError": "评论加载失败"
+    },
+    "apply": {
+      "join": "申请加入",
+      "success": "申请成功",
+      "alreadyApplied": "已申请",
+      "failed": "申请失败"
     }
   },
   "aiAssistant": {
@@ -261,7 +281,8 @@
       "viewImage": "查看大图",
       "removeImage": "移除图片",
       "imageTooLarge": "图片过大，请压缩至 10MB 以内",
-      "postCreated": "组队帖已发布"
+      "postCreated": "组队帖已发布",
+      "existingPostHint": "你已有组队帖，请去「我的」编辑或在活动详情查看"
     }
   }
 }

@@ -84,7 +84,7 @@ export const HomeFeaturedEvents: FC<HomeFeaturedEventsProps> = ({
                   disabled={status === "ended"}
                   onClick={() => onJoinClick(event)}
                 >
-                  {status === "ended" ? t("activityStatus.ended") : "加入"}
+                  {status === "ended" ? t("activityStatus.ended") : t("home.featured.join")}
                 </Button>
               </div>
             </div>

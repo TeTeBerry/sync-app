@@ -88,6 +88,7 @@ export interface ProfilePostItem {
   likes: number;
   comments: number;
   date: string;
+  activityLegacyId?: number;
 }
 
 export interface HomeFeedPost {

@@ -27,6 +27,7 @@ export type FeaturedEvent = {
   guests: string[];
   image?: string;
   logo?: string;
+  going: boolean;
 };
 
 export function buildActivityNameMap(activities: import("../types/backend").BackendActivity[]): Map<string, string> {
@@ -68,6 +69,7 @@ export function mapSignupEventToFeaturedEvent(item: SignupEvent): FeaturedEvent 
     remaining: "",
     guests: ACTIVITY_GUEST_AVATARS,
     image: item.image || undefined,
+    going: item.going,
   };
 }
 

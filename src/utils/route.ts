@@ -96,6 +96,7 @@ export function goAiAssistant(options?: GoAiAssistantOptions) {
   }
   if (options?.activityLegacyId != null && !Number.isNaN(options.activityLegacyId)) {
     intent.activityLegacyId = options.activityLegacyId;
+    useNavigationStore.getState().setActiveActivityLegacyId(options.activityLegacyId);
   }
   if (intent.initialMessage || intent.activityLegacyId != null) {
     useNavigationStore.getState().setAiAssistantIntent(intent);

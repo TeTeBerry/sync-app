@@ -1,7 +1,9 @@
+import "../styles/_overlay.scss";
 import "./ImagePreviewLightbox.scss";
 import React, { useCallback, useEffect } from "react";
 import { XIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { cn } from "./ui";
 
 export interface ImagePreviewLightboxProps {
   open: boolean;
@@ -42,10 +44,11 @@ const ImagePreviewLightbox: React.FC<ImagePreviewLightboxProps> = ({
 
   return (
     <div
-      className={`s-image-preview${open ? "" : " s-image-preview--off"}`}
+      className={cn("s-overlay s-image-preview", !open && "s-overlay--off")}
+      style={{ zIndex: "var(--overlay-z-lightbox)" }}
       role="presentation"
     >
-      <div className="s-image-preview__backdrop" onClick={onClose} />
+      <div className="s-overlay__backdrop s-image-preview__backdrop" onClick={onClose} />
       <button
         type="button"
         className="s-image-preview__close"

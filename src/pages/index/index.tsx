@@ -8,7 +8,6 @@ import { useConfirmDialog } from "../../hooks/useConfirmDialog";
 import {
   deletePostAndInvalidate,
   likePostAndInvalidate,
-  registerForActivityAndInvalidate,
   useFeaturedEvents,
   useHomeSummary,
   useNearestUpcomingForCountdown,
@@ -16,7 +15,6 @@ import {
   usePopularPosts,
 } from "../../hooks/useSyncApi";
 import { isApiEnabled } from "../../constants/api";
-import { getActivityStatusFromActivity } from "../../utils/activityStatus";
 import { go, goAiAssistant, goEventDetail, ROUTES } from "../../utils/route";
 import { HomeActivityFeed } from "./components/HomeActivityFeed";
 import { HomeCountdownCard } from "./components/HomeCountdownCard";
@@ -53,24 +51,6 @@ const Home = () => {
     goEventDetail(event.id);
   }, []);
 
-  const joinEvent = useCallback(
-    (event: FeaturedEvent) => {
-      if (getActivityStatusFromActivity(event.date, event.title) === "ended") {
-        return;
-      }
-      void registerForActivityAndInvalidate(queryClient, event.id)
-        .then((result) => {
-          const title = result.alreadyRegistered ? "已报名" : "报名成功";
-          void Taro.showToast({ title, icon: "success" });
-          goEventDetail(event.id);
-        })
-        .catch(() => {
-          void Taro.showToast({ title: "报名失败", icon: "none" });
-        });
-    },
-    [queryClient],
-  );
-
   const handleDeletePost = useCallback(
     async (post: ActivityPost) => {
       const ok = await confirm({
@@ -94,12 +74,7 @@ const Home = () => {
 
   const handleLikePost = useCallback(
     (post: ActivityPost) => {
-      if (post.liked) {
-        void Taro.showToast({ title: t("home.feed.liked"), icon: "none" });
-        return;
-      }
       if (!isApiEnabled()) {
-        void Taro.showToast({ title: t("home.feed.liked"), icon: "none" });
         return;
       }
       void likePostAndInvalidate(queryClient, post.id).catch(() =>
@@ -132,7 +107,7 @@ const Home = () => {
         <HomeFeaturedEvents
           items={featuredEvents}
           onEventClick={openEventDetail}
-          onJoinClick={joinEvent}
+          onJoinClick={openEventDetail}
         />
 
         <HomeActivityFeed

@@ -122,9 +122,10 @@ export function useEventList(options?: QueryEnableOptions) {
 
 export function useHomeSummary() {
   const enabled = isApiEnabled();
+  const userId = getClientUserId();
 
   const query = useQuery({
-    queryKey: ["home"],
+    queryKey: ["home", userId],
     queryFn: fetchHomeSummary,
     enabled,
     staleTime: 60_000,
@@ -320,7 +321,21 @@ export async function registerForActivityAndInvalidate(
   legacyId: number,
 ) {
   const result = await registerForActivity(legacyId);
-  await invalidateRegistrationQueries(queryClient);
+  const userId = getClientUserId();
+  try {
+    queryClient.setQueryData<HomeSummary>(["home", userId], (prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        signupEvents: prev.signupEvents.map((event) =>
+          event.id === legacyId ? { ...event, going: true } : event,
+        ),
+      };
+    });
+    await invalidateRegistrationQueries(queryClient);
+  } catch {
+    // Registration succeeded; cache refresh is best-effort.
+  }
   return result;
 }
 
@@ -401,7 +416,7 @@ function patchLikedPostInCaches(
         ? {
             ...post,
             likes: updated.likes,
-            liked: updated.liked ?? true,
+            liked: updated.liked ?? false,
             comments: updated.comments ?? post.comments,
           }
         : post,
@@ -413,7 +428,7 @@ function patchLikedPostInCaches(
         ? {
             ...post,
             likes: updated.likes,
-            liked: updated.liked ?? true,
+            liked: updated.liked ?? false,
             comments: updated.comments ?? post.comments,
           }
         : post,

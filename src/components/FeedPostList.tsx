@@ -81,7 +81,7 @@ export const FeedPostList: FC<FeedPostListProps> = ({
                   className={`s-home-post__action${post.liked ? " s-home-post__action--liked" : ""}`}
                   onClick={() => onLike?.(post)}
                 >
-                  <ThumbsUpIcon size={16} />
+                  <ThumbsUpIcon size={16} fill={post.liked ? "currentColor" : "none"} />
                   {post.likes}
                 </Button>
                 <Button
@@ -96,10 +96,7 @@ export const FeedPostList: FC<FeedPostListProps> = ({
                   {t("common.share")}
                 </Button>
                 {isOwn && onDelete ? (
-                  <Button
-                    className="s-home-post__action s-home-post__action--delete"
-                    onClick={() => onDelete(post)}
-                  >
+                  <Button className="s-home-post__action" onClick={() => onDelete(post)}>
                     <Trash2Icon size={16} />
                     {t("profile.myPosts.delete")}
                   </Button>

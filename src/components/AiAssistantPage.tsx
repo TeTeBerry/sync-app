@@ -13,6 +13,8 @@ import { useAiChatStream } from "../hooks/useAiChatStream";
 import { invalidatePostQueries } from "../hooks/useSyncApi";
 import { ChatImageTooLargeError, pickAndCompressChatImage } from "../utils/chatImage";
 import { useNavigationStore } from "../stores";
+import { normalizeAiShortcutTag } from "../utils/aiShortcutTags";
+import { goBack, goEventDetail, ROUTES } from "../utils/route";
 
 const quickReplyKeys = [`findBuddy`, `nearEvents`] as const;
 
@@ -58,6 +60,13 @@ function AiAssistantChat({
       void Taro.showToast({
         title: t("aiAssistant.chat.postCreated"),
         icon: "success",
+      });
+    },
+    onExistingPost: () => {
+      void Taro.showToast({
+        title: t("aiAssistant.chat.existingPostHint"),
+        icon: "none",
+        duration: 2500,
       });
     },
   });
@@ -196,7 +205,9 @@ function AiAssistantChat({
             key={key}
             className="s-ai-assistant-chat__quick-chip"
             disabled={isStreaming}
-            onClick={() => submit(t(`aiAssistant.chat.quickReplies.${key}`))}
+            onClick={() =>
+              submit(normalizeAiShortcutTag(t(`aiAssistant.chat.quickReplies.${key}`)))
+            }
           >
             {t(`aiAssistant.chat.quickReplies.${key}`)}
           </Button>
@@ -281,10 +292,23 @@ const AiAssistantPage: FC = () => {
 
   useDidShow(applyAiAssistantIntent);
 
+  const handleBack = useCallback(() => {
+    const pages = Taro.getCurrentPages();
+    if (pages.length <= 1) {
+      if (activityLegacyId != null && !Number.isNaN(activityLegacyId)) {
+        goEventDetail(activityLegacyId);
+        return;
+      }
+      goBack(ROUTES.HOME);
+      return;
+    }
+    goBack();
+  }, [activityLegacyId]);
+
   return (
     <div data-cmp="AiAssistant" className="s-ai-assistant">
       <header className="s-ai-assistant__header">
-        <PageNavigation title={t("aiAssistant.title")} />
+        <PageNavigation title={t("aiAssistant.title")} onBack={handleBack} />
       </header>
 
       <div className="s-ai-assistant__body">

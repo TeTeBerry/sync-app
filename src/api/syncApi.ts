@@ -36,7 +36,7 @@ export function matchActivity(keyword: string) {
 }
 
 export function fetchHomeSummary() {
-  return apiGet<HomeSummary>("/home");
+  return apiGet<HomeSummary>("/home", ownerParams());
 }
 
 export function fetchActivityByLegacyId(legacyId: number) {

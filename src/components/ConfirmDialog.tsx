@@ -1,6 +1,7 @@
-import "./ConfirmDialog.scss";
+import "../styles/_overlay.scss";
 import React from "react";
-import { Button } from "./ui";
+import { useOverlayLock } from "../hooks/useOverlayLock";
+import { Button, cn } from "./ui";
 
 export interface ConfirmDialogProps {
   open: boolean;
@@ -8,7 +9,7 @@ export interface ConfirmDialogProps {
   message: string;
   confirmText: string;
   cancelText: string;
-  /** Destructive actions (delete) use pink/red confirm styling */
+  /** Destructive actions (delete, logout) use theme destructive styling */
   danger?: boolean;
   onConfirm: () => void;
   onCancel: () => void;
@@ -24,28 +25,39 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   onConfirm,
   onCancel,
 }) => {
+  useOverlayLock(open);
+
   return (
-    <div className={`s-confirm-dialog${open ? "" : " s-confirm-dialog--off"}`} role="presentation">
-      <div className="s-confirm-dialog__backdrop" onClick={onCancel} />
+    <div
+      className={cn("s-overlay s-confirm-dialog", !open && "s-overlay--off")}
+      style={{ zIndex: "var(--overlay-z-dialog)" }}
+      role="presentation"
+    >
+      <div className="s-overlay__backdrop" onClick={onCancel} />
       <div
-        className="s-confirm-dialog__panel"
+        className="s-overlay__panel"
         role="dialog"
         aria-modal="true"
         aria-labelledby="confirm-dialog-title"
         aria-describedby="confirm-dialog-message"
       >
-        <h2 id="confirm-dialog-title" className="s-confirm-dialog__title">
+        <h2 id="confirm-dialog-title" className="s-overlay__title">
           {title}
         </h2>
-        <p id="confirm-dialog-message" className="s-confirm-dialog__message">
+        <p id="confirm-dialog-message" className="s-overlay__message">
           {message}
         </p>
-        <div className="s-confirm-dialog__actions">
-          <Button block="s-confirm-dialog" element="btn" modifiers={["cancel"]} onClick={onCancel}>
+        <div className="s-overlay__actions">
+          <Button
+            block="s-overlay"
+            element="btn"
+            modifiers={["cancel"]}
+            onClick={onCancel}
+          >
             {cancelText}
           </Button>
           <Button
-            block="s-confirm-dialog"
+            block="s-overlay"
             element="btn"
             modifiers={["confirm", danger && "danger"]}
             onClick={onConfirm}

@@ -35,6 +35,16 @@ function parseSseDataLine(line: string): AiChatStreamEvent | null {
             : undefined,
       };
     }
+    if (json.type === "existing_post" && typeof json.postId === "string") {
+      return {
+        type: "existing_post",
+        postId: json.postId,
+        activityLegacyId:
+          typeof json.activityLegacyId === "number"
+            ? json.activityLegacyId
+            : undefined,
+      };
+    }
     if (typeof json.content === "string") {
       return { type: "delta", content: json.content };
     }

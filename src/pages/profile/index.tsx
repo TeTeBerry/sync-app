@@ -1,6 +1,6 @@
 import "./profile.scss";
 import Taro, { useDidShow } from "@tarojs/taro";
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   BellIcon,
@@ -12,11 +12,13 @@ import {
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import BottomNav from "../../components/BottomNav";
-import { go, ROUTES } from "../../utils/route";
+import { go, goEventDetail, ROUTES } from "../../utils/route";
 import { profilePosts, profileUser } from "./mockData";
 import ProfileActivitiesSection from "./components/ProfileActivitiesSection";
-import ProfilePostsSection from "./components/ProfilePostsSection";
-import type { ProfilePostItem } from "./mockData";
+import ProfilePostsSection, {
+  type ProfilePostEditDraft,
+} from "./components/ProfilePostsSection";
+import type { ProfilePostItem } from "../../types/backend";
 import { persistUserName } from "../../utils/session";
 import { useNavigationStore, useProfilePageStore } from "../../stores";
 import {
@@ -27,7 +29,6 @@ import {
   useProfileSummaryQuery,
 } from "../../hooks/useSyncApi";
 import { isApiEnabled } from "../../constants/api";
-import { promptText } from "../../utils/promptText";
 import { useConfirmDialog } from "../../hooks/useConfirmDialog";
 
 const STORAGE_KEYS = {
@@ -71,6 +72,9 @@ const Profile: React.FC = () => {
     ? postsQuery.data
     : profilePosts;
 
+  const [editingPostId, setEditingPostId] = useState<string | null>(null);
+  const [editDraft, setEditDraft] = useState<ProfilePostEditDraft | null>(null);
+
   const applyRouteParams = useCallback(() => {
     consumeProfileIntent();
   }, [consumeProfileIntent]);
@@ -96,6 +100,15 @@ const Profile: React.FC = () => {
     void Taro.showToast({ title: `${action}: ${item.title}`, icon: "none" });
   }, []);
 
+  const handleSelectPost = useCallback((item: ProfilePostItem) => {
+    const activityLegacyId = item.activityLegacyId;
+    if (activityLegacyId == null || Number.isNaN(activityLegacyId)) {
+      void Taro.showToast({ title: "无法打开该帖子所属活动", icon: "none" });
+      return;
+    }
+    goEventDetail(activityLegacyId, { postId: item.id });
+  }, []);
+
   const handleCompletePost = useCallback(
     async (item: ProfilePostItem) => {
       if (!apiEnabled) {
@@ -115,19 +128,47 @@ const Profile: React.FC = () => {
     [apiEnabled, confirm, handlePostAction, queryClient, t],
   );
 
-  const handleEditPost = useCallback(
+  const handleEditPost = useCallback((item: ProfilePostItem) => {
+    if (editingPostId === item.id) {
+      setEditingPostId(null);
+      setEditDraft(null);
+      return;
+    }
+    setEditingPostId(item.id);
+    setEditDraft({
+      body: item.content,
+      status: item.status === "已组队" ? "已组队" : "招募中",
+    });
+  }, [editingPostId]);
+
+  const handleCancelPostEdit = useCallback(() => {
+    setEditingPostId(null);
+    setEditDraft(null);
+  }, []);
+
+  const handleSavePostEdit = useCallback(
     (item: ProfilePostItem) => {
-      if (!apiEnabled) {
-        handlePostAction(t("profile.myPosts.edit"), item);
+      if (!editDraft) return;
+      const body = editDraft.body.trim();
+      if (!body) {
+        void Taro.showToast({ title: "帖子内容不能为空", icon: "none" });
         return;
       }
-      const body = promptText("编辑帖子内容", item.content);
-      if (!body) return;
-      void updatePostAndInvalidate(queryClient, item.id, { body })
-        .then(() => void Taro.showToast({ title: "已保存", icon: "success" }))
+      if (!apiEnabled) {
+        handlePostAction(t("profile.myPosts.save"), item);
+        handleCancelPostEdit();
+        return;
+      }
+      const status =
+        editDraft.status === "已组队" ? "completed" : ("recruiting" as const);
+      void updatePostAndInvalidate(queryClient, item.id, { body, status })
+        .then(() => {
+          handleCancelPostEdit();
+          void Taro.showToast({ title: "已保存", icon: "success" });
+        })
         .catch(() => void Taro.showToast({ title: "保存失败", icon: "none" }));
     },
-    [apiEnabled, handlePostAction, queryClient, t],
+    [apiEnabled, editDraft, handleCancelPostEdit, handlePostAction, queryClient, t],
   );
 
   const handleDeletePost = useCallback(
@@ -225,9 +266,15 @@ const Profile: React.FC = () => {
           <ProfileActivitiesSection items={activities} />
           <ProfilePostsSection
             items={posts}
+            editingPostId={editingPostId}
+            editDraft={editDraft}
+            onSelect={handleSelectPost}
             onComplete={handleCompletePost}
             onEdit={handleEditPost}
             onDelete={handleDeletePost}
+            onEditDraftChange={setEditDraft}
+            onSaveEdit={handleSavePostEdit}
+            onCancelEdit={handleCancelPostEdit}
           />
         </div>
 

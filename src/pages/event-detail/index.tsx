@@ -1,5 +1,5 @@
 import "./event-detail.scss";
-import Taro from "@tarojs/taro";
+import Taro, { useRouter } from "@tarojs/taro";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -20,6 +20,7 @@ import BottomNav from "../../components/BottomNav";
 import { PostCommentSection } from "../../components/PostCommentSection";
 import { PostStatusBadge } from "../../components/PostStatusBadge";
 import { useConfirmDialog } from "../../hooks/useConfirmDialog";
+import { useNavigationStore } from "../../stores/navigationStore";
 import {
   applyToPostAndInvalidate,
   deletePostAndInvalidate,
@@ -45,8 +46,25 @@ import { formatPostPublishTime } from "../../utils/formatPostPublishTime";
 const EventDetailPage = () => {
   const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
-  const eventId = Number(Taro.getCurrentInstance().router?.params?.id);
-  const highlightPostId = Taro.getCurrentInstance().router?.params?.postId?.trim() || "";
+  const router = useRouter();
+  const activeActivityLegacyId = useNavigationStore((state) => state.activeActivityLegacyId);
+  const eventId = useMemo(() => {
+    const fromParams = Number(router.params.id);
+    if (Number.isFinite(fromParams) && fromParams > 0) {
+      return fromParams;
+    }
+    if (activeActivityLegacyId != null && activeActivityLegacyId > 0) {
+      return activeActivityLegacyId;
+    }
+    return NaN;
+  }, [activeActivityLegacyId, router.params.id]);
+  const highlightPostId = router.params.postId?.trim() || "";
+
+  useEffect(() => {
+    if (Number.isFinite(eventId) && eventId > 0) {
+      useNavigationStore.getState().setActiveActivityLegacyId(eventId);
+    }
+  }, [eventId]);
   const activityQuery = useActivityDetailQuery(eventId);
   const postsQuery = useEventPostsQuery(eventId);
   const currentUserQuery = useCurrentUserQuery();
@@ -106,23 +124,21 @@ const EventDetailPage = () => {
       if (appliedPostIds.has(postId)) return;
 
       void applyToPostAndInvalidate(queryClient, postId)
-        .then(() => {
+        .then((result) => {
           setAppliedPostIds((prev) => new Set(prev).add(postId));
-          void Taro.showToast({ title: "已申请", icon: "success" });
+          const title = result.alreadyApplied
+            ? t("eventDetail.apply.alreadyApplied")
+            : t("eventDetail.apply.success");
+          void Taro.showToast({ title, icon: "success" });
         })
-        .catch(() => void Taro.showToast({ title: "申请失败", icon: "none" }));
+        .catch(() => void Taro.showToast({ title: t("eventDetail.apply.failed"), icon: "none" }));
     },
-    [appliedPostIds, queryClient],
+    [appliedPostIds, queryClient, t],
   );
 
   const handleLikePost = useCallback(
     (post: EventDetailPost) => {
-      if (post.liked) {
-        void Taro.showToast({ title: t("home.feed.liked"), icon: "none" });
-        return;
-      }
       if (!apiEnabled) {
-        void Taro.showToast({ title: t("home.feed.liked"), icon: "none" });
         return;
       }
       void likePostAndInvalidate(queryClient, post.id).catch(() =>
@@ -181,11 +197,11 @@ const EventDetailPage = () => {
         bumpShortcutTagUsage(trimmed);
       }
       goAiAssistant({
-        initialMessage: trimmed || (title ? `我想参加 ${title}，帮我组队` : undefined),
+        ...(trimmed ? { initialMessage: trimmed } : {}),
         activityLegacyId: Number.isNaN(eventId) ? undefined : eventId,
       });
     },
-    [bumpShortcutTagUsage, eventId, title],
+    [bumpShortcutTagUsage, eventId],
   );
 
   const handleShortcutTag = useCallback(
@@ -304,91 +320,91 @@ const EventDetailPage = () => {
               const commentsExpanded = expandedCommentPostIds.has(post.id);
 
               return (
-              <article
-                key={post.id}
-                ref={post.id === highlightPostId ? highlightedPostRef : undefined}
-                className={`s-event-post${post.id === highlightPostId ? " s-event-post--highlight" : ""}`}
-              >
-                <div className="s-event-post__header">
-                  <img className="s-event-post__avatar" src={post.avatar} alt="" />
-                  <div className="s-event-post__head-main">
-                    <div className="s-event-post__top">
-                      <p>
-                        <strong>{post.name}</strong>
-                        <span>
-                          {post.location} · {formatPublishTime(post)}
-                        </span>
-                      </p>
-                      <PostStatusBadge status={post.status} variant="event" />
+                <article
+                  key={post.id}
+                  ref={post.id === highlightPostId ? highlightedPostRef : undefined}
+                  className={`s-event-post${post.id === highlightPostId ? " s-event-post--highlight" : ""}`}
+                >
+                  <div className="s-event-post__header">
+                    <img className="s-event-post__avatar" src={post.avatar} alt="" />
+                    <div className="s-event-post__head-main">
+                      <div className="s-event-post__top">
+                        <p>
+                          <strong>{post.name}</strong>
+                          <span>
+                            {post.location} · {formatPublishTime(post)}
+                          </span>
+                        </p>
+                        <PostStatusBadge status={post.status} variant="event" />
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <p className="s-event-post__text">{post.body}</p>
+                  <p className="s-event-post__text">{post.body}</p>
 
-                <div className="s-event-post__tags">
-                  {post.tags.map((tag) => (
-                    <span key={tag} className="s-event-post__tag">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
+                  <div className="s-event-post__tags">
+                    {post.tags.map((tag) => (
+                      <span key={tag} className="s-event-post__tag">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
 
-                <div className="s-event-post__footer">
-                  <div className="s-event-post__actions">
-                    <button
-                      type="button"
-                      className={`s-event-post__action${post.liked ? " s-event-post__action--liked" : ""}`}
-                      onClick={() => handleLikePost(post)}
-                    >
-                      <HeartIcon size={16} fill={post.liked ? "currentColor" : "none"} />
-                      {post.likes}
-                    </button>
-                    <button
-                      type="button"
-                      className={`s-event-post__action${commentsExpanded ? " s-event-post__action--active" : ""}`}
-                      onClick={() => togglePostComments(post.id)}
-                    >
-                      <MessageCircleIcon size={16} />
-                      {post.comments}
-                    </button>
-                    <button type="button" className="s-event-post__action">
-                      <Share2Icon size={16} />
-                    </button>
-                    {isOwn ? (
+                  <div className="s-event-post__footer">
+                    <div className="s-event-post__actions">
                       <button
                         type="button"
-                        className="s-event-post__action s-event-post__action--delete"
-                        aria-label="删除"
-                        onClick={() => handleDeletePost(post)}
+                        className={`s-event-post__action${post.liked ? " s-event-post__action--liked" : ""}`}
+                        onClick={() => handleLikePost(post)}
                       >
-                        <Trash2Icon size={16} />
+                        <HeartIcon size={16} fill={post.liked ? "currentColor" : "none"} />
+                        {post.likes}
                       </button>
+                      <button
+                        type="button"
+                        className={`s-event-post__action${commentsExpanded ? " s-event-post__action--active" : ""}`}
+                        onClick={() => togglePostComments(post.id)}
+                      >
+                        <MessageCircleIcon size={16} />
+                        {post.comments}
+                      </button>
+                      <button type="button" className="s-event-post__action">
+                        <Share2Icon size={16} />
+                      </button>
+                      {isOwn ? (
+                        <button
+                          type="button"
+                          className="s-event-post__action"
+                          aria-label="删除"
+                          onClick={() => handleDeletePost(post)}
+                        >
+                          <Trash2Icon size={16} />
+                        </button>
+                      ) : null}
+                    </div>
+                    {!isOwn && post.status === "招募中" ? (
+                      appliedPostIds.has(post.id) ? (
+                        <button type="button" className="s-event-post__apply s-event-post__apply--done" disabled>
+                          <CheckIcon size={14} />
+                          已申请
+                        </button>
+                      ) : (
+                        <button type="button" className="s-event-post__apply" onClick={() => handleApply(post.id)}>
+                          <UserPlusIcon size={14} />
+                          申请加入
+                        </button>
+                      )
                     ) : null}
                   </div>
-                  {!isOwn && post.status === "招募中" ? (
-                    appliedPostIds.has(post.id) ? (
-                      <button type="button" className="s-event-post__apply s-event-post__apply--done" disabled>
-                        <CheckIcon size={14} />
-                        已申请
-                      </button>
-                    ) : (
-                      <button type="button" className="s-event-post__apply" onClick={() => handleApply(post.id)}>
-                        <UserPlusIcon size={14} />
-                        申请加入
-                      </button>
-                    )
-                  ) : null}
-                </div>
 
-                <PostCommentSection
-                  postId={post.id}
-                  expanded={commentsExpanded}
-                  onToggleExpanded={() => togglePostComments(post.id)}
-                  currentUserAvatar={currentUserQuery.data?.avatar}
-                  onCommentSubmitted={() => void postsQuery.refetch()}
-                />
-              </article>
+                  <PostCommentSection
+                    postId={post.id}
+                    expanded={commentsExpanded}
+                    onToggleExpanded={() => togglePostComments(post.id)}
+                    currentUserAvatar={currentUserQuery.data?.avatar}
+                    onCommentSubmitted={() => void postsQuery.refetch()}
+                  />
+                </article>
               );
             })
           )}

@@ -47,12 +47,7 @@ const AllPostsPage = () => {
 
   const handleLikePost = useCallback(
     (post: ActivityPost) => {
-      if (post.liked) {
-        void Taro.showToast({ title: t("home.feed.liked"), icon: "none" });
-        return;
-      }
       if (!isApiEnabled()) {
-        void Taro.showToast({ title: t("home.feed.liked"), icon: "none" });
         return;
       }
       void likePostAndInvalidate(queryClient, post.id).catch(() =>
