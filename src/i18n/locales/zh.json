@@ -49,7 +49,7 @@
   },
   "home": {
     "ai": {
-      "title": "AI 搭子助手",
+      "title": "AI 智能助手",
       "online": "在线 · 已服务 12,400+ 音乐节玩家",
       "summon": "唤起",
       "placeholder": "告诉我你的需求…"
@@ -64,7 +64,7 @@
       "pinOrders": "{{count}} 拼单",
       "wantGo": "我要去",
       "going": "已报名",
-      "findBuddy": "找搭子拼"
+      "findBuddy": "结伴拼单"
     },
     "heat": {
       "title": "今日热度",
@@ -136,7 +136,7 @@
       "pinSuccess": "结伴成功",
       "likes": "获赞数",
       "posts": "我的帖子",
-      "buddies": "搭子"
+      "buddies": "同行"
     },
     "myActivities": {
       "title": "我的活动"
@@ -235,11 +235,11 @@
       "logoutSuccess": "已退出登录",
       "faq": {
         "q1": "如何发起拼单？",
-        "a1": "在首页点击「我要拼单」，或在 AI 搭子助手中说出需求，系统会帮你匹配搭子。",
+        "a1": "在首页点击「我要拼单」，或在 AI 智能助手中说出需求，系统会帮你匹配同行伙伴。",
         "q2": "门票交易如何保障？",
         "a2": "平台提供实名认证、资金托管和真票保障，交易全程受官方担保。",
         "q3": "如何提升拼单等级？",
-        "a3": "参与拼单、成功匹配搭子、完成活动均可获得 XP，累计 XP 即可升级。"
+        "a3": "参与拼单、成功结伴、完成活动均可获得 XP，累计 XP 即可升级。"
       }
     }
   },
@@ -250,30 +250,29 @@
     "developing": "探索页面开发中..."
   },
   "chat": {
-    "name": "SYNC 智能搭子",
+    "name": "SYNC 智能助手",
     "status": "在线为你匹配...",
-    "welcome": "Hey！听说你想去周末的 S2O 电音节？需要我帮你找搭子，或查门票出/收吗？",
+    "welcome": "Hey！听说你想去周末的 S2O 电音节？需要我帮你找同行、拼单，或查门票出/收吗？",
     "placeholder": "告诉我想去哪场派对..."
   },
   "eventDetail": {
     "ai": {
       "title": "告诉我你的需求 ai精准匹配",
-      "prompt": "👋 你想找什么类型的搭子？",
       "placeholder": "告诉我你的需求..."
     }
   },
   "aiAssistant": {
-    "title": "AI 搭子助手",
+    "title": "AI 智能助手",
     "chat": {
-      "welcome": "👋 我是你的 AI 搭子助手，帮你发现活动、找队友、规划行程，说出需求，我来搞定。",
+      "welcome": "👋 我是你的 AI 智能助手，帮你发现活动、找队友、规划行程，说出需求，我来搞定。",
       "quickReplies": {
-        "findBuddy": "帮我找搭子",
+        "findBuddy": "帮我结伴",
         "nearEvents": "查最近活动"
       },
       "searching": "正在为你搜索「{{query}}」相关内容 🔍 已找到 {{count}} 条相关信息。",
       "streamError": "抱歉，回复出错了，请稍后再试。",
       "thinking": "AI 正在思考",
-      "placeholder": "说说你想去哪、想找什么样的搭子…",
+      "placeholder": "说说你想去哪、想找什么样的同行…",
       "uploadImage": "上传图片",
       "uploadedImageAlt": "已上传的图片",
       "viewImage": "查看大图",

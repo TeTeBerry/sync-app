@@ -49,7 +49,7 @@
   },
   "home": {
     "ai": {
-      "title": "AI Buddy Assistant",
+      "title": "AI Assistant",
       "online": "Online · Served 12,400+ festival goers",
       "summon": "Summon",
       "placeholder": "Tell me what you want to group buy…"
@@ -64,7 +64,7 @@
       "pinOrders": "{{count}} groups",
       "wantGo": "I'm going",
       "going": "Registered",
-      "findBuddy": "Find buddies"
+      "findBuddy": "Group up"
     },
     "heat": {
       "title": "Today's heat",
@@ -136,7 +136,7 @@
       "pinSuccess": "Pairings",
       "likes": "Likes",
       "posts": "My posts",
-      "buddies": "Buddies"
+      "buddies": "Crew"
     },
     "myActivities": {
       "title": "My activities"
@@ -238,7 +238,7 @@
         "q2": "How are ticket trades protected?",
         "a2": "We offer verified sellers, escrow, and official ticket guarantees.",
         "q3": "How do I level up?",
-        "a3": "Join group buys, match with buddies, and complete events to earn XP."
+        "a3": "Join group buys, match with crew, and complete events to earn XP."
       }
     }
   },
@@ -249,30 +249,29 @@
     "developing": "Explore page coming soon..."
   },
   "chat": {
-    "name": "SYNC AI Buddy",
+    "name": "SYNC AI Assistant",
     "status": "Matching for you...",
-    "welcome": "Hey! Heard you're going to S2O this weekend? Want me to match you with buddies for tickets or VIP tables?",
+    "welcome": "Hey! Heard you're going to S2O this weekend? Want help finding crew, group buys, or ticket listings?",
     "placeholder": "Tell me which party you want to go to..."
   },
   "eventDetail": {
     "ai": {
       "title": "Tell me your needs — AI precision matching",
-      "prompt": "👋 What kind of buddy are you looking for?",
       "placeholder": "Tell me what you need..."
     }
   },
   "aiAssistant": {
-    "title": "AI Buddy",
+    "title": "AI Assistant",
     "chat": {
-      "welcome": "👋 I'm your AI festival buddy — discover events, find crew, and plan your trip. Just tell me what you need!",
+      "welcome": "👋 I'm your AI festival assistant — discover events, find crew, and plan your trip. Just tell me what you need!",
       "quickReplies": {
-        "findBuddy": "Find a buddy",
+        "findBuddy": "Help me group up",
         "nearEvents": "Nearby events"
       },
       "searching": "Searching for \"{{query}}\" 🔍 Found {{count}} relevant results.",
       "streamError": "Sorry, something went wrong. Please try again.",
       "thinking": "AI is thinking",
-      "placeholder": "Tell me where you want to go or what kind of crew you're looking for…",
+      "placeholder": "Tell me where you want to go or what kind of crew you need…",
       "uploadImage": "Upload image",
       "uploadedImageAlt": "Uploaded image",
       "viewImage": "View full image",

@@ -22,8 +22,11 @@ import { deletePostAndInvalidate, useEventPostsQuery } from "../../hooks/useSync
 import { isApiEnabled } from "../../constants/api";
 import { isCurrentUserPostAuthor } from "../../utils/postOwnership";
 import { getEventDetail, type EventTeamPost } from "./eventDetailData";
-
-const aiTags = ["组队队友", "拼房搭子", "拼车同行", "拼套票"];
+import {
+  getTopAiShortcutTags,
+  isAiShortcutTag,
+  recordAiShortcutTagUse,
+} from "../../utils/aiShortcutTags";
 
 const EventDetailPage = () => {
   const { t } = useTranslation();
@@ -32,6 +35,7 @@ const EventDetailPage = () => {
   const detail = useMemo(() => getEventDetail(eventId), [eventId]);
   const postsQuery = useEventPostsQuery(eventId);
   const [prompt, setPrompt] = useState("");
+  const [shortcutTags, setShortcutTags] = useState(() => getTopAiShortcutTags());
   const [appliedPostIds, setAppliedPostIds] = useState<Set<string>>(() => new Set());
 
   const posts: EventTeamPost[] = useMemo(() => {
@@ -88,13 +92,30 @@ const EventDetailPage = () => {
     [postsQuery, queryClient],
   );
 
+  const bumpShortcutTagUsage = useCallback((tag: string) => {
+    recordAiShortcutTagUse(tag);
+    setShortcutTags(getTopAiShortcutTags());
+  }, []);
+
   const openAi = useCallback(
     (message?: string) => {
+      const trimmed = message?.trim();
+      if (trimmed && isAiShortcutTag(trimmed)) {
+        bumpShortcutTagUsage(trimmed);
+      }
       goAiAssistant({
-        initialMessage: message?.trim() || (detail ? `我想参加 ${detail.title}，帮我找搭子` : undefined),
+        initialMessage: trimmed || (detail ? `我想参加 ${detail.title}，帮我结伴` : undefined),
       });
     },
-    [detail],
+    [bumpShortcutTagUsage, detail],
+  );
+
+  const handleShortcutTag = useCallback(
+    (tag: string) => {
+      bumpShortcutTagUsage(tag);
+      goAiAssistant({ initialMessage: tag });
+    },
+    [bumpShortcutTagUsage],
   );
 
   if (!detail) {
@@ -126,14 +147,20 @@ const EventDetailPage = () => {
             <SparklesIcon size={14} />
             <span>{t("eventDetail.ai.title")}</span>
           </div>
-          <p className="s-event-detail__ai-bubble">{t("eventDetail.ai.prompt")}</p>
-          <div className="s-event-detail__ai-tags">
-            {aiTags.map((tag) => (
-              <button key={tag} type="button" className="s-event-detail__ai-tag" onClick={() => openAi(tag)}>
-                {tag}
-              </button>
-            ))}
-          </div>
+          {shortcutTags.length > 0 ? (
+            <div className="s-event-detail__ai-tags">
+              {shortcutTags.map((tag) => (
+                <button
+                  key={tag}
+                  type="button"
+                  className="s-event-detail__ai-tag"
+                  onClick={() => handleShortcutTag(tag)}
+                >
+                  {tag}
+                </button>
+              ))}
+            </div>
+          ) : null}
           <div className="s-event-detail__ai-input">
             <input
               className="s-event-detail__ai-input__field"
