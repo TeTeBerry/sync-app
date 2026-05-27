@@ -11,6 +11,9 @@ export interface AiChatMessage {
   role: AiChatRole;
   content: string;
   imageContext?: AiChatImageContext;
+  recommendedPosts?: RecommendedPostCard[];
+  createdPost?: RecommendedPostCard;
+  suggestedReplies?: string[];
 }
 
 export type RecommendedPostAuthorGender = "female" | "male";
@@ -29,12 +32,6 @@ export interface RecommendedPostCard {
   matchReason?: string;
 }
 
-export interface BuddyCopyVariant {
-  style: "literary" | "minimal" | "direct";
-  label: string;
-  body: string;
-}
-
 export type AiChatStreamEvent =
   | { type: "delta"; content: string }
   | {
@@ -51,6 +48,7 @@ export type AiChatStreamEvent =
       type: "post_created";
       postId: string;
       activityLegacyId?: number;
+      post?: RecommendedPostCard;
     }
   | {
       type: "existing_post";
@@ -67,10 +65,6 @@ export type AiChatStreamEvent =
       replies: string[];
     }
   | {
-      type: "buddy_copy_variants";
-      variants: BuddyCopyVariant[];
-    }
-  | {
       /** Sync with backend manually — see `types/conversationState.ts` */
       type: "conversation_patch";
       state: ConversationState;
@@ -85,7 +79,8 @@ export type ChatUiMessage = {
   ocrText?: string;
   streaming?: boolean;
   recommendedPosts?: RecommendedPostCard[];
-  copyVariants?: BuddyCopyVariant[];
+  /** Post card shown after user successfully publishes from chat */
+  createdPost?: RecommendedPostCard;
   suggestedReplies?: string[];
 };
 

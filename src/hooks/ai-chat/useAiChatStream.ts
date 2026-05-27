@@ -72,6 +72,7 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
     welcomeText,
     apiUrl,
     sessionId: sessionIdOption,
+    activityLegacyId,
     userId: userIdOption ?? getClientUserId(),
     userName: userNameOption ?? getClientUserName(),
     userPhone: userPhoneOption ?? getClientUserPhone(),

@@ -5,7 +5,6 @@ export type NotificationCategory =
   | "comment"
   | "like"
   | "system"
-  | "match"
   | "general";
 
 export function getNotificationCategory(meta?: NotificationMeta): NotificationCategory {
@@ -20,7 +19,6 @@ export function getNotificationCategory(meta?: NotificationMeta): NotificationCa
   ) {
     return "system";
   }
-  if (type === "match_recommendation") return "match";
   return "general";
 }
 

@@ -3,7 +3,9 @@ import { useDidShow } from "@tarojs/taro";
 import { fetchChatSession, clearChatSession } from "../../api/syncApi";
 import { mapHistoryToUiMessages } from "../../utils/aiChatHistory";
 import {
+  createFreshActivitySessionId,
   createFreshSessionId,
+  getOrCreateActivitySessionId,
   getOrCreateSessionId,
   persistSessionId,
 } from "../../utils/session";
@@ -14,20 +16,47 @@ export interface UseChatSessionOptions {
   welcomeText: string;
   apiUrl?: string;
   sessionId?: string;
+  activityLegacyId?: number;
   userId?: string;
   userName?: string;
   userPhone?: string;
 }
 
-export function useChatSession(options: UseChatSessionOptions) {
-  const { welcomeText, apiUrl } = options;
+function resolveSessionId(
+  sessionIdOption: string | undefined,
+  activityLegacyId: number | undefined,
+): string {
+  if (sessionIdOption?.trim()) return sessionIdOption.trim();
+  if (activityLegacyId != null && !Number.isNaN(activityLegacyId)) {
+    return getOrCreateActivitySessionId(activityLegacyId);
+  }
+  return getOrCreateSessionId();
+}
 
-  const sessionIdRef = useRef(options.sessionId ?? getOrCreateSessionId());
+function createFreshSessionIdForScope(
+  activityLegacyId: number | undefined,
+): string {
+  if (activityLegacyId != null && !Number.isNaN(activityLegacyId)) {
+    return createFreshActivitySessionId(activityLegacyId);
+  }
+  return createFreshSessionId();
+}
+
+export function useChatSession(options: UseChatSessionOptions) {
+  const { welcomeText, apiUrl, activityLegacyId } = options;
+  const activityLegacyIdRef = useRef(activityLegacyId);
+
+  const sessionIdRef = useRef(
+    resolveSessionId(options.sessionId, activityLegacyId),
+  );
   const userIdRef = useRef(options.userId);
   const userNameRef = useRef(options.userName);
   const userPhoneRef = useRef(options.userPhone);
+  const historyLoadSeqRef = useRef(0);
 
-  const [messages, setMessages] = useState<ChatUiMessage[]>([]);
+  const [messages, setMessages] = useState<ChatUiMessage[]>(() => [
+    { id: createMessageId(), from: "ai", text: welcomeText },
+  ]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const messagesRef = useRef<ChatUiMessage[]>(messages);
   const isStreamingRef = useRef(false);
@@ -35,6 +64,10 @@ export function useChatSession(options: UseChatSessionOptions) {
   useEffect(() => {
     messagesRef.current = messages;
   }, [messages]);
+
+  useEffect(() => {
+    activityLegacyIdRef.current = activityLegacyId;
+  }, [activityLegacyId]);
 
   const setIsStreamingRef = useCallback((value: boolean) => {
     isStreamingRef.current = value;
@@ -52,32 +85,67 @@ export function useChatSession(options: UseChatSessionOptions) {
       return;
     }
 
+    const requestSessionId = sessionIdRef.current;
+    const loadSeq = ++historyLoadSeqRef.current;
+
     setIsLoadingHistory(true);
     try {
-      const session = await fetchChatSession(sessionIdRef.current);
-      if (isStreamingRef.current) return;
+      const session = await fetchChatSession(requestSessionId);
+      if (
+        loadSeq !== historyLoadSeqRef.current ||
+        requestSessionId !== sessionIdRef.current ||
+        isStreamingRef.current
+      ) {
+        return;
+      }
 
-      if (session.history?.length) {
-        setMessages(
-          mapHistoryToUiMessages(session.history, sessionIdRef.current),
-        );
+      const uiMessages = session.history?.length
+        ? mapHistoryToUiMessages(session.history, requestSessionId)
+        : [];
+      if (uiMessages.length > 0) {
+        setMessages(uiMessages);
       } else {
         showWelcome();
       }
     } catch {
-      if (!isStreamingRef.current) {
+      if (
+        loadSeq === historyLoadSeqRef.current &&
+        requestSessionId === sessionIdRef.current &&
+        !isStreamingRef.current
+      ) {
         showWelcome();
       }
     } finally {
-      setIsLoadingHistory(false);
+      if (loadSeq === historyLoadSeqRef.current) {
+        setIsLoadingHistory(false);
+      }
     }
   }, [apiUrl, showWelcome]);
+
+  useEffect(() => {
+    const nextSessionId = resolveSessionId(
+      options.sessionId,
+      activityLegacyId,
+    );
+    if (sessionIdRef.current === nextSessionId) return;
+
+    historyLoadSeqRef.current += 1;
+    sessionIdRef.current = nextSessionId;
+    showWelcome();
+    void loadSessionHistory();
+  }, [activityLegacyId, loadSessionHistory, options.sessionId, showWelcome]);
+
+  useEffect(() => {
+    void loadSessionHistory();
+  }, [loadSessionHistory]);
 
   useDidShow(() => {
     void loadSessionHistory();
   });
 
   const resetSession = useCallback(async () => {
+    historyLoadSeqRef.current += 1;
+
     const previousSessionId = sessionIdRef.current;
     try {
       await clearChatSession(previousSessionId);
@@ -85,9 +153,11 @@ export function useChatSession(options: UseChatSessionOptions) {
       // ignore network errors; still reset local state
     }
 
-    const nextSessionId = createFreshSessionId();
+    const nextSessionId = createFreshSessionIdForScope(
+      activityLegacyIdRef.current,
+    );
     sessionIdRef.current = nextSessionId;
-    persistSessionId(nextSessionId);
+    persistSessionId(nextSessionId, activityLegacyIdRef.current);
     messagesRef.current = [];
     setMessages([]);
     showWelcome();
@@ -96,7 +166,7 @@ export function useChatSession(options: UseChatSessionOptions) {
 
   const persistSessionFromStream = useCallback((sessionId: string) => {
     sessionIdRef.current = sessionId;
-    persistSessionId(sessionId);
+    persistSessionId(sessionId, activityLegacyIdRef.current);
   }, []);
 
   return {

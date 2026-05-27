@@ -7,7 +7,8 @@ export type ConversationFlow =
   | "idle"
   | "recommend_gate"
   | "publish_confirm"
-  | "clarify_buddy";
+  | "clarify_buddy"
+  | "collect_post_body";
 
 export interface RecommendGateState {
   activityLegacyId?: number;
@@ -18,6 +19,7 @@ export interface RecommendGateState {
 export interface PublishDraftState {
   activityLegacyId?: number;
   draftBody?: string;
+  fromSelfPost?: boolean;
 }
 
 export interface ConversationState {

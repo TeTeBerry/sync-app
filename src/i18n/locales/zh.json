@@ -107,11 +107,10 @@
       "all": "全部",
       "comment": "评论",
       "like": "点赞",
-      "system": "系统",
-      "match": "搭子推荐"
+      "system": "系统"
     },
     "emptyTitle": "暂无消息",
-    "emptyDesc": "评论、点赞、活动变更和搭子推荐会在这里显示。",
+    "emptyDesc": "评论、点赞和活动变更会在这里显示。",
     "someone": "有人",
     "time": {
       "justNow": "刚刚",
@@ -311,8 +310,16 @@
       "welcome": "👋 我是你的 AI 智能助手，帮你发现活动、找队友、规划行程，说出需求，我来搞定。",
       "quickReplies": {
         "findBuddy": "帮我dd",
-        "nearEvents": "查最近活动"
+        "nearEvents": "查最近活动",
+        "findPartner": "找搭子",
+        "popularEvents": "热门活动",
+        "teamUp": "组队队友",
+        "lodging": "住宿同行",
+        "carpool": "拼车同行",
+        "searchPosts": "查组队帖",
+        "createOwn": "自己发帖"
       },
+      "customPostPlaceholder": "描述你的组队需求，如出发地、人数、日期…",
       "searching": "正在为你搜索「{{query}}」相关内容 🔍 已找到 {{count}} 条相关信息。",
       "streamError": "抱歉，回复出错了，请稍后再试。",
       "thinking": "AI 正在思考",

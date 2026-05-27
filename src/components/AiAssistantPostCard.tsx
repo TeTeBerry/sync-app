@@ -8,9 +8,14 @@ import { goEventDetail } from "../utils/route";
 
 export type AiAssistantPostCardProps = {
   post: RecommendedPostCard;
+  /** Emphasize card when showing the user's newly published post */
+  highlight?: boolean;
 };
 
-export const AiAssistantPostCard: FC<AiAssistantPostCardProps> = ({ post }) => {
+export const AiAssistantPostCard: FC<AiAssistantPostCardProps> = ({
+  post,
+  highlight = false,
+}) => {
   const { t } = useTranslation();
   const authorGender = inferAuthorGenderFromPost(post);
   const nameClassName = authorGender
@@ -25,13 +30,23 @@ export const AiAssistantPostCard: FC<AiAssistantPostCardProps> = ({ post }) => {
   };
 
   return (
-    <button type="button" className="s-ai-assistant-post-card" onClick={handleOpen}>
+    <button
+      type="button"
+      className={
+        highlight
+          ? "s-ai-assistant-post-card s-ai-assistant-post-card--mine"
+          : "s-ai-assistant-post-card"
+      }
+      onClick={handleOpen}
+    >
       <div className="s-ai-assistant-post-card__header">
         {post.authorAvatar ? (
           <img
             className="s-ai-assistant-post-card__avatar"
             src={post.authorAvatar}
             alt=""
+            loading="lazy"
+            decoding="async"
           />
         ) : (
           <span className="s-ai-assistant-post-card__avatar s-ai-assistant-post-card__avatar--fallback">

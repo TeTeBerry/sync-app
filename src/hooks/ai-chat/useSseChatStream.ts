@@ -112,6 +112,12 @@ export function useSseChatStream(options: UseSseChatStreamOptions) {
 
         if (event.type === "post_created") {
           onPostCreated?.(event);
+          if (event.post) {
+            finishAiMessage((message) => ({
+              ...message,
+              createdPost: event.post,
+            }));
+          }
           continue;
         }
 
@@ -124,14 +130,6 @@ export function useSseChatStream(options: UseSseChatStreamOptions) {
           finishAiMessage((message) => ({
             ...message,
             recommendedPosts: event.posts,
-          }));
-          continue;
-        }
-
-        if (event.type === "buddy_copy_variants") {
-          finishAiMessage((message) => ({
-            ...message,
-            copyVariants: event.variants,
           }));
           continue;
         }

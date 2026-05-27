@@ -1,4 +1,5 @@
 const SESSION_KEY = "sync_ai_session";
+const ACTIVITY_SESSION_KEY_PREFIX = "sync_ai_session_activity_";
 const USER_NAME_KEY = "sync_user_name";
 const USER_PHONE_KEY = "sync_user_phone";
 const DEFAULT_USER_NAME = "Zara";
@@ -8,27 +9,57 @@ function createSessionId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
-export function createFreshSessionId(): string {
+function activitySessionStorageKey(activityLegacyId: number): string {
+  return `${ACTIVITY_SESSION_KEY_PREFIX}${activityLegacyId}`;
+}
+
+function readStoredSessionId(key: string): string | null {
+  if (typeof sessionStorage === "undefined") return null;
+  return sessionStorage.getItem(key);
+}
+
+function writeStoredSessionId(key: string, sessionId: string): void {
+  if (typeof sessionStorage === "undefined" || !sessionId.trim()) return;
+  sessionStorage.setItem(key, sessionId.trim());
+}
+
+function getOrCreateStoredSessionId(key: string): string {
+  const existing = readStoredSessionId(key);
+  if (existing) return existing;
+
   const id = createSessionId();
-  if (typeof sessionStorage !== "undefined") {
-    sessionStorage.setItem(SESSION_KEY, id);
-  }
+  writeStoredSessionId(key, id);
   return id;
+}
+
+function createFreshStoredSessionId(key: string): string {
+  const id = createSessionId();
+  writeStoredSessionId(key, id);
+  return id;
+}
+
+export function createFreshSessionId(): string {
+  return createFreshStoredSessionId(SESSION_KEY);
 }
 
 export function getOrCreateSessionId(): string {
   if (typeof sessionStorage === "undefined") {
     return `guest-${Date.now()}`;
   }
+  return getOrCreateStoredSessionId(SESSION_KEY);
+}
 
-  const existing = sessionStorage.getItem(SESSION_KEY);
-  if (existing) {
-    return existing;
+export function getOrCreateActivitySessionId(activityLegacyId: number): string {
+  if (typeof sessionStorage === "undefined") {
+    return `guest-activity-${activityLegacyId}-${Date.now()}`;
   }
+  return getOrCreateStoredSessionId(
+    activitySessionStorageKey(activityLegacyId),
+  );
+}
 
-  const id = createSessionId();
-  sessionStorage.setItem(SESSION_KEY, id);
-  return id;
+export function createFreshActivitySessionId(activityLegacyId: number): string {
+  return createFreshStoredSessionId(activitySessionStorageKey(activityLegacyId));
 }
 
 /** 客户端用户标识 */
@@ -66,9 +97,15 @@ export function persistUserName(name: string): void {
   localStorage.setItem(USER_NAME_KEY, name.trim());
 }
 
-export function persistSessionId(sessionId: string): void {
-  if (typeof sessionStorage === "undefined" || !sessionId.trim()) return;
-  sessionStorage.setItem(SESSION_KEY, sessionId.trim());
+export function persistSessionId(
+  sessionId: string,
+  activityLegacyId?: number,
+): void {
+  const key =
+    activityLegacyId != null && !Number.isNaN(activityLegacyId)
+      ? activitySessionStorageKey(activityLegacyId)
+      : SESSION_KEY;
+  writeStoredSessionId(key, sessionId);
 }
 
 /** 清除本地 AI session，配合后端 db:reset 重新开始测试 */

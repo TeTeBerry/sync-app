@@ -22,6 +22,9 @@ export function mapHistoryToUiMessages(
       text: message.content,
       imagePreview: message.imageContext?.source,
       ocrText: message.imageContext?.ocrText,
+      recommendedPosts: message.recommendedPosts,
+      createdPost: message.createdPost,
+      suggestedReplies: message.suggestedReplies,
     }));
 }
 
@@ -33,7 +36,14 @@ export function buildApiChatHistory(
   pendingImage?: string,
 ): AiChatMessage[] {
   const settled = uiMessages.filter(
-    (message) => !message.streaming && (message.text || message.imagePreview || message.ocrText),
+    (message) =>
+      !message.streaming &&
+      (message.text ||
+        message.imagePreview ||
+        message.ocrText ||
+        message.recommendedPosts?.length ||
+        message.createdPost ||
+        message.suggestedReplies?.length),
   );
   const apiMessages: AiChatMessage[] = [];
 
@@ -46,6 +56,9 @@ export function buildApiChatHistory(
       role: message.from === "user" ? "user" : "assistant",
       content: message.text || message.ocrText || "",
       imageContext: resolveImageContext(message),
+      recommendedPosts: message.recommendedPosts,
+      createdPost: message.createdPost,
+      suggestedReplies: message.suggestedReplies,
     });
   }
 

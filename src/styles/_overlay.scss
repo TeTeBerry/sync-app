@@ -82,9 +82,14 @@
     }
 
     &--cancel {
-      background: transparent;
+      background: var(--overlay-muted-surface);
       border: 1px solid var(--border);
       color: var(--muted-foreground);
+
+      &:active {
+        background: var(--overlay-muted-surface-hover);
+        opacity: 1;
+      }
     }
 
     &--confirm {
@@ -96,7 +101,7 @@
     &--danger {
       background: var(--destructive);
       color: var(--destructive-foreground);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.28);
+      box-shadow: 0 0 12px rgba(var(--destructive-rgb), 0.45);
     }
   }
 

@@ -189,10 +189,13 @@
   &__scroll {
     flex: 1;
     overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior-y: contain;
     padding: 16px;
     display: flex;
     flex-direction: column;
     gap: 10px;
+    -webkit-overflow-scrolling: touch;
   }
 
   &__timestamp {
@@ -299,6 +302,7 @@
     gap: 8px;
     margin-top: 8px;
     width: 100%;
+    contain: layout;
   }
 
   &__copy-row {
@@ -310,6 +314,12 @@
 
   &__copy-chip {
     @include chat.chat-inline-chip;
+
+    &--primary {
+      @include chat.chat-send-active;
+      padding: 6px 16px;
+      font-size: 12px;
+    }
   }
 
   &__degraded-banner {
@@ -331,6 +341,7 @@
     display: flex;
     gap: 8px;
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
     background: var(--background);
   }
 
@@ -433,14 +444,16 @@
   &__input {
     flex: 1;
     width: 100%;
-    min-height: 20px;
+    min-height: 48px;
+    box-sizing: border-box;
     background: rgb(38, 38, 40);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 9999px;
     outline: none;
     font-size: 14px;
+    line-height: 20px;
     color: var(--foreground);
-    padding: 11px 16px;
+    padding: 14px 16px;
   }
 
   &__input::placeholder {

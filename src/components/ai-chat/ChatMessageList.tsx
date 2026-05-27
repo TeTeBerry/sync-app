@@ -1,8 +1,8 @@
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { SparklesIcon } from "lucide-react";
-import { Button, cn } from "../ui";
-import type { BuddyCopyVariant, ChatUiMessage } from "../../types/aiChat";
+import { cn } from "../ui";
+import type { ChatUiMessage } from "../../types/aiChat";
 import { ChatUserAvatar } from "./ChatUserAvatar";
 import { RecommendPostCards } from "./RecommendPostCards";
 import { SuggestedReplyChips } from "./SuggestedReplyChips";
@@ -24,7 +24,6 @@ export function ChatMessageList({
   userAvatar,
   userName,
   onOpenImagePreview,
-  onSelectCopyVariant,
   onSelectSuggestedReply,
 }: {
   messages: ChatUiMessage[];
@@ -32,15 +31,64 @@ export function ChatMessageList({
   userAvatar?: string;
   userName: string;
   onOpenImagePreview: (src: string) => void;
-  onSelectCopyVariant: (label: string) => void;
   onSelectSuggestedReply: (reply: string) => void;
 }) {
   const { t } = useTranslation();
+  const scrollRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const [stickToBottom, setStickToBottom] = useState(true);
+  const prevMessageCountRef = useRef(messages.length);
+  const prevLastFromRef = useRef<"ai" | "user" | undefined>(
+    messages[messages.length - 1]?.from,
+  );
+
+  const scrollToBottom = useCallback((behavior: ScrollBehavior = "auto") => {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.scrollTo({ top: el.scrollHeight, behavior });
+  }, []);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+    const root = scrollRef.current;
+    const sentinel = bottomRef.current;
+    if (!root || !sentinel) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setStickToBottom(entry.isIntersecting);
+      },
+      {
+        root,
+        threshold: 0,
+        rootMargin: "0px 0px 64px 0px",
+      },
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, []);
+
+  useLayoutEffect(() => {
+    const prevCount = prevMessageCountRef.current;
+    const last = messages[messages.length - 1];
+    const prevLastFrom = prevLastFromRef.current;
+    const newUserMessage =
+      messages.length > prevCount && last?.from === "user";
+    const userJustSent =
+      last?.from === "user" && prevLastFrom !== "user";
+
+    prevMessageCountRef.current = messages.length;
+    prevLastFromRef.current = last?.from;
+
+    if (newUserMessage || userJustSent) {
+      scrollToBottom("smooth");
+      return;
+    }
+
+    if (!stickToBottom) return;
+
+    scrollToBottom("auto");
+  }, [messages, stickToBottom, isStreaming, scrollToBottom]);
 
   const showTimestampForIndex = useCallback(
     (index: number) => {
@@ -53,7 +101,7 @@ export function ChatMessageList({
   );
 
   return (
-    <div className="s-ai-assistant-chat__scroll">
+    <div ref={scrollRef} className="s-ai-assistant-chat__scroll">
       {messages.map((msg, index) => {
         const isUser = msg.from === "user";
         const timestamp = formatMessageTime(msg.id);
@@ -116,15 +164,14 @@ export function ChatMessageList({
                         </button>
                       ) : null}
                       {msg.text ? <span>{msg.text}</span> : null}
+                      {msg.createdPost ? (
+                        <RecommendPostCards
+                          posts={[msg.createdPost]}
+                          variant="created"
+                        />
+                      ) : null}
                       {msg.recommendedPosts?.length ? (
                         <RecommendPostCards posts={msg.recommendedPosts} />
-                      ) : null}
-                      {msg.copyVariants?.length ? (
-                        <CopyVariantChips
-                          variants={msg.copyVariants}
-                          disabled={isStreaming}
-                          onSelect={onSelectCopyVariant}
-                        />
                       ) : null}
                       {msg.suggestedReplies?.length ? (
                         <SuggestedReplyChips
@@ -143,31 +190,6 @@ export function ChatMessageList({
         );
       })}
       <div ref={bottomRef} />
-    </div>
-  );
-}
-
-function CopyVariantChips({
-  variants,
-  disabled,
-  onSelect,
-}: {
-  variants: BuddyCopyVariant[];
-  disabled?: boolean;
-  onSelect: (label: string) => void;
-}) {
-  return (
-    <div className="s-ai-assistant-chat__copy-row">
-      {variants.map((variant) => (
-        <Button
-          key={variant.style}
-          className="s-ai-assistant-chat__copy-chip"
-          disabled={disabled}
-          onClick={() => onSelect(variant.label)}
-        >
-          {variant.label}
-        </Button>
-      ))}
     </div>
   );
 }

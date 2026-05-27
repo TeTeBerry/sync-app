@@ -24,7 +24,6 @@ function AiAssistantChat({
   initialMessage,
   activityLegacyId,
   onInitialMessageSent,
-  onClearActivityContext,
   onClearReady,
   onMessageCountChange,
   userAvatar,
@@ -33,7 +32,6 @@ function AiAssistantChat({
   initialMessage?: string | null;
   activityLegacyId?: number;
   onInitialMessageSent?: () => void;
-  onClearActivityContext?: () => void;
   onClearReady?: (clear: () => Promise<void>, isBusy: boolean) => void;
   onMessageCountChange?: (count: number) => void;
   userAvatar?: string;
@@ -117,20 +115,11 @@ function AiAssistantChat({
   const handleClearChat = useCallback(async () => {
     if (isStreaming) return;
     await clearChat();
-    onClearActivityContext?.();
-  }, [clearChat, isStreaming, onClearActivityContext]);
+  }, [clearChat, isStreaming]);
 
   useEffect(() => {
     onClearReady?.(handleClearChat, isStreaming || isLoadingHistory);
   }, [handleClearChat, isLoadingHistory, isStreaming, onClearReady]);
-
-  const handleSelectCopyVariant = useCallback(
-    (label: string) => {
-      if (isStreaming) return;
-      void send({ text: `文案-${label}` });
-    },
-    [isStreaming, send],
-  );
 
   const handleSelectSuggestedReply = useCallback(
     (reply: string) => {
@@ -152,13 +141,13 @@ function AiAssistantChat({
         userAvatar={userAvatar}
         userName={userName}
         onOpenImagePreview={setPreviewImage}
-        onSelectCopyVariant={handleSelectCopyVariant}
         onSelectSuggestedReply={handleSelectSuggestedReply}
       />
       <ChatComposer
         input={input}
         pendingImage={pendingImage}
         isStreaming={isStreaming}
+        activityLegacyId={activityLegacyId}
         onInputChange={setInput}
         onSubmit={submit}
         onPendingImageChange={setPendingImage}
@@ -197,11 +186,6 @@ const AiAssistantPage: FC = () => {
 
   const profileUserData = useResolvedProfile();
 
-  const handleClearActivityContext = useCallback(() => {
-    setActiveActivityLegacyId(null);
-    setPendingInitialMessage(null);
-  }, [setActiveActivityLegacyId]);
-
   const handleClearReady = useCallback(
     (clear: () => Promise<void>, isBusy: boolean) => {
       setClearChatFn(() => clear);
@@ -219,6 +203,10 @@ const AiAssistantPage: FC = () => {
       setActiveActivityLegacyId(intent.activityLegacyId);
     }
   }, [consumeAiAssistantIntent, setActiveActivityLegacyId]);
+
+  useEffect(() => {
+    applyAiAssistantIntent();
+  }, [applyAiAssistantIntent]);
 
   useDidShow(applyAiAssistantIntent);
 
@@ -291,7 +279,6 @@ const AiAssistantPage: FC = () => {
             initialMessage={pendingInitialMessage}
             activityLegacyId={activityLegacyId}
             onInitialMessageSent={() => setPendingInitialMessage(null)}
-            onClearActivityContext={handleClearActivityContext}
             onClearReady={handleClearReady}
             onMessageCountChange={setMessageCount}
             userAvatar={profileUserData.avatar}

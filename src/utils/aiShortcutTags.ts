@@ -1,7 +1,7 @@
 import Taro from "@tarojs/taro";
 
 const STORAGE_KEY = "sync_ai_shortcut_tag_usage";
-const DISPLAY_COUNT = 4;
+const DISPLAY_COUNT = 6;
 
 /** 可选快捷标签池（含默认展示项） */
 export const AI_SHORTCUT_TAG_POOL = [

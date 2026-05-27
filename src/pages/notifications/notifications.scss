@@ -78,10 +78,6 @@
   padding: 4px 0;
   -webkit-tap-highlight-color: transparent;
 
-  &--danger {
-    color: rgba(255, 120, 120, 0.92);
-  }
-
   &:disabled {
     opacity: 0.4;
     cursor: default;
@@ -158,11 +154,6 @@
     color: #ffc107;
   }
 
-  &--match {
-    background: rgba(168, 85, 247, 0.15);
-    color: #a855f7;
-  }
-
   &--general {
     background: rgba(255, 255, 255, 0.08);
     color: rgba(255, 255, 255, 0.72);
@@ -225,7 +216,7 @@
   -webkit-tap-highlight-color: transparent;
 
   &:active {
-    color: rgba(255, 120, 120, 0.92);
+    color: rgba(var(--destructive-rgb), 0.92);
   }
 }
 

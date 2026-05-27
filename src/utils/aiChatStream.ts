@@ -1,4 +1,4 @@
-import type { AiChatMessage, AiChatStreamEvent, ChatUiMessage, RecommendedPostCard, BuddyCopyVariant } from "../types/aiChat";
+import type { AiChatMessage, AiChatStreamEvent, ChatUiMessage, RecommendedPostCard } from "../types/aiChat";
 import type { ConversationState } from "../types/conversationState";
 
 function parseSseDataLine(line: string): AiChatStreamEvent | null {
@@ -35,12 +35,20 @@ function parseSseDataLine(line: string): AiChatStreamEvent | null {
       };
     }
     if (json.type === "post_created" && typeof json.postId === "string") {
+      const post =
+        json.post && typeof json.post === "object"
+          ? (json.post as RecommendedPostCard)
+          : undefined;
       return {
         type: "post_created",
         postId: json.postId,
         activityLegacyId:
           typeof json.activityLegacyId === "number"
             ? json.activityLegacyId
+            : undefined,
+        post:
+          post && typeof post.postId === "string" && typeof post.snippet === "string"
+            ? post
             : undefined,
       };
     }
@@ -66,12 +74,6 @@ function parseSseDataLine(line: string): AiChatStreamEvent | null {
       return {
         type: "suggested_replies",
         replies: json.replies.filter((item): item is string => typeof item === "string"),
-      };
-    }
-    if (json.type === "buddy_copy_variants" && Array.isArray(json.variants)) {
-      return {
-        type: "buddy_copy_variants",
-        variants: json.variants as BuddyCopyVariant[],
       };
     }
     if (json.type === "conversation_patch" && json.state && typeof json.state === "object") {

@@ -1,17 +1,47 @@
-import React, { type KeyboardEvent, useCallback } from "react";
+import React, { type KeyboardEvent, useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import Taro from "@tarojs/taro";
 import { ImagePlusIcon, SendIcon, ShieldIcon, XIcon } from "lucide-react";
 import { Button, Input, cn } from "../ui";
-import { normalizeAiShortcutTag } from "../../utils/aiShortcutTags";
+import {
+  getTopAiShortcutTags,
+  normalizeAiShortcutTag,
+  recordAiShortcutTagUse,
+  type AiShortcutTag,
+} from "../../utils/aiShortcutTags";
 import { ChatImageTooLargeError, pickAndCompressChatImage } from "../../utils/chatImage";
+import { useAiChatStore } from "../../stores/aiChatStore";
 
-const quickReplyKeys = [`findBuddy`, `nearEvents`] as const;
+const SHORTCUT_TAG_LABEL_KEYS: Record<AiShortcutTag, string> = {
+  组队队友: "teamUp",
+  住宿同行: "lodging",
+  拼车同行: "carpool",
+};
+
+const globalQuickChips = [
+  { key: "findBuddy", submitText: "帮我dd" },
+  { key: "nearEvents", submitText: "查最近活动" },
+  { key: "findPartner", submitText: "帮我找搭子" },
+  { key: "popularEvents", submitText: "查最近活动" },
+] as const;
+
+const activityActionChips = [
+  { key: "createOwn", submitText: "自己发帖" },
+  { key: "searchPosts", submitText: "看看有没有组队帖" },
+] as const;
+
+type QuickChip = {
+  key: string;
+  label: string;
+  submitText: string;
+  isShortcutTag?: boolean;
+};
 
 export function ChatComposer({
   input,
   pendingImage,
   isStreaming,
+  activityLegacyId,
   onInputChange,
   onSubmit,
   onPendingImageChange,
@@ -20,12 +50,50 @@ export function ChatComposer({
   input: string;
   pendingImage: string | null;
   isStreaming: boolean;
+  activityLegacyId?: number;
   onInputChange: (value: string) => void;
   onSubmit: (text: string, image?: string | null) => void;
   onPendingImageChange: (image: string | null) => void;
   onOpenImagePreview: (src: string) => void;
 }) {
   const { t } = useTranslation();
+  const [shortcutTags, setShortcutTags] = useState(() => getTopAiShortcutTags());
+  const conversationFlow = useAiChatStore((state) => state.conversationState?.flow);
+
+  const inputPlaceholder =
+    conversationFlow === "collect_post_body"
+      ? t("aiAssistant.chat.customPostPlaceholder")
+      : t("aiAssistant.chat.placeholder");
+
+  const quickChips = useMemo((): QuickChip[] => {
+    if (activityLegacyId != null && !Number.isNaN(activityLegacyId)) {
+      const tagChips: QuickChip[] = shortcutTags.map((tag) => {
+        const labelKey = SHORTCUT_TAG_LABEL_KEYS[tag as AiShortcutTag];
+        return {
+          key: `tag-${tag}`,
+          label: labelKey
+            ? t(`aiAssistant.chat.quickReplies.${labelKey}`)
+            : tag,
+          submitText: normalizeAiShortcutTag(tag),
+          isShortcutTag: true,
+        };
+      });
+
+      const actionChips: QuickChip[] = activityActionChips.map((chip) => ({
+        key: chip.key,
+        label: t(`aiAssistant.chat.quickReplies.${chip.key}`),
+        submitText: chip.submitText,
+      }));
+
+      return [actionChips[0], ...tagChips, ...actionChips.slice(1)];
+    }
+
+    return globalQuickChips.map((chip) => ({
+      key: chip.key,
+      label: t(`aiAssistant.chat.quickReplies.${chip.key}`),
+      submitText: chip.submitText,
+    }));
+  }, [activityLegacyId, shortcutTags, t]);
 
   const handlePickImage = useCallback(async () => {
     if (isStreaming) return;
@@ -54,23 +122,30 @@ export function ChatComposer({
     [input, onSubmit],
   );
 
+  const handleQuickChipClick = useCallback(
+    (chip: QuickChip) => {
+      if (chip.isShortcutTag) {
+        recordAiShortcutTagUse(chip.submitText);
+        setShortcutTags(getTopAiShortcutTags());
+      }
+      onSubmit(chip.submitText);
+    },
+    [onSubmit],
+  );
+
   const canSend = Boolean(input.trim() || pendingImage) && !isStreaming;
 
   return (
     <>
       <div className="s-ai-assistant-chat__quick-row s-scrollbar-none">
-        {quickReplyKeys.map((key) => (
+        {quickChips.map((chip) => (
           <Button
-            key={key}
+            key={chip.key}
             className="s-ai-assistant-chat__quick-chip"
             disabled={isStreaming}
-            onClick={() =>
-              onSubmit(
-                normalizeAiShortcutTag(t(`aiAssistant.chat.quickReplies.${key}`)),
-              )
-            }
+            onClick={() => handleQuickChipClick(chip)}
           >
-            {t(`aiAssistant.chat.quickReplies.${key}`)}
+            {chip.label}
           </Button>
         ))}
       </div>
@@ -111,7 +186,7 @@ export function ChatComposer({
             type="text"
             value={input}
             disabled={isStreaming}
-            placeholder={t("aiAssistant.chat.placeholder")}
+            placeholder={inputPlaceholder}
             onChange={(e) => onInputChange(e.target.value)}
             onKeyDown={onKeyDown}
           />

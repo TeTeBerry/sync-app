@@ -6,7 +6,6 @@ import {
   BellIcon,
   HeartIcon,
   MessageCircleIcon,
-  SparklesIcon,
   MegaphoneIcon,
   Trash2Icon,
 } from "lucide-react";
@@ -30,7 +29,7 @@ import { navigateFromNotification, ROUTES } from "../../utils/route";
 
 type CategoryFilter = "all" | NotificationCategory;
 
-const CATEGORY_TABS: CategoryFilter[] = ["all", "comment", "like", "system", "match"];
+const CATEGORY_TABS: CategoryFilter[] = ["all", "comment", "like", "system"];
 
 function NotificationIcon({
   category,
@@ -44,8 +43,6 @@ function NotificationIcon({
       return <HeartIcon {...iconProps} />;
     case "comment":
       return <MessageCircleIcon {...iconProps} />;
-    case "match":
-      return <SparklesIcon {...iconProps} />;
     case "system":
       return <MegaphoneIcon {...iconProps} />;
     default:
@@ -80,7 +77,6 @@ const NotificationsPage: React.FC = () => {
       comment: 0,
       like: 0,
       system: 0,
-      match: 0,
       general: 0,
     };
     for (const item of notifications) {
@@ -102,7 +98,6 @@ const NotificationsPage: React.FC = () => {
       title: t("notifications.clearAllConfirmTitle"),
       message: t("notifications.clearAllConfirmMessage"),
       confirmText: t("notifications.clearAll"),
-      danger: true,
     });
     if (!confirmed) return;
     await clearAllNotificationsAndInvalidate(queryClient);
@@ -116,7 +111,6 @@ const NotificationsPage: React.FC = () => {
         title: t("notifications.deleteConfirmTitle"),
         message: t("notifications.deleteConfirmMessage"),
         confirmText: t("notifications.delete"),
-        danger: true,
       });
       if (!confirmed) return;
       await deleteNotificationAndInvalidate(queryClient, item.id);
@@ -175,7 +169,7 @@ const NotificationsPage: React.FC = () => {
             )}
             <button
               type="button"
-              className="s-notifications__toolbar-btn s-notifications__toolbar-btn--danger"
+              className="s-notifications__toolbar-btn"
               onClick={() => void handleClearAll()}
             >
               {t("notifications.clearAll")}

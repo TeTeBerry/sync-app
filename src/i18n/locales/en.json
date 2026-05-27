@@ -144,11 +144,10 @@
       "all": "All",
       "comment": "Comments",
       "like": "Likes",
-      "system": "System",
-      "match": "Buddy matches"
+      "system": "System"
     },
     "emptyTitle": "No messages yet",
-    "emptyDesc": "Comments, likes, activity updates, and buddy matches will appear here.",
+    "emptyDesc": "Comments, likes, and activity updates will appear here.",
     "someone": "Someone",
     "time": {
       "justNow": "Just now",
@@ -399,8 +398,16 @@
       "welcome": "👋 I'm your AI festival assistant — discover events, find crew, and plan your trip. Just tell me what you need!",
       "quickReplies": {
         "findBuddy": "Help me group up",
-        "nearEvents": "Nearby events"
+        "nearEvents": "Recent events",
+        "findPartner": "Find a buddy",
+        "popularEvents": "Popular events",
+        "teamUp": "Find teammates",
+        "lodging": "Share lodging",
+        "carpool": "Share rides",
+        "searchPosts": "Browse team posts",
+        "createOwn": "Post my own"
       },
+      "customPostPlaceholder": "Describe your group-up needs — departure city, headcount, dates…",
       "searching": "Searching for \"{{query}}\" 🔍 Found {{count}} relevant results.",
       "streamError": "Sorry, something went wrong. Please try again.",
       "thinking": "AI is thinking",
