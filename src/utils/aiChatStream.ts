@@ -139,6 +139,7 @@ export interface StreamAiChatOptions {
   userPhone?: string;
   activityLegacyId?: number;
   image?: string;
+  images?: string[];
   signal?: AbortSignal;
   headers?: Record<string, string>;
 }
@@ -161,6 +162,7 @@ export async function* streamAiChatRequest(
       userPhone: options.userPhone,
       activityLegacyId: options.activityLegacyId,
       image: options.image,
+      images: options.images,
     }),
     signal: options.signal,
   });

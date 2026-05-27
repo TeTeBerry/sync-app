@@ -6,13 +6,15 @@ import {
   ThumbsUpIcon,
   Trash2Icon,
 } from "lucide-react";
-import { useCallback, useState, type FC } from "react";
+import { memo, useCallback, useState, type FC } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "./ui";
 import { MetaRow } from "./MetaRow";
 import { PostCommentSection } from "./PostCommentSection";
 import { PostActionMenu } from "./PostActionMenu";
 import { PostStatusBadge } from "./PostStatusBadge";
+import { ContentTypeBadge } from "./ContentTypeBadge";
+import { PostImageGrid, PostImageCount } from "./PostImageGrid";
 import { useCurrentUserQuery } from "../hooks/useSyncApi";
 import { isCurrentUserPostAuthor } from "../utils/postOwnership";
 import type { ActivityPost } from "../pages/index/homeData";
@@ -24,12 +26,12 @@ export type FeedPostListProps = {
   onCommentSubmitted?: () => void;
 };
 
-export const FeedPostList: FC<FeedPostListProps> = ({
+function FeedPostListInner({
   items,
   onDelete,
   onLike,
   onCommentSubmitted,
-}) => {
+}: FeedPostListProps) {
   const { t } = useTranslation();
   const { data: currentUser } = useCurrentUserQuery();
   const [expandedCommentPostIds, setExpandedCommentPostIds] = useState<Set<string>>(
@@ -63,6 +65,7 @@ export const FeedPostList: FC<FeedPostListProps> = ({
                   <p>
                     <strong>{post.name}</strong>
                     <span>{post.handle}</span>
+                    {post.images?.length ? <PostImageCount count={post.images.length} /> : null}
                   </p>
                   <div className="s-home-post__head-actions">
                     <PostStatusBadge status={post.status} variant="home" />
@@ -79,6 +82,10 @@ export const FeedPostList: FC<FeedPostListProps> = ({
             </div>
 
             <p className="s-home-post__text">{post.body}</p>
+
+            {post.images?.length ? <PostImageGrid images={post.images} fullBleed /> : null}
+
+            <ContentTypeBadge types={post.contentTypes} />
 
             <div className="s-home-post__footer">
               <span className="s-home-post__time">{post.time}</span>
@@ -122,4 +129,6 @@ export const FeedPostList: FC<FeedPostListProps> = ({
       })}
     </div>
   );
-};
+}
+
+export const FeedPostList = memo(FeedPostListInner);

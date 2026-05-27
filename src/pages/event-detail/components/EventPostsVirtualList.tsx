@@ -21,6 +21,7 @@ type EventPostsVirtualListProps = {
   onToggleComments: EventPostCardProps["onToggleComments"];
   onDelete: EventPostCardProps["onDelete"];
   onApply: EventPostCardProps["onApply"];
+  onComplete?: EventPostCardProps["onComplete"];
   onCommentSubmitted: EventPostCardProps["onCommentSubmitted"];
 };
 
@@ -36,6 +37,7 @@ export function EventPostsVirtualList({
   onToggleComments,
   onDelete,
   onApply,
+  onComplete,
   onCommentSubmitted,
 }: EventPostsVirtualListProps) {
   const virtualizer = useVirtualizer({
@@ -68,44 +70,50 @@ export function EventPostsVirtualList({
 
   return (
     <div
-      className="s-event-detail__posts-virtual"
-      style={{ height: `${virtualizer.getTotalSize()}px` }}
+      style={{
+        height: `${virtualizer.getTotalSize()}px`,
+        position: "relative",
+        width: "100%",
+      }}
     >
-      <div className="s-event-detail__posts-inner">
-        {virtualItems.map((virtualRow) => {
-          const item = items[virtualRow.index];
-          if (!item) return null;
+      {virtualItems.map((virtualRow) => {
+        const item = items[virtualRow.index];
+        if (!item) return null;
 
-          const highlighted = item.post.id === highlightPostId;
+        const highlighted = item.post.id === highlightPostId;
 
-          return (
-            <div
-              key={item.post.id}
-              data-index={virtualRow.index}
-              ref={virtualizer.measureElement}
-              className="s-event-detail__posts-row"
-              style={{
-                transform: `translateY(${virtualRow.start}px)`,
-              }}
-            >
-              <EventPostCard
-                post={item.post}
-                publishTimeLabel={item.publishTimeLabel}
-                highlighted={highlighted}
-                commentsExpanded={expandedCommentPostIds.has(item.post.id)}
-                applied={appliedPostIds.has(item.post.id)}
-                apiEnabled={apiEnabled}
-                currentUserAvatar={currentUserAvatar}
-                onLike={onLike}
-                onToggleComments={onToggleComments}
-                onDelete={onDelete}
-                onApply={onApply}
-                onCommentSubmitted={onCommentSubmitted}
-              />
-            </div>
-          );
-        })}
-      </div>
+        return (
+          <div
+            key={virtualRow.key}
+            data-index={virtualRow.index}
+            ref={virtualizer.measureElement}
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "100%",
+              minHeight: `${virtualRow.size}px`,
+              transform: `translateY(${virtualRow.start}px)`,
+            }}
+          >
+            <EventPostCard
+              post={item.post}
+              publishTimeLabel={item.publishTimeLabel}
+              highlighted={highlighted}
+              commentsExpanded={expandedCommentPostIds.has(item.post.id)}
+              applied={appliedPostIds.has(item.post.id)}
+              apiEnabled={apiEnabled}
+              currentUserAvatar={currentUserAvatar}
+              onLike={onLike}
+              onToggleComments={onToggleComments}
+              onDelete={onDelete}
+              onApply={onApply}
+              onComplete={onComplete}
+              onCommentSubmitted={onCommentSubmitted}
+            />
+          </div>
+        );
+      })}
     </div>
   );
 }

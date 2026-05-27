@@ -20,4 +20,6 @@ export type ActivityPost = {
   comments: number;
   avatar: string;
   status: "招募中" | "已组队" | "已隐藏";
+  contentTypes?: string[];
+  images?: string[];
 };

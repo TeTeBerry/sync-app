@@ -21,14 +21,7 @@ import type {
   UpdateCurrentUserPayload,
   UpdatePostPayload,
 } from "../types/backend";
-import { getClientUserId, getClientUserName } from "../utils/session";
-
-function ownerParams() {
-  return {
-    userId: getClientUserId(),
-    authorName: getClientUserName(),
-  };
-}
+import { ownerParams } from "../utils/session";
 
 export function fetchActivities() {
   return apiGet<BackendActivity[]>("/activities");

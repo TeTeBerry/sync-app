@@ -188,7 +188,7 @@ export function useSseChatStream(options: UseSseChatStreamOptions) {
       aiMsgId: string,
       abortSignal: AbortSignal,
     ) => {
-      const { text, image } = payload;
+      const { text, image, images } = payload;
       const trimmed = text.trim();
       const activityId = activityLegacyIdRef.current;
       const activityHeaders =
@@ -231,6 +231,7 @@ export function useSseChatStream(options: UseSseChatStreamOptions) {
               userPhone: userPhoneRef.current,
               activityLegacyId: activityId,
               image,
+              images,
               signal: abortSignal,
               headers: {
                 ...activityHeaders,

@@ -118,16 +118,21 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
   const send = useCallback(
     async (payload: string | SendChatOptions) => {
       const sendOptions = typeof payload === "string" ? { text: payload } : payload;
-      const { text, image } = sendOptions;
+      const { text, image, images } = sendOptions;
       const trimmed = text.trim();
-      if ((!trimmed && !image) || isStreaming) return;
+      const hasImages = Boolean(image) || (images && images.length > 0);
+      if (!trimmed && !hasImages) return;
+
+      // Use messagesRef for synchronous concurrency guard (React state is async)
+      const lastMsg = messagesRef.current[messagesRef.current.length - 1];
+      if (lastMsg?.streaming) return;
 
       const userMsg: ChatUiMessage = {
         id: createMessageId(),
         from: "user",
         text: trimmed,
-        imagePreview: image,
-        ocrText: image ? trimmed : undefined,
+        imagePreview: image ?? images?.[0],
+        ocrText: hasImages ? trimmed : undefined,
       };
       const aiMsgId = createMessageId();
       const baseMessages = messagesRef.current;
@@ -154,7 +159,7 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
         abortRef.current = null;
       }
     },
-    [isStreaming, messagesRef, runStream, setMessages],
+    [messagesRef, runStream, setMessages],
   );
 
   const clearChat = useCallback(async () => {

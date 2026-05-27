@@ -28,6 +28,7 @@ const Events: React.FC = () => {
   const { t } = useTranslation();
   const { events, isLoading, isError, refetch } = useEventList();
   const [activeTab, setActiveTab] = useState<EventFilterTab>("upcoming");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const openDetail = useCallback((legacyId: string) => {
     const id = Number(legacyId);
@@ -37,11 +38,18 @@ const Events: React.FC = () => {
   }, []);
 
   const filteredEvents = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
     return events.filter((event) => {
       const status = getActivityStatusFromActivity(event.date, event.title);
-      return matchesEventFilter(status, activeTab);
+      if (!matchesEventFilter(status, activeTab)) return false;
+      if (!q) return true;
+      return (
+        event.title.toLowerCase().includes(q) ||
+        event.location.toLowerCase().includes(q) ||
+        event.date.includes(q)
+      );
     });
-  }, [activeTab, events]);
+  }, [activeTab, events, searchQuery]);
 
   const filterTabs: Array<{ id: EventFilterTab; label: string }> = [
     { id: "all", label: t("common.all") },
@@ -69,7 +77,23 @@ const Events: React.FC = () => {
         <div className="s-events__toolbar">
           <div className="s-events__search" aria-label={t("events.searchPlaceholder")}>
             <SearchIcon size={18} className="s-events__search-icon" aria-hidden />
-            <span className="s-events__search-placeholder">{t("events.searchPlaceholder")}</span>
+            <input
+              type="text"
+              className="s-events__search-input"
+              placeholder={t("events.searchPlaceholder")}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                className="s-events__search-clear"
+                onClick={() => setSearchQuery("")}
+                aria-label={t("common.clear")}
+              >
+                ×
+              </button>
+            )}
           </div>
 
           <div className="s-events__tabs" role="tablist" aria-label={t("events.tabsLabel")}>

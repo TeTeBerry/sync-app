@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { ChevronLeftIcon, MapIcon, SendIcon, SparklesIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { goAiAssistant, goBack, ROUTES } from "../../utils/route";
+import { go, goAiAssistant, ROUTES } from "../../utils/route";
 import BottomNav from "../../components/BottomNav";
 import { useConfirmDialog } from "../../hooks/useConfirmDialog";
 import { useDeferredMount } from "../../hooks/useDeferredMount";
@@ -13,6 +13,7 @@ import {
   applyToPostAndInvalidate,
   deletePostAndInvalidate,
   likePostAndInvalidate,
+  updatePostAndInvalidate,
   useActivityDetailQuery,
   useCurrentUserQuery,
   useEventPostsQuery,
@@ -96,6 +97,8 @@ const EventDetailPage = () => {
         comments: item.comments,
         avatar: item.avatar,
         status: item.status,
+        contentTypes: item.contentTypes,
+        images: item.images,
       };
       const publishTimeLabel = post.createdAt
         ? formatPostPublishTime(post.createdAt, t, i18n.language)
@@ -171,6 +174,29 @@ const EventDetailPage = () => {
     void postsQuery.refetch();
   }, [postsQuery]);
 
+  const handleCompletePost = useCallback(
+    async (postId: string) => {
+      const ok = await confirm({
+        title: "确认标记为已组队",
+        message: "标记后该帖子将结束招募，同类型帖子可重新发布。确定要继续吗？",
+        confirmText: "确认",
+      });
+      if (!ok) return;
+      if (!apiEnabled) {
+        void Taro.showToast({ title: "已标记为已组队", icon: "success" });
+        return;
+      }
+      void updatePostAndInvalidate(queryClient, postId, { status: "completed" })
+        .then(() => {
+          void Taro.showToast({ title: "已标记为已组队", icon: "success" });
+        })
+        .catch(() => {
+          void Taro.showToast({ title: "标记失败", icon: "none" });
+        });
+    },
+    [apiEnabled, confirm, queryClient],
+  );
+
   const bumpShortcutTagUsage = useCallback((tag: string) => {
     recordAiShortcutTagUse(tag);
     setShortcutTags(getTopAiShortcutTags());
@@ -182,6 +208,7 @@ const EventDetailPage = () => {
       if (trimmed && isAiShortcutTag(trimmed)) {
         bumpShortcutTagUsage(trimmed);
       }
+      setPrompt("");
       goAiAssistant({
         ...(trimmed ? { initialMessage: trimmed } : {}),
         activityLegacyId: Number.isNaN(eventId) ? undefined : eventId,
@@ -256,7 +283,7 @@ const EventDetailPage = () => {
             type="button"
             className="s-event-detail__back"
             aria-label="返回"
-            onClick={() => goBack(ROUTES.HOME)}
+            onClick={() => go(ROUTES.HOME)}
           >
             <ChevronLeftIcon size={22} />
           </button>
@@ -329,6 +356,7 @@ const EventDetailPage = () => {
               onToggleComments={togglePostComments}
               onDelete={handleDeletePost}
               onApply={handleApply}
+              onComplete={handleCompletePost}
               onCommentSubmitted={handleCommentSubmitted}
             />
           )}

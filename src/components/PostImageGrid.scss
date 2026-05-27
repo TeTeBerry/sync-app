@@ -1,0 +1,155 @@
+.s-post-image-grid {
+  display: grid;
+  gap: 6px;
+  margin: 0 0 10px;
+  border-radius: 12px;
+  overflow: hidden;
+
+  /* 全宽 modifier：突破父容器 padding */
+  &--full-bleed {
+    margin-left: -16px;
+    margin-right: -16px;
+    margin-top: 4px;
+    margin-bottom: 14px;
+    border-radius: 0;
+    gap: 8px;
+
+    .s-post-image-grid__featured {
+      border-radius: 0;
+    }
+
+    .s-post-image-grid__thumbs {
+      padding: 0 16px;
+    }
+
+    .s-post-image-grid__thumb {
+      border-radius: 10px;
+    }
+
+    .s-post-image-grid__item {
+      border-radius: 0;
+    }
+  }
+}
+
+.s-post-image-grid__item,
+.s-post-image-grid__featured,
+.s-post-image-grid__thumb {
+  position: relative;
+  padding: 0;
+  border: none;
+  background: #1c1c1e;
+  cursor: pointer;
+  overflow: hidden;
+  display: block;
+
+  &:active {
+    opacity: 0.85;
+  }
+}
+
+.s-post-image-grid__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.s-post-image-grid__more {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+/* Image count badge (top-right of featured image, like screenshot) */
+.s-post-image-grid__count-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  backdrop-filter: blur(4px);
+}
+
+/* ---------- 1-3 images: grid layout ---------- */
+
+/* 1 image: full width, 16:10 ratio */
+.s-post-image-grid--1 {
+  grid-template-columns: 1fr;
+  aspect-ratio: 16 / 10;
+}
+
+/* 2 images: side by side, 1:1 each */
+.s-post-image-grid--2 {
+  grid-template-columns: 1fr 1fr;
+  aspect-ratio: 2 / 1;
+
+  .s-post-image-grid__item {
+    aspect-ratio: 1 / 1;
+  }
+}
+
+/* 3 images: row of 3 */
+.s-post-image-grid--3 {
+  grid-template-columns: repeat(3, 1fr);
+  aspect-ratio: 3 / 1;
+
+  .s-post-image-grid__item {
+    aspect-ratio: 1 / 1;
+  }
+}
+
+/* ---------- 4+ images: featured + thumbnails (screenshot style) ---------- */
+.s-post-image-grid--featured {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  aspect-ratio: unset;
+}
+
+.s-post-image-grid__featured {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.s-post-image-grid__thumbs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  width: 100%;
+}
+
+.s-post-image-grid__thumb {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* Image count badge in post header (legacy, kept for EventPostCard header) */
+.s-post-image-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: 6px;
+  font-size: 12px;
+  color: #8e8e93;
+  vertical-align: middle;
+}

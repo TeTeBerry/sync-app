@@ -19,5 +19,5 @@
     "types": ["webpack-env", "node", "react"],
     "typeRoots": ["./node_modules/@types"]
   },
-  "include": ["./src/**/*", "./config/**/*", "./types/**/*"],
+  "include": ["./src/**/*", "./config/**/*", "./types/**/*"]
 }

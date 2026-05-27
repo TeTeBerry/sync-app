@@ -40,9 +40,11 @@ function AiAssistantChat({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [input, setInput] = useState("");
-  const [pendingImage, setPendingImage] = useState<string | null>(null);
+  const [pendingImages, setPendingImages] = useState<string[]>([]);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const initialMessageSentRef = React.useRef<string | null>(null);
+  const initialMessageHandledRef = React.useRef(false);
+  const submitLockRef = React.useRef(false);
 
   const mockReply = useCallback(
     (query: string) =>
@@ -87,29 +89,38 @@ function AiAssistantChat({
 
   useEffect(() => {
     if (!initialMessage) {
-      initialMessageSentRef.current = null;
+      return;
+    }
+    if (initialMessageHandledRef.current) {
       return;
     }
 
     const trimmed = initialMessage.trim();
     if (!trimmed || isLoadingHistory || isStreaming) return;
-    if (initialMessageSentRef.current === trimmed) return;
 
+    initialMessageHandledRef.current = true;
     initialMessageSentRef.current = trimmed;
     void send({ text: trimmed });
     onInitialMessageSent?.();
   }, [initialMessage, isLoadingHistory, isStreaming, onInitialMessageSent, send]);
 
   const submit = useCallback(
-    (text: string, image?: string | null) => {
+    async (text: string, images?: string[]) => {
+      if (submitLockRef.current) return;
       const trimmed = text.trim();
-      const attachment = image ?? pendingImage;
-      if ((!trimmed && !attachment) || isStreaming) return;
-      setInput("");
-      setPendingImage(null);
-      void send({ text: trimmed, image: attachment ?? undefined });
+      const hasImages = images && images.length > 0;
+      if ((!trimmed && !hasImages) || isStreaming) return;
+
+      submitLockRef.current = true;
+      try {
+        setInput("");
+        setPendingImages([]);
+        await send({ text: trimmed, images: images?.length ? images : undefined });
+      } finally {
+        submitLockRef.current = false;
+      }
     },
-    [isStreaming, pendingImage, send],
+    [isStreaming, send],
   );
 
   const handleClearChat = useCallback(async () => {
@@ -122,9 +133,14 @@ function AiAssistantChat({
   }, [handleClearChat, isLoadingHistory, isStreaming, onClearReady]);
 
   const handleSelectSuggestedReply = useCallback(
-    (reply: string) => {
-      if (isStreaming) return;
-      void send({ text: reply });
+    async (reply: string) => {
+      if (submitLockRef.current || isStreaming) return;
+      submitLockRef.current = true;
+      try {
+        await send({ text: reply });
+      } finally {
+        submitLockRef.current = false;
+      }
     },
     [isStreaming, send],
   );
@@ -145,12 +161,12 @@ function AiAssistantChat({
       />
       <ChatComposer
         input={input}
-        pendingImage={pendingImage}
+        pendingImages={pendingImages}
         isStreaming={isStreaming}
         activityLegacyId={activityLegacyId}
         onInputChange={setInput}
         onSubmit={submit}
-        onPendingImageChange={setPendingImage}
+        onPendingImagesChange={setPendingImages}
         onOpenImagePreview={setPreviewImage}
       />
       <ImagePreviewLightbox
@@ -193,6 +209,10 @@ const AiAssistantPage: FC = () => {
     },
     [],
   );
+
+  const handleInitialMessageSent = useCallback(() => {
+    setPendingInitialMessage(null);
+  }, []);
 
   const applyAiAssistantIntent = useCallback(() => {
     const intent = consumeAiAssistantIntent();
@@ -278,7 +298,7 @@ const AiAssistantPage: FC = () => {
           <AiAssistantChat
             initialMessage={pendingInitialMessage}
             activityLegacyId={activityLegacyId}
-            onInitialMessageSent={() => setPendingInitialMessage(null)}
+            onInitialMessageSent={handleInitialMessageSent}
             onClearReady={handleClearReady}
             onMessageCountChange={setMessageCount}
             userAvatar={profileUserData.avatar}

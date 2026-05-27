@@ -1,4 +1,4 @@
-import React, { type KeyboardEvent, useCallback, useMemo, useState } from "react";
+import React, { type KeyboardEvent, type ClipboardEvent, useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import Taro from "@tarojs/taro";
 import { ImagePlusIcon, SendIcon, ShieldIcon, XIcon } from "lucide-react";
@@ -9,8 +9,13 @@ import {
   recordAiShortcutTagUse,
   type AiShortcutTag,
 } from "../../utils/aiShortcutTags";
-import { ChatImageTooLargeError, pickAndCompressChatImage } from "../../utils/chatImage";
+import {
+  ChatImageTooLargeError,
+  pickAndCompressChatImages,
+  fileToDataUrl,
+} from "../../utils/chatImage";
 import { useAiChatStore } from "../../stores/aiChatStore";
+import { validateChatImageDataUrl } from "../../utils/chatImage";
 
 const SHORTCUT_TAG_LABEL_KEYS: Record<AiShortcutTag, string> = {
   组队队友: "teamUp",
@@ -30,6 +35,8 @@ const activityActionChips = [
   { key: "searchPosts", submitText: "看看有没有组队帖" },
 ] as const;
 
+const MAX_IMAGES = 6;
+
 type QuickChip = {
   key: string;
   label: string;
@@ -39,21 +46,21 @@ type QuickChip = {
 
 export function ChatComposer({
   input,
-  pendingImage,
+  pendingImages,
   isStreaming,
   activityLegacyId,
   onInputChange,
   onSubmit,
-  onPendingImageChange,
+  onPendingImagesChange,
   onOpenImagePreview,
 }: {
   input: string;
-  pendingImage: string | null;
+  pendingImages: string[];
   isStreaming: boolean;
   activityLegacyId?: number;
   onInputChange: (value: string) => void;
-  onSubmit: (text: string, image?: string | null) => void;
-  onPendingImageChange: (image: string | null) => void;
+  onSubmit: (text: string, images?: string[]) => void;
+  onPendingImagesChange: (images: string[]) => void;
   onOpenImagePreview: (src: string) => void;
 }) {
   const { t } = useTranslation();
@@ -95,11 +102,21 @@ export function ChatComposer({
     }));
   }, [activityLegacyId, shortcutTags, t]);
 
-  const handlePickImage = useCallback(async () => {
+  const handlePickImages = useCallback(async () => {
     if (isStreaming) return;
+    const remaining = MAX_IMAGES - pendingImages.length;
+    if (remaining <= 0) {
+      void Taro.showToast({
+        title: `最多上传 ${MAX_IMAGES} 张图片`,
+        icon: "none",
+      });
+      return;
+    }
     try {
-      const dataUrl = await pickAndCompressChatImage();
-      if (dataUrl) onPendingImageChange(dataUrl);
+      const dataUrls = await pickAndCompressChatImages(remaining);
+      if (dataUrls.length) {
+        onPendingImagesChange([...pendingImages, ...dataUrls].slice(0, MAX_IMAGES));
+      }
     } catch (error) {
       if (error instanceof ChatImageTooLargeError) {
         void Taro.showToast({
@@ -110,16 +127,73 @@ export function ChatComposer({
       }
       void Taro.showToast({ title: t("common.requestFailed"), icon: "none" });
     }
-  }, [isStreaming, onPendingImageChange, t]);
+  }, [isStreaming, pendingImages, onPendingImagesChange, t]);
+
+  const removeImage = useCallback(
+    (index: number) => {
+      onPendingImagesChange(pendingImages.filter((_, i) => i !== index));
+    },
+    [pendingImages, onPendingImagesChange],
+  );
 
   const onKeyDown = useCallback(
     (e: KeyboardEvent<HTMLInputElement>) => {
       if (e.key === "Enter") {
         e.preventDefault();
-        onSubmit(input);
+        onSubmit(input, pendingImages);
       }
     },
-    [input, onSubmit],
+    [input, pendingImages, onSubmit],
+  );
+
+  const handlePaste = useCallback(
+    async (e: ClipboardEvent<HTMLInputElement>) => {
+      if (isStreaming) return;
+      const items = e.clipboardData?.items;
+      if (!items) return;
+
+      const imageFiles: File[] = [];
+      for (const item of items) {
+        if (item.type.startsWith("image/")) {
+          const file = item.getAsFile();
+          if (file) imageFiles.push(file);
+        }
+      }
+      if (!imageFiles.length) return;
+
+      e.preventDefault();
+      const remaining = MAX_IMAGES - pendingImages.length;
+      if (remaining <= 0) {
+        void Taro.showToast({
+          title: `最多上传 ${MAX_IMAGES} 张图片`,
+          icon: "none",
+        });
+        return;
+      }
+
+      const toProcess = imageFiles.slice(0, remaining);
+      const newImages: string[] = [];
+
+      for (const file of toProcess) {
+        try {
+          const dataUrl = await fileToDataUrl(file);
+          validateChatImageDataUrl(dataUrl);
+          newImages.push(dataUrl);
+        } catch (error) {
+          if (error instanceof ChatImageTooLargeError) {
+            void Taro.showToast({
+              title: t("aiAssistant.chat.imageTooLarge"),
+              icon: "none",
+            });
+          }
+        }
+      }
+
+      if (newImages.length) {
+        onPendingImagesChange([...pendingImages, ...newImages].slice(0, MAX_IMAGES));
+      }
+    },
+    [isStreaming, pendingImages, onPendingImagesChange, t],
   );
 
   const handleQuickChipClick = useCallback(
@@ -128,12 +202,12 @@ export function ChatComposer({
         recordAiShortcutTagUse(chip.submitText);
         setShortcutTags(getTopAiShortcutTags());
       }
-      onSubmit(chip.submitText);
+      onSubmit(chip.submitText, pendingImages);
     },
-    [onSubmit],
+    [onSubmit, pendingImages],
   );
 
-  const canSend = Boolean(input.trim() || pendingImage) && !isStreaming;
+  const canSend = Boolean(input.trim() || pendingImages.length) && !isStreaming;
 
   return (
     <>
@@ -151,33 +225,37 @@ export function ChatComposer({
       </div>
 
       <div className="s-ai-assistant-chat__composer">
-        {pendingImage ? (
-          <div className="s-ai-assistant-chat__attach-preview">
-            <button
-              type="button"
-              className="s-ai-assistant-chat__attach-preview-btn"
-              aria-label={t("aiAssistant.chat.viewImage")}
-              onClick={() => onOpenImagePreview(pendingImage)}
-            >
-              <img src={pendingImage} alt={t("aiAssistant.chat.uploadedImageAlt")} />
-            </button>
-            <button
-              type="button"
-              className="s-ai-assistant-chat__attach-remove"
-              aria-label={t("aiAssistant.chat.removeImage")}
-              onClick={() => onPendingImageChange(null)}
-            >
-              <XIcon size={14} />
-            </button>
+        {pendingImages.length > 0 ? (
+          <div className="s-ai-assistant-chat__attach-preview-list">
+            {pendingImages.map((src, index) => (
+              <div key={`${src.slice(0, 40)}-${index}`} className="s-ai-assistant-chat__attach-thumb">
+                <button
+                  type="button"
+                  className="s-ai-assistant-chat__attach-preview-btn"
+                  aria-label={t("aiAssistant.chat.viewImage")}
+                  onClick={() => onOpenImagePreview(src)}
+                >
+                  <img src={src} alt={t("aiAssistant.chat.uploadedImageAlt")} />
+                </button>
+                <button
+                  type="button"
+                  className="s-ai-assistant-chat__attach-remove"
+                  aria-label={t("aiAssistant.chat.removeImage")}
+                  onClick={() => removeImage(index)}
+                >
+                  <XIcon size={14} />
+                </button>
+              </div>
+            ))}
           </div>
         ) : null}
         <div className="s-ai-assistant-chat__composer-inner">
           <button
             type="button"
             className="s-ai-assistant-chat__attach-btn"
-            disabled={isStreaming}
+            disabled={isStreaming || pendingImages.length >= MAX_IMAGES}
             aria-label={t("aiAssistant.chat.uploadImage")}
-            onClick={() => void handlePickImage()}
+            onClick={() => void handlePickImages()}
           >
             <ImagePlusIcon size={18} />
           </button>
@@ -189,6 +267,7 @@ export function ChatComposer({
             placeholder={inputPlaceholder}
             onChange={(e) => onInputChange(e.target.value)}
             onKeyDown={onKeyDown}
+            onPaste={handlePaste}
           />
           <Button
             className={cn(
@@ -196,7 +275,7 @@ export function ChatComposer({
               canSend && "s-ai-assistant-chat__send--active",
             )}
             disabled={!canSend}
-            onClick={() => onSubmit(input)}
+            onClick={() => onSubmit(input, pendingImages)}
           >
             <SendIcon size={16} />
           </Button>

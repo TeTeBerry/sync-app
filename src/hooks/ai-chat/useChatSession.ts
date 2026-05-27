@@ -53,6 +53,7 @@ export function useChatSession(options: UseChatSessionOptions) {
   const userNameRef = useRef(options.userName);
   const userPhoneRef = useRef(options.userPhone);
   const historyLoadSeqRef = useRef(0);
+  const hasLoadedHistoryRef = useRef(false);
 
   const [messages, setMessages] = useState<ChatUiMessage[]>(() => [
     { id: createMessageId(), from: "ai", text: welcomeText },
@@ -79,9 +80,11 @@ export function useChatSession(options: UseChatSessionOptions) {
 
   const loadSessionHistory = useCallback(async () => {
     if (isStreamingRef.current) return;
+    if (hasLoadedHistoryRef.current) return;
 
     if (!apiUrl) {
       showWelcome();
+      hasLoadedHistoryRef.current = true;
       return;
     }
 
@@ -107,6 +110,7 @@ export function useChatSession(options: UseChatSessionOptions) {
       } else {
         showWelcome();
       }
+      hasLoadedHistoryRef.current = true;
     } catch {
       if (
         loadSeq === historyLoadSeqRef.current &&
@@ -115,6 +119,7 @@ export function useChatSession(options: UseChatSessionOptions) {
       ) {
         showWelcome();
       }
+      hasLoadedHistoryRef.current = true;
     } finally {
       if (loadSeq === historyLoadSeqRef.current) {
         setIsLoadingHistory(false);
@@ -130,6 +135,7 @@ export function useChatSession(options: UseChatSessionOptions) {
     if (sessionIdRef.current === nextSessionId) return;
 
     historyLoadSeqRef.current += 1;
+    hasLoadedHistoryRef.current = false;
     sessionIdRef.current = nextSessionId;
     showWelcome();
     void loadSessionHistory();
@@ -145,6 +151,7 @@ export function useChatSession(options: UseChatSessionOptions) {
 
   const resetSession = useCallback(async () => {
     historyLoadSeqRef.current += 1;
+    hasLoadedHistoryRef.current = false;
 
     const previousSessionId = sessionIdRef.current;
     try {

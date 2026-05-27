@@ -64,20 +64,45 @@ async function compressPath(path: string): Promise<string> {
 
 /** 选择并压缩聊天图片，返回 JPEG data URL */
 export async function pickAndCompressChatImage(): Promise<string | null> {
+  const images = await pickAndCompressChatImages(1);
+  return images[0] ?? null;
+}
+
+/** 选择并压缩多张聊天图片，返回 JPEG data URL 数组 */
+export async function pickAndCompressChatImages(maxCount = 6): Promise<string[]> {
   const result = await Taro.chooseImage({
-    count: 1,
+    count: maxCount,
     sizeType: ["compressed"],
     sourceType: ["album", "camera"],
   }).catch(() => null);
 
-  const path = result?.tempFilePaths?.[0];
-  if (!path) return null;
+  const paths = result?.tempFilePaths ?? [];
+  if (!paths.length) return [];
 
-  return compressPath(path);
+  const compressed: string[] = [];
+  for (const path of paths) {
+    try {
+      const dataUrl = await compressPath(path);
+      compressed.push(dataUrl);
+    } catch {
+      // skip failed images
+    }
+  }
+  return compressed;
 }
 
 export function validateChatImageDataUrl(dataUrl: string): void {
   if (base64ByteSize(dataUrl) > MAX_IMAGE_BASE64_BYTES) {
     throw new ChatImageTooLargeError();
   }
+}
+
+/** 将 File / Blob 读取为 Data URL */
+export function fileToDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(new Error("FILE_READ_FAILED"));
+    reader.readAsDataURL(file);
+  });
 }

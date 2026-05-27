@@ -49,11 +49,18 @@ import {
   getActivityStatusFromActivity,
   type ActivityDateFields,
 } from "../utils/activityStatus";
+import {
+  invalidateNotifications,
+  invalidateRegistration,
+  invalidatePostFeeds,
+  invalidateAllPosts,
+  invalidatePostComments,
+  invalidateUser,
+  invalidateProfile,
+} from "../utils/queryInvalidation";
 
 export function invalidateNotificationQueries(queryClient: QueryClient) {
-  return Promise.all([
-    queryClient.invalidateQueries({ queryKey: ["notifications"] }),
-  ]);
+  return invalidateNotifications(queryClient);
 }
 
 export function useInvalidateNotificationQueries() {
@@ -344,12 +351,7 @@ export function useCurrentUserQuery() {
 }
 
 export async function invalidateRegistrationQueries(queryClient: QueryClient) {
-  await Promise.all([
-    queryClient.invalidateQueries({ queryKey: ["profile", "activities"] }),
-    queryClient.invalidateQueries({ queryKey: ["profile", "summary"] }),
-    queryClient.invalidateQueries({ queryKey: ["users", "me"] }),
-    queryClient.invalidateQueries({ queryKey: ["home"] }),
-  ]);
+  await invalidateRegistration(queryClient);
 }
 
 export async function registerForActivityAndInvalidate(
@@ -390,18 +392,14 @@ export async function updateCurrentUserAndInvalidate(
 ) {
   const user = await updateCurrentUser(payload);
   await Promise.all([
-    queryClient.invalidateQueries({ queryKey: ["users", "me"] }),
-    queryClient.invalidateQueries({ queryKey: ["profile", "summary"] }),
+    invalidateUser(queryClient),
+    invalidateProfile(queryClient),
   ]);
   return user;
 }
 
 async function invalidatePostFeedQueries(queryClient: QueryClient) {
-  await Promise.all([
-    queryClient.invalidateQueries({ queryKey: ["posts", "popular"] }),
-    queryClient.invalidateQueries({ queryKey: ["posts", "all"] }),
-    queryClient.invalidateQueries({ queryKey: ["posts", "activity"] }),
-  ]);
+  await invalidatePostFeeds(queryClient, false);
 }
 
 export async function blockUserAndInvalidate(
@@ -454,11 +452,7 @@ export function useProfilePostsQuery() {
 }
 
 export async function invalidatePostQueries(queryClient: QueryClient) {
-  await Promise.all([
-    queryClient.invalidateQueries({ queryKey: ["posts"] }),
-    queryClient.invalidateQueries({ queryKey: ["profile", "posts"] }),
-    queryClient.invalidateQueries({ queryKey: ["profile", "summary"] }),
-  ]);
+  await invalidateAllPosts(queryClient);
 }
 
 export async function deletePostAndInvalidate(queryClient: QueryClient, postId: string) {
@@ -519,7 +513,7 @@ export async function commentPostAndInvalidate(
   await Promise.all([
     invalidatePostQueries(queryClient),
     invalidateNotificationQueries(queryClient),
-    queryClient.invalidateQueries({ queryKey: ["posts", postId, "comments"] }),
+    invalidatePostComments(queryClient, postId),
   ]);
 }
 

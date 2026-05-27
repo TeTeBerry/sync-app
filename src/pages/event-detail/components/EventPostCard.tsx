@@ -1,6 +1,7 @@
 import { memo } from "react";
 import {
   CheckIcon,
+  CheckCircle2Icon,
   HeartIcon,
   MessageCircleIcon,
   Share2Icon,
@@ -11,6 +12,8 @@ import { PostActionMenu } from "../../../components/PostActionMenu";
 import { PostCommentSection } from "../../../components/PostCommentSection";
 import { PostStatusBadge } from "../../../components/PostStatusBadge";
 import { ImageWithFallback } from "../../../components/ImageWithFallback";
+import { ContentTypeBadge } from "../../../components/ContentTypeBadge";
+import { PostImageGrid, PostImageCount } from "../../../components/PostImageGrid";
 import { isCurrentUserPostAuthor } from "../../../utils/postOwnership";
 import type { EventDetailPost } from "../../../types/backend";
 
@@ -26,6 +29,7 @@ export type EventPostCardProps = {
   onToggleComments: (postId: string) => void;
   onDelete: (post: EventDetailPost) => void;
   onApply: (postId: string) => void;
+  onComplete?: (postId: string) => void;
   onCommentSubmitted: () => void;
 };
 
@@ -41,6 +45,7 @@ function EventPostCardInner({
   onToggleComments,
   onDelete,
   onApply,
+  onComplete,
   onCommentSubmitted,
 }: EventPostCardProps) {
   const isOwn = isCurrentUserPostAuthor(post.name);
@@ -63,6 +68,7 @@ function EventPostCardInner({
               <strong>{post.name}</strong>
               <span>
                 {post.location} · {publishTimeLabel}
+                {post.images?.length ? <PostImageCount count={post.images.length} /> : null}
               </span>
             </p>
             <div className="s-event-post__head-actions">
@@ -76,6 +82,10 @@ function EventPostCardInner({
       </div>
 
       <p className="s-event-post__text">{post.body}</p>
+
+      {post.images?.length ? <PostImageGrid images={post.images} fullBleed /> : null}
+
+      <ContentTypeBadge types={post.contentTypes} />
 
       <div className="s-event-post__tags">
         {post.tags.map((tag) => (
@@ -107,6 +117,18 @@ function EventPostCardInner({
           <button type="button" className="s-event-post__action">
             <Share2Icon size={16} />
           </button>
+          {isOwn && post.status === "招募中" && onComplete ? (
+            <button
+              type="button"
+              className="s-event-post__action s-event-post__action--complete"
+              aria-label="标记为已组队"
+              title="标记为已组队"
+              onClick={() => onComplete(post.id)}
+            >
+              <CheckCircle2Icon size={16} />
+              招募中
+            </button>
+          ) : null}
           {isOwn ? (
             <button
               type="button"

@@ -397,6 +397,27 @@
     cursor: pointer;
   }
 
+  &__attach-preview-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 10px;
+    max-height: 160px;
+    overflow-y: auto;
+  }
+
+  &__attach-thumb {
+    position: relative;
+    width: 72px;
+    height: 72px;
+    flex-shrink: 0;
+
+    .s-ai-assistant-chat__attach-preview-btn img {
+      width: 72px;
+      height: 72px;
+    }
+  }
+
   &__composer-inner {
     display: flex;
     align-items: center;

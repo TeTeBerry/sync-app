@@ -114,6 +114,8 @@ export interface ProfilePostItem {
   comments: number;
   date: string;
   activityLegacyId?: number;
+  contentTypes?: PostContentType[];
+  images?: string[];
 }
 
 export interface HomeFeedPost {
@@ -130,6 +132,8 @@ export interface HomeFeedPost {
   comments: number;
   avatar: string;
   status: "招募中" | "已组队" | "已隐藏";
+  contentTypes?: PostContentType[];
+  images?: string[];
 }
 
 export interface PostCommentItem {
@@ -151,12 +155,16 @@ export interface EventDetailPost {
   createdAt?: string;
   body: string;
   tags: string[];
+  contentTypes?: PostContentType[];
   likes: number;
   liked?: boolean;
   comments: number;
   avatar: string;
   status: "招募中" | "已组队" | "已隐藏";
+  images?: string[];
 }
+
+export type PostContentType = "team" | "accommodation" | "carpool" | "other";
 
 export interface CreatePostPayload {
   body: string;
@@ -164,6 +172,8 @@ export interface CreatePostPayload {
   eventTitle?: string;
   location?: string;
   tags?: string[];
+  contentTypes?: PostContentType[];
+  images?: string[];
 }
 
 export interface UpdatePostPayload {

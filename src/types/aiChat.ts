@@ -87,6 +87,7 @@ export type ChatUiMessage = {
 export interface SendChatOptions {
   text: string;
   image?: string;
+  images?: string[];
 }
 
 export interface ChatSessionRecord {
