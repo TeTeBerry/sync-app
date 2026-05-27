@@ -3,6 +3,7 @@ import { MapPinIcon } from "lucide-react";
 import type { FC } from "react";
 import { useTranslation } from "react-i18next";
 import type { RecommendedPostCard } from "../types/aiChat";
+import { inferAuthorGenderFromPost } from "../utils/inferAuthorGender";
 import { goEventDetail } from "../utils/route";
 
 export type AiAssistantPostCardProps = {
@@ -11,6 +12,10 @@ export type AiAssistantPostCardProps = {
 
 export const AiAssistantPostCard: FC<AiAssistantPostCardProps> = ({ post }) => {
   const { t } = useTranslation();
+  const authorGender = inferAuthorGenderFromPost(post);
+  const nameClassName = authorGender
+    ? `s-ai-assistant-post-card__name s-ai-assistant-post-card__name--${authorGender}`
+    : "s-ai-assistant-post-card__name";
 
   const handleOpen = () => {
     const activityId = post.activityLegacyId;
@@ -34,7 +39,7 @@ export const AiAssistantPostCard: FC<AiAssistantPostCardProps> = ({ post }) => {
           </span>
         )}
         <div className="s-ai-assistant-post-card__meta">
-          <strong>{post.authorName}</strong>
+          <strong className={nameClassName}>{post.authorName}</strong>
           {post.authorHandle ? <span>{post.authorHandle}</span> : null}
           <small>{post.eventTitle}</small>
         </div>

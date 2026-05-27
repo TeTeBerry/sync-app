@@ -255,7 +255,7 @@
     }
   },
   "events": {
-    "subtitle": "电音活动日历",
+    "subtitle": "电音活动",
     "countLabel": "{{count}} 场活动",
     "searchPlaceholder": "搜索活动、城市...",
     "tabsLabel": "活动筛选",

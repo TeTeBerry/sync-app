@@ -40,9 +40,18 @@
     gap: 2px;
     min-width: 0;
 
-    strong {
+    .s-ai-assistant-post-card__name {
       font-size: 13px;
       line-height: 1.2;
+      color: var(--foreground, #fff);
+
+      &--female {
+        color: var(--primary);
+      }
+
+      &--male {
+        color: var(--secondary);
+      }
     }
 
     span {

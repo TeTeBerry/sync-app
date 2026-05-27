@@ -102,7 +102,11 @@ export function useSseChatStream(options: UseSseChatStreamOptions) {
         }
 
         if (event.type === "message_complete") {
-          typewriter.setFullText(event.content);
+          if (!typewriter.getTarget()) {
+            typewriter.append(event.content);
+          } else {
+            typewriter.ensureTarget(event.content);
+          }
           continue;
         }
 

@@ -2,25 +2,12 @@ import "./event-detail.scss";
 import Taro, { useRouter } from "@tarojs/taro";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import {
-  CheckIcon,
-  ChevronLeftIcon,
-  HeartIcon,
-  MapIcon,
-  MessageCircleIcon,
-  SendIcon,
-  Share2Icon,
-  SparklesIcon,
-  Trash2Icon,
-  UserPlusIcon,
-} from "lucide-react";
+import { ChevronLeftIcon, MapIcon, SendIcon, SparklesIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { goAiAssistant, goBack, ROUTES } from "../../utils/route";
 import BottomNav from "../../components/BottomNav";
-import { PostActionMenu } from "../../components/PostActionMenu";
-import { PostCommentSection } from "../../components/PostCommentSection";
-import { PostStatusBadge } from "../../components/PostStatusBadge";
 import { useConfirmDialog } from "../../hooks/useConfirmDialog";
+import { useDeferredMount } from "../../hooks/useDeferredMount";
 import { useNavigationStore } from "../../stores/navigationStore";
 import {
   applyToPostAndInvalidate,
@@ -31,7 +18,6 @@ import {
   useEventPostsQuery,
 } from "../../hooks/useSyncApi";
 import { isApiEnabled } from "../../constants/api";
-import { isCurrentUserPostAuthor } from "../../utils/postOwnership";
 import type { EventDetailPost } from "../../types/backend";
 import {
   getTopAiShortcutTags,
@@ -43,12 +29,16 @@ import {
   getActivityStatusFromActivity,
 } from "../../utils/activityStatus";
 import { formatPostPublishTime } from "../../utils/formatPostPublishTime";
+import { EventPostsVirtualList } from "./components/EventPostsVirtualList";
 
 const EventDetailPage = () => {
   const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   const router = useRouter();
+  const scrollRef = useRef<HTMLElement | null>(null);
   const activeActivityLegacyId = useNavigationStore((state) => state.activeActivityLegacyId);
+  const feedReady = useDeferredMount(80);
+
   const eventId = useMemo(() => {
     const fromParams = Number(router.params.id);
     if (Number.isFinite(fromParams) && fromParams > 0) {
@@ -66,8 +56,9 @@ const EventDetailPage = () => {
       useNavigationStore.getState().setActiveActivityLegacyId(eventId);
     }
   }, [eventId]);
+
   const activityQuery = useActivityDetailQuery(eventId);
-  const postsQuery = useEventPostsQuery(eventId);
+  const postsQuery = useEventPostsQuery(eventId, { enabled: feedReady });
   const currentUserQuery = useCurrentUserQuery();
   const apiEnabled = isApiEnabled();
   const { confirm, confirmDialog } = useConfirmDialog({
@@ -76,8 +67,9 @@ const EventDetailPage = () => {
   const [prompt, setPrompt] = useState("");
   const [shortcutTags, setShortcutTags] = useState(() => getTopAiShortcutTags());
   const [appliedPostIds, setAppliedPostIds] = useState<Set<string>>(() => new Set());
-  const [expandedCommentPostIds, setExpandedCommentPostIds] = useState<Set<string>>(() => new Set());
-  const highlightedPostRef = useRef<HTMLElement | null>(null);
+  const [expandedCommentPostIds, setExpandedCommentPostIds] = useState<Set<string>>(
+    () => new Set(),
+  );
 
   const title = activityQuery.data?.name;
   const activityDate = activityQuery.data?.date;
@@ -88,38 +80,29 @@ const EventDetailPage = () => {
     return parts.join(" · ");
   }, [activityQuery.data]);
 
-  const posts: EventDetailPost[] = useMemo(() => {
-    return (postsQuery.data ?? []).map((item) => ({
-      id: item.id,
-      userId: item.userId,
-      name: item.name,
-      location: item.location,
-      time: item.time,
-      createdAt: item.createdAt,
-      body: item.body,
-      tags: item.tags,
-      likes: item.likes,
-      liked: item.liked,
-      comments: item.comments,
-      avatar: item.avatar,
-      status: item.status,
-    }));
-  }, [postsQuery.data]);
-
-  const formatPublishTime = useCallback(
-    (post: EventDetailPost) => {
-      if (post.createdAt) {
-        return formatPostPublishTime(post.createdAt, t, i18n.language);
-      }
-      return post.time;
-    },
-    [i18n.language, t],
-  );
-
-  useEffect(() => {
-    if (!highlightPostId || !highlightedPostRef.current) return;
-    highlightedPostRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
-  }, [highlightPostId, posts.length, postsQuery.isLoading]);
+  const postItems = useMemo(() => {
+    return (postsQuery.data ?? []).map((item) => {
+      const post: EventDetailPost = {
+        id: item.id,
+        userId: item.userId,
+        name: item.name,
+        location: item.location,
+        time: item.time,
+        createdAt: item.createdAt,
+        body: item.body,
+        tags: item.tags,
+        likes: item.likes,
+        liked: item.liked,
+        comments: item.comments,
+        avatar: item.avatar,
+        status: item.status,
+      };
+      const publishTimeLabel = post.createdAt
+        ? formatPostPublishTime(post.createdAt, t, i18n.language)
+        : post.time;
+      return { post, publishTimeLabel };
+    });
+  }, [postsQuery.data, i18n.language, t]);
 
   const handleApply = useCallback(
     (postId: string) => {
@@ -128,10 +111,10 @@ const EventDetailPage = () => {
       void applyToPostAndInvalidate(queryClient, postId)
         .then((result) => {
           setAppliedPostIds((prev) => new Set(prev).add(postId));
-          const title = result.alreadyApplied
+          const toastTitle = result.alreadyApplied
             ? t("eventDetail.apply.alreadyApplied")
             : t("eventDetail.apply.success");
-          void Taro.showToast({ title, icon: "success" });
+          void Taro.showToast({ title: toastTitle, icon: "success" });
         })
         .catch(() => void Taro.showToast({ title: t("eventDetail.apply.failed"), icon: "none" }));
     },
@@ -139,11 +122,9 @@ const EventDetailPage = () => {
   );
 
   const handleLikePost = useCallback(
-    (post: EventDetailPost) => {
-      if (!apiEnabled) {
-        return;
-      }
-      void likePostAndInvalidate(queryClient, post.id).catch(() =>
+    (postId: string) => {
+      if (!apiEnabled) return;
+      void likePostAndInvalidate(queryClient, postId).catch(() =>
         void Taro.showToast({ title: t("common.requestFailed"), icon: "none" }),
       );
     },
@@ -185,6 +166,10 @@ const EventDetailPage = () => {
     },
     [apiEnabled, confirm, postsQuery, queryClient, t],
   );
+
+  const handleCommentSubmitted = useCallback(() => {
+    void postsQuery.refetch();
+  }, [postsQuery]);
 
   const bumpShortcutTagUsage = useCallback((tag: string) => {
     recordAiShortcutTagUse(tag);
@@ -236,7 +221,11 @@ const EventDetailPage = () => {
       <div className="s-event-detail">
         <div className="s-event-detail__fallback">
           <p>{t("eventDetail.loadError")}</p>
-          <button type="button" className="s-event-detail__retry" onClick={() => void activityQuery.refetch()}>
+          <button
+            type="button"
+            className="s-event-detail__retry"
+            onClick={() => void activityQuery.refetch()}
+          >
             {t("common.retry")}
           </button>
         </div>
@@ -254,14 +243,21 @@ const EventDetailPage = () => {
     );
   }
 
+  const postsLoading = !feedReady || postsQuery.isLoading;
+
   return (
     <div
       data-cmp="EventDetail"
       className={["s-event-detail", activityStatusCardClass(activityStatus)].filter(Boolean).join(" ")}
     >
-      <main className="s-event-detail__main s-scrollbar-none">
+      <main ref={scrollRef} className="s-event-detail__main s-scrollbar-none">
         <header className="s-event-detail__header">
-          <button type="button" className="s-event-detail__back" aria-label="返回" onClick={() => goBack(ROUTES.HOME)}>
+          <button
+            type="button"
+            className="s-event-detail__back"
+            aria-label="返回"
+            onClick={() => goBack(ROUTES.HOME)}
+          >
             <ChevronLeftIcon size={22} />
           </button>
           <div className="s-event-detail__head-main">
@@ -304,119 +300,43 @@ const EventDetailPage = () => {
                 if (e.key === "Enter" && prompt.trim()) openAi(prompt);
               }}
             />
-            <button type="button" className="s-event-detail__ai-send" aria-label="发送" onClick={() => openAi(prompt)}>
+            <button
+              type="button"
+              className="s-event-detail__ai-send"
+              aria-label="发送"
+              onClick={() => openAi(prompt)}
+            >
               <SendIcon size={14} />
             </button>
           </div>
         </section>
 
         <div className="s-event-detail__posts">
-          {postsQuery.isLoading ? (
+          {postsLoading ? (
             <p className="s-event-detail__empty">{t("eventDetail.loading")}</p>
-          ) : posts.length === 0 ? (
+          ) : postItems.length === 0 ? (
             <p className="s-event-detail__empty">{t("eventDetail.emptyPosts")}</p>
           ) : (
-            posts.map((post) => {
-              const isOwn = isCurrentUserPostAuthor(post.name);
-              const commentsExpanded = expandedCommentPostIds.has(post.id);
-
-              return (
-                <article
-                  key={post.id}
-                  ref={post.id === highlightPostId ? highlightedPostRef : undefined}
-                  className={`s-event-post${post.id === highlightPostId ? " s-event-post--highlight" : ""}`}
-                >
-                  <div className="s-event-post__header">
-                    <img className="s-event-post__avatar" src={post.avatar} alt="" />
-                    <div className="s-event-post__head-main">
-                      <div className="s-event-post__top">
-                        <p>
-                          <strong>{post.name}</strong>
-                          <span>
-                            {post.location} · {formatPublishTime(post)}
-                          </span>
-                        </p>
-                        <div className="s-event-post__head-actions">
-                          <PostStatusBadge status={post.status} variant="event" />
-                          {!isOwn ? (
-                            <PostActionMenu postId={post.id} authorUserId={post.userId} />
-                          ) : null}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <p className="s-event-post__text">{post.body}</p>
-
-                  <div className="s-event-post__tags">
-                    {post.tags.map((tag) => (
-                      <span key={tag} className="s-event-post__tag">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-
-                  <div className="s-event-post__footer">
-                    <div className="s-event-post__actions">
-                      <button
-                        type="button"
-                        className={`s-event-post__action${post.liked ? " s-event-post__action--liked" : ""}`}
-                        onClick={() => handleLikePost(post)}
-                      >
-                        <HeartIcon size={16} fill={post.liked ? "currentColor" : "none"} />
-                        {post.likes}
-                      </button>
-                      <button
-                        type="button"
-                        className={`s-event-post__action${commentsExpanded ? " s-event-post__action--active" : ""}`}
-                        onClick={() => togglePostComments(post.id)}
-                      >
-                        <MessageCircleIcon size={16} />
-                        {post.comments}
-                      </button>
-                      <button type="button" className="s-event-post__action">
-                        <Share2Icon size={16} />
-                      </button>
-                      {isOwn ? (
-                        <button
-                          type="button"
-                          className="s-event-post__action"
-                          aria-label="删除"
-                          onClick={() => handleDeletePost(post)}
-                        >
-                          <Trash2Icon size={16} />
-                        </button>
-                      ) : null}
-                    </div>
-                    {!isOwn && post.status === "招募中" ? (
-                      appliedPostIds.has(post.id) ? (
-                        <button type="button" className="s-event-post__apply s-event-post__apply--done" disabled>
-                          <CheckIcon size={14} />
-                          已申请
-                        </button>
-                      ) : (
-                        <button type="button" className="s-event-post__apply" onClick={() => handleApply(post.id)}>
-                          <UserPlusIcon size={14} />
-                          申请加入
-                        </button>
-                      )
-                    ) : null}
-                  </div>
-
-                  <PostCommentSection
-                    postId={post.id}
-                    expanded={commentsExpanded}
-                    onToggleExpanded={() => togglePostComments(post.id)}
-                    currentUserAvatar={currentUserQuery.data?.avatar}
-                    onCommentSubmitted={() => void postsQuery.refetch()}
-                  />
-                </article>
-              );
-            })
+            <EventPostsVirtualList
+              scrollRef={scrollRef}
+              items={postItems}
+              highlightPostId={highlightPostId}
+              expandedCommentPostIds={expandedCommentPostIds}
+              appliedPostIds={appliedPostIds}
+              apiEnabled={apiEnabled}
+              currentUserAvatar={currentUserQuery.data?.avatar}
+              onLike={handleLikePost}
+              onToggleComments={togglePostComments}
+              onDelete={handleDeletePost}
+              onApply={handleApply}
+              onCommentSubmitted={handleCommentSubmitted}
+            />
           )}
         </div>
 
-        {posts.length > 0 ? <p className="s-event-detail__end">已经到底啦 ~</p> : null}
+        {postItems.length > 0 && !postsLoading ? (
+          <p className="s-event-detail__end">已经到底啦 ~</p>
+        ) : null}
       </main>
       {confirmDialog}
       <BottomNav />

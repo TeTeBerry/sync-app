@@ -301,8 +301,16 @@ export function useAllPostsQuery() {
   };
 }
 
-export function useEventPostsQuery(activityLegacyId?: number) {
-  const enabled = isApiEnabled() && activityLegacyId != null && !Number.isNaN(activityLegacyId);
+export function useEventPostsQuery(
+  activityLegacyId?: number,
+  options?: QueryEnableOptions,
+) {
+  const tabEnabled = options?.enabled ?? true;
+  const enabled =
+    isApiEnabled() &&
+    activityLegacyId != null &&
+    !Number.isNaN(activityLegacyId) &&
+    tabEnabled;
   const userId = getClientUserId();
 
   return useQuery({

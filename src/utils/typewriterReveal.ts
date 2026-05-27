@@ -6,7 +6,9 @@ export interface TypewriterRevealOptions {
 
 export interface TypewriterReveal {
   append: (chunk: string) => void;
-  /** Replace target and show full text immediately (e.g. message_complete SSE). */
+  /** Set final target without skipping animation (e.g. message_complete after delta). */
+  ensureTarget: (text: string) => void;
+  /** Replace target and show full text immediately (errors / abort). */
   setFullText: (text: string) => void;
   flush: () => void;
   stop: () => void;
@@ -63,6 +65,12 @@ export function createTypewriterReveal(
     append(chunk: string) {
       if (!chunk) return;
       target += chunk;
+      ensureRunning();
+    },
+    ensureTarget(text: string) {
+      if (!text) return;
+      if (text.length <= target.length) return;
+      target = text;
       ensureRunning();
     },
     setFullText(text: string) {
