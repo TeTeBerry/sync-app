@@ -127,7 +127,7 @@ function EventPostCardInner({
           ) : (
             <button type="button" className="s-event-post__apply" onClick={() => onApply(post.id)}>
               <UserPlusIcon size={14} />
-              申请加入
+              申请组队
             </button>
           )
         ) : null}

@@ -299,7 +299,7 @@
       "loadError": "评论加载失败"
     },
     "apply": {
-      "join": "申请加入",
+      "join": "申请组队",
       "success": "申请成功",
       "alreadyApplied": "已申请",
       "failed": "申请失败"
