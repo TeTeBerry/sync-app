@@ -1,9 +1,7 @@
 import "./event-detail.scss";
 import Taro, { useRouter } from "@tarojs/taro";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-import { ChevronLeftIcon, MapIcon, SendIcon, SparklesIcon } from "lucide-react";
-import { useTranslation } from "react-i18next";
+import { ChevronLeft, Map, Send, Sparkles } from "lucide-react-taro";
 import { go, goAiAssistant, ROUTES } from "../../utils/route";
 import BottomNav from "../../components/BottomNav";
 import { useConfirmDialog } from "../../hooks/useConfirmDialog";
@@ -31,10 +29,9 @@ import {
 } from "../../utils/activityStatus";
 import { formatPostPublishTime } from "../../utils/formatPostPublishTime";
 import { EventPostsVirtualList } from "./components/EventPostsVirtualList";
+import { Button, Input, Text, View } from '@tarojs/components';
 
 const EventDetailPage = () => {
-  const { t, i18n } = useTranslation();
-  const queryClient = useQueryClient();
   const router = useRouter();
   const scrollRef = useRef<HTMLElement | null>(null);
   const activeActivityLegacyId = useNavigationStore((state) => state.activeActivityLegacyId);
@@ -63,7 +60,7 @@ const EventDetailPage = () => {
   const currentUserQuery = useCurrentUserQuery();
   const apiEnabled = isApiEnabled();
   const { confirm, confirmDialog } = useConfirmDialog({
-    cancelText: t("common.cancel"),
+    cancelText: "取消",
   });
   const [prompt, setPrompt] = useState("");
   const [shortcutTags, setShortcutTags] = useState(() => getTopAiShortcutTags());
@@ -101,37 +98,37 @@ const EventDetailPage = () => {
         images: item.images,
       };
       const publishTimeLabel = post.createdAt
-        ? formatPostPublishTime(post.createdAt, t, i18n.language)
+        ? formatPostPublishTime(post.createdAt)
         : post.time;
       return { post, publishTimeLabel };
     });
-  }, [postsQuery.data, i18n.language, t]);
+  }, [postsQuery.data]);
 
   const handleApply = useCallback(
     (postId: string) => {
       if (appliedPostIds.has(postId)) return;
 
-      void applyToPostAndInvalidate(queryClient, postId)
+      void applyToPostAndInvalidate(postId)
         .then((result) => {
           setAppliedPostIds((prev) => new Set(prev).add(postId));
           const toastTitle = result.alreadyApplied
-            ? t("eventDetail.apply.alreadyApplied")
-            : t("eventDetail.apply.success");
+            ? "已申请"
+            : "申请成功";
           void Taro.showToast({ title: toastTitle, icon: "success" });
         })
-        .catch(() => void Taro.showToast({ title: t("eventDetail.apply.failed"), icon: "none" }));
+        .catch(() => void Taro.showToast({ title: "申请失败", icon: "none" }));
     },
-    [appliedPostIds, queryClient, t],
+    [appliedPostIds],
   );
 
   const handleLikePost = useCallback(
     (postId: string) => {
       if (!apiEnabled) return;
-      void likePostAndInvalidate(queryClient, postId).catch(() =>
-        void Taro.showToast({ title: t("common.requestFailed"), icon: "none" }),
+      void likePostAndInvalidate(postId).catch(() =>
+        void Taro.showToast({ title: "请求失败，请稍后重试", icon: "none" }),
       );
     },
-    [apiEnabled, queryClient, t],
+    [apiEnabled],
   );
 
   const togglePostComments = useCallback((postId: string) => {
@@ -151,14 +148,14 @@ const EventDetailPage = () => {
       const ok = await confirm({
         title: "确认删除",
         message: "删除后无法恢复，确定要删除这条帖子吗？",
-        confirmText: t("profile.myPosts.delete"),
+        confirmText: "删除",
       });
       if (!ok) return;
       if (!apiEnabled) {
         void Taro.showToast({ title: "已删除", icon: "success" });
         return;
       }
-      void deletePostAndInvalidate(queryClient, post.id)
+      void deletePostAndInvalidate(post.id)
         .then(() => {
           void Taro.showToast({ title: "已删除", icon: "success" });
         })
@@ -167,7 +164,7 @@ const EventDetailPage = () => {
           void Taro.showToast({ title: "删除失败", icon: "none" });
         });
     },
-    [apiEnabled, confirm, postsQuery, queryClient, t],
+    [apiEnabled, confirm, postsQuery],
   );
 
   const handleCommentSubmitted = useCallback(() => {
@@ -186,7 +183,7 @@ const EventDetailPage = () => {
         void Taro.showToast({ title: "已标记为已组队", icon: "success" });
         return;
       }
-      void updatePostAndInvalidate(queryClient, postId, { status: "completed" })
+      void updatePostAndInvalidate(postId, { status: "completed" })
         .then(() => {
           void Taro.showToast({ title: "已标记为已组队", icon: "success" });
         })
@@ -194,7 +191,7 @@ const EventDetailPage = () => {
           void Taro.showToast({ title: "标记失败", icon: "none" });
         });
     },
-    [apiEnabled, confirm, queryClient],
+    [apiEnabled, confirm],
   );
 
   const bumpShortcutTagUsage = useCallback((tag: string) => {
@@ -227,122 +224,122 @@ const EventDetailPage = () => {
 
   if (Number.isNaN(eventId) || eventId <= 0) {
     return (
-      <div className="s-event-detail">
-        <div className="s-event-detail__fallback">{t("eventDetail.notFound")}</div>
+      <View className="s-event-detail">
+        <View className="s-event-detail__fallback">活动不存在</View>
         <BottomNav />
-      </div>
+      </View>
     );
   }
 
   if (activityQuery.isLoading) {
     return (
-      <div className="s-event-detail">
-        <div className="s-event-detail__fallback">{t("eventDetail.loading")}</div>
+      <View className="s-event-detail">
+        <View className="s-event-detail__fallback">加载中...</View>
         <BottomNav />
-      </div>
+      </View>
     );
   }
 
   if (activityQuery.isError) {
     return (
-      <div className="s-event-detail">
-        <div className="s-event-detail__fallback">
-          <p>{t("eventDetail.loadError")}</p>
-          <button
+      <View className="s-event-detail">
+        <View className="s-event-detail__fallback">
+          <Text>活动信息加载失败</Text>
+          <Button
             type="button"
             className="s-event-detail__retry"
             onClick={() => void activityQuery.refetch()}
           >
-            {t("common.retry")}
-          </button>
-        </div>
+            重试
+          </Button>
+        </View>
         <BottomNav />
-      </div>
+      </View>
     );
   }
 
   if (!title) {
     return (
-      <div className="s-event-detail">
-        <div className="s-event-detail__fallback">{t("eventDetail.notFound")}</div>
+      <View className="s-event-detail">
+        <View className="s-event-detail__fallback">活动不存在</View>
         <BottomNav />
-      </div>
+      </View>
     );
   }
 
   const postsLoading = !feedReady || postsQuery.isLoading;
 
   return (
-    <div
+    <View
       data-cmp="EventDetail"
       className={["s-event-detail", activityStatusCardClass(activityStatus)].filter(Boolean).join(" ")}
     >
-      <main ref={scrollRef} className="s-event-detail__main s-scrollbar-none">
-        <header className="s-event-detail__header">
-          <button
+      <View ref={scrollRef} className="s-event-detail__main s-scrollbar-none">
+        <View className="s-event-detail__header">
+          <Button
             type="button"
             className="s-event-detail__back"
             aria-label="返回"
             onClick={() => go(ROUTES.HOME)}
           >
-            <ChevronLeftIcon size={22} />
-          </button>
-          <div className="s-event-detail__head-main">
-            <div className="s-event-detail__title-row">
-              <h1>{title}</h1>
-            </div>
-            {metaLine ? <p className="s-event-detail__meta">{metaLine}</p> : null}
-          </div>
-          <button type="button" className="s-event-detail__map-btn" aria-label="地图">
-            <MapIcon size={18} />
-          </button>
-        </header>
+            <ChevronLeft size={22} />
+          </Button>
+          <View className="s-event-detail__head-main">
+            <View className="s-event-detail__title-row">
+              <Text>{title}</Text>
+            </View>
+            {metaLine ? <Text className="s-event-detail__meta">{metaLine}</Text> : null}
+          </View>
+          <Button type="button" className="s-event-detail__map-btn" aria-label="地图">
+            <Map size={18} />
+          </Button>
+        </View>
 
-        <section className="s-event-detail__ai">
-          <div className="s-event-detail__ai-head">
-            <SparklesIcon size={14} />
-            <span>{t("eventDetail.ai.title")}</span>
-          </div>
+        <View className="s-event-detail__ai">
+          <View className="s-event-detail__ai-head">
+            <Sparkles size={14} />
+            <Text>告诉我你的需求 ai精准匹配</Text>
+          </View>
           {shortcutTags.length > 0 ? (
-            <div className="s-event-detail__ai-tags">
+            <View className="s-event-detail__ai-tags">
               {shortcutTags.map((tag) => (
-                <button
+                <Button
                   key={tag}
                   type="button"
                   className="s-event-detail__ai-tag"
                   onClick={() => handleShortcutTag(tag)}
                 >
                   {tag}
-                </button>
+                </Button>
               ))}
-            </div>
+            </View>
           ) : null}
-          <div className="s-event-detail__ai-input">
-            <input
+          <View className="s-event-detail__ai-input">
+            <Input
               className="s-event-detail__ai-input__field"
               value={prompt}
-              placeholder={t("eventDetail.ai.placeholder")}
-              onChange={(e) => setPrompt(e.target.value)}
+              placeholder="告诉我你的需求..."
+              onInput={(e) => setPrompt(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && prompt.trim()) openAi(prompt);
               }}
             />
-            <button
+            <Button
               type="button"
               className="s-event-detail__ai-send"
               aria-label="发送"
               onClick={() => openAi(prompt)}
             >
-              <SendIcon size={14} />
-            </button>
-          </div>
-        </section>
+              <Send size={14} />
+            </Button>
+          </View>
+        </View>
 
-        <div className="s-event-detail__posts">
+        <View className="s-event-detail__posts">
           {postsLoading ? (
-            <p className="s-event-detail__empty">{t("eventDetail.loading")}</p>
+            <Text className="s-event-detail__empty">加载中...</Text>
           ) : postItems.length === 0 ? (
-            <p className="s-event-detail__empty">{t("eventDetail.emptyPosts")}</p>
+            <Text className="s-event-detail__empty">暂无组队帖，来发布第一条吧</Text>
           ) : (
             <EventPostsVirtualList
               scrollRef={scrollRef}
@@ -360,15 +357,15 @@ const EventDetailPage = () => {
               onCommentSubmitted={handleCommentSubmitted}
             />
           )}
-        </div>
+        </View>
 
         {postItems.length > 0 && !postsLoading ? (
-          <p className="s-event-detail__end">已经到底啦 ~</p>
+          <Text className="s-event-detail__end">已经到底啦 ~</Text>
         ) : null}
-      </main>
+      </View>
       {confirmDialog}
       <BottomNav />
-    </div>
+    </View>
   );
 };
 

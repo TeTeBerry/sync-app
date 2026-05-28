@@ -1,6 +1,7 @@
 import { memo } from "react";
 import AiAssistantPostCard from "../AiAssistantPostCard";
 import type { RecommendedPostCard } from "../../types/aiChat";
+import { View } from '@tarojs/components';
 
 export const RecommendPostCards = memo(function RecommendPostCards({
   posts,
@@ -12,7 +13,7 @@ export const RecommendPostCards = memo(function RecommendPostCards({
   if (!posts.length) return null;
 
   return (
-    <div className="s-ai-assistant-chat__post-cards">
+    <View className="s-ai-assistant-chat__post-cards">
       {posts.map((post) => (
         <AiAssistantPostCard
           key={post.postId}
@@ -20,6 +21,6 @@ export const RecommendPostCards = memo(function RecommendPostCards({
           highlight={variant === "created"}
         />
       ))}
-    </div>
+    </View>
   );
 });

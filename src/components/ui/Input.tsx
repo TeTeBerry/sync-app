@@ -1,5 +1,6 @@
 import React, { forwardRef, isValidElement, cloneElement } from "react";
 import { cn } from "./cn";
+import { Input as TaroInput, Text } from '@tarojs/components';
 
 export type InputVariant = `ai-assistant-chat` | `chat`;
 
@@ -17,7 +18,7 @@ function renderIcon(icon: React.ReactNode, iconClass?: string) {
   if (isValidElement<{ className?: string }>(icon)) {
     return cloneElement(icon, { className: cn(iconClass, icon.props.className) });
   }
-  return <span className={iconClass}>{icon}</span>;
+  return <Text className={iconClass}>{icon}</Text>;
 }
 
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -30,11 +31,11 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ variant, icon, fieldModifier, wrapperClassName, className, ...props }, ref) => {
     if (!variant) {
-      return <input ref={ref} className={className} {...props} />;
+      return <TaroInput ref={ref} className={className} {...props} />;
     }
 
     const styles = VARIANT_STYLES[variant];
-    const inputEl = <input ref={ref} className={cn(styles.input, className)} {...props} />;
+    const inputEl = <Input ref={ref} className={cn(styles.input, className)} {...props} />;
 
     if (!styles.wrapper) return inputEl;
 

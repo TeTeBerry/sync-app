@@ -1,6 +1,7 @@
 import "./AvatarGroup.scss";
 import React from "react";
 import { ACTIVITY_GUEST_AVATARS } from "../constants/activityGuestAvatars";
+import { Image, Text, View } from '@tarojs/components';
 
 interface AvatarGroupProps {
   avatars?: string[];
@@ -16,18 +17,18 @@ const AvatarGroup: React.FC<AvatarGroupProps> = ({
   const displayAvatars = avatars.slice(0, max);
 
   return (
-    <div data-cmp="AvatarGroup" className="s-avatar-group">
-      <div className="s-avatar-group__pile">
+    <View data-cmp="AvatarGroup" className="s-avatar-group">
+      <View className="s-avatar-group__pile">
         {displayAvatars.map((url, i) => (
-          <img key={url + i} src={url} alt="" className="s-avatar-group__avatar" />
+          <Image key={url + i} src={url} className="s-avatar-group__avatar" />
         ))}
-      </div>
+      </View>
       {total > 0 ? (
-        <span className="s-avatar-group__count">
+        <Text className="s-avatar-group__count">
           {total.toLocaleString()} 参与
-        </span>
+        </Text>
       ) : null}
-    </div>
+    </View>
   );
 };
 

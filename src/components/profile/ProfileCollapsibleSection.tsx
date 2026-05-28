@@ -1,12 +1,7 @@
 import React, { useState } from "react";
-import {
-  ChevronDownIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  ChevronUpIcon,
-} from "lucide-react";
-import { useTranslation } from "react-i18next";
+import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp,  } from "lucide-react-taro";
 import { useClientPagination } from "../../hooks/useClientPagination";
+import { Button, Text, View } from '@tarojs/components';
 
 const SECTION_VARIANTS = {
   activities: {
@@ -38,7 +33,6 @@ export function ProfileCollapsibleSection<T>({
   pageSize = 2,
   children,
 }: ProfileCollapsibleSectionProps<T>) {
-  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const { page, totalPages, pageItems, goPrev, goNext, resetPage } = useClientPagination(
     items,
@@ -52,14 +46,14 @@ export function ProfileCollapsibleSection<T>({
   };
 
   return (
-    <section
+    <View
       className={[
         "s-profile-section",
         styles.modifier,
         expanded ? " s-profile-section--expanded" : "",
       ].join("")}
     >
-      <div
+      <View
         className="s-profile-section__header"
         role="button"
         tabIndex={0}
@@ -71,48 +65,48 @@ export function ProfileCollapsibleSection<T>({
           }
         }}
       >
-        <span className="s-profile-section__header-left">
-          <span className={`s-profile-section__icon ${styles.icon}`}>{icon}</span>
-          <span className="s-profile-section__title">{title}</span>
-          <span className={`s-profile-section__badge ${styles.badge}`}>{items.length}</span>
-        </span>
+        <Text className="s-profile-section__header-left">
+          <Text className={`s-profile-section__icon ${styles.icon}`}>{icon}</Text>
+          <Text className="s-profile-section__title">{title}</Text>
+          <Text className={`s-profile-section__badge ${styles.badge}`}>{items.length}</Text>
+        </Text>
 
-        <span className="s-profile-section__header-right">
+        <Text className="s-profile-section__header-right">
           {expanded ? (
-            <span
+            <Text
               className="s-profile-section__pagination"
               onClick={(event) => event.stopPropagation()}
             >
-              <button
+              <Button
                 type="button"
                 className="s-profile-section__page-btn"
                 disabled={page === 0}
-                aria-label={t("profile.pagination.prev")}
+                aria-label="上一页"
                 onClick={goPrev}
               >
-                <ChevronLeftIcon size={16} />
-              </button>
-              <span className="s-profile-section__page-label">
+                <ChevronLeft size={16} />
+              </Button>
+              <Text className="s-profile-section__page-label">
                 {page + 1}/{totalPages}
-              </span>
-              <button
+              </Text>
+              <Button
                 type="button"
                 className="s-profile-section__page-btn"
                 disabled={page >= totalPages - 1}
-                aria-label={t("profile.pagination.next")}
+                aria-label="下一页"
                 onClick={goNext}
               >
-                <ChevronRightIcon size={16} />
-              </button>
-            </span>
+                <ChevronRight size={16} />
+              </Button>
+            </Text>
           ) : null}
-          {expanded ? <ChevronUpIcon size={18} /> : <ChevronDownIcon size={18} />}
-        </span>
-      </div>
+          {expanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+        </Text>
+      </View>
 
       {expanded ? (
-        <div className="s-profile-section__body">{children(pageItems)}</div>
+        <View className="s-profile-section__body">{children(pageItems)}</View>
       ) : null}
-    </section>
+    </View>
   );
 }

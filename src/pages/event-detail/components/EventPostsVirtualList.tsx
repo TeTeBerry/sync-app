@@ -1,8 +1,7 @@
 import { useEffect, useRef, type RefObject } from "react";
-import { useVirtualizer } from "@tanstack/react-virtual";
+import Taro from "@tarojs/taro";
 import { EventPostCard, type EventPostCardProps } from "./EventPostCard";
-
-const ESTIMATED_POST_HEIGHT = 280;
+import { View } from '@tarojs/components';
 
 export type EventPostListItem = {
   post: import("../../../types/backend").EventDetailPost;
@@ -26,7 +25,6 @@ type EventPostsVirtualListProps = {
 };
 
 export function EventPostsVirtualList({
-  scrollRef,
   items,
   highlightPostId,
   expandedCommentPostIds,
@@ -40,13 +38,6 @@ export function EventPostsVirtualList({
   onComplete,
   onCommentSubmitted,
 }: EventPostsVirtualListProps) {
-  const virtualizer = useVirtualizer({
-    count: items.length,
-    getScrollElement: () => scrollRef.current,
-    estimateSize: () => ESTIMATED_POST_HEIGHT,
-    overscan: 4,
-  });
-
   const highlightScrolledRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -57,45 +48,19 @@ export function EventPostsVirtualList({
     if (index < 0) return;
 
     highlightScrolledRef.current = highlightPostId;
-    requestAnimationFrame(() => {
-      virtualizer.scrollToIndex(index, { align: "center", behavior: "smooth" });
-    });
-  }, [highlightPostId, items, virtualizer]);
 
-  useEffect(() => {
-    virtualizer.measure();
-  }, [expandedCommentPostIds, items, virtualizer]);
-
-  const virtualItems = virtualizer.getVirtualItems();
+    const elId = `post-${highlightPostId}`;
+    setTimeout(() => {
+      void Taro.pageScrollTo({ selector: `#${elId}`, duration: 300, offsetTop: -80 });
+    }, 100);
+  }, [highlightPostId, items]);
 
   return (
-    <div
-      style={{
-        height: `${virtualizer.getTotalSize()}px`,
-        position: "relative",
-        width: "100%",
-      }}
-    >
-      {virtualItems.map((virtualRow) => {
-        const item = items[virtualRow.index];
-        if (!item) return null;
-
+    <View style={{ width: "100%" }}>
+      {items.map((item) => {
         const highlighted = item.post.id === highlightPostId;
-
         return (
-          <div
-            key={virtualRow.key}
-            data-index={virtualRow.index}
-            ref={virtualizer.measureElement}
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: "100%",
-              minHeight: `${virtualRow.size}px`,
-              transform: `translateY(${virtualRow.start}px)`,
-            }}
-          >
+          <View key={item.post.id} id={`post-${item.post.id}`}>
             <EventPostCard
               post={item.post}
               publishTimeLabel={item.publishTimeLabel}
@@ -111,9 +76,9 @@ export function EventPostsVirtualList({
               onComplete={onComplete}
               onCommentSubmitted={onCommentSubmitted}
             />
-          </div>
+          </View>
         );
       })}
-    </div>
+    </View>
   );
 }

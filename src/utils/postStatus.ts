@@ -31,3 +31,7 @@ export function eventPostStatusI18nKey(
     ? "common.full"
     : "eventDetail.postStatus.recruiting";
 }
+
+export function eventPostStatusText(status: EventPostCardStatus): string {
+  return status === "full" ? "已组队" : "招募中";
+}

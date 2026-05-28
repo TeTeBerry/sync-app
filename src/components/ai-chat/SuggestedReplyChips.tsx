@@ -1,5 +1,6 @@
 import { Button, cn } from "../ui";
 import { useAiChatStore } from "../../stores/aiChatStore";
+import { View } from '@tarojs/components';
 
 const PUBLISH_CONFIRM_REPLY = "确认发布";
 
@@ -18,7 +19,7 @@ export function SuggestedReplyChips({
   if (!replies.length) return null;
 
   return (
-    <div className="s-ai-assistant-chat__copy-row">
+    <View className="s-ai-assistant-chat__copy-row">
       {replies.map((reply) => (
         <Button
           key={reply}
@@ -33,6 +34,6 @@ export function SuggestedReplyChips({
           {reply}
         </Button>
       ))}
-    </div>
+    </View>
   );
 }

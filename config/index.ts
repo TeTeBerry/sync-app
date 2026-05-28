@@ -1,4 +1,5 @@
 import { defineConfig } from "@tarojs/cli";
+import * as path from "path";
 
 /** 微信小程序使用 HTML 标签映射；H5 使用原生浏览器标签 */
 const plugins: (string | [string, Record<string, unknown>])[] = ["@tarojs/plugin-framework-react"];
@@ -33,6 +34,11 @@ export default defineConfig({
         enable: true,
         config: {},
       },
+    },
+    webpackChain(chain) {
+      chain.resolve.alias
+        .set("lucide-react", path.resolve(__dirname, "../src/utils/lucideMock.tsx"))
+        .set("lucide-react-taro", path.resolve(__dirname, "../src/utils/lucideMock.tsx"));
     },
   },
   h5: {

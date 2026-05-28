@@ -1,8 +1,6 @@
 import "./home.scss";
 import Taro from "@tarojs/taro";
 import { lazy, Suspense, useCallback } from "react";
-import { useTranslation } from "react-i18next";
-import { useQueryClient } from "@tanstack/react-query";
 import BottomNav from "../../components/BottomNav";
 import PageLoadingFallback from "../../components/PageLoadingFallback";
 import { useConfirmDialog } from "../../hooks/useConfirmDialog";
@@ -23,6 +21,7 @@ import { HomeFeaturedEvents } from "./components/HomeFeaturedEvents";
 import { HomePlazaHero } from "./components/HomePlazaHero";
 import { type ActivityPost } from "./homeData";
 import { type FeaturedEvent } from "../../utils/apiMappers";
+import { View } from '@tarojs/components';
 
 const LazyHomeActivityFeed = lazy(async () => {
   const mod = await import("./components/HomeActivityFeed");
@@ -30,13 +29,12 @@ const LazyHomeActivityFeed = lazy(async () => {
 });
 
 const Home = () => {
-  const { t } = useTranslation();
-  const queryClient = useQueryClient();
   const belowFoldReady = useDeferredMount(120);
   const { confirm, confirmDialog } = useConfirmDialog({
-    cancelText: t("common.cancel"),
+    cancelText: "取消",
   });
-  const { heat } = useHomeSummary();
+  const { data: summary } = useHomeSummary();
+  const heat = summary?.heat;
   const { items: featuredEvents } = useFeaturedEvents();
   const nearestUpcoming = useNearestUpcomingForCountdown({ enabled: belowFoldReady });
   const { data: unreadCount = 0 } = useNotificationUnreadCount();
@@ -63,10 +61,10 @@ const Home = () => {
       const ok = await confirm({
         title: "确认删除",
         message: "删除后无法恢复，确定要删除这条帖子吗？",
-        confirmText: t("profile.myPosts.delete"),
+        confirmText: "删除",
       });
       if (!ok) return;
-      void deletePostAndInvalidate(queryClient, post.id)
+      void deletePostAndInvalidate(post.id)
         .then(() => {
           void Taro.showToast({ title: "已删除", icon: "success" });
         })
@@ -75,7 +73,7 @@ const Home = () => {
           void Taro.showToast({ title: "删除失败", icon: "none" });
         });
     },
-    [confirm, queryClient, refetchPosts, t],
+    [confirm, refetchPosts],
   );
 
   const handleLikePost = useCallback(
@@ -83,22 +81,22 @@ const Home = () => {
       if (!isApiEnabled()) {
         return;
       }
-      void likePostAndInvalidate(queryClient, post.id).catch(() =>
-        void Taro.showToast({ title: t("common.requestFailed"), icon: "none" }),
+      void likePostAndInvalidate(post.id).catch(() =>
+        void Taro.showToast({ title: "请求失败，请稍后重试", icon: "none" }),
       );
     },
-    [queryClient, t],
+    [],
   );
 
   const handleCommentSubmitted = useCallback(() => {
     void refetchPosts();
   }, [refetchPosts]);
 
-  const activeTeamCount = heat.people;
+  const activeTeamCount = heat?.people ?? 0;
 
   return (
-    <div data-cmp="Home" className="s-home">
-      <main className="s-home__main s-scrollbar-none">
+    <View data-cmp="Home" className="s-home">
+      <View className="s-home__main s-scrollbar-none">
         <HomePlazaHero
           unreadCount={unreadCount}
           onAgentClick={() => openAiAssistant()}
@@ -130,15 +128,15 @@ const Home = () => {
           <PageLoadingFallback minHeight={240} />
         )}
 
-        <div className="s-home__heat" aria-label="Today heat">
+        <View className="s-home__heat" aria-label="Today heat">
           {activeTeamCount} 人正在发现活动
-        </div>
-      </main>
+        </View>
+      </View>
 
       {confirmDialog}
 
       <BottomNav />
-    </div>
+    </View>
   );
 };
 

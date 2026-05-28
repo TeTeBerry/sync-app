@@ -1,11 +1,10 @@
 import "./PostCommentSection.scss";
 import Taro from "@tarojs/taro";
 import { useCallback, useState, type FC } from "react";
-import { ChevronUpIcon, HeartIcon, SendIcon } from "lucide-react";
-import { useTranslation } from "react-i18next";
-import { useQueryClient } from "@tanstack/react-query";
+import { ChevronUp, Heart, Send } from "lucide-react-taro";
 import { commentPostAndInvalidate, usePostCommentsQuery } from "../hooks/useSyncApi";
 import { isApiEnabled } from "../constants/api";
+import { Button, Image, Input, Text, View } from '@tarojs/components';
 
 const DEFAULT_AVATAR =
   "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80";
@@ -25,8 +24,6 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
   currentUserAvatar,
   onCommentSubmitted,
 }) => {
-  const { t } = useTranslation();
-  const queryClient = useQueryClient();
   const apiEnabled = isApiEnabled();
   const commentsQuery = usePostCommentsQuery(postId, expanded);
   const [draft, setDraft] = useState("");
@@ -38,20 +35,20 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
     if (!body || submitting) return;
 
     if (!apiEnabled) {
-      void Taro.showToast({ title: t("home.feed.apiRequired"), icon: "none" });
+      void Taro.showToast({ title: "请开启 API 模式", icon: "none" });
       return;
     }
 
     setSubmitting(true);
-    void commentPostAndInvalidate(queryClient, postId, body)
+    void commentPostAndInvalidate(postId, body)
       .then(() => {
         setDraft("");
         onCommentSubmitted?.();
-        void Taro.showToast({ title: t("home.feed.commentSuccess"), icon: "success" });
+        void Taro.showToast({ title: "评论成功", icon: "success" });
       })
-      .catch(() => void Taro.showToast({ title: t("home.feed.commentFailed"), icon: "none" }))
+      .catch(() => void Taro.showToast({ title: "评论失败", icon: "none" }))
       .finally(() => setSubmitting(false));
-  }, [apiEnabled, draft, onCommentSubmitted, postId, queryClient, submitting, t]);
+  }, [apiEnabled, draft, onCommentSubmitted, postId, submitting]);
 
   const toggleCommentLike = useCallback((commentId: string) => {
     setLikedCommentIds((prev) => {
@@ -71,74 +68,73 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
   if (!expanded) return null;
 
   return (
-    <section className="s-post-comments" aria-label={t("eventDetail.comments.sectionLabel")}>
-      <div className="s-post-comments__list">
+    <View className="s-post-comments" aria-label="帖子评论">
+      <View className="s-post-comments__list">
         {commentsQuery.isLoading ? (
-          <p className="s-post-comments__status">{t("common.loading")}</p>
+          <Text className="s-post-comments__status">加载中…</Text>
         ) : commentsQuery.isError ? (
-          <p className="s-post-comments__status">{t("eventDetail.comments.loadError")}</p>
+          <Text className="s-post-comments__status">评论加载失败</Text>
         ) : comments.length === 0 ? (
-          <p className="s-post-comments__status">{t("eventDetail.comments.empty")}</p>
+          <Text className="s-post-comments__status">暂无评论，来抢沙发吧</Text>
         ) : (
           comments.map((comment) => {
             const liked = likedCommentIds.has(comment.id);
 
             return (
-              <article key={comment.id} className="s-post-comments__item">
-                <img
+              <View key={comment.id} className="s-post-comments__item">
+                <Image
                   className="s-post-comments__avatar"
                   src={comment.avatar || DEFAULT_AVATAR}
-                  alt=""
                 />
-                <div className="s-post-comments__body-wrap">
-                  <div className="s-post-comments__meta">
-                    <strong>{comment.authorName}</strong>
-                    <span>{comment.time}</span>
-                  </div>
-                  <p className="s-post-comments__bubble">{comment.body}</p>
-                  <button
+                <View className="s-post-comments__body-wrap">
+                  <View className="s-post-comments__meta">
+                    <Text style={{fontWeight:"bold"}}>{comment.authorName}</Text>
+                    <Text>{comment.time}</Text>
+                  </View>
+                  <Text className="s-post-comments__bubble">{comment.body}</Text>
+                  <Button
                     type="button"
                     className={`s-post-comments__like${liked ? " s-post-comments__like--active" : ""}`}
                     onClick={() => toggleCommentLike(comment.id)}
                   >
-                    <HeartIcon size={12} fill={liked ? "currentColor" : "none"} />
-                    {t("eventDetail.comments.like")}
-                  </button>
-                </div>
-              </article>
+                    <Heart size={12} fill={liked ? "currentColor" : "none"} />
+                    赞
+                  </Button>
+                </View>
+              </View>
             );
           })
         )}
-      </div>
+      </View>
 
-      <div className="s-post-comments__composer">
-        <img className="s-post-comments__avatar" src={userAvatar} alt="" />
-        <div className="s-post-comments__input-wrap">
-          <input
+      <View className="s-post-comments__composer">
+        <Image className="s-post-comments__avatar" src={userAvatar} />
+        <View className="s-post-comments__input-wrap">
+          <Input
             className="s-post-comments__input"
             value={draft}
-            placeholder={t("eventDetail.comments.placeholder")}
-            onChange={(e) => setDraft(e.target.value)}
+            placeholder="说点什么..."
+            onInput={(e) => setDraft(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Enter" && draft.trim()) handleSubmit();
             }}
           />
-          <button
+          <Button
             type="button"
             className="s-post-comments__send"
-            aria-label={t("eventDetail.comments.send")}
+            aria-label="发送评论"
             disabled={!draft.trim() || submitting}
             onClick={handleSubmit}
           >
-            <SendIcon size={14} />
-          </button>
-        </div>
-      </div>
+            <Send size={14} />
+          </Button>
+        </View>
+      </View>
 
-      <button type="button" className="s-post-comments__toggle" onClick={onToggleExpanded}>
-        {t("eventDetail.comments.collapse")}
-        <ChevronUpIcon size={14} />
-      </button>
-    </section>
+      <Button type="button" className="s-post-comments__toggle" onClick={onToggleExpanded}>
+        收起评论
+        <ChevronUp size={14} />
+      </Button>
+    </View>
   );
 };

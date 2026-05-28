@@ -1,7 +1,8 @@
 import { useState, useCallback } from "react";
-import { ImageIcon } from "lucide-react";
+import { Image } from "lucide-react-taro";
 import ImagePreviewLightbox from "./ImagePreviewLightbox";
 import "./PostImageGrid.scss";
+import { Button, Image as TaroImage, Text, View } from '@tarojs/components';
 
 export interface PostImageGridProps {
   images: string[];
@@ -39,19 +40,19 @@ export function PostImageGrid({ images, maxDisplay = 6, fullBleed = false }: Pos
 
     return (
       <>
-        <div className={`s-post-image-grid ${gridClass} ${bleedClass}`}>
+        <View className={`s-post-image-grid ${gridClass} ${bleedClass}`}>
           {validImages.map((src, index) => (
-            <button
+            <Button
               key={`${src.slice(0, 40)}-${index}`}
               type="button"
               className="s-post-image-grid__item"
               onClick={() => handleOpen(index)}
               aria-label={`查看图片 ${index + 1}`}
             >
-              <img src={src} alt="" loading="lazy" className="s-post-image-grid__img" />
-            </button>
+              <TaroImage src={src} className="s-post-image-grid__img" />
+            </Button>
           ))}
-        </div>
+        </View>
         <ImagePreviewLightbox
           open={previewIndex !== null}
           src={previewIndex !== null ? validImages[previewIndex] : null}
@@ -67,41 +68,41 @@ export function PostImageGrid({ images, maxDisplay = 6, fullBleed = false }: Pos
 
   return (
     <>
-      <div className={`s-post-image-grid s-post-image-grid--featured ${bleedClass}`}>
+      <View className={`s-post-image-grid s-post-image-grid--featured ${bleedClass}`}>
         {/* 首图大图 */}
-        <button
+        <Button
           type="button"
           className="s-post-image-grid__featured"
           onClick={() => handleOpen(0)}
           aria-label="查看图片 1"
         >
-          <img src={featured} alt="" loading="eager" className="s-post-image-grid__img" />
-          <span className="s-post-image-grid__count-badge">
-            <ImageIcon size={14} />
+          <TaroImage src={featured} className="s-post-image-grid__img" />
+          <Text className="s-post-image-grid__count-badge">
+            <Image size={14} />
             {images.length}
-          </span>
-        </button>
+          </Text>
+        </Button>
 
         {/* 缩略图行 */}
-        <div className="s-post-image-grid__thumbs">
+        <View className="s-post-image-grid__thumbs">
           {thumbnails.map((src, index) => (
-            <button
+            <Button
               key={`${src.slice(0, 40)}-${index + 1}`}
               type="button"
               className="s-post-image-grid__thumb"
               onClick={() => handleOpen(index + 1)}
               aria-label={`查看图片 ${index + 2}`}
             >
-              <img src={src} alt="" loading="lazy" className="s-post-image-grid__img" />
+              <TaroImage src={src} className="s-post-image-grid__img" />
               {index === thumbnails.length - 1 && images.length > maxDisplay ? (
-                <span className="s-post-image-grid__more">
+                <Text className="s-post-image-grid__more">
                   +{images.length - maxDisplay}
-                </span>
+                </Text>
               ) : null}
-            </button>
+            </Button>
           ))}
-        </div>
-      </div>
+        </View>
+      </View>
 
       <ImagePreviewLightbox
         open={previewIndex !== null}
@@ -115,9 +116,9 @@ export function PostImageGrid({ images, maxDisplay = 6, fullBleed = false }: Pos
 export function PostImageCount({ count }: { count: number }) {
   if (count <= 0) return null;
   return (
-    <span className="s-post-image-count">
-      <ImageIcon size={12} />
+    <Text className="s-post-image-count">
+      <Image size={12} />
       {count}
-    </span>
+    </Text>
   );
 }

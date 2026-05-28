@@ -1,11 +1,18 @@
 import React, { useMemo } from "react";
-import { CalendarIcon, MapPinIcon, TicketIcon } from "lucide-react";
-import { useTranslation } from "react-i18next";
+import { Calendar, MapPin, Ticket } from "lucide-react-taro";
 import { ImageWithFallback } from "../../../components/ImageWithFallback";
 import { MetaRow } from "../../../components/MetaRow";
 import { ProfileCollapsibleSection } from "../../../components/profile/ProfileCollapsibleSection";
 import type { ProfileActivityItem } from "../../../types/backend";
 import { compareActivityDateDesc } from "../../../utils/activityStatus";
+import { Text, View } from '@tarojs/components';
+
+const EVENT_STATUS_TEXT: Record<string, string> = {
+  upcoming: "即将参加",
+  registered: "已报名",
+  attended: "已参加",
+  completed: "已结束",
+};
 
 export type ProfileActivitiesSectionProps = {
   items: ProfileActivityItem[];
@@ -14,7 +21,6 @@ export type ProfileActivitiesSectionProps = {
 const ProfileActivitiesSection: React.FC<ProfileActivitiesSectionProps> = ({
   items,
 }) => {
-  const { t } = useTranslation();
   const sortedItems = useMemo(
     () => [...items].sort(compareActivityDateDesc),
     [items],
@@ -23,13 +29,13 @@ const ProfileActivitiesSection: React.FC<ProfileActivitiesSectionProps> = ({
   return (
     <ProfileCollapsibleSection
       variant="activities"
-      icon={<TicketIcon size={14} />}
-      title={t("profile.myActivities.title")}
+      icon={<Ticket size={14} />}
+      title="我的活动"
       items={sortedItems}
     >
       {(pageItems) =>
         pageItems.map((item) => (
-          <article key={item.id} className="s-profile-activity">
+          <View key={item.id} className="s-profile-activity">
             <ImageWithFallback
               src={item.image}
               alt=""
@@ -37,24 +43,24 @@ const ProfileActivitiesSection: React.FC<ProfileActivitiesSectionProps> = ({
               placeholderClassName="s-profile-activity__thumb s-profile-activity__thumb--placeholder"
               fallback={item.title.slice(0, 2)}
             />
-            <div className="s-profile-activity__content">
-              <div className="s-profile-activity__top">
-                <h3 className="s-profile-activity__title">{item.title}</h3>
-                <span className="s-profile-activity__status">
-                  {t(`profile.eventStatus.${item.status}`)}
-                </span>
-              </div>
+            <View className="s-profile-activity__content">
+              <View className="s-profile-activity__top">
+                <Text className="s-profile-activity__title">{item.title}</Text>
+                <Text className="s-profile-activity__status">
+                  {EVENT_STATUS_TEXT[item.status] ?? item.status}
+                </Text>
+              </View>
 
-              <div className="s-profile-activity__meta">
-                <MetaRow className="s-profile-activity__meta-item" icon={<CalendarIcon size={12} />}>
+              <View className="s-profile-activity__meta">
+                <MetaRow className="s-profile-activity__meta-item" icon={<Calendar size={12} />}>
                   {item.date}
                 </MetaRow>
-                <MetaRow className="s-profile-activity__meta-item" icon={<MapPinIcon size={12} />}>
+                <MetaRow className="s-profile-activity__meta-item" icon={<MapPin size={12} />}>
                   {item.location}
                 </MetaRow>
-              </div>
-            </div>
-          </article>
+              </View>
+            </View>
+          </View>
         ))
       }
     </ProfileCollapsibleSection>

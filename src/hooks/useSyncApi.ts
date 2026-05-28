@@ -1,5 +1,5 @@
-import { useCallback, useMemo } from "react";
-import { useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
+import { useMemo } from "react";
+import { useApiQuery } from "./useApiQuery";
 import {
   addPostComment,
   applyToPost,
@@ -57,27 +57,22 @@ import {
   invalidatePostComments,
   invalidateUser,
   invalidateProfile,
+  patchLikedPostInCaches,
 } from "../utils/queryInvalidation";
 
-export function invalidateNotificationQueries(queryClient: QueryClient) {
-  return invalidateNotifications(queryClient);
-}
-
-export function useInvalidateNotificationQueries() {
-  const queryClient = useQueryClient();
-  return useCallback(() => invalidateNotificationQueries(queryClient), [queryClient]);
+export async function invalidateNotificationQueries() {
+  return invalidateNotifications();
 }
 
 export function useNotificationsQuery() {
   const enabled = isApiEnabled();
   const userId = getClientUserId();
 
-  return useQuery({
+  return useApiQuery({
     queryKey: ["notifications", "list", userId],
     queryFn: () => fetchNotifications(userId),
     enabled,
     staleTime: 30_000,
-    refetchOnWindowFocus: true,
   });
 }
 
@@ -85,40 +80,36 @@ export function useNotificationUnreadCount() {
   const enabled = isApiEnabled();
   const userId = getClientUserId();
 
-  return useQuery({
+  return useApiQuery({
     queryKey: ["notifications", "unread", userId],
     queryFn: () => fetchNotificationUnreadCount(userId),
     enabled,
     staleTime: 30_000,
-    refetchOnWindowFocus: true,
   });
 }
 
-export async function markNotificationAsRead(id: string, queryClient: QueryClient) {
+export async function markNotificationAsRead(id: string) {
   const userId = getClientUserId();
   await markNotificationRead(id, userId);
-  await invalidateNotificationQueries(queryClient);
+  await invalidateNotificationQueries();
 }
 
-export async function markAllNotificationsAsRead(queryClient: QueryClient) {
+export async function markAllNotificationsAsRead() {
   const userId = getClientUserId();
   await markAllNotificationsRead(userId);
-  await invalidateNotificationQueries(queryClient);
+  await invalidateNotificationQueries();
 }
 
-export async function deleteNotificationAndInvalidate(
-  queryClient: QueryClient,
-  id: string,
-) {
+export async function deleteNotificationAndInvalidate(id: string) {
   const userId = getClientUserId();
   await deleteNotification(id, userId);
-  await invalidateNotificationQueries(queryClient);
+  await invalidateNotificationQueries();
 }
 
-export async function clearAllNotificationsAndInvalidate(queryClient: QueryClient) {
+export async function clearAllNotificationsAndInvalidate() {
   const userId = getClientUserId();
   await clearAllNotifications(userId);
-  await invalidateNotificationQueries(queryClient);
+  await invalidateNotificationQueries();
 }
 
 type QueryEnableOptions = { enabled?: boolean };
@@ -127,7 +118,7 @@ export function useActivitiesQuery(options?: QueryEnableOptions) {
   const tabEnabled = options?.enabled ?? true;
   const enabled = isApiEnabled() && tabEnabled;
 
-  return useQuery({
+  return useApiQuery({
     queryKey: ["activities"],
     queryFn: fetchActivities,
     enabled,
@@ -153,36 +144,24 @@ export function useEventList(options?: QueryEnableOptions) {
 }
 
 export function useHomeSummary() {
-  const enabled = isApiEnabled();
-  const userId = getClientUserId();
-
-  const query = useQuery({
-    queryKey: ["home", userId],
+  return useApiQuery({
+    queryKey: ["home", "summary"],
     queryFn: fetchHomeSummary,
-    enabled,
+    enabled: isApiEnabled(),
     staleTime: 60_000,
   });
-
-  return {
-    heat: query.data?.heat ?? { people: 0, growthPercent: 0 },
-    signupEvents: query.data?.signupEvents ?? [],
-    isLoading: query.isLoading,
-    isError: query.isError,
-    refetch: query.refetch,
-  };
-}
-
-function isInProgressFeaturedEvent(item: { date: string; title: string }): boolean {
-  return getActivityStatusFromActivity(item.date, item.title) === "in_progress";
 }
 
 export function useFeaturedEvents() {
-  const { signupEvents, isLoading } = useHomeSummary();
+  const { data: summary, isLoading } = useHomeSummary();
 
   const items = useMemo((): FeaturedEvent[] => {
-    const inProgress = signupEvents.filter(isInProgressFeaturedEvent);
+    const signupEvents = summary?.signupEvents ?? [];
+    const inProgress = signupEvents.filter((item) =>
+      getActivityStatusFromActivity(item.date, item.title) === "in_progress",
+    );
     return pickHomeFeaturedEvents(inProgress);
-  }, [signupEvents]);
+  }, [summary]);
 
   return {
     items,
@@ -215,11 +194,12 @@ function mergeHomeCountdownCandidates(
 }
 
 export function useNearestUpcomingForCountdown(options?: QueryEnableOptions) {
-  const { signupEvents } = useHomeSummary();
+  const { data: summary } = useHomeSummary();
   const tabEnabled = options?.enabled ?? true;
   const activitiesQuery = useActivitiesQuery({ enabled: tabEnabled });
 
   return useMemo(() => {
+    const signupEvents = summary?.signupEvents ?? [];
     const candidates = mergeHomeCountdownCandidates(signupEvents, activitiesQuery.data);
     const nearest = findNearestUpcomingActivity(candidates);
     if (!nearest) return null;
@@ -228,14 +208,14 @@ export function useNearestUpcomingForCountdown(options?: QueryEnableOptions) {
     if (!title) return null;
 
     return { title, startAt: nearest.startAt };
-  }, [signupEvents, activitiesQuery.data]);
+  }, [summary, activitiesQuery.data]);
 }
 
 export function useActivityDetailQuery(legacyId?: number) {
   const enabled =
     isApiEnabled() && legacyId != null && !Number.isNaN(legacyId) && legacyId > 0;
 
-  return useQuery({
+  return useApiQuery({
     queryKey: ["activities", "detail", legacyId],
     queryFn: () => fetchActivityByLegacyId(legacyId as number),
     enabled,
@@ -248,7 +228,7 @@ export function usePopularPostsQuery(options?: QueryEnableOptions) {
   const enabled = isApiEnabled() && tabEnabled;
   const userId = getClientUserId();
 
-  return useQuery({
+  return useApiQuery({
     queryKey: ["posts", "popular", userId],
     queryFn: () => fetchPopularPosts(),
     enabled,
@@ -291,7 +271,7 @@ export function useAllPostsQuery() {
   const enabled = isApiEnabled();
   const userId = getClientUserId();
 
-  const query = useQuery({
+  const query = useApiQuery({
     queryKey: ["posts", "all", userId],
     queryFn: fetchAllPosts,
     enabled,
@@ -320,7 +300,7 @@ export function useEventPostsQuery(
     tabEnabled;
   const userId = getClientUserId();
 
-  return useQuery({
+  return useApiQuery({
     queryKey: ["posts", "activity", activityLegacyId, userId],
     queryFn: () => fetchPostsByActivity(activityLegacyId as number),
     enabled,
@@ -331,7 +311,7 @@ export function useEventPostsQuery(
 export function usePostCommentsQuery(postId: string, enabled: boolean) {
   const apiEnabled = isApiEnabled();
 
-  return useQuery({
+  return useApiQuery({
     queryKey: ["posts", postId, "comments"],
     queryFn: () => fetchPostComments(postId),
     enabled: apiEnabled && enabled && Boolean(postId),
@@ -342,7 +322,7 @@ export function usePostCommentsQuery(postId: string, enabled: boolean) {
 export function useCurrentUserQuery() {
   const enabled = isApiEnabled();
 
-  return useQuery({
+  return useApiQuery({
     queryKey: ["users", "me"],
     queryFn: fetchCurrentUser,
     enabled,
@@ -350,78 +330,48 @@ export function useCurrentUserQuery() {
   });
 }
 
-export async function invalidateRegistrationQueries(queryClient: QueryClient) {
-  await invalidateRegistration(queryClient);
+export async function invalidateRegistrationQueries() {
+  await invalidateRegistration();
 }
 
-export async function registerForActivityAndInvalidate(
-  queryClient: QueryClient,
-  legacyId: number,
-) {
+export async function registerForActivityAndInvalidate(legacyId: number) {
   const result = await registerForActivity(legacyId);
-  const userId = getClientUserId();
   try {
-    queryClient.setQueryData<HomeSummary>(["home", userId], (prev) => {
-      if (!prev) return prev;
-      return {
-        ...prev,
-        signupEvents: prev.signupEvents.map((event) =>
-          event.id === legacyId ? { ...event, going: true } : event,
-        ),
-      };
-    });
-    await invalidateRegistrationQueries(queryClient);
+    await invalidateRegistrationQueries();
   } catch {
     // Registration succeeded; cache refresh is best-effort.
   }
   return result;
 }
 
-export async function cancelActivityRegistrationAndInvalidate(
-  queryClient: QueryClient,
-  legacyId: number,
-) {
+export async function cancelActivityRegistrationAndInvalidate(legacyId: number) {
   const result = await cancelActivityRegistration(legacyId);
-  await invalidateRegistrationQueries(queryClient);
+  await invalidateRegistrationQueries();
   return result;
 }
 
 export async function updateCurrentUserAndInvalidate(
-  queryClient: QueryClient,
   payload: UpdateCurrentUserPayload,
 ) {
   const user = await updateCurrentUser(payload);
-  await Promise.all([
-    invalidateUser(queryClient),
-    invalidateProfile(queryClient),
-  ]);
+  await Promise.all([invalidateUser(), invalidateProfile()]);
   return user;
 }
 
-async function invalidatePostFeedQueries(queryClient: QueryClient) {
-  await invalidatePostFeeds(queryClient, false);
-}
-
-export async function blockUserAndInvalidate(
-  queryClient: QueryClient,
-  blockedUserId: string,
-) {
+export async function blockUserAndInvalidate(blockedUserId: string) {
   const result = await blockUser(blockedUserId);
-  await invalidatePostFeedQueries(queryClient);
+  await invalidatePostFeeds();
   return result;
 }
 
-export async function submitReportAndInvalidate(
-  queryClient: QueryClient,
-  payload: ReportPayload,
-) {
+export async function submitReportAndInvalidate(payload: ReportPayload) {
   return submitReport(payload);
 }
 
 export function useProfileSummaryQuery() {
   const enabled = isApiEnabled();
 
-  return useQuery({
+  return useApiQuery({
     queryKey: ["profile", "summary"],
     queryFn: fetchProfileSummary,
     enabled,
@@ -432,7 +382,7 @@ export function useProfileSummaryQuery() {
 export function useProfileActivitiesQuery() {
   const enabled = isApiEnabled();
 
-  return useQuery({
+  return useApiQuery({
     queryKey: ["profile", "activities"],
     queryFn: fetchProfileActivities,
     enabled,
@@ -443,7 +393,7 @@ export function useProfileActivitiesQuery() {
 export function useProfilePostsQuery() {
   const enabled = isApiEnabled();
 
-  return useQuery({
+  return useApiQuery({
     queryKey: ["profile", "posts"],
     queryFn: fetchProfilePosts,
     enabled,
@@ -451,81 +401,43 @@ export function useProfilePostsQuery() {
   });
 }
 
-export async function invalidatePostQueries(queryClient: QueryClient) {
-  await invalidateAllPosts(queryClient);
+export async function invalidatePostQueries() {
+  await invalidateAllPosts();
 }
 
-export async function deletePostAndInvalidate(queryClient: QueryClient, postId: string) {
+export async function deletePostAndInvalidate(postId: string) {
   await deletePost(postId);
-  await invalidatePostQueries(queryClient);
+  await invalidatePostQueries();
 }
 
-function patchLikedPostInCaches(
-  queryClient: QueryClient,
-  updated: Pick<EventDetailPost, "id" | "likes" | "liked" | "comments">,
-) {
-  const patchFeedPosts = (posts: HomeFeedPost[] | undefined) =>
-    posts?.map((post) =>
-      post.id === updated.id
-        ? {
-            ...post,
-            likes: updated.likes,
-            liked: updated.liked ?? false,
-            comments: updated.comments ?? post.comments,
-          }
-        : post,
-    );
-
-  const patchEventPosts = (posts: EventDetailPost[] | undefined) =>
-    posts?.map((post) =>
-      post.id === updated.id
-        ? {
-            ...post,
-            likes: updated.likes,
-            liked: updated.liked ?? false,
-            comments: updated.comments ?? post.comments,
-          }
-        : post,
-    );
-
-  queryClient.setQueriesData<HomeFeedPost[]>({ queryKey: ["posts", "popular"] }, patchFeedPosts);
-  queryClient.setQueriesData<HomeFeedPost[]>({ queryKey: ["posts", "all"] }, patchFeedPosts);
-  queryClient.setQueriesData<EventDetailPost[]>({ queryKey: ["posts", "activity"] }, patchEventPosts);
-}
-
-export async function likePostAndInvalidate(queryClient: QueryClient, postId: string) {
+export async function likePostAndInvalidate(postId: string) {
   const updated = await likePost(postId);
-  patchLikedPostInCaches(queryClient, updated);
-  await Promise.all([
-    invalidatePostQueries(queryClient),
-    invalidateNotificationQueries(queryClient),
-  ]);
+  patchLikedPostInCaches(updated);
+  await Promise.all([invalidatePostQueries(), invalidateNotificationQueries()]);
   return updated;
 }
 
 export async function commentPostAndInvalidate(
-  queryClient: QueryClient,
   postId: string,
   body: string,
   parentCommentId?: string,
 ) {
   await addPostComment(postId, body, parentCommentId);
   await Promise.all([
-    invalidatePostQueries(queryClient),
-    invalidateNotificationQueries(queryClient),
-    invalidatePostComments(queryClient, postId),
+    invalidatePostQueries(),
+    invalidateNotificationQueries(),
+    invalidatePostComments(postId),
   ]);
 }
 
-export async function applyToPostAndInvalidate(queryClient: QueryClient, postId: string) {
+export async function applyToPostAndInvalidate(postId: string) {
   return applyToPost(postId);
 }
 
 export async function updatePostAndInvalidate(
-  queryClient: QueryClient,
   postId: string,
   payload: Parameters<typeof updatePost>[1],
 ) {
   await updatePost(postId, payload);
-  await invalidatePostQueries(queryClient);
+  await invalidatePostQueries();
 }

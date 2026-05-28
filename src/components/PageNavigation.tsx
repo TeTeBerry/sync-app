@@ -1,8 +1,9 @@
 import "./PageNavigation.scss";
 import React, { type ReactNode } from "react";
-import { ChevronLeftIcon } from "lucide-react";
+import { ChevronLeft } from "lucide-react-taro";
 import { goBack, type RoutePath } from "../utils/route";
 import { Button } from "./ui";
+import { Text, View } from '@tarojs/components';
 
 export interface PageNavigationProps {
   title: string;
@@ -23,13 +24,13 @@ const PageNavigation: React.FC<PageNavigationProps> = ({ title, onBack, fallback
   };
 
   return (
-    <header data-cmp="PageNavigation" className="s-page-nav">
+    <View data-cmp="PageNavigation" className="s-page-nav">
       <Button block="s-page-nav" element="icon-btn" modifiers={[`back`]} onClick={handleBack}>
-        <ChevronLeftIcon size={20} />
+        <ChevronLeft size={20} />
       </Button>
-      <h1 className="s-page-nav__title s-line-clamp-1">{title}</h1>
-      <div className="s-page-nav__trailing">{trailing ?? <span className="s-page-nav__spacer" />}</div>
-    </header>
+      <Text className="s-page-nav__title s-line-clamp-1">{title}</Text>
+      <View className="s-page-nav__trailing">{trailing ?? <Text className="s-page-nav__spacer" />}</View>
+    </View>
   );
 };
 

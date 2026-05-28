@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Image, View } from '@tarojs/components';
 
 export type ImageWithFallbackProps = {
   src?: string;
@@ -38,7 +39,7 @@ export const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
   const imgFetchPriority = priority ? ("high" as const) : undefined;
 
   const renderImg = (className?: string) => (
-    <img
+    <Image
       src={src}
       alt={alt}
       className={className}
@@ -56,9 +57,9 @@ export const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
       : (fallbackWrapperClassName ?? wrapperClassName);
 
     return (
-      <div className={wrapperClass}>
+      <View className={wrapperClass}>
         {showImage ? renderImg(imageClassName) : fallback}
-      </div>
+      </View>
     );
   }
 
@@ -67,11 +68,11 @@ export const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
   }
 
   return (
-    <div
+    <View
       className={placeholderClassName}
       aria-hidden={placeholderAriaHidden ? true : undefined}
     >
       {fallback}
-    </div>
+    </View>
   );
 };

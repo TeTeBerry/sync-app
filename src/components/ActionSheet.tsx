@@ -2,6 +2,7 @@ import "./ActionSheet.scss";
 import React from "react";
 import { useOverlayLock } from "../hooks/useOverlayLock";
 import { cn } from "./ui";
+import { Button, Text, View } from '@tarojs/components';
 
 export interface ActionSheetItem {
   label: string;
@@ -27,15 +28,15 @@ const ActionSheet: React.FC<ActionSheetProps> = ({
   useOverlayLock(open);
 
   return (
-    <div
+    <View
       className={cn("s-overlay s-overlay--sheet", !open && "s-overlay--off")}
       role="presentation"
     >
-      <div className="s-overlay__backdrop" onClick={onCancel} />
-      <div className="s-overlay__panel" role="menu" aria-hidden={!open}>
-        {title ? <p className="s-overlay-sheet__title">{title}</p> : null}
+      <View className="s-overlay__backdrop" onClick={onCancel} />
+      <View className="s-overlay__panel" role="menu" aria-hidden={!open}>
+        {title ? <Text className="s-overlay-sheet__title">{title}</Text> : null}
         {items.map((item) => (
-          <button
+          <Button
             key={item.label}
             type="button"
             role="menuitem"
@@ -46,13 +47,13 @@ const ActionSheet: React.FC<ActionSheetProps> = ({
             onClick={item.onSelect}
           >
             {item.label}
-          </button>
+          </Button>
         ))}
-        <button type="button" className="s-overlay-sheet__cancel" onClick={onCancel}>
+        <Button type="button" className="s-overlay-sheet__cancel" onClick={onCancel}>
           {cancelLabel}
-        </button>
-      </div>
-    </div>
+        </Button>
+      </View>
+    </View>
   );
 };
 

@@ -32,7 +32,12 @@ export function matchActivity(keyword: string) {
 }
 
 export function fetchHomeSummary() {
-  return apiGet<HomeSummary>("/home", ownerParams());
+  // eslint-disable-next-line no-console
+  console.log("[syncApi] fetchHomeSummary called");
+  const result = apiGet<HomeSummary>("/home", ownerParams());
+  // eslint-disable-next-line no-console
+  console.log("[syncApi] fetchHomeSummary returned promise");
+  return result;
 }
 
 export function fetchActivityByLegacyId(legacyId: number) {

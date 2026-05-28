@@ -1,11 +1,11 @@
-import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { SparklesIcon } from "lucide-react";
+import React, { useCallback, useLayoutEffect, useRef } from "react";
+import { Sparkles } from "lucide-react-taro";
 import { cn } from "../ui";
 import type { ChatUiMessage } from "../../types/aiChat";
 import { ChatUserAvatar } from "./ChatUserAvatar";
 import { RecommendPostCards } from "./RecommendPostCards";
 import { SuggestedReplyChips } from "./SuggestedReplyChips";
+import { Button, Image, Text, View } from '@tarojs/components';
 
 function formatMessageTime(id: string): string | null {
   const ts = Number(id.split("-")[0]);
@@ -33,39 +33,16 @@ export function ChatMessageList({
   onOpenImagePreview: (src: string) => void;
   onSelectSuggestedReply: (reply: string) => void;
 }) {
-  const { t } = useTranslation();
   const scrollRef = useRef<HTMLDivElement>(null);
-  const bottomRef = useRef<HTMLDivElement>(null);
-  const [stickToBottom, setStickToBottom] = useState(true);
   const prevMessageCountRef = useRef(messages.length);
   const prevLastFromRef = useRef<"ai" | "user" | undefined>(
     messages[messages.length - 1]?.from,
   );
 
-  const scrollToBottom = useCallback((behavior: ScrollBehavior = "auto") => {
+  const scrollToBottom = useCallback(() => {
     const el = scrollRef.current;
     if (!el) return;
-    el.scrollTo({ top: el.scrollHeight, behavior });
-  }, []);
-
-  useEffect(() => {
-    const root = scrollRef.current;
-    const sentinel = bottomRef.current;
-    if (!root || !sentinel) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setStickToBottom(entry.isIntersecting);
-      },
-      {
-        root,
-        threshold: 0,
-        rootMargin: "0px 0px 64px 0px",
-      },
-    );
-
-    observer.observe(sentinel);
-    return () => observer.disconnect();
+    el.scrollTop = el.scrollHeight;
   }, []);
 
   useLayoutEffect(() => {
@@ -81,14 +58,12 @@ export function ChatMessageList({
     prevLastFromRef.current = last?.from;
 
     if (newUserMessage || userJustSent) {
-      scrollToBottom("smooth");
+      scrollToBottom();
       return;
     }
 
-    if (!stickToBottom) return;
-
-    scrollToBottom("auto");
-  }, [messages, stickToBottom, isStreaming, scrollToBottom]);
+    scrollToBottom();
+  }, [messages, isStreaming, scrollToBottom]);
 
   const showTimestampForIndex = useCallback(
     (index: number) => {
@@ -101,7 +76,7 @@ export function ChatMessageList({
   );
 
   return (
-    <div ref={scrollRef} className="s-ai-assistant-chat__scroll">
+    <View ref={scrollRef} className="s-ai-assistant-chat__scroll">
       {messages.map((msg, index) => {
         const isUser = msg.from === "user";
         const timestamp = formatMessageTime(msg.id);
@@ -109,26 +84,26 @@ export function ChatMessageList({
         return (
           <React.Fragment key={msg.id}>
             {showTimestampForIndex(index) && timestamp ? (
-              <p className="s-ai-assistant-chat__timestamp">{timestamp}</p>
+              <Text className="s-ai-assistant-chat__timestamp">{timestamp}</Text>
             ) : null}
-            <div
+            <View
               className={cn(
                 "s-ai-assistant-chat__row",
                 isUser && "s-ai-assistant-chat__row--from-user",
               )}
             >
               {!isUser ? (
-                <div className="s-ai-assistant-chat__avatar s-ai-assistant-chat__avatar--ai">
-                  <SparklesIcon size={14} />
-                </div>
+                <View className="s-ai-assistant-chat__avatar s-ai-assistant-chat__avatar--ai">
+                  <Sparkles size={14} />
+                </View>
               ) : null}
-              <div
+              <View
                 className={cn(
                   "s-ai-assistant-chat__content",
                   isUser && "s-ai-assistant-chat__content--from-user",
                 )}
               >
-                <div
+                <View
                   className={cn(
                     "s-ai-assistant-chat__bubble",
                     isUser
@@ -139,31 +114,31 @@ export function ChatMessageList({
                   )}
                 >
                   {msg.streaming && !msg.text ? (
-                    <span
+                    <Text
                       className="s-ai-assistant-chat__typing"
-                      aria-label={t("aiAssistant.chat.thinking")}
+                      aria-label="AI 正在思考"
                     >
-                      <span />
-                      <span />
-                      <span />
-                    </span>
+                      <Text />
+                      <Text />
+                      <Text />
+                    </Text>
                   ) : (
                     <>
                       {msg.imagePreview ? (
-                        <button
+                        <Button
                           type="button"
                           className="s-ai-assistant-chat__bubble-image-btn"
-                          aria-label={t("aiAssistant.chat.viewImage")}
+                          aria-label="查看大图"
                           onClick={() => onOpenImagePreview(msg.imagePreview!)}
                         >
-                          <img
+                          <Image
                             className="s-ai-assistant-chat__bubble-image"
                             src={msg.imagePreview}
-                            alt={t("aiAssistant.chat.uploadedImageAlt")}
+                            alt="已上传的图片"
                           />
-                        </button>
+                        </Button>
                       ) : null}
-                      {msg.text ? <span>{msg.text}</span> : null}
+                      {msg.text ? <Text>{msg.text}</Text> : null}
                       {msg.createdPost ? (
                         <RecommendPostCards
                           posts={[msg.createdPost]}
@@ -182,14 +157,13 @@ export function ChatMessageList({
                       ) : null}
                     </>
                   )}
-                </div>
-              </div>
+                </View>
+              </View>
               {isUser ? <ChatUserAvatar avatar={userAvatar} name={userName} /> : null}
-            </div>
+            </View>
           </React.Fragment>
         );
       })}
-      <div ref={bottomRef} />
-    </div>
+    </View>
   );
 }

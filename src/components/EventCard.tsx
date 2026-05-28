@@ -1,21 +1,15 @@
 import "./EventCard.scss";
 import React, { useMemo } from "react";
-import { useTranslation } from "react-i18next";
 import AvatarGroup from "./AvatarGroup";
 import { ACTIVITY_GUEST_AVATARS } from "../constants/activityGuestAvatars";
 import { ImageWithFallback } from "./ImageWithFallback";
 import { Button } from "./ui";
-import {
-  CalendarIcon,
-  FlameIcon,
-  MapPinIcon,
-  SparklesIcon,
-  UsersIcon,
-} from "lucide-react";
+import { Calendar, Flame, MapPin, Sparkles, Users,  } from "lucide-react-taro";
 import {
   activityStatusCardClass,
   getActivityStatusFromActivity,
 } from "../utils/activityStatus";
+import { Text, View } from "@tarojs/components";
 import {
   deriveEventCardStats,
   formatEventDateBadge,
@@ -46,7 +40,6 @@ const EventCard: React.FC<EventCardProps> = ({
   variant = "list",
   onTeamUp,
 }) => {
-  const { t } = useTranslation();
   const status = getActivityStatusFromActivity(date, title);
   const dateBadge = useMemo(() => formatEventDateBadge(date), [date]);
   const fullDate = useMemo(() => formatEventFullDate(date, title), [date, title]);
@@ -61,7 +54,7 @@ const EventCard: React.FC<EventCardProps> = ({
 
   if (variant !== "list") {
     return (
-      <div
+      <View
         data-cmp="EventCard"
         className={["s-event-card", activityStatusCardClass(status)].filter(Boolean).join(" ")}
       >
@@ -72,16 +65,16 @@ const EventCard: React.FC<EventCardProps> = ({
           placeholderClassName="s-event-card__img s-event-card__img--placeholder"
           fallback={title.slice(0, 2)}
         />
-        <div className="s-event-card__body">
-          <h3 className="s-event-card__title">{title}</h3>
-          <p className="s-event-card__date s-line-clamp-1">{date}</p>
-        </div>
-      </div>
+        <View className="s-event-card__body">
+          <Text className="s-event-card__title">{title}</Text>
+          <Text className="s-event-card__date s-line-clamp-1">{date}</Text>
+        </View>
+      </View>
     );
   }
 
   return (
-    <article
+    <View
       data-cmp="EventCard"
       className={[
         "s-event-card",
@@ -91,7 +84,7 @@ const EventCard: React.FC<EventCardProps> = ({
         .filter(Boolean)
         .join(" ")}
     >
-      <div className="s-event-card__hero">
+      <View className="s-event-card__hero">
         <ImageWithFallback
           src={image}
           alt={title}
@@ -99,53 +92,53 @@ const EventCard: React.FC<EventCardProps> = ({
           placeholderClassName="s-event-card__hero-img s-event-card__hero-img--placeholder"
           fallback={title.slice(0, 2)}
         />
-        <div className="s-event-card__hero-scrim" aria-hidden />
+        <View className="s-event-card__hero-scrim" aria-hidden />
 
-        <div className="s-event-card__date-badge" aria-hidden>
-          <span className="s-event-card__date-primary">{dateBadge.primary}</span>
+        <View className="s-event-card__date-badge" aria-hidden>
+          <Text className="s-event-card__date-primary">{dateBadge.primary}</Text>
           {dateBadge.secondary ? (
-            <span className="s-event-card__date-secondary">{dateBadge.secondary}</span>
+            <Text className="s-event-card__date-secondary">{dateBadge.secondary}</Text>
           ) : null}
-        </div>
+        </View>
 
         {hot ? (
-          <span className="s-event-card__hot-tag">
-            <FlameIcon size={12} aria-hidden />
-            {t("common.hot")}
-          </span>
+          <Text className="s-event-card__hot-tag">
+            <Flame size={12} aria-hidden />
+            热门
+          </Text>
         ) : null}
 
-        <div className="s-event-card__hero-copy">
-          <h3 className="s-event-card__hero-title">{title}</h3>
+        <View className="s-event-card__hero-copy">
+          <Text className="s-event-card__hero-title">{title}</Text>
           {heroSubtitle ? (
-            <p className="s-event-card__hero-subtitle">{heroSubtitle}</p>
+            <Text className="s-event-card__hero-subtitle">{heroSubtitle}</Text>
           ) : null}
-        </div>
-      </div>
+        </View>
+      </View>
 
-      <div className="s-event-card__info-row">
-        <div className="s-event-card__info-item">
-          <MapPinIcon size={14} className="s-event-card__info-icon" aria-hidden />
-          <span className="s-event-card__info-text">{location}</span>
-        </div>
+      <View className="s-event-card__info-row">
+        <View className="s-event-card__info-item">
+          <MapPin size={14} className="s-event-card__info-icon" aria-hidden />
+          <Text className="s-event-card__info-text">{location}</Text>
+        </View>
         {fullDate ? (
-          <div className="s-event-card__info-item s-event-card__info-item--date">
-            <CalendarIcon size={14} className="s-event-card__info-icon" aria-hidden />
-            <span className="s-event-card__info-text">{fullDate}</span>
-          </div>
+          <View className="s-event-card__info-item s-event-card__info-item--date">
+            <Calendar size={14} className="s-event-card__info-icon" aria-hidden />
+            <Text className="s-event-card__info-text">{fullDate}</Text>
+          </View>
         ) : null}
-      </div>
+      </View>
 
-      <div className="s-event-card__footer">
-        <div className="s-event-card__social">
+      <View className="s-event-card__footer">
+        <View className="s-event-card__social">
           <AvatarGroup avatars={ACTIVITY_GUEST_AVATARS} total={attendees} />
-          <div className="s-event-card__team-posts">
-            <UsersIcon size={13} aria-hidden />
-            <span>{t("events.teamPosts", { count: stats.teamPostCount })}</span>
-          </div>
-        </div>
+          <View className="s-event-card__team-posts">
+            <Users size={13} aria-hidden />
+            <Text>{`${stats.teamPostCount} 条组队帖`}</Text>
+          </View>
+        </View>
 
-        <div className="s-event-card__cta">
+        <View className="s-event-card__cta">
           <Button
             type="button"
             className="s-event-card__team-btn"
@@ -154,12 +147,12 @@ const EventCard: React.FC<EventCardProps> = ({
               onTeamUp?.();
             }}
           >
-            <SparklesIcon size={15} aria-hidden />
-            {t("events.teamUp")}
+            <Sparkles size={15} aria-hidden />
+            加入
           </Button>
-        </div>
-      </div>
-    </article>
+        </View>
+      </View>
+    </View>
   );
 };
 

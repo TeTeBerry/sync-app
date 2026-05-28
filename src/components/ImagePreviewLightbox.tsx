@@ -1,9 +1,9 @@
 import "./ImagePreviewLightbox.scss";
 import React, { useCallback, useEffect } from "react";
-import { XIcon } from "lucide-react";
-import { useTranslation } from "react-i18next";
+import { X } from "lucide-react-taro";
 import { useOverlayLock } from "../hooks/useOverlayLock";
 import { cn } from "./ui";
+import { Button, Image, View } from '@tarojs/components';
 
 export interface ImagePreviewLightboxProps {
   open: boolean;
@@ -18,7 +18,6 @@ const ImagePreviewLightbox: React.FC<ImagePreviewLightboxProps> = ({
   alt,
   onClose,
 }) => {
-  const { t } = useTranslation();
   useOverlayLock(open);
 
   const handleKeyDown = useCallback(
@@ -37,29 +36,29 @@ const ImagePreviewLightbox: React.FC<ImagePreviewLightboxProps> = ({
   if (!src) return null;
 
   return (
-    <div
+    <View
       className={cn("s-overlay s-image-preview", !open && "s-overlay--off")}
       style={{ zIndex: "var(--overlay-z-lightbox)" }}
       role="presentation"
     >
-      <div className="s-overlay__backdrop s-image-preview__backdrop" onClick={onClose} />
-      <button
+      <View className="s-overlay__backdrop s-image-preview__backdrop" onClick={onClose} />
+      <Button
         type="button"
         className="s-overlay__icon-btn s-image-preview__close"
-        aria-label={t("common.close")}
+        aria-label="关闭"
         onClick={onClose}
       >
-        <XIcon size={22} />
-      </button>
-      <div className="s-image-preview__stage" onClick={onClose}>
-        <img
+        <X size={22} />
+      </Button>
+      <View className="s-image-preview__stage" onClick={onClose}>
+        <Image
           className="s-image-preview__img"
           src={src}
-          alt={alt ?? t("aiAssistant.chat.uploadedImageAlt")}
+          alt={alt ?? "已上传的图片"}
           onClick={(event) => event.stopPropagation()}
         />
-      </div>
-    </div>
+      </View>
+    </View>
   );
 };
 

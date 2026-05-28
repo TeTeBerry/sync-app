@@ -1,9 +1,9 @@
-import { ChevronRightIcon } from "lucide-react";
+import { ChevronRight } from "lucide-react-taro";
 import type { FC } from "react";
-import { useTranslation } from "react-i18next";
 import { Button } from "../../../components/ui";
 import { FeedPostList } from "../../../components/FeedPostList";
 import type { ActivityPost } from "../homeData";
+import { Text, View } from '@tarojs/components';
 
 type HomeActivityFeedProps = {
   items: ActivityPost[];
@@ -20,17 +20,15 @@ export const HomeActivityFeed: FC<HomeActivityFeedProps> = ({
   onLike,
   onCommentSubmitted,
 }) => {
-  const { t } = useTranslation();
-
   return (
-    <section className="s-home-feed">
-      <div className="s-home-feed__head">
-        <h2>{t("home.feed.title")}</h2>
+    <View className="s-home-feed">
+      <View className="s-home-feed__head">
+        <Text>更多热门帖子</Text>
         <Button className="s-home-feed__link" onClick={onSeeAll}>
-          {t("home.feed.seeAll")}
-          <ChevronRightIcon size={16} />
+          查看全部
+          <ChevronRight size={16} />
         </Button>
-      </div>
+      </View>
 
       <FeedPostList
         items={items}
@@ -38,6 +36,6 @@ export const HomeActivityFeed: FC<HomeActivityFeedProps> = ({
         onLike={onLike}
         onCommentSubmitted={onCommentSubmitted}
       />
-    </section>
+    </View>
   );
 };

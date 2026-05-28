@@ -1,7 +1,6 @@
 import React, { type KeyboardEvent, type ClipboardEvent, useCallback, useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
 import Taro from "@tarojs/taro";
-import { ImagePlusIcon, SendIcon, ShieldIcon, XIcon } from "lucide-react";
+import { ImagePlus, Send, Shield, X } from "lucide-react-taro";
 import { Button, Input, cn } from "../ui";
 import {
   getTopAiShortcutTags,
@@ -16,23 +15,24 @@ import {
 } from "../../utils/chatImage";
 import { useAiChatStore } from "../../stores/aiChatStore";
 import { validateChatImageDataUrl } from "../../utils/chatImage";
+import { Image, Text, View } from '@tarojs/components';
 
-const SHORTCUT_TAG_LABEL_KEYS: Record<AiShortcutTag, string> = {
-  组队队友: "teamUp",
-  住宿同行: "lodging",
-  拼车同行: "carpool",
+const SHORTCUT_TAG_LABELS: Record<AiShortcutTag, string> = {
+  组队队友: "组队队友",
+  住宿同行: "住宿同行",
+  拼车同行: "拼车同行",
 };
 
 const globalQuickChips = [
-  { key: "findBuddy", submitText: "帮我dd" },
-  { key: "nearEvents", submitText: "查最近活动" },
-  { key: "findPartner", submitText: "帮我找搭子" },
-  { key: "popularEvents", submitText: "查最近活动" },
+  { key: "findBuddy", label: "帮我dd", submitText: "帮我dd" },
+  { key: "nearEvents", label: "查最近活动", submitText: "查最近活动" },
+  { key: "findPartner", label: "帮我找搭子", submitText: "帮我找搭子" },
+  { key: "popularEvents", label: "热门活动", submitText: "查最近活动" },
 ] as const;
 
 const activityActionChips = [
-  { key: "createOwn", submitText: "自己发帖" },
-  { key: "searchPosts", submitText: "看看有没有组队帖" },
+  { key: "createOwn", label: "自己发帖", submitText: "自己发帖" },
+  { key: "searchPosts", label: "查组队帖", submitText: "看看有没有组队帖" },
 ] as const;
 
 const MAX_IMAGES = 6;
@@ -63,24 +63,21 @@ export function ChatComposer({
   onPendingImagesChange: (images: string[]) => void;
   onOpenImagePreview: (src: string) => void;
 }) {
-  const { t } = useTranslation();
   const [shortcutTags, setShortcutTags] = useState(() => getTopAiShortcutTags());
   const conversationFlow = useAiChatStore((state) => state.conversationState?.flow);
 
   const inputPlaceholder =
     conversationFlow === "collect_post_body"
-      ? t("aiAssistant.chat.customPostPlaceholder")
-      : t("aiAssistant.chat.placeholder");
+      ? "描述你的组队需求，如出发地、人数、日期…"
+      : "说说你想去哪、想找什么样的同行…";
 
   const quickChips = useMemo((): QuickChip[] => {
     if (activityLegacyId != null && !Number.isNaN(activityLegacyId)) {
       const tagChips: QuickChip[] = shortcutTags.map((tag) => {
-        const labelKey = SHORTCUT_TAG_LABEL_KEYS[tag as AiShortcutTag];
+        const label = SHORTCUT_TAG_LABELS[tag as AiShortcutTag] ?? tag;
         return {
           key: `tag-${tag}`,
-          label: labelKey
-            ? t(`aiAssistant.chat.quickReplies.${labelKey}`)
-            : tag,
+          label,
           submitText: normalizeAiShortcutTag(tag),
           isShortcutTag: true,
         };
@@ -88,7 +85,7 @@ export function ChatComposer({
 
       const actionChips: QuickChip[] = activityActionChips.map((chip) => ({
         key: chip.key,
-        label: t(`aiAssistant.chat.quickReplies.${chip.key}`),
+        label: chip.label,
         submitText: chip.submitText,
       }));
 
@@ -97,10 +94,10 @@ export function ChatComposer({
 
     return globalQuickChips.map((chip) => ({
       key: chip.key,
-      label: t(`aiAssistant.chat.quickReplies.${chip.key}`),
+      label: chip.label,
       submitText: chip.submitText,
     }));
-  }, [activityLegacyId, shortcutTags, t]);
+  }, [activityLegacyId, shortcutTags]);
 
   const handlePickImages = useCallback(async () => {
     if (isStreaming) return;
@@ -120,14 +117,14 @@ export function ChatComposer({
     } catch (error) {
       if (error instanceof ChatImageTooLargeError) {
         void Taro.showToast({
-          title: t("aiAssistant.chat.imageTooLarge"),
+          title: "图片过大，请压缩至 10MB 以内",
           icon: "none",
         });
         return;
       }
-      void Taro.showToast({ title: t("common.requestFailed"), icon: "none" });
+      void Taro.showToast({ title: "请求失败，请稍后重试", icon: "none" });
     }
-  }, [isStreaming, pendingImages, onPendingImagesChange, t]);
+  }, [isStreaming, pendingImages, onPendingImagesChange]);
 
   const removeImage = useCallback(
     (index: number) => {
@@ -182,7 +179,7 @@ export function ChatComposer({
         } catch (error) {
           if (error instanceof ChatImageTooLargeError) {
             void Taro.showToast({
-              title: t("aiAssistant.chat.imageTooLarge"),
+              title: "图片过大，请压缩至 10MB 以内",
               icon: "none",
             });
           }
@@ -193,7 +190,7 @@ export function ChatComposer({
         onPendingImagesChange([...pendingImages, ...newImages].slice(0, MAX_IMAGES));
       }
     },
-    [isStreaming, pendingImages, onPendingImagesChange, t],
+    [isStreaming, pendingImages, onPendingImagesChange],
   );
 
   const handleQuickChipClick = useCallback(
@@ -211,7 +208,7 @@ export function ChatComposer({
 
   return (
     <>
-      <div className="s-ai-assistant-chat__quick-row s-scrollbar-none">
+      <View className="s-ai-assistant-chat__quick-row s-scrollbar-none">
         {quickChips.map((chip) => (
           <Button
             key={chip.key}
@@ -222,43 +219,43 @@ export function ChatComposer({
             {chip.label}
           </Button>
         ))}
-      </div>
+      </View>
 
-      <div className="s-ai-assistant-chat__composer">
+      <View className="s-ai-assistant-chat__composer">
         {pendingImages.length > 0 ? (
-          <div className="s-ai-assistant-chat__attach-preview-list">
+          <View className="s-ai-assistant-chat__attach-preview-list">
             {pendingImages.map((src, index) => (
-              <div key={`${src.slice(0, 40)}-${index}`} className="s-ai-assistant-chat__attach-thumb">
-                <button
+              <View key={`${src.slice(0, 40)}-${index}`} className="s-ai-assistant-chat__attach-thumb">
+                <Button
                   type="button"
                   className="s-ai-assistant-chat__attach-preview-btn"
-                  aria-label={t("aiAssistant.chat.viewImage")}
+                  aria-label="查看大图"
                   onClick={() => onOpenImagePreview(src)}
                 >
-                  <img src={src} alt={t("aiAssistant.chat.uploadedImageAlt")} />
-                </button>
-                <button
+                  <Image src={src} alt="已上传的图片" />
+                </Button>
+                <Button
                   type="button"
                   className="s-ai-assistant-chat__attach-remove"
-                  aria-label={t("aiAssistant.chat.removeImage")}
+                  aria-label="移除图片"
                   onClick={() => removeImage(index)}
                 >
-                  <XIcon size={14} />
-                </button>
-              </div>
+                  <X size={14} />
+                </Button>
+              </View>
             ))}
-          </div>
+          </View>
         ) : null}
-        <div className="s-ai-assistant-chat__composer-inner">
-          <button
+        <View className="s-ai-assistant-chat__composer-inner">
+          <Button
             type="button"
             className="s-ai-assistant-chat__attach-btn"
             disabled={isStreaming || pendingImages.length >= MAX_IMAGES}
-            aria-label={t("aiAssistant.chat.uploadImage")}
+            aria-label="上传图片"
             onClick={() => void handlePickImages()}
           >
-            <ImagePlusIcon size={18} />
-          </button>
+            <ImagePlus size={18} />
+          </Button>
           <Input
             variant="ai-assistant-chat"
             type="text"
@@ -277,14 +274,14 @@ export function ChatComposer({
             disabled={!canSend}
             onClick={() => onSubmit(input, pendingImages)}
           >
-            <SendIcon size={16} />
+            <Send size={16} />
           </Button>
-        </div>
-        <p className="s-ai-assistant-chat__disclaimer">
-          <ShieldIcon size={12} aria-hidden />
-          <span>{t("aiAssistant.chat.footerDisclaimer")}</span>
-        </p>
-      </div>
+        </View>
+        <Text className="s-ai-assistant-chat__disclaimer">
+          <Shield size={12} aria-hidden />
+          <Text>AI 内容仅供参考</Text>
+        </Text>
+      </View>
     </>
   );
 }

@@ -1,5 +1,6 @@
 import "./ContentTypeBadge.scss";
 import React from "react";
+import { Text, View } from '@tarojs/components';
 
 const TYPE_LABELS: Record<string, string> = {
   team: "组队",
@@ -21,15 +22,15 @@ export const ContentTypeBadge: React.FC<{
   if (!types?.length) return null;
 
   return (
-    <div className="s-content-badges">
+    <View className="s-content-badges">
       {types.map((type) => (
-        <span
+        <Text
           key={type}
           className={`s-content-badge ${TYPE_STYLES[type] ?? ""}`}
         >
           {TYPE_LABELS[type] ?? type}
-        </span>
+        </Text>
       ))}
-    </div>
+    </View>
   );
 };

@@ -1,14 +1,13 @@
 import "./settings.scss";
 import Taro, { useRouter } from "@tarojs/taro";
 import React, { useCallback, useEffect, useState } from "react";
-import { CheckIcon } from "lucide-react";
-import { useTranslation } from "react-i18next";
-import { useQueryClient } from "@tanstack/react-query";
+import { Check } from "lucide-react-taro";
 import PageNavigation from "../../components/PageNavigation";
 import { ROUTES } from "../../utils/route";
 import { updateCurrentUserAndInvalidate, useCurrentUserQuery } from "../../hooks/useSyncApi";
 import { saveEncryptedProfileSnapshot } from "../../utils/profileSnapshotStorage";
 import { useProfilePageStore } from "../../stores/profilePageStore";
+import { Button, Text, View } from '@tarojs/components';
 
 type SettingsSection = "notifications" | "privacy" | "help";
 type PrivacyLevel = "public" | "friends" | "private";
@@ -17,6 +16,39 @@ const STORAGE_KEYS = {
   notifications: "profile.notificationsEnabled",
   privacy: "profile.privacyLevel",
 } as const;
+
+const SECTION_TITLES: Record<SettingsSection, string> = {
+  notifications: "消息通知",
+  privacy: "隐私设置",
+  help: "帮助与反馈",
+};
+
+const PRIVACY_LABELS: Record<PrivacyLevel, string> = {
+  public: "公开",
+  friends: "仅好友",
+  private: "私密",
+};
+
+const PRIVACY_DESCS: Record<PrivacyLevel, string> = {
+  public: "所有人可见你的主页和活动记录",
+  friends: "仅互相关注的用户可见",
+  private: "仅自己可见",
+};
+
+const FAQ_QA = [
+  {
+    q: "如何发布组队帖？",
+    a: "进入活动详情页，通过 AI 助手描述你的需求，或在「我的帖子」中管理已发布内容。",
+  },
+  {
+    q: "如何找到同行伙伴？",
+    a: "浏览热门帖子或在活动详情页使用 AI 精准匹配，找到志同道合的队友。",
+  },
+  {
+    q: "如何提升个人影响力？",
+    a: "参与活动、成功组队、发布优质帖子均可获得互动与认可。",
+  },
+] as const;
 
 function readBool(key: string, fallback: boolean): boolean {
   try {
@@ -38,9 +70,7 @@ function readPrivacy(key: string, fallback: PrivacyLevel): PrivacyLevel {
 }
 
 const SettingsPage: React.FC = () => {
-  const { t } = useTranslation();
   const router = useRouter();
-  const queryClient = useQueryClient();
   const section = (router.params.section ?? "notifications") as SettingsSection;
   const { data: currentUser } = useCurrentUserQuery();
   const setStoreNotificationsEnabled = useProfilePageStore(
@@ -70,15 +100,13 @@ const SettingsPage: React.FC = () => {
     Taro.setStorageSync(STORAGE_KEYS.privacy, currentUser.privacyLevel);
   }, [currentUser?.privacyLevel, setStorePrivacyLevel]);
 
-  const titleKey = `profile.settings.${section}Title` as const;
-
   const toggleNotifications = useCallback(() => {
     setNotificationsEnabled((prev) => {
       const next = !prev;
       Taro.setStorageSync(STORAGE_KEYS.notifications, next);
       setStoreNotificationsEnabled(next);
 
-      void updateCurrentUserAndInvalidate(queryClient, {
+      void updateCurrentUserAndInvalidate({
         notificationsEnabled: next,
       }).catch(() => undefined);
 
@@ -97,106 +125,104 @@ const SettingsPage: React.FC = () => {
     currentUser?.city,
     currentUser?.favorGenres,
     currentUser?.likeMate,
-    queryClient,
     setStoreNotificationsEnabled,
-    t,
   ]);
 
   const selectPrivacy = useCallback((level: PrivacyLevel) => {
     setPrivacyLevel(level);
     setStorePrivacyLevel(level);
     Taro.setStorageSync(STORAGE_KEYS.privacy, level);
-    void updateCurrentUserAndInvalidate(queryClient, { privacyLevel: level })
+    void updateCurrentUserAndInvalidate({ privacyLevel: level })
       .then(() => {
-        void Taro.showToast({ title: t("profile.settings.saved"), icon: "success" });
+        void Taro.showToast({ title: "已保存", icon: "success" });
       })
       .catch(() => {
-        void Taro.showToast({ title: t("common.requestFailed"), icon: "none" });
+        void Taro.showToast({ title: "请求失败，请稍后重试", icon: "none" });
       });
-  }, [queryClient, setStorePrivacyLevel, t]);
+  }, [setStorePrivacyLevel]);
 
   const submitFeedback = useCallback(() => {
-    void Taro.showToast({ title: t("profile.settings.feedbackSent"), icon: "success" });
-  }, [t]);
+    void Taro.showToast({ title: "反馈已提交，感谢！", icon: "success" });
+  }, []);
 
   const privacyOptions: PrivacyLevel[] = ["public", "friends", "private"];
 
   return (
-    <div data-cmp="Settings" className="s-settings">
-      <PageNavigation title={t(titleKey)} fallback={ROUTES.PROFILE} />
+    <View data-cmp="Settings" className="s-settings">
+      <PageNavigation title={SECTION_TITLES[section]} fallback={ROUTES.PROFILE} />
 
-      <main className="s-settings__main">
+      <View className="s-settings__main">
         {section === "notifications" && (
-          <div className="s-settings__card">
-            <div className="s-settings__row">
-              <div>
-                <div className="s-settings__row-label">{t("profile.settings.pushNotifications")}</div>
-                <div className="s-settings__row-desc">{t("profile.settings.pushNotificationsDesc")}</div>
-              </div>
-              <button
+          <View className="s-settings__card">
+            <View className="s-settings__row">
+              <View>
+                <View className="s-settings__row-label">推送通知</View>
+                <View className="s-settings__row-desc">接收活动提醒、互动消息等</View>
+              </View>
+              <Button
                 type="button"
                 role="switch"
                 aria-checked={notificationsEnabled}
                 className={`s-settings__toggle${notificationsEnabled ? " s-settings__toggle--on" : ""}`}
                 onClick={toggleNotifications}
               >
-                <span className="s-settings__toggle-knob" />
-              </button>
-            </div>
-            <div className="s-settings__row">
-              <div>
-                <div className="s-settings__row-label">{t("profile.settings.activityReminders")}</div>
-                <div className="s-settings__row-desc">{t("profile.settings.activityRemindersDesc")}</div>
-              </div>
-              <button
+                <Text className="s-settings__toggle-knob" />
+              </Button>
+            </View>
+            <View className="s-settings__row">
+              <View>
+                <View className="s-settings__row-label">活动提醒</View>
+                <View className="s-settings__row-desc">活动开始前 24 小时提醒</View>
+              </View>
+              <Button
                 type="button"
                 role="switch"
                 aria-checked={notificationsEnabled}
                 className={`s-settings__toggle${notificationsEnabled ? " s-settings__toggle--on" : ""}`}
                 onClick={toggleNotifications}
               >
-                <span className="s-settings__toggle-knob" />
-              </button>
-            </div>
-          </div>
+                <Text className="s-settings__toggle-knob" />
+              </Button>
+            </View>
+          </View>
         )}
 
         {section === "privacy" && (
-          <div className="s-settings__card">
+          <View className="s-settings__card">
             {privacyOptions.map((level) => (
-              <button
+              <Button
                 key={level}
                 type="button"
                 className={`s-settings__option${privacyLevel === level ? " s-settings__option--selected" : ""}`}
                 onClick={() => selectPrivacy(level)}
               >
-                <div>
-                  <div className="s-settings__option-label">{t(`profile.settings.privacyOptions.${level}`)}</div>
-                  <div className="s-settings__option-desc">{t(`profile.settings.privacyDesc.${level}`)}</div>
-                </div>
-                {privacyLevel === level && <CheckIcon size={20} className="s-settings__check" />}
-              </button>
+                <View>
+                  <View className="s-settings__option-label">{PRIVACY_LABELS[level]}</View>
+                  <View className="s-settings__option-desc">{PRIVACY_DESCS[level]}</View>
+                </View>
+                {privacyLevel === level && <Check size={20} className="s-settings__check" />}
+              </Button>
             ))}
-          </div>
+          </View>
         )}
 
         {section === "help" && (
           <>
-            <div className="s-settings__card s-settings__faq">
-              {[1, 2, 3].map((idx) => (
-                <div key={idx} className="s-settings__faq-item">
-                  <div className="s-settings__faq-q">{t(`profile.settings.faq.q${idx}`)}</div>
-                  <div className="s-settings__faq-a">{t(`profile.settings.faq.a${idx}`)}</div>
-                </div>
+            <View className="s-settings__card s-settings__faq">
+              {FAQ_QA.map((item, idx) => (
+                <View key={idx} className="s-settings__faq-item">
+                  <View className="s-settings__faq-q">{item.q}</View>
+                  <View className="s-settings__faq-a">{item.a}</View>
+                </View>
               ))}
-            </div>
-            <button type="button" className="s-settings__feedback-btn" onClick={submitFeedback}>
-              {t("profile.settings.submitFeedback")}
-            </button>
+            </View>
+            <Button type="button" className="s-settings__feedback-btn" onClick={submitFeedback}>
+              提交反馈
+            </Button>
           </>
         )}
-      </main>
-    </div>
+      </View>
+    </View>
   );
 };
 

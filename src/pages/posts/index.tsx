@@ -1,8 +1,6 @@
 import "./posts.scss";
 import Taro from "@tarojs/taro";
 import { useCallback } from "react";
-import { useTranslation } from "react-i18next";
-import { useQueryClient } from "@tanstack/react-query";
 import PageNavigation from "../../components/PageNavigation";
 import { FeedPostList } from "../../components/FeedPostList";
 import { ListState } from "../../components/ListState";
@@ -15,33 +13,32 @@ import {
 import { isApiEnabled } from "../../constants/api";
 import { ROUTES } from "../../utils/route";
 import type { ActivityPost } from "../index/homeData";
+import { View } from '@tarojs/components';
 
 const AllPostsPage = () => {
-  const { t } = useTranslation();
-  const queryClient = useQueryClient();
   const { confirm, confirmDialog } = useConfirmDialog({
-    cancelText: t("common.cancel"),
+    cancelText: "取消",
   });
   const { posts, isLoading, isError, refetch } = useAllPostsQuery();
 
   const handleDeletePost = useCallback(
     async (post: ActivityPost) => {
       const ok = await confirm({
-        title: t("home.feed.deleteConfirmTitle"),
-        message: t("home.feed.deleteConfirmMessage"),
-        confirmText: t("profile.myPosts.delete"),
+        title: "确认删除",
+        message: "删除后无法恢复，确定要删除这条帖子吗？",
+        confirmText: "删除",
       });
       if (!ok) return;
-      void deletePostAndInvalidate(queryClient, post.id)
+      void deletePostAndInvalidate(post.id)
         .then(() => {
-          void Taro.showToast({ title: t("home.feed.deleted"), icon: "success" });
+          void Taro.showToast({ title: "已删除", icon: "success" });
         })
         .catch(() => {
           void refetch();
-          void Taro.showToast({ title: t("home.feed.deleteFailed"), icon: "none" });
+          void Taro.showToast({ title: "删除失败", icon: "none" });
         });
     },
-    [confirm, queryClient, refetch, t],
+    [confirm, refetch],
   );
 
   const handleLikePost = useCallback(
@@ -49,11 +46,11 @@ const AllPostsPage = () => {
       if (!isApiEnabled()) {
         return;
       }
-      void likePostAndInvalidate(queryClient, post.id).catch(() =>
-        void Taro.showToast({ title: t("common.requestFailed"), icon: "none" }),
+      void likePostAndInvalidate(post.id).catch(() =>
+        void Taro.showToast({ title: "请求失败，请稍后重试", icon: "none" }),
       );
     },
-    [queryClient, t],
+    [],
   );
 
   const handleCommentSubmitted = useCallback(() => {
@@ -61,19 +58,19 @@ const AllPostsPage = () => {
   }, [refetch]);
 
   return (
-    <div data-cmp="AllPosts" className="s-posts-page">
-      <PageNavigation title={t("home.feed.allPosts")} fallback={ROUTES.HOME} />
+    <View data-cmp="AllPosts" className="s-posts-page">
+      <PageNavigation title="所有帖子" fallback={ROUTES.HOME} />
 
-      <main className="s-posts-page__main s-scrollbar-none">
+      <View className="s-posts-page__main s-scrollbar-none">
         <ListState
           isLoading={isLoading}
           isError={isError}
           isEmpty={!isLoading && !isError && posts.length === 0}
-          loadingText={t("home.feed.loading")}
-          errorText={t("common.requestFailed")}
-          emptyText={t("home.feed.empty")}
+          loadingText="加载中…"
+          errorText="请求失败，请稍后重试"
+          emptyText="暂无帖子"
           onRetry={() => void refetch()}
-          retryText={t("common.retry")}
+          retryText="重试"
           stateClassName="s-posts-page__state"
           retryClassName="s-posts-page__retry"
         >
@@ -84,10 +81,10 @@ const AllPostsPage = () => {
             onCommentSubmitted={handleCommentSubmitted}
           />
         </ListState>
-      </main>
+      </View>
 
       {confirmDialog}
-    </div>
+    </View>
   );
 };
 

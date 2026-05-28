@@ -1,11 +1,7 @@
 import "./events.scss";
 import React, { useCallback, useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
-import {
-  AudioWaveformIcon,
-  SearchIcon,
-  TrendingUpIcon,
-} from "lucide-react";
+import { AudioWaveform, Search, TrendingUp,  } from "lucide-react-taro";
+import { View, Text, Input, Button } from "@tarojs/components";
 import BottomNav from "../../components/BottomNav";
 import EventCard from "../../components/EventCard";
 import { ListState } from "../../components/ListState";
@@ -25,7 +21,6 @@ function matchesEventFilter(status: ActivityStatus, tab: EventFilterTab): boolea
 }
 
 const Events: React.FC = () => {
-  const { t } = useTranslation();
   const { events, isLoading, isError, refetch } = useEventList();
   const [activeTab, setActiveTab] = useState<EventFilterTab>("upcoming");
   const [searchQuery, setSearchQuery] = useState("");
@@ -52,53 +47,53 @@ const Events: React.FC = () => {
   }, [activeTab, events, searchQuery]);
 
   const filterTabs: Array<{ id: EventFilterTab; label: string }> = [
-    { id: "all", label: t("common.all") },
-    { id: "upcoming", label: t("events.tabs.upcoming") },
-    { id: "ended", label: t("activityStatus.ended") },
+    { id: "all", label: "全部" },
+    { id: "upcoming", label: "即将开始" },
+    { id: "ended", label: "已结束" },
   ];
 
   return (
-    <div className="s-page-shell">
-      <div className="s-events">
-        <header className="s-events__header">
-          <div className="s-events__brand">
-            <AudioWaveformIcon size={24} className="s-events__brand-icon" aria-hidden />
-            <div className="s-events__brand-copy">
-              <span className="s-events__brand-title">SYNC</span>
-              <span className="s-events__brand-subtitle">{t("events.subtitle")}</span>
-            </div>
-          </div>
-          <div className="s-events__count-pill" aria-label={t("events.countLabel", { count: events.length })}>
-            <TrendingUpIcon size={14} aria-hidden />
-            <span>{t("events.countLabel", { count: events.length })}</span>
-          </div>
-        </header>
+    <View className="s-page-shell">
+      <View className="s-events">
+        <View className="s-events__header">
+          <View className="s-events__brand">
+            <AudioWaveform size={24} className="s-events__brand-icon" aria-hidden />
+            <View className="s-events__brand-copy">
+              <Text className="s-events__brand-title">SYNC</Text>
+              <Text className="s-events__brand-subtitle">电音活动</Text>
+            </View>
+          </View>
+          <View className="s-events__count-pill" aria-label={`${events.length} 场活动`}>
+            <TrendingUp size={14} aria-hidden />
+            <Text>{`${events.length} 场活动`}</Text>
+          </View>
+        </View>
 
-        <div className="s-events__toolbar">
-          <div className="s-events__search" aria-label={t("events.searchPlaceholder")}>
-            <SearchIcon size={18} className="s-events__search-icon" aria-hidden />
-            <input
+        <View className="s-events__toolbar">
+          <View className="s-events__search" aria-label="搜索活动、城市...">
+            <Search size={18} className="s-events__search-icon" aria-hidden />
+            <Input
               type="text"
               className="s-events__search-input"
-              placeholder={t("events.searchPlaceholder")}
+              placeholder="搜索活动、城市..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onInput={(e) => setSearchQuery(e.target.value)}
             />
             {searchQuery && (
-              <button
+              <Button
                 type="button"
                 className="s-events__search-clear"
                 onClick={() => setSearchQuery("")}
-                aria-label={t("common.clear")}
+                aria-label="清空"
               >
                 ×
-              </button>
+              </Button>
             )}
-          </div>
+          </View>
 
-          <div className="s-events__tabs" role="tablist" aria-label={t("events.tabsLabel")}>
+          <View className="s-events__tabs" role="tablist" aria-label="活动筛选">
             {filterTabs.map((tab) => (
-              <button
+              <Button
                 key={tab.id}
                 type="button"
                 role="tab"
@@ -112,27 +107,27 @@ const Events: React.FC = () => {
                 onClick={() => setActiveTab(tab.id)}
               >
                 {tab.label}
-              </button>
+              </Button>
             ))}
-          </div>
-        </div>
+          </View>
+        </View>
 
-        <main className="s-events__main s-scrollbar-none">
+        <View className="s-events__main s-scrollbar-none">
           <ListState
             isLoading={isLoading}
             isError={isError}
             isEmpty={!isLoading && !isError && filteredEvents.length === 0}
-            loadingText={t("events.loading")}
-            errorText={t("events.error")}
-            emptyText={t("events.empty")}
+            loadingText="加载活动中..."
+            errorText="活动列表加载失败"
+            emptyText="暂无活动"
             onRetry={() => void refetch()}
-            retryText={t("common.retry")}
+            retryText="重试"
             stateClassName="s-events__state"
             retryClassName="s-events__retry"
           >
-            <div className="s-events__list">
+            <View className="s-events__list">
               {filteredEvents.map((event) => (
-                <div
+                <View
                   key={event.id}
                   className="s-events__card-wrap"
                   role="button"
@@ -155,14 +150,14 @@ const Events: React.FC = () => {
                     variant="list"
                     onTeamUp={() => openDetail(event.id)}
                   />
-                </div>
+                </View>
               ))}
-            </div>
+            </View>
           </ListState>
-        </main>
-      </div>
+        </View>
+      </View>
       <BottomNav />
-    </div>
+    </View>
   );
 };
 

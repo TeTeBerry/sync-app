@@ -1,14 +1,6 @@
 import "./notifications.scss";
 import React, { useCallback, useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { useQueryClient } from "@tanstack/react-query";
-import {
-  BellIcon,
-  HeartIcon,
-  MessageCircleIcon,
-  MegaphoneIcon,
-  Trash2Icon,
-} from "lucide-react";
+import { Bell, Heart, MessageCircle, Megaphone, Trash2,  } from "lucide-react-taro";
 import PageNavigation from "../../components/PageNavigation";
 import {
   clearAllNotificationsAndInvalidate,
@@ -26,6 +18,7 @@ import {
   type NotificationCategory,
 } from "../../utils/notificationDisplay";
 import { navigateFromNotification, ROUTES } from "../../utils/route";
+import { Button, Text, View } from '@tarojs/components';
 
 type CategoryFilter = "all" | NotificationCategory;
 
@@ -40,23 +33,21 @@ function NotificationIcon({
 
   switch (category) {
     case "like":
-      return <HeartIcon {...iconProps} />;
+      return <Heart {...iconProps} />;
     case "comment":
-      return <MessageCircleIcon {...iconProps} />;
+      return <MessageCircle {...iconProps} />;
     case "system":
-      return <MegaphoneIcon {...iconProps} />;
+      return <Megaphone {...iconProps} />;
     default:
-      return <BellIcon {...iconProps} />;
+      return <Bell {...iconProps} />;
   }
 }
 
 const NotificationsPage: React.FC = () => {
-  const { t } = useTranslation();
-  const queryClient = useQueryClient();
   const { data: notifications = [], isLoading, refetch } = useNotificationsQuery();
   const [activeCategory, setActiveCategory] = useState<CategoryFilter>("all");
   const { confirm, confirmDialog } = useConfirmDialog({
-    cancelText: t("common.cancel"),
+    cancelText: "取消",
   });
 
   const unreadCount = useMemo(
@@ -88,58 +79,58 @@ const NotificationsPage: React.FC = () => {
 
   const handleMarkAll = useCallback(async () => {
     if (unreadCount === 0) return;
-    await markAllNotificationsAsRead(queryClient);
+    await markAllNotificationsAsRead();
     await refetch();
-  }, [queryClient, refetch, unreadCount]);
+  }, [refetch, unreadCount]);
 
   const handleClearAll = useCallback(async () => {
     if (notifications.length === 0) return;
     const confirmed = await confirm({
-      title: t("notifications.clearAllConfirmTitle"),
-      message: t("notifications.clearAllConfirmMessage"),
-      confirmText: t("notifications.clearAll"),
+      title: "清空全部消息",
+      message: "确定要删除所有消息吗？此操作不可撤销。",
+      confirmText: "清空全部",
     });
     if (!confirmed) return;
-    await clearAllNotificationsAndInvalidate(queryClient);
+    await clearAllNotificationsAndInvalidate();
     await refetch();
-  }, [confirm, notifications.length, queryClient, refetch, t]);
+  }, [confirm, notifications.length, refetch]);
 
   const handleDelete = useCallback(
     async (event: React.MouseEvent, item: AppNotification) => {
       event.stopPropagation();
       const confirmed = await confirm({
-        title: t("notifications.deleteConfirmTitle"),
-        message: t("notifications.deleteConfirmMessage"),
-        confirmText: t("notifications.delete"),
+        title: "删除消息",
+        message: "确定要删除这条消息吗？",
+        confirmText: "删除",
       });
       if (!confirmed) return;
-      await deleteNotificationAndInvalidate(queryClient, item.id);
+      await deleteNotificationAndInvalidate(item.id);
       await refetch();
     },
-    [confirm, queryClient, refetch, t],
+    [confirm, refetch],
   );
 
   const handleItemClick = useCallback(
     async (item: AppNotification) => {
       if (!item.read) {
-        await markNotificationAsRead(item.id, queryClient);
+        await markNotificationAsRead(item.id);
       }
       navigateFromNotification(item.meta);
     },
-    [queryClient],
+    [],
   );
 
   return (
-    <div data-cmp="Notifications" className="s-notifications">
-      <PageNavigation title={t("notifications.title")} fallback={ROUTES.HOME} />
+    <View data-cmp="Notifications" className="s-notifications">
+      <PageNavigation title="消息通知" fallback={ROUTES.HOME} />
 
-      <main className="s-notifications__main">
-        <div className="s-notifications__tabs" role="tablist">
+      <View className="s-notifications__main">
+        <View className="s-notifications__tabs" role="tablist">
           {CATEGORY_TABS.map((category) => {
             const count = categoryCounts[category];
             const isActive = activeCategory === category;
             return (
-              <button
+              <Button
                 key={category}
                 type="button"
                 role="tab"
@@ -147,91 +138,91 @@ const NotificationsPage: React.FC = () => {
                 className={`s-notifications__tab${isActive ? " s-notifications__tab--active" : ""}`}
                 onClick={() => setActiveCategory(category)}
               >
-                {t(`notifications.categories.${category}`)}
+                {category === "all" ? "全部" : category === "comment" ? "评论" : category === "like" ? "点赞" : "系统"}
                 {count > 0 && (
-                  <span className="s-notifications__tab-count">{count}</span>
+                  <Text className="s-notifications__tab-count">{count}</Text>
                 )}
-              </button>
+              </Button>
             );
           })}
-        </div>
+        </View>
 
         {notifications.length > 0 && (
-          <div className="s-notifications__toolbar">
+          <View className="s-notifications__toolbar">
             {unreadCount > 0 && (
-              <button
+              <Button
                 type="button"
                 className="s-notifications__toolbar-btn"
                 onClick={() => void handleMarkAll()}
               >
-                {t("notifications.markAllRead")}
-              </button>
+                全部已读
+              </Button>
             )}
-            <button
+            <Button
               type="button"
               className="s-notifications__toolbar-btn"
               onClick={() => void handleClearAll()}
             >
-              {t("notifications.clearAll")}
-            </button>
-          </div>
+              清空全部
+            </Button>
+          </View>
         )}
 
         {isLoading ? (
-          <div className="s-notifications__loading">{t("common.loading")}</div>
+          <View className="s-notifications__loading">加载中…</View>
         ) : filteredNotifications.length === 0 ? (
-          <div className="s-notifications__empty">
-            <BellIcon size={40} className="s-notifications__empty-icon" />
-            <div className="s-notifications__empty-title">{t("notifications.emptyTitle")}</div>
-            <div className="s-notifications__empty-desc">{t("notifications.emptyDesc")}</div>
-          </div>
+          <View className="s-notifications__empty">
+            <Bell size={40} className="s-notifications__empty-icon" />
+            <View className="s-notifications__empty-title">暂无消息</View>
+            <View className="s-notifications__empty-desc">评论、点赞和活动变更会在这里显示。</View>
+          </View>
         ) : (
-          <div className="s-notifications__list">
+          <View className="s-notifications__list">
             {filteredNotifications.map((item) => {
-              const display = resolveNotificationText(item, t);
+              const display = resolveNotificationText(item);
               return (
-                <div
+                <View
                   key={item.id}
                   className={`s-notifications__item${item.read ? "" : " s-notifications__item--unread"}`}
                 >
-                  <button
+                  <Button
                     type="button"
                     className="s-notifications__item-main"
                     onClick={() => void handleItemClick(item)}
                   >
-                    <div
+                    <View
                       className={`s-notifications__icon s-notifications__icon--${display.category}`}
                     >
                       <NotificationIcon category={display.category} />
-                    </div>
-                    <div className="s-notifications__content">
-                      <div className="s-notifications__title-row">
-                        <span className="s-notifications__title">{display.title}</span>
-                        <span className="s-notifications__time">
-                          {formatNotificationTimeAgo(item.createdAt, t)}
-                        </span>
-                      </div>
-                      <div className="s-notifications__body">{display.body}</div>
-                    </div>
-                    {!item.read && <span className="s-notifications__dot" aria-hidden />}
-                  </button>
-                  <button
+                    </View>
+                    <View className="s-notifications__content">
+                      <View className="s-notifications__title-row">
+                        <Text className="s-notifications__title">{display.title}</Text>
+                        <Text className="s-notifications__time">
+                          {formatNotificationTimeAgo(item.createdAt)}
+                        </Text>
+                      </View>
+                      <View className="s-notifications__body">{display.body}</View>
+                    </View>
+                    {!item.read && <Text className="s-notifications__dot" aria-hidden />}
+                  </Button>
+                  <Button
                     type="button"
                     className="s-notifications__delete"
-                    aria-label={t("notifications.delete")}
+                    aria-label="删除"
                     onClick={(event) => void handleDelete(event, item)}
                   >
-                    <Trash2Icon size={16} />
-                  </button>
-                </div>
+                    <Trash2 size={16} />
+                  </Button>
+                </View>
               );
             })}
-          </div>
+          </View>
         )}
-      </main>
+      </View>
 
       {confirmDialog}
-    </div>
+    </View>
   );
 };
 

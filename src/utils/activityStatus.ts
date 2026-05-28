@@ -130,6 +130,17 @@ export function activityStatusI18nKey(
   }
 }
 
+export function activityStatusText(status: ActivityStatus): string {
+  switch (status) {
+    case "in_progress":
+      return "进行中";
+    case "ended":
+      return "已结束";
+    default:
+      return "未开始";
+  }
+}
+
 export function getActivitySortTimestamp(date?: string, title?: string): number {
   const yearHint = extractYearFromText(title) ?? extractYearFromText(date);
   const parsed = date?.trim() ? parseActivityDateRange(date, yearHint) : null;

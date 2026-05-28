@@ -2,15 +2,9 @@ import "./AiAssistantPage.scss";
 import React, { type FC, useCallback, useEffect, useState } from "react";
 import BottomNav from "./BottomNav";
 import ImagePreviewLightbox from "./ImagePreviewLightbox";
-import {
-  ChevronLeftIcon,
-  SparklesIcon,
-  Trash2Icon,
-  ZapIcon,
-} from "lucide-react";
-import { useTranslation } from "react-i18next";
+import { ChevronLeft, Sparkles, Trash2, Zap,  } from "lucide-react-taro";
 import Taro, { useDidShow } from "@tarojs/taro";
-import { useQueryClient } from "@tanstack/react-query";
+import { invalidateCache } from "../hooks/useApiQuery";
 import { useAiChatStream } from "../hooks/useAiChatStream";
 import { useResolvedProfile } from "../hooks/useResolvedProfile";
 import { invalidatePostQueries } from "../hooks/useSyncApi";
@@ -19,6 +13,7 @@ import { goBack, goEventDetail, ROUTES } from "../utils/route";
 import { ChatMessageList } from "./ai-chat/ChatMessageList";
 import { ChatComposer } from "./ai-chat/ChatComposer";
 import { DegradedMatchBanner } from "./ai-chat/DegradedMatchBanner";
+import { Button, Text, View } from '@tarojs/components';
 
 function AiAssistantChat({
   initialMessage,
@@ -37,8 +32,6 @@ function AiAssistantChat({
   userAvatar?: string;
   userName: string;
 }) {
-  const { t } = useTranslation();
-  const queryClient = useQueryClient();
   const [input, setInput] = useState("");
   const [pendingImages, setPendingImages] = useState<string[]>([]);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
@@ -48,35 +41,30 @@ function AiAssistantChat({
 
   const mockReply = useCallback(
     (query: string) =>
-      t("aiAssistant.chat.searching", {
-        query,
-        count: Math.floor(Math.random() * 5 + 3),
-      }),
-    [t],
+      `正在为你搜索「${query}」相关内容 🔍 已找到 ${Math.floor(Math.random() * 5 + 3)} 条相关信息。`,
+    [],
   );
 
   const { messages, isStreaming, isLoadingHistory, send, clearChat } =
     useAiChatStream({
-      welcomeText: t("aiAssistant.chat.welcome"),
+      welcomeText: "👋 我是你的 AI 智能助手，帮你发现活动、找队友、规划行程，说出需求，我来搞定。",
       mockReply,
-      streamErrorText: t("aiAssistant.chat.streamError"),
+      streamErrorText: "抱歉，回复出错了，请稍后再试。",
       activityLegacyId,
       onPostCreated: async (event) => {
-        await invalidatePostQueries(queryClient);
+        await invalidatePostQueries();
         const scopedId = event.activityLegacyId ?? activityLegacyId;
         if (scopedId != null) {
-          await queryClient.invalidateQueries({
-            queryKey: ["posts", "activity", scopedId],
-          });
+          invalidateCache(["posts", "activity", scopedId]);
         }
         void Taro.showToast({
-          title: t("aiAssistant.chat.postCreated"),
+          title: "组队帖已发布",
           icon: "success",
         });
       },
       onExistingPost: () => {
         void Taro.showToast({
-          title: t("aiAssistant.chat.existingPostHint"),
+          title: "你已有组队帖，请去「我的」编辑或在活动详情查看",
           icon: "none",
           duration: 2500,
         });
@@ -146,9 +134,9 @@ function AiAssistantChat({
   );
 
   return (
-    <div className="s-ai-assistant-chat">
+    <View className="s-ai-assistant-chat">
       {isLoadingHistory ? (
-        <p className="s-ai-assistant__hint">{t("common.loading")}</p>
+        <Text className="s-ai-assistant__hint">加载中…</Text>
       ) : null}
       <DegradedMatchBanner />
       <ChatMessageList
@@ -172,15 +160,14 @@ function AiAssistantChat({
       <ImagePreviewLightbox
         open={previewImage != null}
         src={previewImage}
-        alt={t("aiAssistant.chat.uploadedImageAlt")}
+        alt="已上传的图片"
         onClose={() => setPreviewImage(null)}
       />
-    </div>
+    </View>
   );
 }
 
 const AiAssistantPage: FC = () => {
-  const { t } = useTranslation();
   const [pendingInitialMessage, setPendingInitialMessage] = useState<
     string | null
   >(null);
@@ -244,57 +231,57 @@ const AiAssistantPage: FC = () => {
   }, [activityLegacyId]);
 
   return (
-    <div data-cmp="AiAssistant" className="s-ai-assistant">
-      <header className="s-ai-assistant__header">
-        <button
+    <View data-cmp="AiAssistant" className="s-ai-assistant">
+      <View className="s-ai-assistant__header">
+        <Button
           type="button"
           className="s-ai-assistant__back-btn"
           onClick={handleBack}
         >
-          <ChevronLeftIcon size={20} />
-        </button>
+          <ChevronLeft size={20} />
+        </Button>
 
-        <div className="s-ai-assistant__header-main">
-          <div className="s-ai-assistant__header-avatar" aria-hidden>
-            <SparklesIcon size={18} />
-            <span className="s-ai-assistant__header-online" />
-          </div>
-          <div className="s-ai-assistant__header-text">
-            <div className="s-ai-assistant__header-title-row">
-              <h1 className="s-ai-assistant__header-title">
-                {t("aiAssistant.title")}
-              </h1>
-              <span className="s-ai-assistant__ai-badge">
-                <ZapIcon size={10} aria-hidden />
-                {t("aiAssistant.chat.aiBadge")}
-              </span>
-            </div>
-            <p className="s-ai-assistant__header-status">
-              {t("aiAssistant.chat.onlineStatus")}
-            </p>
-          </div>
-        </div>
+        <View className="s-ai-assistant__header-main">
+          <View className="s-ai-assistant__header-avatar" aria-hidden>
+            <Sparkles size={18} />
+            <Text className="s-ai-assistant__header-online" />
+          </View>
+          <View className="s-ai-assistant__header-text">
+            <View className="s-ai-assistant__header-title-row">
+              <Text className="s-ai-assistant__header-title">
+                {"AI 智能助手"}
+              </Text>
+              <Text className="s-ai-assistant__ai-badge">
+                <Zap size={10} aria-hidden />
+                {"AI"}
+              </Text>
+            </View>
+            <Text className="s-ai-assistant__header-status">
+              {"在线 · 实时响应"}
+            </Text>
+          </View>
+        </View>
 
-        <div className="s-ai-assistant__header-actions">
+        <View className="s-ai-assistant__header-actions">
           {messageCount > 0 ? (
-            <span className="s-ai-assistant__message-count" aria-hidden>
+            <Text className="s-ai-assistant__message-count" aria-hidden>
               {messageCount}
-            </span>
+            </Text>
           ) : null}
-          <button
+          <Button
             type="button"
             className="s-ai-assistant__clear-btn"
             disabled={clearBusy || !clearChatFn}
-            aria-label={t("aiAssistant.chat.clearConversation")}
+            aria-label="清空对话"
             onClick={() => void clearChatFn?.()}
           >
-            <Trash2Icon size={16} />
-          </button>
-        </div>
-      </header>
+            <Trash2 size={16} />
+          </Button>
+        </View>
+      </View>
 
-      <div className="s-ai-assistant__body">
-        <div className="s-ai-assistant__panel">
+      <View className="s-ai-assistant__body">
+        <View className="s-ai-assistant__panel">
           <AiAssistantChat
             initialMessage={pendingInitialMessage}
             activityLegacyId={activityLegacyId}
@@ -304,11 +291,11 @@ const AiAssistantPage: FC = () => {
             userAvatar={profileUserData.avatar}
             userName={profileUserData.name}
           />
-        </div>
-      </div>
+        </View>
+      </View>
 
       <BottomNav />
-    </div>
+    </View>
   );
 };
 

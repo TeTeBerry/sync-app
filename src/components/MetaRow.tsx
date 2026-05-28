@@ -1,4 +1,5 @@
 import React from "react";
+import { Text } from '@tarojs/components';
 
 export type MetaRowProps = {
   icon: React.ReactNode;
@@ -7,8 +8,8 @@ export type MetaRowProps = {
 };
 
 export const MetaRow: React.FC<MetaRowProps> = ({ icon, className, children }) => (
-  <span className={className}>
+  <Text className={className}>
     {icon}
     {children}
-  </span>
+  </Text>
 );

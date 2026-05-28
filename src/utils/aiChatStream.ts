@@ -1,4 +1,5 @@
-import type { AiChatMessage, AiChatStreamEvent, ChatUiMessage, RecommendedPostCard } from "../types/aiChat";
+import Taro from "@tarojs/taro";
+import type { AiChatMessage, AiChatStreamEvent, RecommendedPostCard } from "../types/aiChat";
 import type { ConversationState } from "../types/conversationState";
 
 function parseSseDataLine(line: string): AiChatStreamEvent | null {
@@ -95,38 +96,14 @@ function parseSseDataLine(line: string): AiChatStreamEvent | null {
   return null;
 }
 
-async function* readSseBody(
-  body: ReadableStream<Uint8Array>,
-): AsyncGenerator<AiChatStreamEvent> {
-  const reader = body.getReader();
-  const decoder = new TextDecoder();
-  let buffer = "";
+async function* parseSseText(text: string): AsyncGenerator<AiChatStreamEvent> {
+  const lines = text.split(/\r?\n/);
+  for (const raw of lines) {
+    const line = raw.trim();
+    if (!line || line.startsWith(":")) continue;
 
-  try {
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split(/\r?\n/);
-      buffer = lines.pop() ?? "";
-
-      for (const raw of lines) {
-        const line = raw.trim();
-        if (!line || line.startsWith(":")) continue;
-
-        const event = parseSseDataLine(line);
-        if (event) yield event;
-      }
-    }
-
-    const trailing = buffer.trim();
-    if (trailing) {
-      const event = parseSseDataLine(trailing);
-      if (event) yield event;
-    }
-  } finally {
-    reader.releaseLock();
+    const event = parseSseDataLine(line);
+    if (event) yield event;
   }
 }
 
@@ -147,14 +124,15 @@ export interface StreamAiChatOptions {
 export async function* streamAiChatRequest(
   options: StreamAiChatOptions,
 ): AsyncGenerator<AiChatStreamEvent> {
-  const response = await fetch(options.url, {
+  const res = await Taro.request({
+    url: options.url,
     method: "POST",
-    headers: {
+    header: {
       "Content-Type": "application/json",
       Accept: "text/event-stream",
       ...options.headers,
     },
-    body: JSON.stringify({
+    data: {
       messages: options.messages,
       sessionId: options.sessionId,
       userId: options.userId,
@@ -163,18 +141,16 @@ export async function* streamAiChatRequest(
       activityLegacyId: options.activityLegacyId,
       image: options.image,
       images: options.images,
-    }),
-    signal: options.signal,
+    },
+    timeout: 60_000,
   });
 
-  if (!response.ok) {
-    throw new Error(`AI chat failed (${response.status})`);
-  }
-  if (!response.body) {
-    throw new Error("AI chat response has no body");
+  if (res.statusCode !== 200) {
+    throw new Error(`AI chat failed (${res.statusCode})`);
   }
 
-  yield* readSseBody(response.body);
+  const text = typeof res.data === "string" ? res.data : JSON.stringify(res.data);
+  yield* parseSseText(text);
 }
 
 export async function* mockAiChatStream(

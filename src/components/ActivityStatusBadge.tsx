@@ -1,9 +1,9 @@
 import React from "react";
-import { useTranslation } from "react-i18next";
+import { Text } from "@tarojs/components";
 import {
   type ActivityStatus,
   activityStatusBadgeClass,
-  activityStatusI18nKey,
+  activityStatusText,
   getActivityStatusFromActivity,
   shouldShowActivityStatusBadge,
 } from "../utils/activityStatus";
@@ -23,7 +23,6 @@ export const ActivityStatusBadge: React.FC<ActivityStatusBadgeProps> = ({
   alwaysShow = false,
   className,
 }) => {
-  const { t } = useTranslation();
   const status = statusProp ?? getActivityStatusFromActivity(date, title);
 
   if (!alwaysShow && !shouldShowActivityStatusBadge(status)) {
@@ -32,5 +31,5 @@ export const ActivityStatusBadge: React.FC<ActivityStatusBadgeProps> = ({
 
   const badgeClass = [activityStatusBadgeClass(status), className].filter(Boolean).join(" ");
 
-  return <span className={badgeClass}>{t(activityStatusI18nKey(status))}</span>;
+  return <Text className={badgeClass}>{activityStatusText(status)}</Text>;
 };

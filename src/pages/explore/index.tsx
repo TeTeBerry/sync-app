@@ -1,17 +1,15 @@
 import React from "react";
-import { useTranslation } from "react-i18next";
 import BottomNav from "../../components/BottomNav";
 import TopBar from "../../components/TopBar";
+import { View } from '@tarojs/components';
 
 const Explore: React.FC = () => {
-  const { t } = useTranslation();
-
   return (
-    <div className="s-page-shell">
+    <View className="s-page-shell">
       <TopBar />
-      <div className="s-page-shell__muted-center">{t("explore.developing")}</div>
+      <View className="s-page-shell__muted-center">探索页面开发中...</View>
       <BottomNav />
-    </div>
+    </View>
   );
 };
 

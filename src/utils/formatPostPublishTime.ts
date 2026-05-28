@@ -1,15 +1,7 @@
-import type { TFunction } from "i18next";
-
 const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
 
-function toLocaleTag(locale: string): string {
-  if (locale === "zh") return "zh-CN";
-  if (locale === "th") return "th-TH";
-  return "en-US";
-}
-
-function formatAbsoluteDateTime(date: Date, locale: string): string {
-  return new Intl.DateTimeFormat(toLocaleTag(locale), {
+function formatAbsoluteDateTime(date: Date): string {
+  return new Intl.DateTimeFormat("zh-CN", {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
@@ -20,23 +12,19 @@ function formatAbsoluteDateTime(date: Date, locale: string): string {
 }
 
 /** Event-detail post publish time: relative within 24h, absolute datetime after. */
-export function formatPostPublishTime(
-  iso: string,
-  t: TFunction,
-  locale = "zh",
-): string {
+export function formatPostPublishTime(iso: string): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "";
 
   const diffMs = Date.now() - date.getTime();
   if (diffMs < TWENTY_FOUR_HOURS_MS) {
     const minutes = Math.floor(diffMs / 60_000);
-    if (minutes < 1) return t("notifications.time.justNow");
-    if (minutes < 60) return t("notifications.time.minutesAgo", { count: minutes });
+    if (minutes < 1) return "刚刚";
+    if (minutes < 60) return `${minutes} 分钟前`;
 
     const hours = Math.floor(minutes / 60);
-    return t("notifications.time.hoursAgo", { count: hours });
+    return `${hours} 小时前`;
   }
 
-  return formatAbsoluteDateTime(date, locale);
+  return formatAbsoluteDateTime(date);
 }

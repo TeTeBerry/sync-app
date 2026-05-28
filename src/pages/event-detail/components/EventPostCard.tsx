@@ -1,13 +1,5 @@
 import { memo } from "react";
-import {
-  CheckIcon,
-  CheckCircle2Icon,
-  HeartIcon,
-  MessageCircleIcon,
-  Share2Icon,
-  Trash2Icon,
-  UserPlusIcon,
-} from "lucide-react";
+import { Check, CircleCheck, Heart, MessageCircle, Share2, Trash2, UserPlus } from "lucide-react-taro";
 import { PostActionMenu } from "../../../components/PostActionMenu";
 import { PostCommentSection } from "../../../components/PostCommentSection";
 import { PostStatusBadge } from "../../../components/PostStatusBadge";
@@ -16,6 +8,7 @@ import { ContentTypeBadge } from "../../../components/ContentTypeBadge";
 import { PostImageGrid, PostImageCount } from "../../../components/PostImageGrid";
 import { isCurrentUserPostAuthor } from "../../../utils/postOwnership";
 import type { EventDetailPost } from "../../../types/backend";
+import { Button, Text, View } from '@tarojs/components';
 
 export type EventPostCardProps = {
   post: EventDetailPost;
@@ -51,10 +44,10 @@ function EventPostCardInner({
   const isOwn = isCurrentUserPostAuthor(post.name);
 
   return (
-    <article
+    <View
       className={`s-event-post${highlighted ? " s-event-post--highlight" : ""}`}
     >
-      <div className="s-event-post__header">
+      <View className="s-event-post__header">
         <ImageWithFallback
           src={post.avatar}
           alt={post.name}
@@ -62,98 +55,98 @@ function EventPostCardInner({
           placeholderClassName="s-event-post__avatar s-event-post__avatar--placeholder"
           fallback={post.name.slice(0, 1)}
         />
-        <div className="s-event-post__head-main">
-          <div className="s-event-post__top">
-            <p>
-              <strong>{post.name}</strong>
-              <span>
+        <View className="s-event-post__head-main">
+          <View className="s-event-post__top">
+            <Text>
+              <Text style={{fontWeight:"bold"}}>{post.name}</Text>
+              <Text>
                 {post.location} · {publishTimeLabel}
                 {post.images?.length ? <PostImageCount count={post.images.length} /> : null}
-              </span>
-            </p>
-            <div className="s-event-post__head-actions">
+              </Text>
+            </Text>
+            <View className="s-event-post__head-actions">
               <PostStatusBadge status={post.status} variant="event" />
               {!isOwn ? (
                 <PostActionMenu postId={post.id} authorUserId={post.userId} />
               ) : null}
-            </div>
-          </div>
-        </div>
-      </div>
+            </View>
+          </View>
+        </View>
+      </View>
 
-      <p className="s-event-post__text">{post.body}</p>
+      <Text className="s-event-post__text">{post.body}</Text>
 
       {post.images?.length ? <PostImageGrid images={post.images} fullBleed /> : null}
 
       <ContentTypeBadge types={post.contentTypes} />
 
-      <div className="s-event-post__tags">
+      <View className="s-event-post__tags">
         {post.tags.map((tag) => (
-          <span key={tag} className="s-event-post__tag">
+          <Text key={tag} className="s-event-post__tag">
             {tag}
-          </span>
+          </Text>
         ))}
-      </div>
+      </View>
 
-      <div className="s-event-post__footer">
-        <div className="s-event-post__actions">
-          <button
+      <View className="s-event-post__footer">
+        <View className="s-event-post__actions">
+          <Button
             type="button"
             className={`s-event-post__action${post.liked ? " s-event-post__action--liked" : ""}`}
             onClick={() => onLike(post.id)}
             disabled={!apiEnabled}
           >
-            <HeartIcon size={16} fill={post.liked ? "currentColor" : "none"} />
+            <Heart size={16} fill={post.liked ? "currentColor" : "none"} />
             {post.likes}
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
             className={`s-event-post__action${commentsExpanded ? " s-event-post__action--active" : ""}`}
             onClick={() => onToggleComments(post.id)}
           >
-            <MessageCircleIcon size={16} />
+            <MessageCircle size={16} />
             {post.comments}
-          </button>
-          <button type="button" className="s-event-post__action">
-            <Share2Icon size={16} />
-          </button>
+          </Button>
+          <Button type="button" className="s-event-post__action">
+            <Share2 size={16} />
+          </Button>
           {isOwn && post.status === "招募中" && onComplete ? (
-            <button
+            <Button
               type="button"
               className="s-event-post__action s-event-post__action--complete"
               aria-label="标记为已组队"
               title="标记为已组队"
               onClick={() => onComplete(post.id)}
             >
-              <CheckCircle2Icon size={16} />
+              <CircleCheck size={16} />
               招募中
-            </button>
+            </Button>
           ) : null}
           {isOwn ? (
-            <button
+            <Button
               type="button"
               className="s-event-post__action"
               aria-label="删除"
               onClick={() => onDelete(post)}
             >
-              <Trash2Icon size={16} />
-            </button>
+              <Trash2 size={16} />
+            </Button>
           ) : null}
-        </div>
+        </View>
         {!isOwn && post.status === "招募中" ? (
           applied ? (
-            <button type="button" className="s-event-post__apply s-event-post__apply--done" disabled>
-              <CheckIcon size={14} />
+            <Button type="button" className="s-event-post__apply s-event-post__apply--done" disabled>
+              <Check size={14} />
               已申请
-            </button>
+            </Button>
           ) : (
-            <button type="button" className="s-event-post__apply" onClick={() => onApply(post.id)}>
-              <UserPlusIcon size={14} />
+            <Button type="button" className="s-event-post__apply" onClick={() => onApply(post.id)}>
+              <UserPlus size={14} />
               申请组队
-            </button>
+            </Button>
           )
         ) : null}
-      </div>
+      </View>
 
       {commentsExpanded ? (
         <PostCommentSection
@@ -164,7 +157,7 @@ function EventPostCardInner({
           onCommentSubmitted={onCommentSubmitted}
         />
       ) : null}
-    </article>
+    </View>
   );
 }
 

@@ -1,16 +1,7 @@
 import "./profile.scss";
 import Taro, { useDidShow } from "@tarojs/taro";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-import {
-  BellIcon,
-  ChevronRightIcon,
-  HelpCircleIcon,
-  LogOutIcon,
-  SettingsIcon,
-  ShieldIcon,
-} from "lucide-react";
-import { useTranslation } from "react-i18next";
+import { Bell, ChevronRight, Info, LogOut, Settings, Shield } from "lucide-react-taro";
 import BottomNav from "../../components/BottomNav";
 import { go, goEventDetail, ROUTES } from "../../utils/route";
 import { profilePosts, profileUser } from "./mockData";
@@ -30,6 +21,8 @@ import {
 } from "../../hooks/useSyncApi";
 import { isApiEnabled } from "../../constants/api";
 import { useConfirmDialog } from "../../hooks/useConfirmDialog";
+import { invalidateCache } from "../../hooks/useApiQuery";
+import { Button, Image, Text, View } from '@tarojs/components';
 
 const STORAGE_KEYS = {
   notifications: "profile.notificationsEnabled",
@@ -46,15 +39,13 @@ function readStorage<T>(key: string, fallback: T): T {
 }
 
 const Profile: React.FC = () => {
-  const { t } = useTranslation();
-  const queryClient = useQueryClient();
   const settingsRef = useRef<HTMLDivElement>(null);
   const notificationsEnabled = useProfilePageStore((state) => state.notificationsEnabled);
   const setNotificationsEnabled = useProfilePageStore((state) => state.setNotificationsEnabled);
   const setPrivacyLevel = useProfilePageStore((state) => state.setPrivacyLevel);
   const consumeProfileIntent = useNavigationStore((state) => state.consumeProfileIntent);
   const { confirm, confirmDialog } = useConfirmDialog({
-    cancelText: t("common.cancel"),
+    cancelText: "取消",
   });
 
   const summaryQuery = useProfileSummaryQuery();
@@ -84,7 +75,7 @@ const Profile: React.FC = () => {
     setPrivacyLevel(readStorage<string>(STORAGE_KEYS.privacy, "public"));
     applyRouteParams();
     if (apiEnabled) {
-      void queryClient.invalidateQueries({ queryKey: ["profile"] });
+      invalidateCache(["profile"]);
     }
   });
 
@@ -112,20 +103,20 @@ const Profile: React.FC = () => {
   const handleCompletePost = useCallback(
     async (item: ProfilePostItem) => {
       if (!apiEnabled) {
-        handlePostAction(t("profile.myPosts.complete"), item);
+        handlePostAction("标记已组队", item);
         return;
       }
       const ok = await confirm({
-        title: t("profile.myPosts.complete"),
+        title: "标记已组队",
         message: "确认将该帖子标记为已组队？",
-        confirmText: t("profile.myPosts.complete"),
+        confirmText: "标记已组队",
       });
       if (!ok) return;
-      void updatePostAndInvalidate(queryClient, item.id, { status: "completed" })
+      void updatePostAndInvalidate(item.id, { status: "completed" })
         .then(() => void Taro.showToast({ title: "已更新", icon: "success" }))
         .catch(() => void Taro.showToast({ title: "更新失败", icon: "none" }));
     },
-    [apiEnabled, confirm, handlePostAction, queryClient, t],
+    [apiEnabled, confirm, handlePostAction],
   );
 
   const handleEditPost = useCallback((item: ProfilePostItem) => {
@@ -155,35 +146,35 @@ const Profile: React.FC = () => {
         return;
       }
       if (!apiEnabled) {
-        handlePostAction(t("profile.myPosts.save"), item);
+        handlePostAction("保存修改", item);
         handleCancelPostEdit();
         return;
       }
       const status =
         editDraft.status === "已组队" ? "completed" : ("recruiting" as const);
-      void updatePostAndInvalidate(queryClient, item.id, { body, status })
+      void updatePostAndInvalidate(item.id, { body, status })
         .then(() => {
           handleCancelPostEdit();
           void Taro.showToast({ title: "已保存", icon: "success" });
         })
         .catch(() => void Taro.showToast({ title: "保存失败", icon: "none" }));
     },
-    [apiEnabled, editDraft, handleCancelPostEdit, handlePostAction, queryClient, t],
+    [apiEnabled, editDraft, handleCancelPostEdit, handlePostAction],
   );
 
   const handleDeletePost = useCallback(
     async (item: ProfilePostItem) => {
       const ok = await confirm({
-        title: t("profile.myPosts.delete"),
+        title: "删除",
         message: "删除后无法恢复，确定要删除这条帖子吗？",
-        confirmText: t("profile.myPosts.delete"),
+        confirmText: "删除",
       });
       if (!ok) return;
       if (!apiEnabled) {
-        handlePostAction(t("profile.myPosts.delete"), item);
+        handlePostAction("删除", item);
         return;
       }
-      void deletePostAndInvalidate(queryClient, item.id)
+      void deletePostAndInvalidate(item.id)
         .then(() => {
           void Taro.showToast({ title: "已删除", icon: "success" });
         })
@@ -192,7 +183,7 @@ const Profile: React.FC = () => {
           void Taro.showToast({ title: "删除失败", icon: "none" });
         });
     },
-    [apiEnabled, confirm, handlePostAction, postsQuery, queryClient, t],
+    [apiEnabled, confirm, handlePostAction, postsQuery],
   );
 
   const openSettings = useCallback(
@@ -204,63 +195,63 @@ const Profile: React.FC = () => {
 
   const handleLogout = useCallback(async () => {
     const ok = await confirm({
-      title: t("profile.settings.logoutConfirmTitle"),
-      message: t("profile.settings.logoutConfirmMessage"),
-      confirmText: t("profile.settings.logout"),
+      title: "退出登录",
+      message: "确定要退出当前账号吗？",
+      confirmText: "退出登录",
     });
     if (!ok) return;
-    void Taro.showToast({ title: t("profile.settings.logoutSuccess"), icon: "success" });
-  }, [confirm, t]);
+    void Taro.showToast({ title: "已退出登录", icon: "success" });
+  }, [confirm]);
 
   const profileSubtext = `${profileUserData.handle} · ${profileUserData.location} · ${profileUserData.bio}`;
 
   return (
-    <div data-cmp="Profile" className="s-profile">
-      <main className="s-profile__main s-scrollbar-none">
-        <header className="s-profile__header">
-          <button
+    <View data-cmp="Profile" className="s-profile">
+      <View className="s-profile__main s-scrollbar-none">
+        <View className="s-profile__header">
+          <Button
             type="button"
             className="s-profile__settings-btn"
-            aria-label={t("profile.settings.title")}
+            aria-label="设置"
             onClick={scrollToSettings}
           >
-            <SettingsIcon size={20} />
-          </button>
-        </header>
+            <Settings size={20} />
+          </Button>
+        </View>
 
-        <section className="s-profile__card">
-          <div className="s-profile__card-top">
-            <div className="s-profile__avatar-wrap">
-              <img className="s-profile__avatar" src={profileUserData.avatar} alt={profileUserData.name} />
-            </div>
+        <View className="s-profile__card">
+          <View className="s-profile__card-top">
+            <View className="s-profile__avatar-wrap">
+              <Image className="s-profile__avatar" src={profileUserData.avatar} alt={profileUserData.name} />
+            </View>
 
-            <div className="s-profile__info">
-              <span className="s-profile__name">{profileUserData.name}</span>
-              <span className="s-profile__subtext">{profileSubtext}</span>
-            </div>
-          </div>
+            <View className="s-profile__info">
+              <Text className="s-profile__name">{profileUserData.name}</Text>
+              <Text className="s-profile__subtext">{profileSubtext}</Text>
+            </View>
+          </View>
 
-          <div className="s-profile__stats">
-            <div className="s-profile__stat">
-              <span className="s-profile__stat-value">{profileUserData.stats.events}</span>
-              <span className="s-profile__stat-label">{t("profile.stats.events")}</span>
-            </div>
-            <div className="s-profile__stat">
-              <span className="s-profile__stat-value">{profileUserData.stats.matchSuccess}</span>
-              <span className="s-profile__stat-label">{t("profile.stats.matchSuccess")}</span>
-            </div>
-            <div className="s-profile__stat">
-              <span className="s-profile__stat-value">{profileUserData.stats.likes}</span>
-              <span className="s-profile__stat-label">{t("profile.stats.likes")}</span>
-            </div>
-            <div className="s-profile__stat">
-              <span className="s-profile__stat-value">{profileUserData.stats.posts}</span>
-              <span className="s-profile__stat-label">{t("profile.stats.posts")}</span>
-            </div>
-          </div>
-        </section>
+          <View className="s-profile__stats">
+            <View className="s-profile__stat">
+              <Text className="s-profile__stat-value">{profileUserData.stats.events}</Text>
+              <Text className="s-profile__stat-label">参加活动</Text>
+            </View>
+            <View className="s-profile__stat">
+              <Text className="s-profile__stat-value">{profileUserData.stats.matchSuccess}</Text>
+              <Text className="s-profile__stat-label">组队成功</Text>
+            </View>
+            <View className="s-profile__stat">
+              <Text className="s-profile__stat-value">{profileUserData.stats.likes}</Text>
+              <Text className="s-profile__stat-label">获赞数</Text>
+            </View>
+            <View className="s-profile__stat">
+              <Text className="s-profile__stat-value">{profileUserData.stats.posts}</Text>
+              <Text className="s-profile__stat-label">我的帖子</Text>
+            </View>
+          </View>
+        </View>
 
-        <div className="s-profile__sections">
+        <View className="s-profile__sections">
           <ProfileActivitiesSection items={activities} />
           <ProfilePostsSection
             items={posts}
@@ -274,55 +265,55 @@ const Profile: React.FC = () => {
             onSaveEdit={handleSavePostEdit}
             onCancelEdit={handleCancelPostEdit}
           />
-        </div>
+        </View>
 
-        <section ref={settingsRef} className="s-profile__settings-section">
-          <div className="s-profile__settings-card">
-            <button type="button" className="s-profile__settings-row" onClick={() => openSettings("notifications")}>
-              <span className="s-profile__settings-icon s-profile__settings-icon--bell">
-                <BellIcon size={18} />
-              </span>
-              <span className="s-profile__settings-label">{t("profile.settings.notifications")}</span>
-              <span className="s-profile__settings-value">
-                {notificationsEnabled ? t("profile.settings.enabled") : t("profile.settings.disabled")}
-              </span>
-              <ChevronRightIcon size={18} className="s-profile__settings-chevron" />
-            </button>
+        <View ref={settingsRef} className="s-profile__settings-section">
+          <View className="s-profile__settings-card">
+            <Button type="button" className="s-profile__settings-row" onClick={() => openSettings("notifications")}>
+              <Text className="s-profile__settings-icon s-profile__settings-icon--bell">
+                <Bell size={18} />
+              </Text>
+              <Text className="s-profile__settings-label">通知设置</Text>
+              <Text className="s-profile__settings-value">
+                {notificationsEnabled ? "已开启" : "已关闭"}
+              </Text>
+              <ChevronRight size={18} className="s-profile__settings-chevron" />
+            </Button>
 
-            <button type="button" className="s-profile__settings-row" onClick={() => openSettings("privacy")}>
-              <span className="s-profile__settings-icon s-profile__settings-icon--shield">
-                <ShieldIcon size={18} />
-              </span>
-              <span className="s-profile__settings-label">{t("profile.settings.privacy")}</span>
-              <ChevronRightIcon size={18} className="s-profile__settings-chevron" />
-            </button>
+            <Button type="button" className="s-profile__settings-row" onClick={() => openSettings("privacy")}>
+              <Text className="s-profile__settings-icon s-profile__settings-icon--shield">
+                <Shield size={18} />
+              </Text>
+              <Text className="s-profile__settings-label">隐私与安全</Text>
+              <ChevronRight size={18} className="s-profile__settings-chevron" />
+            </Button>
 
-            <button type="button" className="s-profile__settings-row" onClick={() => openSettings("help")}>
-              <span className="s-profile__settings-icon s-profile__settings-icon--help">
-                <HelpCircleIcon size={18} />
-              </span>
-              <span className="s-profile__settings-label">{t("profile.settings.help")}</span>
-              <ChevronRightIcon size={18} className="s-profile__settings-chevron" />
-            </button>
+            <Button type="button" className="s-profile__settings-row" onClick={() => openSettings("help")}>
+              <Text className="s-profile__settings-icon s-profile__settings-icon--help">
+                <Info size={18} />
+              </Text>
+              <Text className="s-profile__settings-label">帮助与反馈</Text>
+              <ChevronRight size={18} className="s-profile__settings-chevron" />
+            </Button>
 
-            <button
+            <Button
               type="button"
               className="s-profile__settings-row s-profile__settings-row--logout"
               onClick={handleLogout}
             >
-              <span className="s-profile__settings-icon s-profile__settings-icon--logout">
-                <LogOutIcon size={18} />
-              </span>
-              <span className="s-profile__settings-label">{t("profile.settings.logout")}</span>
-            </button>
-          </div>
-        </section>
-      </main>
+              <Text className="s-profile__settings-icon s-profile__settings-icon--logout">
+                <LogOut size={18} />
+              </Text>
+              <Text className="s-profile__settings-label">退出登录</Text>
+            </Button>
+          </View>
+        </View>
+      </View>
 
       {confirmDialog}
 
       <BottomNav />
-    </div>
+    </View>
   );
 };
 

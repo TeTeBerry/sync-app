@@ -1,13 +1,12 @@
 import "./PostActionMenu.scss";
-import { MoreVerticalIcon } from "lucide-react";
+import { MoreVerticalIcon } from "lucide-react-taro";
 import { useCallback, useState, type FC } from "react";
-import { useTranslation } from "react-i18next";
 import Taro from "@tarojs/taro";
-import { useQueryClient } from "@tanstack/react-query";
 import ActionSheet from "./ActionSheet";
 import { useConfirmDialog } from "../hooks/useConfirmDialog";
 import { blockUserAndInvalidate, submitReportAndInvalidate } from "../hooks/useSyncApi";
 import type { ReportCategory } from "../types/backend";
+import { Button, Text, View } from '@tarojs/components';
 
 export type PostActionMenuProps = {
   postId: string;
@@ -20,12 +19,10 @@ export const PostActionMenu: FC<PostActionMenuProps> = ({
   authorUserId,
   disabled,
 }) => {
-  const { t } = useTranslation();
-  const queryClient = useQueryClient();
   const [menuOpen, setMenuOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const { confirm, confirmDialog } = useConfirmDialog({
-    cancelText: t("common.cancel"),
+    cancelText: "取消",
   });
 
   const closeAll = useCallback(() => {
@@ -36,73 +33,78 @@ export const PostActionMenu: FC<PostActionMenuProps> = ({
   const handleBlock = useCallback(async () => {
     closeAll();
     if (!authorUserId?.trim()) {
-      void Taro.showToast({ title: t("postActions.blockUnavailable"), icon: "none" });
+      void Taro.showToast({ title: "无法屏蔽该用户", icon: "none" });
       return;
     }
 
     const confirmed = await confirm({
-      title: t("postActions.blockConfirmTitle"),
-      message: t("postActions.blockConfirmMessage"),
-      confirmText: t("postActions.block"),
+      title: "屏蔽用户",
+      message: "屏蔽后将不再看到该用户的内容，确定要继续吗？",
+      confirmText: "屏蔽",
     });
     if (!confirmed) return;
 
     try {
-      await blockUserAndInvalidate(queryClient, authorUserId);
-      void Taro.showToast({ title: t("postActions.blocked"), icon: "success" });
+      await blockUserAndInvalidate(authorUserId);
+      void Taro.showToast({ title: "已屏蔽", icon: "success" });
     } catch {
-      void Taro.showToast({ title: t("postActions.blockFailed"), icon: "none" });
+      void Taro.showToast({ title: "屏蔽失败，请稍后重试", icon: "none" });
     }
-  }, [authorUserId, closeAll, confirm, queryClient, t]);
+  }, [authorUserId, closeAll, confirm]);
 
   const handleReport = useCallback(
     async (category: ReportCategory) => {
       closeAll();
       try {
-        await submitReportAndInvalidate(queryClient, {
+        await submitReportAndInvalidate({
           targetType: "post",
           targetId: postId,
           targetUserId: authorUserId,
           category,
         });
-        void Taro.showToast({ title: t("postActions.reported"), icon: "success" });
+        void Taro.showToast({ title: "举报已提交", icon: "success" });
       } catch {
-        void Taro.showToast({ title: t("postActions.reportFailed"), icon: "none" });
+        void Taro.showToast({ title: "举报失败，请稍后重试", icon: "none" });
       }
     },
-    [authorUserId, closeAll, postId, queryClient, t],
+    [authorUserId, closeAll, postId],
   );
 
   if (disabled) return null;
 
   const reportCategories: ReportCategory[] = ["ads", "scalper", "vulgar"];
+  const categoryLabels: Record<ReportCategory, string> = {
+    ads: "广告骚扰",
+    scalper: "黄牛/欺诈",
+    vulgar: "低俗内容",
+  };
 
   return (
-    <>
-      <button
+    <View>
+      <Button
         type="button"
         className="s-post-action-menu__trigger"
-        aria-label={t("postActions.more")}
+        aria-label="更多"
         onClick={() => setMenuOpen(true)}
       >
         <MoreVerticalIcon size={18} />
-      </button>
+      </Button>
 
       <ActionSheet
         open={menuOpen}
-        title={t("postActions.title")}
-        cancelLabel={t("common.cancel")}
+        title="帖子操作"
+        cancelLabel="取消"
         onCancel={closeAll}
         items={[
           {
-            label: t("postActions.report"),
+            label: "举报",
             onSelect: () => {
               setMenuOpen(false);
               setReportOpen(true);
             },
           },
           {
-            label: t("postActions.block"),
+            label: "屏蔽",
             onSelect: () => void handleBlock(),
           },
         ]}
@@ -110,16 +112,16 @@ export const PostActionMenu: FC<PostActionMenuProps> = ({
 
       <ActionSheet
         open={reportOpen}
-        title={t("postActions.reportTitle")}
-        cancelLabel={t("common.cancel")}
+        title="举报原因"
+        cancelLabel="取消"
         onCancel={closeAll}
         items={reportCategories.map((category) => ({
-          label: t(`postActions.categories.${category}`),
+          label: categoryLabels[category],
           onSelect: () => void handleReport(category),
         }))}
       />
 
       {confirmDialog}
-    </>
+    </View>
   );
 };

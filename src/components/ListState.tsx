@@ -1,4 +1,5 @@
 import React from "react";
+import { Button, Text, View } from '@tarojs/components';
 
 export type ListStateProps = {
   isLoading?: boolean;
@@ -28,24 +29,24 @@ export const ListState: React.FC<ListStateProps> = ({
   children,
 }) => {
   if (isLoading) {
-    return <p className={stateClassName}>{loadingText}</p>;
+    return <Text className={stateClassName}>{loadingText}</Text>;
   }
 
   if (isError) {
     return (
-      <div className={stateClassName}>
-        <p>{errorText}</p>
+      <View className={stateClassName}>
+        <Text>{errorText}</Text>
         {onRetry ? (
-          <button type="button" className={retryClassName} onClick={() => void onRetry()}>
+          <Button type="button" className={retryClassName} onClick={() => void onRetry()}>
             {retryText}
-          </button>
+          </Button>
         ) : null}
-      </div>
+      </View>
     );
   }
 
   if (isEmpty) {
-    return <p className={stateClassName}>{emptyText}</p>;
+    return <Text className={stateClassName}>{emptyText}</Text>;
   }
 
   return children ?? null;

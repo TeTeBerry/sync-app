@@ -2,6 +2,36 @@
 @use "./styles/pages-shared.scss";
 @use "./styles/activity-status.scss";
 
+/* app.wxss 全局配置 */
+page {
+  /* 微信小程序通用无衬线字体栈 */
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Source Han Sans SC", "Helvetica Neue", "Roboto", sans-serif;
+}
+
+/* @tarojs/plugin-html 会把 <button> 映射为 .h5-button，保留普通优先级
+   让业务 class（如 .s-home-icon-btn）能正常覆盖 */
+/* 微信小程序 button 组件默认样式极其顽固，必须用 !important 覆盖 */
+button,
+button[type="default"] {
+  margin: 0 !important;
+  padding: 0 !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  border: none !important;
+  border-radius: 0 !important;
+  line-height: inherit !important;
+  font-size: inherit !important;
+  font-weight: inherit !important;
+  color: inherit !important;
+  box-shadow: none !important;
+}
+
+button::after,
+button[type="default"]::after {
+  border: none !important;
+  display: none !important;
+}
+
 /* 375 栅外层 */
 .s-app-shell {
   min-height: 100vh;

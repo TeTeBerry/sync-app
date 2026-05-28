@@ -1,7 +1,7 @@
-import { AudioWaveformIcon, BellIcon, SparklesIcon } from "lucide-react";
+import { AudioWaveform, Bell, Sparkles } from "lucide-react-taro";
 import type { FC } from "react";
-import LanguageSwitcher from "../../../components/LanguageSwitcher";
 import { Button } from "../../../components/ui";
+import { Text, View } from '@tarojs/components';
 
 type HomePlazaHeroProps = {
   unreadCount: number;
@@ -14,21 +14,20 @@ export const HomePlazaHero: FC<HomePlazaHeroProps> = ({
   onAgentClick,
   onNotificationClick,
 }) => (
-  <header className="s-home-hero">
-    <div className="s-home-hero__brand">
-      <AudioWaveformIcon size={24} className="s-home-hero__icon" />
-      <span className="s-home-hero__logo">SYNC</span>
-    </div>
+  <View className="s-home-hero">
+    <View className="s-home-hero__brand">
+      <AudioWaveform size={24} className="s-home-hero__icon" />
+      <Text className="s-home-hero__logo">SYNC</Text>
+    </View>
 
-    <div className="s-home-hero__actions">
+    <View className="s-home-hero__actions">
       <Button className="s-home-icon-btn s-home-icon-btn--primary" onClick={onAgentClick}>
-        <SparklesIcon size={18} />
+        <Sparkles size={18} />
       </Button>
-      <LanguageSwitcher variant="icon" />
       <Button className="s-home-icon-btn" aria-label="Notifications" onClick={onNotificationClick}>
-        <BellIcon size={18} />
-        {unreadCount > 0 && <span className="s-home-icon-btn__dot" />}
+        <Bell size={18} />
+        {unreadCount > 0 && <Text className="s-home-icon-btn__dot" />}
       </Button>
-    </div>
-  </header>
+    </View>
+  </View>
 );

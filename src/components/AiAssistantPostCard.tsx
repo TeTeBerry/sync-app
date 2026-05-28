@@ -1,10 +1,10 @@
 import "./AiAssistantPostCard.scss";
-import { MapPinIcon } from "lucide-react";
+import { MapPin } from "lucide-react-taro";
 import type { FC } from "react";
-import { useTranslation } from "react-i18next";
 import type { RecommendedPostCard } from "../types/aiChat";
 import { inferAuthorGenderFromPost } from "../utils/inferAuthorGender";
 import { goEventDetail } from "../utils/route";
+import { Button, Image, Text, View } from '@tarojs/components';
 
 export type AiAssistantPostCardProps = {
   post: RecommendedPostCard;
@@ -16,7 +16,6 @@ export const AiAssistantPostCard: FC<AiAssistantPostCardProps> = ({
   post,
   highlight = false,
 }) => {
-  const { t } = useTranslation();
   const authorGender = inferAuthorGenderFromPost(post);
   const nameClassName = authorGender
     ? `s-ai-assistant-post-card__name s-ai-assistant-post-card__name--${authorGender}`
@@ -30,7 +29,7 @@ export const AiAssistantPostCard: FC<AiAssistantPostCardProps> = ({
   };
 
   return (
-    <button
+    <Button
       type="button"
       className={
         highlight
@@ -39,44 +38,42 @@ export const AiAssistantPostCard: FC<AiAssistantPostCardProps> = ({
       }
       onClick={handleOpen}
     >
-      <div className="s-ai-assistant-post-card__header">
+      <View className="s-ai-assistant-post-card__header">
         {post.authorAvatar ? (
-          <img
+          <Image
             className="s-ai-assistant-post-card__avatar"
             src={post.authorAvatar}
-            alt=""
-            loading="lazy"
             decoding="async"
           />
         ) : (
-          <span className="s-ai-assistant-post-card__avatar s-ai-assistant-post-card__avatar--fallback">
+          <Text className="s-ai-assistant-post-card__avatar s-ai-assistant-post-card__avatar--fallback">
             {post.authorName.slice(0, 1)}
-          </span>
+          </Text>
         )}
-        <div className="s-ai-assistant-post-card__meta">
-          <strong className={nameClassName}>{post.authorName}</strong>
-          {post.authorHandle ? <span>{post.authorHandle}</span> : null}
-          <small>{post.eventTitle}</small>
-        </div>
-      </div>
-      <p className="s-ai-assistant-post-card__body">{post.snippet}</p>
+        <View className="s-ai-assistant-post-card__meta">
+          <Text style={{fontWeight:"bold"}} className={nameClassName}>{post.authorName}</Text>
+          {post.authorHandle ? <Text>{post.authorHandle}</Text> : null}
+          <Text>{post.eventTitle}</Text>
+        </View>
+      </View>
+      <Text className="s-ai-assistant-post-card__body">{post.snippet}</Text>
       {post.location ? (
-        <p className="s-ai-assistant-post-card__location">
-          <MapPinIcon size={12} />
-          <span>{post.location}</span>
-        </p>
+        <Text className="s-ai-assistant-post-card__location">
+          <MapPin size={12} />
+          <Text>{post.location}</Text>
+        </Text>
       ) : null}
       {post.tags?.length ? (
-        <div className="s-ai-assistant-post-card__tags">
+        <View className="s-ai-assistant-post-card__tags">
           {post.tags.slice(0, 3).map((tag) => (
-            <span key={tag}>{tag}</span>
+            <Text key={tag}>{tag}</Text>
           ))}
-        </div>
+        </View>
       ) : null}
-      <span className="s-ai-assistant-post-card__cta">
-        {t("aiAssistant.chat.viewPost")}
-      </span>
-    </button>
+      <Text className="s-ai-assistant-post-card__cta">
+        查看帖子
+      </Text>
+    </Button>
   );
 };
 

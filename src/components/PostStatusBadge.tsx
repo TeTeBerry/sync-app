@@ -1,9 +1,9 @@
 import "./PostStatusBadge.scss";
 import React from "react";
-import { useTranslation } from "react-i18next";
+import { Text } from "@tarojs/components";
 import {
   type BackendPostStatusLabel,
-  eventPostStatusI18nKey,
+  eventPostStatusText,
   isHiddenPostStatus,
   isRecruitingPostStatus,
   postStatusBadgeClass,
@@ -16,15 +16,13 @@ export type PostStatusBadgeProps = {
 };
 
 export const PostStatusBadge: React.FC<PostStatusBadgeProps> = ({ status, variant }) => {
-  const { t } = useTranslation();
-
   if (isRecruitingPostStatus(status) || isHiddenPostStatus(status)) {
     return null;
   }
 
   const cardStatus = toEventPostCardStatus(status);
   const label =
-    variant === "home" ? status : t(eventPostStatusI18nKey(cardStatus));
+    variant === "home" ? status : eventPostStatusText(cardStatus);
 
-  return <span className={postStatusBadgeClass(cardStatus)}>{label}</span>;
+  return <Text className={postStatusBadgeClass(cardStatus)}>{label}</Text>;
 };

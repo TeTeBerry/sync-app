@@ -1,6 +1,7 @@
 import React, { forwardRef } from "react";
 import { bem } from "./bem";
 import { cn } from "./cn";
+import { Button as TaroButton } from '@tarojs/components';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   /** BEM block prefix, e.g. `s-aim-modal` */
@@ -12,13 +13,13 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 }
 
 /**
- * Thin wrapper around `<button>` that composes existing BEM classes.
+ * Thin wrapper around `<Button>` that composes existing BEM classes.
  * Pass `className` directly, or use `block` + `element` + `modifiers`.
  */
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ block, element, modifiers, className, type = `button`, ...props }, ref) => {
     const bemClass = block && element ? bem(block, element, modifiers) : undefined;
-    return <button ref={ref} type={type} className={cn(bemClass, className)} {...props} />;
+    return <TaroButton ref={ref} type={type} className={cn(bemClass, className)} {...props} />;
   },
 );
 

@@ -1,3 +1,4 @@
+import Taro from "@tarojs/taro";
 import { API_BASE_URL } from "../constants/api";
 import type { ApiResponse } from "../types/backend";
 
@@ -39,23 +40,36 @@ function buildUrl(path: string, params?: Record<string, string | undefined>): st
   return url.toString();
 }
 
-async function fetchWithTimeout(
+interface CompatibleResponse {
+  ok: boolean;
+  status: number;
+  json(): Promise<unknown>;
+}
+
+async function requestWithTimeout(
   url: string,
   init: RequestInit,
   timeoutMs = DEFAULT_TIMEOUT_MS,
-): Promise<Response> {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
-
-  try {
-    const response = await fetch(url, {
-      ...init,
-      signal: controller.signal,
+): Promise<CompatibleResponse> {
+  return new Promise((resolve, reject) => {
+    Taro.request({
+      url,
+      method: (init.method || "GET") as keyof Taro.request.Method,
+      header: init.headers as Record<string, string>,
+      data: init.body,
+      timeout: timeoutMs,
+      success: (res) => {
+        resolve({
+          ok: res.statusCode >= 200 && res.statusCode < 300,
+          status: res.statusCode,
+          json: async () => res.data,
+        });
+      },
+      fail: (err) => {
+        reject(new Error(err.errMsg || "请求失败"));
+      },
     });
-    return response;
-  } finally {
-    clearTimeout(timeoutId);
-  }
+  });
 }
 
 async function sleep(ms: number): Promise<void> {
@@ -66,17 +80,23 @@ async function retryFetch(
   url: string,
   init: RequestInit,
   retries = MAX_RETRIES,
-): Promise<Response> {
+): Promise<CompatibleResponse> {
   let lastError: Error | undefined;
 
   for (let attempt = 0; attempt <= retries; attempt += 1) {
     try {
-      return await fetchWithTimeout(url, init);
+      // eslint-disable-next-line no-console
+      console.log(`[API] ${init.method ?? "GET"} ${url}`);
+      const response = await requestWithTimeout(url, init);
+      // eslint-disable-next-line no-console
+      console.log(`[API] ${init.method ?? "GET"} ${url} -> ${response.status}`);
+      return response;
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error));
+      // eslint-disable-next-line no-console
+      console.error(`[API] ${init.method ?? "GET"} ${url} error:`, lastError.message);
 
-      // 不重试用户取消的请求
-      if (lastError.name === "AbortError") {
+      if (lastError.message?.includes("timeout")) {
         throw new ApiError("请求超时，请检查网络后重试");
       }
 
@@ -90,7 +110,7 @@ async function retryFetch(
   throw new ApiError(lastError?.message || "网络请求失败，请稍后重试");
 }
 
-async function parseResponse<T>(response: Response): Promise<T> {
+async function parseResponse<T>(response: CompatibleResponse): Promise<T> {
   if (!response.ok) {
     throw new ApiError(`请求失败 (${response.status})`, response.status);
   }
