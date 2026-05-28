@@ -53,6 +53,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         </View>
         <View className="s-overlay__actions">
           <Button
+            type="default"
             block="s-overlay"
             element="btn"
             modifiers={["cancel"]}
@@ -60,6 +61,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             {cancelText}
           </Button>
           <Button
+            type="default"
             block="s-overlay"
             element="btn"
             modifiers={["confirm", danger && "danger"]}
