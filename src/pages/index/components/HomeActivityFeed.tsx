@@ -23,10 +23,10 @@ export const HomeActivityFeed: FC<HomeActivityFeedProps> = ({
   return (
     <View className="s-home-feed">
       <View className="s-home-feed__head">
-        <Text>更多热门帖子</Text>
+        <Text className="s-home-feed__title">更多热门帖子</Text>
         <Button className="s-home-feed__link" onClick={onSeeAll}>
-          查看全部
-          <ChevronRight size={16} />
+          <Text className="s-home-feed__link-text">查看全部</Text>
+          <ChevronRight size={16} color="#8e8e93" />
         </Button>
       </View>
 

@@ -1,3 +1,5 @@
+import Taro from "@tarojs/taro";
+
 const SESSION_KEY = "sync_ai_session";
 const ACTIVITY_SESSION_KEY_PREFIX = "sync_ai_session_activity_";
 const USER_NAME_KEY = "sync_user_name";
@@ -18,13 +20,21 @@ function activitySessionStorageKey(activityLegacyId: number): string {
 }
 
 function readStoredSessionId(key: string): string | null {
-  if (typeof sessionStorage === "undefined") return null;
-  return sessionStorage.getItem(key);
+  try {
+    const value = Taro.getStorageSync(key);
+    return typeof value === "string" && value.trim() ? value.trim() : null;
+  } catch {
+    return null;
+  }
 }
 
 function writeStoredSessionId(key: string, sessionId: string): void {
-  if (typeof sessionStorage === "undefined" || !sessionId.trim()) return;
-  sessionStorage.setItem(key, sessionId.trim());
+  if (!sessionId.trim()) return;
+  try {
+    Taro.setStorageSync(key, sessionId.trim());
+  } catch {
+    // storage full or unavailable
+  }
 }
 
 function getOrCreateStoredSessionId(key: string): string {
@@ -47,16 +57,10 @@ export function createFreshSessionId(): string {
 }
 
 export function getOrCreateSessionId(): string {
-  if (typeof sessionStorage === "undefined") {
-    return `guest-${Date.now()}`;
-  }
   return getOrCreateStoredSessionId(SESSION_KEY);
 }
 
 export function getOrCreateActivitySessionId(activityLegacyId: number): string {
-  if (typeof sessionStorage === "undefined") {
-    return `guest-activity-${activityLegacyId}-${Date.now()}`;
-  }
   return getOrCreateStoredSessionId(
     activitySessionStorageKey(activityLegacyId),
   );
@@ -76,22 +80,32 @@ export function getClientUserId(): string {
 /** 客户端展示名称（带缓存） */
 export function getClientUserName(): string {
   if (cachedUserName) return cachedUserName;
-  if (typeof localStorage === "undefined") {
-    return DEFAULT_USER_NAME;
+  try {
+    const stored = Taro.getStorageSync(USER_NAME_KEY);
+    if (typeof stored === "string" && stored.trim()) {
+      cachedUserName = stored.trim();
+      return cachedUserName;
+    }
+  } catch {
+    // ignore
   }
-  const stored = localStorage.getItem(USER_NAME_KEY)?.trim();
-  cachedUserName = stored || DEFAULT_USER_NAME;
+  cachedUserName = DEFAULT_USER_NAME;
   return cachedUserName;
 }
 
 /** 客户端绑定手机号，出票时回复「手机」自动填入（带缓存） */
 export function getClientUserPhone(): string {
   if (cachedUserPhone) return cachedUserPhone;
-  if (typeof localStorage === "undefined") {
-    return DEFAULT_USER_PHONE;
+  try {
+    const stored = Taro.getStorageSync(USER_PHONE_KEY);
+    if (typeof stored === "string" && stored.trim()) {
+      cachedUserPhone = stored.trim();
+      return cachedUserPhone;
+    }
+  } catch {
+    // ignore
   }
-  const stored = localStorage.getItem(USER_PHONE_KEY)?.trim();
-  cachedUserPhone = stored || DEFAULT_USER_PHONE;
+  cachedUserPhone = DEFAULT_USER_PHONE;
   return cachedUserPhone;
 }
 
@@ -111,14 +125,22 @@ export function ownerParams() {
 }
 
 export function persistUserPhone(phone: string): void {
-  if (typeof localStorage === "undefined" || !phone.trim()) return;
-  localStorage.setItem(USER_PHONE_KEY, phone.trim());
+  if (!phone.trim()) return;
+  try {
+    Taro.setStorageSync(USER_PHONE_KEY, phone.trim());
+  } catch {
+    // ignore
+  }
   cachedUserPhone = undefined;
 }
 
 export function persistUserName(name: string): void {
-  if (typeof localStorage === "undefined" || !name.trim()) return;
-  localStorage.setItem(USER_NAME_KEY, name.trim());
+  if (!name.trim()) return;
+  try {
+    Taro.setStorageSync(USER_NAME_KEY, name.trim());
+  } catch {
+    // ignore
+  }
   cachedUserName = undefined;
 }
 
@@ -136,6 +158,9 @@ export function persistSessionId(
 
 /** 清除本地 AI session，配合后端 db:reset 重新开始测试 */
 export function clearClientSessionId(): void {
-  if (typeof sessionStorage === "undefined") return;
-  sessionStorage.removeItem(SESSION_KEY);
+  try {
+    Taro.removeStorageSync(SESSION_KEY);
+  } catch {
+    // ignore
+  }
 }

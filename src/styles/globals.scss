@@ -11,8 +11,9 @@
 page {
   font-family: var(--fontSans);
   -webkit-font-smoothing: antialiased;
-  background-color: rgb(15, 15, 15);
-  color: var(--foreground);
+  background-color: #000000;
+  color: #ffffff;
+  height: 100%;
 }
 
 ::-webkit-scrollbar {
@@ -39,6 +40,65 @@ page {
 
 .s-pb-safe {
   padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/** 自定义导航栏页面：避开状态栏（weapp 顶栏多用 useNavBarInsets 内联） */
+.s-safe-top {
+  padding-top: calc(env(safe-area-inset-top, 44px) + 8px);
+}
+
+/** 底部 TabBar 占位，避免内容被遮挡 */
+.s-tabbar-offset {
+  padding-bottom: var(--s-tabbar-offset);
+}
+
+/**
+ * Tab page shell: viewport-sized root without overflow:hidden so fixed tab bar
+ * is not clipped on WeChat. Scroll areas use absolute inset above the tab bar.
+ */
+.s-page-with-tabbar {
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  position: relative;
+  box-sizing: border-box;
+}
+
+/** Full-page ScrollView on tab pages (home, profile) */
+.s-page-with-tabbar__scroll {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: var(--s-tabbar-total);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/**
+ * Chrome + nested ScrollView (events). Bounded column above fixed tab bar;
+ * overflow:hidden is safe here because BottomNav is outside this subtree.
+ */
+.s-page-with-tabbar__main {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: var(--s-tabbar-total);
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/** Fixed viewport-level host for custom BottomNav (WeChat-safe) */
+.s-tabbar-fixed-host {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
 }
 
 .s-shadow-custom {

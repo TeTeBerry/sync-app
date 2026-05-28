@@ -24,8 +24,7 @@ export function ChatUserAvatar({
   return (
     <Text
       className="s-ai-assistant-chat__avatar s-ai-assistant-chat__avatar--user s-ai-assistant-chat__avatar--fallback"
-      aria-hidden
-    >
+      aria-hidden>
       {initial}
     </Text>
   );

@@ -7,6 +7,7 @@ import { ImageWithFallback } from "../../../components/ImageWithFallback";
 import { ContentTypeBadge } from "../../../components/ContentTypeBadge";
 import { PostImageGrid, PostImageCount } from "../../../components/PostImageGrid";
 import { isCurrentUserPostAuthor } from "../../../utils/postOwnership";
+import { postActionIconColor } from "../../../utils/postActionColors";
 import type { EventDetailPost } from "../../../types/backend";
 import { Button, Text, View } from '@tarojs/components';
 
@@ -41,12 +42,11 @@ function EventPostCardInner({
   onComplete,
   onCommentSubmitted,
 }: EventPostCardProps) {
-  const isOwn = isCurrentUserPostAuthor(post.name);
+  const isOwn = isCurrentUserPostAuthor(post.name, post.userId);
 
   return (
     <View
-      className={`s-event-post${highlighted ? " s-event-post--highlight" : ""}`}
-    >
+      className={`s-event-post${highlighted ? " s-event-post--highlight" : ""}`}>
       <View className="s-event-post__header">
         <ImageWithFallback
           src={post.avatar}
@@ -57,15 +57,15 @@ function EventPostCardInner({
         />
         <View className="s-event-post__head-main">
           <View className="s-event-post__top">
-            <Text>
-              <Text style={{fontWeight:"bold"}}>{post.name}</Text>
-              <Text>
+            <Text className="s-event-post__user-line">
+              <Text className="s-event-post__user-name">{post.name}</Text>
+              <Text className="s-event-post__user-meta">
                 {post.location} · {publishTimeLabel}
                 {post.images?.length ? <PostImageCount count={post.images.length} /> : null}
               </Text>
             </Text>
             <View className="s-event-post__head-actions">
-              <PostStatusBadge status={post.status} variant="event" />
+              <PostStatusBadge status={post.status} variant="event" isOwn={isOwn} />
               {!isOwn ? (
                 <PostActionMenu postId={post.id} authorUserId={post.userId} />
               ) : null}
@@ -76,7 +76,7 @@ function EventPostCardInner({
 
       <Text className="s-event-post__text">{post.body}</Text>
 
-      {post.images?.length ? <PostImageGrid images={post.images} fullBleed /> : null}
+      {post.images?.length ? <PostImageGrid images={post.images} /> : null}
 
       <ContentTypeBadge types={post.contentTypes} />
 
@@ -90,57 +90,52 @@ function EventPostCardInner({
 
       <View className="s-event-post__footer">
         <View className="s-event-post__actions">
-          <Button
-            type="button"
-            className={`s-event-post__action${post.liked ? " s-event-post__action--liked" : ""}`}
+          <Button className={`s-event-post__action${post.liked ? " s-event-post__action--liked" : ""}`}
             onClick={() => onLike(post.id)}
-            disabled={!apiEnabled}
-          >
-            <Heart size={16} fill={post.liked ? "currentColor" : "none"} />
+            disabled={!apiEnabled}>
+            <Heart
+              size={16}
+              filled={post.liked}
+              color={postActionIconColor({ liked: post.liked })}
+            />
             {post.likes}
           </Button>
-          <Button
-            type="button"
-            className={`s-event-post__action${commentsExpanded ? " s-event-post__action--active" : ""}`}
-            onClick={() => onToggleComments(post.id)}
-          >
-            <MessageCircle size={16} />
+          <Button className={`s-event-post__action${commentsExpanded ? " s-event-post__action--active" : ""}`}
+            onClick={() => onToggleComments(post.id)}>
+            <MessageCircle
+              size={16}
+              color={postActionIconColor({ active: commentsExpanded })}
+            />
             {post.comments}
           </Button>
-          <Button type="button" className="s-event-post__action">
-            <Share2 size={16} />
+          <Button className="s-event-post__action">
+            <Share2 size={16} color={postActionIconColor({})} />
           </Button>
           {isOwn && post.status === "招募中" && onComplete ? (
-            <Button
-              type="button"
-              className="s-event-post__action s-event-post__action--complete"
+            <Button className="s-event-post__action s-event-post__action--complete"
               aria-label="标记为已组队"
               title="标记为已组队"
-              onClick={() => onComplete(post.id)}
-            >
-              <CircleCheck size={16} />
+              onClick={() => onComplete(post.id)}>
+              <CircleCheck size={16} color="#34c759" />
               招募中
             </Button>
           ) : null}
           {isOwn ? (
-            <Button
-              type="button"
-              className="s-event-post__action"
+            <Button className="s-event-post__action"
               aria-label="删除"
-              onClick={() => onDelete(post)}
-            >
-              <Trash2 size={16} />
+              onClick={() => onDelete(post)}>
+              <Trash2 size={16} color={postActionIconColor({})} />
             </Button>
           ) : null}
         </View>
         {!isOwn && post.status === "招募中" ? (
           applied ? (
-            <Button type="button" className="s-event-post__apply s-event-post__apply--done" disabled>
+            <Button className="s-event-post__apply s-event-post__apply--done" disabled>
               <Check size={14} />
               已申请
             </Button>
           ) : (
-            <Button type="button" className="s-event-post__apply" onClick={() => onApply(post.id)}>
+            <Button className="s-event-post__apply" onClick={() => onApply(post.id)}>
               <UserPlus size={14} />
               申请组队
             </Button>

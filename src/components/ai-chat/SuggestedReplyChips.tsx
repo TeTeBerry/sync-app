@@ -29,8 +29,7 @@ export function SuggestedReplyChips({
               "s-ai-assistant-chat__copy-chip--primary",
           )}
           disabled={disabled}
-          onClick={() => onSelect(reply)}
-        >
+          onClick={() => onSelect(reply)}>
           {reply}
         </Button>
       ))}

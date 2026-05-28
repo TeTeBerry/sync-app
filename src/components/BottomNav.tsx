@@ -14,15 +14,27 @@ const BottomNav: React.FC = () => {
   ] as const;
 
   return (
-    <View data-cmp="BottomNav" className="s-bottom-nav s-pb-safe">
+    <View data-cmp="BottomNav" className="s-bottom-nav">
       <View className="s-bottom-nav__row">
         {navItems.map((item) => {
           const isActive = activePath === item.path;
           const Icon = item.icon;
           return (
-            <Button key={item.path} type="button" onClick={() => reLaunchTo(item.path)} className="s-bottom-nav__item">
-              <Icon size={24} className={`s-bottom-nav__icon${isActive ? ` s-bottom-nav__icon--active` : ``}`} strokeWidth={isActive ? 2.5 : 1.5} />
-              <Text className={`s-bottom-nav__label${isActive ? ` s-bottom-nav__label--active` : ``}`}>{item.label}</Text>
+            <Button
+              key={item.path}
+              disabled={isActive}
+              onClick={() => reLaunchTo(item.path)}
+              className="s-bottom-nav__item">
+              <Icon
+                size={24}
+                color={isActive ? "#ffffff" : "#888888"}
+                strokeWidth={isActive ? 2.5 : 1.5}
+                className={`s-bottom-nav__icon${isActive ? " s-bottom-nav__icon--active" : ""}`}
+              />
+              <Text
+                className={`s-bottom-nav__label${isActive ? " s-bottom-nav__label--active" : ""}`}>
+                {item.label}
+              </Text>
             </Button>
           );
         })}
@@ -30,5 +42,14 @@ const BottomNav: React.FC = () => {
     </View>
   );
 };
+
+/** Renders BottomNav in a viewport-fixed host (required on WeChat tab pages). */
+export function BottomNavSlot() {
+  return (
+    <View className="s-tabbar-fixed-host">
+      <BottomNav />
+    </View>
+  );
+}
 
 export default BottomNav;

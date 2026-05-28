@@ -15,9 +15,7 @@ type ActiveConfirm = ConfirmDialogOptions & {
 
 /**
  * Themed confirm dialog hook. Prefer this over `Taro.showModal` for user-facing
- * confirmations — Taro native modals/toasts cannot be styled on H5 (and use
- * platform chrome on mini programs). Use `Taro.showToast` only for lightweight
- * success/error feedback where theming is not required.
+ * confirmations so copy and styling stay consistent with the app shell.
  */
 export function useConfirmDialog(defaults?: {
   confirmText?: string;

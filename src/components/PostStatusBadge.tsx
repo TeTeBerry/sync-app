@@ -1,28 +1,43 @@
-import "./PostStatusBadge.scss";
 import React from "react";
-import { Text } from "@tarojs/components";
+import { Tag } from "@nutui/nutui-react-taro";
 import {
   type BackendPostStatusLabel,
   eventPostStatusText,
   isHiddenPostStatus,
   isRecruitingPostStatus,
-  postStatusBadgeClass,
   toEventPostCardStatus,
 } from "../utils/postStatus";
 
 export type PostStatusBadgeProps = {
   status: BackendPostStatusLabel;
   variant: "home" | "event";
+  /** Author's own post: show recruiting / hidden status in the badge. */
+  isOwn?: boolean;
 };
 
-export const PostStatusBadge: React.FC<PostStatusBadgeProps> = ({ status, variant }) => {
-  if (isRecruitingPostStatus(status) || isHiddenPostStatus(status)) {
+export const PostStatusBadge: React.FC<PostStatusBadgeProps> = ({
+  status,
+  variant,
+  isOwn = false,
+}) => {
+  if (!isOwn && (isRecruitingPostStatus(status) || isHiddenPostStatus(status))) {
     return null;
   }
 
-  const cardStatus = toEventPostCardStatus(status);
   const label =
-    variant === "home" ? status : eventPostStatusText(cardStatus);
+    variant === "home" || isHiddenPostStatus(status)
+      ? status
+      : eventPostStatusText(toEventPostCardStatus(status));
 
-  return <Text className={postStatusBadgeClass(cardStatus)}>{label}</Text>;
+  const isFull = status === "已组队";
+
+  return (
+    <Tag
+      className="s-post-status-badge"
+      round
+      color={isFull ? "var(--muted-foreground)" : "#ff3366"}
+      background={isFull ? "rgba(255, 255, 255, 0.1)" : "rgba(74, 14, 28, 0.85)"}>
+      {label}
+    </Tag>
+  );
 };

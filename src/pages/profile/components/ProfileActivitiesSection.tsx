@@ -31,8 +31,7 @@ const ProfileActivitiesSection: React.FC<ProfileActivitiesSectionProps> = ({
       variant="activities"
       icon={<Ticket size={14} />}
       title="我的活动"
-      items={sortedItems}
-    >
+      items={sortedItems}>
       {(pageItems) =>
         pageItems.map((item) => (
           <View key={item.id} className="s-profile-activity">

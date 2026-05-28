@@ -1,5 +1,5 @@
 import "./EventCard.scss";
-import React, { useMemo } from "react";
+import React, { memo, useMemo } from "react";
 import AvatarGroup from "./AvatarGroup";
 import { ACTIVITY_GUEST_AVATARS } from "../constants/activityGuestAvatars";
 import { ImageWithFallback } from "./ImageWithFallback";
@@ -16,6 +16,9 @@ import {
   formatEventFullDate,
   formatEventHeroSubtitle,
 } from "../utils/eventCardDisplay";
+import { PLACEHOLDER_EVENT_HERO } from "../constants/remoteImages";
+import { thumbnailImageUrl } from "../utils/imageUrl";
+import { useRouteTransitionActive } from "../utils/route";
 
 interface EventCardProps {
   id?: string;
@@ -29,17 +32,22 @@ interface EventCardProps {
   onTeamUp?: () => void;
 }
 
-const EventCard: React.FC<EventCardProps> = ({
+const EventCardInner: React.FC<EventCardProps> = ({
   id = "1",
   title = "Audien",
   date = "Sat 12/20 at 10:00 PM",
   location = "The Ave Live",
-  image = "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=400&q=80",
+  image = PLACEHOLDER_EVENT_HERO,
   attendees = 70,
   hot = false,
   variant = "list",
   onTeamUp,
 }) => {
+  const legacyId = Number(id);
+  const isNavigating = useRouteTransitionActive(
+    Number.isFinite(legacyId) && legacyId> 0 ? legacyId : undefined,
+  );
+  const thumbSrc = thumbnailImageUrl(image, 400);
   const status = getActivityStatusFromActivity(date, title);
   const dateBadge = useMemo(() => formatEventDateBadge(date), [date]);
   const fullDate = useMemo(() => formatEventFullDate(date, title), [date, title]);
@@ -56,10 +64,9 @@ const EventCard: React.FC<EventCardProps> = ({
     return (
       <View
         data-cmp="EventCard"
-        className={["s-event-card", activityStatusCardClass(status)].filter(Boolean).join(" ")}
-      >
+        className={["s-event-card", activityStatusCardClass(status)].filter(Boolean).join(" ")}>
         <ImageWithFallback
-          src={image}
+          src={thumbSrc}
           alt={title}
           imageClassName="s-event-card__img"
           placeholderClassName="s-event-card__img s-event-card__img--placeholder"
@@ -82,11 +89,10 @@ const EventCard: React.FC<EventCardProps> = ({
         activityStatusCardClass(status),
       ]
         .filter(Boolean)
-        .join(" ")}
-    >
+        .join(" ")}>
       <View className="s-event-card__hero">
         <ImageWithFallback
-          src={image}
+          src={thumbSrc}
           alt={title}
           imageClassName="s-event-card__hero-img"
           placeholderClassName="s-event-card__hero-img s-event-card__hero-img--placeholder"
@@ -139,16 +145,19 @@ const EventCard: React.FC<EventCardProps> = ({
         </View>
 
         <View className="s-event-card__cta">
-          <Button
-            type="button"
-            className="s-event-card__team-btn"
+          <Button className={[
+              "s-event-card__team-btn",
+              isNavigating ? "s-event-card__team-btn--loading" : "",
+            ]
+              .filter(Boolean)
+              .join(" ")}
+            disabled={isNavigating}
             onClick={(event) => {
               event.stopPropagation();
               onTeamUp?.();
-            }}
-          >
+            }}>
             <Sparkles size={15} aria-hidden />
-            加入
+            {isNavigating ? "跳转中…" : "加入"}
           </Button>
         </View>
       </View>
@@ -156,4 +165,5 @@ const EventCard: React.FC<EventCardProps> = ({
   );
 };
 
+const EventCard = memo(EventCardInner);
 export default EventCard;

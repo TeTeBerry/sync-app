@@ -1,12 +1,18 @@
-// Design tokens — keep in sync across H5 + 小程序（CSS vars 可被原生引用）
-:root {
+// Design tokens — WeChat mini program (375px logical design draft).
+//
+// Sizing convention: write layout/type in **px** matching the 375px mockup.
+// Taro `mini.postcss.pxtransform` (designWidth: 375) converts px → rpx for weapp.
+// Rule of thumb on 375pt devices: 1 design px ≈ 2rpx in compiled wxss.
+
+:root,
+page {
   --fontSans: "Inter", "Helvetica", sans-serif;
   --radius-xl: 20px;
   --radius-2xl: 16px;
   --radius-3xl: 24px;
   --radius-full: 9999px;
 
-  --background: rgb(15, 15, 15);
+  --background: rgb(0, 0, 0);
   --foreground: rgb(255, 255, 255);
 
   --card: rgba(30, 30, 30, 0.8);
@@ -62,4 +68,35 @@
   --overlay-z-sheet: 105;
   --overlay-z-dialog: 110;
   --overlay-z-lightbox: 120;
+
+  /* Confirm dialog (center modal @ 375px) */
+  --confirm-dialog-backdrop: rgba(0, 0, 0, 0.82);
+  --confirm-dialog-panel: rgb(28, 28, 30);
+  --confirm-dialog-panel-radius: 20px;
+  --confirm-dialog-panel-max-width: 311px;
+  --confirm-dialog-cancel-bg: rgb(38, 38, 40);
+  --confirm-dialog-cancel-bg-active: rgb(48, 48, 50);
+  --confirm-dialog-cancel-fg: rgba(255, 255, 255, 0.9);
+  --confirm-dialog-confirm-glow:
+    0 0 20px rgba(255, 0, 102, 0.55),
+    0 4px 16px rgba(255, 0, 102, 0.35);
+
+  /* Layout @ 375px design */
+  --s-page-gutter: 16px;
+  --s-hero-icon-size: 40px;
+  --s-featured-thumb: 92px;
+  --s-type-body: 15px;
+  --s-type-body-sm: 14px;
+  --s-type-meta: 12px;
+
+  /* Post card action row (like, comment, share) */
+  --s-post-action-icon: #8e8e93;
+  --s-post-action-active: #64d2ff;
+  --s-post-action-liked: #ff0066;
+
+  /* Bottom tab bar: 56px row + 10px top pad + safe area (matches BottomNav.scss) */
+  --s-tabbar-row: 56px;
+  --s-tabbar-height: var(--s-tabbar-row);
+  --s-tabbar-total: calc(var(--s-tabbar-row) + 10px + env(safe-area-inset-bottom, 0px));
+  --s-tabbar-offset: var(--s-tabbar-total);
 }

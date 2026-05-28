@@ -8,7 +8,9 @@
 
 .s-posts-page__main {
   flex: 1;
-  overflow-y: auto;
+  min-height: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .s-posts-page__state {

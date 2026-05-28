@@ -29,15 +29,12 @@ export const AiAssistantPostCard: FC<AiAssistantPostCardProps> = ({
   };
 
   return (
-    <Button
-      type="button"
-      className={
+    <Button className={
         highlight
           ? "s-ai-assistant-post-card s-ai-assistant-post-card--mine"
           : "s-ai-assistant-post-card"
       }
-      onClick={handleOpen}
-    >
+      onClick={handleOpen}>
       <View className="s-ai-assistant-post-card__header">
         {post.authorAvatar ? (
           <Image

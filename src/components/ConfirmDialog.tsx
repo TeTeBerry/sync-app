@@ -31,37 +31,39 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
     <View
       className={cn("s-overlay s-confirm-dialog", !open && "s-overlay--off")}
       style={{ zIndex: "var(--overlay-z-dialog)" }}
-      role="presentation"
-    >
+      role="presentation">
       <View className="s-overlay__backdrop" onClick={onCancel} />
       <View
         className="s-overlay__panel"
         role="dialog"
         aria-modal="true"
         aria-labelledby="confirm-dialog-title"
-        aria-describedby="confirm-dialog-message"
-      >
-        <Text id="confirm-dialog-title" className="s-overlay__title">
-          {title}
-        </Text>
-        <Text id="confirm-dialog-message" className="s-overlay__message">
-          {message}
-        </Text>
+        aria-describedby="confirm-dialog-message">
+        <View className="s-overlay__body">
+          <View className="s-overlay__title-wrap">
+            <Text id="confirm-dialog-title" className="s-overlay__title">
+              {title}
+            </Text>
+          </View>
+          <View className="s-overlay__message-wrap">
+            <Text id="confirm-dialog-message" className="s-overlay__message">
+              {message}
+            </Text>
+          </View>
+        </View>
         <View className="s-overlay__actions">
           <Button
             block="s-overlay"
             element="btn"
             modifiers={["cancel"]}
-            onClick={onCancel}
-          >
+            onClick={onCancel}>
             {cancelText}
           </Button>
           <Button
             block="s-overlay"
             element="btn"
             modifiers={["confirm", danger && "danger"]}
-            onClick={onConfirm}
-          >
+            onClick={onConfirm}>
             {confirmText}
           </Button>
         </View>

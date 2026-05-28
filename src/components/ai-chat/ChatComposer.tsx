@@ -1,4 +1,4 @@
-import React, { type KeyboardEvent, type ClipboardEvent, useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import Taro from "@tarojs/taro";
 import { ImagePlus, Send, Shield, X } from "lucide-react-taro";
 import { Button, Input, cn } from "../ui";
@@ -11,11 +11,10 @@ import {
 import {
   ChatImageTooLargeError,
   pickAndCompressChatImages,
-  fileToDataUrl,
 } from "../../utils/chatImage";
 import { useAiChatStore } from "../../stores/aiChatStore";
-import { validateChatImageDataUrl } from "../../utils/chatImage";
-import { Image, Text, View } from '@tarojs/components';
+import { openImagePreview } from "../../utils/openImagePreview";
+import { Image, ScrollView, Text, View } from "@tarojs/components";
 
 const SHORTCUT_TAG_LABELS: Record<AiShortcutTag, string> = {
   组队队友: "组队队友",
@@ -52,7 +51,6 @@ export function ChatComposer({
   onInputChange,
   onSubmit,
   onPendingImagesChange,
-  onOpenImagePreview,
 }: {
   input: string;
   pendingImages: string[];
@@ -61,7 +59,6 @@ export function ChatComposer({
   onInputChange: (value: string) => void;
   onSubmit: (text: string, images?: string[]) => void;
   onPendingImagesChange: (images: string[]) => void;
-  onOpenImagePreview: (src: string) => void;
 }) {
   const [shortcutTags, setShortcutTags] = useState(() => getTopAiShortcutTags());
   const conversationFlow = useAiChatStore((state) => state.conversationState?.flow);
@@ -133,66 +130,6 @@ export function ChatComposer({
     [pendingImages, onPendingImagesChange],
   );
 
-  const onKeyDown = useCallback(
-    (e: KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        onSubmit(input, pendingImages);
-      }
-    },
-    [input, pendingImages, onSubmit],
-  );
-
-  const handlePaste = useCallback(
-    async (e: ClipboardEvent<HTMLInputElement>) => {
-      if (isStreaming) return;
-      const items = e.clipboardData?.items;
-      if (!items) return;
-
-      const imageFiles: File[] = [];
-      for (const item of items) {
-        if (item.type.startsWith("image/")) {
-          const file = item.getAsFile();
-          if (file) imageFiles.push(file);
-        }
-      }
-      if (!imageFiles.length) return;
-
-      e.preventDefault();
-      const remaining = MAX_IMAGES - pendingImages.length;
-      if (remaining <= 0) {
-        void Taro.showToast({
-          title: `最多上传 ${MAX_IMAGES} 张图片`,
-          icon: "none",
-        });
-        return;
-      }
-
-      const toProcess = imageFiles.slice(0, remaining);
-      const newImages: string[] = [];
-
-      for (const file of toProcess) {
-        try {
-          const dataUrl = await fileToDataUrl(file);
-          validateChatImageDataUrl(dataUrl);
-          newImages.push(dataUrl);
-        } catch (error) {
-          if (error instanceof ChatImageTooLargeError) {
-            void Taro.showToast({
-              title: "图片过大，请压缩至 10MB 以内",
-              icon: "none",
-            });
-          }
-        }
-      }
-
-      if (newImages.length) {
-        onPendingImagesChange([...pendingImages, ...newImages].slice(0, MAX_IMAGES));
-      }
-    },
-    [isStreaming, pendingImages, onPendingImagesChange],
-  );
-
   const handleQuickChipClick = useCallback(
     (chip: QuickChip) => {
       if (chip.isShortcutTag) {
@@ -214,46 +151,41 @@ export function ChatComposer({
             key={chip.key}
             className="s-ai-assistant-chat__quick-chip"
             disabled={isStreaming}
-            onClick={() => handleQuickChipClick(chip)}
-          >
+            onClick={() => handleQuickChipClick(chip)}>
             {chip.label}
           </Button>
         ))}
       </View>
 
       <View className="s-ai-assistant-chat__composer">
-        {pendingImages.length > 0 ? (
-          <View className="s-ai-assistant-chat__attach-preview-list">
+        {pendingImages.length> 0 ? (
+          <ScrollView
+            scrollY
+            enhanced
+            showScrollbar={false}
+            className="s-ai-assistant-chat__attach-preview-list s-scrollbar-none"
+            style={{ height: "160px" }}>
             {pendingImages.map((src, index) => (
               <View key={`${src.slice(0, 40)}-${index}`} className="s-ai-assistant-chat__attach-thumb">
-                <Button
-                  type="button"
-                  className="s-ai-assistant-chat__attach-preview-btn"
+                <Button className="s-ai-assistant-chat__attach-preview-btn"
                   aria-label="查看大图"
-                  onClick={() => onOpenImagePreview(src)}
-                >
+                  onClick={() => void openImagePreview(pendingImages, index)}>
                   <Image src={src} alt="已上传的图片" />
                 </Button>
-                <Button
-                  type="button"
-                  className="s-ai-assistant-chat__attach-remove"
+                <Button className="s-ai-assistant-chat__attach-remove"
                   aria-label="移除图片"
-                  onClick={() => removeImage(index)}
-                >
+                  onClick={() => removeImage(index)}>
                   <X size={14} />
                 </Button>
               </View>
             ))}
-          </View>
+          </ScrollView>
         ) : null}
         <View className="s-ai-assistant-chat__composer-inner">
-          <Button
-            type="button"
-            className="s-ai-assistant-chat__attach-btn"
-            disabled={isStreaming || pendingImages.length >= MAX_IMAGES}
+          <Button className="s-ai-assistant-chat__attach-btn"
+            disabled={isStreaming || pendingImages.length>= MAX_IMAGES}
             aria-label="上传图片"
-            onClick={() => void handlePickImages()}
-          >
+            onClick={() => void handlePickImages()}>
             <ImagePlus size={18} />
           </Button>
           <Input
@@ -263,8 +195,7 @@ export function ChatComposer({
             disabled={isStreaming}
             placeholder={inputPlaceholder}
             onChange={(e) => onInputChange(e.target.value)}
-            onKeyDown={onKeyDown}
-            onPaste={handlePaste}
+            onConfirm={() => onSubmit(input, pendingImages)}
           />
           <Button
             className={cn(
@@ -272,8 +203,7 @@ export function ChatComposer({
               canSend && "s-ai-assistant-chat__send--active",
             )}
             disabled={!canSend}
-            onClick={() => onSubmit(input, pendingImages)}
-          >
+            onClick={() => onSubmit(input, pendingImages)}>
             <Send size={16} />
           </Button>
         </View>

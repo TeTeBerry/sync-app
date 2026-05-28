@@ -159,13 +159,10 @@ const SettingsPage: React.FC = () => {
                 <View className="s-settings__row-label">推送通知</View>
                 <View className="s-settings__row-desc">接收活动提醒、互动消息等</View>
               </View>
-              <Button
-                type="button"
-                role="switch"
+              <Button role="switch"
                 aria-checked={notificationsEnabled}
                 className={`s-settings__toggle${notificationsEnabled ? " s-settings__toggle--on" : ""}`}
-                onClick={toggleNotifications}
-              >
+                onClick={toggleNotifications}>
                 <Text className="s-settings__toggle-knob" />
               </Button>
             </View>
@@ -174,13 +171,10 @@ const SettingsPage: React.FC = () => {
                 <View className="s-settings__row-label">活动提醒</View>
                 <View className="s-settings__row-desc">活动开始前 24 小时提醒</View>
               </View>
-              <Button
-                type="button"
-                role="switch"
+              <Button role="switch"
                 aria-checked={notificationsEnabled}
                 className={`s-settings__toggle${notificationsEnabled ? " s-settings__toggle--on" : ""}`}
-                onClick={toggleNotifications}
-              >
+                onClick={toggleNotifications}>
                 <Text className="s-settings__toggle-knob" />
               </Button>
             </View>
@@ -191,11 +185,8 @@ const SettingsPage: React.FC = () => {
           <View className="s-settings__card">
             {privacyOptions.map((level) => (
               <Button
-                key={level}
-                type="button"
-                className={`s-settings__option${privacyLevel === level ? " s-settings__option--selected" : ""}`}
-                onClick={() => selectPrivacy(level)}
-              >
+                key={level} className={`s-settings__option${privacyLevel === level ? " s-settings__option--selected" : ""}`}
+                onClick={() => selectPrivacy(level)}>
                 <View>
                   <View className="s-settings__option-label">{PRIVACY_LABELS[level]}</View>
                   <View className="s-settings__option-desc">{PRIVACY_DESCS[level]}</View>
@@ -216,7 +207,7 @@ const SettingsPage: React.FC = () => {
                 </View>
               ))}
             </View>
-            <Button type="button" className="s-settings__feedback-btn" onClick={submitFeedback}>
+            <Button className="s-settings__feedback-btn" onClick={submitFeedback}>
               提交反馈
             </Button>
           </>

@@ -146,7 +146,7 @@
   }
 }
 
-// Bottom sheet (language picker, etc.)
+// Bottom sheet overlays
 .s-overlay--sheet {
   z-index: var(--overlay-z-sheet);
   align-items: flex-end;
@@ -154,7 +154,7 @@
   padding: 0 12px calc(12px + env(safe-area-inset-bottom, 0px));
 
   .s-overlay__panel {
-    max-width: 375px;
+    max-width: 430px;
     padding: 8px;
     border-radius: var(--radius-2xl);
     transform: translateY(100%);

@@ -2,17 +2,15 @@
 @use "./styles/pages-shared.scss";
 @use "./styles/activity-status.scss";
 
-/* app.wxss 全局配置 */
 page {
-  /* 微信小程序通用无衬线字体栈 */
   font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Source Han Sans SC", "Helvetica Neue", "Roboto", sans-serif;
+  background-color: #000000;
+  height: 100%;
 }
 
-/* @tarojs/plugin-html 会把 <button> 映射为 .h5-button，保留普通优先级
-   让业务 class（如 .s-home-icon-btn）能正常覆盖 */
-/* 微信小程序 button 组件默认样式极其顽固，必须用 !important 覆盖 */
-button,
-button[type="default"] {
+/* Weapp: plugin-html button reset; business classes override below */
+button:not([class*="s-"]),
+button[type="default"]:not([class*="s-"]) {
   margin: 0 !important;
   padding: 0 !important;
   background-color: transparent !important;
@@ -26,27 +24,33 @@ button[type="default"] {
   box-shadow: none !important;
 }
 
-button::after,
-button[type="default"]::after {
+button:not([class*="s-"])::after,
+button[type="default"]:not([class*="s-"])::after {
   border: none !important;
   display: none !important;
 }
 
-/* 375 栅外层 */
+button[class*="s-"],
+button[type="default"][class*="s-"] {
+  margin: 0;
+  box-sizing: border-box;
+  line-height: inherit;
+}
+
+button[class*="s-"]::after,
+button[type="default"][class*="s-"]::after {
+  border: none !important;
+  display: none !important;
+}
+
 .s-app-shell {
-  min-height: 100vh;
-  background: #000;
   width: 100%;
-  display: flex;
-  justify-content: center;
+  height: 100%;
+  background: #000000;
 }
 
 .s-app-shell__viewport {
   width: 100%;
-  max-width: 375px;
-  min-height: 100vh;
-  position: relative;
-  overflow-x: hidden;
-  background-color: var(--background);
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.45);
+  height: 100%;
+  background-color: #000000;
 }

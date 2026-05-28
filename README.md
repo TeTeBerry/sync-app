@@ -10,13 +10,30 @@
 
 ## 命令
 
+**主发布端为微信小程序**（`dev:weapp` / `build:weapp`）。H5 脚本保留但未主动维护。
+
 ```bash
 npm install
-npm run dev:h5        # H5 开发（热更新）
-npm run dev:weapp     # 微信小程序开发（监听）
+npm run dev:weapp     # 微信小程序开发（监听，推荐）
+npm run build:weapp   # 微信小程序生产构建
+npm run dev:h5        # H5 开发（热更新，未维护）
 npm run build:h5
-npm run build:weapp
 ```
+
+### 微信小程序（WeChat DevTools）
+
+1. **先编译**（监听模式推荐）：
+   ```bash
+   npm run dev:weapp
+   ```
+   产物输出到 **`dist-weapp/`**，其中应包含 `app.json`、`app.js` 等。
+
+2. **用微信开发者工具导入项目**：
+   - 选择目录：**`sync-app`（仓库根，含 `project.config.json` 的目录）**
+   - **不要**只打开空的 `dist-weapp` 文件夹；若该目录尚未编译，会报 `app.json is not found`。
+   - `project.config.json` 中 `miniprogramRoot` 已指向 `dist-weapp/`。
+
+3. 若仍报错，确认 `dist-weapp/app.json` 存在后再点「编译」；没有则重新运行 `npm run dev:weapp`。
 
 ## 重要说明
 

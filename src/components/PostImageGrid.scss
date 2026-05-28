@@ -1,35 +1,13 @@
 .s-post-image-grid {
   display: grid;
   gap: 6px;
-  margin: 0 0 10px;
+  margin: 12px 0 10px;
   border-radius: 12px;
   overflow: hidden;
-
-  /* 全宽 modifier：突破父容器 padding */
-  &--full-bleed {
-    margin-left: -16px;
-    margin-right: -16px;
-    margin-top: 4px;
-    margin-bottom: 14px;
-    border-radius: 0;
-    gap: 8px;
-
-    .s-post-image-grid__featured {
-      border-radius: 0;
-    }
-
-    .s-post-image-grid__thumbs {
-      padding: 0 16px;
-    }
-
-    .s-post-image-grid__thumb {
-      border-radius: 10px;
-    }
-
-    .s-post-image-grid__item {
-      border-radius: 0;
-    }
-  }
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .s-post-image-grid__item,
@@ -42,6 +20,10 @@
   cursor: pointer;
   overflow: hidden;
   display: block;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 
   &:active {
     opacity: 0.85;
@@ -49,9 +31,10 @@
 }
 
 .s-post-image-grid__img {
+  box-sizing: border-box;
   width: 100%;
+  max-width: 100%;
   height: 100%;
-  object-fit: cover;
   display: block;
 }
 
@@ -133,7 +116,10 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 6px;
+  box-sizing: border-box;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .s-post-image-grid__thumb {

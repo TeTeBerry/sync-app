@@ -37,7 +37,7 @@ export const ListState: React.FC<ListStateProps> = ({
       <View className={stateClassName}>
         <Text>{errorText}</Text>
         {onRetry ? (
-          <Button type="button" className={retryClassName} onClick={() => void onRetry()}>
+          <Button className={retryClassName} onClick={() => void onRetry()}>
             {retryText}
           </Button>
         ) : null}

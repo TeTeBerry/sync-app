@@ -44,6 +44,7 @@ import {
   type EventCardUi,
   type FeaturedEvent,
 } from "../utils/apiMappers";
+import { sanitizeImageList, sanitizeRemoteImageUrl } from "../utils/imageUrl";
 import {
   findNearestUpcomingActivity,
   getActivityStatusFromActivity,
@@ -262,8 +263,10 @@ function mapHomeFeedPost(item: HomeFeedPost): HomeFeedPost {
     likes: item.likes,
     liked: item.liked,
     comments: item.comments ?? 0,
-    avatar: item.avatar,
+    avatar: sanitizeRemoteImageUrl(item.avatar) ?? item.avatar,
     status: item.status,
+    contentTypes: item.contentTypes,
+    images: sanitizeImageList(item.images),
   };
 }
 

@@ -1,7 +1,6 @@
-import { useEffect, useRef, type RefObject } from "react";
-import Taro from "@tarojs/taro";
+import { useEffect, useRef } from "react";
 import { EventPostCard, type EventPostCardProps } from "./EventPostCard";
-import { View } from '@tarojs/components';
+import { View } from "@tarojs/components";
 
 export type EventPostListItem = {
   post: import("../../../types/backend").EventDetailPost;
@@ -9,7 +8,7 @@ export type EventPostListItem = {
 };
 
 type EventPostsVirtualListProps = {
-  scrollRef: RefObject<HTMLElement | null>;
+  onScrollToPostId?: (elementId: string) => void;
   items: EventPostListItem[];
   highlightPostId: string;
   expandedCommentPostIds: Set<string>;
@@ -25,6 +24,7 @@ type EventPostsVirtualListProps = {
 };
 
 export function EventPostsVirtualList({
+  onScrollToPostId,
   items,
   highlightPostId,
   expandedCommentPostIds,
@@ -50,13 +50,11 @@ export function EventPostsVirtualList({
     highlightScrolledRef.current = highlightPostId;
 
     const elId = `post-${highlightPostId}`;
-    setTimeout(() => {
-      void Taro.pageScrollTo({ selector: `#${elId}`, duration: 300, offsetTop: -80 });
-    }, 100);
-  }, [highlightPostId, items]);
+    setTimeout(() => onScrollToPostId?.(elId), 100);
+  }, [highlightPostId, items, onScrollToPostId]);
 
   return (
-    <View style={{ width: "100%" }}>
+    <View className="s-event-posts-list">
       {items.map((item) => {
         const highlighted = item.post.id === highlightPostId;
         return (

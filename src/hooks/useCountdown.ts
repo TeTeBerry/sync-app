@@ -14,8 +14,8 @@ export function useCountdown(target: Date | null | undefined): CountdownPart[] {
     }
     const tick = () => setParts(getCountdownParts(target));
     tick();
-    const id = window.setInterval(tick, 1000);
-    return () => window.clearInterval(id);
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
   }, [target]);
 
   return parts;

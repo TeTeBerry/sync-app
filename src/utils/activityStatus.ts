@@ -117,19 +117,6 @@ export function activityStatusCardClass(status: ActivityStatus): string {
   return status === "ended" ? "s-activity-card--ended" : "";
 }
 
-export function activityStatusI18nKey(
-  status: ActivityStatus,
-): "activityStatus.notStarted" | "activityStatus.inProgress" | "activityStatus.ended" {
-  switch (status) {
-    case "in_progress":
-      return "activityStatus.inProgress";
-    case "ended":
-      return "activityStatus.ended";
-    default:
-      return "activityStatus.notStarted";
-  }
-}
-
 export function activityStatusText(status: ActivityStatus): string {
   switch (status) {
     case "in_progress":

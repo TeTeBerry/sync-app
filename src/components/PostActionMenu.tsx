@@ -1,5 +1,5 @@
 import "./PostActionMenu.scss";
-import { MoreVerticalIcon } from "lucide-react-taro";
+import { EllipsisVertical } from "lucide-react-taro";
 import { useCallback, useState, type FC } from "react";
 import Taro from "@tarojs/taro";
 import ActionSheet from "./ActionSheet";
@@ -81,13 +81,10 @@ export const PostActionMenu: FC<PostActionMenuProps> = ({
 
   return (
     <View>
-      <Button
-        type="button"
-        className="s-post-action-menu__trigger"
+      <Button className="s-post-action-menu__trigger"
         aria-label="更多"
-        onClick={() => setMenuOpen(true)}
-      >
-        <MoreVerticalIcon size={18} />
+        onClick={() => setMenuOpen(true)}>
+        <EllipsisVertical size={18} color="#8e8e93" />
       </Button>
 
       <ActionSheet

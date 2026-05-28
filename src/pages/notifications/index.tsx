@@ -1,6 +1,9 @@
 import "./notifications.scss";
 import React, { useCallback, useMemo, useState } from "react";
-import { Bell, Heart, MessageCircle, Megaphone, Trash2,  } from "lucide-react-taro";
+import ThemedPageLoader from "../../components/ThemedPageLoader";
+import { useDeferredMount } from "../../hooks/useDeferredMount";
+import { usePageRouteReady } from "../../hooks/usePageRouteReady";
+import { Bell, Heart, MessageCircle, Megaphone, Trash2 } from "lucide-react-taro";
 import PageNavigation from "../../components/PageNavigation";
 import {
   clearAllNotificationsAndInvalidate,
@@ -18,6 +21,7 @@ import {
   type NotificationCategory,
 } from "../../utils/notificationDisplay";
 import { navigateFromNotification, ROUTES } from "../../utils/route";
+import { DEFER_NOTIFICATIONS_MS } from "../../utils/timing";
 import { Button, Text, View } from '@tarojs/components';
 
 type CategoryFilter = "all" | NotificationCategory;
@@ -44,7 +48,10 @@ function NotificationIcon({
 }
 
 const NotificationsPage: React.FC = () => {
+  const listReady = useDeferredMount(DEFER_NOTIFICATIONS_MS);
   const { data: notifications = [], isLoading, refetch } = useNotificationsQuery();
+  const contentReady = listReady && !isLoading;
+  usePageRouteReady(contentReady);
   const [activeCategory, setActiveCategory] = useState<CategoryFilter>("all");
   const { confirm, confirmDialog } = useConfirmDialog({
     cancelText: "取消",
@@ -131,15 +138,12 @@ const NotificationsPage: React.FC = () => {
             const isActive = activeCategory === category;
             return (
               <Button
-                key={category}
-                type="button"
-                role="tab"
+                key={category} role="tab"
                 aria-selected={isActive}
                 className={`s-notifications__tab${isActive ? " s-notifications__tab--active" : ""}`}
-                onClick={() => setActiveCategory(category)}
-              >
+                onClick={() => setActiveCategory(category)}>
                 {category === "all" ? "全部" : category === "comment" ? "评论" : category === "like" ? "点赞" : "系统"}
-                {count > 0 && (
+                {count> 0 && (
                   <Text className="s-notifications__tab-count">{count}</Text>
                 )}
               </Button>
@@ -147,29 +151,23 @@ const NotificationsPage: React.FC = () => {
           })}
         </View>
 
-        {notifications.length > 0 && (
+        {notifications.length> 0 && (
           <View className="s-notifications__toolbar">
-            {unreadCount > 0 && (
-              <Button
-                type="button"
-                className="s-notifications__toolbar-btn"
-                onClick={() => void handleMarkAll()}
-              >
+            {unreadCount> 0 && (
+              <Button className="s-notifications__toolbar-btn"
+                onClick={() => void handleMarkAll()}>
                 全部已读
               </Button>
             )}
-            <Button
-              type="button"
-              className="s-notifications__toolbar-btn"
-              onClick={() => void handleClearAll()}
-            >
+            <Button className="s-notifications__toolbar-btn"
+              onClick={() => void handleClearAll()}>
               清空全部
             </Button>
           </View>
         )}
 
-        {isLoading ? (
-          <View className="s-notifications__loading">加载中…</View>
+        {isLoading || !listReady ? (
+          <ThemedPageLoader variant="skeleton-feed" minHeight={280} />
         ) : filteredNotifications.length === 0 ? (
           <View className="s-notifications__empty">
             <Bell size={40} className="s-notifications__empty-icon" />
@@ -183,16 +181,11 @@ const NotificationsPage: React.FC = () => {
               return (
                 <View
                   key={item.id}
-                  className={`s-notifications__item${item.read ? "" : " s-notifications__item--unread"}`}
-                >
-                  <Button
-                    type="button"
-                    className="s-notifications__item-main"
-                    onClick={() => void handleItemClick(item)}
-                  >
+                  className={`s-notifications__item${item.read ? "" : " s-notifications__item--unread"}`}>
+                  <Button className="s-notifications__item-main"
+                    onClick={() => void handleItemClick(item)}>
                     <View
-                      className={`s-notifications__icon s-notifications__icon--${display.category}`}
-                    >
+                      className={`s-notifications__icon s-notifications__icon--${display.category}`}>
                       <NotificationIcon category={display.category} />
                     </View>
                     <View className="s-notifications__content">
@@ -206,12 +199,9 @@ const NotificationsPage: React.FC = () => {
                     </View>
                     {!item.read && <Text className="s-notifications__dot" aria-hidden />}
                   </Button>
-                  <Button
-                    type="button"
-                    className="s-notifications__delete"
+                  <Button className="s-notifications__delete"
                     aria-label="删除"
-                    onClick={(event) => void handleDelete(event, item)}
-                  >
+                    onClick={(event) => void handleDelete(event, item)}>
                     <Trash2 size={16} />
                   </Button>
                 </View>

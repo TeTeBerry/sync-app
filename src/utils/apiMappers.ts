@@ -1,5 +1,6 @@
 import type { HomeSummary } from "../types/backend";
 import { ACTIVITY_GUEST_AVATARS } from "../constants/activityGuestAvatars";
+import { sanitizeRemoteImageUrl } from "./imageUrl";
 
 type SignupEvent = HomeSummary["signupEvents"][number];
 
@@ -22,6 +23,7 @@ export type FeaturedEvent = {
   date: string;
   venue: string;
   distance: string;
+  isHot: boolean;
   attendeeCount: string;
   remaining: string;
   guests: string[];
@@ -50,7 +52,7 @@ export function mapActivitiesToEvents(
     going: false,
     date: activity.date ?? "",
     location: activity.location ?? "",
-    image: activity.image ?? "",
+    image: sanitizeRemoteImageUrl(activity.image) ?? activity.image ?? "",
     hot: Boolean(activity.hot),
     attendees: activity.attendees ?? 0,
     distance: activity.hot ? "热门" : "",
@@ -59,16 +61,18 @@ export function mapActivitiesToEvents(
 }
 
 export function mapSignupEventToFeaturedEvent(item: SignupEvent): FeaturedEvent {
+  const isHot = Boolean(item.hot);
   return {
     id: item.id,
     title: item.title,
     date: item.date,
     venue: item.location,
-    distance: item.hot ? "热门" : item.category,
+    isHot,
+    distance: item.category,
     attendeeCount: `${item.attendees}+`,
     remaining: "",
     guests: ACTIVITY_GUEST_AVATARS,
-    image: item.image || undefined,
+    image: sanitizeRemoteImageUrl(item.image) || undefined,
     going: item.going,
   };
 }
@@ -81,7 +85,7 @@ export function mapBackendActivityToFeaturedEvent(
     title: activity.name,
     date: activity.date ?? "",
     location: activity.location ?? "",
-    image: activity.image ?? "",
+    image: sanitizeRemoteImageUrl(activity.image) ?? activity.image ?? "",
     category: activity.hot ? "户外电音" : "EDM节",
     hot: Boolean(activity.hot),
     attendees: activity.attendees ?? 0,
@@ -93,5 +97,5 @@ export function mapBackendActivityToFeaturedEvent(
 export function pickHomeFeaturedEvents(signupEvents: SignupEvent[]): FeaturedEvent[] {
   const hot = signupEvents.filter((item) => item.hot);
   const rest = signupEvents.filter((item) => !item.hot);
-  return [...hot, ...rest].slice(0, 2).map(mapSignupEventToFeaturedEvent);
+  return [...hot, ...rest].slice(0, 2).map((item) => mapSignupEventToFeaturedEvent(item));
 }

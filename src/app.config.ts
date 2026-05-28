@@ -4,7 +4,6 @@ export default {
   pages: [
     "pages/index/index",
     "pages/events/index",
-    "pages/explore/index",
     "pages/profile/index",
     "pages/settings/index",
     "pages/ai-assistant/index",
@@ -15,6 +14,6 @@ export default {
   window: {
     navigationStyle: "custom",
     backgroundTextStyle: "light",
-    backgroundColor: "#0f0f0f",
+    backgroundColor: "#000000",
   },
 };

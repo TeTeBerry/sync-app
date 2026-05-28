@@ -51,8 +51,7 @@ export function ProfileCollapsibleSection<T>({
         "s-profile-section",
         styles.modifier,
         expanded ? " s-profile-section--expanded" : "",
-      ].join("")}
-    >
+      ].join("")}>
       <View
         className="s-profile-section__header"
         role="button"
@@ -63,8 +62,7 @@ export function ProfileCollapsibleSection<T>({
             event.preventDefault();
             toggleExpanded();
           }
-        }}
-      >
+        }}>
         <Text className="s-profile-section__header-left">
           <Text className={`s-profile-section__icon ${styles.icon}`}>{icon}</Text>
           <Text className="s-profile-section__title">{title}</Text>
@@ -75,27 +73,20 @@ export function ProfileCollapsibleSection<T>({
           {expanded ? (
             <Text
               className="s-profile-section__pagination"
-              onClick={(event) => event.stopPropagation()}
-            >
-              <Button
-                type="button"
-                className="s-profile-section__page-btn"
+              onClick={(event) => event.stopPropagation()}>
+              <Button className="s-profile-section__page-btn"
                 disabled={page === 0}
                 aria-label="上一页"
-                onClick={goPrev}
-              >
+                onClick={goPrev}>
                 <ChevronLeft size={16} />
               </Button>
               <Text className="s-profile-section__page-label">
                 {page + 1}/{totalPages}
               </Text>
-              <Button
-                type="button"
-                className="s-profile-section__page-btn"
-                disabled={page >= totalPages - 1}
+              <Button className="s-profile-section__page-btn"
+                disabled={page>= totalPages - 1}
                 aria-label="下一页"
-                onClick={goNext}
-              >
+                onClick={goNext}>
                 <ChevronRight size={16} />
               </Button>
             </Text>

@@ -1,0 +1,3 @@
+/*! Universal Router | MIT License | https://www.kriasoft.com/universal-router/ */
+
+/*!__STENCIL_STATIC_IMPORT_SWITCH__*/

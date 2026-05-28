@@ -19,25 +19,21 @@ const RETRY_DELAY_MS = 300;
 function buildUrl(path: string, params?: Record<string, string | undefined>): string {
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
   const base = API_BASE_URL.replace(/\/$/, "");
-  const combined = `${base}${normalizedPath}`;
-
-  const url =
-    base.startsWith("http://") || base.startsWith("https://")
-      ? new URL(combined)
-      : new URL(
-          combined,
-          typeof window !== "undefined" ? window.location.origin : "http://localhost",
-        );
+  let url = `${base}${normalizedPath}`;
 
   if (params) {
+    const pairs: string[] = [];
     for (const [key, value] of Object.entries(params)) {
       if (value !== undefined && value !== "") {
-        url.searchParams.set(key, value);
+        pairs.push(`${encodeURIComponent(key)}=${encodeURIComponent(value)}`);
       }
+    }
+    if (pairs.length > 0) {
+      url += `${url.includes("?") ? "&" : "?"}${pairs.join("&")}`;
     }
   }
 
-  return url.toString();
+  return url;
 }
 
 interface CompatibleResponse {

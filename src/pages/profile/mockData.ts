@@ -7,8 +7,7 @@ export const profileUser = {
   handle: "@zara",
   location: "上海",
   bio: "电音爱好者",
-  avatar:
-    "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80",
+  avatar: "https://picsum.photos/seed/sync-avatar-zara/200/200",
   stats: {
     events: 12,
     matchSuccess: 8,

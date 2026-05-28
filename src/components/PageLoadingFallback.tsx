@@ -15,8 +15,7 @@ export default function PageLoadingFallback({
       style={{ minHeight }}
       role="status"
       aria-live="polite"
-      aria-busy="true"
-    >
+      aria-busy="true">
       <Text className="s-page-loading__dot" />
       <Text className="s-page-loading__dot" />
       <Text className="s-page-loading__dot" />

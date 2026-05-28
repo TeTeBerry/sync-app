@@ -13,9 +13,11 @@ import {
 import { isApiEnabled } from "../../constants/api";
 import { ROUTES } from "../../utils/route";
 import type { ActivityPost } from "../index/homeData";
-import { View } from '@tarojs/components';
+import { useStackPageMainHeight } from "../../hooks/useTabPageMainHeight";
+import { ScrollView, View } from "@tarojs/components";
 
 const AllPostsPage = () => {
+  const mainScrollHeight = useStackPageMainHeight();
   const { confirm, confirmDialog } = useConfirmDialog({
     cancelText: "取消",
   });
@@ -61,7 +63,12 @@ const AllPostsPage = () => {
     <View data-cmp="AllPosts" className="s-posts-page">
       <PageNavigation title="所有帖子" fallback={ROUTES.HOME} />
 
-      <View className="s-posts-page__main s-scrollbar-none">
+      <ScrollView
+        scrollY
+        enhanced
+        showScrollbar={false}
+        className="s-posts-page__main s-scrollbar-none"
+        style={mainScrollHeight != null ? { height: `${mainScrollHeight}px` } : undefined}>
         <ListState
           isLoading={isLoading}
           isError={isError}
@@ -72,8 +79,7 @@ const AllPostsPage = () => {
           onRetry={() => void refetch()}
           retryText="重试"
           stateClassName="s-posts-page__state"
-          retryClassName="s-posts-page__retry"
-        >
+          retryClassName="s-posts-page__retry">
           <FeedPostList
             items={posts}
             onDelete={handleDeletePost}
@@ -81,7 +87,7 @@ const AllPostsPage = () => {
             onCommentSubmitted={handleCommentSubmitted}
           />
         </ListState>
-      </View>
+      </ScrollView>
 
       {confirmDialog}
     </View>

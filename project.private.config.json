@@ -1,0 +1,7 @@
+{
+  "description": "本文件仅本地生效，勿提交真实 appid",
+  "projectname": "sync-app",
+  "setting": {
+    "compileHotReLoad": true
+  }
+}

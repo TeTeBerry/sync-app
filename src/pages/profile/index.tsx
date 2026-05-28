@@ -1,10 +1,11 @@
 import "./profile.scss";
 import Taro, { useDidShow } from "@tarojs/taro";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Bell, ChevronRight, Info, LogOut, Settings, Shield } from "lucide-react-taro";
-import BottomNav from "../../components/BottomNav";
+import { BottomNavSlot } from "../../components/BottomNav";
 import { go, goEventDetail, ROUTES } from "../../utils/route";
 import { profilePosts, profileUser } from "./mockData";
+import { sanitizeRemoteImageUrl } from "../../utils/imageUrl";
 import ProfileActivitiesSection from "./components/ProfileActivitiesSection";
 import ProfilePostsSection, {
   type ProfilePostEditDraft,
@@ -22,7 +23,7 @@ import {
 import { isApiEnabled } from "../../constants/api";
 import { useConfirmDialog } from "../../hooks/useConfirmDialog";
 import { invalidateCache } from "../../hooks/useApiQuery";
-import { Button, Image, Text, View } from '@tarojs/components';
+import { Button, Image, ScrollView, Text, View } from "@tarojs/components";
 
 const STORAGE_KEYS = {
   notifications: "profile.notificationsEnabled",
@@ -39,7 +40,7 @@ function readStorage<T>(key: string, fallback: T): T {
 }
 
 const Profile: React.FC = () => {
-  const settingsRef = useRef<HTMLDivElement>(null);
+  const [scrollIntoView, setScrollIntoView] = useState<string | undefined>();
   const notificationsEnabled = useProfilePageStore((state) => state.notificationsEnabled);
   const setNotificationsEnabled = useProfilePageStore((state) => state.setNotificationsEnabled);
   const setPrivacyLevel = useProfilePageStore((state) => state.setPrivacyLevel);
@@ -84,7 +85,8 @@ const Profile: React.FC = () => {
   }, [profileUserData.name]);
 
   const scrollToSettings = useCallback(() => {
-    settingsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    setScrollIntoView(undefined);
+    setTimeout(() => setScrollIntoView("profile-settings"), 0);
   }, []);
 
   const handlePostAction = useCallback((action: string, item: ProfilePostItem) => {
@@ -206,15 +208,17 @@ const Profile: React.FC = () => {
   const profileSubtext = `${profileUserData.handle} · ${profileUserData.location} · ${profileUserData.bio}`;
 
   return (
-    <View data-cmp="Profile" className="s-profile">
-      <View className="s-profile__main s-scrollbar-none">
+    <View data-cmp="Profile" className="s-profile s-page-with-tabbar">
+      <ScrollView
+        scrollY
+        enhanced
+        showScrollbar={false}
+        scrollIntoView={scrollIntoView}
+        className="s-page-with-tabbar__scroll s-profile__main s-scrollbar-none">
         <View className="s-profile__header">
-          <Button
-            type="button"
-            className="s-profile__settings-btn"
+          <Button className="s-profile__settings-btn"
             aria-label="设置"
-            onClick={scrollToSettings}
-          >
+            onClick={scrollToSettings}>
             <Settings size={20} />
           </Button>
         </View>
@@ -222,7 +226,11 @@ const Profile: React.FC = () => {
         <View className="s-profile__card">
           <View className="s-profile__card-top">
             <View className="s-profile__avatar-wrap">
-              <Image className="s-profile__avatar" src={profileUserData.avatar} alt={profileUserData.name} />
+              <Image
+                className="s-profile__avatar"
+                src={sanitizeRemoteImageUrl(profileUserData.avatar) ?? profileUserData.avatar}
+                alt={profileUserData.name}
+              />
             </View>
 
             <View className="s-profile__info">
@@ -267,9 +275,9 @@ const Profile: React.FC = () => {
           />
         </View>
 
-        <View ref={settingsRef} className="s-profile__settings-section">
+        <View id="profile-settings" className="s-profile__settings-section s-tabbar-offset">
           <View className="s-profile__settings-card">
-            <Button type="button" className="s-profile__settings-row" onClick={() => openSettings("notifications")}>
+            <Button className="s-profile__settings-row" onClick={() => openSettings("notifications")}>
               <Text className="s-profile__settings-icon s-profile__settings-icon--bell">
                 <Bell size={18} />
               </Text>
@@ -280,7 +288,7 @@ const Profile: React.FC = () => {
               <ChevronRight size={18} className="s-profile__settings-chevron" />
             </Button>
 
-            <Button type="button" className="s-profile__settings-row" onClick={() => openSettings("privacy")}>
+            <Button className="s-profile__settings-row" onClick={() => openSettings("privacy")}>
               <Text className="s-profile__settings-icon s-profile__settings-icon--shield">
                 <Shield size={18} />
               </Text>
@@ -288,7 +296,7 @@ const Profile: React.FC = () => {
               <ChevronRight size={18} className="s-profile__settings-chevron" />
             </Button>
 
-            <Button type="button" className="s-profile__settings-row" onClick={() => openSettings("help")}>
+            <Button className="s-profile__settings-row" onClick={() => openSettings("help")}>
               <Text className="s-profile__settings-icon s-profile__settings-icon--help">
                 <Info size={18} />
               </Text>
@@ -296,11 +304,8 @@ const Profile: React.FC = () => {
               <ChevronRight size={18} className="s-profile__settings-chevron" />
             </Button>
 
-            <Button
-              type="button"
-              className="s-profile__settings-row s-profile__settings-row--logout"
-              onClick={handleLogout}
-            >
+            <Button className="s-profile__settings-row s-profile__settings-row--logout"
+              onClick={handleLogout}>
               <Text className="s-profile__settings-icon s-profile__settings-icon--logout">
                 <LogOut size={18} />
               </Text>
@@ -308,11 +313,11 @@ const Profile: React.FC = () => {
             </Button>
           </View>
         </View>
-      </View>
+      </ScrollView>
 
       {confirmDialog}
 
-      <BottomNav />
+      <BottomNavSlot />
     </View>
   );
 };

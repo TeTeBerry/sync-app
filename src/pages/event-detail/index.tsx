@@ -1,11 +1,14 @@
 import "./event-detail.scss";
 import Taro, { useRouter } from "@tarojs/taro";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { ChevronLeft, Map, Send, Sparkles } from "lucide-react-taro";
-import { go, goAiAssistant, ROUTES } from "../../utils/route";
-import BottomNav from "../../components/BottomNav";
+import { endRouteTransition, go, goAiAssistant, ROUTES } from "../../utils/route";
+import { BottomNavSlot } from "../../components/BottomNav";
+import ThemedPageLoader from "../../components/ThemedPageLoader";
 import { useConfirmDialog } from "../../hooks/useConfirmDialog";
+import { usePageRouteReady } from "../../hooks/usePageRouteReady";
 import { useDeferredMount } from "../../hooks/useDeferredMount";
+import { DEFER_EVENT_POSTS_MS } from "../../utils/timing";
 import { useNavigationStore } from "../../stores/navigationStore";
 import {
   applyToPostAndInvalidate,
@@ -28,21 +31,25 @@ import {
   getActivityStatusFromActivity,
 } from "../../utils/activityStatus";
 import { formatPostPublishTime } from "../../utils/formatPostPublishTime";
+import { sanitizeImageList, sanitizeRemoteImageUrl } from "../../utils/imageUrl";
 import { EventPostsVirtualList } from "./components/EventPostsVirtualList";
-import { Button, Input, Text, View } from '@tarojs/components';
+import { useNavBarInsets } from "../../hooks/useNavBarInsets";
+import { Button, Input, ScrollView, Text, View } from "@tarojs/components";
 
 const EventDetailPage = () => {
   const router = useRouter();
-  const scrollRef = useRef<HTMLElement | null>(null);
+  const navInsets = useNavBarInsets();
+  const [scrollIntoView, setScrollIntoView] = useState<string | undefined>();
   const activeActivityLegacyId = useNavigationStore((state) => state.activeActivityLegacyId);
-  const feedReady = useDeferredMount(80);
+  const feedReady = useDeferredMount(DEFER_EVENT_POSTS_MS);
+  const composerReady = useDeferredMount(0);
 
   const eventId = useMemo(() => {
     const fromParams = Number(router.params.id);
-    if (Number.isFinite(fromParams) && fromParams > 0) {
+    if (Number.isFinite(fromParams) && fromParams> 0) {
       return fromParams;
     }
-    if (activeActivityLegacyId != null && activeActivityLegacyId > 0) {
+    if (activeActivityLegacyId != null && activeActivityLegacyId> 0) {
       return activeActivityLegacyId;
     }
     return NaN;
@@ -50,9 +57,11 @@ const EventDetailPage = () => {
   const highlightPostId = router.params.postId?.trim() || "";
 
   useEffect(() => {
-    if (Number.isFinite(eventId) && eventId > 0) {
+    if (Number.isFinite(eventId) && eventId> 0) {
       useNavigationStore.getState().setActiveActivityLegacyId(eventId);
+      return;
     }
+    endRouteTransition();
   }, [eventId]);
 
   const activityQuery = useActivityDetailQuery(eventId);
@@ -72,6 +81,9 @@ const EventDetailPage = () => {
   const title = activityQuery.data?.name;
   const activityDate = activityQuery.data?.date;
   const activityStatus = getActivityStatusFromActivity(activityDate, title);
+  const headerReady =
+    !activityQuery.isLoading && Boolean(title) && !activityQuery.isError;
+  usePageRouteReady(headerReady);
   const metaLine = useMemo(() => {
     if (!activityQuery.data) return "";
     const parts = [activityQuery.data.date, activityQuery.data.location].filter(Boolean);
@@ -92,10 +104,10 @@ const EventDetailPage = () => {
         likes: item.likes,
         liked: item.liked,
         comments: item.comments,
-        avatar: item.avatar,
+        avatar: sanitizeRemoteImageUrl(item.avatar) ?? item.avatar,
         status: item.status,
         contentTypes: item.contentTypes,
-        images: item.images,
+        images: sanitizeImageList(item.images),
       };
       const publishTimeLabel = post.createdAt
         ? formatPostPublishTime(post.createdAt)
@@ -130,6 +142,11 @@ const EventDetailPage = () => {
     },
     [apiEnabled],
   );
+
+  const scrollToElement = useCallback((elementId: string) => {
+    setScrollIntoView(undefined);
+    setTimeout(() => setScrollIntoView(elementId), 0);
+  }, []);
 
   const togglePostComments = useCallback((postId: string) => {
     setExpandedCommentPostIds((prev) => {
@@ -224,91 +241,93 @@ const EventDetailPage = () => {
 
   if (Number.isNaN(eventId) || eventId <= 0) {
     return (
-      <View className="s-event-detail">
+      <View className="s-event-detail s-page-with-tabbar">
         <View className="s-event-detail__fallback">活动不存在</View>
-        <BottomNav />
+        <BottomNavSlot />
       </View>
     );
   }
 
-  if (activityQuery.isLoading) {
+  if (activityQuery.isError && !activityQuery.isLoading) {
     return (
-      <View className="s-event-detail">
-        <View className="s-event-detail__fallback">加载中...</View>
-        <BottomNav />
-      </View>
-    );
-  }
-
-  if (activityQuery.isError) {
-    return (
-      <View className="s-event-detail">
+      <View className="s-event-detail s-page-with-tabbar">
         <View className="s-event-detail__fallback">
           <Text>活动信息加载失败</Text>
-          <Button
-            type="button"
-            className="s-event-detail__retry"
-            onClick={() => void activityQuery.refetch()}
-          >
+          <Button className="s-event-detail__retry"
+            onClick={() => void activityQuery.refetch()}>
             重试
           </Button>
         </View>
-        <BottomNav />
+        <BottomNavSlot />
       </View>
     );
   }
 
-  if (!title) {
+  if (!activityQuery.isLoading && !title) {
     return (
-      <View className="s-event-detail">
+      <View className="s-event-detail s-page-with-tabbar">
         <View className="s-event-detail__fallback">活动不存在</View>
-        <BottomNav />
+        <BottomNavSlot />
       </View>
     );
   }
 
   const postsLoading = !feedReady || postsQuery.isLoading;
+  const showHeaderSkeleton = activityQuery.isLoading || !title;
+
+  const headerStyle =
+    navInsets.paddingTop> 0 || navInsets.paddingRight> 16
+      ? {
+          ...(navInsets.paddingTop> 0 ? { paddingTop: `${navInsets.paddingTop}px` } : {}),
+          ...(navInsets.paddingRight> 16
+            ? { paddingRight: `${navInsets.paddingRight}px` }
+            : {}),
+        }
+      : undefined;
 
   return (
     <View
       data-cmp="EventDetail"
-      className={["s-event-detail", activityStatusCardClass(activityStatus)].filter(Boolean).join(" ")}
-    >
-      <View ref={scrollRef} className="s-event-detail__main s-scrollbar-none">
-        <View className="s-event-detail__header">
-          <Button
-            type="button"
-            className="s-event-detail__back"
+      className={["s-event-detail", "s-page-with-tabbar", activityStatusCardClass(activityStatus)].filter(Boolean).join(" ")}>
+      {showHeaderSkeleton ? (
+        <ThemedPageLoader variant="skeleton-event" overlay />
+      ) : null}
+      <ScrollView
+        scrollY
+        enhanced
+        showScrollbar={false}
+        scrollIntoView={scrollIntoView}
+        className="s-page-with-tabbar__scroll s-event-detail__main s-scrollbar-none">
+        <View className="s-event-detail__scroll-inner s-tabbar-offset">
+        <View className="s-event-detail__header" style={headerStyle}>
+          <Button className="s-event-detail__back"
             aria-label="返回"
-            onClick={() => go(ROUTES.HOME)}
-          >
+            onClick={() => go(ROUTES.HOME)}>
             <ChevronLeft size={22} />
           </Button>
           <View className="s-event-detail__head-main">
             <View className="s-event-detail__title-row">
-              <Text>{title}</Text>
+              <Text className="s-event-detail__title">{title ?? ""}</Text>
             </View>
             {metaLine ? <Text className="s-event-detail__meta">{metaLine}</Text> : null}
           </View>
-          <Button type="button" className="s-event-detail__map-btn" aria-label="地图">
+          <Button className="s-event-detail__map-btn" aria-label="地图">
             <Map size={18} />
           </Button>
         </View>
 
+        {composerReady ? (
         <View className="s-event-detail__ai">
           <View className="s-event-detail__ai-head">
             <Sparkles size={14} />
             <Text>告诉我你的需求 ai精准匹配</Text>
           </View>
-          {shortcutTags.length > 0 ? (
+          {shortcutTags.length> 0 ? (
             <View className="s-event-detail__ai-tags">
               {shortcutTags.map((tag) => (
                 <Button
-                  key={tag}
-                  type="button"
-                  className="s-event-detail__ai-tag"
-                  onClick={() => handleShortcutTag(tag)}
-                >
+                  key={tag} className="s-event-detail__ai-tag"
+                  onClick={() => handleShortcutTag(tag)}>
                   {tag}
                 </Button>
               ))}
@@ -324,25 +343,23 @@ const EventDetailPage = () => {
                 if (e.key === "Enter" && prompt.trim()) openAi(prompt);
               }}
             />
-            <Button
-              type="button"
-              className="s-event-detail__ai-send"
+            <Button className="s-event-detail__ai-send"
               aria-label="发送"
-              onClick={() => openAi(prompt)}
-            >
-              <Send size={14} />
+              onClick={() => openAi(prompt)}>
+              <Send size={20} />
             </Button>
           </View>
         </View>
+        ) : null}
 
         <View className="s-event-detail__posts">
           {postsLoading ? (
-            <Text className="s-event-detail__empty">加载中...</Text>
+            <ThemedPageLoader variant="inline" label="加载组队帖…" minHeight={80} />
           ) : postItems.length === 0 ? (
             <Text className="s-event-detail__empty">暂无组队帖，来发布第一条吧</Text>
           ) : (
             <EventPostsVirtualList
-              scrollRef={scrollRef}
+              onScrollToPostId={scrollToElement}
               items={postItems}
               highlightPostId={highlightPostId}
               expandedCommentPostIds={expandedCommentPostIds}
@@ -359,12 +376,13 @@ const EventDetailPage = () => {
           )}
         </View>
 
-        {postItems.length > 0 && !postsLoading ? (
+        {postItems.length> 0 && !postsLoading ? (
           <Text className="s-event-detail__end">已经到底啦 ~</Text>
         ) : null}
-      </View>
+        </View>
+      </ScrollView>
       {confirmDialog}
-      <BottomNav />
+      <BottomNavSlot />
     </View>
   );
 };

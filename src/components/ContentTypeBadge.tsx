@@ -26,8 +26,7 @@ export const ContentTypeBadge: React.FC<{
       {types.map((type) => (
         <Text
           key={type}
-          className={`s-content-badge ${TYPE_STYLES[type] ?? ""}`}
-        >
+          className={`s-content-badge ${TYPE_STYLES[type] ?? ""}`}>
           {TYPE_LABELS[type] ?? type}
         </Text>
       ))}

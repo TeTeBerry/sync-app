@@ -15,51 +15,44 @@ function base64ByteSize(dataUrl: string): number {
   return Math.ceil((base64.length * 3) / 4);
 }
 
-function loadImage(src: string): Promise<HTMLImageElement> {
+function readFileAsJpegDataUrl(filePath: string): Promise<string> {
+  const fs = Taro.getFileSystemManager();
   return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.onload = () => resolve(img);
-    img.onerror = () => reject(new Error("LOAD_FAILED"));
-    img.src = src;
+    fs.readFile({
+      filePath,
+      encoding: "base64",
+      success: (res) => {
+        const base64 = typeof res.data === "string" ? res.data : "";
+        resolve(`data:image/jpeg;base64,${base64}`);
+      },
+      fail: (err) => reject(new Error(err.errMsg || "FILE_READ_FAILED")),
+    });
   });
 }
 
-function canvasToJpegDataUrl(canvas: HTMLCanvasElement, quality: number): string {
-  return canvas.toDataURL("image/jpeg", quality);
-}
+async function compressToJpegDataUrl(filePath: string): Promise<string> {
+  let path = filePath;
+  let quality = 80;
 
-async function compressPath(path: string): Promise<string> {
-  const img = await loadImage(path);
-  const canvas = document.createElement("canvas");
-  let width = img.naturalWidth || img.width;
-  let height = img.naturalHeight || img.height;
-  const maxDim = 1600;
+  for (let attempt = 0; attempt < 6; attempt += 1) {
+    const compressed = await Taro.compressImage({ src: path, quality }).catch(() => null);
+    if (compressed?.tempFilePath) {
+      path = compressed.tempFilePath;
+    }
 
-  if (width > maxDim || height > maxDim) {
-    const ratio = Math.min(maxDim / width, maxDim / height);
-    width = Math.round(width * ratio);
-    height = Math.round(height * ratio);
+    const dataUrl = await readFileAsJpegDataUrl(path);
+    if (base64ByteSize(dataUrl) <= MAX_IMAGE_BASE64_BYTES) {
+      return dataUrl;
+    }
+
+    quality = Math.max(35, quality - 10);
   }
 
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext("2d");
-  if (!ctx) throw new Error("CANVAS_FAILED");
-  ctx.drawImage(img, 0, 0, width, height);
-
-  let quality = 0.85;
-  let dataUrl = canvasToJpegDataUrl(canvas, quality);
-  while (base64ByteSize(dataUrl) > MAX_IMAGE_BASE64_BYTES && quality > 0.35) {
-    quality -= 0.1;
-    dataUrl = canvasToJpegDataUrl(canvas, quality);
-  }
-
-  if (base64ByteSize(dataUrl) > MAX_IMAGE_BASE64_BYTES) {
+  const finalDataUrl = await readFileAsJpegDataUrl(path);
+  if (base64ByteSize(finalDataUrl) > MAX_IMAGE_BASE64_BYTES) {
     throw new ChatImageTooLargeError();
   }
-
-  return dataUrl;
+  return finalDataUrl;
 }
 
 /** 选择并压缩聊天图片，返回 JPEG data URL */
@@ -82,7 +75,7 @@ export async function pickAndCompressChatImages(maxCount = 6): Promise<string[]>
   const compressed: string[] = [];
   for (const path of paths) {
     try {
-      const dataUrl = await compressPath(path);
+      const dataUrl = await compressToJpegDataUrl(path);
       compressed.push(dataUrl);
     } catch {
       // skip failed images
@@ -95,14 +88,4 @@ export function validateChatImageDataUrl(dataUrl: string): void {
   if (base64ByteSize(dataUrl) > MAX_IMAGE_BASE64_BYTES) {
     throw new ChatImageTooLargeError();
   }
-}
-
-/** 将 File / Blob 读取为 Data URL */
-export function fileToDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result));
-    reader.onerror = () => reject(new Error("FILE_READ_FAILED"));
-    reader.readAsDataURL(file);
-  });
 }

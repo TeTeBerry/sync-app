@@ -1,12 +1,15 @@
 import "./events.scss";
-import React, { useCallback, useMemo, useState } from "react";
-import { AudioWaveform, Search, TrendingUp,  } from "lucide-react-taro";
-import { View, Text, Input, Button } from "@tarojs/components";
-import BottomNav from "../../components/BottomNav";
+import { useDidShow } from "@tarojs/taro";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { AudioWaveform, Search, TrendingUp } from "lucide-react-taro";
+import { View, Text, Input, Button, ScrollView } from "@tarojs/components";
+import { BottomNavSlot } from "../../components/BottomNav";
+import { useNavBarInsets } from "../../hooks/useNavBarInsets";
+import { useTabPageMainHeight } from "../../hooks/useTabPageMainHeight";
 import EventCard from "../../components/EventCard";
 import { ListState } from "../../components/ListState";
 import { useEventList } from "../../hooks/useSyncApi";
-import { goEventDetail } from "../../utils/route";
+import { goEventDetail, preloadHotRoutes } from "../../utils/route";
 import {
   getActivityStatusFromActivity,
   type ActivityStatus,
@@ -20,14 +23,43 @@ function matchesEventFilter(status: ActivityStatus, tab: EventFilterTab): boolea
   return status !== "ended";
 }
 
+/** Fixed header + search/tabs above the event list (px, design @ 375). */
+const EVENTS_CHROME_PX = 168;
+/** Baseline top padding in events.scss before status-bar inset. */
+const EVENTS_HEADER_TOP_PX = 14;
+
 const Events: React.FC = () => {
+  useEffect(() => {
+    preloadHotRoutes();
+  }, []);
+
+  useDidShow(() => {
+    preloadHotRoutes();
+  });
+
+  const navInsets = useNavBarInsets();
+  const eventsChromePx =
+    EVENTS_CHROME_PX - EVENTS_HEADER_TOP_PX + navInsets.paddingTop;
+  const listScrollHeight = useTabPageMainHeight(eventsChromePx);
+
+  const headerStyle =
+    navInsets.paddingTop > 0 || navInsets.paddingRight > 16
+      ? {
+          ...(navInsets.paddingTop > 0
+            ? { paddingTop: `${navInsets.paddingTop}px` }
+            : {}),
+          ...(navInsets.paddingRight > 16
+            ? { paddingRight: `${navInsets.paddingRight}px` }
+            : {}),
+        }
+      : undefined;
   const { events, isLoading, isError, refetch } = useEventList();
   const [activeTab, setActiveTab] = useState<EventFilterTab>("upcoming");
   const [searchQuery, setSearchQuery] = useState("");
 
   const openDetail = useCallback((legacyId: string) => {
     const id = Number(legacyId);
-    if (!Number.isNaN(id) && id > 0) {
+    if (!Number.isNaN(id) && id> 0) {
       goEventDetail(id);
     }
   }, []);
@@ -53,9 +85,9 @@ const Events: React.FC = () => {
   ];
 
   return (
-    <View className="s-page-shell">
-      <View className="s-events">
-        <View className="s-events__header">
+    <View className="s-page-shell s-page-with-tabbar">
+      <View className="s-page-with-tabbar__main s-events">
+        <View className="s-events__header" style={headerStyle}>
           <View className="s-events__brand">
             <AudioWaveform size={24} className="s-events__brand-icon" aria-hidden />
             <View className="s-events__brand-copy">
@@ -80,12 +112,9 @@ const Events: React.FC = () => {
               onInput={(e) => setSearchQuery(e.target.value)}
             />
             {searchQuery && (
-              <Button
-                type="button"
-                className="s-events__search-clear"
+              <Button className="s-events__search-clear"
                 onClick={() => setSearchQuery("")}
-                aria-label="清空"
-              >
+                aria-label="清空">
                 ×
               </Button>
             )}
@@ -94,9 +123,7 @@ const Events: React.FC = () => {
           <View className="s-events__tabs" role="tablist" aria-label="活动筛选">
             {filterTabs.map((tab) => (
               <Button
-                key={tab.id}
-                type="button"
-                role="tab"
+                key={tab.id} role="tab"
                 aria-selected={activeTab === tab.id}
                 className={[
                   "s-events__tab",
@@ -104,15 +131,20 @@ const Events: React.FC = () => {
                 ]
                   .filter(Boolean)
                   .join(" ")}
-                onClick={() => setActiveTab(tab.id)}
-              >
+                onClick={() => setActiveTab(tab.id)}>
                 {tab.label}
               </Button>
             ))}
           </View>
         </View>
 
-        <View className="s-events__main s-scrollbar-none">
+        <ScrollView
+          scrollY
+          enhanced
+          showScrollbar={false}
+          className="s-events__main s-scrollbar-none"
+          style={listScrollHeight != null ? { height: `${listScrollHeight}px` } : undefined}>
+          <View className="s-events__scroll-inner">
           <ListState
             isLoading={isLoading}
             isError={isError}
@@ -123,8 +155,7 @@ const Events: React.FC = () => {
             onRetry={() => void refetch()}
             retryText="重试"
             stateClassName="s-events__state"
-            retryClassName="s-events__retry"
-          >
+            retryClassName="s-events__retry">
             <View className="s-events__list">
               {filteredEvents.map((event) => (
                 <View
@@ -137,8 +168,7 @@ const Events: React.FC = () => {
                     if (e.key !== "Enter" && e.key !== " ") return;
                     e.preventDefault();
                     openDetail(event.id);
-                  }}
-                >
+                  }}>
                   <EventCard
                     id={event.id}
                     title={event.title}
@@ -154,9 +184,10 @@ const Events: React.FC = () => {
               ))}
             </View>
           </ListState>
-        </View>
+          </View>
+        </ScrollView>
       </View>
-      <BottomNav />
+      <BottomNavSlot />
     </View>
   );
 };

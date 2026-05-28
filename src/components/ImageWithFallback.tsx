@@ -1,9 +1,12 @@
-import React, { useEffect, useState } from "react";
-import { Image, View } from '@tarojs/components';
+import React, { useEffect, useMemo, useState } from "react";
+import { sanitizeRemoteImageUrl } from "../utils/imageUrl";
+import { Image, View } from "@tarojs/components";
+import type { ImageProps } from "@tarojs/components";
 
 export type ImageWithFallbackProps = {
   src?: string;
   alt?: string;
+  mode?: ImageProps["mode"];
   referrerPolicy?: "no-referrer";
   imageClassName?: string;
   placeholderClassName?: string;
@@ -26,24 +29,28 @@ export const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
   wrapperClassName,
   fallbackWrapperClassName,
   priority = false,
+  mode = "aspectFill",
 }) => {
   const [broken, setBroken] = useState(false);
+  const resolvedSrc = useMemo(() => sanitizeRemoteImageUrl(src), [src]);
 
   useEffect(() => {
     setBroken(false);
-  }, [src]);
+  }, [resolvedSrc]);
 
-  const showImage = Boolean(src) && !broken;
+  const showImage = Boolean(resolvedSrc) && !broken;
   const imgLoading = priority ? "eager" : "lazy";
   const imgDecoding = priority ? "sync" : "async";
   const imgFetchPriority = priority ? ("high" as const) : undefined;
 
   const renderImg = (className?: string) => (
     <Image
-      src={src}
+      src={resolvedSrc}
       alt={alt}
+      mode={mode}
       className={className}
       referrerPolicy={referrerPolicy}
+      lazyLoad={!priority}
       loading={imgLoading}
       decoding={imgDecoding}
       {...(imgFetchPriority ? { fetchPriority: imgFetchPriority } : {})}
@@ -70,8 +77,7 @@ export const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
   return (
     <View
       className={placeholderClassName}
-      aria-hidden={placeholderAriaHidden ? true : undefined}
-    >
+      aria-hidden={placeholderAriaHidden ? true : undefined}>
       {fallback}
     </View>
   );

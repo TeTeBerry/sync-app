@@ -1,8 +1,12 @@
 import { defineConfig } from "@tarojs/cli";
-import * as path from "path";
 
-/** 微信小程序使用 HTML 标签映射；H5 使用原生浏览器标签 */
-const plugins: (string | [string, Record<string, unknown>])[] = ["@tarojs/plugin-framework-react"];
+/**
+ * Primary target: WeChat mini program (weapp). Design draft: 375px logical width.
+ * H5 is not actively maintained — use `npm run build:weapp` for release checks.
+ */
+const plugins: (string | [string, Record<string, unknown>])[] = [
+  "@tarojs/plugin-framework-react",
+];
 if (process.env.TARO_ENV === "weapp") {
   plugins.push(["@tarojs/plugin-html", {}]);
 }
@@ -11,12 +15,16 @@ if (process.env.TARO_ENV === "weapp") {
 export default defineConfig({
   projectName: "sync-app",
   date: "2026-5-24",
+  /** Figma / mockup width; SCSS px values match this draft (postcss → rpx on weapp). */
   designWidth: 375,
   deviceRatio: {
-    640: 2.34 / 2,
-    750: 1,
-    828: 1.81 / 2,
     375: 2,
+    390: 390 / 375,
+    393: 393 / 375,
+    414: 414 / 375,
+    428: 428 / 375,
+    768: 768 / 375,
+    820: 820 / 375,
   },
   sourceRoot: "src",
   outputRoot: "dist",
@@ -27,33 +35,70 @@ export default defineConfig({
       enable: false,
     },
   },
+  sass: {
+    data: `@use "@nutui/nutui-react-taro/dist/styles/variables.scss" as *;`,
+  },
   framework: "react",
   mini: {
+    outputRoot: "dist-weapp",
+    /** 多页面共用组件时 SCSS 导入顺序不一致，忽略 css 合并顺序警告 */
+    miniCssExtractPluginOption: {
+      ignoreOrder: true,
+    },
+    /** Taro weapp already emits common + per-page chunks; keep vendor sideEffects for tree-shake. */
+    webpackChain(chain) {
+      chain.optimization.usedExports(true);
+      chain.optimization.sideEffects(true);
+    },
     postcss: {
       pxtransform: {
         enable: true,
-        config: {},
+        config: {
+          designWidth: 375,
+          onePxTransform: true,
+          unitPrecision: 5,
+          propList: ["*"],
+          selectorBlackList: [],
+          replace: true,
+          mediaQuery: false,
+          minPixelValue: 0,
+          baseFontSize: 20,
+        },
       },
     },
-    webpackChain(chain) {
-      chain.resolve.alias
-        .set("lucide-react", path.resolve(__dirname, "../src/utils/lucideMock.tsx"))
-        .set("lucide-react-taro", path.resolve(__dirname, "../src/utils/lucideMock.tsx"));
-    },
   },
+  /** Unmaintained; kept for `npm run build:h5` only. */
   h5: {
+    outputRoot: "dist-h5",
     publicPath: "/",
     staticDirectory: "static",
-    /** 根路径 `/` 即首页（hash 模式需 `#/pages/...`，否则空白） */
+    miniCssExtractPluginOption: {
+      ignoreOrder: true,
+    },
     router: {
       mode: "browser",
     },
     postcss: {
+      pxtransform: {
+        enable: true,
+        config: {
+          onePxTransform: true,
+          unitPrecision: 5,
+          propList: ["*"],
+          selectorBlackList: [],
+          replace: true,
+          mediaQuery: false,
+          minPixelValue: 0,
+          baseFontSize: 20,
+        },
+      },
       autoprefixer: {
         enable: true,
       },
     },
     webpackChain(chain) {
+      chain.performance.maxEntrypointSize(5 * 1024 * 1024);
+      chain.performance.maxAssetSize(5 * 1024 * 1024);
       chain.optimization.splitChunks({
         chunks: "all",
         maxInitialRequests: 25,
@@ -69,19 +114,9 @@ export default defineConfig({
             test: /[\\/]node_modules[\\/](react|react-dom|scheduler)[\\/]/,
             priority: 20,
           },
-          query: {
-            name: "query-vendor",
-            test: /[\\/]node_modules[\\/]@tanstack[\\/]/,
-            priority: 15,
-          },
-          lucide: {
-            name: "lucide-vendor",
-            test: /[\\/]node_modules[\\/]lucide-react[\\/]/,
-            priority: 15,
-          },
-          i18n: {
-            name: "i18n-vendor",
-            test: /[\\/]node_modules[\\/](i18next|react-i18next)[\\/]/,
+          zustand: {
+            name: "zustand-vendor",
+            test: /[\\/]node_modules[\\/]zustand[\\/]/,
             priority: 15,
           },
           common: {

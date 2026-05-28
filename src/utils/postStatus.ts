@@ -24,14 +24,6 @@ export function postStatusBadgeClass(status: EventPostCardStatus): string {
     : "s-post-status-badge s-post-status-badge--recruiting";
 }
 
-export function eventPostStatusI18nKey(
-  status: EventPostCardStatus,
-): "eventDetail.postStatus.recruiting" | "common.full" {
-  return status === "full"
-    ? "common.full"
-    : "eventDetail.postStatus.recruiting";
-}
-
 export function eventPostStatusText(status: EventPostCardStatus): string {
   return status === "full" ? "已组队" : "招募中";
 }

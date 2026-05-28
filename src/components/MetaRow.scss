@@ -1,0 +1,21 @@
+.s-meta-row {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+}
+
+.s-meta-row__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  line-height: 0;
+}
+
+.s-meta-row__text {
+  color: #8e8e93;
+  font-size: var(--s-type-meta);
+  line-height: 1.3;
+}

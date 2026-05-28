@@ -4,10 +4,11 @@ import { useCallback, useState, type FC } from "react";
 import { ChevronUp, Heart, Send } from "lucide-react-taro";
 import { commentPostAndInvalidate, usePostCommentsQuery } from "../hooks/useSyncApi";
 import { isApiEnabled } from "../constants/api";
+import { PLACEHOLDER_AVATAR } from "../constants/remoteImages";
+import { sanitizeRemoteImageUrl } from "../utils/imageUrl";
 import { Button, Image, Input, Text, View } from '@tarojs/components';
 
-const DEFAULT_AVATAR =
-  "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80";
+const DEFAULT_AVATAR = PLACEHOLDER_AVATAR;
 
 export type PostCommentSectionProps = {
   postId: string;
@@ -62,7 +63,8 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
     });
   }, []);
 
-  const userAvatar = currentUserAvatar?.trim() || DEFAULT_AVATAR;
+  const userAvatar =
+    sanitizeRemoteImageUrl(currentUserAvatar?.trim()) || DEFAULT_AVATAR;
   const comments = commentsQuery.data ?? [];
 
   if (!expanded) return null;
@@ -84,7 +86,7 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
               <View key={comment.id} className="s-post-comments__item">
                 <Image
                   className="s-post-comments__avatar"
-                  src={comment.avatar || DEFAULT_AVATAR}
+                  src={sanitizeRemoteImageUrl(comment.avatar) || DEFAULT_AVATAR}
                 />
                 <View className="s-post-comments__body-wrap">
                   <View className="s-post-comments__meta">
@@ -92,12 +94,9 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
                     <Text>{comment.time}</Text>
                   </View>
                   <Text className="s-post-comments__bubble">{comment.body}</Text>
-                  <Button
-                    type="button"
-                    className={`s-post-comments__like${liked ? " s-post-comments__like--active" : ""}`}
-                    onClick={() => toggleCommentLike(comment.id)}
-                  >
-                    <Heart size={12} fill={liked ? "currentColor" : "none"} />
+                  <Button className={`s-post-comments__like${liked ? " s-post-comments__like--active" : ""}`}
+                    onClick={() => toggleCommentLike(comment.id)}>
+                    <Heart size={12} filled={liked} color={liked ? "#ff0066" : "#8e8e93"} />
                     赞
                   </Button>
                 </View>
@@ -119,19 +118,16 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
               if (e.key === "Enter" && draft.trim()) handleSubmit();
             }}
           />
-          <Button
-            type="button"
-            className="s-post-comments__send"
+          <Button className="s-post-comments__send"
             aria-label="发送评论"
             disabled={!draft.trim() || submitting}
-            onClick={handleSubmit}
-          >
+            onClick={handleSubmit}>
             <Send size={14} />
           </Button>
         </View>
       </View>
 
-      <Button type="button" className="s-post-comments__toggle" onClick={onToggleExpanded}>
+      <Button className="s-post-comments__toggle" onClick={onToggleExpanded}>
         收起评论
         <ChevronUp size={14} />
       </Button>

@@ -35,7 +35,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     }
 
     const styles = VARIANT_STYLES[variant];
-    const inputEl = <Input ref={ref} className={cn(styles.input, className)} {...props} />;
+    const inputEl = <TaroInput ref={ref} className={cn(styles.input, className)} {...props} />;
 
     if (!styles.wrapper) return inputEl;
 

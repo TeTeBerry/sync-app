@@ -1,21 +1,30 @@
 import { create } from "zustand";
 import type { AiAssistantNavIntent, ProfileNavIntent } from "./types";
 
-interface NavigationState {
+export type RouteTransitionState = {
+  active: boolean;
+  eventId?: number;
+};
+
+export interface NavigationState {
   profileIntent: ProfileNavIntent | null;
   aiAssistantIntent: AiAssistantNavIntent | null;
   activeActivityLegacyId: number | null;
+  routeTransition: RouteTransitionState;
   setProfileIntent: (intent: ProfileNavIntent | null) => void;
   consumeProfileIntent: () => ProfileNavIntent | null;
   setAiAssistantIntent: (intent: AiAssistantNavIntent | null) => void;
   consumeAiAssistantIntent: () => AiAssistantNavIntent | null;
   setActiveActivityLegacyId: (legacyId: number | null) => void;
+  beginRouteTransition: (options?: { eventId?: number }) => void;
+  endRouteTransition: () => void;
 }
 
 export const useNavigationStore = create<NavigationState>((set, get) => ({
   profileIntent: null,
   aiAssistantIntent: null,
   activeActivityLegacyId: null,
+  routeTransition: { active: false },
 
   setProfileIntent: (intent) => set({ profileIntent: intent }),
   consumeProfileIntent: () => {
@@ -32,4 +41,14 @@ export const useNavigationStore = create<NavigationState>((set, get) => ({
   },
 
   setActiveActivityLegacyId: (legacyId) => set({ activeActivityLegacyId: legacyId }),
+
+  beginRouteTransition: (options) =>
+    set({
+      routeTransition: {
+        active: true,
+        ...(options?.eventId != null ? { eventId: options.eventId } : {}),
+      },
+    }),
+
+  endRouteTransition: () => set({ routeTransition: { active: false } }),
 }));

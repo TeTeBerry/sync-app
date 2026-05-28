@@ -30,26 +30,22 @@ const ActionSheet: React.FC<ActionSheetProps> = ({
   return (
     <View
       className={cn("s-overlay s-overlay--sheet", !open && "s-overlay--off")}
-      role="presentation"
-    >
+      role="presentation">
       <View className="s-overlay__backdrop" onClick={onCancel} />
       <View className="s-overlay__panel" role="menu" aria-hidden={!open}>
         {title ? <Text className="s-overlay-sheet__title">{title}</Text> : null}
         {items.map((item) => (
           <Button
-            key={item.label}
-            type="button"
-            role="menuitem"
+            key={item.label} role="menuitem"
             className={cn(
               "s-overlay-sheet__item",
               item.active && "s-overlay-sheet__item--active",
             )}
-            onClick={item.onSelect}
-          >
+            onClick={item.onSelect}>
             {item.label}
           </Button>
         ))}
-        <Button type="button" className="s-overlay-sheet__cancel" onClick={onCancel}>
+        <Button className="s-overlay-sheet__cancel" onClick={onCancel}>
           {cancelLabel}
         </Button>
       </View>

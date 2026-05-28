@@ -1,7 +1,6 @@
 import "./AiAssistantPage.scss";
 import React, { type FC, useCallback, useEffect, useState } from "react";
-import BottomNav from "./BottomNav";
-import ImagePreviewLightbox from "./ImagePreviewLightbox";
+import { BottomNavSlot } from "./BottomNav";
 import { ChevronLeft, Sparkles, Trash2, Zap,  } from "lucide-react-taro";
 import Taro, { useDidShow } from "@tarojs/taro";
 import { invalidateCache } from "../hooks/useApiQuery";
@@ -13,7 +12,14 @@ import { goBack, goEventDetail, ROUTES } from "../utils/route";
 import { ChatMessageList } from "./ai-chat/ChatMessageList";
 import { ChatComposer } from "./ai-chat/ChatComposer";
 import { DegradedMatchBanner } from "./ai-chat/DegradedMatchBanner";
-import { Button, Text, View } from '@tarojs/components';
+import { useDeferredMount } from "../hooks/useDeferredMount";
+import { DEFER_AI_CHAT_MS } from "../utils/timing";
+import { usePageRouteReady } from "../hooks/usePageRouteReady";
+import { useTabPageMainHeight } from "../hooks/useTabPageMainHeight";
+import { Button, Text, View } from "@tarojs/components";
+
+/** Header row below status bar (px, matches AiAssistantPage.scss). */
+const AI_HEADER_PX = 100;
 
 function AiAssistantChat({
   initialMessage,
@@ -21,6 +27,7 @@ function AiAssistantChat({
   onInitialMessageSent,
   onClearReady,
   onMessageCountChange,
+  chatBodyHeight,
   userAvatar,
   userName,
 }: {
@@ -29,12 +36,12 @@ function AiAssistantChat({
   onInitialMessageSent?: () => void;
   onClearReady?: (clear: () => Promise<void>, isBusy: boolean) => void;
   onMessageCountChange?: (count: number) => void;
+  chatBodyHeight?: number;
   userAvatar?: string;
   userName: string;
 }) {
   const [input, setInput] = useState("");
   const [pendingImages, setPendingImages] = useState<string[]>([]);
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
   const initialMessageSentRef = React.useRef<string | null>(null);
   const initialMessageHandledRef = React.useRef(false);
   const submitLockRef = React.useRef(false);
@@ -96,7 +103,7 @@ function AiAssistantChat({
     async (text: string, images?: string[]) => {
       if (submitLockRef.current) return;
       const trimmed = text.trim();
-      const hasImages = images && images.length > 0;
+      const hasImages = images && images.length> 0;
       if ((!trimmed && !hasImages) || isStreaming) return;
 
       submitLockRef.current = true;
@@ -134,7 +141,9 @@ function AiAssistantChat({
   );
 
   return (
-    <View className="s-ai-assistant-chat">
+    <View
+      className="s-ai-assistant-chat"
+      style={chatBodyHeight != null ? { height: `${chatBodyHeight}px` } : undefined}>
       {isLoadingHistory ? (
         <Text className="s-ai-assistant__hint">加载中…</Text>
       ) : null}
@@ -144,33 +153,28 @@ function AiAssistantChat({
         isStreaming={isStreaming}
         userAvatar={userAvatar}
         userName={userName}
-        onOpenImagePreview={setPreviewImage}
         onSelectSuggestedReply={handleSelectSuggestedReply}
       />
-      <ChatComposer
-        input={input}
-        pendingImages={pendingImages}
-        isStreaming={isStreaming}
-        activityLegacyId={activityLegacyId}
-        onInputChange={setInput}
-        onSubmit={submit}
-        onPendingImagesChange={setPendingImages}
-        onOpenImagePreview={setPreviewImage}
-      />
-      <ImagePreviewLightbox
-        open={previewImage != null}
-        src={previewImage}
-        alt="已上传的图片"
-        onClose={() => setPreviewImage(null)}
-      />
+      <View className="s-ai-assistant-chat__footer">
+        <ChatComposer
+          input={input}
+          pendingImages={pendingImages}
+          isStreaming={isStreaming}
+          activityLegacyId={activityLegacyId}
+          onInputChange={setInput}
+          onSubmit={submit}
+          onPendingImagesChange={setPendingImages}
+        />
+      </View>
     </View>
   );
 }
 
 const AiAssistantPage: FC = () => {
+  const chatReady = useDeferredMount(DEFER_AI_CHAT_MS);
   const [pendingInitialMessage, setPendingInitialMessage] = useState<
     string | null
-  >(null);
+>(null);
   const [clearChatFn, setClearChatFn] = useState<(() => Promise<void>) | null>(
     null,
   );
@@ -188,6 +192,9 @@ const AiAssistantPage: FC = () => {
   );
 
   const profileUserData = useResolvedProfile();
+  const chatBodyHeight = useTabPageMainHeight({ subtractPx: AI_HEADER_PX });
+
+  usePageRouteReady(true);
 
   const handleClearReady = useCallback(
     (clear: () => Promise<void>, isBusy: boolean) => {
@@ -231,13 +238,11 @@ const AiAssistantPage: FC = () => {
   }, [activityLegacyId]);
 
   return (
-    <View data-cmp="AiAssistant" className="s-ai-assistant">
-      <View className="s-ai-assistant__header">
-        <Button
-          type="button"
-          className="s-ai-assistant__back-btn"
-          onClick={handleBack}
-        >
+    <View data-cmp="AiAssistant" className="s-page-with-tabbar">
+      <View className="s-page-with-tabbar__main s-ai-assistant">
+        <View className="s-ai-assistant__header">
+        <Button className="s-ai-assistant__back-btn"
+          onClick={handleBack}>
           <ChevronLeft size={20} />
         </Button>
 
@@ -263,38 +268,41 @@ const AiAssistantPage: FC = () => {
         </View>
 
         <View className="s-ai-assistant__header-actions">
-          {messageCount > 0 ? (
+          {messageCount> 0 ? (
             <Text className="s-ai-assistant__message-count" aria-hidden>
               {messageCount}
             </Text>
           ) : null}
-          <Button
-            type="button"
-            className="s-ai-assistant__clear-btn"
+          <Button className="s-ai-assistant__clear-btn"
             disabled={clearBusy || !clearChatFn}
             aria-label="清空对话"
-            onClick={() => void clearChatFn?.()}
-          >
+            onClick={() => void clearChatFn?.()}>
             <Trash2 size={16} />
           </Button>
         </View>
-      </View>
+        </View>
 
-      <View className="s-ai-assistant__body">
-        <View className="s-ai-assistant__panel">
-          <AiAssistantChat
-            initialMessage={pendingInitialMessage}
-            activityLegacyId={activityLegacyId}
-            onInitialMessageSent={handleInitialMessageSent}
-            onClearReady={handleClearReady}
-            onMessageCountChange={setMessageCount}
-            userAvatar={profileUserData.avatar}
-            userName={profileUserData.name}
-          />
+        <View className="s-ai-assistant__body">
+          <View className="s-ai-assistant__panel">
+            {chatReady ? (
+              <AiAssistantChat
+                initialMessage={pendingInitialMessage}
+                activityLegacyId={activityLegacyId}
+                onInitialMessageSent={handleInitialMessageSent}
+                onClearReady={handleClearReady}
+                onMessageCountChange={setMessageCount}
+                chatBodyHeight={chatBodyHeight}
+                userAvatar={profileUserData.avatar}
+                userName={profileUserData.name}
+              />
+            ) : (
+              <View className="s-ai-assistant__chat-placeholder" aria-hidden />
+            )}
+          </View>
         </View>
       </View>
 
-      <BottomNav />
+      <BottomNavSlot />
     </View>
   );
 };

@@ -1,0 +1,92 @@
+/** Unsplash IDs that 404 or fail in WeChat mini-program. */
+const BROKEN_UNSPLASH_PHOTO_IDS = new Set([
+  "1459749411177-0479bf78d6f2",
+  "1459749411177",
+]);
+
+const UNSPLASH_PHOTO_RE = /photo-([a-zA-Z0-9-]+)/;
+
+export function picsumUrl(seed: string, width: number, height?: number): string {
+  const h = height ?? Math.round(width * 0.75);
+  const safeSeed = seed.replace(/[^a-zA-Z0-9-_]/g, "").slice(0, 48) || "sync";
+  return `https://picsum.photos/seed/${safeSeed}/${width}/${h}`;
+}
+
+function extractUnsplashPhotoId(url: URL): string | null {
+  const match = url.pathname.match(UNSPLASH_PHOTO_RE);
+  return match?.[1] ?? null;
+}
+
+function unsplashDimensions(url: URL): { width: number; height: number } {
+  const w = Number(url.searchParams.get("w")) || 800;
+  const isSquareCrop =
+    url.searchParams.get("fit") === "crop" &&
+    url.searchParams.get("crop") === "face";
+  return { width: w, height: isSquareCrop ? w : Math.round(w * 0.75) };
+}
+
+/** Map legacy Unsplash URLs to stable picsum.photos (WeChat-safe). */
+export function sanitizeRemoteImageUrl(
+  src: string | undefined,
+): string | undefined {
+  if (!src?.trim()) return undefined;
+  const trimmed = src.trim();
+  if (!/^https?:\/\//i.test(trimmed)) return trimmed;
+
+  try {
+    const url = new URL(trimmed);
+    if (!url.hostname.includes("unsplash.com")) {
+      return trimmed;
+    }
+
+    const photoId = extractUnsplashPhotoId(url);
+    if (photoId && BROKEN_UNSPLASH_PHOTO_IDS.has(photoId)) {
+      return picsumUrl("edc-festival", 800, 600);
+    }
+
+    const { width, height } = unsplashDimensions(url);
+    const seed = photoId ? `unsplash-${photoId}` : "sync-image";
+    return picsumUrl(seed, width, height);
+  } catch {
+    return trimmed;
+  }
+}
+
+export function sanitizeImageList(
+  images: string[] | undefined,
+): string[] | undefined {
+  if (!images?.length) return images;
+  const next = images
+    .map((url) => sanitizeRemoteImageUrl(url) ?? url)
+    .filter((url) => Boolean(url));
+  return next.length ? next : undefined;
+}
+
+/** Resize remote list thumbnails when the CDN supports path or query params. */
+export function thumbnailImageUrl(
+  src: string | undefined,
+  width = 240,
+): string | undefined {
+  const sanitized = sanitizeRemoteImageUrl(src);
+  if (!sanitized?.trim()) return undefined;
+  const trimmed = sanitized.trim();
+  if (!/^https?:\/\//i.test(trimmed)) return trimmed;
+
+  try {
+    const url = new URL(trimmed);
+    if (url.hostname.includes("picsum.photos")) {
+      const parts = url.pathname.split("/").filter(Boolean);
+      if (parts[0] === "seed" && parts[1]) {
+        const height = Math.round(width * 0.75);
+        return picsumUrl(parts[1], width, height);
+      }
+    }
+    if (url.searchParams.has("w")) {
+      return trimmed;
+    }
+    url.searchParams.set("w", String(width));
+    return url.toString();
+  } catch {
+    return trimmed;
+  }
+}

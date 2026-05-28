@@ -8,7 +8,9 @@ import {
   getActivityStatusFromActivity,
 } from "../../../utils/activityStatus";
 import type { FeaturedEvent } from "../../../utils/apiMappers";
-import { Image, Text, View } from '@tarojs/components';
+import { thumbnailImageUrl } from "../../../utils/imageUrl";
+import { useRouteTransitionActive } from "../../../utils/route";
+import { Image, Text, View } from "@tarojs/components";
 
 type HomeFeaturedEventsProps = {
   items: FeaturedEvent[];
@@ -31,65 +33,97 @@ export const HomeFeaturedEvents: FC<HomeFeaturedEventsProps> = ({
 
   return (
     <View className="s-home-featured" aria-label="Featured events">
-      {items.map((event, index) => {
-        const status = getActivityStatusFromActivity(event.date, event.title);
-
-        return (
-          <View
-            key={event.id}
-            className={["s-home-event", activityStatusCardClass(status)].filter(Boolean).join(" ")}
-          >
-            <ImageWithFallback
-              src={event.image}
-              alt={event.title}
-              priority={index === 0}
-              wrapperClassName="s-home-event__media"
-              fallbackWrapperClassName="s-home-event__media s-home-event__media--logo"
-              fallback={<Text>{event.logo?.replace(/\n/g, " ")}</Text>}
-            />
-
-            <View className="s-home-event__content">
-              <Button className="s-home-event__main" onClick={() => onEventClick(event)}>
-                <View className="s-home-event__title-row">
-                  <Text>{event.title}</Text>
-                  <ActivityStatusBadge date={event.date} title={event.title} status={status} />
-                </View>
-                <Text>
-                  <Text style={{fontWeight:"bold"}}>{event.date}</Text>
-                  <Text className="s-home-event__at"> at </Text>
-                  <Text className="s-home-event__venue">{event.venue}</Text>
-                </Text>
-                <Text>{event.distance}</Text>
-              </Button>
-
-              <View className="s-home-event__footer">
-                <View className="s-home-event__meta">
-                  <Text className="s-home-event__team" aria-hidden>
-                    {event.guests.map((guest, index) => (
-                      <Image
-                        key={guest}
-                        src={guest}
-                        decoding="async"
-                        style={{ zIndex: event.guests.length - index }}
-                      />
-                    ))}
-                  </Text>
-                  <Text className="s-home-event__count">{event.attendeeCount}</Text>
-                  <Users size={14} className="s-home-event__count-icon" />
-                </View>
-
-                <Button
-                  className="s-home-event__join"
-                  disabled={status === "ended"}
-                  onClick={() => onJoinClick(event)}
-                >
-                  {status === "ended" ? "已结束" : "加入"}
-                </Button>
-              </View>
-            </View>
-          </View>
-        );
-      })}
+      {items.map((event, index) => (
+        <HomeFeaturedEventRow
+          key={event.id}
+          event={event}
+          index={index}
+          onEventClick={onEventClick}
+          onJoinClick={onJoinClick}
+        />
+      ))}
     </View>
   );
 };
+
+function HomeFeaturedEventRow({
+  event,
+  index,
+  onEventClick,
+  onJoinClick,
+}: {
+  event: FeaturedEvent;
+  index: number;
+  onEventClick: (item: FeaturedEvent) => void;
+  onJoinClick: (item: FeaturedEvent) => void;
+}) {
+  const status = getActivityStatusFromActivity(event.date, event.title);
+  const isJoinNavigating = useRouteTransitionActive(event.id);
+  const thumbSrc = thumbnailImageUrl(event.image, 184);
+
+  return (
+    <View
+      className={["s-home-event", activityStatusCardClass(status)].filter(Boolean).join(" ")}>
+      <ImageWithFallback
+        src={thumbSrc}
+        alt={event.title}
+        priority={index === 0}
+        wrapperClassName="s-home-event__media"
+        fallbackWrapperClassName="s-home-event__media s-home-event__media--logo"
+        fallback={<Text>{event.logo?.replace(/\n/g, " ")}</Text>}
+      />
+
+      <View className="s-home-event__content">
+        <Button className="s-home-event__main" onClick={() => onEventClick(event)}>
+          <View className="s-home-event__title-row">
+            <Text className="s-home-event__title">{event.title}</Text>
+            <View className="s-home-event__title-badges">
+              <ActivityStatusBadge date={event.date} title={event.title} status={status} />
+            </View>
+          </View>
+          <Text className="s-home-event__date-row">
+            <Text className="s-home-event__date">{event.date}</Text>
+            <Text className="s-home-event__at"> at </Text>
+            <Text className="s-home-event__venue">{event.venue}</Text>
+          </Text>
+          {event.distance ? (
+            <Text className="s-home-event__distance">{event.distance}</Text>
+          ) : null}
+        </Button>
+
+        <View className="s-home-event__footer">
+          <View className="s-home-event__meta">
+            <View className="s-home-event__team" aria-hidden>
+              {event.guests.map((guest, guestIndex) => (
+                <Image
+                  key={guest}
+                  src={thumbnailImageUrl(guest, 48) ?? guest}
+                  className="s-home-event__team-avatar"
+                  mode="aspectFill"
+                  lazyLoad
+                  style={{ zIndex: event.guests.length - guestIndex }}
+                />
+              ))}
+            </View>
+            <Text className="s-home-event__count">{event.attendeeCount}</Text>
+            <Users size={14} color="#ffffff" className="s-home-event__count-icon" />
+          </View>
+
+          <Button
+            className={[
+              "s-home-event__join",
+              isJoinNavigating ? "s-home-event__join--loading" : "",
+            ]
+              .filter(Boolean)
+              .join(" ")}
+            disabled={status === "ended" || isJoinNavigating}
+            onClick={() => onJoinClick(event)}>
+            <Text className="s-home-event__join-text">
+              {isJoinNavigating ? "跳转中…" : status === "ended" ? "已结束" : "加入"}
+            </Text>
+          </Button>
+        </View>
+      </View>
+    </View>
+  );
+}

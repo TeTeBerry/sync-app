@@ -1,7 +1,7 @@
 import "./home.scss";
-import Taro from "@tarojs/taro";
-import { lazy, Suspense, useCallback } from "react";
-import BottomNav from "../../components/BottomNav";
+import Taro, { useDidShow } from "@tarojs/taro";
+import { lazy, Suspense, useCallback, useEffect } from "react";
+import { BottomNavSlot } from "../../components/BottomNav";
 import PageLoadingFallback from "../../components/PageLoadingFallback";
 import { useConfirmDialog } from "../../hooks/useConfirmDialog";
 import { useDeferredMount } from "../../hooks/useDeferredMount";
@@ -15,13 +15,15 @@ import {
   usePopularPosts,
 } from "../../hooks/useSyncApi";
 import { isApiEnabled } from "../../constants/api";
-import { go, goAiAssistant, goEventDetail, ROUTES } from "../../utils/route";
+import { go, goAiAssistant, goEventDetail, goNotifications, preloadHotRoutes, ROUTES } from "../../utils/route";
+import { DEFER_BELOW_FOLD_MS } from "../../utils/timing";
 import { HomeCountdownCard } from "./components/HomeCountdownCard";
 import { HomeFeaturedEvents } from "./components/HomeFeaturedEvents";
 import { HomePlazaHero } from "./components/HomePlazaHero";
 import { type ActivityPost } from "./homeData";
 import { type FeaturedEvent } from "../../utils/apiMappers";
-import { View } from '@tarojs/components';
+import { useNavBarInsets } from "../../hooks/useNavBarInsets";
+import { ScrollView, View } from "@tarojs/components";
 
 const LazyHomeActivityFeed = lazy(async () => {
   const mod = await import("./components/HomeActivityFeed");
@@ -29,7 +31,7 @@ const LazyHomeActivityFeed = lazy(async () => {
 });
 
 const Home = () => {
-  const belowFoldReady = useDeferredMount(120);
+  const belowFoldReady = useDeferredMount(DEFER_BELOW_FOLD_MS);
   const { confirm, confirmDialog } = useConfirmDialog({
     cancelText: "取消",
   });
@@ -48,8 +50,16 @@ const Home = () => {
     go(ROUTES.AI_ASSISTANT);
   }, []);
 
+  useEffect(() => {
+    preloadHotRoutes();
+  }, []);
+
+  useDidShow(() => {
+    preloadHotRoutes();
+  });
+
   const handleNotification = useCallback(() => {
-    go(ROUTES.NOTIFICATIONS);
+    goNotifications();
   }, []);
 
   const openEventDetail = useCallback((event: FeaturedEvent) => {
@@ -93,49 +103,58 @@ const Home = () => {
   }, [refetchPosts]);
 
   const activeTeamCount = heat?.people ?? 0;
+  const navInsets = useNavBarInsets();
 
   return (
-    <View data-cmp="Home" className="s-home">
-      <View className="s-home__main s-scrollbar-none">
-        <HomePlazaHero
-          unreadCount={unreadCount}
-          onAgentClick={() => openAiAssistant()}
-          onNotificationClick={handleNotification}
-        />
+    <View data-cmp="Home" className="s-page-with-tabbar">
+      <ScrollView
+        scrollY
+        enhanced
+        showScrollbar={false}
+        className="s-page-with-tabbar__scroll s-home__main s-scrollbar-none">
+        <View className="s-home__scroll-inner">
+          <HomePlazaHero
+            capsulePaddingTop={navInsets.paddingTop}
+            capsulePaddingRight={navInsets.paddingRight}
+            unreadCount={unreadCount}
+            onAgentClick={() => openAiAssistant()}
+            onNotificationClick={handleNotification}
+          />
 
-        <HomeCountdownCard
-          eventName={nearestUpcoming?.title}
-          targetAt={nearestUpcoming?.startAt ?? null}
-        />
+          <HomeCountdownCard
+            eventName={nearestUpcoming?.title}
+            targetAt={nearestUpcoming?.startAt ?? null}
+          />
 
-        <HomeFeaturedEvents
-          items={featuredEvents}
-          onEventClick={openEventDetail}
-          onJoinClick={openEventDetail}
-        />
+          <HomeFeaturedEvents
+            items={featuredEvents}
+            onEventClick={openEventDetail}
+            onJoinClick={openEventDetail}
+          />
 
-        {belowFoldReady ? (
-          <Suspense fallback={<PageLoadingFallback minHeight={240} />}>
-            <LazyHomeActivityFeed
-              items={posts}
-              onSeeAll={() => go(ROUTES.ALL_POSTS)}
-              onDelete={handleDeletePost}
-              onLike={handleLikePost}
-              onCommentSubmitted={handleCommentSubmitted}
-            />
-          </Suspense>
-        ) : (
-          <PageLoadingFallback minHeight={240} />
-        )}
+          {belowFoldReady ? (
+            <Suspense fallback={<PageLoadingFallback minHeight={240} />}>
+              <LazyHomeActivityFeed
+                items={posts}
+                onSeeAll={() => go(ROUTES.ALL_POSTS)}
+                onDelete={handleDeletePost}
+                onLike={handleLikePost}
+                onCommentSubmitted={handleCommentSubmitted}
+              />
+            </Suspense>
+          ) : (
+            <PageLoadingFallback minHeight={240} />
+          )}
 
-        <View className="s-home__heat" aria-label="Today heat">
-          {activeTeamCount} 人正在发现活动
+          <View className="s-home__heat s-tabbar-offset" aria-label="Today heat">
+            {activeTeamCount} 人正在发现活动
+          </View>
         </View>
-      </View>
+      </ScrollView>
 
       {confirmDialog}
 
-      <BottomNav />
+      <BottomNavSlot />
     </View>
   );
 };
