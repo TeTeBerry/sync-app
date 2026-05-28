@@ -1,16 +1,35 @@
 import { Users } from "lucide-react-taro";
 import { type FC } from "react";
-import { ActivityStatusBadge } from "../../../components/ActivityStatusBadge";
 import { ImageWithFallback } from "../../../components/ImageWithFallback";
 import { Button } from "../../../components/ui";
 import {
   activityStatusCardClass,
   getActivityStatusFromActivity,
+  type ActivityStatus,
 } from "../../../utils/activityStatus";
-import type { FeaturedEvent } from "../../../utils/apiMappers";
+import {
+  resolveFeaturedEventLegacyId,
+  type FeaturedEvent,
+} from "../../../utils/apiMappers";
 import { thumbnailImageUrl } from "../../../utils/imageUrl";
 import { useRouteTransitionActive } from "../../../utils/route";
 import { Image, Text, View } from "@tarojs/components";
+
+function featuredEventStatusTag(event: FeaturedEvent, status: ActivityStatus): string | null {
+  if (status === "ended") return "已结束";
+  if (event.isHot) return "热门";
+  const location = event.venue?.trim();
+  if (!location) return null;
+  return location;
+}
+
+function featuredEventTagClassName(tag: string): string {
+  const classes = ["s-home-event__tag"];
+  if (tag !== "已结束" && tag !== "热门") {
+    classes.push("s-home-event__tag--location");
+  }
+  return classes.join(" ");
+}
 
 type HomeFeaturedEventsProps = {
   items: FeaturedEvent[];
@@ -58,8 +77,13 @@ function HomeFeaturedEventRow({
   onJoinClick: (item: FeaturedEvent) => void;
 }) {
   const status = getActivityStatusFromActivity(event.date, event.title);
-  const isJoinNavigating = useRouteTransitionActive(event.id);
-  const thumbSrc = thumbnailImageUrl(event.image, 184);
+  const statusTag = featuredEventStatusTag(event, status);
+  const venue = event.venue?.trim() ?? "";
+  const tagIsLocation = Boolean(statusTag && statusTag === venue);
+  const showVenueInline = Boolean(venue) && !tagIsLocation;
+  const legacyId = resolveFeaturedEventLegacyId(event);
+  const isJoinNavigating = useRouteTransitionActive(legacyId ?? undefined);
+  const thumbSrc = thumbnailImageUrl(event.image, 200);
 
   return (
     <View
@@ -69,26 +93,28 @@ function HomeFeaturedEventRow({
         alt={event.title}
         priority={index === 0}
         wrapperClassName="s-home-event__media"
+        imageClassName="s-home-event__media-img"
         fallbackWrapperClassName="s-home-event__media s-home-event__media--logo"
         fallback={<Text>{event.logo?.replace(/\n/g, " ")}</Text>}
       />
 
       <View className="s-home-event__content">
         <Button className="s-home-event__main" onClick={() => onEventClick(event)}>
-          <View className="s-home-event__title-row">
+          <View className="s-home-event__info">
             <Text className="s-home-event__title">{event.title}</Text>
-            <View className="s-home-event__title-badges">
-              <ActivityStatusBadge date={event.date} title={event.title} status={status} />
+            <View className="s-home-event__date-row">
+              <Text className="s-home-event__date">{event.date}</Text>
+              {showVenueInline ? (
+                <>
+                  <Text className="s-home-event__at">at</Text>
+                  <Text className="s-home-event__venue">{venue}</Text>
+                </>
+              ) : null}
             </View>
+            {statusTag ? (
+              <Text className={featuredEventTagClassName(statusTag)}>{statusTag}</Text>
+            ) : null}
           </View>
-          <Text className="s-home-event__date-row">
-            <Text className="s-home-event__date">{event.date}</Text>
-            <Text className="s-home-event__at"> at </Text>
-            <Text className="s-home-event__venue">{event.venue}</Text>
-          </Text>
-          {event.distance ? (
-            <Text className="s-home-event__distance">{event.distance}</Text>
-          ) : null}
         </Button>
 
         <View className="s-home-event__footer">
@@ -116,10 +142,13 @@ function HomeFeaturedEventRow({
             ]
               .filter(Boolean)
               .join(" ")}
-            disabled={status === "ended" || isJoinNavigating}
-            onClick={() => onJoinClick(event)}>
+            disabled={status === "ended" || isJoinNavigating || legacyId == null}
+            onClick={(clickEvent) => {
+              clickEvent.stopPropagation();
+              onJoinClick(event);
+            }}>
             <Text className="s-home-event__join-text">
-              {isJoinNavigating ? "跳转中…" : status === "ended" ? "已结束" : "加入"}
+              {isJoinNavigating ? "加入中…" : status === "ended" ? "已结束" : "加入"}
             </Text>
           </Button>
         </View>

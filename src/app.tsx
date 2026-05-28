@@ -1,3 +1,4 @@
+import "./utils/abortControllerPolyfill";
 import "./app.scss";
 import { View } from "@tarojs/components";
 import { LucideTaroProvider } from "lucide-react-taro";

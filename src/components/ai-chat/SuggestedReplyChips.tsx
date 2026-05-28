@@ -1,6 +1,6 @@
 import { Button, cn } from "../ui";
 import { useAiChatStore } from "../../stores/aiChatStore";
-import { View } from '@tarojs/components';
+import { Text, View } from '@tarojs/components';
 
 const PUBLISH_CONFIRM_REPLY = "确认发布";
 
@@ -30,7 +30,7 @@ export function SuggestedReplyChips({
           )}
           disabled={disabled}
           onClick={() => onSelect(reply)}>
-          {reply}
+          <Text className="s-btn-label">{reply}</Text>
         </Button>
       ))}
     </View>

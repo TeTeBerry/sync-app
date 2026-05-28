@@ -66,6 +66,7 @@ export function sanitizeImageList(
 export function thumbnailImageUrl(
   src: string | undefined,
   width = 240,
+  heightRatio = 0.75,
 ): string | undefined {
   const sanitized = sanitizeRemoteImageUrl(src);
   if (!sanitized?.trim()) return undefined;
@@ -77,7 +78,7 @@ export function thumbnailImageUrl(
     if (url.hostname.includes("picsum.photos")) {
       const parts = url.pathname.split("/").filter(Boolean);
       if (parts[0] === "seed" && parts[1]) {
-        const height = Math.round(width * 0.75);
+        const height = Math.round(width * heightRatio);
         return picsumUrl(parts[1], width, height);
       }
     }
@@ -89,4 +90,12 @@ export function thumbnailImageUrl(
   } catch {
     return trimmed;
   }
+}
+
+/** Featured post hero (16:10 tile). WeChat reliably loads resized picsum, not raw 800px URLs. */
+export function featuredPostImageUrl(
+  src: string | undefined,
+  width = 480,
+): string | undefined {
+  return thumbnailImageUrl(src, width, 10 / 16);
 }

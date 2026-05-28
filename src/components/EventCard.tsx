@@ -4,7 +4,7 @@ import AvatarGroup from "./AvatarGroup";
 import { ACTIVITY_GUEST_AVATARS } from "../constants/activityGuestAvatars";
 import { ImageWithFallback } from "./ImageWithFallback";
 import { Button } from "./ui";
-import { Calendar, Flame, MapPin, Sparkles, Users,  } from "lucide-react-taro";
+import { Calendar, Flame, MapPin, Sparkles, Users, } from "lucide-react-taro";
 import {
   activityStatusCardClass,
   getActivityStatusFromActivity,
@@ -18,6 +18,7 @@ import {
 } from "../utils/eventCardDisplay";
 import { PLACEHOLDER_EVENT_HERO } from "../constants/remoteImages";
 import { thumbnailImageUrl } from "../utils/imageUrl";
+import { resolveEventCardLegacyId } from "../utils/apiMappers";
 import { useRouteTransitionActive } from "../utils/route";
 
 interface EventCardProps {
@@ -43,10 +44,8 @@ const EventCardInner: React.FC<EventCardProps> = ({
   variant = "list",
   onTeamUp,
 }) => {
-  const legacyId = Number(id);
-  const isNavigating = useRouteTransitionActive(
-    Number.isFinite(legacyId) && legacyId> 0 ? legacyId : undefined,
-  );
+  const legacyId = resolveEventCardLegacyId(id);
+  const isNavigating = useRouteTransitionActive(legacyId ?? undefined);
   const thumbSrc = thumbnailImageUrl(image, 400);
   const status = getActivityStatusFromActivity(date, title);
   const dateBadge = useMemo(() => formatEventDateBadge(date), [date]);
@@ -146,18 +145,20 @@ const EventCardInner: React.FC<EventCardProps> = ({
 
         <View className="s-event-card__cta">
           <Button className={[
-              "s-event-card__team-btn",
-              isNavigating ? "s-event-card__team-btn--loading" : "",
-            ]
-              .filter(Boolean)
-              .join(" ")}
+            "s-event-card__team-btn",
+            isNavigating ? "s-event-card__team-btn--loading" : "",
+          ]
+            .filter(Boolean)
+            .join(" ")}
             disabled={isNavigating}
             onClick={(event) => {
               event.stopPropagation();
               onTeamUp?.();
             }}>
             <Sparkles size={15} aria-hidden />
-            {isNavigating ? "跳转中…" : "加入"}
+            <Text className="s-event-card__team-btn-text">
+              {isNavigating ? "加入中…" : "加入"}
+            </Text>
           </Button>
         </View>
       </View>

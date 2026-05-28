@@ -34,7 +34,7 @@
   padding: 8px 14px;
   background: rgba(255, 255, 255, 0.06);
   color: rgba(255, 255, 255, 0.72);
-  font-size: 13px;
+  font-size: var(--s-type-small);
   font-weight: 500;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
@@ -52,7 +52,7 @@
   padding: 0 5px;
   border-radius: 9999px;
   background: rgba(255, 255, 255, 0.1);
-  font-size: 11px;
+  font-size: var(--s-type-caption);
   line-height: 18px;
   text-align: center;
 
@@ -69,11 +69,15 @@
 }
 
 .s-notifications__toolbar-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
   border: none;
   background: transparent;
   color: var(--primary);
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--s-type-small);
+  font-weight: var(--s-fw-semibold);
   cursor: pointer;
   padding: 4px 0;
   -webkit-tap-highlight-color: transparent;
@@ -111,6 +115,7 @@
   display: flex;
   gap: 12px;
   align-items: flex-start;
+  justify-content: flex-start;
   flex: 1;
   min-width: 0;
   text-align: left;
@@ -178,20 +183,20 @@
 }
 
 .s-notifications__title {
-  font-size: 15px;
-  font-weight: 600;
+  font-size: var(--s-type-body);
+  font-weight: var(--s-fw-semibold);
   color: #fff;
 }
 
 .s-notifications__time {
-  font-size: 11px;
+  font-size: var(--s-type-caption);
   color: var(--muted-foreground);
   flex-shrink: 0;
 }
 
 .s-notifications__body {
   margin-top: 4px;
-  font-size: 13px;
+  font-size: var(--s-type-small);
   line-height: 1.45;
   color: rgba(255, 255, 255, 0.72);
 }
@@ -232,19 +237,19 @@
 }
 
 .s-notifications__empty-title {
-  font-size: 16px;
-  font-weight: 600;
+  font-size: var(--s-type-subtitle);
+  font-weight: var(--s-fw-semibold);
   color: rgba(255, 255, 255, 0.85);
   margin-bottom: 6px;
 }
 
 .s-notifications__empty-desc {
-  font-size: 13px;
+  font-size: var(--s-type-small);
 }
 
 .s-notifications__loading {
   padding: 32px;
   text-align: center;
   color: var(--muted-foreground);
-  font-size: 14px;
+  font-size: var(--s-type-body-sm);
 }

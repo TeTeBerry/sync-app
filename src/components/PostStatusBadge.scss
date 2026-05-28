@@ -2,9 +2,9 @@
   &.nut-tag {
     padding: 3px 10px;
     border-radius: var(--radius-full);
-    font-size: 11px;
+    font-size: var(--s-type-caption);
     line-height: 1.2;
-    font-weight: 700;
+    font-weight: var(--s-fw-bold);
     white-space: nowrap;
     border: none;
     display: inline-flex;

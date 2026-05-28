@@ -16,22 +16,81 @@ const EVENT_STATUS_TEXT: Record<string, string> = {
 
 export type ProfileActivitiesSectionProps = {
   items: ProfileActivityItem[];
+  /** `list` renders all items without collapsible chrome (detail sub-page). */
+  mode?: "collapsible" | "list";
 };
 
 const ProfileActivitiesSection: React.FC<ProfileActivitiesSectionProps> = ({
   items,
+  mode = "collapsible",
 }) => {
   const sortedItems = useMemo(
     () => [...items].sort(compareActivityDateDesc),
     [items],
   );
 
+  const listBody = (
+    <>
+      {sortedItems.length === 0 ? (
+        <View className="s-profile-section__empty">
+          <View className="s-profile-section__empty-icon s-profile-section__empty-icon--activities">
+            <Ticket size={22} />
+          </View>
+          <Text className="s-profile-section__empty-title">还没有报名活动</Text>
+          <Text className="s-profile-section__empty-hint">在首页或活动页报名后，会显示在这里</Text>
+        </View>
+      ) : (
+        sortedItems.map((item) => (
+          <View key={item.id} className="s-profile-activity">
+            <ImageWithFallback
+              src={item.image}
+              alt=""
+              imageClassName="s-profile-activity__thumb"
+              placeholderClassName="s-profile-activity__thumb s-profile-activity__thumb--placeholder"
+              fallback={item.title.slice(0, 2)}
+            />
+            <View className="s-profile-activity__content">
+              <View className="s-profile-activity__top">
+                <Text className="s-profile-activity__title">{item.title}</Text>
+                <Text className="s-profile-activity__status">
+                  {EVENT_STATUS_TEXT[item.status] ?? item.status}
+                </Text>
+              </View>
+
+              <View className="s-profile-activity__meta">
+                <MetaRow className="s-profile-activity__meta-item" icon={<Calendar size={12} />}>
+                  {item.date}
+                </MetaRow>
+                <MetaRow className="s-profile-activity__meta-item" icon={<MapPin size={12} />}>
+                  {item.location}
+                </MetaRow>
+              </View>
+            </View>
+          </View>
+        ))
+      )}
+    </>
+  );
+
+  if (mode === "list") {
+    return <View className="s-profile-section__body s-profile-section__body--standalone">{listBody}</View>;
+  }
+
   return (
     <ProfileCollapsibleSection
       variant="activities"
       icon={<Ticket size={14} />}
       title="我的活动"
-      items={sortedItems}>
+      items={sortedItems}
+      renderEmpty={() => (
+        <View className="s-profile-section__empty">
+          <View className="s-profile-section__empty-icon s-profile-section__empty-icon--activities">
+            <Ticket size={22} />
+          </View>
+          <Text className="s-profile-section__empty-title">还没有报名活动</Text>
+          <Text className="s-profile-section__empty-hint">在首页或活动页报名后，会显示在这里</Text>
+        </View>
+      )}>
       {(pageItems) =>
         pageItems.map((item) => (
           <View key={item.id} className="s-profile-activity">

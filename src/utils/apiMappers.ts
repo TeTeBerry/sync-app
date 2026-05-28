@@ -1,5 +1,6 @@
 import type { HomeSummary } from "../types/backend";
 import { ACTIVITY_GUEST_AVATARS } from "../constants/activityGuestAvatars";
+import { parseActivityLegacyId } from "./activityLegacyId";
 import { sanitizeRemoteImageUrl } from "./imageUrl";
 
 type SignupEvent = HomeSummary["signupEvents"][number];
@@ -18,7 +19,9 @@ export interface EventCardUi {
 }
 
 export type FeaturedEvent = {
+  /** Activity legacy id used for `/activities/:legacyId` and event-detail navigation. */
   id: number;
+  legacyId: number;
   title: string;
   date: string;
   venue: string;
@@ -43,11 +46,17 @@ export function findBackendActivityByLegacyId(
   return activities.find((activity) => activity.legacyId === legacyId);
 }
 
+export function resolveFeaturedEventLegacyId(event: Pick<FeaturedEvent, "id" | "legacyId">): number | null {
+  return parseActivityLegacyId(event.legacyId ?? event.id);
+}
+
 export function mapActivitiesToEvents(
   activities: import("../types/backend").BackendActivity[],
 ): EventCardUi[] {
-  return activities.map((activity) => ({
-    id: String(activity.legacyId ?? activity._id),
+  return activities
+    .filter((activity) => parseActivityLegacyId(activity.legacyId) != null)
+    .map((activity) => ({
+    id: String(activity.legacyId),
     title: activity.name,
     going: false,
     date: activity.date ?? "",
@@ -60,15 +69,21 @@ export function mapActivitiesToEvents(
   }));
 }
 
+export function resolveEventCardLegacyId(id?: string): number | null {
+  return parseActivityLegacyId(id);
+}
+
 export function mapSignupEventToFeaturedEvent(item: SignupEvent): FeaturedEvent {
   const isHot = Boolean(item.hot);
+  const legacyId = parseActivityLegacyId(item.id) ?? 0;
   return {
-    id: item.id,
+    id: legacyId,
+    legacyId,
     title: item.title,
     date: item.date,
     venue: item.location,
     isHot,
-    distance: item.category,
+    distance: item.location ?? "",
     attendeeCount: `${item.attendees}+`,
     remaining: "",
     guests: ACTIVITY_GUEST_AVATARS,
@@ -86,7 +101,7 @@ export function mapBackendActivityToFeaturedEvent(
     date: activity.date ?? "",
     location: activity.location ?? "",
     image: sanitizeRemoteImageUrl(activity.image) ?? activity.image ?? "",
-    category: activity.hot ? "户外电音" : "EDM节",
+    category: "",
     hot: Boolean(activity.hot),
     attendees: activity.attendees ?? 0,
     going: false,

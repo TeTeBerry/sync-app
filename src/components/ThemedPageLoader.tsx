@@ -1,5 +1,6 @@
 import "./ThemedPageLoader.scss";
 import { Text, View } from "@tarojs/components";
+import { SyncBrandMark } from "./SyncBrandMark";
 
 export type ThemedPageLoaderVariant =
   | "spinner"
@@ -111,7 +112,9 @@ export default function ThemedPageLoader({
       aria-live="polite"
       aria-busy="true"
       aria-label={label ?? "加载中"}>
-      {showBrand ? <Text className="s-themed-loader__brand">SYNC</Text> : null}
+      {showBrand ? (
+        <SyncBrandMark className="s-themed-loader__brand" />
+      ) : null}
       {variant === "skeleton-event" ? <EventDetailSkeleton /> : null}
       {variant === "skeleton-feed" ? <FeedSkeleton /> : null}
       {variant === "spinner" || variant === "inline" ? <PinkSpinner /> : null}

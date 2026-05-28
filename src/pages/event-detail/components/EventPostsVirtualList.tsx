@@ -50,7 +50,7 @@ export function EventPostsVirtualList({
     highlightScrolledRef.current = highlightPostId;
 
     const elId = `post-${highlightPostId}`;
-    setTimeout(() => onScrollToPostId?.(elId), 100);
+    setTimeout(() => onScrollToPostId?.(elId), 150);
   }, [highlightPostId, items, onScrollToPostId]);
 
   return (

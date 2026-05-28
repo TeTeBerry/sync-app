@@ -88,10 +88,29 @@ page {
   /* Layout @ 375px design */
   --s-page-gutter: 16px;
   --s-hero-icon-size: 40px;
-  --s-featured-thumb: 92px;
-  --s-type-body: 15px;
-  --s-type-body-sm: 14px;
-  --s-type-meta: 12px;
+  --s-featured-thumb: 100px;
+
+  /* Typography scale — one step smaller than original 375px mockup */
+  --s-type-hero: 32px;
+  --s-type-display-lg: 26px;
+  --s-type-display: 22px;
+  --s-type-display-sm: 20px;
+  --s-type-lead: 18px;
+  --s-type-title: 17px;
+  --s-type-subtitle: 15px;
+  --s-type-body: 14px;
+  --s-type-body-sm: 13px;
+  --s-type-small: 12px;
+  --s-type-meta: 11px;
+  --s-type-caption: 10px;
+
+  /* Font weight scale — one step lighter */
+  --s-fw-normal: 400;
+  --s-fw-medium: 500;
+  --s-fw-semibold: 500;
+  --s-fw-bold: 600;
+  --s-fw-extrabold: 700;
+  --s-fw-black: 800;
 
   /* Post card action row (like, comment, share) */
   --s-post-action-icon: #8e8e93;
@@ -103,4 +122,9 @@ page {
   --s-tabbar-height: var(--s-tabbar-row);
   --s-tabbar-total: calc(var(--s-tabbar-row) + 10px + env(safe-area-inset-bottom, 0px));
   --s-tabbar-offset: var(--s-tabbar-total);
+  --s-tabbar-bg: rgba(8, 8, 10, 0.88);
+  --s-tabbar-border: rgba(255, 255, 255, 0.08);
+  --s-tabbar-inactive: #888888;
+  --s-tabbar-blur: 16px;
+  --s-tabbar-shadow: 0 -4px 24px rgba(0, 0, 0, 0.45);
 }

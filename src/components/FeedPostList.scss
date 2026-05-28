@@ -68,7 +68,7 @@
 .s-home-post__user-name {
   color: #fff;
   font-size: var(--s-type-body);
-  font-weight: 900;
+  font-weight: var(--s-fw-black);
   margin-right: 6px;
 }
 
@@ -84,9 +84,9 @@
 .s-home-post__event-name {
   margin: 0 0 6px;
   color: #ffffff;
-  font-size: 16px;
+  font-size: var(--s-type-subtitle);
   line-height: 1.25;
-  font-weight: 900;
+  font-weight: var(--s-fw-black);
 }
 
 .s-home-post__location {
@@ -94,10 +94,15 @@
 }
 
 .s-home-post__text {
-  margin: 0 0 16px;
+  margin: 0 0 12px;
   color: #ffffff;
   font-size: var(--s-type-body);
   line-height: 1.6;
+}
+
+.s-home-post .s-content-badges {
+  margin-top: 12px;
+  margin-bottom: 10px;
 }
 
 .s-home-post__footer {
@@ -125,7 +130,7 @@
   gap: 16px;
   min-width: 0;
   color: var(--s-post-action-icon);
-  font-size: 13px;
+  font-size: var(--s-type-small);
   line-height: 1;
 }
 
@@ -147,7 +152,7 @@
   background-color: transparent !important;
   box-shadow: none;
   color: var(--s-post-action-icon);
-  font-size: 13px;
+  font-size: var(--s-type-small);
   line-height: 1;
   cursor: pointer;
   appearance: none;
@@ -165,7 +170,7 @@
 
 .s-home-post__action-label {
   color: inherit;
-  font-size: 13px;
+  font-size: var(--s-type-small);
   line-height: 1;
   white-space: nowrap;
 }

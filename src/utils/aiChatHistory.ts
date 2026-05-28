@@ -63,13 +63,23 @@ export function buildApiChatHistory(
   }
 
   if (pendingUserText || pendingImage) {
-    apiMessages.push({
-      role: "user",
-      content: pendingUserText?.trim() || "",
-      imageContext: pendingImage
-        ? { source: pendingImage }
-        : undefined,
-    });
+    const trimmedPending = pendingUserText?.trim() ?? "";
+    const lastApi = apiMessages[apiMessages.length - 1];
+    const duplicateUserText =
+      Boolean(trimmedPending) &&
+      !pendingImage &&
+      lastApi?.role === "user" &&
+      lastApi.content === trimmedPending;
+
+    if (!duplicateUserText) {
+      apiMessages.push({
+        role: "user",
+        content: trimmedPending,
+        imageContext: pendingImage ? { source: pendingImage } : undefined,
+      });
+    } else if (pendingImage && lastApi?.role === "user") {
+      lastApi.imageContext = { source: pendingImage };
+    }
   }
 
   return apiMessages;

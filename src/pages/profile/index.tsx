@@ -1,21 +1,28 @@
 import "./profile.scss";
 import Taro, { useDidShow } from "@tarojs/taro";
-import React, { useCallback, useEffect, useState } from "react";
-import { Bell, ChevronRight, Info, LogOut, Settings, Shield } from "lucide-react-taro";
+import React, { useCallback, useEffect } from "react";
+import {
+  Bell,
+  Check,
+  ChevronRight,
+  FileText,
+  Info,
+  LogOut,
+  Music2,
+  Shield,
+  Zap,
+} from "lucide-react-taro";
 import { BottomNavSlot } from "../../components/BottomNav";
-import { go, goEventDetail, ROUTES } from "../../utils/route";
-import { profilePosts, profileUser } from "./mockData";
+import ThemedPageLoader from "../../components/ThemedPageLoader";
+import { useNavBarInsets } from "../../hooks/useNavBarInsets";
+import { go, ROUTES } from "../../utils/route";
+import { profileActivities, profilePosts, profileUser } from "./mockData";
 import { sanitizeRemoteImageUrl } from "../../utils/imageUrl";
-import ProfileActivitiesSection from "./components/ProfileActivitiesSection";
-import ProfilePostsSection, {
-  type ProfilePostEditDraft,
-} from "./components/ProfilePostsSection";
-import type { ProfilePostItem } from "../../types/backend";
+import ProfileActionCard from "./components/ProfileActionCard";
+import { countOngoingActivities, deriveInterestTag } from "./utils";
 import { persistUserName } from "../../utils/session";
 import { useNavigationStore, useProfilePageStore } from "../../stores";
 import {
-  deletePostAndInvalidate,
-  updatePostAndInvalidate,
   useProfileActivitiesQuery,
   useProfilePostsQuery,
   useProfileSummaryQuery,
@@ -23,7 +30,7 @@ import {
 import { isApiEnabled } from "../../constants/api";
 import { useConfirmDialog } from "../../hooks/useConfirmDialog";
 import { invalidateCache } from "../../hooks/useApiQuery";
-import { Button, Image, ScrollView, Text, View } from "@tarojs/components";
+import { Image, ScrollView, Text, View } from "@tarojs/components";
 
 const STORAGE_KEYS = {
   notifications: "profile.notificationsEnabled",
@@ -40,7 +47,7 @@ function readStorage<T>(key: string, fallback: T): T {
 }
 
 const Profile: React.FC = () => {
-  const [scrollIntoView, setScrollIntoView] = useState<string | undefined>();
+  const navInsets = useNavBarInsets();
   const notificationsEnabled = useProfilePageStore((state) => state.notificationsEnabled);
   const setNotificationsEnabled = useProfilePageStore((state) => state.setNotificationsEnabled);
   const setPrivacyLevel = useProfilePageStore((state) => state.setPrivacyLevel);
@@ -54,18 +61,22 @@ const Profile: React.FC = () => {
   const postsQuery = useProfilePostsQuery();
   const apiEnabled = isApiEnabled();
 
-  const profileUserData = apiEnabled && summaryQuery.data
-    ? summaryQuery.data
-    : profileUser;
+  const profileUserData = apiEnabled && summaryQuery.data ? summaryQuery.data : profileUser;
 
-  const activities = activitiesQuery.data ?? [];
+  const activities =
+    apiEnabled && activitiesQuery.data ? activitiesQuery.data : profileActivities;
 
-  const posts = apiEnabled && postsQuery.data
-    ? postsQuery.data
-    : profilePosts;
+  const posts = apiEnabled && postsQuery.data ? postsQuery.data : profilePosts;
 
-  const [editingPostId, setEditingPostId] = useState<string | null>(null);
-  const [editDraft, setEditDraft] = useState<ProfilePostEditDraft | null>(null);
+  const profileLoading = apiEnabled && summaryQuery.isLoading && !summaryQuery.data;
+
+  const ongoingCount = countOngoingActivities(activities);
+  const postsCount = posts.length;
+  const interestTag = deriveInterestTag(profileUserData.bio);
+  const verified =
+    "verified" in profileUser && typeof profileUser.verified === "boolean"
+      ? profileUser.verified
+      : true;
 
   const applyRouteParams = useCallback(() => {
     consumeProfileIntent();
@@ -84,110 +95,6 @@ const Profile: React.FC = () => {
     persistUserName(profileUserData.name);
   }, [profileUserData.name]);
 
-  const scrollToSettings = useCallback(() => {
-    setScrollIntoView(undefined);
-    setTimeout(() => setScrollIntoView("profile-settings"), 0);
-  }, []);
-
-  const handlePostAction = useCallback((action: string, item: ProfilePostItem) => {
-    void Taro.showToast({ title: `${action}: ${item.title}`, icon: "none" });
-  }, []);
-
-  const handleSelectPost = useCallback((item: ProfilePostItem) => {
-    const activityLegacyId = item.activityLegacyId;
-    if (activityLegacyId == null || Number.isNaN(activityLegacyId)) {
-      void Taro.showToast({ title: "无法打开该帖子所属活动", icon: "none" });
-      return;
-    }
-    goEventDetail(activityLegacyId, { postId: item.id });
-  }, []);
-
-  const handleCompletePost = useCallback(
-    async (item: ProfilePostItem) => {
-      if (!apiEnabled) {
-        handlePostAction("标记已组队", item);
-        return;
-      }
-      const ok = await confirm({
-        title: "标记已组队",
-        message: "确认将该帖子标记为已组队？",
-        confirmText: "标记已组队",
-      });
-      if (!ok) return;
-      void updatePostAndInvalidate(item.id, { status: "completed" })
-        .then(() => void Taro.showToast({ title: "已更新", icon: "success" }))
-        .catch(() => void Taro.showToast({ title: "更新失败", icon: "none" }));
-    },
-    [apiEnabled, confirm, handlePostAction],
-  );
-
-  const handleEditPost = useCallback((item: ProfilePostItem) => {
-    if (editingPostId === item.id) {
-      setEditingPostId(null);
-      setEditDraft(null);
-      return;
-    }
-    setEditingPostId(item.id);
-    setEditDraft({
-      body: item.content,
-      status: item.status === "已组队" ? "已组队" : "招募中",
-    });
-  }, [editingPostId]);
-
-  const handleCancelPostEdit = useCallback(() => {
-    setEditingPostId(null);
-    setEditDraft(null);
-  }, []);
-
-  const handleSavePostEdit = useCallback(
-    (item: ProfilePostItem) => {
-      if (!editDraft) return;
-      const body = editDraft.body.trim();
-      if (!body) {
-        void Taro.showToast({ title: "帖子内容不能为空", icon: "none" });
-        return;
-      }
-      if (!apiEnabled) {
-        handlePostAction("保存修改", item);
-        handleCancelPostEdit();
-        return;
-      }
-      const status =
-        editDraft.status === "已组队" ? "completed" : ("recruiting" as const);
-      void updatePostAndInvalidate(item.id, { body, status })
-        .then(() => {
-          handleCancelPostEdit();
-          void Taro.showToast({ title: "已保存", icon: "success" });
-        })
-        .catch(() => void Taro.showToast({ title: "保存失败", icon: "none" }));
-    },
-    [apiEnabled, editDraft, handleCancelPostEdit, handlePostAction],
-  );
-
-  const handleDeletePost = useCallback(
-    async (item: ProfilePostItem) => {
-      const ok = await confirm({
-        title: "删除",
-        message: "删除后无法恢复，确定要删除这条帖子吗？",
-        confirmText: "删除",
-      });
-      if (!ok) return;
-      if (!apiEnabled) {
-        handlePostAction("删除", item);
-        return;
-      }
-      void deletePostAndInvalidate(item.id)
-        .then(() => {
-          void Taro.showToast({ title: "已删除", icon: "success" });
-        })
-        .catch(() => {
-          void postsQuery.refetch();
-          void Taro.showToast({ title: "删除失败", icon: "none" });
-        });
-    },
-    [apiEnabled, confirm, handlePostAction, postsQuery],
-  );
-
   const openSettings = useCallback(
     (section: "notifications" | "privacy" | "help") => {
       go(`${ROUTES.SETTINGS}?section=${section}`);
@@ -205,7 +112,11 @@ const Profile: React.FC = () => {
     void Taro.showToast({ title: "已退出登录", icon: "success" });
   }, [confirm]);
 
-  const profileSubtext = `${profileUserData.handle} · ${profileUserData.location} · ${profileUserData.bio}`;
+  const metaParts = [
+    profileUserData.handle,
+    profileUserData.location,
+    profileUserData.bio,
+  ].filter(Boolean);
 
   return (
     <View data-cmp="Profile" className="s-profile s-page-with-tabbar">
@@ -213,105 +124,147 @@ const Profile: React.FC = () => {
         scrollY
         enhanced
         showScrollbar={false}
-        scrollIntoView={scrollIntoView}
         className="s-page-with-tabbar__scroll s-profile__main s-scrollbar-none">
-        <View className="s-profile__header">
-          <Button className="s-profile__settings-btn"
-            aria-label="设置"
-            onClick={scrollToSettings}>
-            <Settings size={20} />
-          </Button>
-        </View>
+        <View
+          className="s-profile__scroll-inner"
+          style={
+            navInsets.paddingTop > 0
+              ? { paddingTop: `${navInsets.paddingTop}px` }
+              : undefined
+          }>
+          {profileLoading ? (
+            <View className="s-profile__card s-profile__card--loading">
+              <ThemedPageLoader variant="inline" label="加载个人资料…" minHeight={148} />
+            </View>
+          ) : (
+            <View className="s-profile__card">
+              <View className="s-profile__card-top">
+                <View className="s-profile__avatar-wrap">
+                  <Image
+                    className="s-profile__avatar"
+                    src={
+                      sanitizeRemoteImageUrl(profileUserData.avatar) ?? profileUserData.avatar
+                    }
+                    alt={profileUserData.name}
+                  />
+                  <View className="s-profile__online-dot" aria-label="在线" />
+                </View>
 
-        <View className="s-profile__card">
-          <View className="s-profile__card-top">
-            <View className="s-profile__avatar-wrap">
-              <Image
-                className="s-profile__avatar"
-                src={sanitizeRemoteImageUrl(profileUserData.avatar) ?? profileUserData.avatar}
-                alt={profileUserData.name}
-              />
-            </View>
+                <View className="s-profile__info">
+                  <Text className="s-profile__name">{profileUserData.name}</Text>
+                  {metaParts.length > 0 ? (
+                    <Text className="s-profile__meta-line">{metaParts.join(" · ")}</Text>
+                  ) : null}
+                  {interestTag || verified ? (
+                    <View className="s-profile__tags">
+                      {interestTag ? (
+                        <View className="s-profile__tag s-profile__tag--primary">
+                          <Music2 size={12} />
+                          <Text>{interestTag}</Text>
+                        </View>
+                      ) : null}
+                      {verified ? (
+                        <View className="s-profile__tag s-profile__tag--verified">
+                          <Check size={12} strokeWidth={3} />
+                          <Text>已认证</Text>
+                        </View>
+                      ) : null}
+                    </View>
+                  ) : null}
+                </View>
+              </View>
 
-            <View className="s-profile__info">
-              <Text className="s-profile__name">{profileUserData.name}</Text>
-              <Text className="s-profile__subtext">{profileSubtext}</Text>
+              <View className="s-profile__stats" aria-label="个人数据">
+                <View className="s-profile__stat">
+                  <Text className="s-profile__stat-value">{profileUserData.stats.events}</Text>
+                  <Text className="s-profile__stat-label">参加活动</Text>
+                </View>
+                <View className="s-profile__stat s-profile__stat--accent">
+                  <Text className="s-profile__stat-value">
+                    {profileUserData.stats.matchSuccess}
+                  </Text>
+                  <Text className="s-profile__stat-label">组队成功</Text>
+                </View>
+                <View className="s-profile__stat">
+                  <Text className="s-profile__stat-value">{profileUserData.stats.likes}</Text>
+                  <Text className="s-profile__stat-label">获赞数</Text>
+                </View>
+                <View className="s-profile__stat">
+                  <Text className="s-profile__stat-value">{profileUserData.stats.posts}</Text>
+                  <Text className="s-profile__stat-label">我的帖子</Text>
+                </View>
+              </View>
             </View>
-          </View>
+          )}
 
-          <View className="s-profile__stats">
-            <View className="s-profile__stat">
-              <Text className="s-profile__stat-value">{profileUserData.stats.events}</Text>
-              <Text className="s-profile__stat-label">参加活动</Text>
-            </View>
-            <View className="s-profile__stat">
-              <Text className="s-profile__stat-value">{profileUserData.stats.matchSuccess}</Text>
-              <Text className="s-profile__stat-label">组队成功</Text>
-            </View>
-            <View className="s-profile__stat">
-              <Text className="s-profile__stat-value">{profileUserData.stats.likes}</Text>
-              <Text className="s-profile__stat-label">获赞数</Text>
-            </View>
-            <View className="s-profile__stat">
-              <Text className="s-profile__stat-value">{profileUserData.stats.posts}</Text>
-              <Text className="s-profile__stat-label">我的帖子</Text>
-            </View>
-          </View>
-        </View>
-
-        <View className="s-profile__sections">
-          <ProfileActivitiesSection items={activities} />
-          <ProfilePostsSection
-            items={posts}
-            editingPostId={editingPostId}
-            editDraft={editDraft}
-            onSelect={handleSelectPost}
-            onComplete={handleCompletePost}
-            onEdit={handleEditPost}
-            onDelete={handleDeletePost}
-            onEditDraftChange={setEditDraft}
-            onSaveEdit={handleSavePostEdit}
-            onCancelEdit={handleCancelPostEdit}
+          <ProfileActionCard
+            accent="activities"
+            icon={<Zap size={20} />}
+            title="我的活动"
+            badge={ongoingCount}
+            subtitle={`${ongoingCount} 个进行中的活动`}
+            onClick={() => go(ROUTES.PROFILE_ACTIVITIES)}
           />
-        </View>
+          <ProfileActionCard
+            accent="posts"
+            icon={<FileText size={20} />}
+            title="我的帖子"
+            badge={postsCount}
+            subtitle={`${postsCount} 篇发布的帖子`}
+            onClick={() => go(ROUTES.PROFILE_POSTS)}
+          />
 
-        <View id="profile-settings" className="s-profile__settings-section s-tabbar-offset">
           <View className="s-profile__settings-card">
-            <Button className="s-profile__settings-row" onClick={() => openSettings("notifications")}>
-              <Text className="s-profile__settings-icon s-profile__settings-icon--bell">
+            <View
+              className="s-profile__settings-row"
+              hoverClass="s-profile__settings-row--pressed"
+              onClick={() => openSettings("notifications")}>
+              <View className="s-profile__settings-icon s-profile__settings-icon--bell">
                 <Bell size={18} />
-              </Text>
+              </View>
               <Text className="s-profile__settings-label">通知设置</Text>
               <Text className="s-profile__settings-value">
                 {notificationsEnabled ? "已开启" : "已关闭"}
               </Text>
               <ChevronRight size={18} className="s-profile__settings-chevron" />
-            </Button>
+            </View>
 
-            <Button className="s-profile__settings-row" onClick={() => openSettings("privacy")}>
-              <Text className="s-profile__settings-icon s-profile__settings-icon--shield">
+            <View
+              className="s-profile__settings-row"
+              hoverClass="s-profile__settings-row--pressed"
+              onClick={() => openSettings("privacy")}>
+              <View className="s-profile__settings-icon s-profile__settings-icon--shield">
                 <Shield size={18} />
-              </Text>
+              </View>
               <Text className="s-profile__settings-label">隐私与安全</Text>
               <ChevronRight size={18} className="s-profile__settings-chevron" />
-            </Button>
+            </View>
 
-            <Button className="s-profile__settings-row" onClick={() => openSettings("help")}>
-              <Text className="s-profile__settings-icon s-profile__settings-icon--help">
+            <View
+              className="s-profile__settings-row"
+              hoverClass="s-profile__settings-row--pressed"
+              onClick={() => openSettings("help")}>
+              <View className="s-profile__settings-icon s-profile__settings-icon--help">
                 <Info size={18} />
-              </Text>
+              </View>
               <Text className="s-profile__settings-label">帮助与反馈</Text>
               <ChevronRight size={18} className="s-profile__settings-chevron" />
-            </Button>
+            </View>
 
-            <Button className="s-profile__settings-row s-profile__settings-row--logout"
+            <View
+              className="s-profile__settings-row s-profile__settings-row--logout"
+              hoverClass="s-profile__settings-row--pressed"
               onClick={handleLogout}>
-              <Text className="s-profile__settings-icon s-profile__settings-icon--logout">
+              <View className="s-profile__settings-icon s-profile__settings-icon--logout">
                 <LogOut size={18} />
+              </View>
+              <Text className="s-profile__settings-label s-profile__settings-label--logout">
+                退出登录
               </Text>
-              <Text className="s-profile__settings-label">退出登录</Text>
-            </Button>
+            </View>
           </View>
+
+          <View className="s-profile__scroll-spacer s-tabbar-offset" />
         </View>
       </ScrollView>
 

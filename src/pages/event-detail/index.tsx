@@ -2,7 +2,14 @@ import "./event-detail.scss";
 import Taro, { useRouter } from "@tarojs/taro";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ChevronLeft, Map, Send, Sparkles } from "lucide-react-taro";
-import { endRouteTransition, go, goAiAssistant, ROUTES } from "../../utils/route";
+import {
+  endRouteTransition,
+  go,
+  goAiAssistant,
+  goEventMap,
+  resolveEventDetailIdFromQuery,
+  ROUTES,
+} from "../../utils/route";
 import { BottomNavSlot } from "../../components/BottomNav";
 import ThemedPageLoader from "../../components/ThemedPageLoader";
 import { useConfirmDialog } from "../../hooks/useConfirmDialog";
@@ -34,26 +41,32 @@ import { formatPostPublishTime } from "../../utils/formatPostPublishTime";
 import { sanitizeImageList, sanitizeRemoteImageUrl } from "../../utils/imageUrl";
 import { EventPostsVirtualList } from "./components/EventPostsVirtualList";
 import { useNavBarInsets } from "../../hooks/useNavBarInsets";
+import { useTabPageMainHeight } from "../../hooks/useTabPageMainHeight";
+import { scrollElementToCenter } from "../../utils/scrollToCenter";
 import { Button, Input, ScrollView, Text, View } from "@tarojs/components";
+
+const EVENT_DETAIL_SCROLL_ID = "event-detail-scroll";
+
+/** Title/meta row + vertical padding (px @ 375), excluding status-bar inset. */
+const EVENT_DETAIL_HEADER_CHROME_PX = 72;
+/** Baseline top padding in event-detail.scss before status-bar inset. */
+const EVENT_DETAIL_HEADER_TOP_PX = 12;
 
 const EventDetailPage = () => {
   const router = useRouter();
   const navInsets = useNavBarInsets();
-  const [scrollIntoView, setScrollIntoView] = useState<string | undefined>();
+  const headerChromePx =
+    EVENT_DETAIL_HEADER_CHROME_PX - EVENT_DETAIL_HEADER_TOP_PX + navInsets.paddingTop;
+  const scrollHeight = useTabPageMainHeight(headerChromePx);
+  const [scrollTop, setScrollTop] = useState<number | undefined>();
   const activeActivityLegacyId = useNavigationStore((state) => state.activeActivityLegacyId);
   const feedReady = useDeferredMount(DEFER_EVENT_POSTS_MS);
   const composerReady = useDeferredMount(0);
 
-  const eventId = useMemo(() => {
-    const fromParams = Number(router.params.id);
-    if (Number.isFinite(fromParams) && fromParams> 0) {
-      return fromParams;
-    }
-    if (activeActivityLegacyId != null && activeActivityLegacyId> 0) {
-      return activeActivityLegacyId;
-    }
-    return NaN;
-  }, [activeActivityLegacyId, router.params.id]);
+  const eventId = useMemo(
+    () => resolveEventDetailIdFromQuery(router.params, activeActivityLegacyId),
+    [activeActivityLegacyId, router.params.activityLegacyId, router.params.id],
+  );
   const highlightPostId = router.params.postId?.trim() || "";
 
   useEffect(() => {
@@ -72,7 +85,7 @@ const EventDetailPage = () => {
     cancelText: "取消",
   });
   const [prompt, setPrompt] = useState("");
-  const [shortcutTags, setShortcutTags] = useState(() => getTopAiShortcutTags());
+  const [shortcutTags, setShortcutTags] = useState(() => getTopAiShortcutTags(3));
   const [appliedPostIds, setAppliedPostIds] = useState<Set<string>>(() => new Set());
   const [expandedCommentPostIds, setExpandedCommentPostIds] = useState<Set<string>>(
     () => new Set(),
@@ -144,8 +157,23 @@ const EventDetailPage = () => {
   );
 
   const scrollToElement = useCallback((elementId: string) => {
-    setScrollIntoView(undefined);
-    setTimeout(() => setScrollIntoView(elementId), 0);
+    const targetSelector = `#${elementId}`;
+    void scrollElementToCenter(
+      `#${EVENT_DETAIL_SCROLL_ID}`,
+      targetSelector,
+      setScrollTop,
+    ).then((centered) => {
+      if (!centered) {
+        setScrollTop(undefined);
+        setTimeout(() => {
+          void scrollElementToCenter(
+            `#${EVENT_DETAIL_SCROLL_ID}`,
+            targetSelector,
+            setScrollTop,
+          );
+        }, 150);
+      }
+    });
   }, []);
 
   const togglePostComments = useCallback((postId: string) => {
@@ -213,7 +241,7 @@ const EventDetailPage = () => {
 
   const bumpShortcutTagUsage = useCallback((tag: string) => {
     recordAiShortcutTagUse(tag);
-    setShortcutTags(getTopAiShortcutTags());
+    setShortcutTags(getTopAiShortcutTags(3));
   }, []);
 
   const openAi = useCallback(
@@ -255,7 +283,7 @@ const EventDetailPage = () => {
           <Text>活动信息加载失败</Text>
           <Button className="s-event-detail__retry"
             onClick={() => void activityQuery.refetch()}>
-            重试
+            <Text className="s-btn-label">重试</Text>
           </Button>
         </View>
         <BottomNavSlot />
@@ -292,13 +320,7 @@ const EventDetailPage = () => {
       {showHeaderSkeleton ? (
         <ThemedPageLoader variant="skeleton-event" overlay />
       ) : null}
-      <ScrollView
-        scrollY
-        enhanced
-        showScrollbar={false}
-        scrollIntoView={scrollIntoView}
-        className="s-page-with-tabbar__scroll s-event-detail__main s-scrollbar-none">
-        <View className="s-event-detail__scroll-inner s-tabbar-offset">
+      <View className="s-page-with-tabbar__main s-event-detail__shell">
         <View className="s-event-detail__header" style={headerStyle}>
           <Button className="s-event-detail__back"
             aria-label="返回"
@@ -311,16 +333,42 @@ const EventDetailPage = () => {
             </View>
             {metaLine ? <Text className="s-event-detail__meta">{metaLine}</Text> : null}
           </View>
-          <Button className="s-event-detail__map-btn" aria-label="地图">
-            <Map size={18} />
+          <Button
+            className="s-event-detail__map-btn"
+            aria-label="地图"
+            onClick={() => {
+              if (Number.isFinite(eventId) && eventId > 0) {
+                goEventMap(eventId, { title: title ?? undefined });
+              } else {
+                goEventMap(0, { title: title ?? undefined });
+              }
+            }}>
+            <Map size={26} />
           </Button>
         </View>
 
+        <ScrollView
+          id={EVENT_DETAIL_SCROLL_ID}
+          scrollY
+          enhanced
+          showScrollbar={false}
+          scrollTop={scrollTop}
+          scrollWithAnimation
+          className="s-event-detail__main s-scrollbar-none"
+          style={scrollHeight != null ? { height: `${scrollHeight}px` } : undefined}>
+        <View className="s-event-detail__scroll-inner">
         {composerReady ? (
         <View className="s-event-detail__ai">
           <View className="s-event-detail__ai-head">
-            <Sparkles size={14} />
-            <Text>告诉我你的需求 ai精准匹配</Text>
+            <View className="s-event-detail__ai-head-icon-wrap" aria-hidden>
+              <Sparkles size={16} className="s-event-detail__ai-head-icon" />
+            </View>
+            <View className="s-event-detail__ai-head-text">
+              <Text className="s-event-detail__ai-kicker">AI 智能匹配</Text>
+              <Text className="s-event-detail__ai-head-title">
+                {title ? `为「${title}」找队友` : "告诉我你的需求，AI 精准匹配"}
+              </Text>
+            </View>
           </View>
           {shortcutTags.length> 0 ? (
             <View className="s-event-detail__ai-tags">
@@ -328,7 +376,7 @@ const EventDetailPage = () => {
                 <Button
                   key={tag} className="s-event-detail__ai-tag"
                   onClick={() => handleShortcutTag(tag)}>
-                  {tag}
+                  <Text className="s-btn-label">{tag}</Text>
                 </Button>
               ))}
             </View>
@@ -337,18 +385,32 @@ const EventDetailPage = () => {
             <Input
               className="s-event-detail__ai-input__field"
               value={prompt}
-              placeholder="告诉我你的需求..."
+              placeholder={
+                title
+                  ? `例如：想在「${title}」找住宿同行…`
+                  : "描述你想找的队友或同行方式…"
+              }
               onInput={(e) => setPrompt(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && prompt.trim()) openAi(prompt);
               }}
             />
-            <Button className="s-event-detail__ai-send"
-              aria-label="发送"
+            <Button
+              className={[
+                "s-event-detail__ai-send",
+                !prompt.trim() && "s-event-detail__ai-send--disabled",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+              aria-label="开始 AI 对话"
+              disabled={!prompt.trim()}
               onClick={() => openAi(prompt)}>
-              <Send size={20} />
+              <Send size={18} />
             </Button>
           </View>
+          <Text className="s-event-detail__ai-footnote">
+            发送后将进入本场活动的 AI 对话
+          </Text>
         </View>
         ) : null}
 
@@ -380,7 +442,8 @@ const EventDetailPage = () => {
           <Text className="s-event-detail__end">已经到底啦 ~</Text>
         ) : null}
         </View>
-      </ScrollView>
+        </ScrollView>
+      </View>
       {confirmDialog}
       <BottomNavSlot />
     </View>

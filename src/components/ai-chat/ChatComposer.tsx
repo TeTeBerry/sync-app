@@ -1,7 +1,8 @@
 import React, { useCallback, useMemo, useState } from "react";
 import Taro from "@tarojs/taro";
-import { ImagePlus, Send, X } from "lucide-react-taro";
+import { ImagePlus, Send, Trash2, X } from "lucide-react-taro";
 import { Button, Input, cn } from "../ui";
+import { HOME_FESTIVAL_SHORTCUT_CHIPS } from "../../constants/homeFestivalShortcuts";
 import {
   getTopAiShortcutTags,
   normalizeAiShortcutTag,
@@ -14,20 +15,13 @@ import {
 } from "../../utils/chatImage";
 import { useAiChatStore } from "../../stores/aiChatStore";
 import { openImagePreview } from "../../utils/openImagePreview";
-import { Image, ScrollView, View } from "@tarojs/components";
+import { Image, ScrollView, Text, View } from "@tarojs/components";
 
 const SHORTCUT_TAG_LABELS: Record<AiShortcutTag, string> = {
   组队队友: "组队队友",
   住宿同行: "住宿同行",
   拼车同行: "拼车同行",
 };
-
-const globalQuickChips = [
-  { key: "findBuddy", label: "帮我dd", submitText: "帮我dd" },
-  { key: "nearEvents", label: "查最近活动", submitText: "查最近活动" },
-  { key: "findPartner", label: "帮我找搭子", submitText: "帮我找搭子" },
-  { key: "popularEvents", label: "热门活动", submitText: "查最近活动" },
-] as const;
 
 const activityActionChips = [
   { key: "createOwn", label: "自己发帖", submitText: "自己发帖" },
@@ -55,27 +49,44 @@ export function ChatComposer({
   pendingImages,
   isStreaming,
   activityLegacyId,
+  activityTitle,
   onInputChange,
   onSubmit,
   onPendingImagesChange,
+  onClearChat,
+  clearDisabled = false,
   isLoadingHistory = false,
 }: {
   input: string;
   pendingImages: string[];
   isStreaming: boolean;
   activityLegacyId?: number;
+  activityTitle?: string;
   onInputChange: (value: string) => void;
   onSubmit: (text: string, images?: string[]) => void;
   onPendingImagesChange: (images: string[]) => void;
+  onClearChat?: () => void | Promise<void>;
+  clearDisabled?: boolean;
   isLoadingHistory?: boolean;
 }) {
   const [shortcutTags, setShortcutTags] = useState(() => getTopAiShortcutTags());
   const conversationFlow = useAiChatStore((state) => state.conversationState?.flow);
 
-  const inputPlaceholder =
-    conversationFlow === "collect_post_body"
-      ? "描述你的组队需求，如出发地、人数、日期…"
-      : "说说你想去哪、想找什么样的同行…";
+  const scopedToActivity =
+    activityLegacyId != null && !Number.isNaN(activityLegacyId);
+  const trimmedActivityTitle = activityTitle?.trim();
+
+  const inputPlaceholder = (() => {
+    if (conversationFlow === "collect_post_body") {
+      return scopedToActivity && trimmedActivityTitle
+        ? `描述你在「${trimmedActivityTitle}」的组队需求…`
+        : "描述你的组队需求，如出发地、人数、日期…";
+    }
+    if (scopedToActivity && trimmedActivityTitle) {
+      return `为「${trimmedActivityTitle}」找队友或发帖…`;
+    }
+    return "说说你想去哪、想找什么样的同行…";
+  })();
 
   const quickChips = useMemo((): QuickChip[] => {
     if (activityLegacyId != null && !Number.isNaN(activityLegacyId)) {
@@ -98,14 +109,15 @@ export function ChatComposer({
       return [actionChips[0], ...tagChips, ...actionChips.slice(1)];
     }
 
-    return globalQuickChips.map((chip) => ({
+    return HOME_FESTIVAL_SHORTCUT_CHIPS.map((chip) => ({
       key: chip.key,
       label: chip.label,
       submitText: chip.submitText,
     }));
   }, [activityLegacyId, shortcutTags]);
 
-  const isBusy = isStreaming || isLoadingHistory;
+  const isBusy = isStreaming;
+  const isComposerDisabled = isStreaming || isLoadingHistory;
 
   const handlePickImages = useCallback(async () => {
     if (isBusy) return;
@@ -143,16 +155,18 @@ export function ChatComposer({
 
   const handleQuickChipClick = useCallback(
     (chip: QuickChip) => {
+      if (isBusy) return;
       if (chip.isShortcutTag) {
         recordAiShortcutTagUse(chip.submitText);
         setShortcutTags(getTopAiShortcutTags());
       }
       onSubmit(chip.submitText, pendingImages);
     },
-    [onSubmit, pendingImages],
+    [isBusy, onSubmit, pendingImages],
   );
 
-  const canSend = Boolean(input.trim() || pendingImages.length) && !isBusy;
+  const canSend =
+    Boolean(input.trim() || pendingImages.length) && !isComposerDisabled;
 
   return (
     <>
@@ -168,7 +182,7 @@ export function ChatComposer({
               className="s-ai-assistant-chat__quick-chip"
               disabled={isBusy}
               onClick={() => handleQuickChipClick(chip)}>
-              {chip.label}
+              <Text className="s-btn-label">{chip.label}</Text>
             </Button>
           ))}
         </View>
@@ -200,7 +214,7 @@ export function ChatComposer({
         ) : null}
         <View className="s-ai-assistant-chat__composer-inner">
           <Button className="s-ai-assistant-chat__attach-btn"
-            disabled={isBusy || pendingImages.length>= MAX_IMAGES}
+            disabled={isComposerDisabled || pendingImages.length>= MAX_IMAGES}
             aria-label="上传图片"
             onClick={() => void handlePickImages()}>
             <ImagePlus size={18} />
@@ -209,11 +223,18 @@ export function ChatComposer({
             variant="ai-assistant-chat"
             type="text"
             value={input}
-            disabled={isBusy}
+            disabled={isComposerDisabled}
             placeholder={inputPlaceholder}
             onInput={(e) => onInputChange(readComposerInputValue(e))}
             onConfirm={() => onSubmit(input, pendingImages)}
           />
+          <Button
+            className="s-ai-assistant-chat__clear-btn"
+            disabled={clearDisabled}
+            aria-label="清空对话"
+            onClick={() => void onClearChat?.()}>
+            <Trash2 size={16} color="#ef4444" />
+          </Button>
           <Button
             className={cn(
               "s-ai-assistant-chat__send",

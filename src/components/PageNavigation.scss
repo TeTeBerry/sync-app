@@ -32,8 +32,8 @@
   flex: 1;
   min-width: 0;
   text-align: center;
-  font-size: 18px;
-  font-weight: 700;
+  font-size: var(--s-type-title);
+  font-weight: var(--s-fw-bold);
   color: #fff;
   margin: 0 8px;
 }

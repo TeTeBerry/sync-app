@@ -1,6 +1,7 @@
 @use "./styles/globals.scss";
 @use "./styles/pages-shared.scss";
 @use "./styles/activity-status.scss";
+@use "./styles/button" as btn;
 
 page {
   font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Source Han Sans SC", "Helvetica Neue", "Roboto", sans-serif;
@@ -33,14 +34,19 @@ button[type="default"]:not([class*="s-"])::after {
 button[class*="s-"],
 button[type="default"][class*="s-"] {
   margin: 0;
-  box-sizing: border-box;
-  line-height: inherit;
+  @include btn.button-label-center;
 }
 
 button[class*="s-"]::after,
 button[type="default"][class*="s-"]::after {
   border: none !important;
   display: none !important;
+}
+
+button[class*="s-"] .s-btn-label,
+button[class*="s-"] [class$="-text"],
+button[class*="s-"] [class*="__text"] {
+  @include btn.button-label-text;
 }
 
 .s-app-shell {

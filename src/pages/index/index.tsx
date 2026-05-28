@@ -21,7 +21,7 @@ import { HomeCountdownCard } from "./components/HomeCountdownCard";
 import { HomeFeaturedEvents } from "./components/HomeFeaturedEvents";
 import { HomePlazaHero } from "./components/HomePlazaHero";
 import { type ActivityPost } from "./homeData";
-import { type FeaturedEvent } from "../../utils/apiMappers";
+import { resolveFeaturedEventLegacyId, type FeaturedEvent } from "../../utils/apiMappers";
 import { useNavBarInsets } from "../../hooks/useNavBarInsets";
 import { ScrollView, View } from "@tarojs/components";
 
@@ -47,7 +47,7 @@ const Home = () => {
       goAiAssistant({ initialMessage: message.trim() });
       return;
     }
-    go(ROUTES.AI_ASSISTANT);
+    goAiAssistant();
   }, []);
 
   useEffect(() => {
@@ -63,7 +63,11 @@ const Home = () => {
   }, []);
 
   const openEventDetail = useCallback((event: FeaturedEvent) => {
-    goEventDetail(event.id);
+    const legacyId = resolveFeaturedEventLegacyId(event);
+    if (legacyId == null) {
+      return;
+    }
+    goEventDetail(legacyId);
   }, []);
 
   const handleDeletePost = useCallback(

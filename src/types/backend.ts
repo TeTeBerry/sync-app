@@ -15,6 +15,8 @@ export interface BackendActivity {
   image?: string;
   hot?: boolean;
   attendees?: number;
+  damaiProjectId?: string;
+  externalUrl?: string;
 }
 
 export type PrivacyLevel = "public" | "friends" | "private";
@@ -164,7 +166,12 @@ export interface EventDetailPost {
   images?: string[];
 }
 
-export type PostContentType = "team" | "accommodation" | "carpool" | "other";
+export type PostContentType =
+  | "team"
+  | "accommodation"
+  | "carpool"
+  | "ticket"
+  | "other";
 
 export interface CreatePostPayload {
   body: string;

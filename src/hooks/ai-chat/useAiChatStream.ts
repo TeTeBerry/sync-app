@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Taro from "@tarojs/taro";
-import { AI_CHAT_STREAM_URL } from "../../constants/api";
+import { AI_CHAT_WS_URL } from "../../constants/api";
 import { useAiChatStore } from "../../stores/aiChatStore";
 import type { AiChatStreamEvent, ChatUiMessage, SendChatOptions } from "../../types/aiChat";
 import {
@@ -8,18 +8,21 @@ import {
   getClientUserName,
   getClientUserPhone,
 } from "../../utils/session";
+import { formatAiChatToastError } from "../../utils/aiChatErrors";
 import { createMessageId } from "./createMessageId";
 import { useChatSession } from "./useChatSession";
-import { useSseChatStream } from "./useSseChatStream";
+import { useWsChatStream } from "./useWsChatStream";
 import { useTypewriterReply } from "./useTypewriterReply";
 
 export interface UseAiChatStreamOptions {
   welcomeText: string;
   /** 打字机每字间隔（毫秒） */
   typewriterCharDelayMs?: number;
-  /** Used when `TARO_APP_AI_CHAT_URL` is unset */
+  /** Used when WebSocket URL is unset */
   mockReply: (query: string) => string;
   streamErrorText: string;
+  wsUrl?: string;
+  /** @deprecated Use `wsUrl` */
   apiUrl?: string;
   sessionId?: string;
   userId?: string;
@@ -40,7 +43,8 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
     welcomeText,
     mockReply,
     streamErrorText,
-    apiUrl = AI_CHAT_STREAM_URL,
+    wsUrl: wsUrlOption,
+    apiUrl: apiUrlDeprecated,
     sessionId: sessionIdOption,
     userId: userIdOption,
     userName: userNameOption,
@@ -70,9 +74,9 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
     userPhoneRef,
     setIsStreamingRef,
     isStreamingRef,
+    cancelHistoryLoad,
   } = useChatSession({
     welcomeText,
-    apiUrl,
     sessionId: sessionIdOption,
     activityLegacyId,
     userId: userIdOption ?? getClientUserId(),
@@ -80,12 +84,14 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
     userPhone: userPhoneOption ?? getClientUserPhone(),
   });
 
+  const wsUrl = wsUrlOption ?? apiUrlDeprecated ?? AI_CHAT_WS_URL;
+
   const { createTypewriter } = useTypewriterReply();
-  const { runStream } = useSseChatStream({
+  const { runStream } = useWsChatStream({
     welcomeText,
     mockReply,
     streamErrorText,
-    apiUrl,
+    wsUrl,
     activityLegacyIdRef,
     sessionIdRef,
     userIdRef,
@@ -117,18 +123,14 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
     abortRef.current?.abort();
   }, []);
 
-  const send = useCallback(
-    async (payload: string | SendChatOptions) => {
-      const sendOptions = typeof payload === "string" ? { text: payload } : payload;
+  const executeSend = useCallback(
+    async (sendOptions: SendChatOptions) => {
       const { text, image, images } = sendOptions;
       const trimmed = text.trim();
       const hasImages = Boolean(image) || (images && images.length > 0);
       if (!trimmed && !hasImages) return;
 
-      if (isStreamingRef.current) {
-        void Taro.showToast({ title: "请等待上一条回复", icon: "none" });
-        return;
-      }
+      cancelHistoryLoad();
 
       const userMsg: ChatUiMessage = {
         id: createMessageId(),
@@ -158,7 +160,7 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
           return;
         }
         void Taro.showToast({
-          title: streamErrorText,
+          title: formatAiChatToastError(error, streamErrorText),
           icon: "none",
         });
       } finally {
@@ -166,7 +168,28 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
         abortRef.current = null;
       }
     },
-    [isStreamingRef, messagesRef, runStream, setMessages, streamErrorText],
+    [cancelHistoryLoad, messagesRef, runStream, setMessages, streamErrorText],
+  );
+
+  const send = useCallback(
+    async (payload: string | SendChatOptions) => {
+      const sendOptions = typeof payload === "string" ? { text: payload } : payload;
+      const { text, image, images } = sendOptions;
+      const trimmed = text.trim();
+      const hasImages = Boolean(image) || (images && images.length > 0);
+      if (!trimmed && !hasImages) return;
+
+      if (isStreamingRef.current) {
+        void Taro.showToast({ title: "请等待上一条回复", icon: "none" });
+        return;
+      }
+
+      // Cancel in-flight session hydrate so chip/send is never stuck behind
+      // isLoadingHistoryRef vs isLoadingHistory state desync.
+      cancelHistoryLoad();
+      await executeSend(sendOptions);
+    },
+    [cancelHistoryLoad, executeSend, isStreamingRef],
   );
 
   const clearChat = useCallback(async () => {

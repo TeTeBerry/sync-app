@@ -39,20 +39,21 @@ export const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
   }, [resolvedSrc]);
 
   const showImage = Boolean(resolvedSrc) && !broken;
-  const imgLoading = priority ? "eager" : "lazy";
-  const imgDecoding = priority ? "sync" : "async";
-  const imgFetchPriority = priority ? ("high" as const) : undefined;
+  const isH5 = process.env.TARO_ENV === "h5";
+  const imgLoading = isH5 && priority ? "eager" : undefined;
+  const imgDecoding = isH5 && priority ? "sync" : undefined;
+  const imgFetchPriority = isH5 && priority ? ("high" as const) : undefined;
 
   const renderImg = (className?: string) => (
     <Image
-      src={resolvedSrc}
+      src={resolvedSrc!}
       alt={alt}
       mode={mode}
       className={className}
       referrerPolicy={referrerPolicy}
       lazyLoad={!priority}
-      loading={imgLoading}
-      decoding={imgDecoding}
+      {...(imgLoading ? { loading: imgLoading } : {})}
+      {...(imgDecoding ? { decoding: imgDecoding } : {})}
       {...(imgFetchPriority ? { fetchPriority: imgFetchPriority } : {})}
       onError={() => setBroken(true)}
     />

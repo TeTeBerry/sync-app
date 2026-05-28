@@ -1,12 +1,15 @@
 import "./AiAssistantPage.scss";
-import React, { type FC, useCallback, useEffect, useState } from "react";
+import React, { type FC, useCallback, useEffect, useMemo, useState } from "react";
 import { BottomNavSlot } from "./BottomNav";
-import { ChevronLeft, Sparkles, Trash2, Zap,  } from "lucide-react-taro";
+import { CalendarDays, ChevronLeft, Sparkles, Zap } from "lucide-react-taro";
 import Taro, { useDidShow } from "@tarojs/taro";
 import { invalidateCache } from "../hooks/useApiQuery";
 import { useAiChatStream } from "../hooks/useAiChatStream";
 import { useResolvedProfile } from "../hooks/useResolvedProfile";
-import { invalidatePostQueries } from "../hooks/useSyncApi";
+import {
+  invalidatePostQueries,
+  useActivityDetailQuery,
+} from "../hooks/useSyncApi";
 import { useNavigationStore } from "../stores";
 import { goBack, goEventDetail, ROUTES } from "../utils/route";
 import { ChatMessageList } from "./ai-chat/ChatMessageList";
@@ -14,18 +17,23 @@ import { ChatComposer } from "./ai-chat/ChatComposer";
 import { DegradedMatchBanner } from "./ai-chat/DegradedMatchBanner";
 import { useDeferredMount } from "../hooks/useDeferredMount";
 import { DEFER_AI_CHAT_MS } from "../utils/timing";
+import { useNavBarInsets } from "../hooks/useNavBarInsets";
 import { usePageRouteReady } from "../hooks/usePageRouteReady";
 import { useTabPageMainHeight } from "../hooks/useTabPageMainHeight";
+import { resolveAiChatWsUrl } from "../constants/api";
+import { isAiChatWsDevLog } from "../utils/aiChatWs";
 import { Button, Text, View } from "@tarojs/components";
 
-/** Header row below status bar (px, matches AiAssistantPage.scss). */
-const AI_HEADER_PX = 100;
+/** Header content row (avatar + titles), excluding status bar. */
+const AI_HEADER_CONTENT_PX = 56;
+/** Event context strip below header when scoped to an activity. */
+const AI_EVENT_CONTEXT_PX = 44;
 
 function AiAssistantChat({
   initialMessage,
   activityLegacyId,
+  activityTitle,
   onInitialMessageSent,
-  onClearReady,
   onMessageCountChange,
   chatBodyHeight,
   userAvatar,
@@ -33,8 +41,8 @@ function AiAssistantChat({
 }: {
   initialMessage?: string | null;
   activityLegacyId?: number;
+  activityTitle?: string;
   onInitialMessageSent?: () => void;
-  onClearReady?: (clear: () => Promise<void>, isBusy: boolean) => void;
   onMessageCountChange?: (count: number) => void;
   chatBodyHeight?: number;
   userAvatar?: string;
@@ -52,9 +60,16 @@ function AiAssistantChat({
     [],
   );
 
+  const welcomeText = useMemo(() => {
+    if (activityTitle?.trim()) {
+      return `👋 已为你锁定「${activityTitle.trim()}」。可以说说想找什么样的队友、住宿或出行方式，我来帮你匹配或发帖。`;
+    }
+    return "👋 我是你的 AI 智能助手，帮你发现活动、找队友、规划行程，说出需求，我来搞定。";
+  }, [activityTitle]);
+
   const { messages, isStreaming, isLoadingHistory, send, clearChat } =
     useAiChatStream({
-      welcomeText: "👋 我是你的 AI 智能助手，帮你发现活动、找队友、规划行程，说出需求，我来搞定。",
+      welcomeText,
       mockReply,
       streamErrorText: "抱歉，回复出错了，请稍后再试。",
       activityLegacyId,
@@ -91,20 +106,20 @@ function AiAssistantChat({
     }
 
     const trimmed = initialMessage.trim();
-    if (!trimmed || isLoadingHistory || isStreaming) return;
+    if (!trimmed || isStreaming) return;
 
     initialMessageHandledRef.current = true;
     initialMessageSentRef.current = trimmed;
     void send({ text: trimmed });
     onInitialMessageSent?.();
-  }, [initialMessage, isLoadingHistory, isStreaming, onInitialMessageSent, send]);
+  }, [initialMessage, isStreaming, onInitialMessageSent, send]);
 
   const submit = useCallback(
     async (text: string, images?: string[]) => {
       if (submitLockRef.current) return;
       const trimmed = text.trim();
       const hasImages = images && images.length> 0;
-      if ((!trimmed && !hasImages) || isStreaming || isLoadingHistory) return;
+      if ((!trimmed && !hasImages) || isStreaming) return;
 
       submitLockRef.current = true;
       try {
@@ -115,17 +130,13 @@ function AiAssistantChat({
         submitLockRef.current = false;
       }
     },
-    [isLoadingHistory, isStreaming, send],
+    [isStreaming, send],
   );
 
   const handleClearChat = useCallback(async () => {
     if (isStreaming) return;
     await clearChat();
   }, [clearChat, isStreaming]);
-
-  useEffect(() => {
-    onClearReady?.(handleClearChat, isStreaming || isLoadingHistory);
-  }, [handleClearChat, isLoadingHistory, isStreaming, onClearReady]);
 
   const handleSelectSuggestedReply = useCallback(
     async (reply: string) => {
@@ -145,7 +156,10 @@ function AiAssistantChat({
       className="s-ai-assistant-chat"
       style={chatBodyHeight != null ? { height: `${chatBodyHeight}px` } : undefined}>
       {isLoadingHistory ? (
-        <Text className="s-ai-assistant__hint">加载中…</Text>
+        <View className="s-ai-assistant__history-loading" aria-live="polite">
+          <View className="s-ai-assistant__history-loading-bar" />
+          <Text className="s-ai-assistant__history-loading-text">同步对话记录…</Text>
+        </View>
       ) : null}
       <DegradedMatchBanner />
       <ChatMessageList
@@ -162,9 +176,12 @@ function AiAssistantChat({
           isStreaming={isStreaming}
           isLoadingHistory={isLoadingHistory}
           activityLegacyId={activityLegacyId}
+          activityTitle={activityTitle}
           onInputChange={setInput}
           onSubmit={submit}
           onPendingImagesChange={setPendingImages}
+          onClearChat={handleClearChat}
+          clearDisabled={isStreaming || isLoadingHistory}
         />
       </View>
     </View>
@@ -172,14 +189,21 @@ function AiAssistantChat({
 }
 
 const AiAssistantPage: FC = () => {
+  const navInsets = useNavBarInsets();
   const chatReady = useDeferredMount(DEFER_AI_CHAT_MS);
-  const [pendingInitialMessage, setPendingInitialMessage] = useState<
-    string | null
->(null);
-  const [clearChatFn, setClearChatFn] = useState<(() => Promise<void>) | null>(
-    null,
+  const [pendingInitialMessage, setPendingInitialMessage] = useState<string | null>(
+    () => {
+      const intent = useNavigationStore.getState().consumeAiAssistantIntent();
+      if (intent?.activityLegacyId != null && !Number.isNaN(intent.activityLegacyId)) {
+        useNavigationStore
+          .getState()
+          .setActiveActivityLegacyId(intent.activityLegacyId);
+      } else if (intent) {
+        useNavigationStore.getState().setActiveActivityLegacyId(null);
+      }
+      return intent?.initialMessage?.trim() ?? null;
+    },
   );
-  const [clearBusy, setClearBusy] = useState(false);
   const [messageCount, setMessageCount] = useState(0);
 
   const consumeAiAssistantIntent = useNavigationStore(
@@ -193,17 +217,51 @@ const AiAssistantPage: FC = () => {
   );
 
   const profileUserData = useResolvedProfile();
-  const chatBodyHeight = useTabPageMainHeight({ subtractPx: AI_HEADER_PX });
+  const activityQuery = useActivityDetailQuery(activityLegacyId);
+  const activityTitle = activityQuery.data?.name;
+  const activityMeta = useMemo(() => {
+    if (!activityQuery.data) return "";
+    return [activityQuery.data.date, activityQuery.data.location]
+      .filter(Boolean)
+      .join(" · ");
+  }, [activityQuery.data]);
+
+  const hasEventScope =
+    activityLegacyId != null && !Number.isNaN(activityLegacyId);
+  const showEventContext = hasEventScope && Boolean(activityTitle || activityQuery.isLoading);
+
+  const headerSubtractPx = useMemo(() => {
+    const eventBar = showEventContext ? AI_EVENT_CONTEXT_PX : 0;
+    return navInsets.paddingTop + 12 + AI_HEADER_CONTENT_PX + eventBar;
+  }, [navInsets.paddingTop, showEventContext]);
+
+  const headerStyle = useMemo(
+    () =>
+      navInsets.paddingTop > 0 || navInsets.paddingRight > 16
+        ? {
+            ...(navInsets.paddingTop > 0
+              ? { paddingTop: `${navInsets.paddingTop}px` }
+              : {}),
+            ...(navInsets.paddingRight > 16
+              ? { paddingRight: `${navInsets.paddingRight}px` }
+              : {}),
+          }
+        : undefined,
+    [navInsets.paddingRight, navInsets.paddingTop],
+  );
+
+  const chatBodyHeight = useTabPageMainHeight({ subtractPx: headerSubtractPx });
 
   usePageRouteReady(true);
 
-  const handleClearReady = useCallback(
-    (clear: () => Promise<void>, isBusy: boolean) => {
-      setClearChatFn(() => clear);
-      setClearBusy(isBusy);
-    },
-    [],
-  );
+  useEffect(() => {
+    if (!isAiChatWsDevLog()) return;
+    console.warn("[SYNC AI WS] AiAssistantPage mounted", {
+      wsUrl: resolveAiChatWsUrl(),
+      taroEnv: process.env.TARO_ENV,
+      nodeEnv: process.env.NODE_ENV,
+    });
+  }, []);
 
   const handleInitialMessageSent = useCallback(() => {
     setPendingInitialMessage(null);
@@ -211,11 +269,14 @@ const AiAssistantPage: FC = () => {
 
   const applyAiAssistantIntent = useCallback(() => {
     const intent = consumeAiAssistantIntent();
-    if (intent?.initialMessage?.trim()) {
+    if (!intent) return;
+    if (intent.initialMessage?.trim()) {
       setPendingInitialMessage(intent.initialMessage.trim());
     }
-    if (intent?.activityLegacyId != null && !Number.isNaN(intent.activityLegacyId)) {
+    if (intent.activityLegacyId != null && !Number.isNaN(intent.activityLegacyId)) {
       setActiveActivityLegacyId(intent.activityLegacyId);
+    } else {
+      setActiveActivityLegacyId(null);
     }
   }, [consumeAiAssistantIntent, setActiveActivityLegacyId]);
 
@@ -241,8 +302,9 @@ const AiAssistantPage: FC = () => {
   return (
     <View data-cmp="AiAssistant" className="s-page-with-tabbar">
       <View className="s-page-with-tabbar__main s-ai-assistant">
-        <View className="s-ai-assistant__header">
+        <View className="s-ai-assistant__header" style={headerStyle}>
         <Button className="s-ai-assistant__back-btn"
+          aria-label={hasEventScope ? "返回活动详情" : "返回"}
           onClick={handleBack}>
           <ChevronLeft size={22} />
         </Button>
@@ -253,17 +315,17 @@ const AiAssistantPage: FC = () => {
             <Text className="s-ai-assistant__header-online" />
           </View>
           <View className="s-ai-assistant__header-text">
-            <View className="s-ai-assistant__header-title-row">
-              <Text className="s-ai-assistant__header-title">
-                {"AI 智能助手"}
-              </Text>
-              <Text className="s-ai-assistant__ai-badge">
-                <Zap size={10} aria-hidden />
-                {"AI"}
-              </Text>
-            </View>
+            {!hasEventScope ? (
+              <View className="s-ai-assistant__header-title-row">
+                <Text className="s-ai-assistant__header-title">AI 智能助手</Text>
+                <Text className="s-ai-assistant__ai-badge">
+                  <Zap size={10} aria-hidden />
+                  {"AI"}
+                </Text>
+              </View>
+            ) : null}
             <Text className="s-ai-assistant__header-status">
-              {"在线 · 实时响应"}
+              {hasEventScope ? "正在对话" : "在线 · 实时响应"}
             </Text>
           </View>
         </View>
@@ -274,14 +336,37 @@ const AiAssistantPage: FC = () => {
               {messageCount}
             </Text>
           ) : null}
-          <Button className="s-ai-assistant__clear-btn"
-            disabled={clearBusy || !clearChatFn}
-            aria-label="清空对话"
-            onClick={() => void clearChatFn?.()}>
-            <Trash2 size={16} />
-          </Button>
         </View>
         </View>
+
+        {showEventContext ? (
+          <View className="s-ai-assistant__event-context">
+            <View className="s-ai-assistant__event-context-icon" aria-hidden>
+              <CalendarDays size={14} />
+            </View>
+            <View className="s-ai-assistant__event-context-text">
+              {activityQuery.isLoading && !activityTitle ? (
+                <Text className="s-ai-assistant__event-context-title">
+                  加载活动信息…
+                </Text>
+              ) : (
+                <>
+                  <Text className="s-ai-assistant__event-context-kicker">
+                    当前活动
+                  </Text>
+                  <Text className="s-ai-assistant__event-context-title">
+                    {activityTitle ?? "本场活动"}
+                  </Text>
+                  {activityMeta ? (
+                    <Text className="s-ai-assistant__event-context-meta">
+                      {activityMeta}
+                    </Text>
+                  ) : null}
+                </>
+              )}
+            </View>
+          </View>
+        ) : null}
 
         <View className="s-ai-assistant__body">
           <View className="s-ai-assistant__panel">
@@ -289,8 +374,8 @@ const AiAssistantPage: FC = () => {
               <AiAssistantChat
                 initialMessage={pendingInitialMessage}
                 activityLegacyId={activityLegacyId}
+                activityTitle={activityTitle}
                 onInitialMessageSent={handleInitialMessageSent}
-                onClearReady={handleClearReady}
                 onMessageCountChange={setMessageCount}
                 chatBodyHeight={chatBodyHeight}
                 userAvatar={profileUserData.avatar}

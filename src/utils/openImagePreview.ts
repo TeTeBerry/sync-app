@@ -22,6 +22,13 @@ function dataUrlToTempPath(dataUrl: string): Promise<string> {
   });
 }
 
+function resolvePreviewUrlSync(url: string): string | null {
+  const trimmed = url.trim();
+  if (!trimmed) return null;
+  if (isDataUrl(trimmed)) return null;
+  return sanitizeRemoteImageUrl(trimmed) ?? trimmed;
+}
+
 async function resolvePreviewUrl(url: string): Promise<string | null> {
   const trimmed = url.trim();
   if (!trimmed) return null;
@@ -33,7 +40,21 @@ async function resolvePreviewUrl(url: string): Promise<string | null> {
     return trimmed;
   }
 
-  return sanitizeRemoteImageUrl(trimmed) ?? trimmed;
+  return resolvePreviewUrlSync(trimmed);
+}
+
+const PREVIEW_COOLDOWN_MS = 400;
+let previewInFlight = false;
+let previewReleaseTimer: ReturnType<typeof setTimeout> | undefined;
+
+function releasePreviewLock(): void {
+  if (previewReleaseTimer) {
+    clearTimeout(previewReleaseTimer);
+  }
+  previewReleaseTimer = setTimeout(() => {
+    previewInFlight = false;
+    previewReleaseTimer = undefined;
+  }, PREVIEW_COOLDOWN_MS);
 }
 
 /** Open native full-screen image preview (WeChat `previewImage` on weapp). */
@@ -41,20 +62,40 @@ export async function openImagePreview(
   urls: string[],
   currentIndex = 0,
 ): Promise<void> {
-  if (!urls.length) return;
+  if (!urls.length || previewInFlight) return;
 
-  const resolved = (
-    await Promise.all(urls.map((url) => resolvePreviewUrl(url).catch(() => null)))
-  ).filter((url): url is string => Boolean(url));
+  previewInFlight = true;
 
-  if (!resolved.length) return;
+  try {
+    const resolved: string[] = [];
+    const resolvedFromOriginal: number[] = [];
 
-  const idx = Math.min(Math.max(0, currentIndex), resolved.length - 1);
+    for (let i = 0; i < urls.length; i += 1) {
+      const url = await resolvePreviewUrl(urls[i]).catch(() => null);
+      if (!url) continue;
+      resolvedFromOriginal[i] = resolved.length;
+      resolved.push(url);
+    }
 
-  await Taro.previewImage({
-    urls: resolved,
-    current: resolved[idx],
-  });
+    if (!resolved.length) return;
+
+    const safeOriginalIndex = Math.min(Math.max(0, currentIndex), urls.length - 1);
+    const mappedIndex = resolvedFromOriginal[safeOriginalIndex];
+    const idx =
+      mappedIndex != null
+        ? mappedIndex
+        : Math.min(Math.max(0, currentIndex), resolved.length - 1);
+
+    await Taro.previewImage({
+      urls: resolved,
+      current: resolved[idx],
+    });
+  } catch {
+    // Native preview already surfaces errors; avoid leaving UI stuck.
+  } finally {
+    void Taro.hideLoading();
+    releasePreviewLock();
+  }
 }
 
 export function openSingleImagePreview(src: string, allUrls?: string[]): void {

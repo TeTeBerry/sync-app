@@ -59,6 +59,8 @@ import {
   invalidateUser,
   invalidateProfile,
   patchLikedPostInCaches,
+  patchPostStatusInCaches,
+  patchUpdatedProfilePostInCaches,
 } from "../utils/queryInvalidation";
 
 export async function invalidateNotificationQueries() {
@@ -441,6 +443,11 @@ export async function updatePostAndInvalidate(
   postId: string,
   payload: Parameters<typeof updatePost>[1],
 ) {
-  await updatePost(postId, payload);
+  const updated = await updatePost(postId, payload);
+  if (payload.body !== undefined) {
+    patchUpdatedProfilePostInCaches(updated);
+  } else {
+    patchPostStatusInCaches(postId, updated.status);
+  }
   await invalidatePostQueries();
 }

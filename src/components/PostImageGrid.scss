@@ -38,6 +38,10 @@
   display: block;
 }
 
+.s-post-image-grid__img--placeholder {
+  background: #1c1c1e;
+}
+
 .s-post-image-grid__more {
   position: absolute;
   inset: 0;
@@ -46,8 +50,8 @@
   justify-content: center;
   background: rgba(0, 0, 0, 0.55);
   color: #fff;
-  font-size: 20px;
-  font-weight: 700;
+  font-size: var(--s-type-lead);
+  font-weight: var(--s-fw-bold);
 }
 
 /* Image count badge (top-right of featured image, like screenshot) */
@@ -62,8 +66,8 @@
   border-radius: 9999px;
   background: rgba(0, 0, 0, 0.55);
   color: #fff;
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--s-type-meta);
+  font-weight: var(--s-fw-semibold);
   line-height: 1;
   backdrop-filter: blur(4px);
 }
@@ -110,6 +114,14 @@
   aspect-ratio: 16 / 10;
   border-radius: 12px;
   overflow: hidden;
+
+  .s-post-image-grid__img,
+  image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
 }
 
 .s-post-image-grid__thumbs {
@@ -135,7 +147,7 @@
   align-items: center;
   gap: 3px;
   margin-left: 6px;
-  font-size: 12px;
+  font-size: var(--s-type-meta);
   color: #8e8e93;
   vertical-align: middle;
 }

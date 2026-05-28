@@ -4,15 +4,15 @@
   align-items: center;
   padding: 4px 11px;
   border-radius: var(--radius-full);
-  font-size: 12px;
+  font-size: var(--s-type-meta);
   line-height: 1.2;
-  font-weight: 800;
+  font-weight: var(--s-fw-extrabold);
 }
 
 .s-activity-status--not-started {
   background: rgba(255, 255, 255, 0.08);
   color: #c7c7cc;
-  font-weight: 700;
+  font-weight: var(--s-fw-bold);
 }
 
 .s-activity-status--in-progress {
@@ -23,5 +23,5 @@
 .s-activity-status--ended {
   background: rgba(255, 255, 255, 0.06);
   color: #636366;
-  font-weight: 700;
+  font-weight: var(--s-fw-bold);
 }

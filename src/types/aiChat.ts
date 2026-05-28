@@ -94,4 +94,5 @@ export interface ChatSessionRecord {
   sessionId: string;
   userId?: string;
   history?: AiChatMessage[];
+  conversationState?: ConversationState;
 }

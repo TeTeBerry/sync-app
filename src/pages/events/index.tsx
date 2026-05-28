@@ -1,7 +1,8 @@
 import "./events.scss";
 import { useDidShow } from "@tarojs/taro";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { AudioWaveform, Search, TrendingUp } from "lucide-react-taro";
+import { Search, TrendingUp } from "lucide-react-taro";
+import SyncBrandMark from "../../components/SyncBrandMark";
 import { View, Text, Input, Button, ScrollView } from "@tarojs/components";
 import { BottomNavSlot } from "../../components/BottomNav";
 import { useNavBarInsets } from "../../hooks/useNavBarInsets";
@@ -9,6 +10,7 @@ import { useTabPageMainHeight } from "../../hooks/useTabPageMainHeight";
 import EventCard from "../../components/EventCard";
 import { ListState } from "../../components/ListState";
 import { useEventList } from "../../hooks/useSyncApi";
+import { resolveEventCardLegacyId } from "../../utils/apiMappers";
 import { goEventDetail, preloadHotRoutes } from "../../utils/route";
 import {
   getActivityStatusFromActivity,
@@ -58,8 +60,8 @@ const Events: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   const openDetail = useCallback((legacyId: string) => {
-    const id = Number(legacyId);
-    if (!Number.isNaN(id) && id> 0) {
+    const id = resolveEventCardLegacyId(legacyId);
+    if (id != null) {
       goEventDetail(id);
     }
   }, []);
@@ -88,13 +90,7 @@ const Events: React.FC = () => {
     <View className="s-page-shell s-page-with-tabbar">
       <View className="s-page-with-tabbar__main s-events">
         <View className="s-events__header" style={headerStyle}>
-          <View className="s-events__brand">
-            <AudioWaveform size={24} className="s-events__brand-icon" aria-hidden />
-            <View className="s-events__brand-copy">
-              <Text className="s-events__brand-title">SYNC</Text>
-              <Text className="s-events__brand-subtitle">电音活动</Text>
-            </View>
-          </View>
+          <SyncBrandMark subtitle="电音活动" />
           <View className="s-events__count-pill" aria-label={`${events.length} 场活动`}>
             <TrendingUp size={14} aria-hidden />
             <Text>{`${events.length} 场活动`}</Text>
@@ -115,7 +111,7 @@ const Events: React.FC = () => {
               <Button className="s-events__search-clear"
                 onClick={() => setSearchQuery("")}
                 aria-label="清空">
-                ×
+                <Text className="s-btn-label">×</Text>
               </Button>
             )}
           </View>
@@ -132,7 +128,7 @@ const Events: React.FC = () => {
                   .filter(Boolean)
                   .join(" ")}
                 onClick={() => setActiveTab(tab.id)}>
-                {tab.label}
+                <Text className="s-btn-label">{tab.label}</Text>
               </Button>
             ))}
           </View>

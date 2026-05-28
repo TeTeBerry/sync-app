@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp,  } from "lucide-react-taro";
+import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp } from "lucide-react-taro";
 import { useClientPagination } from "../../hooks/useClientPagination";
-import { Button, Text, View } from '@tarojs/components';
+import { Button, Text, View } from "@tarojs/components";
 
 const SECTION_VARIANTS = {
   activities: {
@@ -22,6 +22,7 @@ export type ProfileCollapsibleSectionProps<T> = {
   title: string;
   items: T[];
   pageSize?: number;
+  renderEmpty?: () => React.ReactNode;
   children: (pageItems: T[]) => React.ReactNode;
 };
 
@@ -31,6 +32,7 @@ export function ProfileCollapsibleSection<T>({
   title,
   items,
   pageSize = 2,
+  renderEmpty,
   children,
 }: ProfileCollapsibleSectionProps<T>) {
   const [expanded, setExpanded] = useState(false);
@@ -63,18 +65,19 @@ export function ProfileCollapsibleSection<T>({
             toggleExpanded();
           }
         }}>
-        <Text className="s-profile-section__header-left">
-          <Text className={`s-profile-section__icon ${styles.icon}`}>{icon}</Text>
+        <View className="s-profile-section__header-left">
+          <View className={`s-profile-section__icon ${styles.icon}`}>{icon}</View>
           <Text className="s-profile-section__title">{title}</Text>
           <Text className={`s-profile-section__badge ${styles.badge}`}>{items.length}</Text>
-        </Text>
+        </View>
 
-        <Text className="s-profile-section__header-right">
+        <View className="s-profile-section__header-right">
           {expanded ? (
-            <Text
+            <View
               className="s-profile-section__pagination"
               onClick={(event) => event.stopPropagation()}>
-              <Button className="s-profile-section__page-btn"
+              <Button
+                className="s-profile-section__page-btn"
                 disabled={page === 0}
                 aria-label="上一页"
                 onClick={goPrev}>
@@ -83,20 +86,27 @@ export function ProfileCollapsibleSection<T>({
               <Text className="s-profile-section__page-label">
                 {page + 1}/{totalPages}
               </Text>
-              <Button className="s-profile-section__page-btn"
-                disabled={page>= totalPages - 1}
+              <Button
+                className="s-profile-section__page-btn"
+                disabled={page >= totalPages - 1}
                 aria-label="下一页"
                 onClick={goNext}>
                 <ChevronRight size={16} />
               </Button>
-            </Text>
+            </View>
           ) : null}
-          {expanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-        </Text>
+          {expanded ? (
+            <ChevronUp size={18} className="s-profile-section__chevron" />
+          ) : (
+            <ChevronDown size={18} className="s-profile-section__chevron" />
+          )}
+        </View>
       </View>
 
       {expanded ? (
-        <View className="s-profile-section__body">{children(pageItems)}</View>
+        <View className="s-profile-section__body">
+          {items.length === 0 && renderEmpty ? renderEmpty() : children(pageItems)}
+        </View>
       ) : null}
     </View>
   );

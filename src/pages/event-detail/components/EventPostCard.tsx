@@ -4,7 +4,12 @@ import { PostActionMenu } from "../../../components/PostActionMenu";
 import { PostCommentSection } from "../../../components/PostCommentSection";
 import { PostStatusBadge } from "../../../components/PostStatusBadge";
 import { ImageWithFallback } from "../../../components/ImageWithFallback";
-import { ContentTypeBadge } from "../../../components/ContentTypeBadge";
+import {
+  ContentTypeBadge,
+  filterContentTypeTags,
+  mergePostContentTypes,
+  stripContentTypeHashtags,
+} from "../../../components/ContentTypeBadge";
 import { PostImageGrid, PostImageCount } from "../../../components/PostImageGrid";
 import { isCurrentUserPostAuthor } from "../../../utils/postOwnership";
 import { postActionIconColor } from "../../../utils/postActionColors";
@@ -43,6 +48,12 @@ function EventPostCardInner({
   onCommentSubmitted,
 }: EventPostCardProps) {
   const isOwn = isCurrentUserPostAuthor(post.name, post.userId);
+  const contentTypeKeys = mergePostContentTypes(post.contentTypes, {
+    body: post.body,
+    tags: post.tags,
+  });
+  const bodyText = stripContentTypeHashtags(post.body);
+  const displayTags = filterContentTypeTags(post.tags, contentTypeKeys);
 
   return (
     <View
@@ -74,19 +85,21 @@ function EventPostCardInner({
         </View>
       </View>
 
-      <Text className="s-event-post__text">{post.body}</Text>
+      {bodyText ? <Text className="s-event-post__text">{bodyText}</Text> : null}
 
       {post.images?.length ? <PostImageGrid images={post.images} /> : null}
 
-      <ContentTypeBadge types={post.contentTypes} />
+      <ContentTypeBadge types={contentTypeKeys} />
 
-      <View className="s-event-post__tags">
-        {post.tags.map((tag) => (
-          <Text key={tag} className="s-event-post__tag">
-            {tag}
-          </Text>
-        ))}
-      </View>
+      {displayTags.length ? (
+        <View className="s-event-post__tags">
+          {displayTags.map((tag) => (
+            <Text key={tag} className="s-event-post__tag">
+              {tag}
+            </Text>
+          ))}
+        </View>
+      ) : null}
 
       <View className="s-event-post__footer">
         <View className="s-event-post__actions">
@@ -98,7 +111,7 @@ function EventPostCardInner({
               filled={post.liked}
               color={postActionIconColor({ liked: post.liked })}
             />
-            {post.likes}
+            <Text className="s-event-post__action-label">{post.likes}</Text>
           </Button>
           <Button className={`s-event-post__action${commentsExpanded ? " s-event-post__action--active" : ""}`}
             onClick={() => onToggleComments(post.id)}>
@@ -106,7 +119,7 @@ function EventPostCardInner({
               size={16}
               color={postActionIconColor({ active: commentsExpanded })}
             />
-            {post.comments}
+            <Text className="s-event-post__action-label">{post.comments}</Text>
           </Button>
           <Button className="s-event-post__action">
             <Share2 size={16} color={postActionIconColor({})} />
@@ -117,7 +130,7 @@ function EventPostCardInner({
               title="标记为已组队"
               onClick={() => onComplete(post.id)}>
               <CircleCheck size={16} color="#34c759" />
-              招募中
+              <Text className="s-event-post__action-label">招募中</Text>
             </Button>
           ) : null}
           {isOwn ? (
@@ -132,12 +145,12 @@ function EventPostCardInner({
           applied ? (
             <Button className="s-event-post__apply s-event-post__apply--done" disabled>
               <Check size={14} />
-              已申请
+              <Text className="s-event-post__apply-text">已申请</Text>
             </Button>
           ) : (
             <Button className="s-event-post__apply" onClick={() => onApply(post.id)}>
               <UserPlus size={14} />
-              申请组队
+              <Text className="s-event-post__apply-text">申请组队</Text>
             </Button>
           )
         ) : null}

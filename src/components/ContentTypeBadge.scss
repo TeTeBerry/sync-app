@@ -2,47 +2,63 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin: 0 0 10px;
+  margin: 12px 0 10px;
 }
 
 .s-content-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  align-self: flex-start;
+  width: fit-content;
+  max-width: 100%;
   padding: 4px 10px;
   border-radius: var(--radius-full, 9999px);
-  font-size: 12px;
-  font-weight: 700;
+  font-size: var(--s-type-meta);
+  font-weight: var(--s-fw-bold);
   line-height: 1.2;
   white-space: nowrap;
+  box-sizing: border-box;
 
   &__label {
     font-size: inherit;
     font-weight: inherit;
     line-height: inherit;
+    color: inherit;
   }
 
   &--team {
     background: rgba(255, 45, 85, 0.12);
     color: #ff2d55;
+    border: 1px solid rgba(255, 45, 85, 0.28);
     box-shadow: inset 0 0 0 1px rgba(255, 45, 85, 0.28);
   }
 
   &--accommodation {
     background: rgba(100, 210, 255, 0.12);
     color: #64d2ff;
+    border: 1px solid rgba(100, 210, 255, 0.28);
     box-shadow: inset 0 0 0 1px rgba(100, 210, 255, 0.28);
   }
 
   &--carpool {
     background: rgba(255, 204, 0, 0.12);
     color: #ffcc00;
+    border: 1px solid rgba(255, 204, 0, 0.28);
     box-shadow: inset 0 0 0 1px rgba(255, 204, 0, 0.28);
   }
 
+  &--ticket {
+    background: rgba(191, 90, 242, 0.12);
+    color: #bf5af2;
+    border: 1px solid rgba(191, 90, 242, 0.28);
+    box-shadow: inset 0 0 0 1px rgba(191, 90, 242, 0.28);
+  }
+
   &--other {
-    background: rgba(142, 142, 147, 0.16);
-    color: rgba(255, 255, 255, 0.72);
-    box-shadow: inset 0 0 0 1px rgba(142, 142, 147, 0.35);
+    background: rgba(100, 210, 255, 0.12);
+    color: #64d2ff;
+    border: 1px solid rgba(100, 210, 255, 0.28);
+    box-shadow: inset 0 0 0 1px rgba(100, 210, 255, 0.28);
   }
 }

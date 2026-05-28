@@ -6,7 +6,11 @@ import { MetaRow } from "./MetaRow";
 import { PostCommentSection } from "./PostCommentSection";
 import { PostActionMenu } from "./PostActionMenu";
 import { PostStatusBadge } from "./PostStatusBadge";
-import { ContentTypeBadge } from "./ContentTypeBadge";
+import {
+  ContentTypeBadge,
+  mergePostContentTypes,
+  stripContentTypeHashtags,
+} from "./ContentTypeBadge";
 import { PostImageGrid, PostImageCount } from "./PostImageGrid";
 import { useCurrentUserQuery } from "../hooks/useSyncApi";
 import { isCurrentUserPostAuthor } from "../utils/postOwnership";
@@ -43,6 +47,8 @@ function FeedPostRowInner({
 }: FeedPostRowProps) {
   const isOwn = isCurrentUserPostAuthor(post.name, post.userId);
   const avatarSrc = thumbnailImageUrl(post.avatar, 80) ?? post.avatar;
+  const contentTypeKeys = mergePostContentTypes(post.contentTypes, { body: post.body });
+  const bodyText = stripContentTypeHashtags(post.body);
 
   return (
     <View className="s-home-post">
@@ -78,11 +84,11 @@ function FeedPostRowInner({
         </View>
       </View>
 
-      <Text className="s-home-post__text">{post.body}</Text>
+      {bodyText ? <Text className="s-home-post__text">{bodyText}</Text> : null}
 
       {post.images?.length ? <PostImageGrid images={post.images} /> : null}
 
-      <ContentTypeBadge types={post.contentTypes} />
+      <ContentTypeBadge types={contentTypeKeys} />
 
       <View className="s-home-post__footer">
         <Text className="s-home-post__time">{post.time}</Text>

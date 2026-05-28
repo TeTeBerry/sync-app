@@ -4,19 +4,39 @@ import { cn } from "../ui";
 import type { ChatUiMessage } from "../../types/aiChat";
 import { ChatUserAvatar } from "./ChatUserAvatar";
 import { RecommendPostCards } from "./RecommendPostCards";
+import { PublishConfirmCard } from "./PublishConfirmCard";
 import { SuggestedReplyChips } from "./SuggestedReplyChips";
+import { parsePublishConfirmMessage } from "../../utils/parsePublishConfirmMessage";
 import { openSingleImagePreview } from "../../utils/openImagePreview";
 import { Button, Image, ScrollView, Text, View } from "@tarojs/components";
 
-function formatMessageTime(id: string): string | null {
+const TIMESTAMP_GAP_MS = 5 * 60 * 1000;
+
+function messageTimestampMs(id: string): number | null {
   const ts = Number(id.split("-")[0]);
   if (!Number.isFinite(ts) || ts <= 0) return null;
+  return ts;
+}
+
+function formatMessageTime(id: string): string | null {
+  const ts = messageTimestampMs(id);
+  if (ts == null) return null;
   const date = new Date(ts);
   return date.toLocaleTimeString([], {
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
   });
+}
+
+function shouldShowTimestamp(messages: ChatUiMessage[], index: number): boolean {
+  if (index === 0) return true;
+  const currentTs = messageTimestampMs(messages[index].id);
+  const previousTs = messageTimestampMs(messages[index - 1].id);
+  if (currentTs == null || previousTs == null) {
+    return messages[index].from !== messages[index - 1].from;
+  }
+  return currentTs - previousTs >= TIMESTAMP_GAP_MS;
 }
 
 export function ChatMessageList({
@@ -46,16 +66,6 @@ export function ChatMessageList({
     scrollToBottom();
   }, [messages, isStreaming, scrollToBottom]);
 
-  const showTimestampForIndex = useCallback(
-    (index: number) => {
-      if (index === 0) return true;
-      const current = messages[index];
-      const previous = messages[index - 1];
-      return current.from !== previous.from;
-    },
-    [messages],
-  );
-
   return (
     <ScrollView
       scrollY
@@ -69,9 +79,20 @@ export function ChatMessageList({
           const isUser = msg.from === "user";
           const timestamp = formatMessageTime(msg.id);
 
+          const publishConfirm =
+            !isUser && !msg.streaming
+              ? parsePublishConfirmMessage(msg.text)
+              : null;
+          const hasPostCards = Boolean(
+            msg.createdPost || msg.recommendedPosts?.length,
+          );
+          const hasSuggestedReplies = Boolean(msg.suggestedReplies?.length);
+          const showEmbedBelow = !isUser && (hasPostCards || hasSuggestedReplies);
+          const showPublishConfirm = Boolean(publishConfirm);
+
           return (
             <React.Fragment key={msg.id}>
-              {showTimestampForIndex(index) && timestamp ? (
+              {shouldShowTimestamp(messages, index) && timestamp ? (
                 <Text className="s-ai-assistant-chat__timestamp">{timestamp}</Text>
               ) : null}
               <View
@@ -89,6 +110,8 @@ export function ChatMessageList({
                   className={cn(
                     "s-ai-assistant-chat__content",
                     isUser && "s-ai-assistant-chat__content--from-user",
+                    (hasPostCards || showPublishConfirm) &&
+                      "s-ai-assistant-chat__content--has-cards",
                   )}>
                   <View
                     className={cn(
@@ -98,6 +121,8 @@ export function ChatMessageList({
                         : "s-ai-assistant-chat__bubble--from-ai",
                       msg.streaming && "s-ai-assistant-chat__bubble--streaming",
                       msg.streaming && !msg.text && "s-ai-assistant-chat__bubble--waiting",
+                      showEmbedBelow && "s-ai-assistant-chat__bubble--with-embed-below",
+                      showPublishConfirm && "s-ai-assistant-chat__bubble--publish-confirm",
                     )}>
                     {msg.streaming && !msg.text ? (
                       <View
@@ -120,17 +145,18 @@ export function ChatMessageList({
                             />
                           </Button>
                         ) : null}
-                        {msg.text ? <Text>{msg.text}</Text> : null}
-                        {msg.createdPost ? (
-                          <RecommendPostCards
-                            posts={[msg.createdPost]}
-                            variant="created"
+                        {publishConfirm ? (
+                          <PublishConfirmCard
+                            payload={publishConfirm}
+                            userAvatar={userAvatar}
+                            userName={userName}
                           />
+                        ) : msg.text ? (
+                          <Text className="s-ai-assistant-chat__bubble-text">
+                            {msg.text}
+                          </Text>
                         ) : null}
-                        {msg.recommendedPosts?.length ? (
-                          <RecommendPostCards posts={msg.recommendedPosts} />
-                        ) : null}
-                        {msg.suggestedReplies?.length ? (
+                        {isUser && hasSuggestedReplies ? (
                           <SuggestedReplyChips
                             replies={msg.suggestedReplies}
                             disabled={isStreaming}
@@ -140,6 +166,26 @@ export function ChatMessageList({
                       </>
                     )}
                   </View>
+                  {showEmbedBelow ? (
+                    <View className="s-ai-assistant-chat__embed">
+                      {msg.createdPost ? (
+                        <RecommendPostCards
+                          posts={[msg.createdPost]}
+                          variant="created"
+                        />
+                      ) : null}
+                      {msg.recommendedPosts?.length ? (
+                        <RecommendPostCards posts={msg.recommendedPosts} />
+                      ) : null}
+                      {hasSuggestedReplies ? (
+                        <SuggestedReplyChips
+                          replies={msg.suggestedReplies}
+                          disabled={isStreaming}
+                          onSelect={onSelectSuggestedReply}
+                        />
+                      ) : null}
+                    </View>
+                  ) : null}
                 </View>
                 {isUser ? <ChatUserAvatar avatar={userAvatar} name={userName} /> : null}
               </View>

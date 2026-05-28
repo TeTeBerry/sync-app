@@ -8,13 +8,51 @@ export const profileUser = {
   location: "上海",
   bio: "电音爱好者",
   avatar: "https://picsum.photos/seed/sync-avatar-zara/200/200",
+  verified: true,
   stats: {
-    events: 12,
-    matchSuccess: 8,
-    likes: 156,
+    events: 4,
+    matchSuccess: 1,
+    likes: 49,
     posts: 3,
   },
 };
+
+export const profileActivities: ProfileActivityItem[] = [
+  {
+    id: "1",
+    title: "Tomorrowland Thailand 2026",
+    date: "2026-12-12",
+    location: "芭提雅",
+    image:
+      "https://mma.prnewswire.com/media/2921955/Tomorrowland_Thailand_PR_Newswire.jpg",
+    status: "registered",
+  },
+  {
+    id: "4",
+    title: "风暴电音节 深圳站",
+    date: "2026-06-20",
+    location: "深圳",
+    image:
+      "https://img.alicdn.com/imgextra/i2/2251059038/O1CN011VWlmX2GdSmiFVt13_!!2251059038.jpg",
+    status: "registered",
+  },
+  {
+    id: "6",
+    title: "2026横琴VAC电音节",
+    date: "2026-04-18",
+    location: "珠海",
+    image: "https://picsum.photos/seed/sync-act-6/144/144",
+    status: "registered",
+  },
+  {
+    id: "2",
+    title: "Ultra Miami 2026",
+    date: "2025-03-28",
+    location: "迈阿密",
+    image: "https://picsum.photos/seed/sync-act-2/144/144",
+    status: "attended",
+  },
+];
 
 export const profilePosts: ProfilePostItem[] = [
   {

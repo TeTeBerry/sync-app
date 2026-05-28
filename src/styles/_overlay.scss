@@ -1,4 +1,5 @@
 @use "variables" as *;
+@use "button" as btn;
 
 // Shared overlay / dialog / sheet / popover primitives.
 // Tokens live in styles/_variables.scss (--overlay-*).
@@ -59,8 +60,8 @@
     width: 100%;
     margin: 0;
     font-family: var(--fontSans);
-    font-size: 18px;
-    font-weight: 700;
+    font-size: var(--s-type-title);
+    font-weight: var(--s-fw-bold);
     color: var(--foreground);
     line-height: 1.35;
     word-wrap: break-word;
@@ -73,7 +74,7 @@
     width: 100%;
     margin: 0;
     font-family: var(--fontSans);
-    font-size: 14px;
+    font-size: var(--s-type-body-sm);
     line-height: 1.5;
     color: var(--muted-foreground);
     word-wrap: break-word;
@@ -89,14 +90,15 @@
   }
 
   &__btn {
+    @include btn.button-label-center;
     flex: 1;
     min-height: 40px;
     padding: 8px 14px;
     border-radius: var(--radius-full);
     border: none;
     font-family: var(--fontSans);
-    font-size: 14px;
-    font-weight: 600;
+    font-size: var(--s-type-body-sm);
+    font-weight: var(--s-fw-semibold);
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
     transition: opacity 160ms ease, background 160ms ease;
@@ -204,14 +206,14 @@
   }
 
   .s-overlay__title {
-    font-size: 17px;
-    font-weight: 700;
+    font-size: var(--s-type-title);
+    font-weight: var(--s-fw-bold);
     line-height: 1.4;
     color: var(--confirm-dialog-title-fg);
   }
 
   .s-overlay__message {
-    font-size: 13px;
+    font-size: var(--s-type-small);
     line-height: 1.55;
     color: var(--confirm-dialog-message-fg);
   }
@@ -227,8 +229,8 @@
     justify-content: center;
     min-height: 48px;
     padding: 0 16px;
-    font-size: 15px;
-    font-weight: 600;
+    font-size: var(--s-type-body);
+    font-weight: var(--s-fw-semibold);
     line-height: 1 !important;
     text-align: center;
     box-sizing: border-box;
@@ -304,14 +306,14 @@
     margin: 0;
     padding: 12px 16px 8px;
     font-family: var(--fontSans);
-    font-size: 13px;
-    font-weight: 600;
+    font-size: var(--s-type-small);
+    font-weight: var(--s-fw-semibold);
     color: var(--muted-foreground);
     text-align: center;
   }
 
   &__item {
-    display: block;
+    @include btn.button-label-center;
     width: 100%;
     padding: 14px 16px;
     border: none;
@@ -319,8 +321,8 @@
     background: transparent;
     color: var(--foreground);
     font-family: var(--fontSans);
-    font-size: 16px;
-    font-weight: 600;
+    font-size: var(--s-type-subtitle);
+    font-weight: var(--s-fw-semibold);
     text-align: center;
     cursor: pointer;
     transition: background 160ms ease, color 160ms ease;
@@ -336,7 +338,7 @@
   }
 
   &__cancel {
-    display: block;
+    @include btn.button-label-center;
     width: 100%;
     margin-top: 8px;
     padding: 14px 16px;
@@ -345,8 +347,8 @@
     background: var(--overlay-muted-surface);
     color: var(--muted-foreground);
     font-family: var(--fontSans);
-    font-size: 16px;
-    font-weight: 600;
+    font-size: var(--s-type-subtitle);
+    font-weight: var(--s-fw-semibold);
     text-align: center;
     cursor: pointer;
     transition: background 160ms ease;
@@ -379,8 +381,8 @@
     background: transparent;
     color: var(--muted-foreground);
     font-family: var(--fontSans);
-    font-size: 13px;
-    font-weight: 600;
+    font-size: var(--s-type-small);
+    font-weight: var(--s-fw-semibold);
     text-align: left;
     cursor: pointer;
     transition: background 160ms ease, color 160ms ease;

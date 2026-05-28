@@ -97,7 +97,7 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
                   <Button className={`s-post-comments__like${liked ? " s-post-comments__like--active" : ""}`}
                     onClick={() => toggleCommentLike(comment.id)}>
                     <Heart size={12} filled={liked} color={liked ? "#ff0066" : "#8e8e93"} />
-                    赞
+                    <Text className="s-btn-label">赞</Text>
                   </Button>
                 </View>
               </View>
@@ -128,7 +128,7 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
       </View>
 
       <Button className="s-post-comments__toggle" onClick={onToggleExpanded}>
-        收起评论
+        <Text className="s-btn-label">收起评论</Text>
         <ChevronUp size={14} />
       </Button>
     </View>

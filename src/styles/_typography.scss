@@ -1,0 +1,6 @@
+/* App-wide typography defaults — sizes/weights come from _variables.scss tokens. */
+page {
+  font-size: var(--s-type-body);
+  font-weight: var(--s-fw-normal);
+  line-height: 1.5;
+}

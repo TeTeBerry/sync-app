@@ -42,11 +42,11 @@ const ActionSheet: React.FC<ActionSheetProps> = ({
               item.active && "s-overlay-sheet__item--active",
             )}
             onClick={item.onSelect}>
-            {item.label}
+            <Text className="s-btn-label">{item.label}</Text>
           </Button>
         ))}
         <Button className="s-overlay-sheet__cancel" onClick={onCancel}>
-          {cancelLabel}
+          <Text className="s-btn-label">{cancelLabel}</Text>
         </Button>
       </View>
     </View>

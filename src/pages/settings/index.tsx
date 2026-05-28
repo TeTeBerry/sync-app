@@ -208,7 +208,7 @@ const SettingsPage: React.FC = () => {
               ))}
             </View>
             <Button className="s-settings__feedback-btn" onClick={submitFeedback}>
-              提交反馈
+              <Text className="s-btn-label">提交反馈</Text>
             </Button>
           </>
         )}

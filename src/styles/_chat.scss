@@ -1,14 +1,17 @@
+@use "button" as btn;
+
 $chat-pill-bg: rgb(38, 38, 40);
 $chat-pill-border: rgba(255, 255, 255, 0.1);
 
 @mixin chat-pill-chip {
+  @include btn.button-label-center;
   flex-shrink: 0;
   padding: 7px 14px;
   border-radius: 9999px;
   border: 1px solid $chat-pill-border;
   cursor: pointer;
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--s-type-meta);
+  font-weight: var(--s-fw-semibold);
   background: $chat-pill-bg;
   color: var(--foreground);
 
@@ -21,8 +24,8 @@ $chat-pill-border: rgba(255, 255, 255, 0.1);
 @mixin chat-inline-chip {
   padding: 4px 10px;
   border-radius: 9999px;
-  font-size: 11px;
-  font-weight: 600;
+  font-size: var(--s-type-caption);
+  font-weight: var(--s-fw-semibold);
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.12);
   color: var(--foreground);

@@ -1,5 +1,17 @@
-import { invalidateCache, setCacheData } from "../hooks/useApiQuery";
-import type { HomeSummary, HomeFeedPost, EventDetailPost } from "../types/backend";
+import {
+  broadcastCacheData,
+  forEachCacheEntry,
+  invalidateCache,
+  setCacheData,
+  setCacheDataByKey,
+} from "../hooks/useApiQuery";
+import type {
+  HomeSummary,
+  HomeFeedPost,
+  EventDetailPost,
+  ProfilePostItem,
+} from "../types/backend";
+import type { BackendPostStatusLabel } from "./postStatus";
 
 /** 失效通知相关查询 */
 export function invalidateNotifications() {
@@ -46,6 +58,49 @@ export function invalidateRegistration() {
 /** 失效指定帖子的评论查询 */
 export function invalidatePostComments(postId: string) {
   invalidateCache(["posts", postId, "comments"]);
+}
+
+export function patchPostStatusInCaches(postId: string, status: BackendPostStatusLabel) {
+  const patchList = <T extends { id: string; status?: BackendPostStatusLabel }>(
+    posts: T[] | undefined,
+  ) => posts?.map((post) => (post.id === postId ? { ...post, status } : post));
+
+  forEachCacheEntry((key, data) => {
+    if (!key.startsWith("posts|") && key !== "profile|posts") return;
+    if (!Array.isArray(data)) return;
+    const patched = patchList(data as { id: string; status?: BackendPostStatusLabel }[]);
+    if (patched) {
+      setCacheDataByKey(key, patched);
+    }
+  });
+
+  broadcastCacheData(["posts"]);
+  broadcastCacheData(["profile", "posts"]);
+}
+
+export function patchUpdatedProfilePostInCaches(updated: ProfilePostItem) {
+  const patchList = (posts: ProfilePostItem[] | undefined) =>
+    posts?.map((post) =>
+      post.id === updated.id
+        ? {
+            ...post,
+            content: updated.content,
+            status: updated.status,
+            title: updated.title,
+          }
+        : post,
+    );
+
+  forEachCacheEntry((key, data) => {
+    if (key !== "profile|posts") return;
+    const patched = patchList(data as ProfilePostItem[] | undefined);
+    if (patched) {
+      setCacheDataByKey(key, patched);
+    }
+  });
+
+  patchPostStatusInCaches(updated.id, updated.status);
+  broadcastCacheData(["profile", "posts"]);
 }
 
 export function patchLikedPostInCaches(

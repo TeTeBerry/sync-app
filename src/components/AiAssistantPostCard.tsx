@@ -4,7 +4,7 @@ import type { FC } from "react";
 import type { RecommendedPostCard } from "../types/aiChat";
 import { inferAuthorGenderFromPost } from "../utils/inferAuthorGender";
 import { goEventDetail } from "../utils/route";
-import { Button, Image, Text, View } from '@tarojs/components';
+import { Button, Image, Text, View } from "@tarojs/components";
 
 export type AiAssistantPostCardProps = {
   post: RecommendedPostCard;
@@ -29,7 +29,8 @@ export const AiAssistantPostCard: FC<AiAssistantPostCardProps> = ({
   };
 
   return (
-    <Button className={
+    <Button
+      className={
         highlight
           ? "s-ai-assistant-post-card s-ai-assistant-post-card--mine"
           : "s-ai-assistant-post-card"
@@ -47,29 +48,49 @@ export const AiAssistantPostCard: FC<AiAssistantPostCardProps> = ({
             {post.authorName.slice(0, 1)}
           </Text>
         )}
-        <View className="s-ai-assistant-post-card__meta">
-          <Text style={{fontWeight:"bold"}} className={nameClassName}>{post.authorName}</Text>
-          {post.authorHandle ? <Text>{post.authorHandle}</Text> : null}
-          <Text>{post.eventTitle}</Text>
+        <View className="s-ai-assistant-post-card__author">
+          <View className="s-ai-assistant-post-card__author-line">
+            <Text className={nameClassName}>{post.authorName}</Text>
+            {post.authorHandle ? (
+              <Text className="s-ai-assistant-post-card__handle">
+                {post.authorHandle}
+              </Text>
+            ) : null}
+          </View>
+          {post.matchReason ? (
+            <Text className="s-ai-assistant-post-card__match">
+              {post.matchReason}
+            </Text>
+          ) : null}
         </View>
       </View>
+
+      <Text className="s-ai-assistant-post-card__title">{post.eventTitle}</Text>
+
       <Text className="s-ai-assistant-post-card__body">{post.snippet}</Text>
+
       {post.location ? (
-        <Text className="s-ai-assistant-post-card__location">
-          <MapPin size={12} />
-          <Text>{post.location}</Text>
-        </Text>
+        <View className="s-ai-assistant-post-card__location">
+          <MapPin size={12} color="#64d2ff" />
+          <Text className="s-ai-assistant-post-card__location-text">
+            {post.location}
+          </Text>
+        </View>
       ) : null}
+
       {post.tags?.length ? (
         <View className="s-ai-assistant-post-card__tags">
           {post.tags.slice(0, 3).map((tag) => (
-            <Text key={tag}>{tag}</Text>
+            <Text key={tag} className="s-ai-assistant-post-card__tag">
+              {tag}
+            </Text>
           ))}
         </View>
       ) : null}
-      <Text className="s-ai-assistant-post-card__cta">
-        查看帖子
-      </Text>
+
+      <View className="s-ai-assistant-post-card__cta">
+        <Text className="s-ai-assistant-post-card__cta-label">查看帖子</Text>
+      </View>
     </Button>
   );
 };

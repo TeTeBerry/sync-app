@@ -1,5 +1,6 @@
-import { AudioWaveform, Bell, Sparkles } from "lucide-react-taro";
+import { Bell, Sparkles } from "lucide-react-taro";
 import type { FC } from "react";
+import { SyncBrandMark } from "../../../components/SyncBrandMark";
 import { Button } from "../../../components/ui";
 import { Text, View } from '@tarojs/components';
 
@@ -31,8 +32,7 @@ export const HomePlazaHero: FC<HomePlazaHeroProps> = ({
   return (
   <View className="s-home-hero" style={heroStyle}>
     <View className="s-home-hero__brand">
-      <AudioWaveform size={24} color="#4cc9f0" className="s-home-hero__icon" />
-      <Text className="s-home-hero__logo">SYNC</Text>
+      <SyncBrandMark />
     </View>
 
     <View className="s-home-hero__actions">

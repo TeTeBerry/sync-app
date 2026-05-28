@@ -142,7 +142,9 @@ const NotificationsPage: React.FC = () => {
                 aria-selected={isActive}
                 className={`s-notifications__tab${isActive ? " s-notifications__tab--active" : ""}`}
                 onClick={() => setActiveCategory(category)}>
-                {category === "all" ? "全部" : category === "comment" ? "评论" : category === "like" ? "点赞" : "系统"}
+                <Text className="s-btn-label">
+                  {category === "all" ? "全部" : category === "comment" ? "评论" : category === "like" ? "点赞" : "系统"}
+                </Text>
                 {count> 0 && (
                   <Text className="s-notifications__tab-count">{count}</Text>
                 )}
@@ -156,12 +158,12 @@ const NotificationsPage: React.FC = () => {
             {unreadCount> 0 && (
               <Button className="s-notifications__toolbar-btn"
                 onClick={() => void handleMarkAll()}>
-                全部已读
+                <Text className="s-btn-label">全部已读</Text>
               </Button>
             )}
             <Button className="s-notifications__toolbar-btn"
               onClick={() => void handleClearAll()}>
-              清空全部
+              <Text className="s-btn-label">清空全部</Text>
             </Button>
           </View>
         )}

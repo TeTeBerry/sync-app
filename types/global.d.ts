@@ -8,7 +8,9 @@ declare module "*.scss" {
 declare namespace NodeJS {
   interface ProcessEnv {
     TARO_APP_API_BASE_URL?: string;
-    TARO_APP_AI_CHAT_URL?: string;
+    /** Full WebSocket URL; defaults to ws(s) derived from API_BASE_URL + /ai/chat/ws */
+    TARO_APP_WS_URL?: string;
+    TARO_APP_AI_CHAT_WS_URL?: string;
     TARO_ENV?:
       | "weapp"
       | "swan"

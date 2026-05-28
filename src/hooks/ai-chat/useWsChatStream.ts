@@ -1,22 +1,26 @@
 import { useCallback, type Dispatch, type MutableRefObject, type SetStateAction } from "react";
 import Taro from "@tarojs/taro";
-import { AI_CHAT_STREAM_URL, isApiEnabled } from "../../constants/api";
+import { AI_CHAT_WS_URL, isApiEnabled } from "../../constants/api";
 import { useAiChatStore } from "../../stores/aiChatStore";
 import type {
   AiChatStreamEvent,
   ChatUiMessage,
   SendChatOptions,
 } from "../../types/aiChat";
+import {
+  formatAiChatStreamError,
+  formatAiChatToastError,
+} from "../../utils/aiChatErrors";
 import { buildApiChatHistory } from "../../utils/aiChatHistory";
-import { mockAiChatStream, streamAiChatRequest } from "../../utils/aiChatStream";
+import { streamAiChatWs } from "../../utils/aiChatWs";
+import { mockAiChatStream } from "../../utils/aiChatStream";
 import type { TypewriterReveal } from "../../utils/typewriterReveal";
-import { createMessageId } from "./createMessageId";
 
-export interface UseSseChatStreamOptions {
+export interface UseWsChatStreamOptions {
   welcomeText: string;
   mockReply: (query: string) => string;
   streamErrorText: string;
-  apiUrl?: string;
+  wsUrl?: string;
   activityLegacyIdRef: MutableRefObject<number | undefined>;
   sessionIdRef: MutableRefObject<string>;
   userIdRef: MutableRefObject<string | undefined>;
@@ -57,12 +61,12 @@ function applyStreamEventToStore(event: AiChatStreamEvent) {
   }
 }
 
-export function useSseChatStream(options: UseSseChatStreamOptions) {
+export function useWsChatStream(options: UseWsChatStreamOptions) {
   const {
     welcomeText,
     mockReply,
     streamErrorText,
-    apiUrl = AI_CHAT_STREAM_URL,
+    wsUrl = AI_CHAT_WS_URL,
     activityLegacyIdRef,
     sessionIdRef,
     userIdRef,
@@ -148,12 +152,22 @@ export function useSseChatStream(options: UseSseChatStreamOptions) {
         }
 
         if (event.type === "error") {
+          if (process.env.NODE_ENV !== "production") {
+            console.warn("[AI chat] stream error:", event.message);
+          }
           typewriter.flush();
           finishAiMessage((message) => ({
             ...message,
-            text: message.text || event.message,
+            text: event.message || message.text || streamErrorText,
             streaming: false,
           }));
+          void Taro.showToast({
+            title: formatAiChatToastError(
+              new Error(event.message),
+              streamErrorText,
+            ),
+            icon: "none",
+          });
           break;
         }
 
@@ -180,6 +194,7 @@ export function useSseChatStream(options: UseSseChatStreamOptions) {
       onPostCreated,
       persistSessionFromStream,
       setMessages,
+      streamErrorText,
     ],
   );
 
@@ -223,10 +238,10 @@ export function useSseChatStream(options: UseSseChatStreamOptions) {
       });
 
       try {
-        const useLiveApi = Boolean(apiUrl?.trim()) && isApiEnabled();
+        const useLiveApi = Boolean(wsUrl?.trim()) && isApiEnabled();
         const stream = useLiveApi
-          ? streamAiChatRequest({
-              url: apiUrl,
+          ? streamAiChatWs({
+              url: wsUrl,
               messages: history,
               sessionId: sessionIdRef.current,
               userId: userIdRef.current,
@@ -250,17 +265,15 @@ export function useSseChatStream(options: UseSseChatStreamOptions) {
           throw error;
         }
 
+        const displayError = formatAiChatStreamError(error, streamErrorText);
         typewriter.flush();
         finishAiMessage((message) => ({
           ...message,
-          text: message.text || streamErrorText,
+          text: message.text || displayError,
           streaming: false,
         }));
         void Taro.showToast({
-          title:
-            error instanceof Error && error.message
-              ? error.message
-              : streamErrorText,
+          title: formatAiChatToastError(error, streamErrorText),
           icon: "none",
         });
       } finally {
@@ -269,7 +282,7 @@ export function useSseChatStream(options: UseSseChatStreamOptions) {
     },
     [
       activityLegacyIdRef,
-      apiUrl,
+      wsUrl,
       createTypewriter,
       getAuthHeaders,
       messagesRef,

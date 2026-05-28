@@ -4,15 +4,22 @@ import { useNavigationStore } from "../stores/navigationStore";
 import type { NavigationState } from "../stores/navigationStore";
 import type { AiAssistantNavIntent } from "../stores/types";
 import type { NotificationMeta } from "../types/backend";
+import { parseActivityLegacyId } from "./activityLegacyId";
+import { buildQueryString, normalizeQueryString, parseQueryString } from "./queryString";
 import { PRELOAD_HOT_ROUTES_MS } from "./timing";
+
+export { parseActivityLegacyId } from "./activityLegacyId";
 
 export const ROUTES = {
   HOME: "/pages/index/index",
   EVENTS: "/pages/events/index",
   PROFILE: "/pages/profile/index",
+  PROFILE_ACTIVITIES: "/pages/profile-activities/index",
+  PROFILE_POSTS: "/pages/profile-posts/index",
   SETTINGS: "/pages/settings/index",
   AI_ASSISTANT: "/pages/ai-assistant/index",
   EVENT_DETAIL: "/pages/event-detail/index",
+  EVENT_MAP: "/pages/event-map/index",
   NOTIFICATIONS: "/pages/notifications/index",
   ALL_POSTS: "/pages/posts/index",
 } as const;
@@ -43,10 +50,58 @@ function pathsEqual(a: string, b: string): boolean {
   return normalizePath(a) === normalizePath(b);
 }
 
-function currentRoutePath(): string {
+function normalizeNavigationUrl(url: string): string {
+  const [rawPath, rawQuery = ""] = url.split("?");
+  const path = normalizePath(rawPath);
+  if (!rawQuery) {
+    return path;
+  }
+  const qs = normalizeQueryString(rawQuery);
+  return qs ? `${path}?${qs}` : path;
+}
+
+function currentPageUrl(): string {
   const pages = Taro.getCurrentPages();
-  const route = pages[pages.length - 1]?.route;
-  return route ? `/${route}` : "";
+  const page = pages[pages.length - 1] as
+    | { route?: string; options?: Record<string, string | undefined> }
+    | undefined;
+  if (!page?.route) {
+    return "";
+  }
+  const path = normalizePath(page.route);
+  const options = page.options ?? {};
+  const query: Record<string, string> = {};
+  for (const [key, value] of Object.entries(options)) {
+    if (value != null && value !== "") {
+      query[key] = String(value);
+    }
+  }
+  const qs = buildQueryString(query);
+  return qs ? `${path}?${qs}` : path;
+}
+
+function currentRoutePath(): string {
+  return normalizePath(currentPageUrl());
+}
+
+/** Resolve event-detail id from query params and optional navigation-store fallback. */
+export function resolveEventDetailIdFromQuery(
+  params: Record<string, string | undefined>,
+  fallbackLegacyId?: number | null,
+): number {
+  const fromId = parseActivityLegacyId(params.id);
+  if (fromId != null) {
+    return fromId;
+  }
+  const fromLegacy = parseActivityLegacyId(params.activityLegacyId);
+  if (fromLegacy != null) {
+    return fromLegacy;
+  }
+  const fromStore = parseActivityLegacyId(fallbackLegacyId);
+  if (fromStore != null) {
+    return fromStore;
+  }
+  return NaN;
 }
 
 function resolveFallback(fallback: RoutePath | unknown): RoutePath {
@@ -57,17 +112,41 @@ function buildPageUrl(path: RoutePath, query?: Record<string, string>): string {
   if (!query || Object.keys(query).length === 0) {
     return path;
   }
-  const params = new URLSearchParams(query);
-  return `${path}?${params.toString()}`;
+  const qs = buildQueryString(query);
+  return qs ? `${path}?${qs}` : path;
+}
+
+/** Decode query params that WeChat may leave percent-encoded (e.g. Chinese titles). */
+export function decodeRouteQueryParam(value?: string): string {
+  if (!value?.trim()) {
+    return "";
+  }
+  let decoded = value.trim();
+  for (let pass = 0; pass < 2; pass += 1) {
+    if (!/%[0-9A-Fa-f]{2}/.test(decoded)) {
+      break;
+    }
+    try {
+      const next = decodeURIComponent(decoded.replace(/\+/g, " "));
+      if (next === decoded) {
+        break;
+      }
+      decoded = next;
+    } catch {
+      break;
+    }
+  }
+  return decoded;
 }
 
 function shouldSkipNavigation(url: string): boolean {
-  const path = normalizePath(url);
-  if (pathsEqual(currentRoutePath(), path)) {
+  const target = normalizeNavigationUrl(url);
+  const current = normalizeNavigationUrl(currentPageUrl());
+  if (current && current === target) {
     return true;
   }
   const now = Date.now();
-  if (lastNavUrl === url && now - lastNavAt < NAV_DEBOUNCE_MS) {
+  if (lastNavUrl === target && now - lastNavAt < NAV_DEBOUNCE_MS) {
     return true;
   }
   return false;
@@ -76,7 +155,7 @@ function shouldSkipNavigation(url: string): boolean {
 function markNavigationStart(url: string) {
   isNavigating = true;
   lastNavAt = Date.now();
-  lastNavUrl = url;
+  lastNavUrl = normalizeNavigationUrl(url);
 }
 
 function markNavigationEnd() {
@@ -165,6 +244,7 @@ function navigateToSafe(url: string, options?: { eventId?: number }) {
           success: () => resolve(),
           fail: () => {
             endRouteTransition();
+            void Taro.showToast({ title: "页面打开失败", icon: "none" });
             resolve();
           },
           complete: () => {
@@ -202,14 +282,48 @@ export function go(url: RoutePath | string) {
   navigateToSafe(url);
 }
 
-export function goEventDetail(eventId: number, options?: { postId?: string }) {
-  useNavigationStore.getState().setActiveActivityLegacyId(eventId);
-  const query: Record<string, string> = { id: String(eventId) };
+export function goEventDetail(
+  eventId: number | string,
+  options?: { postId?: string },
+) {
+  const legacyId = parseActivityLegacyId(eventId);
+  if (legacyId == null) {
+    void Taro.showToast({ title: "活动信息无效", icon: "none" });
+    return;
+  }
+  useNavigationStore.getState().setActiveActivityLegacyId(legacyId);
+  const query: Record<string, string> = {
+    id: String(legacyId),
+    activityLegacyId: String(legacyId),
+  };
   const postId = options?.postId?.trim();
   if (postId) {
     query.postId = postId;
   }
-  navigateToSafe(buildPageUrl(ROUTES.EVENT_DETAIL, query), { eventId });
+  navigateToSafe(buildPageUrl(ROUTES.EVENT_DETAIL, query), { eventId: legacyId });
+}
+
+export type GoEventMapOptions = {
+  title?: string;
+  dateRange?: string;
+};
+
+export function goEventMap(activityLegacyId: number, options?: GoEventMapOptions) {
+  const query: Record<string, string> = {
+    activityLegacyId: String(activityLegacyId),
+  };
+  const title = options?.title?.trim();
+  if (title) {
+    query.title = title;
+  }
+  const dateRange = options?.dateRange?.trim();
+  if (dateRange) {
+    query.dateRange = dateRange;
+  }
+  if (activityLegacyId > 0) {
+    useNavigationStore.getState().setActiveActivityLegacyId(activityLegacyId);
+  }
+  navigateToSafe(buildPageUrl(ROUTES.EVENT_MAP, query));
 }
 
 function resolveActivityLegacyId(meta?: NotificationMeta): number | null {
@@ -260,6 +374,8 @@ export function goAiAssistant(options?: GoAiAssistantOptions) {
   if (options?.activityLegacyId != null && !Number.isNaN(options.activityLegacyId)) {
     intent.activityLegacyId = options.activityLegacyId;
     useNavigationStore.getState().setActiveActivityLegacyId(options.activityLegacyId);
+  } else {
+    useNavigationStore.getState().setActiveActivityLegacyId(null);
   }
   if (intent.initialMessage || intent.activityLegacyId != null) {
     useNavigationStore.getState().setAiAssistantIntent(intent);

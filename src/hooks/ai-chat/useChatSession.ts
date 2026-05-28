@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useDidShow } from "@tarojs/taro";
 import { fetchChatSession, clearChatSession } from "../../api/syncApi";
+import { useAiChatStore } from "../../stores/aiChatStore";
 import { mapHistoryToUiMessages } from "../../utils/aiChatHistory";
+import { isApiEnabled } from "../../constants/api";
 import {
   createFreshActivitySessionId,
   createFreshSessionId,
@@ -14,7 +16,6 @@ import { createMessageId } from "./createMessageId";
 
 export interface UseChatSessionOptions {
   welcomeText: string;
-  apiUrl?: string;
   sessionId?: string;
   activityLegacyId?: number;
   userId?: string;
@@ -43,7 +44,7 @@ function createFreshSessionIdForScope(
 }
 
 export function useChatSession(options: UseChatSessionOptions) {
-  const { welcomeText, apiUrl, activityLegacyId } = options;
+  const { welcomeText, activityLegacyId } = options;
   const activityLegacyIdRef = useRef(activityLegacyId);
 
   const sessionIdRef = useRef(
@@ -74,15 +75,23 @@ export function useChatSession(options: UseChatSessionOptions) {
     isStreamingRef.current = value;
   }, []);
 
+  const cancelHistoryLoad = useCallback(() => {
+    historyLoadSeqRef.current += 1;
+    setIsLoadingHistory(false);
+  }, []);
+
   const showWelcome = useCallback(() => {
     setMessages([{ id: createMessageId(), from: "ai", text: welcomeText }]);
   }, [welcomeText]);
 
   const loadSessionHistory = useCallback(async () => {
-    if (isStreamingRef.current) return;
+    if (isStreamingRef.current) {
+      setIsLoadingHistory(false);
+      return;
+    }
     if (hasLoadedHistoryRef.current) return;
 
-    if (!apiUrl) {
+    if (!isApiEnabled()) {
       showWelcome();
       hasLoadedHistoryRef.current = true;
       return;
@@ -105,6 +114,10 @@ export function useChatSession(options: UseChatSessionOptions) {
       const uiMessages = session.history?.length
         ? mapHistoryToUiMessages(session.history, requestSessionId)
         : [];
+      if (session.conversationState) {
+        useAiChatStore.getState().applyConversationPatch(session.conversationState);
+      }
+
       if (uiMessages.length > 0) {
         setMessages(uiMessages);
       } else {
@@ -125,7 +138,7 @@ export function useChatSession(options: UseChatSessionOptions) {
         setIsLoadingHistory(false);
       }
     }
-  }, [apiUrl, showWelcome]);
+  }, [showWelcome]);
 
   useEffect(() => {
     const nextSessionId = resolveSessionId(
@@ -135,9 +148,13 @@ export function useChatSession(options: UseChatSessionOptions) {
     if (sessionIdRef.current === nextSessionId) return;
 
     historyLoadSeqRef.current += 1;
+    setIsLoadingHistory(false);
     hasLoadedHistoryRef.current = false;
     sessionIdRef.current = nextSessionId;
-    showWelcome();
+    const hasUserMessages = messagesRef.current.some((m) => m.from === "user");
+    if (!hasUserMessages && !isStreamingRef.current) {
+      showWelcome();
+    }
     void loadSessionHistory();
   }, [activityLegacyId, loadSessionHistory, options.sessionId, showWelcome]);
 
@@ -191,5 +208,6 @@ export function useChatSession(options: UseChatSessionOptions) {
     userPhoneRef,
     setIsStreamingRef,
     isStreamingRef,
+    cancelHistoryLoad,
   };
 }
