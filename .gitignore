@@ -11,6 +11,7 @@ node_modules
 dist
 dist-ssr
 dist-weapp
+dist-h5
 *.local
 
 # Editor directories and files

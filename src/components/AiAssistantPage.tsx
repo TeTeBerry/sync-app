@@ -104,7 +104,7 @@ function AiAssistantChat({
       if (submitLockRef.current) return;
       const trimmed = text.trim();
       const hasImages = images && images.length> 0;
-      if ((!trimmed && !hasImages) || isStreaming) return;
+      if ((!trimmed && !hasImages) || isStreaming || isLoadingHistory) return;
 
       submitLockRef.current = true;
       try {
@@ -115,7 +115,7 @@ function AiAssistantChat({
         submitLockRef.current = false;
       }
     },
-    [isStreaming, send],
+    [isLoadingHistory, isStreaming, send],
   );
 
   const handleClearChat = useCallback(async () => {
@@ -160,6 +160,7 @@ function AiAssistantChat({
           input={input}
           pendingImages={pendingImages}
           isStreaming={isStreaming}
+          isLoadingHistory={isLoadingHistory}
           activityLegacyId={activityLegacyId}
           onInputChange={setInput}
           onSubmit={submit}
@@ -243,7 +244,7 @@ const AiAssistantPage: FC = () => {
         <View className="s-ai-assistant__header">
         <Button className="s-ai-assistant__back-btn"
           onClick={handleBack}>
-          <ChevronLeft size={20} />
+          <ChevronLeft size={22} />
         </Button>
 
         <View className="s-ai-assistant__header-main">

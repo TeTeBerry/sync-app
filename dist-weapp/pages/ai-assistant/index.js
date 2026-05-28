@@ -1,1 +1,2050 @@
-"use strict";(wx["webpackJsonp"]=wx["webpackJsonp"]||[]).push([[880],{1889:function(e,s,t){var a=t(8870),n=t(6540),r=t(62),i=t(5036),c=t(758),o=t.n(c),l=t(2529),u=t(687),d=t(8697),m=t(775);function h(){return`${Date.now()}-${Math.random().toString(36).slice(2,9)}`}var g=t(1835);function p(e,s){const t=e.imagePreview||s;if(t||e.ocrText)return{source:t,ocrText:e.ocrText}}function f(e,s){return e.filter(e=>"user"===e.role||"assistant"===e.role).map((e,t)=>({id:`${s}-${t}`,from:"user"===e.role?"user":"ai",text:e.content,imagePreview:e.imageContext?.source,ocrText:e.imageContext?.ocrText,recommendedPosts:e.recommendedPosts,createdPost:e.createdPost,suggestedReplies:e.suggestedReplies}))}function y(e,s,t,a){const n=e.filter(e=>!e.streaming&&(e.text||e.imagePreview||e.ocrText||e.recommendedPosts?.length||e.createdPost||e.suggestedReplies?.length)),r=[];for(let e=0;e<n.length;e+=1){const t=n[e];0===e&&"ai"===t.from&&t.text===s||r.push({role:"user"===t.from?"user":"assistant",content:t.text||t.ocrText||"",imageContext:p(t),recommendedPosts:t.recommendedPosts,createdPost:t.createdPost,suggestedReplies:t.suggestedReplies})}return(t||a)&&r.push({role:"user",content:t?.trim()||"",imageContext:a?{source:a}:void 0}),r}function x(e,s){return e?.trim()?e.trim():null==s||Number.isNaN(s)?(0,m.rm)():(0,m.Yh)(s)}function _(e){return null==e||Number.isNaN(e)?(0,m.sV)():(0,m.jc)(e)}function b(e){const{welcomeText:s,apiUrl:t,activityLegacyId:a}=e,r=(0,n.useRef)(a),i=(0,n.useRef)(x(e.sessionId,a)),o=(0,n.useRef)(e.userId),l=(0,n.useRef)(e.userName),u=(0,n.useRef)(e.userPhone),d=(0,n.useRef)(0),p=(0,n.useRef)(!1),[y,b]=(0,n.useState)(()=>[{id:h(),from:"ai",text:s}]),[v,j]=(0,n.useState)(!1),N=(0,n.useRef)(y),I=(0,n.useRef)(!1);(0,n.useEffect)(()=>{N.current=y},[y]),(0,n.useEffect)(()=>{r.current=a},[a]);const S=(0,n.useCallback)(e=>{I.current=e},[]),w=(0,n.useCallback)(()=>{b([{id:h(),from:"ai",text:s}])},[s]),C=(0,n.useCallback)(async()=>{if(I.current)return;if(p.current)return;if(!t)return w(),void(p.current=!0);const e=i.current,s=++d.current;j(!0);try{const t=await(0,g.hj)(e);if(s!==d.current||e!==i.current||I.current)return;const a=t.history?.length?f(t.history,e):[];a.length>0?b(a):w(),p.current=!0}catch{s!==d.current||e!==i.current||I.current||w(),p.current=!0}finally{s===d.current&&j(!1)}},[t,w]);(0,n.useEffect)(()=>{const s=x(e.sessionId,a);i.current!==s&&(d.current+=1,p.current=!1,i.current=s,w(),C())},[a,C,e.sessionId,w]),(0,n.useEffect)(()=>{C()},[C]),(0,c.useDidShow)(()=>{C()});const k=(0,n.useCallback)(async()=>{d.current+=1,p.current=!1;const e=i.current;try{await(0,g.mc)(e)}catch{}const s=_(r.current);return i.current=s,(0,m.qm)(s,r.current),N.current=[],b([]),w(),s},[w]),T=(0,n.useCallback)(e=>{i.current=e,(0,m.qm)(e,r.current)},[]);return{messages:y,setMessages:b,messagesRef:N,isLoadingHistory:v,loadSessionHistory:C,showWelcome:w,resetSession:k,persistSessionFromStream:T,sessionIdRef:i,userIdRef:o,userNameRef:l,userPhoneRef:u,setIsStreamingRef:S,isStreamingRef:I}}function v(e){if(!e.startsWith("data:"))return null;const s=e.slice(5).trim();if(!s||"[DONE]"===s)return{type:"done"};try{const e=JSON.parse(s);if("error"===e.type)return{type:"error",message:String(e.message??"Unknown error")};if("delta"===e.type&&"string"===typeof e.content)return{type:"delta",content:e.content};if("message_complete"===e.type&&"string"===typeof e.content)return{type:"message_complete",content:e.content,requestId:"string"===typeof e.requestId?e.requestId:void 0};if("done"===e.type)return{type:"done",messageId:e.messageId,sessionId:e.sessionId};if("post_created"===e.type&&"string"===typeof e.postId){const s=e.post&&"object"===typeof e.post?e.post:void 0;return{type:"post_created",postId:e.postId,activityLegacyId:"number"===typeof e.activityLegacyId?e.activityLegacyId:void 0,post:s&&"string"===typeof s.postId&&"string"===typeof s.snippet?s:void 0}}if("existing_post"===e.type&&"string"===typeof e.postId)return{type:"existing_post",postId:e.postId,activityLegacyId:"number"===typeof e.activityLegacyId?e.activityLegacyId:void 0};if("post_recommendations"===e.type&&Array.isArray(e.posts))return{type:"post_recommendations",posts:e.posts,degraded:"boolean"===typeof e.degraded?e.degraded:void 0};if("suggested_replies"===e.type&&Array.isArray(e.replies))return{type:"suggested_replies",replies:e.replies.filter(e=>"string"===typeof e)};if("conversation_patch"===e.type&&e.state&&"object"===typeof e.state)return{type:"conversation_patch",state:e.state};if("string"===typeof e.content)return{type:"delta",content:e.content};if("string"===typeof e.delta)return{type:"delta",content:e.delta}}catch{return{type:"delta",content:s}}return null}async function*j(e){const s=e.split(/\r?\n/);for(const e of s){const s=e.trim();if(!s||s.startsWith(":"))continue;const t=v(s);t&&(yield t)}}async function*N(e){const s=await o().request({url:e.url,method:"POST",header:{"Content-Type":"application/json",Accept:"text/event-stream",...e.headers},data:{messages:e.messages,sessionId:e.sessionId,userId:e.userId,userName:e.userName,userPhone:e.userPhone,activityLegacyId:e.activityLegacyId,image:e.image,images:e.images},timeout:6e4});if(200!==s.statusCode)throw new Error(`AI chat failed (${s.statusCode})`);const t="string"===typeof s.data?s.data:JSON.stringify(s.data);yield*j(t)}async function*I(e){e&&(yield{type:"delta",content:e}),yield{type:"done"}}function S(e){const s=d.r.getState();"conversation_patch"!==e.type?"suggested_replies"!==e.type?"post_recommendations"===e.type&&s.setPostRecommendationsMeta(e.degraded):s.setSuggestedReplies(e.replies):s.applyConversationPatch(e.state)}function w(e){const{welcomeText:s,mockReply:t,streamErrorText:a,apiUrl:r=u.PD,activityLegacyIdRef:i,sessionIdRef:c,userIdRef:o,userNameRef:l,userPhoneRef:d,messagesRef:m,setMessages:h,getAuthHeaders:g,onPostCreated:p,onExistingPost:f,persistSessionFromStream:x,createTypewriter:_,typewriterCharDelayMs:b=22}=e,v=(0,n.useCallback)(async(e,s,t)=>{const a=e=>{h(t=>t.map(t=>t.id===s?e(t):t))};for await(const s of e)if(S(s),"delta"!==s.type)if("message_complete"!==s.type)if("post_created"!==s.type)if("existing_post"!==s.type)if("post_recommendations"!==s.type)if("suggested_replies"!==s.type){if("conversation_patch"!==s.type){if("error"===s.type){t.flush(),a(e=>({...e,text:e.text||s.message,streaming:!1}));break}if("done"===s.type){a(e=>({...e,streaming:!1})),await t.waitUntilComplete(),a(e=>({...e,text:t.getTarget()||e.text,streaming:!1})),s.sessionId&&x(s.sessionId);break}}}else a(e=>({...e,suggestedReplies:s.replies}));else a(e=>({...e,recommendedPosts:s.posts}));else f?.(s);else p?.(s),s.post&&a(e=>({...e,createdPost:s.post}));else t.getTarget()?t.ensureTarget(s.content):t.append(s.content);else t.append(s.content)},[f,p,x,h]),j=(0,n.useCallback)(async(e,n,u)=>{const{text:p,image:f,images:x}=e,j=p.trim(),S=i.current,w=null!=S?{"X-Activity-Id":String(S)}:void 0,C=y(m.current,s,j,f),k=e=>{h(s=>s.map(s=>s.id===n?e(s):s))},T=_({charDelayMs:b,onUpdate:e=>{k(s=>({...s,text:e}))}});try{const e=r?N({url:r,messages:C,sessionId:c.current,userId:o.current,userName:l.current,userPhone:d.current,activityLegacyId:S,image:f,images:x,signal:u,headers:{...w,...g?.()}}):I(t(j));await v(e,n,T)}catch(e){if("AbortError"===e.name)throw T.stop(),e;T.flush(),k(e=>({...e,text:e.text||a,streaming:!1}))}finally{k(e=>({...e,streaming:!1}))}},[i,r,_,g,m,t,v,c,a,b,o,l,d,s]);return{runStream:j}}function C(e){const s=e.charDelayMs??22;let t="",a="",n=null,r=null;const i=()=>{if(a.length>=t.length&&!n&&r){const e=r;r=null,e()}},c=()=>{if(a.length>=t.length)return n=null,void i();a=t.slice(0,a.length+1),e.onUpdate(a),n=setTimeout(c,s)},o=()=>{null==n&&a.length<t.length&&c()},l=()=>{n&&(clearTimeout(n),n=null),a=t,e.onUpdate(a),i()};return{append(e){e&&(t+=e,o())},ensureTarget(e){e&&(e.length<=t.length||(t=e,o()))},setFullText(e){t=e,l()},flush:l,stop(){n&&(clearTimeout(n),n=null)},waitUntilComplete(){return a.length>=t.length&&!n?Promise.resolve():new Promise(e=>{r=e,o()})},getTarget:()=>t}}function k(){const e=(0,n.useRef)(null),s=(0,n.useCallback)(s=>{const t=C({charDelayMs:s.charDelayMs,onUpdate:s.onUpdate});return e.current=t,t},[]),t=(0,n.useCallback)(()=>e.current,[]);return{createTypewriter:s,getActiveTypewriter:t}}function T(e){const{welcomeText:s,mockReply:t,streamErrorText:a,apiUrl:r=u.PD,sessionId:i,userId:c,userName:o,userPhone:l,activityLegacyId:g,getAuthHeaders:p,onPostCreated:f,onExistingPost:y,typewriterCharDelayMs:x=22}=e,_=(0,n.useRef)(g),[v,j]=(0,n.useState)(!1),N=(0,n.useRef)(null),{messages:I,setMessages:S,messagesRef:C,isLoadingHistory:T,loadSessionHistory:R,resetSession:E,persistSessionFromStream:P,sessionIdRef:A,userIdRef:L,userNameRef:M,userPhoneRef:Y,setIsStreamingRef:$}=b({welcomeText:s,apiUrl:r,sessionId:i,activityLegacyId:g,userId:c??(0,m.a7)(),userName:o??(0,m.m2)(),userPhone:l??(0,m.t8)()}),{createTypewriter:U}=k(),{runStream:D}=w({welcomeText:s,mockReply:t,streamErrorText:a,apiUrl:r,activityLegacyIdRef:_,sessionIdRef:A,userIdRef:L,userNameRef:M,userPhoneRef:Y,messagesRef:C,setMessages:S,getAuthHeaders:p,onPostCreated:f,onExistingPost:y,persistSessionFromStream:P,createTypewriter:U,typewriterCharDelayMs:x});(0,n.useEffect)(()=>{_.current=g},[g]),(0,n.useEffect)(()=>{$(v)},[v,$]),(0,n.useEffect)(()=>()=>N.current?.abort(),[]);const z=(0,n.useCallback)(()=>{N.current?.abort()},[]),F=(0,n.useCallback)(async e=>{const s="string"===typeof e?{text:e}:e,{text:t,image:a,images:n}=s,r=t.trim(),i=Boolean(a)||n&&n.length>0;if(!r&&!i)return;const c=C.current[C.current.length-1];if(c?.streaming)return;const o={id:h(),from:"user",text:r,imagePreview:a??n?.[0],ocrText:i?r:void 0},l=h(),u=C.current,d=[...u,o,{id:l,from:"ai",text:"",streaming:!0}];C.current=d,S(d),j(!0);const m=new AbortController;N.current=m;try{await D(s,l,m.signal)}catch(e){if("AbortError"===e.name)return}finally{j(!1),N.current=null}},[C,D,S]),H=(0,n.useCallback)(async()=>{N.current?.abort(),d.r.getState().resetOnClearSession(),await E(),j(!1)},[E]);return{messages:I,isStreaming:v,isLoadingHistory:T,send:F,abort:z,reloadHistory:R,clearChat:H,sessionId:A.current}}var R=t(1976),E=t(9014);function P(){const e=(0,E.Tt)(),s=(0,u.Ki)();return(0,n.useMemo)(()=>s&&e.data?e.data:R.n,[s,e.data])}var A=t(2500),L=t(9474),M=t(631),Y=t(118),$=t(4848);function U({avatar:e,name:s}){const t=s.trim().charAt(0).toUpperCase()||"\u6211";return e?.trim()?(0,$.jsx)(Y._V,{className:"s-ai-assistant-chat__avatar s-ai-assistant-chat__avatar--user",src:e,alt:s}):(0,$.jsx)(Y.EY,{className:"s-ai-assistant-chat__avatar s-ai-assistant-chat__avatar--user s-ai-assistant-chat__avatar--fallback","aria-hidden":!0,children:t})}function D(e){if("female"===e.authorGender||"male"===e.authorGender)return e.authorGender;const s=[...e.tags??[],e.snippet??""].join(" ");if(/(\d+)\u4eba\u5973\u751f|\u5973\u751f\u540c\u884c|\u6211\u4eec\u5973\u751f|\u5973\u751f\u4e00\u8d77/i.test(s)&&!/\u7537\u751f\u5973\u751f\u90fd\u53ef|\u7537\u5973\u90fd\u53ef/i.test(s))return"female";if(/(\d+)\u7f3a\d*\u7537\u751f|\u7f3a\d*\u7537\u751f|(\d+)\u4eba\u7537\u751f|\u7537\u751f\u62fc\u8f66/i.test(s)&&!/\u7537\u751f\u5973\u751f\u90fd\u53ef|\u7537\u5973\u90fd\u53ef/i.test(s))return"male";if(/\u5973\u751f\u4f18\u5148|\u9650\u5973\u751f|\u53ea\u8981\u5973\u751f|\u5973\u5b69\u5b50\u66f4\u597d/i.test(s))return"female";const t=e.authorName?.trim().toLowerCase()??"",a=t.split(/\s+/)[0]??t;return["luna","zara","mia","jade","nova","chen"].some(e=>a.includes(e))?"female":["ryan","sam","leo","kai","alex"].some(e=>a.includes(e))?"male":void 0}const z=({post:e,highlight:s=!1})=>{const t=D(e),a=t?`s-ai-assistant-post-card__name s-ai-assistant-post-card__name--${t}`:"s-ai-assistant-post-card__name",n=()=>{const s=e.activityLegacyId;null==s||Number.isNaN(s)||(0,L.W0)(s,{postId:e.postId})};return(0,$.jsxs)(Y.$n,{className:s?"s-ai-assistant-post-card s-ai-assistant-post-card--mine":"s-ai-assistant-post-card",onClick:n,children:[(0,$.jsxs)(Y.Ss,{className:"s-ai-assistant-post-card__header",children:[e.authorAvatar?(0,$.jsx)(Y._V,{className:"s-ai-assistant-post-card__avatar",src:e.authorAvatar,decoding:"async"}):(0,$.jsx)(Y.EY,{className:"s-ai-assistant-post-card__avatar s-ai-assistant-post-card__avatar--fallback",children:e.authorName.slice(0,1)}),(0,$.jsxs)(Y.Ss,{className:"s-ai-assistant-post-card__meta",children:[(0,$.jsx)(Y.EY,{style:{fontWeight:"bold"},className:a,children:e.authorName}),e.authorHandle?(0,$.jsx)(Y.EY,{children:e.authorHandle}):null,(0,$.jsx)(Y.EY,{children:e.eventTitle})]})]}),(0,$.jsx)(Y.EY,{className:"s-ai-assistant-post-card__body",children:e.snippet}),e.location?(0,$.jsxs)(Y.EY,{className:"s-ai-assistant-post-card__location",children:[(0,$.jsx)(i.sDd,{size:12}),(0,$.jsx)(Y.EY,{children:e.location})]}):null,e.tags?.length?(0,$.jsx)(Y.Ss,{className:"s-ai-assistant-post-card__tags",children:e.tags.slice(0,3).map(e=>(0,$.jsx)(Y.EY,{children:e},e))}):null,(0,$.jsx)(Y.EY,{className:"s-ai-assistant-post-card__cta",children:"\u67e5\u770b\u5e16\u5b50"})]})};var F=z;const H=(0,n.memo)(function({posts:e,variant:s="recommend"}){return e.length?(0,$.jsx)(Y.Ss,{className:"s-ai-assistant-chat__post-cards",children:e.map(e=>(0,$.jsx)(F,{post:e,highlight:"created"===s},e.postId))}):null}),O="\u786e\u8ba4\u53d1\u5e03";function q({replies:e,disabled:s,onSelect:t}){const a=(0,d.r)(e=>e.suggestedReplies),n=e?.length?e:a;return n.length?(0,$.jsx)(Y.Ss,{className:"s-ai-assistant-chat__copy-row",children:n.map(e=>(0,$.jsx)(M.$n,{className:(0,M.cn)("s-ai-assistant-chat__copy-chip",e===O&&"s-ai-assistant-chat__copy-chip--primary"),disabled:s,onClick:()=>t(e),children:e},e))}):null}var B=t(2248);function W(e){const s=Number(e.split("-")[0]);if(!Number.isFinite(s)||s<=0)return null;const t=new Date(s);return t.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit",hour12:!1})}function V({messages:e,isStreaming:s,userAvatar:t,userName:a,onSelectSuggestedReply:r}){const[c,o]=(0,n.useState)(),l=(0,n.useCallback)(()=>{const s=e[e.length-1];if(!s)return;const t=`chat-msg-${s.id}`;o(void 0),setTimeout(()=>o(t),0)},[e]);(0,n.useLayoutEffect)(()=>{l()},[e,s,l]);const u=(0,n.useCallback)(s=>{if(0===s)return!0;const t=e[s],a=e[s-1];return t.from!==a.from},[e]);return(0,$.jsx)(Y.BM,{scrollY:!0,enhanced:!0,showScrollbar:!1,scrollIntoView:c,scrollWithAnimation:!0,className:"s-ai-assistant-chat__scroll s-scrollbar-none",children:(0,$.jsx)(Y.Ss,{className:"s-ai-assistant-chat__scroll-inner",children:e.map((e,c)=>{const o="user"===e.from,l=W(e.id);return(0,$.jsxs)(n.Fragment,{children:[u(c)&&l?(0,$.jsx)(Y.EY,{className:"s-ai-assistant-chat__timestamp",children:l}):null,(0,$.jsxs)(Y.Ss,{id:`chat-msg-${e.id}`,className:(0,M.cn)("s-ai-assistant-chat__row",o&&"s-ai-assistant-chat__row--from-user"),children:[o?null:(0,$.jsx)(Y.Ss,{className:"s-ai-assistant-chat__avatar s-ai-assistant-chat__avatar--ai",children:(0,$.jsx)(i.sUz,{size:14})}),(0,$.jsx)(Y.Ss,{className:(0,M.cn)("s-ai-assistant-chat__content",o&&"s-ai-assistant-chat__content--from-user"),children:(0,$.jsx)(Y.Ss,{className:(0,M.cn)("s-ai-assistant-chat__bubble",o?"s-ai-assistant-chat__bubble--from-user":"s-ai-assistant-chat__bubble--from-ai",e.streaming&&"s-ai-assistant-chat__bubble--streaming",e.streaming&&!e.text&&"s-ai-assistant-chat__bubble--waiting"),children:e.streaming&&!e.text?(0,$.jsxs)(Y.EY,{className:"s-ai-assistant-chat__typing","aria-label":"AI \u6b63\u5728\u601d\u8003",children:[(0,$.jsx)(Y.EY,{}),(0,$.jsx)(Y.EY,{}),(0,$.jsx)(Y.EY,{})]}):(0,$.jsxs)($.Fragment,{children:[e.imagePreview?(0,$.jsx)(Y.$n,{className:"s-ai-assistant-chat__bubble-image-btn","aria-label":"\u67e5\u770b\u5927\u56fe",onClick:()=>(0,B.U)(e.imagePreview),children:(0,$.jsx)(Y._V,{className:"s-ai-assistant-chat__bubble-image",src:e.imagePreview,alt:"\u5df2\u4e0a\u4f20\u7684\u56fe\u7247"})}):null,e.text?(0,$.jsx)(Y.EY,{children:e.text}):null,e.createdPost?(0,$.jsx)(H,{posts:[e.createdPost],variant:"created"}):null,e.recommendedPosts?.length?(0,$.jsx)(H,{posts:e.recommendedPosts}):null,e.suggestedReplies?.length?(0,$.jsx)(q,{replies:e.suggestedReplies,disabled:s,onSelect:r}):null]})})}),o?(0,$.jsx)(U,{avatar:t,name:a}):null]})]},e.id)})})})}var G=t(4634);const J=10485760;class K extends Error{constructor(){super("IMAGE_TOO_LARGE"),this.name="ChatImageTooLargeError"}}function X(e){const s=e.includes(",")?e.split(",")[1]:e;return Math.ceil(3*s.length/4)}function Q(e){const s=o().getFileSystemManager();return new Promise((t,a)=>{s.readFile({filePath:e,encoding:"base64",success:e=>{const s="string"===typeof e.data?e.data:"";t(`data:image/jpeg;base64,${s}`)},fail:e=>a(new Error(e.errMsg||"FILE_READ_FAILED"))})})}async function Z(e){let s=e,t=80;for(let e=0;e<6;e+=1){const e=await o().compressImage({src:s,quality:t}).catch(()=>null);e?.tempFilePath&&(s=e.tempFilePath);const a=await Q(s);if(X(a)<=J)return a;t=Math.max(35,t-10)}const a=await Q(s);if(X(a)>J)throw new K;return a}async function ee(e=6){const s=await o().chooseImage({count:e,sizeType:["compressed"],sourceType:["album","camera"]}).catch(()=>null),t=s?.tempFilePaths??[];if(!t.length)return[];const a=[];for(const e of t)try{const s=await Z(e);a.push(s)}catch{}return a}const se={"\u7ec4\u961f\u961f\u53cb":"\u7ec4\u961f\u961f\u53cb","\u4f4f\u5bbf\u540c\u884c":"\u4f4f\u5bbf\u540c\u884c","\u62fc\u8f66\u540c\u884c":"\u62fc\u8f66\u540c\u884c"},te=[{key:"findBuddy",label:"\u5e2e\u6211dd",submitText:"\u5e2e\u6211dd"},{key:"nearEvents",label:"\u67e5\u6700\u8fd1\u6d3b\u52a8",submitText:"\u67e5\u6700\u8fd1\u6d3b\u52a8"},{key:"findPartner",label:"\u5e2e\u6211\u627e\u642d\u5b50",submitText:"\u5e2e\u6211\u627e\u642d\u5b50"},{key:"popularEvents",label:"\u70ed\u95e8\u6d3b\u52a8",submitText:"\u67e5\u6700\u8fd1\u6d3b\u52a8"}],ae=[{key:"createOwn",label:"\u81ea\u5df1\u53d1\u5e16",submitText:"\u81ea\u5df1\u53d1\u5e16"},{key:"searchPosts",label:"\u67e5\u7ec4\u961f\u5e16",submitText:"\u770b\u770b\u6709\u6ca1\u6709\u7ec4\u961f\u5e16"}],ne=6;function re({input:e,pendingImages:s,isStreaming:t,activityLegacyId:a,onInputChange:r,onSubmit:c,onPendingImagesChange:l}){const[u,m]=(0,n.useState)(()=>(0,G.zo)()),h=(0,d.r)(e=>e.conversationState?.flow),g="collect_post_body"===h?"\u63cf\u8ff0\u4f60\u7684\u7ec4\u961f\u9700\u6c42\uff0c\u5982\u51fa\u53d1\u5730\u3001\u4eba\u6570\u3001\u65e5\u671f\u2026":"\u8bf4\u8bf4\u4f60\u60f3\u53bb\u54ea\u3001\u60f3\u627e\u4ec0\u4e48\u6837\u7684\u540c\u884c\u2026",p=(0,n.useMemo)(()=>{if(null!=a&&!Number.isNaN(a)){const e=u.map(e=>{const s=se[e]??e;return{key:`tag-${e}`,label:s,submitText:(0,G.mS)(e),isShortcutTag:!0}}),s=ae.map(e=>({key:e.key,label:e.label,submitText:e.submitText}));return[s[0],...e,...s.slice(1)]}return te.map(e=>({key:e.key,label:e.label,submitText:e.submitText}))},[a,u]),f=(0,n.useCallback)(async()=>{if(t)return;const e=ne-s.length;if(e<=0)o().showToast({title:`\u6700\u591a\u4e0a\u4f20 ${ne} \u5f20\u56fe\u7247`,icon:"none"});else try{const t=await ee(e);t.length&&l([...s,...t].slice(0,ne))}catch(e){if(e instanceof K)return void o().showToast({title:"\u56fe\u7247\u8fc7\u5927\uff0c\u8bf7\u538b\u7f29\u81f3 10MB \u4ee5\u5185",icon:"none"});o().showToast({title:"\u8bf7\u6c42\u5931\u8d25\uff0c\u8bf7\u7a0d\u540e\u91cd\u8bd5",icon:"none"})}},[t,s,l]),y=(0,n.useCallback)(e=>{l(s.filter((s,t)=>t!==e))},[s,l]),x=(0,n.useCallback)(e=>{e.isShortcutTag&&((0,G.vq)(e.submitText),m((0,G.zo)())),c(e.submitText,s)},[c,s]),_=Boolean(e.trim()||s.length)&&!t;return(0,$.jsxs)($.Fragment,{children:[(0,$.jsx)(Y.Ss,{className:"s-ai-assistant-chat__quick-row s-scrollbar-none",children:p.map(e=>(0,$.jsx)(M.$n,{className:"s-ai-assistant-chat__quick-chip",disabled:t,onClick:()=>x(e),children:e.label},e.key))}),(0,$.jsxs)(Y.Ss,{className:"s-ai-assistant-chat__composer",children:[s.length>0?(0,$.jsx)(Y.BM,{scrollY:!0,enhanced:!0,showScrollbar:!1,className:"s-ai-assistant-chat__attach-preview-list s-scrollbar-none",style:{height:"160px"},children:s.map((e,t)=>(0,$.jsxs)(Y.Ss,{className:"s-ai-assistant-chat__attach-thumb",children:[(0,$.jsx)(M.$n,{className:"s-ai-assistant-chat__attach-preview-btn","aria-label":"\u67e5\u770b\u5927\u56fe",onClick:()=>{(0,B.I)(s,t)},children:(0,$.jsx)(Y._V,{src:e,alt:"\u5df2\u4e0a\u4f20\u7684\u56fe\u7247"})}),(0,$.jsx)(M.$n,{className:"s-ai-assistant-chat__attach-remove","aria-label":"\u79fb\u9664\u56fe\u7247",onClick:()=>y(t),children:(0,$.jsx)(i.X,{size:14})})]},`${e.slice(0,40)}-${t}`))}):null,(0,$.jsxs)(Y.Ss,{className:"s-ai-assistant-chat__composer-inner",children:[(0,$.jsx)(M.$n,{className:"s-ai-assistant-chat__attach-btn",disabled:t||s.length>=ne,"aria-label":"\u4e0a\u4f20\u56fe\u7247",onClick:()=>{f()},children:(0,$.jsx)(i.ePb,{size:18})}),(0,$.jsx)(M.pd,{variant:"ai-assistant-chat",type:"text",value:e,disabled:t,placeholder:g,onChange:e=>r(e.target.value),onConfirm:()=>c(e,s)}),(0,$.jsx)(M.$n,{className:(0,M.cn)("s-ai-assistant-chat__send",_&&"s-ai-assistant-chat__send--active"),disabled:!_,onClick:()=>c(e,s),children:(0,$.jsx)(i.Vnp,{size:16})})]}),(0,$.jsxs)(Y.EY,{className:"s-ai-assistant-chat__disclaimer",children:[(0,$.jsx)(i.ekZ,{size:12,"aria-hidden":!0}),(0,$.jsx)(Y.EY,{children:"AI \u5185\u5bb9\u4ec5\u4f9b\u53c2\u8003"})]})]})]})}function ie(){const e=(0,d.r)(e=>e.degraded);return e?(0,$.jsx)(Y.EY,{className:"s-ai-assistant-chat__degraded-banner",role:"status",children:"\u5339\u914d\u7ed3\u679c\u53ef\u80fd\u4e0d\u5b8c\u6574\uff0c\u5df2\u5c55\u793a\u53ef\u7528\u63a8\u8350"}):null}var ce=t(7121),oe=t(1933),le=t(3682),ue=t(9891);const de=100;function me({initialMessage:e,activityLegacyId:s,onInitialMessageSent:t,onClearReady:a,onMessageCountChange:r,chatBodyHeight:i,userAvatar:c,userName:u}){const[d,m]=(0,n.useState)(""),[h,g]=(0,n.useState)([]),p=n.useRef(null),f=n.useRef(!1),y=n.useRef(!1),x=(0,n.useCallback)(e=>`\u6b63\u5728\u4e3a\u4f60\u641c\u7d22\u300c${e}\u300d\u76f8\u5173\u5185\u5bb9 \ud83d\udd0d \u5df2\u627e\u5230 ${Math.floor(5*Math.random()+3)} \u6761\u76f8\u5173\u4fe1\u606f\u3002`,[]),{messages:_,isStreaming:b,isLoadingHistory:v,send:j,clearChat:N}=T({welcomeText:"\ud83d\udc4b \u6211\u662f\u4f60\u7684 AI \u667a\u80fd\u52a9\u624b\uff0c\u5e2e\u4f60\u53d1\u73b0\u6d3b\u52a8\u3001\u627e\u961f\u53cb\u3001\u89c4\u5212\u884c\u7a0b\uff0c\u8bf4\u51fa\u9700\u6c42\uff0c\u6211\u6765\u641e\u5b9a\u3002",mockReply:x,streamErrorText:"\u62b1\u6b49\uff0c\u56de\u590d\u51fa\u9519\u4e86\uff0c\u8bf7\u7a0d\u540e\u518d\u8bd5\u3002",activityLegacyId:s,onPostCreated:async e=>{await(0,E.OR)();const t=e.activityLegacyId??s;null!=t&&(0,l.gm)(["posts","activity",t]),o().showToast({title:"\u7ec4\u961f\u5e16\u5df2\u53d1\u5e03",icon:"success"})},onExistingPost:()=>{o().showToast({title:"\u4f60\u5df2\u6709\u7ec4\u961f\u5e16\uff0c\u8bf7\u53bb\u300c\u6211\u7684\u300d\u7f16\u8f91\u6216\u5728\u6d3b\u52a8\u8be6\u60c5\u67e5\u770b",icon:"none",duration:2500})}});(0,n.useEffect)(()=>{r?.(_.length)},[_.length,r]),(0,n.useEffect)(()=>{if(!e)return;if(f.current)return;const s=e.trim();!s||v||b||(f.current=!0,p.current=s,j({text:s}),t?.())},[e,v,b,t,j]);const I=(0,n.useCallback)(async(e,s)=>{if(y.current)return;const t=e.trim(),a=s&&s.length>0;if((t||a)&&!b){y.current=!0;try{m(""),g([]),await j({text:t,images:s?.length?s:void 0})}finally{y.current=!1}}},[b,j]),S=(0,n.useCallback)(async()=>{b||await N()},[N,b]);(0,n.useEffect)(()=>{a?.(S,b||v)},[S,v,b,a]);const w=(0,n.useCallback)(async e=>{if(!y.current&&!b){y.current=!0;try{await j({text:e})}finally{y.current=!1}}},[b,j]);return(0,$.jsxs)(Y.Ss,{className:"s-ai-assistant-chat",style:null!=i?{height:`${i}px`}:void 0,children:[v?(0,$.jsx)(Y.EY,{className:"s-ai-assistant__hint",children:"\u52a0\u8f7d\u4e2d\u2026"}):null,(0,$.jsx)(ie,{}),(0,$.jsx)(V,{messages:_,isStreaming:b,userAvatar:c,userName:u,onSelectSuggestedReply:w}),(0,$.jsx)(Y.Ss,{className:"s-ai-assistant-chat__footer",children:(0,$.jsx)(re,{input:d,pendingImages:h,isStreaming:b,activityLegacyId:s,onInputChange:m,onSubmit:I,onPendingImagesChange:g})})]})}const he=()=>{const e=(0,ce.Q)(oe.gW),[s,t]=(0,n.useState)(null),[a,l]=(0,n.useState)(null),[u,d]=(0,n.useState)(!1),[m,h]=(0,n.useState)(0),g=(0,A.lx)(e=>e.consumeAiAssistantIntent),p=(0,A.lx)(e=>e.activeActivityLegacyId??void 0),f=(0,A.lx)(e=>e.setActiveActivityLegacyId),y=P(),x=(0,ue.sU)({subtractPx:de});(0,le.J)(!0);const _=(0,n.useCallback)((e,s)=>{l(()=>e),d(s)},[]),b=(0,n.useCallback)(()=>{t(null)},[]),v=(0,n.useCallback)(()=>{const e=g();e?.initialMessage?.trim()&&t(e.initialMessage.trim()),null==e?.activityLegacyId||Number.isNaN(e.activityLegacyId)||f(e.activityLegacyId)},[g,f]);(0,n.useEffect)(()=>{v()},[v]),(0,c.useDidShow)(v);const j=(0,n.useCallback)(()=>{const e=o().getCurrentPages();if(e.length<=1)return null==p||Number.isNaN(p)?void(0,L.OE)(L.bw.HOME):void(0,L.W0)(p);(0,L.OE)()},[p]);return(0,$.jsxs)(Y.Ss,{"data-cmp":"AiAssistant",className:"s-page-with-tabbar",children:[(0,$.jsxs)(Y.Ss,{className:"s-page-with-tabbar__main s-ai-assistant",children:[(0,$.jsxs)(Y.Ss,{className:"s-ai-assistant__header",children:[(0,$.jsx)(Y.$n,{className:"s-ai-assistant__back-btn",onClick:j,children:(0,$.jsx)(i.JGc,{size:20})}),(0,$.jsxs)(Y.Ss,{className:"s-ai-assistant__header-main",children:[(0,$.jsxs)(Y.Ss,{className:"s-ai-assistant__header-avatar","aria-hidden":!0,children:[(0,$.jsx)(i.sUz,{size:18}),(0,$.jsx)(Y.EY,{className:"s-ai-assistant__header-online"})]}),(0,$.jsxs)(Y.Ss,{className:"s-ai-assistant__header-text",children:[(0,$.jsxs)(Y.Ss,{className:"s-ai-assistant__header-title-row",children:[(0,$.jsx)(Y.EY,{className:"s-ai-assistant__header-title",children:"AI \u667a\u80fd\u52a9\u624b"}),(0,$.jsxs)(Y.EY,{className:"s-ai-assistant__ai-badge",children:[(0,$.jsx)(i.KqI,{size:10,"aria-hidden":!0}),"AI"]})]}),(0,$.jsx)(Y.EY,{className:"s-ai-assistant__header-status",children:"\u5728\u7ebf \xb7 \u5b9e\u65f6\u54cd\u5e94"})]})]}),(0,$.jsxs)(Y.Ss,{className:"s-ai-assistant__header-actions",children:[m>0?(0,$.jsx)(Y.EY,{className:"s-ai-assistant__message-count","aria-hidden":!0,children:m}):null,(0,$.jsx)(Y.$n,{className:"s-ai-assistant__clear-btn",disabled:u||!a,"aria-label":"\u6e05\u7a7a\u5bf9\u8bdd",onClick:()=>{a?.()},children:(0,$.jsx)(i.TBR,{size:16})})]})]}),(0,$.jsx)(Y.Ss,{className:"s-ai-assistant__body",children:(0,$.jsx)(Y.Ss,{className:"s-ai-assistant__panel",children:e?(0,$.jsx)(me,{initialMessage:s,activityLegacyId:p,onInitialMessageSent:b,onClearReady:_,onMessageCountChange:h,chatBodyHeight:x,userAvatar:y.avatar,userName:y.name}):(0,$.jsx)(Y.Ss,{className:"s-ai-assistant__chat-placeholder","aria-hidden":!0})})})]}),(0,$.jsx)(r.v,{})]})};var ge=he;function pe(){return(0,$.jsx)(ge,{})}var fe={navigationBarTitleText:"",navigationStyle:"custom",disableScroll:!0,backgroundColor:"#000000",backgroundColorContent:"#000000",backgroundTextStyle:"light"},ye=(0,a.eU)(pe,"pages/ai-assistant/index",{root:{cn:[]}},fe||{});pe&&pe.behaviors&&(ye.behaviors=(ye.behaviors||[]).concat(pe.behaviors));Page(ye)}},function(e){var s=function(s){return e(e.s=s)};e.O(0,[907,96,76],function(){return s(1889)});e.O()}]);
+"use strict";
+(wx["webpackJsonp"] = wx["webpackJsonp"] || []).push([["pages/ai-assistant/index"],{
+
+/***/ "./node_modules/@tarojs/taro-loader/lib/entry-cache.js?name=pages/ai-assistant/index!./src/pages/ai-assistant/index.tsx":
+/*!******************************************************************************************************************************!*\
+  !*** ./node_modules/@tarojs/taro-loader/lib/entry-cache.js?name=pages/ai-assistant/index!./src/pages/ai-assistant/index.tsx ***!
+  \******************************************************************************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": function() { return /* binding */ AiAssistantRoute; }
+/* harmony export */ });
+/* harmony import */ var _components_AiAssistantPage__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../components/AiAssistantPage */ "./src/components/AiAssistantPage.tsx");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/cjs/react-jsx-runtime.production.min.js");
+
+
+function AiAssistantRoute() {
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(_components_AiAssistantPage__WEBPACK_IMPORTED_MODULE_0__["default"], {});
+}
+
+/***/ }),
+
+/***/ "./src/components/AiAssistantPage.tsx":
+/*!********************************************!*\
+  !*** ./src/components/AiAssistantPage.tsx ***!
+  \********************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _BottomNav__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./BottomNav */ "./src/components/BottomNav.tsx");
+/* harmony import */ var lucide_react_taro__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! lucide-react-taro */ "./node_modules/lucide-react-taro/dist/esm/index.js");
+/* harmony import */ var _tarojs_taro__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @tarojs/taro */ "./node_modules/@tarojs/taro/index.js");
+/* harmony import */ var _tarojs_taro__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_tarojs_taro__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _hooks_useApiQuery__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../hooks/useApiQuery */ "./src/hooks/useApiQuery.ts");
+/* harmony import */ var _hooks_useAiChatStream__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../hooks/useAiChatStream */ "./src/hooks/useAiChatStream.ts");
+/* harmony import */ var _hooks_useResolvedProfile__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../hooks/useResolvedProfile */ "./src/hooks/useResolvedProfile.ts");
+/* harmony import */ var _hooks_useSyncApi__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../hooks/useSyncApi */ "./src/hooks/useSyncApi.ts");
+/* harmony import */ var _stores__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../stores */ "./src/stores/index.ts");
+/* harmony import */ var _utils_route__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../utils/route */ "./src/utils/route.ts");
+/* harmony import */ var _ai_chat_ChatMessageList__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./ai-chat/ChatMessageList */ "./src/components/ai-chat/ChatMessageList.tsx");
+/* harmony import */ var _ai_chat_ChatComposer__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./ai-chat/ChatComposer */ "./src/components/ai-chat/ChatComposer.tsx");
+/* harmony import */ var _ai_chat_DegradedMatchBanner__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./ai-chat/DegradedMatchBanner */ "./src/components/ai-chat/DegradedMatchBanner.tsx");
+/* harmony import */ var _hooks_useDeferredMount__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ../hooks/useDeferredMount */ "./src/hooks/useDeferredMount.ts");
+/* harmony import */ var _utils_timing__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ../utils/timing */ "./src/utils/timing.ts");
+/* harmony import */ var _hooks_usePageRouteReady__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ../hooks/usePageRouteReady */ "./src/hooks/usePageRouteReady.ts");
+/* harmony import */ var _hooks_useTabPageMainHeight__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ../hooks/useTabPageMainHeight */ "./src/hooks/useTabPageMainHeight.ts");
+/* harmony import */ var _tarojs_components__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! @tarojs/components */ "./node_modules/@tarojs/plugin-platform-weapp/dist/components-react.js");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/cjs/react-jsx-runtime.production.min.js");
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/** Header row below status bar (px, matches AiAssistantPage.scss). */
+
+const AI_HEADER_PX = 100;
+function AiAssistantChat({
+  initialMessage,
+  activityLegacyId,
+  onInitialMessageSent,
+  onClearReady,
+  onMessageCountChange,
+  chatBodyHeight,
+  userAvatar,
+  userName
+}) {
+  const [input, setInput] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)("");
+  const [pendingImages, setPendingImages] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)([]);
+  const initialMessageSentRef = react__WEBPACK_IMPORTED_MODULE_0___default().useRef(null);
+  const initialMessageHandledRef = react__WEBPACK_IMPORTED_MODULE_0___default().useRef(false);
+  const submitLockRef = react__WEBPACK_IMPORTED_MODULE_0___default().useRef(false);
+  const mockReply = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(query => `正在为你搜索「${query}」相关内容 🔍 已找到 ${Math.floor(Math.random() * 5 + 3)} 条相关信息。`, []);
+  const {
+    messages,
+    isStreaming,
+    isLoadingHistory,
+    send,
+    clearChat
+  } = (0,_hooks_useAiChatStream__WEBPACK_IMPORTED_MODULE_4__.useAiChatStream)({
+    welcomeText: "👋 我是你的 AI 智能助手，帮你发现活动、找队友、规划行程，说出需求，我来搞定。",
+    mockReply,
+    streamErrorText: "抱歉，回复出错了，请稍后再试。",
+    activityLegacyId,
+    onPostCreated: async event => {
+      await (0,_hooks_useSyncApi__WEBPACK_IMPORTED_MODULE_6__.invalidatePostQueries)();
+      const scopedId = event.activityLegacyId ?? activityLegacyId;
+      if (scopedId != null) {
+        (0,_hooks_useApiQuery__WEBPACK_IMPORTED_MODULE_3__.invalidateCache)(["posts", "activity", scopedId]);
+      }
+      void _tarojs_taro__WEBPACK_IMPORTED_MODULE_2___default().showToast({
+        title: "组队帖已发布",
+        icon: "success"
+      });
+    },
+    onExistingPost: () => {
+      void _tarojs_taro__WEBPACK_IMPORTED_MODULE_2___default().showToast({
+        title: "你已有组队帖，请去「我的」编辑或在活动详情查看",
+        icon: "none",
+        duration: 2500
+      });
+    }
+  });
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+    onMessageCountChange?.(messages.length);
+  }, [messages.length, onMessageCountChange]);
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+    if (!initialMessage) {
+      return;
+    }
+    if (initialMessageHandledRef.current) {
+      return;
+    }
+    const trimmed = initialMessage.trim();
+    if (!trimmed || isLoadingHistory || isStreaming) return;
+    initialMessageHandledRef.current = true;
+    initialMessageSentRef.current = trimmed;
+    void send({
+      text: trimmed
+    });
+    onInitialMessageSent?.();
+  }, [initialMessage, isLoadingHistory, isStreaming, onInitialMessageSent, send]);
+  const submit = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(async (text, images) => {
+    if (submitLockRef.current) return;
+    const trimmed = text.trim();
+    const hasImages = images && images.length > 0;
+    if (!trimmed && !hasImages || isStreaming || isLoadingHistory) return;
+    submitLockRef.current = true;
+    try {
+      setInput("");
+      setPendingImages([]);
+      await send({
+        text: trimmed,
+        images: images?.length ? images : undefined
+      });
+    } finally {
+      submitLockRef.current = false;
+    }
+  }, [isLoadingHistory, isStreaming, send]);
+  const handleClearChat = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(async () => {
+    if (isStreaming) return;
+    await clearChat();
+  }, [clearChat, isStreaming]);
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+    onClearReady?.(handleClearChat, isStreaming || isLoadingHistory);
+  }, [handleClearChat, isLoadingHistory, isStreaming, onClearReady]);
+  const handleSelectSuggestedReply = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(async reply => {
+    if (submitLockRef.current || isStreaming) return;
+    submitLockRef.current = true;
+    try {
+      await send({
+        text: reply
+      });
+    } finally {
+      submitLockRef.current = false;
+    }
+  }, [isStreaming, send]);
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_16__.View, {
+    className: "s-ai-assistant-chat",
+    style: chatBodyHeight != null ? {
+      height: `${chatBodyHeight}px`
+    } : undefined,
+    children: [isLoadingHistory ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_16__.Text, {
+      className: "s-ai-assistant__hint",
+      children: "\u52A0\u8F7D\u4E2D\u2026"
+    }) : null, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_ai_chat_DegradedMatchBanner__WEBPACK_IMPORTED_MODULE_11__.DegradedMatchBanner, {}), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_ai_chat_ChatMessageList__WEBPACK_IMPORTED_MODULE_9__.ChatMessageList, {
+      messages: messages,
+      isStreaming: isStreaming,
+      userAvatar: userAvatar,
+      userName: userName,
+      onSelectSuggestedReply: handleSelectSuggestedReply
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_16__.View, {
+      className: "s-ai-assistant-chat__footer",
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_ai_chat_ChatComposer__WEBPACK_IMPORTED_MODULE_10__.ChatComposer, {
+        input: input,
+        pendingImages: pendingImages,
+        isStreaming: isStreaming,
+        isLoadingHistory: isLoadingHistory,
+        activityLegacyId: activityLegacyId,
+        onInputChange: setInput,
+        onSubmit: submit,
+        onPendingImagesChange: setPendingImages
+      })
+    })]
+  });
+}
+const AiAssistantPage = () => {
+  const chatReady = (0,_hooks_useDeferredMount__WEBPACK_IMPORTED_MODULE_12__.useDeferredMount)(_utils_timing__WEBPACK_IMPORTED_MODULE_17__.DEFER_AI_CHAT_MS);
+  const [pendingInitialMessage, setPendingInitialMessage] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null);
+  const [clearChatFn, setClearChatFn] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null);
+  const [clearBusy, setClearBusy] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
+  const [messageCount, setMessageCount] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(0);
+  const consumeAiAssistantIntent = (0,_stores__WEBPACK_IMPORTED_MODULE_7__.useNavigationStore)(state => state.consumeAiAssistantIntent);
+  const activityLegacyId = (0,_stores__WEBPACK_IMPORTED_MODULE_7__.useNavigationStore)(state => state.activeActivityLegacyId ?? undefined);
+  const setActiveActivityLegacyId = (0,_stores__WEBPACK_IMPORTED_MODULE_7__.useNavigationStore)(state => state.setActiveActivityLegacyId);
+  const profileUserData = (0,_hooks_useResolvedProfile__WEBPACK_IMPORTED_MODULE_5__.useResolvedProfile)();
+  const chatBodyHeight = (0,_hooks_useTabPageMainHeight__WEBPACK_IMPORTED_MODULE_14__.useTabPageMainHeight)({
+    subtractPx: AI_HEADER_PX
+  });
+  (0,_hooks_usePageRouteReady__WEBPACK_IMPORTED_MODULE_13__.usePageRouteReady)(true);
+  const handleClearReady = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)((clear, isBusy) => {
+    setClearChatFn(() => clear);
+    setClearBusy(isBusy);
+  }, []);
+  const handleInitialMessageSent = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(() => {
+    setPendingInitialMessage(null);
+  }, []);
+  const applyAiAssistantIntent = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(() => {
+    const intent = consumeAiAssistantIntent();
+    if (intent?.initialMessage?.trim()) {
+      setPendingInitialMessage(intent.initialMessage.trim());
+    }
+    if (intent?.activityLegacyId != null && !Number.isNaN(intent.activityLegacyId)) {
+      setActiveActivityLegacyId(intent.activityLegacyId);
+    }
+  }, [consumeAiAssistantIntent, setActiveActivityLegacyId]);
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+    applyAiAssistantIntent();
+  }, [applyAiAssistantIntent]);
+  (0,_tarojs_taro__WEBPACK_IMPORTED_MODULE_2__.useDidShow)(applyAiAssistantIntent);
+  const handleBack = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(() => {
+    const pages = _tarojs_taro__WEBPACK_IMPORTED_MODULE_2___default().getCurrentPages();
+    if (pages.length <= 1) {
+      if (activityLegacyId != null && !Number.isNaN(activityLegacyId)) {
+        (0,_utils_route__WEBPACK_IMPORTED_MODULE_8__.goEventDetail)(activityLegacyId);
+        return;
+      }
+      (0,_utils_route__WEBPACK_IMPORTED_MODULE_8__.goBack)(_utils_route__WEBPACK_IMPORTED_MODULE_8__.ROUTES.HOME);
+      return;
+    }
+    (0,_utils_route__WEBPACK_IMPORTED_MODULE_8__.goBack)();
+  }, [activityLegacyId]);
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_16__.View, {
+    "data-cmp": "AiAssistant",
+    className: "s-page-with-tabbar",
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_16__.View, {
+      className: "s-page-with-tabbar__main s-ai-assistant",
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_16__.View, {
+        className: "s-ai-assistant__header",
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_16__.Button, {
+          className: "s-ai-assistant__back-btn",
+          onClick: handleBack,
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(lucide_react_taro__WEBPACK_IMPORTED_MODULE_18__.ChevronLeft, {
+            size: 22
+          })
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_16__.View, {
+          className: "s-ai-assistant__header-main",
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_16__.View, {
+            className: "s-ai-assistant__header-avatar",
+            "aria-hidden": true,
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(lucide_react_taro__WEBPACK_IMPORTED_MODULE_18__.Sparkles, {
+              size: 18
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_16__.Text, {
+              className: "s-ai-assistant__header-online"
+            })]
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_16__.View, {
+            className: "s-ai-assistant__header-text",
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_16__.View, {
+              className: "s-ai-assistant__header-title-row",
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_16__.Text, {
+                className: "s-ai-assistant__header-title",
+                children: "AI 智能助手"
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_16__.Text, {
+                className: "s-ai-assistant__ai-badge",
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(lucide_react_taro__WEBPACK_IMPORTED_MODULE_18__.Zap, {
+                  size: 10,
+                  "aria-hidden": true
+                }), "AI"]
+              })]
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_16__.Text, {
+              className: "s-ai-assistant__header-status",
+              children: "在线 · 实时响应"
+            })]
+          })]
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_16__.View, {
+          className: "s-ai-assistant__header-actions",
+          children: [messageCount > 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_16__.Text, {
+            className: "s-ai-assistant__message-count",
+            "aria-hidden": true,
+            children: messageCount
+          }) : null, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_16__.Button, {
+            className: "s-ai-assistant__clear-btn",
+            disabled: clearBusy || !clearChatFn,
+            "aria-label": "\u6E05\u7A7A\u5BF9\u8BDD",
+            onClick: () => void clearChatFn?.(),
+            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(lucide_react_taro__WEBPACK_IMPORTED_MODULE_18__.Trash2, {
+              size: 16
+            })
+          })]
+        })]
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_16__.View, {
+        className: "s-ai-assistant__body",
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_16__.View, {
+          className: "s-ai-assistant__panel",
+          children: chatReady ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(AiAssistantChat, {
+            initialMessage: pendingInitialMessage,
+            activityLegacyId: activityLegacyId,
+            onInitialMessageSent: handleInitialMessageSent,
+            onClearReady: handleClearReady,
+            onMessageCountChange: setMessageCount,
+            chatBodyHeight: chatBodyHeight,
+            userAvatar: profileUserData.avatar,
+            userName: profileUserData.name
+          }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_16__.View, {
+            className: "s-ai-assistant__chat-placeholder",
+            "aria-hidden": true
+          })
+        })
+      })]
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_BottomNav__WEBPACK_IMPORTED_MODULE_1__.BottomNavSlot, {})]
+  });
+};
+/* harmony default export */ __webpack_exports__["default"] = (AiAssistantPage);
+
+/***/ }),
+
+/***/ "./src/components/AiAssistantPostCard.tsx":
+/*!************************************************!*\
+  !*** ./src/components/AiAssistantPostCard.tsx ***!
+  \************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+/* unused harmony export AiAssistantPostCard */
+/* harmony import */ var lucide_react_taro__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! lucide-react-taro */ "./node_modules/lucide-react-taro/dist/esm/index.js");
+/* harmony import */ var _utils_inferAuthorGender__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../utils/inferAuthorGender */ "./src/utils/inferAuthorGender.ts");
+/* harmony import */ var _utils_route__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../utils/route */ "./src/utils/route.ts");
+/* harmony import */ var _tarojs_components__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @tarojs/components */ "./node_modules/@tarojs/plugin-platform-weapp/dist/components-react.js");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/cjs/react-jsx-runtime.production.min.js");
+
+
+
+
+
+
+const AiAssistantPostCard = ({
+  post,
+  highlight = false
+}) => {
+  const authorGender = (0,_utils_inferAuthorGender__WEBPACK_IMPORTED_MODULE_2__.inferAuthorGenderFromPost)(post);
+  const nameClassName = authorGender ? `s-ai-assistant-post-card__name s-ai-assistant-post-card__name--${authorGender}` : "s-ai-assistant-post-card__name";
+  const handleOpen = () => {
+    const activityId = post.activityLegacyId;
+    if (activityId != null && !Number.isNaN(activityId)) {
+      (0,_utils_route__WEBPACK_IMPORTED_MODULE_0__.goEventDetail)(activityId, {
+        postId: post.postId
+      });
+    }
+  };
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_3__.Button, {
+    className: highlight ? "s-ai-assistant-post-card s-ai-assistant-post-card--mine" : "s-ai-assistant-post-card",
+    onClick: handleOpen,
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_3__.View, {
+      className: "s-ai-assistant-post-card__header",
+      children: [post.authorAvatar ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_3__.Image, {
+        className: "s-ai-assistant-post-card__avatar",
+        src: post.authorAvatar,
+        decoding: "async"
+      }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_3__.Text, {
+        className: "s-ai-assistant-post-card__avatar s-ai-assistant-post-card__avatar--fallback",
+        children: post.authorName.slice(0, 1)
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_3__.View, {
+        className: "s-ai-assistant-post-card__meta",
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_3__.Text, {
+          style: {
+            fontWeight: "bold"
+          },
+          className: nameClassName,
+          children: post.authorName
+        }), post.authorHandle ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_3__.Text, {
+          children: post.authorHandle
+        }) : null, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_3__.Text, {
+          children: post.eventTitle
+        })]
+      })]
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_3__.Text, {
+      className: "s-ai-assistant-post-card__body",
+      children: post.snippet
+    }), post.location ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_3__.Text, {
+      className: "s-ai-assistant-post-card__location",
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(lucide_react_taro__WEBPACK_IMPORTED_MODULE_4__.MapPin, {
+        size: 12
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_3__.Text, {
+        children: post.location
+      })]
+    }) : null, post.tags?.length ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_3__.View, {
+      className: "s-ai-assistant-post-card__tags",
+      children: post.tags.slice(0, 3).map(tag => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_3__.Text, {
+        children: tag
+      }, tag))
+    }) : null, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_3__.Text, {
+      className: "s-ai-assistant-post-card__cta",
+      children: "\u67E5\u770B\u5E16\u5B50"
+    })]
+  });
+};
+/* harmony default export */ __webpack_exports__["default"] = (AiAssistantPostCard);
+
+/***/ }),
+
+/***/ "./src/components/ai-chat/ChatComposer.tsx":
+/*!*************************************************!*\
+  !*** ./src/components/ai-chat/ChatComposer.tsx ***!
+  \*************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   ChatComposer: function() { return /* binding */ ChatComposer; }
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _tarojs_taro__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @tarojs/taro */ "./node_modules/@tarojs/taro/index.js");
+/* harmony import */ var _tarojs_taro__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_tarojs_taro__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var lucide_react_taro__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! lucide-react-taro */ "./node_modules/lucide-react-taro/dist/esm/index.js");
+/* harmony import */ var _ui__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../ui */ "./src/components/ui/index.ts");
+/* harmony import */ var _utils_aiShortcutTags__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../utils/aiShortcutTags */ "./src/utils/aiShortcutTags.ts");
+/* harmony import */ var _utils_chatImage__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../utils/chatImage */ "./src/utils/chatImage.ts");
+/* harmony import */ var _stores_aiChatStore__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../stores/aiChatStore */ "./src/stores/aiChatStore.ts");
+/* harmony import */ var _utils_openImagePreview__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../utils/openImagePreview */ "./src/utils/openImagePreview.ts");
+/* harmony import */ var _tarojs_components__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @tarojs/components */ "./node_modules/@tarojs/plugin-platform-weapp/dist/components-react.js");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/cjs/react-jsx-runtime.production.min.js");
+
+
+
+
+
+
+
+
+
+
+const SHORTCUT_TAG_LABELS = {
+  组队队友: "组队队友",
+  住宿同行: "住宿同行",
+  拼车同行: "拼车同行"
+};
+const globalQuickChips = [{
+  key: "findBuddy",
+  label: "帮我dd",
+  submitText: "帮我dd"
+}, {
+  key: "nearEvents",
+  label: "查最近活动",
+  submitText: "查最近活动"
+}, {
+  key: "findPartner",
+  label: "帮我找搭子",
+  submitText: "帮我找搭子"
+}, {
+  key: "popularEvents",
+  label: "热门活动",
+  submitText: "查最近活动"
+}];
+const activityActionChips = [{
+  key: "createOwn",
+  label: "自己发帖",
+  submitText: "自己发帖"
+}, {
+  key: "searchPosts",
+  label: "查组队帖",
+  submitText: "看看有没有组队帖"
+}];
+const MAX_IMAGES = 6;
+function readComposerInputValue(event) {
+  return event.detail?.value ?? event.target?.value ?? "";
+}
+function ChatComposer({
+  input,
+  pendingImages,
+  isStreaming,
+  activityLegacyId,
+  onInputChange,
+  onSubmit,
+  onPendingImagesChange,
+  isLoadingHistory = false
+}) {
+  const [shortcutTags, setShortcutTags] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(() => (0,_utils_aiShortcutTags__WEBPACK_IMPORTED_MODULE_3__.getTopAiShortcutTags)());
+  const conversationFlow = (0,_stores_aiChatStore__WEBPACK_IMPORTED_MODULE_5__.useAiChatStore)(state => state.conversationState?.flow);
+  const inputPlaceholder = conversationFlow === "collect_post_body" ? "描述你的组队需求，如出发地、人数、日期…" : "说说你想去哪、想找什么样的同行…";
+  const quickChips = (0,react__WEBPACK_IMPORTED_MODULE_0__.useMemo)(() => {
+    if (activityLegacyId != null && !Number.isNaN(activityLegacyId)) {
+      const tagChips = shortcutTags.map(tag => {
+        const label = SHORTCUT_TAG_LABELS[tag] ?? tag;
+        return {
+          key: `tag-${tag}`,
+          label,
+          submitText: (0,_utils_aiShortcutTags__WEBPACK_IMPORTED_MODULE_3__.normalizeAiShortcutTag)(tag),
+          isShortcutTag: true
+        };
+      });
+      const actionChips = activityActionChips.map(chip => ({
+        key: chip.key,
+        label: chip.label,
+        submitText: chip.submitText
+      }));
+      return [actionChips[0], ...tagChips, ...actionChips.slice(1)];
+    }
+    return globalQuickChips.map(chip => ({
+      key: chip.key,
+      label: chip.label,
+      submitText: chip.submitText
+    }));
+  }, [activityLegacyId, shortcutTags]);
+  const isBusy = isStreaming || isLoadingHistory;
+  const handlePickImages = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(async () => {
+    if (isBusy) return;
+    const remaining = MAX_IMAGES - pendingImages.length;
+    if (remaining <= 0) {
+      void _tarojs_taro__WEBPACK_IMPORTED_MODULE_1___default().showToast({
+        title: `最多上传 ${MAX_IMAGES} 张图片`,
+        icon: "none"
+      });
+      return;
+    }
+    try {
+      const dataUrls = await (0,_utils_chatImage__WEBPACK_IMPORTED_MODULE_4__.pickAndCompressChatImages)(remaining);
+      if (dataUrls.length) {
+        onPendingImagesChange([...pendingImages, ...dataUrls].slice(0, MAX_IMAGES));
+      }
+    } catch (error) {
+      if (error instanceof _utils_chatImage__WEBPACK_IMPORTED_MODULE_4__.ChatImageTooLargeError) {
+        void _tarojs_taro__WEBPACK_IMPORTED_MODULE_1___default().showToast({
+          title: "图片过大，请压缩至 10MB 以内",
+          icon: "none"
+        });
+        return;
+      }
+      void _tarojs_taro__WEBPACK_IMPORTED_MODULE_1___default().showToast({
+        title: "请求失败，请稍后重试",
+        icon: "none"
+      });
+    }
+  }, [isBusy, pendingImages, onPendingImagesChange]);
+  const removeImage = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(index => {
+    onPendingImagesChange(pendingImages.filter((_, i) => i !== index));
+  }, [pendingImages, onPendingImagesChange]);
+  const handleQuickChipClick = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(chip => {
+    if (chip.isShortcutTag) {
+      (0,_utils_aiShortcutTags__WEBPACK_IMPORTED_MODULE_3__.recordAiShortcutTagUse)(chip.submitText);
+      setShortcutTags((0,_utils_aiShortcutTags__WEBPACK_IMPORTED_MODULE_3__.getTopAiShortcutTags)());
+    }
+    onSubmit(chip.submitText, pendingImages);
+  }, [onSubmit, pendingImages]);
+  const canSend = Boolean(input.trim() || pendingImages.length) && !isBusy;
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.Fragment, {
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_8__.ScrollView, {
+      scrollX: true,
+      enhanced: true,
+      showScrollbar: false,
+      className: "s-ai-assistant-chat__quick-scroll s-scrollbar-none",
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_8__.View, {
+        className: "s-ai-assistant-chat__quick-row",
+        children: quickChips.map(chip => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_ui__WEBPACK_IMPORTED_MODULE_2__.Button, {
+          className: "s-ai-assistant-chat__quick-chip",
+          disabled: isBusy,
+          onClick: () => handleQuickChipClick(chip),
+          children: chip.label
+        }, chip.key))
+      })
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_8__.View, {
+      className: "s-ai-assistant-chat__composer",
+      children: [pendingImages.length > 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_8__.ScrollView, {
+        scrollY: true,
+        enhanced: true,
+        showScrollbar: false,
+        className: "s-ai-assistant-chat__attach-preview-list s-scrollbar-none",
+        style: {
+          height: "160px"
+        },
+        children: pendingImages.map((src, index) => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_8__.View, {
+          className: "s-ai-assistant-chat__attach-thumb",
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_ui__WEBPACK_IMPORTED_MODULE_2__.Button, {
+            className: "s-ai-assistant-chat__attach-preview-btn",
+            "aria-label": "\u67E5\u770B\u5927\u56FE",
+            onClick: () => void (0,_utils_openImagePreview__WEBPACK_IMPORTED_MODULE_6__.openImagePreview)(pendingImages, index),
+            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_8__.Image, {
+              src: src,
+              alt: "\u5DF2\u4E0A\u4F20\u7684\u56FE\u7247"
+            })
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_ui__WEBPACK_IMPORTED_MODULE_2__.Button, {
+            className: "s-ai-assistant-chat__attach-remove",
+            "aria-label": "\u79FB\u9664\u56FE\u7247",
+            onClick: () => removeImage(index),
+            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(lucide_react_taro__WEBPACK_IMPORTED_MODULE_9__.X, {
+              size: 14
+            })
+          })]
+        }, `${src.slice(0, 40)}-${index}`))
+      }) : null, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_8__.View, {
+        className: "s-ai-assistant-chat__composer-inner",
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_ui__WEBPACK_IMPORTED_MODULE_2__.Button, {
+          className: "s-ai-assistant-chat__attach-btn",
+          disabled: isBusy || pendingImages.length >= MAX_IMAGES,
+          "aria-label": "\u4E0A\u4F20\u56FE\u7247",
+          onClick: () => void handlePickImages(),
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(lucide_react_taro__WEBPACK_IMPORTED_MODULE_9__.ImagePlus, {
+            size: 18
+          })
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_ui__WEBPACK_IMPORTED_MODULE_2__.Input, {
+          variant: "ai-assistant-chat",
+          type: "text",
+          value: input,
+          disabled: isBusy,
+          placeholder: inputPlaceholder,
+          onInput: e => onInputChange(readComposerInputValue(e)),
+          onConfirm: () => onSubmit(input, pendingImages)
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_ui__WEBPACK_IMPORTED_MODULE_2__.Button, {
+          className: (0,_ui__WEBPACK_IMPORTED_MODULE_2__.cn)("s-ai-assistant-chat__send", canSend && "s-ai-assistant-chat__send--active"),
+          disabled: !canSend,
+          onClick: () => onSubmit(input, pendingImages),
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(lucide_react_taro__WEBPACK_IMPORTED_MODULE_9__.Send, {
+            size: 16
+          })
+        })]
+      })]
+    })]
+  });
+}
+
+/***/ }),
+
+/***/ "./src/components/ai-chat/ChatMessageList.tsx":
+/*!****************************************************!*\
+  !*** ./src/components/ai-chat/ChatMessageList.tsx ***!
+  \****************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   ChatMessageList: function() { return /* binding */ ChatMessageList; }
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var lucide_react_taro__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! lucide-react-taro */ "./node_modules/lucide-react-taro/dist/esm/index.js");
+/* harmony import */ var _ui__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../ui */ "./src/components/ui/index.ts");
+/* harmony import */ var _ChatUserAvatar__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./ChatUserAvatar */ "./src/components/ai-chat/ChatUserAvatar.tsx");
+/* harmony import */ var _RecommendPostCards__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./RecommendPostCards */ "./src/components/ai-chat/RecommendPostCards.tsx");
+/* harmony import */ var _SuggestedReplyChips__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./SuggestedReplyChips */ "./src/components/ai-chat/SuggestedReplyChips.tsx");
+/* harmony import */ var _utils_openImagePreview__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../utils/openImagePreview */ "./src/utils/openImagePreview.ts");
+/* harmony import */ var _tarojs_components__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @tarojs/components */ "./node_modules/@tarojs/plugin-platform-weapp/dist/components-react.js");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/cjs/react-jsx-runtime.production.min.js");
+
+
+
+
+
+
+
+
+
+function formatMessageTime(id) {
+  const ts = Number(id.split("-")[0]);
+  if (!Number.isFinite(ts) || ts <= 0) return null;
+  const date = new Date(ts);
+  return date.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false
+  });
+}
+function ChatMessageList({
+  messages,
+  isStreaming,
+  userAvatar,
+  userName,
+  onSelectSuggestedReply
+}) {
+  const [scrollIntoView, setScrollIntoView] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)();
+  const scrollToBottom = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(() => {
+    const last = messages[messages.length - 1];
+    if (!last) return;
+    const targetId = `chat-msg-${last.id}`;
+    setScrollIntoView(undefined);
+    setTimeout(() => setScrollIntoView(targetId), 0);
+  }, [messages]);
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useLayoutEffect)(() => {
+    scrollToBottom();
+  }, [messages, isStreaming, scrollToBottom]);
+  const showTimestampForIndex = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(index => {
+    if (index === 0) return true;
+    const current = messages[index];
+    const previous = messages[index - 1];
+    return current.from !== previous.from;
+  }, [messages]);
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_7__.ScrollView, {
+    scrollY: true,
+    enhanced: true,
+    showScrollbar: false,
+    scrollIntoView: scrollIntoView,
+    scrollWithAnimation: true,
+    className: "s-ai-assistant-chat__scroll s-scrollbar-none",
+    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_7__.View, {
+      className: "s-ai-assistant-chat__scroll-inner",
+      children: messages.map((msg, index) => {
+        const isUser = msg.from === "user";
+        const timestamp = formatMessageTime(msg.id);
+        return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), {
+          children: [showTimestampForIndex(index) && timestamp ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_7__.Text, {
+            className: "s-ai-assistant-chat__timestamp",
+            children: timestamp
+          }) : null, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_7__.View, {
+            id: `chat-msg-${msg.id}`,
+            className: (0,_ui__WEBPACK_IMPORTED_MODULE_1__.cn)("s-ai-assistant-chat__row", isUser && "s-ai-assistant-chat__row--from-user"),
+            children: [!isUser ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_7__.View, {
+              className: "s-ai-assistant-chat__avatar s-ai-assistant-chat__avatar--ai",
+              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(lucide_react_taro__WEBPACK_IMPORTED_MODULE_8__.Sparkles, {
+                size: 14
+              })
+            }) : null, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_7__.View, {
+              className: (0,_ui__WEBPACK_IMPORTED_MODULE_1__.cn)("s-ai-assistant-chat__content", isUser && "s-ai-assistant-chat__content--from-user"),
+              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_7__.View, {
+                className: (0,_ui__WEBPACK_IMPORTED_MODULE_1__.cn)("s-ai-assistant-chat__bubble", isUser ? "s-ai-assistant-chat__bubble--from-user" : "s-ai-assistant-chat__bubble--from-ai", msg.streaming && "s-ai-assistant-chat__bubble--streaming", msg.streaming && !msg.text && "s-ai-assistant-chat__bubble--waiting"),
+                children: msg.streaming && !msg.text ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_7__.View, {
+                  className: "s-ai-assistant-chat__typing",
+                  "aria-label": "AI \u6B63\u5728\u601D\u8003",
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_7__.View, {
+                    className: "s-ai-assistant-chat__typing-dot"
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_7__.View, {
+                    className: "s-ai-assistant-chat__typing-dot"
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_7__.View, {
+                    className: "s-ai-assistant-chat__typing-dot"
+                  })]
+                }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.Fragment, {
+                  children: [msg.imagePreview ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_7__.Button, {
+                    className: "s-ai-assistant-chat__bubble-image-btn",
+                    "aria-label": "\u67E5\u770B\u5927\u56FE",
+                    onClick: () => (0,_utils_openImagePreview__WEBPACK_IMPORTED_MODULE_5__.openSingleImagePreview)(msg.imagePreview),
+                    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_7__.Image, {
+                      className: "s-ai-assistant-chat__bubble-image",
+                      src: msg.imagePreview,
+                      alt: "\u5DF2\u4E0A\u4F20\u7684\u56FE\u7247"
+                    })
+                  }) : null, msg.text ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_7__.Text, {
+                    children: msg.text
+                  }) : null, msg.createdPost ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_RecommendPostCards__WEBPACK_IMPORTED_MODULE_3__.RecommendPostCards, {
+                    posts: [msg.createdPost],
+                    variant: "created"
+                  }) : null, msg.recommendedPosts?.length ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_RecommendPostCards__WEBPACK_IMPORTED_MODULE_3__.RecommendPostCards, {
+                    posts: msg.recommendedPosts
+                  }) : null, msg.suggestedReplies?.length ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_SuggestedReplyChips__WEBPACK_IMPORTED_MODULE_4__.SuggestedReplyChips, {
+                    replies: msg.suggestedReplies,
+                    disabled: isStreaming,
+                    onSelect: onSelectSuggestedReply
+                  }) : null]
+                })
+              })
+            }), isUser ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_ChatUserAvatar__WEBPACK_IMPORTED_MODULE_2__.ChatUserAvatar, {
+              avatar: userAvatar,
+              name: userName
+            }) : null]
+          })]
+        }, msg.id);
+      })
+    })
+  });
+}
+
+/***/ }),
+
+/***/ "./src/components/ai-chat/ChatUserAvatar.tsx":
+/*!***************************************************!*\
+  !*** ./src/components/ai-chat/ChatUserAvatar.tsx ***!
+  \***************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   ChatUserAvatar: function() { return /* binding */ ChatUserAvatar; }
+/* harmony export */ });
+/* harmony import */ var _tarojs_components__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @tarojs/components */ "./node_modules/@tarojs/plugin-platform-weapp/dist/components-react.js");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/cjs/react-jsx-runtime.production.min.js");
+
+
+function ChatUserAvatar({
+  avatar,
+  name
+}) {
+  const initial = name.trim().charAt(0).toUpperCase() || "我";
+  if (avatar?.trim()) {
+    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Image, {
+      className: "s-ai-assistant-chat__avatar s-ai-assistant-chat__avatar--user",
+      src: avatar,
+      alt: name
+    });
+  }
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Text, {
+    className: "s-ai-assistant-chat__avatar s-ai-assistant-chat__avatar--user s-ai-assistant-chat__avatar--fallback",
+    "aria-hidden": true,
+    children: initial
+  });
+}
+
+/***/ }),
+
+/***/ "./src/components/ai-chat/DegradedMatchBanner.tsx":
+/*!********************************************************!*\
+  !*** ./src/components/ai-chat/DegradedMatchBanner.tsx ***!
+  \********************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   DegradedMatchBanner: function() { return /* binding */ DegradedMatchBanner; }
+/* harmony export */ });
+/* harmony import */ var _stores_aiChatStore__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../stores/aiChatStore */ "./src/stores/aiChatStore.ts");
+/* harmony import */ var _tarojs_components__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @tarojs/components */ "./node_modules/@tarojs/plugin-platform-weapp/dist/components-react.js");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/cjs/react-jsx-runtime.production.min.js");
+
+
+
+function DegradedMatchBanner() {
+  const degraded = (0,_stores_aiChatStore__WEBPACK_IMPORTED_MODULE_0__.useAiChatStore)(state => state.degraded);
+  if (!degraded) return null;
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_2__.Text, {
+    className: "s-ai-assistant-chat__degraded-banner",
+    role: "status",
+    children: "\u5339\u914D\u7ED3\u679C\u53EF\u80FD\u4E0D\u5B8C\u6574\uFF0C\u5DF2\u5C55\u793A\u53EF\u7528\u63A8\u8350"
+  });
+}
+
+/***/ }),
+
+/***/ "./src/components/ai-chat/RecommendPostCards.tsx":
+/*!*******************************************************!*\
+  !*** ./src/components/ai-chat/RecommendPostCards.tsx ***!
+  \*******************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   RecommendPostCards: function() { return /* binding */ RecommendPostCards; }
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _AiAssistantPostCard__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../AiAssistantPostCard */ "./src/components/AiAssistantPostCard.tsx");
+/* harmony import */ var _tarojs_components__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @tarojs/components */ "./node_modules/@tarojs/plugin-platform-weapp/dist/components-react.js");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/cjs/react-jsx-runtime.production.min.js");
+
+
+
+
+const RecommendPostCards = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.memo)(function RecommendPostCards({
+  posts,
+  variant = "recommend"
+}) {
+  if (!posts.length) return null;
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_3__.View, {
+    className: "s-ai-assistant-chat__post-cards",
+    children: posts.map(post => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_AiAssistantPostCard__WEBPACK_IMPORTED_MODULE_1__["default"], {
+      post: post,
+      highlight: variant === "created"
+    }, post.postId))
+  });
+});
+
+/***/ }),
+
+/***/ "./src/components/ai-chat/SuggestedReplyChips.tsx":
+/*!********************************************************!*\
+  !*** ./src/components/ai-chat/SuggestedReplyChips.tsx ***!
+  \********************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   SuggestedReplyChips: function() { return /* binding */ SuggestedReplyChips; }
+/* harmony export */ });
+/* harmony import */ var _ui__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../ui */ "./src/components/ui/index.ts");
+/* harmony import */ var _stores_aiChatStore__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../stores/aiChatStore */ "./src/stores/aiChatStore.ts");
+/* harmony import */ var _tarojs_components__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @tarojs/components */ "./node_modules/@tarojs/plugin-platform-weapp/dist/components-react.js");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/cjs/react-jsx-runtime.production.min.js");
+
+
+
+
+const PUBLISH_CONFIRM_REPLY = "确认发布";
+function SuggestedReplyChips({
+  replies: repliesProp,
+  disabled,
+  onSelect
+}) {
+  const storeReplies = (0,_stores_aiChatStore__WEBPACK_IMPORTED_MODULE_1__.useAiChatStore)(state => state.suggestedReplies);
+  const replies = repliesProp?.length ? repliesProp : storeReplies;
+  if (!replies.length) return null;
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_3__.View, {
+    className: "s-ai-assistant-chat__copy-row",
+    children: replies.map(reply => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_ui__WEBPACK_IMPORTED_MODULE_0__.Button, {
+      className: (0,_ui__WEBPACK_IMPORTED_MODULE_0__.cn)("s-ai-assistant-chat__copy-chip", reply === PUBLISH_CONFIRM_REPLY && "s-ai-assistant-chat__copy-chip--primary"),
+      disabled: disabled,
+      onClick: () => onSelect(reply),
+      children: reply
+    }, reply))
+  });
+}
+
+/***/ }),
+
+/***/ "./src/hooks/ai-chat/createMessageId.ts":
+/*!**********************************************!*\
+  !*** ./src/hooks/ai-chat/createMessageId.ts ***!
+  \**********************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   createMessageId: function() { return /* binding */ createMessageId; }
+/* harmony export */ });
+function createMessageId() {
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+}
+
+/***/ }),
+
+/***/ "./src/hooks/ai-chat/useAiChatStream.ts":
+/*!**********************************************!*\
+  !*** ./src/hooks/ai-chat/useAiChatStream.ts ***!
+  \**********************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   useAiChatStream: function() { return /* binding */ useAiChatStream; }
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _tarojs_taro__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @tarojs/taro */ "./node_modules/@tarojs/taro/index.js");
+/* harmony import */ var _tarojs_taro__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_tarojs_taro__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _constants_api__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../constants/api */ "./src/constants/api.ts");
+/* harmony import */ var _stores_aiChatStore__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../stores/aiChatStore */ "./src/stores/aiChatStore.ts");
+/* harmony import */ var _utils_session__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../utils/session */ "./src/utils/session.ts");
+/* harmony import */ var _createMessageId__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./createMessageId */ "./src/hooks/ai-chat/createMessageId.ts");
+/* harmony import */ var _useChatSession__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./useChatSession */ "./src/hooks/ai-chat/useChatSession.ts");
+/* harmony import */ var _useSseChatStream__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./useSseChatStream */ "./src/hooks/ai-chat/useSseChatStream.ts");
+/* harmony import */ var _useTypewriterReply__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./useTypewriterReply */ "./src/hooks/ai-chat/useTypewriterReply.ts");
+
+
+
+
+
+
+
+
+
+function useAiChatStream(options) {
+  const {
+    welcomeText,
+    mockReply,
+    streamErrorText,
+    apiUrl = _constants_api__WEBPACK_IMPORTED_MODULE_2__.AI_CHAT_STREAM_URL,
+    sessionId: sessionIdOption,
+    userId: userIdOption,
+    userName: userNameOption,
+    userPhone: userPhoneOption,
+    activityLegacyId,
+    getAuthHeaders,
+    onPostCreated,
+    onExistingPost,
+    typewriterCharDelayMs = 22
+  } = options;
+  const activityLegacyIdRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(activityLegacyId);
+  const [isStreaming, setIsStreaming] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
+  const abortRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
+  const {
+    messages,
+    setMessages,
+    messagesRef,
+    isLoadingHistory,
+    loadSessionHistory,
+    resetSession,
+    persistSessionFromStream,
+    sessionIdRef,
+    userIdRef,
+    userNameRef,
+    userPhoneRef,
+    setIsStreamingRef,
+    isStreamingRef
+  } = (0,_useChatSession__WEBPACK_IMPORTED_MODULE_5__.useChatSession)({
+    welcomeText,
+    apiUrl,
+    sessionId: sessionIdOption,
+    activityLegacyId,
+    userId: userIdOption ?? (0,_utils_session__WEBPACK_IMPORTED_MODULE_4__.getClientUserId)(),
+    userName: userNameOption ?? (0,_utils_session__WEBPACK_IMPORTED_MODULE_4__.getClientUserName)(),
+    userPhone: userPhoneOption ?? (0,_utils_session__WEBPACK_IMPORTED_MODULE_4__.getClientUserPhone)()
+  });
+  const {
+    createTypewriter
+  } = (0,_useTypewriterReply__WEBPACK_IMPORTED_MODULE_7__.useTypewriterReply)();
+  const {
+    runStream
+  } = (0,_useSseChatStream__WEBPACK_IMPORTED_MODULE_6__.useSseChatStream)({
+    welcomeText,
+    mockReply,
+    streamErrorText,
+    apiUrl,
+    activityLegacyIdRef,
+    sessionIdRef,
+    userIdRef,
+    userNameRef,
+    userPhoneRef,
+    messagesRef,
+    setMessages,
+    getAuthHeaders,
+    onPostCreated,
+    onExistingPost,
+    persistSessionFromStream,
+    createTypewriter,
+    typewriterCharDelayMs
+  });
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+    activityLegacyIdRef.current = activityLegacyId;
+  }, [activityLegacyId]);
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+    setIsStreamingRef(isStreaming);
+  }, [isStreaming, setIsStreamingRef]);
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+    return () => abortRef.current?.abort();
+  }, []);
+  const abort = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(() => {
+    abortRef.current?.abort();
+  }, []);
+  const send = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(async payload => {
+    const sendOptions = typeof payload === "string" ? {
+      text: payload
+    } : payload;
+    const {
+      text,
+      image,
+      images
+    } = sendOptions;
+    const trimmed = text.trim();
+    const hasImages = Boolean(image) || images && images.length > 0;
+    if (!trimmed && !hasImages) return;
+    if (isStreamingRef.current) {
+      void _tarojs_taro__WEBPACK_IMPORTED_MODULE_1___default().showToast({
+        title: "请等待上一条回复",
+        icon: "none"
+      });
+      return;
+    }
+    const userMsg = {
+      id: (0,_createMessageId__WEBPACK_IMPORTED_MODULE_8__.createMessageId)(),
+      from: "user",
+      text: trimmed,
+      imagePreview: image ?? images?.[0],
+      ocrText: hasImages ? trimmed : undefined
+    };
+    const aiMsgId = (0,_createMessageId__WEBPACK_IMPORTED_MODULE_8__.createMessageId)();
+    const baseMessages = messagesRef.current;
+    const nextMessages = [...baseMessages, userMsg, {
+      id: aiMsgId,
+      from: "ai",
+      text: "",
+      streaming: true
+    }];
+    messagesRef.current = nextMessages;
+    setMessages(nextMessages);
+    setIsStreaming(true);
+    const controller = new AbortController();
+    abortRef.current = controller;
+    try {
+      await runStream(sendOptions, aiMsgId, controller.signal);
+    } catch (error) {
+      if (error.name === "AbortError") {
+        return;
+      }
+      void _tarojs_taro__WEBPACK_IMPORTED_MODULE_1___default().showToast({
+        title: streamErrorText,
+        icon: "none"
+      });
+    } finally {
+      setIsStreaming(false);
+      abortRef.current = null;
+    }
+  }, [isStreamingRef, messagesRef, runStream, setMessages, streamErrorText]);
+  const clearChat = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(async () => {
+    abortRef.current?.abort();
+    _stores_aiChatStore__WEBPACK_IMPORTED_MODULE_3__.useAiChatStore.getState().resetOnClearSession();
+    await resetSession();
+    setIsStreaming(false);
+  }, [resetSession]);
+  return {
+    messages,
+    isStreaming,
+    isLoadingHistory,
+    send,
+    abort,
+    reloadHistory: loadSessionHistory,
+    clearChat,
+    sessionId: sessionIdRef.current
+  };
+}
+
+/***/ }),
+
+/***/ "./src/hooks/ai-chat/useChatSession.ts":
+/*!*********************************************!*\
+  !*** ./src/hooks/ai-chat/useChatSession.ts ***!
+  \*********************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   useChatSession: function() { return /* binding */ useChatSession; }
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _tarojs_taro__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @tarojs/taro */ "./node_modules/@tarojs/taro/index.js");
+/* harmony import */ var _tarojs_taro__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_tarojs_taro__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _api_syncApi__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../api/syncApi */ "./src/api/syncApi.ts");
+/* harmony import */ var _utils_aiChatHistory__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../utils/aiChatHistory */ "./src/utils/aiChatHistory.ts");
+/* harmony import */ var _utils_session__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../utils/session */ "./src/utils/session.ts");
+/* harmony import */ var _createMessageId__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./createMessageId */ "./src/hooks/ai-chat/createMessageId.ts");
+
+
+
+
+
+
+function resolveSessionId(sessionIdOption, activityLegacyId) {
+  if (sessionIdOption?.trim()) return sessionIdOption.trim();
+  if (activityLegacyId != null && !Number.isNaN(activityLegacyId)) {
+    return (0,_utils_session__WEBPACK_IMPORTED_MODULE_3__.getOrCreateActivitySessionId)(activityLegacyId);
+  }
+  return (0,_utils_session__WEBPACK_IMPORTED_MODULE_3__.getOrCreateSessionId)();
+}
+function createFreshSessionIdForScope(activityLegacyId) {
+  if (activityLegacyId != null && !Number.isNaN(activityLegacyId)) {
+    return (0,_utils_session__WEBPACK_IMPORTED_MODULE_3__.createFreshActivitySessionId)(activityLegacyId);
+  }
+  return (0,_utils_session__WEBPACK_IMPORTED_MODULE_3__.createFreshSessionId)();
+}
+function useChatSession(options) {
+  const {
+    welcomeText,
+    apiUrl,
+    activityLegacyId
+  } = options;
+  const activityLegacyIdRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(activityLegacyId);
+  const sessionIdRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(resolveSessionId(options.sessionId, activityLegacyId));
+  const userIdRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(options.userId);
+  const userNameRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(options.userName);
+  const userPhoneRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(options.userPhone);
+  const historyLoadSeqRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(0);
+  const hasLoadedHistoryRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(false);
+  const [messages, setMessages] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(() => [{
+    id: (0,_createMessageId__WEBPACK_IMPORTED_MODULE_4__.createMessageId)(),
+    from: "ai",
+    text: welcomeText
+  }]);
+  const [isLoadingHistory, setIsLoadingHistory] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
+  const messagesRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(messages);
+  const isStreamingRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(false);
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+    messagesRef.current = messages;
+  }, [messages]);
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+    activityLegacyIdRef.current = activityLegacyId;
+  }, [activityLegacyId]);
+  const setIsStreamingRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(value => {
+    isStreamingRef.current = value;
+  }, []);
+  const showWelcome = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(() => {
+    setMessages([{
+      id: (0,_createMessageId__WEBPACK_IMPORTED_MODULE_4__.createMessageId)(),
+      from: "ai",
+      text: welcomeText
+    }]);
+  }, [welcomeText]);
+  const loadSessionHistory = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(async () => {
+    if (isStreamingRef.current) return;
+    if (hasLoadedHistoryRef.current) return;
+    if (!apiUrl) {
+      showWelcome();
+      hasLoadedHistoryRef.current = true;
+      return;
+    }
+    const requestSessionId = sessionIdRef.current;
+    const loadSeq = ++historyLoadSeqRef.current;
+    setIsLoadingHistory(true);
+    try {
+      const session = await (0,_api_syncApi__WEBPACK_IMPORTED_MODULE_2__.fetchChatSession)(requestSessionId);
+      if (loadSeq !== historyLoadSeqRef.current || requestSessionId !== sessionIdRef.current || isStreamingRef.current) {
+        return;
+      }
+      const uiMessages = session.history?.length ? (0,_utils_aiChatHistory__WEBPACK_IMPORTED_MODULE_5__.mapHistoryToUiMessages)(session.history, requestSessionId) : [];
+      if (uiMessages.length > 0) {
+        setMessages(uiMessages);
+      } else {
+        showWelcome();
+      }
+      hasLoadedHistoryRef.current = true;
+    } catch {
+      if (loadSeq === historyLoadSeqRef.current && requestSessionId === sessionIdRef.current && !isStreamingRef.current) {
+        showWelcome();
+      }
+      hasLoadedHistoryRef.current = true;
+    } finally {
+      if (loadSeq === historyLoadSeqRef.current) {
+        setIsLoadingHistory(false);
+      }
+    }
+  }, [apiUrl, showWelcome]);
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+    const nextSessionId = resolveSessionId(options.sessionId, activityLegacyId);
+    if (sessionIdRef.current === nextSessionId) return;
+    historyLoadSeqRef.current += 1;
+    hasLoadedHistoryRef.current = false;
+    sessionIdRef.current = nextSessionId;
+    showWelcome();
+    void loadSessionHistory();
+  }, [activityLegacyId, loadSessionHistory, options.sessionId, showWelcome]);
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+    void loadSessionHistory();
+  }, [loadSessionHistory]);
+  (0,_tarojs_taro__WEBPACK_IMPORTED_MODULE_1__.useDidShow)(() => {
+    void loadSessionHistory();
+  });
+  const resetSession = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(async () => {
+    historyLoadSeqRef.current += 1;
+    hasLoadedHistoryRef.current = false;
+    const previousSessionId = sessionIdRef.current;
+    try {
+      await (0,_api_syncApi__WEBPACK_IMPORTED_MODULE_2__.clearChatSession)(previousSessionId);
+    } catch {
+      // ignore network errors; still reset local state
+    }
+    const nextSessionId = createFreshSessionIdForScope(activityLegacyIdRef.current);
+    sessionIdRef.current = nextSessionId;
+    (0,_utils_session__WEBPACK_IMPORTED_MODULE_3__.persistSessionId)(nextSessionId, activityLegacyIdRef.current);
+    messagesRef.current = [];
+    setMessages([]);
+    showWelcome();
+    return nextSessionId;
+  }, [showWelcome]);
+  const persistSessionFromStream = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(sessionId => {
+    sessionIdRef.current = sessionId;
+    (0,_utils_session__WEBPACK_IMPORTED_MODULE_3__.persistSessionId)(sessionId, activityLegacyIdRef.current);
+  }, []);
+  return {
+    messages,
+    setMessages,
+    messagesRef,
+    isLoadingHistory,
+    loadSessionHistory,
+    showWelcome,
+    resetSession,
+    persistSessionFromStream,
+    sessionIdRef,
+    userIdRef,
+    userNameRef,
+    userPhoneRef,
+    setIsStreamingRef,
+    isStreamingRef
+  };
+}
+
+/***/ }),
+
+/***/ "./src/hooks/ai-chat/useSseChatStream.ts":
+/*!***********************************************!*\
+  !*** ./src/hooks/ai-chat/useSseChatStream.ts ***!
+  \***********************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   useSseChatStream: function() { return /* binding */ useSseChatStream; }
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _tarojs_taro__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @tarojs/taro */ "./node_modules/@tarojs/taro/index.js");
+/* harmony import */ var _tarojs_taro__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_tarojs_taro__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _constants_api__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../constants/api */ "./src/constants/api.ts");
+/* harmony import */ var _stores_aiChatStore__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../stores/aiChatStore */ "./src/stores/aiChatStore.ts");
+/* harmony import */ var _utils_aiChatHistory__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../utils/aiChatHistory */ "./src/utils/aiChatHistory.ts");
+/* harmony import */ var _utils_aiChatStream__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../utils/aiChatStream */ "./src/utils/aiChatStream.ts");
+
+
+
+
+
+
+function applyStreamEventToStore(event) {
+  const store = _stores_aiChatStore__WEBPACK_IMPORTED_MODULE_3__.useAiChatStore.getState();
+  if (event.type === "conversation_patch") {
+    store.applyConversationPatch(event.state);
+    return;
+  }
+  if (event.type === "suggested_replies") {
+    store.setSuggestedReplies(event.replies);
+    return;
+  }
+  if (event.type === "post_recommendations") {
+    store.setPostRecommendationsMeta(event.degraded);
+  }
+}
+function useSseChatStream(options) {
+  const {
+    welcomeText,
+    mockReply,
+    streamErrorText,
+    apiUrl = _constants_api__WEBPACK_IMPORTED_MODULE_2__.AI_CHAT_STREAM_URL,
+    activityLegacyIdRef,
+    sessionIdRef,
+    userIdRef,
+    userNameRef,
+    userPhoneRef,
+    messagesRef,
+    setMessages,
+    getAuthHeaders,
+    onPostCreated,
+    onExistingPost,
+    persistSessionFromStream,
+    createTypewriter,
+    typewriterCharDelayMs = 22
+  } = options;
+  const processStreamEvents = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(async (stream, aiMsgId, typewriter) => {
+    const finishAiMessage = updater => {
+      setMessages(prev => prev.map(message => message.id === aiMsgId ? updater(message) : message));
+    };
+    for await (const event of stream) {
+      applyStreamEventToStore(event);
+      if (event.type === "delta") {
+        typewriter.append(event.content);
+        continue;
+      }
+      if (event.type === "message_complete") {
+        if (!typewriter.getTarget()) {
+          typewriter.append(event.content);
+        } else {
+          typewriter.ensureTarget(event.content);
+        }
+        continue;
+      }
+      if (event.type === "post_created") {
+        onPostCreated?.(event);
+        if (event.post) {
+          finishAiMessage(message => ({
+            ...message,
+            createdPost: event.post
+          }));
+        }
+        continue;
+      }
+      if (event.type === "existing_post") {
+        onExistingPost?.(event);
+        continue;
+      }
+      if (event.type === "post_recommendations") {
+        finishAiMessage(message => ({
+          ...message,
+          recommendedPosts: event.posts
+        }));
+        continue;
+      }
+      if (event.type === "suggested_replies") {
+        finishAiMessage(message => ({
+          ...message,
+          suggestedReplies: event.replies
+        }));
+        continue;
+      }
+      if (event.type === "conversation_patch") {
+        continue;
+      }
+      if (event.type === "error") {
+        typewriter.flush();
+        finishAiMessage(message => ({
+          ...message,
+          text: message.text || event.message,
+          streaming: false
+        }));
+        break;
+      }
+      if (event.type === "done") {
+        finishAiMessage(message => ({
+          ...message,
+          streaming: false
+        }));
+        await typewriter.waitUntilComplete();
+        finishAiMessage(message => ({
+          ...message,
+          text: typewriter.getTarget() || message.text,
+          streaming: false
+        }));
+        if (event.sessionId) {
+          persistSessionFromStream(event.sessionId);
+        }
+        break;
+      }
+    }
+  }, [onExistingPost, onPostCreated, persistSessionFromStream, setMessages]);
+  const runStream = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(async (payload, aiMsgId, abortSignal) => {
+    const {
+      text,
+      image,
+      images
+    } = payload;
+    const trimmed = text.trim();
+    const activityId = activityLegacyIdRef.current;
+    const activityHeaders = activityId != null ? {
+      "X-Activity-Id": String(activityId)
+    } : undefined;
+    const pendingImage = image ?? images?.[0];
+    const history = (0,_utils_aiChatHistory__WEBPACK_IMPORTED_MODULE_5__.buildApiChatHistory)(messagesRef.current, welcomeText, trimmed, pendingImage);
+    const finishAiMessage = updater => {
+      setMessages(prev => prev.map(message => message.id === aiMsgId ? updater(message) : message));
+    };
+    const typewriter = createTypewriter({
+      charDelayMs: typewriterCharDelayMs,
+      onUpdate: visible => {
+        finishAiMessage(message => ({
+          ...message,
+          text: visible
+        }));
+      }
+    });
+    try {
+      const useLiveApi = Boolean(apiUrl?.trim()) && (0,_constants_api__WEBPACK_IMPORTED_MODULE_2__.isApiEnabled)();
+      const stream = useLiveApi ? (0,_utils_aiChatStream__WEBPACK_IMPORTED_MODULE_4__.streamAiChatRequest)({
+        url: apiUrl,
+        messages: history,
+        sessionId: sessionIdRef.current,
+        userId: userIdRef.current,
+        userName: userNameRef.current,
+        userPhone: userPhoneRef.current,
+        activityLegacyId: activityId,
+        image: pendingImage,
+        images,
+        signal: abortSignal,
+        headers: {
+          ...activityHeaders,
+          ...getAuthHeaders?.()
+        }
+      }) : (0,_utils_aiChatStream__WEBPACK_IMPORTED_MODULE_4__.mockAiChatStream)(mockReply(trimmed));
+      await processStreamEvents(stream, aiMsgId, typewriter);
+    } catch (error) {
+      if (error.name === "AbortError") {
+        typewriter.stop();
+        throw error;
+      }
+      typewriter.flush();
+      finishAiMessage(message => ({
+        ...message,
+        text: message.text || streamErrorText,
+        streaming: false
+      }));
+      void _tarojs_taro__WEBPACK_IMPORTED_MODULE_1___default().showToast({
+        title: error instanceof Error && error.message ? error.message : streamErrorText,
+        icon: "none"
+      });
+    } finally {
+      finishAiMessage(message => ({
+        ...message,
+        streaming: false
+      }));
+    }
+  }, [activityLegacyIdRef, apiUrl, createTypewriter, getAuthHeaders, messagesRef, mockReply, processStreamEvents, sessionIdRef, streamErrorText, typewriterCharDelayMs, userIdRef, userNameRef, userPhoneRef, welcomeText]);
+  return {
+    runStream
+  };
+}
+
+/***/ }),
+
+/***/ "./src/hooks/ai-chat/useTypewriterReply.ts":
+/*!*************************************************!*\
+  !*** ./src/hooks/ai-chat/useTypewriterReply.ts ***!
+  \*************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   useTypewriterReply: function() { return /* binding */ useTypewriterReply; }
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _utils_typewriterReveal__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../utils/typewriterReveal */ "./src/utils/typewriterReveal.ts");
+
+
+function useTypewriterReply() {
+  const typewriterRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
+  const createTypewriter = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(options => {
+    const typewriter = (0,_utils_typewriterReveal__WEBPACK_IMPORTED_MODULE_1__.createTypewriterReveal)({
+      charDelayMs: options.charDelayMs,
+      onUpdate: options.onUpdate
+    });
+    typewriterRef.current = typewriter;
+    return typewriter;
+  }, []);
+  const getActiveTypewriter = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(() => typewriterRef.current, []);
+  return {
+    createTypewriter,
+    getActiveTypewriter
+  };
+}
+
+/***/ }),
+
+/***/ "./src/hooks/useAiChatStream.ts":
+/*!**************************************!*\
+  !*** ./src/hooks/useAiChatStream.ts ***!
+  \**************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   useAiChatStream: function() { return /* reexport safe */ _ai_chat_useAiChatStream__WEBPACK_IMPORTED_MODULE_0__.useAiChatStream; }
+/* harmony export */ });
+/* harmony import */ var _ai_chat_useAiChatStream__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./ai-chat/useAiChatStream */ "./src/hooks/ai-chat/useAiChatStream.ts");
+
+
+/***/ }),
+
+/***/ "./src/hooks/useResolvedProfile.ts":
+/*!*****************************************!*\
+  !*** ./src/hooks/useResolvedProfile.ts ***!
+  \*****************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   useResolvedProfile: function() { return /* binding */ useResolvedProfile; }
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _constants_api__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../constants/api */ "./src/constants/api.ts");
+/* harmony import */ var _pages_profile_mockData__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../pages/profile/mockData */ "./src/pages/profile/mockData.ts");
+/* harmony import */ var _useSyncApi__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./useSyncApi */ "./src/hooks/useSyncApi.ts");
+
+
+
+
+
+/** Profile summary from API with mock fallback (same as profile page). */
+function useResolvedProfile() {
+  const summaryQuery = (0,_useSyncApi__WEBPACK_IMPORTED_MODULE_3__.useProfileSummaryQuery)();
+  const apiEnabled = (0,_constants_api__WEBPACK_IMPORTED_MODULE_1__.isApiEnabled)();
+  return (0,react__WEBPACK_IMPORTED_MODULE_0__.useMemo)(() => apiEnabled && summaryQuery.data ? summaryQuery.data : _pages_profile_mockData__WEBPACK_IMPORTED_MODULE_2__.profileUser, [apiEnabled, summaryQuery.data]);
+}
+
+/***/ }),
+
+/***/ "./src/pages/ai-assistant/index.tsx":
+/*!******************************************!*\
+  !*** ./src/pages/ai-assistant/index.tsx ***!
+  \******************************************/
+/***/ (function(__unused_webpack_module, __unused_webpack___webpack_exports__, __webpack_require__) {
+
+/* harmony import */ var _tarojs_runtime__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @tarojs/runtime */ "./node_modules/@tarojs/runtime/dist/dsl/common.js");
+/* harmony import */ var _node_modules_tarojs_taro_loader_lib_entry_cache_js_name_pages_ai_assistant_index_index_tsx__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! !!../../../node_modules/@tarojs/taro-loader/lib/entry-cache.js?name=pages/ai-assistant/index!./index.tsx */ "./node_modules/@tarojs/taro-loader/lib/entry-cache.js?name=pages/ai-assistant/index!./src/pages/ai-assistant/index.tsx");
+
+
+var config = {"navigationBarTitleText":"","navigationStyle":"custom","disableScroll":true,"backgroundColor":"#000000","backgroundColorContent":"#000000","backgroundTextStyle":"light"};
+
+
+
+var taroOption = (0,_tarojs_runtime__WEBPACK_IMPORTED_MODULE_1__.createPageConfig)(_node_modules_tarojs_taro_loader_lib_entry_cache_js_name_pages_ai_assistant_index_index_tsx__WEBPACK_IMPORTED_MODULE_0__["default"], 'pages/ai-assistant/index', {root:{cn:[]}}, config || {})
+if (_node_modules_tarojs_taro_loader_lib_entry_cache_js_name_pages_ai_assistant_index_index_tsx__WEBPACK_IMPORTED_MODULE_0__["default"] && _node_modules_tarojs_taro_loader_lib_entry_cache_js_name_pages_ai_assistant_index_index_tsx__WEBPACK_IMPORTED_MODULE_0__["default"].behaviors) {
+  taroOption.behaviors = (taroOption.behaviors || []).concat(_node_modules_tarojs_taro_loader_lib_entry_cache_js_name_pages_ai_assistant_index_index_tsx__WEBPACK_IMPORTED_MODULE_0__["default"].behaviors)
+}
+var inst = Page(taroOption)
+
+
+
+/* unused harmony default export */ var __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_tarojs_taro_loader_lib_entry_cache_js_name_pages_ai_assistant_index_index_tsx__WEBPACK_IMPORTED_MODULE_0__["default"]);
+
+
+/***/ }),
+
+/***/ "./src/utils/aiChatHistory.ts":
+/*!************************************!*\
+  !*** ./src/utils/aiChatHistory.ts ***!
+  \************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   buildApiChatHistory: function() { return /* binding */ buildApiChatHistory; },
+/* harmony export */   mapHistoryToUiMessages: function() { return /* binding */ mapHistoryToUiMessages; }
+/* harmony export */ });
+function resolveImageContext(message, pendingImage) {
+  const source = message.imagePreview || pendingImage;
+  if (!source && !message.ocrText) return undefined;
+  return {
+    source,
+    ocrText: message.ocrText
+  };
+}
+
+/** 将 MongoDB 完整历史映射为 UI 消息（不做截断） */
+function mapHistoryToUiMessages(history, sessionId) {
+  return history.filter(message => message.role === "user" || message.role === "assistant").map((message, index) => ({
+    id: `${sessionId}-${index}`,
+    from: message.role === "user" ? "user" : "ai",
+    text: message.content,
+    imagePreview: message.imageContext?.source,
+    ocrText: message.imageContext?.ocrText,
+    recommendedPosts: message.recommendedPosts,
+    createdPost: message.createdPost,
+    suggestedReplies: message.suggestedReplies
+  }));
+}
+
+/** 构建发给后端的完整对话（排除 UI 欢迎语；后端自行截断 LLM 上下文） */
+function buildApiChatHistory(uiMessages, welcomeText, pendingUserText, pendingImage) {
+  const settled = uiMessages.filter(message => !message.streaming && (message.text || message.imagePreview || message.ocrText || message.recommendedPosts?.length || message.createdPost || message.suggestedReplies?.length));
+  const apiMessages = [];
+  for (let index = 0; index < settled.length; index += 1) {
+    const message = settled[index];
+    if (index === 0 && message.from === "ai" && message.text === welcomeText) {
+      continue;
+    }
+    apiMessages.push({
+      role: message.from === "user" ? "user" : "assistant",
+      content: message.text || message.ocrText || "",
+      imageContext: resolveImageContext(message),
+      recommendedPosts: message.recommendedPosts,
+      createdPost: message.createdPost,
+      suggestedReplies: message.suggestedReplies
+    });
+  }
+  if (pendingUserText || pendingImage) {
+    apiMessages.push({
+      role: "user",
+      content: pendingUserText?.trim() || "",
+      imageContext: pendingImage ? {
+        source: pendingImage
+      } : undefined
+    });
+  }
+  return apiMessages;
+}
+
+/***/ }),
+
+/***/ "./src/utils/aiChatStream.ts":
+/*!***********************************!*\
+  !*** ./src/utils/aiChatStream.ts ***!
+  \***********************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   mockAiChatStream: function() { return /* binding */ mockAiChatStream; },
+/* harmony export */   streamAiChatRequest: function() { return /* binding */ streamAiChatRequest; }
+/* harmony export */ });
+/* harmony import */ var _tarojs_taro__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @tarojs/taro */ "./node_modules/@tarojs/taro/index.js");
+/* harmony import */ var _tarojs_taro__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_tarojs_taro__WEBPACK_IMPORTED_MODULE_0__);
+
+function taroRequest(options) {
+  return new Promise((resolve, reject) => {
+    _tarojs_taro__WEBPACK_IMPORTED_MODULE_0___default().request({
+      ...options,
+      success: resolve,
+      fail: err => {
+        reject(new Error(err.errMsg || "网络请求失败"));
+      }
+    });
+  });
+}
+function parseSseDataLine(line) {
+  if (!line.startsWith("data:")) return null;
+  const payload = line.slice(5).trim();
+  if (!payload || payload === "[DONE]") return {
+    type: "done"
+  };
+  try {
+    const json = JSON.parse(payload);
+    if (json.type === "error") {
+      return {
+        type: "error",
+        message: String(json.message ?? "Unknown error")
+      };
+    }
+    if (json.type === "delta" && typeof json.content === "string") {
+      return {
+        type: "delta",
+        content: json.content
+      };
+    }
+    if (json.type === "message_complete" && typeof json.content === "string") {
+      return {
+        type: "message_complete",
+        content: json.content,
+        requestId: typeof json.requestId === "string" ? json.requestId : undefined
+      };
+    }
+    if (json.type === "done") {
+      return {
+        type: "done",
+        messageId: json.messageId,
+        sessionId: json.sessionId
+      };
+    }
+    if (json.type === "post_created" && typeof json.postId === "string") {
+      const post = json.post && typeof json.post === "object" ? json.post : undefined;
+      return {
+        type: "post_created",
+        postId: json.postId,
+        activityLegacyId: typeof json.activityLegacyId === "number" ? json.activityLegacyId : undefined,
+        post: post && typeof post.postId === "string" && typeof post.snippet === "string" ? post : undefined
+      };
+    }
+    if (json.type === "existing_post" && typeof json.postId === "string") {
+      return {
+        type: "existing_post",
+        postId: json.postId,
+        activityLegacyId: typeof json.activityLegacyId === "number" ? json.activityLegacyId : undefined
+      };
+    }
+    if (json.type === "post_recommendations" && Array.isArray(json.posts)) {
+      return {
+        type: "post_recommendations",
+        posts: json.posts,
+        degraded: typeof json.degraded === "boolean" ? json.degraded : undefined
+      };
+    }
+    if (json.type === "suggested_replies" && Array.isArray(json.replies)) {
+      return {
+        type: "suggested_replies",
+        replies: json.replies.filter(item => typeof item === "string")
+      };
+    }
+    if (json.type === "conversation_patch" && json.state && typeof json.state === "object") {
+      return {
+        type: "conversation_patch",
+        state: json.state
+      };
+    }
+    if (typeof json.content === "string") {
+      return {
+        type: "delta",
+        content: json.content
+      };
+    }
+    if (typeof json.delta === "string") {
+      return {
+        type: "delta",
+        content: json.delta
+      };
+    }
+  } catch {
+    return {
+      type: "delta",
+      content: payload
+    };
+  }
+  return null;
+}
+async function* parseSseText(text) {
+  const lines = text.split(/\r?\n/);
+  for (const raw of lines) {
+    const line = raw.trim();
+    if (!line || line.startsWith(":")) continue;
+    const event = parseSseDataLine(line);
+    if (event) yield event;
+  }
+}
+async function* streamAiChatRequest(options) {
+  if (!options.url?.trim()) {
+    throw new Error("AI chat URL is not configured");
+  }
+  if ( true && options.url.startsWith("/")) {
+    throw new Error("小程序需配置完整 API 地址（TARO_APP_API_BASE_URL）");
+  }
+  const res = await taroRequest({
+    url: options.url,
+    method: "POST",
+    header: {
+      "Content-Type": "application/json",
+      Accept: "text/event-stream",
+      ...options.headers
+    },
+    data: {
+      messages: options.messages,
+      sessionId: options.sessionId,
+      userId: options.userId,
+      userName: options.userName,
+      userPhone: options.userPhone,
+      activityLegacyId: options.activityLegacyId,
+      image: options.image,
+      images: options.images
+    },
+    timeout: 60_000,
+    responseType: "text",
+    enableChunked: true
+  });
+  if (res.statusCode !== 200) {
+    throw new Error(`AI chat failed (${res.statusCode})`);
+  }
+  const text = typeof res.data === "string" ? res.data : res.data == null ? "" : JSON.stringify(res.data);
+  if (!text.trim()) {
+    throw new Error("AI chat returned an empty response");
+  }
+  let sawTerminal = false;
+  for await (const event of parseSseText(text)) {
+    if (event.type === "done" || event.type === "error") {
+      sawTerminal = true;
+    }
+    yield event;
+  }
+  if (!sawTerminal) {
+    yield {
+      type: "done"
+    };
+  }
+}
+async function* mockAiChatStream(fullText) {
+  if (fullText) {
+    yield {
+      type: "delta",
+      content: fullText
+    };
+  }
+  yield {
+    type: "done"
+  };
+}
+
+/***/ }),
+
+/***/ "./src/utils/chatImage.ts":
+/*!********************************!*\
+  !*** ./src/utils/chatImage.ts ***!
+  \********************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   ChatImageTooLargeError: function() { return /* binding */ ChatImageTooLargeError; },
+/* harmony export */   pickAndCompressChatImages: function() { return /* binding */ pickAndCompressChatImages; }
+/* harmony export */ });
+/* unused harmony exports MAX_IMAGE_BASE64_BYTES, pickAndCompressChatImage, validateChatImageDataUrl */
+/* harmony import */ var _tarojs_taro__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @tarojs/taro */ "./node_modules/@tarojs/taro/index.js");
+/* harmony import */ var _tarojs_taro__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_tarojs_taro__WEBPACK_IMPORTED_MODULE_0__);
+
+
+/** 与后端一致：Base64 解码后不超过 10MB */
+const MAX_IMAGE_BASE64_BYTES = 10 * 1024 * 1024;
+class ChatImageTooLargeError extends Error {
+  constructor() {
+    super("IMAGE_TOO_LARGE");
+    this.name = "ChatImageTooLargeError";
+  }
+}
+function base64ByteSize(dataUrl) {
+  const base64 = dataUrl.includes(",") ? dataUrl.split(",")[1] : dataUrl;
+  return Math.ceil(base64.length * 3 / 4);
+}
+function readFileAsJpegDataUrl(filePath) {
+  const fs = _tarojs_taro__WEBPACK_IMPORTED_MODULE_0___default().getFileSystemManager();
+  return new Promise((resolve, reject) => {
+    fs.readFile({
+      filePath,
+      encoding: "base64",
+      success: res => {
+        const base64 = typeof res.data === "string" ? res.data : "";
+        resolve(`data:image/jpeg;base64,${base64}`);
+      },
+      fail: err => reject(new Error(err.errMsg || "FILE_READ_FAILED"))
+    });
+  });
+}
+async function compressToJpegDataUrl(filePath) {
+  let path = filePath;
+  let quality = 80;
+  for (let attempt = 0; attempt < 6; attempt += 1) {
+    const compressed = await _tarojs_taro__WEBPACK_IMPORTED_MODULE_0___default().compressImage({
+      src: path,
+      quality
+    }).catch(() => null);
+    if (compressed?.tempFilePath) {
+      path = compressed.tempFilePath;
+    }
+    const dataUrl = await readFileAsJpegDataUrl(path);
+    if (base64ByteSize(dataUrl) <= MAX_IMAGE_BASE64_BYTES) {
+      return dataUrl;
+    }
+    quality = Math.max(35, quality - 10);
+  }
+  const finalDataUrl = await readFileAsJpegDataUrl(path);
+  if (base64ByteSize(finalDataUrl) > MAX_IMAGE_BASE64_BYTES) {
+    throw new ChatImageTooLargeError();
+  }
+  return finalDataUrl;
+}
+
+/** 选择并压缩聊天图片，返回 JPEG data URL */
+async function pickAndCompressChatImage() {
+  const images = await pickAndCompressChatImages(1);
+  return images[0] ?? null;
+}
+
+/** 选择并压缩多张聊天图片，返回 JPEG data URL 数组 */
+async function pickAndCompressChatImages(maxCount = 6) {
+  const result = await _tarojs_taro__WEBPACK_IMPORTED_MODULE_0___default().chooseImage({
+    count: maxCount,
+    sizeType: ["compressed"],
+    sourceType: ["album", "camera"]
+  }).catch(() => null);
+  const paths = result?.tempFilePaths ?? [];
+  if (!paths.length) return [];
+  const compressed = [];
+  for (const path of paths) {
+    try {
+      const dataUrl = await compressToJpegDataUrl(path);
+      compressed.push(dataUrl);
+    } catch {
+      // skip failed images
+    }
+  }
+  return compressed;
+}
+function validateChatImageDataUrl(dataUrl) {
+  if (base64ByteSize(dataUrl) > MAX_IMAGE_BASE64_BYTES) {
+    throw new ChatImageTooLargeError();
+  }
+}
+
+/***/ }),
+
+/***/ "./src/utils/inferAuthorGender.ts":
+/*!****************************************!*\
+  !*** ./src/utils/inferAuthorGender.ts ***!
+  \****************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   inferAuthorGenderFromPost: function() { return /* binding */ inferAuthorGenderFromPost; }
+/* harmony export */ });
+function inferAuthorGenderFromPost(post) {
+  if (post.authorGender === "female" || post.authorGender === "male") {
+    return post.authorGender;
+  }
+  const haystack = [...(post.tags ?? []), post.snippet ?? ""].join(" ");
+  if (/(\d+)人女生|女生同行|我们女生|女生一起/i.test(haystack) && !/男生女生都可|男女都可/i.test(haystack)) {
+    return "female";
+  }
+  if (/(\d+)缺\d*男生|缺\d*男生|(\d+)人男生|男生拼车/i.test(haystack) && !/男生女生都可|男女都可/i.test(haystack)) {
+    return "male";
+  }
+  if (/女生优先|限女生|只要女生|女孩子更好/i.test(haystack)) {
+    return "female";
+  }
+  const name = post.authorName?.trim().toLowerCase() ?? "";
+  const first = name.split(/\s+/)[0] ?? name;
+  if (["luna", "zara", "mia", "jade", "nova", "chen"].some(h => first.includes(h))) {
+    return "female";
+  }
+  if (["ryan", "sam", "leo", "kai", "alex"].some(h => first.includes(h))) {
+    return "male";
+  }
+  return undefined;
+}
+
+/***/ }),
+
+/***/ "./src/utils/typewriterReveal.ts":
+/*!***************************************!*\
+  !*** ./src/utils/typewriterReveal.ts ***!
+  \***************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   createTypewriterReveal: function() { return /* binding */ createTypewriterReveal; }
+/* harmony export */ });
+function createTypewriterReveal(options) {
+  const charDelayMs = options.charDelayMs ?? 22;
+  let target = "";
+  let visible = "";
+  let timer = null;
+  let resolveWait = null;
+  const notifyWaiters = () => {
+    if (visible.length >= target.length && !timer && resolveWait) {
+      const resolve = resolveWait;
+      resolveWait = null;
+      resolve();
+    }
+  };
+  const tick = () => {
+    if (visible.length >= target.length) {
+      timer = null;
+      notifyWaiters();
+      return;
+    }
+    visible = target.slice(0, visible.length + 1);
+    options.onUpdate(visible);
+    timer = setTimeout(tick, charDelayMs);
+  };
+  const ensureRunning = () => {
+    if (timer == null && visible.length < target.length) {
+      tick();
+    }
+  };
+  const flushNow = () => {
+    if (timer) {
+      clearTimeout(timer);
+      timer = null;
+    }
+    visible = target;
+    options.onUpdate(visible);
+    notifyWaiters();
+  };
+  return {
+    append(chunk) {
+      if (!chunk) return;
+      target += chunk;
+      ensureRunning();
+    },
+    ensureTarget(text) {
+      if (!text) return;
+      if (text.length <= target.length) return;
+      target = text;
+      ensureRunning();
+    },
+    setFullText(text) {
+      target = text;
+      flushNow();
+    },
+    flush: flushNow,
+    stop() {
+      if (timer) {
+        clearTimeout(timer);
+        timer = null;
+      }
+    },
+    waitUntilComplete() {
+      if (visible.length >= target.length && !timer) {
+        return Promise.resolve();
+      }
+      return new Promise(resolve => {
+        resolveWait = resolve;
+        ensureRunning();
+      });
+    },
+    getTarget: () => target
+  };
+}
+
+/***/ })
+
+},
+/******/ function(__webpack_require__) { // webpackRuntimeModules
+/******/ var __webpack_exec__ = function(moduleId) { return __webpack_require__(__webpack_require__.s = moduleId); }
+/******/ __webpack_require__.O(0, ["taro","vendors","common"], function() { return __webpack_exec__("./src/pages/ai-assistant/index.tsx"); });
+/******/ var __webpack_exports__ = __webpack_require__.O();
+/******/ }
+]);
+//# sourceMappingURL=index.js.map

@@ -100,13 +100,13 @@ export function ChatMessageList({
                       msg.streaming && !msg.text && "s-ai-assistant-chat__bubble--waiting",
                     )}>
                     {msg.streaming && !msg.text ? (
-                      <Text
+                      <View
                         className="s-ai-assistant-chat__typing"
                         aria-label="AI 正在思考">
-                        <Text />
-                        <Text />
-                        <Text />
-                      </Text>
+                        <View className="s-ai-assistant-chat__typing-dot" />
+                        <View className="s-ai-assistant-chat__typing-dot" />
+                        <View className="s-ai-assistant-chat__typing-dot" />
+                      </View>
                     ) : (
                       <>
                         {msg.imagePreview ? (

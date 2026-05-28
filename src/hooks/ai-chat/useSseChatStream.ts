@@ -1,5 +1,6 @@
 import { useCallback, type Dispatch, type MutableRefObject, type SetStateAction } from "react";
-import { AI_CHAT_STREAM_URL } from "../../constants/api";
+import Taro from "@tarojs/taro";
+import { AI_CHAT_STREAM_URL, isApiEnabled } from "../../constants/api";
 import { useAiChatStore } from "../../stores/aiChatStore";
 import type {
   AiChatStreamEvent,
@@ -196,11 +197,12 @@ export function useSseChatStream(options: UseSseChatStreamOptions) {
           ? { "X-Activity-Id": String(activityId) }
           : undefined;
 
+      const pendingImage = image ?? images?.[0];
       const history = buildApiChatHistory(
         messagesRef.current,
         welcomeText,
         trimmed,
-        image,
+        pendingImage,
       );
 
       const finishAiMessage = (
@@ -221,7 +223,8 @@ export function useSseChatStream(options: UseSseChatStreamOptions) {
       });
 
       try {
-        const stream = apiUrl
+        const useLiveApi = Boolean(apiUrl?.trim()) && isApiEnabled();
+        const stream = useLiveApi
           ? streamAiChatRequest({
               url: apiUrl,
               messages: history,
@@ -230,7 +233,7 @@ export function useSseChatStream(options: UseSseChatStreamOptions) {
               userName: userNameRef.current,
               userPhone: userPhoneRef.current,
               activityLegacyId: activityId,
-              image,
+              image: pendingImage,
               images,
               signal: abortSignal,
               headers: {
@@ -253,6 +256,13 @@ export function useSseChatStream(options: UseSseChatStreamOptions) {
           text: message.text || streamErrorText,
           streaming: false,
         }));
+        void Taro.showToast({
+          title:
+            error instanceof Error && error.message
+              ? error.message
+              : streamErrorText,
+          icon: "none",
+        });
       } finally {
         finishAiMessage((message) => ({ ...message, streaming: false }));
       }

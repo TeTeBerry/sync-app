@@ -1,1 +1,311 @@
-"use strict";(wx["webpackJsonp"]=wx["webpackJsonp"]||[]).push([[613],{5608:function(t,s,e){var i=e(8870),a=e(6540),n=e(5245),o=e(7121),c=e(3682),l=e(5036),r=e(5223),m=e(9014),f=e(6359);function _(t){const s=t?.type;return"like"===s?"like":"comment"===s||"comment_reply"===s?"comment":"activity_update"===s||"post_rejected"===s||"post_hidden"===s||"activity"===s?"system":"general"}function d(t){const s=_(t.meta);return{title:t.title,body:t.body,category:s}}function u(t){const s=new Date(t);if(Number.isNaN(s.getTime()))return"";const e=Date.now()-s.getTime(),i=Math.floor(e/6e4);if(i<1)return"\u521a\u521a";if(i<60)return`${i} \u5206\u949f\u524d`;const a=Math.floor(i/60);if(a<24)return`${a} \u5c0f\u65f6\u524d`;const n=Math.floor(a/24);return`${n} \u5929\u524d`}var h=e(9474),x=e(1933),b=e(118),j=e(4848);const g=["all","comment","like","system"];function N({category:t}){const s={size:20};switch(t){case"like":return(0,j.jsx)(l.B1N,{...s});case"comment":return(0,j.jsx)(l.oFn,{...s});case"system":return(0,j.jsx)(l.R03,{...s});default:return(0,j.jsx)(l.IrQ,{...s})}}const y=()=>{const t=(0,o.Q)(x.jl),{data:s=[],isLoading:e,refetch:i}=(0,m.q2)(),y=t&&!e;(0,c.J)(y);const[k,p]=(0,a.useState)("all"),{confirm:w,confirmDialog:S}=(0,f.G)({cancelText:"\u53d6\u6d88"}),v=(0,a.useMemo)(()=>s.filter(t=>!t.read).length,[s]),C=(0,a.useMemo)(()=>"all"===k?s:s.filter(t=>_(t.meta)===k),[k,s]),T=(0,a.useMemo)(()=>{const t={all:s.length,comment:0,like:0,system:0,general:0};for(const e of s){const s=_(e.meta);t[s]+=1}return t},[s]),$=(0,a.useCallback)(async()=>{0!==v&&(await(0,m.he)(),await i())},[i,v]),M=(0,a.useCallback)(async()=>{if(0===s.length)return;const t=await w({title:"\u6e05\u7a7a\u5168\u90e8\u6d88\u606f",message:"\u786e\u5b9a\u8981\u5220\u9664\u6240\u6709\u6d88\u606f\u5417\uff1f\u6b64\u64cd\u4f5c\u4e0d\u53ef\u64a4\u9500\u3002",confirmText:"\u6e05\u7a7a\u5168\u90e8"});t&&(await(0,m.Lx)(),await i())},[w,s.length,i]),E=(0,a.useCallback)(async(t,s)=>{t.stopPropagation();const e=await w({title:"\u5220\u9664\u6d88\u606f",message:"\u786e\u5b9a\u8981\u5220\u9664\u8fd9\u6761\u6d88\u606f\u5417\uff1f",confirmText:"\u5220\u9664"});e&&(await(0,m.D6)(s.id),await i())},[w,i]),A=(0,a.useCallback)(async t=>{t.read||await(0,m.bA)(t.id),(0,h.Ht)(t.meta)},[]);return(0,j.jsxs)(b.Ss,{"data-cmp":"Notifications",className:"s-notifications",children:[(0,j.jsx)(r.A,{title:"\u6d88\u606f\u901a\u77e5",fallback:h.bw.HOME}),(0,j.jsxs)(b.Ss,{className:"s-notifications__main",children:[(0,j.jsx)(b.Ss,{className:"s-notifications__tabs",role:"tablist",children:g.map(t=>{const s=T[t],e=k===t;return(0,j.jsxs)(b.$n,{role:"tab","aria-selected":e,className:"s-notifications__tab"+(e?" s-notifications__tab--active":""),onClick:()=>p(t),children:["all"===t?"\u5168\u90e8":"comment"===t?"\u8bc4\u8bba":"like"===t?"\u70b9\u8d5e":"\u7cfb\u7edf",s>0&&(0,j.jsx)(b.EY,{className:"s-notifications__tab-count",children:s})]},t)})}),s.length>0&&(0,j.jsxs)(b.Ss,{className:"s-notifications__toolbar",children:[v>0&&(0,j.jsx)(b.$n,{className:"s-notifications__toolbar-btn",onClick:()=>{$()},children:"\u5168\u90e8\u5df2\u8bfb"}),(0,j.jsx)(b.$n,{className:"s-notifications__toolbar-btn",onClick:()=>{M()},children:"\u6e05\u7a7a\u5168\u90e8"})]}),e||!t?(0,j.jsx)(n.A,{variant:"skeleton-feed",minHeight:280}):0===C.length?(0,j.jsxs)(b.Ss,{className:"s-notifications__empty",children:[(0,j.jsx)(l.IrQ,{size:40,className:"s-notifications__empty-icon"}),(0,j.jsx)(b.Ss,{className:"s-notifications__empty-title",children:"\u6682\u65e0\u6d88\u606f"}),(0,j.jsx)(b.Ss,{className:"s-notifications__empty-desc",children:"\u8bc4\u8bba\u3001\u70b9\u8d5e\u548c\u6d3b\u52a8\u53d8\u66f4\u4f1a\u5728\u8fd9\u91cc\u663e\u793a\u3002"})]}):(0,j.jsx)(b.Ss,{className:"s-notifications__list",children:C.map(t=>{const s=d(t);return(0,j.jsxs)(b.Ss,{className:"s-notifications__item"+(t.read?"":" s-notifications__item--unread"),children:[(0,j.jsxs)(b.$n,{className:"s-notifications__item-main",onClick:()=>{A(t)},children:[(0,j.jsx)(b.Ss,{className:`s-notifications__icon s-notifications__icon--${s.category}`,children:(0,j.jsx)(N,{category:s.category})}),(0,j.jsxs)(b.Ss,{className:"s-notifications__content",children:[(0,j.jsxs)(b.Ss,{className:"s-notifications__title-row",children:[(0,j.jsx)(b.EY,{className:"s-notifications__title",children:s.title}),(0,j.jsx)(b.EY,{className:"s-notifications__time",children:u(t.createdAt)})]}),(0,j.jsx)(b.Ss,{className:"s-notifications__body",children:s.body})]}),!t.read&&(0,j.jsx)(b.EY,{className:"s-notifications__dot","aria-hidden":!0})]}),(0,j.jsx)(b.$n,{className:"s-notifications__delete","aria-label":"\u5220\u9664",onClick:s=>{E(s,t)},children:(0,j.jsx)(l.TBR,{size:16})})]},t.id)})})]}),S]})};var k=y,p={navigationBarTitleText:"",navigationStyle:"custom",backgroundColor:"#000000",backgroundColorContent:"#000000",backgroundTextStyle:"light"},w=(0,i.eU)(k,"pages/notifications/index",{root:{cn:[]}},p||{});k&&k.behaviors&&(w.behaviors=(w.behaviors||[]).concat(k.behaviors));Page(w)}},function(t){var s=function(s){return t(t.s=s)};t.O(0,[907,96,76],function(){return s(5608)});t.O()}]);
+"use strict";
+(wx["webpackJsonp"] = wx["webpackJsonp"] || []).push([["pages/notifications/index"],{
+
+/***/ "./node_modules/@tarojs/taro-loader/lib/entry-cache.js?name=pages/notifications/index!./src/pages/notifications/index.tsx":
+/*!********************************************************************************************************************************!*\
+  !*** ./node_modules/@tarojs/taro-loader/lib/entry-cache.js?name=pages/notifications/index!./src/pages/notifications/index.tsx ***!
+  \********************************************************************************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _components_ThemedPageLoader__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../components/ThemedPageLoader */ "./src/components/ThemedPageLoader.tsx");
+/* harmony import */ var _hooks_useDeferredMount__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../hooks/useDeferredMount */ "./src/hooks/useDeferredMount.ts");
+/* harmony import */ var _hooks_usePageRouteReady__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../hooks/usePageRouteReady */ "./src/hooks/usePageRouteReady.ts");
+/* harmony import */ var lucide_react_taro__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! lucide-react-taro */ "./node_modules/lucide-react-taro/dist/esm/index.js");
+/* harmony import */ var _components_PageNavigation__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../components/PageNavigation */ "./src/components/PageNavigation.tsx");
+/* harmony import */ var _hooks_useSyncApi__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../hooks/useSyncApi */ "./src/hooks/useSyncApi.ts");
+/* harmony import */ var _hooks_useConfirmDialog__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../hooks/useConfirmDialog */ "./src/hooks/useConfirmDialog.tsx");
+/* harmony import */ var _utils_notificationDisplay__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ../../utils/notificationDisplay */ "./src/utils/notificationDisplay.ts");
+/* harmony import */ var _utils_route__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../../utils/route */ "./src/utils/route.ts");
+/* harmony import */ var _utils_timing__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ../../utils/timing */ "./src/utils/timing.ts");
+/* harmony import */ var _tarojs_components__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! @tarojs/components */ "./node_modules/@tarojs/plugin-platform-weapp/dist/components-react.js");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/cjs/react-jsx-runtime.production.min.js");
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+const CATEGORY_TABS = ["all", "comment", "like", "system"];
+function NotificationIcon({
+  category
+}) {
+  const iconProps = {
+    size: 20
+  };
+  switch (category) {
+    case "like":
+      return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(lucide_react_taro__WEBPACK_IMPORTED_MODULE_9__.Heart, {
+        ...iconProps
+      });
+    case "comment":
+      return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(lucide_react_taro__WEBPACK_IMPORTED_MODULE_9__.MessageCircle, {
+        ...iconProps
+      });
+    case "system":
+      return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(lucide_react_taro__WEBPACK_IMPORTED_MODULE_9__.Megaphone, {
+        ...iconProps
+      });
+    default:
+      return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(lucide_react_taro__WEBPACK_IMPORTED_MODULE_9__.Bell, {
+        ...iconProps
+      });
+  }
+}
+const NotificationsPage = () => {
+  const listReady = (0,_hooks_useDeferredMount__WEBPACK_IMPORTED_MODULE_2__.useDeferredMount)(_utils_timing__WEBPACK_IMPORTED_MODULE_10__.DEFER_NOTIFICATIONS_MS);
+  const {
+    data: notifications = [],
+    isLoading,
+    refetch
+  } = (0,_hooks_useSyncApi__WEBPACK_IMPORTED_MODULE_5__.useNotificationsQuery)();
+  const contentReady = listReady && !isLoading;
+  (0,_hooks_usePageRouteReady__WEBPACK_IMPORTED_MODULE_3__.usePageRouteReady)(contentReady);
+  const [activeCategory, setActiveCategory] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)("all");
+  const {
+    confirm,
+    confirmDialog
+  } = (0,_hooks_useConfirmDialog__WEBPACK_IMPORTED_MODULE_6__.useConfirmDialog)({
+    cancelText: "取消"
+  });
+  const unreadCount = (0,react__WEBPACK_IMPORTED_MODULE_0__.useMemo)(() => notifications.filter(item => !item.read).length, [notifications]);
+  const filteredNotifications = (0,react__WEBPACK_IMPORTED_MODULE_0__.useMemo)(() => {
+    if (activeCategory === "all") return notifications;
+    return notifications.filter(item => (0,_utils_notificationDisplay__WEBPACK_IMPORTED_MODULE_11__.getNotificationCategory)(item.meta) === activeCategory);
+  }, [activeCategory, notifications]);
+  const categoryCounts = (0,react__WEBPACK_IMPORTED_MODULE_0__.useMemo)(() => {
+    const counts = {
+      all: notifications.length,
+      comment: 0,
+      like: 0,
+      system: 0,
+      general: 0
+    };
+    for (const item of notifications) {
+      const category = (0,_utils_notificationDisplay__WEBPACK_IMPORTED_MODULE_11__.getNotificationCategory)(item.meta);
+      counts[category] += 1;
+    }
+    return counts;
+  }, [notifications]);
+  const handleMarkAll = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(async () => {
+    if (unreadCount === 0) return;
+    await (0,_hooks_useSyncApi__WEBPACK_IMPORTED_MODULE_5__.markAllNotificationsAsRead)();
+    await refetch();
+  }, [refetch, unreadCount]);
+  const handleClearAll = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(async () => {
+    if (notifications.length === 0) return;
+    const confirmed = await confirm({
+      title: "清空全部消息",
+      message: "确定要删除所有消息吗？此操作不可撤销。",
+      confirmText: "清空全部"
+    });
+    if (!confirmed) return;
+    await (0,_hooks_useSyncApi__WEBPACK_IMPORTED_MODULE_5__.clearAllNotificationsAndInvalidate)();
+    await refetch();
+  }, [confirm, notifications.length, refetch]);
+  const handleDelete = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(async (event, item) => {
+    event.stopPropagation();
+    const confirmed = await confirm({
+      title: "删除消息",
+      message: "确定要删除这条消息吗？",
+      confirmText: "删除"
+    });
+    if (!confirmed) return;
+    await (0,_hooks_useSyncApi__WEBPACK_IMPORTED_MODULE_5__.deleteNotificationAndInvalidate)(item.id);
+    await refetch();
+  }, [confirm, refetch]);
+  const handleItemClick = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(async item => {
+    if (!item.read) {
+      await (0,_hooks_useSyncApi__WEBPACK_IMPORTED_MODULE_5__.markNotificationAsRead)(item.id);
+    }
+    (0,_utils_route__WEBPACK_IMPORTED_MODULE_7__.navigateFromNotification)(item.meta);
+  }, []);
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_12__.View, {
+    "data-cmp": "Notifications",
+    className: "s-notifications",
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(_components_PageNavigation__WEBPACK_IMPORTED_MODULE_4__["default"], {
+      title: "\u6D88\u606F\u901A\u77E5",
+      fallback: _utils_route__WEBPACK_IMPORTED_MODULE_7__.ROUTES.HOME
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_12__.View, {
+      className: "s-notifications__main",
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_12__.View, {
+        className: "s-notifications__tabs",
+        role: "tablist",
+        children: CATEGORY_TABS.map(category => {
+          const count = categoryCounts[category];
+          const isActive = activeCategory === category;
+          return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_12__.Button, {
+            role: "tab",
+            "aria-selected": isActive,
+            className: `s-notifications__tab${isActive ? " s-notifications__tab--active" : ""}`,
+            onClick: () => setActiveCategory(category),
+            children: [category === "all" ? "全部" : category === "comment" ? "评论" : category === "like" ? "点赞" : "系统", count > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_12__.Text, {
+              className: "s-notifications__tab-count",
+              children: count
+            })]
+          }, category);
+        })
+      }), notifications.length > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_12__.View, {
+        className: "s-notifications__toolbar",
+        children: [unreadCount > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_12__.Button, {
+          className: "s-notifications__toolbar-btn",
+          onClick: () => void handleMarkAll(),
+          children: "\u5168\u90E8\u5DF2\u8BFB"
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_12__.Button, {
+          className: "s-notifications__toolbar-btn",
+          onClick: () => void handleClearAll(),
+          children: "\u6E05\u7A7A\u5168\u90E8"
+        })]
+      }), isLoading || !listReady ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(_components_ThemedPageLoader__WEBPACK_IMPORTED_MODULE_1__["default"], {
+        variant: "skeleton-feed",
+        minHeight: 280
+      }) : filteredNotifications.length === 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_12__.View, {
+        className: "s-notifications__empty",
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(lucide_react_taro__WEBPACK_IMPORTED_MODULE_9__.Bell, {
+          size: 40,
+          className: "s-notifications__empty-icon"
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_12__.View, {
+          className: "s-notifications__empty-title",
+          children: "\u6682\u65E0\u6D88\u606F"
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_12__.View, {
+          className: "s-notifications__empty-desc",
+          children: "\u8BC4\u8BBA\u3001\u70B9\u8D5E\u548C\u6D3B\u52A8\u53D8\u66F4\u4F1A\u5728\u8FD9\u91CC\u663E\u793A\u3002"
+        })]
+      }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_12__.View, {
+        className: "s-notifications__list",
+        children: filteredNotifications.map(item => {
+          const display = (0,_utils_notificationDisplay__WEBPACK_IMPORTED_MODULE_11__.resolveNotificationText)(item);
+          return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_12__.View, {
+            className: `s-notifications__item${item.read ? "" : " s-notifications__item--unread"}`,
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_12__.Button, {
+              className: "s-notifications__item-main",
+              onClick: () => void handleItemClick(item),
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_12__.View, {
+                className: `s-notifications__icon s-notifications__icon--${display.category}`,
+                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(NotificationIcon, {
+                  category: display.category
+                })
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_12__.View, {
+                className: "s-notifications__content",
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_12__.View, {
+                  className: "s-notifications__title-row",
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_12__.Text, {
+                    className: "s-notifications__title",
+                    children: display.title
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_12__.Text, {
+                    className: "s-notifications__time",
+                    children: (0,_utils_notificationDisplay__WEBPACK_IMPORTED_MODULE_11__.formatNotificationTimeAgo)(item.createdAt)
+                  })]
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_12__.View, {
+                  className: "s-notifications__body",
+                  children: display.body
+                })]
+              }), !item.read && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_12__.Text, {
+                className: "s-notifications__dot",
+                "aria-hidden": true
+              })]
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_12__.Button, {
+              className: "s-notifications__delete",
+              "aria-label": "\u5220\u9664",
+              onClick: event => void handleDelete(event, item),
+              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(lucide_react_taro__WEBPACK_IMPORTED_MODULE_9__.Trash2, {
+                size: 16
+              })
+            })]
+          }, item.id);
+        })
+      })]
+    }), confirmDialog]
+  });
+};
+/* harmony default export */ __webpack_exports__["default"] = (NotificationsPage);
+
+/***/ }),
+
+/***/ "./src/pages/notifications/index.tsx":
+/*!*******************************************!*\
+  !*** ./src/pages/notifications/index.tsx ***!
+  \*******************************************/
+/***/ (function(__unused_webpack_module, __unused_webpack___webpack_exports__, __webpack_require__) {
+
+/* harmony import */ var _tarojs_runtime__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @tarojs/runtime */ "./node_modules/@tarojs/runtime/dist/dsl/common.js");
+/* harmony import */ var _node_modules_tarojs_taro_loader_lib_entry_cache_js_name_pages_notifications_index_index_tsx__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! !!../../../node_modules/@tarojs/taro-loader/lib/entry-cache.js?name=pages/notifications/index!./index.tsx */ "./node_modules/@tarojs/taro-loader/lib/entry-cache.js?name=pages/notifications/index!./src/pages/notifications/index.tsx");
+
+
+var config = {"navigationBarTitleText":"","navigationStyle":"custom","backgroundColor":"#000000","backgroundColorContent":"#000000","backgroundTextStyle":"light"};
+
+
+
+var taroOption = (0,_tarojs_runtime__WEBPACK_IMPORTED_MODULE_1__.createPageConfig)(_node_modules_tarojs_taro_loader_lib_entry_cache_js_name_pages_notifications_index_index_tsx__WEBPACK_IMPORTED_MODULE_0__["default"], 'pages/notifications/index', {root:{cn:[]}}, config || {})
+if (_node_modules_tarojs_taro_loader_lib_entry_cache_js_name_pages_notifications_index_index_tsx__WEBPACK_IMPORTED_MODULE_0__["default"] && _node_modules_tarojs_taro_loader_lib_entry_cache_js_name_pages_notifications_index_index_tsx__WEBPACK_IMPORTED_MODULE_0__["default"].behaviors) {
+  taroOption.behaviors = (taroOption.behaviors || []).concat(_node_modules_tarojs_taro_loader_lib_entry_cache_js_name_pages_notifications_index_index_tsx__WEBPACK_IMPORTED_MODULE_0__["default"].behaviors)
+}
+var inst = Page(taroOption)
+
+
+
+/* unused harmony default export */ var __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_tarojs_taro_loader_lib_entry_cache_js_name_pages_notifications_index_index_tsx__WEBPACK_IMPORTED_MODULE_0__["default"]);
+
+
+/***/ }),
+
+/***/ "./src/utils/notificationDisplay.ts":
+/*!******************************************!*\
+  !*** ./src/utils/notificationDisplay.ts ***!
+  \******************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   formatNotificationTimeAgo: function() { return /* binding */ formatNotificationTimeAgo; },
+/* harmony export */   getNotificationCategory: function() { return /* binding */ getNotificationCategory; },
+/* harmony export */   resolveNotificationText: function() { return /* binding */ resolveNotificationText; }
+/* harmony export */ });
+function getNotificationCategory(meta) {
+  const type = meta?.type;
+  if (type === "like") return "like";
+  if (type === "comment" || type === "comment_reply") return "comment";
+  if (type === "activity_update" || type === "post_rejected" || type === "post_hidden" || type === "activity") {
+    return "system";
+  }
+  return "general";
+}
+function resolveNotificationText(item) {
+  const category = getNotificationCategory(item.meta);
+  return {
+    title: item.title,
+    body: item.body,
+    category
+  };
+}
+function formatNotificationTimeAgo(iso) {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "";
+  const diffMs = Date.now() - date.getTime();
+  const minutes = Math.floor(diffMs / 60_000);
+  if (minutes < 1) return "刚刚";
+  if (minutes < 60) return `${minutes} 分钟前`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} 小时前`;
+  const days = Math.floor(hours / 24);
+  return `${days} 天前`;
+}
+
+/***/ })
+
+},
+/******/ function(__webpack_require__) { // webpackRuntimeModules
+/******/ var __webpack_exec__ = function(moduleId) { return __webpack_require__(__webpack_require__.s = moduleId); }
+/******/ __webpack_require__.O(0, ["taro","vendors","common"], function() { return __webpack_exec__("./src/pages/notifications/index.tsx"); });
+/******/ var __webpack_exports__ = __webpack_require__.O();
+/******/ }
+]);
+//# sourceMappingURL=index.js.map

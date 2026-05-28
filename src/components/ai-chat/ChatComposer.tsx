@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useState } from "react";
 import Taro from "@tarojs/taro";
-import { ImagePlus, Send, Shield, X } from "lucide-react-taro";
+import { ImagePlus, Send, X } from "lucide-react-taro";
 import { Button, Input, cn } from "../ui";
 import {
   getTopAiShortcutTags,
@@ -14,7 +14,7 @@ import {
 } from "../../utils/chatImage";
 import { useAiChatStore } from "../../stores/aiChatStore";
 import { openImagePreview } from "../../utils/openImagePreview";
-import { Image, ScrollView, Text, View } from "@tarojs/components";
+import { Image, ScrollView, View } from "@tarojs/components";
 
 const SHORTCUT_TAG_LABELS: Record<AiShortcutTag, string> = {
   组队队友: "组队队友",
@@ -36,6 +36,13 @@ const activityActionChips = [
 
 const MAX_IMAGES = 6;
 
+function readComposerInputValue(event: {
+  detail?: { value?: string };
+  target?: { value?: string };
+}): string {
+  return event.detail?.value ?? event.target?.value ?? "";
+}
+
 type QuickChip = {
   key: string;
   label: string;
@@ -51,6 +58,7 @@ export function ChatComposer({
   onInputChange,
   onSubmit,
   onPendingImagesChange,
+  isLoadingHistory = false,
 }: {
   input: string;
   pendingImages: string[];
@@ -59,6 +67,7 @@ export function ChatComposer({
   onInputChange: (value: string) => void;
   onSubmit: (text: string, images?: string[]) => void;
   onPendingImagesChange: (images: string[]) => void;
+  isLoadingHistory?: boolean;
 }) {
   const [shortcutTags, setShortcutTags] = useState(() => getTopAiShortcutTags());
   const conversationFlow = useAiChatStore((state) => state.conversationState?.flow);
@@ -96,8 +105,10 @@ export function ChatComposer({
     }));
   }, [activityLegacyId, shortcutTags]);
 
+  const isBusy = isStreaming || isLoadingHistory;
+
   const handlePickImages = useCallback(async () => {
-    if (isStreaming) return;
+    if (isBusy) return;
     const remaining = MAX_IMAGES - pendingImages.length;
     if (remaining <= 0) {
       void Taro.showToast({
@@ -121,7 +132,7 @@ export function ChatComposer({
       }
       void Taro.showToast({ title: "请求失败，请稍后重试", icon: "none" });
     }
-  }, [isStreaming, pendingImages, onPendingImagesChange]);
+  }, [isBusy, pendingImages, onPendingImagesChange]);
 
   const removeImage = useCallback(
     (index: number) => {
@@ -141,21 +152,27 @@ export function ChatComposer({
     [onSubmit, pendingImages],
   );
 
-  const canSend = Boolean(input.trim() || pendingImages.length) && !isStreaming;
+  const canSend = Boolean(input.trim() || pendingImages.length) && !isBusy;
 
   return (
     <>
-      <View className="s-ai-assistant-chat__quick-row s-scrollbar-none">
-        {quickChips.map((chip) => (
-          <Button
-            key={chip.key}
-            className="s-ai-assistant-chat__quick-chip"
-            disabled={isStreaming}
-            onClick={() => handleQuickChipClick(chip)}>
-            {chip.label}
-          </Button>
-        ))}
-      </View>
+      <ScrollView
+        scrollX
+        enhanced
+        showScrollbar={false}
+        className="s-ai-assistant-chat__quick-scroll s-scrollbar-none">
+        <View className="s-ai-assistant-chat__quick-row">
+          {quickChips.map((chip) => (
+            <Button
+              key={chip.key}
+              className="s-ai-assistant-chat__quick-chip"
+              disabled={isBusy}
+              onClick={() => handleQuickChipClick(chip)}>
+              {chip.label}
+            </Button>
+          ))}
+        </View>
+      </ScrollView>
 
       <View className="s-ai-assistant-chat__composer">
         {pendingImages.length> 0 ? (
@@ -183,7 +200,7 @@ export function ChatComposer({
         ) : null}
         <View className="s-ai-assistant-chat__composer-inner">
           <Button className="s-ai-assistant-chat__attach-btn"
-            disabled={isStreaming || pendingImages.length>= MAX_IMAGES}
+            disabled={isBusy || pendingImages.length>= MAX_IMAGES}
             aria-label="上传图片"
             onClick={() => void handlePickImages()}>
             <ImagePlus size={18} />
@@ -192,9 +209,9 @@ export function ChatComposer({
             variant="ai-assistant-chat"
             type="text"
             value={input}
-            disabled={isStreaming}
+            disabled={isBusy}
             placeholder={inputPlaceholder}
-            onChange={(e) => onInputChange(e.target.value)}
+            onInput={(e) => onInputChange(readComposerInputValue(e))}
             onConfirm={() => onSubmit(input, pendingImages)}
           />
           <Button
@@ -207,10 +224,6 @@ export function ChatComposer({
             <Send size={16} />
           </Button>
         </View>
-        <Text className="s-ai-assistant-chat__disclaimer">
-          <Shield size={12} aria-hidden />
-          <Text>AI 内容仅供参考</Text>
-        </Text>
       </View>
     </>
   );

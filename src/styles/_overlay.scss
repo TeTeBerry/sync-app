@@ -172,22 +172,111 @@
 
 // Centered confirm dialog (WeChat: block Views keep title/message on separate lines)
 .s-confirm-dialog {
+  .s-overlay__backdrop {
+    background: var(--confirm-dialog-backdrop);
+  }
+
   .s-overlay__panel {
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    padding: 20px;
+    max-width: var(--confirm-dialog-panel-max-width);
+    padding: 24px 20px 20px;
     box-sizing: border-box;
+    background: var(--confirm-dialog-panel);
+    border-radius: var(--confirm-dialog-panel-radius);
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+      0 24px 48px rgba(0, 0, 0, 0.5);
   }
 
   .s-overlay__body {
     flex: 0 1 auto;
-    gap: 12px;
-    margin-bottom: 18px;
+    align-items: center;
+    text-align: center;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .s-overlay__title-wrap,
+  .s-overlay__message-wrap {
+    text-align: center;
+  }
+
+  .s-overlay__title {
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1.4;
+    color: var(--confirm-dialog-title-fg);
+  }
+
+  .s-overlay__message {
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--confirm-dialog-message-fg);
   }
 
   .s-overlay__actions {
     margin-top: 0;
+    gap: 10px;
+  }
+
+  .s-overlay__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    padding: 0 16px;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1 !important;
+    text-align: center;
+    box-sizing: border-box;
+    border: none;
+    box-shadow: none;
+
+    &:active {
+      opacity: 0.88;
+    }
+
+    &--cancel {
+      background: var(--confirm-dialog-cancel-bg) !important;
+      color: var(--confirm-dialog-cancel-fg) !important;
+
+      &:active {
+        opacity: 1;
+        background: var(--confirm-dialog-cancel-bg-active) !important;
+      }
+    }
+
+    &--confirm {
+      background: var(--confirm-dialog-confirm-bg) !important;
+      color: var(--confirm-dialog-confirm-fg) !important;
+      box-shadow: var(--confirm-dialog-confirm-glow);
+
+      &:active {
+        opacity: 0.88;
+        background: var(--confirm-dialog-confirm-bg) !important;
+      }
+    }
+
+    &--danger {
+      background: var(--destructive) !important;
+      color: var(--destructive-foreground) !important;
+      box-shadow: var(--confirm-dialog-danger-glow);
+
+      &:active {
+        opacity: 0.88;
+        background: var(--destructive) !important;
+      }
+    }
+  }
+
+  .s-overlay__btn-text {
+    color: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    line-height: 1;
   }
 }
 

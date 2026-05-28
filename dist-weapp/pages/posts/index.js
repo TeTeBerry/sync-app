@@ -1,1 +1,156 @@
-"use strict";(wx["webpackJsonp"]=wx["webpackJsonp"]||[]).push([[304],{2769:function(s,e,t){var o=t(8870),a=t(758),n=t.n(a),i=t(6540),r=t(5223),c=t(1058),l=t(8641),h=t(6359),p=t(9014),g=t(687),u=t(9474),m=t(9891),b=t(118),x=t(4848);const d=()=>{const s=(0,m.zD)(),{confirm:e,confirmDialog:t}=(0,h.G)({cancelText:"\u53d6\u6d88"}),{posts:o,isLoading:a,isError:d,refetch:v}=(0,p.M0)(),T=(0,i.useCallback)(async s=>{const t=await e({title:"\u786e\u8ba4\u5220\u9664",message:"\u5220\u9664\u540e\u65e0\u6cd5\u6062\u590d\uff0c\u786e\u5b9a\u8981\u5220\u9664\u8fd9\u6761\u5e16\u5b50\u5417\uff1f",confirmText:"\u5220\u9664"});t&&(0,p.Av)(s.id).then(()=>{n().showToast({title:"\u5df2\u5220\u9664",icon:"success"})}).catch(()=>{v(),n().showToast({title:"\u5220\u9664\u5931\u8d25",icon:"none"})})},[e,v]),k=(0,i.useCallback)(s=>{(0,g.Ki)()&&(0,p.QF)(s.id).catch(()=>{n().showToast({title:"\u8bf7\u6c42\u5931\u8d25\uff0c\u8bf7\u7a0d\u540e\u91cd\u8bd5",icon:"none"})})},[]),w=(0,i.useCallback)(()=>{v()},[v]);return(0,x.jsxs)(b.Ss,{"data-cmp":"AllPosts",className:"s-posts-page",children:[(0,x.jsx)(r.A,{title:"\u6240\u6709\u5e16\u5b50",fallback:u.bw.HOME}),(0,x.jsx)(b.BM,{scrollY:!0,enhanced:!0,showScrollbar:!1,className:"s-posts-page__main s-scrollbar-none",style:null!=s?{height:`${s}px`}:void 0,children:(0,x.jsx)(l.m,{isLoading:a,isError:d,isEmpty:!a&&!d&&0===o.length,loadingText:"\u52a0\u8f7d\u4e2d\u2026",errorText:"\u8bf7\u6c42\u5931\u8d25\uff0c\u8bf7\u7a0d\u540e\u91cd\u8bd5",emptyText:"\u6682\u65e0\u5e16\u5b50",onRetry:()=>{v()},retryText:"\u91cd\u8bd5",stateClassName:"s-posts-page__state",retryClassName:"s-posts-page__retry",children:(0,x.jsx)(c.v,{items:o,onDelete:T,onLike:k,onCommentSubmitted:w})})}),t]})};var v=d,T={navigationBarTitleText:"",navigationStyle:"custom",backgroundColor:"#000000",backgroundColorContent:"#000000",backgroundTextStyle:"light"},k=(0,o.eU)(v,"pages/posts/index",{root:{cn:[]}},T||{});v&&v.behaviors&&(k.behaviors=(k.behaviors||[]).concat(v.behaviors));Page(k)}},function(s){var e=function(e){return s(s.s=e)};s.O(0,[907,96,76],function(){return e(2769)});s.O()}]);
+"use strict";
+(wx["webpackJsonp"] = wx["webpackJsonp"] || []).push([["pages/posts/index"],{
+
+/***/ "./node_modules/@tarojs/taro-loader/lib/entry-cache.js?name=pages/posts/index!./src/pages/posts/index.tsx":
+/*!****************************************************************************************************************!*\
+  !*** ./node_modules/@tarojs/taro-loader/lib/entry-cache.js?name=pages/posts/index!./src/pages/posts/index.tsx ***!
+  \****************************************************************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+/* harmony import */ var _tarojs_taro__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @tarojs/taro */ "./node_modules/@tarojs/taro/index.js");
+/* harmony import */ var _tarojs_taro__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_tarojs_taro__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _components_PageNavigation__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../components/PageNavigation */ "./src/components/PageNavigation.tsx");
+/* harmony import */ var _components_FeedPostList__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../components/FeedPostList */ "./src/components/FeedPostList.tsx");
+/* harmony import */ var _components_ListState__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../components/ListState */ "./src/components/ListState.tsx");
+/* harmony import */ var _hooks_useConfirmDialog__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../hooks/useConfirmDialog */ "./src/hooks/useConfirmDialog.tsx");
+/* harmony import */ var _hooks_useSyncApi__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../hooks/useSyncApi */ "./src/hooks/useSyncApi.ts");
+/* harmony import */ var _constants_api__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../../constants/api */ "./src/constants/api.ts");
+/* harmony import */ var _utils_route__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../../utils/route */ "./src/utils/route.ts");
+/* harmony import */ var _hooks_useTabPageMainHeight__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../../hooks/useTabPageMainHeight */ "./src/hooks/useTabPageMainHeight.ts");
+/* harmony import */ var _tarojs_components__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! @tarojs/components */ "./node_modules/@tarojs/plugin-platform-weapp/dist/components-react.js");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/cjs/react-jsx-runtime.production.min.js");
+
+
+
+
+
+
+
+
+
+
+
+
+
+const AllPostsPage = () => {
+  const mainScrollHeight = (0,_hooks_useTabPageMainHeight__WEBPACK_IMPORTED_MODULE_9__.useStackPageMainHeight)();
+  const {
+    confirm,
+    confirmDialog
+  } = (0,_hooks_useConfirmDialog__WEBPACK_IMPORTED_MODULE_5__.useConfirmDialog)({
+    cancelText: "取消"
+  });
+  const {
+    posts,
+    isLoading,
+    isError,
+    refetch
+  } = (0,_hooks_useSyncApi__WEBPACK_IMPORTED_MODULE_6__.useAllPostsQuery)();
+  const handleDeletePost = (0,react__WEBPACK_IMPORTED_MODULE_1__.useCallback)(async post => {
+    const ok = await confirm({
+      title: "确认删除",
+      message: "删除后无法恢复，确定要删除这条帖子吗？",
+      confirmText: "删除"
+    });
+    if (!ok) return;
+    void (0,_hooks_useSyncApi__WEBPACK_IMPORTED_MODULE_6__.deletePostAndInvalidate)(post.id).then(() => {
+      void _tarojs_taro__WEBPACK_IMPORTED_MODULE_0___default().showToast({
+        title: "已删除",
+        icon: "success"
+      });
+    }).catch(() => {
+      void refetch();
+      void _tarojs_taro__WEBPACK_IMPORTED_MODULE_0___default().showToast({
+        title: "删除失败",
+        icon: "none"
+      });
+    });
+  }, [confirm, refetch]);
+  const handleLikePost = (0,react__WEBPACK_IMPORTED_MODULE_1__.useCallback)(post => {
+    if (!(0,_constants_api__WEBPACK_IMPORTED_MODULE_7__.isApiEnabled)()) {
+      return;
+    }
+    void (0,_hooks_useSyncApi__WEBPACK_IMPORTED_MODULE_6__.likePostAndInvalidate)(post.id).catch(() => void _tarojs_taro__WEBPACK_IMPORTED_MODULE_0___default().showToast({
+      title: "请求失败，请稍后重试",
+      icon: "none"
+    }));
+  }, []);
+  const handleCommentSubmitted = (0,react__WEBPACK_IMPORTED_MODULE_1__.useCallback)(() => {
+    void refetch();
+  }, [refetch]);
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_11__.View, {
+    "data-cmp": "AllPosts",
+    className: "s-posts-page",
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_components_PageNavigation__WEBPACK_IMPORTED_MODULE_2__["default"], {
+      title: "\u6240\u6709\u5E16\u5B50",
+      fallback: _utils_route__WEBPACK_IMPORTED_MODULE_8__.ROUTES.HOME
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_11__.ScrollView, {
+      scrollY: true,
+      enhanced: true,
+      showScrollbar: false,
+      className: "s-posts-page__main s-scrollbar-none",
+      style: mainScrollHeight != null ? {
+        height: `${mainScrollHeight}px`
+      } : undefined,
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_components_ListState__WEBPACK_IMPORTED_MODULE_4__.ListState, {
+        isLoading: isLoading,
+        isError: isError,
+        isEmpty: !isLoading && !isError && posts.length === 0,
+        loadingText: "\u52A0\u8F7D\u4E2D\u2026",
+        errorText: "\u8BF7\u6C42\u5931\u8D25\uFF0C\u8BF7\u7A0D\u540E\u91CD\u8BD5",
+        emptyText: "\u6682\u65E0\u5E16\u5B50",
+        onRetry: () => void refetch(),
+        retryText: "\u91CD\u8BD5",
+        stateClassName: "s-posts-page__state",
+        retryClassName: "s-posts-page__retry",
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_components_FeedPostList__WEBPACK_IMPORTED_MODULE_3__.FeedPostList, {
+          items: posts,
+          onDelete: handleDeletePost,
+          onLike: handleLikePost,
+          onCommentSubmitted: handleCommentSubmitted
+        })
+      })
+    }), confirmDialog]
+  });
+};
+/* harmony default export */ __webpack_exports__["default"] = (AllPostsPage);
+
+/***/ }),
+
+/***/ "./src/pages/posts/index.tsx":
+/*!***********************************!*\
+  !*** ./src/pages/posts/index.tsx ***!
+  \***********************************/
+/***/ (function(__unused_webpack_module, __unused_webpack___webpack_exports__, __webpack_require__) {
+
+/* harmony import */ var _tarojs_runtime__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @tarojs/runtime */ "./node_modules/@tarojs/runtime/dist/dsl/common.js");
+/* harmony import */ var _node_modules_tarojs_taro_loader_lib_entry_cache_js_name_pages_posts_index_index_tsx__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! !!../../../node_modules/@tarojs/taro-loader/lib/entry-cache.js?name=pages/posts/index!./index.tsx */ "./node_modules/@tarojs/taro-loader/lib/entry-cache.js?name=pages/posts/index!./src/pages/posts/index.tsx");
+
+
+var config = {"navigationBarTitleText":"","navigationStyle":"custom","backgroundColor":"#000000","backgroundColorContent":"#000000","backgroundTextStyle":"light"};
+
+
+
+var taroOption = (0,_tarojs_runtime__WEBPACK_IMPORTED_MODULE_1__.createPageConfig)(_node_modules_tarojs_taro_loader_lib_entry_cache_js_name_pages_posts_index_index_tsx__WEBPACK_IMPORTED_MODULE_0__["default"], 'pages/posts/index', {root:{cn:[]}}, config || {})
+if (_node_modules_tarojs_taro_loader_lib_entry_cache_js_name_pages_posts_index_index_tsx__WEBPACK_IMPORTED_MODULE_0__["default"] && _node_modules_tarojs_taro_loader_lib_entry_cache_js_name_pages_posts_index_index_tsx__WEBPACK_IMPORTED_MODULE_0__["default"].behaviors) {
+  taroOption.behaviors = (taroOption.behaviors || []).concat(_node_modules_tarojs_taro_loader_lib_entry_cache_js_name_pages_posts_index_index_tsx__WEBPACK_IMPORTED_MODULE_0__["default"].behaviors)
+}
+var inst = Page(taroOption)
+
+
+
+/* unused harmony default export */ var __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_tarojs_taro_loader_lib_entry_cache_js_name_pages_posts_index_index_tsx__WEBPACK_IMPORTED_MODULE_0__["default"]);
+
+
+/***/ })
+
+},
+/******/ function(__webpack_require__) { // webpackRuntimeModules
+/******/ var __webpack_exec__ = function(moduleId) { return __webpack_require__(__webpack_require__.s = moduleId); }
+/******/ __webpack_require__.O(0, ["taro","vendors","common"], function() { return __webpack_exec__("./src/pages/posts/index.tsx"); });
+/******/ var __webpack_exports__ = __webpack_require__.O();
+/******/ }
+]);
+//# sourceMappingURL=index.js.map

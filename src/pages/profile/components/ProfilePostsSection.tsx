@@ -12,6 +12,7 @@ import {
   Trash2,
   X,
 } from "lucide-react-taro";
+import { ContentTypeBadge } from "../../../components/ContentTypeBadge";
 import { ProfileCollapsibleSection } from "../../../components/profile/ProfileCollapsibleSection";
 import type { ProfilePostItem } from "../../../types/backend";
 import { Button, Text, Textarea, View } from "@tarojs/components";
@@ -95,6 +96,8 @@ const ProfilePostsSection: React.FC<ProfilePostsSectionProps> = ({
             </View>
 
             <Text className="s-profile-post__content">{item.content}</Text>
+
+            <ContentTypeBadge types={item.contentTypes} />
 
             <View className="s-profile-post__footer">
               <View className="s-profile-post__stats">

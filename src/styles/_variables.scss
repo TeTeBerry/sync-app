@@ -74,12 +74,16 @@ page {
   --confirm-dialog-panel: rgb(28, 28, 30);
   --confirm-dialog-panel-radius: 20px;
   --confirm-dialog-panel-max-width: 311px;
+  --confirm-dialog-title-fg: var(--foreground);
+  --confirm-dialog-message-fg: var(--muted-foreground);
   --confirm-dialog-cancel-bg: rgb(38, 38, 40);
   --confirm-dialog-cancel-bg-active: rgb(48, 48, 50);
-  --confirm-dialog-cancel-fg: rgba(255, 255, 255, 0.9);
-  --confirm-dialog-confirm-glow:
-    0 0 20px rgba(255, 0, 102, 0.55),
-    0 4px 16px rgba(255, 0, 102, 0.35);
+  --confirm-dialog-cancel-fg: rgba(255, 255, 255, 0.72);
+  --confirm-dialog-confirm-bg: #ff0066;
+  --confirm-dialog-confirm-fg: #ffffff;
+  --confirm-dialog-confirm-glow: 0 4px 15px rgba(255, 0, 102, 0.4);
+  --confirm-dialog-danger-glow:
+    0 4px 15px rgba(255, 100, 103, 0.35);
 
   /* Layout @ 375px design */
   --s-page-gutter: 16px;

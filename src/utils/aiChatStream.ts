@@ -2,6 +2,20 @@ import Taro from "@tarojs/taro";
 import type { AiChatMessage, AiChatStreamEvent, RecommendedPostCard } from "../types/aiChat";
 import type { ConversationState } from "../types/conversationState";
 
+function taroRequest(
+  options: Taro.request.Option,
+): Promise<Taro.request.SuccessCallbackResult<string | unknown>> {
+  return new Promise((resolve, reject) => {
+    Taro.request({
+      ...options,
+      success: resolve,
+      fail: (err) => {
+        reject(new Error(err.errMsg || "网络请求失败"));
+      },
+    });
+  });
+}
+
 function parseSseDataLine(line: string): AiChatStreamEvent | null {
   if (!line.startsWith("data:")) return null;
 
@@ -124,7 +138,18 @@ export interface StreamAiChatOptions {
 export async function* streamAiChatRequest(
   options: StreamAiChatOptions,
 ): AsyncGenerator<AiChatStreamEvent> {
-  const res = await Taro.request({
+  if (!options.url?.trim()) {
+    throw new Error("AI chat URL is not configured");
+  }
+
+  if (
+    process.env.TARO_ENV === "weapp" &&
+    options.url.startsWith("/")
+  ) {
+    throw new Error("小程序需配置完整 API 地址（TARO_APP_API_BASE_URL）");
+  }
+
+  const res = await taroRequest({
     url: options.url,
     method: "POST",
     header: {
@@ -143,14 +168,36 @@ export async function* streamAiChatRequest(
       images: options.images,
     },
     timeout: 60_000,
+    responseType: "text",
+    enableChunked: true,
   });
 
   if (res.statusCode !== 200) {
     throw new Error(`AI chat failed (${res.statusCode})`);
   }
 
-  const text = typeof res.data === "string" ? res.data : JSON.stringify(res.data);
-  yield* parseSseText(text);
+  const text =
+    typeof res.data === "string"
+      ? res.data
+      : res.data == null
+        ? ""
+        : JSON.stringify(res.data);
+
+  if (!text.trim()) {
+    throw new Error("AI chat returned an empty response");
+  }
+
+  let sawTerminal = false;
+  for await (const event of parseSseText(text)) {
+    if (event.type === "done" || event.type === "error") {
+      sawTerminal = true;
+    }
+    yield event;
+  }
+
+  if (!sawTerminal) {
+    yield { type: "done" };
+  }
 }
 
 export async function* mockAiChatStream(

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import Taro from "@tarojs/taro";
 import { AI_CHAT_STREAM_URL } from "../../constants/api";
 import { useAiChatStore } from "../../stores/aiChatStore";
 import type { AiChatStreamEvent, ChatUiMessage, SendChatOptions } from "../../types/aiChat";
@@ -68,6 +69,7 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
     userNameRef,
     userPhoneRef,
     setIsStreamingRef,
+    isStreamingRef,
   } = useChatSession({
     welcomeText,
     apiUrl,
@@ -123,9 +125,10 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
       const hasImages = Boolean(image) || (images && images.length > 0);
       if (!trimmed && !hasImages) return;
 
-      // Use messagesRef for synchronous concurrency guard (React state is async)
-      const lastMsg = messagesRef.current[messagesRef.current.length - 1];
-      if (lastMsg?.streaming) return;
+      if (isStreamingRef.current) {
+        void Taro.showToast({ title: "请等待上一条回复", icon: "none" });
+        return;
+      }
 
       const userMsg: ChatUiMessage = {
         id: createMessageId(),
@@ -154,12 +157,16 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
         if ((error as Error).name === "AbortError") {
           return;
         }
+        void Taro.showToast({
+          title: streamErrorText,
+          icon: "none",
+        });
       } finally {
         setIsStreaming(false);
         abortRef.current = null;
       }
     },
-    [messagesRef, runStream, setMessages],
+    [isStreamingRef, messagesRef, runStream, setMessages, streamErrorText],
   );
 
   const clearChat = useCallback(async () => {
