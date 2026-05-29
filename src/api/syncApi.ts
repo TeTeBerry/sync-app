@@ -72,7 +72,11 @@ export function fetchBlockedUserIds() {
 }
 
 export function blockUser(blockedUserId: string) {
-  return apiPost<{ ok: true }>("/users/blocks", { blockedUserId }, ownerParams());
+  return apiPost<{ ok: true }>(
+    "/users/blocks",
+    { blockedUserId },
+    ownerParams(),
+  );
 }
 
 export function unblockUser(blockedUserId: string) {
@@ -116,6 +120,16 @@ export function fetchProfilePosts() {
   return apiGet<ProfilePostItem[]>("/profile/posts", ownerParams());
 }
 
+/** 指定用户的个人页帖子（地图用户弹层等） */
+export function fetchUserPosts(ownerUserId: string, ownerAuthorName?: string) {
+  const params: Record<string, string> = { userId: ownerUserId.trim() };
+  const name = ownerAuthorName?.trim();
+  if (name) {
+    params.authorName = name;
+  }
+  return apiGet<ProfilePostItem[]>("/profile/posts", params);
+}
+
 export function deletePost(postId: string) {
   return apiDelete<{ ok: true }>(`/posts/${postId}`, ownerParams());
 }
@@ -133,14 +147,22 @@ export function likePost(postId: string) {
 }
 
 export function applyToPost(postId: string) {
-  return apiPost<PostActionResult>(`/posts/${postId}/applications`, {}, ownerParams());
+  return apiPost<PostActionResult>(
+    `/posts/${postId}/applications`,
+    {},
+    ownerParams(),
+  );
 }
 
 export function fetchPostComments(postId: string) {
   return apiGet<PostCommentItem[]>(`/posts/${postId}/comments`);
 }
 
-export function addPostComment(postId: string, body: string, parentCommentId?: string) {
+export function addPostComment(
+  postId: string,
+  body: string,
+  parentCommentId?: string,
+) {
   return apiPost<EventDetailPost>(
     `/posts/${postId}/comments`,
     { body, ...(parentCommentId ? { parentCommentId } : {}) },
@@ -153,7 +175,9 @@ export function fetchChatSession(sessionId: string) {
 }
 
 export function clearChatSession(sessionId: string) {
-  return apiDelete<{ ok: true; sessionId: string }>(`/chat/sessions/${sessionId}`);
+  return apiDelete<{ ok: true; sessionId: string }>(
+    `/chat/sessions/${sessionId}`,
+  );
 }
 
 export function fetchNotifications(userId?: string) {

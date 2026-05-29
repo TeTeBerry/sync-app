@@ -1,8 +1,11 @@
 /** Below-fold UI mount defer (first paint). */
 export const DEFER_BELOW_FOLD_MS = 120;
 
-/** Event detail posts feed defer (0 = fetch on first paint; skeleton covers gap). */
-export const DEFER_EVENT_POSTS_MS = 0;
+/** Non-critical API on home (notification badge, etc.). */
+export const DEFER_SECONDARY_API_MS = 280;
+
+/** Event detail posts feed defer (let header/meta paint first). */
+export const DEFER_EVENT_POSTS_MS = DEFER_BELOW_FOLD_MS;
 
 /** Notifications list defer. */
 export const DEFER_NOTIFICATIONS_MS = 0;

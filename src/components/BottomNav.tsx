@@ -2,7 +2,7 @@ import "./BottomNav.scss";
 import React from "react";
 import { View, Text, Button } from "@tarojs/components";
 import { CalendarDays, House, User } from "lucide-react-taro";
-import { ROUTES, reLaunchTo, useActiveRoutePath } from "../utils/route";
+import { ROUTES, switchTabTo, useActiveRoutePath } from "../utils/route";
 
 const BottomNav: React.FC = () => {
   const activePath = useActiveRoutePath();
@@ -23,7 +23,7 @@ const BottomNav: React.FC = () => {
             <Button
               key={item.path}
               disabled={isActive}
-              onClick={() => reLaunchTo(item.path)}
+              onClick={() => switchTabTo(item.path)}
               className="s-bottom-nav__item">
               <Icon
                 size={24}

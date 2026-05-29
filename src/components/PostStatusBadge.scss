@@ -1,13 +1,27 @@
 .s-post-status-badge {
-  &.nut-tag {
-    padding: 3px 10px;
-    border-radius: var(--radius-full);
-    font-size: var(--s-type-caption);
-    line-height: 1.2;
-    font-weight: var(--s-fw-bold);
-    white-space: nowrap;
-    border: none;
-    display: inline-flex;
-    align-items: center;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  font-size: var(--s-type-caption);
+  line-height: 1.2;
+  font-weight: var(--s-fw-bold);
+  white-space: nowrap;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+
+  &__text {
+    font-size: inherit;
+    line-height: inherit;
+    font-weight: inherit;
+  }
+
+  &--recruiting {
+    color: #ff3366;
+    background: rgba(74, 14, 28, 0.85);
+  }
+
+  &--full {
+    color: var(--muted-foreground);
+    background: rgba(255, 255, 255, 0.1);
   }
 }

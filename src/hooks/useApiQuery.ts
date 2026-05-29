@@ -98,13 +98,21 @@ export function useApiQuery<T>(options: UseApiQueryOptions<T>) {
   const [isError, setIsError] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const lastFetchRef = useRef<number>(cached?.timestamp ?? 0);
+  const queryFnRef = useRef(queryFn);
+  queryFnRef.current = queryFn;
+  const dataRef = useRef(data);
+  dataRef.current = data;
 
   const fetch = useCallback(
     async (options?: { force?: boolean; background?: boolean }) => {
       const force = options?.force ?? false;
       const background = options?.background ?? false;
       const now = Date.now();
-      if (!force && now - lastFetchRef.current < staleTime && data !== undefined) {
+      if (
+        !force &&
+        now - lastFetchRef.current < staleTime &&
+        dataRef.current !== undefined
+      ) {
         return;
       }
 
@@ -114,7 +122,7 @@ export function useApiQuery<T>(options: UseApiQueryOptions<T>) {
       setIsError(false);
       setError(null);
       try {
-        const result = await queryFn();
+        const result = await queryFnRef.current();
         setData(result);
         globalCache.set(cacheKey, { data: result, timestamp: now });
         lastFetchRef.current = now;
@@ -127,7 +135,7 @@ export function useApiQuery<T>(options: UseApiQueryOptions<T>) {
         }
       }
     },
-    [queryFn, staleTime, cacheKey, data],
+    [staleTime, cacheKey],
   );
 
   useEffect(() => {
@@ -141,9 +149,9 @@ export function useApiQuery<T>(options: UseApiQueryOptions<T>) {
     return subscribeInvalidation((prefix) => {
       if (!cacheKey.startsWith(prefix)) return;
       lastFetchRef.current = 0;
-      void fetch({ force: true, background: data !== undefined });
+      void fetch({ force: true, background: dataRef.current !== undefined });
     });
-  }, [cacheKey, enabled, fetch, data]);
+  }, [cacheKey, enabled, fetch]);
 
   useEffect(() => {
     if (!enabled) return;

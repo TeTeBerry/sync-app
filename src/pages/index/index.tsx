@@ -1,7 +1,6 @@
 import "./home.scss";
-import Taro, { useDidShow } from "@tarojs/taro";
-import { lazy, Suspense, useCallback, useEffect } from "react";
-import { BottomNavSlot } from "../../components/BottomNav";
+import Taro from "@tarojs/taro";
+import { lazy, Suspense, useCallback } from "react";
 import PageLoadingFallback from "../../components/PageLoadingFallback";
 import { useConfirmDialog } from "../../hooks/useConfirmDialog";
 import { useDeferredMount } from "../../hooks/useDeferredMount";
@@ -15,11 +14,12 @@ import {
   usePopularPosts,
 } from "../../hooks/useSyncApi";
 import { isApiEnabled } from "../../constants/api";
-import { go, goAiAssistant, goEventDetail, goNotifications, preloadHotRoutes, ROUTES } from "../../utils/route";
-import { DEFER_BELOW_FOLD_MS } from "../../utils/timing";
+import { go, goAiAssistant, goEventDetail, goNotifications, preloadPageSafe, ROUTES } from "../../utils/route";
+import { DEFER_BELOW_FOLD_MS, DEFER_SECONDARY_API_MS } from "../../utils/timing";
 import { HomeCountdownCard } from "./components/HomeCountdownCard";
 import { HomeFeaturedEvents } from "./components/HomeFeaturedEvents";
-import { HomePlazaHero } from "./components/HomePlazaHero";
+import TabPageHeader from "../../components/TabPageHeader";
+import { HomeHeaderActions } from "./components/HomeHeaderActions";
 import { type ActivityPost } from "./homeData";
 import { resolveFeaturedEventLegacyId, type FeaturedEvent } from "../../utils/apiMappers";
 import { useNavBarInsets } from "../../hooks/useNavBarInsets";
@@ -32,14 +32,17 @@ const LazyHomeActivityFeed = lazy(async () => {
 
 const Home = () => {
   const belowFoldReady = useDeferredMount(DEFER_BELOW_FOLD_MS);
+  const secondaryApiReady = useDeferredMount(DEFER_SECONDARY_API_MS);
   const { confirm, confirmDialog } = useConfirmDialog({
     cancelText: "取消",
   });
   const { data: summary } = useHomeSummary();
   const heat = summary?.heat;
   const { items: featuredEvents } = useFeaturedEvents();
-  const nearestUpcoming = useNearestUpcomingForCountdown({ enabled: belowFoldReady });
-  const { data: unreadCount = 0 } = useNotificationUnreadCount();
+  const nearestUpcoming = useNearestUpcomingForCountdown();
+  const { data: unreadCount = 0 } = useNotificationUnreadCount({
+    enabled: secondaryApiReady,
+  });
   const { posts, refetch: refetchPosts } = usePopularPosts({ enabled: belowFoldReady });
 
   const openAiAssistant = useCallback((message?: string) => {
@@ -50,14 +53,6 @@ const Home = () => {
     goAiAssistant();
   }, []);
 
-  useEffect(() => {
-    preloadHotRoutes();
-  }, []);
-
-  useDidShow(() => {
-    preloadHotRoutes();
-  });
-
   const handleNotification = useCallback(() => {
     goNotifications();
   }, []);
@@ -67,6 +62,7 @@ const Home = () => {
     if (legacyId == null) {
       return;
     }
+    preloadPageSafe(ROUTES.EVENT_DETAIL, { activityLegacyId: String(legacyId) });
     goEventDetail(legacyId);
   }, []);
 
@@ -117,12 +113,17 @@ const Home = () => {
         showScrollbar={false}
         className="s-page-with-tabbar__scroll s-home__main s-scrollbar-none">
         <View className="s-home__scroll-inner">
-          <HomePlazaHero
-            capsulePaddingTop={navInsets.paddingTop}
-            capsulePaddingRight={navInsets.paddingRight}
-            unreadCount={unreadCount}
-            onAgentClick={() => openAiAssistant()}
-            onNotificationClick={handleNotification}
+          <TabPageHeader
+            className="s-tab-page-header--home"
+            navInsets={navInsets}
+            paddingRightGutterPx={16}
+            trailing={
+              <HomeHeaderActions
+                unreadCount={unreadCount}
+                onAgentClick={() => openAiAssistant()}
+                onNotificationClick={handleNotification}
+              />
+            }
           />
 
           <HomeCountdownCard
@@ -157,8 +158,6 @@ const Home = () => {
       </ScrollView>
 
       {confirmDialog}
-
-      <BottomNavSlot />
     </View>
   );
 };

@@ -1,10 +1,12 @@
 import React from "react";
-import { Tag } from "@nutui/nutui-react-taro";
+import { Text, View } from "@tarojs/components";
+import "./PostStatusBadge.scss";
 import {
   type BackendPostStatusLabel,
   eventPostStatusText,
   isHiddenPostStatus,
   isRecruitingPostStatus,
+  postStatusBadgeClass,
   toEventPostCardStatus,
 } from "../utils/postStatus";
 
@@ -29,15 +31,11 @@ export const PostStatusBadge: React.FC<PostStatusBadgeProps> = ({
       ? status
       : eventPostStatusText(toEventPostCardStatus(status));
 
-  const isFull = status === "已组队";
+  const cardStatus = toEventPostCardStatus(status);
 
   return (
-    <Tag
-      className="s-post-status-badge"
-      round
-      color={isFull ? "var(--muted-foreground)" : "#ff3366"}
-      background={isFull ? "rgba(255, 255, 255, 0.1)" : "rgba(74, 14, 28, 0.85)"}>
-      {label}
-    </Tag>
+    <View className={postStatusBadgeClass(cardStatus)}>
+      <Text className="s-post-status-badge__text">{label}</Text>
+    </View>
   );
 };

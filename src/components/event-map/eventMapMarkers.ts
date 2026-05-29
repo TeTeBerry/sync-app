@@ -6,6 +6,10 @@ export const EVENT_MAP_DEFAULT_DATE_RANGE = "Sun 3/10 - Sun 3/24";
 export type EventMapMarker = {
   name: string;
   shortName?: string;
+  /** 后端 demo / 真实用户 id，用于拉取 TA 的帖子 */
+  userId: string;
+  /** 与后端 authorName 对齐，用于 owner 过滤 */
+  authorName: string;
   ring: string;
   ringClass: string;
   avatarSeed: string;
@@ -20,16 +24,19 @@ export const EVENT_MAP_MARKERS: EventMapMarker[] = [
   {
     name: "Christopher",
     shortName: "Chris",
+    userId: "demo-sean",
+    authorName: "Sean",
     ring: "#ff4d8d",
     ringClass: "s-event-map__bottom-avatar--pink",
     avatarSeed: "sync-map-christopher",
     nx: 0.28,
     ny: 0.36,
     star: true,
-    bottomBadge: "plane",
   },
   {
     name: "Luna",
+    userId: "demo-luna",
+    authorName: "Luna",
     ring: "#3dd9f5",
     ringClass: "s-event-map__bottom-avatar--cyan",
     avatarSeed: "sync-map-luna",
@@ -38,6 +45,8 @@ export const EVENT_MAP_MARKERS: EventMapMarker[] = [
   },
   {
     name: "Makenzie",
+    userId: "demo-mia",
+    authorName: "Mia",
     ring: "#ff4d8d",
     ringClass: "s-event-map__bottom-avatar--grey",
     avatarSeed: "sync-map-makenzie",
@@ -47,6 +56,8 @@ export const EVENT_MAP_MARKERS: EventMapMarker[] = [
   {
     name: "Jestin",
     shortName: "Jestin",
+    userId: "demo-ryan",
+    authorName: "Ryan",
     ring: "#3dd9f5",
     ringClass: "s-event-map__bottom-avatar--cyan",
     avatarSeed: "sync-map-jestin",
@@ -55,6 +66,8 @@ export const EVENT_MAP_MARKERS: EventMapMarker[] = [
   },
   {
     name: "Bry",
+    userId: "demo-alex",
+    authorName: "Alex",
     ring: "#4ade80",
     ringClass: "s-event-map__bottom-avatar--green",
     avatarSeed: "sync-map-bry",
@@ -63,6 +76,8 @@ export const EVENT_MAP_MARKERS: EventMapMarker[] = [
   },
   {
     name: "Nick",
+    userId: "demo-sam",
+    authorName: "Sam",
     ring: "#a78bfa",
     ringClass: "s-event-map__bottom-avatar--purple",
     avatarSeed: "sync-map-nick",
@@ -72,6 +87,8 @@ export const EVENT_MAP_MARKERS: EventMapMarker[] = [
   {
     name: "Bianca",
     shortName: "Bianca",
+    userId: "demo-jade",
+    authorName: "Jade",
     ring: "#f7e018",
     ringClass: "s-event-map__bottom-avatar--yellow",
     avatarSeed: "sync-map-bianca",
@@ -82,6 +99,8 @@ export const EVENT_MAP_MARKERS: EventMapMarker[] = [
   {
     name: "Ariel",
     shortName: "Ariel",
+    userId: "demo-nova-storm",
+    authorName: "Nova",
     ring: "#a78bfa",
     ringClass: "s-event-map__bottom-avatar--purple",
     avatarSeed: "sync-map-ariel",

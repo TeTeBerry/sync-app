@@ -8,6 +8,12 @@ const TABBAR_PADDING_TOP_PX = 10;
 /** Matches PageNavigation.scss top + bottom padding + control row. */
 export const STACK_PAGE_NAV_PX = 100;
 
+/** Matches TabPageHeader profile/events row + bottom padding (px, design @ 375). */
+export const TAB_PAGE_NAV_PX = 48;
+
+/** Brand-only TabPageHeader row + bottom padding (profile tab; px @ 375). */
+export const TAB_PAGE_HEADER_BRAND_PX = 36;
+
 export type TabPageMainHeightOptions = {
   /** Fixed chrome inside the main column (headers, composers, toolbars, etc.). */
   subtractPx?: number;

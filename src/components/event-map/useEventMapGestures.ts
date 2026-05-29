@@ -3,11 +3,12 @@ import type { CanvasTouchEvent } from "@tarojs/components";
 import {
   getEventMapViewport,
   repaintEventMapNow,
+  setEventMapInteracting,
   setEventMapViewport,
 } from "./eventMapCanvasRuntime";
 import { findMarkerAtScreen } from "./eventMapHitTest";
+import type { EventMapMarker } from "./eventMapMarkers";
 import {
-  clampMapScale,
   panViewport,
   zoomViewportAtScreen,
   type EventMapViewport,
@@ -20,7 +21,12 @@ type TouchPoint = { x: number; y: number };
 
 type GestureMode = "none" | "pan" | "pinch";
 
-function touchXY(touch: { x?: number; y?: number; clientX?: number; clientY?: number }): TouchPoint {
+function touchXY(touch: {
+  x?: number;
+  y?: number;
+  clientX?: number;
+  clientY?: number;
+}): TouchPoint {
   return {
     x: touch.x ?? touch.clientX ?? 0,
     y: touch.y ?? touch.clientY ?? 0,
@@ -39,7 +45,7 @@ export type UseEventMapGesturesOptions = {
   eventTitle: string;
   mapWidth: number;
   mapHeight: number;
-  onMarkerTap?: (marker: { name: string }) => void;
+  onMarkerTap?: (marker: EventMapMarker) => void;
 };
 
 export function useEventMapGestures({
@@ -70,6 +76,7 @@ export function useEventMapGestures({
       return;
     }
 
+    setEventMapInteracting(true);
     viewportStartRef.current = getEventMapViewport();
     movedRef.current = false;
 
@@ -122,12 +129,19 @@ export function useEventMapGestures({
         return;
       }
 
-      if (touches.length === 1 && modeRef.current === "pan" && panStartTouchRef.current) {
+      if (
+        touches.length === 1 &&
+        modeRef.current === "pan" &&
+        panStartTouchRef.current
+      ) {
         const p = touchXY(touches[0]);
         const dx = p.x - panStartTouchRef.current.x;
         const dy = p.y - panStartTouchRef.current.y;
 
-        if (Math.abs(dx) > TAP_MOVE_THRESHOLD_PX || Math.abs(dy) > TAP_MOVE_THRESHOLD_PX) {
+        if (
+          Math.abs(dx) > TAP_MOVE_THRESHOLD_PX ||
+          Math.abs(dy) > TAP_MOVE_THRESHOLD_PX
+        ) {
           movedRef.current = true;
         }
 
@@ -159,6 +173,8 @@ export function useEventMapGestures({
       modeRef.current = "none";
       panStartTouchRef.current = null;
       tapStartRef.current = null;
+      setEventMapInteracting(false);
+      repaintEventMapNow(titleRef.current);
 
       if (
         wasPan &&
@@ -175,7 +191,7 @@ export function useEventMapGestures({
           getEventMapViewport(),
         );
         if (marker) {
-          onMarkerTap({ name: marker.name });
+          onMarkerTap(marker);
         }
       }
     },
@@ -186,6 +202,8 @@ export function useEventMapGestures({
     modeRef.current = "none";
     panStartTouchRef.current = null;
     tapStartRef.current = null;
+    setEventMapInteracting(false);
+    repaintEventMapNow(titleRef.current);
   }, []);
 
   return {

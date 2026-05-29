@@ -3,6 +3,9 @@
 export const MAP_SCALE_MIN = 0.5;
 export const MAP_SCALE_MAX = 2;
 
+/** Multiplicative step for toolbar +/- zoom (pinch uses continuous ratio). */
+export const MAP_ZOOM_BUTTON_FACTOR = 1.25;
+
 export type EventMapViewport = {
   offsetX: number;
   offsetY: number;
@@ -80,4 +83,21 @@ export function panViewport(
     offsetX: viewport.offsetX + deltaX,
     offsetY: viewport.offsetY + deltaY,
   };
+}
+
+/** Step zoom around a screen anchor (toolbar +/-). */
+export function stepMapViewportZoom(
+  viewport: EventMapViewport,
+  direction: "in" | "out",
+  anchorScreenX: number,
+  anchorScreenY: number,
+): EventMapViewport {
+  const factor =
+    direction === "in" ? MAP_ZOOM_BUTTON_FACTOR : 1 / MAP_ZOOM_BUTTON_FACTOR;
+  return zoomViewportAtScreen(
+    viewport,
+    anchorScreenX,
+    anchorScreenY,
+    viewport.scale * factor,
+  );
 }

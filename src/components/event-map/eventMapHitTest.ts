@@ -1,4 +1,6 @@
-import { EVENT_MAP_MARKERS, type EventMapMarker } from "./eventMapMarkers";
+import type { EventMapMarker } from "./eventMapMarkers";
+import { EVENT_MAP_MARKERS_HIT_TEST } from "./eventMapPaint";
+import { getMapWorldDimensions } from "./eventMapWorld";
 import { createIsometricProjection } from "./isometricProjection";
 import {
   screenToContent,
@@ -23,19 +25,17 @@ export function findMarkerAtScreen(
   height: number,
   viewport: EventMapViewport,
 ): EventMapMarker | null {
-  const w = Math.max(1, width);
-  const h = Math.max(1, height);
+  const { worldW, worldH } = getMapWorldDimensions(width, height);
   const { x: contentX, y: contentY } = screenToContent(
     screenX,
     screenY,
     viewport,
   );
-  const proj = createIsometricProjection(w, h);
+  const proj = createIsometricProjection(worldW, worldH);
 
-  const sorted = [...EVENT_MAP_MARKERS].sort((a, b) => b.ny - a.ny);
-  for (const marker of sorted) {
+  for (const marker of EVENT_MAP_MARKERS_HIT_TEST) {
     const center = proj.projectNorm(marker.nx, marker.ny);
-    const r = markerHitRadius(w, h, center.scale);
+    const r = markerHitRadius(worldW, worldH, center.scale);
     const dx = contentX - center.x;
     const dy = contentY - center.y;
     if (dx * dx + dy * dy <= r * r) {

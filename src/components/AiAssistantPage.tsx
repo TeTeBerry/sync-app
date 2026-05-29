@@ -19,6 +19,7 @@ import { useDeferredMount } from "../hooks/useDeferredMount";
 import { DEFER_AI_CHAT_MS } from "../utils/timing";
 import { useNavBarInsets } from "../hooks/useNavBarInsets";
 import { usePageRouteReady } from "../hooks/usePageRouteReady";
+import { tabPageHeaderStyle } from "./TabPageHeader";
 import { useTabPageMainHeight } from "../hooks/useTabPageMainHeight";
 import { resolveAiChatWsUrl } from "../constants/api";
 import { isAiChatWsDevLog } from "../utils/aiChatWs";
@@ -235,20 +236,7 @@ const AiAssistantPage: FC = () => {
     return navInsets.paddingTop + 12 + AI_HEADER_CONTENT_PX + eventBar;
   }, [navInsets.paddingTop, showEventContext]);
 
-  const headerStyle = useMemo(
-    () =>
-      navInsets.paddingTop > 0 || navInsets.paddingRight > 16
-        ? {
-            ...(navInsets.paddingTop > 0
-              ? { paddingTop: `${navInsets.paddingTop}px` }
-              : {}),
-            ...(navInsets.paddingRight > 16
-              ? { paddingRight: `${navInsets.paddingRight}px` }
-              : {}),
-          }
-        : undefined,
-    [navInsets.paddingRight, navInsets.paddingTop],
-  );
+  const headerStyle = tabPageHeaderStyle(navInsets);
 
   const chatBodyHeight = useTabPageMainHeight({ subtractPx: headerSubtractPx });
 

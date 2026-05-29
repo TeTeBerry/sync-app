@@ -1,5 +1,6 @@
 import type { HomeSummary } from "../types/backend";
 import { ACTIVITY_GUEST_AVATARS } from "../constants/activityGuestAvatars";
+import { resolveActivityThumb } from "../constants/activityImages";
 import { parseActivityLegacyId } from "./activityLegacyId";
 import { sanitizeRemoteImageUrl } from "./imageUrl";
 
@@ -35,7 +36,9 @@ export type FeaturedEvent = {
   going: boolean;
 };
 
-export function buildActivityNameMap(activities: import("../types/backend").BackendActivity[]): Map<string, string> {
+export function buildActivityNameMap(
+  activities: import("../types/backend").BackendActivity[],
+): Map<string, string> {
   return new Map(activities.map((item) => [item.code, item.name]));
 }
 
@@ -46,7 +49,9 @@ export function findBackendActivityByLegacyId(
   return activities.find((activity) => activity.legacyId === legacyId);
 }
 
-export function resolveFeaturedEventLegacyId(event: Pick<FeaturedEvent, "id" | "legacyId">): number | null {
+export function resolveFeaturedEventLegacyId(
+  event: Pick<FeaturedEvent, "id" | "legacyId">,
+): number | null {
   return parseActivityLegacyId(event.legacyId ?? event.id);
 }
 
@@ -56,26 +61,33 @@ export function mapActivitiesToEvents(
   return activities
     .filter((activity) => parseActivityLegacyId(activity.legacyId) != null)
     .map((activity) => ({
-    id: String(activity.legacyId),
-    title: activity.name,
-    going: false,
-    date: activity.date ?? "",
-    location: activity.location ?? "",
-    image: sanitizeRemoteImageUrl(activity.image) ?? activity.image ?? "",
-    hot: Boolean(activity.hot),
-    attendees: activity.attendees ?? 0,
-    distance: activity.hot ? "热门" : "",
-    category: activity.hot ? "户外电音" : "EDM节",
-  }));
+      id: String(activity.legacyId),
+      title: activity.name,
+      going: false,
+      date: activity.date ?? "",
+      location: activity.location ?? "",
+      image: resolveActivityThumb(
+        activity.legacyId,
+        sanitizeRemoteImageUrl(activity.image) ?? activity.image,
+        200,
+      ),
+      hot: Boolean(activity.hot),
+      attendees: activity.attendees ?? 0,
+      distance: activity.hot ? "热门" : "",
+      category: activity.hot ? "户外电音" : "EDM节",
+    }));
 }
 
 export function resolveEventCardLegacyId(id?: string): number | null {
   return parseActivityLegacyId(id);
 }
 
-export function mapSignupEventToFeaturedEvent(item: SignupEvent): FeaturedEvent {
+export function mapSignupEventToFeaturedEvent(
+  item: SignupEvent,
+): FeaturedEvent {
   const isHot = Boolean(item.hot);
   const legacyId = parseActivityLegacyId(item.id) ?? 0;
+  const remote = sanitizeRemoteImageUrl(item.image) || item.image;
   return {
     id: legacyId,
     legacyId,
@@ -87,7 +99,7 @@ export function mapSignupEventToFeaturedEvent(item: SignupEvent): FeaturedEvent 
     attendeeCount: `${item.attendees}+`,
     remaining: "",
     guests: ACTIVITY_GUEST_AVATARS,
-    image: sanitizeRemoteImageUrl(item.image) || undefined,
+    image: resolveActivityThumb(legacyId, remote, 200),
     going: item.going,
   };
 }
@@ -109,8 +121,12 @@ export function mapBackendActivityToFeaturedEvent(
 }
 
 /** 首页精选：优先 hot，最多 2 条 */
-export function pickHomeFeaturedEvents(signupEvents: SignupEvent[]): FeaturedEvent[] {
+export function pickHomeFeaturedEvents(
+  signupEvents: SignupEvent[],
+): FeaturedEvent[] {
   const hot = signupEvents.filter((item) => item.hot);
   const rest = signupEvents.filter((item) => !item.hot);
-  return [...hot, ...rest].slice(0, 2).map((item) => mapSignupEventToFeaturedEvent(item));
+  return [...hot, ...rest]
+    .slice(0, 2)
+    .map((item) => mapSignupEventToFeaturedEvent(item));
 }

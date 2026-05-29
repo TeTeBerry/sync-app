@@ -11,33 +11,7 @@
   padding: 0 var(--s-page-gutter);
 }
 
-// ── Hero ──────────────────────────────────────────────────────────────────────
-
-.s-home-hero {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 18px;
-  min-height: var(--s-hero-icon-size);
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.s-home-hero__brand {
-  flex-shrink: 0;
-  min-width: 0;
-}
-
-.s-home-hero__actions {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 10px;
-  flex-shrink: 0;
-}
+// ── Home header actions (TabPageHeader trailing) ─────────────────────────────
 
 .s-home-icon-btn {
   position: relative;

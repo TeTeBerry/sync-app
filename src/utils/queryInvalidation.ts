@@ -20,8 +20,23 @@ export function invalidateNotifications() {
 
 /** 失效用户个人资料查询 */
 export function invalidateProfile() {
-  invalidateCache(["profile", "activities"]);
+  invalidateProfileActivities();
+  invalidateProfileSummary();
+}
+
+/** 失效个人资料摘要（个人 tab 展示） */
+export function invalidateProfileSummary() {
   invalidateCache(["profile", "summary"]);
+}
+
+/** 失效个人活动列表 */
+export function invalidateProfileActivities() {
+  invalidateCache(["profile", "activities"]);
+}
+
+/** 失效个人帖子列表 */
+export function invalidateProfilePosts() {
+  invalidateCache(["profile", "posts"]);
 }
 
 /** 失效当前用户查询 */
@@ -133,4 +148,15 @@ export function patchLikedPostInCaches(
   setCacheData<HomeFeedPost[]>(["posts", "popular"], patchFeedPosts);
   setCacheData<HomeFeedPost[]>(["posts", "all"], patchFeedPosts);
   setCacheData<EventDetailPost[]>(["posts", "activity"], patchEventPosts);
+
+  forEachCacheEntry((key, entryData) => {
+    if (!key.startsWith("posts|activity|")) return;
+    if (!Array.isArray(entryData)) return;
+    const patched = patchEventPosts(entryData as EventDetailPost[]);
+    if (patched) {
+      setCacheDataByKey(key, patched);
+    }
+  });
+
+  broadcastCacheData(["posts"]);
 }

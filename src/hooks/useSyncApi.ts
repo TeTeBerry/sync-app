@@ -79,8 +79,9 @@ export function useNotificationsQuery() {
   });
 }
 
-export function useNotificationUnreadCount() {
-  const enabled = isApiEnabled();
+export function useNotificationUnreadCount(options?: QueryEnableOptions) {
+  const tabEnabled = options?.enabled ?? true;
+  const enabled = isApiEnabled() && tabEnabled;
   const userId = getClientUserId();
 
   return useApiQuery({
@@ -160,8 +161,9 @@ export function useFeaturedEvents() {
 
   const items = useMemo((): FeaturedEvent[] => {
     const signupEvents = summary?.signupEvents ?? [];
-    const inProgress = signupEvents.filter((item) =>
-      getActivityStatusFromActivity(item.date, item.title) === "in_progress",
+    const inProgress = signupEvents.filter(
+      (item) =>
+        getActivityStatusFromActivity(item.date, item.title) === "in_progress",
     );
     return pickHomeFeaturedEvents(inProgress);
   }, [summary]);
@@ -196,14 +198,13 @@ function mergeHomeCountdownCandidates(
   return candidates;
 }
 
-export function useNearestUpcomingForCountdown(options?: QueryEnableOptions) {
+/** Countdown uses home summary only — avoids a second `/activities` fetch on tab open. */
+export function useNearestUpcomingForCountdown() {
   const { data: summary } = useHomeSummary();
-  const tabEnabled = options?.enabled ?? true;
-  const activitiesQuery = useActivitiesQuery({ enabled: tabEnabled });
 
   return useMemo(() => {
     const signupEvents = summary?.signupEvents ?? [];
-    const candidates = mergeHomeCountdownCandidates(signupEvents, activitiesQuery.data);
+    const candidates = mergeHomeCountdownCandidates(signupEvents, undefined);
     const nearest = findNearestUpcomingActivity(candidates);
     if (!nearest) return null;
 
@@ -211,12 +212,15 @@ export function useNearestUpcomingForCountdown(options?: QueryEnableOptions) {
     if (!title) return null;
 
     return { title, startAt: nearest.startAt };
-  }, [summary, activitiesQuery.data]);
+  }, [summary]);
 }
 
 export function useActivityDetailQuery(legacyId?: number) {
   const enabled =
-    isApiEnabled() && legacyId != null && !Number.isNaN(legacyId) && legacyId > 0;
+    isApiEnabled() &&
+    legacyId != null &&
+    !Number.isNaN(legacyId) &&
+    legacyId > 0;
 
   return useApiQuery({
     queryKey: ["activities", "detail", legacyId],
@@ -349,7 +353,9 @@ export async function registerForActivityAndInvalidate(legacyId: number) {
   return result;
 }
 
-export async function cancelActivityRegistrationAndInvalidate(legacyId: number) {
+export async function cancelActivityRegistrationAndInvalidate(
+  legacyId: number,
+) {
   const result = await cancelActivityRegistration(legacyId);
   await invalidateRegistrationQueries();
   return result;
@@ -418,7 +424,7 @@ export async function deletePostAndInvalidate(postId: string) {
 export async function likePostAndInvalidate(postId: string) {
   const updated = await likePost(postId);
   patchLikedPostInCaches(updated);
-  await Promise.all([invalidatePostQueries(), invalidateNotificationQueries()]);
+  await invalidateNotificationQueries();
   return updated;
 }
 
@@ -427,9 +433,9 @@ export async function commentPostAndInvalidate(
   body: string,
   parentCommentId?: string,
 ) {
-  await addPostComment(postId, body, parentCommentId);
+  const updated = await addPostComment(postId, body, parentCommentId);
+  patchLikedPostInCaches(updated);
   await Promise.all([
-    invalidatePostQueries(),
     invalidateNotificationQueries(),
     invalidatePostComments(postId),
   ]);

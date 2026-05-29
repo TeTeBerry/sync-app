@@ -46,7 +46,7 @@ const EventCardInner: React.FC<EventCardProps> = ({
 }) => {
   const legacyId = resolveEventCardLegacyId(id);
   const isNavigating = useRouteTransitionActive(legacyId ?? undefined);
-  const thumbSrc = thumbnailImageUrl(image, 400);
+  const thumbSrc = thumbnailImageUrl(image, variant === "list" ? 200 : 320);
   const status = getActivityStatusFromActivity(date, title);
   const dateBadge = useMemo(() => formatEventDateBadge(date), [date]);
   const fullDate = useMemo(() => formatEventFullDate(date, title), [date, title]);

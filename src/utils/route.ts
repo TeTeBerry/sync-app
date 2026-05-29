@@ -1,11 +1,15 @@
 import Taro, { useDidShow } from "@tarojs/taro";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigationStore } from "../stores/navigationStore";
 import type { NavigationState } from "../stores/navigationStore";
 import type { AiAssistantNavIntent } from "../stores/types";
 import type { NotificationMeta } from "../types/backend";
 import { parseActivityLegacyId } from "./activityLegacyId";
-import { buildQueryString, normalizeQueryString, parseQueryString } from "./queryString";
+import {
+  buildQueryString,
+  normalizeQueryString,
+  parseQueryString,
+} from "./queryString";
 import { PRELOAD_HOT_ROUTES_MS } from "./timing";
 
 export { parseActivityLegacyId } from "./activityLegacyId";
@@ -14,23 +18,45 @@ export const ROUTES = {
   HOME: "/pages/index/index",
   EVENTS: "/pages/events/index",
   PROFILE: "/pages/profile/index",
-  PROFILE_ACTIVITIES: "/pages/profile-activities/index",
-  PROFILE_POSTS: "/pages/profile-posts/index",
-  SETTINGS: "/pages/settings/index",
-  AI_ASSISTANT: "/pages/ai-assistant/index",
-  EVENT_DETAIL: "/pages/event-detail/index",
-  EVENT_MAP: "/pages/event-map/index",
-  NOTIFICATIONS: "/pages/notifications/index",
-  ALL_POSTS: "/pages/posts/index",
+  PROFILE_ACTIVITIES: "/packageProfile/pages/profile-activities/index",
+  PROFILE_POSTS: "/packageProfile/pages/profile-posts/index",
+  SETTINGS: "/packageProfile/pages/settings/index",
+  AI_ASSISTANT: "/packageAi/pages/ai-assistant/index",
+  EVENT_DETAIL: "/packageEvent/pages/event-detail/index",
+  EVENT_MAP: "/packageEvent/pages/event-map/index",
+  NOTIFICATIONS: "/packageProfile/pages/notifications/index",
+  ALL_POSTS: "/packageEvent/pages/posts/index",
 } as const;
 
 export type RoutePath = (typeof ROUTES)[keyof typeof ROUTES];
 
-const PRELOAD_HOT_ROUTES: RoutePath[] = [
-  ROUTES.EVENT_DETAIL,
-  ROUTES.AI_ASSISTANT,
-  ROUTES.NOTIFICATIONS,
-];
+const TAB_ROUTE_PATHS = new Set<RoutePath>([
+  ROUTES.HOME,
+  ROUTES.EVENTS,
+  ROUTES.PROFILE,
+]);
+
+/** Tab-show preload targets; event detail is warmed on tap via preloadPageSafe instead. */
+const PRELOAD_HOT_ROUTES: RoutePath[] = [];
+
+const tabRouteListeners = new Set<() => void>();
+
+function notifyTabRouteChange() {
+  for (const listener of tabRouteListeners) {
+    listener();
+  }
+}
+
+export function subscribeTabRouteChange(listener: () => void): () => void {
+  tabRouteListeners.add(listener);
+  return () => {
+    tabRouteListeners.delete(listener);
+  };
+}
+
+export function isTabRoute(url: string): url is RoutePath {
+  return TAB_ROUTE_PATHS.has(normalizePath(url) as RoutePath);
+}
 
 /** Blocks duplicate taps only; first navigation is never delayed. */
 const NAV_DEBOUNCE_MS = 120;
@@ -172,11 +198,16 @@ function runSerializedNavigation(task: () => Promise<void>): void {
 }
 
 /** WeChat preloadPage — warms page JS/WXML; never call immediately before navigateTo. */
-export function preloadPageSafe(path: RoutePath, query?: Record<string, string>) {
+export function preloadPageSafe(
+  path: RoutePath,
+  query?: Record<string, string>,
+) {
   if (process.env.TARO_ENV !== "weapp" || isNavigating) {
     return;
   }
-  const preload = Taro.preloadPage as ((options: { url: string }) => Promise<void>) | undefined;
+  const preload = Taro.preloadPage as
+    | ((options: { url: string }) => Promise<void>)
+    | undefined;
   if (typeof preload !== "function") {
     return;
   }
@@ -255,8 +286,53 @@ function navigateToSafe(url: string, options?: { eventId?: number }) {
   );
 }
 
-/** Bottom tabs: replace route without stacking history like the old SPA Router. */
+/** Tab pages: switchTab keeps tab stacks alive (smoother than reLaunch). */
+export function switchTabTo(url: RoutePath) {
+  if (!isTabRoute(url)) {
+    reLaunchTo(url);
+    return;
+  }
+  if (shouldSkipNavigation(url)) {
+    return;
+  }
+
+  if (process.env.TARO_ENV !== "weapp") {
+    reLaunchTo(url);
+    return;
+  }
+
+  markNavigationStart(url);
+  endRouteTransition();
+
+  runSerializedNavigation(
+    () =>
+      new Promise<void>((resolve) => {
+        Taro.switchTab({
+          url,
+          success: () => {
+            notifyTabRouteChange();
+            resolve();
+          },
+          fail: () => {
+            Taro.reLaunch({
+              url,
+              complete: () => resolve(),
+            });
+          },
+          complete: () => {
+            markNavigationEnd();
+          },
+        });
+      }),
+  );
+}
+
+/** Non-tab or fallback: replace entire stack. Tab URLs on weapp use switchTabTo. */
 export function reLaunchTo(url: RoutePath) {
+  if (process.env.TARO_ENV === "weapp" && isTabRoute(url)) {
+    switchTabTo(url);
+    return;
+  }
   if (shouldSkipNavigation(url)) {
     return;
   }
@@ -300,7 +376,9 @@ export function goEventDetail(
   if (postId) {
     query.postId = postId;
   }
-  navigateToSafe(buildPageUrl(ROUTES.EVENT_DETAIL, query), { eventId: legacyId });
+  navigateToSafe(buildPageUrl(ROUTES.EVENT_DETAIL, query), {
+    eventId: legacyId,
+  });
 }
 
 export type GoEventMapOptions = {
@@ -308,7 +386,10 @@ export type GoEventMapOptions = {
   dateRange?: string;
 };
 
-export function goEventMap(activityLegacyId: number, options?: GoEventMapOptions) {
+export function goEventMap(
+  activityLegacyId: number,
+  options?: GoEventMapOptions,
+) {
   const query: Record<string, string> = {
     activityLegacyId: String(activityLegacyId),
   };
@@ -361,19 +442,27 @@ export function navigateFromNotification(meta?: NotificationMeta): boolean {
 }
 
 export function goProfile() {
-  reLaunchTo(ROUTES.PROFILE);
+  switchTabTo(ROUTES.PROFILE);
 }
 
-export type GoAiAssistantOptions = Pick<AiAssistantNavIntent, "initialMessage" | "activityLegacyId">;
+export type GoAiAssistantOptions = Pick<
+  AiAssistantNavIntent,
+  "initialMessage" | "activityLegacyId"
+>;
 
 export function goAiAssistant(options?: GoAiAssistantOptions) {
   const intent: AiAssistantNavIntent = {};
   if (options?.initialMessage?.trim()) {
     intent.initialMessage = options.initialMessage.trim();
   }
-  if (options?.activityLegacyId != null && !Number.isNaN(options.activityLegacyId)) {
+  if (
+    options?.activityLegacyId != null &&
+    !Number.isNaN(options.activityLegacyId)
+  ) {
     intent.activityLegacyId = options.activityLegacyId;
-    useNavigationStore.getState().setActiveActivityLegacyId(options.activityLegacyId);
+    useNavigationStore
+      .getState()
+      .setActiveActivityLegacyId(options.activityLegacyId);
   } else {
     useNavigationStore.getState().setActiveActivityLegacyId(null);
   }
@@ -388,12 +477,20 @@ export function goNotifications() {
   navigateToSafe(ROUTES.NOTIFICATIONS);
 }
 
+function relaunchOrSwitchTab(target: RoutePath) {
+  if (isTabRoute(target)) {
+    switchTabTo(target);
+    return;
+  }
+  reLaunchTo(target);
+}
+
 export function goBack(fallback: RoutePath = ROUTES.HOME) {
   endRouteTransition();
   const target = resolveFallback(fallback);
   const pages = Taro.getCurrentPages();
   if (pages.length <= 1) {
-    reLaunchTo(target);
+    relaunchOrSwitchTab(target);
     return;
   }
 
@@ -406,7 +503,7 @@ export function goBack(fallback: RoutePath = ROUTES.HOME) {
           delta: 1,
           success: () => resolve(),
           fail: () => {
-            reLaunchTo(target);
+            relaunchOrSwitchTab(target);
             resolve();
           },
           complete: () => {
@@ -421,9 +518,16 @@ export function useActiveRoutePath(): string {
   const [path, setPath] = useState(() => currentRoutePath());
   const bump = useCallback(() => setPath(currentRoutePath()), []);
   useDidShow(() => bump());
+
+  useEffect(() => {
+    return subscribeTabRouteChange(bump);
+  }, [bump]);
+
   return path;
 }
 
 export function useRouteTransitionActive(eventId?: number): boolean {
-  return useNavigationStore((state) => selectRouteTransitionActive(state, eventId));
+  return useNavigationStore((state) =>
+    selectRouteTransitionActive(state, eventId),
+  );
 }

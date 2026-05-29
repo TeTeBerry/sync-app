@@ -75,13 +75,30 @@ export function thumbnailImageUrl(
 
   try {
     const url = new URL(trimmed);
+    const height = Math.round(width * heightRatio);
+
     if (url.hostname.includes("picsum.photos")) {
       const parts = url.pathname.split("/").filter(Boolean);
       if (parts[0] === "seed" && parts[1]) {
-        const height = Math.round(width * heightRatio);
         return picsumUrl(parts[1], width, height);
       }
     }
+
+    const host = url.hostname;
+    if (
+      host.includes("alicdn.com") ||
+      host.includes("tbcdn.cn") ||
+      host.includes("aliyuncs.com")
+    ) {
+      if (!url.searchParams.has("x-oss-process")) {
+        url.searchParams.set(
+          "x-oss-process",
+          `image/resize,m_fill,w_${width},h_${height}`,
+        );
+      }
+      return url.toString();
+    }
+
     if (url.searchParams.has("w")) {
       return trimmed;
     }

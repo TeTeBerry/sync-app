@@ -1,10 +1,9 @@
 import "./events.scss";
 import { useDidShow } from "@tarojs/taro";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { Search, TrendingUp } from "lucide-react-taro";
-import SyncBrandMark from "../../components/SyncBrandMark";
+import TabPageHeader from "../../components/TabPageHeader";
 import { View, Text, Input, Button, ScrollView } from "@tarojs/components";
-import { BottomNavSlot } from "../../components/BottomNav";
 import { useNavBarInsets } from "../../hooks/useNavBarInsets";
 import { useTabPageMainHeight } from "../../hooks/useTabPageMainHeight";
 import EventCard from "../../components/EventCard";
@@ -31,10 +30,6 @@ const EVENTS_CHROME_PX = 168;
 const EVENTS_HEADER_TOP_PX = 14;
 
 const Events: React.FC = () => {
-  useEffect(() => {
-    preloadHotRoutes();
-  }, []);
-
   useDidShow(() => {
     preloadHotRoutes();
   });
@@ -44,17 +39,6 @@ const Events: React.FC = () => {
     EVENTS_CHROME_PX - EVENTS_HEADER_TOP_PX + navInsets.paddingTop;
   const listScrollHeight = useTabPageMainHeight(eventsChromePx);
 
-  const headerStyle =
-    navInsets.paddingTop > 0 || navInsets.paddingRight > 16
-      ? {
-          ...(navInsets.paddingTop > 0
-            ? { paddingTop: `${navInsets.paddingTop}px` }
-            : {}),
-          ...(navInsets.paddingRight > 16
-            ? { paddingRight: `${navInsets.paddingRight}px` }
-            : {}),
-        }
-      : undefined;
   const { events, isLoading, isError, refetch } = useEventList();
   const [activeTab, setActiveTab] = useState<EventFilterTab>("upcoming");
   const [searchQuery, setSearchQuery] = useState("");
@@ -89,13 +73,17 @@ const Events: React.FC = () => {
   return (
     <View className="s-page-shell s-page-with-tabbar">
       <View className="s-page-with-tabbar__main s-events">
-        <View className="s-events__header" style={headerStyle}>
-          <SyncBrandMark subtitle="电音活动" />
-          <View className="s-events__count-pill" aria-label={`${events.length} 场活动`}>
-            <TrendingUp size={14} aria-hidden />
-            <Text>{`${events.length} 场活动`}</Text>
-          </View>
-        </View>
+        <TabPageHeader
+          className="s-tab-page-header--events"
+          brandSubtitle="电音活动"
+          navInsets={navInsets}
+          trailing={
+            <View className="s-events__count-pill" aria-label={`${events.length} 场活动`}>
+              <TrendingUp size={14} aria-hidden />
+              <Text>{`${events.length} 场活动`}</Text>
+            </View>
+          }
+        />
 
         <View className="s-events__toolbar">
           <View className="s-events__search" aria-label="搜索活动、城市...">
@@ -183,7 +171,6 @@ const Events: React.FC = () => {
           </View>
         </ScrollView>
       </View>
-      <BottomNavSlot />
     </View>
   );
 };

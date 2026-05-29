@@ -12,9 +12,13 @@ import {
   Shield,
   Zap,
 } from "lucide-react-taro";
-import { BottomNavSlot } from "../../components/BottomNav";
+import TabPageHeader from "../../components/TabPageHeader";
 import ThemedPageLoader from "../../components/ThemedPageLoader";
 import { useNavBarInsets } from "../../hooks/useNavBarInsets";
+import {
+  TAB_PAGE_HEADER_BRAND_PX,
+  useTabPageMainHeight,
+} from "../../hooks/useTabPageMainHeight";
 import { go, ROUTES } from "../../utils/route";
 import { profileActivities, profilePosts, profileUser } from "./mockData";
 import { sanitizeRemoteImageUrl } from "../../utils/imageUrl";
@@ -22,32 +26,20 @@ import ProfileActionCard from "./components/ProfileActionCard";
 import { countOngoingActivities, deriveInterestTag } from "./utils";
 import { persistUserName } from "../../utils/session";
 import { useNavigationStore, useProfilePageStore } from "../../stores";
-import {
-  useProfileActivitiesQuery,
-  useProfilePostsQuery,
-  useProfileSummaryQuery,
-} from "../../hooks/useSyncApi";
+import { useProfileSummaryQuery } from "../../hooks/useSyncApi";
 import { isApiEnabled } from "../../constants/api";
 import { useConfirmDialog } from "../../hooks/useConfirmDialog";
-import { invalidateCache } from "../../hooks/useApiQuery";
+import {
+  readProfileNotificationsEnabled,
+  readProfilePrivacyLevel,
+} from "../../utils/profileStorage";
+import { invalidateProfileSummary } from "../../utils/queryInvalidation";
 import { Image, ScrollView, Text, View } from "@tarojs/components";
-
-const STORAGE_KEYS = {
-  notifications: "profile.notificationsEnabled",
-  privacy: "profile.privacyLevel",
-} as const;
-
-function readStorage<T>(key: string, fallback: T): T {
-  try {
-    const raw = Taro.getStorageSync(key);
-    return raw !== "" && raw != null ? (raw as T) : fallback;
-  } catch {
-    return fallback;
-  }
-}
 
 const Profile: React.FC = () => {
   const navInsets = useNavBarInsets();
+  const headerChromePx = navInsets.paddingTop + TAB_PAGE_HEADER_BRAND_PX;
+  const mainScrollHeight = useTabPageMainHeight(headerChromePx);
   const notificationsEnabled = useProfilePageStore((state) => state.notificationsEnabled);
   const setNotificationsEnabled = useProfilePageStore((state) => state.setNotificationsEnabled);
   const setPrivacyLevel = useProfilePageStore((state) => state.setPrivacyLevel);
@@ -57,21 +49,16 @@ const Profile: React.FC = () => {
   });
 
   const summaryQuery = useProfileSummaryQuery();
-  const activitiesQuery = useProfileActivitiesQuery();
-  const postsQuery = useProfilePostsQuery();
   const apiEnabled = isApiEnabled();
 
   const profileUserData = apiEnabled && summaryQuery.data ? summaryQuery.data : profileUser;
 
-  const activities =
-    apiEnabled && activitiesQuery.data ? activitiesQuery.data : profileActivities;
-
-  const posts = apiEnabled && postsQuery.data ? postsQuery.data : profilePosts;
-
   const profileLoading = apiEnabled && summaryQuery.isLoading && !summaryQuery.data;
 
-  const ongoingCount = countOngoingActivities(activities);
-  const postsCount = posts.length;
+  const ongoingCount = apiEnabled
+    ? profileUserData.stats.events
+    : countOngoingActivities(profileActivities);
+  const postsCount = apiEnabled ? profileUserData.stats.posts : profilePosts.length;
   const interestTag = deriveInterestTag(profileUserData.bio);
   const verified =
     "verified" in profileUser && typeof profileUser.verified === "boolean"
@@ -83,11 +70,11 @@ const Profile: React.FC = () => {
   }, [consumeProfileIntent]);
 
   useDidShow(() => {
-    setNotificationsEnabled(readStorage(STORAGE_KEYS.notifications, true));
-    setPrivacyLevel(readStorage<string>(STORAGE_KEYS.privacy, "public"));
+    setNotificationsEnabled(readProfileNotificationsEnabled());
+    setPrivacyLevel(readProfilePrivacyLevel());
     applyRouteParams();
     if (apiEnabled) {
-      invalidateCache(["profile"]);
+      invalidateProfileSummary();
     }
   });
 
@@ -120,18 +107,16 @@ const Profile: React.FC = () => {
 
   return (
     <View data-cmp="Profile" className="s-profile s-page-with-tabbar">
-      <ScrollView
-        scrollY
-        enhanced
-        showScrollbar={false}
-        className="s-page-with-tabbar__scroll s-profile__main s-scrollbar-none">
-        <View
-          className="s-profile__scroll-inner"
-          style={
-            navInsets.paddingTop > 0
-              ? { paddingTop: `${navInsets.paddingTop}px` }
-              : undefined
-          }>
+      <View className="s-page-with-tabbar__main s-profile">
+        <TabPageHeader className="s-tab-page-header--profile" navInsets={navInsets} />
+
+        <ScrollView
+          scrollY
+          enhanced
+          showScrollbar={false}
+          className="s-profile__scroll s-scrollbar-none"
+          style={mainScrollHeight != null ? { height: `${mainScrollHeight}px` } : undefined}>
+          <View className="s-profile__scroll-inner">
           {profileLoading ? (
             <View className="s-profile__card s-profile__card--loading">
               <ThemedPageLoader variant="inline" label="加载个人资料…" minHeight={148} />
@@ -264,13 +249,12 @@ const Profile: React.FC = () => {
             </View>
           </View>
 
-          <View className="s-profile__scroll-spacer s-tabbar-offset" />
-        </View>
-      </ScrollView>
+            <View className="s-profile__scroll-spacer s-tabbar-offset" />
+          </View>
+        </ScrollView>
+      </View>
 
       {confirmDialog}
-
-      <BottomNavSlot />
     </View>
   );
 };

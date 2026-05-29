@@ -16,15 +16,44 @@ import {
   type EventMapViewport,
 } from "./eventMapViewport";
 import { decodeRouteQueryParam } from "../../utils/route";
+import {
+  drawOfficialStormLogoSlowRotateSafe,
+  drawOfficialStormLogoStaticSafe,
+  stormLogoBottomOffset,
+} from "./eventMapStormLogo";
+import {
+  getMapWorldDimensions,
+  MAP_VENUE_NX,
+  MAP_VENUE_NY,
+} from "./eventMapWorld";
+import {
+  getMapAvatarBaseRadius,
+  getStormLogoHalfSize,
+  MAP_VENUE_PILL_GAP,
+} from "./eventMapLayout";
+import {
+  createMapOffscreenCanvas,
+  isMapOffscreenSupported,
+} from "./mapOffscreenCanvas";
 
-const BG = "#0e0b16";
+export const EVENT_MAP_BG = "#0e0b16";
+const BG = EVENT_MAP_BG;
 const BLOCK = "#1b1429";
 const GRID = "rgba(140, 120, 180, 0.12)";
 const STREET = "rgba(160, 150, 190, 0.35)";
-const STORM_GLOW = "rgba(157, 87, 255, 0.5)";
 const CONNECTOR = "rgba(167, 139, 250, 0.75)";
 
 type CanvasImageSource = Parameters<CanvasRenderingContext2D["drawImage"]>[0];
+
+const VENUE_NY = 0.44;
+const MARKERS_BY_DEPTH = Object.freeze(
+  [...EVENT_MAP_MARKERS].sort((a, b) => a.ny - b.ny),
+);
+
+/** 点击检测：深度大的（靠前）优先 */
+export const EVENT_MAP_MARKERS_HIT_TEST = Object.freeze(
+  [...MARKERS_BY_DEPTH].reverse(),
+);
 
 const CITY_BLOCKS: Array<{ x: number; y: number; w: number; h: number }> = [
   { x: 0.05, y: 0.18, w: 0.22, h: 0.14 },
@@ -38,6 +67,16 @@ const CITY_BLOCKS: Array<{ x: number; y: number; w: number; h: number }> = [
   { x: 0.05, y: 0.66, w: 0.25, h: 0.14 },
   { x: 0.38, y: 0.64, w: 0.18, h: 0.12 },
   { x: 0.62, y: 0.66, w: 0.3, h: 0.14 },
+  /* 扩展外围街区，撑满更大逻辑地图 */
+  { x: 0.02, y: 0.06, w: 0.14, h: 0.1 },
+  { x: 0.78, y: 0.08, w: 0.16, h: 0.11 },
+  { x: 0.82, y: 0.28, w: 0.14, h: 0.12 },
+  { x: 0.04, y: 0.42, w: 0.12, h: 0.1 },
+  { x: 0.76, y: 0.52, w: 0.18, h: 0.11 },
+  { x: 0.18, y: 0.78, w: 0.2, h: 0.12 },
+  { x: 0.52, y: 0.82, w: 0.22, h: 0.1 },
+  { x: 0.8, y: 0.74, w: 0.15, h: 0.12 },
+  { x: 0.06, y: 0.82, w: 0.16, h: 0.1 },
 ];
 
 function normalizeEventTitle(raw: string): string {
@@ -50,15 +89,16 @@ function normalizeEventTitle(raw: string): string {
 
 function drawGrid(ctx: CanvasRenderingContext2D, proj: IsometricProjection) {
   const { width: w, height: h } = proj;
-  const step = Math.max(28, Math.round(Math.min(w, h) / 14));
+  const step = Math.max(28, Math.round(Math.min(w, h) / 18));
+  const pad = step * 2;
   ctx.beginPath();
-  for (let x = 0; x <= w; x += step) {
+  for (let x = -pad; x <= w + pad; x += step) {
     const a = proj.project(x, 0);
     const b = proj.project(x, h);
     ctx.moveTo(a.x, a.y);
     ctx.lineTo(b.x, b.y);
   }
-  for (let y = 0; y <= h; y += step) {
+  for (let y = -pad; y <= h + pad; y += step) {
     const a = proj.project(0, y);
     const b = proj.project(w, y);
     ctx.moveTo(a.x, a.y);
@@ -116,7 +156,10 @@ function drawProjectedText(
   ctx.restore();
 }
 
-function drawStreetLabels(ctx: CanvasRenderingContext2D, proj: IsometricProjection) {
+function drawStreetLabels(
+  ctx: CanvasRenderingContext2D,
+  proj: IsometricProjection,
+) {
   const { width: w, height: h } = proj;
   const font =
     "600 10px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
@@ -134,22 +177,16 @@ function drawStreetLabels(ctx: CanvasRenderingContext2D, proj: IsometricProjecti
     font,
     fillStyle: STREET,
   });
-}
-
-function drawCompass(ctx: CanvasRenderingContext2D, w: number, _h: number) {
-  const cx = w - 28;
-  const cy = 72;
-  ctx.fillStyle = "rgba(255,255,255,0.85)";
-  ctx.font = "700 11px -apple-system, BlinkMacSystemFont, sans-serif";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText("N", cx, cy);
-  ctx.beginPath();
-  ctx.moveTo(cx, cy - 14);
-  ctx.lineTo(cx - 4, cy - 8);
-  ctx.lineTo(cx + 4, cy - 8);
-  ctx.closePath();
-  ctx.fill();
+  drawProjectedText(ctx, "E 8TH AVE", proj.project(w * 0.88, h * 0.38), {
+    font,
+    fillStyle: STREET,
+    rotateRad: -Math.PI / 2,
+  });
+  drawProjectedText(ctx, "W 9TH AVE", proj.project(w * 0.06, h * 0.58), {
+    font,
+    fillStyle: STREET,
+    rotateRad: -Math.PI / 2,
+  });
 }
 
 function roundRect(
@@ -201,77 +238,50 @@ function drawStar(
   ctx.fill();
 }
 
-/** 绘制风暴电音节图标（中心坐标 x,y，大小 size） */
-function drawStormIcon(
-  ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  size: number,
+function getStormVenueCenter(
+  proj: IsometricProjection,
+  stormLogo?: CanvasImageSource | null,
 ) {
-  ctx.save();
-  ctx.translate(x, y);
-
-  ctx.beginPath();
-  ctx.moveTo(0, -size * 1.0);
-  ctx.lineTo(-size * 0.9, size * 0.7);
-  ctx.lineTo(size * 0.9, size * 0.7);
-  ctx.closePath();
-  try {
-    const grd = ctx.createRadialGradient(0, 0, 0, 0, 0, size);
-    grd.addColorStop(0, "#7a2ff8");
-    grd.addColorStop(1, "#3f1c7a");
-    ctx.fillStyle = grd;
-  } catch {
-    ctx.fillStyle = "#5b2bb8";
-  }
-  ctx.fill();
-
-  ctx.beginPath();
-  ctx.moveTo(0, -size * 0.5);
-  ctx.lineTo(-size * 0.3, 0);
-  ctx.lineTo(size * 0.2, 0);
-  ctx.lineTo(-size * 0.2, size * 0.5);
-  ctx.lineWidth = Math.max(2, size * 0.12);
-  ctx.strokeStyle = "#ffffff";
-  ctx.lineJoin = "round";
-  ctx.stroke();
-
-  ctx.restore();
+  const { width: w, height: h } = proj;
+  const center = proj.projectNorm(MAP_VENUE_NX, MAP_VENUE_NY);
+  const iconSize = getStormLogoHalfSize(w, h, center.scale);
+  return {
+    w,
+    h,
+    center,
+    cx: center.x,
+    cy: center.y,
+    iconSize,
+    iconBottomY: center.y + stormLogoBottomOffset(iconSize, stormLogo),
+  };
 }
 
-/** 地图中心：风暴电音节会场（已移除原 Clubspace 金色圆标） */
-function drawStormVenue(
+function getStormVenueLayout(
+  proj: IsometricProjection,
+  eventTitle: string,
+  stormLogo?: CanvasImageSource | null,
+) {
+  return {
+    ...getStormVenueCenter(proj, stormLogo),
+    label: normalizeEventTitle(eventTitle),
+  };
+}
+
+/** 会场静态装饰：连接线 + 标题 pill */
+function drawStormVenueDecor(
   ctx: CanvasRenderingContext2D,
   proj: IsometricProjection,
   eventTitle: string,
+  stormLogo?: CanvasImageSource | null,
 ) {
-  const { width: w, height: h } = proj;
-  const center = proj.project(w * 0.54, h * 0.44);
-  const baseR = Math.min(w, h) * 0.11;
-  const r = baseR * center.scale;
-  const label = normalizeEventTitle(eventTitle);
-  const cx = center.x;
-  const cy = center.y;
-
-  const iconSize = r * 0.92;
-  const iconBottomY = cy + iconSize * 0.7;
-  const glowR = Math.max(1, iconSize * 1.75);
-  try {
-    const glow = ctx.createRadialGradient(cx, cy, iconSize * 0.2, cx, cy, glowR);
-    glow.addColorStop(0, STORM_GLOW);
-    glow.addColorStop(1, "rgba(157, 87, 255, 0)");
-    ctx.fillStyle = glow;
-  } catch {
-    ctx.fillStyle = STORM_GLOW;
-  }
-  ctx.beginPath();
-  ctx.arc(cx, cy, glowR, 0, Math.PI * 2);
-  ctx.fill();
-
-  drawStormIcon(ctx, cx, cy, iconSize);
-
-  const pillY = iconBottomY + 18 * center.scale;
-  ctx.font = "600 11px -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif";
+  const { w, center, label, cx, iconBottomY } = getStormVenueLayout(
+    proj,
+    eventTitle,
+    stormLogo,
+  );
+  const pillY = iconBottomY + MAP_VENUE_PILL_GAP * center.scale;
+  ctx.font =
+    "600 11px -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif";
   const textW = ctx.measureText(label).width;
   const pillW = Math.min(w * 0.72, textW + 52);
 
@@ -297,6 +307,75 @@ function drawStormVenue(
   ctx.restore();
 }
 
+/** 会场 LOGO：静态光晕 + 慢速 360° 旋转 */
+function drawStormVenueLogo(
+  ctx: CanvasRenderingContext2D,
+  proj: IsometricProjection,
+  time: number,
+  stormLogo: CanvasImageSource | null | undefined,
+) {
+  const { cx, cy, iconSize } = getStormVenueCenter(proj, stormLogo);
+  drawOfficialStormLogoSlowRotateSafe(ctx, cx, cy, iconSize, time, stormLogo);
+}
+
+/** 会场 LOGO：世界坐标固定（拖拽/平移时不旋转） */
+function drawStormVenueLogoStatic(
+  ctx: CanvasRenderingContext2D,
+  proj: IsometricProjection,
+  stormLogo: CanvasImageSource | null | undefined,
+) {
+  const { cx, cy, iconSize } = getStormVenueCenter(proj, stormLogo);
+  drawOfficialStormLogoStaticSafe(ctx, cx, cy, iconSize, stormLogo);
+}
+
+function drawStormVenue(
+  ctx: CanvasRenderingContext2D,
+  proj: IsometricProjection,
+  eventTitle: string,
+  time: number,
+  stormLogo: CanvasImageSource | null | undefined,
+) {
+  drawStormVenueLogo(ctx, proj, time, stormLogo);
+  drawStormVenueDecor(ctx, proj, eventTitle, stormLogo);
+}
+
+/** 世界坐标静态 LOGO（随视口平移，idle 旋转层之外的拖拽路径） */
+export function paintEventMapStormLogoLayerStatic(
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  mapViewport: EventMapViewport,
+  stormLogo: CanvasImageSource | null | undefined,
+) {
+  if (!stormLogo) {
+    return;
+  }
+  const proj = getProjection(width, height);
+  ctx.save();
+  applyViewportTransform(ctx, mapViewport);
+  drawStormVenueLogoStatic(ctx, proj, stormLogo);
+  ctx.restore();
+}
+
+/** 仅绘制旋转 LOGO 层（叠在场景缓存 blit 之上，随地图平移） */
+export function paintEventMapStormLogoLayer(
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  mapViewport: EventMapViewport,
+  time: number,
+  stormLogo: CanvasImageSource | null | undefined,
+) {
+  if (!stormLogo) {
+    return;
+  }
+  const proj = getProjection(width, height);
+  ctx.save();
+  applyViewportTransform(ctx, mapViewport);
+  drawStormVenueLogo(ctx, proj, time, stormLogo);
+  ctx.restore();
+}
+
 function drawAvatarMarker(
   ctx: CanvasRenderingContext2D,
   proj: IsometricProjection,
@@ -305,7 +384,7 @@ function drawAvatarMarker(
 ) {
   const { width: w, height: h } = proj;
   const center = proj.projectNorm(marker.nx, marker.ny);
-  const baseR = Math.max(16, Math.min(w, h) * 0.034);
+  const baseR = getMapAvatarBaseRadius(w, h);
   const r = baseR * center.scale;
   const cx = center.x;
   const cy = center.y;
@@ -377,9 +456,11 @@ function drawAvatarMarker(
 
 const projectionCache = new Map<string, IsometricProjection>();
 
-function getProjection(width: number, height: number): IsometricProjection {
-  const w = Math.max(1, width);
-  const h = Math.max(1, height);
+/** css 画布尺寸 → 逻辑世界投影（更大可拖动区域） */
+function getProjection(cssW: number, cssH: number): IsometricProjection {
+  const { worldW, worldH } = getMapWorldDimensions(cssW, cssH);
+  const w = worldW;
+  const h = worldH;
   const key = `${w}x${h}`;
   let proj = projectionCache.get(key);
   if (!proj) {
@@ -395,6 +476,176 @@ function getProjection(width: number, height: number): IsometricProjection {
   return proj;
 }
 
+type TerrainCacheEntry = {
+  key: string;
+  canvas: HTMLCanvasElement;
+};
+
+let terrainCache: TerrainCacheEntry | null = null;
+let terrainCacheSupported: boolean | null = null;
+
+function isTerrainCacheSupported(): boolean {
+  // 小程序主画布直接绘制地形，离屏地形缓存易与场景缓存叠加导致异常
+  return false;
+}
+
+function paintTerrainOffscreenLayers(
+  ctx: CanvasRenderingContext2D,
+  cssW: number,
+  cssH: number,
+) {
+  const proj = getProjection(cssW, cssH);
+  drawGrid(ctx, proj);
+  drawBlocks(ctx, proj);
+  drawStreetLabels(ctx, proj);
+}
+
+function blitCachedTerrain(
+  ctx: CanvasRenderingContext2D,
+  cssW: number,
+  cssH: number,
+): boolean {
+  if (!isTerrainCacheSupported()) {
+    return false;
+  }
+
+  const { worldW, worldH } = getMapWorldDimensions(cssW, cssH);
+  const key = `${worldW}x${worldH}`;
+  if (!terrainCache || terrainCache.key !== key) {
+    const offscreen = createMapOffscreenCanvas(worldW, worldH);
+    if (!offscreen) {
+      terrainCacheSupported = false;
+      terrainCache = null;
+      return false;
+    }
+    const offCtx = offscreen.getContext("2d");
+    if (!offCtx) {
+      return false;
+    }
+    paintTerrainOffscreenLayers(offCtx, cssW, cssH);
+    terrainCache = { key, canvas: offscreen };
+  }
+
+  try {
+    ctx.drawImage(terrainCache.canvas, 0, 0, worldW, worldH);
+    return true;
+  } catch {
+    terrainCache = null;
+    terrainCacheSupported = false;
+    return false;
+  }
+}
+
+export function invalidateEventMapTerrainCache() {
+  terrainCache = null;
+  terrainCacheSupported = null;
+}
+
+function paintMapTerrain(
+  ctx: CanvasRenderingContext2D,
+  cssW: number,
+  cssH: number,
+) {
+  const proj = getProjection(cssW, cssH);
+  if (!blitCachedTerrain(ctx, cssW, cssH)) {
+    drawGrid(ctx, proj);
+    drawBlocks(ctx, proj);
+    drawStreetLabels(ctx, proj);
+  }
+}
+
+function paintMarkersBeforeVenue(
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  avatars: Map<string, CanvasImageSource>,
+) {
+  const proj = getProjection(width, height);
+  for (const marker of MARKERS_BY_DEPTH) {
+    if (marker.ny >= VENUE_NY) {
+      break;
+    }
+    drawAvatarMarker(ctx, proj, marker, avatars);
+  }
+}
+
+function paintMarkersAfterVenue(
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  avatars: Map<string, CanvasImageSource>,
+) {
+  const proj = getProjection(width, height);
+  for (const marker of MARKERS_BY_DEPTH) {
+    if (marker.ny >= VENUE_NY) {
+      drawAvatarMarker(ctx, proj, marker, avatars);
+    }
+  }
+}
+
+/** 静态场景（地形 + 标记 + 会场装饰），写入离屏缓存 */
+export function paintEventMapScene(
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  eventTitle: string,
+  avatars: Map<string, CanvasImageSource>,
+  mapViewport: EventMapViewport,
+  stormLogo?: CanvasImageSource | null,
+) {
+  const { worldW, worldH } = getMapWorldDimensions(width, height);
+
+  ctx.fillStyle = BG;
+  ctx.fillRect(0, 0, worldW, worldH);
+
+  ctx.save();
+  applyViewportTransform(ctx, mapViewport);
+  paintMapTerrain(ctx, width, height);
+  paintMarkersBeforeVenue(ctx, width, height, avatars);
+  ctx.restore();
+}
+
+/** 会场标题装饰（在 LOGO 之上） */
+export function paintEventMapDecorLayer(
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  eventTitle: string,
+  mapViewport: EventMapViewport,
+  stormLogo: CanvasImageSource | null | undefined,
+) {
+  const proj = getProjection(width, height);
+  ctx.save();
+  applyViewportTransform(ctx, mapViewport);
+  drawStormVenueDecor(ctx, proj, eventTitle, stormLogo);
+  ctx.restore();
+}
+
+/** 会场后方用户标记（须在 LOGO / 装饰层之后绘制） */
+export function paintEventMapMarkersAfterVenueLayer(
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  avatars: Map<string, CanvasImageSource>,
+  mapViewport: EventMapViewport,
+) {
+  ctx.save();
+  applyViewportTransform(ctx, mapViewport);
+  paintMarkersAfterVenue(ctx, width, height, avatars);
+  ctx.restore();
+}
+
+/** 最小可绘制帧（无 drawImage），用于主绘制失败时的兜底 */
+export function paintEventMapMinimal(
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+) {
+  ctx.fillStyle = BG;
+  ctx.fillRect(0, 0, width, height);
+  paintMapTerrain(ctx, width, height);
+}
+
 export function paintEventMap(
   ctx: CanvasRenderingContext2D,
   width: number,
@@ -402,34 +653,26 @@ export function paintEventMap(
   eventTitle: string,
   avatars: Map<string, CanvasImageSource>,
   mapViewport: EventMapViewport = DEFAULT_EVENT_MAP_VIEWPORT,
+  time: number = Date.now(),
+  stormLogo: CanvasImageSource | null | undefined = null,
+  /** 拖拽/缩放中不绘制 LOGO */
+  gestureLite = false,
 ) {
   const proj = getProjection(width, height);
 
-  ctx.clearRect(0, 0, width, height);
   ctx.fillStyle = BG;
   ctx.fillRect(0, 0, width, height);
 
   ctx.save();
   applyViewportTransform(ctx, mapViewport);
-  drawGrid(ctx, proj);
-  drawBlocks(ctx, proj);
-  drawStreetLabels(ctx, proj);
-
-  const markersByDepth = [...EVENT_MAP_MARKERS].sort((a, b) => a.ny - b.ny);
-  const venueNy = 0.44;
-  for (const marker of markersByDepth) {
-    if (marker.ny >= venueNy) {
-      break;
-    }
-    drawAvatarMarker(ctx, proj, marker, avatars);
+  paintMapTerrain(ctx, width, height);
+  paintMarkersBeforeVenue(ctx, width, height, avatars);
+  if (gestureLite) {
+    drawStormVenueLogoStatic(ctx, proj, stormLogo);
+    drawStormVenueDecor(ctx, proj, eventTitle, stormLogo);
+  } else {
+    drawStormVenue(ctx, proj, eventTitle, time, stormLogo);
   }
-  drawStormVenue(ctx, proj, eventTitle);
-  for (const marker of markersByDepth) {
-    if (marker.ny >= venueNy) {
-      drawAvatarMarker(ctx, proj, marker, avatars);
-    }
-  }
+  paintMarkersAfterVenue(ctx, width, height, avatars);
   ctx.restore();
-
-  drawCompass(ctx, width, height);
 }

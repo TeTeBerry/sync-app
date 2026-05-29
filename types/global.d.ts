@@ -5,6 +5,21 @@ declare module "*.scss" {
   export default content;
 }
 
+declare module "*.png" {
+  const src: string;
+  export default src;
+}
+
+declare module "*.jpg" {
+  const src: string;
+  export default src;
+}
+
+declare module "*.jpeg" {
+  const src: string;
+  export default src;
+}
+
 declare namespace NodeJS {
   interface ProcessEnv {
     TARO_APP_API_BASE_URL?: string;
