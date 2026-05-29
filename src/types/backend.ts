@@ -120,9 +120,12 @@ export interface ProfilePostItem {
   images?: string[];
 }
 
+export type HomeFeedPostAuthorGender = "female" | "male";
+
 export interface HomeFeedPost {
   id: string;
   userId?: string;
+  authorGender?: HomeFeedPostAuthorGender;
   name: string;
   handle: string;
   event: string;

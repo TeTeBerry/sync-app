@@ -1,8 +1,7 @@
 import "./FeedPostList.scss";
-import { MapPin, MessageCircle, Share2, ThumbsUp, Trash2 } from "lucide-react-taro";
+import { MessageCircle, Share2, ThumbsUp, Trash2 } from "lucide-react-taro";
 import { memo, useCallback, useState, type FC } from "react";
 import { Button } from "./ui";
-import { MetaRow } from "./MetaRow";
 import { PostCommentSection } from "./PostCommentSection";
 import { PostActionMenu } from "./PostActionMenu";
 import { PostStatusBadge } from "./PostStatusBadge";
@@ -17,6 +16,7 @@ import { isCurrentUserPostAuthor } from "../utils/postOwnership";
 import type { ActivityPost } from "../pages/index/homeData";
 import { thumbnailImageUrl } from "../utils/imageUrl";
 import { postActionIconColor } from "../utils/postActionColors";
+import { inferAuthorGenderFromPost } from "../utils/inferAuthorGender";
 import { Image, Text, View } from "@tarojs/components";
 
 export type FeedPostListProps = {
@@ -49,6 +49,18 @@ function FeedPostRowInner({
   const avatarSrc = thumbnailImageUrl(post.avatar, 80) ?? post.avatar;
   const contentTypeKeys = mergePostContentTypes(post.contentTypes, { body: post.body });
   const bodyText = stripContentTypeHashtags(post.body);
+  const authorGender = inferAuthorGenderFromPost({
+    userId: post.userId,
+    authorName: post.name,
+    authorGender: post.authorGender,
+    body: post.body,
+    tags: post.contentTypes,
+  });
+  const locationClassName = post.location
+    ? authorGender
+      ? `s-home-post__user-location s-home-post__user-location--${authorGender}`
+      : "s-home-post__user-location"
+    : "";
 
   return (
     <View className="s-home-post">
@@ -61,11 +73,17 @@ function FeedPostRowInner({
         />
         <View className="s-home-post__head-main">
           <View className="s-home-post__top">
-            <Text className="s-home-post__user-line">
+            <View className="s-home-post__user-line">
               <Text className="s-home-post__user-name">{post.name}</Text>
-              <Text>{post.handle}</Text>
+              {post.location ? (
+                <Text className={locationClassName}>
+                  <Text className="s-home-post__user-location-sep"> · </Text>
+                  {post.location}
+                </Text>
+              ) : null}
+              <Text className="s-home-post__user-handle">{post.handle}</Text>
               {post.images?.length ? <PostImageCount count={post.images.length} /> : null}
-            </Text>
+            </View>
             <View className="s-home-post__head-actions">
               <PostStatusBadge status={post.status} variant="home" isOwn={isOwn} />
               {!isOwn ? (
@@ -74,13 +92,6 @@ function FeedPostRowInner({
             </View>
           </View>
           <Text className="s-home-post__event-name">{post.event}</Text>
-          <View className="s-home-post__location">
-            <MetaRow
-              className="s-home-post__meta-row"
-              icon={<MapPin size={13} color="#4cc9f0" />}>
-              {post.location}
-            </MetaRow>
-          </View>
         </View>
       </View>
 

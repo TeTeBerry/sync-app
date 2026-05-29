@@ -260,6 +260,7 @@ function mapHomeFeedPost(item: HomeFeedPost): HomeFeedPost {
   return {
     id: item.id,
     userId: item.userId,
+    authorGender: item.authorGender,
     name: item.name,
     handle: item.handle,
     event: item.event,

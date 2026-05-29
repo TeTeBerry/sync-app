@@ -2,7 +2,6 @@ import {
   broadcastCacheData,
   forEachCacheEntry,
   invalidateCache,
-  setCacheData,
   setCacheDataByKey,
 } from "../hooks/useApiQuery";
 import type {
@@ -145,16 +144,23 @@ export function patchLikedPostInCaches(
         : post,
     );
 
-  setCacheData<HomeFeedPost[]>(["posts", "popular"], patchFeedPosts);
-  setCacheData<HomeFeedPost[]>(["posts", "all"], patchFeedPosts);
-  setCacheData<EventDetailPost[]>(["posts", "activity"], patchEventPosts);
-
   forEachCacheEntry((key, entryData) => {
-    if (!key.startsWith("posts|activity|")) return;
+    if (!key.startsWith("posts|")) return;
     if (!Array.isArray(entryData)) return;
-    const patched = patchEventPosts(entryData as EventDetailPost[]);
-    if (patched) {
-      setCacheDataByKey(key, patched);
+
+    if (key.startsWith("posts|popular|") || key.startsWith("posts|all|")) {
+      const patched = patchFeedPosts(entryData as HomeFeedPost[]);
+      if (patched) {
+        setCacheDataByKey(key, patched);
+      }
+      return;
+    }
+
+    if (key.startsWith("posts|activity|")) {
+      const patched = patchEventPosts(entryData as EventDetailPost[]);
+      if (patched) {
+        setCacheDataByKey(key, patched);
+      }
     }
   });
 

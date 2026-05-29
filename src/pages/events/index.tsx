@@ -25,7 +25,7 @@ function matchesEventFilter(status: ActivityStatus, tab: EventFilterTab): boolea
 }
 
 /** Fixed header + search/tabs above the event list (px, design @ 375). */
-const EVENTS_CHROME_PX = 168;
+const EVENTS_CHROME_PX = 158;
 /** Baseline top padding in events.scss before status-bar inset. */
 const EVENTS_HEADER_TOP_PX = 14;
 
@@ -75,7 +75,6 @@ const Events: React.FC = () => {
       <View className="s-page-with-tabbar__main s-events">
         <TabPageHeader
           className="s-tab-page-header--events"
-          brandSubtitle="电音活动"
           navInsets={navInsets}
           trailing={
             <View className="s-events__count-pill" aria-label={`${events.length} 场活动`}>

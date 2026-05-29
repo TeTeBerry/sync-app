@@ -1,5 +1,5 @@
 import type { EventMapViewport } from "./eventMapViewport";
-import { clampMapScale } from "./eventMapViewport";
+import { clampMapScale, MAP_SCALE_MIN } from "./eventMapViewport";
 
 /**
  * 逻辑地图相对一屏的倍数（约 4× 屏宽高 ≈ 可拖动探索「附近 10km」量级区域）。
@@ -46,7 +46,7 @@ export function getVenueLandmarkScreenPosition(
 export function getDefaultEventMapViewport(
   cssW: number,
   cssH: number,
-  scale = 1,
+  scale = MAP_SCALE_MIN,
 ): EventMapViewport {
   const {
     cssW: w,

@@ -20,6 +20,7 @@ import {
   getDefaultEventMapViewport,
 } from "./eventMapWorld";
 import type { EventMapViewport } from "./eventMapViewport";
+import { MAP_SCALE_MIN } from "./eventMapViewport";
 
 type CanvasImageSource = Parameters<CanvasRenderingContext2D["drawImage"]>[0];
 
@@ -68,7 +69,7 @@ const MAX_CANVAS_DPR = 2;
 const CANVAS_BIND_MAX_ATTEMPTS = 80;
 
 let viewportDirty = true;
-let viewport: EventMapViewport = { offsetX: 0, offsetY: 0, scale: 1 };
+let viewport: EventMapViewport = { offsetX: 0, offsetY: 0, scale: MAP_SCALE_MIN };
 const EMPTY_AVATARS = new Map<string, CanvasImageSource>();
 let logoAnimFrameId: number | null = null;
 
@@ -497,9 +498,13 @@ export function setEventMapViewport(next: EventMapViewport) {
 
 export function resetEventMapViewport(cssW?: number, cssH?: number) {
   if (cssW != null && cssH != null && cssW > 0 && cssH > 0) {
-    viewport = getDefaultEventMapViewport(cssW, cssH);
+    viewport = clampEventMapViewport(
+      getDefaultEventMapViewport(cssW, cssH),
+      cssW,
+      cssH,
+    );
   } else {
-    viewport = { offsetX: 0, offsetY: 0, scale: 1 };
+    viewport = { offsetX: 0, offsetY: 0, scale: MAP_SCALE_MIN };
   }
   viewportDirty = true;
 }

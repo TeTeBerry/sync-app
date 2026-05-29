@@ -15,7 +15,7 @@ export type EventMapViewport = {
 export const DEFAULT_EVENT_MAP_VIEWPORT: EventMapViewport = {
   offsetX: 0,
   offsetY: 0,
-  scale: 1,
+  scale: MAP_SCALE_MIN,
 };
 
 export function clampMapScale(scale: number): number {

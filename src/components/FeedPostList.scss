@@ -56,29 +56,53 @@
   margin: 0;
   min-width: 0;
   flex: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  flex-wrap: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: #8e8e93;
   font-size: var(--s-type-body-sm);
   line-height: 1.3;
-  display: block;
 }
 
 .s-home-post__user-name {
+  flex-shrink: 0;
   color: #fff;
   font-size: var(--s-type-body);
   font-weight: var(--s-fw-black);
-  margin-right: 6px;
 }
 
-.s-home-post__location {
-  display: block;
-  margin-top: 2px;
+.s-home-post__user-location {
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--s-type-body-sm);
+  font-weight: var(--s-fw-semibold);
+  color: var(--muted-foreground);
+
+  &--female {
+    color: var(--primary);
+  }
+
+  &--male {
+    color: var(--secondary);
+  }
 }
 
-.s-home-post__meta-row .s-meta-row__text {
-  color: #4cc9f0;
+.s-home-post__user-location-sep {
+  color: var(--muted-foreground);
+}
+
+.s-home-post__user-handle {
+  flex-shrink: 0;
+  margin-left: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--muted-foreground);
+  font-size: var(--s-type-body-sm);
 }
 
 .s-home-post__event-name {
@@ -87,10 +111,6 @@
   font-size: var(--s-type-subtitle);
   line-height: 1.25;
   font-weight: var(--s-fw-black);
-}
-
-.s-home-post__location {
-  margin-bottom: 2px;
 }
 
 .s-home-post__text {

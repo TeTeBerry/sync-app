@@ -1,3 +1,5 @@
+import type { AuthorGender } from "../../utils/inferAuthorGender";
+
 export type CountdownPart = {
   value: string;
   unit: string;
@@ -9,6 +11,7 @@ export type { FeaturedEvent } from "../../utils/apiMappers";
 export type ActivityPost = {
   id: string;
   userId?: string;
+  authorGender?: AuthorGender;
   name: string;
   handle: string;
   event: string;
