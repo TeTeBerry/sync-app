@@ -31,19 +31,45 @@ $chat-pill-border: rgba(255, 255, 255, 0.1);
   color: var(--foreground);
 }
 
-@mixin chat-gradient-user-bubble {
-  background: linear-gradient(135deg, rgb(255, 0, 102) 0%, rgb(236, 72, 153) 52%, rgb(239, 68, 68) 100%);
+@mixin chat-user-bubble-female {
+  background: rgba(var(--primary-rgb), 0.92);
   color: #fff;
+  border: 1px solid rgba(var(--primary-rgb), 0.42);
   box-shadow: 0 4px 18px rgba(var(--primary-rgb), 0.32);
 }
 
-@mixin chat-gradient-avatar-fallback {
-  background: linear-gradient(135deg, rgb(255, 0, 102), rgb(239, 68, 68));
+@mixin chat-user-bubble-male {
+  background: rgba(var(--secondary-rgb), 0.92);
+  color: #fff;
+  border: 1px solid rgba(var(--secondary-rgb), 0.42);
+  box-shadow: 0 4px 18px rgba(var(--secondary-rgb), 0.32);
+}
+
+@mixin chat-user-bubble-neutral {
+  background: rgb(38, 38, 40);
+  color: var(--foreground);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+@mixin chat-avatar-fallback-female {
+  background: rgba(var(--primary-rgb), 0.88);
+  color: #fff;
+}
+
+@mixin chat-avatar-fallback-male {
+  background: rgba(var(--secondary-rgb), 0.88);
+  color: #fff;
+}
+
+@mixin chat-avatar-fallback-neutral {
+  background: rgb(48, 48, 50);
+  color: #fff;
 }
 
 @mixin chat-ai-avatar-surface {
-  background: linear-gradient(145deg, rgba(var(--primary-rgb), 0.18), rgba(30, 30, 30, 0.95));
-  border: 1px solid rgba(var(--primary-rgb), 0.28);
+  background: rgb(30, 30, 32);
+  border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 @mixin chat-send-active {

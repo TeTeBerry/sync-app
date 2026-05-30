@@ -1,4 +1,10 @@
-/** Backend/API post status labels (Chinese from post.mapper). */
+import type { PostStatusBadgeVariant } from "./postStatusBadge";
+
+/**
+ * 帖子招募状态（recruiting | completed）：
+ * - 招募中
+ * - 已组队：组队成功或手动标记
+ */
 export type BackendPostStatusLabel = "招募中" | "已组队" | "已隐藏";
 
 export function isRecruitingPostStatus(status: BackendPostStatusLabel): boolean {
@@ -19,9 +25,15 @@ export function toEventPostCardStatus(
 }
 
 export function postStatusBadgeClass(status: EventPostCardStatus): string {
-  return status === "full"
-    ? "s-post-status-badge s-post-status-badge--full"
-    : "s-post-status-badge s-post-status-badge--recruiting";
+  return postStatusBadgeClassForVariant(
+    status === "full" ? "full" : "recruiting",
+  );
+}
+
+export function postStatusBadgeClassForVariant(
+  variant: PostStatusBadgeVariant,
+): string {
+  return `s-post-status-badge s-post-status-badge--${variant}`;
 }
 
 export function eventPostStatusText(status: EventPostCardStatus): string {

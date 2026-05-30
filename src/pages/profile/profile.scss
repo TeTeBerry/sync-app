@@ -26,6 +26,7 @@
   padding: 4px var(--s-page-gutter) 8px;
 
   > .s-profile__card,
+  > .s-profile-benefits,
   > .s-profile__action-card,
   > .s-profile__settings-card {
     align-self: stretch;
@@ -40,6 +41,14 @@
 
 .s-profile__scroll-spacer {
   min-height: 12px;
+}
+
+.s-profile-benefits {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .s-profile__card {
@@ -1072,6 +1081,25 @@
 .s-profile__settings-chevron {
   color: var(--muted-foreground);
   flex-shrink: 0;
+}
+
+.s-profile__debug-entitlements {
+  margin: 0 var(--s-page-gutter);
+  padding: 10px 14px;
+  border-radius: var(--s-radius-md);
+  border: 1px dashed var(--border);
+  background: color-mix(in srgb, var(--muted) 40%, transparent);
+  text-align: center;
+
+  &--pressed {
+    opacity: 0.85;
+  }
+}
+
+.s-profile__debug-entitlements-label {
+  font-size: var(--s-type-meta);
+  font-weight: var(--s-fw-semibold);
+  color: var(--muted-foreground);
 }
 
 .s-profile-stack {

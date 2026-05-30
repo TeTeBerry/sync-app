@@ -84,6 +84,116 @@ export interface ActivityUnregisterResult {
   wasRegistered?: boolean;
 }
 
+export type PackageTierId = "pro" | "pro_plus" | "ultra";
+
+export type PackageFeatureIcon =
+  | "match"
+  | "contact"
+  | "map"
+  | "exposure"
+  | "pin";
+
+export interface PackageTierLimits {
+  aiMatchCount: number | null;
+  contactUnlockCount: number | null;
+  mapDays: number;
+  postPinCount: number;
+  basicExposure: boolean;
+}
+
+export interface PackageFeatureDefinition {
+  icon: PackageFeatureIcon;
+  text: string;
+  unlimited?: boolean;
+}
+
+export interface PackageTierDefinition {
+  id: PackageTierId;
+  name: string;
+  priceYuan: number;
+  priceLabel: string;
+  audience: string;
+  badge?: string;
+  limits: PackageTierLimits;
+  features: PackageFeatureDefinition[];
+}
+
+export interface PackageCatalogSheet {
+  title: string;
+  subtitle: string;
+  defaultTierId: PackageTierId;
+}
+
+export interface PackageCatalog {
+  sheet: PackageCatalogSheet;
+  tiers: PackageTierDefinition[];
+}
+
+export interface QuotaSlot {
+  limit: number | null;
+  used: number;
+  remaining: number | null;
+}
+
+export interface MapEntitlementSlot {
+  days: number;
+  expiresAt: string;
+  active: boolean;
+}
+
+export interface EventEntitlementQuotas {
+  aiMatch: QuotaSlot;
+  contactUnlock: QuotaSlot;
+  map: MapEntitlementSlot;
+  postPin: QuotaSlot;
+  basicExposure: boolean;
+}
+
+export interface FreeMonthlyQuota {
+  period: string;
+  aiMatch: QuotaSlot;
+  contactUnlock: QuotaSlot;
+}
+
+export type ProfileEntitlementTierId = PackageTierId | "free";
+
+export interface EventPackageEntitlement {
+  activityLegacyId: number;
+  tierId: ProfileEntitlementTierId;
+  tierName: string;
+  purchasedAt?: string;
+  /** ISO start of 30-day package window (usually equals purchasedAt). */
+  validFrom?: string;
+  /** ISO end of 30-day package window (purchasedAt + 30 days UTC). */
+  validUntil?: string;
+  quotas: EventEntitlementQuotas;
+  freeMonthly?: FreeMonthlyQuota;
+  paidTierId?: PackageTierId | null;
+}
+
+export interface PurchaseProfilePackagePayload {
+  tierId: PackageTierId;
+  activityLegacyId: number;
+}
+
+export interface PurchaseProfilePackageResult {
+  ok: true;
+  stubPayment: true;
+  entitlement: EventPackageEntitlement;
+}
+
+export type EntitlementConsumeBucket = "free" | "paid";
+
+export interface ConsumeProfileEntitlementPayload {
+  activityLegacyId: number;
+}
+
+export interface ConsumeProfileEntitlementResult {
+  ok: true;
+  bucket: EntitlementConsumeBucket;
+  entitlement: EventPackageEntitlement;
+}
+
 export interface ProfileSummary {
   name: string;
   handle: string;
@@ -96,6 +206,8 @@ export interface ProfileSummary {
     likes: number;
     posts: number;
   };
+  packageEntitlement?: EventPackageEntitlement | null;
+  packageEntitlements?: EventPackageEntitlement[];
 }
 
 export interface ProfileActivityItem {
@@ -137,6 +249,7 @@ export interface HomeFeedPost {
   comments: number;
   avatar: string;
   status: "招募中" | "已组队" | "已隐藏";
+  activityLegacyId?: number;
   contentTypes?: PostContentType[];
   images?: string[];
 }
@@ -148,6 +261,13 @@ export interface PostCommentItem {
   avatar: string;
   body: string;
   time: string;
+  replies?: PostCommentItem[];
+}
+
+export interface EventPostsPage {
+  items: EventDetailPost[];
+  nextCursor?: string;
+  hasMore: boolean;
 }
 
 export interface EventDetailPost {
@@ -253,4 +373,64 @@ export interface AppNotification {
   read: boolean;
   meta?: NotificationMeta;
   createdAt: string;
+}
+
+export type LiveInfoCategoryId =
+  | "entry_crowd"
+  | "toilet_queue"
+  | "water_queue"
+  | "smoke_drink";
+
+export interface LiveInfoSummaryRow {
+  categoryId: LiveInfoCategoryId;
+  score: number;
+}
+
+export interface LiveInfoFeedItem {
+  id: string;
+  userName: string;
+  avatar?: string;
+  certified: boolean;
+  timeLabel: string;
+  ratings: { categoryId: LiveInfoCategoryId; score: number }[];
+  remark?: string;
+  likes: number;
+  liked?: boolean;
+}
+
+export type LiveInfoCertStatus = "none" | "pending" | "approved" | "rejected";
+
+export interface LiveInfoViewerState {
+  isCertified: boolean;
+  certStatus: LiveInfoCertStatus;
+  certExpiryLabel: string;
+  wristbandImageUrl?: string;
+  rejectReason?: string;
+}
+
+export interface LiveInfoSnapshot {
+  activityLegacyId: number;
+  eventDate: string;
+  viewer: LiveInfoViewerState;
+  summary: LiveInfoSummaryRow[];
+  certCount: number;
+  feed: LiveInfoFeedItem[];
+}
+
+export interface SubmitLiveInfoWristbandPayload {
+  imageUrl: string;
+}
+
+export type SubmitLiveInfoWristbandRejectCode = "duplicate_image";
+
+export interface SubmitLiveInfoWristbandResult {
+  ok: boolean;
+  viewer: LiveInfoViewerState;
+  message?: string;
+  code?: SubmitLiveInfoWristbandRejectCode;
+}
+
+export interface PublishLiveInfoPayload {
+  ratings: { categoryId: LiveInfoCategoryId; score: number }[];
+  remark?: string;
 }

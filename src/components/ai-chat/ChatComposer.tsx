@@ -15,6 +15,7 @@ import {
 } from "../../utils/chatImage";
 import { useAiChatStore } from "../../stores/aiChatStore";
 import { openImagePreview } from "../../utils/openImagePreview";
+import { AiMatchQuotaBanner } from "./AiMatchQuotaBanner";
 import { Image, ScrollView, Text, View } from "@tarojs/components";
 
 const SHORTCUT_TAG_LABELS: Record<AiShortcutTag, string> = {
@@ -32,7 +33,7 @@ const MAX_IMAGES = 6;
 
 function readComposerInputValue(event: {
   detail?: { value?: string };
-  target?: { value?: string };
+  target?: EventTarget & { value?: string };
 }): string {
   return event.detail?.value ?? event.target?.value ?? "";
 }
@@ -187,6 +188,8 @@ export function ChatComposer({
           ))}
         </View>
       </ScrollView>
+
+      <AiMatchQuotaBanner />
 
       <View className="s-ai-assistant-chat__composer">
         {pendingImages.length> 0 ? (

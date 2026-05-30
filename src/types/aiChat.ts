@@ -7,11 +7,19 @@ export interface AiChatImageContext {
   ocrText?: string;
 }
 
+export interface RecommendedActivityCard {
+  activityLegacyId: number;
+  title: string;
+  date?: string;
+  venue?: string;
+}
+
 export interface AiChatMessage {
   role: AiChatRole;
   content: string;
   imageContext?: AiChatImageContext;
   recommendedPosts?: RecommendedPostCard[];
+  recommendedActivity?: RecommendedActivityCard;
   createdPost?: RecommendedPostCard;
   suggestedReplies?: string[];
 }
@@ -61,6 +69,10 @@ export type AiChatStreamEvent =
       degraded?: boolean;
     }
   | {
+      type: "activity_recommendation";
+      activity: RecommendedActivityCard;
+    }
+  | {
       type: "suggested_replies";
       replies: string[];
     }
@@ -79,6 +91,7 @@ export type ChatUiMessage = {
   ocrText?: string;
   streaming?: boolean;
   recommendedPosts?: RecommendedPostCard[];
+  recommendedActivity?: RecommendedActivityCard;
   /** Post card shown after user successfully publishes from chat */
   createdPost?: RecommendedPostCard;
   suggestedReplies?: string[];

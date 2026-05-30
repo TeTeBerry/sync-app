@@ -1,9 +1,9 @@
 import "./FeedPostList.scss";
-import { MessageCircle, Share2, ThumbsUp, Trash2 } from "lucide-react-taro";
+import { MessageCircle, ThumbsUp } from "lucide-react-taro";
 import { memo, useCallback, useState, type FC } from "react";
 import { Button } from "./ui";
 import { PostCommentSection } from "./PostCommentSection";
-import { PostActionMenu } from "./PostActionMenu";
+import { PostActionMenu, PostShareButton } from "./PostActionMenu";
 import { PostStatusBadge } from "./PostStatusBadge";
 import {
   ContentTypeBadge,
@@ -17,7 +17,20 @@ import type { ActivityPost } from "../pages/index/homeData";
 import { thumbnailImageUrl } from "../utils/imageUrl";
 import { postActionIconColor } from "../utils/postActionColors";
 import { inferAuthorGenderFromPost } from "../utils/inferAuthorGender";
+import type { PostSharePayload } from "../utils/postShare";
 import { Image, Text, View } from "@tarojs/components";
+
+function feedPostSharePayload(post: ActivityPost): PostSharePayload {
+  return {
+    postId: post.id,
+    activityLegacyId: post.activityLegacyId,
+    body: post.body,
+    eventTitle: post.event,
+    authorName: post.name,
+    images: post.images,
+    imageUrl: post.images?.[0] ?? post.avatar,
+  };
+}
 
 export type FeedPostListProps = {
   items: ActivityPost[];
@@ -85,8 +98,15 @@ function FeedPostRowInner({
               {post.images?.length ? <PostImageCount count={post.images.length} /> : null}
             </View>
             <View className="s-home-post__head-actions">
-              <PostStatusBadge status={post.status} variant="home" isOwn={isOwn} />
-              {!isOwn ? (
+              <PostStatusBadge post={post} variant="home" isOwn={isOwn} />
+              <PostShareButton share={feedPostSharePayload(post)} />
+              {isOwn && onDelete ? (
+                <PostActionMenu
+                  postId={post.id}
+                  authorUserId={post.userId}
+                  onDelete={() => onDelete(post)}
+                />
+              ) : !isOwn ? (
                 <PostActionMenu postId={post.id} authorUserId={post.userId} />
               ) : null}
             </View>
@@ -109,6 +129,7 @@ function FeedPostRowInner({
             onClick={() => onLike?.(post)}>
             <ThumbsUp
               size={16}
+              className="s-home-post__action-icon"
               filled={post.liked}
               color={postActionIconColor({ liked: post.liked })}
             />
@@ -119,25 +140,18 @@ function FeedPostRowInner({
             onClick={() => onToggleComments(post.id)}>
             <MessageCircle
               size={16}
+              className="s-home-post__action-icon"
               color={postActionIconColor({ active: commentsExpanded })}
             />
             <Text className="s-home-post__action-label">{post.comments}</Text>
           </Button>
-          <Button className="s-home-post__action">
-            <Share2 size={16} color={postActionIconColor({})} />
-            <Text className="s-home-post__action-label">分享</Text>
-          </Button>
-          {isOwn && onDelete ? (
-            <Button className="s-home-post__action" onClick={() => onDelete(post)}>
-              <Trash2 size={16} color={postActionIconColor({})} />
-              <Text className="s-home-post__action-label">删除</Text>
-            </Button>
-          ) : null}
         </View>
       </View>
 
       <PostCommentSection
         postId={post.id}
+        postAuthorName={post.name}
+        postAuthorUserId={post.userId}
         expanded={commentsExpanded}
         onToggleExpanded={() => onToggleComments(post.id)}
         currentUserAvatar={currentUserAvatar}

@@ -1,6 +1,6 @@
 import "./profile.scss";
 import Taro, { useDidShow } from "@tarojs/taro";
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Bell,
   Check,
@@ -20,21 +20,75 @@ import {
   useTabPageMainHeight,
 } from "../../hooks/useTabPageMainHeight";
 import { go, ROUTES } from "../../utils/route";
+import ProfileBenefitsPurchaseBanner from "./components/ProfileBenefitsPurchaseBanner";
+import ProfileFreeBenefitsSection from "./components/ProfileFreeBenefitsSection";
+import ProfilePaidBenefitsSection from "./components/ProfilePaidBenefitsSection";
+import ProfilePackageSheet from "./components/ProfilePackageSheet";
 import { profileActivities, profilePosts, profileUser } from "./mockData";
 import { sanitizeRemoteImageUrl } from "../../utils/imageUrl";
 import ProfileActionCard from "./components/ProfileActionCard";
 import { countOngoingActivities, deriveInterestTag } from "./utils";
 import { persistUserName } from "../../utils/session";
 import { useNavigationStore, useProfilePageStore } from "../../stores";
-import { useProfileSummaryQuery } from "../../hooks/useSyncApi";
+import {
+  useProfileActivitiesQuery,
+  useProfileEntitlementsQuery,
+  useProfileSummaryQuery,
+} from "../../hooks/useSyncApi";
+import { useProfileActivityLegacyId } from "../../hooks/useProfileActivityLegacyId";
 import { isApiEnabled } from "../../constants/api";
 import { useConfirmDialog } from "../../hooks/useConfirmDialog";
 import {
   readProfileNotificationsEnabled,
   readProfilePrivacyLevel,
 } from "../../utils/profileStorage";
-import { invalidateProfileSummary } from "../../utils/queryInvalidation";
+import { invalidateProfilePackageState } from "../../utils/queryInvalidation";
+import type { ProfileActivityItem, ProfileSummary } from "../../types/backend";
+import {
+  buildEventBenefitCardModel,
+  buildFreeBenefitCardModel,
+  buildMockPaidEntitlement,
+  buildMockProPlusEntitlement,
+  getNextTierId,
+  listPaidEntitlements,
+  pickGlobalFreeMonthly,
+  type ProfileEventBenefitCardModel,
+} from "./profileBenefitsMapper";
+import type { PackageTierId } from "./profilePackageData";
+import {
+  isProfileDebugEntitlementsEnabled,
+  PROFILE_DEBUG_ENTITLEMENT_LABELS,
+  persistProfileDebugEntitlementPreset,
+  profileDebugEntitlementActionSheetItems,
+  profileDebugPresetFromActionSheetIndex,
+  readProfileDebugEntitlementPreset,
+  resolveProfileDebugEntitlements,
+  type ProfileDebugEntitlementPreset,
+} from "./profileDebugEntitlements";
 import { Image, ScrollView, Text, View } from "@tarojs/components";
+
+function normalizeProfileUserData(
+  data: ProfileSummary | typeof profileUser,
+): typeof profileUser {
+  const stats = data.stats ?? profileUser.stats;
+  return {
+    name: data.name?.trim() || profileUser.name,
+    handle: data.handle?.trim() ?? profileUser.handle,
+    location: data.location?.trim() ?? profileUser.location,
+    bio: data.bio?.trim() ?? profileUser.bio,
+    avatar: data.avatar?.trim() || profileUser.avatar,
+    verified:
+      "verified" in data && typeof data.verified === "boolean"
+        ? data.verified
+        : profileUser.verified,
+    stats: {
+      events: Number(stats.events) || 0,
+      matchSuccess: Number(stats.matchSuccess) || 0,
+      likes: Number(stats.likes) || 0,
+      posts: Number(stats.posts) || 0,
+    },
+  };
+}
 
 const Profile: React.FC = () => {
   const navInsets = useNavBarInsets();
@@ -47,34 +101,239 @@ const Profile: React.FC = () => {
   const { confirm, confirmDialog } = useConfirmDialog({
     cancelText: "取消",
   });
+  const [packageSheetOpen, setPackageSheetOpen] = useState(false);
+  const [packageSheetActivityLegacyId, setPackageSheetActivityLegacyId] =
+    useState<number | undefined>(undefined);
+  const [packageSheetInitialTierId, setPackageSheetInitialTierId] = useState<
+    PackageTierId | undefined
+  >(undefined);
+  const [packageSheetCurrentPaidTierId, setPackageSheetCurrentPaidTierId] =
+    useState<PackageTierId | undefined>(undefined);
+  const debugEntitlementsEnabled = isProfileDebugEntitlementsEnabled();
+  const [debugEntitlementPreset, setDebugEntitlementPreset] =
+    useState<ProfileDebugEntitlementPreset>(() =>
+      readProfileDebugEntitlementPreset(),
+    );
 
-  const summaryQuery = useProfileSummaryQuery();
+  const activityLegacyId = useProfileActivityLegacyId();
+  const summaryQuery = useProfileSummaryQuery(activityLegacyId);
+  /** Unscoped list: one paid card per activity with a purchase. */
+  const allEntitlementsQuery = useProfileEntitlementsQuery();
+  const activitiesQuery = useProfileActivitiesQuery();
   const apiEnabled = isApiEnabled();
+  const debugEntitlementOverride = useMemo(
+    () =>
+      debugEntitlementsEnabled
+        ? resolveProfileDebugEntitlements(debugEntitlementPreset)
+        : null,
+    [debugEntitlementPreset, debugEntitlementsEnabled],
+  );
 
-  const profileUserData = apiEnabled && summaryQuery.data ? summaryQuery.data : profileUser;
+  const profileUserData = useMemo(
+    () =>
+      apiEnabled && summaryQuery.data
+        ? normalizeProfileUserData(summaryQuery.data)
+        : profileUser,
+    [apiEnabled, summaryQuery.data],
+  );
+
+  const entitlementList = useMemo(
+    () =>
+      Array.isArray(allEntitlementsQuery.data) ? allEntitlementsQuery.data : [],
+    [allEntitlementsQuery.data],
+  );
 
   const profileLoading = apiEnabled && summaryQuery.isLoading && !summaryQuery.data;
+
+  const benefitsLoading =
+    apiEnabled &&
+    !debugEntitlementOverride &&
+    (allEntitlementsQuery.isLoading || summaryQuery.isLoading) &&
+    allEntitlementsQuery.data == null;
+
+  const paidEntitlements = useMemo(() => {
+    if (debugEntitlementOverride) {
+      return debugEntitlementOverride.paid;
+    }
+    if (!apiEnabled) {
+      return [buildMockPaidEntitlement(), buildMockProPlusEntitlement()];
+    }
+    return listPaidEntitlements(
+      entitlementList,
+      summaryQuery.data?.packageEntitlements,
+    );
+  }, [
+    apiEnabled,
+    debugEntitlementOverride,
+    entitlementList,
+    summaryQuery.data?.packageEntitlements,
+  ]);
+
+  const summaryFreeMonthly = useMemo(() => {
+    const scoped = summaryQuery.data?.packageEntitlement?.freeMonthly;
+    if (scoped) {
+      return scoped;
+    }
+    for (const item of summaryQuery.data?.packageEntitlements ?? []) {
+      if (item.freeMonthly) {
+        return item.freeMonthly;
+      }
+    }
+    return undefined;
+  }, [summaryQuery.data]);
+
+  const globalFreeMonthly = useMemo(() => {
+    if (debugEntitlementOverride) {
+      return debugEntitlementOverride.freeMonthly;
+    }
+    return pickGlobalFreeMonthly(entitlementList, summaryFreeMonthly);
+  }, [debugEntitlementOverride, entitlementList, summaryFreeMonthly]);
+
+  const activityByLegacyId = useMemo(() => {
+    const items: ProfileActivityItem[] =
+      apiEnabled && activitiesQuery.data?.length
+        ? activitiesQuery.data
+        : profileActivities;
+    return new Map(items.map((item) => [Number(item.id), item]));
+  }, [activitiesQuery.data, apiEnabled]);
+
+  const profileActivitiesList = useMemo(() => {
+    if (apiEnabled && activitiesQuery.data?.length) {
+      return activitiesQuery.data;
+    }
+    return profileActivities;
+  }, [activitiesQuery.data, apiEnabled]);
+
+  const paidTierByActivityLegacyId = useMemo(() => {
+    const map = new Map<number, PackageTierId>();
+    for (const entitlement of paidEntitlements) {
+      if (entitlement.paidTierId) {
+        map.set(entitlement.activityLegacyId, entitlement.paidTierId);
+      }
+    }
+    return map;
+  }, [paidEntitlements]);
+
+  const paidBenefitCards = useMemo(
+    () =>
+      paidEntitlements.map((entitlement) =>
+        buildEventBenefitCardModel(
+          entitlement,
+          activityByLegacyId.get(entitlement.activityLegacyId),
+        ),
+      ),
+    [activityByLegacyId, paidEntitlements],
+  );
+
+  const hasPaidEntitlement = paidEntitlements.length > 0;
+
+  const showPaidBenefitsSection = !apiEnabled || hasPaidEntitlement;
+
+  const showFreeBenefitsSection =
+    paidEntitlements.length === 0 && (debugEntitlementOverride != null || !benefitsLoading);
+
+  const showBenefitsLoading = benefitsLoading && !showPaidBenefitsSection;
+
+  const showBenefitsBlock =
+    showPaidBenefitsSection || showFreeBenefitsSection || showBenefitsLoading;
+
+  const freeBenefitCard = useMemo(() => {
+    if (!showFreeBenefitsSection) {
+      return null;
+    }
+    return buildFreeBenefitCardModel(globalFreeMonthly);
+  }, [globalFreeMonthly, showFreeBenefitsSection]);
 
   const ongoingCount = apiEnabled
     ? profileUserData.stats.events
     : countOngoingActivities(profileActivities);
   const postsCount = apiEnabled ? profileUserData.stats.posts : profilePosts.length;
   const interestTag = deriveInterestTag(profileUserData.bio);
-  const verified =
-    "verified" in profileUser && typeof profileUser.verified === "boolean"
-      ? profileUser.verified
-      : true;
+  const verified = profileUserData.verified;
+
+  const openPackageSheet = useCallback(
+    (options?: {
+      /** Pre-bound activity (paid benefit card / upgrade). Skips activity step in sheet. */
+      activityLegacyId?: number;
+      initialSelectedTierId?: PackageTierId;
+      currentPaidTierId?: PackageTierId;
+    }) => {
+      const rawActivityId = options?.activityLegacyId;
+      const resolvedActivityId =
+        rawActivityId != null && !Number.isNaN(rawActivityId)
+          ? rawActivityId
+          : undefined;
+      let currentPaidTierId = options?.currentPaidTierId;
+      if (currentPaidTierId == null && resolvedActivityId != null) {
+        const entitlement = paidEntitlements.find(
+          (item) => item.activityLegacyId === resolvedActivityId,
+        );
+        currentPaidTierId = entitlement?.paidTierId ?? undefined;
+      }
+      setPackageSheetActivityLegacyId(resolvedActivityId);
+      setPackageSheetInitialTierId(options?.initialSelectedTierId);
+      setPackageSheetCurrentPaidTierId(currentPaidTierId);
+      setPackageSheetOpen(true);
+    },
+    [paidEntitlements],
+  );
+
+  const closePackageSheet = useCallback(() => {
+    setPackageSheetOpen(false);
+    setPackageSheetActivityLegacyId(undefined);
+    setPackageSheetInitialTierId(undefined);
+    setPackageSheetCurrentPaidTierId(undefined);
+  }, []);
+
+  const packageSheetResolvedCurrentPaidTierId = useMemo(() => {
+    if (packageSheetCurrentPaidTierId != null) {
+      return packageSheetCurrentPaidTierId;
+    }
+    if (packageSheetActivityLegacyId == null) {
+      return undefined;
+    }
+    const entitlement = paidEntitlements.find(
+      (item) => item.activityLegacyId === packageSheetActivityLegacyId,
+    );
+    return entitlement?.paidTierId ?? undefined;
+  }, [
+    packageSheetActivityLegacyId,
+    packageSheetCurrentPaidTierId,
+    paidEntitlements,
+  ]);
+
+  const handleBenefitUpgrade = useCallback(
+    (card: ProfileEventBenefitCardModel) => {
+      const nextTierId = getNextTierId(card.tierId);
+      if (!nextTierId) {
+        return;
+      }
+      openPackageSheet({
+        activityLegacyId: card.activityLegacyId,
+        initialSelectedTierId: nextTierId,
+        currentPaidTierId: card.tierId,
+      });
+    },
+    [openPackageSheet],
+  );
 
   const applyRouteParams = useCallback(() => {
-    consumeProfileIntent();
-  }, [consumeProfileIntent]);
+    const intent = consumeProfileIntent();
+    if (intent?.openPackageSheet) {
+      openPackageSheet();
+    }
+  }, [consumeProfileIntent, openPackageSheet]);
+
+  useEffect(() => {
+    applyRouteParams();
+  }, [applyRouteParams]);
 
   useDidShow(() => {
     setNotificationsEnabled(readProfileNotificationsEnabled());
     setPrivacyLevel(readProfilePrivacyLevel());
     applyRouteParams();
     if (apiEnabled) {
-      invalidateProfileSummary();
+      void invalidateProfilePackageState();
     }
   });
 
@@ -98,6 +357,26 @@ const Profile: React.FC = () => {
     if (!ok) return;
     void Taro.showToast({ title: "已退出登录", icon: "success" });
   }, [confirm]);
+
+  const handleUsageHistory = useCallback(() => {
+    void Taro.showToast({ title: "使用记录敬请期待", icon: "none" });
+  }, []);
+
+  const handleDebugEntitlements = useCallback(() => {
+    if (!debugEntitlementsEnabled) return;
+    void Taro.showActionSheet({
+      itemList: profileDebugEntitlementActionSheetItems(),
+      success: (res) => {
+        const preset = profileDebugPresetFromActionSheetIndex(res.tapIndex);
+        persistProfileDebugEntitlementPreset(preset);
+        setDebugEntitlementPreset(preset);
+        void Taro.showToast({
+          title: PROFILE_DEBUG_ENTITLEMENT_LABELS[preset],
+          icon: "none",
+        });
+      },
+    });
+  }, [debugEntitlementsEnabled]);
 
   const metaParts = [
     profileUserData.handle,
@@ -182,6 +461,49 @@ const Profile: React.FC = () => {
             </View>
           )}
 
+          {showBenefitsBlock ? (
+            <View className="s-profile-benefits">
+              <ProfileBenefitsPurchaseBanner
+                onOpenPurchase={() => openPackageSheet()}
+              />
+
+              {showPaidBenefitsSection ? (
+                <ProfilePaidBenefitsSection
+                  cards={paidBenefitCards}
+                  loading={benefitsLoading}
+                  onUpgrade={handleBenefitUpgrade}
+                  onUsageHistory={handleUsageHistory}
+                />
+              ) : null}
+
+              {showFreeBenefitsSection && freeBenefitCard ? (
+                <ProfileFreeBenefitsSection
+                  card={freeBenefitCard}
+                  onOpenPurchase={() => openPackageSheet()}
+                />
+              ) : showBenefitsLoading ? (
+                <ProfileFreeBenefitsSection
+                  card={buildFreeBenefitCardModel(null)}
+                  loading
+                  onOpenPurchase={() => openPackageSheet()}
+                />
+              ) : null}
+            </View>
+          ) : null}
+
+          {debugEntitlementsEnabled ? (
+            <View
+              className="s-profile__debug-entitlements"
+              hoverClass="s-profile__debug-entitlements--pressed"
+              onClick={handleDebugEntitlements}>
+              <Text className="s-profile__debug-entitlements-label">
+                调试权益 ·{" "}
+                {PROFILE_DEBUG_ENTITLEMENT_LABELS[debugEntitlementPreset] ??
+                  PROFILE_DEBUG_ENTITLEMENT_LABELS.api}
+              </Text>
+            </View>
+          ) : null}
+
           <ProfileActionCard
             accent="activities"
             icon={<Zap size={20} />}
@@ -255,6 +577,21 @@ const Profile: React.FC = () => {
       </View>
 
       {confirmDialog}
+      {packageSheetOpen ? (
+        <ProfilePackageSheet
+          open
+          activityLegacyId={packageSheetActivityLegacyId}
+          initialSelectedTierId={packageSheetInitialTierId}
+          currentPaidTierId={packageSheetResolvedCurrentPaidTierId}
+          activities={profileActivitiesList}
+          activitiesLoading={apiEnabled && activitiesQuery.isLoading}
+          paidTierByActivityLegacyId={paidTierByActivityLegacyId}
+          onClose={closePackageSheet}
+          onPurchaseSuccess={() => {
+            void invalidateProfilePackageState();
+          }}
+        />
+      ) : null}
     </View>
   );
 };

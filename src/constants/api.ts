@@ -69,3 +69,8 @@ export const AI_CHAT_WS_URL = resolveAiChatWsUrl();
 export function isApiEnabled(): boolean {
   return Boolean(API_BASE_URL || AI_CHAT_WS_URL);
 }
+
+/** When API is off, force AI quota exhausted UI for local testing. */
+export function isDevMockQuotaExhausted(): boolean {
+  return process.env.TARO_APP_MOCK_QUOTA_EXHAUSTED === "true";
+}

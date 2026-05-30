@@ -5,8 +5,8 @@ export function countOngoingActivities(items: ProfileActivityItem[]): number {
   return items.filter((item) => item.status === "registered").length;
 }
 
-export function deriveInterestTag(bio: string): string | null {
-  const trimmed = bio.trim();
+export function deriveInterestTag(bio?: string | null): string | null {
+  const trimmed = (bio ?? "").trim();
   if (!trimmed) return null;
   if (trimmed.includes("电音")) return "电音";
   return null;

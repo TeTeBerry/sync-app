@@ -6,6 +6,8 @@ interface CacheEntry<T> {
 }
 
 const globalCache = new Map<string, CacheEntry<unknown>>();
+/** One in-flight request per cache key (shared across hook instances). */
+const inflightByKey = new Map<string, Promise<unknown>>();
 
 type InvalidationListener = (prefix: string) => void;
 const invalidationListeners = new Set<InvalidationListener>();
@@ -42,6 +44,11 @@ export function invalidateCache(queryKey: (string | number | undefined)[]) {
   for (const key of globalCache.keys()) {
     if (key.startsWith(prefix)) {
       globalCache.delete(key);
+    }
+  }
+  for (const key of inflightByKey.keys()) {
+    if (key.startsWith(prefix)) {
+      inflightByKey.delete(key);
     }
   }
   for (const listener of invalidationListeners) {
@@ -108,12 +115,40 @@ export function useApiQuery<T>(options: UseApiQueryOptions<T>) {
       const force = options?.force ?? false;
       const background = options?.background ?? false;
       const now = Date.now();
-      if (
-        !force &&
-        now - lastFetchRef.current < staleTime &&
-        dataRef.current !== undefined
-      ) {
-        return;
+
+      if (!force) {
+        const cachedEntry = globalCache.get(cacheKey) as CacheEntry<T> | undefined;
+        if (
+          cachedEntry &&
+          now - cachedEntry.timestamp < staleTime
+        ) {
+          setData(cachedEntry.data);
+          lastFetchRef.current = cachedEntry.timestamp;
+          return;
+        }
+        if (
+          now - lastFetchRef.current < staleTime &&
+          dataRef.current !== undefined
+        ) {
+          return;
+        }
+      }
+
+      const runFetch = async (): Promise<T> => {
+        const result = await queryFnRef.current();
+        const timestamp = Date.now();
+        globalCache.set(cacheKey, { data: result, timestamp });
+        return result;
+      };
+
+      let request = inflightByKey.get(cacheKey) as Promise<T> | undefined;
+      if (!request) {
+        request = runFetch().finally(() => {
+          if (inflightByKey.get(cacheKey) === request) {
+            inflightByKey.delete(cacheKey);
+          }
+        });
+        inflightByKey.set(cacheKey, request);
       }
 
       if (!background) {
@@ -122,10 +157,9 @@ export function useApiQuery<T>(options: UseApiQueryOptions<T>) {
       setIsError(false);
       setError(null);
       try {
-        const result = await queryFnRef.current();
+        const result = await request;
         setData(result);
-        globalCache.set(cacheKey, { data: result, timestamp: now });
-        lastFetchRef.current = now;
+        lastFetchRef.current = Date.now();
       } catch (err) {
         setIsError(true);
         setError(err instanceof Error ? err : new Error(String(err)));
@@ -139,10 +173,13 @@ export function useApiQuery<T>(options: UseApiQueryOptions<T>) {
   );
 
   useEffect(() => {
+    const entry = globalCache.get(cacheKey) as CacheEntry<T> | undefined;
+    setData(entry?.data);
+    lastFetchRef.current = entry?.timestamp ?? 0;
     if (enabled) {
       void fetch();
     }
-  }, [enabled, fetch]);
+  }, [cacheKey, enabled, fetch]);
 
   useEffect(() => {
     if (!enabled) return;

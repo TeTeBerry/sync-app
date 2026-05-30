@@ -6,7 +6,9 @@
     "dev:h5": "taro build --type h5 --watch",
     "dev:weapp": "taro build --type weapp --watch",
     "build:h5": "taro build --type h5",
-    "build:weapp": "taro build --type weapp"
+    "build:weapp": "taro build --type weapp",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@babel/runtime": "^7.27.6",
@@ -48,6 +50,7 @@
     "postcss": "^8.5.3",
     "sass": "^1.93.3",
     "typescript": "~5.9.3",
+    "vitest": "^3.2.4",
     "webpack": "5.91.0"
   }
 }

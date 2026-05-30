@@ -83,3 +83,8 @@ export function inferAuthorGenderFromPost(post: {
 
   return undefined;
 }
+
+/** Current-user gender for chat chrome (name-based inference). */
+export function inferUserGenderFromName(name: string): AuthorGender | undefined {
+  return inferAuthorGenderFromPost({ authorName: name });
+}

@@ -3,4 +3,7 @@ export type AiAssistantNavIntent = {
   activityLegacyId?: number;
 };
 
-export type ProfileNavIntent = Record<string, never>;
+export type ProfileNavIntent = {
+  /** Open the profile package upgrade sheet after switching to the profile tab. */
+  openPackageSheet?: boolean;
+};

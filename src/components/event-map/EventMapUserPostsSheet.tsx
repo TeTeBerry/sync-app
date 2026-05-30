@@ -14,6 +14,8 @@ import { markerAvatarUrl } from "./eventMapMarkers";
 import type { EventMapUserPost } from "./eventMapUserPostsData";
 import { useEventMapUserSheet } from "./useEventMapUserSheet";
 
+/** Contact unlock: call `consumeContactUnlockWithQuota(activityLegacyId)` before revealing WeChat / phone. */
+
 export type EventMapUserPostsSheetProps = {
   open: boolean;
   marker: EventMapMarker | null;

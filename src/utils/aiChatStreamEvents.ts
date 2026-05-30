@@ -1,4 +1,8 @@
-import type { AiChatStreamEvent, RecommendedPostCard } from "../types/aiChat";
+import type {
+  AiChatStreamEvent,
+  RecommendedActivityCard,
+  RecommendedPostCard,
+} from "../types/aiChat";
 import type { ConversationState } from "../types/conversationState";
 
 function isRestApiEnvelope(json: Record<string, unknown>): boolean {
@@ -91,6 +95,18 @@ export function parseStreamEventPayload(
       posts: json.posts as RecommendedPostCard[],
       degraded: typeof json.degraded === "boolean" ? json.degraded : undefined,
     };
+  }
+  if (json.type === "activity_recommendation" && json.activity && typeof json.activity === "object") {
+    const activity = json.activity as RecommendedActivityCard;
+    if (
+      typeof activity.activityLegacyId === "number" &&
+      typeof activity.title === "string"
+    ) {
+      return {
+        type: "activity_recommendation",
+        activity,
+      };
+    }
   }
   if (json.type === "suggested_replies" && Array.isArray(json.replies)) {
     return {

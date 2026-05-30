@@ -1,7 +1,7 @@
 import "./event-map.scss";
 import Taro, { useRouter } from "@tarojs/taro";
 import { useCallback, useMemo, useState } from "react";
-import { Bell, ChevronLeft, Minus, Plane, Plus } from "lucide-react-taro";
+import { Bell, Minus, Plane, Plus } from "lucide-react-taro";
 import { Button, Canvas, Image, Text, View } from "@tarojs/components";
 import { EventMapUserPostsSheet } from "../../../components/event-map/EventMapUserPostsSheet";
 import { useEventMapController } from "../../../components/event-map/useEventMapController";
@@ -14,9 +14,9 @@ import {
   markerAvatarUrl,
   type EventMapMarker,
 } from "../../../components/event-map/eventMapMarkers";
-import { tabPageHeaderStyle } from "../../../components/TabPageHeader";
+import PageNavigation from "../../../components/PageNavigation";
 import { useNavBarInsets } from "../../../hooks/useNavBarInsets";
-import { decodeRouteQueryParam, goBack, ROUTES } from "../../../utils/route";
+import { decodeRouteQueryParam, ROUTES } from "../../../utils/route";
 
 function showMapToast(label: string) {
   void Taro.showToast({ title: label, icon: "none", duration: 1200 });
@@ -49,8 +49,6 @@ const EventMapPage = () => {
 
   const topChromePx = navInsets.paddingTop + EVENT_MAP_TOP_BAR_CONTENT_PX;
 
-  const topBarStyle = tabPageHeaderStyle(navInsets);
-
   const {
     canvasId,
     canvasStyle,
@@ -67,28 +65,21 @@ const EventMapPage = () => {
     topChromePx,
   });
 
-  const handleBack = useCallback(() => {
-    goBack(ROUTES.EVENT_DETAIL);
-  }, []);
-
   return (
     <View className="s-event-map">
-      <View className="s-event-map__top" style={topBarStyle}>
-        <Button
-          className="s-event-map__back"
-          aria-label="返回"
-          hoverClass="s-event-map__back--pressed"
-          onTap={handleBack}>
-          <ChevronLeft size={22} />
-        </Button>
-        <Button
-          className="s-event-map__side-btn"
-          aria-label="通知"
-          hoverClass="s-event-map__side-btn--pressed"
-          onTap={() => showMapToast("通知即将上线")}>
-          <Bell size={18} />
-        </Button>
-      </View>
+      <PageNavigation
+        className="s-event-map__top"
+        fallback={ROUTES.EVENT_DETAIL}
+        trailing={
+          <Button
+            className="s-page-nav__icon-action s-page-nav__icon-action--overlay"
+            aria-label="通知"
+            hoverClass="s-page-nav__icon-action--pressed"
+            onTap={() => showMapToast("通知即将上线")}>
+            <Bell size={18} />
+          </Button>
+        }
+      />
 
       <View className="s-event-map__stage">
         <Canvas

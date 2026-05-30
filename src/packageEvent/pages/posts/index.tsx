@@ -14,9 +14,11 @@ import { isApiEnabled } from "../../../constants/api";
 import { ROUTES } from "../../../utils/route";
 import type { ActivityPost } from "../../../pages/index/homeData";
 import { useStackPageMainHeight } from "../../../hooks/useTabPageMainHeight";
+import { usePostPageShare } from "../../../hooks/usePostPageShare";
 import { ScrollView, View } from "@tarojs/components";
 
 const AllPostsPage = () => {
+  usePostPageShare();
   const mainScrollHeight = useStackPageMainHeight();
   const { confirm, confirmDialog } = useConfirmDialog({
     cancelText: "取消",

@@ -1,22 +1,52 @@
 import "./PostActionMenu.scss";
-import { EllipsisVertical } from "lucide-react-taro";
+import { EllipsisVertical, Share2 } from "lucide-react-taro";
 import { useCallback, useState, type FC } from "react";
 import Taro from "@tarojs/taro";
 import ActionSheet from "./ActionSheet";
 import { useConfirmDialog } from "../hooks/useConfirmDialog";
 import { blockUserAndInvalidate, submitReportAndInvalidate } from "../hooks/useSyncApi";
+import { usePostShareStore } from "../stores/postShareStore";
 import type { ReportCategory } from "../types/backend";
+import type { PostSharePayload } from "../utils/postShare";
 import { Button, Text, View } from '@tarojs/components';
 
 export type PostActionMenuProps = {
   postId: string;
   authorUserId?: string;
+  onDelete?: () => void;
   disabled?: boolean;
+};
+
+export type PostShareButtonProps = {
+  share: PostSharePayload;
+};
+
+export const PostShareButton: FC<PostShareButtonProps> = ({ share }) => {
+  const setPendingShare = usePostShareStore((state) => state.setPendingShare);
+  const isWeapp = process.env.TARO_ENV === "weapp";
+
+  const handleShareTap = useCallback(() => {
+    setPendingShare(share);
+    if (!isWeapp) {
+      void Taro.showToast({ title: "请在微信小程序中分享", icon: "none" });
+    }
+  }, [isWeapp, setPendingShare, share]);
+
+  return (
+    <Button
+      className="s-post-share-btn"
+      aria-label="分享"
+      openType={isWeapp ? "share" : undefined}
+      onClick={handleShareTap}>
+      <Share2 size={18} color="#8e8e93" />
+    </Button>
+  );
 };
 
 export const PostActionMenu: FC<PostActionMenuProps> = ({
   postId,
   authorUserId,
+  onDelete,
   disabled,
 }) => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -79,6 +109,30 @@ export const PostActionMenu: FC<PostActionMenuProps> = ({
     vulgar: "低俗内容",
   };
 
+  const menuItems = onDelete
+    ? [
+        {
+          label: "删除",
+          onSelect: () => {
+            closeAll();
+            onDelete();
+          },
+        },
+      ]
+    : [
+        {
+          label: "举报",
+          onSelect: () => {
+            setMenuOpen(false);
+            setReportOpen(true);
+          },
+        },
+        {
+          label: "屏蔽",
+          onSelect: () => void handleBlock(),
+        },
+      ];
+
   return (
     <View>
       <Button className="s-post-action-menu__trigger"
@@ -88,35 +142,27 @@ export const PostActionMenu: FC<PostActionMenuProps> = ({
       </Button>
 
       <ActionSheet
+        overlayClassName="s-post-action-sheet"
         open={menuOpen}
         title="帖子操作"
         cancelLabel="取消"
         onCancel={closeAll}
-        items={[
-          {
-            label: "举报",
-            onSelect: () => {
-              setMenuOpen(false);
-              setReportOpen(true);
-            },
-          },
-          {
-            label: "屏蔽",
-            onSelect: () => void handleBlock(),
-          },
-        ]}
+        items={menuItems}
       />
 
-      <ActionSheet
-        open={reportOpen}
-        title="举报原因"
-        cancelLabel="取消"
-        onCancel={closeAll}
-        items={reportCategories.map((category) => ({
-          label: categoryLabels[category],
-          onSelect: () => void handleReport(category),
-        }))}
-      />
+      {!onDelete ? (
+        <ActionSheet
+          overlayClassName="s-post-action-sheet"
+          open={reportOpen}
+          title="举报原因"
+          cancelLabel="取消"
+          onCancel={closeAll}
+          items={reportCategories.map((category) => ({
+            label: categoryLabels[category],
+            onSelect: () => void handleReport(category),
+          }))}
+        />
+      ) : null}
 
       {confirmDialog}
     </View>

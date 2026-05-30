@@ -148,6 +148,27 @@ export function compareActivityDateAsc(
   return getActivitySortTimestamp(a.date, a.title) - getActivitySortTimestamp(b.date, b.title);
 }
 
+/** Event list: upcoming/ongoing by start asc (soonest first), ended after, missing dates last. */
+export function compareActivitiesNearestFirst(
+  a: { date?: string; title?: string },
+  b: { date?: string; title?: string },
+  now?: Date,
+): number {
+  const aEnded = getActivityStatusFromActivity(a.date, a.title, now) === "ended";
+  const bEnded = getActivityStatusFromActivity(b.date, b.title, now) === "ended";
+  if (aEnded !== bEnded) return aEnded ? 1 : -1;
+
+  const aTs = getActivitySortTimestamp(a.date, a.title);
+  const bTs = getActivitySortTimestamp(b.date, b.title);
+  const aMissing = aTs <= 0;
+  const bMissing = bTs <= 0;
+  if (aMissing !== bMissing) return aMissing ? 1 : -1;
+  if (aMissing) return 0;
+
+  if (aEnded) return bTs - aTs;
+  return aTs - bTs;
+}
+
 export type ActivityDateFields = {
   date?: string;
   title?: string;

@@ -23,6 +23,7 @@ import { HomeHeaderActions } from "./components/HomeHeaderActions";
 import { type ActivityPost } from "./homeData";
 import { resolveFeaturedEventLegacyId, type FeaturedEvent } from "../../utils/apiMappers";
 import { useNavBarInsets } from "../../hooks/useNavBarInsets";
+import { usePostPageShare } from "../../hooks/usePostPageShare";
 import { ScrollView, View } from "@tarojs/components";
 
 const LazyHomeActivityFeed = lazy(async () => {
@@ -31,6 +32,8 @@ const LazyHomeActivityFeed = lazy(async () => {
 });
 
 const Home = () => {
+  usePostPageShare();
+
   const belowFoldReady = useDeferredMount(DEFER_BELOW_FOLD_MS);
   const secondaryApiReady = useDeferredMount(DEFER_SECONDARY_API_MS);
   const { confirm, confirmDialog } = useConfirmDialog({

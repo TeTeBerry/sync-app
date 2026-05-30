@@ -13,6 +13,7 @@ import {
   X,
 } from "lucide-react-taro";
 import { ContentTypeBadge } from "../../../components/ContentTypeBadge";
+import { PostStatusBadge } from "../../../components/PostStatusBadge";
 import { ProfileCollapsibleSection } from "../../../components/profile/ProfileCollapsibleSection";
 import type { ProfilePostItem } from "../../../types/backend";
 import { POST_ACTION_ICON_COLOR } from "../../../utils/postActionColors";
@@ -90,15 +91,7 @@ function renderPostItems(
             <Text className="s-profile-post__title-dot" />
             {item.title}
           </Text>
-          {item.status === "招募中" ? (
-            <Text className="s-profile-post__status s-profile-post__status--recruiting">
-              招募中
-            </Text>
-          ) : item.status === "已组队" ? (
-            <Text className="s-profile-post__status s-profile-post__status--grouped">
-              已组队
-            </Text>
-          ) : null}
+          <PostStatusBadge post={item} variant="home" isOwn />
         </View>
 
         <Text className="s-profile-post__content">{item.content}</Text>

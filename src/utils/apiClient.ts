@@ -1,6 +1,7 @@
 import Taro from "@tarojs/taro";
 import { API_BASE_URL } from "../constants/api";
 import type { ApiResponse } from "../types/backend";
+import { taroRequestData } from "./apiRequestBody";
 
 export class ApiError extends Error {
   constructor(
@@ -52,7 +53,7 @@ async function requestWithTimeout(
       url,
       method: (init.method || "GET") as keyof Taro.request.Method,
       header: init.headers as Record<string, string>,
-      data: init.body,
+      data: taroRequestData(init),
       timeout: timeoutMs,
       success: (res) => {
         resolve({

@@ -445,6 +445,12 @@ export function goProfile() {
   switchTabTo(ROUTES.PROFILE);
 }
 
+/** Profile tab with package upgrade sheet open. */
+export function goProfileUpgrade() {
+  useNavigationStore.getState().setProfileIntent({ openPackageSheet: true });
+  switchTabTo(ROUTES.PROFILE);
+}
+
 export type GoAiAssistantOptions = Pick<
   AiAssistantNavIntent,
   "initialMessage" | "activityLegacyId"

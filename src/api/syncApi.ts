@@ -1,4 +1,5 @@
 import { apiDelete, apiGet, apiPatch, apiPost } from "../utils/apiClient";
+import { uploadImageFile } from "../utils/uploadImage";
 import type { ChatSessionRecord } from "../types/aiChat";
 import type {
   ActivityRegistrationResult,
@@ -8,6 +9,7 @@ import type {
   CreatePostPayload,
   CurrentUser,
   EventDetailPost,
+  EventPostsPage,
   HomeFeedPost,
   PostCommentItem,
   HomeSummary,
@@ -15,9 +17,19 @@ import type {
   ProfileActivityItem,
   ProfilePostItem,
   ProfileSummary,
+  PackageCatalog,
+  EventPackageEntitlement,
+  PurchaseProfilePackagePayload,
+  PurchaseProfilePackageResult,
+  ConsumeProfileEntitlementPayload,
+  ConsumeProfileEntitlementResult,
   BlockListResult,
   ReportPayload,
   ReportResult,
+  LiveInfoSnapshot,
+  PublishLiveInfoPayload,
+  SubmitLiveInfoWristbandPayload,
+  SubmitLiveInfoWristbandResult,
   UpdateCurrentUserPayload,
   UpdatePostPayload,
 } from "../types/backend";
@@ -32,12 +44,7 @@ export function matchActivity(keyword: string) {
 }
 
 export function fetchHomeSummary() {
-  // eslint-disable-next-line no-console
-  console.log("[syncApi] fetchHomeSummary called");
-  const result = apiGet<HomeSummary>("/home", ownerParams());
-  // eslint-disable-next-line no-console
-  console.log("[syncApi] fetchHomeSummary returned promise");
-  return result;
+  return apiGet<HomeSummary>("/home", ownerParams());
 }
 
 export function fetchActivityByLegacyId(legacyId: number) {
@@ -101,15 +108,82 @@ export function fetchAllPosts() {
   return apiGet<HomeFeedPost[]>("/posts/all", ownerParams());
 }
 
-export function fetchPostsByActivity(activityLegacyId: number) {
-  return apiGet<EventDetailPost[]>("/posts", {
+export type FetchPostsByActivityPageOptions = {
+  limit?: number;
+  cursor?: string;
+  anchorPostId?: string;
+};
+
+export function fetchPostsByActivityPage(
+  activityLegacyId: number,
+  options?: FetchPostsByActivityPageOptions,
+) {
+  const params: Record<string, string> = {
     activityLegacyId: String(activityLegacyId),
     ...ownerParams(),
-  });
+  };
+  if (options?.limit != null) {
+    params.limit = String(options.limit);
+  }
+  if (options?.cursor) {
+    params.cursor = options.cursor;
+  }
+  if (options?.anchorPostId) {
+    params.anchorPostId = options.anchorPostId;
+  }
+  return apiGet<EventPostsPage>("/posts", params);
 }
 
-export function fetchProfileSummary() {
-  return apiGet<ProfileSummary>("/profile", ownerParams());
+/** First page only — for lightweight consumers (e.g. event map sheet). */
+export async function fetchPostsByActivity(activityLegacyId: number) {
+  const page = await fetchPostsByActivityPage(activityLegacyId, { limit: 20 });
+  return page.items;
+}
+
+export function fetchProfileSummary(activityLegacyId?: number) {
+  const params: Record<string, string> = { ...ownerParams() };
+  if (activityLegacyId != null && !Number.isNaN(activityLegacyId)) {
+    params.activityLegacyId = String(activityLegacyId);
+  }
+  return apiGet<ProfileSummary>("/profile", params);
+}
+
+export function fetchProfilePackages() {
+  return apiGet<PackageCatalog>("/profile/packages", ownerParams());
+}
+
+export function fetchProfileEntitlements(activityLegacyId?: number) {
+  const params: Record<string, string> = { ...ownerParams() };
+  if (activityLegacyId != null && !Number.isNaN(activityLegacyId)) {
+    params.activityLegacyId = String(activityLegacyId);
+  }
+  return apiGet<EventPackageEntitlement[]>("/profile/entitlements", params);
+}
+
+export function purchaseProfilePackage(payload: PurchaseProfilePackagePayload) {
+  return apiPost<PurchaseProfilePackageResult>(
+    "/profile/packages/purchase",
+    payload,
+    ownerParams(),
+  );
+}
+
+export function consumeProfileAiMatch(payload: ConsumeProfileEntitlementPayload) {
+  return apiPost<ConsumeProfileEntitlementResult>(
+    "/profile/entitlements/consume/ai-match",
+    payload,
+    ownerParams(),
+  );
+}
+
+export function consumeProfileContactUnlock(
+  payload: ConsumeProfileEntitlementPayload,
+) {
+  return apiPost<ConsumeProfileEntitlementResult>(
+    "/profile/entitlements/consume/contact-unlock",
+    payload,
+    ownerParams(),
+  );
 }
 
 export function fetchProfileActivities() {
@@ -206,4 +280,55 @@ export function deleteNotification(id: string, userId?: string) {
 export function clearAllNotifications(userId?: string) {
   const query = userId ? `?userId=${encodeURIComponent(userId)}` : "";
   return apiDelete<{ ok: true }>(`/notifications${query}`);
+}
+
+export function fetchLiveInfoSnapshot(activityLegacyId: number) {
+  return apiGet<LiveInfoSnapshot>(
+    `/activities/${activityLegacyId}/live-info`,
+    ownerParams(),
+  );
+}
+
+export function uploadImage(filePath: string) {
+  return uploadImageFile(filePath);
+}
+
+export function submitLiveInfoWristband(
+  activityLegacyId: number,
+  payload: SubmitLiveInfoWristbandPayload,
+) {
+  return apiPost<SubmitLiveInfoWristbandResult>(
+    `/activities/${activityLegacyId}/live-info/wristband`,
+    payload,
+    ownerParams(),
+  );
+}
+
+export function clearLiveInfoWristband(activityLegacyId: number) {
+  return apiDelete<{ ok: true; viewer: LiveInfoSnapshot["viewer"] }>(
+    `/activities/${activityLegacyId}/live-info/wristband`,
+    ownerParams(),
+  );
+}
+
+export function publishLiveInfoUpdate(
+  activityLegacyId: number,
+  payload: PublishLiveInfoPayload,
+) {
+  return apiPost<{ ok: true; update: LiveInfoSnapshot["feed"][number] }>(
+    `/activities/${activityLegacyId}/live-info/updates`,
+    payload,
+    ownerParams(),
+  );
+}
+
+export function toggleLiveInfoUpdateLike(
+  activityLegacyId: number,
+  updateId: string,
+) {
+  return apiPost<{ ok: true; update: LiveInfoSnapshot["feed"][number] }>(
+    `/activities/${activityLegacyId}/live-info/updates/${updateId}/like`,
+    {},
+    ownerParams(),
+  );
 }

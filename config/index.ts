@@ -36,10 +36,16 @@ export default defineConfig({
     },
   },
   sass: {
-    data: `@use "@nutui/nutui-react-taro/dist/styles/variables.scss" as *;`,
+    // NutUI variables.scss emits `:root, page { … }`; Taro pages are wrapped in `comp`,
+    // so page wxss is component wxss and must not use the `page` tag selector.
+    data:
+      process.env.TARO_ENV === "weapp"
+        ? `@use "src/styles/nutui-weapp-scale.scss" as *;`
+        : `@use "@nutui/nutui-react-taro/dist/styles/variables.scss" as *;`,
   },
   framework: "react",
   mini: {
+    // @ts-expect-error outputRoot is valid in Taro weapp build
     outputRoot: "dist-weapp",
     /** 多页面共用组件时 SCSS 导入顺序不一致，忽略 css 合并顺序警告 */
     miniCssExtractPluginOption: {
@@ -69,6 +75,7 @@ export default defineConfig({
   },
   /** Unmaintained; kept for `npm run build:h5` only. */
   h5: {
+    // @ts-expect-error outputRoot is valid in Taro h5 build
     outputRoot: "dist-h5",
     publicPath: "/",
     staticDirectory: "static",

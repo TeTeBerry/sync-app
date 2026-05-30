@@ -5,23 +5,23 @@
   line-height: 1.2;
   font-weight: var(--s-fw-bold);
   white-space: nowrap;
-  border: none;
+  border: 1px solid;
   display: inline-flex;
   align-items: center;
+  gap: 6px;
+  box-sizing: border-box;
+
+  &__dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
 
   &__text {
     font-size: inherit;
     line-height: inherit;
     font-weight: inherit;
-  }
-
-  &--recruiting {
-    color: #ff3366;
-    background: rgba(74, 14, 28, 0.85);
-  }
-
-  &--full {
-    color: var(--muted-foreground);
-    background: rgba(255, 255, 255, 0.1);
+    color: inherit;
   }
 }

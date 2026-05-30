@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { EventPostCard, type EventPostCardProps } from "./EventPostCard";
-import { View } from "@tarojs/components";
+import { Text, View } from "@tarojs/components";
 
 export type EventPostListItem = {
   post: import("../../../../types/backend").EventDetailPost;
@@ -8,6 +8,7 @@ export type EventPostListItem = {
 };
 
 type EventPostsVirtualListProps = {
+  activityLegacyId: number;
   onScrollToPostId?: (elementId: string) => void;
   items: EventPostListItem[];
   highlightPostId: string;
@@ -21,9 +22,12 @@ type EventPostsVirtualListProps = {
   onApply: EventPostCardProps["onApply"];
   onComplete?: EventPostCardProps["onComplete"];
   onCommentSubmitted: EventPostCardProps["onCommentSubmitted"];
+  hasMore?: boolean;
+  isLoadingMore?: boolean;
 };
 
 export function EventPostsVirtualList({
+  activityLegacyId,
   onScrollToPostId,
   items,
   highlightPostId,
@@ -37,6 +41,8 @@ export function EventPostsVirtualList({
   onApply,
   onComplete,
   onCommentSubmitted,
+  hasMore = false,
+  isLoadingMore = false,
 }: EventPostsVirtualListProps) {
   const highlightScrolledRef = useRef<string | null>(null);
 
@@ -61,6 +67,7 @@ export function EventPostsVirtualList({
           <View key={item.post.id} id={`post-${item.post.id}`}>
             <EventPostCard
               post={item.post}
+              activityLegacyId={activityLegacyId}
               publishTimeLabel={item.publishTimeLabel}
               highlighted={highlighted}
               commentsExpanded={expandedCommentPostIds.has(item.post.id)}
@@ -77,6 +84,14 @@ export function EventPostsVirtualList({
           </View>
         );
       })}
+      {isLoadingMore ? (
+        <Text className="s-event-posts-list__more">加载更多…</Text>
+      ) : null}
+      {!hasMore && items.length > 0 ? (
+        <Text className="s-event-posts-list__more s-event-posts-list__more--end">
+          没有更多帖子了
+        </Text>
+      ) : null}
     </View>
   );
 }

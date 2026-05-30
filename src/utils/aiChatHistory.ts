@@ -23,6 +23,7 @@ export function mapHistoryToUiMessages(
       imagePreview: message.imageContext?.source,
       ocrText: message.imageContext?.ocrText,
       recommendedPosts: message.recommendedPosts,
+      recommendedActivity: message.recommendedActivity,
       createdPost: message.createdPost,
       suggestedReplies: message.suggestedReplies,
     }));
@@ -42,6 +43,7 @@ export function buildApiChatHistory(
         message.imagePreview ||
         message.ocrText ||
         message.recommendedPosts?.length ||
+        message.recommendedActivity ||
         message.createdPost ||
         message.suggestedReplies?.length),
   );
@@ -57,6 +59,7 @@ export function buildApiChatHistory(
       content: message.text || message.ocrText || "",
       imageContext: resolveImageContext(message),
       recommendedPosts: message.recommendedPosts,
+      recommendedActivity: message.recommendedActivity,
       createdPost: message.createdPost,
       suggestedReplies: message.suggestedReplies,
     });

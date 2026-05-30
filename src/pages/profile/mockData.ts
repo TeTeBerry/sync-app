@@ -1,6 +1,34 @@
 import type { ProfileActivityItem, ProfilePostItem } from "../../types/backend";
+import { buildMockProfileBenefits } from "./profileBenefitsMapper";
 
 export type { ProfileActivityItem, ProfilePostItem };
+
+export type ProfileBenefitMetricKind = "match" | "contact" | "duration";
+
+export type ProfileBenefitMetric = {
+  id: string;
+  kind: ProfileBenefitMetricKind;
+  value: number;
+  unit: string;
+  label: string;
+  /** Remaining quota ratio (0–1), drives progress bar fill. */
+  remainingRatio: number;
+  lowRemaining: boolean;
+};
+
+export type ProfileBenefits = {
+  planLabel: string;
+  upgradeLabel: string;
+  promo: {
+    prefix: string;
+    highlight: string;
+    suffix: string;
+  };
+  metrics: ProfileBenefitMetric[];
+};
+
+/** 我的权益 — mock 用户 Zara 展示 Pro 单场额度（风暴电音节 activity 4，含每月免费额度） */
+export const profileBenefits = buildMockProfileBenefits();
 
 export const profileUser = {
   name: "Zara Chen",
@@ -13,7 +41,7 @@ export const profileUser = {
     events: 4,
     matchSuccess: 1,
     likes: 49,
-    posts: 3,
+    posts: 7,
   },
 };
 
@@ -30,8 +58,8 @@ export const profileActivities: ProfileActivityItem[] = [
   {
     id: "4",
     title: "风暴电音节 深圳站",
-    date: "2026-06-20",
-    location: "深圳",
+    date: "2026-06-13",
+    location: "深圳国际会展中心",
     image:
       "https://img.alicdn.com/imgextra/i2/2251059038/O1CN011VWlmX2GdSmiFVt13_!!2251059038.jpg",
     status: "registered",
@@ -65,6 +93,7 @@ export const profilePosts: ProfilePostItem[] = [
     comments: 8,
     date: "2026-05-20",
     activityLegacyId: 1,
+    contentTypes: ["accommodation"],
   },
   {
     id: "post-3",
@@ -75,6 +104,7 @@ export const profilePosts: ProfilePostItem[] = [
     comments: 6,
     date: "2026-05-18",
     activityLegacyId: 4,
+    contentTypes: ["team"],
   },
   {
     id: "post-4",

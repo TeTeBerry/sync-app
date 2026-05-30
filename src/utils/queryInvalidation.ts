@@ -8,6 +8,7 @@ import type {
   HomeSummary,
   HomeFeedPost,
   EventDetailPost,
+  EventPostsPage,
   ProfilePostItem,
 } from "../types/backend";
 import type { BackendPostStatusLabel } from "./postStatus";
@@ -26,6 +27,17 @@ export function invalidateProfile() {
 /** 失效个人资料摘要（个人 tab 展示） */
 export function invalidateProfileSummary() {
   invalidateCache(["profile", "summary"]);
+}
+
+/** 失效单场套餐权益查询 */
+export function invalidateProfileEntitlements() {
+  invalidateCache(["profile", "entitlements"]);
+}
+
+/** 失效套餐权益与个人摘要（购买后刷新） */
+export function invalidateProfilePackageState() {
+  invalidateProfileEntitlements();
+  invalidateProfileSummary();
 }
 
 /** 失效个人活动列表 */
@@ -157,9 +169,19 @@ export function patchLikedPostInCaches(
     }
 
     if (key.startsWith("posts|activity|")) {
-      const patched = patchEventPosts(entryData as EventDetailPost[]);
-      if (patched) {
-        setCacheDataByKey(key, patched);
+      if (Array.isArray(entryData)) {
+        const patched = patchEventPosts(entryData as EventDetailPost[]);
+        if (patched) {
+          setCacheDataByKey(key, patched);
+        }
+        return;
+      }
+      const page = entryData as EventPostsPage;
+      if (page?.items && Array.isArray(page.items)) {
+        const patchedItems = patchEventPosts(page.items);
+        if (patchedItems) {
+          setCacheDataByKey(key, { ...page, items: patchedItems });
+        }
       }
     }
   });

@@ -1,12 +1,13 @@
 import "./AiAssistantPage.scss";
 import React, { type FC, useCallback, useEffect, useMemo, useState } from "react";
 import { BottomNavSlot } from "./BottomNav";
-import { CalendarDays, ChevronLeft, Sparkles, Zap } from "lucide-react-taro";
+import { CalendarDays, Sparkles, Zap } from "lucide-react-taro";
 import Taro, { useDidShow } from "@tarojs/taro";
 import { invalidateCache } from "../hooks/useApiQuery";
 import { useAiChatStream } from "../hooks/useAiChatStream";
 import { useResolvedProfile } from "../hooks/useResolvedProfile";
 import {
+  consumeProfileAiMatchAndInvalidate,
   invalidatePostQueries,
   useActivityDetailQuery,
 } from "../hooks/useSyncApi";
@@ -19,11 +20,19 @@ import { useDeferredMount } from "../hooks/useDeferredMount";
 import { DEFER_AI_CHAT_MS } from "../utils/timing";
 import { useNavBarInsets } from "../hooks/useNavBarInsets";
 import { usePageRouteReady } from "../hooks/usePageRouteReady";
-import { tabPageHeaderStyle } from "./TabPageHeader";
+import PageNavigation from "./PageNavigation";
 import { useTabPageMainHeight } from "../hooks/useTabPageMainHeight";
-import { resolveAiChatWsUrl } from "../constants/api";
+import { useKeyboardInset } from "../hooks/useKeyboardInset";
+import { API_BASE_URL, resolveAiChatWsUrl } from "../constants/api";
 import { isAiChatWsDevLog } from "../utils/aiChatWs";
+import { inferUserGenderFromName } from "../utils/inferAuthorGender";
 import { Button, Text, View } from "@tarojs/components";
+import { AiUpgradeSheetProvider } from "./ai-chat/AiUpgradeSheetContext";
+import AiPackageUpgradeSheet from "./ai-chat/AiPackageUpgradeSheet";
+import { useAiMatchQuota } from "../hooks/useAiMatchQuota";
+import { useProfileActivityLegacyId } from "../hooks/useProfileActivityLegacyId";
+import { goProfile } from "../utils/route";
+import { invalidateProfileEntitlements } from "../utils/queryInvalidation";
 
 /** Header content row (avatar + titles), excluding status bar. */
 const AI_HEADER_CONTENT_PX = 56;
@@ -39,6 +48,8 @@ function AiAssistantChat({
   chatBodyHeight,
   userAvatar,
   userName,
+  userGender,
+  aiMatchQuotaExhausted,
 }: {
   initialMessage?: string | null;
   activityLegacyId?: number;
@@ -48,9 +59,12 @@ function AiAssistantChat({
   chatBodyHeight?: number;
   userAvatar?: string;
   userName: string;
+  userGender?: ReturnType<typeof inferUserGenderFromName>;
+  aiMatchQuotaExhausted: boolean;
 }) {
   const [input, setInput] = useState("");
   const [pendingImages, setPendingImages] = useState<string[]>([]);
+  const keyboardInset = useKeyboardInset();
   const initialMessageSentRef = React.useRef<string | null>(null);
   const initialMessageHandledRef = React.useRef(false);
   const submitLockRef = React.useRef(false);
@@ -67,6 +81,18 @@ function AiAssistantChat({
     }
     return "👋 我是你的 AI 智能助手，帮你发现活动、找队友、规划行程，说出需求，我来搞定。";
   }, [activityTitle]);
+
+  const handleMatchTurnComplete = useCallback(async () => {
+    if (!API_BASE_URL) return;
+    if (activityLegacyId == null || Number.isNaN(activityLegacyId)) {
+      return;
+    }
+    try {
+      await consumeProfileAiMatchAndInvalidate(activityLegacyId);
+    } catch {
+      await invalidateProfileEntitlements();
+    }
+  }, [activityLegacyId]);
 
   const { messages, isStreaming, isLoadingHistory, send, clearChat } =
     useAiChatStream({
@@ -92,6 +118,7 @@ function AiAssistantChat({
           duration: 2500,
         });
       },
+      onMatchTurnComplete: handleMatchTurnComplete,
     });
 
   useEffect(() => {
@@ -107,13 +134,19 @@ function AiAssistantChat({
     }
 
     const trimmed = initialMessage.trim();
-    if (!trimmed || isStreaming) return;
+    if (!trimmed || isStreaming || aiMatchQuotaExhausted) return;
 
     initialMessageHandledRef.current = true;
     initialMessageSentRef.current = trimmed;
     void send({ text: trimmed });
     onInitialMessageSent?.();
-  }, [initialMessage, isStreaming, onInitialMessageSent, send]);
+  }, [
+    aiMatchQuotaExhausted,
+    initialMessage,
+    isStreaming,
+    onInitialMessageSent,
+    send,
+  ]);
 
   const submit = useCallback(
     async (text: string, images?: string[]) => {
@@ -121,6 +154,14 @@ function AiAssistantChat({
       const trimmed = text.trim();
       const hasImages = images && images.length> 0;
       if ((!trimmed && !hasImages) || isStreaming) return;
+
+      if (aiMatchQuotaExhausted) {
+        void Taro.showToast({
+          title: "AI 匹配次数已用完，请升级套餐",
+          icon: "none",
+        });
+        return;
+      }
 
       submitLockRef.current = true;
       try {
@@ -131,7 +172,7 @@ function AiAssistantChat({
         submitLockRef.current = false;
       }
     },
-    [isStreaming, send],
+    [aiMatchQuotaExhausted, isStreaming, send],
   );
 
   const handleClearChat = useCallback(async () => {
@@ -142,6 +183,13 @@ function AiAssistantChat({
   const handleSelectSuggestedReply = useCallback(
     async (reply: string) => {
       if (submitLockRef.current || isStreaming) return;
+      if (aiMatchQuotaExhausted) {
+        void Taro.showToast({
+          title: "AI 匹配次数已用完，请升级套餐",
+          icon: "none",
+        });
+        return;
+      }
       submitLockRef.current = true;
       try {
         await send({ text: reply });
@@ -149,7 +197,7 @@ function AiAssistantChat({
         submitLockRef.current = false;
       }
     },
-    [isStreaming, send],
+    [aiMatchQuotaExhausted, isStreaming, send],
   );
 
   return (
@@ -166,11 +214,17 @@ function AiAssistantChat({
       <ChatMessageList
         messages={messages}
         isStreaming={isStreaming}
+        keyboardInset={keyboardInset}
         userAvatar={userAvatar}
         userName={userName}
+        userGender={userGender}
         onSelectSuggestedReply={handleSelectSuggestedReply}
       />
-      <View className="s-ai-assistant-chat__footer">
+      <View
+        className="s-ai-assistant-chat__footer"
+        style={
+          keyboardInset > 0 ? { paddingBottom: `${keyboardInset}px` } : undefined
+        }>
         <ChatComposer
           input={input}
           pendingImages={pendingImages}
@@ -206,6 +260,18 @@ const AiAssistantPage: FC = () => {
     },
   );
   const [messageCount, setMessageCount] = useState(0);
+  const [upgradeSheetOpen, setUpgradeSheetOpen] = useState(false);
+  const profileActivityLegacyId = useProfileActivityLegacyId();
+  const aiMatchQuota = useAiMatchQuota();
+
+  const openUpgradeSheet = useCallback(() => {
+    setUpgradeSheetOpen(true);
+  }, []);
+
+  const handleViewAllBenefits = useCallback(() => {
+    setUpgradeSheetOpen(false);
+    goProfile();
+  }, []);
 
   const consumeAiAssistantIntent = useNavigationStore(
     (state) => state.consumeAiAssistantIntent,
@@ -218,6 +284,10 @@ const AiAssistantPage: FC = () => {
   );
 
   const profileUserData = useResolvedProfile();
+  const userGender = useMemo(
+    () => inferUserGenderFromName(profileUserData.name),
+    [profileUserData.name],
+  );
   const activityQuery = useActivityDetailQuery(activityLegacyId);
   const activityTitle = activityQuery.data?.name;
   const activityMeta = useMemo(() => {
@@ -235,8 +305,6 @@ const AiAssistantPage: FC = () => {
     const eventBar = showEventContext ? AI_EVENT_CONTEXT_PX : 0;
     return navInsets.paddingTop + 12 + AI_HEADER_CONTENT_PX + eventBar;
   }, [navInsets.paddingTop, showEventContext]);
-
-  const headerStyle = tabPageHeaderStyle(navInsets);
 
   const chatBodyHeight = useTabPageMainHeight({ subtractPx: headerSubtractPx });
 
@@ -289,43 +357,51 @@ const AiAssistantPage: FC = () => {
 
   return (
     <View data-cmp="AiAssistant" className="s-page-with-tabbar">
-      <View className="s-page-with-tabbar__main s-ai-assistant">
-        <View className="s-ai-assistant__header" style={headerStyle}>
-        <Button className="s-ai-assistant__back-btn"
-          aria-label={hasEventScope ? "返回活动详情" : "返回"}
-          onClick={handleBack}>
-          <ChevronLeft size={22} />
-        </Button>
-
-        <View className="s-ai-assistant__header-main">
-          <View className="s-ai-assistant__header-avatar" aria-hidden>
-            <Sparkles size={18} />
-            <Text className="s-ai-assistant__header-online" />
-          </View>
-          <View className="s-ai-assistant__header-text">
-            {!hasEventScope ? (
-              <View className="s-ai-assistant__header-title-row">
-                <Text className="s-ai-assistant__header-title">AI 智能助手</Text>
-                <Text className="s-ai-assistant__ai-badge">
-                  <Zap size={10} aria-hidden />
-                  {"AI"}
+      <View
+        className={[
+          "s-page-with-tabbar__main",
+          "s-ai-assistant",
+          userGender === "female" && "s-ai-assistant--female",
+          userGender === "male" && "s-ai-assistant--male",
+        ]
+          .filter(Boolean)
+          .join(" ")}>
+        <PageNavigation
+          className="s-ai-assistant__header"
+          tone="surface"
+          centerAlign="start"
+          onBack={handleBack}
+          backAriaLabel={hasEventScope ? "返回活动详情" : "返回"}
+          center={
+            <View className="s-ai-assistant__header-main">
+              <View className="s-ai-assistant__header-avatar" aria-hidden>
+                <Sparkles size={18} />
+                <Text className="s-ai-assistant__header-online" />
+              </View>
+              <View className="s-ai-assistant__header-text">
+                {!hasEventScope ? (
+                  <View className="s-ai-assistant__header-title-row">
+                    <Text className="s-ai-assistant__header-title">AI 智能助手</Text>
+                    <Text className="s-ai-assistant__ai-badge">
+                      <Zap size={10} aria-hidden />
+                      {"AI"}
+                    </Text>
+                  </View>
+                ) : null}
+                <Text className="s-ai-assistant__header-status">
+                  {hasEventScope ? "正在对话" : "在线 · 实时响应"}
                 </Text>
               </View>
-            ) : null}
-            <Text className="s-ai-assistant__header-status">
-              {hasEventScope ? "正在对话" : "在线 · 实时响应"}
-            </Text>
-          </View>
-        </View>
-
-        <View className="s-ai-assistant__header-actions">
-          {messageCount> 0 ? (
-            <Text className="s-ai-assistant__message-count" aria-hidden>
-              {messageCount}
-            </Text>
-          ) : null}
-        </View>
-        </View>
+            </View>
+          }
+          trailing={
+            messageCount > 0 ? (
+              <Text className="s-ai-assistant__message-count" aria-hidden>
+                {messageCount}
+              </Text>
+            ) : undefined
+          }
+        />
 
         {showEventContext ? (
           <View className="s-ai-assistant__event-context">
@@ -359,16 +435,20 @@ const AiAssistantPage: FC = () => {
         <View className="s-ai-assistant__body">
           <View className="s-ai-assistant__panel">
             {chatReady ? (
-              <AiAssistantChat
-                initialMessage={pendingInitialMessage}
-                activityLegacyId={activityLegacyId}
-                activityTitle={activityTitle}
-                onInitialMessageSent={handleInitialMessageSent}
-                onMessageCountChange={setMessageCount}
-                chatBodyHeight={chatBodyHeight}
-                userAvatar={profileUserData.avatar}
-                userName={profileUserData.name}
-              />
+              <AiUpgradeSheetProvider openUpgradeSheet={openUpgradeSheet}>
+                <AiAssistantChat
+                  initialMessage={pendingInitialMessage}
+                  activityLegacyId={activityLegacyId}
+                  activityTitle={activityTitle}
+                  onInitialMessageSent={handleInitialMessageSent}
+                  onMessageCountChange={setMessageCount}
+                  chatBodyHeight={chatBodyHeight}
+                  userAvatar={profileUserData.avatar}
+                  userName={profileUserData.name}
+                  userGender={userGender}
+                  aiMatchQuotaExhausted={aiMatchQuota.exhausted}
+                />
+              </AiUpgradeSheetProvider>
             ) : (
               <View className="s-ai-assistant__chat-placeholder" aria-hidden />
             )}
@@ -377,6 +457,13 @@ const AiAssistantPage: FC = () => {
       </View>
 
       <BottomNavSlot />
+
+      <AiPackageUpgradeSheet
+        open={upgradeSheetOpen}
+        onClose={() => setUpgradeSheetOpen(false)}
+        activityLegacyId={profileActivityLegacyId ?? activityLegacyId}
+        onViewAllBenefits={handleViewAllBenefits}
+      />
     </View>
   );
 };

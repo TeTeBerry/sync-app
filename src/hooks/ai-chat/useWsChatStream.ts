@@ -35,6 +35,7 @@ export interface UseWsChatStreamOptions {
   onExistingPost?: (
     event: Extract<AiChatStreamEvent, { type: "existing_post" }>,
   ) => void;
+  onMatchTurnComplete?: () => void | Promise<void>;
   persistSessionFromStream: (sessionId: string) => void;
   createTypewriter: (options: {
     charDelayMs?: number;
@@ -77,6 +78,7 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
     getAuthHeaders,
     onPostCreated,
     onExistingPost,
+    onMatchTurnComplete,
     persistSessionFromStream,
     createTypewriter,
     typewriterCharDelayMs = 22,
@@ -139,6 +141,14 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
           continue;
         }
 
+        if (event.type === "activity_recommendation") {
+          finishAiMessage((message) => ({
+            ...message,
+            recommendedActivity: event.activity,
+          }));
+          continue;
+        }
+
         if (event.type === "suggested_replies") {
           finishAiMessage((message) => ({
             ...message,
@@ -185,12 +195,14 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
           if (event.sessionId) {
             persistSessionFromStream(event.sessionId);
           }
+          await onMatchTurnComplete?.();
           break;
         }
       }
     },
     [
       onExistingPost,
+      onMatchTurnComplete,
       onPostCreated,
       persistSessionFromStream,
       setMessages,

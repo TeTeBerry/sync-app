@@ -4,6 +4,7 @@ export const CONTENT_TYPE_LABELS: Record<string, string> = {
   accommodation: "住宿",
   carpool: "拼车",
   ticket: "转票",
+  groupbuy: "拼单",
   other: "其他",
 };
 
@@ -12,6 +13,7 @@ export const CONTENT_TYPE_STYLE_KEYS = new Set([
   "accommodation",
   "carpool",
   "ticket",
+  "groupbuy",
   "other",
 ]);
 
@@ -25,6 +27,7 @@ const LABEL_TO_TYPE: Record<string, string> = {
   拼车: "carpool",
   拼车同行: "carpool",
   转票: "ticket",
+  拼单: "groupbuy",
   出票: "ticket",
   票务: "ticket",
   其他: "other",
@@ -36,6 +39,7 @@ const LABEL_TO_TYPE: Record<string, string> = {
   "#拼车": "carpool",
   "#拼车同行": "carpool",
   "#转票": "ticket",
+  "#拼单": "groupbuy",
   "#出票": "ticket",
   "#其他": "other",
 };
@@ -62,7 +66,7 @@ export function formatContentTypeHashtag(type: string): string {
 }
 
 const CONTENT_TYPE_HASHTAG_RE =
-  /#(组队队友|组队|住宿同行|拼房|住宿|拼车同行|拼车|转票|出票|票务|其他)/g;
+  /#(组队队友|组队|住宿同行|拼房|住宿|拼车同行|拼车|拼单|转票|出票|票务|其他)/g;
 
 function contentTypeKeysFromHashtagText(text: string): string[] {
   const keys = new Set<string>();
@@ -98,7 +102,8 @@ export function mergePostContentTypes(
 }
 
 /** Remove content-type hashtags from visible post text (shown as badges instead). */
-export function stripContentTypeHashtags(text: string): string {
+export function stripContentTypeHashtags(text?: string): string {
+  if (!text?.trim()) return "";
   return text
     .replace(CONTENT_TYPE_HASHTAG_RE, "")
     .replace(/[ \t]+$/gm, "")
@@ -107,14 +112,18 @@ export function stripContentTypeHashtags(text: string): string {
 }
 
 /** Tags that duplicate a content-type badge (e.g. #其他 when other badge is shown). */
-export function filterContentTypeTags(tags: string[], contentTypeKeys: string[]): string[] {
-  if (!tags.length || !contentTypeKeys.length) return tags;
+export function filterContentTypeTags(
+  tags: string[] | undefined,
+  contentTypeKeys: string[],
+): string[] {
+  const safeTags = tags ?? [];
+  if (!safeTags.length || !contentTypeKeys.length) return safeTags;
 
   const badgeLabels = new Set(
     contentTypeKeys.map((key) => CONTENT_TYPE_LABELS[key]).filter(Boolean),
   );
 
-  return tags.filter((tag) => {
+  return safeTags.filter((tag) => {
     const normalized = tag.trim().replace(/^#/, "");
     const key = resolveContentTypeKey(tag);
     if (CONTENT_TYPE_STYLE_KEYS.has(key)) return false;

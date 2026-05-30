@@ -16,6 +16,8 @@ export interface ActionSheetProps {
   items: ActionSheetItem[];
   cancelLabel: string;
   onCancel: () => void;
+  /** Extra class on the overlay root (e.g. layout tweaks per caller). */
+  overlayClassName?: string;
 }
 
 const ActionSheet: React.FC<ActionSheetProps> = ({
@@ -24,12 +26,17 @@ const ActionSheet: React.FC<ActionSheetProps> = ({
   items,
   cancelLabel,
   onCancel,
+  overlayClassName,
 }) => {
   useOverlayLock(open);
 
   return (
     <View
-      className={cn("s-overlay s-overlay--sheet", !open && "s-overlay--off")}
+      className={cn(
+        "s-overlay s-overlay--sheet",
+        overlayClassName,
+        !open && "s-overlay--off",
+      )}
       role="presentation">
       <View className="s-overlay__backdrop" onClick={onCancel} />
       <View className="s-overlay__panel" role="menu" aria-hidden={!open}>

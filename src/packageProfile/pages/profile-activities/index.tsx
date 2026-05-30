@@ -27,7 +27,7 @@ const ProfileActivitiesPage: React.FC = () => {
 
   return (
     <View data-cmp="ProfileActivitiesPage" className="s-profile-stack">
-      <PageNavigation title="我的活动" fallback={ROUTES.PROFILE} />
+      <PageNavigation title="我的活动" fallback={ROUTES.PROFILE} tone="surface" />
 
       <ScrollView
         scrollY

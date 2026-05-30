@@ -1,11 +1,13 @@
 import Taro from "@tarojs/taro";
 import { useMemo } from "react";
+import { stackPageNavChromePx } from "../components/PageNavigation";
+import { useNavBarInsets } from "./useNavBarInsets";
 
 /** Matches BottomNav.scss: row + top padding (px, design @ 375). */
 const TABBAR_ROW_PX = 56;
 const TABBAR_PADDING_TOP_PX = 10;
 
-/** Matches PageNavigation.scss top + bottom padding + control row. */
+/** Fallback when window metrics are unavailable (≈ design @ 375 + status bar). */
 export const STACK_PAGE_NAV_PX = 100;
 
 /** Matches TabPageHeader profile/events row + bottom padding (px, design @ 375). */
@@ -49,8 +51,10 @@ export function useTabPageMainHeight(
 export function useStackPageMainHeight(
   options?: TabPageMainHeightOptions | number,
 ): number | undefined {
+  const navInsets = useNavBarInsets();
   const extraSubtract =
     typeof options === "number" ? options : (options?.subtractPx ?? 0);
+  const navChrome = stackPageNavChromePx(navInsets);
 
   return useMemo(() => {
     try {
@@ -58,10 +62,10 @@ export function useStackPageMainHeight(
       const windowHeight = win.windowHeight ?? win.screenHeight ?? 667;
       return Math.max(
         200,
-        Math.floor(windowHeight - STACK_PAGE_NAV_PX - extraSubtract),
+        Math.floor(windowHeight - navChrome - extraSubtract),
       );
     } catch {
       return undefined;
     }
-  }, [extraSubtract]);
+  }, [extraSubtract, navChrome]);
 }

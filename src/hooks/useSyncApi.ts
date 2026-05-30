@@ -16,8 +16,13 @@ import {
   fetchPostsByActivity,
   fetchPostComments,
   fetchProfileActivities,
+  fetchProfileEntitlements,
+  fetchProfilePackages,
   fetchProfilePosts,
   fetchProfileSummary,
+  purchaseProfilePackage,
+  consumeProfileAiMatch,
+  consumeProfileContactUnlock,
   likePost,
   clearAllNotifications,
   deleteNotification,
@@ -33,6 +38,7 @@ import type {
   EventDetailPost,
   HomeFeedPost,
   HomeSummary,
+  PurchaseProfilePackagePayload,
   ReportPayload,
   UpdateCurrentUserPayload,
 } from "../types/backend";
@@ -46,6 +52,7 @@ import {
 } from "../utils/apiMappers";
 import { sanitizeImageList, sanitizeRemoteImageUrl } from "../utils/imageUrl";
 import {
+  compareActivitiesNearestFirst,
   findNearestUpcomingActivity,
   getActivityStatusFromActivity,
   type ActivityDateFields,
@@ -58,6 +65,8 @@ import {
   invalidatePostComments,
   invalidateUser,
   invalidateProfile,
+  invalidateProfilePackageState,
+  invalidateProfileEntitlements,
   patchLikedPostInCaches,
   patchPostStatusInCaches,
   patchUpdatedProfilePostInCaches,
@@ -136,7 +145,7 @@ export function useEventList(options?: QueryEnableOptions) {
 
   const events = useMemo((): EventCardUi[] => {
     if (!query.data) return [];
-    return mapActivitiesToEvents(query.data);
+    return [...mapActivitiesToEvents(query.data)].sort(compareActivitiesNearestFirst);
   }, [query.data]);
 
   return {
@@ -272,6 +281,7 @@ function mapHomeFeedPost(item: HomeFeedPost): HomeFeedPost {
     comments: item.comments ?? 0,
     avatar: sanitizeRemoteImageUrl(item.avatar) ?? item.avatar,
     status: item.status,
+    activityLegacyId: item.activityLegacyId,
     contentTypes: item.contentTypes,
     images: sanitizeImageList(item.images),
   };
@@ -380,15 +390,73 @@ export async function submitReportAndInvalidate(payload: ReportPayload) {
   return submitReport(payload);
 }
 
-export function useProfileSummaryQuery() {
+export function useProfileSummaryQuery(activityLegacyId?: number) {
   const enabled = isApiEnabled();
+  const scopedId =
+    activityLegacyId != null && !Number.isNaN(activityLegacyId)
+      ? activityLegacyId
+      : undefined;
 
   return useApiQuery({
-    queryKey: ["profile", "summary"],
-    queryFn: fetchProfileSummary,
+    queryKey: ["profile", "summary", scopedId ?? "all"],
+    queryFn: () => fetchProfileSummary(scopedId),
     enabled,
     staleTime: 60_000,
   });
+}
+
+export function useProfilePackagesQuery() {
+  const enabled = isApiEnabled();
+
+  return useApiQuery({
+    queryKey: ["profile", "packages"],
+    queryFn: fetchProfilePackages,
+    enabled,
+    staleTime: 300_000,
+  });
+}
+
+export function useProfileEntitlementsQuery(activityLegacyId?: number) {
+  const enabled = isApiEnabled();
+  const scopedId =
+    activityLegacyId != null && !Number.isNaN(activityLegacyId)
+      ? activityLegacyId
+      : undefined;
+
+  return useApiQuery({
+    queryKey: ["profile", "entitlements", scopedId ?? "all"],
+    queryFn: () => fetchProfileEntitlements(scopedId),
+    enabled,
+    staleTime: 30_000,
+  });
+}
+
+export async function purchaseProfilePackageAndInvalidate(
+  payload: PurchaseProfilePackagePayload,
+) {
+  const result = await purchaseProfilePackage(payload);
+  await invalidateProfilePackageState();
+  return result;
+}
+
+export async function consumeProfileAiMatchAndInvalidate(activityLegacyId: number) {
+  if (Number.isNaN(activityLegacyId)) {
+    throw new Error("activityLegacyId is required");
+  }
+  const result = await consumeProfileAiMatch({ activityLegacyId });
+  await invalidateProfileEntitlements();
+  return result;
+}
+
+export async function consumeProfileContactUnlockAndInvalidate(
+  activityLegacyId: number,
+) {
+  if (Number.isNaN(activityLegacyId)) {
+    throw new Error("activityLegacyId is required");
+  }
+  const result = await consumeProfileContactUnlock({ activityLegacyId });
+  await invalidateProfileEntitlements();
+  return result;
 }
 
 export function useProfileActivitiesQuery() {
@@ -457,4 +525,5 @@ export async function updatePostAndInvalidate(
     patchPostStatusInCaches(postId, updated.status);
   }
   await invalidatePostQueries();
+  return updated;
 }

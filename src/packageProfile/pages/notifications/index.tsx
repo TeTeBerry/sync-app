@@ -103,7 +103,7 @@ const NotificationsPage: React.FC = () => {
   }, [confirm, notifications.length, refetch]);
 
   const handleDelete = useCallback(
-    async (event: React.MouseEvent, item: AppNotification) => {
+    async (event: { stopPropagation: () => void }, item: AppNotification) => {
       event.stopPropagation();
       const confirmed = await confirm({
         title: "删除消息",
@@ -129,7 +129,7 @@ const NotificationsPage: React.FC = () => {
 
   return (
     <View data-cmp="Notifications" className="s-notifications">
-      <PageNavigation title="消息通知" fallback={ROUTES.HOME} />
+      <PageNavigation title="消息通知" fallback={ROUTES.HOME} tone="surface" />
 
       <View className="s-notifications__main">
         <View className="s-notifications__tabs" role="tablist">

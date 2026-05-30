@@ -2,40 +2,41 @@ import React from "react";
 import { Text, View } from "@tarojs/components";
 import "./PostStatusBadge.scss";
 import {
-  type BackendPostStatusLabel,
-  eventPostStatusText,
-  isHiddenPostStatus,
-  isRecruitingPostStatus,
-  postStatusBadgeClass,
-  toEventPostCardStatus,
-} from "../utils/postStatus";
+  type PostStatusBadgeInput,
+  postStatusBadgeTintStyle,
+  resolvePostStatusBadge,
+  shouldShowPostStatusBadge,
+} from "../utils/postStatusBadge";
 
 export type PostStatusBadgeProps = {
-  status: BackendPostStatusLabel;
+  post: PostStatusBadgeInput;
   variant: "home" | "event";
-  /** Author's own post: show recruiting / hidden status in the badge. */
+  /** Author's own post: show recruiting / hidden / review status in the badge. */
   isOwn?: boolean;
 };
 
 export const PostStatusBadge: React.FC<PostStatusBadgeProps> = ({
-  status,
-  variant,
+  post,
+  variant: _variant,
   isOwn = false,
 }) => {
-  if (!isOwn && (isRecruitingPostStatus(status) || isHiddenPostStatus(status))) {
+  const badge = resolvePostStatusBadge(post);
+
+  if (!shouldShowPostStatusBadge(badge, isOwn, { variant: _variant })) {
     return null;
   }
 
-  const label =
-    variant === "home" || isHiddenPostStatus(status)
-      ? status
-      : eventPostStatusText(toEventPostCardStatus(status));
-
-  const cardStatus = toEventPostCardStatus(status);
+  const tint = postStatusBadgeTintStyle(badge.color);
 
   return (
-    <View className={postStatusBadgeClass(cardStatus)}>
-      <Text className="s-post-status-badge__text">{label}</Text>
+    <View
+      className={`s-post-status-badge s-post-status-badge--${badge.variant}`}
+      style={tint}>
+      <View
+        className="s-post-status-badge__dot"
+        style={{ backgroundColor: badge.color }}
+      />
+      <Text className="s-post-status-badge__text">{badge.label}</Text>
     </View>
   );
 };

@@ -25,4 +25,5 @@ dist-h5
 *.sln
 *.sw?
 *.env
+.env.example
 *.sync-app-backend

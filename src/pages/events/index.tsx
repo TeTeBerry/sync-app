@@ -92,7 +92,7 @@ const Events: React.FC = () => {
               className="s-events__search-input"
               placeholder="搜索活动、城市..."
               value={searchQuery}
-              onInput={(e) => setSearchQuery(e.target.value)}
+              onInput={(e) => setSearchQuery(e.detail.value)}
             />
             {searchQuery && (
               <Button className="s-events__search-clear"

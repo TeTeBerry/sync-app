@@ -2,10 +2,13 @@ import React, { useCallback, useLayoutEffect, useState } from "react";
 import { Sparkles } from "lucide-react-taro";
 import { cn } from "../ui";
 import type { ChatUiMessage } from "../../types/aiChat";
+import type { AuthorGender } from "../../utils/inferAuthorGender";
 import { ChatUserAvatar } from "./ChatUserAvatar";
+import { AiAssistantActivityCard } from "./AiAssistantActivityCard";
 import { RecommendPostCards } from "./RecommendPostCards";
 import { PublishConfirmCard } from "./PublishConfirmCard";
 import { SuggestedReplyChips } from "./SuggestedReplyChips";
+import { AiMatchQuotaExhaustedMessage } from "./AiMatchQuotaExhaustedMessage";
 import { parsePublishConfirmMessage } from "../../utils/parsePublishConfirmMessage";
 import { openSingleImagePreview } from "../../utils/openImagePreview";
 import { Button, Image, ScrollView, Text, View } from "@tarojs/components";
@@ -42,14 +45,18 @@ function shouldShowTimestamp(messages: ChatUiMessage[], index: number): boolean 
 export function ChatMessageList({
   messages,
   isStreaming,
+  keyboardInset = 0,
   userAvatar,
   userName,
+  userGender,
   onSelectSuggestedReply,
 }: {
   messages: ChatUiMessage[];
   isStreaming: boolean;
+  keyboardInset?: number;
   userAvatar?: string;
   userName: string;
+  userGender?: AuthorGender;
   onSelectSuggestedReply: (reply: string) => void;
 }) {
   const [scrollIntoView, setScrollIntoView] = useState<string | undefined>();
@@ -64,7 +71,7 @@ export function ChatMessageList({
 
   useLayoutEffect(() => {
     scrollToBottom();
-  }, [messages, isStreaming, scrollToBottom]);
+  }, [messages, isStreaming, keyboardInset, scrollToBottom]);
 
   return (
     <ScrollView
@@ -86,8 +93,10 @@ export function ChatMessageList({
           const hasPostCards = Boolean(
             msg.createdPost || msg.recommendedPosts?.length,
           );
+          const hasActivityCard = Boolean(msg.recommendedActivity);
           const hasSuggestedReplies = Boolean(msg.suggestedReplies?.length);
-          const showEmbedBelow = !isUser && (hasPostCards || hasSuggestedReplies);
+          const showEmbedBelow =
+            !isUser && (hasPostCards || hasActivityCard || hasSuggestedReplies);
           const showPublishConfirm = Boolean(publishConfirm);
 
           return (
@@ -110,14 +119,20 @@ export function ChatMessageList({
                   className={cn(
                     "s-ai-assistant-chat__content",
                     isUser && "s-ai-assistant-chat__content--from-user",
-                    (hasPostCards || showPublishConfirm) &&
+                    (hasPostCards || hasActivityCard || showPublishConfirm) &&
                       "s-ai-assistant-chat__content--has-cards",
                   )}>
                   <View
                     className={cn(
                       "s-ai-assistant-chat__bubble",
                       isUser
-                        ? "s-ai-assistant-chat__bubble--from-user"
+                        ? cn(
+                            "s-ai-assistant-chat__bubble--from-user",
+                            userGender === "female" &&
+                              "s-ai-assistant-chat__bubble--from-user--female",
+                            userGender === "male" &&
+                              "s-ai-assistant-chat__bubble--from-user--male",
+                          )
                         : "s-ai-assistant-chat__bubble--from-ai",
                       msg.streaming && "s-ai-assistant-chat__bubble--streaming",
                       msg.streaming && !msg.text && "s-ai-assistant-chat__bubble--waiting",
@@ -168,6 +183,9 @@ export function ChatMessageList({
                   </View>
                   {showEmbedBelow ? (
                     <View className="s-ai-assistant-chat__embed">
+                      {msg.recommendedActivity ? (
+                        <AiAssistantActivityCard activity={msg.recommendedActivity} />
+                      ) : null}
                       {msg.createdPost ? (
                         <RecommendPostCards
                           posts={[msg.createdPost]}
@@ -187,11 +205,18 @@ export function ChatMessageList({
                     </View>
                   ) : null}
                 </View>
-                {isUser ? <ChatUserAvatar avatar={userAvatar} name={userName} /> : null}
+                {isUser ? (
+                  <ChatUserAvatar
+                    avatar={userAvatar}
+                    name={userName}
+                    userGender={userGender}
+                  />
+                ) : null}
               </View>
             </React.Fragment>
           );
         })}
+        <AiMatchQuotaExhaustedMessage />
       </View>
     </ScrollView>
   );

@@ -69,7 +69,11 @@ const MAX_CANVAS_DPR = 2;
 const CANVAS_BIND_MAX_ATTEMPTS = 80;
 
 let viewportDirty = true;
-let viewport: EventMapViewport = { offsetX: 0, offsetY: 0, scale: MAP_SCALE_MIN };
+let viewport: EventMapViewport = {
+  offsetX: 0,
+  offsetY: 0,
+  scale: MAP_SCALE_MIN,
+};
 const EMPTY_AVATARS = new Map<string, CanvasImageSource>();
 let logoAnimFrameId: number | null = null;
 

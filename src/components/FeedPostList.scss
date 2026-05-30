@@ -121,7 +121,7 @@
 }
 
 .s-home-post .s-content-badges {
-  margin-top: 12px;
+  margin-top: 13px;
   margin-bottom: 10px;
 }
 
@@ -178,14 +178,11 @@
   appearance: none;
   -webkit-appearance: none;
   -webkit-tap-highlight-color: transparent;
+}
 
-  image,
-  img {
-    display: block;
-    flex-shrink: 0;
-    width: 16px;
-    height: 16px;
-  }
+.s-home-post__action-icon {
+  display: block;
+  flex-shrink: 0;
 }
 
 .s-home-post__action-label {

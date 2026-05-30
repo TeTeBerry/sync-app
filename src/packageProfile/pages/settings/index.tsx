@@ -132,7 +132,11 @@ const SettingsPage: React.FC = () => {
 
   return (
     <View data-cmp="Settings" className="s-settings">
-      <PageNavigation title={SECTION_TITLES[section]} fallback={ROUTES.PROFILE} />
+      <PageNavigation
+        title={SECTION_TITLES[section]}
+        fallback={ROUTES.PROFILE}
+        tone="surface"
+      />
 
       <View className="s-settings__main">
         {section === "notifications" && (

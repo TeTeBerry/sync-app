@@ -1,7 +1,15 @@
 import "./event-detail.scss";
 import Taro, { useDidShow, useRouter } from "@tarojs/taro";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { ChevronLeft, Map, Send, Sparkles } from "lucide-react-taro";
+import {
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { Map } from "lucide-react-taro";
 import {
   endRouteTransition,
   goAiAssistant,
@@ -17,6 +25,9 @@ import { usePageRouteReady } from "../../../hooks/usePageRouteReady";
 import { useDeferredMount } from "../../../hooks/useDeferredMount";
 import { DEFER_EVENT_POSTS_MS } from "../../../utils/timing";
 import { useNavigationStore } from "../../../stores/navigationStore";
+import { ContactUnlockQuotaExhaustedModal } from "../../../components/contact-unlock/ContactUnlockQuotaExhaustedModal";
+import ProfilePackageSheet from "../../../pages/profile/components/ProfilePackageSheet";
+import { useContactUnlockQuota } from "../../../hooks/useContactUnlockQuota";
 import {
   applyToPostAndInvalidate,
   deletePostAndInvalidate,
@@ -24,15 +35,17 @@ import {
   updatePostAndInvalidate,
   useActivityDetailQuery,
   useCurrentUserQuery,
-  useEventPostsQuery,
+  useProfileEntitlementsQuery,
 } from "../../../hooks/useSyncApi";
+import { pickGlobalFreeMonthly } from "../../../pages/profile/profileBenefitsMapper";
+import type { PackageTierId } from "../../../types/backend";
+import { resolveProfileEntitlement } from "../../../utils/profileEntitlement";
+import { invalidateProfilePackageState } from "../../../utils/queryInvalidation";
+import { useEventPostsInfiniteQuery } from "../../../hooks/useEventPostsInfiniteQuery";
+import { consumeContactUnlockWithQuota } from "../../../utils/contactUnlockEntitlement";
 import { isApiEnabled } from "../../../constants/api";
 import type { EventDetailPost } from "../../../types/backend";
-import {
-  getTopAiShortcutTags,
-  isAiShortcutTag,
-  recordAiShortcutTagUse,
-} from "../../../utils/aiShortcutTags";
+import { isAiShortcutTag, recordAiShortcutTagUse } from "../../../utils/aiShortcutTags";
 import {
   activityStatusCardClass,
   getActivityStatusFromActivity,
@@ -40,25 +53,37 @@ import {
 import { formatPostPublishTime } from "../../../utils/formatPostPublishTime";
 import { sanitizeImageList, sanitizeRemoteImageUrl } from "../../../utils/imageUrl";
 import { EventPostsVirtualList } from "./components/EventPostsVirtualList";
+import {
+  EventDetailContentTabs,
+  type EventDetailTabId,
+} from "./components/EventDetailContentTabs";
+import { MOCK_LIVE_INFO_FEED } from "./liveInfoMock";
+import PageNavigation, {
+  stackPageNavChromePx,
+} from "../../../components/PageNavigation";
 import { useNavBarInsets } from "../../../hooks/useNavBarInsets";
-import { tabPageHeaderStyle } from "../../../components/TabPageHeader";
 import { useTabPageMainHeight } from "../../../hooks/useTabPageMainHeight";
 import { scrollElementToCenter } from "../../../utils/scrollToCenter";
-import { Button, Input, ScrollView, Text, View } from "@tarojs/components";
+import { useResolvedProfile } from "../../../hooks/useResolvedProfile";
+import { usePostPageShare } from "../../../hooks/usePostPageShare";
+import type { PostSharePayload } from "../../../utils/postShare";
+import { Button, ScrollView, Text, View } from "@tarojs/components";
+import { EventDetailAiMatchCard } from "./components/EventDetailAiMatchCard";
+import { EventLiveInfoUpdateSheet } from "./components/EventLiveInfoUpdateSheet";
+import type { EventLiveInfoTabActions } from "./live/EventLiveInfoTab";
+import type { PublishLiveInfoPayload } from "./useEventLiveInfo";
 
 const EVENT_DETAIL_SCROLL_ID = "event-detail-scroll";
 
-/** Title/meta row + vertical padding (px @ 375), excluding status-bar inset. */
-const EVENT_DETAIL_HEADER_CHROME_PX = 72;
-/** Baseline top padding in event-detail.scss before status-bar inset. */
-const EVENT_DETAIL_HEADER_TOP_PX = 12;
+const EventLiveInfoTab = lazy(() =>
+  import("./live/EventLiveInfoTab").then((mod) => ({
+    default: mod.EventLiveInfoTab,
+  })),
+);
 
 const EventDetailPage = () => {
   const router = useRouter();
   const navInsets = useNavBarInsets();
-  const headerChromePx =
-    EVENT_DETAIL_HEADER_CHROME_PX - EVENT_DETAIL_HEADER_TOP_PX + navInsets.paddingTop;
-  const scrollHeight = useTabPageMainHeight(headerChromePx);
   const [scrollTop, setScrollTop] = useState<number | undefined>();
   const activeActivityLegacyId = useNavigationStore((state) => state.activeActivityLegacyId);
   const feedReady = useDeferredMount(DEFER_EVENT_POSTS_MS);
@@ -79,21 +104,116 @@ const EventDetailPage = () => {
   }, [eventId]);
 
   const activityQuery = useActivityDetailQuery(eventId);
-  const postsQuery = useEventPostsQuery(eventId, { enabled: feedReady });
+  const postsQuery = useEventPostsInfiniteQuery(eventId, {
+    enabled: feedReady,
+    anchorPostId: highlightPostId || undefined,
+  });
+  const contactUnlockQuota = useContactUnlockQuota(eventId);
+  const entitlementsQuery = useProfileEntitlementsQuery(eventId);
+  const profileEntitlement = useMemo(
+    () => resolveProfileEntitlement(entitlementsQuery.data, eventId),
+    [entitlementsQuery.data, eventId],
+  );
+  const currentPaidTierId = profileEntitlement?.paidTierId ?? null;
+  const freeMonthly = useMemo(
+    () => pickGlobalFreeMonthly(entitlementsQuery.data),
+    [entitlementsQuery.data],
+  );
   const currentUserQuery = useCurrentUserQuery();
+  const profileUser = useResolvedProfile();
   const apiEnabled = isApiEnabled();
   const { confirm, confirmDialog } = useConfirmDialog({
     cancelText: "取消",
   });
   const [prompt, setPrompt] = useState("");
-  const [shortcutTags, setShortcutTags] = useState(() => getTopAiShortcutTags(3));
   const [appliedPostIds, setAppliedPostIds] = useState<Set<string>>(() => new Set());
   const [expandedCommentPostIds, setExpandedCommentPostIds] = useState<Set<string>>(
     () => new Set(),
   );
+  const [contentTab, setContentTab] = useState<EventDetailTabId>("posts");
+  const [liveFeedCount, setLiveFeedCount] = useState(MOCK_LIVE_INFO_FEED.length);
+  const [liveUpdateSheetOpen, setLiveUpdateSheetOpen] = useState(false);
+  const [contactUnlockExhaustedOpen, setContactUnlockExhaustedOpen] =
+    useState(false);
+  const [packageSheetOpen, setPackageSheetOpen] = useState(false);
+  const [packageSheetInitialTierId, setPackageSheetInitialTierId] = useState<
+    PackageTierId | undefined
+  >(undefined);
+  const liveInfoActionsRef = useRef<EventLiveInfoTabActions | null>(null);
+
+  const openContactUnlockExhaustedModal = useCallback(() => {
+    setContactUnlockExhaustedOpen(true);
+  }, []);
+
+  const closeContactUnlockExhaustedModal = useCallback(() => {
+    setContactUnlockExhaustedOpen(false);
+  }, []);
+
+  const openPackageUpgradeSheet = useCallback((targetTierId: PackageTierId) => {
+    setContactUnlockExhaustedOpen(false);
+    setPackageSheetInitialTierId(targetTierId);
+    setPackageSheetOpen(true);
+  }, []);
+
+  const closePackageUpgradeSheet = useCallback(() => {
+    setPackageSheetOpen(false);
+    setPackageSheetInitialTierId(undefined);
+  }, []);
+
+  const displayUserName =
+    currentUserQuery.data?.name ?? profileUser.name ?? "用户";
+
+  const handleLiveFeedCountChange = useCallback((count: number) => {
+    setLiveFeedCount(count);
+  }, []);
+
+  const handleLiveInfoActions = useCallback((actions: EventLiveInfoTabActions | null) => {
+    liveInfoActionsRef.current = actions;
+  }, []);
+
+  const handleOpenLiveUpdateSheet = useCallback(() => {
+    setLiveUpdateSheetOpen(true);
+  }, []);
+
+  const handleCloseLiveUpdateSheet = useCallback(() => {
+    setLiveUpdateSheetOpen(false);
+  }, []);
+
+  const handleLiveUpdatePublish = useCallback(
+    async (payload: PublishLiveInfoPayload): Promise<boolean> => {
+      const actions = liveInfoActionsRef.current;
+      if (!actions) {
+        void Taro.showToast({ title: "请稍候再试", icon: "none" });
+        return false;
+      }
+      return actions.publishUpdate(payload);
+    },
+    [],
+  );
+
+  useEffect(() => {
+    if (contentTab !== "live") {
+      setLiveUpdateSheetOpen(false);
+    }
+  }, [contentTab]);
 
   const title = activityQuery.data?.name;
+  const activityImage = activityQuery.data?.image;
   const activityDate = activityQuery.data?.date;
+
+  const getDefaultShare = useCallback((): PostSharePayload | null => {
+    if (!Number.isFinite(eventId) || eventId <= 0) {
+      return null;
+    }
+    return {
+      postId: "",
+      activityLegacyId: eventId,
+      eventTitle: title,
+      imageUrl: activityImage,
+    };
+  }, [activityImage, eventId, title]);
+
+  usePostPageShare({ getDefaultShare });
   const activityStatus = getActivityStatusFromActivity(activityDate, title);
   const headerReady =
     !activityQuery.isLoading && Boolean(title) && !activityQuery.isError;
@@ -113,17 +233,22 @@ const EventDetailPage = () => {
     return parts.join(" · ");
   }, [activityQuery.data]);
 
+  const headerChromePx = stackPageNavChromePx(navInsets, {
+    meta: Boolean(metaLine),
+  });
+  const scrollHeight = useTabPageMainHeight(headerChromePx);
+
   const postItems = useMemo(() => {
-    return (postsQuery.data ?? []).map((item) => {
+    return postsQuery.items.map((item) => {
       const post: EventDetailPost = {
         id: item.id,
         userId: item.userId,
-        name: item.name,
         location: item.location,
         time: item.time,
         createdAt: item.createdAt,
-        body: item.body,
-        tags: item.tags,
+        body: item.body ?? "",
+        tags: item.tags ?? [],
+        name: item.name?.trim() || "用户",
         likes: item.likes,
         liked: item.liked,
         comments: item.comments,
@@ -137,33 +262,58 @@ const EventDetailPage = () => {
         : post.time;
       return { post, publishTimeLabel };
     });
-  }, [postsQuery.data]);
+  }, [postsQuery.items]);
+
+  const handleScrollToLower = useCallback(() => {
+    if (contentTab !== "posts") return;
+    void postsQuery.loadMore();
+  }, [contentTab, postsQuery]);
 
   const handleApply = useCallback(
     (postId: string) => {
       if (appliedPostIds.has(postId)) return;
 
+      if (contactUnlockQuota.exhausted) {
+        openContactUnlockExhaustedModal();
+        return;
+      }
+
       void applyToPostAndInvalidate(postId)
-        .then((result) => {
+        .then(async (result) => {
+          if (!result.alreadyApplied) {
+            const consumed = await consumeContactUnlockWithQuota(eventId);
+            if (!consumed) {
+              openContactUnlockExhaustedModal();
+              return;
+            }
+          }
+
           setAppliedPostIds((prev) => new Set(prev).add(postId));
-          const toastTitle = result.alreadyApplied
-            ? "已申请"
-            : "申请成功";
+          const toastTitle = result.alreadyApplied ? "已申请" : "申请成功";
           void Taro.showToast({ title: toastTitle, icon: "success" });
         })
         .catch(() => void Taro.showToast({ title: "申请失败", icon: "none" }));
     },
-    [appliedPostIds],
+    [
+      appliedPostIds,
+      contactUnlockQuota.exhausted,
+      eventId,
+      openContactUnlockExhaustedModal,
+    ],
   );
 
   const handleLikePost = useCallback(
     (postId: string) => {
       if (!apiEnabled) return;
-      void likePostAndInvalidate(postId).catch(() =>
-        void Taro.showToast({ title: "请求失败，请稍后重试", icon: "none" }),
-      );
+      void likePostAndInvalidate(postId)
+        .then((updated) => {
+          postsQuery.patchItem(updated);
+        })
+        .catch(() =>
+          void Taro.showToast({ title: "请求失败，请稍后重试", icon: "none" }),
+        );
     },
-    [apiEnabled],
+    [apiEnabled, postsQuery],
   );
 
   const scrollToElement = useCallback((elementId: string) => {
@@ -212,6 +362,7 @@ const EventDetailPage = () => {
       }
       void deletePostAndInvalidate(post.id)
         .then(() => {
+          postsQuery.removeItem(post.id);
           void Taro.showToast({ title: "已删除", icon: "success" });
         })
         .catch(() => {
@@ -239,19 +390,19 @@ const EventDetailPage = () => {
         return;
       }
       void updatePostAndInvalidate(postId, { status: "completed" })
-        .then(() => {
+        .then((updated) => {
+          postsQuery.patchItem({ id: postId, status: updated.status });
           void Taro.showToast({ title: "已标记为已组队", icon: "success" });
         })
         .catch(() => {
           void Taro.showToast({ title: "标记失败", icon: "none" });
         });
     },
-    [apiEnabled, confirm],
+    [apiEnabled, confirm, postsQuery],
   );
 
   const bumpShortcutTagUsage = useCallback((tag: string) => {
     recordAiShortcutTagUse(tag);
-    setShortcutTags(getTopAiShortcutTags(3));
   }, []);
 
   const openAi = useCallback(
@@ -312,41 +463,40 @@ const EventDetailPage = () => {
 
   const postsLoading = !feedReady || postsQuery.isLoading;
   const showHeaderSkeleton = activityQuery.isLoading || !title;
-
-  const headerStyle = tabPageHeaderStyle(navInsets);
+  const showPostsEnd =
+    contentTab === "posts" &&
+    postItems.length > 0 &&
+    !postsLoading &&
+    !postsQuery.hasMore &&
+    !postsQuery.isLoadingMore;
+  const showLiveEnd =
+    contentTab === "live" && !showHeaderSkeleton && liveFeedCount > 0;
 
   return (
     <View
       data-cmp="EventDetail"
       className={["s-event-detail", "s-page-with-tabbar", activityStatusCardClass(activityStatus)].filter(Boolean).join(" ")}>
       <View className="s-page-with-tabbar__main s-event-detail__shell">
-        <View className="s-event-detail__header" style={headerStyle}>
-          <Button
-            className="s-event-detail__back"
-            aria-label="返回"
-            hoverClass="s-event-detail__back--pressed"
-            onTap={handleBack}>
-            <ChevronLeft size={22} />
-          </Button>
-          <View className="s-event-detail__head-main">
-            <View className="s-event-detail__title-row">
-              <Text className="s-event-detail__title">{title ?? ""}</Text>
-            </View>
-            {metaLine ? <Text className="s-event-detail__meta">{metaLine}</Text> : null}
-          </View>
-          <Button
-            className="s-event-detail__map-btn"
-            aria-label="地图"
-            onClick={() => {
-              if (Number.isFinite(eventId) && eventId > 0) {
-                goEventMap(eventId, { title: title ?? undefined });
-              } else {
-                goEventMap(0, { title: title ?? undefined });
-              }
-            }}>
-            <Map size={26} />
-          </Button>
-        </View>
+        <PageNavigation
+          title={title ?? ""}
+          meta={metaLine || undefined}
+          onBack={handleBack}
+          trailing={
+            <Button
+              className="s-page-nav__icon-action s-page-nav__icon-action--map"
+              aria-label="地图"
+              hoverClass="s-page-nav__icon-action--pressed"
+              onClick={() => {
+                if (Number.isFinite(eventId) && eventId > 0) {
+                  goEventMap(eventId, { title: title ?? undefined });
+                } else {
+                  goEventMap(0, { title: title ?? undefined });
+                }
+              }}>
+              <Map size={26} />
+            </Button>
+          }
+        />
 
         <ScrollView
           id={EVENT_DETAIL_SCROLL_ID}
@@ -355,6 +505,8 @@ const EventDetailPage = () => {
           showScrollbar={false}
           scrollTop={scrollTop}
           scrollWithAnimation
+          lowerThreshold={80}
+          onScrollToLower={handleScrollToLower}
           className="s-event-detail__main s-scrollbar-none"
           style={scrollHeight != null ? { height: `${scrollHeight}px` } : undefined}>
         <View className="s-event-detail__scroll-inner">
@@ -362,63 +514,24 @@ const EventDetailPage = () => {
           <ThemedPageLoader variant="skeleton-event" minHeight={360} />
         ) : null}
         {!showHeaderSkeleton && composerReady ? (
-        <View className="s-event-detail__ai">
-          <View className="s-event-detail__ai-head">
-            <View className="s-event-detail__ai-head-icon-wrap" aria-hidden>
-              <Sparkles size={16} className="s-event-detail__ai-head-icon" />
-            </View>
-            <View className="s-event-detail__ai-head-text">
-              <Text className="s-event-detail__ai-kicker">AI 智能匹配</Text>
-              <Text className="s-event-detail__ai-head-title">
-                {title ? `为「${title}」找队友` : "告诉我你的需求，AI 精准匹配"}
-              </Text>
-            </View>
-          </View>
-          {shortcutTags.length> 0 ? (
-            <View className="s-event-detail__ai-tags">
-              {shortcutTags.map((tag) => (
-                <Button
-                  key={tag} className="s-event-detail__ai-tag"
-                  onClick={() => handleShortcutTag(tag)}>
-                  <Text className="s-btn-label">{tag}</Text>
-                </Button>
-              ))}
-            </View>
-          ) : null}
-          <View className="s-event-detail__ai-input">
-            <Input
-              className="s-event-detail__ai-input__field"
-              value={prompt}
-              placeholder={
-                title
-                  ? `例如：想在「${title}」找住宿同行…`
-                  : "描述你想找的队友或同行方式…"
-              }
-              onInput={(e) => setPrompt(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && prompt.trim()) openAi(prompt);
-              }}
-            />
-            <Button
-              className={[
-                "s-event-detail__ai-send",
-                !prompt.trim() && "s-event-detail__ai-send--disabled",
-              ]
-                .filter(Boolean)
-                .join(" ")}
-              aria-label="开始 AI 对话"
-              disabled={!prompt.trim()}
-              onClick={() => openAi(prompt)}>
-              <Send size={18} />
-            </Button>
-          </View>
-          <Text className="s-event-detail__ai-footnote">
-            发送后将进入本场活动的 AI 对话
-          </Text>
-        </View>
+        <EventDetailAiMatchCard
+          prompt={prompt}
+          onPromptChange={setPrompt}
+          onSubmit={() => openAi(prompt)}
+          onTagClick={handleShortcutTag}
+        />
         ) : null}
 
         {!showHeaderSkeleton ? (
+          <EventDetailContentTabs
+            active={contentTab}
+            postsCount={postItems.length}
+            liveCount={liveFeedCount}
+            onChange={setContentTab}
+          />
+        ) : null}
+
+        {!showHeaderSkeleton && contentTab === "posts" ? (
         <View className="s-event-detail__posts">
           {postsLoading ? (
             <ThemedPageLoader variant="inline" label="加载组队帖…" minHeight={80} />
@@ -426,6 +539,7 @@ const EventDetailPage = () => {
             <Text className="s-event-detail__empty">暂无组队帖，来发布第一条吧</Text>
           ) : (
             <EventPostsVirtualList
+              activityLegacyId={eventId}
               onScrollToPostId={scrollToElement}
               items={postItems}
               highlightPostId={highlightPostId}
@@ -433,6 +547,8 @@ const EventDetailPage = () => {
               appliedPostIds={appliedPostIds}
               apiEnabled={apiEnabled}
               currentUserAvatar={currentUserQuery.data?.avatar}
+              hasMore={postsQuery.hasMore}
+              isLoadingMore={postsQuery.isLoadingMore}
               onLike={handleLikePost}
               onToggleComments={togglePostComments}
               onDelete={handleDeletePost}
@@ -444,13 +560,57 @@ const EventDetailPage = () => {
         </View>
         ) : null}
 
-        {!showHeaderSkeleton && postItems.length> 0 && !postsLoading ? (
+        {!showHeaderSkeleton && contentTab === "live" ? (
+          <Suspense
+            fallback={
+              <ThemedPageLoader variant="inline" label="加载实时资讯…" minHeight={200} />
+            }>
+            <EventLiveInfoTab
+              eventId={eventId}
+              userName={displayUserName}
+              onFeedCountChange={handleLiveFeedCountChange}
+              onOpenUpdate={handleOpenLiveUpdateSheet}
+              onLiveInfoActions={handleLiveInfoActions}
+            />
+          </Suspense>
+        ) : null}
+
+        {!showHeaderSkeleton && showPostsEnd ? (
+          <Text className="s-event-detail__end">已经到底啦 ~</Text>
+        ) : null}
+        {!showHeaderSkeleton && showLiveEnd ? (
           <Text className="s-event-detail__end">已经到底啦 ~</Text>
         ) : null}
         </View>
         </ScrollView>
       </View>
       {confirmDialog}
+      <ContactUnlockQuotaExhaustedModal
+        open={contactUnlockExhaustedOpen}
+        onClose={closeContactUnlockExhaustedModal}
+        onUpgrade={openPackageUpgradeSheet}
+        currentPaidTierId={currentPaidTierId}
+        freeMonthly={freeMonthly}
+      />
+      {packageSheetOpen ? (
+        <ProfilePackageSheet
+          open
+          activityLegacyId={eventId}
+          initialSelectedTierId={packageSheetInitialTierId}
+          currentPaidTierId={currentPaidTierId ?? undefined}
+          onClose={closePackageUpgradeSheet}
+          onPurchaseSuccess={() => {
+            void invalidateProfilePackageState();
+          }}
+        />
+      ) : null}
+      {contentTab === "live" && liveUpdateSheetOpen ? (
+        <EventLiveInfoUpdateSheet
+          open
+          onClose={handleCloseLiveUpdateSheet}
+          onPublish={handleLiveUpdatePublish}
+        />
+      ) : null}
       <BottomNavSlot />
     </View>
   );
