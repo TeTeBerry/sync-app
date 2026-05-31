@@ -116,6 +116,204 @@ function createEventQueue() {
 
 const WS_CONNECT_TIMEOUT_MS = 12_000;
 const WS_CONNECTED_ACK_TIMEOUT_MS = 5_000;
+const WS_RECONNECT_MAX = 2;
+const WS_RECONNECT_BASE_MS = 400;
+
+type PooledConnection = {
+  wsUrl: string;
+  headersKey: string;
+  task: Taro.SocketTask;
+  activeTurn: {
+    queue: ReturnType<typeof createEventQueue>;
+    settleConnected: (action: "resolve" | "reject", error?: Error) => void;
+    connectedSettled: boolean;
+    connectedTimer: ReturnType<typeof setTimeout>;
+  } | null;
+};
+
+let wsPool: PooledConnection | null = null;
+
+function headersKey(headers?: Record<string, string>): string {
+  if (!headers) return "";
+  return JSON.stringify(
+    Object.keys(headers)
+      .sort()
+      .map((k) => [k, headers[k]]),
+  );
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+export function closeAiChatWsConnection(reason = "client close"): void {
+  if (!wsPool) return;
+  try {
+    wsPool.task.close({ code: 1000, reason });
+  } catch {
+    // ignore
+  }
+  wsPool.activeTurn?.queue.push({ kind: "close" });
+  wsPool = null;
+}
+
+function attachPoolListeners(connection: PooledConnection): void {
+  bindSocketListeners(connection.task, {
+    onMessage: (res) => {
+      const turn = connection.activeTurn;
+      if (!turn) return;
+
+      const rawKind = describeRawWsData(res.data);
+      const raw = decodeWsMessageData(res.data);
+      if (!raw) {
+        devLog("onMessage ignored", { rawKind });
+        return;
+      }
+
+      let json: Record<string, unknown>;
+      try {
+        json = JSON.parse(raw) as Record<string, unknown>;
+      } catch {
+        devLog("onMessage invalid JSON", {
+          rawKind,
+          preview: previewDecodedText(raw),
+        });
+        turn.queue.push({
+          kind: "error",
+          error: new Error("AI chat WebSocket 收到无效 JSON"),
+        });
+        return;
+      }
+
+      devLog("onMessage", {
+        rawKind,
+        type: typeof json.type === "string" ? json.type : undefined,
+        preview: previewDecodedText(raw),
+      });
+
+      if (json.type === "connected") {
+        if (!turn.connectedSettled) {
+          turn.connectedSettled = true;
+          clearTimeout(turn.connectedTimer);
+          turn.settleConnected("resolve");
+        }
+        return;
+      }
+
+      if (
+        typeof json.code === "number" &&
+        "data" in json &&
+        !("type" in json)
+      ) {
+        devLog("onMessage REST envelope (wrong endpoint?)", {
+          code: json.code,
+          message: json.message,
+        });
+        return;
+      }
+
+      if (
+        typeof json.sessionId === "string" &&
+        Array.isArray(json.history) &&
+        !("type" in json)
+      ) {
+        devLog("onMessage session snapshot (not a stream frame)", {
+          sessionId: json.sessionId,
+        });
+        return;
+      }
+
+      if (json.type === "error" && typeof json.message === "string") {
+        devLog("server error frame", { message: json.message });
+      }
+
+      const event = parseStreamEventPayload(json);
+      if (event) {
+        devLog("stream event", { type: event.type });
+        turn.queue.push({ kind: "event", event });
+        return;
+      }
+
+      if (json.type === "error" && typeof json.message === "string") {
+        turn.queue.push({
+          kind: "event",
+          event: { type: "error", message: json.message },
+        });
+      }
+    },
+    onClose: (res) => {
+      devLog("onClose", {
+        code: res?.code,
+        reason: res?.reason,
+      });
+      const turn = connection.activeTurn;
+      if (turn && !turn.connectedSettled) {
+        turn.settleConnected("reject", new Error("WebSocket 连接已关闭"));
+      }
+      turn?.queue.push({ kind: "close" });
+      wsPool = null;
+    },
+    onError: (err) => {
+      devLog("onError", { errMsg: err.errMsg });
+      const turn = connection.activeTurn;
+      if (turn && !turn.connectedSettled) {
+        turn.settleConnected(
+          "reject",
+          new Error(err.errMsg || "WebSocket 连接异常"),
+        );
+      }
+      turn?.queue.push({
+        kind: "error",
+        error: new Error(err.errMsg || "WebSocket 连接异常"),
+      });
+      wsPool = null;
+    },
+  });
+}
+
+async function ensureWsPool(
+  wsUrl: string,
+  headers?: Record<string, string>,
+): Promise<PooledConnection> {
+  const key = headersKey(headers);
+  if (wsPool && wsPool.wsUrl === wsUrl && wsPool.headersKey === key) {
+    return wsPool;
+  }
+
+  if (wsPool) {
+    try {
+      wsPool.task.close({ code: 1000, reason: "reconnect" });
+    } catch {
+      // ignore
+    }
+    wsPool = null;
+  }
+
+  let lastError: Error | undefined;
+  for (let attempt = 0; attempt <= WS_RECONNECT_MAX; attempt += 1) {
+    try {
+      devLogWarn("connecting", { url: wsUrl, attempt });
+      const task = await connectSocket(wsUrl, headers);
+      const connection: PooledConnection = {
+        wsUrl,
+        headersKey: key,
+        task,
+        activeTurn: null,
+      };
+      attachPoolListeners(connection);
+      wsPool = connection;
+      devLogWarn("onOpen", { url: wsUrl });
+      return connection;
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+      if (attempt < WS_RECONNECT_MAX) {
+        await sleep(WS_RECONNECT_BASE_MS * 2 ** attempt);
+      }
+    }
+  }
+
+  throw lastError ?? new Error("WebSocket 连接失败");
+}
 
 /** WeChat miniprogram often delivers WebSocket frames as ArrayBuffer, not string. */
 export function decodeWsMessageData(raw: unknown): string | null {
@@ -289,26 +487,10 @@ export async function* streamAiChatWs(
   }
 
   const queue = createEventQueue();
-  let task: Taro.SocketTask | null = null;
-  let closed = false;
-
-  const closeSocket = (reason?: string) => {
-    if (closed || !task) return;
-    closed = true;
-    try {
-      task.close({
-        code: 1000,
-        reason: reason ?? "client close",
-      });
-    } catch {
-      // ignore close errors
-    }
-    task = null;
-  };
 
   const onAbort = () => {
     queue.push({ kind: "close" });
-    closeSocket("aborted");
+    closeAiChatWsConnection("aborted");
   };
 
   options.signal?.addEventListener("abort", onAbort, { once: true });
@@ -338,115 +520,15 @@ export async function* streamAiChatWs(
   }, WS_CONNECTED_ACK_TIMEOUT_MS);
 
   try {
-    devLogWarn("connecting", { url: wsUrl });
-    task = await connectSocket(wsUrl, options.headers);
-    devLogWarn("onOpen", { url: wsUrl });
+    const connection = await ensureWsPool(wsUrl, options.headers);
+    connection.activeTurn = {
+      queue,
+      settleConnected,
+      connectedSettled: false,
+      connectedTimer,
+    };
 
-    bindSocketListeners(task, {
-      onMessage: (res) => {
-        const rawKind = describeRawWsData(res.data);
-        const raw = decodeWsMessageData(res.data);
-        if (!raw) {
-          devLog("onMessage ignored", { rawKind });
-          return;
-        }
-
-        let json: Record<string, unknown>;
-        try {
-          json = JSON.parse(raw) as Record<string, unknown>;
-        } catch {
-          devLog("onMessage invalid JSON", {
-            rawKind,
-            preview: previewDecodedText(raw),
-          });
-          queue.push({
-            kind: "error",
-            error: new Error("AI chat WebSocket 收到无效 JSON"),
-          });
-          return;
-        }
-
-        devLog("onMessage", {
-          rawKind,
-          type: typeof json.type === "string" ? json.type : undefined,
-          preview: previewDecodedText(raw),
-        });
-
-        if (json.type === "connected") {
-          settleConnected("resolve");
-          return;
-        }
-
-        if (
-          typeof json.code === "number" &&
-          "data" in json &&
-          !("type" in json)
-        ) {
-          devLog("onMessage REST envelope (wrong endpoint?)", {
-            code: json.code,
-            message: json.message,
-          });
-          return;
-        }
-
-        if (
-          typeof json.sessionId === "string" &&
-          Array.isArray(json.history) &&
-          !("type" in json)
-        ) {
-          devLog("onMessage session snapshot (not a stream frame)", {
-            sessionId: json.sessionId,
-          });
-          return;
-        }
-
-        if (json.type === "error" && typeof json.message === "string") {
-          devLog("server error frame", { message: json.message });
-        }
-
-        const event = parseStreamEventPayload(json);
-        if (event) {
-          devLog("stream event", { type: event.type });
-          queue.push({ kind: "event", event });
-          if (event.type === "done" || event.type === "error") {
-            closeSocket();
-          }
-          return;
-        }
-
-        if (json.type === "error" && typeof json.message === "string") {
-          queue.push({
-            kind: "event",
-            event: { type: "error", message: json.message },
-          });
-          closeSocket();
-          return;
-        }
-
-        devLog("unhandled frame", json);
-      },
-      onClose: (res) => {
-        devLog("onClose", {
-          code: res?.code,
-          reason: res?.reason,
-        });
-        settleConnected("reject", new Error("WebSocket 连接已关闭"));
-        queue.push({ kind: "close" });
-        closed = true;
-        task = null;
-      },
-      onError: (err) => {
-        devLog("onError", { errMsg: err.errMsg });
-        settleConnected("reject", new Error(err.errMsg || "WebSocket 连接异常"));
-        queue.push({
-          kind: "error",
-          error: new Error(err.errMsg || "WebSocket 连接异常"),
-        });
-        closeSocket();
-      },
-    });
-
-    await sendJson(task, {
+    await sendJson(connection.task, {
       type: "connect",
       sessionId: options.sessionId,
       activityLegacyId: options.activityLegacyId,
@@ -454,7 +536,7 @@ export async function* streamAiChatWs(
 
     await connectedReady;
 
-    await sendJson(task, {
+    await sendJson(connection.task, {
       type: "send",
       messages: options.messages,
       sessionId: options.sessionId,
@@ -504,6 +586,8 @@ export async function* streamAiChatWs(
   } finally {
     clearTimeout(connectedTimer);
     options.signal?.removeEventListener("abort", onAbort);
-    closeSocket();
+    if (wsPool) {
+      wsPool.activeTurn = null;
+    }
   }
 }

@@ -5,6 +5,7 @@
 ## 相关文档
 
 - API 契约：`docs/API.md`
+- 包体基线：`docs/BUNDLE-SIZE.md`（`npm run build:weapp:size`）
 - 改造清单：`docs/FRONTEND-REFACTOR-CHECKLIST.md`
 - 后端架构：`../sync-app-backend/docs/ARCHITECTURE.md`
 

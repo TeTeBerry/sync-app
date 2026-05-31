@@ -38,7 +38,6 @@ export const ROUTES = {
   EXCLUSIVE_ITINERARY: "/packageEvent/pages/exclusive-itinerary/index",
   MY_ITINERARY: "/packageEvent/pages/my-itinerary/index",
   NOTIFICATIONS: "/packageProfile/pages/notifications/index",
-  ALL_POSTS: "/packageEvent/pages/posts/index",
 } as const;
 
 export type RoutePath = (typeof ROUTES)[keyof typeof ROUTES];

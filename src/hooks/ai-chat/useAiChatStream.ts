@@ -36,8 +36,8 @@ export interface UseAiChatStreamOptions {
   onExistingPost?: (
     event: Extract<AiChatStreamEvent, { type: "existing_post" }>,
   ) => void;
-  /** Called after a chat turn completes successfully (stream `done`). */
-  onMatchTurnComplete?: () => void | Promise<void>;
+  /** Called when match recommendations include posts (server already consumed quota). */
+  onMatchResults?: (activityLegacyId?: number) => void | Promise<void>;
 }
 
 export function useAiChatStream(options: UseAiChatStreamOptions) {
@@ -55,7 +55,7 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
     getAuthHeaders,
     onPostCreated,
     onExistingPost,
-    onMatchTurnComplete,
+    onMatchResults,
     typewriterCharDelayMs = 22,
   } = options;
 
@@ -105,7 +105,7 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
     getAuthHeaders,
     onPostCreated,
     onExistingPost,
-    onMatchTurnComplete,
+    onMatchResults,
     persistSessionFromStream,
     createTypewriter,
     typewriterCharDelayMs,

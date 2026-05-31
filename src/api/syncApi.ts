@@ -116,10 +116,6 @@ export function fetchPopularPosts(limit = 20) {
   });
 }
 
-export function fetchAllPosts() {
-  return apiGet<HomeFeedPost[]>("/posts/all", ownerParams());
-}
-
 export type FetchPostsByActivityPageOptions = {
   limit?: number;
   cursor?: string;

@@ -7,7 +7,6 @@ import {
   deletePost,
   fetchActivities,
   fetchActivityByLegacyId,
-  fetchAllPosts,
   fetchCurrentUser,
   fetchHomeSummary,
   fetchNotificationUnreadCount,
@@ -304,27 +303,6 @@ function mapHomeFeedPost(item: HomeFeedPost): HomeFeedPost {
     activityLegacyId: item.activityLegacyId,
     contentTypes: item.contentTypes,
     images: sanitizeImageList(item.images),
-  };
-}
-
-export function useAllPostsQuery() {
-  const enabled = isApiEnabled();
-  const userId = getClientUserId();
-
-  const query = useApiQuery({
-    queryKey: ["posts", "all", userId],
-    queryFn: fetchAllPosts,
-    enabled,
-    staleTime: 30_000,
-  });
-
-  const posts: HomeFeedPost[] = (query.data ?? []).map(mapHomeFeedPost);
-
-  return {
-    posts,
-    isLoading: query.isLoading,
-    isError: query.isError,
-    refetch: query.refetch,
   };
 }
 

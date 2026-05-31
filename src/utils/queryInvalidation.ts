@@ -63,7 +63,6 @@ export function invalidateHome() {
 /** 失效帖子 Feed 查询 */
 export function invalidatePostFeeds() {
   invalidateCache(["posts", "popular"]);
-  invalidateCache(["posts", "all"]);
   invalidateCache(["posts", "activity"]);
 }
 
@@ -160,7 +159,7 @@ export function patchLikedPostInCaches(
     if (!key.startsWith("posts|")) return;
     if (!Array.isArray(entryData)) return;
 
-    if (key.startsWith("posts|popular|") || key.startsWith("posts|all|")) {
+    if (key.startsWith("posts|popular|")) {
       const patched = patchFeedPosts(entryData as HomeFeedPost[]);
       if (patched) {
         setCacheDataByKey(key, patched);
