@@ -302,27 +302,6 @@ function mapHomeFeedPost(item: HomeFeedPost): HomeFeedPost {
   };
 }
 
-export function useAllPostsQuery() {
-  const enabled = isApiEnabled();
-  const userId = getClientUserId();
-
-  const query = useApiQuery({
-    queryKey: ['posts', 'all', userId],
-    queryFn: fetchAllPosts,
-    enabled,
-    staleTime: 30_000,
-  });
-
-  const posts: HomeFeedPost[] = (query.data ?? []).map(mapHomeFeedPost);
-
-  return {
-    posts,
-    isLoading: query.isLoading,
-    isError: query.isError,
-    refetch: query.refetch,
-  };
-}
-
 export function useEventPostsQuery(
   activityLegacyId?: number,
   options?: QueryEnableOptions,

@@ -38,8 +38,8 @@ export interface UseAiChatStreamOptions {
   onExistingPost?: (
     event: Extract<AiChatStreamEvent, { type: 'existing_post' }>,
   ) => void;
-  /** Called after a chat turn completes successfully (stream `done`). */
-  onMatchTurnComplete?: () => void | Promise<void>;
+  /** Called when the stream returns post recommendations with at least one post. */
+  onMatchResults?: (activityLegacyId?: number) => void | Promise<void>;
 }
 
 export function useAiChatStream(options: UseAiChatStreamOptions) {

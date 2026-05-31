@@ -493,131 +493,38 @@ export async function* streamAiChatWs(
 
   let resolveConnected: (() => void) | null = null;
   let rejectConnected: ((error: Error) => void) | null = null;
-  let connectedSettled = false;
-  const settleConnected = (action: 'resolve' | 'reject', error?: Error) => {
-    if (connectedSettled) return;
-    connectedSettled = true;
-    clearTimeout(connectedTimer);
-    if (action === 'resolve') {
-      resolveConnected?.();
-    } else {
-      rejectConnected?.(error ?? new Error('WebSocket 握手失败'));
-    }
-  };
   const connectedReady = new Promise<void>((resolve, reject) => {
     resolveConnected = resolve;
     rejectConnected = reject;
   });
   const connectedTimer = setTimeout(() => {
-    settleConnected('reject', new Error('WebSocket 未收到 connected 确认，请稍后重试'));
+    activeTurn?.settleConnected(
+      'reject',
+      new Error('WebSocket 未收到 connected 确认，请稍后重试'),
+    );
   }, WS_CONNECTED_ACK_TIMEOUT_MS);
 
+  const activeTurn: NonNullable<PooledConnection['activeTurn']> = {
+    queue,
+    connectedSettled: false,
+    connectedTimer,
+    settleConnected: (action, error) => {
+      if (activeTurn.connectedSettled) return;
+      activeTurn.connectedSettled = true;
+      clearTimeout(activeTurn.connectedTimer);
+      if (action === 'resolve') {
+        resolveConnected?.();
+      } else {
+        rejectConnected?.(error ?? new Error('WebSocket 握手失败'));
+      }
+    },
+  };
+
   try {
-    devLogWarn('connecting', { url: wsUrl });
-    task = await connectSocket(wsUrl, options.headers);
-    devLogWarn('onOpen', { url: wsUrl });
+    const connection = await ensureWsPool(wsUrl, options.headers);
+    connection.activeTurn = activeTurn;
 
-    bindSocketListeners(task, {
-      onMessage: (res) => {
-        const rawKind = describeRawWsData(res.data);
-        const raw = decodeWsMessageData(res.data);
-        if (!raw) {
-          devLog('onMessage ignored', { rawKind });
-          return;
-        }
-
-        let json: Record<string, unknown>;
-        try {
-          json = JSON.parse(raw) as Record<string, unknown>;
-        } catch {
-          devLog('onMessage invalid JSON', {
-            rawKind,
-            preview: previewDecodedText(raw),
-          });
-          queue.push({
-            kind: 'error',
-            error: new Error('AI chat WebSocket 收到无效 JSON'),
-          });
-          return;
-        }
-
-        devLog('onMessage', {
-          rawKind,
-          type: typeof json.type === 'string' ? json.type : undefined,
-          preview: previewDecodedText(raw),
-        });
-
-        if (json.type === 'connected') {
-          settleConnected('resolve');
-          return;
-        }
-
-        if (typeof json.code === 'number' && 'data' in json && !('type' in json)) {
-          devLog('onMessage REST envelope (wrong endpoint?)', {
-            code: json.code,
-            message: json.message,
-          });
-          return;
-        }
-
-        if (
-          typeof json.sessionId === 'string' &&
-          Array.isArray(json.history) &&
-          !('type' in json)
-        ) {
-          devLog('onMessage session snapshot (not a stream frame)', {
-            sessionId: json.sessionId,
-          });
-          return;
-        }
-
-        if (json.type === 'error' && typeof json.message === 'string') {
-          devLog('server error frame', { message: json.message });
-        }
-
-        const event = parseStreamEventPayload(json);
-        if (event) {
-          devLog('stream event', { type: event.type });
-          queue.push({ kind: 'event', event });
-          if (event.type === 'done' || event.type === 'error') {
-            closeSocket();
-          }
-          return;
-        }
-
-        if (json.type === 'error' && typeof json.message === 'string') {
-          queue.push({
-            kind: 'event',
-            event: { type: 'error', message: json.message },
-          });
-          closeSocket();
-          return;
-        }
-
-        devLog('unhandled frame', json);
-      },
-      onClose: (res) => {
-        devLog('onClose', {
-          code: res?.code,
-          reason: res?.reason,
-        });
-        settleConnected('reject', new Error('WebSocket 连接已关闭'));
-        queue.push({ kind: 'close' });
-        closed = true;
-        task = null;
-      },
-      onError: (err) => {
-        devLog('onError', { errMsg: err.errMsg });
-        settleConnected('reject', new Error(err.errMsg || 'WebSocket 连接异常'));
-        queue.push({
-          kind: 'error',
-          error: new Error(err.errMsg || 'WebSocket 连接异常'),
-        });
-        closeSocket();
-      },
-    });
-
-    await sendJson(task, {
+    await sendJson(connection.task, {
       type: 'connect',
       sessionId: options.sessionId,
       activityLegacyId: options.activityLegacyId,
@@ -673,7 +580,7 @@ export async function* streamAiChatWs(
       yield { type: 'done' };
     }
   } finally {
-    clearTimeout(connectedTimer);
+    clearTimeout(activeTurn.connectedTimer);
     options.signal?.removeEventListener('abort', onAbort);
     if (wsPool) {
       wsPool.activeTurn = null;

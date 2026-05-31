@@ -109,7 +109,7 @@ function AiAssistantChat({
         duration: 2500,
       });
     },
-    onMatchTurnComplete: handleMatchTurnComplete,
+    onMatchResults: handleMatchResults,
   });
 
   useEffect(() => {
@@ -451,7 +451,4 @@ const AiAssistantPage: FC = () => {
 };
 
 export default AiAssistantPage;
-function handleMatchTurnComplete(): void | Promise<void> {
-  throw new Error("Function not implemented.");
-}
 

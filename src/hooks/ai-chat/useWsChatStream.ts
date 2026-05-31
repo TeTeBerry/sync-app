@@ -38,7 +38,7 @@ export interface UseWsChatStreamOptions {
   onExistingPost?: (
     event: Extract<AiChatStreamEvent, { type: 'existing_post' }>,
   ) => void;
-  onMatchTurnComplete?: () => void | Promise<void>;
+  onMatchResults?: (activityLegacyId?: number) => void | Promise<void>;
   persistSessionFromStream: (sessionId: string) => void;
   createTypewriter: (options: {
     charDelayMs?: number;
