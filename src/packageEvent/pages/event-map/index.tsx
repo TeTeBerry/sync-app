@@ -17,12 +17,14 @@ import {
 import PageNavigation from "../../../components/PageNavigation";
 import { useNavBarInsets } from "../../../hooks/useNavBarInsets";
 import { decodeRouteQueryParam, ROUTES } from "../../../utils/route";
+import { useEndRouteTransitionOnShow } from "../../../hooks/useEndRouteTransitionOnShow";
 
 function showMapToast(label: string) {
   void Taro.showToast({ title: label, icon: "none", duration: 1200 });
 }
 
 const EventMapPage = () => {
+  useEndRouteTransitionOnShow();
   const router = useRouter();
   const navInsets = useNavBarInsets();
   const [postsSheetMarker, setPostsSheetMarker] = useState<EventMapMarker | null>(

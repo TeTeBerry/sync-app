@@ -35,12 +35,14 @@ type HomeFeaturedEventsProps = {
   items: FeaturedEvent[];
   onEventClick: (item: FeaturedEvent) => void;
   onJoinClick: (item: FeaturedEvent) => void;
+  onEventPreload?: (item: FeaturedEvent) => void;
 };
 
 export const HomeFeaturedEvents: FC<HomeFeaturedEventsProps> = ({
   items,
   onEventClick,
   onJoinClick,
+  onEventPreload,
 }) => {
   if (items.length === 0) {
     return (
@@ -59,6 +61,7 @@ export const HomeFeaturedEvents: FC<HomeFeaturedEventsProps> = ({
           index={index}
           onEventClick={onEventClick}
           onJoinClick={onJoinClick}
+          onEventPreload={onEventPreload}
         />
       ))}
     </View>
@@ -70,11 +73,13 @@ function HomeFeaturedEventRow({
   index,
   onEventClick,
   onJoinClick,
+  onEventPreload,
 }: {
   event: FeaturedEvent;
   index: number;
   onEventClick: (item: FeaturedEvent) => void;
   onJoinClick: (item: FeaturedEvent) => void;
+  onEventPreload?: (item: FeaturedEvent) => void;
 }) {
   const status = getActivityStatusFromActivity(event.date, event.title);
   const statusTag = featuredEventStatusTag(event, status);
@@ -85,9 +90,15 @@ function HomeFeaturedEventRow({
   const isJoinNavigating = useRouteTransitionActive(legacyId ?? undefined);
   const thumbSrc = thumbnailImageUrl(event.image, 200);
 
+  const handlePreload = () => {
+    if (legacyId == null) return;
+    onEventPreload?.(event);
+  };
+
   return (
     <View
-      className={["s-home-event", activityStatusCardClass(status)].filter(Boolean).join(" ")}>
+      className={["s-home-event", activityStatusCardClass(status)].filter(Boolean).join(" ")}
+      onTouchStart={handlePreload}>
       <ImageWithFallback
         src={thumbSrc}
         alt={event.title}
@@ -99,7 +110,10 @@ function HomeFeaturedEventRow({
       />
 
       <View className="s-home-event__content">
-        <Button className="s-home-event__main" onClick={() => onEventClick(event)}>
+        <Button
+          className="s-home-event__main"
+          onTouchStart={handlePreload}
+          onClick={() => onEventClick(event)}>
           <View className="s-home-event__info">
             <Text className="s-home-event__title">{event.title}</Text>
             <View className="s-home-event__date-row">
@@ -120,7 +134,7 @@ function HomeFeaturedEventRow({
         <View className="s-home-event__footer">
           <View className="s-home-event__meta">
             <View className="s-home-event__team" aria-hidden>
-              {event.guests.map((guest, guestIndex) => (
+              {(event.guests ?? []).map((guest, guestIndex) => (
                 <Image
                   key={guest}
                   src={thumbnailImageUrl(guest, 48) ?? guest}
@@ -143,6 +157,7 @@ function HomeFeaturedEventRow({
               .filter(Boolean)
               .join(" ")}
             disabled={status === "ended" || isJoinNavigating || legacyId == null}
+            onTouchStart={handlePreload}
             onClick={(clickEvent) => {
               clickEvent.stopPropagation();
               onJoinClick(event);

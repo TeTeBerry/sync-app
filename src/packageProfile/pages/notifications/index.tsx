@@ -3,6 +3,7 @@ import React, { useCallback, useMemo, useState } from "react";
 import ThemedPageLoader from "../../../components/ThemedPageLoader";
 import { useDeferredMount } from "../../../hooks/useDeferredMount";
 import { usePageRouteReady } from "../../../hooks/usePageRouteReady";
+import { useEndRouteTransitionOnShow } from "../../../hooks/useEndRouteTransitionOnShow";
 import { Bell, Heart, MessageCircle, Megaphone, Trash2 } from "lucide-react-taro";
 import PageNavigation from "../../../components/PageNavigation";
 import {
@@ -48,6 +49,7 @@ function NotificationIcon({
 }
 
 const NotificationsPage: React.FC = () => {
+  useEndRouteTransitionOnShow();
   const listReady = useDeferredMount(DEFER_NOTIFICATIONS_MS);
   const { data: notifications = [], isLoading, refetch } = useNotificationsQuery();
   const contentReady = listReady && !isLoading;

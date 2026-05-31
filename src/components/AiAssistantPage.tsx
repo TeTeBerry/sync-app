@@ -20,6 +20,7 @@ import { useDeferredMount } from "../hooks/useDeferredMount";
 import { DEFER_AI_CHAT_MS } from "../utils/timing";
 import { useNavBarInsets } from "../hooks/useNavBarInsets";
 import { usePageRouteReady } from "../hooks/usePageRouteReady";
+import { useEndRouteTransitionOnShow } from "../hooks/useEndRouteTransitionOnShow";
 import PageNavigation from "./PageNavigation";
 import { useTabPageMainHeight } from "../hooks/useTabPageMainHeight";
 import { useKeyboardInset } from "../hooks/useKeyboardInset";
@@ -309,6 +310,7 @@ const AiAssistantPage: FC = () => {
   const chatBodyHeight = useTabPageMainHeight({ subtractPx: headerSubtractPx });
 
   usePageRouteReady(true);
+  useEndRouteTransitionOnShow();
 
   useEffect(() => {
     if (!isAiChatWsDevLog()) return;

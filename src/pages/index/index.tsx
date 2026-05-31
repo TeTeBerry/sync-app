@@ -1,5 +1,5 @@
 import "./home.scss";
-import Taro from "@tarojs/taro";
+import Taro, { useDidShow } from "@tarojs/taro";
 import { lazy, Suspense, useCallback } from "react";
 import PageLoadingFallback from "../../components/PageLoadingFallback";
 import { useConfirmDialog } from "../../hooks/useConfirmDialog";
@@ -14,7 +14,15 @@ import {
   usePopularPosts,
 } from "../../hooks/useSyncApi";
 import { isApiEnabled } from "../../constants/api";
-import { go, goAiAssistant, goEventDetail, goNotifications, preloadPageSafe, ROUTES } from "../../utils/route";
+import {
+  go,
+  goAiAssistant,
+  goEventDetail,
+  goNotifications,
+  preloadHotRoutes,
+  preloadPageSafe,
+  ROUTES,
+} from "../../utils/route";
 import { DEFER_BELOW_FOLD_MS, DEFER_SECONDARY_API_MS } from "../../utils/timing";
 import { HomeCountdownCard } from "./components/HomeCountdownCard";
 import { HomeFeaturedEvents } from "./components/HomeFeaturedEvents";
@@ -33,6 +41,10 @@ const LazyHomeActivityFeed = lazy(async () => {
 
 const Home = () => {
   usePostPageShare();
+
+  useDidShow(() => {
+    preloadHotRoutes();
+  });
 
   const belowFoldReady = useDeferredMount(DEFER_BELOW_FOLD_MS);
   const secondaryApiReady = useDeferredMount(DEFER_SECONDARY_API_MS);
@@ -60,12 +72,19 @@ const Home = () => {
     goNotifications();
   }, []);
 
-  const openEventDetail = useCallback((event: FeaturedEvent) => {
+  const handleEventPreload = useCallback((event: FeaturedEvent) => {
     const legacyId = resolveFeaturedEventLegacyId(event);
     if (legacyId == null) {
       return;
     }
     preloadPageSafe(ROUTES.EVENT_DETAIL, { activityLegacyId: String(legacyId) });
+  }, []);
+
+  const openEventDetail = useCallback((event: FeaturedEvent) => {
+    const legacyId = resolveFeaturedEventLegacyId(event);
+    if (legacyId == null) {
+      return;
+    }
     goEventDetail(legacyId);
   }, []);
 
@@ -138,6 +157,7 @@ const Home = () => {
             items={featuredEvents}
             onEventClick={openEventDetail}
             onJoinClick={openEventDetail}
+            onEventPreload={handleEventPreload}
           />
 
           {belowFoldReady ? (

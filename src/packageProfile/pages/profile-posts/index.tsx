@@ -18,9 +18,11 @@ import { invalidateProfilePosts } from "../../../utils/queryInvalidation";
 import { useStackPageMainHeight } from "../../../hooks/useTabPageMainHeight";
 import type { ProfilePostItem } from "../../../types/backend";
 import { goEventDetail, ROUTES } from "../../../utils/route";
+import { useEndRouteTransitionOnShow } from "../../../hooks/useEndRouteTransitionOnShow";
 import { ScrollView, View } from "@tarojs/components";
 
 const ProfilePostsPage: React.FC = () => {
+  useEndRouteTransitionOnShow();
   const mainScrollHeight = useStackPageMainHeight();
   const apiEnabled = isApiEnabled();
   const postsQuery = useProfilePostsQuery();

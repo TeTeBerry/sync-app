@@ -45,6 +45,11 @@ import type {
 import { isApiEnabled } from "../constants/api";
 import { getClientUserId } from "../utils/session";
 import {
+  HOME_POPULAR_POSTS_PERSIST_LIMIT,
+  persistHomeSummary,
+  persistPopularPosts,
+} from "../utils/homeCacheStorage";
+import {
   mapActivitiesToEvents,
   pickHomeFeaturedEvents,
   type EventCardUi,
@@ -159,7 +164,11 @@ export function useEventList(options?: QueryEnableOptions) {
 export function useHomeSummary() {
   return useApiQuery({
     queryKey: ["home", "summary"],
-    queryFn: fetchHomeSummary,
+    queryFn: async () => {
+      const result = await fetchHomeSummary();
+      persistHomeSummary(result);
+      return result;
+    },
     enabled: isApiEnabled(),
     staleTime: 60_000,
   });
@@ -246,7 +255,11 @@ export function usePopularPostsQuery(options?: QueryEnableOptions) {
 
   return useApiQuery({
     queryKey: ["posts", "popular", userId],
-    queryFn: () => fetchPopularPosts(),
+    queryFn: async () => {
+      const result = await fetchPopularPosts(HOME_POPULAR_POSTS_PERSIST_LIMIT);
+      persistPopularPosts(result);
+      return result;
+    },
     enabled,
     staleTime: 30_000,
   });
@@ -266,12 +279,14 @@ export function usePopularPosts(options?: QueryEnableOptions) {
 }
 
 function mapHomeFeedPost(item: HomeFeedPost): HomeFeedPost {
+  const name = item.name?.trim() || "用户";
+  const handle = item.handle?.trim() || `@${name}`;
   return {
     id: item.id,
     userId: item.userId,
     authorGender: item.authorGender,
-    name: item.name,
-    handle: item.handle,
+    name,
+    handle,
     event: item.event,
     location: item.location,
     body: item.body,
@@ -280,7 +295,7 @@ function mapHomeFeedPost(item: HomeFeedPost): HomeFeedPost {
     liked: item.liked,
     comments: item.comments ?? 0,
     avatar: sanitizeRemoteImageUrl(item.avatar) ?? item.avatar,
-    status: item.status,
+    status: item.status ?? "招募中",
     activityLegacyId: item.activityLegacyId,
     contentTypes: item.contentTypes,
     images: sanitizeImageList(item.images),

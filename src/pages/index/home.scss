@@ -13,6 +13,12 @@
 
 // ── Home header actions (TabPageHeader trailing) ─────────────────────────────
 
+.s-home-header-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .s-home-icon-btn {
   position: relative;
   width: var(--s-hero-icon-size);

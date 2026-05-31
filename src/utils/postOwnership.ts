@@ -23,12 +23,13 @@ function isDemoOwnerClient(userId?: string): boolean {
 
 /** Whether a feed/event post was authored by the current client user. */
 export function isCurrentUserPostAuthor(
-  authorName: string,
+  authorName?: string | null,
   authorUserId?: string,
 ): boolean {
   const clientUserId = getClientUserId().trim();
   const clientUserName = getClientUserName().trim();
   const postUserId = authorUserId?.trim();
+  const normalizedAuthorName = authorName?.trim() ?? "";
 
   if (clientUserId && postUserId && postUserId === clientUserId) {
     return true;
@@ -36,8 +37,8 @@ export function isCurrentUserPostAuthor(
 
   if (
     clientUserName &&
-    authorName.trim() &&
-    authorNameMatches(authorName, clientUserName)
+    normalizedAuthorName &&
+    authorNameMatches(normalizedAuthorName, clientUserName)
   ) {
     return true;
   }

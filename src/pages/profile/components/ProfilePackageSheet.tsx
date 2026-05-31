@@ -184,7 +184,7 @@ function ActivityPickerRow({
         alt=""
         imageClassName="s-profile-package-sheet__activity-thumb"
         placeholderClassName="s-profile-package-sheet__activity-thumb s-profile-package-sheet__activity-thumb--placeholder"
-        fallback={item.title.slice(0, 2)}
+        fallback={(item.title ?? "").slice(0, 2)}
       />
       <View className="s-profile-package-sheet__activity-body">
         <Text className="s-profile-package-sheet__activity-name">{item.title}</Text>

@@ -53,7 +53,8 @@ export type PostStatusBadgeInput = {
 export function resolvePostStatusBadge(
   post: PostStatusBadgeInput,
 ): PostStatusBadgeResult {
-  if (post.status === "已隐藏") {
+  const status = post?.status;
+  if (status === "已隐藏") {
     return {
       label: "已隐藏",
       color: POST_STATUS_BADGE_COLORS.hidden,
@@ -61,7 +62,7 @@ export function resolvePostStatusBadge(
     };
   }
 
-  if (post.status === "已组队") {
+  if (status === "已组队") {
     return {
       label: "已组队",
       color: POST_STATUS_BADGE_COLORS.completed,

@@ -10,9 +10,11 @@ import { useProfileActivitiesQuery } from "../../../hooks/useSyncApi";
 import { invalidateProfileActivities } from "../../../utils/queryInvalidation";
 import { useStackPageMainHeight } from "../../../hooks/useTabPageMainHeight";
 import { ROUTES } from "../../../utils/route";
+import { useEndRouteTransitionOnShow } from "../../../hooks/useEndRouteTransitionOnShow";
 import { ScrollView, View } from "@tarojs/components";
 
 const ProfileActivitiesPage: React.FC = () => {
+  useEndRouteTransitionOnShow();
   const mainScrollHeight = useStackPageMainHeight();
   const apiEnabled = isApiEnabled();
   const activitiesQuery = useProfileActivitiesQuery();

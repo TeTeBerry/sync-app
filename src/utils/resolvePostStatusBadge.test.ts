@@ -29,6 +29,14 @@ describe("resolvePostStatusBadge", () => {
       variant: "hidden",
     });
   });
+
+  it("defaults missing status to recruiting", () => {
+    expect(resolvePostStatusBadge({ status: undefined as never })).toEqual({
+      label: "招募中",
+      color: POST_STATUS_BADGE_COLORS.recruiting,
+      variant: "recruiting",
+    });
+  });
 });
 
 describe("shouldShowPostStatusBadge", () => {

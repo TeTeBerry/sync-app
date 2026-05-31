@@ -20,13 +20,16 @@ import { inferAuthorGenderFromPost } from "../utils/inferAuthorGender";
 import type { PostSharePayload } from "../utils/postShare";
 import { Image, Text, View } from "@tarojs/components";
 
-function feedPostSharePayload(post: ActivityPost): PostSharePayload {
+function feedPostSharePayload(
+  post: ActivityPost,
+  authorName: string,
+): PostSharePayload {
   return {
     postId: post.id,
     activityLegacyId: post.activityLegacyId,
     body: post.body,
     eventTitle: post.event,
-    authorName: post.name,
+    authorName,
     images: post.images,
     imageUrl: post.images?.[0] ?? post.avatar,
   };
@@ -58,13 +61,15 @@ function FeedPostRowInner({
   onCommentSubmitted,
   onToggleComments,
 }: FeedPostRowProps) {
-  const isOwn = isCurrentUserPostAuthor(post.name, post.userId);
+  const postName = post.name?.trim() || "用户";
+  const postHandle = post.handle?.trim() || `@${postName}`;
+  const isOwn = isCurrentUserPostAuthor(postName, post.userId);
   const avatarSrc = thumbnailImageUrl(post.avatar, 80) ?? post.avatar;
   const contentTypeKeys = mergePostContentTypes(post.contentTypes, { body: post.body });
   const bodyText = stripContentTypeHashtags(post.body);
   const authorGender = inferAuthorGenderFromPost({
     userId: post.userId,
-    authorName: post.name,
+    authorName: postName,
     authorGender: post.authorGender,
     body: post.body,
     tags: post.contentTypes,
@@ -87,19 +92,23 @@ function FeedPostRowInner({
         <View className="s-home-post__head-main">
           <View className="s-home-post__top">
             <View className="s-home-post__user-line">
-              <Text className="s-home-post__user-name">{post.name}</Text>
+              <Text className="s-home-post__user-name">{postName}</Text>
               {post.location ? (
                 <Text className={locationClassName}>
                   <Text className="s-home-post__user-location-sep"> · </Text>
                   {post.location}
                 </Text>
               ) : null}
-              <Text className="s-home-post__user-handle">{post.handle}</Text>
+              <Text className="s-home-post__user-handle">{postHandle}</Text>
               {post.images?.length ? <PostImageCount count={post.images.length} /> : null}
             </View>
             <View className="s-home-post__head-actions">
-              <PostStatusBadge post={post} variant="home" isOwn={isOwn} />
-              <PostShareButton share={feedPostSharePayload(post)} />
+              <PostStatusBadge
+                post={{ status: post.status ?? "招募中" }}
+                variant="home"
+                isOwn={isOwn}
+              />
+              <PostShareButton share={feedPostSharePayload(post, postName)} />
               {isOwn && onDelete ? (
                 <PostActionMenu
                   postId={post.id}
@@ -150,7 +159,7 @@ function FeedPostRowInner({
 
       <PostCommentSection
         postId={post.id}
-        postAuthorName={post.name}
+        postAuthorName={postName}
         postAuthorUserId={post.userId}
         expanded={commentsExpanded}
         onToggleExpanded={() => onToggleComments(post.id)}

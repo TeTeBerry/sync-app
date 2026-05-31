@@ -528,8 +528,10 @@ function buildMapBenefitRow(
   };
 }
 
-function tierIncludesPostPin(postPin: EventPackageEntitlement["quotas"]["postPin"]): boolean {
-  return postPin.limit != null && postPin.limit > 0;
+function tierIncludesPostPin(
+  postPin: EventPackageEntitlement["quotas"]["postPin"] | null | undefined,
+): boolean {
+  return (postPin?.limit ?? 0) > 0;
 }
 
 function resolvePaidTierDisplay(

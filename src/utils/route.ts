@@ -11,6 +11,7 @@ import {
   parseQueryString,
 } from "./queryString";
 import { PRELOAD_HOT_ROUTES_MS } from "./timing";
+import { preloadEventSubpackage } from "./subpackagePreload";
 
 export { parseActivityLegacyId } from "./activityLegacyId";
 
@@ -228,6 +229,7 @@ export function preloadHotRoutes() {
     if (isNavigating) {
       return;
     }
+    preloadEventSubpackage();
     for (const route of PRELOAD_HOT_ROUTES) {
       preloadPageSafe(route);
     }
@@ -257,14 +259,11 @@ export function endRouteTransition() {
   useNavigationStore.getState().endRouteTransition();
 }
 
-function navigateToSafe(url: string, options?: { eventId?: number }) {
+function navigateToSafe(url: string, _options?: { eventId?: number }) {
   if (shouldSkipNavigation(url)) {
     return;
   }
 
-  beginRouteTransition(
-    options?.eventId != null ? { eventId: options.eventId } : undefined,
-  );
   markNavigationStart(url);
 
   runSerializedNavigation(

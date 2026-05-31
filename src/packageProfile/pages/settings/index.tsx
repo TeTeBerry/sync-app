@@ -14,6 +14,7 @@ import {
   type ProfilePrivacyLevel,
 } from "../../../utils/profileStorage";
 import { useProfilePageStore } from "../../../stores/profilePageStore";
+import { useEndRouteTransitionOnShow } from "../../../hooks/useEndRouteTransitionOnShow";
 import { Button, Text, View } from '@tarojs/components';
 
 type SettingsSection = "notifications" | "privacy" | "help";
@@ -53,6 +54,7 @@ const FAQ_QA = [
 ] as const;
 
 const SettingsPage: React.FC = () => {
+  useEndRouteTransitionOnShow();
   const router = useRouter();
   const section = (router.params.section ?? "notifications") as SettingsSection;
   const { data: currentUser } = useCurrentUserQuery();

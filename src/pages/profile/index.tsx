@@ -50,6 +50,7 @@ import {
   buildMockPaidEntitlement,
   buildMockProPlusEntitlement,
   getNextTierId,
+  isValidFreeMonthlyQuota,
   listPaidEntitlements,
   pickGlobalFreeMonthly,
   type ProfileEventBenefitCardModel,
@@ -67,16 +68,24 @@ import {
 } from "./profileDebugEntitlements";
 import { Image, ScrollView, Text, View } from "@tarojs/components";
 
+function trimProfileField(value: unknown): string | undefined {
+  if (typeof value !== "string") {
+    return undefined;
+  }
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+}
+
 function normalizeProfileUserData(
   data: ProfileSummary | typeof profileUser,
 ): typeof profileUser {
   const stats = data.stats ?? profileUser.stats;
   return {
-    name: data.name?.trim() || profileUser.name,
-    handle: data.handle?.trim() ?? profileUser.handle,
-    location: data.location?.trim() ?? profileUser.location,
-    bio: data.bio?.trim() ?? profileUser.bio,
-    avatar: data.avatar?.trim() || profileUser.avatar,
+    name: trimProfileField(data.name) ?? profileUser.name,
+    handle: trimProfileField(data.handle) ?? profileUser.handle,
+    location: trimProfileField(data.location) ?? profileUser.location,
+    bio: trimProfileField(data.bio) ?? profileUser.bio,
+    avatar: trimProfileField(data.avatar) ?? profileUser.avatar,
     verified:
       "verified" in data && typeof data.verified === "boolean"
         ? data.verified
@@ -171,11 +180,11 @@ const Profile: React.FC = () => {
 
   const summaryFreeMonthly = useMemo(() => {
     const scoped = summaryQuery.data?.packageEntitlement?.freeMonthly;
-    if (scoped) {
+    if (isValidFreeMonthlyQuota(scoped)) {
       return scoped;
     }
     for (const item of summaryQuery.data?.packageEntitlements ?? []) {
-      if (item.freeMonthly) {
+      if (isValidFreeMonthlyQuota(item.freeMonthly)) {
         return item.freeMonthly;
       }
     }

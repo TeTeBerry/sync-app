@@ -1,4 +1,8 @@
 import "./utils/abortControllerPolyfill";
+import { hydrateHomeCachesFromStorage } from "./utils/homeCacheStorage";
+
+hydrateHomeCachesFromStorage();
+
 import "./app.scss";
 import { View } from "@tarojs/components";
 import { LucideTaroProvider } from "lucide-react-taro";

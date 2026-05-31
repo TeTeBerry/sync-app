@@ -45,7 +45,8 @@ const LABEL_TO_TYPE: Record<string, string> = {
 };
 
 export function resolveContentTypeKey(type: string): string {
-  const trimmed = type.trim();
+  const trimmed = (typeof type === "string" ? type : String(type ?? "")).trim();
+  if (!trimmed) return "other";
   if (CONTENT_TYPE_STYLE_KEYS.has(trimmed)) return trimmed;
 
   const fromLabel = LABEL_TO_TYPE[trimmed] ?? LABEL_TO_TYPE[trimmed.replace(/^#/, "")];
@@ -85,6 +86,7 @@ export function mergePostContentTypes(
   const keys = new Set<string>();
 
   for (const type of types ?? []) {
+    if (type == null) continue;
     const key = resolveContentTypeKey(type);
     if (CONTENT_TYPE_STYLE_KEYS.has(key)) keys.add(key);
   }

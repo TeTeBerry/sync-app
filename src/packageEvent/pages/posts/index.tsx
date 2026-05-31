@@ -15,9 +15,11 @@ import { ROUTES } from "../../../utils/route";
 import type { ActivityPost } from "../../../pages/index/homeData";
 import { useStackPageMainHeight } from "../../../hooks/useTabPageMainHeight";
 import { usePostPageShare } from "../../../hooks/usePostPageShare";
+import { useEndRouteTransitionOnShow } from "../../../hooks/useEndRouteTransitionOnShow";
 import { ScrollView, View } from "@tarojs/components";
 
 const AllPostsPage = () => {
+  useEndRouteTransitionOnShow();
   usePostPageShare();
   const mainScrollHeight = useStackPageMainHeight();
   const { confirm, confirmDialog } = useConfirmDialog({

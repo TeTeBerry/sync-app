@@ -261,6 +261,14 @@ describe("listPaidEntitlements", () => {
     expect(card.rows.map((row) => row.id)).toEqual(["contact", "ai-match", "map"]);
   });
 
+  it("builds paid card when postPin slot is missing (partial API quotas)", () => {
+    const quotas = { ...proSeed.quotas };
+    delete (quotas as { postPin?: unknown }).postPin;
+    const card = buildEventBenefitCardModel({ ...proSeed, quotas });
+    expect(card.rows).toHaveLength(3);
+    expect(card.rows.find((row) => row.id === "post-pin")).toBeUndefined();
+  });
+
   it("builds four benefit rows when pin quota exists", () => {
     const card = buildEventBenefitCardModel(
       paidEntitlement("pro_plus"),
