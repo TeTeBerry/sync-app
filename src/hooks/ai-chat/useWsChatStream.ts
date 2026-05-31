@@ -35,7 +35,8 @@ export interface UseWsChatStreamOptions {
   onExistingPost?: (
     event: Extract<AiChatStreamEvent, { type: "existing_post" }>,
   ) => void;
-  onMatchTurnComplete?: () => void | Promise<void>;
+  /** Server already consumed quota; refresh entitlement display only. */
+  onMatchResults?: (activityLegacyId?: number) => void | Promise<void>;
   persistSessionFromStream: (sessionId: string) => void;
   createTypewriter: (options: {
     charDelayMs?: number;
@@ -78,7 +79,7 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
     getAuthHeaders,
     onPostCreated,
     onExistingPost,
-    onMatchTurnComplete,
+    onMatchResults,
     persistSessionFromStream,
     createTypewriter,
     typewriterCharDelayMs = 22,
@@ -138,6 +139,9 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
             ...message,
             recommendedPosts: event.posts,
           }));
+          if (event.posts.length > 0) {
+            void onMatchResults?.(activityLegacyIdRef.current);
+          }
           continue;
         }
 
@@ -195,14 +199,14 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
           if (event.sessionId) {
             persistSessionFromStream(event.sessionId);
           }
-          await onMatchTurnComplete?.();
           break;
         }
       }
     },
     [
+      activityLegacyIdRef,
       onExistingPost,
-      onMatchTurnComplete,
+      onMatchResults,
       onPostCreated,
       persistSessionFromStream,
       setMessages,

@@ -1,0 +1,8 @@
+node_modules
+dist
+dist-weapp
+dist-h5
+dist-ssr
+coverage
+*.min.js
+package-lock.json

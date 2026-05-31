@@ -12,7 +12,6 @@ export default {
         "pages/event-map/index",
         "pages/exclusive-itinerary/index",
         "pages/my-itinerary/index",
-        "pages/posts/index",
       ],
     },
     {

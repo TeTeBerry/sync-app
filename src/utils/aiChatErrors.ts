@@ -10,6 +10,9 @@ export function formatAiChatStreamError(
         ? error
         : "";
   if (!message.trim()) return fallback;
+  if (/匹配次数已用完|quota exhausted/i.test(message)) {
+    return message.trim();
+  }
   if (process.env.NODE_ENV === "production") return fallback;
   return message.trim();
 }

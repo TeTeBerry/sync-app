@@ -17,7 +17,6 @@ import {
 } from "../../hooks/useSyncApi";
 import { isApiEnabled } from "../../constants/api";
 import {
-  go,
   goAiAssistant,
   goEventDetail,
   goNotifications,
@@ -174,7 +173,6 @@ const Home = () => {
               }>
               <LazyHomeActivityFeed
                 items={posts}
-                onSeeAll={() => go(ROUTES.ALL_POSTS)}
                 onDelete={handleDeletePost}
                 onLike={handleLikePost}
                 onCommentSubmitted={handleCommentSubmitted}
