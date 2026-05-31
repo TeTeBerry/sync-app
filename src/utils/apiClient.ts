@@ -96,16 +96,10 @@ async function retryFetch(url: string, init?: ApiFetchInit): Promise<CompatibleR
 
   for (let attempt = 0; attempt <= maxRetries; attempt += 1) {
     try {
-      // eslint-disable-next-line no-console
-      console.log(`[API] ${requestInit.method ?? "GET"} ${url}`);
       const response = await requestWithTimeout(url, requestInit, timeoutMs);
-      // eslint-disable-next-line no-console
-      console.log(`[API] ${requestInit.method ?? "GET"} ${url} -> ${response.status}`);
       return response;
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error));
-      // eslint-disable-next-line no-console
-      console.error(`[API] ${requestInit.method ?? "GET"} ${url} error:`, lastError.message);
 
       if (lastError.message?.includes("timeout")) {
         throw new ApiError("请求超时，请检查网络后重试");

@@ -6,11 +6,7 @@ import Taro, { useDidShow } from "@tarojs/taro";
 import { invalidateCache } from "../hooks/useApiQuery";
 import { useAiChatStream } from "../hooks/useAiChatStream";
 import { useResolvedProfile } from "../hooks/useResolvedProfile";
-import {
-  consumeProfileAiMatchAndInvalidate,
-  invalidatePostQueries,
-  useActivityDetailQuery,
-} from "../hooks/useSyncApi";
+import { invalidatePostQueries, useActivityDetailQuery } from "../hooks/useSyncApi";
 import { useNavigationStore } from "../stores";
 import { goBack, goEventDetail, ROUTES } from "../utils/route";
 import { ChatMessageList } from "./ai-chat/ChatMessageList";
@@ -27,6 +23,7 @@ import { useTabPageMainHeight } from "../hooks/useTabPageMainHeight";
 import { useKeyboardInset } from "../hooks/useKeyboardInset";
 import { API_BASE_URL, resolveAiChatWsUrl } from "../constants/api";
 import { isAiChatWsDevLog } from "../utils/aiChatWs";
+import { uploadChatImageRefs } from "../utils/chatImage";
 import { inferUserGenderFromName } from "../utils/inferAuthorGender";
 import { Button, Text, View } from "@tarojs/components";
 import { AiUpgradeSheetProvider } from "./ai-chat/AiUpgradeSheetContext";
@@ -84,17 +81,10 @@ function AiAssistantChat({
     return "👋 我是你的 AI 智能助手，帮你发现活动、找队友、规划行程，说出需求，我来搞定。";
   }, [activityTitle]);
 
-  const handleMatchTurnComplete = useCallback(async () => {
+  const handleMatchResults = useCallback(async () => {
     if (!API_BASE_URL) return;
-    if (activityLegacyId == null || Number.isNaN(activityLegacyId)) {
-      return;
-    }
-    try {
-      await consumeProfileAiMatchAndInvalidate(activityLegacyId);
-    } catch {
-      await invalidateProfileEntitlements();
-    }
-  }, [activityLegacyId]);
+    await invalidateProfileEntitlements();
+  }, []);
 
   const { messages, isStreaming, isLoadingHistory, send, clearChat } = useAiChatStream({
     welcomeText,
@@ -161,8 +151,16 @@ function AiAssistantChat({
       submitLockRef.current = true;
       try {
         setInput("");
+        const localImages = images?.length ? [...images] : [];
         setPendingImages([]);
-        await send({ text: trimmed, images: images?.length ? images : undefined });
+        const imageUrls =
+          localImages.length > 0
+            ? await uploadChatImageRefs(localImages)
+            : undefined;
+        await send({
+          text: trimmed,
+          images: imageUrls?.length ? imageUrls : undefined,
+        });
       } finally {
         submitLockRef.current = false;
       }
@@ -453,3 +451,7 @@ const AiAssistantPage: FC = () => {
 };
 
 export default AiAssistantPage;
+function handleMatchTurnComplete(): void | Promise<void> {
+  throw new Error("Function not implemented.");
+}
+

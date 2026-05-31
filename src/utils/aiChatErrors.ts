@@ -2,6 +2,9 @@
 export function formatAiChatStreamError(error: unknown, fallback: string): string {
   const message = error instanceof Error ? error.message : typeof error === "string" ? error : "";
   if (!message.trim()) return fallback;
+  if (/匹配次数已用完|quota exhausted/i.test(message)) {
+    return message.trim();
+  }
   if (process.env.NODE_ENV === "production") return fallback;
   return message.trim();
 }

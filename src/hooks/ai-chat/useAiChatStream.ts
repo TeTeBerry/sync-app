@@ -1,14 +1,22 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import Taro from "@tarojs/taro";
-import { AI_CHAT_WS_URL } from "../../constants/api";
-import { useAiChatStore } from "../../stores/aiChatStore";
-import type { AiChatStreamEvent, ChatUiMessage, SendChatOptions } from "../../types/aiChat";
-import { getClientUserId, getClientUserName, getClientUserPhone } from "../../utils/session";
-import { formatAiChatToastError } from "../../utils/aiChatErrors";
-import { createMessageId } from "./createMessageId";
-import { useChatSession } from "./useChatSession";
-import { useWsChatStream } from "./useWsChatStream";
-import { useTypewriterReply } from "./useTypewriterReply";
+import { useCallback, useEffect, useRef, useState } from 'react';
+import Taro from '@tarojs/taro';
+import { AI_CHAT_WS_URL } from '../../constants/api';
+import { useAiChatStore } from '../../stores/aiChatStore';
+import type {
+  AiChatStreamEvent,
+  ChatUiMessage,
+  SendChatOptions,
+} from '../../types/aiChat';
+import {
+  getClientUserId,
+  getClientUserName,
+  getClientUserPhone,
+} from '../../utils/session';
+import { formatAiChatToastError } from '../../utils/aiChatErrors';
+import { createMessageId } from './createMessageId';
+import { useChatSession } from './useChatSession';
+import { useWsChatStream } from './useWsChatStream';
+import { useTypewriterReply } from './useTypewriterReply';
 
 export interface UseAiChatStreamOptions {
   welcomeText: string;
@@ -26,8 +34,10 @@ export interface UseAiChatStreamOptions {
   userPhone?: string;
   activityLegacyId?: number;
   getAuthHeaders?: () => Record<string, string>;
-  onPostCreated?: (event: Extract<AiChatStreamEvent, { type: "post_created" }>) => void;
-  onExistingPost?: (event: Extract<AiChatStreamEvent, { type: "existing_post" }>) => void;
+  onPostCreated?: (event: Extract<AiChatStreamEvent, { type: 'post_created' }>) => void;
+  onExistingPost?: (
+    event: Extract<AiChatStreamEvent, { type: 'existing_post' }>,
+  ) => void;
   /** Called after a chat turn completes successfully (stream `done`). */
   onMatchTurnComplete?: () => void | Promise<void>;
 }
@@ -47,7 +57,7 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
     getAuthHeaders,
     onPostCreated,
     onExistingPost,
-    onMatchTurnComplete,
+    onMatchResults,
     typewriterCharDelayMs = 22,
   } = options;
 
@@ -97,7 +107,7 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
     getAuthHeaders,
     onPostCreated,
     onExistingPost,
-    onMatchTurnComplete,
+    onMatchResults,
     persistSessionFromStream,
     createTypewriter,
     typewriterCharDelayMs,
@@ -130,7 +140,7 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
 
       const userMsg: ChatUiMessage = {
         id: createMessageId(),
-        from: "user",
+        from: 'user',
         text: trimmed,
         imagePreview: image ?? images?.[0],
         ocrText: hasImages ? trimmed : undefined,
@@ -140,7 +150,7 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
       const nextMessages: ChatUiMessage[] = [
         ...baseMessages,
         userMsg,
-        { id: aiMsgId, from: "ai", text: "", streaming: true },
+        { id: aiMsgId, from: 'ai', text: '', streaming: true },
       ];
       messagesRef.current = nextMessages;
       setMessages(nextMessages);
@@ -152,12 +162,12 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
       try {
         await runStream(sendOptions, aiMsgId, controller.signal);
       } catch (error) {
-        if ((error as Error).name === "AbortError") {
+        if ((error as Error).name === 'AbortError') {
           return;
         }
         void Taro.showToast({
           title: formatAiChatToastError(error, streamErrorText),
-          icon: "none",
+          icon: 'none',
         });
       } finally {
         setIsStreaming(false);
@@ -169,14 +179,14 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
 
   const send = useCallback(
     async (payload: string | SendChatOptions) => {
-      const sendOptions = typeof payload === "string" ? { text: payload } : payload;
+      const sendOptions = typeof payload === 'string' ? { text: payload } : payload;
       const { text, image, images } = sendOptions;
       const trimmed = text.trim();
       const hasImages = Boolean(image) || (images && images.length > 0);
       if (!trimmed && !hasImages) return;
 
       if (isStreamingRef.current) {
-        void Taro.showToast({ title: "请等待上一条回复", icon: "none" });
+        void Taro.showToast({ title: '请等待上一条回复', icon: 'none' });
         return;
       }
 

@@ -3,13 +3,13 @@
  * Report WeChat mini program bundle sizes from dist-weapp (excludes *.map).
  * Usage: npm run build:weapp && npm run size:weapp
  */
-import fs from "node:fs";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const ROOT = path.resolve(__dirname, "..");
-const DIST = path.join(ROOT, "dist-weapp");
+const ROOT = path.resolve(__dirname, '..');
+const DIST = path.join(ROOT, 'dist-weapp');
 
 const THRESHOLDS = {
   mainPackage: 1_100_000,
@@ -20,18 +20,18 @@ const THRESHOLDS = {
 };
 
 const MAIN_ROOT_FILES = [
-  "app.js",
-  "common.js",
-  "taro.js",
-  "vendors.js",
-  "runtime.js",
-  "common.wxss",
-  "app-origin.wxss",
-  "base.wxml",
-  "utils.wxs",
+  'app.js',
+  'common.js',
+  'taro.js',
+  'vendors.js',
+  'runtime.js',
+  'common.wxss',
+  'app-origin.wxss',
+  'base.wxml',
+  'utils.wxs',
 ];
 
-const MAIN_DIRS = ["pages", "custom-tab-bar", "assets"];
+const MAIN_DIRS = ['pages', 'custom-tab-bar', 'assets'];
 
 function dirSize(dirPath, { excludeMaps = true } = {}) {
   if (!fs.existsSync(dirPath)) return 0;
@@ -44,7 +44,7 @@ function dirSize(dirPath, { excludeMaps = true } = {}) {
         walk(full);
         continue;
       }
-      if (excludeMaps && name.endsWith(".map")) continue;
+      if (excludeMaps && name.endsWith('.map')) continue;
       total += stat.size;
     }
   };
@@ -78,38 +78,39 @@ for (const name of MAIN_DIRS) {
 }
 
 const subpackages = {
-  packageEvent: dirSize(path.join(DIST, "packageEvent")),
-  packageAi: dirSize(path.join(DIST, "packageAi")),
-  packageProfile: dirSize(path.join(DIST, "packageProfile")),
+  packageEvent: dirSize(path.join(DIST, 'packageEvent')),
+  packageAi: dirSize(path.join(DIST, 'packageAi')),
+  packageProfile: dirSize(path.join(DIST, 'packageProfile')),
 };
 
-const mapsTotal = dirSize(DIST, { excludeMaps: false }) - dirSize(DIST, { excludeMaps: true });
+const mapsTotal =
+  dirSize(DIST, { excludeMaps: false }) - dirSize(DIST, { excludeMaps: true });
 const totalNoMaps =
   main +
   Object.values(subpackages).reduce((a, b) => a + b, 0) +
-  dirSize(path.join(DIST, "prebundle")) +
-  dirSize(path.join(DIST, "comp"));
+  dirSize(path.join(DIST, 'prebundle')) +
+  dirSize(path.join(DIST, 'comp'));
 
-const assetsMain = dirSize(path.join(DIST, "assets"));
-const assetsEvent = dirSize(path.join(DIST, "packageEvent", "assets"));
+const assetsMain = dirSize(path.join(DIST, 'assets'));
+const assetsEvent = dirSize(path.join(DIST, 'packageEvent', 'assets'));
 
 const rows = [
-  ["主包 (main)", main, THRESHOLDS.mainPackage],
-  ["分包 packageEvent", subpackages.packageEvent, THRESHOLDS.packageEvent],
-  ["分包 packageAi", subpackages.packageAi, THRESHOLDS.packageAi],
-  ["分包 packageProfile", subpackages.packageProfile, THRESHOLDS.packageProfile],
-  ["合计 (不含 .map)", totalNoMaps, THRESHOLDS.totalNoMaps],
+  ['主包 (main)', main, THRESHOLDS.mainPackage],
+  ['分包 packageEvent', subpackages.packageEvent, THRESHOLDS.packageEvent],
+  ['分包 packageAi', subpackages.packageAi, THRESHOLDS.packageAi],
+  ['分包 packageProfile', subpackages.packageProfile, THRESHOLDS.packageProfile],
+  ['合计 (不含 .map)', totalNoMaps, THRESHOLDS.totalNoMaps],
 ];
 
-console.log("\nWeChat 小程序包体 (dist-weapp, 不含 .map)\n");
-console.log("路径".padEnd(28) + "大小".padStart(12) + "阈值".padStart(12) + "  状态");
-console.log("-".repeat(58));
+console.log('\nWeChat 小程序包体 (dist-weapp, 不含 .map)\n');
+console.log('路径'.padEnd(28) + '大小'.padStart(12) + '阈值'.padStart(12) + '  状态');
+console.log('-'.repeat(58));
 
 let exitCode = 0;
 for (const [label, bytes, limit] of rows) {
   const ok = bytes <= limit;
   if (!ok) exitCode = 1;
-  const status = ok ? "OK" : "OVER";
+  const status = ok ? 'OK' : 'OVER';
   console.log(
     label.padEnd(28) +
       formatKb(bytes).padStart(12) +
@@ -118,17 +119,17 @@ for (const [label, bytes, limit] of rows) {
   );
 }
 
-console.log("\n静态资源:");
+console.log('\n静态资源:');
 console.log(`  主包 assets/     ${formatKb(assetsMain)}`);
 console.log(`  event 分包 assets/ ${formatKb(assetsEvent)}`);
 console.log(`  *.map (上传应忽略) ${formatKb(mapsTotal)}`);
 
 if (assetsMain > 50_000) {
-  console.warn("\n[size:weapp] warn: 主包 assets/ 仍较大，检查是否有图片打进主包。");
+  console.warn('\n[size:weapp] warn: 主包 assets/ 仍较大，检查是否有图片打进主包。');
 }
 
 if (exitCode !== 0) {
-  fail("一项或多项超过阈值，见 docs/BUNDLE-SIZE.md");
+  fail('一项或多项超过阈值，见 docs/BUNDLE-SIZE.md');
 }
 
-console.log("\n[size:weapp] 全部在阈值内。\n");
+console.log('\n[size:weapp] 全部在阈值内。\n');

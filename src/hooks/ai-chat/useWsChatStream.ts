@@ -1,13 +1,25 @@
-import { useCallback, type Dispatch, type MutableRefObject, type SetStateAction } from "react";
-import Taro from "@tarojs/taro";
-import { AI_CHAT_WS_URL, isApiEnabled } from "../../constants/api";
-import { useAiChatStore } from "../../stores/aiChatStore";
-import type { AiChatStreamEvent, ChatUiMessage, SendChatOptions } from "../../types/aiChat";
-import { formatAiChatStreamError, formatAiChatToastError } from "../../utils/aiChatErrors";
-import { buildApiChatHistory } from "../../utils/aiChatHistory";
-import { streamAiChatWs } from "../../utils/aiChatWs";
-import { mockAiChatStream } from "../../utils/aiChatStream";
-import type { TypewriterReveal } from "../../utils/typewriterReveal";
+import {
+  useCallback,
+  type Dispatch,
+  type MutableRefObject,
+  type SetStateAction,
+} from 'react';
+import Taro from '@tarojs/taro';
+import { AI_CHAT_WS_URL, isApiEnabled } from '../../constants/api';
+import { useAiChatStore } from '../../stores/aiChatStore';
+import type {
+  AiChatStreamEvent,
+  ChatUiMessage,
+  SendChatOptions,
+} from '../../types/aiChat';
+import {
+  formatAiChatStreamError,
+  formatAiChatToastError,
+} from '../../utils/aiChatErrors';
+import { buildApiChatHistory } from '../../utils/aiChatHistory';
+import { streamAiChatWs } from '../../utils/aiChatWs';
+import { mockAiChatStream } from '../../utils/aiChatStream';
+import type { TypewriterReveal } from '../../utils/typewriterReveal';
 
 export interface UseWsChatStreamOptions {
   welcomeText: string;
@@ -22,8 +34,10 @@ export interface UseWsChatStreamOptions {
   messagesRef: MutableRefObject<ChatUiMessage[]>;
   setMessages: Dispatch<SetStateAction<ChatUiMessage[]>>;
   getAuthHeaders?: () => Record<string, string>;
-  onPostCreated?: (event: Extract<AiChatStreamEvent, { type: "post_created" }>) => void;
-  onExistingPost?: (event: Extract<AiChatStreamEvent, { type: "existing_post" }>) => void;
+  onPostCreated?: (event: Extract<AiChatStreamEvent, { type: 'post_created' }>) => void;
+  onExistingPost?: (
+    event: Extract<AiChatStreamEvent, { type: 'existing_post' }>,
+  ) => void;
   onMatchTurnComplete?: () => void | Promise<void>;
   persistSessionFromStream: (sessionId: string) => void;
   createTypewriter: (options: {
@@ -36,17 +50,17 @@ export interface UseWsChatStreamOptions {
 function applyStreamEventToStore(event: AiChatStreamEvent) {
   const store = useAiChatStore.getState();
 
-  if (event.type === "conversation_patch") {
+  if (event.type === 'conversation_patch') {
     store.applyConversationPatch(event.state);
     return;
   }
 
-  if (event.type === "suggested_replies") {
+  if (event.type === 'suggested_replies') {
     store.setSuggestedReplies(event.replies);
     return;
   }
 
-  if (event.type === "post_recommendations") {
+  if (event.type === 'post_recommendations') {
     store.setPostRecommendationsMeta(event.degraded);
   }
 }
@@ -67,7 +81,7 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
     getAuthHeaders,
     onPostCreated,
     onExistingPost,
-    onMatchTurnComplete,
+    onMatchResults,
     persistSessionFromStream,
     createTypewriter,
     typewriterCharDelayMs = 22,
@@ -88,12 +102,12 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
       for await (const event of stream) {
         applyStreamEventToStore(event);
 
-        if (event.type === "delta") {
+        if (event.type === 'delta') {
           typewriter.append(event.content);
           continue;
         }
 
-        if (event.type === "message_complete") {
+        if (event.type === 'message_complete') {
           if (!typewriter.getTarget()) {
             typewriter.append(event.content);
           } else {
@@ -102,7 +116,7 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
           continue;
         }
 
-        if (event.type === "post_created") {
+        if (event.type === 'post_created') {
           onPostCreated?.(event);
           if (event.post) {
             finishAiMessage((message) => ({
@@ -113,20 +127,23 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
           continue;
         }
 
-        if (event.type === "existing_post") {
+        if (event.type === 'existing_post') {
           onExistingPost?.(event);
           continue;
         }
 
-        if (event.type === "post_recommendations") {
+        if (event.type === 'post_recommendations') {
           finishAiMessage((message) => ({
             ...message,
             recommendedPosts: event.posts,
           }));
+          if (event.posts.length > 0) {
+            void onMatchResults?.(activityLegacyIdRef.current);
+          }
           continue;
         }
 
-        if (event.type === "activity_recommendation") {
+        if (event.type === 'activity_recommendation') {
           finishAiMessage((message) => ({
             ...message,
             recommendedActivity: event.activity,
@@ -134,7 +151,7 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
           continue;
         }
 
-        if (event.type === "suggested_replies") {
+        if (event.type === 'suggested_replies') {
           finishAiMessage((message) => ({
             ...message,
             suggestedReplies: event.replies,
@@ -142,13 +159,13 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
           continue;
         }
 
-        if (event.type === "conversation_patch") {
+        if (event.type === 'conversation_patch') {
           continue;
         }
 
-        if (event.type === "error") {
-          if (process.env.NODE_ENV !== "production") {
-            console.warn("[AI chat] stream error:", event.message);
+        if (event.type === 'error') {
+          if (process.env.NODE_ENV !== 'production') {
+            console.warn('[AI chat] stream error:', event.message);
           }
           typewriter.flush();
           finishAiMessage((message) => ({
@@ -158,12 +175,12 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
           }));
           void Taro.showToast({
             title: formatAiChatToastError(new Error(event.message), streamErrorText),
-            icon: "none",
+            icon: 'none',
           });
           break;
         }
 
-        if (event.type === "done") {
+        if (event.type === 'done') {
           finishAiMessage((message) => ({
             ...message,
             streaming: false,
@@ -177,14 +194,14 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
           if (event.sessionId) {
             persistSessionFromStream(event.sessionId);
           }
-          await onMatchTurnComplete?.();
           break;
         }
       }
     },
     [
+      activityLegacyIdRef,
       onExistingPost,
-      onMatchTurnComplete,
+      onMatchResults,
       onPostCreated,
       persistSessionFromStream,
       setMessages,
@@ -198,10 +215,15 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
       const trimmed = text.trim();
       const activityId = activityLegacyIdRef.current;
       const activityHeaders =
-        activityId != null ? { "X-Activity-Id": String(activityId) } : undefined;
+        activityId != null ? { 'X-Activity-Id': String(activityId) } : undefined;
 
       const pendingImage = image ?? images?.[0];
-      const history = buildApiChatHistory(messagesRef.current, welcomeText, trimmed, pendingImage);
+      const history = buildApiChatHistory(
+        messagesRef.current,
+        welcomeText,
+        trimmed,
+        pendingImage,
+      );
 
       const finishAiMessage = (updater: (current: ChatUiMessage) => ChatUiMessage) => {
         setMessages((prev) =>
@@ -239,7 +261,7 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
 
         await processStreamEvents(stream, aiMsgId, typewriter);
       } catch (error) {
-        if ((error as Error).name === "AbortError") {
+        if ((error as Error).name === 'AbortError') {
           typewriter.stop();
           throw error;
         }
@@ -253,7 +275,7 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
         }));
         void Taro.showToast({
           title: formatAiChatToastError(error, streamErrorText),
-          icon: "none",
+          icon: 'none',
         });
       } finally {
         finishAiMessage((message) => ({ ...message, streaming: false }));

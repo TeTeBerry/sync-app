@@ -469,43 +469,6 @@
   white-space: nowrap;
 }
 
-.s-home-feed__link {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  flex-shrink: 0;
-  min-width: 0;
-  min-height: 0;
-  padding: 0;
-  margin: 0;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  background-color: transparent;
-  box-shadow: none;
-  color: #8e8e93;
-  font-size: var(--s-type-small);
-  font-weight: var(--s-fw-extrabold);
-  line-height: 1;
-  cursor: pointer;
-  appearance: none;
-  -webkit-appearance: none;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.s-home-feed__link-text {
-  color: #8e8e93;
-  font-size: var(--s-type-small);
-  font-weight: var(--s-fw-extrabold);
-  line-height: 1;
-  white-space: nowrap;
-}
-
-.s-home-feed__link::after {
-  display: none;
-  border: 0;
-}
-
 // ── Heat footer ───────────────────────────────────────────────────────────────
 
 .s-home__heat {

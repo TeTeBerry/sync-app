@@ -54,12 +54,12 @@
 
 - [x] `goAiAssistant({ activityLegacyId })`；`navigationStore`
 - [x] `useAiChatStream`：`activityLegacyId` body + `X-Activity-Id` header
-- [x] SSE `post_created` → toast + invalidate 帖列表
+- [x] WebSocket `post_created` → toast + invalidate 帖列表
 - [x] 审核拒绝：后端 `delta` 文案展示（无单独事件类型）
 
 ### P4 ✅
 
-- [x] 探索 Tab 从 `BottomNav` 隐藏（页面保留）
+- [x] 探索 Tab 已移除（`pages/explore`、底栏入口、`packageEvent/pages/posts` 全量帖页）
 - [x] `docs/API.md` 与 `syncApi.ts` 一致
 - [x] Mock 模式：`!isApiEnabled()` 仍可本地演示
 
@@ -90,7 +90,7 @@
 ## 明确不做
 
 - [ ] 活动详情 / 独立页 **发帖表单**（产品：仅 AI 闭环）
-- [ ] Explore 功能与底栏入口
+- [x] Explore 功能与底栏入口（已删除，不做）
 - [ ] 登录页（业务期）
 
 ---
@@ -109,7 +109,7 @@
 | PATCH/DELETE | `/posts/:id` | ✅ |
 | POST | `/posts/:id/like|comments|applications` | ✅ |
 | GET | `/profile`… | ✅ |
-| POST | `/ai/chat` (SSE) | ✅ |
+| WS | `/ai/chat/ws` | ✅ |
 | GET | `/chat/sessions/:id` | ✅ |
 | GET/PATCH | `/notifications/*` | ✅ 列表 + 深链 |
 
@@ -121,7 +121,7 @@
 src/
 ├── api/syncApi.ts              ownerParams + REST
 ├── hooks/useSyncApi.ts         queries + mutations + invalidatePostQueries
-├── hooks/useAiChatStream.ts    SSE + post_created
+├── hooks/useAiChatStream.ts    WebSocket + post_created
 ├── utils/aiChatStream.ts       流解析
 ├── stores/navigationStore.ts   AI 跳转 activityLegacyId
 ├── pages/events/               活动列表 API
@@ -137,7 +137,7 @@ src/
 
 ```bash
 TARO_APP_API_BASE_URL=/api
-TARO_APP_AI_CHAT_URL=/api/ai/chat
+TARO_APP_AI_CHAT_WS_URL=ws://127.0.0.1:3000/api/ai/chat/ws
 npm run dev:h5
 ```
 
@@ -150,7 +150,7 @@ npm run dev:h5
 - [x] 活动 Tab / 详情数据来自 API（API 模式）
 - [x] 点赞、评论、申请刷新后仍存在
 - [x] 活动页 → AI → 发帖 → 活动下可见帖子
-- [x] 探索 Tab 未在底栏上线
+- [x] 探索 Tab 与全量帖栈页已下线；首页仅展示热门帖预览
 
 ### P0（登录期）
 

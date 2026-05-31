@@ -12,6 +12,7 @@ import {
   persistSessionId,
 } from "../../utils/session";
 import type { ChatUiMessage } from "../../types/aiChat";
+import { closeAiChatWsConnection } from "../../utils/aiChatWs";
 import { createMessageId } from "./createMessageId";
 
 export interface UseChatSessionOptions {
@@ -162,6 +163,7 @@ export function useChatSession(options: UseChatSessionOptions) {
   const resetSession = useCallback(async () => {
     historyLoadSeqRef.current += 1;
     hasLoadedHistoryRef.current = false;
+    closeAiChatWsConnection("clear chat");
 
     const previousSessionId = sessionIdRef.current;
     try {

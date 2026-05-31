@@ -1,4 +1,5 @@
 import Taro from "@tarojs/taro";
+import { uploadImageFile } from "./uploadImage";
 
 /** 与后端一致：Base64 解码后不超过 10MB */
 export const MAX_IMAGE_BASE64_BYTES = 10 * 1024 * 1024;
@@ -30,7 +31,7 @@ function readFileAsJpegDataUrl(filePath: string): Promise<string> {
   });
 }
 
-async function compressToJpegDataUrl(filePath: string): Promise<string> {
+async function compressToJpegPath(filePath: string): Promise<string> {
   let path = filePath;
   let quality = 80;
 
@@ -42,7 +43,7 @@ async function compressToJpegDataUrl(filePath: string): Promise<string> {
 
     const dataUrl = await readFileAsJpegDataUrl(path);
     if (base64ByteSize(dataUrl) <= MAX_IMAGE_BASE64_BYTES) {
-      return dataUrl;
+      return path;
     }
 
     quality = Math.max(35, quality - 10);
@@ -52,16 +53,16 @@ async function compressToJpegDataUrl(filePath: string): Promise<string> {
   if (base64ByteSize(finalDataUrl) > MAX_IMAGE_BASE64_BYTES) {
     throw new ChatImageTooLargeError();
   }
-  return finalDataUrl;
+  return path;
 }
 
-/** 选择并压缩聊天图片，返回 JPEG data URL */
+/** 选择并压缩聊天图片，返回本地临时路径（用于预览与上传） */
 export async function pickAndCompressChatImage(): Promise<string | null> {
   const images = await pickAndCompressChatImages(1);
   return images[0] ?? null;
 }
 
-/** 选择并压缩多张聊天图片，返回 JPEG data URL 数组 */
+/** 选择并压缩多张聊天图片，返回本地临时路径数组 */
 export async function pickAndCompressChatImages(maxCount = 6): Promise<string[]> {
   const result = await Taro.chooseImage({
     count: maxCount,
@@ -75,13 +76,30 @@ export async function pickAndCompressChatImages(maxCount = 6): Promise<string[]>
   const compressed: string[] = [];
   for (const path of paths) {
     try {
-      const dataUrl = await compressToJpegDataUrl(path);
-      compressed.push(dataUrl);
+      const jpegPath = await compressToJpegPath(path);
+      compressed.push(jpegPath);
     } catch {
       // skip failed images
     }
   }
   return compressed;
+}
+
+function isRemoteImageRef(ref: string): boolean {
+  return /^https?:\/\//i.test(ref.trim());
+}
+
+/** Upload local temp paths; pass through existing server URLs. */
+export async function uploadChatImageRefs(refs: string[]): Promise<string[]> {
+  const uploaded: string[] = [];
+  for (const ref of refs) {
+    if (isRemoteImageRef(ref)) {
+      uploaded.push(ref.trim());
+      continue;
+    }
+    uploaded.push(await uploadImageFile(ref));
+  }
+  return uploaded;
 }
 
 export function validateChatImageDataUrl(dataUrl: string): void {

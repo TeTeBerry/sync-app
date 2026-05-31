@@ -1,4 +1,5 @@
-import stormLogoSrc from "../../assets/images/storm-logo.png";
+/** Kept under packageEvent so the PNG is emitted into the event subpackage, not the main package. */
+import stormLogoSrc from "../../packageEvent/assets/storm-logo.png";
 import {
   MAP_STORM_LOGO_CONTENT_TRIM,
   MAP_STORM_LOGO_GLOW_EXTRA_PX,

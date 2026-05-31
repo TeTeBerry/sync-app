@@ -1,5 +1,5 @@
-import { useMemo } from "react";
-import { useApiQuery } from "./useApiQuery";
+import { useMemo } from 'react';
+import { useApiQuery } from './useApiQuery';
 import {
   addPostComment,
   applyToPost,
@@ -7,7 +7,6 @@ import {
   deletePost,
   fetchActivities,
   fetchActivityByLegacyId,
-  fetchAllPosts,
   fetchCurrentUser,
   fetchHomeSummary,
   fetchNotificationUnreadCount,
@@ -33,7 +32,7 @@ import {
   submitReport,
   updateCurrentUser,
   updatePost,
-} from "../api/syncApi";
+} from '../api/syncApi';
 import type {
   EventDetailPost,
   HomeFeedPost,
@@ -41,28 +40,28 @@ import type {
   PurchaseProfilePackagePayload,
   ReportPayload,
   UpdateCurrentUserPayload,
-} from "../types/backend";
-import { isApiEnabled } from "../constants/api";
-import { getClientUserId } from "../utils/session";
-import { seedActivityDetailsFromList } from "../utils/activityDetailCache";
+} from '../types/backend';
+import { isApiEnabled } from '../constants/api';
+import { getClientUserId } from '../utils/session';
+import { seedActivityDetailsFromList } from '../utils/activityDetailCache';
 import {
   HOME_POPULAR_POSTS_PERSIST_LIMIT,
   persistHomeSummary,
   persistPopularPosts,
-} from "../utils/homeCacheStorage";
+} from '../utils/homeCacheStorage';
 import {
   mapActivitiesToEvents,
   pickHomeFeaturedEvents,
   type EventCardUi,
   type FeaturedEvent,
-} from "../utils/apiMappers";
-import { sanitizeImageList, sanitizeRemoteImageUrl } from "../utils/imageUrl";
+} from '../utils/apiMappers';
+import { sanitizeImageList, sanitizeRemoteImageUrl } from '../utils/imageUrl';
 import {
   compareActivitiesNearestFirst,
   findNearestUpcomingActivity,
   getActivityStatusFromActivity,
   type ActivityDateFields,
-} from "../utils/activityStatus";
+} from '../utils/activityStatus';
 import {
   invalidateNotifications,
   invalidateRegistration,
@@ -76,7 +75,7 @@ import {
   patchLikedPostInCaches,
   patchPostStatusInCaches,
   patchUpdatedProfilePostInCaches,
-} from "../utils/queryInvalidation";
+} from '../utils/queryInvalidation';
 
 export async function invalidateNotificationQueries() {
   return invalidateNotifications();
@@ -87,7 +86,7 @@ export function useNotificationsQuery() {
   const userId = getClientUserId();
 
   return useApiQuery({
-    queryKey: ["notifications", "list", userId],
+    queryKey: ['notifications', 'list', userId],
     queryFn: () => fetchNotifications(userId),
     enabled,
     staleTime: 30_000,
@@ -100,7 +99,7 @@ export function useNotificationUnreadCount(options?: QueryEnableOptions) {
   const userId = getClientUserId();
 
   return useApiQuery({
-    queryKey: ["notifications", "unread", userId],
+    queryKey: ['notifications', 'unread', userId],
     queryFn: () => fetchNotificationUnreadCount(userId),
     enabled,
     staleTime: 30_000,
@@ -138,7 +137,7 @@ export function useActivitiesQuery(options?: QueryEnableOptions) {
   const enabled = isApiEnabled() && tabEnabled;
 
   return useApiQuery({
-    queryKey: ["activities"],
+    queryKey: ['activities'],
     queryFn: async () => {
       const activities = await fetchActivities();
       seedActivityDetailsFromList(activities);
@@ -168,7 +167,7 @@ export function useEventList(options?: QueryEnableOptions) {
 
 export function useHomeSummary() {
   return useApiQuery({
-    queryKey: ["home", "summary"],
+    queryKey: ['home', 'summary'],
     queryFn: async () => {
       const result = await fetchHomeSummary();
       persistHomeSummary(result);
@@ -185,7 +184,7 @@ export function useFeaturedEvents() {
   const items = useMemo((): FeaturedEvent[] => {
     const signupEvents = summary?.signupEvents ?? [];
     const inProgress = signupEvents.filter(
-      (item) => getActivityStatusFromActivity(item.date, item.title) === "in_progress",
+      (item) => getActivityStatusFromActivity(item.date, item.title) === 'in_progress',
     );
     return pickHomeFeaturedEvents(inProgress);
   }, [summary]);
@@ -197,14 +196,14 @@ export function useFeaturedEvents() {
 }
 
 function mergeHomeCountdownCandidates(
-  signupEvents: HomeSummary["signupEvents"],
-  activities: import("../types/backend").BackendActivity[] | undefined,
+  signupEvents: HomeSummary['signupEvents'],
+  activities: import('../types/backend').BackendActivity[] | undefined,
 ): ActivityDateFields[] {
   const seen = new Set<string>();
   const candidates: ActivityDateFields[] = [];
 
   const add = (title: string, date?: string) => {
-    const key = `${title}|${date ?? ""}`;
+    const key = `${title}|${date ?? ''}`;
     if (seen.has(key)) return;
     seen.add(key);
     candidates.push({ title, date });
@@ -238,10 +237,11 @@ export function useNearestUpcomingForCountdown() {
 }
 
 export function useActivityDetailQuery(legacyId?: number) {
-  const enabled = isApiEnabled() && legacyId != null && !Number.isNaN(legacyId) && legacyId > 0;
+  const enabled =
+    isApiEnabled() && legacyId != null && !Number.isNaN(legacyId) && legacyId > 0;
 
   return useApiQuery({
-    queryKey: ["activities", "detail", legacyId],
+    queryKey: ['activities', 'detail', legacyId],
     queryFn: () => fetchActivityByLegacyId(legacyId as number),
     enabled,
     staleTime: 60_000,
@@ -254,7 +254,7 @@ export function usePopularPostsQuery(options?: QueryEnableOptions) {
   const userId = getClientUserId();
 
   return useApiQuery({
-    queryKey: ["posts", "popular", userId],
+    queryKey: ['posts', 'popular', userId],
     queryFn: async () => {
       const result = await fetchPopularPosts(HOME_POPULAR_POSTS_PERSIST_LIMIT);
       persistPopularPosts(result);
@@ -279,7 +279,7 @@ export function usePopularPosts(options?: QueryEnableOptions) {
 }
 
 function mapHomeFeedPost(item: HomeFeedPost): HomeFeedPost {
-  const name = item.name?.trim() || "用户";
+  const name = item.name?.trim() || '用户';
   const handle = item.handle?.trim() || `@${name}`;
   return {
     id: item.id,
@@ -295,7 +295,7 @@ function mapHomeFeedPost(item: HomeFeedPost): HomeFeedPost {
     liked: item.liked,
     comments: item.comments ?? 0,
     avatar: sanitizeRemoteImageUrl(item.avatar) ?? item.avatar,
-    status: item.status ?? "招募中",
+    status: item.status ?? '招募中',
     activityLegacyId: item.activityLegacyId,
     contentTypes: item.contentTypes,
     images: sanitizeImageList(item.images),
@@ -307,7 +307,7 @@ export function useAllPostsQuery() {
   const userId = getClientUserId();
 
   const query = useApiQuery({
-    queryKey: ["posts", "all", userId],
+    queryKey: ['posts', 'all', userId],
     queryFn: fetchAllPosts,
     enabled,
     staleTime: 30_000,
@@ -323,14 +323,20 @@ export function useAllPostsQuery() {
   };
 }
 
-export function useEventPostsQuery(activityLegacyId?: number, options?: QueryEnableOptions) {
+export function useEventPostsQuery(
+  activityLegacyId?: number,
+  options?: QueryEnableOptions,
+) {
   const tabEnabled = options?.enabled ?? true;
   const enabled =
-    isApiEnabled() && activityLegacyId != null && !Number.isNaN(activityLegacyId) && tabEnabled;
+    isApiEnabled() &&
+    activityLegacyId != null &&
+    !Number.isNaN(activityLegacyId) &&
+    tabEnabled;
   const userId = getClientUserId();
 
   return useApiQuery({
-    queryKey: ["posts", "activity", activityLegacyId, userId],
+    queryKey: ['posts', 'activity', activityLegacyId, userId],
     queryFn: () => fetchPostsByActivity(activityLegacyId as number),
     enabled,
     staleTime: 30_000,
@@ -341,7 +347,7 @@ export function usePostCommentsQuery(postId: string, enabled: boolean) {
   const apiEnabled = isApiEnabled();
 
   return useApiQuery({
-    queryKey: ["posts", postId, "comments"],
+    queryKey: ['posts', postId, 'comments'],
     queryFn: () => fetchPostComments(postId),
     enabled: apiEnabled && enabled && Boolean(postId),
     staleTime: 10_000,
@@ -352,7 +358,7 @@ export function useCurrentUserQuery() {
   const enabled = isApiEnabled();
 
   return useApiQuery({
-    queryKey: ["users", "me"],
+    queryKey: ['users', 'me'],
     queryFn: fetchCurrentUser,
     enabled,
     staleTime: 60_000,
@@ -379,7 +385,9 @@ export async function cancelActivityRegistrationAndInvalidate(legacyId: number) 
   return result;
 }
 
-export async function updateCurrentUserAndInvalidate(payload: UpdateCurrentUserPayload) {
+export async function updateCurrentUserAndInvalidate(
+  payload: UpdateCurrentUserPayload,
+) {
   const user = await updateCurrentUser(payload);
   await Promise.all([invalidateUser(), invalidateProfile()]);
   return user;
@@ -398,10 +406,12 @@ export async function submitReportAndInvalidate(payload: ReportPayload) {
 export function useProfileSummaryQuery(activityLegacyId?: number) {
   const enabled = isApiEnabled();
   const scopedId =
-    activityLegacyId != null && !Number.isNaN(activityLegacyId) ? activityLegacyId : undefined;
+    activityLegacyId != null && !Number.isNaN(activityLegacyId)
+      ? activityLegacyId
+      : undefined;
 
   return useApiQuery({
-    queryKey: ["profile", "summary", scopedId ?? "all"],
+    queryKey: ['profile', 'summary', scopedId ?? 'all'],
     queryFn: () => fetchProfileSummary(scopedId),
     enabled,
     staleTime: 60_000,
@@ -412,7 +422,7 @@ export function useProfilePackagesQuery() {
   const enabled = isApiEnabled();
 
   return useApiQuery({
-    queryKey: ["profile", "packages"],
+    queryKey: ['profile', 'packages'],
     queryFn: fetchProfilePackages,
     enabled,
     staleTime: 300_000,
@@ -422,17 +432,21 @@ export function useProfilePackagesQuery() {
 export function useProfileEntitlementsQuery(activityLegacyId?: number) {
   const enabled = isApiEnabled();
   const scopedId =
-    activityLegacyId != null && !Number.isNaN(activityLegacyId) ? activityLegacyId : undefined;
+    activityLegacyId != null && !Number.isNaN(activityLegacyId)
+      ? activityLegacyId
+      : undefined;
 
   return useApiQuery({
-    queryKey: ["profile", "entitlements", scopedId ?? "all"],
+    queryKey: ['profile', 'entitlements', scopedId ?? 'all'],
     queryFn: () => fetchProfileEntitlements(scopedId),
     enabled,
     staleTime: 30_000,
   });
 }
 
-export async function purchaseProfilePackageAndInvalidate(payload: PurchaseProfilePackagePayload) {
+export async function purchaseProfilePackageAndInvalidate(
+  payload: PurchaseProfilePackagePayload,
+) {
   const result = await purchaseProfilePackage(payload);
   await invalidateProfilePackageState();
   return result;
@@ -440,16 +454,18 @@ export async function purchaseProfilePackageAndInvalidate(payload: PurchaseProfi
 
 export async function consumeProfileAiMatchAndInvalidate(activityLegacyId: number) {
   if (Number.isNaN(activityLegacyId)) {
-    throw new Error("activityLegacyId is required");
+    throw new Error('activityLegacyId is required');
   }
   const result = await consumeProfileAiMatch({ activityLegacyId });
   await invalidateProfileEntitlements();
   return result;
 }
 
-export async function consumeProfileContactUnlockAndInvalidate(activityLegacyId: number) {
+export async function consumeProfileContactUnlockAndInvalidate(
+  activityLegacyId: number,
+) {
   if (Number.isNaN(activityLegacyId)) {
-    throw new Error("activityLegacyId is required");
+    throw new Error('activityLegacyId is required');
   }
   const result = await consumeProfileContactUnlock({ activityLegacyId });
   await invalidateProfileEntitlements();
@@ -460,7 +476,7 @@ export function useProfileActivitiesQuery() {
   const enabled = isApiEnabled();
 
   return useApiQuery({
-    queryKey: ["profile", "activities"],
+    queryKey: ['profile', 'activities'],
     queryFn: fetchProfileActivities,
     enabled,
     staleTime: 60_000,
@@ -471,7 +487,7 @@ export function useProfilePostsQuery() {
   const enabled = isApiEnabled();
 
   return useApiQuery({
-    queryKey: ["profile", "posts"],
+    queryKey: ['profile', 'posts'],
     queryFn: fetchProfilePosts,
     enabled,
     staleTime: 30_000,
