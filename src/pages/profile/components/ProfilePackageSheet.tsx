@@ -35,6 +35,7 @@ import type {
   ProfileActivityItem,
 } from "../../../types/backend";
 import { compareActivitiesNearestFirst } from "../../../utils/activityStatus";
+import { safeTrim } from "../../../utils/safeString";
 import { ImageWithFallback } from "../../../components/ImageWithFallback";
 import { ScrollView, Text, View } from "@tarojs/components";
 
@@ -81,7 +82,7 @@ function featureIconColor(tierId: PackageTierId, selected: boolean): string {
 }
 
 function formatActivityMeta(item: ProfileActivityItem): string {
-  return [item.date?.trim(), item.location?.trim()].filter(Boolean).join(" · ");
+  return [safeTrim(item.date), safeTrim(item.location)].filter(Boolean).join(" · ");
 }
 
 function PackageFeatureRow({

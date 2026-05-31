@@ -1,18 +1,3 @@
-.s-post-action-sheet.s-overlay--sheet {
-  padding: 0 12px calc(var(--s-tabbar-total) + 12px);
-
-  .s-overlay__panel {
-    padding: 8px 8px 12px;
-    box-sizing: border-box;
-  }
-
-  .s-overlay-sheet__item,
-  .s-overlay-sheet__cancel {
-    min-height: 48px;
-    box-sizing: border-box;
-  }
-}
-
 .s-post-action-menu__trigger,
 .s-post-share-btn {
   display: inline-flex;
@@ -24,6 +9,12 @@
   background: transparent;
   color: var(--muted-foreground);
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+
+  &::after {
+    display: none;
+    border: 0;
+  }
 
   &:active {
     opacity: 0.7;

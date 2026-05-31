@@ -1,5 +1,6 @@
-import type { LucideIcon } from "lucide-react-taro";
 import { Beer, Droplet, Footprints, Toilet } from "lucide-react-taro";
+
+type LiveInfoIcon = typeof Footprints;
 
 export type LiveInfoCategoryId =
   | "entry_crowd"
@@ -10,7 +11,7 @@ export type LiveInfoCategoryId =
 export type LiveInfoCategoryConfig = {
   id: LiveInfoCategoryId;
   label: string;
-  icon: LucideIcon;
+  icon: LiveInfoIcon;
   color: string;
   scaleLeft: string;
   scaleRight: string;

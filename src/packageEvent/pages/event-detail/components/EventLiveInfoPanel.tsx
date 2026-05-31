@@ -42,7 +42,7 @@ export function EventLiveInfoPanel({
   if (loading) {
     return (
       <View className="s-live-info-panel s-live-info-panel--loading">
-        <ThemedPageLoader variant="inline" label="加载实时资讯…" minHeight={200} />
+        <ThemedPageLoader variant="skeleton-live-feed" minHeight={200} />
       </View>
     );
   }

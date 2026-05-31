@@ -1,5 +1,5 @@
 import "./event-detail.scss";
-import Taro, { useDidShow, useRouter } from "@tarojs/taro";
+import Taro, { useRouter } from "@tarojs/taro";
 import {
   lazy,
   Suspense,
@@ -11,13 +11,15 @@ import {
 } from "react";
 import { Map } from "lucide-react-taro";
 import {
-  endRouteTransition,
   goAiAssistant,
   goBack,
   goEventMap,
+  goExclusiveItinerary,
   resolveEventDetailIdFromQuery,
   ROUTES,
+  warmAiAssistant,
 } from "../../../utils/route";
+import { useEndRouteTransitionOnShow } from "../../../hooks/useEndRouteTransitionOnShow";
 import { BottomNavSlot } from "../../../components/BottomNav";
 import ThemedPageLoader from "../../../components/ThemedPageLoader";
 import { useConfirmDialog } from "../../../hooks/useConfirmDialog";
@@ -69,6 +71,7 @@ import { usePostPageShare } from "../../../hooks/usePostPageShare";
 import type { PostSharePayload } from "../../../utils/postShare";
 import { Button, ScrollView, Text, View } from "@tarojs/components";
 import { EventDetailAiMatchCard } from "./components/EventDetailAiMatchCard";
+import { EventDetailExclusiveItineraryButton } from "./components/EventDetailExclusiveItineraryButton";
 import { EventLiveInfoUpdateSheet } from "./components/EventLiveInfoUpdateSheet";
 import type { EventLiveInfoTabActions } from "./live/EventLiveInfoTab";
 import type { PublishLiveInfoPayload } from "./useEventLiveInfo";
@@ -82,6 +85,7 @@ const EventLiveInfoTab = lazy(() =>
 );
 
 const EventDetailPage = () => {
+  useEndRouteTransitionOnShow();
   const router = useRouter();
   const navInsets = useNavBarInsets();
   const [scrollTop, setScrollTop] = useState<number | undefined>();
@@ -96,12 +100,14 @@ const EventDetailPage = () => {
   const highlightPostId = router.params.postId?.trim() || "";
 
   useEffect(() => {
-    if (Number.isFinite(eventId) && eventId> 0) {
+    if (Number.isFinite(eventId) && eventId > 0) {
       useNavigationStore.getState().setActiveActivityLegacyId(eventId);
-      return;
     }
-    endRouteTransition();
   }, [eventId]);
+
+  useEffect(() => {
+    warmAiAssistant();
+  }, []);
 
   const activityQuery = useActivityDetailQuery(eventId);
   const postsQuery = useEventPostsInfiniteQuery(eventId, {
@@ -215,13 +221,9 @@ const EventDetailPage = () => {
 
   usePostPageShare({ getDefaultShare });
   const activityStatus = getActivityStatusFromActivity(activityDate, title);
-  const headerReady =
-    !activityQuery.isLoading && Boolean(title) && !activityQuery.isError;
-  usePageRouteReady(headerReady);
-
-  useDidShow(() => {
-    endRouteTransition();
-  });
+  const showHeaderSkeleton = !title && activityQuery.isLoading;
+  const routeContentReady = Boolean(title) || showHeaderSkeleton;
+  usePageRouteReady(routeContentReady);
 
   const handleBack = useCallback(() => {
     goBack(ROUTES.HOME);
@@ -405,6 +407,14 @@ const EventDetailPage = () => {
     recordAiShortcutTagUse(tag);
   }, []);
 
+  const handleOpenExclusiveItinerary = useCallback(() => {
+    if (!Number.isFinite(eventId) || eventId <= 0) {
+      void Taro.showToast({ title: "活动信息无效", icon: "none" });
+      return;
+    }
+    goExclusiveItinerary(eventId);
+  }, [eventId]);
+
   const openAi = useCallback(
     (message?: string) => {
       const trimmed = message?.trim();
@@ -462,7 +472,6 @@ const EventDetailPage = () => {
   }
 
   const postsLoading = !feedReady || postsQuery.isLoading;
-  const showHeaderSkeleton = activityQuery.isLoading || !title;
   const showPostsEnd =
     contentTab === "posts" &&
     postItems.length > 0 &&
@@ -523,18 +532,21 @@ const EventDetailPage = () => {
         ) : null}
 
         {!showHeaderSkeleton ? (
-          <EventDetailContentTabs
-            active={contentTab}
-            postsCount={postItems.length}
-            liveCount={liveFeedCount}
-            onChange={setContentTab}
-          />
+          <View className="s-event-detail__feed-section">
+            <EventDetailExclusiveItineraryButton onPress={handleOpenExclusiveItinerary} />
+            <EventDetailContentTabs
+              active={contentTab}
+              postsCount={postItems.length}
+              liveCount={liveFeedCount}
+              onChange={setContentTab}
+            />
+          </View>
         ) : null}
 
         {!showHeaderSkeleton && contentTab === "posts" ? (
         <View className="s-event-detail__posts">
           {postsLoading ? (
-            <ThemedPageLoader variant="inline" label="加载组队帖…" minHeight={80} />
+            <ThemedPageLoader variant="skeleton-event-posts" minHeight={200} />
           ) : postItems.length === 0 ? (
             <Text className="s-event-detail__empty">暂无组队帖，来发布第一条吧</Text>
           ) : (
@@ -562,9 +574,7 @@ const EventDetailPage = () => {
 
         {!showHeaderSkeleton && contentTab === "live" ? (
           <Suspense
-            fallback={
-              <ThemedPageLoader variant="inline" label="加载实时资讯…" minHeight={200} />
-            }>
+            fallback={<ThemedPageLoader variant="skeleton-live-feed" minHeight={200} />}>
             <EventLiveInfoTab
               eventId={eventId}
               userName={displayUserName}

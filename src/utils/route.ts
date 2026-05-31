@@ -10,8 +10,17 @@ import {
   normalizeQueryString,
   parseQueryString,
 } from "./queryString";
+import { getCacheData } from "../hooks/useApiQuery";
+import { findBackendActivityByLegacyId } from "./apiMappers";
+import { seedActivityDetailCache } from "./activityDetailCache";
 import { PRELOAD_HOT_ROUTES_MS } from "./timing";
-import { preloadEventSubpackage } from "./subpackagePreload";
+import {
+  preloadAiSubpackage,
+  preloadEventSubpackage,
+  preloadProfileSubpackage,
+  preloadStackSubpackages,
+} from "./subpackagePreload";
+import type { BackendActivity } from "../types/backend";
 
 export { parseActivityLegacyId } from "./activityLegacyId";
 
@@ -20,11 +29,14 @@ export const ROUTES = {
   EVENTS: "/pages/events/index",
   PROFILE: "/pages/profile/index",
   PROFILE_ACTIVITIES: "/packageProfile/pages/profile-activities/index",
+  PROFILE_BENEFITS: "/packageProfile/pages/profile-benefits/index",
   PROFILE_POSTS: "/packageProfile/pages/profile-posts/index",
   SETTINGS: "/packageProfile/pages/settings/index",
   AI_ASSISTANT: "/packageAi/pages/ai-assistant/index",
   EVENT_DETAIL: "/packageEvent/pages/event-detail/index",
   EVENT_MAP: "/packageEvent/pages/event-map/index",
+  EXCLUSIVE_ITINERARY: "/packageEvent/pages/exclusive-itinerary/index",
+  MY_ITINERARY: "/packageEvent/pages/my-itinerary/index",
   NOTIFICATIONS: "/packageProfile/pages/notifications/index",
   ALL_POSTS: "/packageEvent/pages/posts/index",
 } as const;
@@ -37,8 +49,12 @@ const TAB_ROUTE_PATHS = new Set<RoutePath>([
   ROUTES.PROFILE,
 ]);
 
-/** Tab-show preload targets; event detail is warmed on tap via preloadPageSafe instead. */
-const PRELOAD_HOT_ROUTES: RoutePath[] = [];
+/** Stack pages warmed after tab settle; event detail also preloaded on card touch. */
+const PRELOAD_HOT_ROUTES: RoutePath[] = [
+  ROUTES.EVENT_DETAIL,
+  ROUTES.NOTIFICATIONS,
+  ROUTES.AI_ASSISTANT,
+];
 
 const tabRouteListeners = new Set<() => void>();
 
@@ -229,7 +245,7 @@ export function preloadHotRoutes() {
     if (isNavigating) {
       return;
     }
-    preloadEventSubpackage();
+    preloadStackSubpackages();
     for (const route of PRELOAD_HOT_ROUTES) {
       preloadPageSafe(route);
     }
@@ -251,8 +267,19 @@ export function selectRouteTransitionActive(
   return transitionEventId === eventId;
 }
 
-export function beginRouteTransition(options?: { eventId?: number }) {
+export function beginRouteTransition(options?: {
+  eventId?: number;
+  tabTarget?: RoutePath;
+}) {
   useNavigationStore.getState().beginRouteTransition(options);
+}
+
+/** Themed overlay while switching between tab-bar pages (BottomNav / switchTab). */
+export function beginTabRouteTransition(target: RoutePath) {
+  if (!isTabRoute(target) || shouldSkipNavigation(target)) {
+    return;
+  }
+  beginRouteTransition({ tabTarget: target });
 }
 
 export function endRouteTransition() {
@@ -295,13 +322,14 @@ export function switchTabTo(url: RoutePath) {
     return;
   }
 
+  beginTabRouteTransition(url);
+
   if (process.env.TARO_ENV !== "weapp") {
     reLaunchTo(url);
     return;
   }
 
   markNavigationStart(url);
-  endRouteTransition();
 
   runSerializedNavigation(
     () =>
@@ -313,6 +341,7 @@ export function switchTabTo(url: RoutePath) {
             resolve();
           },
           fail: () => {
+            endRouteTransition();
             Taro.reLaunch({
               url,
               complete: () => resolve(),
@@ -366,6 +395,13 @@ export function goEventDetail(
     void Taro.showToast({ title: "活动信息无效", icon: "none" });
     return;
   }
+  const activities = getCacheData<BackendActivity[]>(["activities"]);
+  const fromList = activities
+    ? findBackendActivityByLegacyId(activities, legacyId)
+    : undefined;
+  if (fromList) {
+    seedActivityDetailCache(fromList);
+  }
   useNavigationStore.getState().setActiveActivityLegacyId(legacyId);
   const query: Record<string, string> = {
     id: String(legacyId),
@@ -375,6 +411,8 @@ export function goEventDetail(
   if (postId) {
     query.postId = postId;
   }
+  preloadEventSubpackage();
+  preloadPageSafe(ROUTES.EVENT_DETAIL, query);
   navigateToSafe(buildPageUrl(ROUTES.EVENT_DETAIL, query), {
     eventId: legacyId,
   });
@@ -384,6 +422,40 @@ export type GoEventMapOptions = {
   title?: string;
   dateRange?: string;
 };
+
+export function goExclusiveItinerary(activityLegacyId: number) {
+  const legacyId = parseActivityLegacyId(activityLegacyId);
+  if (legacyId == null) {
+    void Taro.showToast({ title: "活动信息无效", icon: "none" });
+    return;
+  }
+  const query: Record<string, string> = {
+    id: String(legacyId),
+    activityLegacyId: String(legacyId),
+  };
+  useNavigationStore.getState().setActiveActivityLegacyId(legacyId);
+  preloadEventSubpackage();
+  navigateToSafe(buildPageUrl(ROUTES.EXCLUSIVE_ITINERARY, query));
+}
+
+export function goMyItinerary(
+  activityLegacyId?: number,
+  selectedDjIds?: string[],
+) {
+  const query: Record<string, string> = {};
+  const legacyId = parseActivityLegacyId(activityLegacyId);
+  if (legacyId != null) {
+    query.id = String(legacyId);
+    query.activityLegacyId = String(legacyId);
+    useNavigationStore.getState().setActiveActivityLegacyId(legacyId);
+  }
+  const ids = selectedDjIds?.map((id) => id.trim()).filter(Boolean) ?? [];
+  if (ids.length > 0) {
+    query.selectedDjIds = ids.join(",");
+  }
+  preloadEventSubpackage();
+  navigateToSafe(buildPageUrl(ROUTES.MY_ITINERARY, query));
+}
 
 export function goEventMap(
   activityLegacyId: number,
@@ -444,6 +516,12 @@ export function goProfile() {
   switchTabTo(ROUTES.PROFILE);
 }
 
+/** Full benefits list (e.g. from upgrade sheets or profile preview link). */
+export function goProfileBenefits() {
+  endRouteTransition();
+  navigateToSafe(ROUTES.PROFILE_BENEFITS);
+}
+
 /** Profile tab with package upgrade sheet open. */
 export function goProfileUpgrade() {
   useNavigationStore.getState().setProfileIntent({ openPackageSheet: true });
@@ -454,6 +532,12 @@ export type GoAiAssistantOptions = Pick<
   AiAssistantNavIntent,
   "initialMessage" | "activityLegacyId"
 >;
+
+/** Pre-download AI subpackage and warm ai-assistant page (touch / mount). */
+export function warmAiAssistant(): void {
+  preloadAiSubpackage();
+  preloadPageSafe(ROUTES.AI_ASSISTANT);
+}
 
 export function goAiAssistant(options?: GoAiAssistantOptions) {
   const intent: AiAssistantNavIntent = {};
@@ -475,10 +559,13 @@ export function goAiAssistant(options?: GoAiAssistantOptions) {
     useNavigationStore.getState().setAiAssistantIntent(intent);
   }
 
+  warmAiAssistant();
   navigateToSafe(ROUTES.AI_ASSISTANT);
 }
 
 export function goNotifications() {
+  preloadProfileSubpackage();
+  preloadPageSafe(ROUTES.NOTIFICATIONS);
   navigateToSafe(ROUTES.NOTIFICATIONS);
 }
 

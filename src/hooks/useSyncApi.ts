@@ -44,6 +44,7 @@ import type {
 } from "../types/backend";
 import { isApiEnabled } from "../constants/api";
 import { getClientUserId } from "../utils/session";
+import { seedActivityDetailsFromList } from "../utils/activityDetailCache";
 import {
   HOME_POPULAR_POSTS_PERSIST_LIMIT,
   persistHomeSummary,
@@ -138,7 +139,11 @@ export function useActivitiesQuery(options?: QueryEnableOptions) {
 
   return useApiQuery({
     queryKey: ["activities"],
-    queryFn: fetchActivities,
+    queryFn: async () => {
+      const activities = await fetchActivities();
+      seedActivityDetailsFromList(activities);
+      return activities;
+    },
     enabled,
     staleTime: 60_000,
   });

@@ -170,7 +170,7 @@ const NotificationsPage: React.FC = () => {
           </View>
         )}
 
-        {isLoading || !listReady ? (
+        {(isLoading && notifications.length === 0) || !listReady ? (
           <ThemedPageLoader variant="skeleton-feed" minHeight={280} />
         ) : filteredNotifications.length === 0 ? (
           <View className="s-notifications__empty">

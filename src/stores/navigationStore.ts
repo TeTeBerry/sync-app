@@ -4,6 +4,8 @@ import type { AiAssistantNavIntent, ProfileNavIntent } from "./types";
 export type RouteTransitionState = {
   active: boolean;
   eventId?: number;
+  /** Bottom tab being switched to (HOME / EVENTS / PROFILE). */
+  tabTarget?: string;
 };
 
 export interface NavigationState {
@@ -16,7 +18,10 @@ export interface NavigationState {
   setAiAssistantIntent: (intent: AiAssistantNavIntent | null) => void;
   consumeAiAssistantIntent: () => AiAssistantNavIntent | null;
   setActiveActivityLegacyId: (legacyId: number | null) => void;
-  beginRouteTransition: (options?: { eventId?: number }) => void;
+  beginRouteTransition: (options?: {
+    eventId?: number;
+    tabTarget?: string;
+  }) => void;
   endRouteTransition: () => void;
 }
 
@@ -47,6 +52,7 @@ export const useNavigationStore = create<NavigationState>((set, get) => ({
       routeTransition: {
         active: true,
         ...(options?.eventId != null ? { eventId: options.eventId } : {}),
+        ...(options?.tabTarget ? { tabTarget: options.tabTarget } : {}),
       },
     }),
 

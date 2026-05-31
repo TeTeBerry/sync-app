@@ -2,7 +2,23 @@ import "./BottomNav.scss";
 import React from "react";
 import { View, Text, Button } from "@tarojs/components";
 import { CalendarDays, House, User } from "lucide-react-taro";
+import {
+  preloadAiSubpackage,
+  preloadEventSubpackage,
+  preloadProfileSubpackage,
+} from "../utils/subpackagePreload";
 import { ROUTES, switchTabTo, useActiveRoutePath } from "../utils/route";
+
+function preloadSubpackagesForTab(path: (typeof ROUTES)[keyof typeof ROUTES]) {
+  if (path === ROUTES.HOME || path === ROUTES.EVENTS) {
+    preloadEventSubpackage();
+    return;
+  }
+  if (path === ROUTES.PROFILE) {
+    preloadProfileSubpackage();
+    preloadAiSubpackage();
+  }
+}
 
 const BottomNav: React.FC = () => {
   const activePath = useActiveRoutePath();
@@ -23,6 +39,11 @@ const BottomNav: React.FC = () => {
             <Button
               key={item.path}
               disabled={isActive}
+              onTouchStart={() => {
+                if (!isActive) {
+                  preloadSubpackagesForTab(item.path);
+                }
+              }}
               onClick={() => switchTabTo(item.path)}
               className="s-bottom-nav__item">
               <Icon

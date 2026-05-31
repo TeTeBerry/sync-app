@@ -78,7 +78,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       ...(weappChatVariant
         ? {
             adjustPosition: adjustPosition ?? true,
-            cursorSpacing: cursorSpacing ?? 120,
+            cursorSpacing: cursorSpacing ?? (variant === "chat" ? 120 : 24),
           }
         : {
             ...(adjustPosition != null ? { adjustPosition } : {}),

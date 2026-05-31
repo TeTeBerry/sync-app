@@ -4,10 +4,15 @@ import React, { useCallback, useMemo, useState } from "react";
 import { Search, TrendingUp } from "lucide-react-taro";
 import TabPageHeader from "../../components/TabPageHeader";
 import { View, Text, Input, Button, ScrollView } from "@tarojs/components";
+import { useEndRouteTransitionOnShow } from "../../hooks/useEndRouteTransitionOnShow";
 import { useNavBarInsets } from "../../hooks/useNavBarInsets";
 import { useTabPageMainHeight } from "../../hooks/useTabPageMainHeight";
 import EventCard from "../../components/EventCard";
 import { ListState } from "../../components/ListState";
+import ThemedPageLoader from "../../components/ThemedPageLoader";
+import { seedActivityDetailFromEventCard } from "../../utils/activityDetailCache";
+import { preloadEventSubpackage } from "../../utils/subpackagePreload";
+import { preloadPageSafe, ROUTES } from "../../utils/route";
 import { useEventList } from "../../hooks/useSyncApi";
 import { resolveEventCardLegacyId } from "../../utils/apiMappers";
 import { goEventDetail, preloadHotRoutes } from "../../utils/route";
@@ -30,6 +35,8 @@ const EVENTS_CHROME_PX = 158;
 const EVENTS_HEADER_TOP_PX = 14;
 
 const Events: React.FC = () => {
+  useEndRouteTransitionOnShow();
+
   useDidShow(() => {
     preloadHotRoutes();
   });
@@ -43,12 +50,30 @@ const Events: React.FC = () => {
   const [activeTab, setActiveTab] = useState<EventFilterTab>("upcoming");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const openDetail = useCallback((legacyId: string) => {
-    const id = resolveEventCardLegacyId(legacyId);
-    if (id != null) {
-      goEventDetail(id);
+  const warmEventDetail = useCallback((event: (typeof events)[number]) => {
+    seedActivityDetailFromEventCard(event);
+    const id = resolveEventCardLegacyId(event.id);
+    if (id == null) {
+      return;
     }
+    preloadEventSubpackage();
+    preloadPageSafe(ROUTES.EVENT_DETAIL, { activityLegacyId: String(id) });
   }, []);
+
+  const openDetail = useCallback(
+    (legacyId: string) => {
+      const id = resolveEventCardLegacyId(legacyId);
+      if (id == null) {
+        return;
+      }
+      const event = events.find((item) => item.id === legacyId);
+      if (event) {
+        warmEventDetail(event);
+      }
+      goEventDetail(id);
+    },
+    [events, warmEventDetail],
+  );
 
   const filteredEvents = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -128,10 +153,13 @@ const Events: React.FC = () => {
           className="s-events__main s-scrollbar-none"
           style={listScrollHeight != null ? { height: `${listScrollHeight}px` } : undefined}>
           <View className="s-events__scroll-inner">
+          {isLoading ? (
+            <ThemedPageLoader variant="skeleton-feed" minHeight={280} />
+          ) : (
           <ListState
-            isLoading={isLoading}
+            isLoading={false}
             isError={isError}
-            isEmpty={!isLoading && !isError && filteredEvents.length === 0}
+            isEmpty={!isError && filteredEvents.length === 0}
             loadingText="加载活动中..."
             errorText="活动列表加载失败"
             emptyText="暂无活动"
@@ -146,6 +174,7 @@ const Events: React.FC = () => {
                   className="s-events__card-wrap"
                   role="button"
                   tabIndex={0}
+                  onTouchStart={() => warmEventDetail(event)}
                   onClick={() => openDetail(event.id)}
                   onKeyDown={(e) => {
                     if (e.key !== "Enter" && e.key !== " ") return;
@@ -162,11 +191,13 @@ const Events: React.FC = () => {
                     hot={event.hot}
                     variant="list"
                     onTeamUp={() => openDetail(event.id)}
+                    onTeamUpWarmup={() => warmEventDetail(event)}
                   />
                 </View>
               ))}
             </View>
           </ListState>
+          )}
           </View>
         </ScrollView>
       </View>

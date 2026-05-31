@@ -1,5 +1,5 @@
 /** Below-fold UI mount defer (first paint). */
-export const DEFER_BELOW_FOLD_MS = 120;
+export const DEFER_BELOW_FOLD_MS = 0;
 
 /** Non-critical API on home (notification badge, etc.). */
 export const DEFER_SECONDARY_API_MS = 280;
@@ -14,4 +14,4 @@ export const DEFER_NOTIFICATIONS_MS = 0;
 export const DEFER_AI_CHAT_MS = 0;
 
 /** Hot-route preload after tab settle (see route.ts). */
-export const PRELOAD_HOT_ROUTES_MS = 900;
+export const PRELOAD_HOT_ROUTES_MS = 500;

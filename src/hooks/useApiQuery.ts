@@ -177,7 +177,7 @@ export function useApiQuery<T>(options: UseApiQueryOptions<T>) {
     setData(entry?.data);
     lastFetchRef.current = entry?.timestamp ?? 0;
     if (enabled) {
-      void fetch();
+      void fetch({ background: entry?.data !== undefined });
     }
   }, [cacheKey, enabled, fetch]);
 

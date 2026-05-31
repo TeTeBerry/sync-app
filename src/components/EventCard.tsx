@@ -31,6 +31,7 @@ interface EventCardProps {
   hot?: boolean;
   variant?: "default" | "list";
   onTeamUp?: () => void;
+  onTeamUpWarmup?: () => void;
 }
 
 const EventCardInner: React.FC<EventCardProps> = ({
@@ -43,6 +44,7 @@ const EventCardInner: React.FC<EventCardProps> = ({
   hot = false,
   variant = "list",
   onTeamUp,
+  onTeamUpWarmup,
 }) => {
   const legacyId = resolveEventCardLegacyId(id);
   const isNavigating = useRouteTransitionActive(legacyId ?? undefined);
@@ -151,6 +153,10 @@ const EventCardInner: React.FC<EventCardProps> = ({
             .filter(Boolean)
             .join(" ")}
             disabled={isNavigating}
+            onTouchStart={(event) => {
+              event.stopPropagation();
+              onTeamUpWarmup?.();
+            }}
             onClick={(event) => {
               event.stopPropagation();
               onTeamUp?.();

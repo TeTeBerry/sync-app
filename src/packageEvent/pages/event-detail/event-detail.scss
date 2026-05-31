@@ -37,10 +37,81 @@
   box-sizing: border-box;
 }
 
+.s-event-detail__feed-section {
+  margin: 6px 0 0;
+  padding: 14px 0 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  box-sizing: border-box;
+}
+
+.s-event-detail__feed-section .s-event-detail-tabs {
+  margin-bottom: 12px;
+}
+
+.s-event-detail__itinerary-wrap {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  padding: 0 16px;
+  margin-bottom: 12px;
+  box-sizing: border-box;
+}
+
+.s-event-detail__itinerary-btn {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  margin: 0;
+  padding: 13px 18px;
+  border: none;
+  border-radius: 12px;
+  background: var(--primary);
+  box-shadow: 0 0 16px rgba(var(--primary-rgb), 0.5);
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+
+  &::after {
+    display: none;
+    border: 0;
+  }
+
+  &--pressed {
+    opacity: 0.9;
+    transform: scale(0.985);
+  }
+}
+
+.s-event-detail__itinerary-btn__icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+}
+
+.s-event-detail__itinerary-btn__label {
+  flex: 0 1 auto;
+  min-width: 0;
+  font-size: 16px;
+  font-weight: var(--s-fw-extrabold);
+  color: #ffffff;
+  letter-spacing: 0.02em;
+  text-align: center;
+}
+
+.s-event-detail__itinerary-btn__chevron {
+  flex-shrink: 0;
+  opacity: 0.95;
+}
+
 .s-event-detail__ai {
   display: flex;
   flex-direction: column;
-  margin: 0 16px 14px;
+  margin: 0 16px 4px;
   padding: 14px 14px 12px;
   border-radius: 20px;
   background: #1c1c1e;
@@ -145,12 +216,15 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  @include chat.chat-send-active;
+  -webkit-tap-highlight-color: transparent;
 
-  &--disabled {
-    opacity: 0.45;
-    box-shadow: none;
-    background: #3a3a3c;
+  &--enter {
+    background: rgba(var(--primary-rgb), 0.72);
+    box-shadow: 0 0 10px rgba(var(--primary-rgb), 0.28);
+  }
+
+  &--active {
+    @include chat.chat-send-active;
   }
 
   &::after {

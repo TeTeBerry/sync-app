@@ -32,11 +32,21 @@
   line-height: 1.25;
 }
 
-.s-profile-paid-benefits__section-count {
+.s-profile-paid-benefits__view-all {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.s-profile-paid-benefits__view-all--pressed {
+  opacity: 0.72;
+}
+
+.s-profile-paid-benefits__view-all-text {
   font-size: 12px;
   color: #8e8e93;
   line-height: 1.25;
-  font-variant-numeric: tabular-nums;
 }
 
 .s-profile-paid-benefits__cards {

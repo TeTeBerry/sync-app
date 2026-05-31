@@ -22,6 +22,7 @@ import { useNavBarInsets } from "../hooks/useNavBarInsets";
 import { usePageRouteReady } from "../hooks/usePageRouteReady";
 import { useEndRouteTransitionOnShow } from "../hooks/useEndRouteTransitionOnShow";
 import PageNavigation from "./PageNavigation";
+import ThemedPageLoader from "./ThemedPageLoader";
 import { useTabPageMainHeight } from "../hooks/useTabPageMainHeight";
 import { useKeyboardInset } from "../hooks/useKeyboardInset";
 import { API_BASE_URL, resolveAiChatWsUrl } from "../constants/api";
@@ -32,7 +33,7 @@ import { AiUpgradeSheetProvider } from "./ai-chat/AiUpgradeSheetContext";
 import AiPackageUpgradeSheet from "./ai-chat/AiPackageUpgradeSheet";
 import { useAiMatchQuota } from "../hooks/useAiMatchQuota";
 import { useProfileActivityLegacyId } from "../hooks/useProfileActivityLegacyId";
-import { goProfile } from "../utils/route";
+import { goProfileBenefits } from "../utils/route";
 import { invalidateProfileEntitlements } from "../utils/queryInvalidation";
 
 /** Header content row (avatar + titles), excluding status bar. */
@@ -271,7 +272,9 @@ const AiAssistantPage: FC = () => {
 
   const handleViewAllBenefits = useCallback(() => {
     setUpgradeSheetOpen(false);
-    goProfile();
+    Taro.nextTick(() => {
+      goProfileBenefits();
+    });
   }, []);
 
   const consumeAiAssistantIntent = useNavigationStore(
@@ -452,7 +455,11 @@ const AiAssistantPage: FC = () => {
                 />
               </AiUpgradeSheetProvider>
             ) : (
-              <View className="s-ai-assistant__chat-placeholder" aria-hidden />
+              <ThemedPageLoader
+                variant="skeleton-ai-chat"
+                className="s-ai-assistant__chat-skeleton"
+                minHeight={chatBodyHeight ?? 320}
+              />
             )}
           </View>
         </View>

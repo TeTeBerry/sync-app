@@ -2,13 +2,14 @@ import "./PostActionMenu.scss";
 import { EllipsisVertical, Share2 } from "lucide-react-taro";
 import { useCallback, useState, type FC } from "react";
 import Taro from "@tarojs/taro";
-import ActionSheet from "./ActionSheet";
+import { PostActionSheet } from "./PostActionSheet";
 import { useConfirmDialog } from "../hooks/useConfirmDialog";
 import { blockUserAndInvalidate, submitReportAndInvalidate } from "../hooks/useSyncApi";
 import { usePostShareStore } from "../stores/postShareStore";
 import type { ReportCategory } from "../types/backend";
 import type { PostSharePayload } from "../utils/postShare";
-import { Button, Text, View } from '@tarojs/components';
+import { POST_ACTION_ICON_COLOR } from "../utils/postActionColors";
+import { Button, View } from "@tarojs/components";
 
 export type PostActionMenuProps = {
   postId: string;
@@ -38,7 +39,7 @@ export const PostShareButton: FC<PostShareButtonProps> = ({ share }) => {
       aria-label="分享"
       openType={isWeapp ? "share" : undefined}
       onClick={handleShareTap}>
-      <Share2 size={18} color="#8e8e93" />
+      <Share2 size={18} color={POST_ACTION_ICON_COLOR} />
     </Button>
   );
 };
@@ -102,67 +103,51 @@ export const PostActionMenu: FC<PostActionMenuProps> = ({
 
   if (disabled) return null;
 
-  const reportCategories: ReportCategory[] = ["ads", "scalper", "vulgar"];
-  const categoryLabels: Record<ReportCategory, string> = {
-    ads: "广告骚扰",
-    scalper: "黄牛/欺诈",
-    vulgar: "低俗内容",
-  };
-
-  const menuItems = onDelete
-    ? [
-        {
-          label: "删除",
-          onSelect: () => {
-            closeAll();
-            onDelete();
-          },
-        },
-      ]
-    : [
-        {
-          label: "举报",
-          onSelect: () => {
-            setMenuOpen(false);
-            setReportOpen(true);
-          },
-        },
-        {
-          label: "屏蔽",
-          onSelect: () => void handleBlock(),
-        },
-      ];
+  const sheetOpen = menuOpen || reportOpen;
+  const sheetStep = reportOpen ? "report" : "actions";
+  const sheetMode = onDelete ? "owner" : "viewer";
 
   return (
     <View>
-      <Button className="s-post-action-menu__trigger"
+      <Button
+        className="s-post-action-menu__trigger"
         aria-label="更多"
         onClick={() => setMenuOpen(true)}>
-        <EllipsisVertical size={18} color="#8e8e93" />
+        <EllipsisVertical size={18} color={POST_ACTION_ICON_COLOR} />
       </Button>
 
-      <ActionSheet
-        overlayClassName="s-post-action-sheet"
-        open={menuOpen}
-        title="帖子操作"
-        cancelLabel="取消"
+      <PostActionSheet
+        open={sheetOpen}
+        step={sheetStep}
+        mode={sheetMode}
         onCancel={closeAll}
-        items={menuItems}
+        onBack={
+          reportOpen
+            ? () => {
+                setReportOpen(false);
+                setMenuOpen(true);
+              }
+            : undefined
+        }
+        onDelete={
+          onDelete
+            ? () => {
+                closeAll();
+                onDelete();
+              }
+            : undefined
+        }
+        onOpenReport={
+          !onDelete
+            ? () => {
+                setMenuOpen(false);
+                setReportOpen(true);
+              }
+            : undefined
+        }
+        onBlock={!onDelete ? () => void handleBlock() : undefined}
+        onReportCategory={(category) => void handleReport(category)}
       />
-
-      {!onDelete ? (
-        <ActionSheet
-          overlayClassName="s-post-action-sheet"
-          open={reportOpen}
-          title="举报原因"
-          cancelLabel="取消"
-          onCancel={closeAll}
-          items={reportCategories.map((category) => ({
-            label: categoryLabels[category],
-            onSelect: () => void handleReport(category),
-          }))}
-        />
-      ) : null}
 
       {confirmDialog}
     </View>

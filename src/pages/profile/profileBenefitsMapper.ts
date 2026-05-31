@@ -4,6 +4,7 @@ import type {
   PackageTierId,
   ProfileActivityItem,
 } from "../../types/backend";
+import { safeFiniteNumber, safeTrim } from "../../utils/safeString";
 import type { ProfileBenefits } from "./mockData";
 import { PROFILE_SEED_ACTIVITY_LEGACY_ID } from "../../constants/profilePackage";
 import { MOCK_PACKAGE_CATALOG, PACKAGE_TIER_ORDER } from "./profilePackageData";
@@ -72,11 +73,61 @@ const EMPTY_QUOTAS: EventPackageEntitlement["quotas"] = {
   basicExposure: false,
 };
 
+function isValidQuotaSlot(slot: unknown): boolean {
+  if (!slot || typeof slot !== "object") {
+    return false;
+  }
+  const record = slot as {
+    limit?: unknown;
+    used?: unknown;
+    remaining?: unknown;
+  };
+  const { limit, used, remaining } = record;
+  return (
+    (limit === null || typeof limit === "number") &&
+    (remaining === null || typeof remaining === "number") &&
+    (used === undefined || typeof used === "number")
+  );
+}
+
+function isValidMapQuotaSlot(map: unknown): boolean {
+  if (!map || typeof map !== "object") {
+    return false;
+  }
+  const record = map as { active?: unknown; expiresAt?: unknown; days?: unknown };
+  return (
+    typeof record.active === "boolean" &&
+    typeof record.expiresAt === "string" &&
+    (record.days === undefined || typeof record.days === "number")
+  );
+}
+
+/** Coerce API payloads to an array (never throws on object/null). */
+export function asEntitlementList(value: unknown): EventPackageEntitlement[] {
+  if (Array.isArray(value)) {
+    return value;
+  }
+  if (value != null && typeof value === "object") {
+    return Object.values(value as Record<string, unknown>).filter(
+      (item): item is EventPackageEntitlement =>
+        item != null && typeof item === "object",
+    );
+  }
+  return [];
+}
+
 export function hasValidEntitlementQuotas(
   entitlement: EventPackageEntitlement | null | undefined,
 ): entitlement is EventPackageEntitlement {
   const quotas = entitlement?.quotas;
-  return Boolean(quotas?.aiMatch && quotas?.contactUnlock && quotas?.map);
+  if (!quotas) {
+    return false;
+  }
+  return (
+    isValidQuotaSlot(quotas.aiMatch) &&
+    isValidQuotaSlot(quotas.contactUnlock) &&
+    isValidMapQuotaSlot(quotas.map)
+  );
 }
 
 export function isValidFreeMonthlyQuota(
@@ -89,10 +140,50 @@ export function isValidFreeMonthlyQuota(
   );
 }
 
+function normalizeQuotaSlot(
+  slot: EventPackageEntitlement["quotas"]["aiMatch"] | undefined,
+  fallback: EventPackageEntitlement["quotas"]["aiMatch"],
+): EventPackageEntitlement["quotas"]["aiMatch"] {
+  if (!slot) {
+    return fallback;
+  }
+  return {
+    limit:
+      slot.limit === null
+        ? null
+        : safeFiniteNumber(slot.limit, fallback.limit ?? 0),
+    used: safeFiniteNumber(slot.used, 0),
+    remaining:
+      slot.remaining === null
+        ? null
+        : safeFiniteNumber(slot.remaining, fallback.remaining ?? 0),
+  };
+}
+
 function resolveEntitlementQuotas(
   entitlement: EventPackageEntitlement,
 ): EventPackageEntitlement["quotas"] {
-  return hasValidEntitlementQuotas(entitlement) ? entitlement.quotas : EMPTY_QUOTAS;
+  if (!hasValidEntitlementQuotas(entitlement)) {
+    return EMPTY_QUOTAS;
+  }
+  const quotas = entitlement.quotas;
+  return {
+    aiMatch: normalizeQuotaSlot(quotas.aiMatch, EMPTY_QUOTAS.aiMatch),
+    contactUnlock: normalizeQuotaSlot(
+      quotas.contactUnlock,
+      EMPTY_QUOTAS.contactUnlock,
+    ),
+    map: {
+      days: safeFiniteNumber(quotas.map.days, 0),
+      expiresAt:
+        typeof quotas.map.expiresAt === "string" && quotas.map.expiresAt
+          ? quotas.map.expiresAt
+          : EMPTY_QUOTAS.map.expiresAt,
+      active: Boolean(quotas.map.active),
+    },
+    postPin: normalizeQuotaSlot(quotas.postPin, EMPTY_QUOTAS.postPin),
+    basicExposure: Boolean(quotas.basicExposure),
+  };
 }
 
 /** Per-activity package validity from purchase (matches backend). */
@@ -346,13 +437,13 @@ export function buildProPlusUpsellText(): string {
 
 /** Global monthly free bucket from summary or any entitlement row (same for all activities). */
 export function pickGlobalFreeMonthly(
-  entitlements: EventPackageEntitlement[] | undefined,
+  entitlements: EventPackageEntitlement[] | undefined | unknown,
   summaryFreeMonthly?: FreeMonthlyQuota | null,
 ): FreeMonthlyQuota | null | undefined {
   if (isValidFreeMonthlyQuota(summaryFreeMonthly)) {
     return summaryFreeMonthly;
   }
-  for (const item of entitlements ?? []) {
+  for (const item of asEntitlementList(entitlements)) {
     if (isValidFreeMonthlyQuota(item.freeMonthly)) {
       return item.freeMonthly;
     }
@@ -447,17 +538,17 @@ export function getNextTierId(
 /** Deduped paid per-event entitlements (one card per activity). */
 export function listPaidEntitlements(
   entitlements: EventPackageEntitlement[] | undefined,
-  summaryEntitlements?: EventPackageEntitlement[] | null,
+  summaryEntitlements?: EventPackageEntitlement[] | null | unknown,
 ): EventPackageEntitlement[] {
   const byActivity = new Map<number, EventPackageEntitlement>();
 
-  for (const item of summaryEntitlements ?? []) {
+  for (const item of asEntitlementList(summaryEntitlements)) {
     if (isPaidEntitlement(item) && hasValidEntitlementQuotas(item)) {
       byActivity.set(item.activityLegacyId, item);
     }
   }
 
-  for (const item of entitlements ?? []) {
+  for (const item of asEntitlementList(entitlements)) {
     if (isPaidEntitlement(item) && hasValidEntitlementQuotas(item)) {
       byActivity.set(item.activityLegacyId, item);
     }
@@ -671,9 +762,9 @@ export function buildEventBenefitCardModel(
   > | null,
 ): ProfileEventBenefitCardModel {
   const title =
-    activity?.title?.trim() || `活动 ${entitlement.activityLegacyId}`;
-  const date = activity?.date?.trim() ?? "";
-  const location = activity?.location?.trim() ?? "";
+    safeTrim(activity?.title) || `活动 ${entitlement.activityLegacyId}`;
+  const date = safeTrim(activity?.date);
+  const location = safeTrim(activity?.location);
   const eventMeta = [date, location].filter(Boolean).join(" · ");
 
   const quotas = resolveEntitlementQuotas(entitlement);
@@ -687,7 +778,7 @@ export function buildEventBenefitCardModel(
     eventTitle: title,
     eventMeta,
     eventImage:
-      activity?.image?.trim() ||
+      safeTrim(activity?.image) ||
       "https://picsum.photos/seed/sync-benefit-event/96/96",
     tierId,
     tierName,

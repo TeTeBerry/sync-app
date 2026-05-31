@@ -1,14 +1,28 @@
 import "./NavigationLoadingOverlay.scss";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useNavigationStore } from "../stores/navigationStore";
-import { endRouteTransition } from "../utils/route";
-import ThemedPageLoader from "./ThemedPageLoader";
+import { endRouteTransition, ROUTES } from "../utils/route";
+import ThemedPageLoader, { type ThemedPageLoaderVariant } from "./ThemedPageLoader";
 
 const ROUTE_TRANSITION_MAX_MS = 12_000;
 
-/** Global pink-on-black loader from navigate tap until destination page is ready. */
+function tabSwitchLoaderVariant(
+  tabTarget: string | undefined,
+): ThemedPageLoaderVariant {
+  if (tabTarget === ROUTES.PROFILE) {
+    return "skeleton-feed";
+  }
+  if (tabTarget === ROUTES.HOME || tabTarget === ROUTES.EVENTS) {
+    return "skeleton-feed";
+  }
+  return "spinner";
+}
+
+/** Global pink-on-black loader from navigate / tab tap until destination page is ready. */
 export default function NavigationLoadingOverlay() {
-  const active = useNavigationStore((state) => state.routeTransition.active);
+  const { active, tabTarget } = useNavigationStore((state) => state.routeTransition);
+  const variant = useMemo(() => tabSwitchLoaderVariant(tabTarget), [tabTarget]);
+  const isTabSwitch = tabTarget != null;
 
   useEffect(() => {
     if (!active) {
@@ -25,9 +39,10 @@ export default function NavigationLoadingOverlay() {
   return (
     <ThemedPageLoader
       overlay
-      variant="spinner"
-      label="加载中…"
-      showBrand
+      variant={variant}
+      label={isTabSwitch ? undefined : "加载中…"}
+      showBrand={!isTabSwitch || variant === "spinner"}
+      minHeight={variant === "skeleton-feed" ? 320 : undefined}
       className="s-nav-loading-overlay"
     />
   );

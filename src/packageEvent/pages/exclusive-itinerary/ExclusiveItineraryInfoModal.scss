@@ -1,0 +1,122 @@
+$ei-info-bg: #1c1c1e;
+$ei-info-muted: #8e8e93;
+
+.s-exclusive-itinerary-info-modal {
+  z-index: var(--overlay-z-dialog);
+  padding: 24px 20px;
+
+  .s-overlay__backdrop {
+    background: var(--confirm-dialog-backdrop);
+  }
+
+  .s-overlay__panel {
+    width: 100%;
+    max-width: min(92vw, 340px);
+    padding: 0;
+    background: $ei-info-bg;
+    border-radius: 20px;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.05),
+      0 24px 48px rgba(0, 0, 0, 0.55);
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    overflow: hidden;
+    text-align: center;
+  }
+}
+
+.s-exclusive-itinerary-info-modal__close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  z-index: 1;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+
+  &:active {
+    opacity: 0.75;
+  }
+}
+
+.s-exclusive-itinerary-info-modal__body {
+  padding: 20px 20px 8px;
+  box-sizing: border-box;
+
+  &--compact {
+    padding-top: 28px;
+  }
+}
+
+.s-exclusive-itinerary-info-modal__icon-wrap {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 14px;
+  border-radius: var(--radius-full);
+  background: rgba(var(--primary-rgb), 0.12);
+  border: 1.5px solid rgba(var(--primary-rgb), 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.s-exclusive-itinerary-info-modal__icon {
+  color: var(--primary);
+}
+
+.s-exclusive-itinerary-info-modal__title {
+  display: block;
+  font-size: 17px;
+  font-weight: var(--s-fw-bold);
+  color: #ffffff;
+  line-height: 1.35;
+  margin-bottom: 10px;
+}
+
+.s-exclusive-itinerary-info-modal__message {
+  display: block;
+  font-size: 14px;
+  font-weight: var(--s-fw-regular);
+  color: $ei-info-muted;
+  line-height: 1.55;
+  padding: 0 4px;
+}
+
+.s-exclusive-itinerary-info-modal__foot {
+  flex-shrink: 0;
+  padding: 8px 20px calc(16px + env(safe-area-inset-bottom, 0px));
+  box-sizing: border-box;
+}
+
+.s-exclusive-itinerary-info-modal__cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 50px;
+  padding: 13px 20px;
+  border-radius: 14px;
+  background: var(--primary);
+  box-shadow: 0 0 20px rgba(var(--primary-rgb), 0.45);
+  box-sizing: border-box;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+
+  &--pressed {
+    opacity: 0.9;
+  }
+}
+
+.s-exclusive-itinerary-info-modal__cta-label {
+  font-size: 16px;
+  font-weight: var(--s-fw-bold);
+  color: var(--primary-foreground);
+}

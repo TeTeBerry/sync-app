@@ -45,7 +45,15 @@ const mockSummary: HomeSummary = {
 const mockPosts: HomeFeedPost[] = Array.from({ length: 10 }, (_, index) => ({
   id: `post-${index}`,
   name: "User",
+  handle: "@user",
+  event: "Test Fest",
+  location: "SZ",
   body: `body ${index}`,
+  time: "1h",
+  likes: 0,
+  comments: 0,
+  avatar: "",
+  status: "招募中" as const,
 }));
 
 describe("homeCacheStorage", () => {

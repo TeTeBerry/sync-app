@@ -228,6 +228,8 @@ export function ChatComposer({
             value={input}
             disabled={isComposerDisabled}
             placeholder={inputPlaceholder}
+            adjustPosition={false}
+            cursorSpacing={12}
             onInput={(e) => onInputChange(readComposerInputValue(e))}
             onConfirm={() => onSubmit(input, pendingImages)}
           />

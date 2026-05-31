@@ -10,7 +10,7 @@ import {
   Sparkles,
   X,
 } from "lucide-react-taro";
-import { Button, Text, View } from "@tarojs/components";
+import { Text, View } from "@tarojs/components";
 import { useOverlayLock } from "../../hooks/useOverlayLock";
 import {
   purchaseProfilePackageAndInvalidate,
@@ -81,7 +81,7 @@ function CompareTable({
         ))}
       </View>
       {rows.map((row) => {
-        const Icon = FEATURE_ICONS[row.icon];
+        const Icon = FEATURE_ICONS[row.icon] ?? Sparkles;
         return (
           <View key={row.id} className="s-ai-package-upgrade-sheet__table-row">
             <View className="s-ai-package-upgrade-sheet__table-feature">
@@ -126,12 +126,10 @@ const AiPackageUpgradeSheet: React.FC<AiPackageUpgradeSheetProps> = ({
   const tiers = catalog?.tiers ?? [];
 
   const [selectedId, setSelectedId] = useState<PackageTierId>("pro_plus");
-  const [alertDismissed, setAlertDismissed] = useState(false);
   const [purchasing, setPurchasing] = useState(false);
 
   useEffect(() => {
     if (!open) {
-      setAlertDismissed(false);
       return;
     }
     const defaultId = catalog?.sheet?.defaultTierId ?? "pro_plus";
@@ -198,35 +196,34 @@ const AiPackageUpgradeSheet: React.FC<AiPackageUpgradeSheetProps> = ({
   if (!open) return null;
 
   return (
-    <View
-      className="s-overlay s-overlay--sheet s-ai-package-upgrade-sheet"
-      role="presentation">
+    <View className="s-overlay s-ai-package-upgrade-sheet" role="presentation">
       <View className="s-overlay__backdrop" onClick={onClose} />
-      <View className="s-overlay__panel" aria-hidden={!open}>
-        <View className="s-ai-package-upgrade-sheet__handle" aria-hidden />
+      <View
+        className="s-overlay__panel s-ai-package-upgrade-sheet__panel"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="ai-package-upgrade-title">
+        <View
+          className="s-ai-package-upgrade-sheet__close"
+          aria-label="关闭"
+          onClick={onClose}>
+          <X size={16} color="#8e8e93" aria-hidden />
+        </View>
 
         <View className="s-ai-package-upgrade-sheet__body">
-          {!alertDismissed ? (
-            <View className="s-ai-package-upgrade-sheet__alert">
-              <View className="s-ai-package-upgrade-sheet__alert-icon" aria-hidden>
-                <Sparkles size={16} />
-              </View>
-              <View className="s-ai-package-upgrade-sheet__alert-text">
-                <Text className="s-ai-package-upgrade-sheet__alert-title">
-                  AI 匹配次数已用完
-                </Text>
-                <Text className="s-ai-package-upgrade-sheet__alert-sub">
-                  本月 AI 智能匹配额度耗尽，升级套餐立即恢复
-                </Text>
-              </View>
-              <Button
-                className="s-ai-package-upgrade-sheet__alert-close"
-                aria-label="关闭提示"
-                onClick={() => setAlertDismissed(true)}>
-                <X size={14} color="#8e8e93" />
-              </Button>
+          <View className="s-ai-package-upgrade-sheet__hero" aria-hidden>
+            <View className="s-ai-package-upgrade-sheet__hero-icon-wrap">
+              <Sparkles size={24} className="s-ai-package-upgrade-sheet__hero-icon" />
             </View>
-          ) : null}
+            <Text
+              id="ai-package-upgrade-title"
+              className="s-ai-package-upgrade-sheet__hero-title">
+              AI 匹配次数已用完
+            </Text>
+            <Text className="s-ai-package-upgrade-sheet__hero-sub">
+              本月 AI 智能匹配额度已耗尽{"\n"}升级套餐即可立即恢复匹配能力
+            </Text>
+          </View>
 
           <View className="s-ai-package-upgrade-sheet__tiers">
             {apiEnabled && packagesQuery.isLoading && tiers.length === 0 ? (
@@ -273,9 +270,12 @@ const AiPackageUpgradeSheet: React.FC<AiPackageUpgradeSheetProps> = ({
 
         <View className="s-ai-package-upgrade-sheet__foot">
           <View
-            className={`s-ai-package-upgrade-sheet__cta s-ai-package-upgrade-sheet__cta--${selectedId}${
-              purchasing ? " s-ai-package-upgrade-sheet__cta--disabled" : ""
-            }`}
+            className={[
+              "s-ai-package-upgrade-sheet__cta",
+              purchasing && "s-ai-package-upgrade-sheet__cta--disabled",
+            ]
+              .filter(Boolean)
+              .join(" ")}
             hoverClass={
               purchasing ? "" : "s-ai-package-upgrade-sheet__cta--pressed"
             }
@@ -293,7 +293,11 @@ const AiPackageUpgradeSheet: React.FC<AiPackageUpgradeSheetProps> = ({
               onClick={onViewAllBenefits}>
               查看我的全部权益 &gt;
             </Text>
-          ) : null}
+          ) : (
+            <Text className="s-ai-package-upgrade-sheet__footer-link" onClick={onClose}>
+              暂不升级
+            </Text>
+          )}
         </View>
       </View>
     </View>

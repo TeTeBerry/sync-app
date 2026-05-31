@@ -19,8 +19,8 @@ function tabBarOffsetPx(): number {
 
 /**
  * Keyboard height to lift fixed footers on WeChat mini programs.
- * The composer sits above the tab bar, so subtract tab bar chrome when the
- * keyboard is taller than the tab bar.
+ * Use with `adjustPosition={false}` on the focused input to avoid double lift.
+ * The composer sits above the tab bar, so subtract tab bar chrome from keyboard height.
  */
 export function useKeyboardInset(): number {
   const [inset, setInset] = useState(0);
@@ -33,7 +33,12 @@ export function useKeyboardInset(): number {
 
     const onChange: Taro.onKeyboardHeightChange.Callback = (res) => {
       const height = res.height ?? 0;
-      setInset(height > 0 ? Math.max(0, height - tabBarPx) : 0);
+      if (height <= 0) {
+        setInset(0);
+        return;
+      }
+      // Footer already sits above the tab bar; lift only the overlap with the keyboard.
+      setInset(Math.max(0, height - tabBarPx));
     };
 
     Taro.onKeyboardHeightChange(onChange);

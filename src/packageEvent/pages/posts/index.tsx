@@ -4,6 +4,7 @@ import { useCallback } from "react";
 import PageNavigation from "../../../components/PageNavigation";
 import { FeedPostList } from "../../../components/FeedPostList";
 import { ListState } from "../../../components/ListState";
+import ThemedPageLoader from "../../../components/ThemedPageLoader";
 import { useConfirmDialog } from "../../../hooks/useConfirmDialog";
 import {
   deletePostAndInvalidate,
@@ -73,10 +74,13 @@ const AllPostsPage = () => {
         showScrollbar={false}
         className="s-posts-page__main s-scrollbar-none"
         style={mainScrollHeight != null ? { height: `${mainScrollHeight}px` } : undefined}>
+        {isLoading && posts.length === 0 ? (
+          <ThemedPageLoader variant="skeleton-feed" minHeight={280} />
+        ) : (
         <ListState
-          isLoading={isLoading}
+          isLoading={false}
           isError={isError}
-          isEmpty={!isLoading && !isError && posts.length === 0}
+          isEmpty={!isError && posts.length === 0}
           loadingText="加载中…"
           errorText="请求失败，请稍后重试"
           emptyText="暂无帖子"
@@ -91,6 +95,7 @@ const AllPostsPage = () => {
             onCommentSubmitted={handleCommentSubmitted}
           />
         </ListState>
+        )}
       </ScrollView>
 
       {confirmDialog}

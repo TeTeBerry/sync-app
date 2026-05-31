@@ -10,6 +10,8 @@ export default {
       pages: [
         "pages/event-detail/index",
         "pages/event-map/index",
+        "pages/exclusive-itinerary/index",
+        "pages/my-itinerary/index",
         "pages/posts/index",
       ],
     },
@@ -18,6 +20,7 @@ export default {
       name: "profile",
       pages: [
         "pages/profile-activities/index",
+        "pages/profile-benefits/index",
         "pages/profile-posts/index",
         "pages/settings/index",
         "pages/notifications/index",
@@ -45,5 +48,31 @@ export default {
     navigationStyle: "custom",
     backgroundTextStyle: "light",
     backgroundColor: "#000000",
+  },
+  /** LLM itinerary generation can exceed the default 10s request limit. */
+  networkTimeout: {
+    request: 60000,
+    connectSocket: 60000,
+    uploadFile: 60000,
+    downloadFile: 60000,
+  },
+  permission: {
+    "scope.writePhotosAlbum": {
+      desc: "保存行程屏保图片到你的相册",
+    },
+  },
+  preloadRule: {
+    "pages/index/index": {
+      network: "all",
+      packages: ["event", "ai"],
+    },
+    "pages/events/index": {
+      network: "all",
+      packages: ["event", "ai"],
+    },
+    "pages/profile/index": {
+      network: "all",
+      packages: ["profile", "event"],
+    },
   },
 };

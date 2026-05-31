@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  asEntitlementList,
   buildEventBenefitCardModel,
   buildFreeBenefitCardModel,
   buildMockPaidEntitlement,
@@ -7,6 +8,7 @@ import {
   buildMockProfileBenefits,
   buildProPlusUpsellText,
   getNextTierId,
+  hasValidEntitlementQuotas,
   listPaidEntitlements,
   pickGlobalFreeMonthly,
   pickProfileEntitlement,
@@ -70,6 +72,35 @@ function paidEntitlement(
     ...overrides,
   };
 }
+
+describe("asEntitlementList", () => {
+  it("returns arrays as-is", () => {
+    const list = [paidEntitlement("pro")];
+    expect(asEntitlementList(list)).toBe(list);
+  });
+
+  it("coerces object maps without throwing", () => {
+    const item = paidEntitlement("pro");
+    const fromObject = asEntitlementList({ a: item });
+    expect(fromObject).toEqual([item]);
+  });
+
+  it("returns empty list for nullish and primitives", () => {
+    expect(asEntitlementList(null)).toEqual([]);
+    expect(asEntitlementList(undefined)).toEqual([]);
+    expect(asEntitlementList("bad")).toEqual([]);
+  });
+});
+
+describe("listPaidEntitlements with non-array API payload", () => {
+  it("does not throw when summary entitlements is an object", () => {
+    const paid = paidEntitlement("pro");
+    expect(() =>
+      listPaidEntitlements([], { "0": paid } as unknown as EventPackageEntitlement[]),
+    ).not.toThrow();
+    expect(listPaidEntitlements([], { "0": paid } as never)).toEqual([paid]);
+  });
+});
 
 describe("getNextTierId", () => {
   it("follows pro → pro_plus → ultra ladder", () => {
@@ -200,6 +231,30 @@ describe("pickProfileEntitlement", () => {
     };
     const picked = pickProfileEntitlement(4, [freeStorm], null);
     expect(picked?.tierName).toBe("免费版");
+  });
+});
+
+describe("hasValidEntitlementQuotas", () => {
+  it("rejects hollow quota objects from partial API payloads", () => {
+    expect(
+      hasValidEntitlementQuotas({
+        activityLegacyId: 4,
+        tierId: "pro",
+        tierName: "Pro",
+        paidTierId: "pro",
+        quotas: {
+          aiMatch: {} as never,
+          contactUnlock: { limit: 8, used: 0, remaining: 8 },
+          map: {
+            days: 7,
+            expiresAt: "2099-01-01T00:00:00.000Z",
+            active: true,
+          },
+          postPin: { limit: 0, used: 0, remaining: 0 },
+          basicExposure: true,
+        },
+      }),
+    ).toBe(false);
   });
 });
 

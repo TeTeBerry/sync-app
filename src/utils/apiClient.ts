@@ -14,8 +14,29 @@ export class ApiError extends Error {
 }
 
 const DEFAULT_TIMEOUT_MS = 10_000;
+/** WeChat `request` ceiling; used for LLM-heavy itinerary generation. */
+export const LONG_RUNNING_REQUEST_TIMEOUT_MS = 60_000;
 const MAX_RETRIES = 2;
 const RETRY_DELAY_MS = 300;
+
+export type ApiFetchInit = RequestInit & {
+  timeoutMs?: number;
+  /** Default 2; use 0 for idempotent-sensitive POSTs (e.g. itinerary generate). */
+  maxRetries?: number;
+};
+
+function splitFetchInit(init?: ApiFetchInit): {
+  requestInit: RequestInit;
+  timeoutMs: number;
+  maxRetries: number;
+} {
+  const {
+    timeoutMs = DEFAULT_TIMEOUT_MS,
+    maxRetries = MAX_RETRIES,
+    ...requestInit
+  } = init ?? {};
+  return { requestInit, timeoutMs, maxRetries };
+}
 
 function buildUrl(path: string, params?: Record<string, string | undefined>): string {
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
@@ -75,29 +96,29 @@ async function sleep(ms: number): Promise<void> {
 
 async function retryFetch(
   url: string,
-  init: RequestInit,
-  retries = MAX_RETRIES,
+  init?: ApiFetchInit,
 ): Promise<CompatibleResponse> {
+  const { requestInit, timeoutMs, maxRetries } = splitFetchInit(init);
   let lastError: Error | undefined;
 
-  for (let attempt = 0; attempt <= retries; attempt += 1) {
+  for (let attempt = 0; attempt <= maxRetries; attempt += 1) {
     try {
       // eslint-disable-next-line no-console
-      console.log(`[API] ${init.method ?? "GET"} ${url}`);
-      const response = await requestWithTimeout(url, init);
+      console.log(`[API] ${requestInit.method ?? "GET"} ${url}`);
+      const response = await requestWithTimeout(url, requestInit, timeoutMs);
       // eslint-disable-next-line no-console
-      console.log(`[API] ${init.method ?? "GET"} ${url} -> ${response.status}`);
+      console.log(`[API] ${requestInit.method ?? "GET"} ${url} -> ${response.status}`);
       return response;
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error));
       // eslint-disable-next-line no-console
-      console.error(`[API] ${init.method ?? "GET"} ${url} error:`, lastError.message);
+      console.error(`[API] ${requestInit.method ?? "GET"} ${url} error:`, lastError.message);
 
       if (lastError.message?.includes("timeout")) {
         throw new ApiError("请求超时，请检查网络后重试");
       }
 
-      if (attempt < retries) {
+      if (attempt < maxRetries) {
         const delay = RETRY_DELAY_MS * 2 ** attempt;
         await sleep(delay);
       }
@@ -123,7 +144,7 @@ async function parseResponse<T>(response: CompatibleResponse): Promise<T> {
 export async function apiGet<T>(
   path: string,
   params?: Record<string, string | undefined>,
-  init?: RequestInit,
+  init?: ApiFetchInit,
 ): Promise<T> {
   const response = await retryFetch(buildUrl(path, params), {
     method: "GET",
@@ -141,7 +162,7 @@ export async function apiPost<T>(
   path: string,
   body: unknown,
   params?: Record<string, string | undefined>,
-  init?: RequestInit,
+  init?: ApiFetchInit,
 ): Promise<T> {
   const response = await retryFetch(buildUrl(path, params), {
     method: "POST",
@@ -161,7 +182,7 @@ export async function apiPatch<T>(
   path: string,
   body: unknown,
   params?: Record<string, string | undefined>,
-  init?: RequestInit,
+  init?: ApiFetchInit,
 ): Promise<T> {
   const response = await retryFetch(buildUrl(path, params), {
     method: "PATCH",
@@ -180,7 +201,7 @@ export async function apiPatch<T>(
 export async function apiDelete<T>(
   path: string,
   params?: Record<string, string | undefined>,
-  init?: RequestInit,
+  init?: ApiFetchInit,
 ): Promise<T> {
   const response = await retryFetch(buildUrl(path, params), {
     method: "DELETE",

@@ -19,11 +19,12 @@ import {
   TAB_PAGE_HEADER_BRAND_PX,
   useTabPageMainHeight,
 } from "../../hooks/useTabPageMainHeight";
-import { go, ROUTES } from "../../utils/route";
+import { go, preloadHotRoutes, ROUTES } from "../../utils/route";
 import ProfileBenefitsPurchaseBanner from "./components/ProfileBenefitsPurchaseBanner";
 import ProfileFreeBenefitsSection from "./components/ProfileFreeBenefitsSection";
 import ProfilePaidBenefitsSection from "./components/ProfilePaidBenefitsSection";
 import ProfilePackageSheet from "./components/ProfilePackageSheet";
+import { ProfileTabErrorBoundary } from "./components/ProfileTabErrorBoundary";
 import { profileActivities, profilePosts, profileUser } from "./mockData";
 import { sanitizeRemoteImageUrl } from "../../utils/imageUrl";
 import ProfileActionCard from "./components/ProfileActionCard";
@@ -43,18 +44,16 @@ import {
   readProfilePrivacyLevel,
 } from "../../utils/profileStorage";
 import { invalidateProfilePackageState } from "../../utils/queryInvalidation";
-import type { ProfileActivityItem, ProfileSummary } from "../../types/backend";
+import type { ProfileSummary } from "../../types/backend";
 import {
-  buildEventBenefitCardModel,
+  asEntitlementList,
   buildFreeBenefitCardModel,
-  buildMockPaidEntitlement,
-  buildMockProPlusEntitlement,
   getNextTierId,
   isValidFreeMonthlyQuota,
-  listPaidEntitlements,
   pickGlobalFreeMonthly,
   type ProfileEventBenefitCardModel,
 } from "./profileBenefitsMapper";
+import { useProfilePaidBenefitCards } from "./useProfilePaidBenefitCards";
 import type { PackageTierId } from "./profilePackageData";
 import {
   isProfileDebugEntitlementsEnabled,
@@ -66,6 +65,11 @@ import {
   resolveProfileDebugEntitlements,
   type ProfileDebugEntitlementPreset,
 } from "./profileDebugEntitlements";
+import { buildDebugContactUnlockExhaustedPreview } from "./profileDebugModals";
+import { ContactUnlockQuotaExhaustedModal } from "../../components/contact-unlock/ContactUnlockQuotaExhaustedModal";
+import AiPackageUpgradeSheet from "../../components/ai-chat/AiPackageUpgradeSheet";
+import { PROFILE_SEED_ACTIVITY_LEGACY_ID } from "../../constants/profilePackage";
+import { useEndRouteTransitionOnShow } from "../../hooks/useEndRouteTransitionOnShow";
 import { Image, ScrollView, Text, View } from "@tarojs/components";
 
 function trimProfileField(value: unknown): string | undefined {
@@ -123,9 +127,18 @@ const Profile: React.FC = () => {
     useState<ProfileDebugEntitlementPreset>(() =>
       readProfileDebugEntitlementPreset(),
     );
+  const [debugContactUnlockExhaustedOpen, setDebugContactUnlockExhaustedOpen] =
+    useState(false);
+  const [debugAiMatchExhaustedOpen, setDebugAiMatchExhaustedOpen] =
+    useState(false);
+  const debugContactUnlockPreview = useMemo(
+    () => buildDebugContactUnlockExhaustedPreview(),
+    [],
+  );
 
   const activityLegacyId = useProfileActivityLegacyId();
-  const summaryQuery = useProfileSummaryQuery(activityLegacyId);
+  /** Global summary for profile tab (not scoped to AI/event context). */
+  const summaryQuery = useProfileSummaryQuery();
   /** Unscoped list: one paid card per activity with a purchase. */
   const allEntitlementsQuery = useProfileEntitlementsQuery();
   const activitiesQuery = useProfileActivitiesQuery();
@@ -147,43 +160,28 @@ const Profile: React.FC = () => {
   );
 
   const entitlementList = useMemo(
-    () =>
-      Array.isArray(allEntitlementsQuery.data) ? allEntitlementsQuery.data : [],
+    () => asEntitlementList(allEntitlementsQuery.data),
     [allEntitlementsQuery.data],
   );
 
   const profileLoading = apiEnabled && summaryQuery.isLoading && !summaryQuery.data;
 
-  const benefitsLoading =
-    apiEnabled &&
-    !debugEntitlementOverride &&
-    (allEntitlementsQuery.isLoading || summaryQuery.isLoading) &&
-    allEntitlementsQuery.data == null;
-
-  const paidEntitlements = useMemo(() => {
-    if (debugEntitlementOverride) {
-      return debugEntitlementOverride.paid;
-    }
-    if (!apiEnabled) {
-      return [buildMockPaidEntitlement(), buildMockProPlusEntitlement()];
-    }
-    return listPaidEntitlements(
-      entitlementList,
-      summaryQuery.data?.packageEntitlements,
-    );
-  }, [
-    apiEnabled,
-    debugEntitlementOverride,
-    entitlementList,
-    summaryQuery.data?.packageEntitlements,
-  ]);
+  const {
+    benefitsLoading,
+    paidEntitlements,
+    recentPaidBenefitCards,
+    totalPaidCardCount,
+  } = useProfilePaidBenefitCards({
+    useDebugEntitlements: debugEntitlementsEnabled,
+    debugPreset: debugEntitlementPreset,
+  });
 
   const summaryFreeMonthly = useMemo(() => {
     const scoped = summaryQuery.data?.packageEntitlement?.freeMonthly;
     if (isValidFreeMonthlyQuota(scoped)) {
       return scoped;
     }
-    for (const item of summaryQuery.data?.packageEntitlements ?? []) {
+    for (const item of asEntitlementList(summaryQuery.data?.packageEntitlements)) {
       if (isValidFreeMonthlyQuota(item.freeMonthly)) {
         return item.freeMonthly;
       }
@@ -197,14 +195,6 @@ const Profile: React.FC = () => {
     }
     return pickGlobalFreeMonthly(entitlementList, summaryFreeMonthly);
   }, [debugEntitlementOverride, entitlementList, summaryFreeMonthly]);
-
-  const activityByLegacyId = useMemo(() => {
-    const items: ProfileActivityItem[] =
-      apiEnabled && activitiesQuery.data?.length
-        ? activitiesQuery.data
-        : profileActivities;
-    return new Map(items.map((item) => [Number(item.id), item]));
-  }, [activitiesQuery.data, apiEnabled]);
 
   const profileActivitiesList = useMemo(() => {
     if (apiEnabled && activitiesQuery.data?.length) {
@@ -222,17 +212,6 @@ const Profile: React.FC = () => {
     }
     return map;
   }, [paidEntitlements]);
-
-  const paidBenefitCards = useMemo(
-    () =>
-      paidEntitlements.map((entitlement) =>
-        buildEventBenefitCardModel(
-          entitlement,
-          activityByLegacyId.get(entitlement.activityLegacyId),
-        ),
-      ),
-    [activityByLegacyId, paidEntitlements],
-  );
 
   const hasPaidEntitlement = paidEntitlements.length > 0;
 
@@ -337,7 +316,10 @@ const Profile: React.FC = () => {
     applyRouteParams();
   }, [applyRouteParams]);
 
+  useEndRouteTransitionOnShow();
+
   useDidShow(() => {
+    preloadHotRoutes();
     setNotificationsEnabled(readProfileNotificationsEnabled());
     setPrivacyLevel(readProfilePrivacyLevel());
     applyRouteParams();
@@ -356,6 +338,20 @@ const Profile: React.FC = () => {
     },
     [],
   );
+
+  const handleProfileRetry = useCallback(() => {
+    if (apiEnabled) {
+      void invalidateProfilePackageState();
+      void summaryQuery.refetch();
+      void allEntitlementsQuery.refetch();
+      void activitiesQuery.refetch();
+    }
+  }, [
+    activitiesQuery,
+    allEntitlementsQuery,
+    apiEnabled,
+    summaryQuery,
+  ]);
 
   const handleLogout = useCallback(async () => {
     const ok = await confirm({
@@ -404,6 +400,7 @@ const Profile: React.FC = () => {
           showScrollbar={false}
           className="s-profile__scroll s-scrollbar-none"
           style={mainScrollHeight != null ? { height: `${mainScrollHeight}px` } : undefined}>
+          <ProfileTabErrorBoundary onRetry={handleProfileRetry}>
           <View className="s-profile__scroll-inner">
           {profileLoading ? (
             <View className="s-profile__card s-profile__card--loading">
@@ -478,7 +475,9 @@ const Profile: React.FC = () => {
 
               {showPaidBenefitsSection ? (
                 <ProfilePaidBenefitsSection
-                  cards={paidBenefitCards}
+                  cards={recentPaidBenefitCards}
+                  totalCount={totalPaidCardCount}
+                  onViewAll={() => go(ROUTES.PROFILE_BENEFITS)}
                   loading={benefitsLoading}
                   onUpgrade={handleBenefitUpgrade}
                   onUsageHistory={handleUsageHistory}
@@ -501,15 +500,35 @@ const Profile: React.FC = () => {
           ) : null}
 
           {debugEntitlementsEnabled ? (
-            <View
-              className="s-profile__debug-entitlements"
-              hoverClass="s-profile__debug-entitlements--pressed"
-              onClick={handleDebugEntitlements}>
-              <Text className="s-profile__debug-entitlements-label">
-                调试权益 ·{" "}
-                {PROFILE_DEBUG_ENTITLEMENT_LABELS[debugEntitlementPreset] ??
-                  PROFILE_DEBUG_ENTITLEMENT_LABELS.api}
-              </Text>
+            <View className="s-profile__debug-block">
+              <View
+                className="s-profile__debug-entitlements"
+                hoverClass="s-profile__debug-entitlements--pressed"
+                onClick={handleDebugEntitlements}>
+                <Text className="s-profile__debug-entitlements-label">
+                  调试权益 ·{" "}
+                  {PROFILE_DEBUG_ENTITLEMENT_LABELS[debugEntitlementPreset] ??
+                    PROFILE_DEBUG_ENTITLEMENT_LABELS.api}
+                </Text>
+              </View>
+              <View className="s-profile__debug-modals">
+                  <View
+                    className="s-profile__debug-modal-btn"
+                    hoverClass="s-profile__debug-modal-btn--pressed"
+                    onClick={() => setDebugContactUnlockExhaustedOpen(true)}>
+                    <Text className="s-profile__debug-modal-btn-label">
+                      预览 · 联系方式解锁用尽
+                    </Text>
+                  </View>
+                  <View
+                    className="s-profile__debug-modal-btn"
+                    hoverClass="s-profile__debug-modal-btn--pressed"
+                    onClick={() => setDebugAiMatchExhaustedOpen(true)}>
+                    <Text className="s-profile__debug-modal-btn-label">
+                      预览 · AI 匹配次数用尽
+                    </Text>
+                  </View>
+                </View>
             </View>
           ) : null}
 
@@ -582,10 +601,34 @@ const Profile: React.FC = () => {
 
             <View className="s-profile__scroll-spacer s-tabbar-offset" />
           </View>
+          </ProfileTabErrorBoundary>
         </ScrollView>
       </View>
 
       {confirmDialog}
+      {debugEntitlementsEnabled ? (
+        <>
+          <ContactUnlockQuotaExhaustedModal
+            open={debugContactUnlockExhaustedOpen}
+            onClose={() => setDebugContactUnlockExhaustedOpen(false)}
+            onUpgrade={(tierId) => {
+              setDebugContactUnlockExhaustedOpen(false);
+              openPackageSheet({ initialSelectedTierId: tierId });
+            }}
+            currentPaidTierId={debugContactUnlockPreview.currentPaidTierId}
+            freeMonthly={debugContactUnlockPreview.freeMonthly}
+          />
+          <AiPackageUpgradeSheet
+            open={debugAiMatchExhaustedOpen}
+            onClose={() => setDebugAiMatchExhaustedOpen(false)}
+            activityLegacyId={PROFILE_SEED_ACTIVITY_LEGACY_ID}
+            onViewAllBenefits={() => {
+              setDebugAiMatchExhaustedOpen(false);
+              go(ROUTES.PROFILE_BENEFITS);
+            }}
+          />
+        </>
+      ) : null}
       {packageSheetOpen ? (
         <ProfilePackageSheet
           open

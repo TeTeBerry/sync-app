@@ -1,4 +1,10 @@
-import { apiDelete, apiGet, apiPatch, apiPost } from "../utils/apiClient";
+import {
+  apiDelete,
+  apiGet,
+  apiPatch,
+  apiPost,
+  LONG_RUNNING_REQUEST_TIMEOUT_MS,
+} from "../utils/apiClient";
 import { uploadImageFile } from "../utils/uploadImage";
 import type { ChatSessionRecord } from "../types/aiChat";
 import type {
@@ -27,6 +33,12 @@ import type {
   ReportPayload,
   ReportResult,
   LiveInfoSnapshot,
+  GenerateItineraryPayload,
+  GenerateItineraryResult,
+  ItineraryScheduleSnapshot,
+  SaveItineraryPayload,
+  SaveItineraryResult,
+  SavedItineraryResult,
   PublishLiveInfoPayload,
   SubmitLiveInfoWristbandPayload,
   SubmitLiveInfoWristbandResult,
@@ -329,6 +341,54 @@ export function toggleLiveInfoUpdateLike(
   return apiPost<{ ok: true; update: LiveInfoSnapshot["feed"][number] }>(
     `/activities/${activityLegacyId}/live-info/updates/${updateId}/like`,
     {},
+    ownerParams(),
+  );
+}
+
+export function fetchItinerarySchedule(
+  activityLegacyId: number,
+  options?: { dateKey?: string; selectedDjIds?: string[] },
+) {
+  const params: Record<string, string> = { ...ownerParams() };
+  if (options?.dateKey) params.dateKey = options.dateKey;
+  if (options?.selectedDjIds?.length) {
+    params.selectedDjIds = options.selectedDjIds.join(",");
+  }
+  return apiGet<ItineraryScheduleSnapshot>(
+    `/activities/${activityLegacyId}/itinerary/schedule`,
+    params,
+  );
+}
+
+export function generateItinerary(
+  activityLegacyId: number,
+  payload: GenerateItineraryPayload,
+) {
+  return apiPost<GenerateItineraryResult>(
+    `/activities/${activityLegacyId}/itinerary/generate`,
+    payload,
+    ownerParams(),
+    {
+      timeoutMs: LONG_RUNNING_REQUEST_TIMEOUT_MS,
+      maxRetries: 0,
+    },
+  );
+}
+
+export function saveItinerary(
+  activityLegacyId: number,
+  payload: SaveItineraryPayload,
+) {
+  return apiPost<SaveItineraryResult>(
+    `/activities/${activityLegacyId}/itinerary/save`,
+    payload,
+    ownerParams(),
+  );
+}
+
+export function fetchSavedItinerary(activityLegacyId: number) {
+  return apiGet<SavedItineraryResult>(
+    `/activities/${activityLegacyId}/itinerary/saved`,
     ownerParams(),
   );
 }

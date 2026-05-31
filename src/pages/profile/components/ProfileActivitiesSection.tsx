@@ -5,7 +5,13 @@ import { MetaRow } from "../../../components/MetaRow";
 import { ProfileCollapsibleSection } from "../../../components/profile/ProfileCollapsibleSection";
 import type { ProfileActivityItem } from "../../../types/backend";
 import { compareActivityDateDesc } from "../../../utils/activityStatus";
+import { safeTrim } from "../../../utils/safeString";
 import { Text, View } from '@tarojs/components';
+
+function activityTitleFallback(title: unknown): string {
+  const trimmed = safeTrim(title);
+  return trimmed.slice(0, 2) || "活动";
+}
 
 const EVENT_STATUS_TEXT: Record<string, string> = {
   upcoming: "即将参加",
@@ -47,7 +53,7 @@ const ProfileActivitiesSection: React.FC<ProfileActivitiesSectionProps> = ({
               alt=""
               imageClassName="s-profile-activity__thumb"
               placeholderClassName="s-profile-activity__thumb s-profile-activity__thumb--placeholder"
-              fallback={item.title.slice(0, 2)}
+              fallback={activityTitleFallback(item.title)}
             />
             <View className="s-profile-activity__content">
               <View className="s-profile-activity__top">
@@ -99,7 +105,7 @@ const ProfileActivitiesSection: React.FC<ProfileActivitiesSectionProps> = ({
               alt=""
               imageClassName="s-profile-activity__thumb"
               placeholderClassName="s-profile-activity__thumb s-profile-activity__thumb--placeholder"
-              fallback={item.title.slice(0, 2)}
+              fallback={activityTitleFallback(item.title)}
             />
             <View className="s-profile-activity__content">
               <View className="s-profile-activity__top">

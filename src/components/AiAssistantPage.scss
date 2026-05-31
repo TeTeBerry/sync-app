@@ -36,9 +36,12 @@
   letter-spacing: 0.02em;
 }
 
-.s-ai-assistant__chat-placeholder {
+.s-ai-assistant__chat-skeleton {
   flex: 1;
-  min-height: 200px;
+  min-height: 0;
+  align-items: stretch;
+  justify-content: stretch;
+  padding: 0;
 }
 
 .s-ai-assistant {

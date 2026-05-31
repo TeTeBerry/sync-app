@@ -434,3 +434,117 @@ export interface PublishLiveInfoPayload {
   ratings: { categoryId: LiveInfoCategoryId; score: number }[];
   remark?: string;
 }
+
+export type ItineraryStage = "main" | "bass" | "late" | "outdoor";
+
+export interface ItineraryDj {
+  id: string;
+  name: string;
+  genre: string;
+  genreLabel: string;
+  stage: ItineraryStage;
+  popularity: number;
+  avatarSeed: string;
+  genreColor: string;
+}
+
+export interface ItineraryConflict {
+  artistIds: [string, string];
+  artistNames: [string, string];
+  dateKey: string;
+  overlapStart: string;
+  overlapEnd: string;
+  message: string;
+}
+
+export interface ItineraryScheduleSnapshot {
+  activityLegacyId: number;
+  eventMeta: string;
+  sessions: Array<{
+    dateKey: string;
+    label: string;
+    bannerDateLabel: string;
+  }>;
+  djs: ItineraryDj[];
+  performances: Array<{
+    artistId: string;
+    artistName: string;
+    dateKey: string;
+    dateLabel: string;
+    genre: string;
+    genreLabel: string;
+    stage: string;
+    stageLabel: string;
+    startTime: string;
+    endTime: string;
+    startMinutes: number;
+    endMinutes: number;
+    popularity: number;
+    avatarSeed: string;
+    genreColor: string;
+  }>;
+  conflicts: ItineraryConflict[];
+}
+
+export type ItineraryTimelineDotColor = "pink" | "cyan" | "purple";
+
+export interface ItineraryTimelinePill {
+  label: string;
+  variant: "green" | "pink";
+}
+
+export interface ItineraryTimelineItem {
+  id: string;
+  time: string;
+  dotColor: ItineraryTimelineDotColor;
+  title: string;
+  subtitle?: string;
+  timeTag?: string;
+  timeTagColor?: ItineraryTimelineDotColor;
+  pill?: ItineraryTimelinePill;
+  highlighted?: boolean;
+}
+
+export interface ItineraryDay {
+  id: string;
+  label: string;
+  bannerDateLabel: string;
+  nodeCount: number;
+  items: ItineraryTimelineItem[];
+}
+
+export interface GenerateItineraryPayload {
+  selectedDjIds: string[];
+  dateKey?: string;
+}
+
+export interface GenerateItineraryResult {
+  itinerary: {
+    eventMeta: string;
+    days: ItineraryDay[];
+  };
+  conflicts: ItineraryConflict[];
+  cached: boolean;
+  llmUsed: boolean;
+}
+
+export interface SaveItineraryPayload {
+  eventMeta: string;
+  days: ItineraryDay[];
+  selectedDjIds?: string[];
+}
+
+export interface SaveItineraryResult {
+  ok: true;
+  activityLegacyId: number;
+  savedAt: string;
+}
+
+export interface SavedItineraryResult {
+  saved: boolean;
+  activityLegacyId?: number;
+  selectedDjIds?: string[];
+  eventMeta?: string;
+  days?: ItineraryDay[];
+  updatedAt?: string;
+}

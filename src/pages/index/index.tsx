@@ -1,7 +1,9 @@
 import "./home.scss";
 import Taro, { useDidShow } from "@tarojs/taro";
 import { lazy, Suspense, useCallback } from "react";
-import PageLoadingFallback from "../../components/PageLoadingFallback";
+import ThemedPageLoader from "../../components/ThemedPageLoader";
+import { seedActivityDetailFromFeaturedEvent } from "../../utils/activityDetailCache";
+import { preloadEventSubpackage } from "../../utils/subpackagePreload";
 import { useConfirmDialog } from "../../hooks/useConfirmDialog";
 import { useDeferredMount } from "../../hooks/useDeferredMount";
 import {
@@ -31,6 +33,7 @@ import { HomeHeaderActions } from "./components/HomeHeaderActions";
 import { type ActivityPost } from "./homeData";
 import { resolveFeaturedEventLegacyId, type FeaturedEvent } from "../../utils/apiMappers";
 import { useNavBarInsets } from "../../hooks/useNavBarInsets";
+import { useEndRouteTransitionOnShow } from "../../hooks/useEndRouteTransitionOnShow";
 import { usePostPageShare } from "../../hooks/usePostPageShare";
 import { ScrollView, View } from "@tarojs/components";
 
@@ -41,6 +44,7 @@ const LazyHomeActivityFeed = lazy(async () => {
 
 const Home = () => {
   usePostPageShare();
+  useEndRouteTransitionOnShow();
 
   useDidShow(() => {
     preloadHotRoutes();
@@ -77,6 +81,8 @@ const Home = () => {
     if (legacyId == null) {
       return;
     }
+    seedActivityDetailFromFeaturedEvent(event);
+    preloadEventSubpackage();
     preloadPageSafe(ROUTES.EVENT_DETAIL, { activityLegacyId: String(legacyId) });
   }, []);
 
@@ -85,6 +91,7 @@ const Home = () => {
     if (legacyId == null) {
       return;
     }
+    seedActivityDetailFromFeaturedEvent(event);
     goEventDetail(legacyId);
   }, []);
 
@@ -161,7 +168,10 @@ const Home = () => {
           />
 
           {belowFoldReady ? (
-            <Suspense fallback={<PageLoadingFallback minHeight={240} />}>
+            <Suspense
+              fallback={
+                <ThemedPageLoader variant="skeleton-feed" minHeight={240} />
+              }>
               <LazyHomeActivityFeed
                 items={posts}
                 onSeeAll={() => go(ROUTES.ALL_POSTS)}
@@ -171,7 +181,7 @@ const Home = () => {
               />
             </Suspense>
           ) : (
-            <PageLoadingFallback minHeight={240} />
+            <ThemedPageLoader variant="skeleton-feed" minHeight={240} />
           )}
 
           <View className="s-home__heat s-tabbar-offset" aria-label="Today heat">
