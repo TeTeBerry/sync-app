@@ -1,15 +1,7 @@
 import "./AiPackageUpgradeSheet.scss";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import Taro from "@tarojs/taro";
-import {
-  Crown,
-  LockOpen,
-  Map,
-  Pin,
-  Shield,
-  Sparkles,
-  X,
-} from "lucide-react-taro";
+import { Crown, LockOpen, Map, Pin, Shield, Sparkles, X } from "lucide-react-taro";
 import { Text, View } from "@tarojs/components";
 import { useOverlayLock } from "../../hooks/useOverlayLock";
 import {
@@ -19,15 +11,8 @@ import {
 import { isApiEnabled } from "../../constants/api";
 import { MOCK_PACKAGE_CATALOG } from "../../pages/profile/profilePackageData";
 import { packageTierCtaLabel } from "../../pages/profile/profilePackageData";
-import type {
-  PackageFeatureIcon,
-  PackageTierDefinition,
-  PackageTierId,
-} from "../../types/backend";
-import {
-  buildAiPackageCompareRows,
-  type AiPackageCompareRow,
-} from "./aiPackageUpgradeTable";
+import type { PackageFeatureIcon, PackageTierDefinition, PackageTierId } from "../../types/backend";
+import { buildAiPackageCompareRows, type AiPackageCompareRow } from "./aiPackageUpgradeTable";
 
 const TIER_ORDER: PackageTierId[] = ["pro", "pro_plus", "ultra"];
 
@@ -72,10 +57,9 @@ function CompareTable({
           <Text
             key={tierId}
             className={`s-ai-package-upgrade-sheet__table-tier-col s-ai-package-upgrade-sheet__table-tier-col--${tierId}${
-              selectedId === tierId
-                ? " s-ai-package-upgrade-sheet__table-tier-col--selected"
-                : ""
-            }`}>
+              selectedId === tierId ? " s-ai-package-upgrade-sheet__table-tier-col--selected" : ""
+            }`}
+          >
             {tierId === "pro_plus" ? "Pro+" : tierId === "ultra" ? "Ultra" : "Pro"}
           </Text>
         ))}
@@ -90,18 +74,15 @@ function CompareTable({
                 className="s-ai-package-upgrade-sheet__table-feature-icon"
                 aria-hidden
               />
-              <Text className="s-ai-package-upgrade-sheet__table-feature-label">
-                {row.label}
-              </Text>
+              <Text className="s-ai-package-upgrade-sheet__table-feature-label">{row.label}</Text>
             </View>
             {TIER_ORDER.map((tierId) => (
               <Text
                 key={tierId}
                 className={`s-ai-package-upgrade-sheet__table-value s-ai-package-upgrade-sheet__table-value--${tierId}${
-                  selectedId === tierId
-                    ? " s-ai-package-upgrade-sheet__table-value--selected"
-                    : ""
-                }`}>
+                  selectedId === tierId ? " s-ai-package-upgrade-sheet__table-value--selected" : ""
+                }`}
+              >
                 {row.values[tierId]}
               </Text>
             ))}
@@ -178,20 +159,12 @@ const AiPackageUpgradeSheet: React.FC<AiPackageUpgradeSheetProps> = ({
       onPurchaseSuccess?.();
       onClose();
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "购买失败，请稍后重试";
+      const message = error instanceof Error ? error.message : "购买失败，请稍后重试";
       void Taro.showToast({ title: message, icon: "none" });
     } finally {
       setPurchasing(false);
     }
-  }, [
-    activityLegacyId,
-    apiEnabled,
-    onClose,
-    onPurchaseSuccess,
-    purchasing,
-    selectedTier,
-  ]);
+  }, [activityLegacyId, apiEnabled, onClose, onPurchaseSuccess, purchasing, selectedTier]);
 
   if (!open) return null;
 
@@ -202,11 +175,9 @@ const AiPackageUpgradeSheet: React.FC<AiPackageUpgradeSheetProps> = ({
         className="s-overlay__panel s-ai-package-upgrade-sheet__panel"
         role="dialog"
         aria-modal="true"
-        aria-labelledby="ai-package-upgrade-title">
-        <View
-          className="s-ai-package-upgrade-sheet__close"
-          aria-label="关闭"
-          onClick={onClose}>
+        aria-labelledby="ai-package-upgrade-title"
+      >
+        <View className="s-ai-package-upgrade-sheet__close" aria-label="关闭" onClick={onClose}>
           <X size={16} color="#8e8e93" aria-hidden />
         </View>
 
@@ -215,9 +186,7 @@ const AiPackageUpgradeSheet: React.FC<AiPackageUpgradeSheetProps> = ({
             <View className="s-ai-package-upgrade-sheet__hero-icon-wrap">
               <Sparkles size={24} className="s-ai-package-upgrade-sheet__hero-icon" />
             </View>
-            <Text
-              id="ai-package-upgrade-title"
-              className="s-ai-package-upgrade-sheet__hero-title">
+            <Text id="ai-package-upgrade-title" className="s-ai-package-upgrade-sheet__hero-title">
               AI 匹配次数已用完
             </Text>
             <Text className="s-ai-package-upgrade-sheet__hero-sub">
@@ -240,7 +209,8 @@ const AiPackageUpgradeSheet: React.FC<AiPackageUpgradeSheetProps> = ({
                   className={`s-ai-package-upgrade-sheet__tier s-ai-package-upgrade-sheet__tier--${tier.id}${
                     selected ? " s-ai-package-upgrade-sheet__tier--selected" : ""
                   }`}
-                  onClick={() => setSelectedId(tier.id)}>
+                  onClick={() => setSelectedId(tier.id)}
+                >
                   {badge ? (
                     <View className="s-ai-package-upgrade-sheet__tier-badge">
                       <Text>{badge}</Text>
@@ -276,21 +246,18 @@ const AiPackageUpgradeSheet: React.FC<AiPackageUpgradeSheetProps> = ({
             ]
               .filter(Boolean)
               .join(" ")}
-            hoverClass={
-              purchasing ? "" : "s-ai-package-upgrade-sheet__cta--pressed"
-            }
+            hoverClass={purchasing ? "" : "s-ai-package-upgrade-sheet__cta--pressed"}
             onClick={() => {
               if (!purchasing) void handlePurchase();
-            }}>
+            }}
+          >
             <Crown size={18} className="s-ai-package-upgrade-sheet__cta-icon" aria-hidden />
             <Text className="s-ai-package-upgrade-sheet__cta-label">
               {selectedTier ? packageTierCtaLabel(selectedTier) : "选择套餐"}
             </Text>
           </View>
           {onViewAllBenefits ? (
-            <Text
-              className="s-ai-package-upgrade-sheet__footer-link"
-              onClick={onViewAllBenefits}>
+            <Text className="s-ai-package-upgrade-sheet__footer-link" onClick={onViewAllBenefits}>
               查看我的全部权益 &gt;
             </Text>
           ) : (

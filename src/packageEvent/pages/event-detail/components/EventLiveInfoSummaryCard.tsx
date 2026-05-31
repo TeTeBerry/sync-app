@@ -8,10 +8,7 @@ type EventLiveInfoSummaryCardProps = {
   certCount: number;
 };
 
-export function EventLiveInfoSummaryCard({
-  rows,
-  certCount,
-}: EventLiveInfoSummaryCardProps) {
+export function EventLiveInfoSummaryCard({ rows, certCount }: EventLiveInfoSummaryCardProps) {
   const safeRows = Array.isArray(rows) ? rows : [];
 
   return (

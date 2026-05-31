@@ -18,10 +18,7 @@ export const SUB_PAGE_HEADER_ROW_PX = BACK_BTN_PX;
 /** Extra height when a meta subtitle line is shown. */
 export const SUB_PAGE_HEADER_META_EXTRA_PX = 22;
 
-export function stackPageNavChromePx(
-  insets: NavBarInsets,
-  options?: { meta?: boolean },
-): number {
+export function stackPageNavChromePx(insets: NavBarInsets, options?: { meta?: boolean }): number {
   return (
     insets.paddingTop +
     SUB_PAGE_HEADER_BOTTOM_PAD_PX +
@@ -98,19 +95,18 @@ const PageNavigation: React.FC<PageNavigationProps> = ({
       className="s-page-nav__back"
       aria-label={backAriaLabel}
       hoverClass="s-page-nav__back--pressed"
-      onTap={handleBack}>
+      onTap={handleBack}
+    >
       <ChevronLeft size={22} />
     </Button>
   );
 
   const trailingSlot = (
     <View
-      className={[
-        "s-page-nav__trailing",
-        !trailing ? "s-page-nav__trailing--placeholder" : "",
-      ]
+      className={["s-page-nav__trailing", !trailing ? "s-page-nav__trailing--placeholder" : ""]
         .filter(Boolean)
-        .join(" ")}>
+        .join(" ")}
+    >
       {trailing ?? null}
     </View>
   );
@@ -128,9 +124,7 @@ const PageNavigation: React.FC<PageNavigationProps> = ({
             ) : null}
             {trailingSlot}
           </View>
-          {meta ? (
-            <Text className="s-page-nav__meta s-line-clamp-1">{meta}</Text>
-          ) : null}
+          {meta ? <Text className="s-page-nav__meta s-line-clamp-1">{meta}</Text> : null}
         </>
       ) : (
         <>

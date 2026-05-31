@@ -29,16 +29,14 @@ export type TabPageMainHeightOptions = {
 export function useTabPageMainHeight(
   options?: TabPageMainHeightOptions | number,
 ): number | undefined {
-  const subtractPx =
-    typeof options === "number" ? options : (options?.subtractPx ?? 0);
+  const subtractPx = typeof options === "number" ? options : (options?.subtractPx ?? 0);
 
   return useMemo(() => {
     try {
       const win = Taro.getWindowInfo();
       const windowHeight = win.windowHeight ?? win.screenHeight ?? 667;
       const screenHeight = win.screenHeight ?? windowHeight;
-      const safeBottom =
-        win.safeArea != null ? Math.max(0, screenHeight - win.safeArea.bottom) : 0;
+      const safeBottom = win.safeArea != null ? Math.max(0, screenHeight - win.safeArea.bottom) : 0;
       const tabBarPx = TABBAR_ROW_PX + TABBAR_PADDING_TOP_PX + safeBottom;
       return Math.max(200, Math.floor(windowHeight - tabBarPx - subtractPx));
     } catch {
@@ -52,18 +50,14 @@ export function useStackPageMainHeight(
   options?: TabPageMainHeightOptions | number,
 ): number | undefined {
   const navInsets = useNavBarInsets();
-  const extraSubtract =
-    typeof options === "number" ? options : (options?.subtractPx ?? 0);
+  const extraSubtract = typeof options === "number" ? options : (options?.subtractPx ?? 0);
   const navChrome = stackPageNavChromePx(navInsets);
 
   return useMemo(() => {
     try {
       const win = Taro.getWindowInfo();
       const windowHeight = win.windowHeight ?? win.screenHeight ?? 667;
-      return Math.max(
-        200,
-        Math.floor(windowHeight - navChrome - extraSubtract),
-      );
+      return Math.max(200, Math.floor(windowHeight - navChrome - extraSubtract));
     } catch {
       return undefined;
     }

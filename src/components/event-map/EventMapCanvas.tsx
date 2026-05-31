@@ -8,8 +8,4 @@ export {
   hitTestMarkerScreen,
 } from "./isometricProjection";
 export { findMarkerAtScreen } from "./eventMapHitTest";
-export {
-  screenToContent,
-  contentToScreen,
-  type EventMapViewport,
-} from "./eventMapViewport";
+export { screenToContent, contentToScreen, type EventMapViewport } from "./eventMapViewport";

@@ -7,10 +7,7 @@ import {
   saveItinerary,
 } from "../api/syncApi";
 import { isApiEnabled } from "../constants/api";
-import type {
-  GenerateItineraryPayload,
-  SaveItineraryPayload,
-} from "../types/backend";
+import type { GenerateItineraryPayload, SaveItineraryPayload } from "../types/backend";
 
 export function useItineraryScheduleQuery(
   activityLegacyId: number | null | undefined,
@@ -41,9 +38,7 @@ export function useItineraryScheduleQuery(
   });
 }
 
-export function useSavedItineraryQuery(
-  activityLegacyId: number | null | undefined,
-) {
+export function useSavedItineraryQuery(activityLegacyId: number | null | undefined) {
   const enabled =
     isApiEnabled() &&
     activityLegacyId != null &&
@@ -59,14 +54,12 @@ export function useSavedItineraryQuery(
 
 export function useItineraryMutations(activityLegacyId: number) {
   const generate = useCallback(
-    (payload: GenerateItineraryPayload) =>
-      generateItinerary(activityLegacyId, payload),
+    (payload: GenerateItineraryPayload) => generateItinerary(activityLegacyId, payload),
     [activityLegacyId],
   );
 
   const save = useCallback(
-    (payload: SaveItineraryPayload) =>
-      saveItinerary(activityLegacyId, payload),
+    (payload: SaveItineraryPayload) => saveItinerary(activityLegacyId, payload),
     [activityLegacyId],
   );
 

@@ -9,9 +9,7 @@ import { useProfileActivitiesQuery } from "./useSyncApi";
  * Does not default to demo seed activity — paid quotas apply only where purchased.
  */
 export function useProfileActivityLegacyId(): number | undefined {
-  const activeActivityLegacyId = useNavigationStore(
-    (state) => state.activeActivityLegacyId,
-  );
+  const activeActivityLegacyId = useNavigationStore((state) => state.activeActivityLegacyId);
   const activitiesQuery = useProfileActivitiesQuery();
 
   return useMemo(() => {

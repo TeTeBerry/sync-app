@@ -1,9 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { getCacheData } from "../hooks/useApiQuery";
-import {
-  seedActivityDetailCache,
-  seedActivityDetailFromEventCard,
-} from "./activityDetailCache";
+import { seedActivityDetailCache, seedActivityDetailFromEventCard } from "./activityDetailCache";
 
 describe("activityDetailCache", () => {
   it("seeds detail query cache for event-detail first paint", () => {
@@ -40,11 +37,7 @@ describe("activityDetailCache", () => {
       date: "Tomorrow",
     });
 
-    const cached = getCacheData<{ name: string; date?: string }>([
-      "activities",
-      "detail",
-      7,
-    ]);
+    const cached = getCacheData<{ name: string; date?: string }>(["activities", "detail", 7]);
     expect(cached?.name).toBe("After");
     expect(cached?.date).toBe("Tomorrow");
   });

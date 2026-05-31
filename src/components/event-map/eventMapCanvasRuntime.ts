@@ -15,10 +15,7 @@ import {
   rebuildEventMapSceneCache,
 } from "./eventMapSceneCache";
 import { EVENT_MAP_MARKERS, markerAvatarUrl } from "./eventMapMarkers";
-import {
-  clampEventMapViewport,
-  getDefaultEventMapViewport,
-} from "./eventMapWorld";
+import { clampEventMapViewport, getDefaultEventMapViewport } from "./eventMapWorld";
 import type { EventMapViewport } from "./eventMapViewport";
 import { MAP_SCALE_MIN } from "./eventMapViewport";
 
@@ -117,17 +114,7 @@ function paintLogoRotationFrame(): void {
   const { ctx, cssW, cssH } = surface;
   const avatars = avatarsCache;
   try {
-    paintEventMap(
-      ctx,
-      cssW,
-      cssH,
-      pendingTitle,
-      avatars,
-      viewport,
-      Date.now(),
-      stormLogo,
-      false,
-    );
+    paintEventMap(ctx, cssW, cssH, pendingTitle, avatars, viewport, Date.now(), stormLogo, false);
   } catch {
     // ignore frame errors
   }
@@ -135,13 +122,7 @@ function paintLogoRotationFrame(): void {
 
 function syncLogoRotationLoop(): void {
   stopLogoRotationLoop();
-  if (
-    !active ||
-    mapInteracting ||
-    !surface ||
-    !richAssetsEnabled ||
-    !stormLogoImage
-  ) {
+  if (!active || mapInteracting || !surface || !richAssetsEnabled || !stormLogoImage) {
     return;
   }
 
@@ -179,17 +160,11 @@ function getCanvasDpr(): number {
 
 function isCanvas2dNode(node: unknown): node is WeappCanvas {
   return (
-    !!node &&
-    typeof node === "object" &&
-    typeof (node as WeappCanvas).getContext === "function"
+    !!node && typeof node === "object" && typeof (node as WeappCanvas).getContext === "function"
   );
 }
 
-const CANVAS_SELECTORS = [
-  `#${EVENT_MAP_CANVAS_ID}`,
-  ".s-event-map__canvas",
-  "canvas",
-] as const;
+const CANVAS_SELECTORS = [`#${EVENT_MAP_CANVAS_ID}`, ".s-event-map__canvas", "canvas"] as const;
 
 export function setEventMapPageScope(
   pageScope: object | null | undefined,
@@ -204,9 +179,7 @@ function runCanvasSelectorQuery(
   selector: string,
 ): Promise<CanvasNodeResult | undefined> {
   return new Promise((resolve) => {
-    const query = scope
-      ? Taro.createSelectorQuery().in(scope)
-      : Taro.createSelectorQuery();
+    const query = scope ? Taro.createSelectorQuery().in(scope) : Taro.createSelectorQuery();
     query
       .select(selector)
       .fields({ node: true, size: true })
@@ -234,11 +207,7 @@ async function queryCanvasNodeGlobal(): Promise<CanvasNodeResult | undefined> {
     };
   }
 
-  const scopes: Array<object | null> = [
-    eventMapPageScope,
-    eventMapComponentScope,
-    null,
-  ];
+  const scopes: Array<object | null> = [eventMapPageScope, eventMapComponentScope, null];
   for (const scope of scopes) {
     for (const selector of CANVAS_SELECTORS) {
       const raw = await runCanvasSelectorQuery(scope, selector);
@@ -258,10 +227,7 @@ function createCanvasImageSource(canvas: HTMLCanvasElement): HTMLImageElement {
   throw new Error("canvas.createImage is required on WeChat");
 }
 
-function loadCanvasImage(
-  canvas: HTMLCanvasElement,
-  src: string,
-): Promise<CanvasImageSource> {
+function loadCanvasImage(canvas: HTMLCanvasElement, src: string): Promise<CanvasImageSource> {
   return new Promise((resolve, reject) => {
     const img = createCanvasImageSource(canvas) as HTMLImageElement & {
       onload: (() => void) | null;
@@ -274,12 +240,7 @@ function loadCanvasImage(
   });
 }
 
-function syncSurfaceSize(
-  next: CanvasSurface,
-  cssW: number,
-  cssH: number,
-  dpr: number,
-): void {
+function syncSurfaceSize(next: CanvasSurface, cssW: number, cssH: number, dpr: number): void {
   const bufferW = Math.floor(cssW * dpr);
   const bufferH = Math.floor(cssH * dpr);
 
@@ -317,13 +278,7 @@ function paintSurfaceWithSceneCache(eventTitle: string): boolean {
   const hasStormLogo = Boolean(stormLogo);
   const avatarCount = avatars.size;
 
-  const cacheParams = [
-    cssW,
-    cssH,
-    eventTitle,
-    avatarCount,
-    hasStormLogo,
-  ] as const;
+  const cacheParams = [cssW, cssH, eventTitle, avatarCount, hasStormLogo] as const;
 
   if (
     !canUseEventMapSceneCache(
@@ -338,15 +293,7 @@ function paintSurfaceWithSceneCache(eventTitle: string): boolean {
   }
 
   if (mapInteracting) {
-    return paintEventMapSceneBlitOnly(
-      ctx,
-      cssW,
-      cssH,
-      viewport,
-      eventTitle,
-      avatars,
-      stormLogo,
-    );
+    return paintEventMapSceneBlitOnly(ctx, cssW, cssH, viewport, eventTitle, avatars, stormLogo);
   }
 
   return paintEventMapWithSceneCache(
@@ -400,10 +347,7 @@ function paintSurface(eventTitle: string): boolean {
       resetCtxState(surface);
       paintEventMapMinimal(ctx, cssW, cssH);
     } catch (fallbackError) {
-      console.error(
-        "[eventMapCanvasRuntime] fallback paint failed",
-        fallbackError,
-      );
+      console.error("[eventMapCanvasRuntime] fallback paint failed", fallbackError);
       return false;
     }
   }
@@ -502,11 +446,7 @@ export function setEventMapViewport(next: EventMapViewport) {
 
 export function resetEventMapViewport(cssW?: number, cssH?: number) {
   if (cssW != null && cssH != null && cssW > 0 && cssH > 0) {
-    viewport = clampEventMapViewport(
-      getDefaultEventMapViewport(cssW, cssH),
-      cssW,
-      cssH,
-    );
+    viewport = clampEventMapViewport(getDefaultEventMapViewport(cssW, cssH), cssW, cssH);
   } else {
     viewport = { offsetX: 0, offsetY: 0, scale: MAP_SCALE_MIN };
   }
@@ -532,25 +472,16 @@ function clearRuntimeTimers() {
   }
 }
 
-async function setupSurfaceFromNode(
-  item: CanvasNodeResult,
-  eventTitle: string,
-): Promise<boolean> {
+async function setupSurfaceFromNode(item: CanvasNodeResult, eventTitle: string): Promise<boolean> {
   const canvas = item.node;
   if (!canvas || !isCanvas2dNode(canvas)) {
     return false;
   }
 
-  const { width: cssW, height: cssH } = resolveCanvasCssSize(
-    item.width,
-    item.height,
-  );
+  const { width: cssW, height: cssH } = resolveCanvasCssSize(item.width, item.height);
   const dpr = getCanvasDpr();
 
-  const ctx =
-    surface && surface.canvas === canvas
-      ? surface.ctx
-      : canvas.getContext("2d");
+  const ctx = surface && surface.canvas === canvas ? surface.ctx : canvas.getContext("2d");
 
   if (!ctx) {
     return false;
@@ -574,10 +505,7 @@ async function setupSurfaceFromNode(
 }
 
 /** 绑定 Canvas 节点并绘制（页面 useReady / useDidShow 调用） */
-export async function bindEventMapCanvasAndPaint(
-  eventTitle: string,
-  attempt = 0,
-): Promise<void> {
+export async function bindEventMapCanvasAndPaint(eventTitle: string, attempt = 0): Promise<void> {
   if (!active) {
     return;
   }

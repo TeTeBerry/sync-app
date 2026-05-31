@@ -51,34 +51,21 @@ const TabPageHeader: React.FC<TabPageHeaderProps> = ({
   style,
 }) => {
   const insetStyle =
-    navInsets != null
-      ? tabPageHeaderStyle(navInsets, { paddingRightGutterPx })
-      : undefined;
+    navInsets != null ? tabPageHeaderStyle(navInsets, { paddingRightGutterPx }) : undefined;
 
-  const rootClass = [
-    "s-tab-page-header",
-    title ? "s-tab-page-header--with-title" : "",
-    className,
-  ]
+  const rootClass = ["s-tab-page-header", title ? "s-tab-page-header--with-title" : "", className]
     .filter(Boolean)
     .join(" ");
 
   return (
-    <View
-      data-cmp="TabPageHeader"
-      className={rootClass}
-      style={{ ...insetStyle, ...style }}>
+    <View data-cmp="TabPageHeader" className={rootClass} style={{ ...insetStyle, ...style }}>
       <View className="s-tab-page-header__brand">
         <SyncBrandMark subtitle={brandSubtitle} />
       </View>
 
-      {title ? (
-        <Text className="s-tab-page-header__title s-line-clamp-1">{title}</Text>
-      ) : null}
+      {title ? <Text className="s-tab-page-header__title s-line-clamp-1">{title}</Text> : null}
 
-      {trailing != null ? (
-        <View className="s-tab-page-header__trailing">{trailing}</View>
-      ) : null}
+      {trailing != null ? <View className="s-tab-page-header__trailing">{trailing}</View> : null}
     </View>
   );
 };

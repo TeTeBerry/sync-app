@@ -115,17 +115,14 @@ const Home = () => {
     [confirm, refetchPosts],
   );
 
-  const handleLikePost = useCallback(
-    (post: ActivityPost) => {
-      if (!isApiEnabled()) {
-        return;
-      }
-      void likePostAndInvalidate(post.id).catch(() =>
-        void Taro.showToast({ title: "请求失败，请稍后重试", icon: "none" }),
-      );
-    },
-    [],
-  );
+  const handleLikePost = useCallback((post: ActivityPost) => {
+    if (!isApiEnabled()) {
+      return;
+    }
+    void likePostAndInvalidate(post.id).catch(
+      () => void Taro.showToast({ title: "请求失败，请稍后重试", icon: "none" }),
+    );
+  }, []);
 
   const handleCommentSubmitted = useCallback(() => {
     void refetchPosts();
@@ -140,7 +137,8 @@ const Home = () => {
         scrollY
         enhanced
         showScrollbar={false}
-        className="s-page-with-tabbar__scroll s-home__main s-scrollbar-none">
+        className="s-page-with-tabbar__scroll s-home__main s-scrollbar-none"
+      >
         <View className="s-home__scroll-inner">
           <TabPageHeader
             className="s-tab-page-header--home"
@@ -168,10 +166,7 @@ const Home = () => {
           />
 
           {belowFoldReady ? (
-            <Suspense
-              fallback={
-                <ThemedPageLoader variant="skeleton-feed" minHeight={240} />
-              }>
+            <Suspense fallback={<ThemedPageLoader variant="skeleton-feed" minHeight={240} />}>
               <LazyHomeActivityFeed
                 items={posts}
                 onSeeAll={() => go(ROUTES.ALL_POSTS)}

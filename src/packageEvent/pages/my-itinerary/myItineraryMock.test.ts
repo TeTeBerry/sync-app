@@ -14,17 +14,11 @@ describe("parseSelectedDjIds", () => {
   });
 
   it("splits comma-separated ids and trims whitespace", () => {
-    expect(parseSelectedDjIds("marshmello, illenium")).toEqual([
-      "marshmello",
-      "illenium",
-    ]);
+    expect(parseSelectedDjIds("marshmello, illenium")).toEqual(["marshmello", "illenium"]);
   });
 
   it("filters empty segments", () => {
-    expect(parseSelectedDjIds("marshmello,,illenium,")).toEqual([
-      "marshmello",
-      "illenium",
-    ]);
+    expect(parseSelectedDjIds("marshmello,,illenium,")).toEqual(["marshmello", "illenium"]);
   });
 });
 

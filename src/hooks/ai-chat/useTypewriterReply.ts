@@ -1,8 +1,5 @@
 import { useCallback, useRef } from "react";
-import {
-  createTypewriterReveal,
-  type TypewriterReveal,
-} from "../../utils/typewriterReveal";
+import { createTypewriterReveal, type TypewriterReveal } from "../../utils/typewriterReveal";
 
 export interface UseTypewriterReplyOptions {
   charDelayMs?: number;

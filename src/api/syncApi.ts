@@ -64,18 +64,11 @@ export function fetchActivityByLegacyId(legacyId: number) {
 }
 
 export function registerForActivity(legacyId: number) {
-  return apiPost<ActivityRegistrationResult>(
-    `/activities/${legacyId}/register`,
-    {},
-    ownerParams(),
-  );
+  return apiPost<ActivityRegistrationResult>(`/activities/${legacyId}/register`, {}, ownerParams());
 }
 
 export function cancelActivityRegistration(legacyId: number) {
-  return apiDelete<ActivityUnregisterResult>(
-    `/activities/${legacyId}/register`,
-    ownerParams(),
-  );
+  return apiDelete<ActivityUnregisterResult>(`/activities/${legacyId}/register`, ownerParams());
 }
 
 export function fetchCurrentUser() {
@@ -91,11 +84,7 @@ export function fetchBlockedUserIds() {
 }
 
 export function blockUser(blockedUserId: string) {
-  return apiPost<{ ok: true }>(
-    "/users/blocks",
-    { blockedUserId },
-    ownerParams(),
-  );
+  return apiPost<{ ok: true }>("/users/blocks", { blockedUserId }, ownerParams());
 }
 
 export function unblockUser(blockedUserId: string) {
@@ -188,9 +177,7 @@ export function consumeProfileAiMatch(payload: ConsumeProfileEntitlementPayload)
   );
 }
 
-export function consumeProfileContactUnlock(
-  payload: ConsumeProfileEntitlementPayload,
-) {
+export function consumeProfileContactUnlock(payload: ConsumeProfileEntitlementPayload) {
   return apiPost<ConsumeProfileEntitlementResult>(
     "/profile/entitlements/consume/contact-unlock",
     payload,
@@ -233,22 +220,14 @@ export function likePost(postId: string) {
 }
 
 export function applyToPost(postId: string) {
-  return apiPost<PostActionResult>(
-    `/posts/${postId}/applications`,
-    {},
-    ownerParams(),
-  );
+  return apiPost<PostActionResult>(`/posts/${postId}/applications`, {}, ownerParams());
 }
 
 export function fetchPostComments(postId: string) {
   return apiGet<PostCommentItem[]>(`/posts/${postId}/comments`);
 }
 
-export function addPostComment(
-  postId: string,
-  body: string,
-  parentCommentId?: string,
-) {
+export function addPostComment(postId: string, body: string, parentCommentId?: string) {
   return apiPost<EventDetailPost>(
     `/posts/${postId}/comments`,
     { body, ...(parentCommentId ? { parentCommentId } : {}) },
@@ -261,9 +240,7 @@ export function fetchChatSession(sessionId: string) {
 }
 
 export function clearChatSession(sessionId: string) {
-  return apiDelete<{ ok: true; sessionId: string }>(
-    `/chat/sessions/${sessionId}`,
-  );
+  return apiDelete<{ ok: true; sessionId: string }>(`/chat/sessions/${sessionId}`);
 }
 
 export function fetchNotifications(userId?: string) {
@@ -295,10 +272,7 @@ export function clearAllNotifications(userId?: string) {
 }
 
 export function fetchLiveInfoSnapshot(activityLegacyId: number) {
-  return apiGet<LiveInfoSnapshot>(
-    `/activities/${activityLegacyId}/live-info`,
-    ownerParams(),
-  );
+  return apiGet<LiveInfoSnapshot>(`/activities/${activityLegacyId}/live-info`, ownerParams());
 }
 
 export function uploadImage(filePath: string) {
@@ -323,10 +297,7 @@ export function clearLiveInfoWristband(activityLegacyId: number) {
   );
 }
 
-export function publishLiveInfoUpdate(
-  activityLegacyId: number,
-  payload: PublishLiveInfoPayload,
-) {
+export function publishLiveInfoUpdate(activityLegacyId: number, payload: PublishLiveInfoPayload) {
   return apiPost<{ ok: true; update: LiveInfoSnapshot["feed"][number] }>(
     `/activities/${activityLegacyId}/live-info/updates`,
     payload,
@@ -334,10 +305,7 @@ export function publishLiveInfoUpdate(
   );
 }
 
-export function toggleLiveInfoUpdateLike(
-  activityLegacyId: number,
-  updateId: string,
-) {
+export function toggleLiveInfoUpdateLike(activityLegacyId: number, updateId: string) {
   return apiPost<{ ok: true; update: LiveInfoSnapshot["feed"][number] }>(
     `/activities/${activityLegacyId}/live-info/updates/${updateId}/like`,
     {},
@@ -360,10 +328,7 @@ export function fetchItinerarySchedule(
   );
 }
 
-export function generateItinerary(
-  activityLegacyId: number,
-  payload: GenerateItineraryPayload,
-) {
+export function generateItinerary(activityLegacyId: number, payload: GenerateItineraryPayload) {
   return apiPost<GenerateItineraryResult>(
     `/activities/${activityLegacyId}/itinerary/generate`,
     payload,
@@ -375,10 +340,7 @@ export function generateItinerary(
   );
 }
 
-export function saveItinerary(
-  activityLegacyId: number,
-  payload: SaveItineraryPayload,
-) {
+export function saveItinerary(activityLegacyId: number, payload: SaveItineraryPayload) {
   return apiPost<SaveItineraryResult>(
     `/activities/${activityLegacyId}/itinerary/save`,
     payload,

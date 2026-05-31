@@ -36,9 +36,7 @@ export function PublishConfirmCard({
   });
   const bodyText = stripContentTypeHashtags(payload.draftBody);
   const inferredTags =
-    payload.draftTags.length > 0 ?
-      payload.draftTags
-    : inferIntentTagsFromText(payload.draftBody);
+    payload.draftTags.length > 0 ? payload.draftTags : inferIntentTagsFromText(payload.draftBody);
   const displayTags = filterContentTypeTags(
     inferredTags.length ? inferredTags : extractDisplayTags(payload.draftBody, contentTypeKeys),
     contentTypeKeys,
@@ -47,18 +45,12 @@ export function PublishConfirmCard({
   return (
     <View className="s-publish-confirm">
       <Text className="s-publish-confirm__title">{PUBLISH_CONFIRM_MARKER}</Text>
-      <Text className="s-publish-confirm__context">
-        {`「${payload.activityLabel}」帖子预览`}
-      </Text>
+      <Text className="s-publish-confirm__context">{`「${payload.activityLabel}」帖子预览`}</Text>
 
       <View className="s-publish-confirm__preview">
         <View className="s-publish-confirm__preview-header">
           {userAvatar ? (
-            <Image
-              className="s-publish-confirm__avatar"
-              src={userAvatar}
-              mode="aspectFill"
-            />
+            <Image className="s-publish-confirm__avatar" src={userAvatar} mode="aspectFill" />
           ) : (
             <Text className="s-publish-confirm__avatar s-publish-confirm__avatar--fallback">
               {userName.slice(0, 1)}
@@ -70,13 +62,9 @@ export function PublishConfirmCard({
           </View>
         </View>
 
-        <Text className="s-publish-confirm__event-title">
-          {payload.activityLabel}
-        </Text>
+        <Text className="s-publish-confirm__event-title">{payload.activityLabel}</Text>
 
-        {bodyText ? (
-          <Text className="s-publish-confirm__body">{bodyText}</Text>
-        ) : null}
+        {bodyText ? <Text className="s-publish-confirm__body">{bodyText}</Text> : null}
 
         <ContentTypeBadge types={contentTypeKeys} />
 

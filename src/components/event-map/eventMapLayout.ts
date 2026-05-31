@@ -11,15 +11,11 @@ export const EVENT_MAP_BOTTOM_BAR_CONTENT_PX = 100;
 export const EVENT_MAP_TOP_BAR_CONTENT_PX = 46;
 
 /** Canvas 可用高度 = 窗口 − 顶栏 − 底栏（控件须在 Canvas 外，否则微信端点不到） */
-export function getEventMapMapViewportHeight(
-  windowHeight?: number,
-  topChromePx?: number,
-): number {
+export function getEventMapMapViewportHeight(windowHeight?: number, topChromePx?: number): number {
   const info = Taro.getWindowInfo();
   const h = windowHeight ?? info.windowHeight ?? 667;
   const safeBottom = info.safeArea ? Math.max(0, h - info.safeArea.bottom) : 0;
-  const top =
-    topChromePx ?? EVENT_MAP_TOP_BAR_CONTENT_PX + (info.statusBarHeight ?? 44);
+  const top = topChromePx ?? EVENT_MAP_TOP_BAR_CONTENT_PX + (info.statusBarHeight ?? 44);
   return Math.max(1, h - top - EVENT_MAP_BOTTOM_BAR_CONTENT_PX - safeBottom);
 }
 
@@ -46,14 +42,8 @@ export const MAP_STORM_LOGO_VISUAL_CENTER_NY = 0.35;
 /** 标题 pill 与 LOGO 底间距（内容坐标，会乘 depth scale） */
 export const MAP_VENUE_PILL_GAP = 10;
 
-export function getMapAvatarBaseRadius(
-  mapWidth: number,
-  mapHeight: number,
-): number {
-  return Math.max(
-    MAP_AVATAR_R_MIN,
-    Math.min(mapWidth, mapHeight) * MAP_AVATAR_R_RATIO,
-  );
+export function getMapAvatarBaseRadius(mapWidth: number, mapHeight: number): number {
+  return Math.max(MAP_AVATAR_R_MIN, Math.min(mapWidth, mapHeight) * MAP_AVATAR_R_RATIO);
 }
 
 /** LOGO 半高（传入 drawOfficialStormLogo 的 size；宽度按原图比例） */

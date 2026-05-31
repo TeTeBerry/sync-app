@@ -1,9 +1,6 @@
 import Taro from "@tarojs/taro";
 import type { EventPackageEntitlement, FreeMonthlyQuota } from "../../types/backend";
-import {
-  buildMockPaidEntitlement,
-  buildMockProPlusEntitlement,
-} from "./profileBenefitsMapper";
+import { buildMockPaidEntitlement, buildMockProPlusEntitlement } from "./profileBenefitsMapper";
 
 /** Dev-only: override profile paid cards + global free monthly. Set `TARO_APP_DEBUG_ENTITLEMENTS=true` or use in development. */
 export type ProfileDebugEntitlementPreset =
@@ -14,13 +11,9 @@ export type ProfileDebugEntitlementPreset =
   | "ultra_single"
   | "dual_cards";
 
-export const PROFILE_DEBUG_ENTITLEMENT_STORAGE_KEY =
-  "sync.profile.debugEntitlementPreset";
+export const PROFILE_DEBUG_ENTITLEMENT_STORAGE_KEY = "sync.profile.debugEntitlementPreset";
 
-export const PROFILE_DEBUG_ENTITLEMENT_LABELS: Record<
-  ProfileDebugEntitlementPreset,
-  string
-> = {
+export const PROFILE_DEBUG_ENTITLEMENT_LABELS: Record<ProfileDebugEntitlementPreset, string> = {
   api: "API 真实数据",
   free_only: "纯免费",
   pro_single: "Pro 单场",
@@ -40,8 +33,7 @@ const PRESET_ORDER: ProfileDebugEntitlementPreset[] = [
 
 export function isProfileDebugEntitlementsEnabled(): boolean {
   return (
-    process.env.NODE_ENV === "development" ||
-    process.env.TARO_APP_DEBUG_ENTITLEMENTS === "true"
+    process.env.NODE_ENV === "development" || process.env.TARO_APP_DEBUG_ENTITLEMENTS === "true"
   );
 }
 
@@ -113,10 +105,7 @@ export function readProfileDebugEntitlementPreset(): ProfileDebugEntitlementPres
   }
   try {
     const stored = Taro.getStorageSync(PROFILE_DEBUG_ENTITLEMENT_STORAGE_KEY);
-    if (
-      typeof stored === "string" &&
-      stored in PROFILE_DEBUG_ENTITLEMENT_LABELS
-    ) {
+    if (typeof stored === "string" && stored in PROFILE_DEBUG_ENTITLEMENT_LABELS) {
       return stored as ProfileDebugEntitlementPreset;
     }
   } catch {
@@ -125,9 +114,7 @@ export function readProfileDebugEntitlementPreset(): ProfileDebugEntitlementPres
   return "api";
 }
 
-export function persistProfileDebugEntitlementPreset(
-  preset: ProfileDebugEntitlementPreset,
-): void {
+export function persistProfileDebugEntitlementPreset(preset: ProfileDebugEntitlementPreset): void {
   try {
     Taro.setStorageSync(PROFILE_DEBUG_ENTITLEMENT_STORAGE_KEY, preset);
   } catch {

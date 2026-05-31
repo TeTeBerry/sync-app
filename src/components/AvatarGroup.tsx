@@ -2,7 +2,7 @@ import "./AvatarGroup.scss";
 import React from "react";
 import { ACTIVITY_GUEST_AVATARS } from "../constants/activityGuestAvatars";
 import { thumbnailImageUrl } from "../utils/imageUrl";
-import { Image, Text, View } from '@tarojs/components';
+import { Image, Text, View } from "@tarojs/components";
 
 interface AvatarGroupProps {
   avatars?: string[];
@@ -28,10 +28,8 @@ const AvatarGroup: React.FC<AvatarGroupProps> = ({
           />
         ))}
       </View>
-      {total> 0 ? (
-        <Text className="s-avatar-group__count">
-          {total.toLocaleString()} 参与
-        </Text>
+      {total > 0 ? (
+        <Text className="s-avatar-group__count">{total.toLocaleString()} 参与</Text>
       ) : null}
     </View>
   );

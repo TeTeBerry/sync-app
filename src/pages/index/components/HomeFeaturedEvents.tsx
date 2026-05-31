@@ -7,10 +7,7 @@ import {
   getActivityStatusFromActivity,
   type ActivityStatus,
 } from "../../../utils/activityStatus";
-import {
-  resolveFeaturedEventLegacyId,
-  type FeaturedEvent,
-} from "../../../utils/apiMappers";
+import { resolveFeaturedEventLegacyId, type FeaturedEvent } from "../../../utils/apiMappers";
 import { thumbnailImageUrl } from "../../../utils/imageUrl";
 import { useRouteTransitionActive } from "../../../utils/route";
 import { Image, Text, View } from "@tarojs/components";
@@ -98,7 +95,8 @@ function HomeFeaturedEventRow({
   return (
     <View
       className={["s-home-event", activityStatusCardClass(status)].filter(Boolean).join(" ")}
-      onTouchStart={handlePreload}>
+      onTouchStart={handlePreload}
+    >
       <ImageWithFallback
         src={thumbSrc}
         alt={event.title}
@@ -113,7 +111,8 @@ function HomeFeaturedEventRow({
         <Button
           className="s-home-event__main"
           onTouchStart={handlePreload}
-          onClick={() => onEventClick(event)}>
+          onClick={() => onEventClick(event)}
+        >
           <View className="s-home-event__info">
             <Text className="s-home-event__title">{event.title}</Text>
             <View className="s-home-event__date-row">
@@ -150,10 +149,7 @@ function HomeFeaturedEventRow({
           </View>
 
           <Button
-            className={[
-              "s-home-event__join",
-              isJoinNavigating ? "s-home-event__join--loading" : "",
-            ]
+            className={["s-home-event__join", isJoinNavigating ? "s-home-event__join--loading" : ""]
               .filter(Boolean)
               .join(" ")}
             disabled={status === "ended" || isJoinNavigating || legacyId == null}
@@ -161,7 +157,8 @@ function HomeFeaturedEventRow({
             onClick={(clickEvent) => {
               clickEvent.stopPropagation();
               onJoinClick(event);
-            }}>
+            }}
+          >
             <Text className="s-home-event__join-text">
               {isJoinNavigating ? "加入中…" : status === "ended" ? "已结束" : "加入"}
             </Text>

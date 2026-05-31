@@ -27,9 +27,7 @@ export function useContactUnlockQuota(
   const entitlementsQuery = useProfileEntitlementsQuery(activityLegacyId);
 
   return useMemo(() => {
-    const loading =
-      apiEnabled &&
-      entitlementsQuery.isLoading;
+    const loading = apiEnabled && entitlementsQuery.isLoading;
 
     if (!apiEnabled) {
       const mockExhausted = isDevMockQuotaExhausted();
@@ -40,10 +38,7 @@ export function useContactUnlockQuota(
       };
     }
 
-    const entitlement = resolveProfileEntitlement(
-      entitlementsQuery.data,
-      activityLegacyId,
-    );
+    const entitlement = resolveProfileEntitlement(entitlementsQuery.data, activityLegacyId);
     const remaining = getContactUnlockRemaining(entitlement);
 
     return {
@@ -51,10 +46,5 @@ export function useContactUnlockQuota(
       remaining,
       loading,
     };
-  }, [
-    activityLegacyId,
-    apiEnabled,
-    entitlementsQuery.data,
-    entitlementsQuery.isLoading,
-  ]);
+  }, [activityLegacyId, apiEnabled, entitlementsQuery.data, entitlementsQuery.isLoading]);
 }

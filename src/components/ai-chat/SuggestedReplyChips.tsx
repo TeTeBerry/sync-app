@@ -1,6 +1,6 @@
 import { Button, cn } from "../ui";
 import { useAiChatStore } from "../../stores/aiChatStore";
-import { Text, View } from '@tarojs/components';
+import { Text, View } from "@tarojs/components";
 
 const PUBLISH_CONFIRM_REPLY = "确认发布";
 
@@ -25,11 +25,11 @@ export function SuggestedReplyChips({
           key={reply}
           className={cn(
             "s-ai-assistant-chat__copy-chip",
-            reply === PUBLISH_CONFIRM_REPLY &&
-              "s-ai-assistant-chat__copy-chip--primary",
+            reply === PUBLISH_CONFIRM_REPLY && "s-ai-assistant-chat__copy-chip--primary",
           )}
           disabled={disabled}
-          onClick={() => onSelect(reply)}>
+          onClick={() => onSelect(reply)}
+        >
           <Text className="s-btn-label">{reply}</Text>
         </Button>
       ))}

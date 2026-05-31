@@ -5,11 +5,7 @@ import type { NavigationState } from "../stores/navigationStore";
 import type { AiAssistantNavIntent } from "../stores/types";
 import type { NotificationMeta } from "../types/backend";
 import { parseActivityLegacyId } from "./activityLegacyId";
-import {
-  buildQueryString,
-  normalizeQueryString,
-  parseQueryString,
-} from "./queryString";
+import { buildQueryString, normalizeQueryString, parseQueryString } from "./queryString";
 import { getCacheData } from "../hooks/useApiQuery";
 import { findBackendActivityByLegacyId } from "./apiMappers";
 import { seedActivityDetailCache } from "./activityDetailCache";
@@ -43,11 +39,7 @@ export const ROUTES = {
 
 export type RoutePath = (typeof ROUTES)[keyof typeof ROUTES];
 
-const TAB_ROUTE_PATHS = new Set<RoutePath>([
-  ROUTES.HOME,
-  ROUTES.EVENTS,
-  ROUTES.PROFILE,
-]);
+const TAB_ROUTE_PATHS = new Set<RoutePath>([ROUTES.HOME, ROUTES.EVENTS, ROUTES.PROFILE]);
 
 /** Stack pages warmed after tab settle; event detail also preloaded on card touch. */
 const PRELOAD_HOT_ROUTES: RoutePath[] = [
@@ -215,16 +207,11 @@ function runSerializedNavigation(task: () => Promise<void>): void {
 }
 
 /** WeChat preloadPage — warms page JS/WXML; never call immediately before navigateTo. */
-export function preloadPageSafe(
-  path: RoutePath,
-  query?: Record<string, string>,
-) {
+export function preloadPageSafe(path: RoutePath, query?: Record<string, string>) {
   if (process.env.TARO_ENV !== "weapp" || isNavigating) {
     return;
   }
-  const preload = Taro.preloadPage as
-    | ((options: { url: string }) => Promise<void>)
-    | undefined;
+  const preload = Taro.preloadPage as ((options: { url: string }) => Promise<void>) | undefined;
   if (typeof preload !== "function") {
     return;
   }
@@ -253,10 +240,7 @@ export function preloadHotRoutes() {
 }
 
 /** Zustand selector: only the target event card should re-render on transition. */
-export function selectRouteTransitionActive(
-  state: NavigationState,
-  eventId?: number,
-): boolean {
+export function selectRouteTransitionActive(state: NavigationState, eventId?: number): boolean {
   const { active, eventId: transitionEventId } = state.routeTransition;
   if (!active) {
     return false;
@@ -267,10 +251,7 @@ export function selectRouteTransitionActive(
   return transitionEventId === eventId;
 }
 
-export function beginRouteTransition(options?: {
-  eventId?: number;
-  tabTarget?: RoutePath;
-}) {
+export function beginRouteTransition(options?: { eventId?: number; tabTarget?: RoutePath }) {
   useNavigationStore.getState().beginRouteTransition(options);
 }
 
@@ -386,19 +367,14 @@ export function go(url: RoutePath | string) {
   navigateToSafe(url);
 }
 
-export function goEventDetail(
-  eventId: number | string,
-  options?: { postId?: string },
-) {
+export function goEventDetail(eventId: number | string, options?: { postId?: string }) {
   const legacyId = parseActivityLegacyId(eventId);
   if (legacyId == null) {
     void Taro.showToast({ title: "活动信息无效", icon: "none" });
     return;
   }
   const activities = getCacheData<BackendActivity[]>(["activities"]);
-  const fromList = activities
-    ? findBackendActivityByLegacyId(activities, legacyId)
-    : undefined;
+  const fromList = activities ? findBackendActivityByLegacyId(activities, legacyId) : undefined;
   if (fromList) {
     seedActivityDetailCache(fromList);
   }
@@ -438,10 +414,7 @@ export function goExclusiveItinerary(activityLegacyId: number) {
   navigateToSafe(buildPageUrl(ROUTES.EXCLUSIVE_ITINERARY, query));
 }
 
-export function goMyItinerary(
-  activityLegacyId?: number,
-  selectedDjIds?: string[],
-) {
+export function goMyItinerary(activityLegacyId?: number, selectedDjIds?: string[]) {
   const query: Record<string, string> = {};
   const legacyId = parseActivityLegacyId(activityLegacyId);
   if (legacyId != null) {
@@ -457,10 +430,7 @@ export function goMyItinerary(
   navigateToSafe(buildPageUrl(ROUTES.MY_ITINERARY, query));
 }
 
-export function goEventMap(
-  activityLegacyId: number,
-  options?: GoEventMapOptions,
-) {
+export function goEventMap(activityLegacyId: number, options?: GoEventMapOptions) {
   const query: Record<string, string> = {
     activityLegacyId: String(activityLegacyId),
   };
@@ -544,14 +514,9 @@ export function goAiAssistant(options?: GoAiAssistantOptions) {
   if (options?.initialMessage?.trim()) {
     intent.initialMessage = options.initialMessage.trim();
   }
-  if (
-    options?.activityLegacyId != null &&
-    !Number.isNaN(options.activityLegacyId)
-  ) {
+  if (options?.activityLegacyId != null && !Number.isNaN(options.activityLegacyId)) {
     intent.activityLegacyId = options.activityLegacyId;
-    useNavigationStore
-      .getState()
-      .setActiveActivityLegacyId(options.activityLegacyId);
+    useNavigationStore.getState().setActiveActivityLegacyId(options.activityLegacyId);
   } else {
     useNavigationStore.getState().setActiveActivityLegacyId(null);
   }
@@ -619,7 +584,5 @@ export function useActiveRoutePath(): string {
 }
 
 export function useRouteTransitionActive(eventId?: number): boolean {
-  return useNavigationStore((state) =>
-    selectRouteTransitionActive(state, eventId),
-  );
+  return useNavigationStore((state) => selectRouteTransitionActive(state, eventId));
 }

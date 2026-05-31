@@ -20,10 +20,7 @@ function paidEntitlement(
   tier: "pro" | "pro_plus" | "ultra",
   overrides: Partial<EventPackageEntitlement> = {},
 ): EventPackageEntitlement {
-  const quotasByTier: Record<
-    typeof tier,
-    EventPackageEntitlement["quotas"]
-  > = {
+  const quotasByTier: Record<typeof tier, EventPackageEntitlement["quotas"]> = {
     pro: {
       aiMatch: { limit: 11, used: 2, remaining: 9 },
       contactUnlock: { limit: 8, used: 1, remaining: 7 },
@@ -59,8 +56,7 @@ function paidEntitlement(
     },
   };
 
-  const tierName =
-    tier === "pro" ? "Pro" : tier === "pro_plus" ? "Pro+" : "Ultra";
+  const tierName = tier === "pro" ? "Pro" : tier === "pro_plus" ? "Pro+" : "Ultra";
 
   return {
     activityLegacyId: 1,
@@ -163,7 +159,16 @@ describe("pickGlobalFreeMonthly", () => {
     };
     expect(
       pickGlobalFreeMonthly(
-        [{ activityLegacyId: 1, tierId: "free", tierName: "免费版", paidTierId: null, freeMonthly: fromList, quotas: {} as never }],
+        [
+          {
+            activityLegacyId: 1,
+            tierId: "free",
+            tierName: "免费版",
+            paidTierId: null,
+            freeMonthly: fromList,
+            quotas: {} as never,
+          },
+        ],
         summary,
       ),
     ).toBe(summary);
@@ -302,10 +307,7 @@ describe("listPaidEntitlements", () => {
   };
 
   it("returns only paid activities and dedupes by activityLegacyId", () => {
-    const paid = listPaidEntitlements(
-      [freeScoped, proSeed, ultraOther],
-      [proSeed],
-    );
+    const paid = listPaidEntitlements([freeScoped, proSeed, ultraOther], [proSeed]);
     expect(paid).toHaveLength(2);
     expect(paid.map((item) => item.activityLegacyId)).toEqual([1, 4]);
   });
@@ -325,9 +327,7 @@ describe("listPaidEntitlements", () => {
   });
 
   it("builds four benefit rows when pin quota exists", () => {
-    const card = buildEventBenefitCardModel(
-      paidEntitlement("pro_plus"),
-    );
+    const card = buildEventBenefitCardModel(paidEntitlement("pro_plus"));
     expect(card.rows).toHaveLength(4);
     expect(card.rows.map((row) => row.id)).toContain("post-pin");
   });
@@ -351,21 +351,13 @@ describe("buildEventBenefitCardModel tier display", () => {
     expect(card.tierId).toBe("pro");
     expect(card.tierName).toBe("Pro");
     expect(card.rows.find((row) => row.id === "post-pin")).toBeUndefined();
-    expect(card.rows.find((row) => row.id === "ai-match")?.quotaLabel).toBe(
-      "剩 11/11",
-    );
-    expect(card.rows.find((row) => row.id === "contact")?.quotaLabel).toBe(
-      "剩 8/8",
-    );
-    expect(card.rows.find((row) => row.id === "map")?.quotaLabel).toMatch(
-      /^剩 \d+ 天$/,
-    );
+    expect(card.rows.find((row) => row.id === "ai-match")?.quotaLabel).toBe("剩 11/11");
+    expect(card.rows.find((row) => row.id === "contact")?.quotaLabel).toBe("剩 8/8");
+    expect(card.rows.find((row) => row.id === "map")?.quotaLabel).toMatch(/^剩 \d+ 天$/);
   });
 
   it("uses paidTierId for badge when tierName from API is stale", () => {
-    const card = buildEventBenefitCardModel(
-      paidEntitlement("pro", { tierName: "Pro+" }),
-    );
+    const card = buildEventBenefitCardModel(paidEntitlement("pro", { tierName: "Pro+" }));
     expect(card.tierId).toBe("pro");
     expect(card.tierName).toBe("Pro");
   });
@@ -374,30 +366,18 @@ describe("buildEventBenefitCardModel tier display", () => {
     const card = buildEventBenefitCardModel(paidEntitlement("pro_plus"));
     expect(card.tierId).toBe("pro_plus");
     expect(card.tierName).toBe("Pro+");
-    expect(card.rows.find((row) => row.id === "ai-match")?.quotaLabel).toBe(
-      "剩 15/18",
-    );
-    expect(card.rows.find((row) => row.id === "contact")?.quotaLabel).toBe(
-      "剩 15/15",
-    );
-    expect(card.rows.find((row) => row.id === "post-pin")?.quotaLabel).toBe(
-      "剩 1/1",
-    );
+    expect(card.rows.find((row) => row.id === "ai-match")?.quotaLabel).toBe("剩 15/18");
+    expect(card.rows.find((row) => row.id === "contact")?.quotaLabel).toBe("剩 15/15");
+    expect(card.rows.find((row) => row.id === "post-pin")?.quotaLabel).toBe("剩 1/1");
   });
 
   it("shows Ultra badge with unlimited labels", () => {
     const card = buildEventBenefitCardModel(paidEntitlement("ultra"));
     expect(card.tierId).toBe("ultra");
     expect(card.tierName).toBe("Ultra");
-    expect(card.rows.find((row) => row.id === "ai-match")?.quotaLabel).toBe(
-      "不限",
-    );
-    expect(card.rows.find((row) => row.id === "contact")?.quotaLabel).toBe(
-      "不限",
-    );
-    expect(card.rows.find((row) => row.id === "post-pin")?.quotaLabel).toBe(
-      "剩 1/2",
-    );
+    expect(card.rows.find((row) => row.id === "ai-match")?.quotaLabel).toBe("不限");
+    expect(card.rows.find((row) => row.id === "contact")?.quotaLabel).toBe("不限");
+    expect(card.rows.find((row) => row.id === "post-pin")?.quotaLabel).toBe("剩 1/2");
   });
 
   it("buildMockProPlusEntitlement is Pro+ on activity 6 with pin", () => {

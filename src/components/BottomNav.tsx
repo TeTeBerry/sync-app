@@ -45,7 +45,8 @@ const BottomNav: React.FC = () => {
                 }
               }}
               onClick={() => switchTabTo(item.path)}
-              className="s-bottom-nav__item">
+              className="s-bottom-nav__item"
+            >
               <Icon
                 size={24}
                 color={isActive ? "#ffffff" : "#888888"}
@@ -53,7 +54,8 @@ const BottomNav: React.FC = () => {
                 className={`s-bottom-nav__icon${isActive ? " s-bottom-nav__icon--active" : ""}`}
               />
               <Text
-                className={`s-bottom-nav__label${isActive ? " s-bottom-nav__label--active" : ""}`}>
+                className={`s-bottom-nav__label${isActive ? " s-bottom-nav__label--active" : ""}`}
+              >
                 {item.label}
               </Text>
             </Button>

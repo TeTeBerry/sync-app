@@ -30,13 +30,9 @@ async function deriveKey(secret: string): Promise<CryptoKey | null> {
   if (!subtle) return null;
 
   const encoder = new TextEncoder();
-  const keyMaterial = await subtle.importKey(
-    "raw",
-    encoder.encode(secret),
-    "PBKDF2",
-    false,
-    ["deriveKey"],
-  );
+  const keyMaterial = await subtle.importKey("raw", encoder.encode(secret), "PBKDF2", false, [
+    "deriveKey",
+  ]);
 
   return subtle.deriveKey(
     {
@@ -52,10 +48,7 @@ async function deriveKey(secret: string): Promise<CryptoKey | null> {
   );
 }
 
-export async function encryptJson<T>(
-  secret: string,
-  payload: T,
-): Promise<string | null> {
+export async function encryptJson<T>(secret: string, payload: T): Promise<string | null> {
   const subtle = getSubtleCrypto();
   const key = await deriveKey(secret);
   if (!subtle || !key) return null;
@@ -70,10 +63,7 @@ export async function encryptJson<T>(
   });
 }
 
-export async function decryptJson<T>(
-  secret: string,
-  encrypted: string,
-): Promise<T | null> {
+export async function decryptJson<T>(secret: string, encrypted: string): Promise<T | null> {
   const subtle = getSubtleCrypto();
   const key = await deriveKey(secret);
   if (!subtle || !key || !encrypted.trim()) return null;

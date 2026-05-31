@@ -4,11 +4,9 @@ export function taroRequestData(init: RequestInit): unknown {
   if (body == null || body === "") return undefined;
 
   const headerRecord = headers as Record<string, string> | undefined;
-  const contentType =
-    headerRecord?.["Content-Type"] ?? headerRecord?.["content-type"] ?? "";
+  const contentType = headerRecord?.["Content-Type"] ?? headerRecord?.["content-type"] ?? "";
   const isJsonBody =
-    method.toUpperCase() !== "GET" &&
-    contentType.toLowerCase().includes("application/json");
+    method.toUpperCase() !== "GET" && contentType.toLowerCase().includes("application/json");
 
   if (isJsonBody && typeof body === "string") {
     try {

@@ -1,7 +1,5 @@
 /** Taro injects `process.env.TARO_*` at compile time; avoid `typeof process` guards. */
-const rawBase =
-  process.env.TARO_APP_API_BASE_URL ||
-  (process.env.TARO_ENV === "h5" ? "/api" : "");
+const rawBase = process.env.TARO_APP_API_BASE_URL || (process.env.TARO_ENV === "h5" ? "/api" : "");
 
 /** REST API root, e.g. `https://api.example.com` (weapp) or `/api` (unmaintained H5 dev). */
 export const API_BASE_URL = rawBase.replace(/\/$/, "");
@@ -55,9 +53,7 @@ export function resolveAiChatWsUrl(): string {
   if (wsBase) {
     const root = wsBase.replace(/\/$/, "");
     const httpRoot = apiBase.replace(/\/$/, "");
-    const suffix = httpRoot.endsWith("/api")
-      ? AI_CHAT_WS_SUFFIX
-      : AI_CHAT_WS_CANONICAL_SUFFIX;
+    const suffix = httpRoot.endsWith("/api") ? AI_CHAT_WS_SUFFIX : AI_CHAT_WS_CANONICAL_SUFFIX;
     return `${root}${suffix}`;
   }
 

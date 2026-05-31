@@ -14,7 +14,8 @@ export function EventDetailExclusiveItineraryButton({
         className="s-event-detail__itinerary-btn"
         hoverClass="s-event-detail__itinerary-btn--pressed"
         aria-label="专属电音行程"
-        onClick={onPress}>
+        onClick={onPress}
+      >
         <View className="s-event-detail__itinerary-btn__icon" aria-hidden>
           <Music2 size={18} color="#ffffff" />
         </View>

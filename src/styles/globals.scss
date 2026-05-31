@@ -103,7 +103,8 @@ page {
 }
 
 .s-shadow-custom {
-  box-shadow: var(--shadow-x) var(--shadow-y) var(--shadow-blur) var(--shadow-spread) var(--shadow-color);
+  box-shadow: var(--shadow-x) var(--shadow-y) var(--shadow-blur) var(--shadow-spread)
+    var(--shadow-color);
 }
 
 @keyframes s-pulse-soft {

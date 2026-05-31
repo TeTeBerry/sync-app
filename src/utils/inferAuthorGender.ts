@@ -19,16 +19,7 @@ const MALE_DEMO_USER_IDS = new Set([
   "demo-alex",
 ]);
 
-const FEMALE_NAME_HINTS = [
-  "luna",
-  "zara",
-  "mia",
-  "jade",
-  "nova",
-  "chen",
-  "anna",
-  "lily",
-];
+const FEMALE_NAME_HINTS = ["luna", "zara", "mia", "jade", "nova", "chen", "anna", "lily"];
 
 const MALE_NAME_HINTS = ["ryan", "sam", "sean", "leo", "kai", "alex", "tom", "jack", "max"];
 
@@ -58,9 +49,7 @@ export function inferAuthorGenderFromPost(post: {
   }
 
   if (
-    /(\d+)缺\d*男生|缺\d*男生|(\d+)人男生|男生拼车|男生同行|北京出发.*男生/i.test(
-      haystack,
-    ) &&
+    /(\d+)缺\d*男生|缺\d*男生|(\d+)人男生|男生拼车|男生同行|北京出发.*男生/i.test(haystack) &&
     !/男生女生都可|男女都可/i.test(haystack)
   ) {
     return "male";

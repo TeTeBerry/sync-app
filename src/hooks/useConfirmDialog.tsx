@@ -17,10 +17,7 @@ type ActiveConfirm = ConfirmDialogOptions & {
  * Themed confirm dialog hook. Prefer this over `Taro.showModal` for user-facing
  * confirmations so copy and styling stay consistent with the app shell.
  */
-export function useConfirmDialog(defaults?: {
-  confirmText?: string;
-  cancelText?: string;
-}) {
+export function useConfirmDialog(defaults?: { confirmText?: string; cancelText?: string }) {
   const [active, setActive] = useState<ActiveConfirm | null>(null);
 
   const confirm = useCallback(

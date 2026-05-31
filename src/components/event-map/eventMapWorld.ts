@@ -18,10 +18,7 @@ export type MapWorldDimensions = {
   worldH: number;
 };
 
-export function getMapWorldDimensions(
-  cssW: number,
-  cssH: number,
-): MapWorldDimensions {
+export function getMapWorldDimensions(cssW: number, cssH: number): MapWorldDimensions {
   const safeW = Math.max(1, cssW);
   const safeH = Math.max(1, cssH);
   return {
@@ -48,12 +45,7 @@ export function getDefaultEventMapViewport(
   cssH: number,
   scale = MAP_SCALE_MIN,
 ): EventMapViewport {
-  const {
-    cssW: w,
-    cssH: h,
-    worldW,
-    worldH,
-  } = getMapWorldDimensions(cssW, cssH);
+  const { cssW: w, cssH: h, worldW, worldH } = getMapWorldDimensions(cssW, cssH);
   const s = clampMapScale(scale);
   return {
     scale: s,

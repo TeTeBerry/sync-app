@@ -49,12 +49,10 @@ export function EventLiveInfoPanel({
 
   return (
     <View
-      className={[
-        "s-live-info-panel",
-        isCertified && "s-live-info-panel--with-fab",
-      ]
+      className={["s-live-info-panel", isCertified && "s-live-info-panel--with-fab"]
         .filter(Boolean)
-        .join(" ")}>
+        .join(" ")}
+    >
       <EventLiveInfoCertCard
         userName={userName}
         isCertified={isCertified}
@@ -70,7 +68,8 @@ export function EventLiveInfoPanel({
         <Button
           className="s-live-info-panel__fab"
           hoverClass="s-live-info-panel__fab--pressed"
-          onClick={onOpenUpdate}>
+          onClick={onOpenUpdate}
+        >
           <Zap size={18} color="#fff" aria-hidden />
           <Text className="s-live-info-panel__fab-text">我要更新实时资讯</Text>
         </Button>

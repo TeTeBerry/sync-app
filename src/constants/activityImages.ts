@@ -35,7 +35,5 @@ export function resolveActivityThumb(
   }
   const remote = thumbnailImageUrl(remoteUrl, width);
   if (remote) return remote;
-  return (
-    thumbnailImageUrl(PLACEHOLDER_EVENT_HERO, width) ?? PLACEHOLDER_EVENT_HERO
-  );
+  return thumbnailImageUrl(PLACEHOLDER_EVENT_HERO, width) ?? PLACEHOLDER_EVENT_HERO;
 }

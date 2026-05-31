@@ -15,17 +15,11 @@ function isRestApiEnvelope(json: Record<string, unknown>): boolean {
 }
 
 function isChatSessionSnapshot(json: Record<string, unknown>): boolean {
-  return (
-    typeof json.sessionId === "string" &&
-    Array.isArray(json.history) &&
-    !("type" in json)
-  );
+  return typeof json.sessionId === "string" && Array.isArray(json.history) && !("type" in json);
 }
 
 /** Parse one server stream event (WebSocket JSON frame). */
-export function parseStreamEventPayload(
-  json: Record<string, unknown>,
-): AiChatStreamEvent | null {
+export function parseStreamEventPayload(json: Record<string, unknown>): AiChatStreamEvent | null {
   if (isRestApiEnvelope(json) || isChatSessionSnapshot(json)) {
     return null;
   }
@@ -63,16 +57,12 @@ export function parseStreamEventPayload(
   }
   if (json.type === "post_created" && typeof json.postId === "string") {
     const post =
-      json.post && typeof json.post === "object"
-        ? (json.post as RecommendedPostCard)
-        : undefined;
+      json.post && typeof json.post === "object" ? (json.post as RecommendedPostCard) : undefined;
     return {
       type: "post_created",
       postId: json.postId,
       activityLegacyId:
-        typeof json.activityLegacyId === "number"
-          ? json.activityLegacyId
-          : undefined,
+        typeof json.activityLegacyId === "number" ? json.activityLegacyId : undefined,
       post:
         post && typeof post.postId === "string" && typeof post.snippet === "string"
           ? post
@@ -84,9 +74,7 @@ export function parseStreamEventPayload(
       type: "existing_post",
       postId: json.postId,
       activityLegacyId:
-        typeof json.activityLegacyId === "number"
-          ? json.activityLegacyId
-          : undefined,
+        typeof json.activityLegacyId === "number" ? json.activityLegacyId : undefined,
     };
   }
   if (json.type === "post_recommendations" && Array.isArray(json.posts)) {
@@ -96,12 +84,13 @@ export function parseStreamEventPayload(
       degraded: typeof json.degraded === "boolean" ? json.degraded : undefined,
     };
   }
-  if (json.type === "activity_recommendation" && json.activity && typeof json.activity === "object") {
+  if (
+    json.type === "activity_recommendation" &&
+    json.activity &&
+    typeof json.activity === "object"
+  ) {
     const activity = json.activity as RecommendedActivityCard;
-    if (
-      typeof activity.activityLegacyId === "number" &&
-      typeof activity.title === "string"
-    ) {
+    if (typeof activity.activityLegacyId === "number" && typeof activity.title === "string") {
       return {
         type: "activity_recommendation",
         activity,

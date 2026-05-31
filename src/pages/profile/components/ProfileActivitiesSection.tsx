@@ -6,7 +6,7 @@ import { ProfileCollapsibleSection } from "../../../components/profile/ProfileCo
 import type { ProfileActivityItem } from "../../../types/backend";
 import { compareActivityDateDesc } from "../../../utils/activityStatus";
 import { safeTrim } from "../../../utils/safeString";
-import { Text, View } from '@tarojs/components';
+import { Text, View } from "@tarojs/components";
 
 function activityTitleFallback(title: unknown): string {
   const trimmed = safeTrim(title);
@@ -30,10 +30,7 @@ const ProfileActivitiesSection: React.FC<ProfileActivitiesSectionProps> = ({
   items,
   mode = "collapsible",
 }) => {
-  const sortedItems = useMemo(
-    () => [...items].sort(compareActivityDateDesc),
-    [items],
-  );
+  const sortedItems = useMemo(() => [...items].sort(compareActivityDateDesc), [items]);
 
   const listBody = (
     <>
@@ -79,7 +76,11 @@ const ProfileActivitiesSection: React.FC<ProfileActivitiesSectionProps> = ({
   );
 
   if (mode === "list") {
-    return <View className="s-profile-section__body s-profile-section__body--standalone">{listBody}</View>;
+    return (
+      <View className="s-profile-section__body s-profile-section__body--standalone">
+        {listBody}
+      </View>
+    );
   }
 
   return (
@@ -96,7 +97,8 @@ const ProfileActivitiesSection: React.FC<ProfileActivitiesSectionProps> = ({
           <Text className="s-profile-section__empty-title">还没有报名活动</Text>
           <Text className="s-profile-section__empty-hint">在首页或活动页报名后，会显示在这里</Text>
         </View>
-      )}>
+      )}
+    >
       {(pageItems) =>
         pageItems.map((item) => (
           <View key={item.id} className="s-profile-activity">

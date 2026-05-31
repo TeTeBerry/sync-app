@@ -109,8 +109,7 @@ export function asEntitlementList(value: unknown): EventPackageEntitlement[] {
   }
   if (value != null && typeof value === "object") {
     return Object.values(value as Record<string, unknown>).filter(
-      (item): item is EventPackageEntitlement =>
-        item != null && typeof item === "object",
+      (item): item is EventPackageEntitlement => item != null && typeof item === "object",
     );
   }
   return [];
@@ -134,9 +133,7 @@ export function isValidFreeMonthlyQuota(
   freeMonthly: FreeMonthlyQuota | null | undefined,
 ): freeMonthly is FreeMonthlyQuota {
   return Boolean(
-    freeMonthly?.aiMatch &&
-      freeMonthly?.contactUnlock &&
-      typeof freeMonthly.period === "string",
+    freeMonthly?.aiMatch && freeMonthly?.contactUnlock && typeof freeMonthly.period === "string",
   );
 }
 
@@ -148,15 +145,10 @@ function normalizeQuotaSlot(
     return fallback;
   }
   return {
-    limit:
-      slot.limit === null
-        ? null
-        : safeFiniteNumber(slot.limit, fallback.limit ?? 0),
+    limit: slot.limit === null ? null : safeFiniteNumber(slot.limit, fallback.limit ?? 0),
     used: safeFiniteNumber(slot.used, 0),
     remaining:
-      slot.remaining === null
-        ? null
-        : safeFiniteNumber(slot.remaining, fallback.remaining ?? 0),
+      slot.remaining === null ? null : safeFiniteNumber(slot.remaining, fallback.remaining ?? 0),
   };
 }
 
@@ -169,10 +161,7 @@ function resolveEntitlementQuotas(
   const quotas = entitlement.quotas;
   return {
     aiMatch: normalizeQuotaSlot(quotas.aiMatch, EMPTY_QUOTAS.aiMatch),
-    contactUnlock: normalizeQuotaSlot(
-      quotas.contactUnlock,
-      EMPTY_QUOTAS.contactUnlock,
-    ),
+    contactUnlock: normalizeQuotaSlot(quotas.contactUnlock, EMPTY_QUOTAS.contactUnlock),
     map: {
       days: safeFiniteNumber(quotas.map.days, 0),
       expiresAt:
@@ -206,10 +195,7 @@ export function resolveEntitlementValidUntilIso(
     return entitlement.validUntil;
   }
   if (entitlement.purchasedAt) {
-    return addUtcDaysFromIso(
-      entitlement.purchasedAt,
-      PACKAGE_ENTITLEMENT_VALIDITY_DAYS,
-    );
+    return addUtcDaysFromIso(entitlement.purchasedAt, PACKAGE_ENTITLEMENT_VALIDITY_DAYS);
   }
   return undefined;
 }
@@ -264,14 +250,8 @@ function buildMetricsFromQuotas(
       value: contact.value,
       unit: contact.unit,
       label: "联系方式解锁",
-      remainingRatio: quotaRatio(
-        quotas.contactUnlock.remaining,
-        quotas.contactUnlock.limit,
-      ),
-      lowRemaining: quotaLow(
-        quotas.contactUnlock.remaining,
-        quotas.contactUnlock.limit,
-      ),
+      remainingRatio: quotaRatio(quotas.contactUnlock.remaining, quotas.contactUnlock.limit),
+      lowRemaining: quotaLow(quotas.contactUnlock.remaining, quotas.contactUnlock.limit),
     },
     {
       id: "map",
@@ -288,12 +268,9 @@ function buildMetricsFromQuotas(
 /** Offline / demo Zara — Pro per-event tier merged with full free monthly bucket. */
 export function buildMockProfileBenefits(): ProfileBenefits {
   const proTier =
-    MOCK_PACKAGE_CATALOG.tiers.find((tier) => tier.id === "pro") ??
-    MOCK_PACKAGE_CATALOG.tiers[0];
-  const aiRemaining =
-    (proTier.limits.aiMatchCount ?? 0) + FREE_MONTHLY_AI_LIMIT;
-  const contactRemaining =
-    (proTier.limits.contactUnlockCount ?? 0) + FREE_MONTHLY_CONTACT_LIMIT;
+    MOCK_PACKAGE_CATALOG.tiers.find((tier) => tier.id === "pro") ?? MOCK_PACKAGE_CATALOG.tiers[0];
+  const aiRemaining = (proTier.limits.aiMatchCount ?? 0) + FREE_MONTHLY_AI_LIMIT;
+  const contactRemaining = (proTier.limits.contactUnlockCount ?? 0) + FREE_MONTHLY_CONTACT_LIMIT;
   const mapDays = proTier.limits.mapDays;
 
   return {
@@ -342,9 +319,7 @@ export function pickProfileEntitlement(
   summaryEntitlement: EventPackageEntitlement | null | undefined,
 ): EventPackageEntitlement | null {
   if (activityLegacyId != null && !Number.isNaN(activityLegacyId)) {
-    const scoped = entitlements?.find(
-      (item) => item.activityLegacyId === activityLegacyId,
-    );
+    const scoped = entitlements?.find((item) => item.activityLegacyId === activityLegacyId);
     if (scoped) {
       return scoped;
     }
@@ -366,12 +341,9 @@ function slotToFreeQuota(
   limit: number | null,
   fallbackLimit: number,
 ): ProfileFreeBenefitQuota {
-  const resolvedLimit =
-    limit != null && limit > 0 ? limit : fallbackLimit;
+  const resolvedLimit = limit != null && limit > 0 ? limit : fallbackLimit;
   const resolvedRemaining =
-    remaining != null
-      ? Math.max(0, Math.min(resolvedLimit, remaining))
-      : resolvedLimit;
+    remaining != null ? Math.max(0, Math.min(resolvedLimit, remaining)) : resolvedLimit;
   return {
     remaining: resolvedRemaining,
     limit: resolvedLimit,
@@ -383,8 +355,7 @@ function resolveFreeQuotaSlots(
   entitlement: EventPackageEntitlement | null | undefined,
   freeMonthly?: FreeMonthlyQuota | null,
 ): Pick<ProfileFreeBenefitCardModel, "aiMatch" | "contactUnlock"> {
-  const monthly =
-    entitlement?.freeMonthly ?? freeMonthly ?? null;
+  const monthly = entitlement?.freeMonthly ?? freeMonthly ?? null;
 
   if (isValidFreeMonthlyQuota(monthly)) {
     return {
@@ -401,11 +372,7 @@ function resolveFreeQuotaSlots(
     };
   }
 
-  if (
-    entitlement &&
-    !isPaidEntitlement(entitlement) &&
-    hasValidEntitlementQuotas(entitlement)
-  ) {
+  if (entitlement && !isPaidEntitlement(entitlement) && hasValidEntitlementQuotas(entitlement)) {
     return {
       aiMatch: slotToFreeQuota(
         entitlement.quotas.aiMatch.remaining,
@@ -465,15 +432,9 @@ export function buildFreeBenefitCardModel(
 }
 
 /** Offline fallback or missing API payload — assumes full free monthly bucket. */
-export function buildFreeProfileBenefits(
-  freeMonthly?: FreeMonthlyQuota | null,
-): ProfileBenefits {
-  const aiRemaining =
-    freeMonthly?.aiMatch.remaining ??
-    FREE_MONTHLY_AI_LIMIT;
-  const contactRemaining =
-    freeMonthly?.contactUnlock.remaining ??
-    FREE_MONTHLY_CONTACT_LIMIT;
+export function buildFreeProfileBenefits(freeMonthly?: FreeMonthlyQuota | null): ProfileBenefits {
+  const aiRemaining = freeMonthly?.aiMatch.remaining ?? FREE_MONTHLY_AI_LIMIT;
+  const contactRemaining = freeMonthly?.contactUnlock.remaining ?? FREE_MONTHLY_CONTACT_LIMIT;
   const aiLimit = freeMonthly?.aiMatch.limit ?? FREE_MONTHLY_AI_LIMIT;
   const contactLimit = freeMonthly?.contactUnlock.limit ?? FREE_MONTHLY_CONTACT_LIMIT;
 
@@ -522,9 +483,7 @@ export function isPaidEntitlement(entitlement: EventPackageEntitlement): boolean
 }
 
 /** Next purchasable tier for upgrade CTA; `null` at Ultra (top tier). */
-export function getNextTierId(
-  paidTierId: PackageTierId | null | undefined,
-): PackageTierId | null {
+export function getNextTierId(paidTierId: PackageTierId | null | undefined): PackageTierId | null {
   if (!paidTierId) {
     return null;
   }
@@ -554,9 +513,7 @@ export function listPaidEntitlements(
     }
   }
 
-  return Array.from(byActivity.values()).sort(
-    (a, b) => a.activityLegacyId - b.activityLegacyId,
-  );
+  return Array.from(byActivity.values()).sort((a, b) => a.activityLegacyId - b.activityLegacyId);
 }
 
 function formatQuotaLabel(remaining: number | null, limit: number | null): string {
@@ -581,9 +538,7 @@ function formatValidUntilDate(iso: string): string {
   return `${y}-${m}-${d}`;
 }
 
-function buildMapBenefitRow(
-  map: EventPackageEntitlement["quotas"]["map"],
-): ProfileEventBenefitRow {
+function buildMapBenefitRow(map: EventPackageEntitlement["quotas"]["map"]): ProfileEventBenefitRow {
   if (!map.active) {
     return {
       id: "map",
@@ -645,12 +600,7 @@ function buildPinBenefitRow(
   return {
     id: "post-pin",
     label: "主页置顶",
-    quotaLabel:
-      limit == null
-        ? "不限"
-        : limit <= 0
-          ? "未包含"
-          : formatQuotaLabel(remaining, limit),
+    quotaLabel: limit == null ? "不限" : limit <= 0 ? "未包含" : formatQuotaLabel(remaining, limit),
     remainingRatio: limit != null && limit > 0 ? ratio : 0,
     accent: "gold",
     hint: undefined,
@@ -664,14 +614,8 @@ export function buildEventBenefitRows(
     {
       id: "contact",
       label: "联系方式解锁",
-      quotaLabel: formatQuotaLabel(
-        quotas.contactUnlock.remaining,
-        quotas.contactUnlock.limit,
-      ),
-      remainingRatio: quotaRatio(
-        quotas.contactUnlock.remaining,
-        quotas.contactUnlock.limit,
-      ),
+      quotaLabel: formatQuotaLabel(quotas.contactUnlock.remaining, quotas.contactUnlock.limit),
+      remainingRatio: quotaRatio(quotas.contactUnlock.remaining, quotas.contactUnlock.limit),
       accent: "purple",
       quotaTone: "muted",
     },
@@ -728,11 +672,9 @@ export function buildMockProPlusEntitlement(): EventPackageEntitlement {
 
 export function buildMockPaidEntitlement(): EventPackageEntitlement {
   const proTier =
-    MOCK_PACKAGE_CATALOG.tiers.find((tier) => tier.id === "pro") ??
-    MOCK_PACKAGE_CATALOG.tiers[0];
+    MOCK_PACKAGE_CATALOG.tiers.find((tier) => tier.id === "pro") ?? MOCK_PACKAGE_CATALOG.tiers[0];
   const aiLimit = (proTier.limits.aiMatchCount ?? 0) + FREE_MONTHLY_AI_LIMIT;
-  const contactLimit =
-    (proTier.limits.contactUnlockCount ?? 0) + FREE_MONTHLY_CONTACT_LIMIT;
+  const contactLimit = (proTier.limits.contactUnlockCount ?? 0) + FREE_MONTHLY_CONTACT_LIMIT;
   const mapDays = proTier.limits.mapDays;
 
   return {
@@ -757,19 +699,15 @@ export function buildMockPaidEntitlement(): EventPackageEntitlement {
 
 export function buildEventBenefitCardModel(
   entitlement: EventPackageEntitlement,
-  activity?: Partial<
-    Pick<ProfileActivityItem, "title" | "date" | "location" | "image">
-  > | null,
+  activity?: Partial<Pick<ProfileActivityItem, "title" | "date" | "location" | "image">> | null,
 ): ProfileEventBenefitCardModel {
-  const title =
-    safeTrim(activity?.title) || `活动 ${entitlement.activityLegacyId}`;
+  const title = safeTrim(activity?.title) || `活动 ${entitlement.activityLegacyId}`;
   const date = safeTrim(activity?.date);
   const location = safeTrim(activity?.location);
   const eventMeta = [date, location].filter(Boolean).join(" · ");
 
   const quotas = resolveEntitlementQuotas(entitlement);
-  const validUntilIso =
-    resolveEntitlementValidUntilIso(entitlement) ?? quotas.map.expiresAt;
+  const validUntilIso = resolveEntitlementValidUntilIso(entitlement) ?? quotas.map.expiresAt;
 
   const { tierId, tierName } = resolvePaidTierDisplay(entitlement);
 
@@ -777,9 +715,7 @@ export function buildEventBenefitCardModel(
     activityLegacyId: entitlement.activityLegacyId,
     eventTitle: title,
     eventMeta,
-    eventImage:
-      safeTrim(activity?.image) ||
-      "https://picsum.photos/seed/sync-benefit-event/96/96",
+    eventImage: safeTrim(activity?.image) || "https://picsum.photos/seed/sync-benefit-event/96/96",
     tierId,
     tierName,
     validUntilLabel: `权益有效期至 ${formatValidUntilDate(validUntilIso ?? "")}`,

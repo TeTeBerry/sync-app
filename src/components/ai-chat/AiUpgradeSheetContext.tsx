@@ -4,9 +4,7 @@ export type AiUpgradeSheetContextValue = {
   openUpgradeSheet: () => void;
 };
 
-const AiUpgradeSheetContext = createContext<AiUpgradeSheetContextValue | null>(
-  null,
-);
+const AiUpgradeSheetContext = createContext<AiUpgradeSheetContextValue | null>(null);
 
 export function AiUpgradeSheetProvider({
   openUpgradeSheet,

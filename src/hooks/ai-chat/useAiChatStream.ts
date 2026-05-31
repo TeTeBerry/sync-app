@@ -3,11 +3,7 @@ import Taro from "@tarojs/taro";
 import { AI_CHAT_WS_URL } from "../../constants/api";
 import { useAiChatStore } from "../../stores/aiChatStore";
 import type { AiChatStreamEvent, ChatUiMessage, SendChatOptions } from "../../types/aiChat";
-import {
-  getClientUserId,
-  getClientUserName,
-  getClientUserPhone,
-} from "../../utils/session";
+import { getClientUserId, getClientUserName, getClientUserPhone } from "../../utils/session";
 import { formatAiChatToastError } from "../../utils/aiChatErrors";
 import { createMessageId } from "./createMessageId";
 import { useChatSession } from "./useChatSession";
@@ -30,12 +26,8 @@ export interface UseAiChatStreamOptions {
   userPhone?: string;
   activityLegacyId?: number;
   getAuthHeaders?: () => Record<string, string>;
-  onPostCreated?: (
-    event: Extract<AiChatStreamEvent, { type: "post_created" }>,
-  ) => void;
-  onExistingPost?: (
-    event: Extract<AiChatStreamEvent, { type: "existing_post" }>,
-  ) => void;
+  onPostCreated?: (event: Extract<AiChatStreamEvent, { type: "post_created" }>) => void;
+  onExistingPost?: (event: Extract<AiChatStreamEvent, { type: "existing_post" }>) => void;
   /** Called after a chat turn completes successfully (stream `done`). */
   onMatchTurnComplete?: () => void | Promise<void>;
 }

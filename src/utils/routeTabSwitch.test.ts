@@ -6,12 +6,7 @@ vi.hoisted(() => {
 
 import Taro from "@tarojs/taro";
 import { useNavigationStore } from "../stores/navigationStore";
-import {
-  beginTabRouteTransition,
-  endRouteTransition,
-  ROUTES,
-  switchTabTo,
-} from "./route";
+import { beginTabRouteTransition, endRouteTransition, ROUTES, switchTabTo } from "./route";
 
 vi.mock("@tarojs/taro", () => ({
   default: {
@@ -46,9 +41,7 @@ vi.mock("../hooks/useApiQuery", () => ({
 describe("tab switch loading", () => {
   beforeEach(() => {
     endRouteTransition();
-    vi.mocked(Taro.getCurrentPages).mockReturnValue([
-      { route: "pages/index/index" },
-    ] as never);
+    vi.mocked(Taro.getCurrentPages).mockReturnValue([{ route: "pages/index/index" }] as never);
     vi.mocked(Taro.switchTab).mockImplementation((options) => {
       options?.success?.({ errMsg: "switchTab:ok" } as never);
       options?.complete?.({ errMsg: "switchTab:ok" } as never);
@@ -81,9 +74,7 @@ describe("tab switch loading", () => {
       tabTarget: ROUTES.PROFILE,
     });
     await vi.waitUntil(() => vi.mocked(Taro.switchTab).mock.calls.length > 0);
-    expect(Taro.switchTab).toHaveBeenCalledWith(
-      expect.objectContaining({ url: ROUTES.PROFILE }),
-    );
+    expect(Taro.switchTab).toHaveBeenCalledWith(expect.objectContaining({ url: ROUTES.PROFILE }));
   });
 
   it("switchTabTo does not activate loading for the active tab", () => {

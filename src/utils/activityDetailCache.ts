@@ -7,10 +7,7 @@ function detailQueryKey(legacyId: number) {
   return ["activities", "detail", legacyId] as const;
 }
 
-function minimalActivity(
-  legacyId: number,
-  fields: Partial<BackendActivity>,
-): BackendActivity {
+function minimalActivity(legacyId: number, fields: Partial<BackendActivity>): BackendActivity {
   return {
     _id: fields._id ?? String(legacyId),
     legacyId,

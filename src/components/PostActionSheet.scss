@@ -138,7 +138,9 @@
   text-align: left;
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
-  transition: background 160ms ease, transform 120ms ease;
+  transition:
+    background 160ms ease,
+    transform 120ms ease;
 
   &::after {
     display: none;

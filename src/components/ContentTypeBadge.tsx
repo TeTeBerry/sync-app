@@ -36,12 +36,8 @@ export const ContentTypeBadge: React.FC<{
         const resolved = resolveContentTypeKey(key);
         const styleKey = CONTENT_TYPE_STYLE_KEYS.has(resolved) ? resolved : key;
         return (
-          <View
-            key={styleKey}
-            className={`s-content-badge ${TYPE_STYLES[styleKey] ?? ""}`}>
-            <Text className="s-content-badge__label">
-              {formatContentTypeHashtag(styleKey)}
-            </Text>
+          <View key={styleKey} className={`s-content-badge ${TYPE_STYLES[styleKey] ?? ""}`}>
+            <Text className="s-content-badge__label">{formatContentTypeHashtag(styleKey)}</Text>
           </View>
         );
       })}

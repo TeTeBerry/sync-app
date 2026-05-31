@@ -186,10 +186,9 @@ export default function ThemedPageLoader({
       role="status"
       aria-live="polite"
       aria-busy="true"
-      aria-label={label ?? "加载中"}>
-      {showBrand ? (
-        <SyncBrandMark className="s-themed-loader__brand" />
-      ) : null}
+      aria-label={label ?? "加载中"}
+    >
+      {showBrand ? <SyncBrandMark className="s-themed-loader__brand" /> : null}
       {variant === "skeleton-event" ? <EventDetailSkeleton /> : null}
       {variant === "skeleton-event-posts" ? <EventPostsSkeleton /> : null}
       {variant === "skeleton-live-feed" ? <LiveFeedSkeleton /> : null}

@@ -15,7 +15,7 @@ import {
 } from "../../../utils/profileStorage";
 import { useProfilePageStore } from "../../../stores/profilePageStore";
 import { useEndRouteTransitionOnShow } from "../../../hooks/useEndRouteTransitionOnShow";
-import { Button, Text, View } from '@tarojs/components';
+import { Button, Text, View } from "@tarojs/components";
 
 type SettingsSection = "notifications" | "privacy" | "help";
 type PrivacyLevel = ProfilePrivacyLevel;
@@ -65,9 +65,7 @@ const SettingsPage: React.FC = () => {
   const [notificationsEnabled, setNotificationsEnabled] = useState(() =>
     readProfileNotificationsEnabled(),
   );
-  const [privacyLevel, setPrivacyLevel] = useState<PrivacyLevel>(() =>
-    readProfilePrivacyLevel(),
-  );
+  const [privacyLevel, setPrivacyLevel] = useState<PrivacyLevel>(() => readProfilePrivacyLevel());
 
   const setStorePrivacyLevel = useProfilePageStore((state) => state.setPrivacyLevel);
 
@@ -113,18 +111,21 @@ const SettingsPage: React.FC = () => {
     setStoreNotificationsEnabled,
   ]);
 
-  const selectPrivacy = useCallback((level: PrivacyLevel) => {
-    setPrivacyLevel(level);
-    setStorePrivacyLevel(level);
-    writeProfilePrivacyLevel(level);
-    void updateCurrentUserAndInvalidate({ privacyLevel: level })
-      .then(() => {
-        void Taro.showToast({ title: "已保存", icon: "success" });
-      })
-      .catch(() => {
-        void Taro.showToast({ title: "请求失败，请稍后重试", icon: "none" });
-      });
-  }, [setStorePrivacyLevel]);
+  const selectPrivacy = useCallback(
+    (level: PrivacyLevel) => {
+      setPrivacyLevel(level);
+      setStorePrivacyLevel(level);
+      writeProfilePrivacyLevel(level);
+      void updateCurrentUserAndInvalidate({ privacyLevel: level })
+        .then(() => {
+          void Taro.showToast({ title: "已保存", icon: "success" });
+        })
+        .catch(() => {
+          void Taro.showToast({ title: "请求失败，请稍后重试", icon: "none" });
+        });
+    },
+    [setStorePrivacyLevel],
+  );
 
   const submitFeedback = useCallback(() => {
     void Taro.showToast({ title: "反馈已提交，感谢！", icon: "success" });
@@ -134,11 +135,7 @@ const SettingsPage: React.FC = () => {
 
   return (
     <View data-cmp="Settings" className="s-settings">
-      <PageNavigation
-        title={SECTION_TITLES[section]}
-        fallback={ROUTES.PROFILE}
-        tone="surface"
-      />
+      <PageNavigation title={SECTION_TITLES[section]} fallback={ROUTES.PROFILE} tone="surface" />
 
       <View className="s-settings__main">
         {section === "notifications" && (
@@ -148,10 +145,12 @@ const SettingsPage: React.FC = () => {
                 <View className="s-settings__row-label">推送通知</View>
                 <View className="s-settings__row-desc">接收活动提醒、互动消息等</View>
               </View>
-              <Button role="switch"
+              <Button
+                role="switch"
                 aria-checked={notificationsEnabled}
                 className={`s-settings__toggle${notificationsEnabled ? " s-settings__toggle--on" : ""}`}
-                onClick={toggleNotifications}>
+                onClick={toggleNotifications}
+              >
                 <Text className="s-settings__toggle-knob" />
               </Button>
             </View>
@@ -160,10 +159,12 @@ const SettingsPage: React.FC = () => {
                 <View className="s-settings__row-label">活动提醒</View>
                 <View className="s-settings__row-desc">活动开始前 24 小时提醒</View>
               </View>
-              <Button role="switch"
+              <Button
+                role="switch"
                 aria-checked={notificationsEnabled}
                 className={`s-settings__toggle${notificationsEnabled ? " s-settings__toggle--on" : ""}`}
-                onClick={toggleNotifications}>
+                onClick={toggleNotifications}
+              >
                 <Text className="s-settings__toggle-knob" />
               </Button>
             </View>
@@ -174,8 +175,10 @@ const SettingsPage: React.FC = () => {
           <View className="s-settings__card">
             {privacyOptions.map((level) => (
               <Button
-                key={level} className={`s-settings__option${privacyLevel === level ? " s-settings__option--selected" : ""}`}
-                onClick={() => selectPrivacy(level)}>
+                key={level}
+                className={`s-settings__option${privacyLevel === level ? " s-settings__option--selected" : ""}`}
+                onClick={() => selectPrivacy(level)}
+              >
                 <View>
                   <View className="s-settings__option-label">{PRIVACY_LABELS[level]}</View>
                   <View className="s-settings__option-desc">{PRIVACY_DESCS[level]}</View>

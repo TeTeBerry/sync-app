@@ -15,10 +15,7 @@ export const WALLPAPER_THEME = {
   timePink: "#ff0066",
 } as const;
 
-export const WALLPAPER_ACCENT: Record<
-  ItineraryTimelineDotColor,
-  { time: string; dot: string }
-> = {
+export const WALLPAPER_ACCENT: Record<ItineraryTimelineDotColor, { time: string; dot: string }> = {
   pink: { time: "#ff0066", dot: "#ff0066" },
   cyan: { time: "#22d3ee", dot: "#22d3ee" },
   purple: { time: "#7b61ff", dot: "#7b61ff" },

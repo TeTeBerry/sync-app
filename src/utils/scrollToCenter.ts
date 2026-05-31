@@ -21,9 +21,7 @@ export function measureScrollTopToCenter(
 ): Promise<number | null> {
   return new Promise((resolve) => {
     const query = Taro.createSelectorQuery();
-    query
-      .select(scrollViewSelector)
-      .fields({ size: true, scrollOffset: true, rect: true });
+    query.select(scrollViewSelector).fields({ size: true, scrollOffset: true, rect: true });
     query.select(targetSelector).boundingClientRect();
     query.exec((res) => {
       const scrollView = res?.[0] as ScrollViewRect | null;
@@ -43,10 +41,7 @@ export function measureScrollTopToCenter(
 
       const offsetInView = target.top - scrollView.top;
       const centered =
-        scrollView.scrollTop +
-        offsetInView -
-        scrollView.height / 2 +
-        target.height / 2;
+        scrollView.scrollTop + offsetInView - scrollView.height / 2 + target.height / 2;
       resolve(Math.max(0, Math.round(centered)));
     });
   });

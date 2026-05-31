@@ -1,8 +1,4 @@
-export type ExclusiveItineraryStage =
-  | "main"
-  | "bass"
-  | "late"
-  | "outdoor";
+export type ExclusiveItineraryStage = "main" | "bass" | "late" | "outdoor";
 
 export type ExclusiveItineraryDj = {
   id: string;
@@ -32,10 +28,7 @@ export const EXCLUSIVE_ITINERARY_GENRES = [
 export const EXCLUSIVE_ITINERARY_MAX_SELECTION = 5;
 
 /** Default selection — Day1 headliner + Day2 headliner. */
-export const EXCLUSIVE_ITINERARY_DEFAULT_SELECTED_IDS = [
-  "marshmello",
-  "illenium",
-];
+export const EXCLUSIVE_ITINERARY_DEFAULT_SELECTED_IDS = ["marshmello", "illenium"];
 
 /** 风暴电音节 深圳站 2026 — 可选国际阵容（与 backend seed 一致）。 */
 export const EXCLUSIVE_ITINERARY_DJS: ExclusiveItineraryDj[] = [

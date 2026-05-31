@@ -18,10 +18,7 @@ export interface NavigationState {
   setAiAssistantIntent: (intent: AiAssistantNavIntent | null) => void;
   consumeAiAssistantIntent: () => AiAssistantNavIntent | null;
   setActiveActivityLegacyId: (legacyId: number | null) => void;
-  beginRouteTransition: (options?: {
-    eventId?: number;
-    tabTarget?: string;
-  }) => void;
+  beginRouteTransition: (options?: { eventId?: number; tabTarget?: string }) => void;
   endRouteTransition: () => void;
 }
 

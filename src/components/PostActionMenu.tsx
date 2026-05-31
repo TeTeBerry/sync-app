@@ -38,7 +38,8 @@ export const PostShareButton: FC<PostShareButtonProps> = ({ share }) => {
       className="s-post-share-btn"
       aria-label="分享"
       openType={isWeapp ? "share" : undefined}
-      onClick={handleShareTap}>
+      onClick={handleShareTap}
+    >
       <Share2 size={18} color={POST_ACTION_ICON_COLOR} />
     </Button>
   );
@@ -112,7 +113,8 @@ export const PostActionMenu: FC<PostActionMenuProps> = ({
       <Button
         className="s-post-action-menu__trigger"
         aria-label="更多"
-        onClick={() => setMenuOpen(true)}>
+        onClick={() => setMenuOpen(true)}
+      >
         <EllipsisVertical size={18} color={POST_ACTION_ICON_COLOR} />
       </Button>
 

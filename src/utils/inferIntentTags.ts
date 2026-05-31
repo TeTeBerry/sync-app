@@ -63,8 +63,7 @@ const TICKET_RESALE_CITIES = [
 
 function inferTicketResaleTags(text: string, tags: Set<string>): void {
   const hasTicket = /票|内场|看台|舞台|VIP|Stage/i.test(text);
-  const hasResale =
-    /折价|出票|转票|转手|出一张|转让|临时有事|私我|需要的私|私聊/i.test(text);
+  const hasResale = /折价|出票|转票|转手|出一张|转让|临时有事|私我|需要的私|私聊/i.test(text);
 
   if (!hasTicket && !hasResale) return;
 

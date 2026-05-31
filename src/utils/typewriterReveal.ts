@@ -16,9 +16,7 @@ export interface TypewriterReveal {
   getTarget: () => string;
 }
 
-export function createTypewriterReveal(
-  options: TypewriterRevealOptions,
-): TypewriterReveal {
+export function createTypewriterReveal(options: TypewriterRevealOptions): TypewriterReveal {
   const charDelayMs = options.charDelayMs ?? 22;
   let target = "";
   let visible = "";

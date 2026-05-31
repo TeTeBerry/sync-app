@@ -68,17 +68,13 @@ export function setCacheData<T>(
   }
 }
 
-export function getCacheData<T>(
-  queryKey: (string | number | undefined)[],
-): T | undefined {
+export function getCacheData<T>(queryKey: (string | number | undefined)[]): T | undefined {
   const key = getCacheKey(queryKey);
   return (globalCache.get(key) as CacheEntry<T> | undefined)?.data;
 }
 
 /** Iterate all cached query entries (for cross-key optimistic patches). */
-export function forEachCacheEntry(
-  fn: (cacheKey: string, data: unknown) => void,
-): void {
+export function forEachCacheEntry(fn: (cacheKey: string, data: unknown) => void): void {
   for (const [key, entry] of globalCache.entries()) {
     fn(key, entry.data);
   }
@@ -118,18 +114,12 @@ export function useApiQuery<T>(options: UseApiQueryOptions<T>) {
 
       if (!force) {
         const cachedEntry = globalCache.get(cacheKey) as CacheEntry<T> | undefined;
-        if (
-          cachedEntry &&
-          now - cachedEntry.timestamp < staleTime
-        ) {
+        if (cachedEntry && now - cachedEntry.timestamp < staleTime) {
           setData(cachedEntry.data);
           lastFetchRef.current = cachedEntry.timestamp;
           return;
         }
-        if (
-          now - lastFetchRef.current < staleTime &&
-          dataRef.current !== undefined
-        ) {
+        if (now - lastFetchRef.current < staleTime && dataRef.current !== undefined) {
           return;
         }
       }

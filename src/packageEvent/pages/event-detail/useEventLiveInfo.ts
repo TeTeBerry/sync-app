@@ -9,10 +9,7 @@ import {
 } from "../../../api/syncApi";
 import { isApiEnabled } from "../../../constants/api";
 import type { LiveInfoCertStatus, LiveInfoViewerState } from "../../../types/backend";
-import {
-  pickWristbandImagePath,
-  uploadImageFile,
-} from "../../../utils/uploadImage";
+import { pickWristbandImagePath, uploadImageFile } from "../../../utils/uploadImage";
 import type { LiveInfoCategoryId } from "./liveInfoConfig";
 import {
   MOCK_LIVE_INFO_CERT_COUNT,
@@ -268,9 +265,7 @@ export function useEventLiveInfo(
       if (apiEnabled && eventId > 0) {
         try {
           const res = await toggleLiveInfoUpdateLike(eventId, feedId);
-          setFeed((prev) =>
-            prev.map((item) => (item.id === feedId ? res.update : item)),
-          );
+          setFeed((prev) => prev.map((item) => (item.id === feedId ? res.update : item)));
         } catch {
           void Taro.showToast({ title: "操作失败", icon: "none" });
         }
@@ -309,4 +304,4 @@ export function useEventLiveInfo(
     toggleFeedLike,
     reload,
   };
-};
+}

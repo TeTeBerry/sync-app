@@ -6,9 +6,7 @@ import ThemedPageLoader, { type ThemedPageLoaderVariant } from "./ThemedPageLoad
 
 const ROUTE_TRANSITION_MAX_MS = 12_000;
 
-function tabSwitchLoaderVariant(
-  tabTarget: string | undefined,
-): ThemedPageLoaderVariant {
+function tabSwitchLoaderVariant(tabTarget: string | undefined): ThemedPageLoaderVariant {
   if (tabTarget === ROUTES.PROFILE) {
     return "skeleton-feed";
   }

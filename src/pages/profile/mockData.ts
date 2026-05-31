@@ -51,8 +51,7 @@ export const profileActivities: ProfileActivityItem[] = [
     title: "Tomorrowland Thailand 2026",
     date: "2026-12-12",
     location: "芭提雅",
-    image:
-      "https://mma.prnewswire.com/media/2921955/Tomorrowland_Thailand_PR_Newswire.jpg",
+    image: "https://mma.prnewswire.com/media/2921955/Tomorrowland_Thailand_PR_Newswire.jpg",
     status: "registered",
   },
   {
@@ -60,8 +59,7 @@ export const profileActivities: ProfileActivityItem[] = [
     title: "风暴电音节 深圳站",
     date: "2026-06-13",
     location: "深圳国际会展中心",
-    image:
-      "https://img.alicdn.com/imgextra/i2/2251059038/O1CN011VWlmX2GdSmiFVt13_!!2251059038.jpg",
+    image: "https://img.alicdn.com/imgextra/i2/2251059038/O1CN011VWlmX2GdSmiFVt13_!!2251059038.jpg",
     status: "registered",
   },
   {
@@ -86,8 +84,7 @@ export const profilePosts: ProfilePostItem[] = [
   {
     id: "post-1",
     title: "Tomorrowland Thailand 2026",
-    content:
-      "12月芭提雅场求组队！想拼 Wisdom Valley 附近酒店，已有2人，还差1个女生～",
+    content: "12月芭提雅场求组队！想拼 Wisdom Valley 附近酒店，已有2人，还差1个女生～",
     status: "招募中",
     likes: 24,
     comments: 8,

@@ -14,9 +14,7 @@ export async function pickWristbandImagePath(): Promise<string | null> {
   const path = result?.tempFilePaths?.[0];
   if (!path) return null;
 
-  const compressed = await Taro.compressImage({ src: path, quality: 80 }).catch(
-    () => null,
-  );
+  const compressed = await Taro.compressImage({ src: path, quality: 80 }).catch(() => null);
   return compressed?.tempFilePath ?? path;
 }
 

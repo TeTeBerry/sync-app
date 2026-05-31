@@ -12,17 +12,13 @@ export type PublishConfirmPayload = {
 };
 
 /** Parse assistant publish-confirm replies built by `buildPublishConfirmReply`. */
-export function parsePublishConfirmMessage(
-  text: string,
-): PublishConfirmPayload | null {
+export function parsePublishConfirmMessage(text: string): PublishConfirmPayload | null {
   if (!text.includes(PUBLISH_CONFIRM_MARKER)) {
     return null;
   }
 
   const lines = text.split("\n");
-  const markerIndex = lines.findIndex((line) =>
-    line.includes(PUBLISH_CONFIRM_MARKER),
-  );
+  const markerIndex = lines.findIndex((line) => line.includes(PUBLISH_CONFIRM_MARKER));
   if (markerIndex < 0) {
     return null;
   }
@@ -34,9 +30,7 @@ export function parsePublishConfirmMessage(
 
   const activityLine = lines[index]?.trim() ?? "";
   const activityMatch = activityLine.match(/^「(.+)」帖子预览：$/);
-  const parsedActivityLabel = activityLine
-    .replace(/帖子预览：$/, "")
-    .replace(/^「|」$/g, "");
+  const parsedActivityLabel = activityLine.replace(/帖子预览：$/, "").replace(/^「|」$/g, "");
   const activityLabel = activityMatch?.[1] ?? (parsedActivityLabel || "活动");
   index += 1;
 

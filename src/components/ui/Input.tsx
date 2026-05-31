@@ -67,8 +67,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     ref,
   ) => {
     const isWeapp = process.env.TARO_ENV === "weapp";
-    const weappChatVariant =
-      isWeapp && (variant === "ai-assistant-chat" || variant === "chat");
+    const weappChatVariant = isWeapp && (variant === "ai-assistant-chat" || variant === "chat");
 
     const taroProps = {
       ...props,
@@ -92,9 +91,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     }
 
     const styles = VARIANT_STYLES[variant];
-    const inputEl = (
-      <TaroInput ref={ref} className={cn(styles.input, className)} {...taroProps} />
-    );
+    const inputEl = <TaroInput ref={ref} className={cn(styles.input, className)} {...taroProps} />;
 
     if (!styles.wrapper) return inputEl;
 

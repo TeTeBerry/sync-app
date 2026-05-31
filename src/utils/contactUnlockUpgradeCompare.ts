@@ -10,10 +10,7 @@ import { getNextTierId } from "../pages/profile/profileBenefitsMapper";
 export const FREE_MONTHLY_AI_MATCH_LIMIT = 3;
 export const FREE_MONTHLY_CONTACT_UNLOCK_LIMIT = 3;
 
-export type ContactUnlockUpgradeCompareRowId =
-  | "contactUnlock"
-  | "aiMatch"
-  | "map";
+export type ContactUnlockUpgradeCompareRowId = "contactUnlock" | "aiMatch" | "map";
 
 export type ContactUnlockUpgradeCompareRow = {
   id: ContactUnlockUpgradeCompareRowId;
@@ -56,10 +53,7 @@ function formatMonthlyCount(value: number): string {
   return `${value}次/月`;
 }
 
-function formatMapLimit(
-  limits: PackageTierLimits,
-  isFreeTier: boolean,
-): string {
+function formatMapLimit(limits: PackageTierLimits, isFreeTier: boolean): string {
   if (isFreeTier) {
     return "限量";
   }
@@ -69,13 +63,13 @@ function formatMapLimit(
   return `${limits.mapDays}天`;
 }
 
-function resolveFreeMonthlyLimits(
-  freeMonthly?: FreeMonthlyQuota | null,
-): { aiMatch: number; contactUnlock: number } {
+function resolveFreeMonthlyLimits(freeMonthly?: FreeMonthlyQuota | null): {
+  aiMatch: number;
+  contactUnlock: number;
+} {
   return {
     aiMatch: freeMonthly?.aiMatch.limit ?? FREE_MONTHLY_AI_MATCH_LIMIT,
-    contactUnlock:
-      freeMonthly?.contactUnlock.limit ?? FREE_MONTHLY_CONTACT_UNLOCK_LIMIT,
+    contactUnlock: freeMonthly?.contactUnlock.limit ?? FREE_MONTHLY_CONTACT_UNLOCK_LIMIT,
   };
 }
 
@@ -117,9 +111,10 @@ function buildCurrentColumn(
   };
 }
 
-function buildTargetColumn(
-  targetTier: PackageTierDefinition,
-): Pick<ContactUnlockUpgradeCompareRow, "target"> & {
+function buildTargetColumn(targetTier: PackageTierDefinition): Pick<
+  ContactUnlockUpgradeCompareRow,
+  "target"
+> & {
   contactUnlock: string;
   aiMatch: string;
   map: string;

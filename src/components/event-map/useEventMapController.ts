@@ -121,17 +121,13 @@ export function useEventMapController({
     onEventMapCanvasReady(titleRef.current);
   }, []);
 
-  const {
-    handleTouchStart,
-    handleTouchMove,
-    handleTouchEnd,
-    handleTouchCancel,
-  } = useEventMapGestures({
-    eventTitle,
-    mapWidth: mapSize.width,
-    mapHeight: mapSize.height,
-    onMarkerTap,
-  });
+  const { handleTouchStart, handleTouchMove, handleTouchEnd, handleTouchCancel } =
+    useEventMapGestures({
+      eventTitle,
+      mapWidth: mapSize.width,
+      mapHeight: mapSize.height,
+      onMarkerTap,
+    });
 
   const canvasStyle = useMemo(
     () =>
@@ -142,18 +138,16 @@ export function useEventMapController({
     [mapSize.width, mapSize.height],
   );
 
-  const zoomAtMapCenter = useCallback((direction: "in" | "out") => {
-    const anchorX = mapSize.width / 2;
-    const anchorY = mapSize.height / 2;
-    const next = stepMapViewportZoom(
-      getEventMapViewport(),
-      direction,
-      anchorX,
-      anchorY,
-    );
-    setEventMapViewport(next);
-    repaintEventMapNow(titleRef.current);
-  }, [mapSize.width, mapSize.height]);
+  const zoomAtMapCenter = useCallback(
+    (direction: "in" | "out") => {
+      const anchorX = mapSize.width / 2;
+      const anchorY = mapSize.height / 2;
+      const next = stepMapViewportZoom(getEventMapViewport(), direction, anchorX, anchorY);
+      setEventMapViewport(next);
+      repaintEventMapNow(titleRef.current);
+    },
+    [mapSize.width, mapSize.height],
+  );
 
   const handleZoomIn = useCallback(() => {
     zoomAtMapCenter("in");

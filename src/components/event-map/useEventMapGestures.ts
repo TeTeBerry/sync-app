@@ -8,11 +8,7 @@ import {
 } from "./eventMapCanvasRuntime";
 import { findMarkerAtScreen } from "./eventMapHitTest";
 import type { EventMapMarker } from "./eventMapMarkers";
-import {
-  panViewport,
-  zoomViewportAtScreen,
-  type EventMapViewport,
-} from "./eventMapViewport";
+import { panViewport, zoomViewportAtScreen, type EventMapViewport } from "./eventMapViewport";
 
 const TAP_MOVE_THRESHOLD_PX = 10;
 const TAP_DURATION_MS = 280;
@@ -129,19 +125,12 @@ export function useEventMapGestures({
         return;
       }
 
-      if (
-        touches.length === 1 &&
-        modeRef.current === "pan" &&
-        panStartTouchRef.current
-      ) {
+      if (touches.length === 1 && modeRef.current === "pan" && panStartTouchRef.current) {
         const p = touchXY(touches[0]);
         const dx = p.x - panStartTouchRef.current.x;
         const dy = p.y - panStartTouchRef.current.y;
 
-        if (
-          Math.abs(dx) > TAP_MOVE_THRESHOLD_PX ||
-          Math.abs(dy) > TAP_MOVE_THRESHOLD_PX
-        ) {
+        if (Math.abs(dx) > TAP_MOVE_THRESHOLD_PX || Math.abs(dy) > TAP_MOVE_THRESHOLD_PX) {
           movedRef.current = true;
         }
 
@@ -183,13 +172,7 @@ export function useEventMapGestures({
         Date.now() - tap.t <= TAP_DURATION_MS &&
         onMarkerTap
       ) {
-        const marker = findMarkerAtScreen(
-          tap.x,
-          tap.y,
-          mapWidth,
-          mapHeight,
-          getEventMapViewport(),
-        );
+        const marker = findMarkerAtScreen(tap.x, tap.y, mapWidth, mapHeight, getEventMapViewport());
         if (marker) {
           onMarkerTap(marker);
         }

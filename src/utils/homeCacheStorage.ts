@@ -23,9 +23,7 @@ function readEnvelope<T>(storageKey: string): T | undefined {
     const raw = Taro.getStorageSync(storageKey);
     if (!raw) return undefined;
     const parsed =
-      typeof raw === "string"
-        ? (JSON.parse(raw) as CacheEnvelope<T>)
-        : (raw as CacheEnvelope<T>);
+      typeof raw === "string" ? (JSON.parse(raw) as CacheEnvelope<T>) : (raw as CacheEnvelope<T>);
     if (!parsed?.data || typeof parsed.savedAt !== "number") {
       return undefined;
     }

@@ -5,23 +5,13 @@ import { isApiEnabled } from "../../../constants/api";
 import { useItineraryMutations, useItineraryScheduleQuery } from "../../../hooks/useItineraryApi";
 import { useItineraryStore } from "../../../stores/itineraryStore";
 import { Check, ChevronDown, Info, Sparkles } from "lucide-react-taro";
-import {
-  Button,
-  Image,
-  ScrollView,
-  Text,
-  View,
-} from "@tarojs/components";
+import { Button, Image, ScrollView, Text, View } from "@tarojs/components";
 import ActionSheet from "../../../components/ActionSheet";
 import PageNavigation from "../../../components/PageNavigation";
 import { ExclusiveItineraryInfoModal } from "./ExclusiveItineraryInfoModal";
 import { useEndRouteTransitionOnShow } from "../../../hooks/useEndRouteTransitionOnShow";
 import { useStackPageMainHeight } from "../../../hooks/useTabPageMainHeight";
-import {
-  goMyItinerary,
-  resolveEventDetailIdFromQuery,
-  ROUTES,
-} from "../../../utils/route";
+import { goMyItinerary, resolveEventDetailIdFromQuery, ROUTES } from "../../../utils/route";
 import { picsumUrl } from "../../../utils/imageUrl";
 import { useNavigationStore } from "../../../stores/navigationStore";
 import {
@@ -67,10 +57,7 @@ function mapApiDj(dj: ItineraryDj): ExclusiveItineraryDj {
     genre: dj.genre,
     genreLabel: dj.genreLabel,
     stage:
-      stage === "main" ||
-      stage === "bass" ||
-      stage === "late" ||
-      stage === "outdoor"
+      stage === "main" || stage === "bass" || stage === "late" || stage === "outdoor"
         ? stage
         : "main",
     popularity: dj.popularity,
@@ -82,22 +69,19 @@ function mapApiDj(dj: ItineraryDj): ExclusiveItineraryDj {
 const ExclusiveItineraryPage = () => {
   useEndRouteTransitionOnShow();
   const router = useRouter();
-  const activeActivityLegacyId = useNavigationStore(
-    (state) => state.activeActivityLegacyId,
-  );
+  const activeActivityLegacyId = useNavigationStore((state) => state.activeActivityLegacyId);
 
   const activityLegacyId = useMemo(
-    () =>
-      resolveEventDetailIdFromQuery(router.params, activeActivityLegacyId),
+    () => resolveEventDetailIdFromQuery(router.params, activeActivityLegacyId),
     [activeActivityLegacyId, router.params.activityLegacyId, router.params.id],
   );
 
   const [stageFilter, setStageFilter] = useState<string>("all");
   const [genreFilter, setGenreFilter] = useState<string>("all");
   const [sortMode, setSortMode] = useState<SortMode>("按人气排序");
-  const [selectedIds, setSelectedIds] = useState<string[]>(
-    () => [...EXCLUSIVE_ITINERARY_DEFAULT_SELECTED_IDS],
-  );
+  const [selectedIds, setSelectedIds] = useState<string[]>(() => [
+    ...EXCLUSIVE_ITINERARY_DEFAULT_SELECTED_IDS,
+  ]);
   const [infoOpen, setInfoOpen] = useState(false);
   const [sortSheetOpen, setSortSheetOpen] = useState(false);
   const [hintModal, setHintModal] = useState<{
@@ -108,14 +92,11 @@ const ExclusiveItineraryPage = () => {
   const [generating, setGenerating] = useState(false);
 
   const apiEnabled = isApiEnabled();
-  const scheduleQuery = useItineraryScheduleQuery(
-    apiEnabled ? activityLegacyId : null,
-    { selectedDjIds: selectedIds },
-  );
+  const scheduleQuery = useItineraryScheduleQuery(apiEnabled ? activityLegacyId : null, {
+    selectedDjIds: selectedIds,
+  });
   const { generate } = useItineraryMutations(activityLegacyId ?? 0);
-  const setFromGenerateResult = useItineraryStore(
-    (s) => s.setFromGenerateResult,
-  );
+  const setFromGenerateResult = useItineraryStore((s) => s.setFromGenerateResult);
 
   const djCatalog = useMemo(() => {
     if (apiEnabled && scheduleQuery.data?.djs?.length) {
@@ -128,20 +109,14 @@ const ExclusiveItineraryPage = () => {
     if (apiEnabled && scheduleQuery.data?.conflicts) {
       return scheduleQuery.data.conflicts;
     }
-    return detectItineraryConflicts(
-      EXCLUSIVE_ITINERARY_MOCK_CONFLICT_SLOTS,
-      selectedIds,
-    );
+    return detectItineraryConflicts(EXCLUSIVE_ITINERARY_MOCK_CONFLICT_SLOTS, selectedIds);
   }, [apiEnabled, scheduleQuery.data?.conflicts, selectedIds]);
 
   const footerChromePx = useMemo(() => {
     try {
       const win = Taro.getWindowInfo();
       const screenHeight = win.screenHeight ?? win.windowHeight ?? 667;
-      const safeBottom =
-        win.safeArea != null
-          ? Math.max(0, screenHeight - win.safeArea.bottom)
-          : 0;
+      const safeBottom = win.safeArea != null ? Math.max(0, screenHeight - win.safeArea.bottom) : 0;
       return CTA_FOOTER_BASE_PX + safeBottom;
     } catch {
       return CTA_FOOTER_BASE_PX;
@@ -221,19 +196,12 @@ const ExclusiveItineraryPage = () => {
       setFromGenerateResult(activityLegacyId, selectedIds, result);
       goMyItinerary(activityLegacyId, selectedIds);
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "行程生成失败，请稍后重试";
+      const message = error instanceof Error ? error.message : "行程生成失败，请稍后重试";
       void Taro.showToast({ title: message, icon: "none" });
     } finally {
       setGenerating(false);
     }
-  }, [
-    activityLegacyId,
-    apiEnabled,
-    generate,
-    selectedIds,
-    setFromGenerateResult,
-  ]);
+  }, [activityLegacyId, apiEnabled, generate, selectedIds, setFromGenerateResult]);
 
   const sortSheetItems = useMemo(
     () =>
@@ -249,9 +217,7 @@ const ExclusiveItineraryPage = () => {
   );
 
   const fallback =
-    Number.isFinite(activityLegacyId) && activityLegacyId > 0
-      ? ROUTES.EVENT_DETAIL
-      : ROUTES.EVENTS;
+    Number.isFinite(activityLegacyId) && activityLegacyId > 0 ? ROUTES.EVENT_DETAIL : ROUTES.EVENTS;
 
   return (
     <View data-cmp="ExclusiveItineraryPage" className="s-exclusive-itinerary">
@@ -263,7 +229,8 @@ const ExclusiveItineraryPage = () => {
             className="s-page-nav__icon-action"
             aria-label="说明"
             hoverClass="s-page-nav__icon-action--pressed"
-            onTap={openInfo}>
+            onTap={openInfo}
+          >
             <Info size={18} />
           </Button>
         }
@@ -274,11 +241,8 @@ const ExclusiveItineraryPage = () => {
         enhanced
         showScrollbar={false}
         className="s-exclusive-itinerary__scroll s-scrollbar-none"
-        style={
-          mainScrollHeight != null
-            ? { height: `${mainScrollHeight}px` }
-            : undefined
-        }>
+        style={mainScrollHeight != null ? { height: `${mainScrollHeight}px` } : undefined}
+      >
         <View className="s-exclusive-itinerary__inner">
           {!conflictDismissed && conflicts.length > 0 ? (
             <ExclusiveItineraryConflictBanner
@@ -288,9 +252,7 @@ const ExclusiveItineraryPage = () => {
           ) : null}
 
           <View className="s-exclusive-itinerary__step">
-            <Text className="s-exclusive-itinerary__step-title">
-              第一步：选择你喜爱的 DJ
-            </Text>
+            <Text className="s-exclusive-itinerary__step-title">第一步：选择你喜爱的 DJ</Text>
             <Text className="s-exclusive-itinerary__step-badge">
               已选 {selectedIds.length}/{EXCLUSIVE_ITINERARY_MAX_SELECTION}
             </Text>
@@ -302,7 +264,8 @@ const ExclusiveItineraryPage = () => {
               scrollX
               enhanced
               showScrollbar={false}
-              className="s-exclusive-itinerary__chip-scroll s-scrollbar-none">
+              className="s-exclusive-itinerary__chip-scroll s-scrollbar-none"
+            >
               <View className="s-exclusive-itinerary__chip-row">
                 {EXCLUSIVE_ITINERARY_STAGES.map((stage) => {
                   const active = stageFilter === stage.id;
@@ -316,7 +279,8 @@ const ExclusiveItineraryPage = () => {
                         .filter(Boolean)
                         .join(" ")}
                       hoverClass="s-exclusive-itinerary__chip--pressed"
-                      onTap={() => setStageFilter(stage.id)}>
+                      onTap={() => setStageFilter(stage.id)}
+                    >
                       {stage.label}
                     </Button>
                   );
@@ -331,7 +295,8 @@ const ExclusiveItineraryPage = () => {
               scrollX
               enhanced
               showScrollbar={false}
-              className="s-exclusive-itinerary__chip-scroll s-scrollbar-none">
+              className="s-exclusive-itinerary__chip-scroll s-scrollbar-none"
+            >
               <View className="s-exclusive-itinerary__chip-row">
                 {EXCLUSIVE_ITINERARY_GENRES.map((genre) => {
                   const active = genreFilter === genre.id;
@@ -345,7 +310,8 @@ const ExclusiveItineraryPage = () => {
                         .filter(Boolean)
                         .join(" ")}
                       hoverClass="s-exclusive-itinerary__chip--pressed"
-                      onTap={() => setGenreFilter(genre.id)}>
+                      onTap={() => setGenreFilter(genre.id)}
+                    >
                       {genre.label}
                     </Button>
                   );
@@ -355,13 +321,12 @@ const ExclusiveItineraryPage = () => {
           </View>
 
           <View className="s-exclusive-itinerary__list-head">
-            <Text className="s-exclusive-itinerary__list-count">
-              共 {filteredDjs.length} 位 DJ
-            </Text>
+            <Text className="s-exclusive-itinerary__list-count">共 {filteredDjs.length} 位 DJ</Text>
             <Button
               className="s-exclusive-itinerary__sort-btn"
               hoverClass="s-exclusive-itinerary__sort-btn--pressed"
-              onTap={openSortSheet}>
+              onTap={openSortSheet}
+            >
               <Text>{sortMode}</Text>
               <ChevronDown size={14} color="var(--primary)" />
             </Button>
@@ -371,8 +336,7 @@ const ExclusiveItineraryPage = () => {
             {filteredDjs.map((dj) => {
               const selectionIndex = selectedIds.indexOf(dj.id);
               const isSelected = selectionIndex >= 0;
-              const accent =
-                isSelected && selectionIndex % 2 === 1 ? "purple" : "pink";
+              const accent = isSelected && selectionIndex % 2 === 1 ? "purple" : "pink";
               const showPurple = isSelected && accent === "purple";
               const showPink = isSelected && accent === "pink";
 
@@ -388,7 +352,8 @@ const ExclusiveItineraryPage = () => {
                     .join(" ")}
                   hoverClass="s-exclusive-itinerary__card--pressed"
                   aria-label={`${dj.name}，${dj.genreLabel}`}
-                  onTap={() => toggleDj(dj.id)}>
+                  onTap={() => toggleDj(dj.id)}
+                >
                   <View className="s-exclusive-itinerary__avatar-wrap">
                     <Image
                       className="s-exclusive-itinerary__avatar"
@@ -403,7 +368,8 @@ const ExclusiveItineraryPage = () => {
                             ? "s-exclusive-itinerary__check--purple"
                             : "s-exclusive-itinerary__check--pink",
                         ].join(" ")}
-                        aria-hidden>
+                        aria-hidden
+                      >
                         <Check size={13} color="#fff" strokeWidth={3} />
                       </View>
                     ) : null}
@@ -417,7 +383,8 @@ const ExclusiveItineraryPage = () => {
                           ? "#7b61ff"
                           : "var(--primary)"
                         : dj.genreColor,
-                    }}>
+                    }}
+                  >
                     {dj.genreLabel}
                   </Text>
                 </Button>
@@ -431,14 +398,13 @@ const ExclusiveItineraryPage = () => {
         <Button
           className={[
             "s-exclusive-itinerary__cta",
-            selectedIds.length === 0 || generating
-              ? "s-exclusive-itinerary__cta--disabled"
-              : "",
+            selectedIds.length === 0 || generating ? "s-exclusive-itinerary__cta--disabled" : "",
           ]
             .filter(Boolean)
             .join(" ")}
           hoverClass="s-exclusive-itinerary__cta--pressed"
-          onTap={handleGenerate}>
+          onTap={handleGenerate}
+        >
           <Sparkles size={18} color="#fff" aria-hidden />
           <Text className="s-exclusive-itinerary__cta-label">
             {generating ? "AI 生成中…" : "AI 生成我的专属行程"}

@@ -24,8 +24,7 @@ export const useAiChatStore = create<AiChatStoreState>((set) => ({
 
   setSuggestedReplies: (replies) => set({ suggestedReplies: replies }),
 
-  setPostRecommendationsMeta: (degraded) =>
-    set({ degraded: degraded === true }),
+  setPostRecommendationsMeta: (degraded) => set({ degraded: degraded === true }),
 
   resetOnClearSession: () => set(initialState),
 }));

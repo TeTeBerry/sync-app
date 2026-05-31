@@ -1,10 +1,6 @@
 import type { ItineraryWallpaperSection } from "./itineraryWallpaperParse";
 import type { ItineraryWallpaperRow } from "./itineraryWallpaperParse";
-import {
-  sectionStyleForIndex,
-  WALLPAPER_ACCENT,
-  WALLPAPER_THEME,
-} from "./itineraryWallpaperTheme";
+import { sectionStyleForIndex, WALLPAPER_ACCENT, WALLPAPER_THEME } from "./itineraryWallpaperTheme";
 
 export type ItineraryWallpaperDrawParams = {
   width: number;
@@ -74,10 +70,7 @@ export function computeWallpaperLayout(
   const rowGap = 8 * s;
   const rowH =
     totalRows > 0
-      ? Math.max(
-          64 * s,
-          Math.min(96 * s, (available - totalRows * rowGap) / totalRows),
-        )
+      ? Math.max(64 * s, Math.min(96 * s, (available - totalRows * rowGap) / totalRows))
       : 80 * s;
 
   const timeFontPx = Math.round(Math.min(28 * s, rowH * 0.34));
@@ -125,27 +118,13 @@ function drawBackground(ctx: CanvasRenderingContext2D, w: number, h: number) {
   ctx.fillStyle = gradient;
   ctx.fillRect(0, 0, w, h);
 
-  const glow = ctx.createRadialGradient(
-    w * 0.5,
-    h * 0.08,
-    0,
-    w * 0.5,
-    h * 0.08,
-    w * 0.65,
-  );
+  const glow = ctx.createRadialGradient(w * 0.5, h * 0.08, 0, w * 0.5, h * 0.08, w * 0.65);
   glow.addColorStop(0, WALLPAPER_THEME.glowPink);
   glow.addColorStop(1, "rgba(255, 0, 102, 0)");
   ctx.fillStyle = glow;
   ctx.fillRect(0, 0, w, h);
 
-  const glowPurple = ctx.createRadialGradient(
-    w * 0.85,
-    h * 0.55,
-    0,
-    w * 0.85,
-    h * 0.55,
-    w * 0.5,
-  );
+  const glowPurple = ctx.createRadialGradient(w * 0.85, h * 0.55, 0, w * 0.85, h * 0.55, w * 0.5);
   glowPurple.addColorStop(0, WALLPAPER_THEME.glowPurple);
   glowPurple.addColorStop(1, "rgba(123, 97, 255, 0)");
   ctx.fillStyle = glowPurple;
@@ -297,11 +276,8 @@ function drawEventCard(
   ctx.font = `700 ${timeFontPx}px "SF Mono", "Menlo", monospace`;
   ctx.fillText(row.time, contentX + innerPadX, y + innerPadY);
 
-  const stageLine = row.stage
-    ? `${row.artist} · ${row.stage}`
-    : row.artist;
-  const displayLine =
-    stageLine.length > 28 ? `${stageLine.slice(0, 27)}…` : stageLine;
+  const stageLine = row.stage ? `${row.artist} · ${row.stage}` : row.artist;
+  const displayLine = stageLine.length > 28 ? `${stageLine.slice(0, 27)}…` : stageLine;
 
   ctx.fillStyle = WALLPAPER_THEME.textPrimary;
   ctx.font = `600 ${titleFontPx}px sans-serif`;
@@ -315,13 +291,7 @@ function drawEventCard(
   return y + rowH + 8 * layout.s;
 }
 
-function drawFooter(
-  ctx: CanvasRenderingContext2D,
-  w: number,
-  h: number,
-  pad: number,
-  s: number,
-) {
+function drawFooter(ctx: CanvasRenderingContext2D, w: number, h: number, pad: number, s: number) {
   ctx.textAlign = "center";
   ctx.textBaseline = "bottom";
   ctx.fillStyle = WALLPAPER_THEME.brand;
@@ -341,17 +311,10 @@ export function estimateWallpaperContentHeight(
 ): number {
   const s = scale(width, scaleFactor);
   const probeHeight = 2400 * s;
-  const layout = computeWallpaperLayout(
-    width,
-    probeHeight,
-    sections,
-    eventMeta,
-    scaleFactor,
-  );
+  const layout = computeWallpaperLayout(width, probeHeight, sections, eventMeta, scaleFactor);
   const totalRows = countRows(sections);
   const rowsBlock =
-    totalRows * (layout.rowH + 8 * s) +
-    sections.length * (layout.datePillH + layout.sectionGap);
+    totalRows * (layout.rowH + 8 * s) + sections.length * (layout.datePillH + layout.sectionGap);
   return Math.ceil(layout.headerBottom + rowsBlock + layout.footerH + layout.pad);
 }
 
@@ -361,13 +324,7 @@ export function drawItineraryWallpaper(
   params: ItineraryWallpaperDrawParams,
 ): void {
   const { width: w, height: h, sections, eventMeta } = params;
-  const layout = computeWallpaperLayout(
-    w,
-    h,
-    sections,
-    eventMeta,
-    params.scaleFactor,
-  );
+  const layout = computeWallpaperLayout(w, h, sections, eventMeta, params.scaleFactor);
 
   ctx.clearRect(0, 0, w, h);
   drawBackground(ctx, w, h);
@@ -388,13 +345,7 @@ export function drawItineraryWallpaper(
 
     if (section.rows.length > 0) {
       const railEnd = y - 8 * layout.s - layout.rowH / 2;
-      drawTimelineRail(
-        ctx,
-        layout,
-        firstRowY + layout.rowH / 2,
-        railEnd,
-        si,
-      );
+      drawTimelineRail(ctx, layout, firstRowY + layout.rowH / 2, railEnd, si);
     }
 
     if (section.truncated && section.hiddenCount > 0) {
@@ -402,11 +353,7 @@ export function drawItineraryWallpaper(
       ctx.textBaseline = "top";
       ctx.fillStyle = WALLPAPER_THEME.textMuted;
       ctx.font = `500 ${Math.round(14 * layout.s)}px sans-serif`;
-      ctx.fillText(
-        `… 还有 ${section.hiddenCount} 场演出`,
-        layout.contentX,
-        y,
-      );
+      ctx.fillText(`… 还有 ${section.hiddenCount} 场演出`, layout.contentX, y);
       y += 22 * layout.s;
     }
 

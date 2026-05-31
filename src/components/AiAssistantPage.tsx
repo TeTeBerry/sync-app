@@ -96,32 +96,31 @@ function AiAssistantChat({
     }
   }, [activityLegacyId]);
 
-  const { messages, isStreaming, isLoadingHistory, send, clearChat } =
-    useAiChatStream({
-      welcomeText,
-      mockReply,
-      streamErrorText: "抱歉，回复出错了，请稍后再试。",
-      activityLegacyId,
-      onPostCreated: async (event) => {
-        await invalidatePostQueries();
-        const scopedId = event.activityLegacyId ?? activityLegacyId;
-        if (scopedId != null) {
-          invalidateCache(["posts", "activity", scopedId]);
-        }
-        void Taro.showToast({
-          title: "组队帖已发布",
-          icon: "success",
-        });
-      },
-      onExistingPost: () => {
-        void Taro.showToast({
-          title: "你已有组队帖，请去「我的」编辑或在活动详情查看",
-          icon: "none",
-          duration: 2500,
-        });
-      },
-      onMatchTurnComplete: handleMatchTurnComplete,
-    });
+  const { messages, isStreaming, isLoadingHistory, send, clearChat } = useAiChatStream({
+    welcomeText,
+    mockReply,
+    streamErrorText: "抱歉，回复出错了，请稍后再试。",
+    activityLegacyId,
+    onPostCreated: async (event) => {
+      await invalidatePostQueries();
+      const scopedId = event.activityLegacyId ?? activityLegacyId;
+      if (scopedId != null) {
+        invalidateCache(["posts", "activity", scopedId]);
+      }
+      void Taro.showToast({
+        title: "组队帖已发布",
+        icon: "success",
+      });
+    },
+    onExistingPost: () => {
+      void Taro.showToast({
+        title: "你已有组队帖，请去「我的」编辑或在活动详情查看",
+        icon: "none",
+        duration: 2500,
+      });
+    },
+    onMatchTurnComplete: handleMatchTurnComplete,
+  });
 
   useEffect(() => {
     onMessageCountChange?.(messages.length);
@@ -142,19 +141,13 @@ function AiAssistantChat({
     initialMessageSentRef.current = trimmed;
     void send({ text: trimmed });
     onInitialMessageSent?.();
-  }, [
-    aiMatchQuotaExhausted,
-    initialMessage,
-    isStreaming,
-    onInitialMessageSent,
-    send,
-  ]);
+  }, [aiMatchQuotaExhausted, initialMessage, isStreaming, onInitialMessageSent, send]);
 
   const submit = useCallback(
     async (text: string, images?: string[]) => {
       if (submitLockRef.current) return;
       const trimmed = text.trim();
-      const hasImages = images && images.length> 0;
+      const hasImages = images && images.length > 0;
       if ((!trimmed && !hasImages) || isStreaming) return;
 
       if (aiMatchQuotaExhausted) {
@@ -205,7 +198,8 @@ function AiAssistantChat({
   return (
     <View
       className="s-ai-assistant-chat"
-      style={chatBodyHeight != null ? { height: `${chatBodyHeight}px` } : undefined}>
+      style={chatBodyHeight != null ? { height: `${chatBodyHeight}px` } : undefined}
+    >
       {isLoadingHistory ? (
         <View className="s-ai-assistant__history-loading" aria-live="polite">
           <View className="s-ai-assistant__history-loading-bar" />
@@ -224,9 +218,8 @@ function AiAssistantChat({
       />
       <View
         className="s-ai-assistant-chat__footer"
-        style={
-          keyboardInset > 0 ? { paddingBottom: `${keyboardInset}px` } : undefined
-        }>
+        style={keyboardInset > 0 ? { paddingBottom: `${keyboardInset}px` } : undefined}
+      >
         <ChatComposer
           input={input}
           pendingImages={pendingImages}
@@ -248,19 +241,15 @@ function AiAssistantChat({
 const AiAssistantPage: FC = () => {
   const navInsets = useNavBarInsets();
   const chatReady = useDeferredMount(DEFER_AI_CHAT_MS);
-  const [pendingInitialMessage, setPendingInitialMessage] = useState<string | null>(
-    () => {
-      const intent = useNavigationStore.getState().consumeAiAssistantIntent();
-      if (intent?.activityLegacyId != null && !Number.isNaN(intent.activityLegacyId)) {
-        useNavigationStore
-          .getState()
-          .setActiveActivityLegacyId(intent.activityLegacyId);
-      } else if (intent) {
-        useNavigationStore.getState().setActiveActivityLegacyId(null);
-      }
-      return intent?.initialMessage?.trim() ?? null;
-    },
-  );
+  const [pendingInitialMessage, setPendingInitialMessage] = useState<string | null>(() => {
+    const intent = useNavigationStore.getState().consumeAiAssistantIntent();
+    if (intent?.activityLegacyId != null && !Number.isNaN(intent.activityLegacyId)) {
+      useNavigationStore.getState().setActiveActivityLegacyId(intent.activityLegacyId);
+    } else if (intent) {
+      useNavigationStore.getState().setActiveActivityLegacyId(null);
+    }
+    return intent?.initialMessage?.trim() ?? null;
+  });
   const [messageCount, setMessageCount] = useState(0);
   const [upgradeSheetOpen, setUpgradeSheetOpen] = useState(false);
   const profileActivityLegacyId = useProfileActivityLegacyId();
@@ -277,15 +266,9 @@ const AiAssistantPage: FC = () => {
     });
   }, []);
 
-  const consumeAiAssistantIntent = useNavigationStore(
-    (state) => state.consumeAiAssistantIntent,
-  );
-  const activityLegacyId = useNavigationStore(
-    (state) => state.activeActivityLegacyId ?? undefined,
-  );
-  const setActiveActivityLegacyId = useNavigationStore(
-    (state) => state.setActiveActivityLegacyId,
-  );
+  const consumeAiAssistantIntent = useNavigationStore((state) => state.consumeAiAssistantIntent);
+  const activityLegacyId = useNavigationStore((state) => state.activeActivityLegacyId ?? undefined);
+  const setActiveActivityLegacyId = useNavigationStore((state) => state.setActiveActivityLegacyId);
 
   const profileUserData = useResolvedProfile();
   const userGender = useMemo(
@@ -296,13 +279,10 @@ const AiAssistantPage: FC = () => {
   const activityTitle = activityQuery.data?.name;
   const activityMeta = useMemo(() => {
     if (!activityQuery.data) return "";
-    return [activityQuery.data.date, activityQuery.data.location]
-      .filter(Boolean)
-      .join(" · ");
+    return [activityQuery.data.date, activityQuery.data.location].filter(Boolean).join(" · ");
   }, [activityQuery.data]);
 
-  const hasEventScope =
-    activityLegacyId != null && !Number.isNaN(activityLegacyId);
+  const hasEventScope = activityLegacyId != null && !Number.isNaN(activityLegacyId);
   const showEventContext = hasEventScope && Boolean(activityTitle || activityQuery.isLoading);
 
   const headerSubtractPx = useMemo(() => {
@@ -370,7 +350,8 @@ const AiAssistantPage: FC = () => {
           userGender === "male" && "s-ai-assistant--male",
         ]
           .filter(Boolean)
-          .join(" ")}>
+          .join(" ")}
+      >
         <PageNavigation
           className="s-ai-assistant__header"
           tone="surface"
@@ -415,21 +396,15 @@ const AiAssistantPage: FC = () => {
             </View>
             <View className="s-ai-assistant__event-context-text">
               {activityQuery.isLoading && !activityTitle ? (
-                <Text className="s-ai-assistant__event-context-title">
-                  加载活动信息…
-                </Text>
+                <Text className="s-ai-assistant__event-context-title">加载活动信息…</Text>
               ) : (
                 <>
-                  <Text className="s-ai-assistant__event-context-kicker">
-                    当前活动
-                  </Text>
+                  <Text className="s-ai-assistant__event-context-kicker">当前活动</Text>
                   <Text className="s-ai-assistant__event-context-title">
                     {activityTitle ?? "本场活动"}
                   </Text>
                   {activityMeta ? (
-                    <Text className="s-ai-assistant__event-context-meta">
-                      {activityMeta}
-                    </Text>
+                    <Text className="s-ai-assistant__event-context-meta">{activityMeta}</Text>
                   ) : null}
                 </>
               )}

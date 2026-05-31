@@ -1,8 +1,4 @@
-import type {
-  EventDetailPost,
-  ProfilePostItem,
-  ProfileSummary,
-} from "../../types/backend";
+import type { EventDetailPost, ProfilePostItem, ProfileSummary } from "../../types/backend";
 import type { EventMapMarker } from "./eventMapMarkers";
 
 export type EventMapUserPost = {
@@ -119,9 +115,7 @@ export function mapEventDetailPostToEventMapUserPost(
   };
 }
 
-export function mapProfilePostToEventMapUserPost(
-  item: ProfilePostItem,
-): EventMapUserPost {
+export function mapProfilePostToEventMapUserPost(item: ProfilePostItem): EventMapUserPost {
   return {
     id: item.id,
     contentTypes: item.contentTypes,
@@ -153,10 +147,7 @@ export function buildEventMapUserSheetData(
     marker.shortName ??
     marker.name;
 
-  const avatarUrl =
-    options?.authorAvatar?.trim() ||
-    options?.profile?.avatar?.trim() ||
-    undefined;
+  const avatarUrl = options?.authorAvatar?.trim() || options?.profile?.avatar?.trim() || undefined;
 
   return {
     displayName,
@@ -168,11 +159,6 @@ export function buildEventMapUserSheetData(
 }
 
 /** 无 API 时的本地演示数据 */
-export function getEventMapUserSheetMockData(
-  marker: EventMapMarker,
-): EventMapUserSheetData {
-  return buildEventMapUserSheetData(
-    marker,
-    POSTS_BY_MARKER_NAME[marker.name] ?? [],
-  );
+export function getEventMapUserSheetMockData(marker: EventMapMarker): EventMapUserSheetData {
+  return buildEventMapUserSheetData(marker, POSTS_BY_MARKER_NAME[marker.name] ?? []);
 }

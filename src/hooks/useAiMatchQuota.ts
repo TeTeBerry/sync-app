@@ -2,10 +2,7 @@ import { useMemo } from "react";
 import { isApiEnabled, isDevMockQuotaExhausted } from "../constants/api";
 import { useProfileActivityLegacyId } from "./useProfileActivityLegacyId";
 import { useProfileEntitlementsQuery } from "./useSyncApi";
-import {
-  isAiMatchQuotaExhausted,
-  resolveProfileEntitlement,
-} from "../utils/profileEntitlement";
+import { isAiMatchQuotaExhausted, resolveProfileEntitlement } from "../utils/profileEntitlement";
 import type { EventPackageEntitlement } from "../types/backend";
 
 export type AiMatchQuotaDisplay = {
@@ -35,9 +32,7 @@ export function useAiMatchQuota(): AiMatchQuotaDisplay {
   const entitlementsQuery = useProfileEntitlementsQuery(activityLegacyId);
 
   return useMemo(() => {
-    const loading =
-      apiEnabled &&
-      entitlementsQuery.isLoading;
+    const loading = apiEnabled && entitlementsQuery.isLoading;
 
     if (!apiEnabled) {
       const mockExhausted = isDevMockQuotaExhausted();
@@ -51,10 +46,7 @@ export function useAiMatchQuota(): AiMatchQuotaDisplay {
       };
     }
 
-    const entitlement = resolveProfileEntitlement(
-      entitlementsQuery.data,
-      activityLegacyId,
-    );
+    const entitlement = resolveProfileEntitlement(entitlementsQuery.data, activityLegacyId);
     const slot = entitlement?.quotas.aiMatch;
     const remaining = slot?.remaining ?? null;
     const limit = slot?.limit ?? null;
@@ -68,10 +60,5 @@ export function useAiMatchQuota(): AiMatchQuotaDisplay {
       usageLabel: buildUsageLabel(entitlement),
       loading,
     };
-  }, [
-    activityLegacyId,
-    apiEnabled,
-    entitlementsQuery.data,
-    entitlementsQuery.isLoading,
-  ]);
+  }, [activityLegacyId, apiEnabled, entitlementsQuery.data, entitlementsQuery.isLoading]);
 }

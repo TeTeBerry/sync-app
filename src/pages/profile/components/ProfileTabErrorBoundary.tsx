@@ -33,15 +33,14 @@ export class ProfileTabErrorBoundary extends Component<Props, State> {
       return (
         <View className="s-profile-error-fallback">
           <Text className="s-profile-error-fallback__title">页面加载异常</Text>
-          <Text className="s-profile-error-fallback__hint">
-            请重试；若仍无法打开，可重启小程序
-          </Text>
+          <Text className="s-profile-error-fallback__hint">请重试；若仍无法打开，可重启小程序</Text>
           <Button
             className="s-profile-error-fallback__btn"
             onClick={() => {
               this.handleRetry();
               void Taro.showToast({ title: "已重试", icon: "none" });
-            }}>
+            }}
+          >
             <Text className="s-btn-label">重试</Text>
           </Button>
         </View>

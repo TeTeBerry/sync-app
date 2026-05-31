@@ -101,7 +101,9 @@
     font-weight: var(--s-fw-semibold);
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
-    transition: opacity 160ms ease, background 160ms ease;
+    transition:
+      opacity 160ms ease,
+      background 160ms ease;
 
     &:active {
       opacity: 0.85;
@@ -325,7 +327,9 @@
     font-weight: var(--s-fw-semibold);
     text-align: center;
     cursor: pointer;
-    transition: background 160ms ease, color 160ms ease;
+    transition:
+      background 160ms ease,
+      color 160ms ease;
 
     &:active {
       background: var(--overlay-muted-surface-hover);
@@ -385,7 +389,9 @@
     font-weight: var(--s-fw-semibold);
     text-align: left;
     cursor: pointer;
-    transition: background 160ms ease, color 160ms ease;
+    transition:
+      background 160ms ease,
+      color 160ms ease;
 
     &:active {
       background: var(--overlay-muted-surface-hover);

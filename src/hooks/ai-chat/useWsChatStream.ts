@@ -2,15 +2,8 @@ import { useCallback, type Dispatch, type MutableRefObject, type SetStateAction 
 import Taro from "@tarojs/taro";
 import { AI_CHAT_WS_URL, isApiEnabled } from "../../constants/api";
 import { useAiChatStore } from "../../stores/aiChatStore";
-import type {
-  AiChatStreamEvent,
-  ChatUiMessage,
-  SendChatOptions,
-} from "../../types/aiChat";
-import {
-  formatAiChatStreamError,
-  formatAiChatToastError,
-} from "../../utils/aiChatErrors";
+import type { AiChatStreamEvent, ChatUiMessage, SendChatOptions } from "../../types/aiChat";
+import { formatAiChatStreamError, formatAiChatToastError } from "../../utils/aiChatErrors";
 import { buildApiChatHistory } from "../../utils/aiChatHistory";
 import { streamAiChatWs } from "../../utils/aiChatWs";
 import { mockAiChatStream } from "../../utils/aiChatStream";
@@ -29,12 +22,8 @@ export interface UseWsChatStreamOptions {
   messagesRef: MutableRefObject<ChatUiMessage[]>;
   setMessages: Dispatch<SetStateAction<ChatUiMessage[]>>;
   getAuthHeaders?: () => Record<string, string>;
-  onPostCreated?: (
-    event: Extract<AiChatStreamEvent, { type: "post_created" }>,
-  ) => void;
-  onExistingPost?: (
-    event: Extract<AiChatStreamEvent, { type: "existing_post" }>,
-  ) => void;
+  onPostCreated?: (event: Extract<AiChatStreamEvent, { type: "post_created" }>) => void;
+  onExistingPost?: (event: Extract<AiChatStreamEvent, { type: "existing_post" }>) => void;
   onMatchTurnComplete?: () => void | Promise<void>;
   persistSessionFromStream: (sessionId: string) => void;
   createTypewriter: (options: {
@@ -90,13 +79,9 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
       aiMsgId: string,
       typewriter: TypewriterReveal,
     ) => {
-      const finishAiMessage = (
-        updater: (current: ChatUiMessage) => ChatUiMessage,
-      ) => {
+      const finishAiMessage = (updater: (current: ChatUiMessage) => ChatUiMessage) => {
         setMessages((prev) =>
-          prev.map((message) =>
-            message.id === aiMsgId ? updater(message) : message,
-          ),
+          prev.map((message) => (message.id === aiMsgId ? updater(message) : message)),
         );
       };
 
@@ -172,10 +157,7 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
             streaming: false,
           }));
           void Taro.showToast({
-            title: formatAiChatToastError(
-              new Error(event.message),
-              streamErrorText,
-            ),
+            title: formatAiChatToastError(new Error(event.message), streamErrorText),
             icon: "none",
           });
           break;
@@ -211,34 +193,19 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
   );
 
   const runStream = useCallback(
-    async (
-      payload: SendChatOptions,
-      aiMsgId: string,
-      abortSignal: AbortSignal,
-    ) => {
+    async (payload: SendChatOptions, aiMsgId: string, abortSignal: AbortSignal) => {
       const { text, image, images } = payload;
       const trimmed = text.trim();
       const activityId = activityLegacyIdRef.current;
       const activityHeaders =
-        activityId != null
-          ? { "X-Activity-Id": String(activityId) }
-          : undefined;
+        activityId != null ? { "X-Activity-Id": String(activityId) } : undefined;
 
       const pendingImage = image ?? images?.[0];
-      const history = buildApiChatHistory(
-        messagesRef.current,
-        welcomeText,
-        trimmed,
-        pendingImage,
-      );
+      const history = buildApiChatHistory(messagesRef.current, welcomeText, trimmed, pendingImage);
 
-      const finishAiMessage = (
-        updater: (current: ChatUiMessage) => ChatUiMessage,
-      ) => {
+      const finishAiMessage = (updater: (current: ChatUiMessage) => ChatUiMessage) => {
         setMessages((prev) =>
-          prev.map((message) =>
-            message.id === aiMsgId ? updater(message) : message,
-          ),
+          prev.map((message) => (message.id === aiMsgId ? updater(message) : message)),
         );
       };
 

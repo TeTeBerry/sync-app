@@ -16,10 +16,7 @@ import { preloadPageSafe, ROUTES } from "../../utils/route";
 import { useEventList } from "../../hooks/useSyncApi";
 import { resolveEventCardLegacyId } from "../../utils/apiMappers";
 import { goEventDetail, preloadHotRoutes } from "../../utils/route";
-import {
-  getActivityStatusFromActivity,
-  type ActivityStatus,
-} from "../../utils/activityStatus";
+import { getActivityStatusFromActivity, type ActivityStatus } from "../../utils/activityStatus";
 
 type EventFilterTab = "all" | "upcoming" | "ended";
 
@@ -42,8 +39,7 @@ const Events: React.FC = () => {
   });
 
   const navInsets = useNavBarInsets();
-  const eventsChromePx =
-    EVENTS_CHROME_PX - EVENTS_HEADER_TOP_PX + navInsets.paddingTop;
+  const eventsChromePx = EVENTS_CHROME_PX - EVENTS_HEADER_TOP_PX + navInsets.paddingTop;
   const listScrollHeight = useTabPageMainHeight(eventsChromePx);
 
   const { events, isLoading, isError, refetch } = useEventList();
@@ -120,9 +116,11 @@ const Events: React.FC = () => {
               onInput={(e) => setSearchQuery(e.detail.value)}
             />
             {searchQuery && (
-              <Button className="s-events__search-clear"
+              <Button
+                className="s-events__search-clear"
                 onClick={() => setSearchQuery("")}
-                aria-label="清空">
+                aria-label="清空"
+              >
                 <Text className="s-btn-label">×</Text>
               </Button>
             )}
@@ -131,15 +129,14 @@ const Events: React.FC = () => {
           <View className="s-events__tabs" role="tablist" aria-label="活动筛选">
             {filterTabs.map((tab) => (
               <Button
-                key={tab.id} role="tab"
+                key={tab.id}
+                role="tab"
                 aria-selected={activeTab === tab.id}
-                className={[
-                  "s-events__tab",
-                  activeTab === tab.id ? "s-events__tab--active" : "",
-                ]
+                className={["s-events__tab", activeTab === tab.id ? "s-events__tab--active" : ""]
                   .filter(Boolean)
                   .join(" ")}
-                onClick={() => setActiveTab(tab.id)}>
+                onClick={() => setActiveTab(tab.id)}
+              >
                 <Text className="s-btn-label">{tab.label}</Text>
               </Button>
             ))}
@@ -151,53 +148,56 @@ const Events: React.FC = () => {
           enhanced
           showScrollbar={false}
           className="s-events__main s-scrollbar-none"
-          style={listScrollHeight != null ? { height: `${listScrollHeight}px` } : undefined}>
+          style={listScrollHeight != null ? { height: `${listScrollHeight}px` } : undefined}
+        >
           <View className="s-events__scroll-inner">
-          {isLoading ? (
-            <ThemedPageLoader variant="skeleton-feed" minHeight={280} />
-          ) : (
-          <ListState
-            isLoading={false}
-            isError={isError}
-            isEmpty={!isError && filteredEvents.length === 0}
-            loadingText="加载活动中..."
-            errorText="活动列表加载失败"
-            emptyText="暂无活动"
-            onRetry={() => void refetch()}
-            retryText="重试"
-            stateClassName="s-events__state"
-            retryClassName="s-events__retry">
-            <View className="s-events__list">
-              {filteredEvents.map((event) => (
-                <View
-                  key={event.id}
-                  className="s-events__card-wrap"
-                  role="button"
-                  tabIndex={0}
-                  onTouchStart={() => warmEventDetail(event)}
-                  onClick={() => openDetail(event.id)}
-                  onKeyDown={(e) => {
-                    if (e.key !== "Enter" && e.key !== " ") return;
-                    e.preventDefault();
-                    openDetail(event.id);
-                  }}>
-                  <EventCard
-                    id={event.id}
-                    title={event.title}
-                    date={event.date}
-                    location={event.location}
-                    image={event.image}
-                    attendees={event.attendees}
-                    hot={event.hot}
-                    variant="list"
-                    onTeamUp={() => openDetail(event.id)}
-                    onTeamUpWarmup={() => warmEventDetail(event)}
-                  />
+            {isLoading ? (
+              <ThemedPageLoader variant="skeleton-feed" minHeight={280} />
+            ) : (
+              <ListState
+                isLoading={false}
+                isError={isError}
+                isEmpty={!isError && filteredEvents.length === 0}
+                loadingText="加载活动中..."
+                errorText="活动列表加载失败"
+                emptyText="暂无活动"
+                onRetry={() => void refetch()}
+                retryText="重试"
+                stateClassName="s-events__state"
+                retryClassName="s-events__retry"
+              >
+                <View className="s-events__list">
+                  {filteredEvents.map((event) => (
+                    <View
+                      key={event.id}
+                      className="s-events__card-wrap"
+                      role="button"
+                      tabIndex={0}
+                      onTouchStart={() => warmEventDetail(event)}
+                      onClick={() => openDetail(event.id)}
+                      onKeyDown={(e) => {
+                        if (e.key !== "Enter" && e.key !== " ") return;
+                        e.preventDefault();
+                        openDetail(event.id);
+                      }}
+                    >
+                      <EventCard
+                        id={event.id}
+                        title={event.title}
+                        date={event.date}
+                        location={event.location}
+                        image={event.image}
+                        attendees={event.attendees}
+                        hot={event.hot}
+                        variant="list"
+                        onTeamUp={() => openDetail(event.id)}
+                        onTeamUpWarmup={() => warmEventDetail(event)}
+                      />
+                    </View>
+                  ))}
                 </View>
-              ))}
-            </View>
-          </ListState>
-          )}
+              </ListState>
+            )}
           </View>
         </ScrollView>
       </View>

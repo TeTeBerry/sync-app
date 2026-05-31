@@ -32,10 +32,7 @@ const freeActivity1: EventPackageEntitlement = {
 
 describe("resolveProfileEntitlement", () => {
   it("returns free quotas for activity 1 when Pro exists only on activity 4", () => {
-    const scoped = resolveProfileEntitlement(
-      [freeActivity1],
-      1,
-    );
+    const scoped = resolveProfileEntitlement([freeActivity1], 1);
     expect(scoped?.tierId).toBe("free");
     expect(scoped?.quotas.aiMatch.limit).toBe(3);
   });

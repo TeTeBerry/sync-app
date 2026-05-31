@@ -21,20 +21,9 @@ import {
   drawOfficialStormLogoStaticSafe,
   stormLogoBottomOffset,
 } from "./eventMapStormLogo";
-import {
-  getMapWorldDimensions,
-  MAP_VENUE_NX,
-  MAP_VENUE_NY,
-} from "./eventMapWorld";
-import {
-  getMapAvatarBaseRadius,
-  getStormLogoHalfSize,
-  MAP_VENUE_PILL_GAP,
-} from "./eventMapLayout";
-import {
-  createMapOffscreenCanvas,
-  isMapOffscreenSupported,
-} from "./mapOffscreenCanvas";
+import { getMapWorldDimensions, MAP_VENUE_NX, MAP_VENUE_NY } from "./eventMapWorld";
+import { getMapAvatarBaseRadius, getStormLogoHalfSize, MAP_VENUE_PILL_GAP } from "./eventMapLayout";
+import { createMapOffscreenCanvas, isMapOffscreenSupported } from "./mapOffscreenCanvas";
 
 export const EVENT_MAP_BG = "#0e0b16";
 const BG = EVENT_MAP_BG;
@@ -46,14 +35,10 @@ const CONNECTOR = "rgba(167, 139, 250, 0.75)";
 type CanvasImageSource = Parameters<CanvasRenderingContext2D["drawImage"]>[0];
 
 const VENUE_NY = 0.44;
-const MARKERS_BY_DEPTH = Object.freeze(
-  [...EVENT_MAP_MARKERS].sort((a, b) => a.ny - b.ny),
-);
+const MARKERS_BY_DEPTH = Object.freeze([...EVENT_MAP_MARKERS].sort((a, b) => a.ny - b.ny));
 
 /** 点击检测：深度大的（靠前）优先 */
-export const EVENT_MAP_MARKERS_HIT_TEST = Object.freeze(
-  [...MARKERS_BY_DEPTH].reverse(),
-);
+export const EVENT_MAP_MARKERS_HIT_TEST = Object.freeze([...MARKERS_BY_DEPTH].reverse());
 
 const CITY_BLOCKS: Array<{ x: number; y: number; w: number; h: number }> = [
   { x: 0.05, y: 0.18, w: 0.22, h: 0.14 },
@@ -113,13 +98,7 @@ function drawBlocks(ctx: CanvasRenderingContext2D, proj: IsometricProjection) {
   const { width: w, height: h } = proj;
   ctx.beginPath();
   for (const b of CITY_BLOCKS) {
-    const [c0, c1, c2, c3] = projectRect(
-      proj,
-      b.x * w,
-      b.y * h,
-      b.w * w,
-      b.h * h,
-    );
+    const [c0, c1, c2, c3] = projectRect(proj, b.x * w, b.y * h, b.w * w, b.h * h);
     ctx.moveTo(c0.x, c0.y);
     ctx.lineTo(c1.x, c1.y);
     ctx.lineTo(c2.x, c2.y);
@@ -156,13 +135,9 @@ function drawProjectedText(
   ctx.restore();
 }
 
-function drawStreetLabels(
-  ctx: CanvasRenderingContext2D,
-  proj: IsometricProjection,
-) {
+function drawStreetLabels(ctx: CanvasRenderingContext2D, proj: IsometricProjection) {
   const { width: w, height: h } = proj;
-  const font =
-    "600 10px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+  const font = "600 10px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
 
   drawProjectedText(ctx, "NW 12TH AVE", proj.project(w * 0.1, h * 0.42), {
     font,
@@ -213,12 +188,7 @@ function roundRect(
   ctx.closePath();
 }
 
-function drawStar(
-  ctx: CanvasRenderingContext2D,
-  cx: number,
-  cy: number,
-  size: number,
-) {
+function drawStar(ctx: CanvasRenderingContext2D, cx: number, cy: number, size: number) {
   ctx.beginPath();
   for (let i = 0; i < 4; i++) {
     const a = (Math.PI / 2) * i - Math.PI / 4;
@@ -238,10 +208,7 @@ function drawStar(
   ctx.fill();
 }
 
-function getStormVenueCenter(
-  proj: IsometricProjection,
-  stormLogo?: CanvasImageSource | null,
-) {
+function getStormVenueCenter(proj: IsometricProjection, stormLogo?: CanvasImageSource | null) {
   const { width: w, height: h } = proj;
   const center = proj.projectNorm(MAP_VENUE_NX, MAP_VENUE_NY);
   const iconSize = getStormLogoHalfSize(w, h, center.scale);
@@ -274,14 +241,9 @@ function drawStormVenueDecor(
   eventTitle: string,
   stormLogo?: CanvasImageSource | null,
 ) {
-  const { w, center, label, cx, iconBottomY } = getStormVenueLayout(
-    proj,
-    eventTitle,
-    stormLogo,
-  );
+  const { w, center, label, cx, iconBottomY } = getStormVenueLayout(proj, eventTitle, stormLogo);
   const pillY = iconBottomY + MAP_VENUE_PILL_GAP * center.scale;
-  ctx.font =
-    "600 11px -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif";
+  ctx.font = "600 11px -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif";
   const textW = ctx.measureText(label).width;
   const pillW = Math.min(w * 0.72, textW + 52);
 
@@ -440,8 +402,7 @@ function drawAvatarMarker(
     ctx.restore();
   }
 
-  const nameOffset =
-    marker.badge === "等待队友" ? 28 : marker.badge === "组队中" ? 18 : 16;
+  const nameOffset = marker.badge === "等待队友" ? 28 : marker.badge === "组队中" ? 18 : 16;
   drawProjectedText(
     ctx,
     marker.name,
@@ -489,22 +450,14 @@ function isTerrainCacheSupported(): boolean {
   return false;
 }
 
-function paintTerrainOffscreenLayers(
-  ctx: CanvasRenderingContext2D,
-  cssW: number,
-  cssH: number,
-) {
+function paintTerrainOffscreenLayers(ctx: CanvasRenderingContext2D, cssW: number, cssH: number) {
   const proj = getProjection(cssW, cssH);
   drawGrid(ctx, proj);
   drawBlocks(ctx, proj);
   drawStreetLabels(ctx, proj);
 }
 
-function blitCachedTerrain(
-  ctx: CanvasRenderingContext2D,
-  cssW: number,
-  cssH: number,
-): boolean {
+function blitCachedTerrain(ctx: CanvasRenderingContext2D, cssW: number, cssH: number): boolean {
   if (!isTerrainCacheSupported()) {
     return false;
   }
@@ -541,11 +494,7 @@ export function invalidateEventMapTerrainCache() {
   terrainCacheSupported = null;
 }
 
-function paintMapTerrain(
-  ctx: CanvasRenderingContext2D,
-  cssW: number,
-  cssH: number,
-) {
+function paintMapTerrain(ctx: CanvasRenderingContext2D, cssW: number, cssH: number) {
   const proj = getProjection(cssW, cssH);
   if (!blitCachedTerrain(ctx, cssW, cssH)) {
     drawGrid(ctx, proj);
@@ -636,11 +585,7 @@ export function paintEventMapMarkersAfterVenueLayer(
 }
 
 /** 最小可绘制帧（无 drawImage），用于主绘制失败时的兜底 */
-export function paintEventMapMinimal(
-  ctx: CanvasRenderingContext2D,
-  width: number,
-  height: number,
-) {
+export function paintEventMapMinimal(ctx: CanvasRenderingContext2D, width: number, height: number) {
   ctx.fillStyle = BG;
   ctx.fillRect(0, 0, width, height);
   paintMapTerrain(ctx, width, height);

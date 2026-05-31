@@ -4,11 +4,8 @@ import AvatarGroup from "./AvatarGroup";
 import { ACTIVITY_GUEST_AVATARS } from "../constants/activityGuestAvatars";
 import { ImageWithFallback } from "./ImageWithFallback";
 import { Button } from "./ui";
-import { Calendar, Flame, MapPin, Sparkles, Users, } from "lucide-react-taro";
-import {
-  activityStatusCardClass,
-  getActivityStatusFromActivity,
-} from "../utils/activityStatus";
+import { Calendar, Flame, MapPin, Sparkles, Users } from "lucide-react-taro";
+import { activityStatusCardClass, getActivityStatusFromActivity } from "../utils/activityStatus";
 import { Text, View } from "@tarojs/components";
 import {
   deriveEventCardStats,
@@ -52,20 +49,15 @@ const EventCardInner: React.FC<EventCardProps> = ({
   const status = getActivityStatusFromActivity(date, title);
   const dateBadge = useMemo(() => formatEventDateBadge(date), [date]);
   const fullDate = useMemo(() => formatEventFullDate(date, title), [date, title]);
-  const heroSubtitle = useMemo(
-    () => formatEventHeroSubtitle(title, location),
-    [title, location],
-  );
-  const stats = useMemo(
-    () => deriveEventCardStats(attendees),
-    [attendees],
-  );
+  const heroSubtitle = useMemo(() => formatEventHeroSubtitle(title, location), [title, location]);
+  const stats = useMemo(() => deriveEventCardStats(attendees), [attendees]);
 
   if (variant !== "list") {
     return (
       <View
         data-cmp="EventCard"
-        className={["s-event-card", activityStatusCardClass(status)].filter(Boolean).join(" ")}>
+        className={["s-event-card", activityStatusCardClass(status)].filter(Boolean).join(" ")}
+      >
         <ImageWithFallback
           src={thumbSrc}
           alt={title}
@@ -84,13 +76,10 @@ const EventCardInner: React.FC<EventCardProps> = ({
   return (
     <View
       data-cmp="EventCard"
-      className={[
-        "s-event-card",
-        "s-event-card--list",
-        activityStatusCardClass(status),
-      ]
+      className={["s-event-card", "s-event-card--list", activityStatusCardClass(status)]
         .filter(Boolean)
-        .join(" ")}>
+        .join(" ")}
+    >
       <View className="s-event-card__hero">
         <ImageWithFallback
           src={thumbSrc}
@@ -146,12 +135,13 @@ const EventCardInner: React.FC<EventCardProps> = ({
         </View>
 
         <View className="s-event-card__cta">
-          <Button className={[
-            "s-event-card__team-btn",
-            isNavigating ? "s-event-card__team-btn--loading" : "",
-          ]
-            .filter(Boolean)
-            .join(" ")}
+          <Button
+            className={[
+              "s-event-card__team-btn",
+              isNavigating ? "s-event-card__team-btn--loading" : "",
+            ]
+              .filter(Boolean)
+              .join(" ")}
             disabled={isNavigating}
             onTouchStart={(event) => {
               event.stopPropagation();
@@ -160,11 +150,10 @@ const EventCardInner: React.FC<EventCardProps> = ({
             onClick={(event) => {
               event.stopPropagation();
               onTeamUp?.();
-            }}>
+            }}
+          >
             <Sparkles size={15} aria-hidden />
-            <Text className="s-event-card__team-btn-text">
-              {isNavigating ? "加入中…" : "加入"}
-            </Text>
+            <Text className="s-event-card__team-btn-text">{isNavigating ? "加入中…" : "加入"}</Text>
           </Button>
         </View>
       </View>

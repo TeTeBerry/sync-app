@@ -24,7 +24,8 @@ export function EventDetailContentTabs({
         ]
           .filter(Boolean)
           .join(" ")}
-        onClick={() => onChange("posts")}>
+        onClick={() => onChange("posts")}
+      >
         <Text className="s-event-detail-tabs__label">活动帖子</Text>
         <Text className="s-event-detail-tabs__badge">{postsCount}</Text>
       </View>
@@ -35,7 +36,8 @@ export function EventDetailContentTabs({
         ]
           .filter(Boolean)
           .join(" ")}
-        onClick={() => onChange("live")}>
+        onClick={() => onChange("live")}
+      >
         <Text className="s-event-detail-tabs__label">实时资讯</Text>
         <Text className="s-event-detail-tabs__badge">{liveCount}</Text>
       </View>

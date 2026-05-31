@@ -26,7 +26,8 @@ export function AiMatchQuotaExhaustedMessage() {
           <Button
             className="s-ai-match-quota-msg__cta"
             aria-label="立即升级套餐"
-            onClick={openUpgradeSheet}>
+            onClick={openUpgradeSheet}
+          >
             <Sparkles size={14} className="s-ai-match-quota-msg__cta-sparkle" aria-hidden />
             <Rocket size={14} className="s-ai-match-quota-msg__cta-rocket" aria-hidden />
             <Text className="s-btn-label">🚀 立即升级套餐</Text>

@@ -3,7 +3,7 @@ import type { FC } from "react";
 import { Button } from "../../../components/ui";
 import { FeedPostList } from "../../../components/FeedPostList";
 import type { ActivityPost } from "../homeData";
-import { Text, View } from '@tarojs/components';
+import { Text, View } from "@tarojs/components";
 
 type HomeActivityFeedProps = {
   items: ActivityPost[];

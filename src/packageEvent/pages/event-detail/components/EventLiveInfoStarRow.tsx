@@ -28,7 +28,8 @@ export function EventLiveInfoStarRow({
               <Button
                 key={index}
                 className="s-live-info-stars__star-btn"
-                onClick={() => onScoreChange(index)}>
+                onClick={() => onScoreChange(index)}
+              >
                 <Star
                   size={28}
                   color={active ? category.color : "rgba(255,255,255,0.2)"}

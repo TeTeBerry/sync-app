@@ -11,9 +11,7 @@ export function ChatUserAvatar({
   name: string;
   userGender?: AuthorGender;
 }) {
-  const initial =
-    name.trim().charAt(0).toUpperCase() ||
-    "我";
+  const initial = name.trim().charAt(0).toUpperCase() || "我";
 
   const genderClass =
     userGender === "female"
@@ -45,7 +43,8 @@ export function ChatUserAvatar({
         userGender === "female" && "s-ai-assistant-chat__avatar--fallback--female",
         userGender === "male" && "s-ai-assistant-chat__avatar--fallback--male",
       )}
-      aria-hidden>
+      aria-hidden
+    >
       {initial}
     </Text>
   );

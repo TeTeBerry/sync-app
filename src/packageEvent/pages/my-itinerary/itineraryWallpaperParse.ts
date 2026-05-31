@@ -1,7 +1,4 @@
-import type {
-  ItineraryTimelineDotColor,
-  ItineraryTimelineItem,
-} from "./myItineraryMock";
+import type { ItineraryTimelineDotColor, ItineraryTimelineItem } from "./myItineraryMock";
 
 const TITLE_STAGE_SEP = " · ";
 
@@ -46,9 +43,7 @@ export function parseTitleArtistStage(
   };
 }
 
-export function timelineItemToWallpaperRow(
-  item: ItineraryTimelineItem,
-): ItineraryWallpaperRow {
+export function timelineItemToWallpaperRow(item: ItineraryTimelineItem): ItineraryWallpaperRow {
   const { artist, stage } = parseTitleArtistStage(item.title, item.subtitle);
   return {
     time: item.time,
@@ -59,9 +54,7 @@ export function timelineItemToWallpaperRow(
 }
 
 /** Performance rows only — excludes travel/departure reminders for lock-screen wallpaper. */
-export function isPerformanceTimelineItem(
-  item: ItineraryTimelineItem,
-): boolean {
+export function isPerformanceTimelineItem(item: ItineraryTimelineItem): boolean {
   if (item.title.includes("出发")) {
     return false;
   }
@@ -106,10 +99,7 @@ export function buildWallpaperSectionsByDate(
   const sections: ItineraryWallpaperSection[] = [];
 
   for (const day of days) {
-    const { rows, truncated, hiddenCount } = buildWallpaperRows(
-      day.items,
-      maxRowsPerSection,
-    );
+    const { rows, truncated, hiddenCount } = buildWallpaperRows(day.items, maxRowsPerSection);
     if (rows.length === 0) {
       continue;
     }

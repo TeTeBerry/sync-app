@@ -19,10 +19,7 @@ export const HomeHeaderActions: FC<HomeHeaderActionsProps> = ({
     <Button className="s-home-icon-btn s-home-icon-btn--primary" onClick={onAgentClick}>
       <Sparkles size={18} color="#ffffff" />
     </Button>
-    <Button
-      className="s-home-icon-btn"
-      aria-label="Notifications"
-      onClick={onNotificationClick}>
+    <Button className="s-home-icon-btn" aria-label="Notifications" onClick={onNotificationClick}>
       <Bell size={18} color="#ffffff" />
       {unreadCount > 0 && <Text className="s-home-icon-btn__dot" />}
     </Button>

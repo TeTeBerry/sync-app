@@ -1,9 +1,6 @@
 import Taro from "@tarojs/taro";
 import { createMapOffscreenCanvas } from "../../../components/event-map/mapOffscreenCanvas";
-import {
-  drawItineraryWallpaper,
-  estimateWallpaperContentHeight,
-} from "./itineraryWallpaperDraw";
+import { drawItineraryWallpaper, estimateWallpaperContentHeight } from "./itineraryWallpaperDraw";
 import type { ItineraryWallpaperDrawParams } from "./itineraryWallpaperDraw";
 import type { ItineraryWallpaperSection } from "./itineraryWallpaperParse";
 
@@ -35,18 +32,10 @@ export function getWallpaperCanvasSize(
     const pixelRatio = Math.min(3, win.pixelRatio ?? sys.pixelRatio ?? 2);
 
     const scaleFactor = windowWidth / 390;
-    const width = Math.min(
-      1080,
-      Math.max(720, Math.round(windowWidth * pixelRatio)),
-    );
+    const width = Math.min(1080, Math.max(720, Math.round(windowWidth * pixelRatio)));
 
     const deviceHeight = Math.round(windowHeight * pixelRatio);
-    const contentHeight = estimateWallpaperContentHeight(
-      sections,
-      width,
-      scaleFactor,
-      eventMeta,
-    );
+    const contentHeight = estimateWallpaperContentHeight(sections, width, scaleFactor, eventMeta);
     const height = Math.min(
       3200,
       Math.max(deviceHeight, contentHeight, Math.round((width * 19.5) / 9)),
@@ -56,12 +45,7 @@ export function getWallpaperCanvasSize(
   } catch {
     const width = 1080;
     const scaleFactor = width / 390;
-    const contentHeight = estimateWallpaperContentHeight(
-      sections,
-      width,
-      scaleFactor,
-      eventMeta,
-    );
+    const contentHeight = estimateWallpaperContentHeight(sections, width, scaleFactor, eventMeta);
     return {
       width,
       height: Math.max(1920, contentHeight),
@@ -108,9 +92,7 @@ export function exportWallpaperCanvasToTempFile(
   return new Promise((resolve, reject) => {
     Taro.canvasToTempFilePath({
       // Offscreen canvas from map helper; WeChat accepts it at runtime.
-      canvas: canvas as unknown as Parameters<
-        typeof Taro.canvasToTempFilePath
-      >[0]["canvas"],
+      canvas: canvas as unknown as Parameters<typeof Taro.canvasToTempFilePath>[0]["canvas"],
       width,
       height,
       destWidth: width,
@@ -138,11 +120,7 @@ export async function renderWallpaperToOffscreenTempFile(
     throw new Error("offscreen canvas unsupported");
   }
   paintWallpaper(canvas, params);
-  return exportWallpaperCanvasToTempFile(
-    canvas,
-    params.width,
-    params.height,
-  );
+  return exportWallpaperCanvasToTempFile(canvas, params.width, params.height);
 }
 
 type PageCanvasNode = WallpaperCanvas & {
@@ -151,10 +129,7 @@ type PageCanvasNode = WallpaperCanvas & {
 };
 
 function isCanvas2dNode(node: unknown): node is PageCanvasNode {
-  return (
-    node != null &&
-    typeof (node as PageCanvasNode).getContext === "function"
-  );
+  return node != null && typeof (node as PageCanvasNode).getContext === "function";
 }
 
 /** Fallback when offscreen export is unavailable (page-level Canvas 2d). */
@@ -162,11 +137,14 @@ export async function renderWallpaperToPageCanvasTempFile(
   params: ItineraryWallpaperDrawParams,
 ): Promise<string> {
   const query = Taro.createSelectorQuery();
-  const raw = await new Promise<{
-    node?: PageCanvasNode;
-    width?: number;
-    height?: number;
-  } | undefined>((resolve) => {
+  const raw = await new Promise<
+    | {
+        node?: PageCanvasNode;
+        width?: number;
+        height?: number;
+      }
+    | undefined
+  >((resolve) => {
     query
       .select(`#${ITINERARY_WALLPAPER_CANVAS_ID}`)
       .fields({ node: true, size: true })

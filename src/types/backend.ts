@@ -86,12 +86,7 @@ export interface ActivityUnregisterResult {
 
 export type PackageTierId = "pro" | "pro_plus" | "ultra";
 
-export type PackageFeatureIcon =
-  | "match"
-  | "contact"
-  | "map"
-  | "exposure"
-  | "pin";
+export type PackageFeatureIcon = "match" | "contact" | "map" | "exposure" | "pin";
 
 export interface PackageTierLimits {
   aiMatchCount: number | null;
@@ -289,12 +284,7 @@ export interface EventDetailPost {
   images?: string[];
 }
 
-export type PostContentType =
-  | "team"
-  | "accommodation"
-  | "carpool"
-  | "ticket"
-  | "other";
+export type PostContentType = "team" | "accommodation" | "carpool" | "ticket" | "other";
 
 export interface CreatePostPayload {
   body: string;
@@ -375,11 +365,7 @@ export interface AppNotification {
   createdAt: string;
 }
 
-export type LiveInfoCategoryId =
-  | "entry_crowd"
-  | "toilet_queue"
-  | "water_queue"
-  | "smoke_drink";
+export type LiveInfoCategoryId = "entry_crowd" | "toilet_queue" | "water_queue" | "smoke_drink";
 
 export interface LiveInfoSummaryRow {
   categoryId: LiveInfoCategoryId;

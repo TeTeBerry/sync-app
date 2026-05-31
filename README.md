@@ -5,8 +5,15 @@
 ## 相关文档
 
 - API 契约：`docs/API.md`
+- 贡献 / 分支流程：`docs/CONTRIBUTING.md`
+- 包体基线：`docs/BUNDLE-SIZE.md`
+- 发版冒烟：`docs/RELEASE-SMOKE.md`
 - 改造清单：`docs/FRONTEND-REFACTOR-CHECKLIST.md`
 - 后端架构：`../sync-app-backend/docs/ARCHITECTURE.md`
+
+## 环境
+
+- **Node.js ≥ 18.18**（见 `package.json` `engines`）
 
 ## 命令
 
@@ -14,9 +21,11 @@
 
 ```bash
 npm install
-npm run dev:weapp     # 微信小程序开发（监听，推荐）
-npm run build:weapp   # 微信小程序生产构建
-npm run dev:h5        # H5 开发（热更新，未维护）
+npm run dev:weapp        # 微信小程序开发（监听，推荐）
+npm run build:weapp      # 微信小程序生产构建
+npm run build:weapp:size # 构建 + 包体阈值检查
+npm run check            # typecheck + lint + format:check + test
+npm run dev:h5           # H5 开发（未维护）
 npm run build:h5
 ```
 

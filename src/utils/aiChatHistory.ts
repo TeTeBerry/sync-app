@@ -1,6 +1,9 @@
 import type { AiChatImageContext, AiChatMessage, ChatUiMessage } from "../types/aiChat";
 
-function resolveImageContext(message: ChatUiMessage, pendingImage?: string): AiChatImageContext | undefined {
+function resolveImageContext(
+  message: ChatUiMessage,
+  pendingImage?: string,
+): AiChatImageContext | undefined {
   const source = message.imagePreview || pendingImage;
   if (!source && !message.ocrText) return undefined;
   return {

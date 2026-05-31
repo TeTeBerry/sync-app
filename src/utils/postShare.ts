@@ -20,17 +20,14 @@ export type PostSharePayload = {
   images?: string[];
 };
 
-export function buildPostShareTitle(payload: Pick<
-  PostSharePayload,
-  "body" | "eventTitle" | "authorName"
->): string {
+export function buildPostShareTitle(
+  payload: Pick<PostSharePayload, "body" | "eventTitle" | "authorName">,
+): string {
   const snippet = stripContentTypeHashtags(payload.body ?? "")
     .replace(/\s+/g, " ")
     .trim();
   if (snippet) {
-    return snippet.length > SHARE_TITLE_MAX
-      ? `${snippet.slice(0, SHARE_TITLE_MAX)}…`
-      : snippet;
+    return snippet.length > SHARE_TITLE_MAX ? `${snippet.slice(0, SHARE_TITLE_MAX)}…` : snippet;
   }
   const eventTitle = payload.eventTitle?.trim();
   if (eventTitle) {
@@ -57,9 +54,7 @@ export function buildPostSharePagePath(
       query.postId = postId;
     }
     const qs = buildQueryString(query);
-    return qs
-      ? `${SHARE_PATHS.eventDetail}?${qs}`
-      : SHARE_PATHS.eventDetail;
+    return qs ? `${SHARE_PATHS.eventDetail}?${qs}` : SHARE_PATHS.eventDetail;
   }
   return SHARE_PATHS.home;
 }

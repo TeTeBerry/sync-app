@@ -68,13 +68,7 @@ export function useEventPostsInfiniteQuery(
   }, [enabled, resetAndLoad, userId]);
 
   const loadMore = useCallback(async () => {
-    if (
-      !enabled ||
-      activityLegacyId == null ||
-      !hasMore ||
-      !nextCursor ||
-      loadingMoreRef.current
-    ) {
+    if (!enabled || activityLegacyId == null || !hasMore || !nextCursor || loadingMoreRef.current) {
       return;
     }
     loadingMoreRef.current = true;
@@ -121,9 +115,7 @@ export function useEventPostsInfiniteQuery(
                 ...post,
                 ...(updated.likes !== undefined ? { likes: updated.likes } : {}),
                 ...(updated.liked !== undefined ? { liked: updated.liked } : {}),
-                ...(updated.comments !== undefined
-                  ? { comments: updated.comments }
-                  : {}),
+                ...(updated.comments !== undefined ? { comments: updated.comments } : {}),
                 ...(updated.status !== undefined ? { status: updated.status } : {}),
               }
             : post,

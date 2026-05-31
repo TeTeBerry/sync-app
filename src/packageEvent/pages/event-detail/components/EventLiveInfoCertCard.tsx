@@ -56,14 +56,14 @@ export function EventLiveInfoCertCard({
             </Text>
           </View>
           <Text className="s-live-info-cert__hint">
-            {rejectReason?.trim() ||
-              "请拍摄手腕佩戴的活动入场腕带，确保腕带清晰可见后重新上传"}
+            {rejectReason?.trim() || "请拍摄手腕佩戴的活动入场腕带，确保腕带清晰可见后重新上传"}
           </Text>
         </View>
         <Button
           className="s-live-info-cert__upload"
           hoverClass="s-live-info-cert__upload--pressed"
-          onClick={onReupload}>
+          onClick={onReupload}
+        >
           <Upload size={14} color="#fff" aria-hidden />
           <Text className="s-live-info-cert__upload-text">重新上传</Text>
         </Button>
@@ -81,14 +81,13 @@ export function EventLiveInfoCertCard({
           <Text className="s-live-info-cert__name">{userName}</Text>
           <Text className="s-live-info-cert__badge">未认证</Text>
         </View>
-        <Text className="s-live-info-cert__hint">
-          上传手环照片参与实时资讯更新，认证后可发布
-        </Text>
+        <Text className="s-live-info-cert__hint">上传手环照片参与实时资讯更新，认证后可发布</Text>
       </View>
       <Button
         className="s-live-info-cert__upload"
         hoverClass="s-live-info-cert__upload--pressed"
-        onClick={onUpload}>
+        onClick={onUpload}
+      >
         <Upload size={14} color="#fff" aria-hidden />
         <Text className="s-live-info-cert__upload-text">上传手环</Text>
       </Button>

@@ -61,9 +61,7 @@ export function getOrCreateSessionId(): string {
 }
 
 export function getOrCreateActivitySessionId(activityLegacyId: number): string {
-  return getOrCreateStoredSessionId(
-    activitySessionStorageKey(activityLegacyId),
-  );
+  return getOrCreateStoredSessionId(activitySessionStorageKey(activityLegacyId));
 }
 
 export function createFreshActivitySessionId(activityLegacyId: number): string {
@@ -144,10 +142,7 @@ export function persistUserName(name: string): void {
   cachedUserName = undefined;
 }
 
-export function persistSessionId(
-  sessionId: string,
-  activityLegacyId?: number,
-): void {
+export function persistSessionId(sessionId: string, activityLegacyId?: number): void {
   const key =
     activityLegacyId != null && !Number.isNaN(activityLegacyId)
       ? activitySessionStorageKey(activityLegacyId)

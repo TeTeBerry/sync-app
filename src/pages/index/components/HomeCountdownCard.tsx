@@ -1,17 +1,14 @@
 import type { FC } from "react";
 import { useCountdown } from "../../../hooks/useCountdown";
-import { Text, View } from '@tarojs/components';
+import { Text, View } from "@tarojs/components";
 
 type HomeCountdownCardProps = {
   eventName?: string;
   targetAt?: Date | null;
 };
 
-export const HomeCountdownCard: FC<HomeCountdownCardProps> = ({
-  eventName,
-  targetAt,
-}) => {
-  const hasTarget = targetAt != null && eventName != null && eventName.length> 0;
+export const HomeCountdownCard: FC<HomeCountdownCardProps> = ({ eventName, targetAt }) => {
+  const hasTarget = targetAt != null && eventName != null && eventName.length > 0;
   const parts = useCountdown(hasTarget ? targetAt : null);
   const ariaLabel = hasTarget ? `${eventName} countdown` : "Upcoming activity countdown";
 
@@ -27,15 +24,14 @@ export const HomeCountdownCard: FC<HomeCountdownCardProps> = ({
                     part.accent
                       ? "s-home-countdown__num s-home-countdown__num--accent"
                       : "s-home-countdown__num"
-                  }>
+                  }
+                >
                   {part.value}
                 </Text>
                 <Text className="s-home-countdown__unit">{part.unit}</Text>
               </View>
             </View>
-            {index < parts.length - 1 ? (
-              <Text className="s-home-countdown__sep">·</Text>
-            ) : null}
+            {index < parts.length - 1 ? <Text className="s-home-countdown__sep">·</Text> : null}
           </View>
         ))}
       </View>

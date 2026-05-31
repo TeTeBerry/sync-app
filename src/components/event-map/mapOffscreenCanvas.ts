@@ -16,10 +16,7 @@ function getWx(): WxOffscreen | undefined {
   return (globalThis as { wx?: WxOffscreen }).wx;
 }
 
-export function createMapOffscreenCanvas(
-  width: number,
-  height: number,
-): OffscreenCanvas | null {
+export function createMapOffscreenCanvas(width: number, height: number): OffscreenCanvas | null {
   const w = Math.max(1, Math.floor(width));
   const h = Math.max(1, Math.floor(height));
 

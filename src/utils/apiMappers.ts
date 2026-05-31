@@ -82,9 +82,7 @@ export function resolveEventCardLegacyId(id?: string): number | null {
   return parseActivityLegacyId(id);
 }
 
-export function mapSignupEventToFeaturedEvent(
-  item: SignupEvent,
-): FeaturedEvent {
+export function mapSignupEventToFeaturedEvent(item: SignupEvent): FeaturedEvent {
   const isHot = Boolean(item.hot);
   const legacyId = parseActivityLegacyId(item.id) ?? 0;
   const remote = sanitizeRemoteImageUrl(item.image) || item.image;
@@ -121,12 +119,8 @@ export function mapBackendActivityToFeaturedEvent(
 }
 
 /** 首页精选：优先 hot，最多 2 条 */
-export function pickHomeFeaturedEvents(
-  signupEvents: SignupEvent[],
-): FeaturedEvent[] {
+export function pickHomeFeaturedEvents(signupEvents: SignupEvent[]): FeaturedEvent[] {
   const hot = signupEvents.filter((item) => item.hot);
   const rest = signupEvents.filter((item) => !item.hot);
-  return [...hot, ...rest]
-    .slice(0, 2)
-    .map((item) => mapSignupEventToFeaturedEvent(item));
+  return [...hot, ...rest].slice(0, 2).map((item) => mapSignupEventToFeaturedEvent(item));
 }

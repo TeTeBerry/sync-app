@@ -23,31 +23,21 @@ export type GenerateItineraryWallpaperInput = {
 export class ItineraryWallpaperError extends Error {
   constructor(
     message: string,
-    readonly code:
-      | "empty"
-      | "permission"
-      | "canvas"
-      | "save"
-      | "unsupported",
+    readonly code: "empty" | "permission" | "canvas" | "save" | "unsupported",
   ) {
     super(message);
     this.name = "ItineraryWallpaperError";
   }
 }
 
-async function renderTempFile(
-  input: GenerateItineraryWallpaperInput,
-): Promise<string> {
+async function renderTempFile(input: GenerateItineraryWallpaperInput): Promise<string> {
   const sections = buildWallpaperSectionsByDate(input.days, 32);
   if (sections.length === 0) {
     throw new ItineraryWallpaperError("暂无演出行程可生成屏保", "empty");
   }
 
   const eventMeta = input.eventMeta?.trim();
-  const { width, height, scaleFactor } = getWallpaperCanvasSize(
-    sections,
-    eventMeta,
-  );
+  const { width, height, scaleFactor } = getWallpaperCanvasSize(sections, eventMeta);
   const drawParams = {
     width,
     height,

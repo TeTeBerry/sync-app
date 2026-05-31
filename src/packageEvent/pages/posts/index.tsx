@@ -48,17 +48,14 @@ const AllPostsPage = () => {
     [confirm, refetch],
   );
 
-  const handleLikePost = useCallback(
-    (post: ActivityPost) => {
-      if (!isApiEnabled()) {
-        return;
-      }
-      void likePostAndInvalidate(post.id).catch(() =>
-        void Taro.showToast({ title: "请求失败，请稍后重试", icon: "none" }),
-      );
-    },
-    [],
-  );
+  const handleLikePost = useCallback((post: ActivityPost) => {
+    if (!isApiEnabled()) {
+      return;
+    }
+    void likePostAndInvalidate(post.id).catch(
+      () => void Taro.showToast({ title: "请求失败，请稍后重试", icon: "none" }),
+    );
+  }, []);
 
   const handleCommentSubmitted = useCallback(() => {
     void refetch();
@@ -73,28 +70,30 @@ const AllPostsPage = () => {
         enhanced
         showScrollbar={false}
         className="s-posts-page__main s-scrollbar-none"
-        style={mainScrollHeight != null ? { height: `${mainScrollHeight}px` } : undefined}>
+        style={mainScrollHeight != null ? { height: `${mainScrollHeight}px` } : undefined}
+      >
         {isLoading && posts.length === 0 ? (
           <ThemedPageLoader variant="skeleton-feed" minHeight={280} />
         ) : (
-        <ListState
-          isLoading={false}
-          isError={isError}
-          isEmpty={!isError && posts.length === 0}
-          loadingText="加载中…"
-          errorText="请求失败，请稍后重试"
-          emptyText="暂无帖子"
-          onRetry={() => void refetch()}
-          retryText="重试"
-          stateClassName="s-posts-page__state"
-          retryClassName="s-posts-page__retry">
-          <FeedPostList
-            items={posts}
-            onDelete={handleDeletePost}
-            onLike={handleLikePost}
-            onCommentSubmitted={handleCommentSubmitted}
-          />
-        </ListState>
+          <ListState
+            isLoading={false}
+            isError={isError}
+            isEmpty={!isError && posts.length === 0}
+            loadingText="加载中…"
+            errorText="请求失败，请稍后重试"
+            emptyText="暂无帖子"
+            onRetry={() => void refetch()}
+            retryText="重试"
+            stateClassName="s-posts-page__state"
+            retryClassName="s-posts-page__retry"
+          >
+            <FeedPostList
+              items={posts}
+              onDelete={handleDeletePost}
+              onLike={handleLikePost}
+              onCommentSubmitted={handleCommentSubmitted}
+            />
+          </ListState>
         )}
       </ScrollView>
 

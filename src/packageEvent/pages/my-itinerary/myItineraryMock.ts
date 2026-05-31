@@ -128,10 +128,7 @@ export function parseSelectedDjIds(raw?: string): string[] {
 
 export type DjNameEntry = { id: string; name: string };
 
-export function resolveDjDisplayNames(
-  ids: string[],
-  catalog: DjNameEntry[],
-): string[] {
+export function resolveDjDisplayNames(ids: string[], catalog: DjNameEntry[]): string[] {
   return ids
     .map((id) => catalog.find((dj) => dj.id === id)?.name)
     .filter((name): name is string => Boolean(name));
@@ -166,23 +163,15 @@ export function buildItineraryBannerCopy(input: {
   dayLabels: string[];
 }): { title: string; subtitle: string } {
   const names =
-    input.selectedDjNames.length > 0
-      ? input.selectedDjNames
-      : input.itineraryArtistNames;
+    input.selectedDjNames.length > 0 ? input.selectedDjNames : input.itineraryArtistNames;
 
-  const count =
-    input.selectedDjIds.length > 0 ? input.selectedDjIds.length : names.length;
+  const count = input.selectedDjIds.length > 0 ? input.selectedDjIds.length : names.length;
 
-  const title =
-    count > 0
-      ? `已根据你选择的 ${count} 位 DJ 生成专属行程`
-      : "你的专属行程已生成";
+  const title = count > 0 ? `已根据你选择的 ${count} 位 DJ 生成专属行程` : "你的专属行程已生成";
 
   const namesLine = names.length > 0 ? names.join(" · ") : "";
   const daysLine =
-    input.dayLabels.length > 1
-      ? `覆盖 ${input.dayLabels.join("、")}`
-      : input.dayLabels[0] ?? "";
+    input.dayLabels.length > 1 ? `覆盖 ${input.dayLabels.join("、")}` : (input.dayLabels[0] ?? "");
 
   const subtitle = [namesLine, input.eventMeta.trim(), daysLine]
     .filter((part) => part.length > 0)

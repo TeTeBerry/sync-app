@@ -64,11 +64,7 @@ export const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
       ? wrapperClassName
       : (fallbackWrapperClassName ?? wrapperClassName);
 
-    return (
-      <View className={wrapperClass}>
-        {showImage ? renderImg(imageClassName) : fallback}
-      </View>
-    );
+    return <View className={wrapperClass}>{showImage ? renderImg(imageClassName) : fallback}</View>;
   }
 
   if (showImage) {
@@ -76,9 +72,7 @@ export const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
   }
 
   return (
-    <View
-      className={placeholderClassName}
-      aria-hidden={placeholderAriaHidden ? true : undefined}>
+    <View className={placeholderClassName} aria-hidden={placeholderAriaHidden ? true : undefined}>
       {fallback}
     </View>
   );

@@ -29,13 +29,8 @@ export const PostStatusBadge: React.FC<PostStatusBadgeProps> = ({
   const tint = postStatusBadgeTintStyle(badge.color);
 
   return (
-    <View
-      className={`s-post-status-badge s-post-status-badge--${badge.variant}`}
-      style={tint}>
-      <View
-        className="s-post-status-badge__dot"
-        style={{ backgroundColor: badge.color }}
-      />
+    <View className={`s-post-status-badge s-post-status-badge--${badge.variant}`} style={tint}>
+      <View className="s-post-status-badge__dot" style={{ backgroundColor: badge.color }} />
       <Text className="s-post-status-badge__text">{badge.label}</Text>
     </View>
   );

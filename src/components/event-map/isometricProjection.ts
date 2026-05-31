@@ -43,37 +43,23 @@ function clamp01(v: number): number {
   return Math.max(0, Math.min(1, v));
 }
 
-function depthScaleAt(
-  logicalY: number,
-  height: number,
-  config: IsometricProjectionConfig,
-): number {
+function depthScaleAt(logicalY: number, height: number, config: IsometricProjectionConfig): number {
   const t = clamp01(logicalY / height);
-  return (
-    config.minDepthScale + (config.maxDepthScale - config.minDepthScale) * t
-  );
+  return config.minDepthScale + (config.maxDepthScale - config.minDepthScale) * t;
 }
 
 function skewDeterminant(config: IsometricProjectionConfig): number {
   return config.compressY - config.skewX * config.skewY;
 }
 
-function logicalToSkewed(
-  lx: number,
-  ly: number,
-  config: IsometricProjectionConfig,
-): Point2 {
+function logicalToSkewed(lx: number, ly: number, config: IsometricProjectionConfig): Point2 {
   return {
     x: lx + ly * config.skewX,
     y: ly * config.compressY + lx * config.skewY,
   };
 }
 
-function skewedToLogical(
-  px: number,
-  py: number,
-  config: IsometricProjectionConfig,
-): Point2 {
+function skewedToLogical(px: number, py: number, config: IsometricProjectionConfig): Point2 {
   const det = skewDeterminant(config);
   return {
     x: (config.compressY * px - config.skewX * py) / det,

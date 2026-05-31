@@ -1,13 +1,5 @@
 import { memo } from "react";
-import {
-  Check,
-  CircleCheck,
-  Heart,
-  MapPin,
-  MessageCircle,
-  Users,
-  Zap,
-} from "lucide-react-taro";
+import { Check, CircleCheck, Heart, MapPin, MessageCircle, Users, Zap } from "lucide-react-taro";
 import { PostActionMenu, PostShareButton } from "../../../../components/PostActionMenu";
 import { PostCommentSection } from "../../../../components/PostCommentSection";
 import { PostStatusBadge } from "../../../../components/PostStatusBadge";
@@ -26,10 +18,7 @@ import { isCurrentUserPostAuthor } from "../../../../utils/postOwnership";
 import { postActionIconColor } from "../../../../utils/postActionColors";
 import type { PostSharePayload } from "../../../../utils/postShare";
 import type { EventDetailPost } from "../../../../types/backend";
-import {
-  formatEventPostHandle,
-  parseGroupProgressFromText,
-} from "../utils/eventPostDisplay";
+import { formatEventPostHandle, parseGroupProgressFromText } from "../utils/eventPostDisplay";
 import { Button, Text, View } from "@tarojs/components";
 
 export type EventPostCardProps = {
@@ -49,13 +38,7 @@ export type EventPostCardProps = {
   onCommentSubmitted: () => void;
 };
 
-function GroupProgressRow({
-  current,
-  total,
-}: {
-  current: number;
-  total: number;
-}) {
+function GroupProgressRow({ current, total }: { current: number; total: number }) {
   return (
     <View className="s-event-post__progress">
       {Array.from({ length: total }, (_, index) => (
@@ -76,10 +59,7 @@ function GroupProgressRow({
   );
 }
 
-function eventPostSharePayload(
-  post: EventDetailPost,
-  activityLegacyId: number,
-): PostSharePayload {
+function eventPostSharePayload(post: EventDetailPost, activityLegacyId: number): PostSharePayload {
   return {
     postId: post.id,
     activityLegacyId,
@@ -133,13 +113,10 @@ function EventPostCardInner({
 
   return (
     <View
-      className={[
-        "s-event-post",
-        cardMod,
-        highlighted && "s-event-post--highlight",
-      ]
+      className={["s-event-post", cardMod, highlighted && "s-event-post--highlight"]
         .filter(Boolean)
-        .join(" ")}>
+        .join(" ")}
+    >
       <View className="s-event-post__header">
         <View className="s-event-post__avatar-wrap">
           <ImageWithFallback
@@ -152,14 +129,16 @@ function EventPostCardInner({
           {isRecruiting ? (
             <View
               className="s-event-post__avatar-badge s-event-post__avatar-badge--recruit"
-              aria-hidden>
+              aria-hidden
+            >
               <Zap size={10} color="#fff" />
             </View>
           ) : null}
           {isCompleted ? (
             <View
               className="s-event-post__avatar-badge s-event-post__avatar-badge--done"
-              aria-hidden>
+              aria-hidden
+            >
               <CircleCheck size={10} color="#fff" />
             </View>
           ) : null}
@@ -169,18 +148,14 @@ function EventPostCardInner({
             <View className="s-event-post__identity">
               <View className="s-event-post__name-row">
                 <Text className="s-event-post__user-name">{postName}</Text>
-                <Text className="s-event-post__user-handle">
-                  {formatEventPostHandle(postName)}
-                </Text>
+                <Text className="s-event-post__user-handle">{formatEventPostHandle(postName)}</Text>
               </View>
               <View className="s-event-post__submeta">
                 <MapPin size={12} color="#8e8e93" aria-hidden />
                 <Text className="s-event-post__submeta-text">
                   {submetaLocation ? `${submetaLocation} · ` : ""}
                   {publishTimeLabel}
-                  {post.images?.length ? (
-                    <PostImageCount count={post.images.length} />
-                  ) : null}
+                  {post.images?.length ? <PostImageCount count={post.images.length} /> : null}
                 </Text>
               </View>
             </View>
@@ -212,15 +187,13 @@ function EventPostCardInner({
               className={[
                 "s-event-post__type-tag",
                 `s-event-post__type-tag--${resolveContentTypeKey(primaryTypeKey)}`,
-              ].join(" ")}>
+              ].join(" ")}
+            >
               {formatContentTypeHashtag(primaryTypeKey)}
             </Text>
           ) : null}
           {groupProgress ? (
-            <GroupProgressRow
-              current={groupProgress.current}
-              total={groupProgress.total}
-            />
+            <GroupProgressRow current={groupProgress.current} total={groupProgress.total} />
           ) : null}
           {isCompleted ? (
             <Text className="s-event-post__tag s-event-post__tag--full">#已满</Text>
@@ -239,14 +212,12 @@ function EventPostCardInner({
           <View className="s-event-post__footer-left">
             <View className="s-event-post__actions">
               <Button
-                className={[
-                  "s-event-post__action",
-                  post.liked && "s-event-post__action--liked",
-                ]
+                className={["s-event-post__action", post.liked && "s-event-post__action--liked"]
                   .filter(Boolean)
                   .join(" ")}
                 onClick={() => onLike(post.id)}
-                disabled={!apiEnabled}>
+                disabled={!apiEnabled}
+              >
                 <Heart
                   size={16}
                   filled={post.liked}
@@ -261,7 +232,8 @@ function EventPostCardInner({
                 ]
                   .filter(Boolean)
                   .join(" ")}
-                onClick={() => onToggleComments(post.id)}>
+                onClick={() => onToggleComments(post.id)}
+              >
                 <MessageCircle
                   size={16}
                   color={postActionIconColor({ active: commentsExpanded })}
@@ -278,7 +250,10 @@ function EventPostCardInner({
                 <Text className="s-event-post__cta-text">已申请</Text>
               </Button>
             ) : (
-              <Button className="s-event-post__cta s-event-post__cta--apply" onClick={() => onApply(post.id)}>
+              <Button
+                className="s-event-post__cta s-event-post__cta--apply"
+                onClick={() => onApply(post.id)}
+              >
                 <Users size={14} color="#fff" aria-hidden />
                 <Text className="s-event-post__cta-text">申请组队</Text>
               </Button>
@@ -287,7 +262,8 @@ function EventPostCardInner({
           {isOwn && isRecruiting && onComplete ? (
             <Button
               className="s-event-post__cta s-event-post__cta--manage"
-              onClick={() => onComplete(post.id)}>
+              onClick={() => onComplete(post.id)}
+            >
               <CircleCheck size={14} color="#34c759" aria-hidden />
               <Text className="s-event-post__cta-text">标记完成</Text>
             </Button>

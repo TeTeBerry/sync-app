@@ -4,8 +4,7 @@ import { Text, View } from "@tarojs/components";
 import { useOverlayLock } from "../../../hooks/useOverlayLock";
 
 const DEFAULT_TITLE = "专属电音行程";
-const DEFAULT_MESSAGE =
-  "选择最多 5 位喜爱的 DJ，AI 将根据你的偏好自动生成专属观演行程。";
+const DEFAULT_MESSAGE = "选择最多 5 位喜爱的 DJ，AI 将根据你的偏好自动生成专属观演行程。";
 
 export type ExclusiveItineraryInfoModalProps = {
   open: boolean;
@@ -32,19 +31,19 @@ export function ExclusiveItineraryInfoModal({
   }
 
   return (
-    <View
-      className="s-overlay s-exclusive-itinerary-info-modal"
-      role="presentation">
+    <View className="s-overlay s-exclusive-itinerary-info-modal" role="presentation">
       <View className="s-overlay__backdrop" onClick={onClose} />
       <View
         className="s-overlay__panel s-exclusive-itinerary-info-modal__panel"
         role="dialog"
         aria-modal="true"
-        aria-labelledby="exclusive-itinerary-info-title">
+        aria-labelledby="exclusive-itinerary-info-title"
+      >
         <View
           className="s-exclusive-itinerary-info-modal__close"
           aria-label="关闭"
-          onClick={onClose}>
+          onClick={onClose}
+        >
           <X size={16} color="#8e8e93" aria-hidden />
         </View>
 
@@ -54,36 +53,30 @@ export function ExclusiveItineraryInfoModal({
             !showIcon ? "s-exclusive-itinerary-info-modal__body--compact" : "",
           ]
             .filter(Boolean)
-            .join(" ")}>
+            .join(" ")}
+        >
           {showIcon ? (
-            <View
-              className="s-exclusive-itinerary-info-modal__icon-wrap"
-              aria-hidden>
-              <Sparkles
-                size={26}
-                className="s-exclusive-itinerary-info-modal__icon"
-              />
+            <View className="s-exclusive-itinerary-info-modal__icon-wrap" aria-hidden>
+              <Sparkles size={26} className="s-exclusive-itinerary-info-modal__icon" />
             </View>
           ) : null}
 
           <Text
             id="exclusive-itinerary-info-title"
-            className="s-exclusive-itinerary-info-modal__title">
+            className="s-exclusive-itinerary-info-modal__title"
+          >
             {title}
           </Text>
-          <Text className="s-exclusive-itinerary-info-modal__message">
-            {message}
-          </Text>
+          <Text className="s-exclusive-itinerary-info-modal__message">{message}</Text>
         </View>
 
         <View className="s-exclusive-itinerary-info-modal__foot">
           <View
             className="s-exclusive-itinerary-info-modal__cta"
             hoverClass="s-exclusive-itinerary-info-modal__cta--pressed"
-            onClick={onClose}>
-            <Text className="s-exclusive-itinerary-info-modal__cta-label">
-              {confirmText}
-            </Text>
+            onClick={onClose}
+          >
+            <Text className="s-exclusive-itinerary-info-modal__cta-label">{confirmText}</Text>
           </View>
         </View>
       </View>

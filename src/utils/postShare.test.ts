@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  buildPostSharePagePath,
-  buildPostShareTitle,
-} from "./postShare";
+import { buildPostSharePagePath, buildPostShareTitle } from "./postShare";
 
 describe("buildPostShareTitle", () => {
   it("prefers body snippet", () => {
@@ -27,9 +24,7 @@ describe("buildPostShareTitle", () => {
 
 describe("buildPostSharePagePath", () => {
   it("links to event detail with post highlight", () => {
-    expect(
-      buildPostSharePagePath({ postId: "abc", activityLegacyId: 42 }),
-    ).toBe(
+    expect(buildPostSharePagePath({ postId: "abc", activityLegacyId: 42 })).toBe(
       "/packageEvent/pages/event-detail/index?id=42&activityLegacyId=42&postId=abc",
     );
   });

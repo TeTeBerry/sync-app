@@ -84,9 +84,7 @@ export function EventPostsVirtualList({
           </View>
         );
       })}
-      {isLoadingMore ? (
-        <Text className="s-event-posts-list__more">加载更多…</Text>
-      ) : null}
+      {isLoadingMore ? <Text className="s-event-posts-list__more">加载更多…</Text> : null}
       {!hasMore && items.length > 0 ? (
         <Text className="s-event-posts-list__more s-event-posts-list__more--end">
           没有更多帖子了

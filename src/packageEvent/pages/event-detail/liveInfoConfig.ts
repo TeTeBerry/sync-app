@@ -2,11 +2,7 @@ import { Beer, Droplet, Footprints, Toilet } from "lucide-react-taro";
 
 type LiveInfoIcon = typeof Footprints;
 
-export type LiveInfoCategoryId =
-  | "entry_crowd"
-  | "toilet_queue"
-  | "water_queue"
-  | "smoke_drink";
+export type LiveInfoCategoryId = "entry_crowd" | "toilet_queue" | "water_queue" | "smoke_drink";
 
 export type LiveInfoCategoryConfig = {
   id: LiveInfoCategoryId;

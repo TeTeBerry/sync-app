@@ -34,9 +34,7 @@ function resolveSessionId(
   return getOrCreateSessionId();
 }
 
-function createFreshSessionIdForScope(
-  activityLegacyId: number | undefined,
-): string {
+function createFreshSessionIdForScope(activityLegacyId: number | undefined): string {
   if (activityLegacyId != null && !Number.isNaN(activityLegacyId)) {
     return createFreshActivitySessionId(activityLegacyId);
   }
@@ -47,9 +45,7 @@ export function useChatSession(options: UseChatSessionOptions) {
   const { welcomeText, activityLegacyId } = options;
   const activityLegacyIdRef = useRef(activityLegacyId);
 
-  const sessionIdRef = useRef(
-    resolveSessionId(options.sessionId, activityLegacyId),
-  );
+  const sessionIdRef = useRef(resolveSessionId(options.sessionId, activityLegacyId));
   const userIdRef = useRef(options.userId);
   const userNameRef = useRef(options.userName);
   const userPhoneRef = useRef(options.userPhone);
@@ -141,10 +137,7 @@ export function useChatSession(options: UseChatSessionOptions) {
   }, [showWelcome]);
 
   useEffect(() => {
-    const nextSessionId = resolveSessionId(
-      options.sessionId,
-      activityLegacyId,
-    );
+    const nextSessionId = resolveSessionId(options.sessionId, activityLegacyId);
     if (sessionIdRef.current === nextSessionId) return;
 
     historyLoadSeqRef.current += 1;
@@ -177,9 +170,7 @@ export function useChatSession(options: UseChatSessionOptions) {
       // ignore network errors; still reset local state
     }
 
-    const nextSessionId = createFreshSessionIdForScope(
-      activityLegacyIdRef.current,
-    );
+    const nextSessionId = createFreshSessionIdForScope(activityLegacyIdRef.current);
     sessionIdRef.current = nextSessionId;
     persistSessionId(nextSessionId, activityLegacyIdRef.current);
     messagesRef.current = [];

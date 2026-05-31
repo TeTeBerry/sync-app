@@ -128,7 +128,8 @@ $ai-modal-muted: #8e8e93;
 
   &--pro.s-ai-package-upgrade-sheet__tier--selected {
     border-color: var(--secondary);
-    box-shadow: 0 0 0 1px rgba(var(--secondary-rgb), 0.35),
+    box-shadow:
+      0 0 0 1px rgba(var(--secondary-rgb), 0.35),
       0 6px 18px rgba(var(--secondary-rgb), 0.2);
 
     .s-ai-package-upgrade-sheet__tier-name,
@@ -139,7 +140,8 @@ $ai-modal-muted: #8e8e93;
 
   &--pro_plus.s-ai-package-upgrade-sheet__tier--selected {
     border-color: var(--primary);
-    box-shadow: 0 0 0 1px rgba(var(--primary-rgb), 0.35),
+    box-shadow:
+      0 0 0 1px rgba(var(--primary-rgb), 0.35),
       0 6px 18px rgba(var(--primary-rgb), 0.24);
 
     .s-ai-package-upgrade-sheet__tier-name,
@@ -150,7 +152,8 @@ $ai-modal-muted: #8e8e93;
 
   &--ultra.s-ai-package-upgrade-sheet__tier--selected {
     border-color: $ai-tier-ultra;
-    box-shadow: 0 0 0 1px rgba(168, 85, 247, 0.35),
+    box-shadow:
+      0 0 0 1px rgba(168, 85, 247, 0.35),
       0 6px 18px rgba(168, 85, 247, 0.22);
 
     .s-ai-package-upgrade-sheet__tier-name,

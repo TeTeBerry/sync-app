@@ -9,9 +9,7 @@ export type AiAssistantActivityCardProps = {
   activity: RecommendedActivityCard;
 };
 
-export const AiAssistantActivityCard: FC<AiAssistantActivityCardProps> = ({
-  activity,
-}) => {
+export const AiAssistantActivityCard: FC<AiAssistantActivityCardProps> = ({ activity }) => {
   const handleOpen = () => {
     const id = activity.activityLegacyId;
     if (id != null && !Number.isNaN(id)) {

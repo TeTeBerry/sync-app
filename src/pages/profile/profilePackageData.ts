@@ -1,17 +1,9 @@
-import type {
-  PackageCatalog,
-  PackageTierDefinition,
-  PackageTierId,
-} from "../../types/backend";
+import type { PackageCatalog, PackageTierDefinition, PackageTierId } from "../../types/backend";
 
 export type { PackageTierId };
 
 /** Paid single-event tier ladder (low → high). */
-export const PACKAGE_TIER_ORDER: readonly PackageTierId[] = [
-  "pro",
-  "pro_plus",
-  "ultra",
-] as const;
+export const PACKAGE_TIER_ORDER: readonly PackageTierId[] = ["pro", "pro_plus", "ultra"] as const;
 
 /** Offline / mock-mode catalog when `isApiEnabled()` is false. */
 export const MOCK_PACKAGE_CATALOG: PackageCatalog = {
@@ -91,9 +83,7 @@ export const PACKAGE_SHEET_ACTIVITY_STEP = {
 } as const;
 
 /** Activity already bound (e.g. paid benefit card / upgrade). Skips activity picker step. */
-export function isBoundActivityLegacyId(
-  value: number | undefined | null,
-): value is number {
+export function isBoundActivityLegacyId(value: number | undefined | null): value is number {
   return value != null && !Number.isNaN(value);
 }
 
@@ -113,16 +103,12 @@ export function packageActivitySelectCtaLabel(): string {
 }
 
 /** Activity step CTA after selection — pay and bind tier to event. */
-export function packagePayAndBindCtaLabel(
-  tier: Pick<PackageTierDefinition, "priceLabel">,
-): string {
+export function packagePayAndBindCtaLabel(tier: Pick<PackageTierDefinition, "priceLabel">): string {
   return `支付 ¥${tier.priceLabel} 并绑定`;
 }
 
 /** CTA when user already owns the selected tier for this activity. */
-export function packageTierAlreadyOwnedCtaLabel(
-  tier: Pick<PackageTierDefinition, "name">,
-): string {
+export function packageTierAlreadyOwnedCtaLabel(tier: Pick<PackageTierDefinition, "name">): string {
   return `您已是 ${tier.name} 套餐`;
 }
 
@@ -167,10 +153,7 @@ export function resolvePackageTierCta(params: {
   if (!selectedTier) {
     return { label: "选择套餐", purchaseDisabled: false };
   }
-  if (
-    currentPaidTierId != null &&
-    selectedTier.id === currentPaidTierId
-  ) {
+  if (currentPaidTierId != null && selectedTier.id === currentPaidTierId) {
     return {
       label: packageTierAlreadyOwnedCtaLabel(selectedTier),
       purchaseDisabled: true,

@@ -96,9 +96,7 @@ describe("resolvePackageActivityPayCta", () => {
   });
 
   it("shows pay label with tier price", () => {
-    expect(
-      resolvePackageActivityPayCta({ selectedTier: proPlusTier }),
-    ).toEqual({
+    expect(resolvePackageActivityPayCta({ selectedTier: proPlusTier })).toEqual({
       label: packagePayAndBindCtaLabel(proPlusTier),
       purchaseDisabled: false,
     });

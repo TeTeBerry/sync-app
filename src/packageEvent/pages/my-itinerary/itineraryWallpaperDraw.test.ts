@@ -103,12 +103,7 @@ describe("drawItineraryWallpaper", () => {
 
   it("estimates taller canvas for more date sections", () => {
     const oneDay = estimateWallpaperContentHeight([sections[0]!], 1080, 1);
-    const twoDays = estimateWallpaperContentHeight(
-      sections,
-      1080,
-      1,
-      "风暴电音节 深圳站",
-    );
+    const twoDays = estimateWallpaperContentHeight(sections, 1080, 1, "风暴电音节 深圳站");
     expect(twoDays).toBeGreaterThan(oneDay);
   });
 });

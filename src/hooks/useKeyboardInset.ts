@@ -9,8 +9,7 @@ function tabBarOffsetPx(): number {
   try {
     const win = Taro.getWindowInfo();
     const screenHeight = win.screenHeight ?? win.windowHeight ?? 667;
-    const safeBottom =
-      win.safeArea != null ? Math.max(0, screenHeight - win.safeArea.bottom) : 0;
+    const safeBottom = win.safeArea != null ? Math.max(0, screenHeight - win.safeArea.bottom) : 0;
     return TABBAR_ROW_PX + TABBAR_PADDING_TOP_PX + safeBottom;
   } catch {
     return TABBAR_ROW_PX + TABBAR_PADDING_TOP_PX;

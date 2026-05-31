@@ -4,11 +4,7 @@ const STORAGE_KEY = "sync_ai_shortcut_tag_usage";
 const DISPLAY_COUNT = 6;
 
 /** 可选快捷标签池（含默认展示项） */
-export const AI_SHORTCUT_TAG_POOL = [
-  "组队队友",
-  "住宿同行",
-  "拼车同行",
-] as const;
+export const AI_SHORTCUT_TAG_POOL = ["组队队友", "住宿同行", "拼车同行"] as const;
 
 export type AiShortcutTag = (typeof AI_SHORTCUT_TAG_POOL)[number];
 

@@ -9,10 +9,7 @@ import {
   recordAiShortcutTagUse,
   type AiShortcutTag,
 } from "../../utils/aiShortcutTags";
-import {
-  ChatImageTooLargeError,
-  pickAndCompressChatImages,
-} from "../../utils/chatImage";
+import { ChatImageTooLargeError, pickAndCompressChatImages } from "../../utils/chatImage";
 import { useAiChatStore } from "../../stores/aiChatStore";
 import { openImagePreview } from "../../utils/openImagePreview";
 import { AiMatchQuotaBanner } from "./AiMatchQuotaBanner";
@@ -73,8 +70,7 @@ export function ChatComposer({
   const [shortcutTags, setShortcutTags] = useState(() => getTopAiShortcutTags());
   const conversationFlow = useAiChatStore((state) => state.conversationState?.flow);
 
-  const scopedToActivity =
-    activityLegacyId != null && !Number.isNaN(activityLegacyId);
+  const scopedToActivity = activityLegacyId != null && !Number.isNaN(activityLegacyId);
   const trimmedActivityTitle = activityTitle?.trim();
 
   const inputPlaceholder = (() => {
@@ -166,8 +162,7 @@ export function ChatComposer({
     [isBusy, onSubmit, pendingImages],
   );
 
-  const canSend =
-    Boolean(input.trim() || pendingImages.length) && !isComposerDisabled;
+  const canSend = Boolean(input.trim() || pendingImages.length) && !isComposerDisabled;
 
   return (
     <>
@@ -175,14 +170,16 @@ export function ChatComposer({
         scrollX
         enhanced
         showScrollbar={false}
-        className="s-ai-assistant-chat__quick-scroll s-scrollbar-none">
+        className="s-ai-assistant-chat__quick-scroll s-scrollbar-none"
+      >
         <View className="s-ai-assistant-chat__quick-row">
           {quickChips.map((chip) => (
             <Button
               key={chip.key}
               className="s-ai-assistant-chat__quick-chip"
               disabled={isBusy}
-              onClick={() => handleQuickChipClick(chip)}>
+              onClick={() => handleQuickChipClick(chip)}
+            >
               <Text className="s-btn-label">{chip.label}</Text>
             </Button>
           ))}
@@ -192,23 +189,31 @@ export function ChatComposer({
       <AiMatchQuotaBanner />
 
       <View className="s-ai-assistant-chat__composer">
-        {pendingImages.length> 0 ? (
+        {pendingImages.length > 0 ? (
           <ScrollView
             scrollY
             enhanced
             showScrollbar={false}
             className="s-ai-assistant-chat__attach-preview-list s-scrollbar-none"
-            style={{ height: "160px" }}>
+            style={{ height: "160px" }}
+          >
             {pendingImages.map((src, index) => (
-              <View key={`${src.slice(0, 40)}-${index}`} className="s-ai-assistant-chat__attach-thumb">
-                <Button className="s-ai-assistant-chat__attach-preview-btn"
+              <View
+                key={`${src.slice(0, 40)}-${index}`}
+                className="s-ai-assistant-chat__attach-thumb"
+              >
+                <Button
+                  className="s-ai-assistant-chat__attach-preview-btn"
                   aria-label="查看大图"
-                  onClick={() => void openImagePreview(pendingImages, index)}>
+                  onClick={() => void openImagePreview(pendingImages, index)}
+                >
                   <Image src={src} alt="已上传的图片" />
                 </Button>
-                <Button className="s-ai-assistant-chat__attach-remove"
+                <Button
+                  className="s-ai-assistant-chat__attach-remove"
                   aria-label="移除图片"
-                  onClick={() => removeImage(index)}>
+                  onClick={() => removeImage(index)}
+                >
                   <X size={14} />
                 </Button>
               </View>
@@ -216,10 +221,12 @@ export function ChatComposer({
           </ScrollView>
         ) : null}
         <View className="s-ai-assistant-chat__composer-inner">
-          <Button className="s-ai-assistant-chat__attach-btn"
-            disabled={isComposerDisabled || pendingImages.length>= MAX_IMAGES}
+          <Button
+            className="s-ai-assistant-chat__attach-btn"
+            disabled={isComposerDisabled || pendingImages.length >= MAX_IMAGES}
             aria-label="上传图片"
-            onClick={() => void handlePickImages()}>
+            onClick={() => void handlePickImages()}
+          >
             <ImagePlus size={18} />
           </Button>
           <Input
@@ -237,7 +244,8 @@ export function ChatComposer({
             className="s-ai-assistant-chat__clear-btn"
             disabled={clearDisabled}
             aria-label="清空对话"
-            onClick={() => void onClearChat?.()}>
+            onClick={() => void onClearChat?.()}
+          >
             <Trash2 size={16} color="#ef4444" />
           </Button>
           <Button
@@ -246,7 +254,8 @@ export function ChatComposer({
               canSend && "s-ai-assistant-chat__send--active",
             )}
             disabled={!canSend}
-            onClick={() => onSubmit(input, pendingImages)}>
+            onClick={() => onSubmit(input, pendingImages)}
+          >
             <Send size={16} />
           </Button>
         </View>

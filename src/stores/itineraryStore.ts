@@ -1,9 +1,5 @@
 import { create } from "zustand";
-import type {
-  GenerateItineraryResult,
-  ItineraryConflict,
-  ItineraryDay,
-} from "../types/backend";
+import type { GenerateItineraryResult, ItineraryConflict, ItineraryDay } from "../types/backend";
 
 export type PendingGeneratedItinerary = {
   activityLegacyId: number;

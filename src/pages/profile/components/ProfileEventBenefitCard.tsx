@@ -1,13 +1,6 @@
 import "./ProfileEventBenefitCard.scss";
 import React from "react";
-import {
-  ArrowUp,
-  CloudLightning,
-  Lock,
-  MapPin,
-  Sparkles,
-  Star,
-} from "lucide-react-taro";
+import { ArrowUp, CloudLightning, Lock, MapPin, Sparkles, Star } from "lucide-react-taro";
 import {
   getNextTierId,
   type ProfileEventBenefitRow,
@@ -32,9 +25,7 @@ function rowIcon(rowId: ProfileEventBenefitRow["id"]) {
     return <Lock size={14} color="#d4a017" className={iconClass} aria-hidden />;
   }
   if (rowId === "ai-match") {
-    return (
-      <Sparkles size={14} color="var(--primary)" className={iconClass} aria-hidden />
-    );
+    return <Sparkles size={14} color="var(--primary)" className={iconClass} aria-hidden />;
   }
   if (rowId === "map") {
     return <MapPin size={14} color="#64d2ff" className={iconClass} aria-hidden />;
@@ -63,8 +54,7 @@ const ProfileEventBenefitCard: React.FC<ProfileEventBenefitCardProps> = ({
 }) => {
   const upgradeTierId = getNextTierId(card.tierId);
   const showUpgrade = upgradeTierId != null && onUpgrade != null;
-  const imageSrc =
-    sanitizeRemoteImageUrl(card.eventImage) ?? card.eventImage;
+  const imageSrc = sanitizeRemoteImageUrl(card.eventImage) ?? card.eventImage;
   return (
     <View className="s-profile-event-benefit">
       <View className="s-profile-event-benefit__shell">
@@ -74,8 +64,7 @@ const ProfileEventBenefitCard: React.FC<ProfileEventBenefitCardProps> = ({
             <View className="s-profile-event-benefit__pill s-profile-event-benefit__pill--scope">
               <Text className="s-profile-event-benefit__pill-text">单场专属</Text>
             </View>
-            <View
-              className={`s-profile-event-benefit__tier ${tierBadgeClass(card.tierId)}`}>
+            <View className={`s-profile-event-benefit__tier ${tierBadgeClass(card.tierId)}`}>
               <Text className="s-profile-event-benefit__tier-text">{card.tierName}</Text>
             </View>
           </View>
@@ -138,9 +127,7 @@ const ProfileEventBenefitCard: React.FC<ProfileEventBenefitCardProps> = ({
           </View>
 
           <View className="s-profile-event-benefit__footer">
-            <Text className="s-profile-event-benefit__footer-text">
-              购票即享 · 单场专属权益
-            </Text>
+            <Text className="s-profile-event-benefit__footer-text">购票即享 · 单场专属权益</Text>
             <View className="s-profile-event-benefit__footer-actions">
               {showUpgrade ? (
                 <View
@@ -149,7 +136,8 @@ const ProfileEventBenefitCard: React.FC<ProfileEventBenefitCardProps> = ({
                   onClick={(event) => {
                     event.stopPropagation?.();
                     onUpgrade?.(card);
-                  }}>
+                  }}
+                >
                   <ArrowUp
                     size={12}
                     color="var(--primary)"
@@ -162,10 +150,9 @@ const ProfileEventBenefitCard: React.FC<ProfileEventBenefitCardProps> = ({
               <View
                 className="s-profile-event-benefit__footer-link-wrap"
                 hoverClass="s-profile-event-benefit__footer-link-wrap--pressed"
-                onClick={onUsageHistory}>
-                <Text className="s-profile-event-benefit__footer-link">
-                  使用记录 {'>'}
-                </Text>
+                onClick={onUsageHistory}
+              >
+                <Text className="s-profile-event-benefit__footer-link">使用记录 {">"}</Text>
               </View>
             </View>
           </View>

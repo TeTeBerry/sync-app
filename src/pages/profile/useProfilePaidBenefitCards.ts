@@ -34,12 +34,10 @@ export function useProfilePaidBenefitCards(options?: {
   const allEntitlementsQuery = useProfileEntitlementsQuery();
   const activitiesQuery = useProfileActivitiesQuery();
 
-  const debugEnabled =
-    options?.useDebugEntitlements ?? isProfileDebugEntitlementsEnabled();
+  const debugEnabled = options?.useDebugEntitlements ?? isProfileDebugEntitlementsEnabled();
   const debugPreset = options?.debugPreset ?? readProfileDebugEntitlementPreset();
   const debugEntitlementOverride = useMemo(
-    () =>
-      debugEnabled ? resolveProfileDebugEntitlements(debugPreset) : null,
+    () => (debugEnabled ? resolveProfileDebugEntitlements(debugPreset) : null),
     [debugEnabled, debugPreset],
   );
 
@@ -61,10 +59,7 @@ export function useProfilePaidBenefitCards(options?: {
     if (!apiEnabled) {
       return [buildMockPaidEntitlement(), buildMockProPlusEntitlement()];
     }
-    return listPaidEntitlements(
-      entitlementList,
-      summaryQuery.data?.packageEntitlements,
-    );
+    return listPaidEntitlements(entitlementList, summaryQuery.data?.packageEntitlements);
   }, [
     apiEnabled,
     debugEntitlementOverride,
@@ -74,9 +69,7 @@ export function useProfilePaidBenefitCards(options?: {
 
   const activityByLegacyId = useMemo(() => {
     const items: ProfileActivityItem[] =
-      apiEnabled && activitiesQuery.data?.length
-        ? activitiesQuery.data
-        : profileActivities;
+      apiEnabled && activitiesQuery.data?.length ? activitiesQuery.data : profileActivities;
     return buildActivityByLegacyIdMap(items);
   }, [activitiesQuery.data, apiEnabled]);
 

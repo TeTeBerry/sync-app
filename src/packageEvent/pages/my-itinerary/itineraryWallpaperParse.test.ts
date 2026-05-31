@@ -11,9 +11,7 @@ import {
 
 describe("parseTitleArtistStage", () => {
   it("splits artist and stage on middle dot separator", () => {
-    expect(
-      parseTitleArtistStage("Marshmello · A舞台 (主舞台)"),
-    ).toEqual({
+    expect(parseTitleArtistStage("Marshmello · A舞台 (主舞台)")).toEqual({
       artist: "Marshmello",
       stage: "A舞台 (主舞台)",
     });
@@ -24,9 +22,7 @@ describe("parseTitleArtistStage", () => {
   });
 
   it("uses subtitle as stage when title has no separator", () => {
-    expect(
-      parseTitleArtistStage("出发前往场馆", "建议提前 1.5 小时出发"),
-    ).toEqual({
+    expect(parseTitleArtistStage("出发前往场馆", "建议提前 1.5 小时出发")).toEqual({
       artist: "出发前往场馆",
       stage: "建议提前 1.5 小时出发",
     });
@@ -155,15 +151,9 @@ describe("buildWallpaperSectionsByDate", () => {
 
     expect(sections).toHaveLength(2);
     expect(sections[0]?.dateLabel).toBe("6月13日");
-    expect(sections[0]?.rows.map((r) => r.artist)).toEqual([
-      "EXCISION",
-      "MARSHMELLO",
-    ]);
+    expect(sections[0]?.rows.map((r) => r.artist)).toEqual(["EXCISION", "MARSHMELLO"]);
     expect(sections[1]?.dateLabel).toBe("6月14日");
-    expect(sections[1]?.rows.map((r) => r.artist)).toEqual([
-      "ERIC PRYDZ",
-      "ILLENIUM",
-    ]);
+    expect(sections[1]?.rows.map((r) => r.artist)).toEqual(["ERIC PRYDZ", "ILLENIUM"]);
   });
 
   it("skips days with only travel or non-performance nodes", () => {

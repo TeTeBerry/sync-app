@@ -121,9 +121,7 @@ const WS_CONNECTED_ACK_TIMEOUT_MS = 5_000;
 export function decodeWsMessageData(raw: unknown): string | null {
   if (typeof raw === "string") return raw;
   if (ArrayBuffer.isView(raw)) {
-    return decodeWsMessageData(
-      raw.buffer.slice(raw.byteOffset, raw.byteOffset + raw.byteLength),
-    );
+    return decodeWsMessageData(raw.buffer.slice(raw.byteOffset, raw.byteOffset + raw.byteLength));
   }
   if (raw instanceof ArrayBuffer) {
     try {
@@ -184,20 +182,14 @@ function bindSocketListeners(
   Taro.onSocketError(handlers.onError);
 }
 
-function connectSocket(
-  url: string,
-  headers?: Record<string, string>,
-): Promise<Taro.SocketTask> {
+function connectSocket(url: string, headers?: Record<string, string>): Promise<Taro.SocketTask> {
   return new Promise((resolve, reject) => {
     void (async () => {
       let task: Taro.SocketTask;
       try {
-        task = await resolveConnectSocketTask(
-          Taro.connectSocket({ url, header: headers }),
-        );
+        task = await resolveConnectSocketTask(Taro.connectSocket({ url, header: headers }));
       } catch (err) {
-        const message =
-          err instanceof Error ? err.message : "WebSocket 连接失败";
+        const message = err instanceof Error ? err.message : "WebSocket 连接失败";
         reject(new Error(message));
         return;
       }
@@ -212,9 +204,7 @@ function connectSocket(
       };
 
       const connectTimer = setTimeout(() => {
-        const hint = isAiChatWsDevLog()
-            ? `（请确认地址为 …/api/ai/chat/ws，当前: ${url}）`
-            : "";
+        const hint = isAiChatWsDevLog() ? `（请确认地址为 …/api/ai/chat/ws，当前: ${url}）` : "";
         fail(`WebSocket 连接超时${hint}`);
         try {
           task.close({ code: 1000, reason: "connect timeout" });
@@ -280,9 +270,7 @@ export async function* streamAiChatWs(
     throw new Error("AI chat WebSocket URL is not configured");
   }
   if (wsUrl.includes("/chat/sessions")) {
-    throw new Error(
-      "AI WebSocket 地址配置错误：不能指向 /chat/sessions，请使用 …/api/ai/chat/ws",
-    );
+    throw new Error("AI WebSocket 地址配置错误：不能指向 /chat/sessions，请使用 …/api/ai/chat/ws");
   }
   if (process.env.TARO_ENV === "weapp" && wsUrl.startsWith("/")) {
     throw new Error("小程序需配置完整 WebSocket 地址（TARO_APP_WS_URL 或 TARO_APP_API_BASE_URL）");
@@ -331,10 +319,7 @@ export async function* streamAiChatWs(
     rejectConnected = reject;
   });
   const connectedTimer = setTimeout(() => {
-    settleConnected(
-      "reject",
-      new Error("WebSocket 未收到 connected 确认，请稍后重试"),
-    );
+    settleConnected("reject", new Error("WebSocket 未收到 connected 确认，请稍后重试"));
   }, WS_CONNECTED_ACK_TIMEOUT_MS);
 
   try {
@@ -377,11 +362,7 @@ export async function* streamAiChatWs(
           return;
         }
 
-        if (
-          typeof json.code === "number" &&
-          "data" in json &&
-          !("type" in json)
-        ) {
+        if (typeof json.code === "number" && "data" in json && !("type" in json)) {
           devLog("onMessage REST envelope (wrong endpoint?)", {
             code: json.code,
             message: json.message,
@@ -494,8 +475,8 @@ export async function* streamAiChatWs(
 
     if (!sawAnyEvent) {
       const hint = isAiChatWsDevLog()
-          ? `（无服务端事件，请检查 WebSocket 路径是否为 /api/ai/chat/ws: ${wsUrl}）`
-          : "";
+        ? `（无服务端事件，请检查 WebSocket 路径是否为 /api/ai/chat/ws: ${wsUrl}）`
+        : "";
       throw new Error(`AI chat WebSocket closed without events${hint}`);
     }
     if (!sawTerminal) {

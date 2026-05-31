@@ -28,10 +28,7 @@ export function EventLiveInfoUpdateSheet({
 }: EventLiveInfoUpdateSheetProps) {
   useOverlayLock(open);
 
-  const [selected, setSelected] = useState<LiveInfoCategoryId[]>([
-    "entry_crowd",
-    "toilet_queue",
-  ]);
+  const [selected, setSelected] = useState<LiveInfoCategoryId[]>(["entry_crowd", "toilet_queue"]);
   const [scores, setScores] = useState<Record<LiveInfoCategoryId, number>>({
     entry_crowd: DEFAULT_SCORE,
     toilet_queue: DEFAULT_SCORE,
@@ -96,7 +93,8 @@ export function EventLiveInfoUpdateSheet({
     <View
       className="s-overlay s-overlay--sheet s-live-info-update-sheet"
       catchMove
-      role="presentation">
+      role="presentation"
+    >
       <View className="s-overlay__backdrop" onClick={publishing ? undefined : onClose} />
       <View className="s-overlay__panel" role="dialog" aria-modal="true">
         <View className="s-live-info-update-sheet__handle" aria-hidden />
@@ -107,7 +105,8 @@ export function EventLiveInfoUpdateSheet({
             hoverClass="s-live-info-update-sheet__close--pressed"
             aria-label="关闭"
             disabled={publishing}
-            onClick={onClose}>
+            onClick={onClose}
+          >
             <X size={18} color="#fff" aria-hidden />
           </Button>
         </View>
@@ -116,96 +115,93 @@ export function EventLiveInfoUpdateSheet({
           scrollY
           enhanced
           showScrollbar={false}
-          className="s-live-info-update-sheet__scroll s-scrollbar-none">
+          className="s-live-info-update-sheet__scroll s-scrollbar-none"
+        >
           <View className="s-live-info-update-sheet__body">
-          <Text className="s-live-info-update-sheet__section">
-            ① 选择要更新的类别 (可多选)
-          </Text>
-          <View className="s-live-info-update-sheet__chips">
-            {LIVE_INFO_CATEGORIES.map((category) => {
-              const active = selected.includes(category.id);
-              const Icon = category.icon;
-              return (
-                <Button
-                  key={category.id}
-                  className={[
-                    "s-live-info-update-sheet__chip",
-                    active && "s-live-info-update-sheet__chip--on",
-                  ]
-                    .filter(Boolean)
-                    .join(" ")}
-                  style={
-                    active
-                      ? ({
-                          borderColor: category.color,
-                          color: category.color,
-                        } as Record<string, string>)
-                      : undefined
-                  }
-                  onClick={() => toggleCategory(category.id)}>
-                  <Icon size={14} color={active ? category.color : "#fff"} aria-hidden />
-                  <Text className="s-live-info-update-sheet__chip-label">
-                    {category.label}
-                  </Text>
-                  {active ? (
-                    <Check size={14} color={category.color} aria-hidden />
-                  ) : null}
-                </Button>
-              );
-            })}
-          </View>
-
-          {selectedCategories.length > 0 ? (
-            <>
-              <Text className="s-live-info-update-sheet__section">② 给每项打分</Text>
-              {selectedCategories.map((category) => {
-                const score = scores[category.id] ?? DEFAULT_SCORE;
+            <Text className="s-live-info-update-sheet__section">① 选择要更新的类别 (可多选)</Text>
+            <View className="s-live-info-update-sheet__chips">
+              {LIVE_INFO_CATEGORIES.map((category) => {
+                const active = selected.includes(category.id);
                 const Icon = category.icon;
                 return (
-                  <View key={category.id} className="s-live-info-update-sheet__rate-card">
-                    <View className="s-live-info-update-sheet__rate-head">
-                      <View className="s-live-info-summary__label-wrap">
-                        <Icon size={16} color={category.color} aria-hidden />
-                        <Text className="s-live-info-update-sheet__rate-label">
-                          {category.label}
-                        </Text>
-                      </View>
-                      <Text
-                        className="s-live-info-update-sheet__rate-tag"
-                        style={{
-                          color: category.color,
-                          backgroundColor: `${category.color}22`,
-                        }}>
-                        {category.scoreLabel(score)}
-                      </Text>
-                    </View>
-                    <EventLiveInfoStarRow
-                      category={category}
-                      score={score}
-                      interactive
-                      onScoreChange={(next) =>
-                        setScores((prev) => ({ ...prev, [category.id]: next }))
-                      }
-                    />
-                  </View>
+                  <Button
+                    key={category.id}
+                    className={[
+                      "s-live-info-update-sheet__chip",
+                      active && "s-live-info-update-sheet__chip--on",
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
+                    style={
+                      active
+                        ? ({
+                            borderColor: category.color,
+                            color: category.color,
+                          } as Record<string, string>)
+                        : undefined
+                    }
+                    onClick={() => toggleCategory(category.id)}
+                  >
+                    <Icon size={14} color={active ? category.color : "#fff"} aria-hidden />
+                    <Text className="s-live-info-update-sheet__chip-label">{category.label}</Text>
+                    {active ? <Check size={14} color={category.color} aria-hidden /> : null}
+                  </Button>
                 );
               })}
-            </>
-          ) : null}
+            </View>
 
-          <Text className="s-live-info-update-sheet__section">③ 备注 (选填)</Text>
-          <View className="s-live-info-update-sheet__remark-wrap">
-            <Textarea
-              className="s-live-info-update-sheet__remark"
-              value={remark}
-              maxlength={LIVE_INFO_REMARKS_MAX}
-              placeholder="补充说明，例如：北门排队、厕所位置..."
-              onInput={(e) => setRemark(e.detail.value)}
-            />
-            <Text className="s-live-info-update-sheet__remark-count">
-              {remark.length}/{LIVE_INFO_REMARKS_MAX}
-            </Text>
-          </View>
+            {selectedCategories.length > 0 ? (
+              <>
+                <Text className="s-live-info-update-sheet__section">② 给每项打分</Text>
+                {selectedCategories.map((category) => {
+                  const score = scores[category.id] ?? DEFAULT_SCORE;
+                  const Icon = category.icon;
+                  return (
+                    <View key={category.id} className="s-live-info-update-sheet__rate-card">
+                      <View className="s-live-info-update-sheet__rate-head">
+                        <View className="s-live-info-summary__label-wrap">
+                          <Icon size={16} color={category.color} aria-hidden />
+                          <Text className="s-live-info-update-sheet__rate-label">
+                            {category.label}
+                          </Text>
+                        </View>
+                        <Text
+                          className="s-live-info-update-sheet__rate-tag"
+                          style={{
+                            color: category.color,
+                            backgroundColor: `${category.color}22`,
+                          }}
+                        >
+                          {category.scoreLabel(score)}
+                        </Text>
+                      </View>
+                      <EventLiveInfoStarRow
+                        category={category}
+                        score={score}
+                        interactive
+                        onScoreChange={(next) =>
+                          setScores((prev) => ({ ...prev, [category.id]: next }))
+                        }
+                      />
+                    </View>
+                  );
+                })}
+              </>
+            ) : null}
+
+            <Text className="s-live-info-update-sheet__section">③ 备注 (选填)</Text>
+            <View className="s-live-info-update-sheet__remark-wrap">
+              <Textarea
+                className="s-live-info-update-sheet__remark"
+                value={remark}
+                maxlength={LIVE_INFO_REMARKS_MAX}
+                placeholder="补充说明，例如：北门排队、厕所位置..."
+                onInput={(e) => setRemark(e.detail.value)}
+              />
+              <Text className="s-live-info-update-sheet__remark-count">
+                {remark.length}/{LIVE_INFO_REMARKS_MAX}
+              </Text>
+            </View>
           </View>
         </ScrollView>
 
@@ -214,11 +210,10 @@ export function EventLiveInfoUpdateSheet({
             "s-live-info-update-sheet__publish",
             publishing && "s-live-info-update-sheet__publish--disabled",
           )}
-          hoverClass={
-            publishing ? "" : "s-live-info-update-sheet__publish--pressed"
-          }
+          hoverClass={publishing ? "" : "s-live-info-update-sheet__publish--pressed"}
           disabled={publishing}
-          onClick={() => void handlePublish()}>
+          onClick={() => void handlePublish()}
+        >
           <Zap size={18} color="#fff" aria-hidden />
           <Text className="s-live-info-update-sheet__publish-text">
             {publishing ? "发布中…" : "发布实时资讯"}

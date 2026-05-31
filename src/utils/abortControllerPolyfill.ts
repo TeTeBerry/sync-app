@@ -24,8 +24,7 @@ class AbortSignalPolyfill implements AbortSignal {
       return;
     }
 
-    const once =
-      typeof options === "object" && options != null && options.once === true;
+    const once = typeof options === "object" && options != null && options.once === true;
     const stored: AbortListener = once
       ? () => {
           this.removeEventListener("abort", original);
@@ -39,10 +38,7 @@ class AbortSignalPolyfill implements AbortSignal {
     this.listeners.add(stored);
   }
 
-  removeEventListener(
-    type: string,
-    listener: EventListenerOrEventListenerObject,
-  ): void {
+  removeEventListener(type: string, listener: EventListenerOrEventListenerObject): void {
     if (type !== "abort" || typeof listener !== "function") return;
     const original = listener as AbortListener;
     const stored = this.wrappedByOriginal.get(original) ?? original;
@@ -88,8 +84,7 @@ function installAbortControllerPolyfill(): void {
   };
   if (typeof g.AbortController === "function") return;
 
-  g.AbortController =
-    AbortControllerPolyfill as unknown as typeof AbortController;
+  g.AbortController = AbortControllerPolyfill as unknown as typeof AbortController;
   g.AbortSignal = AbortSignalPolyfill as unknown as typeof AbortSignal;
 }
 

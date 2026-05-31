@@ -18,21 +18,15 @@ export function isHiddenPostStatus(status: BackendPostStatusLabel): boolean {
 /** Activity page post card shows only recruiting vs full. */
 export type EventPostCardStatus = "recruiting" | "full";
 
-export function toEventPostCardStatus(
-  status: BackendPostStatusLabel,
-): EventPostCardStatus {
+export function toEventPostCardStatus(status: BackendPostStatusLabel): EventPostCardStatus {
   return status === "已组队" ? "full" : "recruiting";
 }
 
 export function postStatusBadgeClass(status: EventPostCardStatus): string {
-  return postStatusBadgeClassForVariant(
-    status === "full" ? "full" : "recruiting",
-  );
+  return postStatusBadgeClassForVariant(status === "full" ? "full" : "recruiting");
 }
 
-export function postStatusBadgeClassForVariant(
-  variant: PostStatusBadgeVariant,
-): string {
+export function postStatusBadgeClassForVariant(variant: PostStatusBadgeVariant): string {
   return `s-post-status-badge s-post-status-badge--${variant}`;
 }
 

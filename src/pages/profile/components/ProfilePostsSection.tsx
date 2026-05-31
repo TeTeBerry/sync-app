@@ -85,7 +85,8 @@ function renderPostItems(
           if (event.key !== "Enter" && event.key !== " ") return;
           event.preventDefault();
           onSelect?.(item);
-        }}>
+        }}
+      >
         <View className="s-profile-post__head">
           <Text className="s-profile-post__title">
             <Text className="s-profile-post__title-dot" />
@@ -128,7 +129,8 @@ function renderPostItems(
                 onClick={(event) => {
                   event.stopPropagation();
                   onComplete?.(item);
-                }}>
+                }}
+              >
                 <View className="s-profile-post__action-icon">
                   <CircleCheck
                     size={PROFILE_POST_ACTION_ICON_SIZE}
@@ -143,9 +145,13 @@ function renderPostItems(
               onClick={(event) => {
                 event.stopPropagation();
                 onEdit?.(item);
-              }}>
+              }}
+            >
               <View className="s-profile-post__action-icon">
-                <Pencil size={PROFILE_POST_ACTION_ICON_SIZE} color={PROFILE_POST_ACTION_EDIT_COLOR} />
+                <Pencil
+                  size={PROFILE_POST_ACTION_ICON_SIZE}
+                  color={PROFILE_POST_ACTION_EDIT_COLOR}
+                />
               </View>
             </Button>
             <Button
@@ -154,7 +160,8 @@ function renderPostItems(
               onClick={(event) => {
                 event.stopPropagation();
                 onDelete?.(item);
-              }}>
+              }}
+            >
               <View className="s-profile-post__action-icon">
                 <Trash2
                   size={PROFILE_POST_ACTION_ICON_SIZE}
@@ -210,7 +217,8 @@ function renderPostItems(
                     ? " s-profile-post-edit__status-btn--active-recruiting"
                     : ""
                 }`}
-                onClick={() => onEditDraftChange?.({ ...draft, status: "招募中" })}>
+                onClick={() => onEditDraftChange?.({ ...draft, status: "招募中" })}
+              >
                 <Flame size={16} />
                 <Text>招募中</Text>
                 {draft.status === "招募中" ? (
@@ -223,7 +231,8 @@ function renderPostItems(
                     ? " s-profile-post-edit__status-btn--active-grouped"
                     : ""
                 }`}
-                onClick={() => onEditDraftChange?.({ ...draft, status: "已组队" })}>
+                onClick={() => onEditDraftChange?.({ ...draft, status: "已组队" })}
+              >
                 <CircleCheck size={16} />
                 <Text>已组队</Text>
                 {draft.status === "已组队" ? (
@@ -300,22 +309,23 @@ const ProfilePostsSection: React.FC<ProfilePostsSectionProps> = ({
   }
 
   return (
-  <ProfileCollapsibleSection
-    variant="posts"
-    icon={<MessageSquare size={14} />}
-    title="我的帖子"
-    items={items}
-    renderEmpty={() => (
-      <View className="s-profile-section__empty">
-        <View className="s-profile-section__empty-icon s-profile-section__empty-icon--posts">
-          <MessageSquare size={22} />
+    <ProfileCollapsibleSection
+      variant="posts"
+      icon={<MessageSquare size={14} />}
+      title="我的帖子"
+      items={items}
+      renderEmpty={() => (
+        <View className="s-profile-section__empty">
+          <View className="s-profile-section__empty-icon s-profile-section__empty-icon--posts">
+            <MessageSquare size={22} />
+          </View>
+          <Text className="s-profile-section__empty-title">还没有发布帖子</Text>
+          <Text className="s-profile-section__empty-hint">在活动详情通过 AI 助手发布组队帖</Text>
         </View>
-        <Text className="s-profile-section__empty-title">还没有发布帖子</Text>
-        <Text className="s-profile-section__empty-hint">在活动详情通过 AI 助手发布组队帖</Text>
-      </View>
-    )}>
-    {(pageItems) => renderPostItems(pageItems, postProps)}
-  </ProfileCollapsibleSection>
+      )}
+    >
+      {(pageItems) => renderPostItems(pageItems, postProps)}
+    </ProfileCollapsibleSection>
   );
 };
 

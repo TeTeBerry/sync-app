@@ -4,7 +4,9 @@
 @use "./styles/button" as btn;
 
 page {
-  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Source Han Sans SC", "Helvetica Neue", "Roboto", sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "PingFang SC", "Source Han Sans SC", "Helvetica Neue",
+    "Roboto", sans-serif;
   background-color: #000000;
   height: 100%;
 }

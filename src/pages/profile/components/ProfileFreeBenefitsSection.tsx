@@ -20,7 +20,12 @@ const ProfileFreeBenefitsSection: React.FC<ProfileFreeBenefitsSectionProps> = ({
   <View className="s-profile-free-benefits">
     <View className="s-profile-free-benefits__section-head">
       <View className="s-profile-free-benefits__section-title-wrap">
-        <Zap size={16} color="#ffcc00" className="s-profile-free-benefits__section-zap" aria-hidden />
+        <Zap
+          size={16}
+          color="#ffcc00"
+          className="s-profile-free-benefits__section-zap"
+          aria-hidden
+        />
         <Text className="s-profile-free-benefits__section-title">我的权益</Text>
       </View>
       <Text className="s-profile-free-benefits__section-badge">免费体验</Text>

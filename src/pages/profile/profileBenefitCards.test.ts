@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  buildActivityByLegacyIdMap,
-  pickRecentActivityBenefitCards,
-} from "./profileBenefitCards";
+import { buildActivityByLegacyIdMap, pickRecentActivityBenefitCards } from "./profileBenefitCards";
 import type { ProfileEventBenefitCardModel } from "./profileBenefitsMapper";
 
 function card(legacyId: number): ProfileEventBenefitCardModel {

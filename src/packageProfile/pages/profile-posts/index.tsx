@@ -147,7 +147,8 @@ const ProfilePostsPage: React.FC = () => {
         enhanced
         showScrollbar={false}
         className="s-profile-stack__scroll s-scrollbar-none"
-        style={mainScrollHeight != null ? { height: `${mainScrollHeight}px` } : undefined}>
+        style={mainScrollHeight != null ? { height: `${mainScrollHeight}px` } : undefined}
+      >
         <View className="s-profile-stack__inner">
           {loading ? (
             <ThemedPageLoader variant="inline" label="加载帖子…" minHeight={120} />

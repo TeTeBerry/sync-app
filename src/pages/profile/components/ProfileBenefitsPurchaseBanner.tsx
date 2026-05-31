@@ -13,15 +13,14 @@ const ProfileBenefitsPurchaseBanner: React.FC<ProfileBenefitsPurchaseBannerProps
   <View
     className="s-profile-benefits-banner"
     hoverClass="s-profile-benefits-banner--pressed"
-    onClick={onOpenPurchase}>
+    onClick={onOpenPurchase}
+  >
     <View className="s-profile-benefits-banner__icon-wrap" aria-hidden>
       <Crown size={18} color="#d4a017" aria-hidden />
     </View>
     <View className="s-profile-benefits-banner__copy">
       <Text className="s-profile-benefits-banner__title">购买套餐</Text>
-      <Text className="s-profile-benefits-banner__subtitle">
-        Pro · Pro+ · Ultra — 单场专属权益
-      </Text>
+      <Text className="s-profile-benefits-banner__subtitle">Pro · Pro+ · Ultra — 单场专属权益</Text>
     </View>
     <View className="s-profile-benefits-banner__cta">
       <Text className="s-profile-benefits-banner__cta-text">立即开通</Text>

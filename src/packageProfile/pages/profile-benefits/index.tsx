@@ -23,17 +23,18 @@ const ProfileBenefitsPage: React.FC = () => {
   const mainScrollHeight = useStackPageMainHeight();
   const apiEnabled = isApiEnabled();
   const activitiesQuery = useProfileActivitiesQuery();
-  const { benefitsLoading, paidBenefitCards, paidEntitlements } =
-    useProfilePaidBenefitCards();
+  const { benefitsLoading, paidBenefitCards, paidEntitlements } = useProfilePaidBenefitCards();
 
   const [packageSheetOpen, setPackageSheetOpen] = useState(false);
-  const [packageSheetActivityLegacyId, setPackageSheetActivityLegacyId] =
-    useState<number | undefined>(undefined);
+  const [packageSheetActivityLegacyId, setPackageSheetActivityLegacyId] = useState<
+    number | undefined
+  >(undefined);
   const [packageSheetInitialTierId, setPackageSheetInitialTierId] = useState<
     PackageTierId | undefined
   >(undefined);
-  const [packageSheetCurrentPaidTierId, setPackageSheetCurrentPaidTierId] =
-    useState<PackageTierId | undefined>(undefined);
+  const [packageSheetCurrentPaidTierId, setPackageSheetCurrentPaidTierId] = useState<
+    PackageTierId | undefined
+  >(undefined);
 
   const profileActivitiesList = useMemo((): ProfileActivityItem[] => {
     if (apiEnabled && activitiesQuery.data?.length) {
@@ -60,9 +61,7 @@ const ProfileBenefitsPage: React.FC = () => {
     }) => {
       const rawActivityId = options?.activityLegacyId;
       const resolvedActivityId =
-        rawActivityId != null && !Number.isNaN(rawActivityId)
-          ? rawActivityId
-          : undefined;
+        rawActivityId != null && !Number.isNaN(rawActivityId) ? rawActivityId : undefined;
       let currentPaidTierId = options?.currentPaidTierId;
       if (currentPaidTierId == null && resolvedActivityId != null) {
         const entitlement = paidEntitlements.find(
@@ -96,11 +95,7 @@ const ProfileBenefitsPage: React.FC = () => {
       (item) => item.activityLegacyId === packageSheetActivityLegacyId,
     );
     return entitlement?.paidTierId ?? undefined;
-  }, [
-    packageSheetActivityLegacyId,
-    packageSheetCurrentPaidTierId,
-    paidEntitlements,
-  ]);
+  }, [packageSheetActivityLegacyId, packageSheetCurrentPaidTierId, paidEntitlements]);
 
   const handleBenefitUpgrade = useCallback(
     (card: ProfileEventBenefitCardModel) => {
@@ -136,7 +131,8 @@ const ProfileBenefitsPage: React.FC = () => {
         enhanced
         showScrollbar={false}
         className="s-profile-stack__scroll s-scrollbar-none"
-        style={mainScrollHeight != null ? { height: `${mainScrollHeight}px` } : undefined}>
+        style={mainScrollHeight != null ? { height: `${mainScrollHeight}px` } : undefined}
+      >
         <View className="s-profile-stack__inner">
           <ProfilePaidBenefitsSection
             cards={paidBenefitCards}

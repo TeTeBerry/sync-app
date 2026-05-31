@@ -44,12 +44,12 @@
   background: rgba(255, 255, 255, 0.06);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
 
-.s-profile-free-benefit__tier-pill-text {
-  font-size: 10px;
-  font-weight: var(--s-fw-semibold);
-  color: #8e8e93;
-  line-height: 1.2;
-}
+  .s-profile-free-benefit__tier-pill-text {
+    font-size: 10px;
+    font-weight: var(--s-fw-semibold);
+    color: #8e8e93;
+    line-height: 1.2;
+  }
 }
 
 .s-profile-free-benefit__upgrade-btn {
@@ -192,4 +192,3 @@
   color: var(--primary);
   line-height: 1.35;
 }
-

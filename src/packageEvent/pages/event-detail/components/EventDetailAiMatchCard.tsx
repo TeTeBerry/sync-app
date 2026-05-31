@@ -35,7 +35,8 @@ export function EventDetailAiMatchCard({
             className="s-event-detail__ai-tag"
             hoverClass="s-event-detail__ai-tag--pressed"
             onTouchStart={warmAiAssistant}
-            onClick={() => onTagClick(tag)}>
+            onClick={() => onTagClick(tag)}
+          >
             <Text className="s-btn-label">{tag}</Text>
           </Button>
         ))}
@@ -61,7 +62,8 @@ export function EventDetailAiMatchCard({
           ].join(" ")}
           aria-label={hasContent ? "发送并进入对话" : "进入 AI 对话"}
           onTouchStart={warmAiAssistant}
-          onClick={onSubmit}>
+          onClick={onSubmit}
+        >
           <Send size={18} color="#fff" aria-hidden />
         </Button>
       </View>

@@ -23,17 +23,13 @@ import {
 } from "../../../utils/notificationDisplay";
 import { navigateFromNotification, ROUTES } from "../../../utils/route";
 import { DEFER_NOTIFICATIONS_MS } from "../../../utils/timing";
-import { Button, Text, View } from '@tarojs/components';
+import { Button, Text, View } from "@tarojs/components";
 
 type CategoryFilter = "all" | NotificationCategory;
 
 const CATEGORY_TABS: CategoryFilter[] = ["all", "comment", "like", "system"];
 
-function NotificationIcon({
-  category,
-}: {
-  category: NotificationCategory;
-}) {
+function NotificationIcon({ category }: { category: NotificationCategory }) {
   const iconProps = { size: 20 as const };
 
   switch (category) {
@@ -66,9 +62,7 @@ const NotificationsPage: React.FC = () => {
 
   const filteredNotifications = useMemo(() => {
     if (activeCategory === "all") return notifications;
-    return notifications.filter(
-      (item) => getNotificationCategory(item.meta) === activeCategory,
-    );
+    return notifications.filter((item) => getNotificationCategory(item.meta) === activeCategory);
   }, [activeCategory, notifications]);
 
   const categoryCounts = useMemo(() => {
@@ -119,15 +113,12 @@ const NotificationsPage: React.FC = () => {
     [confirm, refetch],
   );
 
-  const handleItemClick = useCallback(
-    async (item: AppNotification) => {
-      if (!item.read) {
-        await markNotificationAsRead(item.id);
-      }
-      navigateFromNotification(item.meta);
-    },
-    [],
-  );
+  const handleItemClick = useCallback(async (item: AppNotification) => {
+    if (!item.read) {
+      await markNotificationAsRead(item.id);
+    }
+    navigateFromNotification(item.meta);
+  }, []);
 
   return (
     <View data-cmp="Notifications" className="s-notifications">
@@ -140,31 +131,35 @@ const NotificationsPage: React.FC = () => {
             const isActive = activeCategory === category;
             return (
               <Button
-                key={category} role="tab"
+                key={category}
+                role="tab"
                 aria-selected={isActive}
                 className={`s-notifications__tab${isActive ? " s-notifications__tab--active" : ""}`}
-                onClick={() => setActiveCategory(category)}>
+                onClick={() => setActiveCategory(category)}
+              >
                 <Text className="s-btn-label">
-                  {category === "all" ? "全部" : category === "comment" ? "评论" : category === "like" ? "点赞" : "系统"}
+                  {category === "all"
+                    ? "全部"
+                    : category === "comment"
+                      ? "评论"
+                      : category === "like"
+                        ? "点赞"
+                        : "系统"}
                 </Text>
-                {count> 0 && (
-                  <Text className="s-notifications__tab-count">{count}</Text>
-                )}
+                {count > 0 && <Text className="s-notifications__tab-count">{count}</Text>}
               </Button>
             );
           })}
         </View>
 
-        {notifications.length> 0 && (
+        {notifications.length > 0 && (
           <View className="s-notifications__toolbar">
-            {unreadCount> 0 && (
-              <Button className="s-notifications__toolbar-btn"
-                onClick={() => void handleMarkAll()}>
+            {unreadCount > 0 && (
+              <Button className="s-notifications__toolbar-btn" onClick={() => void handleMarkAll()}>
                 <Text className="s-btn-label">全部已读</Text>
               </Button>
             )}
-            <Button className="s-notifications__toolbar-btn"
-              onClick={() => void handleClearAll()}>
+            <Button className="s-notifications__toolbar-btn" onClick={() => void handleClearAll()}>
               <Text className="s-btn-label">清空全部</Text>
             </Button>
           </View>
@@ -185,11 +180,15 @@ const NotificationsPage: React.FC = () => {
               return (
                 <View
                   key={item.id}
-                  className={`s-notifications__item${item.read ? "" : " s-notifications__item--unread"}`}>
-                  <Button className="s-notifications__item-main"
-                    onClick={() => void handleItemClick(item)}>
+                  className={`s-notifications__item${item.read ? "" : " s-notifications__item--unread"}`}
+                >
+                  <Button
+                    className="s-notifications__item-main"
+                    onClick={() => void handleItemClick(item)}
+                  >
                     <View
-                      className={`s-notifications__icon s-notifications__icon--${display.category}`}>
+                      className={`s-notifications__icon s-notifications__icon--${display.category}`}
+                    >
                       <NotificationIcon category={display.category} />
                     </View>
                     <View className="s-notifications__content">
@@ -203,9 +202,11 @@ const NotificationsPage: React.FC = () => {
                     </View>
                     {!item.read && <Text className="s-notifications__dot" aria-hidden />}
                   </Button>
-                  <Button className="s-notifications__delete"
+                  <Button
+                    className="s-notifications__delete"
                     aria-label="删除"
-                    onClick={(event) => void handleDelete(event, item)}>
+                    onClick={(event) => void handleDelete(event, item)}
+                  >
                     <Trash2 size={16} />
                   </Button>
                 </View>

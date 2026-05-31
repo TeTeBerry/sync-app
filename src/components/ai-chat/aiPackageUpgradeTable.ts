@@ -1,14 +1,6 @@
-import type {
-  PackageFeatureIcon,
-  PackageTierDefinition,
-  PackageTierId,
-} from "../../types/backend";
+import type { PackageFeatureIcon, PackageTierDefinition, PackageTierId } from "../../types/backend";
 
-export type AiPackageCompareRowId =
-  | "aiMatch"
-  | "contactUnlock"
-  | "mapDays"
-  | "postPin";
+export type AiPackageCompareRowId = "aiMatch" | "contactUnlock" | "mapDays" | "postPin";
 
 export type AiPackageCompareRow = {
   id: AiPackageCompareRowId;
@@ -32,9 +24,7 @@ function formatPostPin(count: number): string {
 }
 
 /** Comparison rows for the AI upgrade sheet (no voucher / verify / exposure). */
-export function buildAiPackageCompareRows(
-  tiers: PackageTierDefinition[],
-): AiPackageCompareRow[] {
+export function buildAiPackageCompareRows(tiers: PackageTierDefinition[]): AiPackageCompareRow[] {
   const byId = Object.fromEntries(tiers.map((tier) => [tier.id, tier])) as Record<
     PackageTierId,
     PackageTierDefinition | undefined

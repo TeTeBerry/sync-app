@@ -30,11 +30,7 @@ function splitFetchInit(init?: ApiFetchInit): {
   timeoutMs: number;
   maxRetries: number;
 } {
-  const {
-    timeoutMs = DEFAULT_TIMEOUT_MS,
-    maxRetries = MAX_RETRIES,
-    ...requestInit
-  } = init ?? {};
+  const { timeoutMs = DEFAULT_TIMEOUT_MS, maxRetries = MAX_RETRIES, ...requestInit } = init ?? {};
   return { requestInit, timeoutMs, maxRetries };
 }
 
@@ -94,10 +90,7 @@ async function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function retryFetch(
-  url: string,
-  init?: ApiFetchInit,
-): Promise<CompatibleResponse> {
+async function retryFetch(url: string, init?: ApiFetchInit): Promise<CompatibleResponse> {
   const { requestInit, timeoutMs, maxRetries } = splitFetchInit(init);
   let lastError: Error | undefined;
 

@@ -15,10 +15,7 @@ import {
 import TabPageHeader from "../../components/TabPageHeader";
 import ThemedPageLoader from "../../components/ThemedPageLoader";
 import { useNavBarInsets } from "../../hooks/useNavBarInsets";
-import {
-  TAB_PAGE_HEADER_BRAND_PX,
-  useTabPageMainHeight,
-} from "../../hooks/useTabPageMainHeight";
+import { TAB_PAGE_HEADER_BRAND_PX, useTabPageMainHeight } from "../../hooks/useTabPageMainHeight";
 import { go, preloadHotRoutes, ROUTES } from "../../utils/route";
 import ProfileBenefitsPurchaseBanner from "./components/ProfileBenefitsPurchaseBanner";
 import ProfileFreeBenefitsSection from "./components/ProfileFreeBenefitsSection";
@@ -80,9 +77,7 @@ function trimProfileField(value: unknown): string | undefined {
   return trimmed.length > 0 ? trimmed : undefined;
 }
 
-function normalizeProfileUserData(
-  data: ProfileSummary | typeof profileUser,
-): typeof profileUser {
+function normalizeProfileUserData(data: ProfileSummary | typeof profileUser): typeof profileUser {
   const stats = data.stats ?? profileUser.stats;
   return {
     name: trimProfileField(data.name) ?? profileUser.name,
@@ -115,26 +110,21 @@ const Profile: React.FC = () => {
     cancelText: "取消",
   });
   const [packageSheetOpen, setPackageSheetOpen] = useState(false);
-  const [packageSheetActivityLegacyId, setPackageSheetActivityLegacyId] =
-    useState<number | undefined>(undefined);
+  const [packageSheetActivityLegacyId, setPackageSheetActivityLegacyId] = useState<
+    number | undefined
+  >(undefined);
   const [packageSheetInitialTierId, setPackageSheetInitialTierId] = useState<
     PackageTierId | undefined
   >(undefined);
-  const [packageSheetCurrentPaidTierId, setPackageSheetCurrentPaidTierId] =
-    useState<PackageTierId | undefined>(undefined);
+  const [packageSheetCurrentPaidTierId, setPackageSheetCurrentPaidTierId] = useState<
+    PackageTierId | undefined
+  >(undefined);
   const debugEntitlementsEnabled = isProfileDebugEntitlementsEnabled();
   const [debugEntitlementPreset, setDebugEntitlementPreset] =
-    useState<ProfileDebugEntitlementPreset>(() =>
-      readProfileDebugEntitlementPreset(),
-    );
-  const [debugContactUnlockExhaustedOpen, setDebugContactUnlockExhaustedOpen] =
-    useState(false);
-  const [debugAiMatchExhaustedOpen, setDebugAiMatchExhaustedOpen] =
-    useState(false);
-  const debugContactUnlockPreview = useMemo(
-    () => buildDebugContactUnlockExhaustedPreview(),
-    [],
-  );
+    useState<ProfileDebugEntitlementPreset>(() => readProfileDebugEntitlementPreset());
+  const [debugContactUnlockExhaustedOpen, setDebugContactUnlockExhaustedOpen] = useState(false);
+  const [debugAiMatchExhaustedOpen, setDebugAiMatchExhaustedOpen] = useState(false);
+  const debugContactUnlockPreview = useMemo(() => buildDebugContactUnlockExhaustedPreview(), []);
 
   const activityLegacyId = useProfileActivityLegacyId();
   /** Global summary for profile tab (not scoped to AI/event context). */
@@ -145,17 +135,13 @@ const Profile: React.FC = () => {
   const apiEnabled = isApiEnabled();
   const debugEntitlementOverride = useMemo(
     () =>
-      debugEntitlementsEnabled
-        ? resolveProfileDebugEntitlements(debugEntitlementPreset)
-        : null,
+      debugEntitlementsEnabled ? resolveProfileDebugEntitlements(debugEntitlementPreset) : null,
     [debugEntitlementPreset, debugEntitlementsEnabled],
   );
 
   const profileUserData = useMemo(
     () =>
-      apiEnabled && summaryQuery.data
-        ? normalizeProfileUserData(summaryQuery.data)
-        : profileUser,
+      apiEnabled && summaryQuery.data ? normalizeProfileUserData(summaryQuery.data) : profileUser,
     [apiEnabled, summaryQuery.data],
   );
 
@@ -166,15 +152,11 @@ const Profile: React.FC = () => {
 
   const profileLoading = apiEnabled && summaryQuery.isLoading && !summaryQuery.data;
 
-  const {
-    benefitsLoading,
-    paidEntitlements,
-    recentPaidBenefitCards,
-    totalPaidCardCount,
-  } = useProfilePaidBenefitCards({
-    useDebugEntitlements: debugEntitlementsEnabled,
-    debugPreset: debugEntitlementPreset,
-  });
+  const { benefitsLoading, paidEntitlements, recentPaidBenefitCards, totalPaidCardCount } =
+    useProfilePaidBenefitCards({
+      useDebugEntitlements: debugEntitlementsEnabled,
+      debugPreset: debugEntitlementPreset,
+    });
 
   const summaryFreeMonthly = useMemo(() => {
     const scoped = summaryQuery.data?.packageEntitlement?.freeMonthly;
@@ -248,9 +230,7 @@ const Profile: React.FC = () => {
     }) => {
       const rawActivityId = options?.activityLegacyId;
       const resolvedActivityId =
-        rawActivityId != null && !Number.isNaN(rawActivityId)
-          ? rawActivityId
-          : undefined;
+        rawActivityId != null && !Number.isNaN(rawActivityId) ? rawActivityId : undefined;
       let currentPaidTierId = options?.currentPaidTierId;
       if (currentPaidTierId == null && resolvedActivityId != null) {
         const entitlement = paidEntitlements.find(
@@ -284,11 +264,7 @@ const Profile: React.FC = () => {
       (item) => item.activityLegacyId === packageSheetActivityLegacyId,
     );
     return entitlement?.paidTierId ?? undefined;
-  }, [
-    packageSheetActivityLegacyId,
-    packageSheetCurrentPaidTierId,
-    paidEntitlements,
-  ]);
+  }, [packageSheetActivityLegacyId, packageSheetCurrentPaidTierId, paidEntitlements]);
 
   const handleBenefitUpgrade = useCallback(
     (card: ProfileEventBenefitCardModel) => {
@@ -332,12 +308,9 @@ const Profile: React.FC = () => {
     persistUserName(profileUserData.name);
   }, [profileUserData.name]);
 
-  const openSettings = useCallback(
-    (section: "notifications" | "privacy" | "help") => {
-      go(`${ROUTES.SETTINGS}?section=${section}`);
-    },
-    [],
-  );
+  const openSettings = useCallback((section: "notifications" | "privacy" | "help") => {
+    go(`${ROUTES.SETTINGS}?section=${section}`);
+  }, []);
 
   const handleProfileRetry = useCallback(() => {
     if (apiEnabled) {
@@ -346,12 +319,7 @@ const Profile: React.FC = () => {
       void allEntitlementsQuery.refetch();
       void activitiesQuery.refetch();
     }
-  }, [
-    activitiesQuery,
-    allEntitlementsQuery,
-    apiEnabled,
-    summaryQuery,
-  ]);
+  }, [activitiesQuery, allEntitlementsQuery, apiEnabled, summaryQuery]);
 
   const handleLogout = useCallback(async () => {
     const ok = await confirm({
@@ -383,11 +351,9 @@ const Profile: React.FC = () => {
     });
   }, [debugEntitlementsEnabled]);
 
-  const metaParts = [
-    profileUserData.handle,
-    profileUserData.location,
-    profileUserData.bio,
-  ].filter(Boolean);
+  const metaParts = [profileUserData.handle, profileUserData.location, profileUserData.bio].filter(
+    Boolean,
+  );
 
   return (
     <View data-cmp="Profile" className="s-profile s-page-with-tabbar">
@@ -399,208 +365,214 @@ const Profile: React.FC = () => {
           enhanced
           showScrollbar={false}
           className="s-profile__scroll s-scrollbar-none"
-          style={mainScrollHeight != null ? { height: `${mainScrollHeight}px` } : undefined}>
+          style={mainScrollHeight != null ? { height: `${mainScrollHeight}px` } : undefined}
+        >
           <ProfileTabErrorBoundary onRetry={handleProfileRetry}>
-          <View className="s-profile__scroll-inner">
-          {profileLoading ? (
-            <View className="s-profile__card s-profile__card--loading">
-              <ThemedPageLoader variant="inline" label="加载个人资料…" minHeight={148} />
-            </View>
-          ) : (
-            <View className="s-profile__card">
-              <View className="s-profile__card-top">
-                <View className="s-profile__avatar-wrap">
-                  <Image
-                    className="s-profile__avatar"
-                    src={
-                      sanitizeRemoteImageUrl(profileUserData.avatar) ?? profileUserData.avatar
-                    }
-                    alt={profileUserData.name}
-                  />
-                  <View className="s-profile__online-dot" aria-label="在线" />
+            <View className="s-profile__scroll-inner">
+              {profileLoading ? (
+                <View className="s-profile__card s-profile__card--loading">
+                  <ThemedPageLoader variant="inline" label="加载个人资料…" minHeight={148} />
                 </View>
+              ) : (
+                <View className="s-profile__card">
+                  <View className="s-profile__card-top">
+                    <View className="s-profile__avatar-wrap">
+                      <Image
+                        className="s-profile__avatar"
+                        src={
+                          sanitizeRemoteImageUrl(profileUserData.avatar) ?? profileUserData.avatar
+                        }
+                        alt={profileUserData.name}
+                      />
+                      <View className="s-profile__online-dot" aria-label="在线" />
+                    </View>
 
-                <View className="s-profile__info">
-                  <Text className="s-profile__name">{profileUserData.name}</Text>
-                  {metaParts.length > 0 ? (
-                    <Text className="s-profile__meta-line">{metaParts.join(" · ")}</Text>
-                  ) : null}
-                  {interestTag || verified ? (
-                    <View className="s-profile__tags">
-                      {interestTag ? (
-                        <View className="s-profile__tag s-profile__tag--primary">
-                          <Music2 size={12} />
-                          <Text>{interestTag}</Text>
-                        </View>
+                    <View className="s-profile__info">
+                      <Text className="s-profile__name">{profileUserData.name}</Text>
+                      {metaParts.length > 0 ? (
+                        <Text className="s-profile__meta-line">{metaParts.join(" · ")}</Text>
                       ) : null}
-                      {verified ? (
-                        <View className="s-profile__tag s-profile__tag--verified">
-                          <Check size={12} strokeWidth={3} />
-                          <Text>已认证</Text>
+                      {interestTag || verified ? (
+                        <View className="s-profile__tags">
+                          {interestTag ? (
+                            <View className="s-profile__tag s-profile__tag--primary">
+                              <Music2 size={12} />
+                              <Text>{interestTag}</Text>
+                            </View>
+                          ) : null}
+                          {verified ? (
+                            <View className="s-profile__tag s-profile__tag--verified">
+                              <Check size={12} strokeWidth={3} />
+                              <Text>已认证</Text>
+                            </View>
+                          ) : null}
                         </View>
                       ) : null}
                     </View>
+                  </View>
+
+                  <View className="s-profile__stats" aria-label="个人数据">
+                    <View className="s-profile__stat">
+                      <Text className="s-profile__stat-value">{profileUserData.stats.events}</Text>
+                      <Text className="s-profile__stat-label">参加活动</Text>
+                    </View>
+                    <View className="s-profile__stat s-profile__stat--accent">
+                      <Text className="s-profile__stat-value">
+                        {profileUserData.stats.matchSuccess}
+                      </Text>
+                      <Text className="s-profile__stat-label">组队成功</Text>
+                    </View>
+                    <View className="s-profile__stat">
+                      <Text className="s-profile__stat-value">{profileUserData.stats.likes}</Text>
+                      <Text className="s-profile__stat-label">获赞数</Text>
+                    </View>
+                    <View className="s-profile__stat">
+                      <Text className="s-profile__stat-value">{profileUserData.stats.posts}</Text>
+                      <Text className="s-profile__stat-label">我的帖子</Text>
+                    </View>
+                  </View>
+                </View>
+              )}
+
+              {showBenefitsBlock ? (
+                <View className="s-profile-benefits">
+                  <ProfileBenefitsPurchaseBanner onOpenPurchase={() => openPackageSheet()} />
+
+                  {showPaidBenefitsSection ? (
+                    <ProfilePaidBenefitsSection
+                      cards={recentPaidBenefitCards}
+                      totalCount={totalPaidCardCount}
+                      onViewAll={() => go(ROUTES.PROFILE_BENEFITS)}
+                      loading={benefitsLoading}
+                      onUpgrade={handleBenefitUpgrade}
+                      onUsageHistory={handleUsageHistory}
+                    />
+                  ) : null}
+
+                  {showFreeBenefitsSection && freeBenefitCard ? (
+                    <ProfileFreeBenefitsSection
+                      card={freeBenefitCard}
+                      onOpenPurchase={() => openPackageSheet()}
+                    />
+                  ) : showBenefitsLoading ? (
+                    <ProfileFreeBenefitsSection
+                      card={buildFreeBenefitCardModel(null)}
+                      loading
+                      onOpenPurchase={() => openPackageSheet()}
+                    />
                   ) : null}
                 </View>
-              </View>
+              ) : null}
 
-              <View className="s-profile__stats" aria-label="个人数据">
-                <View className="s-profile__stat">
-                  <Text className="s-profile__stat-value">{profileUserData.stats.events}</Text>
-                  <Text className="s-profile__stat-label">参加活动</Text>
+              {debugEntitlementsEnabled ? (
+                <View className="s-profile__debug-block">
+                  <View
+                    className="s-profile__debug-entitlements"
+                    hoverClass="s-profile__debug-entitlements--pressed"
+                    onClick={handleDebugEntitlements}
+                  >
+                    <Text className="s-profile__debug-entitlements-label">
+                      调试权益 ·{" "}
+                      {PROFILE_DEBUG_ENTITLEMENT_LABELS[debugEntitlementPreset] ??
+                        PROFILE_DEBUG_ENTITLEMENT_LABELS.api}
+                    </Text>
+                  </View>
+                  <View className="s-profile__debug-modals">
+                    <View
+                      className="s-profile__debug-modal-btn"
+                      hoverClass="s-profile__debug-modal-btn--pressed"
+                      onClick={() => setDebugContactUnlockExhaustedOpen(true)}
+                    >
+                      <Text className="s-profile__debug-modal-btn-label">
+                        预览 · 联系方式解锁用尽
+                      </Text>
+                    </View>
+                    <View
+                      className="s-profile__debug-modal-btn"
+                      hoverClass="s-profile__debug-modal-btn--pressed"
+                      onClick={() => setDebugAiMatchExhaustedOpen(true)}
+                    >
+                      <Text className="s-profile__debug-modal-btn-label">
+                        预览 · AI 匹配次数用尽
+                      </Text>
+                    </View>
+                  </View>
                 </View>
-                <View className="s-profile__stat s-profile__stat--accent">
-                  <Text className="s-profile__stat-value">
-                    {profileUserData.stats.matchSuccess}
-                  </Text>
-                  <Text className="s-profile__stat-label">组队成功</Text>
-                </View>
-                <View className="s-profile__stat">
-                  <Text className="s-profile__stat-value">{profileUserData.stats.likes}</Text>
-                  <Text className="s-profile__stat-label">获赞数</Text>
-                </View>
-                <View className="s-profile__stat">
-                  <Text className="s-profile__stat-value">{profileUserData.stats.posts}</Text>
-                  <Text className="s-profile__stat-label">我的帖子</Text>
-                </View>
-              </View>
-            </View>
-          )}
+              ) : null}
 
-          {showBenefitsBlock ? (
-            <View className="s-profile-benefits">
-              <ProfileBenefitsPurchaseBanner
-                onOpenPurchase={() => openPackageSheet()}
+              <ProfileActionCard
+                accent="activities"
+                icon={<Zap size={20} />}
+                title="我的活动"
+                badge={ongoingCount}
+                subtitle={`${ongoingCount} 个进行中的活动`}
+                onClick={() => go(ROUTES.PROFILE_ACTIVITIES)}
+              />
+              <ProfileActionCard
+                accent="posts"
+                icon={<FileText size={20} />}
+                title="我的帖子"
+                badge={postsCount}
+                subtitle={`${postsCount} 篇发布的帖子`}
+                onClick={() => go(ROUTES.PROFILE_POSTS)}
               />
 
-              {showPaidBenefitsSection ? (
-                <ProfilePaidBenefitsSection
-                  cards={recentPaidBenefitCards}
-                  totalCount={totalPaidCardCount}
-                  onViewAll={() => go(ROUTES.PROFILE_BENEFITS)}
-                  loading={benefitsLoading}
-                  onUpgrade={handleBenefitUpgrade}
-                  onUsageHistory={handleUsageHistory}
-                />
-              ) : null}
-
-              {showFreeBenefitsSection && freeBenefitCard ? (
-                <ProfileFreeBenefitsSection
-                  card={freeBenefitCard}
-                  onOpenPurchase={() => openPackageSheet()}
-                />
-              ) : showBenefitsLoading ? (
-                <ProfileFreeBenefitsSection
-                  card={buildFreeBenefitCardModel(null)}
-                  loading
-                  onOpenPurchase={() => openPackageSheet()}
-                />
-              ) : null}
-            </View>
-          ) : null}
-
-          {debugEntitlementsEnabled ? (
-            <View className="s-profile__debug-block">
-              <View
-                className="s-profile__debug-entitlements"
-                hoverClass="s-profile__debug-entitlements--pressed"
-                onClick={handleDebugEntitlements}>
-                <Text className="s-profile__debug-entitlements-label">
-                  调试权益 ·{" "}
-                  {PROFILE_DEBUG_ENTITLEMENT_LABELS[debugEntitlementPreset] ??
-                    PROFILE_DEBUG_ENTITLEMENT_LABELS.api}
-                </Text>
-              </View>
-              <View className="s-profile__debug-modals">
-                  <View
-                    className="s-profile__debug-modal-btn"
-                    hoverClass="s-profile__debug-modal-btn--pressed"
-                    onClick={() => setDebugContactUnlockExhaustedOpen(true)}>
-                    <Text className="s-profile__debug-modal-btn-label">
-                      预览 · 联系方式解锁用尽
-                    </Text>
+              <View className="s-profile__settings-card">
+                <View
+                  className="s-profile__settings-row"
+                  hoverClass="s-profile__settings-row--pressed"
+                  onClick={() => openSettings("notifications")}
+                >
+                  <View className="s-profile__settings-icon s-profile__settings-icon--bell">
+                    <Bell size={18} />
                   </View>
-                  <View
-                    className="s-profile__debug-modal-btn"
-                    hoverClass="s-profile__debug-modal-btn--pressed"
-                    onClick={() => setDebugAiMatchExhaustedOpen(true)}>
-                    <Text className="s-profile__debug-modal-btn-label">
-                      预览 · AI 匹配次数用尽
-                    </Text>
-                  </View>
+                  <Text className="s-profile__settings-label">通知设置</Text>
+                  <Text className="s-profile__settings-value">
+                    {notificationsEnabled ? "已开启" : "已关闭"}
+                  </Text>
+                  <ChevronRight size={18} className="s-profile__settings-chevron" />
                 </View>
-            </View>
-          ) : null}
 
-          <ProfileActionCard
-            accent="activities"
-            icon={<Zap size={20} />}
-            title="我的活动"
-            badge={ongoingCount}
-            subtitle={`${ongoingCount} 个进行中的活动`}
-            onClick={() => go(ROUTES.PROFILE_ACTIVITIES)}
-          />
-          <ProfileActionCard
-            accent="posts"
-            icon={<FileText size={20} />}
-            title="我的帖子"
-            badge={postsCount}
-            subtitle={`${postsCount} 篇发布的帖子`}
-            onClick={() => go(ROUTES.PROFILE_POSTS)}
-          />
+                <View
+                  className="s-profile__settings-row"
+                  hoverClass="s-profile__settings-row--pressed"
+                  onClick={() => openSettings("privacy")}
+                >
+                  <View className="s-profile__settings-icon s-profile__settings-icon--shield">
+                    <Shield size={18} />
+                  </View>
+                  <Text className="s-profile__settings-label">隐私与安全</Text>
+                  <ChevronRight size={18} className="s-profile__settings-chevron" />
+                </View>
 
-          <View className="s-profile__settings-card">
-            <View
-              className="s-profile__settings-row"
-              hoverClass="s-profile__settings-row--pressed"
-              onClick={() => openSettings("notifications")}>
-              <View className="s-profile__settings-icon s-profile__settings-icon--bell">
-                <Bell size={18} />
+                <View
+                  className="s-profile__settings-row"
+                  hoverClass="s-profile__settings-row--pressed"
+                  onClick={() => openSettings("help")}
+                >
+                  <View className="s-profile__settings-icon s-profile__settings-icon--help">
+                    <Info size={18} />
+                  </View>
+                  <Text className="s-profile__settings-label">帮助与反馈</Text>
+                  <ChevronRight size={18} className="s-profile__settings-chevron" />
+                </View>
+
+                <View
+                  className="s-profile__settings-row s-profile__settings-row--logout"
+                  hoverClass="s-profile__settings-row--pressed"
+                  onClick={handleLogout}
+                >
+                  <View className="s-profile__settings-icon s-profile__settings-icon--logout">
+                    <LogOut size={18} />
+                  </View>
+                  <Text className="s-profile__settings-label s-profile__settings-label--logout">
+                    退出登录
+                  </Text>
+                </View>
               </View>
-              <Text className="s-profile__settings-label">通知设置</Text>
-              <Text className="s-profile__settings-value">
-                {notificationsEnabled ? "已开启" : "已关闭"}
-              </Text>
-              <ChevronRight size={18} className="s-profile__settings-chevron" />
-            </View>
 
-            <View
-              className="s-profile__settings-row"
-              hoverClass="s-profile__settings-row--pressed"
-              onClick={() => openSettings("privacy")}>
-              <View className="s-profile__settings-icon s-profile__settings-icon--shield">
-                <Shield size={18} />
-              </View>
-              <Text className="s-profile__settings-label">隐私与安全</Text>
-              <ChevronRight size={18} className="s-profile__settings-chevron" />
+              <View className="s-profile__scroll-spacer s-tabbar-offset" />
             </View>
-
-            <View
-              className="s-profile__settings-row"
-              hoverClass="s-profile__settings-row--pressed"
-              onClick={() => openSettings("help")}>
-              <View className="s-profile__settings-icon s-profile__settings-icon--help">
-                <Info size={18} />
-              </View>
-              <Text className="s-profile__settings-label">帮助与反馈</Text>
-              <ChevronRight size={18} className="s-profile__settings-chevron" />
-            </View>
-
-            <View
-              className="s-profile__settings-row s-profile__settings-row--logout"
-              hoverClass="s-profile__settings-row--pressed"
-              onClick={handleLogout}>
-              <View className="s-profile__settings-icon s-profile__settings-icon--logout">
-                <LogOut size={18} />
-              </View>
-              <Text className="s-profile__settings-label s-profile__settings-label--logout">
-                退出登录
-              </Text>
-            </View>
-          </View>
-
-            <View className="s-profile__scroll-spacer s-tabbar-offset" />
-          </View>
           </ProfileTabErrorBoundary>
         </ScrollView>
       </View>

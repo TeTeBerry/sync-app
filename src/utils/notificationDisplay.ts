@@ -1,10 +1,6 @@
 import type { AppNotification, NotificationMeta } from "../types/backend";
 
-export type NotificationCategory =
-  | "comment"
-  | "like"
-  | "system"
-  | "general";
+export type NotificationCategory = "comment" | "like" | "system" | "general";
 
 export function getNotificationCategory(meta?: NotificationMeta): NotificationCategory {
   const type = meta?.type;
@@ -21,9 +17,11 @@ export function getNotificationCategory(meta?: NotificationMeta): NotificationCa
   return "general";
 }
 
-export function resolveNotificationText(
-  item: AppNotification,
-): { title: string; body: string; category: NotificationCategory } {
+export function resolveNotificationText(item: AppNotification): {
+  title: string;
+  body: string;
+  category: NotificationCategory;
+} {
   const category = getNotificationCategory(item.meta);
   return {
     title: item.title,

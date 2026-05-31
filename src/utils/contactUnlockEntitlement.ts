@@ -8,9 +8,7 @@ import { invalidateProfileEntitlements } from "./queryInvalidation";
  *
  * Used when applying to join a team post and when revealing contact on map / user sheets.
  */
-export async function consumeContactUnlockWithQuota(
-  activityLegacyId: number,
-): Promise<boolean> {
+export async function consumeContactUnlockWithQuota(activityLegacyId: number): Promise<boolean> {
   if (!isApiEnabled()) {
     return true;
   }

@@ -1,14 +1,6 @@
 import "./event-detail.scss";
 import Taro, { useRouter } from "@tarojs/taro";
-import {
-  lazy,
-  Suspense,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Map } from "lucide-react-taro";
 import {
   goAiAssistant,
@@ -55,14 +47,9 @@ import {
 import { formatPostPublishTime } from "../../../utils/formatPostPublishTime";
 import { sanitizeImageList, sanitizeRemoteImageUrl } from "../../../utils/imageUrl";
 import { EventPostsVirtualList } from "./components/EventPostsVirtualList";
-import {
-  EventDetailContentTabs,
-  type EventDetailTabId,
-} from "./components/EventDetailContentTabs";
+import { EventDetailContentTabs, type EventDetailTabId } from "./components/EventDetailContentTabs";
 import { MOCK_LIVE_INFO_FEED } from "./liveInfoMock";
-import PageNavigation, {
-  stackPageNavChromePx,
-} from "../../../components/PageNavigation";
+import PageNavigation, { stackPageNavChromePx } from "../../../components/PageNavigation";
 import { useNavBarInsets } from "../../../hooks/useNavBarInsets";
 import { useTabPageMainHeight } from "../../../hooks/useTabPageMainHeight";
 import { scrollElementToCenter } from "../../../utils/scrollToCenter";
@@ -139,8 +126,7 @@ const EventDetailPage = () => {
   const [contentTab, setContentTab] = useState<EventDetailTabId>("posts");
   const [liveFeedCount, setLiveFeedCount] = useState(MOCK_LIVE_INFO_FEED.length);
   const [liveUpdateSheetOpen, setLiveUpdateSheetOpen] = useState(false);
-  const [contactUnlockExhaustedOpen, setContactUnlockExhaustedOpen] =
-    useState(false);
+  const [contactUnlockExhaustedOpen, setContactUnlockExhaustedOpen] = useState(false);
   const [packageSheetOpen, setPackageSheetOpen] = useState(false);
   const [packageSheetInitialTierId, setPackageSheetInitialTierId] = useState<
     PackageTierId | undefined
@@ -166,8 +152,7 @@ const EventDetailPage = () => {
     setPackageSheetInitialTierId(undefined);
   }, []);
 
-  const displayUserName =
-    currentUserQuery.data?.name ?? profileUser.name ?? "用户";
+  const displayUserName = currentUserQuery.data?.name ?? profileUser.name ?? "用户";
 
   const handleLiveFeedCountChange = useCallback((count: number) => {
     setLiveFeedCount(count);
@@ -259,9 +244,7 @@ const EventDetailPage = () => {
         contentTypes: item.contentTypes,
         images: sanitizeImageList(item.images),
       };
-      const publishTimeLabel = post.createdAt
-        ? formatPostPublishTime(post.createdAt)
-        : post.time;
+      const publishTimeLabel = post.createdAt ? formatPostPublishTime(post.createdAt) : post.time;
       return { post, publishTimeLabel };
     });
   }, [postsQuery.items]);
@@ -296,12 +279,7 @@ const EventDetailPage = () => {
         })
         .catch(() => void Taro.showToast({ title: "申请失败", icon: "none" }));
     },
-    [
-      appliedPostIds,
-      contactUnlockQuota.exhausted,
-      eventId,
-      openContactUnlockExhaustedModal,
-    ],
+    [appliedPostIds, contactUnlockQuota.exhausted, eventId, openContactUnlockExhaustedModal],
   );
 
   const handleLikePost = useCallback(
@@ -311,31 +289,23 @@ const EventDetailPage = () => {
         .then((updated) => {
           postsQuery.patchItem(updated);
         })
-        .catch(() =>
-          void Taro.showToast({ title: "请求失败，请稍后重试", icon: "none" }),
-        );
+        .catch(() => void Taro.showToast({ title: "请求失败，请稍后重试", icon: "none" }));
     },
     [apiEnabled, postsQuery],
   );
 
   const scrollToElement = useCallback((elementId: string) => {
     const targetSelector = `#${elementId}`;
-    void scrollElementToCenter(
-      `#${EVENT_DETAIL_SCROLL_ID}`,
-      targetSelector,
-      setScrollTop,
-    ).then((centered) => {
-      if (!centered) {
-        setScrollTop(undefined);
-        setTimeout(() => {
-          void scrollElementToCenter(
-            `#${EVENT_DETAIL_SCROLL_ID}`,
-            targetSelector,
-            setScrollTop,
-          );
-        }, 150);
-      }
-    });
+    void scrollElementToCenter(`#${EVENT_DETAIL_SCROLL_ID}`, targetSelector, setScrollTop).then(
+      (centered) => {
+        if (!centered) {
+          setScrollTop(undefined);
+          setTimeout(() => {
+            void scrollElementToCenter(`#${EVENT_DETAIL_SCROLL_ID}`, targetSelector, setScrollTop);
+          }, 150);
+        }
+      },
+    );
   }, []);
 
   const togglePostComments = useCallback((postId: string) => {
@@ -452,8 +422,7 @@ const EventDetailPage = () => {
       <View className="s-event-detail s-page-with-tabbar">
         <View className="s-event-detail__fallback">
           <Text>活动信息加载失败</Text>
-          <Button className="s-event-detail__retry"
-            onClick={() => void activityQuery.refetch()}>
+          <Button className="s-event-detail__retry" onClick={() => void activityQuery.refetch()}>
             <Text className="s-btn-label">重试</Text>
           </Button>
         </View>
@@ -478,13 +447,15 @@ const EventDetailPage = () => {
     !postsLoading &&
     !postsQuery.hasMore &&
     !postsQuery.isLoadingMore;
-  const showLiveEnd =
-    contentTab === "live" && !showHeaderSkeleton && liveFeedCount > 0;
+  const showLiveEnd = contentTab === "live" && !showHeaderSkeleton && liveFeedCount > 0;
 
   return (
     <View
       data-cmp="EventDetail"
-      className={["s-event-detail", "s-page-with-tabbar", activityStatusCardClass(activityStatus)].filter(Boolean).join(" ")}>
+      className={["s-event-detail", "s-page-with-tabbar", activityStatusCardClass(activityStatus)]
+        .filter(Boolean)
+        .join(" ")}
+    >
       <View className="s-page-with-tabbar__main s-event-detail__shell">
         <PageNavigation
           title={title ?? ""}
@@ -501,7 +472,8 @@ const EventDetailPage = () => {
                 } else {
                   goEventMap(0, { title: title ?? undefined });
                 }
-              }}>
+              }}
+            >
               <Map size={26} />
             </Button>
           }
@@ -517,81 +489,83 @@ const EventDetailPage = () => {
           lowerThreshold={80}
           onScrollToLower={handleScrollToLower}
           className="s-event-detail__main s-scrollbar-none"
-          style={scrollHeight != null ? { height: `${scrollHeight}px` } : undefined}>
-        <View className="s-event-detail__scroll-inner">
-        {showHeaderSkeleton ? (
-          <ThemedPageLoader variant="skeleton-event" minHeight={360} />
-        ) : null}
-        {!showHeaderSkeleton && composerReady ? (
-        <EventDetailAiMatchCard
-          prompt={prompt}
-          onPromptChange={setPrompt}
-          onSubmit={() => openAi(prompt)}
-          onTagClick={handleShortcutTag}
-        />
-        ) : null}
+          style={scrollHeight != null ? { height: `${scrollHeight}px` } : undefined}
+        >
+          <View className="s-event-detail__scroll-inner">
+            {showHeaderSkeleton ? (
+              <ThemedPageLoader variant="skeleton-event" minHeight={360} />
+            ) : null}
+            {!showHeaderSkeleton && composerReady ? (
+              <EventDetailAiMatchCard
+                prompt={prompt}
+                onPromptChange={setPrompt}
+                onSubmit={() => openAi(prompt)}
+                onTagClick={handleShortcutTag}
+              />
+            ) : null}
 
-        {!showHeaderSkeleton ? (
-          <View className="s-event-detail__feed-section">
-            <EventDetailExclusiveItineraryButton onPress={handleOpenExclusiveItinerary} />
-            <EventDetailContentTabs
-              active={contentTab}
-              postsCount={postItems.length}
-              liveCount={liveFeedCount}
-              onChange={setContentTab}
-            />
+            {!showHeaderSkeleton ? (
+              <View className="s-event-detail__feed-section">
+                <EventDetailExclusiveItineraryButton onPress={handleOpenExclusiveItinerary} />
+                <EventDetailContentTabs
+                  active={contentTab}
+                  postsCount={postItems.length}
+                  liveCount={liveFeedCount}
+                  onChange={setContentTab}
+                />
+              </View>
+            ) : null}
+
+            {!showHeaderSkeleton && contentTab === "posts" ? (
+              <View className="s-event-detail__posts">
+                {postsLoading ? (
+                  <ThemedPageLoader variant="skeleton-event-posts" minHeight={200} />
+                ) : postItems.length === 0 ? (
+                  <Text className="s-event-detail__empty">暂无组队帖，来发布第一条吧</Text>
+                ) : (
+                  <EventPostsVirtualList
+                    activityLegacyId={eventId}
+                    onScrollToPostId={scrollToElement}
+                    items={postItems}
+                    highlightPostId={highlightPostId}
+                    expandedCommentPostIds={expandedCommentPostIds}
+                    appliedPostIds={appliedPostIds}
+                    apiEnabled={apiEnabled}
+                    currentUserAvatar={currentUserQuery.data?.avatar}
+                    hasMore={postsQuery.hasMore}
+                    isLoadingMore={postsQuery.isLoadingMore}
+                    onLike={handleLikePost}
+                    onToggleComments={togglePostComments}
+                    onDelete={handleDeletePost}
+                    onApply={handleApply}
+                    onComplete={handleCompletePost}
+                    onCommentSubmitted={handleCommentSubmitted}
+                  />
+                )}
+              </View>
+            ) : null}
+
+            {!showHeaderSkeleton && contentTab === "live" ? (
+              <Suspense
+                fallback={<ThemedPageLoader variant="skeleton-live-feed" minHeight={200} />}
+              >
+                <EventLiveInfoTab
+                  eventId={eventId}
+                  userName={displayUserName}
+                  onFeedCountChange={handleLiveFeedCountChange}
+                  onOpenUpdate={handleOpenLiveUpdateSheet}
+                  onLiveInfoActions={handleLiveInfoActions}
+                />
+              </Suspense>
+            ) : null}
+
+            {!showHeaderSkeleton && showPostsEnd ? (
+              <Text className="s-event-detail__end">已经到底啦 ~</Text>
+            ) : null}
+            {!showHeaderSkeleton && showLiveEnd ? (
+              <Text className="s-event-detail__end">已经到底啦 ~</Text>
+            ) : null}
           </View>
-        ) : null}
-
-        {!showHeaderSkeleton && contentTab === "posts" ? (
-        <View className="s-event-detail__posts">
-          {postsLoading ? (
-            <ThemedPageLoader variant="skeleton-event-posts" minHeight={200} />
-          ) : postItems.length === 0 ? (
-            <Text className="s-event-detail__empty">暂无组队帖，来发布第一条吧</Text>
-          ) : (
-            <EventPostsVirtualList
-              activityLegacyId={eventId}
-              onScrollToPostId={scrollToElement}
-              items={postItems}
-              highlightPostId={highlightPostId}
-              expandedCommentPostIds={expandedCommentPostIds}
-              appliedPostIds={appliedPostIds}
-              apiEnabled={apiEnabled}
-              currentUserAvatar={currentUserQuery.data?.avatar}
-              hasMore={postsQuery.hasMore}
-              isLoadingMore={postsQuery.isLoadingMore}
-              onLike={handleLikePost}
-              onToggleComments={togglePostComments}
-              onDelete={handleDeletePost}
-              onApply={handleApply}
-              onComplete={handleCompletePost}
-              onCommentSubmitted={handleCommentSubmitted}
-            />
-          )}
-        </View>
-        ) : null}
-
-        {!showHeaderSkeleton && contentTab === "live" ? (
-          <Suspense
-            fallback={<ThemedPageLoader variant="skeleton-live-feed" minHeight={200} />}>
-            <EventLiveInfoTab
-              eventId={eventId}
-              userName={displayUserName}
-              onFeedCountChange={handleLiveFeedCountChange}
-              onOpenUpdate={handleOpenLiveUpdateSheet}
-              onLiveInfoActions={handleLiveInfoActions}
-            />
-          </Suspense>
-        ) : null}
-
-        {!showHeaderSkeleton && showPostsEnd ? (
-          <Text className="s-event-detail__end">已经到底啦 ~</Text>
-        ) : null}
-        {!showHeaderSkeleton && showLiveEnd ? (
-          <Text className="s-event-detail__end">已经到底啦 ~</Text>
-        ) : null}
-        </View>
         </ScrollView>
       </View>
       {confirmDialog}

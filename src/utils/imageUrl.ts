@@ -1,8 +1,5 @@
 /** Unsplash IDs that 404 or fail in WeChat mini-program. */
-const BROKEN_UNSPLASH_PHOTO_IDS = new Set([
-  "1459749411177-0479bf78d6f2",
-  "1459749411177",
-]);
+const BROKEN_UNSPLASH_PHOTO_IDS = new Set(["1459749411177-0479bf78d6f2", "1459749411177"]);
 
 const UNSPLASH_PHOTO_RE = /photo-([a-zA-Z0-9-]+)/;
 
@@ -20,15 +17,12 @@ function extractUnsplashPhotoId(url: URL): string | null {
 function unsplashDimensions(url: URL): { width: number; height: number } {
   const w = Number(url.searchParams.get("w")) || 800;
   const isSquareCrop =
-    url.searchParams.get("fit") === "crop" &&
-    url.searchParams.get("crop") === "face";
+    url.searchParams.get("fit") === "crop" && url.searchParams.get("crop") === "face";
   return { width: w, height: isSquareCrop ? w : Math.round(w * 0.75) };
 }
 
 /** Map legacy Unsplash URLs to stable picsum.photos (WeChat-safe). */
-export function sanitizeRemoteImageUrl(
-  src: string | undefined,
-): string | undefined {
+export function sanitizeRemoteImageUrl(src: string | undefined): string | undefined {
   if (!src?.trim()) return undefined;
   const trimmed = src.trim();
   if (!/^https?:\/\//i.test(trimmed)) return trimmed;
@@ -52,9 +46,7 @@ export function sanitizeRemoteImageUrl(
   }
 }
 
-export function sanitizeImageList(
-  images: string[] | undefined,
-): string[] | undefined {
+export function sanitizeImageList(images: string[] | undefined): string[] | undefined {
   if (!images?.length) return images;
   const next = images
     .map((url) => sanitizeRemoteImageUrl(url) ?? url)
@@ -85,16 +77,9 @@ export function thumbnailImageUrl(
     }
 
     const host = url.hostname;
-    if (
-      host.includes("alicdn.com") ||
-      host.includes("tbcdn.cn") ||
-      host.includes("aliyuncs.com")
-    ) {
+    if (host.includes("alicdn.com") || host.includes("tbcdn.cn") || host.includes("aliyuncs.com")) {
       if (!url.searchParams.has("x-oss-process")) {
-        url.searchParams.set(
-          "x-oss-process",
-          `image/resize,m_fill,w_${width},h_${height}`,
-        );
+        url.searchParams.set("x-oss-process", `image/resize,m_fill,w_${width},h_${height}`);
       }
       return url.toString();
     }
@@ -110,9 +95,6 @@ export function thumbnailImageUrl(
 }
 
 /** Featured post hero (16:10 tile). WeChat reliably loads resized picsum, not raw 800px URLs. */
-export function featuredPostImageUrl(
-  src: string | undefined,
-  width = 480,
-): string | undefined {
+export function featuredPostImageUrl(src: string | undefined, width = 480): string | undefined {
   return thumbnailImageUrl(src, width, 10 / 16);
 }

@@ -1,13 +1,5 @@
 import "./PostActionSheet.scss";
-import {
-  Ban,
-  ChevronLeft,
-  Flag,
-  Megaphone,
-  ShieldAlert,
-  Trash2,
-  X,
-} from "lucide-react-taro";
+import { Ban, ChevronLeft, Flag, Megaphone, ShieldAlert, Trash2, X } from "lucide-react-taro";
 import React, { useMemo } from "react";
 import { useOverlayLock } from "../hooks/useOverlayLock";
 import type { ReportCategory } from "../types/backend";
@@ -40,32 +32,26 @@ export type PostActionSheetProps = {
   onReportCategory?: (category: ReportCategory) => void;
 };
 
-const REPORT_META: Record<
-  ReportCategory,
-  { label: string; hint: string; icon: React.ReactNode }
-> = {
-  ads: {
-    label: "广告骚扰",
-    hint: "营销引流、重复刷屏",
-    icon: <Megaphone size={18} color="#4cc9f0" aria-hidden />,
-  },
-  scalper: {
-    label: "黄牛 / 欺诈",
-    hint: "假票、加价倒卖或诈骗",
-    icon: <ShieldAlert size={18} color="#fbbf24" aria-hidden />,
-  },
-  vulgar: {
-    label: "低俗内容",
-    hint: "色情、辱骂或其它不适内容",
-    icon: <Flag size={18} color="#ff0066" aria-hidden />,
-  },
-};
+const REPORT_META: Record<ReportCategory, { label: string; hint: string; icon: React.ReactNode }> =
+  {
+    ads: {
+      label: "广告骚扰",
+      hint: "营销引流、重复刷屏",
+      icon: <Megaphone size={18} color="#4cc9f0" aria-hidden />,
+    },
+    scalper: {
+      label: "黄牛 / 欺诈",
+      hint: "假票、加价倒卖或诈骗",
+      icon: <ShieldAlert size={18} color="#fbbf24" aria-hidden />,
+    },
+    vulgar: {
+      label: "低俗内容",
+      hint: "色情、辱骂或其它不适内容",
+      icon: <Flag size={18} color="#ff0066" aria-hidden />,
+    },
+  };
 
-function PostActionSheetRowButton({
-  row,
-}: {
-  row: PostActionSheetRow;
-}) {
+function PostActionSheetRowButton({ row }: { row: PostActionSheetRow }) {
   return (
     <Button
       className={cn(
@@ -74,20 +60,20 @@ function PostActionSheetRowButton({
         row.tone === "accent" && "s-post-action-sheet__row--accent",
       )}
       hoverClass="s-post-action-sheet__row--pressed"
-      onClick={row.onPress}>
+      onClick={row.onPress}
+    >
       <View
         className={cn(
           "s-post-action-sheet__row-icon",
           row.tone === "destructive" && "s-post-action-sheet__row-icon--destructive",
           row.tone === "accent" && "s-post-action-sheet__row-icon--accent",
-        )}>
+        )}
+      >
         {row.icon}
       </View>
       <View className="s-post-action-sheet__row-text">
         <Text className="s-post-action-sheet__row-label">{row.label}</Text>
-        {row.hint ? (
-          <Text className="s-post-action-sheet__row-hint">{row.hint}</Text>
-        ) : null}
+        {row.hint ? <Text className="s-post-action-sheet__row-hint">{row.hint}</Text> : null}
       </View>
     </Button>
   );
@@ -180,12 +166,10 @@ export const PostActionSheet: React.FC<PostActionSheetProps> = ({
 
   return (
     <View
-      className={cn(
-        "s-overlay s-overlay--sheet s-post-action-sheet",
-        !open && "s-overlay--off",
-      )}
+      className={cn("s-overlay s-overlay--sheet s-post-action-sheet", !open && "s-overlay--off")}
       catchMove
-      role="presentation">
+      role="presentation"
+    >
       <View className="s-overlay__backdrop" onClick={onCancel} />
       <View className="s-post-action-sheet__stack">
         <View className="s-overlay__panel s-post-action-sheet__card" role="menu">
@@ -196,7 +180,8 @@ export const PostActionSheet: React.FC<PostActionSheetProps> = ({
                 className="s-post-action-sheet__back"
                 hoverClass="s-post-action-sheet__icon-btn--pressed"
                 aria-label="返回"
-                onClick={onBack}>
+                onClick={onBack}
+              >
                 <ChevronLeft size={20} color="#fff" aria-hidden />
               </Button>
             ) : (
@@ -210,7 +195,8 @@ export const PostActionSheet: React.FC<PostActionSheetProps> = ({
               className="s-post-action-sheet__close"
               hoverClass="s-post-action-sheet__icon-btn--pressed"
               aria-label="关闭"
-              onClick={onCancel}>
+              onClick={onCancel}
+            >
               <X size={18} color="#fff" aria-hidden />
             </Button>
           </View>
@@ -225,7 +211,8 @@ export const PostActionSheet: React.FC<PostActionSheetProps> = ({
         <Button
           className="s-post-action-sheet__cancel"
           hoverClass="s-post-action-sheet__cancel--pressed"
-          onClick={onCancel}>
+          onClick={onCancel}
+        >
           <Text className="s-post-action-sheet__cancel-label">{cancelLabel}</Text>
         </Button>
       </View>

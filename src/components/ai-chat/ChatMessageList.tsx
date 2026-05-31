@@ -80,19 +80,16 @@ export function ChatMessageList({
       showScrollbar={false}
       scrollIntoView={scrollIntoView}
       scrollWithAnimation
-      className="s-ai-assistant-chat__scroll s-scrollbar-none">
+      className="s-ai-assistant-chat__scroll s-scrollbar-none"
+    >
       <View className="s-ai-assistant-chat__scroll-inner">
         {messages.map((msg, index) => {
           const isUser = msg.from === "user";
           const timestamp = formatMessageTime(msg.id);
 
           const publishConfirm =
-            !isUser && !msg.streaming
-              ? parsePublishConfirmMessage(msg.text)
-              : null;
-          const hasPostCards = Boolean(
-            msg.createdPost || msg.recommendedPosts?.length,
-          );
+            !isUser && !msg.streaming ? parsePublishConfirmMessage(msg.text) : null;
+          const hasPostCards = Boolean(msg.createdPost || msg.recommendedPosts?.length);
           const hasActivityCard = Boolean(msg.recommendedActivity);
           const hasSuggestedReplies = Boolean(msg.suggestedReplies?.length);
           const showEmbedBelow =
@@ -109,7 +106,8 @@ export function ChatMessageList({
                 className={cn(
                   "s-ai-assistant-chat__row",
                   isUser && "s-ai-assistant-chat__row--from-user",
-                )}>
+                )}
+              >
                 {!isUser ? (
                   <View className="s-ai-assistant-chat__avatar s-ai-assistant-chat__avatar--ai">
                     <Sparkles size={14} />
@@ -121,7 +119,8 @@ export function ChatMessageList({
                     isUser && "s-ai-assistant-chat__content--from-user",
                     (hasPostCards || hasActivityCard || showPublishConfirm) &&
                       "s-ai-assistant-chat__content--has-cards",
-                  )}>
+                  )}
+                >
                   <View
                     className={cn(
                       "s-ai-assistant-chat__bubble",
@@ -130,19 +129,17 @@ export function ChatMessageList({
                             "s-ai-assistant-chat__bubble--from-user",
                             userGender === "female" &&
                               "s-ai-assistant-chat__bubble--from-user--female",
-                            userGender === "male" &&
-                              "s-ai-assistant-chat__bubble--from-user--male",
+                            userGender === "male" && "s-ai-assistant-chat__bubble--from-user--male",
                           )
                         : "s-ai-assistant-chat__bubble--from-ai",
                       msg.streaming && "s-ai-assistant-chat__bubble--streaming",
                       msg.streaming && !msg.text && "s-ai-assistant-chat__bubble--waiting",
                       showEmbedBelow && "s-ai-assistant-chat__bubble--with-embed-below",
                       showPublishConfirm && "s-ai-assistant-chat__bubble--publish-confirm",
-                    )}>
+                    )}
+                  >
                     {msg.streaming && !msg.text ? (
-                      <View
-                        className="s-ai-assistant-chat__typing"
-                        aria-label="AI 正在思考">
+                      <View className="s-ai-assistant-chat__typing" aria-label="AI 正在思考">
                         <View className="s-ai-assistant-chat__typing-dot" />
                         <View className="s-ai-assistant-chat__typing-dot" />
                         <View className="s-ai-assistant-chat__typing-dot" />
@@ -150,9 +147,11 @@ export function ChatMessageList({
                     ) : (
                       <>
                         {msg.imagePreview ? (
-                          <Button className="s-ai-assistant-chat__bubble-image-btn"
+                          <Button
+                            className="s-ai-assistant-chat__bubble-image-btn"
                             aria-label="查看大图"
-                            onClick={() => openSingleImagePreview(msg.imagePreview!)}>
+                            onClick={() => openSingleImagePreview(msg.imagePreview!)}
+                          >
                             <Image
                               className="s-ai-assistant-chat__bubble-image"
                               src={msg.imagePreview}
@@ -167,9 +166,7 @@ export function ChatMessageList({
                             userName={userName}
                           />
                         ) : msg.text ? (
-                          <Text className="s-ai-assistant-chat__bubble-text">
-                            {msg.text}
-                          </Text>
+                          <Text className="s-ai-assistant-chat__bubble-text">{msg.text}</Text>
                         ) : null}
                         {isUser && hasSuggestedReplies ? (
                           <SuggestedReplyChips
@@ -187,10 +184,7 @@ export function ChatMessageList({
                         <AiAssistantActivityCard activity={msg.recommendedActivity} />
                       ) : null}
                       {msg.createdPost ? (
-                        <RecommendPostCards
-                          posts={[msg.createdPost]}
-                          variant="created"
-                        />
+                        <RecommendPostCards posts={[msg.createdPost]} variant="created" />
                       ) : null}
                       {msg.recommendedPosts?.length ? (
                         <RecommendPostCards posts={msg.recommendedPosts} />
@@ -206,11 +200,7 @@ export function ChatMessageList({
                   ) : null}
                 </View>
                 {isUser ? (
-                  <ChatUserAvatar
-                    avatar={userAvatar}
-                    name={userName}
-                    userGender={userGender}
-                  />
+                  <ChatUserAvatar avatar={userAvatar} name={userName} userGender={userGender} />
                 ) : null}
               </View>
             </React.Fragment>

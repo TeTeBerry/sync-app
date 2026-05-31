@@ -38,9 +38,7 @@ export function getStormLogoDrawSize(
   logoImage?: CanvasImageSource | null,
 ): { drawW: number; drawH: number } {
   const drawH = halfHeight * 2 * MAP_STORM_LOGO_CONTENT_TRIM;
-  const aspect = logoImage
-    ? readLogoAspect(logoImage)
-    : STORM_LOGO_FALLBACK_ASPECT;
+  const aspect = logoImage ? readLogoAspect(logoImage) : STORM_LOGO_FALLBACK_ASPECT;
   return { drawW: drawH * aspect, drawH };
 }
 
@@ -98,8 +96,7 @@ export function drawSlowRotatingStormLogo(
 
   const { drawW, drawH } = getStormLogoDrawSize(size, logoImage);
   const { originX, originY } = getStormLogoDrawOrigin(drawW, drawH);
-  const glowR =
-    getStormLogoEnvelopeRadius(drawW, drawH) + MAP_STORM_LOGO_GLOW_EXTRA_PX;
+  const glowR = getStormLogoEnvelopeRadius(drawW, drawH) + MAP_STORM_LOGO_GLOW_EXTRA_PX;
 
   ctx.save();
   try {
@@ -157,8 +154,7 @@ export function drawStaticStormLogo(
 
   const { drawW, drawH } = getStormLogoDrawSize(size, logoImage);
   const { originX, originY } = getStormLogoDrawOrigin(drawW, drawH);
-  const glowR =
-    getStormLogoEnvelopeRadius(drawW, drawH) + MAP_STORM_LOGO_GLOW_EXTRA_PX;
+  const glowR = getStormLogoEnvelopeRadius(drawW, drawH) + MAP_STORM_LOGO_GLOW_EXTRA_PX;
 
   ctx.save();
   try {
@@ -215,8 +211,7 @@ export function drawRotatingStormLogo(
 
   const { drawW, drawH } = getStormLogoDrawSize(size, logoImage);
   const { originX, originY } = getStormLogoDrawOrigin(drawW, drawH);
-  const glowR =
-    getStormLogoEnvelopeRadius(drawW, drawH) + MAP_STORM_LOGO_GLOW_EXTRA_PX;
+  const glowR = getStormLogoEnvelopeRadius(drawW, drawH) + MAP_STORM_LOGO_GLOW_EXTRA_PX;
 
   ctx.save();
   try {
@@ -275,10 +270,7 @@ export function drawOfficialStormLogoSafe(
 }
 
 /** 旋转外接圆底边锚点（相对可视中心 y，用于连接线） */
-export function stormLogoBottomOffset(
-  size: number,
-  logoImage?: CanvasImageSource | null,
-): number {
+export function stormLogoBottomOffset(size: number, logoImage?: CanvasImageSource | null): number {
   const { drawW, drawH } = getStormLogoDrawSize(size, logoImage);
   return getStormLogoEnvelopeRadius(drawW, drawH) * 0.92;
 }

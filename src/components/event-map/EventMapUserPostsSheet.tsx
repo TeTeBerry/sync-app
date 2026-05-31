@@ -4,10 +4,7 @@ import { Heart, MapPin, MessageCircle, X } from "lucide-react-taro";
 import { Button, Image, ScrollView, Text, View } from "@tarojs/components";
 import { useOverlayLock } from "../../hooks/useOverlayLock";
 import { useNavigationStore } from "../../stores";
-import {
-  ContentTypeBadge,
-  stripContentTypeHashtags,
-} from "../ContentTypeBadge";
+import { ContentTypeBadge, stripContentTypeHashtags } from "../ContentTypeBadge";
 import { PostImageGrid } from "../PostImageGrid";
 import type { EventMapMarker } from "./eventMapMarkers";
 import { markerAvatarUrl } from "./eventMapMarkers";
@@ -45,12 +42,8 @@ const EventMapUserPostCard = memo(function EventMapUserPostCard({
           <Text>{post.timeLabel}</Text>
         </View>
       </View>
-      {body ? (
-        <Text className="s-event-map-user-sheet__post-body">{body}</Text>
-      ) : null}
-      {post.images?.length ? (
-        <PostImageGrid images={post.images} maxDisplay={3} />
-      ) : null}
+      {body ? <Text className="s-event-map-user-sheet__post-body">{body}</Text> : null}
+      {post.images?.length ? <PostImageGrid images={post.images} maxDisplay={3} /> : null}
       <View className="s-event-map-user-sheet__post-foot">
         <View className="s-event-map-user-sheet__stat">
           <Heart size={14} color="rgba(255,255,255,0.5)" />
@@ -73,9 +66,7 @@ export function EventMapUserPostsSheet({
 }: EventMapUserPostsSheetProps) {
   useOverlayLock(open);
 
-  const activeActivityLegacyId = useNavigationStore(
-    (state) => state.activeActivityLegacyId,
-  );
+  const activeActivityLegacyId = useNavigationStore((state) => state.activeActivityLegacyId);
   const { sheet, isLoading, isError } = useEventMapUserSheet(
     marker,
     open,
@@ -87,13 +78,13 @@ export function EventMapUserPostsSheet({
     return null;
   }
 
-  const avatarSrc =
-    sheet.avatarUrl ?? markerAvatarUrl(marker.avatarSeed, 120);
+  const avatarSrc = sheet.avatarUrl ?? markerAvatarUrl(marker.avatarSeed, 120);
 
   return (
     <View
       className={`s-overlay s-overlay--sheet s-event-map-user-sheet${open ? "" : " s-overlay--off"}`}
-      role="presentation">
+      role="presentation"
+    >
       <View className="s-overlay__backdrop" onClick={onClose} />
       <View className="s-overlay__panel s-event-map-user-sheet__panel" aria-hidden={!open}>
         <View className="s-event-map-user-sheet__handle" aria-hidden />
@@ -102,12 +93,9 @@ export function EventMapUserPostsSheet({
           <View className="s-event-map-user-sheet__profile">
             <View
               className="s-event-map-user-sheet__avatar-wrap"
-              style={{ boxShadow: ringStyle(marker.ring) }}>
-              <Image
-                className="s-event-map-user-sheet__avatar"
-                src={avatarSrc}
-                mode="aspectFill"
-              />
+              style={{ boxShadow: ringStyle(marker.ring) }}
+            >
+              <Image className="s-event-map-user-sheet__avatar" src={avatarSrc} mode="aspectFill" />
             </View>
             <View className="s-event-map-user-sheet__profile-main">
               <Text className="s-event-map-user-sheet__name">
@@ -120,19 +108,14 @@ export function EventMapUserPostsSheet({
               </View>
             </View>
           </View>
-          <Button
-            className="s-event-map-user-sheet__close"
-            aria-label="关闭"
-            onClick={onClose}>
+          <Button className="s-event-map-user-sheet__close" aria-label="关闭" onClick={onClose}>
             <X size={18} color="#fff" />
           </Button>
         </View>
 
         <View className="s-event-map-user-sheet__posts-head">
           <Text className="s-event-map-user-sheet__posts-title">TA 的帖子</Text>
-          <Text className="s-event-map-user-sheet__posts-count">
-            {sheet.posts.length} 条
-          </Text>
+          <Text className="s-event-map-user-sheet__posts-count">{sheet.posts.length} 条</Text>
         </View>
 
         <ScrollView scrollY className="s-event-map-user-sheet__scroll" showScrollbar={false}>
@@ -145,9 +128,7 @@ export function EventMapUserPostsSheet({
               <Text>加载失败，请稍后重试</Text>
             </View>
           ) : sheet.posts.length ? (
-            sheet.posts.map((post) => (
-              <EventMapUserPostCard key={post.id} post={post} />
-            ))
+            sheet.posts.map((post) => <EventMapUserPostCard key={post.id} post={post} />)
           ) : (
             <View className="s-event-map-user-sheet__empty">
               <Text>暂无帖子</Text>

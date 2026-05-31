@@ -50,9 +50,7 @@ export type PostStatusBadgeInput = {
 };
 
 /** Maps post `status` to a single status pill (label + color + variant). */
-export function resolvePostStatusBadge(
-  post: PostStatusBadgeInput,
-): PostStatusBadgeResult {
+export function resolvePostStatusBadge(post: PostStatusBadgeInput): PostStatusBadgeResult {
   const status = post?.status;
   if (status === "已隐藏") {
     return {

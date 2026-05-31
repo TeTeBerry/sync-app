@@ -5,9 +5,7 @@ import { Bell, Minus, Plane, Plus } from "lucide-react-taro";
 import { Button, Canvas, Image, Text, View } from "@tarojs/components";
 import { EventMapUserPostsSheet } from "../../../components/event-map/EventMapUserPostsSheet";
 import { useEventMapController } from "../../../components/event-map/useEventMapController";
-import {
-  EVENT_MAP_TOP_BAR_CONTENT_PX,
-} from "../../../components/event-map/eventMapLayout";
+import { EVENT_MAP_TOP_BAR_CONTENT_PX } from "../../../components/event-map/eventMapLayout";
 import {
   EVENT_MAP_BOTTOM_ROW,
   EVENT_MAP_DEFAULT_TITLE,
@@ -27,9 +25,7 @@ const EventMapPage = () => {
   useEndRouteTransitionOnShow();
   const router = useRouter();
   const navInsets = useNavBarInsets();
-  const [postsSheetMarker, setPostsSheetMarker] = useState<EventMapMarker | null>(
-    null,
-  );
+  const [postsSheetMarker, setPostsSheetMarker] = useState<EventMapMarker | null>(null);
 
   const eventTitle = useMemo(() => {
     const fromRoute = decodeRouteQueryParam(router.params.title);
@@ -77,7 +73,8 @@ const EventMapPage = () => {
             className="s-page-nav__icon-action s-page-nav__icon-action--overlay"
             aria-label="通知"
             hoverClass="s-page-nav__icon-action--pressed"
-            onTap={() => showMapToast("通知即将上线")}>
+            onTap={() => showMapToast("通知即将上线")}
+          >
             <Bell size={18} />
           </Button>
         }
@@ -105,14 +102,16 @@ const EventMapPage = () => {
             className="s-event-map__zoom-btn"
             aria-label="放大"
             hoverClass="s-event-map__zoom-btn--pressed"
-            onTap={handleZoomIn}>
+            onTap={handleZoomIn}
+          >
             <Plus size={20} />
           </Button>
           <Button
             className="s-event-map__zoom-btn"
             aria-label="缩小"
             hoverClass="s-event-map__zoom-btn--pressed"
-            onTap={handleZoomOut}>
+            onTap={handleZoomOut}
+          >
             <Minus size={20} />
           </Button>
         </View>
@@ -125,13 +124,10 @@ const EventMapPage = () => {
               key={person.name}
               className="s-event-map__bottom-person"
               hoverClass="s-event-map__bottom-person--pressed"
-              onTap={() => openUserPosts(person)}>
+              onTap={() => openUserPosts(person)}
+            >
               <View className="s-event-map__bottom-avatar-wrap">
-                <View
-                  className={[
-                    "s-event-map__bottom-avatar",
-                    person.ringClass,
-                  ].join(" ")}>
+                <View className={["s-event-map__bottom-avatar", person.ringClass].join(" ")}>
                   <Image
                     className="s-event-map__bottom-avatar-img"
                     src={markerAvatarUrl(person.avatarSeed, 104)}
@@ -144,9 +140,7 @@ const EventMapPage = () => {
                   </View>
                 ) : null}
               </View>
-              <Text className="s-event-map__bottom-name">
-                {person.shortName ?? person.name}
-              </Text>
+              <Text className="s-event-map__bottom-name">{person.shortName ?? person.name}</Text>
             </View>
           ))}
         </View>

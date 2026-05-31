@@ -58,10 +58,7 @@ function releasePreviewLock(): void {
 }
 
 /** Open native full-screen image preview (WeChat `previewImage` on weapp). */
-export async function openImagePreview(
-  urls: string[],
-  currentIndex = 0,
-): Promise<void> {
+export async function openImagePreview(urls: string[], currentIndex = 0): Promise<void> {
   if (!urls.length || previewInFlight) return;
 
   previewInFlight = true;
@@ -82,9 +79,7 @@ export async function openImagePreview(
     const safeOriginalIndex = Math.min(Math.max(0, currentIndex), urls.length - 1);
     const mappedIndex = resolvedFromOriginal[safeOriginalIndex];
     const idx =
-      mappedIndex != null
-        ? mappedIndex
-        : Math.min(Math.max(0, currentIndex), resolved.length - 1);
+      mappedIndex != null ? mappedIndex : Math.min(Math.max(0, currentIndex), resolved.length - 1);
 
     await Taro.previewImage({
       urls: resolved,

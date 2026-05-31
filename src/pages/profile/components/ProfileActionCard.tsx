@@ -24,7 +24,8 @@ const ProfileActionCard: React.FC<ProfileActionCardProps> = ({
   <View
     className={`s-profile__action-card s-profile__action-card--${accent}`}
     hoverClass="s-profile__action-card--pressed"
-    onClick={onClick}>
+    onClick={onClick}
+  >
     <View className={`s-profile__action-icon s-profile__action-icon--${accent}`}>{icon}</View>
     <View className="s-profile__action-copy">
       <View className="s-profile__action-title-row">

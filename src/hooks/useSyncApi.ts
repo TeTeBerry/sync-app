@@ -185,8 +185,7 @@ export function useFeaturedEvents() {
   const items = useMemo((): FeaturedEvent[] => {
     const signupEvents = summary?.signupEvents ?? [];
     const inProgress = signupEvents.filter(
-      (item) =>
-        getActivityStatusFromActivity(item.date, item.title) === "in_progress",
+      (item) => getActivityStatusFromActivity(item.date, item.title) === "in_progress",
     );
     return pickHomeFeaturedEvents(inProgress);
   }, [summary]);
@@ -239,11 +238,7 @@ export function useNearestUpcomingForCountdown() {
 }
 
 export function useActivityDetailQuery(legacyId?: number) {
-  const enabled =
-    isApiEnabled() &&
-    legacyId != null &&
-    !Number.isNaN(legacyId) &&
-    legacyId > 0;
+  const enabled = isApiEnabled() && legacyId != null && !Number.isNaN(legacyId) && legacyId > 0;
 
   return useApiQuery({
     queryKey: ["activities", "detail", legacyId],
@@ -328,16 +323,10 @@ export function useAllPostsQuery() {
   };
 }
 
-export function useEventPostsQuery(
-  activityLegacyId?: number,
-  options?: QueryEnableOptions,
-) {
+export function useEventPostsQuery(activityLegacyId?: number, options?: QueryEnableOptions) {
   const tabEnabled = options?.enabled ?? true;
   const enabled =
-    isApiEnabled() &&
-    activityLegacyId != null &&
-    !Number.isNaN(activityLegacyId) &&
-    tabEnabled;
+    isApiEnabled() && activityLegacyId != null && !Number.isNaN(activityLegacyId) && tabEnabled;
   const userId = getClientUserId();
 
   return useApiQuery({
@@ -384,17 +373,13 @@ export async function registerForActivityAndInvalidate(legacyId: number) {
   return result;
 }
 
-export async function cancelActivityRegistrationAndInvalidate(
-  legacyId: number,
-) {
+export async function cancelActivityRegistrationAndInvalidate(legacyId: number) {
   const result = await cancelActivityRegistration(legacyId);
   await invalidateRegistrationQueries();
   return result;
 }
 
-export async function updateCurrentUserAndInvalidate(
-  payload: UpdateCurrentUserPayload,
-) {
+export async function updateCurrentUserAndInvalidate(payload: UpdateCurrentUserPayload) {
   const user = await updateCurrentUser(payload);
   await Promise.all([invalidateUser(), invalidateProfile()]);
   return user;
@@ -413,9 +398,7 @@ export async function submitReportAndInvalidate(payload: ReportPayload) {
 export function useProfileSummaryQuery(activityLegacyId?: number) {
   const enabled = isApiEnabled();
   const scopedId =
-    activityLegacyId != null && !Number.isNaN(activityLegacyId)
-      ? activityLegacyId
-      : undefined;
+    activityLegacyId != null && !Number.isNaN(activityLegacyId) ? activityLegacyId : undefined;
 
   return useApiQuery({
     queryKey: ["profile", "summary", scopedId ?? "all"],
@@ -439,9 +422,7 @@ export function useProfilePackagesQuery() {
 export function useProfileEntitlementsQuery(activityLegacyId?: number) {
   const enabled = isApiEnabled();
   const scopedId =
-    activityLegacyId != null && !Number.isNaN(activityLegacyId)
-      ? activityLegacyId
-      : undefined;
+    activityLegacyId != null && !Number.isNaN(activityLegacyId) ? activityLegacyId : undefined;
 
   return useApiQuery({
     queryKey: ["profile", "entitlements", scopedId ?? "all"],
@@ -451,9 +432,7 @@ export function useProfileEntitlementsQuery(activityLegacyId?: number) {
   });
 }
 
-export async function purchaseProfilePackageAndInvalidate(
-  payload: PurchaseProfilePackagePayload,
-) {
+export async function purchaseProfilePackageAndInvalidate(payload: PurchaseProfilePackagePayload) {
   const result = await purchaseProfilePackage(payload);
   await invalidateProfilePackageState();
   return result;
@@ -468,9 +447,7 @@ export async function consumeProfileAiMatchAndInvalidate(activityLegacyId: numbe
   return result;
 }
 
-export async function consumeProfileContactUnlockAndInvalidate(
-  activityLegacyId: number,
-) {
+export async function consumeProfileContactUnlockAndInvalidate(activityLegacyId: number) {
   if (Number.isNaN(activityLegacyId)) {
     throw new Error("activityLegacyId is required");
   }
@@ -524,10 +501,7 @@ export async function commentPostAndInvalidate(
 ) {
   const updated = await addPostComment(postId, body, parentCommentId);
   patchLikedPostInCaches(updated);
-  await Promise.all([
-    invalidateNotificationQueries(),
-    invalidatePostComments(postId),
-  ]);
+  await Promise.all([invalidateNotificationQueries(), invalidatePostComments(postId)]);
 }
 
 export async function applyToPostAndInvalidate(postId: string) {

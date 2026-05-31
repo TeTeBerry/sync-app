@@ -12,10 +12,7 @@ export type AiAssistantPostCardProps = {
   highlight?: boolean;
 };
 
-export const AiAssistantPostCard: FC<AiAssistantPostCardProps> = ({
-  post,
-  highlight = false,
-}) => {
+export const AiAssistantPostCard: FC<AiAssistantPostCardProps> = ({ post, highlight = false }) => {
   const authorGender = inferAuthorGenderFromPost(post);
   const nameClassName = authorGender
     ? `s-ai-assistant-post-card__name s-ai-assistant-post-card__name--${authorGender}`
@@ -35,7 +32,8 @@ export const AiAssistantPostCard: FC<AiAssistantPostCardProps> = ({
           ? "s-ai-assistant-post-card s-ai-assistant-post-card--mine"
           : "s-ai-assistant-post-card"
       }
-      onClick={handleOpen}>
+      onClick={handleOpen}
+    >
       <View className="s-ai-assistant-post-card__header">
         {post.authorAvatar ? (
           <Image
@@ -52,15 +50,11 @@ export const AiAssistantPostCard: FC<AiAssistantPostCardProps> = ({
           <View className="s-ai-assistant-post-card__author-line">
             <Text className={nameClassName}>{post.authorName}</Text>
             {post.authorHandle ? (
-              <Text className="s-ai-assistant-post-card__handle">
-                {post.authorHandle}
-              </Text>
+              <Text className="s-ai-assistant-post-card__handle">{post.authorHandle}</Text>
             ) : null}
           </View>
           {post.matchReason ? (
-            <Text className="s-ai-assistant-post-card__match">
-              {post.matchReason}
-            </Text>
+            <Text className="s-ai-assistant-post-card__match">{post.matchReason}</Text>
           ) : null}
         </View>
       </View>
@@ -72,9 +66,7 @@ export const AiAssistantPostCard: FC<AiAssistantPostCardProps> = ({
       {post.location ? (
         <View className="s-ai-assistant-post-card__location">
           <MapPin size={12} color="#64d2ff" />
-          <Text className="s-ai-assistant-post-card__location-text">
-            {post.location}
-          </Text>
+          <Text className="s-ai-assistant-post-card__location-text">{post.location}</Text>
         </View>
       ) : null}
 

@@ -8,16 +8,11 @@ type Props = {
   onDismiss?: () => void;
 };
 
-export function ExclusiveItineraryConflictBanner({
-  conflicts,
-  onDismiss,
-}: Props) {
+export function ExclusiveItineraryConflictBanner({ conflicts, onDismiss }: Props) {
   if (conflicts.length === 0) return null;
 
   const headline =
-    conflicts.length === 1
-      ? "检测到演出时间冲突"
-      : `检测到 ${conflicts.length} 处演出时间冲突`;
+    conflicts.length === 1 ? "检测到演出时间冲突" : `检测到 ${conflicts.length} 处演出时间冲突`;
 
   return (
     <View className="s-exclusive-itinerary-conflict" role="alert">
@@ -30,7 +25,10 @@ export function ExclusiveItineraryConflictBanner({
           你仍可保留全部选择；生成行程时会在时间轴中提示转场。
         </Text>
         {conflicts.slice(0, 2).map((c) => (
-          <Text key={`${c.artistIds.join("-")}-${c.dateKey}`} className="s-exclusive-itinerary-conflict__item">
+          <Text
+            key={`${c.artistIds.join("-")}-${c.dateKey}`}
+            className="s-exclusive-itinerary-conflict__item"
+          >
             {c.message}
           </Text>
         ))}
@@ -40,7 +38,8 @@ export function ExclusiveItineraryConflictBanner({
           className="s-exclusive-itinerary-conflict__close"
           hoverClass="s-exclusive-itinerary-conflict__close--pressed"
           aria-label="关闭"
-          onTap={onDismiss}>
+          onTap={onDismiss}
+        >
           <Text>知道了</Text>
         </Button>
       ) : null}

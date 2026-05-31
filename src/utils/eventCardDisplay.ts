@@ -29,7 +29,8 @@ export function formatEventFullDate(date?: string, title?: string): string {
   const trimmed = date?.trim() ?? "";
   if (!trimmed) return "";
 
-  const year = extractYearFromText(title) ?? extractYearFromText(trimmed) ?? new Date().getFullYear();
+  const year =
+    extractYearFromText(title) ?? extractYearFromText(trimmed) ?? new Date().getFullYear();
   const badge = formatEventDateBadge(trimmed);
 
   if (badge.secondary.includes("-")) {

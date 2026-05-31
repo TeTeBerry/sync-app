@@ -44,10 +44,7 @@ function mapActivityPostsForUser(
         avatar: sanitizeRemoteImageUrl(post.avatar) ?? post.avatar,
         images: sanitizeImageList(post.images),
       };
-      return mapEventDetailPostToEventMapUserPost(
-        sanitized,
-        formatPostPublishTime,
-      );
+      return mapEventDetailPostToEventMapUserPost(sanitized, formatPostPublishTime);
     });
 }
 
@@ -92,8 +89,7 @@ export function useEventMapUserSheet(
   });
 
   const profilePosts = useMemo(
-    () =>
-      (profilePostsQuery.data ?? []).map(mapProfilePostToEventMapUserPost),
+    () => (profilePostsQuery.data ?? []).map(mapProfilePostToEventMapUserPost),
     [profilePostsQuery.data],
   );
 
@@ -123,8 +119,7 @@ export function useEventMapUserSheet(
     apiEnabled &&
     sheetEnabled &&
     !posts.length &&
-    (activityPostsQuery.isLoading ||
-      (needProfileFallback && profilePostsQuery.isLoading));
+    (activityPostsQuery.isLoading || (needProfileFallback && profilePostsQuery.isLoading));
 
   const isError =
     apiEnabled &&

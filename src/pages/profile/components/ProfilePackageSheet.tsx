@@ -94,9 +94,7 @@ function PackageFeatureRow({
   tierId: PackageTierId;
   selected: boolean;
 }) {
-  const Icon = feature.unlimited
-    ? Infinity
-    : (FEATURE_ICONS[feature.icon] ?? Sparkles);
+  const Icon = feature.unlimited ? Infinity : (FEATURE_ICONS[feature.icon] ?? Sparkles);
   return (
     <View className="s-profile-package-sheet__feature">
       <Icon
@@ -124,16 +122,15 @@ function PackageCard({
       className={`s-profile-package-sheet__card s-profile-package-sheet__card--${tier.id}${
         selected ? " s-profile-package-sheet__card--selected" : ""
       }`}
-      onClick={() => onSelect(tier.id)}>
+      onClick={() => onSelect(tier.id)}
+    >
       <View className="s-profile-package-sheet__card-head">
         <View className="s-profile-package-sheet__card-intro">
           <View className="s-profile-package-sheet__card-title-row">
             <Text className="s-profile-package-sheet__card-name">{tier.name}</Text>
             {tier.badge ? (
               <View className="s-profile-package-sheet__card-badge">
-                <Text className="s-profile-package-sheet__card-badge-text">
-                  {tier.badge}
-                </Text>
+                <Text className="s-profile-package-sheet__card-badge-text">{tier.badge}</Text>
               </View>
             ) : null}
           </View>
@@ -179,7 +176,8 @@ function ActivityPickerRow({
         if (!Number.isNaN(legacyId)) {
           onSelect(legacyId);
         }
-      }}>
+      }}
+    >
       <ImageWithFallback
         src={item.image}
         alt=""
@@ -189,9 +187,7 @@ function ActivityPickerRow({
       />
       <View className="s-profile-package-sheet__activity-body">
         <Text className="s-profile-package-sheet__activity-name">{item.title}</Text>
-        {meta ? (
-          <Text className="s-profile-package-sheet__activity-meta">{meta}</Text>
-        ) : null}
+        {meta ? <Text className="s-profile-package-sheet__activity-meta">{meta}</Text> : null}
       </View>
       <View className="s-profile-package-sheet__activity-radio" aria-hidden />
     </View>
@@ -218,9 +214,9 @@ const ProfilePackageSheet: React.FC<ProfilePackageSheetProps> = ({
 
   const [step, setStep] = useState<ProfilePackageSheetStep>("tier");
   const [selectedId, setSelectedId] = useState<PackageTierId>("pro");
-  const [selectedActivityLegacyId, setSelectedActivityLegacyId] = useState<
-    number | undefined
-  >(undefined);
+  const [selectedActivityLegacyId, setSelectedActivityLegacyId] = useState<number | undefined>(
+    undefined,
+  );
   const [purchasing, setPurchasing] = useState(false);
 
   const boundActivityLegacyId = isBoundActivityLegacyId(activityLegacyId)
@@ -239,13 +235,8 @@ const ProfilePackageSheet: React.FC<ProfilePackageSheetProps> = ({
       return;
     }
     setStep("tier");
-    setSelectedActivityLegacyId(
-      activityPreKnown ? boundActivityLegacyId : undefined,
-    );
-    if (
-      initialSelectedTierId &&
-      tiers.some((tier) => tier.id === initialSelectedTierId)
-    ) {
+    setSelectedActivityLegacyId(activityPreKnown ? boundActivityLegacyId : undefined);
+    if (initialSelectedTierId && tiers.some((tier) => tier.id === initialSelectedTierId)) {
       setSelectedId(initialSelectedTierId);
       return;
     }
@@ -284,21 +275,14 @@ const ProfilePackageSheet: React.FC<ProfilePackageSheetProps> = ({
       paidTierByActivityLegacyId?.get(effectiveActivityLegacyId) ??
       (activityPreKnown ? currentPaidTierId : undefined)
     );
-  }, [
-    activityPreKnown,
-    currentPaidTierId,
-    effectiveActivityLegacyId,
-    paidTierByActivityLegacyId,
-  ]);
+  }, [activityPreKnown, currentPaidTierId, effectiveActivityLegacyId, paidTierByActivityLegacyId]);
 
   const tierStepCta = useMemo(
     () =>
       resolvePackageTierStepCta({
         selectedTier,
         activityPreKnown,
-        currentPaidTierId: activityPreKnown
-          ? paidTierForEffectiveActivity
-          : undefined,
+        currentPaidTierId: activityPreKnown ? paidTierForEffectiveActivity : undefined,
       }),
     [activityPreKnown, paidTierForEffectiveActivity, selectedTier],
   );
@@ -352,8 +336,7 @@ const ProfilePackageSheet: React.FC<ProfilePackageSheetProps> = ({
       onPurchaseSuccess?.();
       onClose();
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "购买失败，请稍后重试";
+      const message = error instanceof Error ? error.message : "购买失败，请稍后重试";
       void Taro.showToast({ title: message, icon: "none" });
     } finally {
       setPurchasing(false);
@@ -398,9 +381,7 @@ const ProfilePackageSheet: React.FC<ProfilePackageSheetProps> = ({
   const ctaDisabled = purchasing || activeCta.purchaseDisabled;
 
   return (
-    <View
-      className="s-overlay s-overlay--sheet s-profile-package-sheet"
-      role="presentation">
+    <View className="s-overlay s-overlay--sheet s-profile-package-sheet" role="presentation">
       <View className="s-overlay__backdrop" onClick={onClose} />
       <View className="s-overlay__panel" aria-hidden={!open}>
         <View className="s-profile-package-sheet__handle" aria-hidden />
@@ -412,7 +393,8 @@ const ProfilePackageSheet: React.FC<ProfilePackageSheetProps> = ({
                 className="s-profile-package-sheet__close"
                 aria-label="关闭"
                 hoverClass="s-profile-package-sheet__close--pressed"
-                onClick={onClose}>
+                onClick={onClose}
+              >
                 <X size={18} color="#8e8e93" />
               </View>
               <Text className="s-profile-package-sheet__title">
@@ -442,14 +424,11 @@ const ProfilePackageSheet: React.FC<ProfilePackageSheetProps> = ({
                 className={`s-profile-package-sheet__cta s-profile-package-sheet__cta--${ctaTierClass}${
                   ctaDisabled ? " s-profile-package-sheet__cta--disabled" : ""
                 }${activeCta.neutralDisabled ? " s-profile-package-sheet__cta--neutral" : ""}`}
-                hoverClass={
-                  ctaDisabled ? "" : "s-profile-package-sheet__cta--pressed"
-                }
-                onClick={handleTierStepPrimary}>
+                hoverClass={ctaDisabled ? "" : "s-profile-package-sheet__cta--pressed"}
+                onClick={handleTierStepPrimary}
+              >
                 <Crown size={18} color="inherit" aria-hidden />
-                <Text className="s-profile-package-sheet__cta-label">
-                  {tierStepCta.label}
-                </Text>
+                <Text className="s-profile-package-sheet__cta-label">{tierStepCta.label}</Text>
               </View>
             </View>
           </>
@@ -460,14 +439,16 @@ const ProfilePackageSheet: React.FC<ProfilePackageSheetProps> = ({
                 className="s-profile-package-sheet__back"
                 aria-label="返回"
                 hoverClass="s-profile-package-sheet__back--pressed"
-                onClick={handleBackToTier}>
+                onClick={handleBackToTier}
+              >
                 <ChevronLeft size={18} color="#8e8e93" />
               </View>
               <View
                 className="s-profile-package-sheet__close"
                 aria-label="关闭"
                 hoverClass="s-profile-package-sheet__close--pressed"
-                onClick={onClose}>
+                onClick={onClose}
+              >
                 <X size={18} color="#8e8e93" />
               </View>
               <Text className="s-profile-package-sheet__title">
@@ -482,7 +463,8 @@ const ProfilePackageSheet: React.FC<ProfilePackageSheetProps> = ({
               scrollY
               enhanced
               showScrollbar={false}
-              className="s-profile-package-sheet__activity-scroll s-scrollbar-none">
+              className="s-profile-package-sheet__activity-scroll s-scrollbar-none"
+            >
               <View className="s-profile-package-sheet__activity-list">
                 {activitiesLoading ? (
                   <Text className="s-profile-package-sheet__loading">加载活动…</Text>
@@ -491,9 +473,7 @@ const ProfilePackageSheet: React.FC<ProfilePackageSheetProps> = ({
                     <View className="s-profile-package-sheet__empty-icon">
                       <Ticket size={22} color="#8e8e93" aria-hidden />
                     </View>
-                    <Text className="s-profile-package-sheet__empty-title">
-                      还没有报名活动
-                    </Text>
+                    <Text className="s-profile-package-sheet__empty-title">还没有报名活动</Text>
                     <Text className="s-profile-package-sheet__empty-hint">
                       在首页或活动页报名后，可在此绑定套餐权益
                     </Text>
@@ -505,10 +485,7 @@ const ProfilePackageSheet: React.FC<ProfilePackageSheetProps> = ({
                       <ActivityPickerRow
                         key={item.id}
                         item={item}
-                        selected={
-                          !Number.isNaN(legacyId) &&
-                          selectedActivityLegacyId === legacyId
-                        }
+                        selected={!Number.isNaN(legacyId) && selectedActivityLegacyId === legacyId}
                         onSelect={setSelectedActivityLegacyId}
                       />
                     );
@@ -522,14 +499,11 @@ const ProfilePackageSheet: React.FC<ProfilePackageSheetProps> = ({
                 className={`s-profile-package-sheet__cta s-profile-package-sheet__cta--${ctaTierClass}${
                   ctaDisabled ? " s-profile-package-sheet__cta--disabled" : ""
                 }${activeCta.neutralDisabled ? " s-profile-package-sheet__cta--neutral" : ""}`}
-                hoverClass={
-                  ctaDisabled ? "" : "s-profile-package-sheet__cta--pressed"
-                }
-                onClick={handleActivityStepPrimary}>
+                hoverClass={ctaDisabled ? "" : "s-profile-package-sheet__cta--pressed"}
+                onClick={handleActivityStepPrimary}
+              >
                 <Crown size={18} color="inherit" aria-hidden />
-                <Text className="s-profile-package-sheet__cta-label">
-                  {activityStepCta.label}
-                </Text>
+                <Text className="s-profile-package-sheet__cta-label">{activityStepCta.label}</Text>
               </View>
             </View>
           </>

@@ -20,10 +20,7 @@ import { inferAuthorGenderFromPost } from "../utils/inferAuthorGender";
 import type { PostSharePayload } from "../utils/postShare";
 import { Image, Text, View } from "@tarojs/components";
 
-function feedPostSharePayload(
-  post: ActivityPost,
-  authorName: string,
-): PostSharePayload {
+function feedPostSharePayload(post: ActivityPost, authorName: string): PostSharePayload {
   return {
     postId: post.id,
     activityLegacyId: post.activityLegacyId,
@@ -83,12 +80,7 @@ function FeedPostRowInner({
   return (
     <View className="s-home-post">
       <View className="s-home-post__header">
-        <Image
-          className="s-home-post__avatar"
-          src={avatarSrc}
-          mode="aspectFill"
-          lazyLoad
-        />
+        <Image className="s-home-post__avatar" src={avatarSrc} mode="aspectFill" lazyLoad />
         <View className="s-home-post__head-main">
           <View className="s-home-post__top">
             <View className="s-home-post__user-line">
@@ -135,7 +127,8 @@ function FeedPostRowInner({
         <View className="s-home-post__actions">
           <Button
             className={`s-home-post__action${post.liked ? " s-home-post__action--liked" : ""}`}
-            onClick={() => onLike?.(post)}>
+            onClick={() => onLike?.(post)}
+          >
             <ThumbsUp
               size={16}
               className="s-home-post__action-icon"
@@ -146,7 +139,8 @@ function FeedPostRowInner({
           </Button>
           <Button
             className={`s-home-post__action${commentsExpanded ? " s-home-post__action--active" : ""}`}
-            onClick={() => onToggleComments(post.id)}>
+            onClick={() => onToggleComments(post.id)}
+          >
             <MessageCircle
               size={16}
               className="s-home-post__action-icon"
@@ -172,12 +166,7 @@ function FeedPostRowInner({
 
 const FeedPostRow = memo(FeedPostRowInner);
 
-function FeedPostListInner({
-  items,
-  onDelete,
-  onLike,
-  onCommentSubmitted,
-}: FeedPostListProps) {
+function FeedPostListInner({ items, onDelete, onLike, onCommentSubmitted }: FeedPostListProps) {
   const { data: currentUser } = useCurrentUserQuery();
   const [expandedCommentPostIds, setExpandedCommentPostIds] = useState<Set<string>>(
     () => new Set(),

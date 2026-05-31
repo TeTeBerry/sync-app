@@ -4,9 +4,7 @@ import { defineConfig } from "@tarojs/cli";
  * Primary target: WeChat mini program (weapp). Design draft: 375px logical width.
  * H5 is not actively maintained — use `npm run build:weapp` for release checks.
  */
-const plugins: (string | [string, Record<string, unknown>])[] = [
-  "@tarojs/plugin-framework-react",
-];
+const plugins: (string | [string, Record<string, unknown>])[] = ["@tarojs/plugin-framework-react"];
 if (process.env.TARO_ENV === "weapp") {
   plugins.push(["@tarojs/plugin-html", {}]);
 }

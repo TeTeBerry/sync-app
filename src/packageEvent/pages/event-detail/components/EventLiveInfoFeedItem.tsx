@@ -50,9 +50,7 @@ export function EventLiveInfoFeedItem({ item, onToggleLike }: EventLiveInfoFeedI
         <View className="s-live-info-post__identity">
           <View className="s-live-info-post__name-row">
             <Text className="s-live-info-post__name">{userName}</Text>
-            {certified ? (
-              <Text className="s-live-info-post__cert-pill">手环认证</Text>
-            ) : null}
+            {certified ? <Text className="s-live-info-post__cert-pill">手环认证</Text> : null}
           </View>
           <Text className="s-live-info-post__meta">
             {formatUpdateMeta(item.timeLabel, ratings.length)}
@@ -68,12 +66,9 @@ export function EventLiveInfoFeedItem({ item, onToggleLike }: EventLiveInfoFeedI
             .join(" ")}
           hoverClass="s-live-info-post__like-pill--pressed"
           disabled={!id}
-          onClick={() => id && onToggleLike(id)}>
-          <ThumbsUp
-            size={14}
-            color={item.liked ? "var(--primary)" : "#8e8e93"}
-            aria-hidden
-          />
+          onClick={() => id && onToggleLike(id)}
+        >
+          <ThumbsUp size={14} color={item.liked ? "var(--primary)" : "#8e8e93"} aria-hidden />
           <Text className="s-live-info-post__like-count">{likes}</Text>
         </Button>
       </View>
@@ -86,7 +81,8 @@ export function EventLiveInfoFeedItem({ item, onToggleLike }: EventLiveInfoFeedI
             ratings.length === 3 && "s-live-info-post__grid--triple",
           ]
             .filter(Boolean)
-            .join(" ")}>
+            .join(" ")}
+        >
           {ratings.map((rating, index) => {
             const category = getLiveInfoCategory(rating.categoryId);
             const Icon = category.icon;
@@ -106,7 +102,8 @@ export function EventLiveInfoFeedItem({ item, onToggleLike }: EventLiveInfoFeedI
                   metricGridClass(ratings.length, index),
                 ]
                   .filter(Boolean)
-                  .join(" ")}>
+                  .join(" ")}
+              >
                 <View className="s-live-info-post__metric-head">
                   <View className="s-live-info-post__metric-label-wrap">
                     <Icon size={14} color={category.color} aria-hidden />
@@ -117,7 +114,8 @@ export function EventLiveInfoFeedItem({ item, onToggleLike }: EventLiveInfoFeedI
                     style={{
                       color: category.color,
                       backgroundColor: `${category.color}24`,
-                    }}>
+                    }}
+                  >
                     {statusLabel}
                   </Text>
                 </View>
@@ -134,7 +132,8 @@ export function EventLiveInfoFeedItem({ item, onToggleLike }: EventLiveInfoFeedI
                   <EventLiveInfoStarRow category={category} score={score} />
                   <Text
                     className="s-live-info-post__metric-score"
-                    style={{ color: category.color }}>
+                    style={{ color: category.color }}
+                  >
                     {score.toFixed(1)}
                   </Text>
                 </View>

@@ -1,7 +1,4 @@
-import type {
-  EventPackageEntitlement,
-  ProfileActivityItem,
-} from "../../types/backend";
+import type { EventPackageEntitlement, ProfileActivityItem } from "../../types/backend";
 import { compareActivitiesNearestFirst } from "../../utils/activityStatus";
 import {
   buildEventBenefitCardModel,
@@ -15,10 +12,7 @@ export function buildPaidBenefitCards(
 ): ProfileEventBenefitCardModel[] {
   const cards: ProfileEventBenefitCardModel[] = [];
   for (const entitlement of paidEntitlements) {
-    if (
-      !Number.isFinite(entitlement.activityLegacyId) ||
-      entitlement.activityLegacyId <= 0
-    ) {
+    if (!Number.isFinite(entitlement.activityLegacyId) || entitlement.activityLegacyId <= 0) {
       continue;
     }
     try {
