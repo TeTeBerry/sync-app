@@ -35,14 +35,6 @@ export default defineConfig({
       enable: false,
     },
   },
-  sass: {
-    // NutUI variables.scss emits `:root, page { … }`; Taro pages are wrapped in `comp`,
-    // so page wxss is component wxss and must not use the `page` tag selector.
-    data:
-      process.env.TARO_ENV === "weapp"
-        ? `@use "src/styles/nutui-weapp-scale.scss" as *;`
-        : `@use "@nutui/nutui-react-taro/dist/styles/variables.scss" as *;`,
-  },
   framework: "react",
   mini: {
     // @ts-expect-error outputRoot is valid in Taro weapp build

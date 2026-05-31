@@ -1,9 +1,0 @@
-// NutUI scale CSS vars without the `page` tag (forbidden in Taro weapp page/comp wxss).
-:root {
-  --nut-scale-f: 1;
-  --nut-scale-font: var(--nut-scale-f, 1);
-  --nut-scale-icon: var(--nut-scale-f, 1);
-  --nut-icon-height: calc(16px * var(--nut-scale-icon, var(--nut-scale-f, 1))) !important;
-  --nut-icon-width: calc(16px * var(--nut-scale-icon, var(--nut-scale-f, 1))) !important;
-  --nut-icon-line-height: calc(16px * var(--nut-scale-icon, var(--nut-scale-f, 1))) !important;
-}

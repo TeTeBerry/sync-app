@@ -12,7 +12,6 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.27.6",
-    "@nutui/nutui-react-taro": "^3.1.0-beta.1",
     "@tanstack/react-virtual": "^3.13.26",
     "@tarojs/components": "4.2.0",
     "@tarojs/helper": "4.2.0",
@@ -44,7 +43,6 @@
     "@types/react-dom": "^18.3.1",
     "@types/webpack-env": "^1.18.8",
     "autoprefixer": "^10.4.20",
-    "babel-plugin-import": "^1.13.8",
     "babel-preset-taro": "4.2.0",
     "cssnano": "^7.1.9",
     "postcss": "^8.5.3",
