@@ -1,12 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mockGetClientUserId = vi.fn(() => 'client-id');
-const mockGetClientUserName = vi.fn(() => 'Demo User');
 const mockGetAccessToken = vi.fn((): string | null => null);
 
 vi.mock('../utils/session', () => ({
   getClientUserId: () => mockGetClientUserId(),
-  getClientUserName: () => mockGetClientUserName(),
 }));
 
 vi.mock('../utils/authStorage', () => ({
@@ -14,6 +12,8 @@ vi.mock('../utils/authStorage', () => ({
 }));
 
 import {
+  demoActorQueryParams,
+  hasAuthenticatedRequest,
   mergeOwnerQueryParams,
   notificationQueryParams,
   ownerQueryParams,
@@ -21,18 +21,37 @@ import {
   resolveRequestUserId,
 } from './requestContext';
 
+describe('hasAuthenticatedRequest', () => {
+  it('returns false when no access token', () => {
+    mockGetAccessToken.mockReturnValue(null);
+    expect(hasAuthenticatedRequest()).toBe(false);
+  });
+
+  it('returns true when access token is present', () => {
+    mockGetAccessToken.mockReturnValue('jwt-token');
+    expect(hasAuthenticatedRequest()).toBe(true);
+  });
+});
+
+describe('demoActorQueryParams', () => {
+  beforeEach(() => {
+    mockGetClientUserId.mockReturnValue('demo-u1');
+  });
+
+  it('returns userId only', () => {
+    expect(demoActorQueryParams()).toEqual({ userId: 'demo-u1' });
+    expect(demoActorQueryParams()).not.toHaveProperty('authorName');
+  });
+});
+
 describe('ownerQueryParams', () => {
   beforeEach(() => {
     mockGetAccessToken.mockReturnValue(null);
     mockGetClientUserId.mockReturnValue('client-id');
-    mockGetClientUserName.mockReturnValue('Demo User');
   });
 
-  it('returns userId and authorName from session helpers when no token', () => {
-    expect(ownerQueryParams()).toEqual({
-      userId: 'client-id',
-      authorName: 'Demo User',
-    });
+  it('returns userId only from session when no token', () => {
+    expect(ownerQueryParams()).toEqual({ userId: 'client-id' });
   });
 
   it('returns empty object when access token is present', () => {
@@ -55,13 +74,11 @@ describe('mergeOwnerQueryParams', () => {
   beforeEach(() => {
     mockGetAccessToken.mockReturnValue(null);
     mockGetClientUserId.mockReturnValue('u1');
-    mockGetClientUserName.mockReturnValue('Alice');
   });
 
   it('merges owner params with extra string fields', () => {
     expect(mergeOwnerQueryParams({ limit: '20', cursor: 'abc' })).toEqual({
       userId: 'u1',
-      authorName: 'Alice',
       limit: '20',
       cursor: 'abc',
     });
@@ -75,7 +92,6 @@ describe('mergeOwnerQueryParams', () => {
   it('extra overrides owner fields', () => {
     expect(mergeOwnerQueryParams({ userId: 'override' })).toEqual({
       userId: 'override',
-      authorName: 'Alice',
     });
   });
 
@@ -88,16 +104,12 @@ describe('mergeOwnerQueryParams', () => {
       }),
     ).toEqual({
       userId: 'u1',
-      authorName: 'Alice',
       activityLegacyId: '7',
     });
   });
 
   it('returns only owner params when extra is omitted', () => {
-    expect(mergeOwnerQueryParams()).toEqual({
-      userId: 'u1',
-      authorName: 'Alice',
-    });
+    expect(mergeOwnerQueryParams()).toEqual({ userId: 'u1' });
   });
 });
 
@@ -121,13 +133,11 @@ describe('ownerQueryParamsWithActivity', () => {
   beforeEach(() => {
     mockGetAccessToken.mockReturnValue(null);
     mockGetClientUserId.mockReturnValue('u1');
-    mockGetClientUserName.mockReturnValue('Alice');
   });
 
   it('adds activityLegacyId when finite', () => {
     expect(ownerQueryParamsWithActivity(42)).toEqual({
       userId: 'u1',
-      authorName: 'Alice',
       activityLegacyId: '42',
     });
   });
@@ -140,16 +150,10 @@ describe('ownerQueryParamsWithActivity', () => {
   });
 
   it('omits activityLegacyId when undefined', () => {
-    expect(ownerQueryParamsWithActivity(undefined)).toEqual({
-      userId: 'u1',
-      authorName: 'Alice',
-    });
+    expect(ownerQueryParamsWithActivity(undefined)).toEqual({ userId: 'u1' });
   });
 
   it('omits activityLegacyId when NaN', () => {
-    expect(ownerQueryParamsWithActivity(Number.NaN)).toEqual({
-      userId: 'u1',
-      authorName: 'Alice',
-    });
+    expect(ownerQueryParamsWithActivity(Number.NaN)).toEqual({ userId: 'u1' });
   });
 });

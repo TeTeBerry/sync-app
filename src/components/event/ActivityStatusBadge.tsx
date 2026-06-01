@@ -6,7 +6,7 @@ import {
   activityStatusText,
   getActivityStatusFromActivity,
   shouldShowActivityStatusBadge,
-} from '../utils/activityStatus';
+} from '../../utils/activityStatus';
 
 export type ActivityStatusBadgeProps = {
   date?: string;

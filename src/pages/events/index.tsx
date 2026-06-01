@@ -8,7 +8,7 @@ import { View, Text, ScrollView } from '@tarojs/components';
 import { useEndRouteTransitionOnShow } from '../../hooks/useEndRouteTransitionOnShow';
 import { useNavBarInsets } from '../../hooks/useNavBarInsets';
 import { useTabPageMainHeight } from '../../hooks/useTabPageMainHeight';
-import EventCard from '../../components/EventCard';
+import { EventCard } from '../../components/event';
 import { ListState } from '../../components/ListState';
 import ThemedPageLoader from '../../components/ThemedPageLoader';
 import { seedActivityDetailFromEventCard } from '../../utils/activityDetailCache';

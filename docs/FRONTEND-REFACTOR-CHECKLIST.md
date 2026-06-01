@@ -97,6 +97,15 @@
 
 </details>
 
+### Phase 4 数据层 + 编排 ✅（2026-06）
+
+- [x] `demoActorQueryParams` / `hasAuthenticatedRequest`；demo REST Query 仅 `userId`
+- [x] `api/sync/posts.test.ts`；`requestContext.test.ts` 更新
+- [x] [DATA-LAYER.md](./DATA-LAYER.md) REST vs WS 身份表
+- [x] Query `authorName` 弱化（前端 demo 已完成；展示名仍用 `getClientUserName()`）
+- [x] `useProfileBenefitsSection` / `useProfileDebugOverlays`；`useAiAssistantPage`
+- [x] `components/event/`；`profileBenefitsMapper` 子模块拆分
+
 ### Phase 3 前端架构 ✅（2026-06）
 
 - [x] `useEventDetailPage` + `PostCardActionBar` / `buildPostSharePayload`（首页 Feed + 活动帖共用互动条）
@@ -126,7 +135,7 @@
 ### P5 收尾 ✅
 
 - [x] 通知页：按 `meta` 跳转活动详情 / 帖子（深链）
-- [ ] `authorName` 身份用途弱化（登录期一次性切换）
+- [x] `authorName` Query 弱化（前端 demo 仅 `userId`；UI/分享展示名不变）
 - [x] `useProfileParticipatedItems` 与 `/profile/activities` 去重评估（个人页用 `useProfileActivitiesQuery`，已移除未使用 hook）
 - [x] 删除遗留 `profileParticipated.ts`、`ProfileParticipatedList.tsx`；`profilePageStore` 移除废弃 `activeTab`
 

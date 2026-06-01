@@ -1,22 +1,28 @@
 import { getAccessToken } from '../utils/authStorage';
-import { getClientUserId, getClientUserName } from '../utils/session';
+import { getClientUserId } from '../utils/session';
 
-/** Demo-owner query identity (`userId` + `authorName`). Empty when Bearer is sent. */
+/** Demo-owner query identity. Empty when Bearer is sent. */
 export type OwnerQueryParams = Record<string, string>;
+
+export function hasAuthenticatedRequest(): boolean {
+  return Boolean(getAccessToken());
+}
+
+/** Demo REST actor: userId only (backend isDemoOwnerClient ignores authorName). */
+export function demoActorQueryParams(): { userId: string } {
+  return { userId: getClientUserId() };
+}
 
 /**
  * Query-string identity for REST.
  * With Bearer: returns `{}` (backend JwtActorMiddleware injects actor from JWT).
- * Without token: demo `userId` / `authorName` for legacy Query flow.
+ * Without token: demo `userId` only.
  */
 export function ownerQueryParams(): OwnerQueryParams {
-  if (getAccessToken()) {
+  if (hasAuthenticatedRequest()) {
     return {};
   }
-  return {
-    userId: getClientUserId(),
-    authorName: getClientUserName(),
-  };
+  return demoActorQueryParams();
 }
 
 /** Stable id for React Query keys and notification APIs. */
@@ -26,7 +32,7 @@ export function resolveRequestUserId(): string {
 
 /** Notification scope: omit userId query when Bearer (JWT middleware injects actor). */
 export function notificationQueryParams(): Record<string, string> | undefined {
-  if (getAccessToken()) {
+  if (hasAuthenticatedRequest()) {
     return undefined;
   }
   return { userId: resolveRequestUserId() };

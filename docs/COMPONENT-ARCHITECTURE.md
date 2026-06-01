@@ -49,9 +49,11 @@ Barrel 导出分包/活动详情需要的组件与逻辑；仅主 profile 页使
 - 内容：`PageNavigation`、`TabPageHeader`、`BottomNav`（`BottomNavSlot`）、`NavigationLoadingOverlay`
 - Barrel：`src/components/navigation/index.ts`（可选；页面也可直引子模块）
 
-### Event（规划）
+### Event
 
-- 目录：`src/components/event/`（待建）— 活动卡片、状态条等第二个消费者出现时再升格
+- 目录：`src/components/event/`
+- 内容：`EventCard`、`ActivityStatusBadge`
+- Barrel：`src/components/event/index.ts`
 
 ### 活动详情
 
@@ -68,6 +70,7 @@ Barrel 导出分包/活动详情需要的组件与逻辑；仅主 profile 页使
 | 只在活动详情用的块 | `packageEvent/.../event-detail/components/` |
 | 跨多 Tab/多活动的帖子 UI | `components/post/`（`FeedPostList`、`PostCardActionBar` 等） |
 | 顶栏 / 底栏 / Tab 页头 | `components/navigation/` |
+| 活动列表卡片 / 状态徽章 | `components/event/` |
 | 新帖子 TypeScript 类型 | `types/post.ts` |
 
 **何时从页面局部升格？** 当**第二个消费者**（含分包页）需要 import 时，再迁入对应域（`profile/`、`post/`、`navigation/`、`event/` 等）并改走 barrel。

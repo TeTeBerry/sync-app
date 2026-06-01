@@ -1,25 +1,25 @@
 import './EventCard.scss';
 import React, { memo, useMemo } from 'react';
-import AvatarGroup from './AvatarGroup';
-import { ACTIVITY_GUEST_AVATARS } from '../constants/activityGuestAvatars';
-import { ImageWithFallback } from './ImageWithFallback';
-import { Button } from './ui';
+import AvatarGroup from '../AvatarGroup';
+import { ACTIVITY_GUEST_AVATARS } from '../../constants/activityGuestAvatars';
+import { ImageWithFallback } from '../ImageWithFallback';
+import { Button } from '../ui';
 import { Calendar, Flame, MapPin, Sparkles, Users } from 'lucide-react-taro';
 import {
   activityStatusCardClass,
   getActivityStatusFromActivity,
-} from '../utils/activityStatus';
+} from '../../utils/activityStatus';
 import { Text, View } from '@tarojs/components';
 import {
   deriveEventCardStats,
   formatEventDateBadge,
   formatEventFullDate,
   formatEventHeroSubtitle,
-} from '../utils/eventCardDisplay';
-import { PLACEHOLDER_EVENT_HERO } from '../constants/remoteImages';
-import { thumbnailImageUrl } from '../utils/imageUrl';
-import { resolveEventCardLegacyId } from '../utils/apiMappers';
-import { useRouteTransitionActive } from '../utils/route';
+} from '../../utils/eventCardDisplay';
+import { PLACEHOLDER_EVENT_HERO } from '../../constants/remoteImages';
+import { thumbnailImageUrl } from '../../utils/imageUrl';
+import { resolveEventCardLegacyId } from '../../utils/apiMappers';
+import { useRouteTransitionActive } from '../../utils/route';
 
 interface EventCardProps {
   id?: string;

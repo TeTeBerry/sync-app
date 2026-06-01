@@ -1,7 +1,7 @@
 # Sync App — API 契约（H5 先行）
 
 > **开发策略**：先 H5 业务联调，**登录后置**；微信登录更晚。  
-> **未登录**：Query `userId` / `authorName`（demo）。  
+> **未登录**：Query `userId`（demo；不再传 Query `authorName`）。  
 > **已登录**：`Authorization: Bearer`；业务 REST **不再**附带 demo Query（由 `ownerQueryParams()` 控制）。  
 > 登录：`POST /auth/dev`（H5）/ `POST /auth/wechat`（小程序）。  
 > 清单：`docs/FRONTEND-REFACTOR-CHECKLIST.md` / 后端 `docs/BACKEND-REFACTOR-CHECKLIST.md`  
@@ -14,12 +14,12 @@
 无 access token 时，个人页、删帖等传 Query：
 
 ```http
-GET /api/profile?userId=...&authorName=Zara
-DELETE /api/posts/:id?userId=...&authorName=Zara
+GET /api/profile?userId=...
+DELETE /api/posts/:id?userId=...
 ```
 
-前端：[`api/requestContext.ts`](../src/api/requestContext.ts) 中 `ownerQueryParams()`。  
-AI 聊天 body 仍可带 `userId` / `userName` / `userPhone` / `activityLegacyId`。
+前端：[`api/requestContext.ts`](../src/api/requestContext.ts) 中 `demoActorQueryParams()` / `ownerQueryParams()`。  
+AI 聊天 **WebSocket** body 仍须带 `userId` / `userName` / `userPhone`（与 REST 不同；后端 WS 未从 JWT 解析 actor）。
 
 ## 已登录（Bearer）
 
@@ -28,7 +28,8 @@ GET /api/profile
 Authorization: Bearer eyJ...
 ```
 
-后端 `JwtActorMiddleware` 从 JWT 注入 actor；前端不再传 `userId`/`authorName` Query（`activityLegacyId` 等业务参数仍可有）。
+后端 [`JwtActorMiddleware`](../sync-app-backend/src/common/middleware/jwt-actor.middleware.ts) 将 JWT `sub` → `req.query.userId`、`name` → `req.query.authorName`；**前端 REST 不再传** demo Query（`activityLegacyId` 等业务参数仍可有）。  
+AI WebSocket：Header 可带 Bearer，但 **send 帧 body 身份字段仍必填**（Phase 4 未改）。
 
 ---
 
