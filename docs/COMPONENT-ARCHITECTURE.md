@@ -88,5 +88,6 @@ import { Button } from '@/components/ui';
 
 ## 相关文档
 
+- [DATA-LAYER.md](./DATA-LAYER.md) — REST / React Query 分层与 P0 身份切换
 - [CONTRIBUTING.md](./CONTRIBUTING.md) — 分支与 `npm run check`
 - [API.md](./API.md) — 接口契约

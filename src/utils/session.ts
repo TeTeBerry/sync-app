@@ -119,14 +119,6 @@ export function clearClientUserCache(): void {
   cachedUserPhone = undefined;
 }
 
-/** API 请求通用的 owner 参数 */
-export function ownerParams() {
-  return {
-    userId: getClientUserId(),
-    authorName: getClientUserName(),
-  };
-}
-
 export function persistUserPhone(phone: string): void {
   if (!phone.trim()) return;
   try {

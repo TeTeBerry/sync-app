@@ -16,7 +16,7 @@
 | P3 | AI 闭环 + activityId | ✅ 完成 |
 | P4 | 信息架构与文档 | ✅ 完成 |
 | P5 | 通知深链等收尾 | ✅ 完成 |
-| P0-H5 | Dev 登录 + Bearer | ⬜ 登录之后 |
+| P0-H5 | Dev 登录 + Bearer | ✅ 前端已接 |
 | P0-Wx | 微信小程序 | ⬜ 更晚 |
 
 **产品约定**：组队帖 **仅 AI 对话闭环创建**，不新增发帖表单 UI。
@@ -25,9 +25,9 @@
 
 ## 当前身份
 
-- `getClientUserId()` / `getClientUserName()` + `syncApi.ownerParams()`
-- 后端 `demo-owner.util.ts` + Query
-- 登录后一次性切 Bearer，删 Query（与后端 P0 同 PR）
+- **未登录**：`ownerQueryParams()` → Query `userId` / `authorName`（demo）
+- **已登录**：`Authorization: Bearer`；`ownerQueryParams()` 返回 `{}`（后端 JWT middleware 注入 actor）
+- `getClientUserId()` / `getClientUserName()` — 已 JWT-aware（session + authStorage）
 
 ---
 
@@ -103,6 +103,13 @@
 - [x] `my-itinerary` / `exclusive-itinerary` 拆 `components/` + page hooks
 - [x] `components/post/` — 帖子 UI 归档；`ui/Input` 扩展 Taro `onInput` + `events-search` variant
 
+### 数据层（登录前）✅
+
+- [x] [`api/requestContext.ts`](src/api/requestContext.ts) — `ownerQueryParams` / `resolveRequestUserId`（P0 单点）
+- [x] [`api/sync/`](src/api/sync/) — REST 按 activities / users / posts / profile / … 拆分；`syncApi.ts` 为 barrel
+- [x] [`hooks/sync/`](src/hooks/sync/) — Query hooks 按域拆分；`useSyncApi.ts` 为 barrel
+- [x] [DATA-LAYER.md](./DATA-LAYER.md) — 依赖方向与 P0 切换说明
+
 ---
 
 ## 待办 / 可选
@@ -116,10 +123,10 @@
 
 ### P0-H5（登录之后）
 
-- [ ] `src/utils/auth.ts` — `POST /auth/dev`
-- [ ] `apiClient` Bearer + 401
-- [ ] 删除 `ownerParams()` Query
-- [ ] `getClientUserId()` 改 JWT `sub`
+- [x] `src/utils/auth.ts` — `POST /auth/dev` + `ensureAuth`（`TARO_APP_AUTH_DEV=true`）
+- [x] `apiClient` Bearer（`getAuthHeaders`）+ 401（[`handleApiUnauthorized.ts`](../src/api/handleApiUnauthorized.ts)）
+- [x] 删除 `ownerParams()`；`ownerQueryParams()` 有 token 时不发 demo Query
+- [x] `getClientUserId()` 已优先 `getAuthUserId()`（JWT `sub`）
 
 ### P0-Wx（更晚）
 
@@ -139,7 +146,7 @@
 
 | 方法 | 路径 | 前端状态 |
 |------|------|----------|
-| POST | `/auth/dev` | ⬜ |
+| POST | `/auth/dev` | ✅ |
 | GET/PATCH | `/users/me` | ✅ `syncApi` + `useCurrentUserQuery` |
 | GET | `/home` | ✅ |
 | GET | `/activities`… | ✅ |
@@ -159,8 +166,11 @@
 
 ```
 src/
-├── api/syncApi.ts              ownerParams + REST
-├── hooks/useSyncApi.ts         queries + mutations + invalidatePostQueries
+├── api/requestContext.ts       ownerQueryParams（P0 单点）
+├── api/sync/*.ts               REST 按域
+├── api/syncApi.ts              barrel
+├── hooks/sync/*.ts             React Query 按域
+├── hooks/useSyncApi.ts         barrel
 ├── hooks/useAiChatStream.ts    WebSocket + post_created
 ├── utils/aiChatStream.ts       流解析
 ├── stores/navigationStore.ts   AI 跳转 activityLegacyId
@@ -179,6 +189,7 @@ src/
 
 ```bash
 TARO_APP_API_BASE_URL=/api
+TARO_APP_AUTH_DEV=true
 TARO_APP_AI_CHAT_WS_URL=ws://127.0.0.1:3000/api/ai/chat/ws
 npm run dev:h5
 ```
@@ -196,8 +207,8 @@ npm run dev:h5
 
 ### P0（登录期）
 
-- [ ] Bearer 鉴权，无 Query 身份
-- [ ] 401 有清晰提示
+- [x] Bearer 鉴权；已登录业务请求无 demo Query 身份
+- [x] 401 有清晰提示并清 session
 
 ---
 

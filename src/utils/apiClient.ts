@@ -1,7 +1,8 @@
 import Taro from '@tarojs/taro';
 import { API_BASE_URL } from '../constants/api';
 import type { ApiResponse } from '../types/backend';
-import { getAuthHeaders } from './authStorage';
+import { handleApiUnauthorized } from '../api/handleApiUnauthorized';
+import { getAccessToken, getAuthHeaders } from './authStorage';
 import { taroRequestData } from './apiRequestBody';
 
 export class ApiError extends Error {
@@ -39,9 +40,7 @@ function splitFetchInit(init?: ApiFetchInit): {
   return { requestInit, timeoutMs, maxRetries };
 }
 
-function mergeHeaders(
-  headers?: Record<string, string>,
-): Record<string, string> {
+function mergeHeaders(headers?: Record<string, string>): Record<string, string> {
   return {
     ...getAuthHeaders(),
     ...(headers ?? {}),
@@ -132,14 +131,35 @@ async function retryFetch(
   throw new ApiError(lastError?.message || '网络请求失败，请稍后重试');
 }
 
+function parseEnvelopeMessage(json: unknown, fallback: string): string {
+  if (json && typeof json === 'object' && 'message' in json) {
+    const message = (json as ApiResponse<unknown>).message;
+    if (typeof message === 'string' && message.trim()) {
+      return message.trim();
+    }
+  }
+  return fallback;
+}
+
+function maybeHandleUnauthorized(status: number, message: string): void {
+  if (status === 401 && getAccessToken()) {
+    handleApiUnauthorized(message);
+  }
+}
+
 async function parseResponse<T>(response: CompatibleResponse): Promise<T> {
+  const json = (await response.json()) as ApiResponse<T>;
+
   if (!response.ok) {
-    throw new ApiError(`请求失败 (${response.status})`, response.status);
+    const message = parseEnvelopeMessage(json, `请求失败 (${response.status})`);
+    maybeHandleUnauthorized(response.status, message);
+    throw new ApiError(message, response.status);
   }
 
-  const json = (await response.json()) as ApiResponse<T>;
   if (json.code !== 200) {
-    throw new ApiError(json.message || '请求失败', json.code);
+    const message = json.message || '请求失败';
+    maybeHandleUnauthorized(json.code, message);
+    throw new ApiError(message, json.code);
   }
 
   return json.data;
