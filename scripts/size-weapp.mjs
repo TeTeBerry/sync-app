@@ -13,11 +13,25 @@ const DIST = path.join(ROOT, 'dist-weapp');
 
 const THRESHOLDS = {
   mainPackage: 1_100_000,
+  /** 微信开发者工具「代码质量」：主包图片+音频合计 ≤ 200 KB */
+  mainPackageMedia: 200_000,
   packageEvent: 2_000_000,
   packageAi: 2_000_000,
   packageProfile: 2_000_000,
   totalNoMaps: 4_500_000,
 };
+
+const MEDIA_EXTENSIONS = new Set([
+  '.png',
+  '.jpg',
+  '.jpeg',
+  '.gif',
+  '.webp',
+  '.mp3',
+  '.wav',
+  '.aac',
+  '.m4a',
+]);
 
 const MAIN_ROOT_FILES = [
   'app.js',
@@ -32,6 +46,27 @@ const MAIN_ROOT_FILES = [
 ];
 
 const MAIN_DIRS = ['pages', 'custom-tab-bar', 'assets'];
+
+function mediaSizeInDir(dirPath) {
+  if (!fs.existsSync(dirPath)) return 0;
+  let total = 0;
+  const walk = (current) => {
+    for (const name of fs.readdirSync(current)) {
+      const full = path.join(current, name);
+      const stat = fs.statSync(full);
+      if (stat.isDirectory()) {
+        walk(full);
+        continue;
+      }
+      const ext = path.extname(name).toLowerCase();
+      if (MEDIA_EXTENSIONS.has(ext)) {
+        total += stat.size;
+      }
+    }
+  };
+  walk(dirPath);
+  return total;
+}
 
 function dirSize(dirPath, { excludeMaps = true } = {}) {
   if (!fs.existsSync(dirPath)) return 0;
@@ -93,6 +128,10 @@ const totalNoMaps =
 
 const assetsMain = dirSize(path.join(DIST, 'assets'));
 const assetsEvent = dirSize(path.join(DIST, 'packageEvent', 'assets'));
+const mainMediaBytes =
+  mediaSizeInDir(path.join(DIST, 'assets')) +
+  mediaSizeInDir(path.join(DIST, 'pages')) +
+  mediaSizeInDir(path.join(DIST, 'custom-tab-bar'));
 
 const rows = [
   ['主包 (main)', main, THRESHOLDS.mainPackage],
@@ -121,8 +160,16 @@ for (const [label, bytes, limit] of rows) {
 
 console.log('\n静态资源:');
 console.log(`  主包 assets/     ${formatKb(assetsMain)}`);
+console.log(`  主包 图片+音频   ${formatKb(mainMediaBytes)} (代码质量 ≤ ${formatKb(THRESHOLDS.mainPackageMedia)})`);
 console.log(`  event 分包 assets/ ${formatKb(assetsEvent)}`);
 console.log(`  *.map (上传应忽略) ${formatKb(mapsTotal)}`);
+
+if (mainMediaBytes > THRESHOLDS.mainPackageMedia) {
+  fail(
+    `主包图片+音频 ${formatKb(mainMediaBytes)} 超过微信代码质量 200 KB。` +
+      ' 先执行: rm -rf dist-weapp && npm run build:weapp（多为旧版 assets 残留）',
+  );
+}
 
 if (assetsMain > 50_000) {
   console.warn('\n[size:weapp] warn: 主包 assets/ 仍较大，检查是否有图片打进主包。');

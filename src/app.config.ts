@@ -1,6 +1,7 @@
 /** 应用配置文件：不要从这里 `import @tarojs/taro`，会连带加载运行时并在构建阶段触发浏览器 API */
-
 export default {
+  /** 微信「代码质量」要求开启按需注入，见开发者工具 → 代码质量 → 组件 */
+  lazyCodeLoading: 'requiredComponents',
   /** 主包：仅 3 个 Tab，缩小首包体积 */
   pages: ['pages/index/index', 'pages/events/index', 'pages/profile/index'],
   subPackages: [

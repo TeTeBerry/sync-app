@@ -18,6 +18,15 @@ npm run build:weapp:size
 
 上传时在 `project.config.json` → `packOptions.ignore` 排除 `*.map`。
 
+## 微信「代码质量」扫描
+
+| 项 | 要求 | 本项目 |
+|----|------|--------|
+| 组件按需注入 | `lazyCodeLoading: "requiredComponents"` | `src/app.config.ts` |
+| 主包图片+音频 | ≤ 200 KB | `npm run size:weapp` 会校验 |
+
+若扫描仍报主包图片超限，多为 **`dist-weapp/assets` 旧构建残留**（历史本地图未再引用）。处理：`npm run clean:weapp && npm run build:weapp` 后在开发者工具点「重新扫描」。
+
 ## 基线
 
 | 日期 | 主包 | packageEvent | packageAi | packageProfile | 主包 assets |

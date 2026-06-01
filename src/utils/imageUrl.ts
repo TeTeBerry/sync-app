@@ -1,3 +1,5 @@
+import { API_BASE_URL } from '../constants/api';
+
 /** Unsplash IDs that 404 or fail in WeChat mini-program. */
 const BROKEN_UNSPLASH_PHOTO_IDS = new Set([
   '1459749411177-0479bf78d6f2',
@@ -24,11 +26,31 @@ function unsplashDimensions(url: URL): { width: number; height: number } {
   return { width: w, height: isSquareCrop ? w : Math.round(w * 0.75) };
 }
 
+/** Rewrite backend upload URLs that still use localhost/127.0.0.1 for weapp LAN dev. */
+export function rewriteLocalDevUploadHost(src: string): string {
+  if (!API_BASE_URL.startsWith('http')) return src;
+  try {
+    const api = new URL(API_BASE_URL);
+    const url = new URL(src);
+    if (url.hostname !== 'localhost' && url.hostname !== '127.0.0.1') {
+      return src;
+    }
+    url.protocol = api.protocol;
+    url.hostname = api.hostname;
+    url.port = api.port;
+    return url.toString();
+  } catch {
+    return src;
+  }
+}
+
 /** Map legacy Unsplash URLs to stable picsum.photos (WeChat-safe). */
 export function sanitizeRemoteImageUrl(src: string | undefined): string | undefined {
   if (!src?.trim()) return undefined;
-  const trimmed = src.trim();
+  let trimmed = src.trim();
   if (!/^https?:\/\//i.test(trimmed)) return trimmed;
+
+  trimmed = rewriteLocalDevUploadHost(trimmed);
 
   try {
     const url = new URL(trimmed);
