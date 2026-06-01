@@ -100,6 +100,8 @@
 
 ### Phase 5 收尾 ✅（2026-06）
 
+- [x] B2：无效 Bearer → REST 401 + WS 清 session（`classifyBearerAuth` / `wsAuthError`）
+- [x] F1：`api/requestActor.ts` + `useRequestActor`；`aiChatWs/*` 拆分；`postOwnership` userId 优先
 - [x] B1：AI WebSocket JWT actor（`buildAiChatWsSendActor` + upgrade Bearer）
 - [x] Checklist「当前身份」与 demo 仅 `userId` 对齐
 - [x] `api/sync/ownerQuery.contract.test.ts` — profile / notifications / activities 有/无 Bearer
@@ -160,7 +162,7 @@
 - [x] `ensureAuth`（weapp）→ `loginWithWechat({ requireProfile: false })`；`shouldSkipAutoLogin` 退出后不自动 `wx.login`
 - [x] Bearer 后通知等 REST 不传 demo `userId`（`notificationQueryParams`）
 - [x] 联调前置与构建变量 — [API.md](./API.md#微信小程序)
-- [ ] 开发者工具真机预览全流程验收（依赖后端 `POST /auth/wechat` + `AUTH_MODE`）
+- [ ] 开发者工具真机预览全流程验收（依赖后端 `POST /auth/wechat` + `AUTH_MODE`；步骤见 [WECHAT-E2E.md](./WECHAT-E2E.md)）
 
 ---
 

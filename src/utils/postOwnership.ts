@@ -31,8 +31,8 @@ export function isCurrentUserPostAuthor(
   const postUserId = authorUserId?.trim();
   const normalizedAuthorName = authorName?.trim() ?? '';
 
-  if (clientUserId && postUserId && postUserId === clientUserId) {
-    return true;
+  if (postUserId && clientUserId) {
+    return postUserId === clientUserId;
   }
 
   if (

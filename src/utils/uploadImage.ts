@@ -2,7 +2,7 @@ import Taro from '@tarojs/taro';
 import { API_BASE_URL } from '../constants/api';
 import type { ApiResponse } from '../types/backend';
 import { handleApiUnauthorized } from '../api/handleApiUnauthorized';
-import { ownerQueryParams } from '../api/requestContext';
+import { ownerQueryParams } from '../api/requestActor';
 import { getAccessToken, getAuthHeaders } from './authStorage';
 
 /** 选择手环图，返回临时文件路径（已尽量压缩）。 */

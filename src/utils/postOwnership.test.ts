@@ -16,9 +16,16 @@ describe('isCurrentUserPostAuthor', () => {
     mockGetClientUserName.mockReset();
   });
 
-  it('matches by userId', () => {
+  it('matches by userId when post has userId', () => {
     mockGetClientUserId.mockReturnValue('user-abc');
     expect(isCurrentUserPostAuthor('Someone', 'user-abc')).toBe(true);
+    expect(isCurrentUserPostAuthor('Someone', 'user-other')).toBe(false);
+  });
+
+  it('does not match by display name when post has a different userId', () => {
+    mockGetClientUserId.mockReturnValue('user-abc');
+    mockGetClientUserName.mockReturnValue('Zara Chen');
+    expect(isCurrentUserPostAuthor('Zara Chen', 'user-other')).toBe(false);
   });
 
   it('matches by author name first token', () => {

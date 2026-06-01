@@ -7,6 +7,15 @@ const mockGetClientUserPhone = vi.fn(() => '');
 
 vi.mock('./requestContext', () => ({
   hasAuthenticatedRequest: () => mockHasAuthenticatedRequest(),
+  demoActorQueryParams: () => ({ userId: 'demo-id' }),
+  ownerQueryParams: () => (mockHasAuthenticatedRequest() ? {} : { userId: 'demo-id' }),
+  mergeOwnerQueryParams: (extra?: Record<string, string>) => ({
+    ...(mockHasAuthenticatedRequest() ? {} : { userId: 'demo-id' }),
+    ...extra,
+  }),
+  ownerQueryParamsWithActivity: () => ({}),
+  notificationQueryParams: () => undefined,
+  resolveRequestUserId: () => 'demo-id',
 }));
 
 vi.mock('../utils/session', () => ({
@@ -15,9 +24,9 @@ vi.mock('../utils/session', () => ({
   getClientUserPhone: () => mockGetClientUserPhone(),
 }));
 
-import { buildAiChatWsSendActor } from './aiChatActor';
+import { buildAiChatWsSendActor, getRequestActor } from './requestActor';
 
-describe('buildAiChatWsSendActor', () => {
+describe('requestActor', () => {
   beforeEach(() => {
     mockHasAuthenticatedRequest.mockReturnValue(false);
     mockGetClientUserId.mockReturnValue('demo-id');
@@ -25,14 +34,23 @@ describe('buildAiChatWsSendActor', () => {
     mockGetClientUserPhone.mockReturnValue('');
   });
 
-  it('includes userId and userName when not authenticated', () => {
+  it('getRequestActor returns demo fields when not authenticated', () => {
+    expect(getRequestActor()).toEqual({
+      isAuthenticated: false,
+      userId: 'demo-id',
+      displayName: 'Demo User',
+      userPhone: '',
+    });
+  });
+
+  it('buildAiChatWsSendActor includes userId and userName when not authenticated', () => {
     expect(buildAiChatWsSendActor()).toEqual({
       userId: 'demo-id',
       userName: 'Demo User',
     });
   });
 
-  it('omits userId and userName when authenticated', () => {
+  it('buildAiChatWsSendActor omits userId and userName when authenticated', () => {
     mockHasAuthenticatedRequest.mockReturnValue(true);
     mockGetClientUserPhone.mockReturnValue('13800138000');
     expect(buildAiChatWsSendActor()).toEqual({ userPhone: '13800138000' });

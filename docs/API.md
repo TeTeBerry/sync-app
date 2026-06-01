@@ -18,8 +18,9 @@ GET /api/profile?userId=...
 DELETE /api/posts/:id?userId=...
 ```
 
-前端：[`api/requestContext.ts`](../src/api/requestContext.ts) 中 `demoActorQueryParams()` / `ownerQueryParams()`。  
-AI 聊天 **WebSocket**：upgrade 可带 `Authorization: Bearer`；已登录时 `send` body **可不传** `userId`/`userName`（后端从 JWT 解析 actor）。无 token 时 body 仍须 `userId`（demo）。
+前端：[`api/requestContext.ts`](../src/api/requestContext.ts) 中 `demoActorQueryParams()` / `ownerQueryParams()`；聚合入口 [`api/requestActor.ts`](../src/api/requestActor.ts)。  
+Query **`authorName`**（demo）：**已废弃**，仅兼容旧客户端；新接入只传 `userId`。  
+AI 聊天 **WebSocket**：upgrade 可带 `Authorization: Bearer`；已登录时 `send` body **可不传** `userId`/`userName`。无效 Bearer → REST 401 / WS `error`（见 [`constants/authMessages.ts`](../src/constants/authMessages.ts)）。
 
 ## 已登录（Bearer）
 

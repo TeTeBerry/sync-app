@@ -18,7 +18,7 @@ REST 与 React Query 的分层约定，便于 P0 鉴权时只改少数入口。
 | **REST** | 不传 demo Query；后端 `JwtActorMiddleware` 将 JWT `sub` / `name` 写入 `req.query` | `demoActorQueryParams()` → `{ userId }` only |
 | **AI WebSocket** | Upgrade `Authorization: Bearer`；`send` body **可不传** `userId`/`userName`（后端从 JWT 解析 actor，见 `buildAiChatWsSendActor()`） | body 须 `userId`（demo）；可选 `userName` / `userPhone` |
 
-无效 JWT：middleware 校验失败时不改 query，请求可能落到 demo 或 anonymous（通知无 `userId` 时为 `anonymous`）。
+无效 JWT：请求头含 **非空 Bearer** 但校验失败 → REST **401**（`登录已过期，请重新登录`），**不**与 demo Query 混用；WS 在 `connect`/`send` 时返回同文案 `error` 帧并关闭连接。
 
 辅助函数：
 
@@ -68,6 +68,7 @@ REST 与 React Query 的分层约定，便于 P0 鉴权时只改少数入口。
 - [x] 删除 `session.ownerParams()`；REST 统一走 `api/sync` + `requestContext`
 
 - [x] AI WebSocket JWT actor（upgrade Bearer；`ai-chat-ws-actor` / `buildAiChatWsSendActor`）
+- [x] 无效 Bearer → REST 401 + WS error（B2）；`useRequestActor` / `api/requestActor.ts`（F1）
 
 后续（可选）：地图他人帖 `GET /profile/posts`（需后端 actor/owner 分离，前端暂不排）。
 

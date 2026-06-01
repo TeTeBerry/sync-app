@@ -17,8 +17,10 @@ import {
   formatAiChatToastError,
 } from '../../utils/aiChatErrors';
 import { buildApiChatHistory } from '../../utils/aiChatHistory';
-import { buildAiChatWsSendActor } from '../../api/aiChatActor';
-import { streamAiChatWs } from '../../utils/aiChatWs';
+import { buildAiChatWsSendActor } from '../../api/requestActor';
+import { handleApiUnauthorized } from '../../api/handleApiUnauthorized';
+import { closeAiChatWsConnection, streamAiChatWs } from '../../utils/aiChatWs';
+import { shouldClearSessionOnWsError } from '../../utils/wsAuthError';
 import { mockAiChatStream } from '../../utils/aiChatStream';
 import type { TypewriterReveal } from '../../utils/typewriterReveal';
 
@@ -167,6 +169,10 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
         if (event.type === 'error') {
           if (process.env.NODE_ENV !== 'production') {
             console.warn('[AI chat] stream error:', event.message);
+          }
+          if (shouldClearSessionOnWsError(event.message)) {
+            closeAiChatWsConnection('session expired');
+            handleApiUnauthorized(event.message);
           }
           typewriter.flush();
           finishAiMessage((message) => ({

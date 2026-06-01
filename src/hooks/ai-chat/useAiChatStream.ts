@@ -7,11 +7,7 @@ import type {
   ChatUiMessage,
   SendChatOptions,
 } from '../../types/aiChat';
-import {
-  getClientUserId,
-  getClientUserName,
-  getClientUserPhone,
-} from '../../utils/session';
+import { getRequestActor } from '../../api/requestActor';
 import { formatAiChatToastError } from '../../utils/aiChatErrors';
 import { createMessageId } from './createMessageId';
 import { useChatSession } from './useChatSession';
@@ -84,9 +80,9 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
     welcomeText,
     sessionId: sessionIdOption,
     activityLegacyId,
-    userId: userIdOption ?? getClientUserId(),
-    userName: userNameOption ?? getClientUserName(),
-    userPhone: userPhoneOption ?? getClientUserPhone(),
+    userId: userIdOption ?? getRequestActor().userId,
+    userName: userNameOption ?? getRequestActor().displayName,
+    userPhone: userPhoneOption ?? getRequestActor().userPhone,
   });
 
   const wsUrl = wsUrlOption ?? apiUrlDeprecated ?? AI_CHAT_WS_URL;
