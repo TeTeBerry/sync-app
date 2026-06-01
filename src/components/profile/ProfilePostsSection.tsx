@@ -12,11 +12,11 @@ import {
   Trash2,
   X,
 } from 'lucide-react-taro';
-import { ContentTypeBadge } from '../../../components/ContentTypeBadge';
-import { PostStatusBadge } from '../../../components/PostStatusBadge';
-import { ProfileCollapsibleSection } from '../../../components/profile/ProfileCollapsibleSection';
-import type { ProfilePostItem } from '../../../types/backend';
-import { POST_ACTION_ICON_COLOR } from '../../../utils/postActionColors';
+import { ContentTypeBadge } from '../ContentTypeBadge';
+import { PostStatusBadge } from '../PostStatusBadge';
+import { ProfileCollapsibleSection } from './ProfileCollapsibleSection';
+import type { ProfilePostItem } from '../../types/backend';
+import { POST_ACTION_ICON_COLOR } from '../../utils/postActionColors';
 import { Button, Text, Textarea, View } from '@tarojs/components';
 
 const POST_BODY_MAX = 200;

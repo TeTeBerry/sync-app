@@ -5,7 +5,11 @@ import type { NavigationState } from '../stores/navigationStore';
 import type { AiAssistantNavIntent } from '../stores/types';
 import type { NotificationMeta } from '../types/backend';
 import { parseActivityLegacyId } from './activityLegacyId';
-import { buildQueryString, normalizeQueryString } from './queryString';
+import {
+  buildQueryString,
+  normalizeQueryString,
+  parseQueryString,
+} from './queryString';
 import { getCacheData } from '../hooks/useApiQuery';
 import { findBackendActivityByLegacyId } from './apiMappers';
 import { seedActivityDetailCache } from './activityDetailCache';
@@ -17,6 +21,8 @@ import {
   preloadStackSubpackages,
 } from './subpackagePreload';
 import type { BackendActivity } from '../types/backend';
+import { isAuthGated, requireAuth } from './authGate';
+import type { LoginInterceptFeature } from '../stores/loginInterceptStore';
 
 export { parseActivityLegacyId } from './activityLegacyId';
 
@@ -274,8 +280,38 @@ export function endRouteTransition() {
   useNavigationStore.getState().endRouteTransition();
 }
 
+const AUTH_PROTECTED_ROUTES: Partial<Record<RoutePath, LoginInterceptFeature>> = {
+  [ROUTES.AI_ASSISTANT]: 'ai_match',
+  [ROUTES.NOTIFICATIONS]: 'notification',
+  [ROUTES.PROFILE_ACTIVITIES]: 'activity',
+  [ROUTES.PROFILE_POSTS]: 'post',
+  [ROUTES.PROFILE_BENEFITS]: 'benefits',
+  [ROUTES.EXCLUSIVE_ITINERARY]: 'activity',
+  [ROUTES.MY_ITINERARY]: 'activity',
+};
+
+function loginFeatureForUrl(url: string): LoginInterceptFeature | null {
+  const [rawPath = '', rawQuery = ''] = url.split('?');
+  const path = normalizePath(rawPath) as RoutePath;
+
+  if (path === ROUTES.SETTINGS) {
+    const section = parseQueryString(rawQuery).section;
+    if (section === 'notifications') return 'notification';
+    if (section === 'privacy') return 'benefits';
+    return null;
+  }
+
+  return AUTH_PROTECTED_ROUTES[path] ?? null;
+}
+
 function navigateToSafe(url: string, _options?: { eventId?: number }) {
   if (shouldSkipNavigation(url)) {
+    return;
+  }
+
+  const loginFeature = loginFeatureForUrl(url);
+  if (loginFeature && isAuthGated()) {
+    requireAuth(() => navigateToSafe(url, _options), loginFeature);
     return;
   }
 
@@ -374,6 +410,22 @@ export function go(url: RoutePath | string) {
   navigateToSafe(url);
 }
 
+/** Query params for event-detail; keep `id` + `activityLegacyId` in sync for preload/navigate. */
+export function buildEventDetailQuery(
+  legacyId: number,
+  options?: { postId?: string },
+): Record<string, string> {
+  const query: Record<string, string> = {
+    id: String(legacyId),
+    activityLegacyId: String(legacyId),
+  };
+  const postId = options?.postId?.trim();
+  if (postId) {
+    query.postId = postId;
+  }
+  return query;
+}
+
 export function goEventDetail(eventId: number | string, options?: { postId?: string }) {
   const legacyId = parseActivityLegacyId(eventId);
   if (legacyId == null) {
@@ -388,16 +440,8 @@ export function goEventDetail(eventId: number | string, options?: { postId?: str
     seedActivityDetailCache(fromList);
   }
   useNavigationStore.getState().setActiveActivityLegacyId(legacyId);
-  const query: Record<string, string> = {
-    id: String(legacyId),
-    activityLegacyId: String(legacyId),
-  };
-  const postId = options?.postId?.trim();
-  if (postId) {
-    query.postId = postId;
-  }
+  const query = buildEventDetailQuery(legacyId, options);
   preloadEventSubpackage();
-  preloadPageSafe(ROUTES.EVENT_DETAIL, query);
   navigateToSafe(buildPageUrl(ROUTES.EVENT_DETAIL, query), {
     eventId: legacyId,
   });
@@ -503,8 +547,10 @@ export function goProfileBenefits() {
 
 /** Profile tab with package upgrade sheet open. */
 export function goProfileUpgrade() {
-  useNavigationStore.getState().setProfileIntent({ openPackageSheet: true });
-  switchTabTo(ROUTES.PROFILE);
+  requireAuth(() => {
+    useNavigationStore.getState().setProfileIntent({ openPackageSheet: true });
+    switchTabTo(ROUTES.PROFILE);
+  }, 'benefits');
 }
 
 export type GoAiAssistantOptions = Pick<

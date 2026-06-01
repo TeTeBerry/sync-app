@@ -132,7 +132,10 @@ export const EXCLUSIVE_ITINERARY_DJS: ExclusiveItineraryDj[] = [
   },
 ];
 
-/** Offline conflict preview — single main stage has no overlaps; use API when enabled. */
+/**
+ * Offline conflict preview — overlaps aligned with festival seed times.
+ * Default selection (marshmello + illenium) has no conflict; add eric-prydz or excision to demo.
+ */
 export const EXCLUSIVE_ITINERARY_MOCK_CONFLICT_SLOTS: Array<{
   artistId: string;
   artistName: string;
@@ -142,4 +145,45 @@ export const EXCLUSIVE_ITINERARY_MOCK_CONFLICT_SLOTS: Array<{
   startTime: string;
   endTime: string;
   stageLabel: string;
-}> = [];
+}> = [
+  {
+    artistId: 'excision',
+    artistName: 'EXCISION',
+    dateKey: 'jun13',
+    startMinutes: 19 * 60,
+    endMinutes: 20 * 60 + 45,
+    startTime: '19:00',
+    endTime: '20:45',
+    stageLabel: '主舞台',
+  },
+  {
+    artistId: 'marshmello',
+    artistName: 'MARSHMELLO',
+    dateKey: 'jun13',
+    startMinutes: 20 * 60 + 30,
+    endMinutes: 22 * 60,
+    startTime: '20:30',
+    endTime: '22:00',
+    stageLabel: '主舞台',
+  },
+  {
+    artistId: 'eric-prydz',
+    artistName: 'ERIC PRYDZ',
+    dateKey: 'jun14',
+    startMinutes: 19 * 60,
+    endMinutes: 20 * 60 + 45,
+    startTime: '19:00',
+    endTime: '20:45',
+    stageLabel: '主舞台',
+  },
+  {
+    artistId: 'illenium',
+    artistName: 'ILLENIUM',
+    dateKey: 'jun14',
+    startMinutes: 20 * 60 + 20,
+    endMinutes: 22 * 60,
+    startTime: '20:20',
+    endTime: '22:00',
+    stageLabel: '主舞台',
+  },
+];

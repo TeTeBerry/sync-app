@@ -15,6 +15,9 @@ import {
   MOCK_LIVE_INFO_CERT_COUNT,
   MOCK_LIVE_INFO_FEED,
   MOCK_LIVE_INFO_SUMMARY,
+  resolveLiveInfoCertCount,
+  resolveLiveInfoFeed,
+  resolveLiveInfoSummary,
   type LiveInfoFeedItem,
   type LiveInfoSummaryRow,
 } from './liveInfoMock';
@@ -119,17 +122,10 @@ export function useEventLiveInfo(
   const applySnapshot = useCallback(
     (snap: Awaited<ReturnType<typeof fetchLiveInfoSnapshot>>) => {
       applyViewer(snap?.viewer);
-      setSummary(
-        Array.isArray(snap?.summary) && snap.summary.length > 0
-          ? snap.summary
-          : MOCK_LIVE_INFO_SUMMARY,
-      );
-      setCertCount(
-        typeof snap?.certCount === 'number'
-          ? snap.certCount
-          : MOCK_LIVE_INFO_CERT_COUNT,
-      );
-      setFeed(Array.isArray(snap?.feed) ? snap.feed : MOCK_LIVE_INFO_FEED);
+      const feed = resolveLiveInfoFeed(snap?.feed);
+      setSummary(resolveLiveInfoSummary(snap?.summary));
+      setCertCount(resolveLiveInfoCertCount(snap?.certCount, snap?.feed));
+      setFeed(feed);
     },
     [applyViewer],
   );
@@ -142,6 +138,9 @@ export function useEventLiveInfo(
         const snap = await fetchLiveInfoSnapshot(eventId);
         applySnapshot(snap);
       } catch {
+        setSummary(MOCK_LIVE_INFO_SUMMARY);
+        setCertCount(MOCK_LIVE_INFO_CERT_COUNT);
+        setFeed(MOCK_LIVE_INFO_FEED);
         void Taro.showToast({ title: '加载实时资讯失败', icon: 'none' });
       } finally {
         if (!opts?.silent) setLoading(false);

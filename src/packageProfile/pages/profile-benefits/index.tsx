@@ -1,14 +1,16 @@
-import '../../../pages/profile/profile.scss';
+import '../../../components/profile/profile.scss';
 import Taro, { useDidShow } from '@tarojs/taro';
 import React, { useCallback, useMemo, useState } from 'react';
 import PageNavigation from '../../../components/PageNavigation';
-import ProfilePackageSheet from '../../../pages/profile/components/ProfilePackageSheet';
-import ProfilePaidBenefitsSection from '../../../pages/profile/components/ProfilePaidBenefitsSection';
-import { profileActivities } from '../../../pages/profile/mockData';
-import { getNextTierId } from '../../../pages/profile/profileBenefitsMapper';
-import type { ProfileEventBenefitCardModel } from '../../../pages/profile/profileBenefitsMapper';
-import type { PackageTierId } from '../../../pages/profile/profilePackageData';
-import { useProfilePaidBenefitCards } from '../../../pages/profile/useProfilePaidBenefitCards';
+import {
+  getNextTierId,
+  ProfilePackageSheet,
+  ProfilePaidBenefitsSection,
+  profileActivities,
+  useProfilePaidBenefitCards,
+  type PackageTierId,
+  type ProfileEventBenefitCardModel,
+} from '../../../components/profile';
 import { isApiEnabled } from '../../../constants/api';
 import { useProfileActivitiesQuery } from '../../../hooks/useSyncApi';
 import { useStackPageMainHeight } from '../../../hooks/useTabPageMainHeight';

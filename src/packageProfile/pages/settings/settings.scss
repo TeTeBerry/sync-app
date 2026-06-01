@@ -74,7 +74,9 @@
   }
 }
 
-.s-settings__option {
+/* Override app.scss button[class*='s-'] { justify-content: center } */
+button.s-settings__option,
+button[type='default'].s-settings__option {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -84,6 +86,7 @@
   background: transparent;
   cursor: pointer;
   text-align: left;
+  box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
 
   &:not(:last-child) {
@@ -96,6 +99,12 @@
 
   &--selected .s-settings__option-label {
     color: var(--primary);
+  }
+
+  > view:first-child {
+    flex: 1;
+    min-width: 0;
+    text-align: left;
   }
 }
 

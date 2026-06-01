@@ -1,4 +1,5 @@
 import Taro from '@tarojs/taro';
+import { getAuthUserId, getAuthUserName } from './authStorage';
 
 const SESSION_KEY = 'sync_ai_session';
 const ACTIVITY_SESSION_KEY_PREFIX = 'sync_ai_session_activity_';
@@ -68,15 +69,19 @@ export function createFreshActivitySessionId(activityLegacyId: number): string {
   return createFreshStoredSessionId(activitySessionStorageKey(activityLegacyId));
 }
 
-/** 客户端用户标识（带缓存） */
+/** 客户端用户标识（带缓存）；已登录时优先 JWT 用户 id */
 export function getClientUserId(): string {
+  const authId = getAuthUserId();
+  if (authId) return authId;
   if (cachedUserId) return cachedUserId;
   cachedUserId = getOrCreateSessionId();
   return cachedUserId;
 }
 
-/** 客户端展示名称（带缓存） */
+/** 客户端展示名称（带缓存）；已登录时优先服务端用户名 */
 export function getClientUserName(): string {
+  const authName = getAuthUserName();
+  if (authName) return authName;
   if (cachedUserName) return cachedUserName;
   try {
     const stored = Taro.getStorageSync(USER_NAME_KEY);

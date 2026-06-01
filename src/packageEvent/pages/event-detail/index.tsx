@@ -27,8 +27,10 @@ import { usePageRouteReady } from '../../../hooks/usePageRouteReady';
 import { useDeferredMount } from '../../../hooks/useDeferredMount';
 import { DEFER_EVENT_POSTS_MS } from '../../../utils/timing';
 import { useNavigationStore } from '../../../stores/navigationStore';
-import { ContactUnlockQuotaExhaustedModal } from '../../../components/contact-unlock/ContactUnlockQuotaExhaustedModal';
-import ProfilePackageSheet from '../../../pages/profile/components/ProfilePackageSheet';
+import { LoginInterceptHost } from '../../../components/auth/LoginInterceptHost';
+import { EventDetailComposerSection } from './components/EventDetailComposerSection';
+import { EventDetailEntitlementModals } from './components/EventDetailEntitlementModals';
+import { pickGlobalFreeMonthly } from '../../../components/profile';
 import { useContactUnlockQuota } from '../../../hooks/useContactUnlockQuota';
 import {
   applyToPostAndInvalidate,
@@ -39,13 +41,12 @@ import {
   useCurrentUserQuery,
   useProfileEntitlementsQuery,
 } from '../../../hooks/useSyncApi';
-import { pickGlobalFreeMonthly } from '../../../pages/profile/profileBenefitsMapper';
 import type { PackageTierId } from '../../../types/backend';
 import { resolveProfileEntitlement } from '../../../utils/profileEntitlement';
-import { invalidateProfilePackageState } from '../../../utils/queryInvalidation';
 import { useEventPostsInfiniteQuery } from '../../../hooks/useEventPostsInfiniteQuery';
 import { consumeContactUnlockWithQuota } from '../../../utils/contactUnlockEntitlement';
 import { isApiEnabled } from '../../../constants/api';
+import { requireAuth } from '../../../utils/authGate';
 import type { EventDetailPost } from '../../../types/backend';
 import { isAiShortcutTag, recordAiShortcutTagUse } from '../../../utils/aiShortcutTags';
 import {
@@ -55,10 +56,7 @@ import {
 import { formatPostPublishTime } from '../../../utils/formatPostPublishTime';
 import { sanitizeImageList, sanitizeRemoteImageUrl } from '../../../utils/imageUrl';
 import { EventPostsVirtualList } from './components/EventPostsVirtualList';
-import {
-  EventDetailContentTabs,
-  type EventDetailTabId,
-} from './components/EventDetailContentTabs';
+import type { EventDetailTabId } from './components/EventDetailContentTabs';
 import { MOCK_LIVE_INFO_FEED } from './liveInfoMock';
 import PageNavigation, {
   stackPageNavChromePx,
@@ -69,9 +67,8 @@ import { scrollElementToCenter } from '../../../utils/scrollToCenter';
 import { useResolvedProfile } from '../../../hooks/useResolvedProfile';
 import { usePostPageShare } from '../../../hooks/usePostPageShare';
 import type { PostSharePayload } from '../../../utils/postShare';
-import { Button, ScrollView, Text, View } from '@tarojs/components';
-import { EventDetailAiMatchCard } from './components/EventDetailAiMatchCard';
-import { EventDetailExclusiveItineraryButton } from './components/EventDetailExclusiveItineraryButton';
+import { Button } from '../../../components/ui';
+import { ScrollView, Text, View } from '@tarojs/components';
 import { EventLiveInfoUpdateSheet } from './components/EventLiveInfoUpdateSheet';
 import type { EventLiveInfoTabActions } from './live/EventLiveInfoTab';
 import type { PublishLiveInfoPayload } from './useEventLiveInfo';
@@ -224,8 +221,19 @@ const EventDetailPage = () => {
 
   usePostPageShare({ getDefaultShare });
   const activityStatus = getActivityStatusFromActivity(activityDate, title);
-  const showHeaderSkeleton = !title && activityQuery.isLoading;
-  const routeContentReady = Boolean(title) || showHeaderSkeleton;
+  const hasValidEventId = Number.isFinite(eventId) && eventId > 0;
+  const showHeaderSkeleton =
+    hasValidEventId &&
+    !title &&
+    !activityQuery.isError &&
+    (activityQuery.isLoading || activityQuery.data === undefined);
+  const showActivityMissing =
+    hasValidEventId &&
+    !title &&
+    !activityQuery.isLoading &&
+    !showHeaderSkeleton &&
+    (activityQuery.isError || activityQuery.data === null);
+  const routeContentReady = Boolean(title) || showHeaderSkeleton || showActivityMissing;
   usePageRouteReady(routeContentReady);
 
   const handleBack = useCallback(() => {
@@ -285,6 +293,7 @@ const EventDetailPage = () => {
         return;
       }
 
+      const runApply = () => {
       void applyToPostAndInvalidate(postId)
         .then(async (result) => {
           if (!result.alreadyApplied) {
@@ -300,6 +309,9 @@ const EventDetailPage = () => {
           void Taro.showToast({ title: toastTitle, icon: 'success' });
         })
         .catch(() => void Taro.showToast({ title: '申请失败', icon: 'none' }));
+      };
+
+      requireAuth(runApply, 'post');
     },
     [
       appliedPostIds,
@@ -311,14 +323,16 @@ const EventDetailPage = () => {
 
   const handleLikePost = useCallback(
     (postId: string) => {
-      if (!apiEnabled) return;
-      void likePostAndInvalidate(postId)
-        .then((updated) => {
-          postsQuery.patchItem(updated);
-        })
-        .catch(
-          () => void Taro.showToast({ title: '请求失败，请稍后重试', icon: 'none' }),
-        );
+      requireAuth(() => {
+        if (!apiEnabled) return;
+        void likePostAndInvalidate(postId)
+          .then((updated) => {
+            postsQuery.patchItem(updated);
+          })
+          .catch(
+            () => void Taro.showToast({ title: '请求失败，请稍后重试', icon: 'none' }),
+          );
+      }, 'social');
     },
     [apiEnabled, postsQuery],
   );
@@ -469,7 +483,7 @@ const EventDetailPage = () => {
     );
   }
 
-  if (!activityQuery.isLoading && !title) {
+  if (showActivityMissing) {
     return (
       <View className="s-event-detail s-page-with-tabbar">
         <View className="s-event-detail__fallback">活动不存在</View>
@@ -534,31 +548,19 @@ const EventDetailPage = () => {
           style={scrollHeight != null ? { height: `${scrollHeight}px` } : undefined}
         >
           <View className="s-event-detail__scroll-inner">
-            {showHeaderSkeleton ? (
-              <ThemedPageLoader variant="skeleton-event" minHeight={360} />
-            ) : null}
-            {!showHeaderSkeleton && composerReady ? (
-              <EventDetailAiMatchCard
-                prompt={prompt}
-                onPromptChange={setPrompt}
-                onSubmit={() => openAi(prompt)}
-                onTagClick={handleShortcutTag}
-              />
-            ) : null}
-
-            {!showHeaderSkeleton ? (
-              <View className="s-event-detail__feed-section">
-                <EventDetailExclusiveItineraryButton
-                  onPress={handleOpenExclusiveItinerary}
-                />
-                <EventDetailContentTabs
-                  active={contentTab}
-                  postsCount={postItems.length}
-                  liveCount={liveFeedCount}
-                  onChange={setContentTab}
-                />
-              </View>
-            ) : null}
+            <EventDetailComposerSection
+              showHeaderSkeleton={showHeaderSkeleton}
+              composerReady={composerReady}
+              prompt={prompt}
+              onPromptChange={setPrompt}
+              onAiSubmit={() => openAi(prompt)}
+              onShortcutTag={handleShortcutTag}
+              onOpenExclusiveItinerary={handleOpenExclusiveItinerary}
+              contentTab={contentTab}
+              onContentTabChange={setContentTab}
+              postsCount={postItems.length}
+              liveCount={liveFeedCount}
+            />
 
             {!showHeaderSkeleton && contentTab === 'posts' ? (
               <View className="s-event-detail__posts">
@@ -617,25 +619,18 @@ const EventDetailPage = () => {
         </ScrollView>
       </View>
       {confirmDialog}
-      <ContactUnlockQuotaExhaustedModal
-        open={contactUnlockExhaustedOpen}
-        onClose={closeContactUnlockExhaustedModal}
-        onUpgrade={openPackageUpgradeSheet}
+      <LoginInterceptHost />
+      <EventDetailEntitlementModals
+        eventId={eventId}
+        contactUnlockExhaustedOpen={contactUnlockExhaustedOpen}
+        onCloseContactUnlockExhausted={closeContactUnlockExhaustedModal}
+        onUpgradeFromContactUnlock={openPackageUpgradeSheet}
         currentPaidTierId={currentPaidTierId}
         freeMonthly={freeMonthly}
+        packageSheetOpen={packageSheetOpen}
+        packageSheetInitialTierId={packageSheetInitialTierId}
+        onClosePackageSheet={closePackageUpgradeSheet}
       />
-      {packageSheetOpen ? (
-        <ProfilePackageSheet
-          open
-          activityLegacyId={eventId}
-          initialSelectedTierId={packageSheetInitialTierId}
-          currentPaidTierId={currentPaidTierId ?? undefined}
-          onClose={closePackageUpgradeSheet}
-          onPurchaseSuccess={() => {
-            void invalidateProfilePackageState();
-          }}
-        />
-      ) : null}
       {contentTab === 'live' && liveUpdateSheetOpen ? (
         <EventLiveInfoUpdateSheet
           open

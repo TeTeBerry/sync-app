@@ -1,9 +1,9 @@
 import './ProfilePaidBenefitsSection.scss';
 import React from 'react';
 import { ChevronRight, Zap } from 'lucide-react-taro';
-import type { ProfileEventBenefitCardModel } from '../profileBenefitsMapper';
+import type { ProfileEventBenefitCardModel } from './profileBenefitsMapper';
 import ProfileEventBenefitCard from './ProfileEventBenefitCard';
-import ThemedPageLoader from '../../../components/ThemedPageLoader';
+import ThemedPageLoader from '../ThemedPageLoader';
 import { Text, View } from '@tarojs/components';
 
 export type ProfilePaidBenefitsSectionProps = {

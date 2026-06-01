@@ -14,29 +14,29 @@ import {
   Ticket,
   X,
 } from 'lucide-react-taro';
-import { useOverlayLock } from '../../../hooks/useOverlayLock';
+import { useOverlayLock } from '../../hooks/useOverlayLock';
 import {
   useProfilePackagesQuery,
   purchaseProfilePackageAndInvalidate,
-} from '../../../hooks/useSyncApi';
-import { isApiEnabled } from '../../../constants/api';
+} from '../../hooks/useSyncApi';
+import { isApiEnabled } from '../../constants/api';
 import {
   isBoundActivityLegacyId,
   MOCK_PACKAGE_CATALOG,
   PACKAGE_SHEET_ACTIVITY_STEP,
   resolvePackageActivityPayCta,
   resolvePackageTierStepCta,
-} from '../profilePackageData';
+} from './profilePackageData';
 import type {
   PackageFeatureDefinition,
   PackageFeatureIcon,
   PackageTierDefinition,
   PackageTierId,
   ProfileActivityItem,
-} from '../../../types/backend';
-import { compareActivitiesNearestFirst } from '../../../utils/activityStatus';
-import { safeTrim } from '../../../utils/safeString';
-import { ImageWithFallback } from '../../../components/ImageWithFallback';
+} from '../../types/backend';
+import { compareActivitiesNearestFirst } from '../../utils/activityStatus';
+import { safeTrim } from '../../utils/safeString';
+import { ImageWithFallback } from '../ImageWithFallback';
 import { ScrollView, Text, View } from '@tarojs/components';
 
 const FEATURE_ICONS: Record<PackageFeatureIcon, typeof Sparkles> = {

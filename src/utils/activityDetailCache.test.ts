@@ -3,6 +3,7 @@ import { getCacheData } from '../hooks/useApiQuery';
 import {
   seedActivityDetailCache,
   seedActivityDetailFromEventCard,
+  seedActivityDetailFromFeaturedEvent,
 } from './activityDetailCache';
 
 describe('activityDetailCache', () => {
@@ -22,6 +23,30 @@ describe('activityDetailCache', () => {
 
     const cached = getCacheData<{ name: string }>(['activities', 'detail', 42]);
     expect(cached?.name).toBe('Test Fest');
+  });
+
+  it('seeds detail cache from home featured event', () => {
+    seedActivityDetailFromFeaturedEvent({
+      id: 9,
+      legacyId: 9,
+      title: 'Home Fest',
+      date: '06/01',
+      venue: 'Shanghai',
+      distance: '',
+      isHot: true,
+      attendeeCount: '10+',
+      remaining: '',
+      guests: [],
+      going: false,
+    });
+
+    const cached = getCacheData<{ name: string; location?: string }>([
+      'activities',
+      'detail',
+      9,
+    ]);
+    expect(cached?.name).toBe('Home Fest');
+    expect(cached?.location).toBe('Shanghai');
   });
 
   it('merges into existing detail cache', () => {

@@ -3,7 +3,8 @@ import { useDidShow } from '@tarojs/taro';
 import React, { useCallback, useMemo, useState } from 'react';
 import { Search, TrendingUp } from 'lucide-react-taro';
 import TabPageHeader from '../../components/TabPageHeader';
-import { View, Text, Input, Button, ScrollView } from '@tarojs/components';
+import { Button } from '../../components/ui';
+import { View, Text, Input, ScrollView } from '@tarojs/components';
 import { useEndRouteTransitionOnShow } from '../../hooks/useEndRouteTransitionOnShow';
 import { useNavBarInsets } from '../../hooks/useNavBarInsets';
 import { useTabPageMainHeight } from '../../hooks/useTabPageMainHeight';
@@ -12,7 +13,7 @@ import { ListState } from '../../components/ListState';
 import ThemedPageLoader from '../../components/ThemedPageLoader';
 import { seedActivityDetailFromEventCard } from '../../utils/activityDetailCache';
 import { preloadEventSubpackage } from '../../utils/subpackagePreload';
-import { preloadPageSafe, ROUTES } from '../../utils/route';
+import { buildEventDetailQuery, preloadPageSafe, ROUTES } from '../../utils/route';
 import { useEventList } from '../../hooks/useSyncApi';
 import { resolveEventCardLegacyId } from '../../utils/apiMappers';
 import { goEventDetail, preloadHotRoutes } from '../../utils/route';
@@ -56,7 +57,7 @@ const Events: React.FC = () => {
       return;
     }
     preloadEventSubpackage();
-    preloadPageSafe(ROUTES.EVENT_DETAIL, { activityLegacyId: String(id) });
+    preloadPageSafe(ROUTES.EVENT_DETAIL, buildEventDetailQuery(id));
   }, []);
 
   const openDetail = useCallback(

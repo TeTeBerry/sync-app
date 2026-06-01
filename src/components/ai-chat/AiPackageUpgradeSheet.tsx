@@ -9,8 +9,7 @@ import {
   useProfilePackagesQuery,
 } from '../../hooks/useSyncApi';
 import { isApiEnabled } from '../../constants/api';
-import { MOCK_PACKAGE_CATALOG } from '../../pages/profile/profilePackageData';
-import { packageTierCtaLabel } from '../../pages/profile/profilePackageData';
+import { MOCK_PACKAGE_CATALOG, packageTierCtaLabel } from '../profile';
 import type {
   PackageFeatureIcon,
   PackageTierDefinition,

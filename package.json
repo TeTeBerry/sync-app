@@ -7,10 +7,10 @@
   },
   "scripts": {
     "dev:h5": "taro build --type h5 --watch",
-    "predev:weapp": "node scripts/sync-weapp-env.mjs",
+    "predev:weapp": "node scripts/sync-weapp-env.mjs && node scripts/sync-weapp-project-config.mjs",
     "dev:weapp": "taro build --type weapp --watch",
     "build:h5": "taro build --type h5",
-    "prebuild:weapp": "node scripts/sync-weapp-env.mjs",
+    "prebuild:weapp": "node scripts/sync-weapp-env.mjs && node scripts/sync-weapp-project-config.mjs",
     "build:weapp": "taro build --type weapp",
     "clean:weapp": "rm -rf dist-weapp",
     "build:weapp:size": "npm run build:weapp && npm run size:weapp",

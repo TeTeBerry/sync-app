@@ -4,7 +4,9 @@ import { hydrateHomeCachesFromStorage } from './utils/homeCacheStorage';
 hydrateHomeCachesFromStorage();
 
 import './app.scss';
-import { useLaunch } from '@tarojs/taro';
+import Taro, { useLaunch } from '@tarojs/taro';
+import { ensureAuth } from './utils/auth';
+import { isApiEnabled } from './constants/api';
 import { View } from '@tarojs/components';
 import { LucideTaroProvider } from 'lucide-react-taro';
 import type { PropsWithChildren } from 'react';
@@ -14,6 +16,13 @@ import { preloadEventSubpackage } from './utils/subpackagePreload';
 
 export default function App({ children }: PropsWithChildren) {
   useLaunch(() => {
+    if (isApiEnabled()) {
+      void ensureAuth().catch((error) => {
+        const message =
+          error instanceof Error ? error.message : '登录失败，请稍后重试';
+        console.warn('[auth] ensureAuth failed:', message);
+      });
+    }
     preloadEventSubpackage();
     preloadHotRoutes();
   });

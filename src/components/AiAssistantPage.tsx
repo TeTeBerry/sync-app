@@ -5,6 +5,7 @@ import { CalendarDays, Sparkles, Zap } from 'lucide-react-taro';
 import Taro, { useDidShow } from '@tarojs/taro';
 import { invalidateCache } from '../hooks/useApiQuery';
 import { useAiChatStream } from '../hooks/useAiChatStream';
+import { getAuthHeaders } from '../utils/authStorage';
 import { useResolvedProfile } from '../hooks/useResolvedProfile';
 import { invalidatePostQueries, useActivityDetailQuery } from '../hooks/useSyncApi';
 import { useNavigationStore } from '../stores';
@@ -91,6 +92,7 @@ function AiAssistantChat({
     mockReply,
     streamErrorText: '抱歉，回复出错了，请稍后再试。',
     activityLegacyId,
+    getAuthHeaders,
     onPostCreated: async (event) => {
       await invalidatePostQueries();
       const scopedId = event.activityLegacyId ?? activityLegacyId;

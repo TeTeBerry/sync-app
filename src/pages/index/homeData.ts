@@ -1,5 +1,3 @@
-import type { AuthorGender } from '../../utils/inferAuthorGender';
-
 export type CountdownPart = {
   value: string;
   unit: string;
@@ -7,23 +5,3 @@ export type CountdownPart = {
 };
 
 export type { FeaturedEvent } from '../../utils/apiMappers';
-
-export type ActivityPost = {
-  id: string;
-  userId?: string;
-  authorGender?: AuthorGender;
-  name: string;
-  handle: string;
-  event: string;
-  location: string;
-  body: string;
-  time: string;
-  likes: number;
-  liked?: boolean;
-  comments: number;
-  avatar: string;
-  status: '招募中' | '已组队' | '已隐藏';
-  activityLegacyId?: number;
-  contentTypes?: string[];
-  images?: string[];
-};

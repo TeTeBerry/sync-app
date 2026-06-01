@@ -18,6 +18,8 @@ import {
 } from '../../../utils/profileStorage';
 import { useProfilePageStore } from '../../../stores/profilePageStore';
 import { useEndRouteTransitionOnShow } from '../../../hooks/useEndRouteTransitionOnShow';
+import { isApiEnabled } from '../../../constants/api';
+import { isLoggedIn } from '../../../utils/authStorage';
 import { Button, Text, View } from '@tarojs/components';
 
 type SettingsSection = 'notifications' | 'privacy' | 'help';
@@ -73,6 +75,14 @@ const SettingsPage: React.FC = () => {
   );
 
   const setStorePrivacyLevel = useProfilePageStore((state) => state.setPrivacyLevel);
+
+  useEffect(() => {
+    if (!isApiEnabled() || !isLoggedIn()) return;
+    if (section !== 'help') {
+      void Taro.showToast({ title: '请先登录', icon: 'none' });
+      void Taro.navigateBack();
+    }
+  }, [section]);
 
   useEffect(() => {
     if (currentUser?.notificationsEnabled == null) return;

@@ -1,12 +1,12 @@
 import type { FC } from 'react';
 import { FeedPostList } from '../../../components/FeedPostList';
-import type { ActivityPost } from '../homeData';
+import type { HomeFeedPost } from '../../../types/post';
 import { Text, View } from '@tarojs/components';
 
 type HomeActivityFeedProps = {
-  items: ActivityPost[];
-  onDelete?: (post: ActivityPost) => void;
-  onLike?: (post: ActivityPost) => void;
+  items: HomeFeedPost[];
+  onDelete?: (post: HomeFeedPost) => void;
+  onLike?: (post: HomeFeedPost) => void;
   onCommentSubmitted?: () => void;
 };
 

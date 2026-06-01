@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { isApiEnabled } from '../constants/api';
-import { profileUser } from '../pages/profile/mockData';
+import { profileUser } from '../components/profile';
 import { useProfileSummaryQuery } from './useSyncApi';
 
 /** Profile summary from API with mock fallback (same as profile page). */

@@ -13,7 +13,7 @@ import {
 import { PostImageGrid, PostImageCount } from './PostImageGrid';
 import { useCurrentUserQuery } from '../hooks/useSyncApi';
 import { isCurrentUserPostAuthor } from '../utils/postOwnership';
-import type { ActivityPost } from '../pages/index/homeData';
+import type { HomeFeedPost } from '../types/post';
 import { thumbnailImageUrl } from '../utils/imageUrl';
 import { postActionIconColor } from '../utils/postActionColors';
 import { inferAuthorGenderFromPost } from '../utils/inferAuthorGender';
@@ -21,7 +21,7 @@ import type { PostSharePayload } from '../utils/postShare';
 import { Image, Text, View } from '@tarojs/components';
 
 function feedPostSharePayload(
-  post: ActivityPost,
+  post: HomeFeedPost,
   authorName: string,
 ): PostSharePayload {
   return {
@@ -36,18 +36,18 @@ function feedPostSharePayload(
 }
 
 export type FeedPostListProps = {
-  items: ActivityPost[];
-  onDelete?: (post: ActivityPost) => void;
-  onLike?: (post: ActivityPost) => void;
+  items: HomeFeedPost[];
+  onDelete?: (post: HomeFeedPost) => void;
+  onLike?: (post: HomeFeedPost) => void;
   onCommentSubmitted?: () => void;
 };
 
 type FeedPostRowProps = {
-  post: ActivityPost;
+  post: HomeFeedPost;
   commentsExpanded: boolean;
   currentUserAvatar?: string;
-  onDelete?: (post: ActivityPost) => void;
-  onLike?: (post: ActivityPost) => void;
+  onDelete?: (post: HomeFeedPost) => void;
+  onLike?: (post: HomeFeedPost) => void;
   onCommentSubmitted?: () => void;
   onToggleComments: (postId: string) => void;
 };

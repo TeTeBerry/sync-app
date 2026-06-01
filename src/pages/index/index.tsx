@@ -16,7 +16,9 @@ import {
   usePopularPosts,
 } from '../../hooks/useSyncApi';
 import { isApiEnabled } from '../../constants/api';
+import { requireAuth } from '../../utils/authGate';
 import {
+  buildEventDetailQuery,
   goAiAssistant,
   goEventDetail,
   goNotifications,
@@ -28,8 +30,9 @@ import { DEFER_BELOW_FOLD_MS, DEFER_SECONDARY_API_MS } from '../../utils/timing'
 import { HomeCountdownCard } from './components/HomeCountdownCard';
 import { HomeFeaturedEvents } from './components/HomeFeaturedEvents';
 import TabPageHeader from '../../components/TabPageHeader';
+import { LoginInterceptHost } from '../../components/auth/LoginInterceptHost';
 import { HomeHeaderActions } from './components/HomeHeaderActions';
-import { type ActivityPost } from './homeData';
+import type { HomeFeedPost } from '../../types/post';
 import {
   resolveFeaturedEventLegacyId,
   type FeaturedEvent,
@@ -67,15 +70,17 @@ const Home = () => {
   const { posts, refetch: refetchPosts } = usePopularPosts({ enabled: belowFoldReady });
 
   const openAiAssistant = useCallback((message?: string) => {
-    if (message?.trim()) {
-      goAiAssistant({ initialMessage: message.trim() });
-      return;
-    }
-    goAiAssistant();
+    requireAuth(() => {
+      if (message?.trim()) {
+        goAiAssistant({ initialMessage: message.trim() });
+        return;
+      }
+      goAiAssistant();
+    }, 'ai_match');
   }, []);
 
   const handleNotification = useCallback(() => {
-    goNotifications();
+    requireAuth(() => goNotifications(), 'notification');
   }, []);
 
   const handleEventPreload = useCallback((event: FeaturedEvent) => {
@@ -85,7 +90,7 @@ const Home = () => {
     }
     seedActivityDetailFromFeaturedEvent(event);
     preloadEventSubpackage();
-    preloadPageSafe(ROUTES.EVENT_DETAIL, { activityLegacyId: String(legacyId) });
+    preloadPageSafe(ROUTES.EVENT_DETAIL, buildEventDetailQuery(legacyId));
   }, []);
 
   const openEventDetail = useCallback((event: FeaturedEvent) => {
@@ -98,7 +103,7 @@ const Home = () => {
   }, []);
 
   const handleDeletePost = useCallback(
-    async (post: ActivityPost) => {
+    async (post: HomeFeedPost) => {
       const ok = await confirm({
         title: '确认删除',
         message: '删除后无法恢复，确定要删除这条帖子吗？',
@@ -117,13 +122,15 @@ const Home = () => {
     [confirm, refetchPosts],
   );
 
-  const handleLikePost = useCallback((post: ActivityPost) => {
-    if (!isApiEnabled()) {
-      return;
-    }
-    void likePostAndInvalidate(post.id).catch(
-      () => void Taro.showToast({ title: '请求失败，请稍后重试', icon: 'none' }),
-    );
+  const handleLikePost = useCallback((post: HomeFeedPost) => {
+    requireAuth(() => {
+      if (!isApiEnabled()) {
+        return;
+      }
+      void likePostAndInvalidate(post.id).catch(
+        () => void Taro.showToast({ title: '请求失败，请稍后重试', icon: 'none' }),
+      );
+    }, 'social');
   }, []);
 
   const handleCommentSubmitted = useCallback(() => {
@@ -189,6 +196,7 @@ const Home = () => {
       </ScrollView>
 
       {confirmDialog}
+      <LoginInterceptHost />
     </View>
   );
 };

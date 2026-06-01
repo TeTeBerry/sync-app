@@ -40,6 +40,11 @@ export interface CurrentUser {
   privacyLevel?: PrivacyLevel;
 }
 
+export interface AuthLoginResult {
+  accessToken: string;
+  user: CurrentUser;
+}
+
 export interface UpdateCurrentUserPayload {
   name?: string;
   handle?: string;

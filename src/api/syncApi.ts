@@ -39,7 +39,10 @@ import type {
   UpdateCurrentUserPayload,
   UpdatePostPayload,
 } from '../types/backend';
+import { loginWithDev, loginWithWechat } from '../utils/auth';
 import { ownerParams } from '../utils/session';
+
+export { loginWithDev, loginWithWechat };
 
 export function fetchActivities() {
   return apiGet<BackendActivity[]>('/activities');

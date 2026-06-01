@@ -1,6 +1,7 @@
 import React, { Component, type ErrorInfo, type ReactNode } from 'react';
 import Taro from '@tarojs/taro';
-import { Button, Text, View } from '@tarojs/components';
+import { Button } from '../ui';
+import { Text, View } from '@tarojs/components';
 
 type Props = {
   children: ReactNode;

@@ -4,7 +4,7 @@ import type {
   PackageTierId,
   PackageTierLimits,
 } from '../types/backend';
-import { getNextTierId } from '../pages/profile/profileBenefitsMapper';
+import { getNextTierId } from '../components/profile/profileBenefitsMapper';
 
 /** Matches backend `free-tier.config.ts` — monthly free bucket. */
 export const FREE_MONTHLY_AI_MATCH_LIMIT = 3;

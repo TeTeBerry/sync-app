@@ -1,12 +1,13 @@
-import '../../../pages/profile/profile.scss';
+import '../../../components/profile/profile.scss';
 import Taro, { useDidShow } from '@tarojs/taro';
 import React, { useCallback, useState } from 'react';
 import PageNavigation from '../../../components/PageNavigation';
 import ThemedPageLoader from '../../../components/ThemedPageLoader';
-import ProfilePostsSection, {
+import {
+  ProfilePostsSection,
+  profilePosts,
   type ProfilePostEditDraft,
-} from '../../../pages/profile/components/ProfilePostsSection';
-import { profilePosts } from '../../../pages/profile/mockData';
+} from '../../../components/profile';
 import { isApiEnabled } from '../../../constants/api';
 import { useConfirmDialog } from '../../../hooks/useConfirmDialog';
 import {

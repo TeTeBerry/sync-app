@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp } from 'lucide-react-taro';
 import { useClientPagination } from '../../hooks/useClientPagination';
-import { Button, Text, View } from '@tarojs/components';
+import { Button } from '../ui';
+import { Text, View } from '@tarojs/components';
 
 const SECTION_VARIANTS = {
   activities: {

@@ -9,6 +9,7 @@
 - 包体基线：`docs/BUNDLE-SIZE.md`
 - 发版冒烟：`docs/RELEASE-SMOKE.md`
 - 改造清单：`docs/FRONTEND-REFACTOR-CHECKLIST.md`
+- 组件分层：`docs/COMPONENT-ARCHITECTURE.md`
 - 后端架构：`../sync-app-backend/docs/ARCHITECTURE.md`
 
 ## 环境

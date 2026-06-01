@@ -4,6 +4,7 @@ import { useCallback, useState, type FC } from 'react';
 import { ChevronUp, Heart, Send } from 'lucide-react-taro';
 import { commentPostAndInvalidate, usePostCommentsQuery } from '../hooks/useSyncApi';
 import { isApiEnabled } from '../constants/api';
+import { requireAuth } from '../utils/authGate';
 import { PLACEHOLDER_AVATAR } from '../constants/remoteImages';
 import { sanitizeRemoteImageUrl } from '../utils/imageUrl';
 import { isCurrentUserPostAuthor } from '../utils/postOwnership';
@@ -132,6 +133,7 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
       return;
     }
 
+    const submitComment = () => {
     setSubmitting(true);
     void commentPostAndInvalidate(postId, body, replyTarget?.commentId)
       .then(() => {
@@ -148,6 +150,9 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
         void Taro.showToast({ title: message, icon: 'none' });
       })
       .finally(() => setSubmitting(false));
+    };
+
+    requireAuth(submitComment, 'social');
   }, [apiEnabled, draft, onCommentSubmitted, postId, replyTarget, submitting]);
 
   const toggleCommentLike = useCallback((commentId: string) => {

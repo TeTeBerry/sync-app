@@ -268,22 +268,28 @@
   align-items: center;
   gap: 6px;
   border: none;
-  background: linear-gradient(135deg, #ff0066 0%, #ff4d94 100%);
-  color: #fff;
+  background: var(--primary);
+  color: var(--primary-foreground);
   font-weight: var(--s-fw-extrabold);
   font-size: var(--s-type-body-sm);
   padding: 9px 18px;
   border-radius: 9999px;
   cursor: pointer;
-  box-shadow: 0 6px 18px rgba(255, 0, 102, 0.34);
+  box-shadow: 0 6px 18px rgba(var(--primary-rgb), 0.34);
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
   transition:
     filter 0.2s ease,
     box-shadow 0.2s ease,
     transform 0.2s ease;
 
+  &::after {
+    border: none;
+  }
+
   &:hover {
     filter: brightness(1.05);
-    box-shadow: 0 8px 22px rgba(255, 0, 102, 0.42);
+    box-shadow: 0 8px 22px rgba(var(--primary-rgb), 0.42);
   }
 
   &:active {

@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { compareActivitiesNearestFirst } from './activityStatus';
+import {
+  compareActivitiesNearestFirst,
+  findNearestUpcomingActivity,
+} from './activityStatus';
 
 const NOW = new Date(2026, 4, 30, 12, 0, 0, 0);
 
@@ -40,5 +43,39 @@ describe('compareActivitiesNearestFirst', () => {
       { date: '06/01', title: 'Dated' },
     ]);
     expect(sorted.map((e) => e.title)).toEqual(['Dated', 'No date']);
+  });
+});
+
+describe('findNearestUpcomingActivity', () => {
+  const NOW = new Date(2026, 4, 30, 12, 0, 0, 0);
+
+  it('returns the soonest future activity that has not ended', () => {
+    const nearest = findNearestUpcomingActivity(
+      [
+        { title: 'Later fest', date: '07/12' },
+        { title: 'Sooner fest', date: '06/01' },
+      ],
+      NOW,
+    );
+    expect(nearest?.title).toBe('Sooner fest');
+    expect(nearest?.startAt.getTime()).toBeGreaterThan(NOW.getTime());
+  });
+
+  it('ignores ended and already-started activities', () => {
+    const nearest = findNearestUpcomingActivity(
+      [
+        { title: 'Past fest', date: '2024-07-12' },
+        { title: 'Today fest', date: '05/30' },
+        { title: 'Future fest', date: '07/12' },
+      ],
+      NOW,
+    );
+    expect(nearest?.title).toBe('Future fest');
+  });
+
+  it('returns null when no upcoming activities remain', () => {
+    expect(
+      findNearestUpcomingActivity([{ title: 'Past fest', date: '2024-07-12' }], NOW),
+    ).toBeNull();
   });
 });

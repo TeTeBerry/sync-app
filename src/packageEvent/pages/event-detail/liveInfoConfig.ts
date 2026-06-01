@@ -75,7 +75,7 @@ export const LIVE_INFO_CATEGORIES: LiveInfoCategoryConfig[] = [
   },
   {
     id: 'smoke_drink',
-    label: '烟酒情况',
+    label: '安检情况',
     icon: Beer,
     color: '#ab47bc',
     scaleLeft: '充足',

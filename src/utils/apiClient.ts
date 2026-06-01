@@ -1,6 +1,7 @@
 import Taro from '@tarojs/taro';
 import { API_BASE_URL } from '../constants/api';
 import type { ApiResponse } from '../types/backend';
+import { getAuthHeaders } from './authStorage';
 import { taroRequestData } from './apiRequestBody';
 
 export class ApiError extends Error {
@@ -36,6 +37,15 @@ function splitFetchInit(init?: ApiFetchInit): {
     ...requestInit
   } = init ?? {};
   return { requestInit, timeoutMs, maxRetries };
+}
+
+function mergeHeaders(
+  headers?: Record<string, string>,
+): Record<string, string> {
+  return {
+    ...getAuthHeaders(),
+    ...(headers ?? {}),
+  };
 }
 
 function buildUrl(path: string, params?: Record<string, string | undefined>): string {
@@ -140,13 +150,14 @@ export async function apiGet<T>(
   params?: Record<string, string | undefined>,
   init?: ApiFetchInit,
 ): Promise<T> {
+  const { headers: extraHeaders, ...restInit } = init ?? {};
   const response = await retryFetch(buildUrl(path, params), {
     method: 'GET',
-    headers: {
+    headers: mergeHeaders({
       Accept: 'application/json',
-      ...init?.headers,
-    },
-    ...init,
+      ...(extraHeaders as Record<string, string> | undefined),
+    }),
+    ...restInit,
   });
 
   return parseResponse<T>(response);
@@ -158,15 +169,16 @@ export async function apiPost<T>(
   params?: Record<string, string | undefined>,
   init?: ApiFetchInit,
 ): Promise<T> {
+  const { headers: extraHeaders, ...restInit } = init ?? {};
   const response = await retryFetch(buildUrl(path, params), {
     method: 'POST',
-    headers: {
+    headers: mergeHeaders({
       Accept: 'application/json',
       'Content-Type': 'application/json',
-      ...init?.headers,
-    },
+      ...(extraHeaders as Record<string, string> | undefined),
+    }),
     body: JSON.stringify(body),
-    ...init,
+    ...restInit,
   });
 
   return parseResponse<T>(response);
@@ -178,15 +190,16 @@ export async function apiPatch<T>(
   params?: Record<string, string | undefined>,
   init?: ApiFetchInit,
 ): Promise<T> {
+  const { headers: extraHeaders, ...restInit } = init ?? {};
   const response = await retryFetch(buildUrl(path, params), {
     method: 'PATCH',
-    headers: {
+    headers: mergeHeaders({
       Accept: 'application/json',
       'Content-Type': 'application/json',
-      ...init?.headers,
-    },
+      ...(extraHeaders as Record<string, string> | undefined),
+    }),
     body: JSON.stringify(body),
-    ...init,
+    ...restInit,
   });
 
   return parseResponse<T>(response);
@@ -197,13 +210,14 @@ export async function apiDelete<T>(
   params?: Record<string, string | undefined>,
   init?: ApiFetchInit,
 ): Promise<T> {
+  const { headers: extraHeaders, ...restInit } = init ?? {};
   const response = await retryFetch(buildUrl(path, params), {
     method: 'DELETE',
-    headers: {
+    headers: mergeHeaders({
       Accept: 'application/json',
-      ...init?.headers,
-    },
-    ...init,
+      ...(extraHeaders as Record<string, string> | undefined),
+    }),
+    ...restInit,
   });
 
   return parseResponse<T>(response);

@@ -65,6 +65,40 @@
 
 ---
 
+## 组件架构 ✅（2026-06）
+
+- [x] `src/types/post.ts` — 帖子类型统一导出入口；移除 `ActivityPost`（改用 `HomeFeedPost`）
+- [x] Profile 域迁入 `src/components/profile/` + `index.ts` barrel
+- [x] `ProfileSummarySection` / `ProfileSettingsSection` / `ProfileDebugSection`
+- [x] `EventDetailComposerSection` / `EventDetailEntitlementModals`
+- [x] [COMPONENT-ARCHITECTURE.md](./COMPONENT-ARCHITECTURE.md) 三层规则与决策表
+
+### 组件债 · Taro `Button` 待迁 `components/ui`
+
+已迁移：`ProfileTabErrorBoundary`、`ProfileCollapsibleSection`、`pages/events/index`、`event-detail/index`（fallback 重试）
+
+- [ ] `components/auth/LoginPromptHero.tsx`
+- [ ] `components/auth/LoginInterceptSheet.tsx`
+- [ ] `components/PostCommentSection.tsx`
+- [ ] `components/PostActionSheet.tsx`
+- [ ] `components/PostActionMenu.tsx`
+- [ ] `components/PageNavigation.tsx`
+- [ ] `components/ListState.tsx`
+- [ ] `components/BottomNav.tsx`
+- [ ] `components/AiAssistantPostCard.tsx`
+- [ ] `components/ActionSheet.tsx`
+- [ ] `components/event-map/EventMapUserPostsSheet.tsx`
+- [ ] `components/ai-chat/*`（`ChatMessageList`、`AiMatchQuotaBanner` 等）
+- [ ] `components/profile/ProfilePostsSection.tsx`
+- [ ] `packageProfile/pages/settings/index.tsx`
+- [ ] `packageProfile/pages/notifications/index.tsx`
+- [ ] `packageEvent/pages/my-itinerary/index.tsx`
+- [ ] `packageEvent/pages/exclusive-itinerary/**`
+- [ ] `packageEvent/pages/event-map/index.tsx`
+- [ ] `packageEvent/pages/event-detail/components/**`（`EventPostCard`、直播信息等）
+
+---
+
 ## 待办 / 可选
 
 ### P5 收尾 ✅
@@ -127,7 +161,9 @@ src/
 ├── pages/events/               活动列表 API
 ├── pages/event-detail/         详情 + 互动 + goAiAssistant
 ├── pages/index/                精选活动 + 热帖互动
-├── pages/profile/              我的帖 edit/complete
+├── pages/profile/index.tsx     个人 Tab 编排
+├── components/profile/         个人中心域 UI + 权益
+├── types/post.ts               帖子类型导出入口
 └── components/AiAssistantPage  activityId + post_created toast
 ```
 

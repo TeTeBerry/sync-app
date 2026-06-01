@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useApiQuery } from './useApiQuery';
+import { getCacheData, useApiQuery } from './useApiQuery';
 import {
   addPostComment,
   applyToPost,
@@ -34,6 +34,7 @@ import {
   updatePost,
 } from '../api/syncApi';
 import type {
+  BackendActivity,
   HomeFeedPost,
   HomeSummary,
   PurchaseProfilePackagePayload,
@@ -41,7 +42,12 @@ import type {
   UpdateCurrentUserPayload,
 } from '../types/backend';
 import { isApiEnabled } from '../constants/api';
+import { isLoggedIn } from '../utils/authStorage';
 import { getClientUserId } from '../utils/session';
+
+function profileApiEnabled(): boolean {
+  return isApiEnabled() && isLoggedIn();
+}
 import { seedActivityDetailsFromList } from '../utils/activityDetailCache';
 import {
   HOME_POPULAR_POSTS_PERSIST_LIMIT,
@@ -241,7 +247,18 @@ export function useActivityDetailQuery(legacyId?: number) {
 
   return useApiQuery({
     queryKey: ['activities', 'detail', legacyId],
-    queryFn: () => fetchActivityByLegacyId(legacyId as number),
+    queryFn: async () => {
+      const result = await fetchActivityByLegacyId(legacyId as number);
+      if (result != null) {
+        return result;
+      }
+      const seeded = getCacheData<BackendActivity | null>([
+        'activities',
+        'detail',
+        legacyId,
+      ]);
+      return seeded ?? null;
+    },
     enabled,
     staleTime: 60_000,
   });
@@ -333,7 +350,7 @@ export function usePostCommentsQuery(postId: string, enabled: boolean) {
 }
 
 export function useCurrentUserQuery() {
-  const enabled = isApiEnabled();
+  const enabled = profileApiEnabled();
 
   return useApiQuery({
     queryKey: ['users', 'me'],
@@ -382,7 +399,7 @@ export async function submitReportAndInvalidate(payload: ReportPayload) {
 }
 
 export function useProfileSummaryQuery(activityLegacyId?: number) {
-  const enabled = isApiEnabled();
+  const enabled = profileApiEnabled();
   const scopedId =
     activityLegacyId != null && !Number.isNaN(activityLegacyId)
       ? activityLegacyId
@@ -397,7 +414,7 @@ export function useProfileSummaryQuery(activityLegacyId?: number) {
 }
 
 export function useProfilePackagesQuery() {
-  const enabled = isApiEnabled();
+  const enabled = profileApiEnabled();
 
   return useApiQuery({
     queryKey: ['profile', 'packages'],
@@ -408,7 +425,7 @@ export function useProfilePackagesQuery() {
 }
 
 export function useProfileEntitlementsQuery(activityLegacyId?: number) {
-  const enabled = isApiEnabled();
+  const enabled = profileApiEnabled();
   const scopedId =
     activityLegacyId != null && !Number.isNaN(activityLegacyId)
       ? activityLegacyId
@@ -451,7 +468,7 @@ export async function consumeProfileContactUnlockAndInvalidate(
 }
 
 export function useProfileActivitiesQuery() {
-  const enabled = isApiEnabled();
+  const enabled = profileApiEnabled();
 
   return useApiQuery({
     queryKey: ['profile', 'activities'],
@@ -462,7 +479,7 @@ export function useProfileActivitiesQuery() {
 }
 
 export function useProfilePostsQuery() {
-  const enabled = isApiEnabled();
+  const enabled = profileApiEnabled();
 
   return useApiQuery({
     queryKey: ['profile', 'posts'],

@@ -12,8 +12,8 @@ import {
   getNextTierId,
   type ProfileEventBenefitRow,
   type ProfileEventBenefitCardModel,
-} from '../profileBenefitsMapper';
-import { sanitizeRemoteImageUrl } from '../../../utils/imageUrl';
+} from './profileBenefitsMapper';
+import { sanitizeRemoteImageUrl } from '../../utils/imageUrl';
 import { Image, Text, View } from '@tarojs/components';
 
 function tierBadgeClass(tierId: ProfileEventBenefitCardModel['tierId']): string {

@@ -1,11 +1,11 @@
 import React, { useMemo } from 'react';
 import { Calendar, MapPin, Ticket } from 'lucide-react-taro';
-import { ImageWithFallback } from '../../../components/ImageWithFallback';
-import { MetaRow } from '../../../components/MetaRow';
-import { ProfileCollapsibleSection } from '../../../components/profile/ProfileCollapsibleSection';
-import type { ProfileActivityItem } from '../../../types/backend';
-import { compareActivityDateDesc } from '../../../utils/activityStatus';
-import { safeTrim } from '../../../utils/safeString';
+import { ImageWithFallback } from '../ImageWithFallback';
+import { MetaRow } from '../MetaRow';
+import { ProfileCollapsibleSection } from './ProfileCollapsibleSection';
+import type { ProfileActivityItem } from '../../types/backend';
+import { compareActivityDateDesc } from '../../utils/activityStatus';
+import { safeTrim } from '../../utils/safeString';
 import { Text, View } from '@tarojs/components';
 
 function activityTitleFallback(title: unknown): string {

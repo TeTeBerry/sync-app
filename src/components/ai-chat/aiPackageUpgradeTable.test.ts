@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { MOCK_PACKAGE_CATALOG } from '../../pages/profile/profilePackageData';
+import { MOCK_PACKAGE_CATALOG } from '../profile/profilePackageData';
 import { buildAiPackageCompareRows } from './aiPackageUpgradeTable';
 
 describe('buildAiPackageCompareRows', () => {

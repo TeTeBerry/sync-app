@@ -28,7 +28,8 @@
   > .s-profile__card,
   > .s-profile-benefits,
   > .s-profile__action-card,
-  > .s-profile__settings-card {
+  > .s-profile__settings-card,
+  > .s-profile-guest {
     align-self: stretch;
     width: 100%;
     max-width: 100%;
@@ -40,7 +41,18 @@
 }
 
 .s-profile__scroll-spacer {
-  min-height: 12px;
+  flex-shrink: 0;
+  height: 16px;
+}
+
+/** Guest profile: no ScrollView — content sits above tab bar without extra scroll padding. */
+.s-profile__guest-body {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  box-sizing: border-box;
+  overflow-y: auto;
+  padding: 4px var(--s-page-gutter) 12px;
 }
 
 .s-profile-benefits {

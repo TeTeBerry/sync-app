@@ -1,11 +1,12 @@
 import './my-itinerary.scss';
 import Taro, { useRouter } from '@tarojs/taro';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { isApiEnabled } from '../../../constants/api';
 import { useActivityDetailQuery } from '../../../hooks/useSyncApi';
 import {
   useItineraryMutations,
   useItineraryScheduleQuery,
+  useSavedItineraryQuery,
 } from '../../../hooks/useItineraryApi';
 import { useItineraryStore } from '../../../stores/itineraryStore';
 import {
@@ -136,7 +137,11 @@ const MyItineraryPage = () => {
     apiEnabled && Number.isFinite(activityLegacyId) ? activityLegacyId : null,
     { selectedDjIds },
   );
+  const savedQuery = useSavedItineraryQuery(
+    apiEnabled && Number.isFinite(activityLegacyId) ? activityLegacyId : null,
+  );
   const { save } = useItineraryMutations(activityLegacyId ?? 0);
+  const hydratedFromPendingRef = useRef(false);
 
   const [itineraryDays, setItineraryDays] = useState<ItineraryDay[]>(
     () => MY_ITINERARY_DAYS,
@@ -151,16 +156,20 @@ const MyItineraryPage = () => {
   }, [router.params.selectedDjIds]);
 
   useEffect(() => {
+    hydratedFromPendingRef.current = false;
     if (!Number.isFinite(activityLegacyId) || activityLegacyId <= 0) return;
+
     const pending = consumePending(activityLegacyId);
     if (pending) {
-      setItineraryDays(pending.days);
+      hydratedFromPendingRef.current = true;
+      setItineraryDays(pending.days as ItineraryDay[]);
       setEventMeta(pending.eventMeta);
       if (pending.selectedDjIds.length > 0) {
         setSelectedDjIds(pending.selectedDjIds);
       }
       return;
     }
+
     if (!apiEnabled) {
       setItineraryDays(MY_ITINERARY_DAYS);
       setEventMeta(MY_ITINERARY_EVENT_META);
@@ -169,6 +178,28 @@ const MyItineraryPage = () => {
       );
     }
   }, [activityLegacyId, apiEnabled, consumePending]);
+
+  useEffect(() => {
+    if (!apiEnabled || hydratedFromPendingRef.current) return;
+    if (!Number.isFinite(activityLegacyId) || activityLegacyId <= 0) return;
+    if (savedQuery.isLoading) return;
+
+    const saved = savedQuery.data;
+    if (!saved?.saved || !saved.days?.length) return;
+
+    setItineraryDays(saved.days as ItineraryDay[]);
+    if (saved.eventMeta?.trim()) {
+      setEventMeta(saved.eventMeta.trim());
+    }
+    if (saved.selectedDjIds?.length) {
+      setSelectedDjIds(saved.selectedDjIds);
+    }
+  }, [
+    activityLegacyId,
+    apiEnabled,
+    savedQuery.data,
+    savedQuery.isLoading,
+  ]);
 
   useEffect(() => {
     if (activityQuery.data?.name) {
@@ -256,6 +287,7 @@ const MyItineraryPage = () => {
           days: daysForSave,
           selectedDjIds: selectedDjIds,
         });
+        void savedQuery.refetch();
         serverSaved = true;
       } catch (error) {
         const message =
@@ -280,7 +312,15 @@ const MyItineraryPage = () => {
       },
       { serverSaved },
     );
-  }, [activityLegacyId, apiEnabled, eventMeta, itineraryDays, save, selectedDjIds]);
+  }, [
+    activityLegacyId,
+    apiEnabled,
+    eventMeta,
+    itineraryDays,
+    save,
+    savedQuery,
+    selectedDjIds,
+  ]);
 
   const fallback =
     Number.isFinite(activityLegacyId) && activityLegacyId > 0

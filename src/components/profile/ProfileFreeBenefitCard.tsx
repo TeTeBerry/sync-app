@@ -1,7 +1,7 @@
 import './ProfileFreeBenefitCard.scss';
 import React from 'react';
 import { ChevronRight, Crown, Lock, Sparkles, Ticket } from 'lucide-react-taro';
-import type { ProfileFreeBenefitCardModel } from '../profileBenefitsMapper';
+import type { ProfileFreeBenefitCardModel } from './profileBenefitsMapper';
 import { Text, View } from '@tarojs/components';
 
 export type ProfileFreeBenefitCardProps = {
@@ -52,8 +52,13 @@ const ProfileFreeBenefitCard: React.FC<ProfileFreeBenefitCardProps> = ({
           hoverClass="s-profile-free-benefit__upgrade-btn--pressed"
           onClick={onOpenUpgrade}
         >
-          <Text>升级解锁</Text>
-          <ChevronRight size={14} color="var(--primary)" aria-hidden />
+          <Text className="s-profile-free-benefit__upgrade-btn-text">升级解锁</Text>
+          <ChevronRight
+            size={14}
+            color="var(--primary)"
+            className="s-profile-free-benefit__upgrade-btn-icon"
+            aria-hidden
+          />
         </View>
       </View>
 

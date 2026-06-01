@@ -1,5 +1,6 @@
 {
   "description": "本地开发者工具私有配置（可提交，便于团队统一关闭域名校验）",
+  "appid": "wxfd3e748e9d97f43b",
   "setting": {
     "urlCheck": false
   }

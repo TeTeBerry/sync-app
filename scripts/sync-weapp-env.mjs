@@ -55,3 +55,7 @@ fs.writeFileSync(localEnvPath, body, 'utf8');
 console.log(`[sync-weapp-env] wrote ${path.relative(process.cwd(), localEnvPath)}`);
 // eslint-disable-next-line no-console
 console.log(`  TARO_APP_API_BASE_URL=${apiBase}`);
+// eslint-disable-next-line no-console
+console.log(
+  '[sync-weapp-env] 微信开发者工具请导入目录 sync-app（含 project.config.json），不要只打开 dist-weapp',
+);

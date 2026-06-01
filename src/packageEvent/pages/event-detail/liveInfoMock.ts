@@ -26,6 +26,31 @@ export const MOCK_LIVE_INFO_SUMMARY: LiveInfoSummaryRow[] = [
 
 export const MOCK_LIVE_INFO_CERT_COUNT = 8;
 
+/** Use demo feed when API is off or returns no updates yet. */
+export function resolveLiveInfoFeed(
+  feed: LiveInfoFeedItem[] | undefined | null,
+): LiveInfoFeedItem[] {
+  return Array.isArray(feed) && feed.length > 0 ? feed : MOCK_LIVE_INFO_FEED;
+}
+
+export function resolveLiveInfoSummary(
+  summary: LiveInfoSummaryRow[] | undefined | null,
+): LiveInfoSummaryRow[] {
+  return Array.isArray(summary) && summary.length > 0
+    ? summary
+    : MOCK_LIVE_INFO_SUMMARY;
+}
+
+export function resolveLiveInfoCertCount(
+  certCount: number | undefined | null,
+  feed: LiveInfoFeedItem[] | undefined | null,
+): number {
+  if (typeof certCount === 'number' && certCount > 0) return certCount;
+  const hasFeed = Array.isArray(feed) && feed.length > 0;
+  if (hasFeed && typeof certCount === 'number') return certCount;
+  return MOCK_LIVE_INFO_CERT_COUNT;
+}
+
 /** Varied feed posts for mock / offline preview (grid layouts: 1, 2, 3, 4 metrics). */
 export const MOCK_LIVE_INFO_FEED: LiveInfoFeedItem[] = [
   {
@@ -66,7 +91,7 @@ export const MOCK_LIVE_INFO_FEED: LiveInfoFeedItem[] = [
       { categoryId: 'water_queue', score: 2 },
       { categoryId: 'smoke_drink', score: 2 },
     ],
-    remark: '下午三点入场很顺，整体不算挤，烟酒摊基本不用排队',
+    remark: '下午三点入场很顺，整体不算挤，安检基本不用排队',
     likes: 3,
   },
   {
@@ -94,7 +119,7 @@ export const MOCK_LIVE_INFO_FEED: LiveInfoFeedItem[] = [
       { categoryId: 'smoke_drink', score: 1 },
       { categoryId: 'water_queue', score: 1 },
     ],
-    remark: '烟酒区很空，啤酒柜不用排队；免费饮水台在医疗帐篷旁边',
+    remark: '安检区很空，入场很快；免费饮水台在医疗帐篷旁边',
     likes: 4,
   },
   {

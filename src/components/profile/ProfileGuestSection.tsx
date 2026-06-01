@@ -1,0 +1,116 @@
+import './ProfileGuestSection.scss';
+import React, { useCallback } from 'react';
+import {
+  Bell,
+  ChevronRight,
+  FileText,
+  Info,
+  Lock,
+  Ticket,
+  Zap,
+} from 'lucide-react-taro';
+import { LoginPromptHero } from '../auth/LoginPromptHero';
+import { requireAuth } from '../../utils/authGate';
+import { go, ROUTES } from '../../utils/route';
+import { Text, View } from '@tarojs/components';
+
+export type ProfileGuestSectionProps = {
+  onLoggedIn: () => void;
+  onOpenHelp: () => void;
+};
+
+type LockedFeature = {
+  icon: React.ReactNode;
+  title: string;
+  desc: string;
+  feature: 'activity' | 'post' | 'benefits' | 'notification';
+};
+
+const LOCKED_FEATURES: LockedFeature[] = [
+  {
+    icon: <Zap size={18} color="var(--primary)" />,
+    title: '我的活动',
+    desc: '报名记录与行程管理',
+    feature: 'activity',
+  },
+  {
+    icon: <FileText size={18} color="#bf5af2" />,
+    title: '我的帖子',
+    desc: '组队帖与互动数据',
+    feature: 'post',
+  },
+  {
+    icon: <Ticket size={18} color="#d4a017" />,
+    title: '权益与套餐',
+    desc: 'AI 匹配与联系方式解锁',
+    feature: 'benefits',
+  },
+  {
+    icon: <Bell size={18} color="#8e8e93" />,
+    title: '消息通知',
+    desc: '评论、点赞与活动提醒',
+    feature: 'notification',
+  },
+];
+
+const ProfileGuestSection: React.FC<ProfileGuestSectionProps> = ({
+  onLoggedIn,
+  onOpenHelp,
+}) => {
+  const promptLogin = useCallback((feature: LockedFeature['feature']) => {
+    requireAuth(() => undefined, feature);
+  }, []);
+
+  const openLockedRoute = useCallback((feature: LockedFeature['feature']) => {
+    const routes = {
+      activity: ROUTES.PROFILE_ACTIVITIES,
+      post: ROUTES.PROFILE_POSTS,
+      benefits: ROUTES.PROFILE_BENEFITS,
+      notification: ROUTES.NOTIFICATIONS,
+    } as const;
+    requireAuth(() => go(routes[feature]), feature);
+  }, []);
+
+  return (
+    <View className="s-profile-guest" aria-label="未登录">
+      <View className="s-profile-guest__hero">
+        <LoginPromptHero onLoggedIn={onLoggedIn} />
+      </View>
+
+      <View className="s-profile-guest__locked-card">
+        <Text className="s-profile-guest__locked-head">登录后可用</Text>
+        {LOCKED_FEATURES.map((item) => (
+          <View
+            key={item.title}
+            className="s-profile-guest__locked-row"
+            hoverClass="s-profile-guest__locked-row--pressed"
+            onClick={() => openLockedRoute(item.feature)}
+          >
+            <View className="s-profile-guest__locked-icon">{item.icon}</View>
+            <View className="s-profile-guest__locked-copy">
+              <Text className="s-profile-guest__locked-title">{item.title}</Text>
+              <Text className="s-profile-guest__locked-desc">{item.desc}</Text>
+            </View>
+            <Lock size={16} color="#636366" aria-hidden />
+          </View>
+        ))}
+      </View>
+
+      <View className="s-profile-guest__settings-card">
+        <View
+          className="s-profile-guest__settings-row"
+          hoverClass="s-profile-guest__settings-row--pressed"
+          onClick={onOpenHelp}
+        >
+          <View className="s-profile-guest__settings-icon">
+            <Info size={18} />
+          </View>
+          <Text className="s-profile-guest__settings-label">帮助与反馈</Text>
+          <ChevronRight size={18} color="#636366" />
+        </View>
+      </View>
+    </View>
+  );
+};
+
+export default ProfileGuestSection;
