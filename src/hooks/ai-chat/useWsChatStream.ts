@@ -6,7 +6,6 @@ import {
 } from 'react';
 import Taro from '@tarojs/taro';
 import { AI_CHAT_WS_URL, isApiEnabled } from '../../constants/api';
-import { useAiChatStore } from '../../stores/aiChatStore';
 import type {
   AiChatStreamEvent,
   ChatUiMessage,
@@ -18,11 +17,10 @@ import {
 } from '../../utils/aiChatErrors';
 import { buildApiChatHistory } from '../../utils/aiChatHistory';
 import { buildAiChatWsSendActor } from '../../api/requestActor';
-import { handleApiUnauthorized } from '../../api/handleApiUnauthorized';
-import { closeAiChatWsConnection, streamAiChatWs } from '../../utils/aiChatWs';
-import { shouldClearSessionOnWsError } from '../../utils/wsAuthError';
+import { streamAiChatWs } from '../../utils/aiChatWs';
 import { mockAiChatStream } from '../../utils/aiChatStream';
 import type { TypewriterReveal } from '../../utils/typewriterReveal';
+import { processChatStreamEvents } from './chatStreamReducer';
 
 export interface UseWsChatStreamOptions {
   welcomeText: string;
@@ -31,9 +29,6 @@ export interface UseWsChatStreamOptions {
   wsUrl?: string;
   activityLegacyIdRef: MutableRefObject<number | undefined>;
   sessionIdRef: MutableRefObject<string>;
-  userIdRef: MutableRefObject<string | undefined>;
-  userNameRef: MutableRefObject<string | undefined>;
-  userPhoneRef: MutableRefObject<string | undefined>;
   messagesRef: MutableRefObject<ChatUiMessage[]>;
   setMessages: Dispatch<SetStateAction<ChatUiMessage[]>>;
   getAuthHeaders?: () => Record<string, string>;
@@ -50,24 +45,6 @@ export interface UseWsChatStreamOptions {
   typewriterCharDelayMs?: number;
 }
 
-function applyStreamEventToStore(event: AiChatStreamEvent) {
-  const store = useAiChatStore.getState();
-
-  if (event.type === 'conversation_patch') {
-    store.applyConversationPatch(event.state);
-    return;
-  }
-
-  if (event.type === 'suggested_replies') {
-    store.setSuggestedReplies(event.replies);
-    return;
-  }
-
-  if (event.type === 'post_recommendations') {
-    store.setPostRecommendationsMeta(event.degraded);
-  }
-}
-
 export function useWsChatStream(options: UseWsChatStreamOptions) {
   const {
     welcomeText,
@@ -76,9 +53,6 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
     wsUrl = AI_CHAT_WS_URL,
     activityLegacyIdRef,
     sessionIdRef,
-    userIdRef,
-    userNameRef,
-    userPhoneRef,
     messagesRef,
     setMessages,
     getAuthHeaders,
@@ -89,132 +63,6 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
     createTypewriter,
     typewriterCharDelayMs = 22,
   } = options;
-
-  const processStreamEvents = useCallback(
-    async (
-      stream: AsyncGenerator<AiChatStreamEvent>,
-      aiMsgId: string,
-      typewriter: TypewriterReveal,
-    ) => {
-      const finishAiMessage = (updater: (current: ChatUiMessage) => ChatUiMessage) => {
-        setMessages((prev) =>
-          prev.map((message) => (message.id === aiMsgId ? updater(message) : message)),
-        );
-      };
-
-      for await (const event of stream) {
-        applyStreamEventToStore(event);
-
-        if (event.type === 'delta') {
-          typewriter.append(event.content);
-          continue;
-        }
-
-        if (event.type === 'message_complete') {
-          if (!typewriter.getTarget()) {
-            typewriter.append(event.content);
-          } else {
-            typewriter.ensureTarget(event.content);
-          }
-          continue;
-        }
-
-        if (event.type === 'post_created') {
-          onPostCreated?.(event);
-          if (event.post) {
-            finishAiMessage((message) => ({
-              ...message,
-              createdPost: event.post,
-            }));
-          }
-          continue;
-        }
-
-        if (event.type === 'existing_post') {
-          onExistingPost?.(event);
-          continue;
-        }
-
-        if (event.type === 'post_recommendations') {
-          finishAiMessage((message) => ({
-            ...message,
-            recommendedPosts: event.posts,
-          }));
-          if (event.posts.length > 0) {
-            void onMatchResults?.(activityLegacyIdRef.current);
-          }
-          continue;
-        }
-
-        if (event.type === 'activity_recommendation') {
-          finishAiMessage((message) => ({
-            ...message,
-            recommendedActivity: event.activity,
-          }));
-          continue;
-        }
-
-        if (event.type === 'suggested_replies') {
-          finishAiMessage((message) => ({
-            ...message,
-            suggestedReplies: event.replies,
-          }));
-          continue;
-        }
-
-        if (event.type === 'conversation_patch') {
-          continue;
-        }
-
-        if (event.type === 'error') {
-          if (process.env.NODE_ENV !== 'production') {
-            console.warn('[AI chat] stream error:', event.message);
-          }
-          if (shouldClearSessionOnWsError(event.message)) {
-            closeAiChatWsConnection('session expired');
-            handleApiUnauthorized(event.message);
-          }
-          typewriter.flush();
-          finishAiMessage((message) => ({
-            ...message,
-            text: event.message || message.text || streamErrorText,
-            streaming: false,
-          }));
-          void Taro.showToast({
-            title: formatAiChatToastError(new Error(event.message), streamErrorText),
-            icon: 'none',
-          });
-          break;
-        }
-
-        if (event.type === 'done') {
-          finishAiMessage((message) => ({
-            ...message,
-            streaming: false,
-          }));
-          await typewriter.waitUntilComplete();
-          finishAiMessage((message) => ({
-            ...message,
-            text: typewriter.getTarget() || message.text,
-            streaming: false,
-          }));
-          if (event.sessionId) {
-            persistSessionFromStream(event.sessionId);
-          }
-          break;
-        }
-      }
-    },
-    [
-      activityLegacyIdRef,
-      onExistingPost,
-      onMatchResults,
-      onPostCreated,
-      persistSessionFromStream,
-      setMessages,
-      streamErrorText,
-    ],
-  );
 
   const runStream = useCallback(
     async (payload: SendChatOptions, aiMsgId: string, abortSignal: AbortSignal) => {
@@ -264,7 +112,18 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
             })
           : mockAiChatStream(mockReply(trimmed));
 
-        await processStreamEvents(stream, aiMsgId, typewriter);
+        await processChatStreamEvents({
+          stream,
+          aiMsgId,
+          typewriter,
+          streamErrorText,
+          setMessages,
+          activityLegacyId: activityId,
+          persistSessionFromStream,
+          onPostCreated,
+          onExistingPost,
+          onMatchResults,
+        });
       } catch (error) {
         if ((error as Error).name === 'AbortError') {
           typewriter.stop();
@@ -293,14 +152,14 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
       getAuthHeaders,
       messagesRef,
       mockReply,
-      processStreamEvents,
+      onExistingPost,
+      onMatchResults,
+      onPostCreated,
+      persistSessionFromStream,
       sessionIdRef,
       setMessages,
       streamErrorText,
       typewriterCharDelayMs,
-      userIdRef,
-      userNameRef,
-      userPhoneRef,
       welcomeText,
     ],
   );

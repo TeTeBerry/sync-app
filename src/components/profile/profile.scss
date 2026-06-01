@@ -1060,6 +1060,12 @@
     color: var(--muted-foreground);
   }
 
+  &--ban {
+    background: rgba(var(--destructive-rgb), 0.12);
+    box-shadow: inset 0 0 0 1px rgba(var(--destructive-rgb), 0.25);
+    color: var(--destructive);
+  }
+
   &--logout {
     background: rgba(var(--destructive-rgb), 0.15);
     box-shadow: inset 0 0 0 1px rgba(var(--destructive-rgb), 0.3);

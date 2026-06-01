@@ -133,10 +133,6 @@ const Home = () => {
     }, 'social');
   }, []);
 
-  const handleCommentSubmitted = useCallback(() => {
-    void refetchPosts();
-  }, [refetchPosts]);
-
   const activeTeamCount = heat?.people ?? 0;
   const navInsets = useNavBarInsets();
 
@@ -182,7 +178,6 @@ const Home = () => {
                 items={posts}
                 onDelete={handleDeletePost}
                 onLike={handleLikePost}
-                onCommentSubmitted={handleCommentSubmitted}
               />
             </Suspense>
           ) : (

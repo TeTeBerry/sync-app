@@ -1,11 +1,10 @@
 import { Button, cn } from '../ui';
-import { useAiChatStore } from '../../stores/aiChatStore';
 import { Text, View } from '@tarojs/components';
 
 const PUBLISH_CONFIRM_REPLY = '确认发布';
 
 export function SuggestedReplyChips({
-  replies: repliesProp,
+  replies,
   disabled,
   onSelect,
 }: {
@@ -13,10 +12,7 @@ export function SuggestedReplyChips({
   disabled?: boolean;
   onSelect: (reply: string) => void;
 }) {
-  const storeReplies = useAiChatStore((state) => state.suggestedReplies);
-  const replies = repliesProp?.length ? repliesProp : storeReplies;
-
-  if (!replies.length) return null;
+  if (!replies?.length) return null;
 
   return (
     <View className="s-ai-assistant-chat__copy-row">

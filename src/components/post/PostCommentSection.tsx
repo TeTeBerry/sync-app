@@ -8,7 +8,7 @@ import { requireAuth } from '../../utils/authGate';
 import { PLACEHOLDER_AVATAR } from '../../constants/remoteImages';
 import { sanitizeRemoteImageUrl } from '../../utils/imageUrl';
 import { isCurrentUserPostAuthor } from '../../utils/postOwnership';
-import type { PostCommentItem } from '../../types/backend';
+import type { EventDetailPost, PostCommentItem } from '../../types/backend';
 import { Button, Input } from '../ui';
 import { Image, Text, View } from '@tarojs/components';
 
@@ -21,7 +21,9 @@ export type PostCommentSectionProps = {
   expanded: boolean;
   onToggleExpanded: () => void;
   currentUserAvatar?: string;
-  onCommentSubmitted?: () => void;
+  onCommentSubmitted?: (
+    updated: Pick<EventDetailPost, 'id' | 'comments' | 'likes' | 'liked'>,
+  ) => void;
 };
 
 type ReplyTarget = {
@@ -137,10 +139,10 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
     const submitComment = () => {
       setSubmitting(true);
       void commentPostAndInvalidate(postId, body, replyTarget?.commentId)
-        .then(() => {
+        .then((updated) => {
           setDraft('');
           setReplyTarget(null);
-          onCommentSubmitted?.();
+          onCommentSubmitted?.(updated);
           void Taro.showToast({ title: '评论成功', icon: 'success' });
         })
         .catch((err: { message?: string }) => {

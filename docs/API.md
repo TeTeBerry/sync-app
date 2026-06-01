@@ -76,6 +76,24 @@ TARO_APP_AI_CHAT_WS_URL=wss://your-api.example.com/api/ai/chat/ws
 
 ---
 
+## 举报与屏蔽
+
+需登录（Bearer）或 demo Query `userId`。
+
+- 屏蔽：帖子卡片 `⋯` → 屏蔽该用户；管理：个人页 → **已屏蔽用户** → 取消屏蔽
+- 举报：帖子卡片 `⋯` → 举报
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| `POST` | `/reports` | 举报内容，body：`targetType`（`post` \| `user` \| `comment`）、`targetId`、`category`（`ads` \| `scalper` \| `vulgar`）、可选 `targetUserId` / `reason` |
+| `GET` | `/users/blocks` | 当前用户已屏蔽列表 `{ blockedUserIds, items: [{ userId, name, avatar? }] }` |
+| `POST` | `/users/blocks` | 屏蔽用户，body：`{ blockedUserId }` |
+| `DELETE` | `/users/blocks/:blockedUserId` | 取消屏蔽 |
+
+重复举报/重复屏蔽 → `409`；屏蔽自己 → `400`。屏蔽后帖子列表（热门、活动）与 AI 匹配会过滤被屏蔽用户（含双向：对方屏蔽你也互相不可见）。
+
+---
+
 ## 鉴权
 
 ### POST `/api/auth/dev`（H5 开发）

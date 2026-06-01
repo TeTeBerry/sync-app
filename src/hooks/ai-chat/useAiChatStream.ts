@@ -8,7 +8,6 @@ import type {
   SendChatOptions,
 } from '../../types/aiChat';
 import { getRequestActor } from '../../api/requestActor';
-import { formatAiChatToastError } from '../../utils/aiChatErrors';
 import { createMessageId } from './createMessageId';
 import { useChatSession } from './useChatSession';
 import { useWsChatStream } from './useWsChatStream';
@@ -95,9 +94,6 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
     wsUrl,
     activityLegacyIdRef,
     sessionIdRef,
-    userIdRef,
-    userNameRef,
-    userPhoneRef,
     messagesRef,
     setMessages,
     getAuthHeaders,
@@ -161,10 +157,7 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
         if ((error as Error).name === 'AbortError') {
           return;
         }
-        void Taro.showToast({
-          title: formatAiChatToastError(error, streamErrorText),
-          icon: 'none',
-        });
+        // Transport layer (`useWsChatStream`) already surfaces user-facing toasts.
       } finally {
         setIsStreaming(false);
         abortRef.current = null;

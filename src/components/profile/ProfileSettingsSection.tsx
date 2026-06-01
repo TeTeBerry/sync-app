@@ -1,19 +1,23 @@
 import React from 'react';
-import { Bell, ChevronRight, Info, LogOut, Shield } from 'lucide-react-taro';
+import { Ban, Bell, ChevronRight, Info, LogOut, Shield } from 'lucide-react-taro';
 import { Text, View } from '@tarojs/components';
 
 export type ProfileSettingsSectionProps = {
   notificationsEnabled: boolean;
+  blockedCount?: number;
   onOpenNotifications: () => void;
   onOpenPrivacy: () => void;
+  onOpenBlockedUsers: () => void;
   onOpenHelp: () => void;
   onLogout: () => void;
 };
 
 const ProfileSettingsSection: React.FC<ProfileSettingsSectionProps> = ({
   notificationsEnabled,
+  blockedCount = 0,
   onOpenNotifications,
   onOpenPrivacy,
+  onOpenBlockedUsers,
   onOpenHelp,
   onLogout,
 }) => (
@@ -42,6 +46,21 @@ const ProfileSettingsSection: React.FC<ProfileSettingsSectionProps> = ({
         <Shield size={18} />
       </View>
       <Text className="s-profile__settings-label">隐私与安全</Text>
+      <ChevronRight size={18} className="s-profile__settings-chevron" />
+    </View>
+
+    <View
+      className="s-profile__settings-row"
+      hoverClass="s-profile__settings-row--pressed"
+      onClick={onOpenBlockedUsers}
+    >
+      <View className="s-profile__settings-icon s-profile__settings-icon--ban">
+        <Ban size={18} />
+      </View>
+      <Text className="s-profile__settings-label">已屏蔽用户</Text>
+      {blockedCount > 0 ? (
+        <Text className="s-profile__settings-value">{blockedCount} 人</Text>
+      ) : null}
       <ChevronRight size={18} className="s-profile__settings-chevron" />
     </View>
 

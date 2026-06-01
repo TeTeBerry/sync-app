@@ -42,7 +42,9 @@ export type EventPostCardProps = {
   onDelete: (post: EventDetailPost) => void;
   onApply: (postId: string) => void;
   onComplete?: (postId: string) => void;
-  onCommentSubmitted: () => void;
+  onCommentSubmitted: (
+    updated: Pick<EventDetailPost, 'id' | 'comments' | 'likes' | 'liked'>,
+  ) => void;
 };
 
 function GroupProgressRow({ current, total }: { current: number; total: number }) {

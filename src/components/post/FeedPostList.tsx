@@ -13,6 +13,7 @@ import {
 import { PostImageGrid, PostImageCount } from './PostImageGrid';
 import { useCurrentUserQuery } from '../../hooks/useSyncApi';
 import { isCurrentUserPostAuthor } from '../../utils/postOwnership';
+import type { EventDetailPost } from '../../types/backend';
 import type { HomeFeedPost } from '../../types/post';
 import { thumbnailImageUrl } from '../../utils/imageUrl';
 import { inferAuthorGenderFromPost } from '../../utils/inferAuthorGender';
@@ -22,7 +23,9 @@ export type FeedPostListProps = {
   items: HomeFeedPost[];
   onDelete?: (post: HomeFeedPost) => void;
   onLike?: (post: HomeFeedPost) => void;
-  onCommentSubmitted?: () => void;
+  onCommentSubmitted?: (
+    updated: Pick<EventDetailPost, 'id' | 'comments' | 'likes' | 'liked'>,
+  ) => void;
 };
 
 type FeedPostRowProps = {
@@ -31,7 +34,7 @@ type FeedPostRowProps = {
   currentUserAvatar?: string;
   onDelete?: (post: HomeFeedPost) => void;
   onLike?: (post: HomeFeedPost) => void;
-  onCommentSubmitted?: () => void;
+  onCommentSubmitted?: FeedPostListProps['onCommentSubmitted'];
   onToggleComments: (postId: string) => void;
 };
 

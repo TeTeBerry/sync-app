@@ -266,8 +266,18 @@ export function useEventLiveInfo(
       if (apiEnabled && eventId > 0) {
         try {
           const res = await toggleLiveInfoUpdateLike(eventId, feedId);
+          const { likes, liked } = res.update;
           setFeed((prev) =>
-            prev.map((item) => (item.id === feedId ? res.update : item)),
+            prev.map((item) =>
+              item.id === feedId
+                ? {
+                    ...item,
+                    likes:
+                      typeof likes === 'number' && likes >= 0 ? likes : item.likes,
+                    liked: Boolean(liked),
+                  }
+                : item,
+            ),
           );
         } catch {
           void Taro.showToast({ title: '操作失败', icon: 'none' });

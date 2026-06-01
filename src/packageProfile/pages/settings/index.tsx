@@ -21,15 +21,17 @@ import { useEndRouteTransitionOnShow } from '../../../hooks/useEndRouteTransitio
 import { isApiEnabled } from '../../../constants/api';
 import { isLoggedIn } from '../../../utils/authStorage';
 import { Button } from '../../../components/ui';
-import { Text, View } from '@tarojs/components';
+import { ScrollView, Text, View } from '@tarojs/components';
+import { BlockedUsersSettings } from './components/BlockedUsersSettings';
 
-type SettingsSection = 'notifications' | 'privacy' | 'help';
+type SettingsSection = 'notifications' | 'privacy' | 'help' | 'blocked';
 type PrivacyLevel = ProfilePrivacyLevel;
 
 const SECTION_TITLES: Record<SettingsSection, string> = {
   notifications: '消息通知',
   privacy: '隐私设置',
   help: '帮助与反馈',
+  blocked: '已屏蔽用户',
 };
 
 const PRIVACY_LABELS: Record<PrivacyLevel, string> = {
@@ -78,8 +80,8 @@ const SettingsPage: React.FC = () => {
   const setStorePrivacyLevel = useProfilePageStore((state) => state.setPrivacyLevel);
 
   useEffect(() => {
-    if (!isApiEnabled() || !isLoggedIn()) return;
-    if (section !== 'help') {
+    if (!isApiEnabled()) return;
+    if (section === 'blocked' && !isLoggedIn()) {
       void Taro.showToast({ title: '请先登录', icon: 'none' });
       void Taro.navigateBack();
     }
@@ -157,6 +159,18 @@ const SettingsPage: React.FC = () => {
         tone="surface"
       />
 
+      {section === 'blocked' ? (
+        <ScrollView
+          scrollY
+          enhanced
+          showScrollbar={false}
+          className="s-settings__scroll s-scrollbar-none"
+        >
+          <View className="s-settings__main">
+            <BlockedUsersSettings />
+          </View>
+        </ScrollView>
+      ) : (
       <View className="s-settings__main">
         {section === 'notifications' && (
           <View className="s-settings__card">
@@ -231,6 +245,7 @@ const SettingsPage: React.FC = () => {
           </>
         )}
       </View>
+      )}
     </View>
   );
 };

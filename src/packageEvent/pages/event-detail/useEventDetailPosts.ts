@@ -171,9 +171,12 @@ export function useEventDetailPosts({
     [apiEnabled, confirm, postsQuery],
   );
 
-  const handleCommentSubmitted = useCallback(() => {
-    // commentPostAndInvalidate patches post list cache; no full refetch.
-  }, []);
+  const handleCommentSubmitted = useCallback(
+    (updated: Pick<EventDetailPost, 'id' | 'comments' | 'likes' | 'liked'>) => {
+      postsQuery.patchItem(updated);
+    },
+    [postsQuery],
+  );
 
   const handleCompletePost = useCallback(
     async (postId: string) => {

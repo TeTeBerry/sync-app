@@ -447,6 +447,10 @@
   }
 }
 
+.s-live-info-post__like-icon {
+  flex-shrink: 0;
+}
+
 .s-live-info-post__like-count {
   font-size: var(--s-type-caption);
   font-weight: var(--s-fw-bold);

@@ -2,6 +2,7 @@ import Taro, { useDidShow } from '@tarojs/taro';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { isApiEnabled } from '../../constants/api';
 import {
+  useBlockedUsersQuery,
   useProfileEntitlementsQuery,
   useProfileSummaryQuery,
 } from '../../hooks/useSyncApi';
@@ -10,6 +11,7 @@ import { useAuthSession } from '../../hooks/useAuthSession';
 import { useEndRouteTransitionOnShow } from '../../hooks/useEndRouteTransitionOnShow';
 import { useProfilePageStore } from '../../stores';
 import { ensureAuth, logout } from '../../utils/auth';
+import { requireAuth } from '../../utils/authGate';
 import { shouldSkipAutoLogin } from '../../utils/authStorage';
 import { invalidateProfilePackageState } from '../../utils/queryInvalidation';
 import {
@@ -73,6 +75,7 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
   });
 
   const summaryQuery = useProfileSummaryQuery();
+  const blockedUsersQuery = useBlockedUsersQuery();
   const allEntitlementsQuery = useProfileEntitlementsQuery();
   const apiEnabled = isApiEnabled();
   const { loggedIn, refresh: refreshAuthSession } = useAuthSession();
@@ -144,7 +147,8 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
     persistUserName(profileUserData.name);
   }, [profileUserData.name]);
 
-  const openSettings = useCallback((section: 'notifications' | 'privacy' | 'help') => {
+  const openSettings = useCallback(
+    (section: 'notifications' | 'privacy' | 'help' | 'blocked') => {
     go(`${ROUTES.SETTINGS}?section=${section}`);
   }, []);
 
@@ -173,10 +177,16 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
     void Taro.showToast({ title: '已退出登录', icon: 'success' });
   }, [confirm, refreshAuthSession]);
 
+  const blockedCount = blockedUsersQuery.data?.blockedUserIds?.length ?? 0;
+
   const settings: ProfileSettingsSectionProps = {
     notificationsEnabled,
+    blockedCount,
     onOpenNotifications: () => openSettings('notifications'),
     onOpenPrivacy: () => openSettings('privacy'),
+    onOpenBlockedUsers: () => {
+      requireAuth(() => openSettings('blocked'), 'general');
+    },
     onOpenHelp: () => openSettings('help'),
     onLogout: handleLogout,
   };

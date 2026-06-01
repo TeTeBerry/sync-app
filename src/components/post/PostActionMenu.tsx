@@ -6,8 +6,11 @@ import { PostActionSheet } from './PostActionSheet';
 import { useConfirmDialog } from '../../hooks/useConfirmDialog';
 import {
   blockUserAndInvalidate,
-  submitReportAndInvalidate,
+  submitReport,
 } from '../../hooks/useSyncApi';
+import { isApiEnabled } from '../../constants/api';
+import { requireAuth } from '../../utils/authGate';
+import { getApiErrorMessage } from '../../utils/apiErrorMessage';
 import { usePostShareStore } from '../../stores/postShareStore';
 import type { ReportCategory } from '../../types/backend';
 import type { PostSharePayload } from '../../utils/postShare';
@@ -66,9 +69,17 @@ export const PostActionMenu: FC<PostActionMenuProps> = ({
     setReportOpen(false);
   }, []);
 
-  const handleBlock = useCallback(async () => {
-    closeAll();
-    if (!authorUserId?.trim()) {
+  const ensureApiReady = useCallback((): boolean => {
+    if (isApiEnabled()) return true;
+    void Taro.showToast({ title: '请配置 API 地址', icon: 'none' });
+    return false;
+  }, []);
+
+  const runBlock = useCallback(async () => {
+    if (!ensureApiReady()) return;
+
+    const targetId = authorUserId?.trim();
+    if (!targetId) {
       void Taro.showToast({ title: '无法屏蔽该用户', icon: 'none' });
       return;
     }
@@ -81,29 +92,53 @@ export const PostActionMenu: FC<PostActionMenuProps> = ({
     if (!confirmed) return;
 
     try {
-      await blockUserAndInvalidate(authorUserId);
+      await blockUserAndInvalidate(targetId);
       void Taro.showToast({ title: '已屏蔽', icon: 'success' });
-    } catch {
-      void Taro.showToast({ title: '屏蔽失败，请稍后重试', icon: 'none' });
+    } catch (error) {
+      void Taro.showToast({
+        title: getApiErrorMessage(error, '屏蔽失败，请稍后重试'),
+        icon: 'none',
+      });
     }
-  }, [authorUserId, closeAll, confirm]);
+  }, [authorUserId, confirm, ensureApiReady]);
 
-  const handleReport = useCallback(
+  const handleBlock = useCallback(() => {
+    closeAll();
+    requireAuth(() => {
+      void runBlock();
+    }, 'social');
+  }, [closeAll, runBlock]);
+
+  const runReport = useCallback(
     async (category: ReportCategory) => {
-      closeAll();
+      if (!ensureApiReady()) return;
+
       try {
-        await submitReportAndInvalidate({
+        await submitReport({
           targetType: 'post',
           targetId: postId,
-          targetUserId: authorUserId,
+          targetUserId: authorUserId?.trim() || undefined,
           category,
         });
         void Taro.showToast({ title: '举报已提交', icon: 'success' });
-      } catch {
-        void Taro.showToast({ title: '举报失败，请稍后重试', icon: 'none' });
+      } catch (error) {
+        void Taro.showToast({
+          title: getApiErrorMessage(error, '举报失败，请稍后重试'),
+          icon: 'none',
+        });
       }
     },
-    [authorUserId, closeAll, postId],
+    [authorUserId, ensureApiReady, postId],
+  );
+
+  const handleReport = useCallback(
+    (category: ReportCategory) => {
+      closeAll();
+      requireAuth(() => {
+        void runReport(category);
+      }, 'social');
+    },
+    [closeAll, runReport],
   );
 
   if (disabled) return null;
@@ -151,8 +186,8 @@ export const PostActionMenu: FC<PostActionMenuProps> = ({
               }
             : undefined
         }
-        onBlock={!onDelete ? () => void handleBlock() : undefined}
-        onReportCategory={(category) => void handleReport(category)}
+        onBlock={!onDelete ? handleBlock : undefined}
+        onReportCategory={handleReport}
       />
 
       {confirmDialog}

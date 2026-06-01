@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import {
   addPostComment,
   applyToPost,
@@ -9,8 +8,7 @@ import {
   likePost,
   updatePost,
 } from '../../api/sync/posts';
-import { blockUser, submitReport } from '../../api/sync/users';
-import type { ReportPayload } from '../../types/backend';
+import { blockUser } from '../../api/sync/users';
 import { resolveRequestUserId } from '../../api/requestContext';
 import type { HomeFeedPost } from '../../types/backend';
 import { isApiEnabled } from '../../constants/api';
@@ -22,6 +20,7 @@ import { sanitizeImageList, sanitizeRemoteImageUrl } from '../../utils/imageUrl'
 import {
   invalidateAllPosts,
   invalidatePostComments,
+  invalidateBlockedUsers,
   invalidatePostFeeds,
   patchLikedPostInCaches,
   patchPostStatusInCaches,
@@ -140,6 +139,7 @@ export async function commentPostAndInvalidate(
   const updated = await addPostComment(postId, body, parentCommentId);
   patchLikedPostInCaches(updated);
   await Promise.all([invalidateNotificationQueries(), invalidatePostComments(postId)]);
+  return updated;
 }
 
 export async function applyToPostAndInvalidate(postId: string) {
@@ -162,10 +162,9 @@ export async function updatePostAndInvalidate(
 
 export async function blockUserAndInvalidate(blockedUserId: string) {
   const result = await blockUser(blockedUserId);
-  await invalidatePostFeeds();
+  invalidatePostFeeds();
+  invalidateBlockedUsers();
   return result;
 }
 
-export async function submitReportAndInvalidate(payload: ReportPayload) {
-  return submitReport(payload);
-}
+export { submitReport } from '../../api/sync/users';

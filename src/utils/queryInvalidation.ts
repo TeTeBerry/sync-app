@@ -65,6 +65,11 @@ export function invalidatePostFeeds() {
   invalidateCache(['posts', 'activity']);
 }
 
+/** 失效已屏蔽用户列表 */
+export function invalidateBlockedUsers() {
+  invalidateCache(['users', 'blocks']);
+}
+
 /** 失效所有帖子及关联查询 */
 export function invalidateAllPosts() {
   invalidateCache(['posts']);
@@ -135,29 +140,25 @@ export function patchUpdatedProfilePostInCaches(updated: ProfilePostItem) {
 export function patchLikedPostInCaches(
   updated: Pick<EventDetailPost, 'id' | 'likes' | 'liked' | 'comments'>,
 ) {
+  const patchPost = <
+    T extends { id: string; likes: number; liked?: boolean; comments: number },
+  >(
+    post: T,
+  ): T => {
+    if (post.id !== updated.id) return post;
+    return {
+      ...post,
+      ...(updated.likes !== undefined ? { likes: updated.likes } : {}),
+      ...(updated.liked !== undefined ? { liked: updated.liked } : {}),
+      ...(updated.comments !== undefined ? { comments: updated.comments } : {}),
+    };
+  };
+
   const patchFeedPosts = (posts: HomeFeedPost[] | undefined) =>
-    posts?.map((post) =>
-      post.id === updated.id
-        ? {
-            ...post,
-            likes: updated.likes,
-            liked: updated.liked ?? false,
-            comments: updated.comments ?? post.comments,
-          }
-        : post,
-    );
+    posts?.map(patchPost);
 
   const patchEventPosts = (posts: EventDetailPost[] | undefined) =>
-    posts?.map((post) =>
-      post.id === updated.id
-        ? {
-            ...post,
-            likes: updated.likes,
-            liked: updated.liked ?? false,
-            comments: updated.comments ?? post.comments,
-          }
-        : post,
-    );
+    posts?.map(patchPost);
 
   forEachCacheEntry((key, entryData) => {
     if (!key.startsWith('posts|')) return;

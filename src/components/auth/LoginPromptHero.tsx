@@ -1,7 +1,7 @@
 import './loginPromptShared.scss';
 import Taro from '@tarojs/taro';
 import React, { useCallback, useState } from 'react';
-import { ChevronRight, Sparkles, Zap } from 'lucide-react-taro';
+import { Bot, ChevronRight, Zap } from 'lucide-react-taro';
 import { Button } from '../ui';
 import { Text, View } from '@tarojs/components';
 import { isApiEnabled } from '../../constants/api';
@@ -75,8 +75,8 @@ export function LoginPromptHero({
 
       <View className="s-login-prompt-hero__highlights" aria-hidden>
         <View className="s-login-prompt-hero__chip">
-          <View className="s-login-prompt-hero__chip-icon">
-            <Sparkles size={14} color="var(--primary)" />
+          <View className="s-login-prompt-hero__chip-icon s-login-prompt-hero__chip-icon--ai">
+            <Bot size={16} color="#64d2ff" strokeWidth={2.25} />
           </View>
           <View className="s-login-prompt-hero__chip-label-wrap">
             <Text className="s-login-prompt-hero__chip-label">AI 智能匹配</Text>

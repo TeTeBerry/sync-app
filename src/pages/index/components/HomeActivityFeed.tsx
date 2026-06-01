@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import { FeedPostList } from '../../../components/post';
+import { FeedPostList, type FeedPostListProps } from '../../../components/post';
 import type { HomeFeedPost } from '../../../types/post';
 import { Text, View } from '@tarojs/components';
 
@@ -7,7 +7,7 @@ type HomeActivityFeedProps = {
   items: HomeFeedPost[];
   onDelete?: (post: HomeFeedPost) => void;
   onLike?: (post: HomeFeedPost) => void;
-  onCommentSubmitted?: () => void;
+  onCommentSubmitted?: FeedPostListProps['onCommentSubmitted'];
 };
 
 export const HomeActivityFeed: FC<HomeActivityFeedProps> = ({

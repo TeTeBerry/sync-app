@@ -1,5 +1,6 @@
 import { Check, MessageCircle, ThumbsUp } from 'lucide-react-taro';
 import { Button } from '../../../../components/ui';
+import { postActionIconColor } from '../../../../utils/postActionColors';
 import { Text, View } from '@tarojs/components';
 import { ImageWithFallback } from '../../../../components/ImageWithFallback';
 import { getLiveInfoCategory } from '../liveInfoConfig';
@@ -30,6 +31,7 @@ export function EventLiveInfoFeedItem({
   const id = item.id?.trim() || '';
   const userName = item.userName?.trim() || '用户';
   const likes = typeof item.likes === 'number' && item.likes >= 0 ? item.likes : 0;
+  const liked = Boolean(item.liked);
   const certified = Boolean(item.certified);
   const remark = item.remark?.trim();
 
@@ -66,7 +68,7 @@ export function EventLiveInfoFeedItem({
         <Button
           className={[
             's-live-info-post__like-pill',
-            item.liked && 's-live-info-post__like-pill--on',
+            liked && 's-live-info-post__like-pill--on',
           ]
             .filter(Boolean)
             .join(' ')}
@@ -76,7 +78,9 @@ export function EventLiveInfoFeedItem({
         >
           <ThumbsUp
             size={14}
-            color={item.liked ? 'var(--primary)' : '#8e8e93'}
+            className="s-live-info-post__like-icon"
+            filled={liked}
+            color={postActionIconColor({ liked })}
             aria-hidden
           />
           <Text className="s-live-info-post__like-count">{likes}</Text>
