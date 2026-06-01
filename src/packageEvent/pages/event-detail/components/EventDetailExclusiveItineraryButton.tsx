@@ -1,5 +1,6 @@
 import { ChevronRight, Music2 } from 'lucide-react-taro';
-import { Button, Text, View } from '@tarojs/components';
+import { Button } from '../../../../components/ui';
+import { Text, View } from '@tarojs/components';
 
 type EventDetailExclusiveItineraryButtonProps = {
   onPress: () => void;

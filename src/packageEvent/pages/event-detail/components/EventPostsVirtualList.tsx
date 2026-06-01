@@ -1,11 +1,9 @@
 import { useEffect, useRef } from 'react';
+import type { EventPostListItem } from '../utils/eventPostNormalize';
 import { EventPostCard, type EventPostCardProps } from './EventPostCard';
 import { Text, View } from '@tarojs/components';
 
-export type EventPostListItem = {
-  post: import('../../../../types/backend').EventDetailPost;
-  publishTimeLabel: string;
-};
+export type { EventPostListItem };
 
 type EventPostsVirtualListProps = {
   activityLegacyId: number;

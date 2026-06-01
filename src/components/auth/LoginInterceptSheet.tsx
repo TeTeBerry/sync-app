@@ -1,7 +1,8 @@
 import './LoginInterceptSheet.scss';
 import React, { useCallback } from 'react';
 import { X } from 'lucide-react-taro';
-import { Button, View } from '@tarojs/components';
+import { Button } from '../ui';
+import { View } from '@tarojs/components';
 import { useOverlayLock } from '../../hooks/useOverlayLock';
 import { useLoginInterceptStore } from '../../stores/loginInterceptStore';
 import { invalidateProfilePackageState } from '../../utils/queryInvalidation';

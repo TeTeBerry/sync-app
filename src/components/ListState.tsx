@@ -1,5 +1,6 @@
 import React from 'react';
-import { Button, Text, View } from '@tarojs/components';
+import { Button } from './ui';
+import { Text, View } from '@tarojs/components';
 
 export type ListStateProps = {
   isLoading?: boolean;

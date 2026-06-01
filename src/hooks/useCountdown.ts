@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import type { CountdownPart } from '../pages/index/homeData';
+import type { CountdownPart } from '../types/home';
 import { EMPTY_COUNTDOWN_PARTS, getCountdownParts } from '../utils/countdown';
 
 function isValidCountdownTarget(target: Date | null | undefined): target is Date {

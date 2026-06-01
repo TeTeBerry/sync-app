@@ -1,7 +1,8 @@
 import './PageNavigation.scss';
 import React, { type CSSProperties, type ReactNode } from 'react';
 import { ChevronLeft } from 'lucide-react-taro';
-import { Button, Text, View } from '@tarojs/components';
+import { Button } from './ui';
+import { Text, View } from '@tarojs/components';
 import { useNavBarInsets, type NavBarInsets } from '../hooks/useNavBarInsets';
 import { goBack, type RoutePath } from '../utils/route';
 import { tabPageHeaderStyle } from './TabPageHeader';

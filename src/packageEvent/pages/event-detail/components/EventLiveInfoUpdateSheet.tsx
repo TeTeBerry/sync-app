@@ -10,7 +10,8 @@ import {
 } from '../liveInfoConfig';
 import type { PublishLiveInfoPayload } from '../useEventLiveInfo';
 import { EventLiveInfoStarRow } from './EventLiveInfoStarRow';
-import { Button, ScrollView, Text, Textarea, View } from '@tarojs/components';
+import { Button } from '../../../../components/ui';
+import { ScrollView, Text, Textarea, View } from '@tarojs/components';
 
 type EventLiveInfoUpdateSheetProps = {
   open: boolean;

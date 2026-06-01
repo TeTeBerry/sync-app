@@ -45,6 +45,10 @@ describe('authStorage skip auto login', () => {
     saveAuthStorage('token-abc', {
       id: 'user-1',
       name: 'Test User',
+      handle: '@test',
+      location: '',
+      bio: '',
+      avatar: '',
     });
     expect(getAccessToken()).toBe('token-abc');
     expect(getAuthUser()?.id).toBe('user-1');

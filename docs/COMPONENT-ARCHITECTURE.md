@@ -26,6 +26,7 @@ types/post.ts、types/backend.ts  ← 任意层（类型不反向依赖 pages）
 |------|------|
 | `src/types/backend.ts` | API 契约与 DTO（与后端对齐） |
 | `src/types/post.ts` | 帖子相关类型的 UI 层统一导出入口 |
+| `src/types/home.ts` | 首页展示类型（`CountdownPart`、`FeaturedEvent`） |
 
 `HomeFeedPost`（首页热帖）与 `EventDetailPost`（活动详情帖）字段不同，**不要**强行合并为单一 interface；需要展示层适配时用 mapper（如 `utils/eventPostDisplay.ts`）。
 

@@ -33,10 +33,6 @@ import { EventDetailEntitlementModals } from './components/EventDetailEntitlemen
 import { pickGlobalFreeMonthly } from '../../../components/profile';
 import { useContactUnlockQuota } from '../../../hooks/useContactUnlockQuota';
 import {
-  applyToPostAndInvalidate,
-  deletePostAndInvalidate,
-  likePostAndInvalidate,
-  updatePostAndInvalidate,
   useActivityDetailQuery,
   useCurrentUserQuery,
   useProfileEntitlementsQuery,
@@ -44,18 +40,17 @@ import {
 import type { PackageTierId } from '../../../types/backend';
 import { resolveProfileEntitlement } from '../../../utils/profileEntitlement';
 import { useEventPostsInfiniteQuery } from '../../../hooks/useEventPostsInfiniteQuery';
-import { consumeContactUnlockWithQuota } from '../../../utils/contactUnlockEntitlement';
 import { isApiEnabled } from '../../../constants/api';
-import { requireAuth } from '../../../utils/authGate';
-import type { EventDetailPost } from '../../../types/backend';
 import { isAiShortcutTag, recordAiShortcutTagUse } from '../../../utils/aiShortcutTags';
 import {
   activityStatusCardClass,
   getActivityStatusFromActivity,
 } from '../../../utils/activityStatus';
-import { formatPostPublishTime } from '../../../utils/formatPostPublishTime';
-import { sanitizeImageList, sanitizeRemoteImageUrl } from '../../../utils/imageUrl';
 import { EventPostsVirtualList } from './components/EventPostsVirtualList';
+import {
+  EVENT_DETAIL_SCROLL_ID,
+  useEventDetailPosts,
+} from './useEventDetailPosts';
 import type { EventDetailTabId } from './components/EventDetailContentTabs';
 import { MOCK_LIVE_INFO_FEED } from './liveInfoMock';
 import PageNavigation, {
@@ -63,7 +58,6 @@ import PageNavigation, {
 } from '../../../components/PageNavigation';
 import { useNavBarInsets } from '../../../hooks/useNavBarInsets';
 import { useTabPageMainHeight } from '../../../hooks/useTabPageMainHeight';
-import { scrollElementToCenter } from '../../../utils/scrollToCenter';
 import { useResolvedProfile } from '../../../hooks/useResolvedProfile';
 import { usePostPageShare } from '../../../hooks/usePostPageShare';
 import type { PostSharePayload } from '../../../utils/postShare';
@@ -72,8 +66,6 @@ import { ScrollView, Text, View } from '@tarojs/components';
 import { EventLiveInfoUpdateSheet } from './components/EventLiveInfoUpdateSheet';
 import type { EventLiveInfoTabActions } from './live/EventLiveInfoTab';
 import type { PublishLiveInfoPayload } from './useEventLiveInfo';
-
-const EVENT_DETAIL_SCROLL_ID = 'event-detail-scroll';
 
 const EventLiveInfoTab = lazy(() =>
   import('./live/EventLiveInfoTab').then((mod) => ({
@@ -131,10 +123,6 @@ const EventDetailPage = () => {
     cancelText: '取消',
   });
   const [prompt, setPrompt] = useState('');
-  const [appliedPostIds, setAppliedPostIds] = useState<Set<string>>(() => new Set());
-  const [expandedCommentPostIds, setExpandedCommentPostIds] = useState<Set<string>>(
-    () => new Set(),
-  );
   const [contentTab, setContentTab] = useState<EventDetailTabId>('posts');
   const [liveFeedCount, setLiveFeedCount] = useState(MOCK_LIVE_INFO_FEED.length);
   const [liveUpdateSheetOpen, setLiveUpdateSheetOpen] = useState(false);
@@ -253,174 +241,28 @@ const EventDetailPage = () => {
   });
   const scrollHeight = useTabPageMainHeight(headerChromePx);
 
-  const postItems = useMemo(() => {
-    return postsQuery.items.map((item) => {
-      const post: EventDetailPost = {
-        id: item.id,
-        userId: item.userId,
-        location: item.location,
-        time: item.time,
-        createdAt: item.createdAt,
-        body: item.body ?? '',
-        tags: item.tags ?? [],
-        name: item.name?.trim() || '用户',
-        likes: item.likes,
-        liked: item.liked,
-        comments: item.comments,
-        avatar: sanitizeRemoteImageUrl(item.avatar) ?? item.avatar,
-        status: item.status,
-        contentTypes: item.contentTypes,
-        images: sanitizeImageList(item.images),
-      };
-      const publishTimeLabel = post.createdAt
-        ? formatPostPublishTime(post.createdAt)
-        : post.time;
-      return { post, publishTimeLabel };
-    });
-  }, [postsQuery.items]);
-
-  const handleScrollToLower = useCallback(() => {
-    if (contentTab !== 'posts') return;
-    void postsQuery.loadMore();
-  }, [contentTab, postsQuery]);
-
-  const handleApply = useCallback(
-    (postId: string) => {
-      if (appliedPostIds.has(postId)) return;
-
-      if (contactUnlockQuota.exhausted) {
-        openContactUnlockExhaustedModal();
-        return;
-      }
-
-      const runApply = () => {
-      void applyToPostAndInvalidate(postId)
-        .then(async (result) => {
-          if (!result.alreadyApplied) {
-            const consumed = await consumeContactUnlockWithQuota(eventId);
-            if (!consumed) {
-              openContactUnlockExhaustedModal();
-              return;
-            }
-          }
-
-          setAppliedPostIds((prev) => new Set(prev).add(postId));
-          const toastTitle = result.alreadyApplied ? '已申请' : '申请成功';
-          void Taro.showToast({ title: toastTitle, icon: 'success' });
-        })
-        .catch(() => void Taro.showToast({ title: '申请失败', icon: 'none' }));
-      };
-
-      requireAuth(runApply, 'post');
-    },
-    [
-      appliedPostIds,
-      contactUnlockQuota.exhausted,
-      eventId,
-      openContactUnlockExhaustedModal,
-    ],
-  );
-
-  const handleLikePost = useCallback(
-    (postId: string) => {
-      requireAuth(() => {
-        if (!apiEnabled) return;
-        void likePostAndInvalidate(postId)
-          .then((updated) => {
-            postsQuery.patchItem(updated);
-          })
-          .catch(
-            () => void Taro.showToast({ title: '请求失败，请稍后重试', icon: 'none' }),
-          );
-      }, 'social');
-    },
-    [apiEnabled, postsQuery],
-  );
-
-  const scrollToElement = useCallback((elementId: string) => {
-    const targetSelector = `#${elementId}`;
-    void scrollElementToCenter(
-      `#${EVENT_DETAIL_SCROLL_ID}`,
-      targetSelector,
-      setScrollTop,
-    ).then((centered) => {
-      if (!centered) {
-        setScrollTop(undefined);
-        setTimeout(() => {
-          void scrollElementToCenter(
-            `#${EVENT_DETAIL_SCROLL_ID}`,
-            targetSelector,
-            setScrollTop,
-          );
-        }, 150);
-      }
-    });
-  }, []);
-
-  const togglePostComments = useCallback((postId: string) => {
-    setExpandedCommentPostIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(postId)) {
-        next.delete(postId);
-      } else {
-        next.add(postId);
-      }
-      return next;
-    });
-  }, []);
-
-  const handleDeletePost = useCallback(
-    async (post: EventDetailPost) => {
-      const ok = await confirm({
-        title: '确认删除',
-        message: '删除后无法恢复，确定要删除这条帖子吗？',
-        confirmText: '删除',
-      });
-      if (!ok) return;
-      if (!apiEnabled) {
-        void Taro.showToast({ title: '已删除', icon: 'success' });
-        return;
-      }
-      void deletePostAndInvalidate(post.id)
-        .then(() => {
-          postsQuery.removeItem(post.id);
-          void Taro.showToast({ title: '已删除', icon: 'success' });
-        })
-        .catch(() => {
-          void postsQuery.refetch();
-          void Taro.showToast({ title: '删除失败', icon: 'none' });
-        });
-    },
-    [apiEnabled, confirm, postsQuery],
-  );
-
-  const handleCommentSubmitted = useCallback(() => {
-    // commentPostAndInvalidate patches post list cache; no full refetch.
-  }, []);
-
-  const handleCompletePost = useCallback(
-    async (postId: string) => {
-      const ok = await confirm({
-        title: '确认标记为已组队',
-        message: '标记后该帖子将结束招募，同类型帖子可重新发布。确定要继续吗？',
-        confirmText: '确认',
-      });
-      if (!ok) return;
-      if (!apiEnabled) {
-        void Taro.showToast({ title: '已标记为已组队', icon: 'success' });
-        return;
-      }
-      void updatePostAndInvalidate(postId, { status: 'completed' })
-        .then((updated) => {
-          postsQuery.patchItem({ id: postId, status: updated.status });
-          void Taro.showToast({ title: '已标记为已组队', icon: 'success' });
-        })
-        .catch(() => {
-          void Taro.showToast({ title: '标记失败', icon: 'none' });
-        });
-    },
-    [apiEnabled, confirm, postsQuery],
-  );
+  const {
+    postItems,
+    appliedPostIds,
+    expandedCommentPostIds,
+    handleScrollToLower,
+    handleApply,
+    handleLikePost,
+    scrollToElement,
+    togglePostComments,
+    handleDeletePost,
+    handleCommentSubmitted,
+    handleCompletePost,
+  } = useEventDetailPosts({
+    eventId,
+    contentTab,
+    postsQuery,
+    apiEnabled,
+    confirm,
+    contactUnlockQuota,
+    openContactUnlockExhaustedModal,
+    setScrollTop,
+  });
 
   const bumpShortcutTagUsage = useCallback((tag: string) => {
     recordAiShortcutTagUse(tag);

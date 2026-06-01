@@ -30,7 +30,8 @@ import {
   formatEventPostHandle,
   parseGroupProgressFromText,
 } from '../utils/eventPostDisplay';
-import { Button, Text, View } from '@tarojs/components';
+import { Button } from '../../../../components/ui';
+import { Text, View } from '@tarojs/components';
 
 export type EventPostCardProps = {
   post: EventDetailPost;

@@ -10,7 +10,9 @@ describe('useItineraryStore', () => {
     useItineraryStore.getState().setFromGenerateResult(4, ['marshmello'], {
       itinerary: {
         eventMeta: '风暴电音节',
-        days: [{ id: 'jun13', label: '6/13', bannerDateLabel: '6/13', items: [] }],
+        days: [
+          { id: 'jun13', label: '6/13', bannerDateLabel: '6/13', nodeCount: 0, items: [] },
+        ],
       },
       conflicts: [],
       cached: true,

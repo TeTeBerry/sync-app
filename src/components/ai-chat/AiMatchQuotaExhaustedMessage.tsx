@@ -1,6 +1,7 @@
 import './AiMatchQuotaExhaustedMessage.scss';
 import { Rocket, Sparkles, Zap } from 'lucide-react-taro';
-import { Button, Text, View } from '@tarojs/components';
+import { Button } from '../ui';
+import { Text, View } from '@tarojs/components';
 import { useAiMatchQuota } from '../../hooks/useAiMatchQuota';
 import { useAiUpgradeSheet } from './AiUpgradeSheetContext';
 

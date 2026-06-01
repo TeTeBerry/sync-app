@@ -72,30 +72,34 @@
 - [x] `ProfileSummarySection` / `ProfileSettingsSection` / `ProfileDebugSection`
 - [x] `EventDetailComposerSection` / `EventDetailEntitlementModals`
 - [x] [COMPONENT-ARCHITECTURE.md](./COMPONENT-ARCHITECTURE.md) 三层规则与决策表
+- [x] `ProfileBenefitsBlock` / `ProfileDebugModalsHost`
+- [x] `eventPostNormalize` + `useEventDetailPosts`
+- [x] `CountdownPart` → `types/home.ts`；Vitest Taro compile flags
 
-### 组件债 · Taro `Button` 待迁 `components/ui`
+### 组件债 · Taro `Button` 待迁 `components/ui` ✅
 
-已迁移：`ProfileTabErrorBoundary`、`ProfileCollapsibleSection`、`pages/events/index`、`event-detail/index`（fallback 重试）
+业务代码已统一使用 `components/ui/Button`（`open-type` 等微信属性经 wrapper 透传）。
 
-- [ ] `components/auth/LoginPromptHero.tsx`
-- [ ] `components/auth/LoginInterceptSheet.tsx`
-- [ ] `components/PostCommentSection.tsx`
-- [ ] `components/PostActionSheet.tsx`
-- [ ] `components/PostActionMenu.tsx`
-- [ ] `components/PageNavigation.tsx`
-- [ ] `components/ListState.tsx`
-- [ ] `components/BottomNav.tsx`
-- [ ] `components/AiAssistantPostCard.tsx`
-- [ ] `components/ActionSheet.tsx`
-- [ ] `components/event-map/EventMapUserPostsSheet.tsx`
-- [ ] `components/ai-chat/*`（`ChatMessageList`、`AiMatchQuotaBanner` 等）
-- [ ] `components/profile/ProfilePostsSection.tsx`
-- [ ] `packageProfile/pages/settings/index.tsx`
-- [ ] `packageProfile/pages/notifications/index.tsx`
-- [ ] `packageEvent/pages/my-itinerary/index.tsx`
-- [ ] `packageEvent/pages/exclusive-itinerary/**`
-- [ ] `packageEvent/pages/event-map/index.tsx`
-- [ ] `packageEvent/pages/event-detail/components/**`（`EventPostCard`、直播信息等）
+**例外（保留 Taro 直引）**：仅 [`components/ui/Button.tsx`](sync-app/src/components/ui/Button.tsx) 实现层。
+
+<details>
+<summary>已迁移文件清单（归档）</summary>
+
+- [x] `components/auth/*`、`Post*`、`PageNavigation`、`ListState`、`BottomNav`、`ActionSheet`
+- [x] `components/AiAssistantPostCard`、`event-map/EventMapUserPostsSheet`
+- [x] `components/ai-chat/*`（含 `ChatMessageList`、`ChatComposer`、`SuggestedReplyChips` 等）
+- [x] `components/profile/ProfilePostsSection`、`ProfileTabErrorBoundary`、`ProfileCollapsibleSection`
+- [x] `pages/events/index`、`pages/profile` 相关、`event-detail/index`（fallback）
+- [x] `packageProfile/pages/settings`、`notifications`
+- [x] `packageEvent/pages/my-itinerary`、`exclusive-itinerary/**`、`event-map`
+- [x] `packageEvent/pages/event-detail/components/**`
+
+</details>
+
+### 后续 Phase（未排期）
+
+- [ ] `AiAssistantPage` 迁入 `packageAi/pages/ai-assistant/` 同目录
+- [ ] `my-itinerary` / `exclusive-itinerary` 拆 `components/`
 
 ---
 

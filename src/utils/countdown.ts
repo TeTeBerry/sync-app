@@ -1,4 +1,4 @@
-import type { CountdownPart } from '../pages/index/homeData';
+import type { CountdownPart } from '../types/home';
 
 function pad2(n: number): string {
   return String(Math.max(0, n)).padStart(2, '0');

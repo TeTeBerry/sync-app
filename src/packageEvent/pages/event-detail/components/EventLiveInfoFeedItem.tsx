@@ -1,5 +1,6 @@
 import { Check, MessageCircle, ThumbsUp } from 'lucide-react-taro';
-import { Button, Text, View } from '@tarojs/components';
+import { Button } from '../../../../components/ui';
+import { Text, View } from '@tarojs/components';
 import { ImageWithFallback } from '../../../../components/ImageWithFallback';
 import { getLiveInfoCategory } from '../liveInfoConfig';
 import type { LiveInfoFeedItem } from '../liveInfoMock';

@@ -4,7 +4,8 @@ import type { FC } from 'react';
 import type { RecommendedPostCard } from '../types/aiChat';
 import { inferAuthorGenderFromPost } from '../utils/inferAuthorGender';
 import { goEventDetail } from '../utils/route';
-import { Button, Image, Text, View } from '@tarojs/components';
+import { Button } from './ui';
+import { Image, Text, View } from '@tarojs/components';
 
 export type AiAssistantPostCardProps = {
   post: RecommendedPostCard;

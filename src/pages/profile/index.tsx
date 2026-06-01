@@ -11,9 +11,8 @@ import {
 } from '../../hooks/useTabPageMainHeight';
 import { go, preloadHotRoutes, ROUTES } from '../../utils/route';
 import ProfileGuestSection from '../../components/profile/ProfileGuestSection';
-import ProfileBenefitsPurchaseBanner from '../../components/profile/ProfileBenefitsPurchaseBanner';
-import ProfileFreeBenefitsSection from '../../components/profile/ProfileFreeBenefitsSection';
-import ProfilePaidBenefitsSection from '../../components/profile/ProfilePaidBenefitsSection';
+import ProfileBenefitsBlock from '../../components/profile/ProfileBenefitsBlock';
+import ProfileDebugModalsHost from '../../components/profile/ProfileDebugModalsHost';
 import ProfilePackageSheet from '../../components/profile/ProfilePackageSheet';
 import { ProfileTabErrorBoundary } from '../../components/profile/ProfileTabErrorBoundary';
 import { profileActivities, profilePosts, profileUser } from '../../components/profile/mockData';
@@ -39,7 +38,6 @@ import {
   readProfilePrivacyLevel,
 } from '../../utils/profileStorage';
 import { invalidateProfilePackageState } from '../../utils/queryInvalidation';
-import type { ProfileSummary } from '../../types/backend';
 import {
   asEntitlementList,
   buildFreeBenefitCardModel,
@@ -62,8 +60,6 @@ import {
 } from '../../components/profile/profileDebugEntitlements';
 import { buildDebugContactUnlockExhaustedPreview } from '../../components/profile/profileDebugModals';
 import { LoginInterceptHost } from '../../components/auth/LoginInterceptHost';
-import { ContactUnlockQuotaExhaustedModal } from '../../components/contact-unlock/ContactUnlockQuotaExhaustedModal';
-import AiPackageUpgradeSheet from '../../components/ai-chat/AiPackageUpgradeSheet';
 import { PROFILE_SEED_ACTIVITY_LEGACY_ID } from '../../constants/profilePackage';
 import { useAuthSession } from '../../hooks/useAuthSession';
 import { useEndRouteTransitionOnShow } from '../../hooks/useEndRouteTransitionOnShow';
@@ -395,37 +391,20 @@ const Profile: React.FC = () => {
                 <>
                 <ProfileSummarySection user={profileUserData} interestTag={interestTag} />
 
-              {showBenefitsBlock ? (
-                <View className="s-profile-benefits">
-                  <ProfileBenefitsPurchaseBanner
-                    onOpenPurchase={() => openPackageSheet()}
-                  />
-
-                  {showPaidBenefitsSection ? (
-                    <ProfilePaidBenefitsSection
-                      cards={recentPaidBenefitCards}
-                      totalCount={totalPaidCardCount}
-                      onViewAll={() => go(ROUTES.PROFILE_BENEFITS)}
-                      loading={benefitsLoading}
-                      onUpgrade={handleBenefitUpgrade}
-                      onUsageHistory={handleUsageHistory}
-                    />
-                  ) : null}
-
-                  {showFreeBenefitsSection && freeBenefitCard ? (
-                    <ProfileFreeBenefitsSection
-                      card={freeBenefitCard}
-                      onOpenPurchase={() => openPackageSheet()}
-                    />
-                  ) : showBenefitsLoading ? (
-                    <ProfileFreeBenefitsSection
-                      card={buildFreeBenefitCardModel(null)}
-                      loading
-                      onOpenPurchase={() => openPackageSheet()}
-                    />
-                  ) : null}
-                </View>
-              ) : null}
+              <ProfileBenefitsBlock
+                visible={showBenefitsBlock}
+                showPaid={showPaidBenefitsSection}
+                showFree={showFreeBenefitsSection}
+                showFreeLoading={showBenefitsLoading}
+                paidCards={recentPaidBenefitCards}
+                totalPaidCount={totalPaidCardCount}
+                benefitsLoading={benefitsLoading}
+                freeCard={freeBenefitCard}
+                onOpenPurchase={() => openPackageSheet()}
+                onViewAllBenefits={() => go(ROUTES.PROFILE_BENEFITS)}
+                onUpgrade={handleBenefitUpgrade}
+                onUsageHistory={handleUsageHistory}
+              />
 
               {debugEntitlementsEnabled ? (
                 <ProfileDebugSection
@@ -475,27 +454,22 @@ const Profile: React.FC = () => {
       {confirmDialog}
       <LoginInterceptHost />
       {debugEntitlementsEnabled ? (
-        <>
-          <ContactUnlockQuotaExhaustedModal
-            open={debugContactUnlockExhaustedOpen}
-            onClose={() => setDebugContactUnlockExhaustedOpen(false)}
-            onUpgrade={(tierId) => {
-              setDebugContactUnlockExhaustedOpen(false);
-              openPackageSheet({ initialSelectedTierId: tierId });
-            }}
-            currentPaidTierId={debugContactUnlockPreview.currentPaidTierId}
-            freeMonthly={debugContactUnlockPreview.freeMonthly}
-          />
-          <AiPackageUpgradeSheet
-            open={debugAiMatchExhaustedOpen}
-            onClose={() => setDebugAiMatchExhaustedOpen(false)}
-            activityLegacyId={PROFILE_SEED_ACTIVITY_LEGACY_ID}
-            onViewAllBenefits={() => {
-              setDebugAiMatchExhaustedOpen(false);
-              go(ROUTES.PROFILE_BENEFITS);
-            }}
-          />
-        </>
+        <ProfileDebugModalsHost
+          contactUnlockOpen={debugContactUnlockExhaustedOpen}
+          aiMatchOpen={debugAiMatchExhaustedOpen}
+          preview={debugContactUnlockPreview}
+          activityLegacyId={PROFILE_SEED_ACTIVITY_LEGACY_ID}
+          onCloseContactUnlock={() => setDebugContactUnlockExhaustedOpen(false)}
+          onCloseAiMatch={() => setDebugAiMatchExhaustedOpen(false)}
+          onUpgradeContactUnlock={(tierId) => {
+            setDebugContactUnlockExhaustedOpen(false);
+            openPackageSheet({ initialSelectedTierId: tierId });
+          }}
+          onViewAllBenefits={() => {
+            setDebugAiMatchExhaustedOpen(false);
+            go(ROUTES.PROFILE_BENEFITS);
+          }}
+        />
       ) : null}
       {packageSheetOpen ? (
         <ProfilePackageSheet

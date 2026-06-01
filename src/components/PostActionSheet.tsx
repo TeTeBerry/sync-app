@@ -12,7 +12,8 @@ import React, { useMemo } from 'react';
 import { useOverlayLock } from '../hooks/useOverlayLock';
 import type { ReportCategory } from '../types/backend';
 import { cn } from './ui';
-import { Button, Text, View } from '@tarojs/components';
+import { Button } from './ui';
+import { Text, View } from '@tarojs/components';
 
 export type PostActionSheetStep = 'actions' | 'report';
 

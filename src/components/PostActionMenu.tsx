@@ -9,7 +9,8 @@ import { usePostShareStore } from '../stores/postShareStore';
 import type { ReportCategory } from '../types/backend';
 import type { PostSharePayload } from '../utils/postShare';
 import { POST_ACTION_ICON_COLOR } from '../utils/postActionColors';
-import { Button, View } from '@tarojs/components';
+import { Button } from './ui';
+import { View } from '@tarojs/components';
 
 export type PostActionMenuProps = {
   postId: string;

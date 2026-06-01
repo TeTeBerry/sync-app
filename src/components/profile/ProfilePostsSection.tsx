@@ -17,7 +17,8 @@ import { PostStatusBadge } from '../PostStatusBadge';
 import { ProfileCollapsibleSection } from './ProfileCollapsibleSection';
 import type { ProfilePostItem } from '../../types/backend';
 import { POST_ACTION_ICON_COLOR } from '../../utils/postActionColors';
-import { Button, Text, Textarea, View } from '@tarojs/components';
+import { Button } from '../ui';
+import { Text, Textarea, View } from '@tarojs/components';
 
 const POST_BODY_MAX = 200;
 const PROFILE_POST_STAT_ICON_SIZE = 14;

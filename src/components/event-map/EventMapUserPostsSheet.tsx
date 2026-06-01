@@ -1,7 +1,8 @@
 import './EventMapUserPostsSheet.scss';
 import { memo } from 'react';
 import { Heart, MapPin, MessageCircle, X } from 'lucide-react-taro';
-import { Button, Image, ScrollView, Text, View } from '@tarojs/components';
+import { Button } from '../ui';
+import { Image, ScrollView, Text, View } from '@tarojs/components';
 import { useOverlayLock } from '../../hooks/useOverlayLock';
 import { useNavigationStore } from '../../stores';
 import { ContentTypeBadge, stripContentTypeHashtags } from '../ContentTypeBadge';

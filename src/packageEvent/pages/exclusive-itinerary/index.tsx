@@ -8,7 +8,8 @@ import {
 } from '../../../hooks/useItineraryApi';
 import { useItineraryStore } from '../../../stores/itineraryStore';
 import { Check, ChevronDown, Info, Sparkles } from 'lucide-react-taro';
-import { Button, Image, ScrollView, Text, View } from '@tarojs/components';
+import { Button } from '../../../components/ui';
+import { Image, ScrollView, Text, View } from '@tarojs/components';
 import ActionSheet from '../../../components/ActionSheet';
 import PageNavigation from '../../../components/PageNavigation';
 import { ExclusiveItineraryInfoModal } from './ExclusiveItineraryInfoModal';

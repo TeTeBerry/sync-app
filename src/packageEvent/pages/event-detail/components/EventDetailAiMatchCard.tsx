@@ -1,5 +1,6 @@
 import { Send, Sparkles } from 'lucide-react-taro';
-import { Button, Text, Textarea, View } from '@tarojs/components';
+import { Button } from '../../../../components/ui';
+import { Text, Textarea, View } from '@tarojs/components';
 import { warmAiAssistant } from '../../../../utils/route';
 import { AI_SHORTCUT_TAG_POOL } from '../../../../utils/aiShortcutTags';
 

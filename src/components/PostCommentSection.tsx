@@ -9,7 +9,8 @@ import { PLACEHOLDER_AVATAR } from '../constants/remoteImages';
 import { sanitizeRemoteImageUrl } from '../utils/imageUrl';
 import { isCurrentUserPostAuthor } from '../utils/postOwnership';
 import type { PostCommentItem } from '../types/backend';
-import { Button, Image, Input, Text, View } from '@tarojs/components';
+import { Button } from './ui';
+import { Image, Input, Text, View } from '@tarojs/components';
 
 const DEFAULT_AVATAR = PLACEHOLDER_AVATAR;
 

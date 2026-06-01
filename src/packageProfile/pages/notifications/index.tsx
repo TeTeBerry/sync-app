@@ -23,7 +23,8 @@ import {
 } from '../../../utils/notificationDisplay';
 import { navigateFromNotification, ROUTES } from '../../../utils/route';
 import { DEFER_NOTIFICATIONS_MS } from '../../../utils/timing';
-import { Button, Text, View } from '@tarojs/components';
+import { Button } from '../../../components/ui';
+import { Text, View } from '@tarojs/components';
 
 type CategoryFilter = 'all' | NotificationCategory;
 

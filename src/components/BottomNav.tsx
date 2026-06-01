@@ -1,6 +1,7 @@
 import './BottomNav.scss';
 import React from 'react';
-import { View, Text, Button } from '@tarojs/components';
+import { Button } from './ui';
+import { View, Text } from '@tarojs/components';
 import { CalendarDays, House, User } from 'lucide-react-taro';
 import {
   preloadAiSubpackage,

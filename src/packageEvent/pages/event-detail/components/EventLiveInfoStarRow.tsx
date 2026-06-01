@@ -1,5 +1,6 @@
 import { Star } from 'lucide-react-taro';
-import { Button, Text, View } from '@tarojs/components';
+import { Button } from '../../../../components/ui';
+import { Text, View } from '@tarojs/components';
 import type { LiveInfoCategoryConfig } from '../liveInfoConfig';
 
 type EventLiveInfoStarRowProps = {

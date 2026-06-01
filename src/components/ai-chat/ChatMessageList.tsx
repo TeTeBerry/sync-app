@@ -11,7 +11,8 @@ import { SuggestedReplyChips } from './SuggestedReplyChips';
 import { AiMatchQuotaExhaustedMessage } from './AiMatchQuotaExhaustedMessage';
 import { parsePublishConfirmMessage } from '../../utils/parsePublishConfirmMessage';
 import { openSingleImagePreview } from '../../utils/openImagePreview';
-import { Button, Image, ScrollView, Text, View } from '@tarojs/components';
+import { Button } from '../ui';
+import { Image, ScrollView, Text, View } from '@tarojs/components';
 
 const TIMESTAMP_GAP_MS = 5 * 60 * 1000;
 

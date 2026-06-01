@@ -1,5 +1,6 @@
 import { Zap } from 'lucide-react-taro';
-import { Button, Text, View } from '@tarojs/components';
+import { Button } from '../../../../components/ui';
+import { Text, View } from '@tarojs/components';
 import ThemedPageLoader from '../../../../components/ThemedPageLoader';
 import type { LiveInfoCertStatus } from '../../../../types/backend';
 import type { PublishLiveInfoPayload } from '../useEventLiveInfo';

@@ -20,7 +20,8 @@ import { useProfilePageStore } from '../../../stores/profilePageStore';
 import { useEndRouteTransitionOnShow } from '../../../hooks/useEndRouteTransitionOnShow';
 import { isApiEnabled } from '../../../constants/api';
 import { isLoggedIn } from '../../../utils/authStorage';
-import { Button, Text, View } from '@tarojs/components';
+import { Button } from '../../../components/ui';
+import { Text, View } from '@tarojs/components';
 
 type SettingsSection = 'notifications' | 'privacy' | 'help';
 type PrivacyLevel = ProfilePrivacyLevel;

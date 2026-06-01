@@ -18,7 +18,8 @@ import {
   Sparkles,
   Star,
 } from 'lucide-react-taro';
-import { Button, Canvas, ScrollView, Text, View } from '@tarojs/components';
+import { Button } from '../../../components/ui';
+import { Canvas, ScrollView, Text, View } from '@tarojs/components';
 import PageNavigation, {
   SUB_PAGE_HEADER_META_EXTRA_PX,
 } from '../../../components/PageNavigation';

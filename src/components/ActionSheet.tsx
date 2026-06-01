@@ -2,7 +2,8 @@ import './ActionSheet.scss';
 import React from 'react';
 import { useOverlayLock } from '../hooks/useOverlayLock';
 import { cn } from './ui';
-import { Button, Text, View } from '@tarojs/components';
+import { Button } from './ui';
+import { Text, View } from '@tarojs/components';
 
 export interface ActionSheetItem {
   label: string;

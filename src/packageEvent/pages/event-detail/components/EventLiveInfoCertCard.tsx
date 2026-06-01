@@ -1,5 +1,6 @@
 import { CircleAlert, Shield, ShieldCheck, Upload } from 'lucide-react-taro';
-import { Button, Text, View } from '@tarojs/components';
+import { Button } from '../../../../components/ui';
+import { Text, View } from '@tarojs/components';
 import type { LiveInfoCertStatus } from '../../../../types/backend';
 
 type EventLiveInfoCertCardProps = {
