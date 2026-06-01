@@ -18,6 +18,11 @@ export type PooledConnection = {
   wsUrl: string;
   headersKey: string;
   task: Taro.SocketTask;
+  /** Last successful `connect` ack for this socket (skip redundant handshakes). */
+  handshake?: {
+    sessionId?: string;
+    activityLegacyId?: number;
+  };
   activeTurn: {
     queue: ReturnType<typeof createEventQueue>;
     settleConnected: (action: 'resolve' | 'reject', error?: Error) => void;
@@ -27,6 +32,123 @@ export type PooledConnection = {
 };
 
 let wsPool: PooledConnection | null = null;
+let globalSocketHandlersBound = false;
+
+function routePooledSocketMessage(res: { data: unknown }): void {
+  const turn = wsPool?.activeTurn;
+  if (!turn) {
+    devLog('onMessage dropped (no active turn)');
+    return;
+  }
+
+  const rawKind = describeRawWsData(res.data);
+  const raw = decodeWsMessageData(res.data);
+  if (!raw) {
+    devLog('onMessage ignored', { rawKind });
+    return;
+  }
+
+  let json: Record<string, unknown>;
+  try {
+    json = JSON.parse(raw) as Record<string, unknown>;
+  } catch {
+    devLog('onMessage invalid JSON', {
+      rawKind,
+      preview: previewDecodedText(raw),
+    });
+    turn.queue.push({
+      kind: 'error',
+      error: new Error('AI chat WebSocket 收到无效 JSON'),
+    });
+    return;
+  }
+
+  devLog('onMessage', {
+    rawKind,
+    type: typeof json.type === 'string' ? json.type : undefined,
+    preview: previewDecodedText(raw),
+  });
+
+  if (json.type === 'connected') {
+    if (wsPool) {
+      wsPool.handshake = {
+        sessionId:
+          typeof json.sessionId === 'string' ? json.sessionId : wsPool.handshake?.sessionId,
+        activityLegacyId:
+          typeof json.activityLegacyId === 'number'
+            ? json.activityLegacyId
+            : wsPool.handshake?.activityLegacyId,
+      };
+    }
+    if (!turn.connectedSettled) {
+      turn.settleConnected('resolve');
+    }
+    return;
+  }
+
+  if (typeof json.code === 'number' && 'data' in json && !('type' in json)) {
+    devLog('onMessage REST envelope (wrong endpoint?)', {
+      code: json.code,
+      message: json.message,
+    });
+    return;
+  }
+
+  if (
+    typeof json.sessionId === 'string' &&
+    Array.isArray(json.history) &&
+    !('type' in json)
+  ) {
+    devLog('onMessage session snapshot (not a stream frame)', {
+      sessionId: json.sessionId,
+    });
+    return;
+  }
+
+  if (json.type === 'error' && typeof json.message === 'string') {
+    devLog('server error frame', { message: json.message });
+  }
+
+  const event = parseStreamEventPayload(json);
+  if (event) {
+    devLog('stream event', { type: event.type });
+    turn.queue.push({ kind: 'event', event });
+    return;
+  }
+
+  if (json.type === 'error' && typeof json.message === 'string') {
+    turn.queue.push({
+      kind: 'event',
+      event: { type: 'error', message: json.message },
+    });
+  }
+}
+
+function routePooledSocketClose(res?: { code?: number; reason?: string }): void {
+  devLog('onClose', {
+    code: res?.code,
+    reason: res?.reason,
+  });
+  const turn = wsPool?.activeTurn;
+  if (turn && !turn.connectedSettled) {
+    turn.settleConnected('reject', new Error('WebSocket 连接已关闭'));
+  }
+  turn?.queue.push({ kind: 'close' });
+  wsPool = null;
+}
+
+function routePooledSocketError(err: { errMsg?: string }): void {
+  devLog('onError', { errMsg: err.errMsg });
+  const turn = wsPool?.activeTurn;
+  if (turn && !turn.connectedSettled) {
+    turn.settleConnected('reject', new Error(err.errMsg || 'WebSocket 连接异常'));
+  }
+  turn?.queue.push({
+    kind: 'error',
+    error: new Error(err.errMsg || 'WebSocket 连接异常'),
+  });
+  wsPool = null;
+}
 
 function headersKey(headers?: Record<string, string>): string {
   if (!headers) return '';
@@ -50,112 +172,29 @@ export function closeAiChatWsConnection(reason = 'client close'): void {
   }
   wsPool.activeTurn?.queue.push({ kind: 'close' });
   wsPool = null;
+  globalSocketHandlersBound = false;
+}
+
+export function isWsHandshakeReady(
+  connection: PooledConnection,
+  sessionId?: string,
+  activityLegacyId?: number,
+): boolean {
+  const handshake = connection.handshake;
+  if (!handshake) return false;
+  const sessionOk = !sessionId?.trim() || handshake.sessionId === sessionId.trim();
+  const activityOk =
+    activityLegacyId == null ||
+    Number.isNaN(activityLegacyId) ||
+    handshake.activityLegacyId === activityLegacyId;
+  return sessionOk && activityOk;
 }
 
 function attachPoolListeners(connection: PooledConnection): void {
   bindSocketListeners(connection.task, {
-    onMessage: (res) => {
-      const turn = connection.activeTurn;
-      if (!turn) return;
-
-      const rawKind = describeRawWsData(res.data);
-      const raw = decodeWsMessageData(res.data);
-      if (!raw) {
-        devLog('onMessage ignored', { rawKind });
-        return;
-      }
-
-      let json: Record<string, unknown>;
-      try {
-        json = JSON.parse(raw) as Record<string, unknown>;
-      } catch {
-        devLog('onMessage invalid JSON', {
-          rawKind,
-          preview: previewDecodedText(raw),
-        });
-        turn.queue.push({
-          kind: 'error',
-          error: new Error('AI chat WebSocket 收到无效 JSON'),
-        });
-        return;
-      }
-
-      devLog('onMessage', {
-        rawKind,
-        type: typeof json.type === 'string' ? json.type : undefined,
-        preview: previewDecodedText(raw),
-      });
-
-      if (json.type === 'connected') {
-        if (!turn.connectedSettled) {
-          turn.connectedSettled = true;
-          clearTimeout(turn.connectedTimer);
-          turn.settleConnected('resolve');
-        }
-        return;
-      }
-
-      if (typeof json.code === 'number' && 'data' in json && !('type' in json)) {
-        devLog('onMessage REST envelope (wrong endpoint?)', {
-          code: json.code,
-          message: json.message,
-        });
-        return;
-      }
-
-      if (
-        typeof json.sessionId === 'string' &&
-        Array.isArray(json.history) &&
-        !('type' in json)
-      ) {
-        devLog('onMessage session snapshot (not a stream frame)', {
-          sessionId: json.sessionId,
-        });
-        return;
-      }
-
-      if (json.type === 'error' && typeof json.message === 'string') {
-        devLog('server error frame', { message: json.message });
-      }
-
-      const event = parseStreamEventPayload(json);
-      if (event) {
-        devLog('stream event', { type: event.type });
-        turn.queue.push({ kind: 'event', event });
-        return;
-      }
-
-      if (json.type === 'error' && typeof json.message === 'string') {
-        turn.queue.push({
-          kind: 'event',
-          event: { type: 'error', message: json.message },
-        });
-      }
-    },
-    onClose: (res) => {
-      devLog('onClose', {
-        code: res?.code,
-        reason: res?.reason,
-      });
-      const turn = connection.activeTurn;
-      if (turn && !turn.connectedSettled) {
-        turn.settleConnected('reject', new Error('WebSocket 连接已关闭'));
-      }
-      turn?.queue.push({ kind: 'close' });
-      wsPool = null;
-    },
-    onError: (err) => {
-      devLog('onError', { errMsg: err.errMsg });
-      const turn = connection.activeTurn;
-      if (turn && !turn.connectedSettled) {
-        turn.settleConnected('reject', new Error(err.errMsg || 'WebSocket 连接异常'));
-      }
-      turn?.queue.push({
-        kind: 'error',
-        error: new Error(err.errMsg || 'WebSocket 连接异常'),
-      });
-      wsPool = null;
-    },
+    onMessage: routePooledSocketMessage,
+    onClose: routePooledSocketClose,
+    onError: routePooledSocketError,
   });
 }
 
@@ -230,9 +269,12 @@ function bindSocketListeners(
     task.onError(handlers.onError);
     return;
   }
-  Taro.onSocketMessage(handlers.onMessage);
-  Taro.onSocketClose(handlers.onClose);
-  Taro.onSocketError(handlers.onError);
+  if (!globalSocketHandlersBound) {
+    globalSocketHandlersBound = true;
+    Taro.onSocketMessage(handlers.onMessage);
+    Taro.onSocketClose(handlers.onClose);
+    Taro.onSocketError(handlers.onError);
+  }
 }
 
 function connectSocket(
@@ -295,6 +337,8 @@ function connectSocket(
   });
 }
 
+const WS_SEND_TIMEOUT_MS = 15_000;
+
 export function sendJson(task: Taro.SocketTask, payload: unknown): Promise<void> {
   const body = JSON.stringify(payload);
   devLog('send', {
@@ -306,10 +350,25 @@ export function sendJson(task: Taro.SocketTask, payload: unknown): Promise<void>
     preview: previewDecodedText(body, 120),
   });
   return new Promise((resolve, reject) => {
+    let settled = false;
+    const timer = setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      reject(new Error('WebSocket 发送超时，请检查网络后重试'));
+    }, WS_SEND_TIMEOUT_MS);
+
+    const finish = (action: 'resolve' | 'reject', error?: Error) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      if (action === 'resolve') resolve();
+      else reject(error ?? new Error('WebSocket 发送失败'));
+    };
+
     task.send({
       data: body,
-      success: () => resolve(),
-      fail: (err) => reject(new Error(err.errMsg || 'WebSocket 发送失败')),
+      success: () => finish('resolve'),
+      fail: (err) => finish('reject', new Error(err.errMsg || 'WebSocket 发送失败')),
     });
   });
 }

@@ -40,7 +40,7 @@ export const profileUser = {
   stats: {
     events: 4,
     matchSuccess: 1,
-    likes: 49,
+    likes: 73,
     posts: 7,
   },
 };

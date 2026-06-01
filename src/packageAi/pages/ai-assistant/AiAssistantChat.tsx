@@ -6,16 +6,23 @@ import { invalidatePostQueries } from '../../../hooks/useSyncApi';
 import { ChatMessageList } from '../../../components/ai-chat/ChatMessageList';
 import { ChatComposer } from '../../../components/ai-chat/ChatComposer';
 import { DegradedMatchBanner } from '../../../components/ai-chat/DegradedMatchBanner';
+import { AiGuidePlanSheet } from '../../../components/ai-chat/AiGuidePlanSheet';
 import { useKeyboardInset } from '../../../hooks/useKeyboardInset';
 import { API_BASE_URL } from '../../../constants/api';
 import { uploadChatImageRefs } from '../../../utils/chatImage';
 import type { inferUserGenderFromName } from '../../../utils/inferAuthorGender';
-import { Text, View } from '@tarojs/components';
+import { Canvas, Text, View } from '@tarojs/components';
 import { invalidateProfileEntitlements } from '../../../utils/queryInvalidation';
 import { invalidateCache } from '../../../hooks/useApiQuery';
-
+import { useAiTravelGuide } from '../../../hooks/useAiTravelGuide';
+import { parseActivityDayCount } from '../../../utils/parseActivityDayCount';
+import { useActivityDetailQuery } from '../../../hooks/useSyncApi';
+import { TRAVEL_GUIDE_CANVAS_ID } from '../../../components/ai-chat/travelGuideWallpaper/renderTravelGuideImage';
+import { isTravelGuideIntent } from '../../../utils/travelGuideIntent';
+import { eventCityFromLocation } from '../../../utils/travelGuideDepartureSuggestions';
 export type AiAssistantChatProps = {
   initialMessage?: string | null;
+  initialOpenAiGuideSheet?: boolean;
   activityLegacyId?: number;
   activityTitle?: string;
   onInitialMessageSent?: () => void;
@@ -29,6 +36,7 @@ export type AiAssistantChatProps = {
 
 export function AiAssistantChat({
   initialMessage,
+  initialOpenAiGuideSheet = false,
   activityLegacyId,
   activityTitle,
   onInitialMessageSent,
@@ -43,7 +51,19 @@ export function AiAssistantChat({
   const [pendingImages, setPendingImages] = useState<string[]>([]);
   const keyboardInset = useKeyboardInset();
   const initialMessageHandledRef = useRef(false);
+  const initialGuideSheetHandledRef = useRef(false);
   const submitLockRef = useRef(false);
+
+  const activityQuery = useActivityDetailQuery(activityLegacyId);
+  const defaultGuideNights = useMemo(
+    () => parseActivityDayCount(activityQuery.data?.date),
+    [activityQuery.data?.date],
+  );
+
+  const guideEventCity = useMemo(
+    () => eventCityFromLocation(activityQuery.data?.location),
+    [activityQuery.data?.location],
+  );
 
   const mockReply = useCallback(
     (query: string) =>
@@ -53,7 +73,7 @@ export function AiAssistantChat({
 
   const welcomeText = useMemo(() => {
     if (activityTitle?.trim()) {
-      return `👋 已为你锁定「${activityTitle.trim()}」。可以说说想找什么样的队友、住宿或出行方式，我来帮你匹配或发帖。`;
+      return `👋 已为你锁定「${activityTitle.trim()}」。可以说「帮我规划行程」生成出行攻略，或说说想找什么样的队友、住宿方式，我来帮你匹配或发帖。`;
     }
     return '👋 我是你的 AI 智能助手，帮你发现活动、找队友、规划行程，说出需求，我来搞定。';
   }, [activityTitle]);
@@ -63,7 +83,16 @@ export function AiAssistantChat({
     await invalidateProfileEntitlements();
   }, []);
 
-  const { messages, isStreaming, isLoadingHistory, send, clearChat } = useAiChatStream({
+  const {
+    messages,
+    setMessages,
+    messagesRef,
+    isStreaming,
+    isLoadingHistory,
+    isStreamingRef,
+    send,
+    clearChat,
+  } = useAiChatStream({
     welcomeText,
     mockReply,
     streamErrorText: '抱歉，回复出错了，请稍后再试。',
@@ -90,6 +119,15 @@ export function AiAssistantChat({
     onMatchResults: handleMatchResults,
   });
 
+  const travelGuide = useAiTravelGuide({
+    activityLegacyId,
+    activityTitle,
+    defaultNights: defaultGuideNights,
+    setMessages,
+    messagesRef,
+    isStreaming,
+  });
+
   useEffect(() => {
     onMessageCountChange?.(messages.length);
   }, [messages.length, onMessageCountChange]);
@@ -106,22 +144,60 @@ export function AiAssistantChat({
     if (!trimmed || isStreaming || aiMatchQuotaExhausted) return;
 
     initialMessageHandledRef.current = true;
-    void send({ text: trimmed });
     onInitialMessageSent?.();
-  }, [aiMatchQuotaExhausted, initialMessage, isStreaming, onInitialMessageSent, send]);
+
+    const scoped =
+      activityLegacyId != null && !Number.isNaN(activityLegacyId);
+    if (isTravelGuideIntent(trimmed) && scoped) {
+      travelGuide.openGuideSheetFromText(trimmed);
+      return;
+    }
+
+    void send({ text: trimmed });
+  }, [
+    activityLegacyId,
+    aiMatchQuotaExhausted,
+    initialMessage,
+    isStreaming,
+    onInitialMessageSent,
+    send,
+    travelGuide,
+  ]);
+
+  useEffect(() => {
+    if (!initialOpenAiGuideSheet || initialGuideSheetHandledRef.current) return;
+    initialGuideSheetHandledRef.current = true;
+    onInitialMessageSent?.();
+    travelGuide.openGuideSheet();
+  }, [initialOpenAiGuideSheet, onInitialMessageSent, travelGuide]);
 
   const submit = useCallback(
     async (text: string, images?: string[]) => {
       if (submitLockRef.current) return;
       const trimmed = text.trim();
       const hasImages = images && images.length > 0;
-      if ((!trimmed && !hasImages) || isStreaming) return;
+      if ((!trimmed && !hasImages) || isStreaming || isStreamingRef.current) {
+        return;
+      }
 
       if (aiMatchQuotaExhausted) {
         void Taro.showToast({
           title: 'AI 匹配次数已用完，请升级套餐',
           icon: 'none',
         });
+        return;
+      }
+
+      const scoped =
+        activityLegacyId != null && !Number.isNaN(activityLegacyId);
+      if (
+        scoped &&
+        !hasImages &&
+        isTravelGuideIntent(trimmed)
+      ) {
+        setInput('');
+        setPendingImages([]);
+        travelGuide.openGuideSheetFromText(trimmed);
         return;
       }
 
@@ -140,17 +216,17 @@ export function AiAssistantChat({
         submitLockRef.current = false;
       }
     },
-    [aiMatchQuotaExhausted, isStreaming, send],
+    [activityLegacyId, aiMatchQuotaExhausted, isStreaming, isStreamingRef, send, travelGuide],
   );
 
   const handleClearChat = useCallback(async () => {
-    if (isStreaming) return;
+    if (isStreaming || isStreamingRef.current) return;
     await clearChat();
-  }, [clearChat, isStreaming]);
+  }, [clearChat, isStreaming, isStreamingRef]);
 
   const handleSelectSuggestedReply = useCallback(
     async (reply: string) => {
-      if (submitLockRef.current || isStreaming) return;
+      if (submitLockRef.current || isStreaming || isStreamingRef.current) return;
       if (aiMatchQuotaExhausted) {
         void Taro.showToast({
           title: 'AI 匹配次数已用完，请升级套餐',
@@ -158,14 +234,22 @@ export function AiAssistantChat({
         });
         return;
       }
+      const trimmed = reply.trim();
+      const scoped =
+        activityLegacyId != null && !Number.isNaN(activityLegacyId);
+      if (scoped && isTravelGuideIntent(trimmed)) {
+        travelGuide.openGuideSheetFromText(trimmed);
+        return;
+      }
+
       submitLockRef.current = true;
       try {
-        await send({ text: reply });
+        await send({ text: trimmed });
       } finally {
         submitLockRef.current = false;
       }
     },
-    [aiMatchQuotaExhausted, isStreaming, send],
+    [activityLegacyId, aiMatchQuotaExhausted, isStreaming, isStreamingRef, send, travelGuide],
   );
 
   return (
@@ -173,6 +257,20 @@ export function AiAssistantChat({
       className="s-ai-assistant-chat"
       style={chatBodyHeight != null ? { height: `${chatBodyHeight}px` } : undefined}
     >
+      <Canvas
+        type="2d"
+        id={TRAVEL_GUIDE_CANVAS_ID}
+        canvasId={TRAVEL_GUIDE_CANVAS_ID}
+        style={{
+          position: 'fixed',
+          left: '-9999px',
+          top: 0,
+          width: '750px',
+          height: '8192px',
+          pointerEvents: 'none',
+        }}
+      />
+
       {isLoadingHistory ? (
         <View className="s-ai-assistant__history-loading" aria-live="polite">
           <View className="s-ai-assistant__history-loading-bar" />
@@ -188,6 +286,8 @@ export function AiAssistantChat({
         userName={userName}
         userGender={userGender}
         onSelectSuggestedReply={handleSelectSuggestedReply}
+        onRegenerateTravelGuide={travelGuide.handleRegenerate}
+        onShareTravelGuide={(path) => void travelGuide.handleShareGuide(path)}
       />
       <View
         className="s-ai-assistant-chat__footer"
@@ -196,7 +296,7 @@ export function AiAssistantChat({
         <ChatComposer
           input={input}
           pendingImages={pendingImages}
-          isStreaming={isStreaming}
+          isStreaming={isStreaming || travelGuide.isGenerating}
           isLoadingHistory={isLoadingHistory}
           activityLegacyId={activityLegacyId}
           activityTitle={activityTitle}
@@ -205,8 +305,18 @@ export function AiAssistantChat({
           onPendingImagesChange={setPendingImages}
           onClearChat={handleClearChat}
           clearDisabled={isStreaming || isLoadingHistory}
+          onAiGuideClick={travelGuide.openGuideSheet}
         />
       </View>
+
+      <AiGuidePlanSheet
+        open={travelGuide.sheetOpen}
+        defaultNights={travelGuide.defaultNights}
+        eventCity={guideEventCity}
+        initialValues={travelGuide.sheetInitialValues}
+        onClose={() => travelGuide.setSheetOpen(false)}
+        onSubmit={travelGuide.handleSheetSubmit}
+      />
     </View>
   );
 }

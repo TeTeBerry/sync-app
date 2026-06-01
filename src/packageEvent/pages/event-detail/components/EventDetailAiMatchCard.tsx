@@ -1,4 +1,5 @@
 import { Send, Sparkles } from 'lucide-react-taro';
+import { AiGuideShortcutChip } from '../../../../components/ai-chat/AiGuideShortcutChip';
 import { Button } from '../../../../components/ui';
 import { Text, Textarea, View } from '@tarojs/components';
 import { warmAiAssistant } from '../../../../utils/route';
@@ -11,6 +12,7 @@ type EventDetailAiMatchCardProps = {
   onPromptChange: (value: string) => void;
   onSubmit: () => void;
   onTagClick: (tag: string) => void;
+  onAiGuideClick: () => void;
 };
 
 export function EventDetailAiMatchCard({
@@ -18,6 +20,7 @@ export function EventDetailAiMatchCard({
   onPromptChange,
   onSubmit,
   onTagClick,
+  onAiGuideClick,
 }: EventDetailAiMatchCardProps) {
   const hasContent = Boolean(prompt.trim());
 
@@ -30,6 +33,7 @@ export function EventDetailAiMatchCard({
         <Text className="s-event-detail__ai-head-title">告诉我你的需求 ai精准匹配</Text>
       </View>
       <View className="s-event-detail__ai-tags" onTouchStart={warmAiAssistant}>
+        <AiGuideShortcutChip onTouchStart={warmAiAssistant} onClick={onAiGuideClick} />
         {EVENT_AI_TAGS.map((tag) => (
           <Button
             key={tag}

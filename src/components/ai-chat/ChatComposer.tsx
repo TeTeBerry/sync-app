@@ -15,6 +15,7 @@ import {
 } from '../../utils/chatImage';
 import { useAiChatStore } from '../../stores/aiChatStore';
 import { openImagePreview } from '../../utils/openImagePreview';
+import { AiGuideShortcutChip } from './AiGuideShortcutChip';
 import { AiMatchQuotaBanner } from './AiMatchQuotaBanner';
 import {
   Image,
@@ -28,9 +29,17 @@ const SHORTCUT_TAG_LABELS: Record<AiShortcutTag, string> = {
   组队队友: '组队队友',
   住宿同行: '住宿同行',
   拼车同行: '拼车同行',
+  拼卡: '拼卡',
 };
 
+const AI_GUIDE_CHIP = {
+  key: 'aiGuide',
+  label: 'AI攻略',
+  submitText: 'AI攻略',
+} as const;
+
 const activityActionChips = [
+  AI_GUIDE_CHIP,
   { key: 'createOwn', label: '自己发帖', submitText: '自己发帖' },
   { key: 'searchPosts', label: '查组队帖', submitText: '看看有没有组队帖' },
 ] as const;
@@ -62,6 +71,7 @@ export function ChatComposer({
   onClearChat,
   clearDisabled = false,
   isLoadingHistory = false,
+  onAiGuideClick,
 }: {
   input: string;
   pendingImages: string[];
@@ -74,6 +84,7 @@ export function ChatComposer({
   onClearChat?: () => void | Promise<void>;
   clearDisabled?: boolean;
   isLoadingHistory?: boolean;
+  onAiGuideClick?: () => void;
 }) {
   const [shortcutTags, setShortcutTags] = useState(() => getTopAiShortcutTags());
   const conversationFlow = useAiChatStore((state) => state.conversationState?.flow);
@@ -114,11 +125,18 @@ export function ChatComposer({
       return [actionChips[0], ...tagChips, ...actionChips.slice(1)];
     }
 
-    return HOME_FESTIVAL_SHORTCUT_CHIPS.map((chip) => ({
-      key: chip.key,
-      label: chip.label,
-      submitText: chip.submitText,
-    }));
+    return [
+      {
+        key: AI_GUIDE_CHIP.key,
+        label: AI_GUIDE_CHIP.label,
+        submitText: AI_GUIDE_CHIP.submitText,
+      },
+      ...HOME_FESTIVAL_SHORTCUT_CHIPS.map((chip) => ({
+        key: chip.key,
+        label: chip.label,
+        submitText: chip.submitText,
+      })),
+    ];
   }, [activityLegacyId, shortcutTags]);
 
   const isBusy = isStreaming;
@@ -161,13 +179,19 @@ export function ChatComposer({
   const handleQuickChipClick = useCallback(
     (chip: QuickChip) => {
       if (isBusy) return;
+      if (chip.key === AI_GUIDE_CHIP.key) {
+        if (activityLegacyId != null && !Number.isNaN(activityLegacyId)) {
+          onAiGuideClick?.();
+          return;
+        }
+      }
       if (chip.isShortcutTag) {
         recordAiShortcutTagUse(chip.submitText);
         setShortcutTags(getTopAiShortcutTags());
       }
       onSubmit(chip.submitText, pendingImages);
     },
-    [isBusy, onSubmit, pendingImages],
+    [activityLegacyId, isBusy, onAiGuideClick, onSubmit, pendingImages],
   );
 
   const canSend = Boolean(input.trim() || pendingImages.length) && !isComposerDisabled;
@@ -181,16 +205,24 @@ export function ChatComposer({
         className="s-ai-assistant-chat__quick-scroll s-scrollbar-none"
       >
         <View className="s-ai-assistant-chat__quick-row">
-          {quickChips.map((chip) => (
-            <Button
-              key={chip.key}
-              className="s-ai-assistant-chat__quick-chip"
-              disabled={isBusy}
-              onClick={() => handleQuickChipClick(chip)}
-            >
-              <Text className="s-btn-label">{chip.label}</Text>
-            </Button>
-          ))}
+          {quickChips.map((chip) =>
+            chip.key === AI_GUIDE_CHIP.key ? (
+              <AiGuideShortcutChip
+                key={chip.key}
+                disabled={isBusy}
+                onClick={() => handleQuickChipClick(chip)}
+              />
+            ) : (
+              <Button
+                key={chip.key}
+                className="s-ai-assistant-chat__quick-chip"
+                disabled={isBusy}
+                onClick={() => handleQuickChipClick(chip)}
+              >
+                <Text className="s-btn-label">{chip.label}</Text>
+              </Button>
+            ),
+          )}
         </View>
       </ScrollView>
 

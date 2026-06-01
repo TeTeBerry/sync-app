@@ -13,6 +13,7 @@ import { createEventQueue } from './queue';
 import type { StreamAiChatWsOptions } from './types';
 
 const WS_CONNECTED_ACK_TIMEOUT_MS = 5_000;
+const WS_TURN_TIMEOUT_MS = 90_000;
 
 export async function* streamAiChatWs(
   options: StreamAiChatWsOptions,
@@ -78,6 +79,9 @@ export async function* streamAiChatWs(
   };
 
   try {
+    // Fresh socket each turn — avoids server `busy` stuck on reused connections.
+    closeAiChatWsConnection('new turn');
+
     const connection = await ensureWsPool(wsUrl, options.headers);
     connection.activeTurn = activeTurn;
 
@@ -86,8 +90,12 @@ export async function* streamAiChatWs(
       sessionId: options.sessionId,
       activityLegacyId: options.activityLegacyId,
     });
-
     await connectedReady;
+
+    devLogWarn('send user turn', {
+      messageCount: options.messages.length,
+      activityLegacyId: options.activityLegacyId,
+    });
 
     await sendJson(connection.task, {
       type: 'send',
@@ -101,6 +109,13 @@ export async function* streamAiChatWs(
       images: options.images,
     });
 
+    const turnTimedOut = new Promise<never>((_, reject) => {
+      setTimeout(
+        () => reject(new Error('AI 回复超时，请检查网络或稍后重试')),
+        WS_TURN_TIMEOUT_MS,
+      );
+    });
+
     let sawTerminal = false;
     let sawAnyEvent = false;
 
@@ -111,7 +126,7 @@ export async function* streamAiChatWs(
         throw aborted;
       }
 
-      const item = await queue.nextItem();
+      const item = await Promise.race([queue.nextItem(), turnTimedOut]);
       if (item.kind === 'error') {
         throw item.error;
       }
@@ -136,6 +151,12 @@ export async function* streamAiChatWs(
     if (!sawTerminal) {
       yield { type: 'done' };
     }
+  } catch (error) {
+    const aborted = error instanceof Error && error.name === 'AbortError';
+    if (!aborted) {
+      closeAiChatWsConnection('turn failed');
+    }
+    throw error;
   } finally {
     clearTimeout(activeTurn.connectedTimer);
     options.signal?.removeEventListener('abort', onAbort);

@@ -2,6 +2,7 @@ import React, { useCallback, useLayoutEffect, useState } from 'react';
 import { Sparkles } from 'lucide-react-taro';
 import { cn } from '../ui';
 import type { ChatUiMessage } from '../../types/aiChat';
+import type { AiGuidePlanFormValues } from '../../types/travelGuide';
 import type { AuthorGender } from '../../utils/inferAuthorGender';
 import { ChatUserAvatar } from './ChatUserAvatar';
 import { AiAssistantActivityCard } from './AiAssistantActivityCard';
@@ -9,6 +10,7 @@ import { RecommendPostCards } from './RecommendPostCards';
 import { PublishConfirmCard } from './PublishConfirmCard';
 import { SuggestedReplyChips } from './SuggestedReplyChips';
 import { AiMatchQuotaExhaustedMessage } from './AiMatchQuotaExhaustedMessage';
+import { AiGuideResultCard } from './AiGuideResultCard';
 import { parsePublishConfirmMessage } from '../../utils/parsePublishConfirmMessage';
 import { openSingleImagePreview } from '../../utils/openImagePreview';
 import { Button } from '../ui';
@@ -51,6 +53,8 @@ export function ChatMessageList({
   userName,
   userGender,
   onSelectSuggestedReply,
+  onRegenerateTravelGuide,
+  onShareTravelGuide,
 }: {
   messages: ChatUiMessage[];
   isStreaming: boolean;
@@ -59,6 +63,8 @@ export function ChatMessageList({
   userName: string;
   userGender?: AuthorGender;
   onSelectSuggestedReply: (reply: string) => void;
+  onRegenerateTravelGuide?: (form: AiGuidePlanFormValues) => void;
+  onShareTravelGuide?: (imagePath: string) => void;
 }) {
   const [scrollIntoView, setScrollIntoView] = useState<string | undefined>();
 
@@ -93,9 +99,18 @@ export function ChatMessageList({
           const hasPostCards = Boolean(msg.createdPost || msg.recommendedPosts?.length);
           const hasActivityCard = Boolean(msg.recommendedActivity);
           const hasSuggestedReplies = Boolean(msg.suggestedReplies?.length);
+          const hasTravelGuide = Boolean(msg.travelGuide?.imagePath);
           const showEmbedBelow =
-            !isUser && (hasPostCards || hasActivityCard || hasSuggestedReplies);
+            !isUser &&
+            (hasPostCards || hasActivityCard || hasSuggestedReplies || hasTravelGuide);
           const showPublishConfirm = Boolean(publishConfirm);
+          const showTypingIndicator =
+            msg.streaming &&
+            !msg.text &&
+            !hasPostCards &&
+            !hasActivityCard &&
+            !hasTravelGuide &&
+            !showPublishConfirm;
 
           return (
             <React.Fragment key={msg.id}>
@@ -143,7 +158,7 @@ export function ChatMessageList({
                         's-ai-assistant-chat__bubble--publish-confirm',
                     )}
                   >
-                    {msg.streaming && !msg.text ? (
+                    {showTypingIndicator ? (
                       <View
                         className="s-ai-assistant-chat__typing"
                         aria-label="AI 正在思考"
@@ -207,6 +222,18 @@ export function ChatMessageList({
                           replies={msg.suggestedReplies}
                           disabled={isStreaming}
                           onSelect={onSelectSuggestedReply}
+                        />
+                      ) : null}
+                      {msg.travelGuide ? (
+                        <AiGuideResultCard
+                          imagePath={msg.travelGuide.imagePath}
+                          disabled={isStreaming}
+                          onRegenerate={() =>
+                            onRegenerateTravelGuide?.(msg.travelGuide!.form)
+                          }
+                          onShare={() =>
+                            onShareTravelGuide?.(msg.travelGuide!.imagePath)
+                          }
                         />
                       ) : null}
                     </View>

@@ -26,6 +26,7 @@ import {
   preloadPageSafe,
   ROUTES,
 } from '../../utils/route';
+import { joinActivityWithAuth } from '../../utils/joinActivity';
 import { DEFER_BELOW_FOLD_MS, DEFER_SECONDARY_API_MS } from '../../utils/timing';
 import { HomeCountdownCard } from './components/HomeCountdownCard';
 import { HomeFeaturedEvents } from './components/HomeFeaturedEvents';
@@ -102,6 +103,19 @@ const Home = () => {
     goEventDetail(legacyId);
   }, []);
 
+  const handleJoinEvent = useCallback(
+    (event: FeaturedEvent) => {
+      const legacyId = resolveFeaturedEventLegacyId(event);
+      if (legacyId == null) {
+        return;
+      }
+      joinActivityWithAuth(legacyId, {
+        onSuccess: () => openEventDetail(event),
+      });
+    },
+    [openEventDetail],
+  );
+
   const handleDeletePost = useCallback(
     async (post: HomeFeedPost) => {
       const ok = await confirm({
@@ -166,7 +180,7 @@ const Home = () => {
           <HomeFeaturedEvents
             items={featuredEvents}
             onEventClick={openEventDetail}
-            onJoinClick={openEventDetail}
+            onJoinClick={handleJoinEvent}
             onEventPreload={handleEventPreload}
           />
 

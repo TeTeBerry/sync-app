@@ -76,7 +76,7 @@ export function LoginPromptHero({
       <View className="s-login-prompt-hero__highlights" aria-hidden>
         <View className="s-login-prompt-hero__chip">
           <View className="s-login-prompt-hero__chip-icon s-login-prompt-hero__chip-icon--ai">
-            <Bot size={16} color="#64d2ff" strokeWidth={2.25} />
+            <Bot size={14} color="#64d2ff" strokeWidth={2.25} />
           </View>
           <View className="s-login-prompt-hero__chip-label-wrap">
             <Text className="s-login-prompt-hero__chip-label">AI 智能匹配</Text>

@@ -89,7 +89,6 @@ export function useExclusiveItineraryPage() {
   const apiEnabled = isApiEnabled();
   const scheduleQuery = useItineraryScheduleQuery(
     apiEnabled ? activityLegacyId : null,
-    { selectedDjIds: selectedIds },
   );
   const { generate } = useItineraryMutations(activityLegacyId ?? 0);
   const setFromGenerateResult = useItineraryStore((s) => s.setFromGenerateResult);
@@ -102,14 +101,12 @@ export function useExclusiveItineraryPage() {
   }, [apiEnabled, scheduleQuery.data?.djs]);
 
   const conflicts: ItineraryConflict[] = useMemo(() => {
-    if (apiEnabled && scheduleQuery.data?.conflicts) {
-      return scheduleQuery.data.conflicts;
-    }
-    return detectItineraryConflicts(
-      EXCLUSIVE_ITINERARY_MOCK_CONFLICT_SLOTS,
-      selectedIds,
-    );
-  }, [apiEnabled, scheduleQuery.data?.conflicts, selectedIds]);
+    const slots =
+      apiEnabled && scheduleQuery.data?.performances?.length
+        ? scheduleQuery.data.performances
+        : EXCLUSIVE_ITINERARY_MOCK_CONFLICT_SLOTS;
+    return detectItineraryConflicts(slots, selectedIds);
+  }, [apiEnabled, scheduleQuery.data?.performances, selectedIds]);
 
   const footerChromePx = useMemo(() => {
     try {

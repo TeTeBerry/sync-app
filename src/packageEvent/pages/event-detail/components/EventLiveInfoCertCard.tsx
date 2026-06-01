@@ -84,7 +84,7 @@ export function EventLiveInfoCertCard({
           <Text className="s-live-info-cert__badge">未认证</Text>
         </View>
         <Text className="s-live-info-cert__hint">
-          上传手环照片参与实时资讯更新，认证后可发布
+          上传手环照片参与现场实时资讯更新，认证后可发布
         </Text>
       </View>
       <Button

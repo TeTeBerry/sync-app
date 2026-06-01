@@ -24,7 +24,10 @@ vi.mock('../utils/session', () => ({
   getClientUserPhone: () => mockGetClientUserPhone(),
 }));
 
-import { buildAiChatWsSendActor, getRequestActor } from './requestActor';
+import {
+  buildAiChatWsSendActor,
+  getClientSessionIdentity,
+} from './requestActor';
 
 describe('requestActor', () => {
   beforeEach(() => {
@@ -34,8 +37,8 @@ describe('requestActor', () => {
     mockGetClientUserPhone.mockReturnValue('');
   });
 
-  it('getRequestActor returns demo fields when not authenticated', () => {
-    expect(getRequestActor()).toEqual({
+  it('getClientSessionIdentity returns demo fields when not authenticated', () => {
+    expect(getClientSessionIdentity()).toEqual({
       isAuthenticated: false,
       userId: 'demo-id',
       displayName: 'Demo User',

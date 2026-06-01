@@ -1,6 +1,7 @@
 import {
   broadcastCacheData,
   forEachCacheEntry,
+  getCacheData,
   invalidateCache,
   setCacheDataByKey,
 } from '../hooks/useApiQuery';
@@ -9,7 +10,9 @@ import type {
   EventDetailPost,
   EventPostsPage,
   ProfilePostItem,
+  ProfileSummary,
 } from '../types/backend';
+import { sumProfilePostLikes } from './profileLikes';
 import type { BackendPostStatusLabel } from './postStatus';
 
 /** 失效通知相关查询 */
@@ -190,5 +193,41 @@ export function patchLikedPostInCaches(
     }
   });
 
+  let profilePostsPatched = false;
+  forEachCacheEntry((key, entryData) => {
+    if (key !== 'profile|posts' || !Array.isArray(entryData)) return;
+    const patched = (entryData as ProfilePostItem[]).map((post) =>
+      post.id === updated.id && updated.likes !== undefined
+        ? { ...post, likes: updated.likes }
+        : post,
+    );
+    setCacheDataByKey(key, patched);
+    profilePostsPatched = true;
+  });
+
+  if (profilePostsPatched) {
+    syncProfileSummaryLikesFromPostsCache();
+    broadcastCacheData(['profile', 'posts']);
+  }
+
   broadcastCacheData(['posts']);
+}
+
+/** Recompute profile summary 获赞数 from cached /profile/posts (same rule as backend). */
+export function syncProfileSummaryLikesFromPostsCache(): void {
+  const posts = getCacheData<ProfilePostItem[]>(['profile', 'posts']);
+  if (!posts) {
+    return;
+  }
+  const likes = sumProfilePostLikes(posts);
+  forEachCacheEntry((key, data) => {
+    if (!key.startsWith('profile|summary|')) return;
+    const summary = data as ProfileSummary | undefined;
+    if (!summary?.stats) return;
+    setCacheDataByKey(key, {
+      ...summary,
+      stats: { ...summary.stats, likes },
+    });
+  });
+  broadcastCacheData(['profile', 'summary']);
 }

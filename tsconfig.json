@@ -14,7 +14,8 @@
     "isolatedModules": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@sync/chat-contracts": ["../sync-app-backend/src/shared/chat/index.ts"]
     },
     "types": ["webpack-env", "node", "react"],
     "typeRoots": ["./node_modules/@types"]

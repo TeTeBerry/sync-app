@@ -22,10 +22,12 @@ import {
   invalidatePostComments,
   invalidateBlockedUsers,
   invalidatePostFeeds,
+  invalidateProfileSummary,
   patchLikedPostInCaches,
   patchPostStatusInCaches,
   patchUpdatedProfilePostInCaches,
 } from '../../utils/queryInvalidation';
+import { isCurrentUserPostAuthor } from '../../utils/postOwnership';
 import { useApiQuery } from '../useApiQuery';
 import type { QueryEnableOptions } from './types';
 import { invalidateNotificationQueries } from './notifications';
@@ -127,6 +129,9 @@ export async function deletePostAndInvalidate(postId: string) {
 export async function likePostAndInvalidate(postId: string) {
   const updated = await likePost(postId);
   patchLikedPostInCaches(updated);
+  if (isCurrentUserPostAuthor(undefined, updated.userId)) {
+    invalidateProfileSummary();
+  }
   await invalidateNotificationQueries();
   return updated;
 }

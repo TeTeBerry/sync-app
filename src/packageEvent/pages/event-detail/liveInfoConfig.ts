@@ -78,10 +78,18 @@ export const LIVE_INFO_CATEGORIES: LiveInfoCategoryConfig[] = [
     label: '安检情况',
     icon: Beer,
     color: '#ab47bc',
-    scaleLeft: '充足',
-    scaleRight: '紧缺',
+    scaleLeft: '宽松',
+    scaleRight: '严格',
     scoreLabel: (s) =>
-      s <= 1 ? '充足' : s <= 2 ? '较充足' : s <= 3 ? '一般' : s <= 4 ? '偏紧' : '紧缺',
+      s <= 1
+        ? '宽松'
+        : s <= 2
+          ? '较宽松'
+          : s <= 3
+            ? '一般'
+            : s <= 4
+              ? '较严格'
+              : '严格',
   },
 ];
 

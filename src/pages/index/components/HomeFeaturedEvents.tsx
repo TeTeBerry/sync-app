@@ -171,7 +171,13 @@ function HomeFeaturedEventRow({
             }}
           >
             <Text className="s-home-event__join-text">
-              {isJoinNavigating ? '加入中…' : status === 'ended' ? '已结束' : '加入'}
+              {isJoinNavigating
+                ? '加入中…'
+                : status === 'ended'
+                  ? '已结束'
+                  : event.going
+                    ? '已加入'
+                    : '加入'}
             </Text>
           </Button>
         </View>

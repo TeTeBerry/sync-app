@@ -106,7 +106,7 @@ export function EventLiveInfoUpdateSheet({
       <View className="s-overlay__panel" role="dialog" aria-modal="true">
         <View className="s-live-info-update-sheet__handle" aria-hidden />
         <View className="s-live-info-update-sheet__top">
-          <Text className="s-live-info-update-sheet__title">更新实时资讯</Text>
+          <Text className="s-live-info-update-sheet__title">更新现场实时资讯</Text>
           <Button
             className="s-live-info-update-sheet__close"
             hoverClass="s-live-info-update-sheet__close--pressed"
@@ -236,7 +236,7 @@ export function EventLiveInfoUpdateSheet({
         >
           <Zap size={18} color="#fff" aria-hidden />
           <Text className="s-live-info-update-sheet__publish-text">
-            {publishing ? '发布中…' : '发布实时资讯'}
+            {publishing ? '发布中…' : '发布现场实时资讯'}
           </Text>
         </Button>
       </View>

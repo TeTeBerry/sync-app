@@ -15,7 +15,7 @@ REST 与 React Query 的分层约定，便于 P0 鉴权时只改少数入口。
 
 | 通道 | 有 Bearer | 无 token（demo / mock） |
 |------|-----------|-------------------------|
-| **REST** | 不传 demo Query；后端 `JwtActorMiddleware` 将 JWT `sub` / `name` 写入 `req.query` | `demoActorQueryParams()` → `{ userId }` only |
+| **REST** | 不传 demo Query；后端 `JwtAuthGuard` 设置 `req.actor`（`RequestActor`） | `demoActorQueryParams()` → `{ userId }` only（需后端 `AUTH_ALLOW_DEMO=true`） |
 | **AI WebSocket** | Upgrade `Authorization: Bearer`；`send` body **可不传** `userId`/`userName`（后端从 JWT 解析 actor，见 `buildAiChatWsSendActor()`） | body 须 `userId`（demo）；可选 `userName` / `userPhone` |
 
 无效 JWT：请求头含 **非空 Bearer** 但校验失败 → REST **401**（`登录已过期，请重新登录`），**不**与 demo Query 混用；WS 在 `connect`/`send` 时返回同文案 `error` 帧并关闭连接。
@@ -72,11 +72,35 @@ REST 与 React Query 的分层约定，便于 P0 鉴权时只改少数入口。
 
 后续（可选）：地图他人帖 `GET /profile/posts`（需后端 actor/owner 分离，前端暂不排）。
 
+## Chat 契约（与后端共享）
+
+`ConversationState`、`AiStreamEvent`、推荐卡片类型**不得**在前端手写重复定义。
+
+- 后端真源：`sync-app-backend/src/shared/chat/`（`index.ts` 统一导出）
+- 前端：`import … from '@sync/chat-contracts'`（`conversationState.ts` / `aiChat.ts` 仅 re-export）
+- 契约测试：`sync-app-backend/test/contract/chat-conversation-state.contract.spec.ts`
+
+## 身份命名对照
+
+| 后端 `RequestActor` | 前端 `ClientSessionIdentity`（`api/requestActor.ts`） |
+| ------------------- | ----------------------------------------------------- |
+| `source` (`jwt` \| `demo`) | `isAuthenticated` |
+| `clientUserId` | `userId` |
+| `displayName` | `displayName` |
+| `resolvedUserId` | （无，由后端解析 demo 映射） |
+
+REST/WS 发请求用 `ownerQueryParams()` / `buildAiChatWsSendActor()`；勿与后端 actor 类型混用。
+
+## 活动上下文 Header
+
+`X-Activity-Id: <legacyId>`：REST 由 `ActivityContextMiddleware` 写入 `req.scopedActivityLegacyId`；AI WebSocket 在 upgrade 与 `send` body 合并。Profile 等接口 Query `activityLegacyId` 可与 Header 并存，Query 优先。
+
 ## 依赖方向
 
 ```text
 pages / components  →  hooks/sync  →  api/sync  →  apiClient
                                     ↘ requestContext → session / authStorage
+types/conversationState  →  @sync/chat-contracts  →  sync-app-backend/shared/chat
 ```
 
 `hooks/sync` **不得** import `pages/**`。

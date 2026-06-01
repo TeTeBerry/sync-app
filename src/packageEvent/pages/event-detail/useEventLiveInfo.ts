@@ -141,7 +141,7 @@ export function useEventLiveInfo(
         setSummary(MOCK_LIVE_INFO_SUMMARY);
         setCertCount(MOCK_LIVE_INFO_CERT_COUNT);
         setFeed(MOCK_LIVE_INFO_FEED);
-        void Taro.showToast({ title: '加载实时资讯失败', icon: 'none' });
+        void Taro.showToast({ title: '加载现场实时资讯失败', icon: 'none' });
       } finally {
         if (!opts?.silent) setLoading(false);
       }
@@ -230,7 +230,7 @@ export function useEventLiveInfo(
         try {
           await publishLiveInfoUpdate(eventId, payload);
           await reload({ silent: true });
-          void Taro.showToast({ title: '实时资讯已发布', icon: 'success' });
+          void Taro.showToast({ title: '现场实时资讯已发布', icon: 'success' });
           return true;
         } catch (err: unknown) {
           const msg =
@@ -255,7 +255,7 @@ export function useEventLiveInfo(
       const averaged = averageSummary(summary, payload.ratings, certCount);
       setSummary(averaged.summary);
       setCertCount(averaged.certCount);
-      void Taro.showToast({ title: '实时资讯已发布', icon: 'success' });
+      void Taro.showToast({ title: '现场实时资讯已发布', icon: 'success' });
       return true;
     },
     [apiEnabled, certCount, eventId, reload, summary, userName],

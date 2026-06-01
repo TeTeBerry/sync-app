@@ -96,6 +96,7 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     displayUserName,
     openAi: ai.openAi,
     handleShortcutTag: ai.handleShortcutTag,
+    handleOpenAiGuide: ai.handleOpenAiGuide,
     handleOpenExclusiveItinerary: ai.handleOpenExclusiveItinerary,
     invalidEventId: route.invalidEventId,
     entitlements,

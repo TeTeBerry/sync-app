@@ -129,6 +129,7 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
       if (!trimmed && !hasImages) return;
 
       cancelHistoryLoad();
+      abortRef.current?.abort();
 
       const userMsg: ChatUiMessage = {
         id: createMessageId(),
@@ -147,6 +148,7 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
       messagesRef.current = nextMessages;
       setMessages(nextMessages);
       setIsStreaming(true);
+      setIsStreamingRef(true);
 
       const controller = new AbortController();
       abortRef.current = controller;
@@ -160,10 +162,18 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
         // Transport layer (`useWsChatStream`) already surfaces user-facing toasts.
       } finally {
         setIsStreaming(false);
+        setIsStreamingRef(false);
         abortRef.current = null;
       }
     },
-    [cancelHistoryLoad, messagesRef, runStream, setMessages, streamErrorText],
+    [
+      cancelHistoryLoad,
+      messagesRef,
+      runStream,
+      setIsStreamingRef,
+      setMessages,
+      streamErrorText,
+    ],
   );
 
   const send = useCallback(
@@ -196,7 +206,10 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
 
   return {
     messages,
+    setMessages,
+    messagesRef,
     isStreaming,
+    isStreamingRef,
     isLoadingHistory,
     send,
     abort,

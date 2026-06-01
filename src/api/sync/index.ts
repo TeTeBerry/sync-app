@@ -6,3 +6,4 @@ export * from './notifications';
 export * from './chat';
 export * from './liveInfo';
 export * from './itinerary';
+export * from './travelGuide';

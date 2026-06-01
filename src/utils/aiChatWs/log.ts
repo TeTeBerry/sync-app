@@ -8,6 +8,7 @@ const WS_LOG_WARN_EVENTS = new Set([
   'onOpen',
   'onClose',
   'onError',
+  'send',
   'server error frame',
 ]);
 

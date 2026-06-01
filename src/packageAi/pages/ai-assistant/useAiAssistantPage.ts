@@ -24,18 +24,25 @@ export const AI_EVENT_CONTEXT_PX = 44;
 export function useAiAssistantPage() {
   const navInsets = useNavBarInsets();
   const chatReady = useDeferredMount(DEFER_AI_CHAT_MS);
-  const [pendingInitialMessage, setPendingInitialMessage] = useState<string | null>(
-    () => {
-      const intent = useNavigationStore.getState().consumeAiAssistantIntent();
-      if (intent?.activityLegacyId != null && !Number.isNaN(intent.activityLegacyId)) {
-        useNavigationStore
-          .getState()
-          .setActiveActivityLegacyId(intent.activityLegacyId);
-      } else if (intent) {
-        useNavigationStore.getState().setActiveActivityLegacyId(null);
-      }
-      return intent?.initialMessage?.trim() ?? null;
-    },
+  const [navBoot] = useState(() => {
+    const intent = useNavigationStore.getState().consumeAiAssistantIntent();
+    if (intent?.activityLegacyId != null && !Number.isNaN(intent.activityLegacyId)) {
+      useNavigationStore
+        .getState()
+        .setActiveActivityLegacyId(intent.activityLegacyId);
+    } else if (intent) {
+      useNavigationStore.getState().setActiveActivityLegacyId(null);
+    }
+    return {
+      initialMessage: intent?.initialMessage?.trim() ?? null,
+      openAiGuideSheet: Boolean(intent?.openAiGuideSheet),
+    };
+  });
+  const [pendingInitialMessage, setPendingInitialMessage] = useState(
+    navBoot.initialMessage,
+  );
+  const [pendingOpenAiGuideSheet, setPendingOpenAiGuideSheet] = useState(
+    navBoot.openAiGuideSheet,
   );
   const [messageCount, setMessageCount] = useState(0);
   const [upgradeSheetOpen, setUpgradeSheetOpen] = useState(false);
@@ -102,6 +109,7 @@ export function useAiAssistantPage() {
 
   const handleInitialMessageSent = useCallback(() => {
     setPendingInitialMessage(null);
+    setPendingOpenAiGuideSheet(false);
   }, []);
 
   const applyAiAssistantIntent = useCallback(() => {
@@ -109,6 +117,9 @@ export function useAiAssistantPage() {
     if (!intent) return;
     if (intent.initialMessage?.trim()) {
       setPendingInitialMessage(intent.initialMessage.trim());
+    }
+    if (intent.openAiGuideSheet) {
+      setPendingOpenAiGuideSheet(true);
     }
     if (intent.activityLegacyId != null && !Number.isNaN(intent.activityLegacyId)) {
       setActiveActivityLegacyId(intent.activityLegacyId);
@@ -140,6 +151,7 @@ export function useAiAssistantPage() {
     navInsets,
     chatReady,
     pendingInitialMessage,
+    pendingOpenAiGuideSheet,
     messageCount,
     setMessageCount,
     upgradeSheetOpen,

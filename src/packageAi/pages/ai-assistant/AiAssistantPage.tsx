@@ -95,6 +95,7 @@ const AiAssistantPage: FC = () => {
               <AiUpgradeSheetProvider openUpgradeSheet={page.openUpgradeSheet}>
                 <AiAssistantChat
                   initialMessage={page.pendingInitialMessage}
+                  initialOpenAiGuideSheet={page.pendingOpenAiGuideSheet}
                   activityLegacyId={page.activityLegacyId}
                   activityTitle={page.activityTitle}
                   onInitialMessageSent={page.handleInitialMessageSent}

@@ -1,6 +1,8 @@
 export type AiAssistantNavIntent = {
   initialMessage?: string;
   activityLegacyId?: number;
+  /** Open AI travel-guide plan sheet after entering the assistant. */
+  openAiGuideSheet?: boolean;
 };
 
 export type ProfileNavIntent = {

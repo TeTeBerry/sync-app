@@ -14,7 +14,10 @@ import ThemedPageLoader from '../../components/ThemedPageLoader';
 import { seedActivityDetailFromEventCard } from '../../utils/activityDetailCache';
 import { preloadEventSubpackage } from '../../utils/subpackagePreload';
 import { buildEventDetailQuery, preloadPageSafe, ROUTES } from '../../utils/route';
-import { useEventList } from '../../hooks/useSyncApi';
+import { useEventList, useHomeSummary } from '../../hooks/useSyncApi';
+import { isApiEnabled } from '../../constants/api';
+import { joinActivityWithAuth } from '../../utils/joinActivity';
+import { parseActivityLegacyId } from '../../utils/activityLegacyId';
 import { resolveEventCardLegacyId } from '../../utils/apiMappers';
 import { goEventDetail, preloadHotRoutes } from '../../utils/route';
 import {
@@ -47,6 +50,22 @@ const Events: React.FC = () => {
   const listScrollHeight = useTabPageMainHeight(eventsChromePx);
 
   const { events, isLoading, isError, refetch } = useEventList();
+  const { data: homeSummary } = useHomeSummary();
+  const registeredLegacyIds = useMemo(() => {
+    if (!isApiEnabled()) {
+      return new Set<number>();
+    }
+    const ids = new Set<number>();
+    for (const item of homeSummary?.signupEvents ?? []) {
+      if (item.going) {
+        const legacyId = parseActivityLegacyId(item.id);
+        if (legacyId != null) {
+          ids.add(legacyId);
+        }
+      }
+    }
+    return ids;
+  }, [homeSummary?.signupEvents]);
   const [activeTab, setActiveTab] = useState<EventFilterTab>('upcoming');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -73,6 +92,19 @@ const Events: React.FC = () => {
       goEventDetail(id);
     },
     [events, warmEventDetail],
+  );
+
+  const handleJoinEvent = useCallback(
+    (legacyId: string) => {
+      const id = resolveEventCardLegacyId(legacyId);
+      if (id == null) {
+        return;
+      }
+      joinActivityWithAuth(id, {
+        onSuccess: () => openDetail(legacyId),
+      });
+    },
+    [openDetail],
   );
 
   const filteredEvents = useMemo(() => {
@@ -201,8 +233,11 @@ const Events: React.FC = () => {
                         image={event.image}
                         attendees={event.attendees}
                         hot={event.hot}
+                        going={registeredLegacyIds.has(
+                          resolveEventCardLegacyId(event.id) ?? -1,
+                        )}
                         variant="list"
-                        onTeamUp={() => openDetail(event.id)}
+                        onTeamUp={() => handleJoinEvent(event.id)}
                         onTeamUpWarmup={() => warmEventDetail(event)}
                       />
                     </View>

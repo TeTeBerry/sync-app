@@ -29,6 +29,7 @@ interface EventCardProps {
   image?: string;
   attendees?: number;
   hot?: boolean;
+  going?: boolean;
   variant?: 'default' | 'list';
   onTeamUp?: () => void;
   onTeamUpWarmup?: () => void;
@@ -42,6 +43,7 @@ const EventCardInner: React.FC<EventCardProps> = ({
   image = PLACEHOLDER_EVENT_HERO,
   attendees = 70,
   hot = false,
+  going = false,
   variant = 'list',
   onTeamUp,
   onTeamUpWarmup,
@@ -162,7 +164,7 @@ const EventCardInner: React.FC<EventCardProps> = ({
           >
             <Sparkles size={15} aria-hidden />
             <Text className="s-event-card__team-btn-text">
-              {isNavigating ? '加入中…' : '加入'}
+              {isNavigating ? '加入中…' : going ? '已加入' : '加入'}
             </Text>
           </Button>
         </View>

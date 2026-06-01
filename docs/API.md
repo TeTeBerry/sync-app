@@ -217,7 +217,7 @@ AI 匹配配额：服务端在 `post_recommendations` 且 `posts.length > 0` 时
 | GET | `/api/activities/:legacyId` | 活动详情 |
 | GET | `/api/posts/popular?limit=` | 首页热门帖子 |
 | GET | `/api/posts?activityLegacyId=&limit=&cursor=&anchorPostId=` | 活动下组队帖（分页：`{ items, nextCursor?, hasMore }`） |
-| POST | `/api/uploads/images` | multipart 字段 `file`，返回 `{ url }` |
+| POST | `/api/uploads/images` | multipart 字段 `file`，返回 `{ url }`；已配置 `WECHAT_MINI_APP_*` 时先调用微信 `img_sec_check`（≤1MB） |
 | GET | `/api/posts?userId=&authorName=` | 我的帖子（owner 过滤） |
 | POST | `/api/posts` | 创建组队帖（Query 身份；**前端 UI 不调用**，由 AI 闭环创建） |
 | PATCH | `/api/posts/:id` | 编辑帖子 / 更新 status |

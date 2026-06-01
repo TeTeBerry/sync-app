@@ -38,7 +38,7 @@ export function EventDetailContentTabs({
           .join(' ')}
         onClick={() => onChange('live')}
       >
-        <Text className="s-event-detail-tabs__label">实时资讯</Text>
+        <Text className="s-event-detail-tabs__label">现场实时资讯</Text>
         <Text className="s-event-detail-tabs__badge">{liveCount}</Text>
       </View>
     </View>

@@ -1,17 +1,28 @@
+/**
+ * Chat UI types. Stream/card contracts: `sync-app-backend/src/shared/chat/`.
+ */
+import type {
+  AiStreamEvent as AiChatStreamEvent,
+  RecommendedActivityCard,
+  RecommendedPostCard,
+} from '@sync/chat-contracts';
 import type { ConversationState } from './conversationState';
+import type { TravelGuideChatPayload } from './travelGuide';
+
+export type {
+  AiChatStreamEvent,
+  RecommendedActivityCard,
+  RecommendedPostAuthorGender,
+  RecommendedPostCard,
+} from '@sync/chat-contracts';
+
+export type { ConversationState };
 
 export type AiChatRole = 'user' | 'assistant' | 'system';
 
 export interface AiChatImageContext {
   source?: string;
   ocrText?: string;
-}
-
-export interface RecommendedActivityCard {
-  activityLegacyId: number;
-  title: string;
-  date?: string;
-  venue?: string;
 }
 
 export interface AiChatMessage {
@@ -24,65 +35,6 @@ export interface AiChatMessage {
   suggestedReplies?: string[];
 }
 
-export type RecommendedPostAuthorGender = 'female' | 'male';
-
-export interface RecommendedPostCard {
-  postId: string;
-  snippet: string;
-  authorName: string;
-  authorHandle?: string;
-  authorAvatar?: string;
-  authorGender?: RecommendedPostAuthorGender;
-  eventTitle: string;
-  location?: string;
-  tags?: string[];
-  activityLegacyId?: number;
-  matchReason?: string;
-}
-
-export type AiChatStreamEvent =
-  | { type: 'delta'; content: string }
-  | {
-      type: 'message_complete';
-      content: string;
-      requestId?: string;
-    }
-  | {
-      type: 'done';
-      messageId?: string;
-      sessionId?: string;
-    }
-  | {
-      type: 'post_created';
-      postId: string;
-      activityLegacyId?: number;
-      post?: RecommendedPostCard;
-    }
-  | {
-      type: 'existing_post';
-      postId: string;
-      activityLegacyId?: number;
-    }
-  | {
-      type: 'post_recommendations';
-      posts: RecommendedPostCard[];
-      degraded?: boolean;
-    }
-  | {
-      type: 'activity_recommendation';
-      activity: RecommendedActivityCard;
-    }
-  | {
-      type: 'suggested_replies';
-      replies: string[];
-    }
-  | {
-      /** Sync with backend manually — see `types/conversationState.ts` */
-      type: 'conversation_patch';
-      state: ConversationState;
-    }
-  | { type: 'error'; message: string };
-
 export type ChatUiMessage = {
   id: string;
   from: 'ai' | 'user';
@@ -92,9 +44,9 @@ export type ChatUiMessage = {
   streaming?: boolean;
   recommendedPosts?: RecommendedPostCard[];
   recommendedActivity?: RecommendedActivityCard;
-  /** Post card shown after user successfully publishes from chat */
   createdPost?: RecommendedPostCard;
   suggestedReplies?: string[];
+  travelGuide?: TravelGuideChatPayload;
 };
 
 export interface SendChatOptions {

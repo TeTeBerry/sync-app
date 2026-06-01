@@ -3,6 +3,11 @@ import { useDidShow } from '@tarojs/taro';
 import { fetchChatSession, clearChatSession } from '../../api/syncApi';
 import { useAiChatStore } from '../../stores/aiChatStore';
 import { mapHistoryToUiMessages } from '../../utils/aiChatHistory';
+import {
+  clearLocalChatHistory,
+  readLocalChatHistory,
+  writeLocalChatHistory,
+} from '../../utils/aiChatLocalHistory';
 import { isApiEnabled } from '../../constants/api';
 import {
   createFreshActivitySessionId,
@@ -52,6 +57,7 @@ export function useChatSession(options: UseChatSessionOptions) {
   const userPhoneRef = useRef(options.userPhone);
   const historyLoadSeqRef = useRef(0);
   const hasLoadedHistoryRef = useRef(false);
+  const persistTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [messages, setMessages] = useState<ChatUiMessage[]>(() => [
     { id: createMessageId(), from: 'ai', text: welcomeText },
@@ -81,61 +87,89 @@ export function useChatSession(options: UseChatSessionOptions) {
     setMessages([{ id: createMessageId(), from: 'ai', text: welcomeText }]);
   }, [welcomeText]);
 
-  const loadSessionHistory = useCallback(async () => {
-    if (isStreamingRef.current) {
-      setIsLoadingHistory(false);
-      return;
-    }
-    if (hasLoadedHistoryRef.current) return;
+  const hasInFlightChatTurn = useCallback(
+    () => isStreamingRef.current || messagesRef.current.some((message) => message.streaming),
+    [],
+  );
 
-    if (!isApiEnabled()) {
+  const applyHydratedMessages = useCallback(
+    (uiMessages: ChatUiMessage[], sessionId: string) => {
+      if (uiMessages.length > 0) {
+        setMessages(uiMessages);
+        writeLocalChatHistory(sessionId, uiMessages);
+        return;
+      }
+      const local = readLocalChatHistory(sessionId);
+      if (local?.some((m) => m.from === 'user')) {
+        setMessages(local);
+        return;
+      }
       showWelcome();
-      hasLoadedHistoryRef.current = true;
-      return;
-    }
+    },
+    [showWelcome],
+  );
 
-    const requestSessionId = sessionIdRef.current;
-    const loadSeq = ++historyLoadSeqRef.current;
+  const loadSessionHistory = useCallback(
+    async (options?: { force?: boolean }) => {
+      if (hasInFlightChatTurn()) {
+        setIsLoadingHistory(false);
+        return;
+      }
+      if (!options?.force && hasLoadedHistoryRef.current) return;
 
-    setIsLoadingHistory(true);
-    try {
-      const session = await fetchChatSession(requestSessionId);
-      if (
-        loadSeq !== historyLoadSeqRef.current ||
-        requestSessionId !== sessionIdRef.current ||
-        isStreamingRef.current
-      ) {
+      const requestSessionId = sessionIdRef.current;
+      const loadSeq = ++historyLoadSeqRef.current;
+
+      if (options?.force || !hasLoadedHistoryRef.current) {
+        const cached = readLocalChatHistory(requestSessionId);
+        if (cached?.some((m) => m.from === 'user')) {
+          setMessages(cached);
+        }
+      }
+
+      if (!isApiEnabled()) {
+        applyHydratedMessages([], requestSessionId);
+        hasLoadedHistoryRef.current = true;
         return;
       }
 
-      const uiMessages = session.history?.length
-        ? mapHistoryToUiMessages(session.history, requestSessionId)
-        : [];
-      if (session.conversationState) {
-        useAiChatStore.getState().applyConversationPatch(session.conversationState);
-      }
+      setIsLoadingHistory(true);
+      try {
+        const session = await fetchChatSession(requestSessionId);
+        if (
+          loadSeq !== historyLoadSeqRef.current ||
+          requestSessionId !== sessionIdRef.current ||
+          hasInFlightChatTurn()
+        ) {
+          return;
+        }
 
-      if (uiMessages.length > 0) {
-        setMessages(uiMessages);
-      } else {
-        showWelcome();
+        const uiMessages = session.history?.length
+          ? mapHistoryToUiMessages(session.history, requestSessionId)
+          : [];
+        if (session.conversationState) {
+          useAiChatStore.getState().applyConversationPatch(session.conversationState);
+        }
+
+        applyHydratedMessages(uiMessages, requestSessionId);
+        hasLoadedHistoryRef.current = true;
+      } catch {
+        if (
+          loadSeq === historyLoadSeqRef.current &&
+          requestSessionId === sessionIdRef.current &&
+          !hasInFlightChatTurn()
+        ) {
+          applyHydratedMessages([], requestSessionId);
+        }
+        hasLoadedHistoryRef.current = true;
+      } finally {
+        if (loadSeq === historyLoadSeqRef.current) {
+          setIsLoadingHistory(false);
+        }
       }
-      hasLoadedHistoryRef.current = true;
-    } catch {
-      if (
-        loadSeq === historyLoadSeqRef.current &&
-        requestSessionId === sessionIdRef.current &&
-        !isStreamingRef.current
-      ) {
-        showWelcome();
-      }
-      hasLoadedHistoryRef.current = true;
-    } finally {
-      if (loadSeq === historyLoadSeqRef.current) {
-        setIsLoadingHistory(false);
-      }
-    }
-  }, [showWelcome]);
+    },
+    [applyHydratedMessages, hasInFlightChatTurn, showWelcome],
+  );
 
   useEffect(() => {
     const nextSessionId = resolveSessionId(options.sessionId, activityLegacyId);
@@ -146,19 +180,44 @@ export function useChatSession(options: UseChatSessionOptions) {
     hasLoadedHistoryRef.current = false;
     sessionIdRef.current = nextSessionId;
     const hasUserMessages = messagesRef.current.some((m) => m.from === 'user');
-    if (!hasUserMessages && !isStreamingRef.current) {
+    if (!hasUserMessages && !hasInFlightChatTurn()) {
       showWelcome();
     }
-    void loadSessionHistory();
-  }, [activityLegacyId, loadSessionHistory, options.sessionId, showWelcome]);
-
-  useEffect(() => {
-    void loadSessionHistory();
-  }, [loadSessionHistory]);
+    void loadSessionHistory({ force: true });
+  }, [activityLegacyId, hasInFlightChatTurn, loadSessionHistory, options.sessionId, showWelcome]);
 
   useDidShow(() => {
-    void loadSessionHistory();
+    void loadSessionHistory({ force: true });
   });
+
+  useEffect(() => {
+    return () => {
+      historyLoadSeqRef.current += 1;
+      hasLoadedHistoryRef.current = false;
+      if (persistTimerRef.current != null) {
+        clearTimeout(persistTimerRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!hasLoadedHistoryRef.current) return;
+    if (hasInFlightChatTurn()) return;
+    if (!messages.some((m) => m.from === 'user' && !m.streaming)) return;
+
+    if (persistTimerRef.current != null) {
+      clearTimeout(persistTimerRef.current);
+    }
+    persistTimerRef.current = setTimeout(() => {
+      writeLocalChatHistory(sessionIdRef.current, messagesRef.current);
+    }, 400);
+
+    return () => {
+      if (persistTimerRef.current != null) {
+        clearTimeout(persistTimerRef.current);
+      }
+    };
+  }, [hasInFlightChatTurn, messages]);
 
   const resetSession = useCallback(async () => {
     historyLoadSeqRef.current += 1;
@@ -171,6 +230,7 @@ export function useChatSession(options: UseChatSessionOptions) {
     } catch {
       // ignore network errors; still reset local state
     }
+    clearLocalChatHistory(previousSessionId);
 
     const nextSessionId = createFreshSessionIdForScope(activityLegacyIdRef.current);
     sessionIdRef.current = nextSessionId;

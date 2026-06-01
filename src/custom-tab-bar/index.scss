@@ -20,9 +20,8 @@
   --s-tabbar-total: calc(var(--s-tabbar-row) + 10px + env(safe-area-inset-bottom, 0px));
 }
 
-/* WeChat default button chrome (plugin-html) */
-button.s-bottom-nav__item,
-button[type='default'].s-bottom-nav__item {
+/* WeChat custom-tab-bar wxss: class selectors only (no tag/attribute selectors). */
+.s-bottom-nav__item {
   margin: 0 !important;
   padding: 0 !important;
   background-color: transparent !important;
@@ -38,8 +37,7 @@ button[type='default'].s-bottom-nav__item {
   min-height: 0 !important;
 }
 
-button.s-bottom-nav__item::after,
-button[type='default'].s-bottom-nav__item::after {
+.s-bottom-nav__item::after {
   border: none !important;
   display: none !important;
 }

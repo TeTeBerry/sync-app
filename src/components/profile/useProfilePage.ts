@@ -13,7 +13,10 @@ import { useProfilePageStore } from '../../stores';
 import { ensureAuth, logout } from '../../utils/auth';
 import { requireAuth } from '../../utils/authGate';
 import { shouldSkipAutoLogin } from '../../utils/authStorage';
-import { invalidateProfilePackageState } from '../../utils/queryInvalidation';
+import {
+  invalidateProfilePackageState,
+  invalidateProfileSummary,
+} from '../../utils/queryInvalidation';
 import {
   readProfileNotificationsEnabled,
   readProfilePrivacyLevel,
@@ -134,6 +137,7 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
     packageSheet.applyRouteParams();
     if (apiEnabled && loggedIn) {
       void invalidateProfilePackageState();
+      invalidateProfileSummary();
       return;
     }
     if (apiEnabled && !loggedIn && !shouldSkipAutoLogin()) {

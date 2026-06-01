@@ -60,6 +60,7 @@ const EventDetailPage = () => {
     handleBack,
     openAi,
     handleShortcutTag,
+    handleOpenAiGuide,
     handleOpenExclusiveItinerary,
     entitlements,
   } = page;
@@ -114,6 +115,7 @@ const EventDetailPage = () => {
               onPromptChange={setPrompt}
               onAiSubmit={() => openAi(prompt)}
               onShortcutTag={handleShortcutTag}
+              onAiGuideClick={handleOpenAiGuide}
               onOpenExclusiveItinerary={handleOpenExclusiveItinerary}
               contentTab={contentTab}
               onContentTabChange={setContentTab}

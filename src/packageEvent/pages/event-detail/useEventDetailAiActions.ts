@@ -35,17 +35,26 @@ export function useEventDetailAiActions(eventId: number) {
 
   const handleShortcutTag = useCallback(
     (tag: string) => {
+      if (tag === 'AI攻略') {
+        goAiAssistant({ activityLegacyId: eventId, openAiGuideSheet: true });
+        return;
+      }
       bumpShortcutTagUsage(tag);
       goAiAssistant({ initialMessage: tag, activityLegacyId: eventId });
     },
     [bumpShortcutTagUsage, eventId],
   );
 
+  const handleOpenAiGuide = useCallback(() => {
+    goAiAssistant({ activityLegacyId: eventId, openAiGuideSheet: true });
+  }, [eventId]);
+
   return {
     prompt,
     setPrompt,
     openAi,
     handleShortcutTag,
+    handleOpenAiGuide,
     handleOpenExclusiveItinerary,
   };
 }

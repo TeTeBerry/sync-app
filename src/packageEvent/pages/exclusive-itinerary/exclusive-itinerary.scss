@@ -165,11 +165,7 @@
     background: #1c1c1e;
     box-sizing: border-box;
     overflow: visible;
-
-    &::after {
-      display: none;
-      border: 0;
-    }
+    -webkit-tap-highlight-color: transparent;
 
     &--pressed {
       opacity: 0.88;

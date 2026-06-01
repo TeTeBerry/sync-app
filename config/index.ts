@@ -1,4 +1,10 @@
+import path from 'node:path';
 import { defineConfig } from '@tarojs/cli';
+
+const chatContractsPath = path.resolve(
+  __dirname,
+  '../../sync-app-backend/src/shared/chat/index.ts',
+);
 
 /**
  * Primary target: WeChat mini program (weapp). Design draft: 375px logical width.
@@ -13,6 +19,9 @@ if (process.env.TARO_ENV === 'weapp') {
 
 // https://docs.taro.zone/docs/config-detail
 export default defineConfig({
+  alias: {
+    '@sync/chat-contracts': chatContractsPath,
+  },
   projectName: 'sync-app',
   date: '2026-5-24',
   /** Figma / mockup width; SCSS px values match this draft (postcss → rpx on weapp). */

@@ -17,12 +17,19 @@ import {
   type OwnerQueryParams,
 } from './requestContext';
 
-export type RequestActor = {
+/**
+ * Client-side session identity (JWT or demo). Not the backend `RequestActor`
+ * (`source` / `clientUserId` / `resolvedUserId`).
+ */
+export type ClientSessionIdentity = {
   isAuthenticated: boolean;
   userId: string;
   displayName: string;
   userPhone: string;
 };
+
+/** @deprecated Use `ClientSessionIdentity` — collides with backend `RequestActor`. */
+export type RequestActor = ClientSessionIdentity;
 
 export {
   demoActorQueryParams,
@@ -35,8 +42,7 @@ export {
   type OwnerQueryParams,
 };
 
-/** Snapshot of REST/WS identity for the current client session. */
-export function getRequestActor(): RequestActor {
+export function getClientSessionIdentity(): ClientSessionIdentity {
   return {
     isAuthenticated: hasAuthenticatedRequest(),
     userId: getClientUserId(),
@@ -45,30 +51,32 @@ export function getRequestActor(): RequestActor {
   };
 }
 
+/** @deprecated Use `getClientSessionIdentity`. */
+export const getRequestActor = getClientSessionIdentity;
+
 /** WebSocket `send` body identity — JWT on upgrade; demo uses body fields. */
 export function buildAiChatWsSendActor(): {
   userId?: string;
   userName?: string;
   userPhone?: string;
 } {
-  const actor = getRequestActor();
-  const phoneField = actor.userPhone.trim()
-    ? { userPhone: actor.userPhone.trim() }
+  const identity = getClientSessionIdentity();
+  const phoneField = identity.userPhone.trim()
+    ? { userPhone: identity.userPhone.trim() }
     : {};
 
-  if (actor.isAuthenticated) {
+  if (identity.isAuthenticated) {
     return phoneField;
   }
 
   return {
-    userId: actor.userId,
-    userName: actor.displayName,
+    userId: identity.userId,
+    userName: identity.displayName,
     ...phoneField,
   };
 }
 
-/** Reactive `getRequestActor()` — refreshes on login/logout and tab show. */
-export function useRequestActor(): RequestActor {
+export function useClientSessionIdentity(): ClientSessionIdentity {
   const [revision, setRevision] = useState(0);
 
   const refresh = useCallback(() => {
@@ -81,5 +89,8 @@ export function useRequestActor(): RequestActor {
 
   useEffect(() => subscribeAuthSessionChange(refresh), [refresh]);
 
-  return useMemo(() => getRequestActor(), [revision]);
+  return useMemo(() => getClientSessionIdentity(), [revision]);
 }
+
+/** @deprecated Use `useClientSessionIdentity`. */
+export const useRequestActor = useClientSessionIdentity;

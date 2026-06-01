@@ -125,7 +125,7 @@ const ExclusiveItineraryDjGrid: React.FC<ExclusiveItineraryDjGridProps> = ({
         const showPink = isSelected && accent === 'pink';
 
         return (
-          <Button
+          <View
             key={dj.id}
             className={[
               's-exclusive-itinerary__card',
@@ -135,8 +135,10 @@ const ExclusiveItineraryDjGrid: React.FC<ExclusiveItineraryDjGridProps> = ({
               .filter(Boolean)
               .join(' ')}
             hoverClass="s-exclusive-itinerary__card--pressed"
+            hoverStartTime={0}
+            hoverStayTime={50}
             aria-label={`${dj.name}，${dj.genreLabel}`}
-            onTap={() => onToggleDj(dj.id)}
+            onClick={() => onToggleDj(dj.id)}
           >
             <View className="s-exclusive-itinerary__avatar-wrap">
               <Image
@@ -171,7 +173,7 @@ const ExclusiveItineraryDjGrid: React.FC<ExclusiveItineraryDjGridProps> = ({
             >
               {dj.genreLabel}
             </Text>
-          </Button>
+          </View>
         );
       })}
     </View>

@@ -1,3 +1,4 @@
+import path from 'node:path';
 import { defineConfig } from 'vitest/config';
 
 /** Mirrors Taro compile-time flags so `@tarojs/*` can load in Vitest. */
@@ -11,6 +12,14 @@ const taroCompileFlags = {
 };
 
 export default defineConfig({
+  resolve: {
+    alias: {
+      '@sync/chat-contracts': path.resolve(
+        __dirname,
+        '../sync-app-backend/src/shared/chat/index.ts',
+      ),
+    },
+  },
   define: Object.fromEntries(
     Object.entries(taroCompileFlags).map(([key, value]) => [
       key,

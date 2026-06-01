@@ -72,7 +72,7 @@ export function EventLiveInfoPanel({
           onClick={onOpenUpdate}
         >
           <Zap size={18} color="#fff" aria-hidden />
-          <Text className="s-live-info-panel__fab-text">我要更新实时资讯</Text>
+          <Text className="s-live-info-panel__fab-text">我要更新现场实时资讯</Text>
         </Button>
       ) : null}
     </View>

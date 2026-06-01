@@ -26,6 +26,7 @@ const LABEL_TO_TYPE: Record<string, string> = {
   拼房: 'accommodation',
   拼车: 'carpool',
   拼车同行: 'carpool',
+  拼卡: 'carpool',
   转票: 'ticket',
   拼单: 'groupbuy',
   出票: 'ticket',
@@ -38,6 +39,7 @@ const LABEL_TO_TYPE: Record<string, string> = {
   '#拼房': 'accommodation',
   '#拼车': 'carpool',
   '#拼车同行': 'carpool',
+  '#拼卡': 'carpool',
   '#转票': 'ticket',
   '#拼单': 'groupbuy',
   '#出票': 'ticket',
@@ -67,7 +69,7 @@ export function formatContentTypeHashtag(type: string): string {
 }
 
 const CONTENT_TYPE_HASHTAG_RE =
-  /#(组队队友|组队|住宿同行|拼房|住宿|拼车同行|拼车|拼单|转票|出票|票务|其他)/g;
+  /#(组队队友|组队|住宿同行|拼房|住宿|拼车同行|拼车|拼卡|拼单|转票|出票|票务|其他)/g;
 
 function contentTypeKeysFromHashtagText(text: string): string[] {
   const keys = new Set<string>();

@@ -1,0 +1,50 @@
+import Taro from '@tarojs/taro';
+import { registerForActivityAndInvalidate } from '../hooks/sync/activities';
+import { isApiEnabled } from '../constants/api';
+import type { LoginInterceptFeature } from '../stores/loginInterceptStore';
+import { getApiErrorMessage } from './apiErrorMessage';
+import { requireAuth } from './authGate';
+
+export async function registerForActivityWithFeedback(
+  legacyId: number,
+): Promise<boolean> {
+  if (!Number.isFinite(legacyId) || legacyId <= 0) {
+    return false;
+  }
+
+  if (!isApiEnabled()) {
+    void Taro.showToast({ title: '已加入本场活动', icon: 'success' });
+    return true;
+  }
+
+  try {
+    const result = await registerForActivityAndInvalidate(legacyId);
+    void Taro.showToast({
+      title: result.alreadyRegistered ? '你已报名本场活动' : '已报名本场活动',
+      icon: 'success',
+    });
+    return true;
+  } catch (error) {
+    void Taro.showToast({
+      title: getApiErrorMessage(error, '报名失败，请稍后重试'),
+      icon: 'none',
+    });
+    return false;
+  }
+}
+
+export function joinActivityWithAuth(
+  legacyId: number,
+  options?: {
+    onSuccess?: () => void;
+    feature?: LoginInterceptFeature;
+  },
+): void {
+  requireAuth(() => {
+    void registerForActivityWithFeedback(legacyId).then((ok) => {
+      if (ok) {
+        options?.onSuccess?.();
+      }
+    });
+  }, options?.feature ?? 'general');
+}
