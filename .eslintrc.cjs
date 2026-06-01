@@ -42,19 +42,5 @@ module.exports = {
       files: ['**/*.test.ts', '**/*.test.tsx'],
       env: { jest: true },
     },
-    {
-      files: ['e2e/**/*.cjs'],
-      env: { jest: true, node: true },
-      parser: 'espree',
-      parserOptions: {
-        ecmaVersion: 'latest',
-        sourceType: 'script',
-      },
-      rules: {
-        'no-undef': 'off',
-        '@typescript-eslint/no-var-requires': 'off',
-        '@typescript-eslint/no-require-imports': 'off',
-      },
-    },
   ],
 };

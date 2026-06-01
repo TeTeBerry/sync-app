@@ -9,4 +9,3 @@
 - [ ] 进入活动详情、AI 助手 WebSocket 一轮对话无报错
 - [ ] 后端 `GET /api/health` 正常（本地或目标环境）
 - [ ] （可选）`cd sync-app-backend && npm run smoke:api` 全链路 REST 冒烟通过
-- [ ] （可选）`cd sync-app && RUN_E2E=1 npm run test:e2e` 小程序 UI 自动化（需微信开发者工具，见 `e2e/README.md`）
