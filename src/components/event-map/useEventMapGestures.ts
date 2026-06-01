@@ -1,21 +1,25 @@
-import { useCallback, useRef } from "react";
-import type { CanvasTouchEvent } from "@tarojs/components";
+import { useCallback, useRef } from 'react';
+import type { CanvasTouchEvent } from '@tarojs/components';
 import {
   getEventMapViewport,
   repaintEventMapNow,
   setEventMapInteracting,
   setEventMapViewport,
-} from "./eventMapCanvasRuntime";
-import { findMarkerAtScreen } from "./eventMapHitTest";
-import type { EventMapMarker } from "./eventMapMarkers";
-import { panViewport, zoomViewportAtScreen, type EventMapViewport } from "./eventMapViewport";
+} from './eventMapCanvasRuntime';
+import { findMarkerAtScreen } from './eventMapHitTest';
+import type { EventMapMarker } from './eventMapMarkers';
+import {
+  panViewport,
+  zoomViewportAtScreen,
+  type EventMapViewport,
+} from './eventMapViewport';
 
 const TAP_MOVE_THRESHOLD_PX = 10;
 const TAP_DURATION_MS = 280;
 
 type TouchPoint = { x: number; y: number };
 
-type GestureMode = "none" | "pan" | "pinch";
+type GestureMode = 'none' | 'pan' | 'pinch';
 
 function touchXY(touch: {
   x?: number;
@@ -53,7 +57,7 @@ export function useEventMapGestures({
   const titleRef = useRef(eventTitle);
   titleRef.current = eventTitle;
 
-  const modeRef = useRef<GestureMode>("none");
+  const modeRef = useRef<GestureMode>('none');
   const viewportStartRef = useRef<EventMapViewport>(getEventMapViewport());
   const panStartTouchRef = useRef<TouchPoint | null>(null);
   const pinchStartDistRef = useRef(0);
@@ -77,7 +81,7 @@ export function useEventMapGestures({
     movedRef.current = false;
 
     if (touches.length >= 2) {
-      modeRef.current = "pinch";
+      modeRef.current = 'pinch';
       const a = touchXY(touches[0]);
       const b = touchXY(touches[1]);
       pinchStartDistRef.current = Math.max(1, touchDistance(a, b));
@@ -86,7 +90,7 @@ export function useEventMapGestures({
       return;
     }
 
-    modeRef.current = "pan";
+    modeRef.current = 'pan';
     const p = touchXY(touches[0]);
     panStartTouchRef.current = p;
     tapStartRef.current = { x: p.x, y: p.y, t: Date.now() };
@@ -97,8 +101,8 @@ export function useEventMapGestures({
       const touches = event.touches ?? [];
 
       if (touches.length >= 2) {
-        if (modeRef.current !== "pinch") {
-          modeRef.current = "pinch";
+        if (modeRef.current !== 'pinch') {
+          modeRef.current = 'pinch';
           viewportStartRef.current = getEventMapViewport();
           const a = touchXY(touches[0]);
           const b = touchXY(touches[1]);
@@ -107,11 +111,10 @@ export function useEventMapGestures({
         }
       }
 
-      if (touches.length >= 2 && modeRef.current === "pinch") {
+      if (touches.length >= 2 && modeRef.current === 'pinch') {
         const a = touchXY(touches[0]);
         const b = touchXY(touches[1]);
         const dist = touchDistance(a, b);
-        const center = touchCenter(a, b);
         const ratio = dist / pinchStartDistRef.current;
         const start = viewportStartRef.current;
         const next = zoomViewportAtScreen(
@@ -125,12 +128,19 @@ export function useEventMapGestures({
         return;
       }
 
-      if (touches.length === 1 && modeRef.current === "pan" && panStartTouchRef.current) {
+      if (
+        touches.length === 1 &&
+        modeRef.current === 'pan' &&
+        panStartTouchRef.current
+      ) {
         const p = touchXY(touches[0]);
         const dx = p.x - panStartTouchRef.current.x;
         const dy = p.y - panStartTouchRef.current.y;
 
-        if (Math.abs(dx) > TAP_MOVE_THRESHOLD_PX || Math.abs(dy) > TAP_MOVE_THRESHOLD_PX) {
+        if (
+          Math.abs(dx) > TAP_MOVE_THRESHOLD_PX ||
+          Math.abs(dy) > TAP_MOVE_THRESHOLD_PX
+        ) {
           movedRef.current = true;
         }
 
@@ -150,7 +160,7 @@ export function useEventMapGestures({
       }
 
       if (remaining === 1) {
-        modeRef.current = "pan";
+        modeRef.current = 'pan';
         const p = touchXY(event.touches[0]);
         panStartTouchRef.current = p;
         viewportStartRef.current = getEventMapViewport();
@@ -158,8 +168,8 @@ export function useEventMapGestures({
       }
 
       const tap = tapStartRef.current;
-      const wasPan = modeRef.current === "pan";
-      modeRef.current = "none";
+      const wasPan = modeRef.current === 'pan';
+      modeRef.current = 'none';
       panStartTouchRef.current = null;
       tapStartRef.current = null;
       setEventMapInteracting(false);
@@ -172,7 +182,13 @@ export function useEventMapGestures({
         Date.now() - tap.t <= TAP_DURATION_MS &&
         onMarkerTap
       ) {
-        const marker = findMarkerAtScreen(tap.x, tap.y, mapWidth, mapHeight, getEventMapViewport());
+        const marker = findMarkerAtScreen(
+          tap.x,
+          tap.y,
+          mapWidth,
+          mapHeight,
+          getEventMapViewport(),
+        );
         if (marker) {
           onMarkerTap(marker);
         }
@@ -182,7 +198,7 @@ export function useEventMapGestures({
   );
 
   const handleTouchCancel = useCallback(() => {
-    modeRef.current = "none";
+    modeRef.current = 'none';
     panStartTouchRef.current = null;
     tapStartRef.current = null;
     setEventMapInteracting(false);

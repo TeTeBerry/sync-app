@@ -1,14 +1,14 @@
-import "./PostCommentSection.scss";
-import Taro from "@tarojs/taro";
-import { useCallback, useState, type FC } from "react";
-import { ChevronUp, Heart, Send } from "lucide-react-taro";
-import { commentPostAndInvalidate, usePostCommentsQuery } from "../hooks/useSyncApi";
-import { isApiEnabled } from "../constants/api";
-import { PLACEHOLDER_AVATAR } from "../constants/remoteImages";
-import { sanitizeRemoteImageUrl } from "../utils/imageUrl";
-import { isCurrentUserPostAuthor } from "../utils/postOwnership";
-import type { PostCommentItem } from "../types/backend";
-import { Button, Image, Input, Text, View } from "@tarojs/components";
+import './PostCommentSection.scss';
+import Taro from '@tarojs/taro';
+import { useCallback, useState, type FC } from 'react';
+import { ChevronUp, Heart, Send } from 'lucide-react-taro';
+import { commentPostAndInvalidate, usePostCommentsQuery } from '../hooks/useSyncApi';
+import { isApiEnabled } from '../constants/api';
+import { PLACEHOLDER_AVATAR } from '../constants/remoteImages';
+import { sanitizeRemoteImageUrl } from '../utils/imageUrl';
+import { isCurrentUserPostAuthor } from '../utils/postOwnership';
+import type { PostCommentItem } from '../types/backend';
+import { Button, Image, Input, Text, View } from '@tarojs/components';
 
 const DEFAULT_AVATAR = PLACEHOLDER_AVATAR;
 
@@ -52,7 +52,9 @@ function CommentRow({
 
   return (
     <>
-      <View className={`s-post-comments__item${nested ? " s-post-comments__item--reply" : ""}`}>
+      <View
+        className={`s-post-comments__item${nested ? ' s-post-comments__item--reply' : ''}`}
+      >
         <Image
           className="s-post-comments__avatar"
           src={sanitizeRemoteImageUrl(comment.avatar) || DEFAULT_AVATAR}
@@ -65,15 +67,15 @@ function CommentRow({
           <Text className="s-post-comments__bubble">{comment.body}</Text>
           <View className="s-post-comments__actions">
             <Button
-              className={`s-post-comments__like${liked ? " s-post-comments__like--active" : ""}`}
+              className={`s-post-comments__like${liked ? ' s-post-comments__like--active' : ''}`}
               onClick={() => onToggleLike(comment.id)}
             >
-              <Heart size={12} filled={liked} color={liked ? "#ff0066" : "#8e8e93"} />
+              <Heart size={12} filled={liked} color={liked ? '#ff0066' : '#8e8e93'} />
               <Text className="s-btn-label">赞</Text>
             </Button>
             {canReply ? (
               <Button
-                className={`s-post-comments__reply${replyTargetId === comment.id ? " s-post-comments__reply--active" : ""}`}
+                className={`s-post-comments__reply${replyTargetId === comment.id ? ' s-post-comments__reply--active' : ''}`}
                 onClick={() =>
                   onStartReply({
                     commentId: comment.id,
@@ -114,34 +116,36 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
   const apiEnabled = isApiEnabled();
   const commentsQuery = usePostCommentsQuery(postId, expanded);
   const isPostAuthor = isCurrentUserPostAuthor(postAuthorName, postAuthorUserId);
-  const [draft, setDraft] = useState("");
+  const [draft, setDraft] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [replyTarget, setReplyTarget] = useState<ReplyTarget | null>(null);
   const [likedCommentIds, setLikedCommentIds] = useState<Set<string>>(() => new Set());
 
-  const placeholder = replyTarget ? `回复 @${replyTarget.authorName}` : "说点什么...";
+  const placeholder = replyTarget ? `回复 @${replyTarget.authorName}` : '说点什么...';
 
   const handleSubmit = useCallback(() => {
     const body = draft.trim();
     if (!body || submitting) return;
 
     if (!apiEnabled) {
-      void Taro.showToast({ title: "请开启 API 模式", icon: "none" });
+      void Taro.showToast({ title: '请开启 API 模式', icon: 'none' });
       return;
     }
 
     setSubmitting(true);
     void commentPostAndInvalidate(postId, body, replyTarget?.commentId)
       .then(() => {
-        setDraft("");
+        setDraft('');
         setReplyTarget(null);
         onCommentSubmitted?.();
-        void Taro.showToast({ title: "评论成功", icon: "success" });
+        void Taro.showToast({ title: '评论成功', icon: 'success' });
       })
       .catch((err: { message?: string }) => {
         const message =
-          typeof err?.message === "string" && err.message.trim() ? err.message : "评论失败";
-        void Taro.showToast({ title: message, icon: "none" });
+          typeof err?.message === 'string' && err.message.trim()
+            ? err.message
+            : '评论失败';
+        void Taro.showToast({ title: message, icon: 'none' });
       })
       .finally(() => setSubmitting(false));
   }, [apiEnabled, draft, onCommentSubmitted, postId, replyTarget, submitting]);
@@ -162,7 +166,8 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
     setReplyTarget((prev) => (prev?.commentId === target.commentId ? null : target));
   }, []);
 
-  const userAvatar = sanitizeRemoteImageUrl(currentUserAvatar?.trim()) || DEFAULT_AVATAR;
+  const userAvatar =
+    sanitizeRemoteImageUrl(currentUserAvatar?.trim()) || DEFAULT_AVATAR;
   const comments = commentsQuery.data ?? [];
 
   if (!expanded) return null;
@@ -209,7 +214,12 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
             disabled={!draft.trim() || submitting}
             onClick={handleSubmit}
           >
-            <Send size={20} color="#fff" className="s-post-comments__send-icon" aria-hidden />
+            <Send
+              size={20}
+              color="#fff"
+              className="s-post-comments__send-icon"
+              aria-hidden
+            />
           </Button>
         </View>
       </View>

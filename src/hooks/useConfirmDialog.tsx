@@ -1,5 +1,5 @@
-import React, { useCallback, useState } from "react";
-import ConfirmDialog, { type ConfirmDialogProps } from "../components/ConfirmDialog";
+import React, { useCallback, useState } from 'react';
+import ConfirmDialog, { type ConfirmDialogProps } from '../components/ConfirmDialog';
 
 export type ConfirmDialogOptions = {
   title: string;
@@ -17,7 +17,10 @@ type ActiveConfirm = ConfirmDialogOptions & {
  * Themed confirm dialog hook. Prefer this over `Taro.showModal` for user-facing
  * confirmations so copy and styling stay consistent with the app shell.
  */
-export function useConfirmDialog(defaults?: { confirmText?: string; cancelText?: string }) {
+export function useConfirmDialog(defaults?: {
+  confirmText?: string;
+  cancelText?: string;
+}) {
   const [active, setActive] = useState<ActiveConfirm | null>(null);
 
   const confirm = useCallback(
@@ -40,8 +43,8 @@ export function useConfirmDialog(defaults?: { confirmText?: string; cancelText?:
         open: true,
         title: active.title,
         message: active.message,
-        confirmText: active.confirmText ?? defaults?.confirmText ?? "确认",
-        cancelText: active.cancelText ?? defaults?.cancelText ?? "取消",
+        confirmText: active.confirmText ?? defaults?.confirmText ?? '确认',
+        cancelText: active.cancelText ?? defaults?.cancelText ?? '取消',
         danger: active.danger,
         onConfirm: () => close(true),
         onCancel: () => close(false),

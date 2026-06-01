@@ -1,10 +1,10 @@
-import type { EventPackageEntitlement, ProfileActivityItem } from "../../types/backend";
-import { compareActivitiesNearestFirst } from "../../utils/activityStatus";
+import type { EventPackageEntitlement, ProfileActivityItem } from '../../types/backend';
+import { compareActivitiesNearestFirst } from '../../utils/activityStatus';
 import {
   buildEventBenefitCardModel,
   listPaidEntitlements,
   type ProfileEventBenefitCardModel,
-} from "./profileBenefitsMapper";
+} from './profileBenefitsMapper';
 
 export function buildPaidBenefitCards(
   paidEntitlements: EventPackageEntitlement[],
@@ -12,7 +12,10 @@ export function buildPaidBenefitCards(
 ): ProfileEventBenefitCardModel[] {
   const cards: ProfileEventBenefitCardModel[] = [];
   for (const entitlement of paidEntitlements) {
-    if (!Number.isFinite(entitlement.activityLegacyId) || entitlement.activityLegacyId <= 0) {
+    if (
+      !Number.isFinite(entitlement.activityLegacyId) ||
+      entitlement.activityLegacyId <= 0
+    ) {
       continue;
     }
     try {
@@ -23,7 +26,7 @@ export function buildPaidBenefitCards(
         ),
       );
     } catch (error) {
-      console.warn("[Profile] skip invalid entitlement card", entitlement, error);
+      console.warn('[Profile] skip invalid entitlement card', entitlement, error);
     }
   }
   return cards;

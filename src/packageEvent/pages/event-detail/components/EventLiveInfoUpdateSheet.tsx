@@ -1,16 +1,16 @@
-import "./EventLiveInfoUpdateSheet.scss";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { Check, X, Zap } from "lucide-react-taro";
-import { cn } from "../../../../components/ui";
-import { useOverlayLock } from "../../../../hooks/useOverlayLock";
+import './EventLiveInfoUpdateSheet.scss';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Check, X, Zap } from 'lucide-react-taro';
+import { cn } from '../../../../components/ui';
+import { useOverlayLock } from '../../../../hooks/useOverlayLock';
 import {
   LIVE_INFO_CATEGORIES,
   LIVE_INFO_REMARKS_MAX,
   type LiveInfoCategoryId,
-} from "../liveInfoConfig";
-import type { PublishLiveInfoPayload } from "../useEventLiveInfo";
-import { EventLiveInfoStarRow } from "./EventLiveInfoStarRow";
-import { Button, ScrollView, Text, Textarea, View } from "@tarojs/components";
+} from '../liveInfoConfig';
+import type { PublishLiveInfoPayload } from '../useEventLiveInfo';
+import { EventLiveInfoStarRow } from './EventLiveInfoStarRow';
+import { Button, ScrollView, Text, Textarea, View } from '@tarojs/components';
 
 type EventLiveInfoUpdateSheetProps = {
   open: boolean;
@@ -28,26 +28,29 @@ export function EventLiveInfoUpdateSheet({
 }: EventLiveInfoUpdateSheetProps) {
   useOverlayLock(open);
 
-  const [selected, setSelected] = useState<LiveInfoCategoryId[]>(["entry_crowd", "toilet_queue"]);
+  const [selected, setSelected] = useState<LiveInfoCategoryId[]>([
+    'entry_crowd',
+    'toilet_queue',
+  ]);
   const [scores, setScores] = useState<Record<LiveInfoCategoryId, number>>({
     entry_crowd: DEFAULT_SCORE,
     toilet_queue: DEFAULT_SCORE,
     water_queue: DEFAULT_SCORE,
     smoke_drink: DEFAULT_SCORE,
   });
-  const [remark, setRemark] = useState("");
+  const [remark, setRemark] = useState('');
   const [publishing, setPublishing] = useState(false);
 
   useEffect(() => {
     if (!open) return;
-    setSelected(["entry_crowd", "toilet_queue"]);
+    setSelected(['entry_crowd', 'toilet_queue']);
     setScores({
       entry_crowd: DEFAULT_SCORE,
       toilet_queue: DEFAULT_SCORE,
       water_queue: DEFAULT_SCORE,
       smoke_drink: DEFAULT_SCORE,
     });
-    setRemark("");
+    setRemark('');
     setPublishing(false);
   }, [open]);
 
@@ -95,7 +98,10 @@ export function EventLiveInfoUpdateSheet({
       catchMove
       role="presentation"
     >
-      <View className="s-overlay__backdrop" onClick={publishing ? undefined : onClose} />
+      <View
+        className="s-overlay__backdrop"
+        onClick={publishing ? undefined : onClose}
+      />
       <View className="s-overlay__panel" role="dialog" aria-modal="true">
         <View className="s-live-info-update-sheet__handle" aria-hidden />
         <View className="s-live-info-update-sheet__top">
@@ -118,7 +124,9 @@ export function EventLiveInfoUpdateSheet({
           className="s-live-info-update-sheet__scroll s-scrollbar-none"
         >
           <View className="s-live-info-update-sheet__body">
-            <Text className="s-live-info-update-sheet__section">① 选择要更新的类别 (可多选)</Text>
+            <Text className="s-live-info-update-sheet__section">
+              ① 选择要更新的类别 (可多选)
+            </Text>
             <View className="s-live-info-update-sheet__chips">
               {LIVE_INFO_CATEGORIES.map((category) => {
                 const active = selected.includes(category.id);
@@ -127,11 +135,11 @@ export function EventLiveInfoUpdateSheet({
                   <Button
                     key={category.id}
                     className={[
-                      "s-live-info-update-sheet__chip",
-                      active && "s-live-info-update-sheet__chip--on",
+                      's-live-info-update-sheet__chip',
+                      active && 's-live-info-update-sheet__chip--on',
                     ]
                       .filter(Boolean)
-                      .join(" ")}
+                      .join(' ')}
                     style={
                       active
                         ? ({
@@ -142,9 +150,17 @@ export function EventLiveInfoUpdateSheet({
                     }
                     onClick={() => toggleCategory(category.id)}
                   >
-                    <Icon size={14} color={active ? category.color : "#fff"} aria-hidden />
-                    <Text className="s-live-info-update-sheet__chip-label">{category.label}</Text>
-                    {active ? <Check size={14} color={category.color} aria-hidden /> : null}
+                    <Icon
+                      size={14}
+                      color={active ? category.color : '#fff'}
+                      aria-hidden
+                    />
+                    <Text className="s-live-info-update-sheet__chip-label">
+                      {category.label}
+                    </Text>
+                    {active ? (
+                      <Check size={14} color={category.color} aria-hidden />
+                    ) : null}
                   </Button>
                 );
               })}
@@ -157,7 +173,10 @@ export function EventLiveInfoUpdateSheet({
                   const score = scores[category.id] ?? DEFAULT_SCORE;
                   const Icon = category.icon;
                   return (
-                    <View key={category.id} className="s-live-info-update-sheet__rate-card">
+                    <View
+                      key={category.id}
+                      className="s-live-info-update-sheet__rate-card"
+                    >
                       <View className="s-live-info-update-sheet__rate-head">
                         <View className="s-live-info-summary__label-wrap">
                           <Icon size={16} color={category.color} aria-hidden />
@@ -207,16 +226,16 @@ export function EventLiveInfoUpdateSheet({
 
         <Button
           className={cn(
-            "s-live-info-update-sheet__publish",
-            publishing && "s-live-info-update-sheet__publish--disabled",
+            's-live-info-update-sheet__publish',
+            publishing && 's-live-info-update-sheet__publish--disabled',
           )}
-          hoverClass={publishing ? "" : "s-live-info-update-sheet__publish--pressed"}
+          hoverClass={publishing ? '' : 's-live-info-update-sheet__publish--pressed'}
           disabled={publishing}
           onClick={() => void handlePublish()}
         >
           <Zap size={18} color="#fff" aria-hidden />
           <Text className="s-live-info-update-sheet__publish-text">
-            {publishing ? "发布中…" : "发布实时资讯"}
+            {publishing ? '发布中…' : '发布实时资讯'}
           </Text>
         </Button>
       </View>

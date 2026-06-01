@@ -1,9 +1,12 @@
-import { useMemo } from "react";
-import { isApiEnabled, isDevMockQuotaExhausted } from "../constants/api";
-import { useProfileActivityLegacyId } from "./useProfileActivityLegacyId";
-import { useProfileEntitlementsQuery } from "./useSyncApi";
-import { isAiMatchQuotaExhausted, resolveProfileEntitlement } from "../utils/profileEntitlement";
-import type { EventPackageEntitlement } from "../types/backend";
+import { useMemo } from 'react';
+import { isApiEnabled, isDevMockQuotaExhausted } from '../constants/api';
+import { useProfileActivityLegacyId } from './useProfileActivityLegacyId';
+import { useProfileEntitlementsQuery } from './useSyncApi';
+import {
+  isAiMatchQuotaExhausted,
+  resolveProfileEntitlement,
+} from '../utils/profileEntitlement';
+import type { EventPackageEntitlement } from '../types/backend';
 
 export type AiMatchQuotaDisplay = {
   exhausted: boolean;
@@ -16,7 +19,7 @@ export type AiMatchQuotaDisplay = {
 };
 
 function buildUsageLabel(entitlement: EventPackageEntitlement | null): string {
-  if (!entitlement) return "0/0";
+  if (!entitlement) return '0/0';
   const { used, limit } = entitlement.quotas.aiMatch;
   if (limit == null) return `${used}/∞`;
   return `${used}/${limit}`;
@@ -41,12 +44,15 @@ export function useAiMatchQuota(): AiMatchQuotaDisplay {
         remaining: mockExhausted ? 0 : null,
         limit: mockExhausted ? 3 : null,
         used: mockExhausted ? 3 : 0,
-        usageLabel: mockExhausted ? "3/3" : "0/0",
+        usageLabel: mockExhausted ? '3/3' : '0/0',
         loading: false,
       };
     }
 
-    const entitlement = resolveProfileEntitlement(entitlementsQuery.data, activityLegacyId);
+    const entitlement = resolveProfileEntitlement(
+      entitlementsQuery.data,
+      activityLegacyId,
+    );
     const slot = entitlement?.quotas.aiMatch;
     const remaining = slot?.remaining ?? null;
     const limit = slot?.limit ?? null;
@@ -60,5 +66,10 @@ export function useAiMatchQuota(): AiMatchQuotaDisplay {
       usageLabel: buildUsageLabel(entitlement),
       loading,
     };
-  }, [activityLegacyId, apiEnabled, entitlementsQuery.data, entitlementsQuery.isLoading]);
+  }, [
+    activityLegacyId,
+    apiEnabled,
+    entitlementsQuery.data,
+    entitlementsQuery.isLoading,
+  ]);
 }

@@ -1,11 +1,14 @@
 /** Unsplash IDs that 404 or fail in WeChat mini-program. */
-const BROKEN_UNSPLASH_PHOTO_IDS = new Set(["1459749411177-0479bf78d6f2", "1459749411177"]);
+const BROKEN_UNSPLASH_PHOTO_IDS = new Set([
+  '1459749411177-0479bf78d6f2',
+  '1459749411177',
+]);
 
 const UNSPLASH_PHOTO_RE = /photo-([a-zA-Z0-9-]+)/;
 
 export function picsumUrl(seed: string, width: number, height?: number): string {
   const h = height ?? Math.round(width * 0.75);
-  const safeSeed = seed.replace(/[^a-zA-Z0-9-_]/g, "").slice(0, 48) || "sync";
+  const safeSeed = seed.replace(/[^a-zA-Z0-9-_]/g, '').slice(0, 48) || 'sync';
   return `https://picsum.photos/seed/${safeSeed}/${width}/${h}`;
 }
 
@@ -15,9 +18,9 @@ function extractUnsplashPhotoId(url: URL): string | null {
 }
 
 function unsplashDimensions(url: URL): { width: number; height: number } {
-  const w = Number(url.searchParams.get("w")) || 800;
+  const w = Number(url.searchParams.get('w')) || 800;
   const isSquareCrop =
-    url.searchParams.get("fit") === "crop" && url.searchParams.get("crop") === "face";
+    url.searchParams.get('fit') === 'crop' && url.searchParams.get('crop') === 'face';
   return { width: w, height: isSquareCrop ? w : Math.round(w * 0.75) };
 }
 
@@ -29,17 +32,17 @@ export function sanitizeRemoteImageUrl(src: string | undefined): string | undefi
 
   try {
     const url = new URL(trimmed);
-    if (!url.hostname.includes("unsplash.com")) {
+    if (!url.hostname.includes('unsplash.com')) {
       return trimmed;
     }
 
     const photoId = extractUnsplashPhotoId(url);
     if (photoId && BROKEN_UNSPLASH_PHOTO_IDS.has(photoId)) {
-      return picsumUrl("edc-festival", 800, 600);
+      return picsumUrl('edc-festival', 800, 600);
     }
 
     const { width, height } = unsplashDimensions(url);
-    const seed = photoId ? `unsplash-${photoId}` : "sync-image";
+    const seed = photoId ? `unsplash-${photoId}` : 'sync-image';
     return picsumUrl(seed, width, height);
   } catch {
     return trimmed;
@@ -69,25 +72,32 @@ export function thumbnailImageUrl(
     const url = new URL(trimmed);
     const height = Math.round(width * heightRatio);
 
-    if (url.hostname.includes("picsum.photos")) {
-      const parts = url.pathname.split("/").filter(Boolean);
-      if (parts[0] === "seed" && parts[1]) {
+    if (url.hostname.includes('picsum.photos')) {
+      const parts = url.pathname.split('/').filter(Boolean);
+      if (parts[0] === 'seed' && parts[1]) {
         return picsumUrl(parts[1], width, height);
       }
     }
 
     const host = url.hostname;
-    if (host.includes("alicdn.com") || host.includes("tbcdn.cn") || host.includes("aliyuncs.com")) {
-      if (!url.searchParams.has("x-oss-process")) {
-        url.searchParams.set("x-oss-process", `image/resize,m_fill,w_${width},h_${height}`);
+    if (
+      host.includes('alicdn.com') ||
+      host.includes('tbcdn.cn') ||
+      host.includes('aliyuncs.com')
+    ) {
+      if (!url.searchParams.has('x-oss-process')) {
+        url.searchParams.set(
+          'x-oss-process',
+          `image/resize,m_fill,w_${width},h_${height}`,
+        );
       }
       return url.toString();
     }
 
-    if (url.searchParams.has("w")) {
+    if (url.searchParams.has('w')) {
       return trimmed;
     }
-    url.searchParams.set("w", String(width));
+    url.searchParams.set('w', String(width));
     return url.toString();
   } catch {
     return trimmed;
@@ -95,6 +105,9 @@ export function thumbnailImageUrl(
 }
 
 /** Featured post hero (16:10 tile). WeChat reliably loads resized picsum, not raw 800px URLs. */
-export function featuredPostImageUrl(src: string | undefined, width = 480): string | undefined {
+export function featuredPostImageUrl(
+  src: string | undefined,
+  width = 480,
+): string | undefined {
   return thumbnailImageUrl(src, width, 10 / 16);
 }

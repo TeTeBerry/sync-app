@@ -290,6 +290,7 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
       mockReply,
       processStreamEvents,
       sessionIdRef,
+      setMessages,
       streamErrorText,
       typewriterCharDelayMs,
       userIdRef,

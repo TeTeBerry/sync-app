@@ -1,4 +1,4 @@
-import Taro from "@tarojs/taro";
+import Taro from '@tarojs/taro';
 
 type ScrollViewRect = {
   scrollTop?: number;
@@ -21,7 +21,9 @@ export function measureScrollTopToCenter(
 ): Promise<number | null> {
   return new Promise((resolve) => {
     const query = Taro.createSelectorQuery();
-    query.select(scrollViewSelector).fields({ size: true, scrollOffset: true, rect: true });
+    query
+      .select(scrollViewSelector)
+      .fields({ size: true, scrollOffset: true, rect: true });
     query.select(targetSelector).boundingClientRect();
     query.exec((res) => {
       const scrollView = res?.[0] as ScrollViewRect | null;

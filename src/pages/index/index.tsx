@@ -1,11 +1,11 @@
-import "./home.scss";
-import Taro, { useDidShow } from "@tarojs/taro";
-import { lazy, Suspense, useCallback } from "react";
-import ThemedPageLoader from "../../components/ThemedPageLoader";
-import { seedActivityDetailFromFeaturedEvent } from "../../utils/activityDetailCache";
-import { preloadEventSubpackage } from "../../utils/subpackagePreload";
-import { useConfirmDialog } from "../../hooks/useConfirmDialog";
-import { useDeferredMount } from "../../hooks/useDeferredMount";
+import './home.scss';
+import Taro, { useDidShow } from '@tarojs/taro';
+import { lazy, Suspense, useCallback } from 'react';
+import ThemedPageLoader from '../../components/ThemedPageLoader';
+import { seedActivityDetailFromFeaturedEvent } from '../../utils/activityDetailCache';
+import { preloadEventSubpackage } from '../../utils/subpackagePreload';
+import { useConfirmDialog } from '../../hooks/useConfirmDialog';
+import { useDeferredMount } from '../../hooks/useDeferredMount';
 import {
   deletePostAndInvalidate,
   likePostAndInvalidate,
@@ -14,8 +14,8 @@ import {
   useNearestUpcomingForCountdown,
   useNotificationUnreadCount,
   usePopularPosts,
-} from "../../hooks/useSyncApi";
-import { isApiEnabled } from "../../constants/api";
+} from '../../hooks/useSyncApi';
+import { isApiEnabled } from '../../constants/api';
 import {
   goAiAssistant,
   goEventDetail,
@@ -23,21 +23,24 @@ import {
   preloadHotRoutes,
   preloadPageSafe,
   ROUTES,
-} from "../../utils/route";
-import { DEFER_BELOW_FOLD_MS, DEFER_SECONDARY_API_MS } from "../../utils/timing";
-import { HomeCountdownCard } from "./components/HomeCountdownCard";
-import { HomeFeaturedEvents } from "./components/HomeFeaturedEvents";
-import TabPageHeader from "../../components/TabPageHeader";
-import { HomeHeaderActions } from "./components/HomeHeaderActions";
-import { type ActivityPost } from "./homeData";
-import { resolveFeaturedEventLegacyId, type FeaturedEvent } from "../../utils/apiMappers";
-import { useNavBarInsets } from "../../hooks/useNavBarInsets";
-import { useEndRouteTransitionOnShow } from "../../hooks/useEndRouteTransitionOnShow";
-import { usePostPageShare } from "../../hooks/usePostPageShare";
-import { ScrollView, View } from "@tarojs/components";
+} from '../../utils/route';
+import { DEFER_BELOW_FOLD_MS, DEFER_SECONDARY_API_MS } from '../../utils/timing';
+import { HomeCountdownCard } from './components/HomeCountdownCard';
+import { HomeFeaturedEvents } from './components/HomeFeaturedEvents';
+import TabPageHeader from '../../components/TabPageHeader';
+import { HomeHeaderActions } from './components/HomeHeaderActions';
+import { type ActivityPost } from './homeData';
+import {
+  resolveFeaturedEventLegacyId,
+  type FeaturedEvent,
+} from '../../utils/apiMappers';
+import { useNavBarInsets } from '../../hooks/useNavBarInsets';
+import { useEndRouteTransitionOnShow } from '../../hooks/useEndRouteTransitionOnShow';
+import { usePostPageShare } from '../../hooks/usePostPageShare';
+import { ScrollView, View } from '@tarojs/components';
 
 const LazyHomeActivityFeed = lazy(async () => {
-  const mod = await import("./components/HomeActivityFeed");
+  const mod = await import('./components/HomeActivityFeed');
   return { default: mod.HomeActivityFeed };
 });
 
@@ -52,7 +55,7 @@ const Home = () => {
   const belowFoldReady = useDeferredMount(DEFER_BELOW_FOLD_MS);
   const secondaryApiReady = useDeferredMount(DEFER_SECONDARY_API_MS);
   const { confirm, confirmDialog } = useConfirmDialog({
-    cancelText: "取消",
+    cancelText: '取消',
   });
   const { data: summary } = useHomeSummary();
   const heat = summary?.heat;
@@ -97,18 +100,18 @@ const Home = () => {
   const handleDeletePost = useCallback(
     async (post: ActivityPost) => {
       const ok = await confirm({
-        title: "确认删除",
-        message: "删除后无法恢复，确定要删除这条帖子吗？",
-        confirmText: "删除",
+        title: '确认删除',
+        message: '删除后无法恢复，确定要删除这条帖子吗？',
+        confirmText: '删除',
       });
       if (!ok) return;
       void deletePostAndInvalidate(post.id)
         .then(() => {
-          void Taro.showToast({ title: "已删除", icon: "success" });
+          void Taro.showToast({ title: '已删除', icon: 'success' });
         })
         .catch(() => {
           void refetchPosts();
-          void Taro.showToast({ title: "删除失败", icon: "none" });
+          void Taro.showToast({ title: '删除失败', icon: 'none' });
         });
     },
     [confirm, refetchPosts],
@@ -119,7 +122,7 @@ const Home = () => {
       return;
     }
     void likePostAndInvalidate(post.id).catch(
-      () => void Taro.showToast({ title: "请求失败，请稍后重试", icon: "none" }),
+      () => void Taro.showToast({ title: '请求失败，请稍后重试', icon: 'none' }),
     );
   }, []);
 
@@ -165,7 +168,9 @@ const Home = () => {
           />
 
           {belowFoldReady ? (
-            <Suspense fallback={<ThemedPageLoader variant="skeleton-feed" minHeight={240} />}>
+            <Suspense
+              fallback={<ThemedPageLoader variant="skeleton-feed" minHeight={240} />}
+            >
               <LazyHomeActivityFeed
                 items={posts}
                 onDelete={handleDeletePost}

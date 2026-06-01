@@ -1,16 +1,21 @@
-import type { FC } from "react";
-import { useCountdown } from "../../../hooks/useCountdown";
-import { Text, View } from "@tarojs/components";
+import type { FC } from 'react';
+import { useCountdown } from '../../../hooks/useCountdown';
+import { Text, View } from '@tarojs/components';
 
 type HomeCountdownCardProps = {
   eventName?: string;
   targetAt?: Date | null;
 };
 
-export const HomeCountdownCard: FC<HomeCountdownCardProps> = ({ eventName, targetAt }) => {
+export const HomeCountdownCard: FC<HomeCountdownCardProps> = ({
+  eventName,
+  targetAt,
+}) => {
   const hasTarget = targetAt != null && eventName != null && eventName.length > 0;
   const parts = useCountdown(hasTarget ? targetAt : null);
-  const ariaLabel = hasTarget ? `${eventName} countdown` : "Upcoming activity countdown";
+  const ariaLabel = hasTarget
+    ? `${eventName} countdown`
+    : 'Upcoming activity countdown';
 
   return (
     <View className="s-home-countdown" aria-label={ariaLabel}>
@@ -22,8 +27,8 @@ export const HomeCountdownCard: FC<HomeCountdownCardProps> = ({ eventName, targe
                 <Text
                   className={
                     part.accent
-                      ? "s-home-countdown__num s-home-countdown__num--accent"
-                      : "s-home-countdown__num"
+                      ? 's-home-countdown__num s-home-countdown__num--accent'
+                      : 's-home-countdown__num'
                   }
                 >
                   {part.value}
@@ -31,7 +36,9 @@ export const HomeCountdownCard: FC<HomeCountdownCardProps> = ({ eventName, targe
                 <Text className="s-home-countdown__unit">{part.unit}</Text>
               </View>
             </View>
-            {index < parts.length - 1 ? <Text className="s-home-countdown__sep">·</Text> : null}
+            {index < parts.length - 1 ? (
+              <Text className="s-home-countdown__sep">·</Text>
+            ) : null}
           </View>
         ))}
       </View>
@@ -41,7 +48,7 @@ export const HomeCountdownCard: FC<HomeCountdownCardProps> = ({ eventName, targe
             距<Text className="s-home-countdown__copy-event">{eventName}</Text>开场还有
           </>
         ) : (
-          "暂无即将开始的活动"
+          '暂无即将开始的活动'
         )}
       </Text>
     </View>

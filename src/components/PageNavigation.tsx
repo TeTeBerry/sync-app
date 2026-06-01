@@ -1,10 +1,10 @@
-import "./PageNavigation.scss";
-import React, { type CSSProperties, type ReactNode } from "react";
-import { ChevronLeft } from "lucide-react-taro";
-import { Button, Text, View } from "@tarojs/components";
-import { useNavBarInsets, type NavBarInsets } from "../hooks/useNavBarInsets";
-import { goBack, type RoutePath } from "../utils/route";
-import { tabPageHeaderStyle } from "./TabPageHeader";
+import './PageNavigation.scss';
+import React, { type CSSProperties, type ReactNode } from 'react';
+import { ChevronLeft } from 'lucide-react-taro';
+import { Button, Text, View } from '@tarojs/components';
+import { useNavBarInsets, type NavBarInsets } from '../hooks/useNavBarInsets';
+import { goBack, type RoutePath } from '../utils/route';
+import { tabPageHeaderStyle } from './TabPageHeader';
 
 const PAGE_GUTTER_PX = 16;
 const BACK_BTN_PX = 36;
@@ -18,7 +18,10 @@ export const SUB_PAGE_HEADER_ROW_PX = BACK_BTN_PX;
 /** Extra height when a meta subtitle line is shown. */
 export const SUB_PAGE_HEADER_META_EXTRA_PX = 22;
 
-export function stackPageNavChromePx(insets: NavBarInsets, options?: { meta?: boolean }): number {
+export function stackPageNavChromePx(
+  insets: NavBarInsets,
+  options?: { meta?: boolean },
+): number {
   return (
     insets.paddingTop +
     SUB_PAGE_HEADER_BOTTOM_PAD_PX +
@@ -35,14 +38,14 @@ export interface PageNavigationProps {
   /** Custom center column (e.g. AI assistant identity row). */
   center?: ReactNode;
   /** Left-align center content when `center` is set. */
-  centerAlign?: "center" | "start";
+  centerAlign?: 'center' | 'start';
   onBack?: () => void;
   /** Fallback when the page stack is empty. */
   fallback?: RoutePath;
   /** Right column (36–40px control). */
   trailing?: ReactNode;
   /** Page background behind the bar. */
-  tone?: "default" | "surface";
+  tone?: 'default' | 'surface';
   className?: string;
   style?: CSSProperties;
   backAriaLabel?: string;
@@ -52,14 +55,14 @@ const PageNavigation: React.FC<PageNavigationProps> = ({
   title,
   meta,
   center,
-  centerAlign = "center",
+  centerAlign = 'center',
   onBack,
   fallback,
   trailing,
-  tone = "default",
+  tone = 'default',
   className,
   style,
-  backAriaLabel = "返回",
+  backAriaLabel = '返回',
 }) => {
   const navInsets = useNavBarInsets();
   const insetStyle = tabPageHeaderStyle(navInsets);
@@ -81,14 +84,14 @@ const PageNavigation: React.FC<PageNavigationProps> = ({
   const usePageCenterTitle = !center && Boolean(title || meta);
 
   const rootClass = [
-    "s-page-nav",
-    tone === "surface" ? "s-page-nav--surface" : "",
-    usePageCenterTitle ? "s-page-nav--title-page" : "",
-    center ? `s-page-nav--center-${centerAlign}` : "",
+    's-page-nav',
+    tone === 'surface' ? 's-page-nav--surface' : '',
+    usePageCenterTitle ? 's-page-nav--title-page' : '',
+    center ? `s-page-nav--center-${centerAlign}` : '',
     className,
   ]
     .filter(Boolean)
-    .join(" ");
+    .join(' ');
 
   const backButton = (
     <Button
@@ -103,9 +106,12 @@ const PageNavigation: React.FC<PageNavigationProps> = ({
 
   const trailingSlot = (
     <View
-      className={["s-page-nav__trailing", !trailing ? "s-page-nav__trailing--placeholder" : ""]
+      className={[
+        's-page-nav__trailing',
+        !trailing ? 's-page-nav__trailing--placeholder' : '',
+      ]
         .filter(Boolean)
-        .join(" ")}
+        .join(' ')}
     >
       {trailing ?? null}
     </View>
@@ -124,7 +130,9 @@ const PageNavigation: React.FC<PageNavigationProps> = ({
             ) : null}
             {trailingSlot}
           </View>
-          {meta ? <Text className="s-page-nav__meta s-line-clamp-1">{meta}</Text> : null}
+          {meta ? (
+            <Text className="s-page-nav__meta s-line-clamp-1">{meta}</Text>
+          ) : null}
         </>
       ) : (
         <>

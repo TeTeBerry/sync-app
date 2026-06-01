@@ -1,10 +1,10 @@
-import React, { forwardRef, isValidElement, cloneElement } from "react";
-import { cn } from "./cn";
+import React, { forwardRef, isValidElement, cloneElement } from 'react';
+import { cn } from './cn';
 import {
   Input as TaroInput,
   Text,
   type InputProps as TaroNativeInputProps,
-} from "@tarojs/components";
+} from '@tarojs/components';
 
 export type InputVariant = `ai-assistant-chat` | `chat`;
 
@@ -12,7 +12,7 @@ const VARIANT_STYLES: Record<
   InputVariant,
   { wrapper?: string; input: string; iconClass?: string; wrapperTag?: `label` | `div` }
 > = {
-  "ai-assistant-chat": { input: `s-ai-assistant-chat__input` },
+  'ai-assistant-chat': { input: `s-ai-assistant-chat__input` },
   chat: { input: `s-chat__field` },
 };
 
@@ -41,10 +41,10 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
 }
 
 function toTaroInputValue(
-  value: InputProps["value"] | InputProps["defaultValue"],
+  value: InputProps['value'] | InputProps['defaultValue'],
 ): string | undefined {
   if (value == null) return undefined;
-  if (Array.isArray(value)) return value.join(",");
+  if (Array.isArray(value)) return value.join(',');
   return String(value);
 }
 
@@ -66,8 +66,9 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     },
     ref,
   ) => {
-    const isWeapp = process.env.TARO_ENV === "weapp";
-    const weappChatVariant = isWeapp && (variant === "ai-assistant-chat" || variant === "chat");
+    const isWeapp = process.env.TARO_ENV === 'weapp';
+    const weappChatVariant =
+      isWeapp && (variant === 'ai-assistant-chat' || variant === 'chat');
 
     const taroProps = {
       ...props,
@@ -77,7 +78,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       ...(weappChatVariant
         ? {
             adjustPosition: adjustPosition ?? true,
-            cursorSpacing: cursorSpacing ?? (variant === "chat" ? 120 : 24),
+            cursorSpacing: cursorSpacing ?? (variant === 'chat' ? 120 : 24),
           }
         : {
             ...(adjustPosition != null ? { adjustPosition } : {}),
@@ -91,7 +92,9 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     }
 
     const styles = VARIANT_STYLES[variant];
-    const inputEl = <TaroInput ref={ref} className={cn(styles.input, className)} {...taroProps} />;
+    const inputEl = (
+      <TaroInput ref={ref} className={cn(styles.input, className)} {...taroProps} />
+    );
 
     if (!styles.wrapper) return inputEl;
 

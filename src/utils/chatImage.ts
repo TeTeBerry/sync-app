@@ -1,18 +1,18 @@
-import Taro from "@tarojs/taro";
-import { uploadImageFile } from "./uploadImage";
+import Taro from '@tarojs/taro';
+import { uploadImageFile } from './uploadImage';
 
 /** 与后端一致：Base64 解码后不超过 10MB */
 export const MAX_IMAGE_BASE64_BYTES = 10 * 1024 * 1024;
 
 export class ChatImageTooLargeError extends Error {
   constructor() {
-    super("IMAGE_TOO_LARGE");
-    this.name = "ChatImageTooLargeError";
+    super('IMAGE_TOO_LARGE');
+    this.name = 'ChatImageTooLargeError';
   }
 }
 
 function base64ByteSize(dataUrl: string): number {
-  const base64 = dataUrl.includes(",") ? dataUrl.split(",")[1] : dataUrl;
+  const base64 = dataUrl.includes(',') ? dataUrl.split(',')[1] : dataUrl;
   return Math.ceil((base64.length * 3) / 4);
 }
 
@@ -21,12 +21,12 @@ function readFileAsJpegDataUrl(filePath: string): Promise<string> {
   return new Promise((resolve, reject) => {
     fs.readFile({
       filePath,
-      encoding: "base64",
+      encoding: 'base64',
       success: (res) => {
-        const base64 = typeof res.data === "string" ? res.data : "";
+        const base64 = typeof res.data === 'string' ? res.data : '';
         resolve(`data:image/jpeg;base64,${base64}`);
       },
-      fail: (err) => reject(new Error(err.errMsg || "FILE_READ_FAILED")),
+      fail: (err) => reject(new Error(err.errMsg || 'FILE_READ_FAILED')),
     });
   });
 }
@@ -36,7 +36,9 @@ async function compressToJpegPath(filePath: string): Promise<string> {
   let quality = 80;
 
   for (let attempt = 0; attempt < 6; attempt += 1) {
-    const compressed = await Taro.compressImage({ src: path, quality }).catch(() => null);
+    const compressed = await Taro.compressImage({ src: path, quality }).catch(
+      () => null,
+    );
     if (compressed?.tempFilePath) {
       path = compressed.tempFilePath;
     }
@@ -66,8 +68,8 @@ export async function pickAndCompressChatImage(): Promise<string | null> {
 export async function pickAndCompressChatImages(maxCount = 6): Promise<string[]> {
   const result = await Taro.chooseImage({
     count: maxCount,
-    sizeType: ["compressed"],
-    sourceType: ["album", "camera"],
+    sizeType: ['compressed'],
+    sourceType: ['album', 'camera'],
   }).catch(() => null);
 
   const paths = result?.tempFilePaths ?? [];

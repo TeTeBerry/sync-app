@@ -1,7 +1,7 @@
-import { Send, Sparkles } from "lucide-react-taro";
-import { Button, Text, Textarea, View } from "@tarojs/components";
-import { warmAiAssistant } from "../../../../utils/route";
-import { AI_SHORTCUT_TAG_POOL } from "../../../../utils/aiShortcutTags";
+import { Send, Sparkles } from 'lucide-react-taro';
+import { Button, Text, Textarea, View } from '@tarojs/components';
+import { warmAiAssistant } from '../../../../utils/route';
+import { AI_SHORTCUT_TAG_POOL } from '../../../../utils/aiShortcutTags';
 
 const EVENT_AI_TAGS = AI_SHORTCUT_TAG_POOL;
 
@@ -55,12 +55,12 @@ export function EventDetailAiMatchCard({
         />
         <Button
           className={[
-            "s-event-detail__ai-compose__send",
+            's-event-detail__ai-compose__send',
             hasContent
-              ? "s-event-detail__ai-compose__send--active"
-              : "s-event-detail__ai-compose__send--enter",
-          ].join(" ")}
-          aria-label={hasContent ? "发送并进入对话" : "进入 AI 对话"}
+              ? 's-event-detail__ai-compose__send--active'
+              : 's-event-detail__ai-compose__send--enter',
+          ].join(' ')}
+          aria-label={hasContent ? '发送并进入对话' : '进入 AI 对话'}
           onTouchStart={warmAiAssistant}
           onClick={onSubmit}
         >

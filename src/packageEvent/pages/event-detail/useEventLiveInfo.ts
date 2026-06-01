@@ -1,25 +1,25 @@
-import Taro from "@tarojs/taro";
-import { useCallback, useEffect, useState } from "react";
+import Taro from '@tarojs/taro';
+import { useCallback, useEffect, useState } from 'react';
 import {
   clearLiveInfoWristband,
   fetchLiveInfoSnapshot,
   publishLiveInfoUpdate,
   submitLiveInfoWristband,
   toggleLiveInfoUpdateLike,
-} from "../../../api/syncApi";
-import { isApiEnabled } from "../../../constants/api";
-import type { LiveInfoCertStatus, LiveInfoViewerState } from "../../../types/backend";
-import { pickWristbandImagePath, uploadImageFile } from "../../../utils/uploadImage";
-import type { LiveInfoCategoryId } from "./liveInfoConfig";
+} from '../../../api/syncApi';
+import { isApiEnabled } from '../../../constants/api';
+import type { LiveInfoCertStatus, LiveInfoViewerState } from '../../../types/backend';
+import { pickWristbandImagePath, uploadImageFile } from '../../../utils/uploadImage';
+import type { LiveInfoCategoryId } from './liveInfoConfig';
 import {
   MOCK_LIVE_INFO_CERT_COUNT,
   MOCK_LIVE_INFO_FEED,
   MOCK_LIVE_INFO_SUMMARY,
   type LiveInfoFeedItem,
   type LiveInfoSummaryRow,
-} from "./liveInfoMock";
+} from './liveInfoMock';
 
-const CERT_STORAGE_PREFIX = "event-live-cert:";
+const CERT_STORAGE_PREFIX = 'event-live-cert:';
 
 type StoredCert = {
   certifiedAt: string;
@@ -42,9 +42,9 @@ function isCertValidToday(certifiedAt: string): boolean {
 function readCert(eventId: number): StoredCert | null {
   try {
     const raw = Taro.getStorageSync(certStorageKey(eventId));
-    if (!raw || typeof raw !== "object") return null;
+    if (!raw || typeof raw !== 'object') return null;
     const certifiedAt = (raw as StoredCert).certifiedAt;
-    if (typeof certifiedAt !== "string" || !isCertValidToday(certifiedAt)) return null;
+    if (typeof certifiedAt !== 'string' || !isCertValidToday(certifiedAt)) return null;
     return { certifiedAt };
   } catch {
     return null;
@@ -102,14 +102,14 @@ export function useEventLiveInfo(
     apiEnabled ? null : readCert(eventId),
   );
   const [viewerCertified, setViewerCertified] = useState(false);
-  const [certStatus, setCertStatus] = useState<LiveInfoCertStatus>("none");
-  const [certExpiryLabel, setCertExpiryLabel] = useState("23:59");
+  const [certStatus, setCertStatus] = useState<LiveInfoCertStatus>('none');
+  const [certExpiryLabel, setCertExpiryLabel] = useState('23:59');
   const [rejectReason, setRejectReason] = useState<string | undefined>();
 
   const applyViewer = useCallback((viewer?: LiveInfoViewerState) => {
     setViewerCertified(Boolean(viewer?.isCertified));
-    setCertStatus(viewer?.certStatus ?? (viewer?.isCertified ? "approved" : "none"));
-    setCertExpiryLabel(viewer?.certExpiryLabel ?? "23:59");
+    setCertStatus(viewer?.certStatus ?? (viewer?.isCertified ? 'approved' : 'none'));
+    setCertExpiryLabel(viewer?.certExpiryLabel ?? '23:59');
     setRejectReason(viewer?.rejectReason);
   }, []);
   const [summary, setSummary] = useState<LiveInfoSummaryRow[]>(MOCK_LIVE_INFO_SUMMARY);
@@ -125,7 +125,9 @@ export function useEventLiveInfo(
           : MOCK_LIVE_INFO_SUMMARY,
       );
       setCertCount(
-        typeof snap?.certCount === "number" ? snap.certCount : MOCK_LIVE_INFO_CERT_COUNT,
+        typeof snap?.certCount === 'number'
+          ? snap.certCount
+          : MOCK_LIVE_INFO_CERT_COUNT,
       );
       setFeed(Array.isArray(snap?.feed) ? snap.feed : MOCK_LIVE_INFO_FEED);
     },
@@ -140,7 +142,7 @@ export function useEventLiveInfo(
         const snap = await fetchLiveInfoSnapshot(eventId);
         applySnapshot(snap);
       } catch {
-        void Taro.showToast({ title: "加载实时资讯失败", icon: "none" });
+        void Taro.showToast({ title: '加载实时资讯失败', icon: 'none' });
       } finally {
         if (!opts?.silent) setLoading(false);
       }
@@ -166,31 +168,31 @@ export function useEventLiveInfo(
 
     if (apiEnabled && eventId > 0) {
       try {
-        void Taro.showLoading({ title: "AI 审核中…", mask: true });
+        void Taro.showLoading({ title: 'AI 审核中…', mask: true });
         const imageUrl = await uploadImageFile(filePath);
         const res = await submitLiveInfoWristband(eventId, { imageUrl });
         applyViewer(res.viewer);
         if (res.ok && res.viewer.isCertified) {
-          void Taro.showToast({ title: "手环认证成功", icon: "success" });
+          void Taro.showToast({ title: '手环认证成功', icon: 'success' });
         } else {
           const msg =
             res.message?.trim() ||
             res.viewer.rejectReason?.trim() ||
-            (res.code === "duplicate_image"
-              ? "该手环照片已使用过，请重新拍摄"
-              : "手环照片未通过审核");
+            (res.code === 'duplicate_image'
+              ? '该手环照片已使用过，请重新拍摄'
+              : '手环照片未通过审核');
           void Taro.showToast({
             title: msg.slice(0, 40),
-            icon: "none",
-            duration: res.code === "duplicate_image" ? 3500 : 3000,
+            icon: 'none',
+            duration: res.code === 'duplicate_image' ? 3500 : 3000,
           });
         }
       } catch (err: unknown) {
         const msg =
-          err && typeof err === "object" && "message" in err
+          err && typeof err === 'object' && 'message' in err
             ? String((err as { message?: string }).message)
-            : "认证失败";
-        void Taro.showToast({ title: msg.slice(0, 40) || "认证失败", icon: "none" });
+            : '认证失败';
+        void Taro.showToast({ title: msg.slice(0, 40) || '认证失败', icon: 'none' });
       } finally {
         Taro.hideLoading();
       }
@@ -199,7 +201,7 @@ export function useEventLiveInfo(
 
     writeCert(eventId);
     setLocalCert(readCert(eventId));
-    void Taro.showToast({ title: "手环认证成功", icon: "success" });
+    void Taro.showToast({ title: '手环认证成功', icon: 'success' });
   }, [apiEnabled, applyViewer, eventId]);
 
   const reuploadWristband = useCallback(async () => {
@@ -213,7 +215,7 @@ export function useEventLiveInfo(
         applyViewer(res.viewer);
       } catch {
         applyViewer(undefined);
-        setCertStatus("none");
+        setCertStatus('none');
       }
       return;
     }
@@ -229,23 +231,23 @@ export function useEventLiveInfo(
         try {
           await publishLiveInfoUpdate(eventId, payload);
           await reload({ silent: true });
-          void Taro.showToast({ title: "实时资讯已发布", icon: "success" });
+          void Taro.showToast({ title: '实时资讯已发布', icon: 'success' });
           return true;
         } catch (err: unknown) {
           const msg =
-            err && typeof err === "object" && "message" in err
+            err && typeof err === 'object' && 'message' in err
               ? String((err as { message?: string }).message)
-              : "发布失败";
-          void Taro.showToast({ title: msg.slice(0, 40) || "发布失败", icon: "none" });
+              : '发布失败';
+          void Taro.showToast({ title: msg.slice(0, 40) || '发布失败', icon: 'none' });
           return false;
         }
       }
 
       const item: LiveInfoFeedItem = {
         id: `live-${Date.now()}`,
-        userName: userName || "用户",
+        userName: userName || '用户',
         certified: true,
-        timeLabel: "刚刚",
+        timeLabel: '刚刚',
         ratings: payload.ratings,
         remark: payload.remark?.trim() || undefined,
         likes: 0,
@@ -254,7 +256,7 @@ export function useEventLiveInfo(
       const averaged = averageSummary(summary, payload.ratings, certCount);
       setSummary(averaged.summary);
       setCertCount(averaged.certCount);
-      void Taro.showToast({ title: "实时资讯已发布", icon: "success" });
+      void Taro.showToast({ title: '实时资讯已发布', icon: 'success' });
       return true;
     },
     [apiEnabled, certCount, eventId, reload, summary, userName],
@@ -265,9 +267,11 @@ export function useEventLiveInfo(
       if (apiEnabled && eventId > 0) {
         try {
           const res = await toggleLiveInfoUpdateLike(eventId, feedId);
-          setFeed((prev) => prev.map((item) => (item.id === feedId ? res.update : item)));
+          setFeed((prev) =>
+            prev.map((item) => (item.id === feedId ? res.update : item)),
+          );
         } catch {
-          void Taro.showToast({ title: "操作失败", icon: "none" });
+          void Taro.showToast({ title: '操作失败', icon: 'none' });
         }
         return;
       }
@@ -284,7 +288,7 @@ export function useEventLiveInfo(
         }),
       );
     },
-    [apiEnabled, applyViewer, eventId],
+    [apiEnabled, eventId],
   );
 
   return {

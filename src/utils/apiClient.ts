@@ -1,7 +1,7 @@
-import Taro from "@tarojs/taro";
-import { API_BASE_URL } from "../constants/api";
-import type { ApiResponse } from "../types/backend";
-import { taroRequestData } from "./apiRequestBody";
+import Taro from '@tarojs/taro';
+import { API_BASE_URL } from '../constants/api';
+import type { ApiResponse } from '../types/backend';
+import { taroRequestData } from './apiRequestBody';
 
 export class ApiError extends Error {
   constructor(
@@ -9,7 +9,7 @@ export class ApiError extends Error {
     readonly status?: number,
   ) {
     super(message);
-    this.name = "ApiError";
+    this.name = 'ApiError';
   }
 }
 
@@ -30,24 +30,28 @@ function splitFetchInit(init?: ApiFetchInit): {
   timeoutMs: number;
   maxRetries: number;
 } {
-  const { timeoutMs = DEFAULT_TIMEOUT_MS, maxRetries = MAX_RETRIES, ...requestInit } = init ?? {};
+  const {
+    timeoutMs = DEFAULT_TIMEOUT_MS,
+    maxRetries = MAX_RETRIES,
+    ...requestInit
+  } = init ?? {};
   return { requestInit, timeoutMs, maxRetries };
 }
 
 function buildUrl(path: string, params?: Record<string, string | undefined>): string {
-  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-  const base = API_BASE_URL.replace(/\/$/, "");
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  const base = API_BASE_URL.replace(/\/$/, '');
   let url = `${base}${normalizedPath}`;
 
   if (params) {
     const pairs: string[] = [];
     for (const [key, value] of Object.entries(params)) {
-      if (value !== undefined && value !== "") {
+      if (value !== undefined && value !== '') {
         pairs.push(`${encodeURIComponent(key)}=${encodeURIComponent(value)}`);
       }
     }
     if (pairs.length > 0) {
-      url += `${url.includes("?") ? "&" : "?"}${pairs.join("&")}`;
+      url += `${url.includes('?') ? '&' : '?'}${pairs.join('&')}`;
     }
   }
 
@@ -68,7 +72,7 @@ async function requestWithTimeout(
   return new Promise((resolve, reject) => {
     Taro.request({
       url,
-      method: (init.method || "GET") as keyof Taro.request.Method,
+      method: (init.method || 'GET') as keyof Taro.request.Method,
       header: init.headers as Record<string, string>,
       data: taroRequestData(init),
       timeout: timeoutMs,
@@ -80,7 +84,7 @@ async function requestWithTimeout(
         });
       },
       fail: (err) => {
-        reject(new Error(err.errMsg || "请求失败"));
+        reject(new Error(err.errMsg || '请求失败'));
       },
     });
   });
@@ -90,7 +94,10 @@ async function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function retryFetch(url: string, init?: ApiFetchInit): Promise<CompatibleResponse> {
+async function retryFetch(
+  url: string,
+  init?: ApiFetchInit,
+): Promise<CompatibleResponse> {
   const { requestInit, timeoutMs, maxRetries } = splitFetchInit(init);
   let lastError: Error | undefined;
 
@@ -101,8 +108,8 @@ async function retryFetch(url: string, init?: ApiFetchInit): Promise<CompatibleR
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error));
 
-      if (lastError.message?.includes("timeout")) {
-        throw new ApiError("请求超时，请检查网络后重试");
+      if (lastError.message?.includes('timeout')) {
+        throw new ApiError('请求超时，请检查网络后重试');
       }
 
       if (attempt < maxRetries) {
@@ -112,7 +119,7 @@ async function retryFetch(url: string, init?: ApiFetchInit): Promise<CompatibleR
     }
   }
 
-  throw new ApiError(lastError?.message || "网络请求失败，请稍后重试");
+  throw new ApiError(lastError?.message || '网络请求失败，请稍后重试');
 }
 
 async function parseResponse<T>(response: CompatibleResponse): Promise<T> {
@@ -122,7 +129,7 @@ async function parseResponse<T>(response: CompatibleResponse): Promise<T> {
 
   const json = (await response.json()) as ApiResponse<T>;
   if (json.code !== 200) {
-    throw new ApiError(json.message || "请求失败", json.code);
+    throw new ApiError(json.message || '请求失败', json.code);
   }
 
   return json.data;
@@ -134,9 +141,9 @@ export async function apiGet<T>(
   init?: ApiFetchInit,
 ): Promise<T> {
   const response = await retryFetch(buildUrl(path, params), {
-    method: "GET",
+    method: 'GET',
     headers: {
-      Accept: "application/json",
+      Accept: 'application/json',
       ...init?.headers,
     },
     ...init,
@@ -152,10 +159,10 @@ export async function apiPost<T>(
   init?: ApiFetchInit,
 ): Promise<T> {
   const response = await retryFetch(buildUrl(path, params), {
-    method: "POST",
+    method: 'POST',
     headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
       ...init?.headers,
     },
     body: JSON.stringify(body),
@@ -172,10 +179,10 @@ export async function apiPatch<T>(
   init?: ApiFetchInit,
 ): Promise<T> {
   const response = await retryFetch(buildUrl(path, params), {
-    method: "PATCH",
+    method: 'PATCH',
     headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
       ...init?.headers,
     },
     body: JSON.stringify(body),
@@ -191,9 +198,9 @@ export async function apiDelete<T>(
   init?: ApiFetchInit,
 ): Promise<T> {
   const response = await retryFetch(buildUrl(path, params), {
-    method: "DELETE",
+    method: 'DELETE',
     headers: {
-      Accept: "application/json",
+      Accept: 'application/json',
       ...init?.headers,
     },
     ...init,

@@ -1,8 +1,8 @@
-import "./AvatarGroup.scss";
-import React from "react";
-import { ACTIVITY_GUEST_AVATARS } from "../constants/activityGuestAvatars";
-import { thumbnailImageUrl } from "../utils/imageUrl";
-import { Image, Text, View } from "@tarojs/components";
+import './AvatarGroup.scss';
+import React from 'react';
+import { ACTIVITY_GUEST_AVATARS } from '../constants/activityGuestAvatars';
+import { thumbnailImageUrl } from '../utils/imageUrl';
+import { Image, Text, View } from '@tarojs/components';
 
 interface AvatarGroupProps {
   avatars?: string[];

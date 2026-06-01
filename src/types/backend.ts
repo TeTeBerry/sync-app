@@ -19,11 +19,11 @@ export interface BackendActivity {
   externalUrl?: string;
 }
 
-export type PrivacyLevel = "public" | "friends" | "private";
+export type PrivacyLevel = 'public' | 'friends' | 'private';
 
-export type ReportCategory = "ads" | "scalper" | "vulgar";
+export type ReportCategory = 'ads' | 'scalper' | 'vulgar';
 
-export type ReportTargetType = "post" | "user" | "comment";
+export type ReportTargetType = 'post' | 'user' | 'comment';
 
 export interface CurrentUser {
   id: string;
@@ -74,7 +74,7 @@ export interface ReportResult {
 export interface ActivityRegistrationResult {
   ok: true;
   activityLegacyId: number;
-  status: "registered";
+  status: 'registered';
   alreadyRegistered?: boolean;
 }
 
@@ -84,9 +84,9 @@ export interface ActivityUnregisterResult {
   wasRegistered?: boolean;
 }
 
-export type PackageTierId = "pro" | "pro_plus" | "ultra";
+export type PackageTierId = 'pro' | 'pro_plus' | 'ultra';
 
-export type PackageFeatureIcon = "match" | "contact" | "map" | "exposure" | "pin";
+export type PackageFeatureIcon = 'match' | 'contact' | 'map' | 'exposure' | 'pin';
 
 export interface PackageTierLimits {
   aiMatchCount: number | null;
@@ -150,7 +150,7 @@ export interface FreeMonthlyQuota {
   contactUnlock: QuotaSlot;
 }
 
-export type ProfileEntitlementTierId = PackageTierId | "free";
+export type ProfileEntitlementTierId = PackageTierId | 'free';
 
 export interface EventPackageEntitlement {
   activityLegacyId: number;
@@ -177,7 +177,7 @@ export interface PurchaseProfilePackageResult {
   entitlement: EventPackageEntitlement;
 }
 
-export type EntitlementConsumeBucket = "free" | "paid";
+export type EntitlementConsumeBucket = 'free' | 'paid';
 
 export interface ConsumeProfileEntitlementPayload {
   activityLegacyId: number;
@@ -211,14 +211,14 @@ export interface ProfileActivityItem {
   date: string;
   location: string;
   image: string;
-  status: "registered" | "attended";
+  status: 'registered' | 'attended';
 }
 
 export interface ProfilePostItem {
   id: string;
   title: string;
   content: string;
-  status: "招募中" | "已组队" | "已隐藏";
+  status: '招募中' | '已组队' | '已隐藏';
   likes: number;
   comments: number;
   date: string;
@@ -227,7 +227,7 @@ export interface ProfilePostItem {
   images?: string[];
 }
 
-export type HomeFeedPostAuthorGender = "female" | "male";
+export type HomeFeedPostAuthorGender = 'female' | 'male';
 
 export interface HomeFeedPost {
   id: string;
@@ -243,7 +243,7 @@ export interface HomeFeedPost {
   liked?: boolean;
   comments: number;
   avatar: string;
-  status: "招募中" | "已组队" | "已隐藏";
+  status: '招募中' | '已组队' | '已隐藏';
   activityLegacyId?: number;
   contentTypes?: PostContentType[];
   images?: string[];
@@ -280,11 +280,11 @@ export interface EventDetailPost {
   liked?: boolean;
   comments: number;
   avatar: string;
-  status: "招募中" | "已组队" | "已隐藏";
+  status: '招募中' | '已组队' | '已隐藏';
   images?: string[];
 }
 
-export type PostContentType = "team" | "accommodation" | "carpool" | "ticket" | "other";
+export type PostContentType = 'team' | 'accommodation' | 'carpool' | 'ticket' | 'other';
 
 export interface CreatePostPayload {
   body: string;
@@ -299,7 +299,7 @@ export interface CreatePostPayload {
 export interface UpdatePostPayload {
   body?: string;
   eventTitle?: string;
-  status?: "recruiting" | "completed";
+  status?: 'recruiting' | 'completed';
 }
 
 export interface PostActionResult {
@@ -325,18 +325,18 @@ export interface HomeSummary {
   }>;
 }
 
-export type NotificationType = "general" | "interaction" | "system" | "match";
+export type NotificationType = 'general' | 'interaction' | 'system' | 'match';
 
 export type NotificationInteractionType =
-  | "like"
-  | "comment"
-  | "comment_reply"
-  | "application"
-  | "activity"
-  | "activity_update"
-  | "post_rejected"
-  | "post_hidden"
-  | "match_recommendation";
+  | 'like'
+  | 'comment'
+  | 'comment_reply'
+  | 'application'
+  | 'activity'
+  | 'activity_update'
+  | 'post_rejected'
+  | 'post_hidden'
+  | 'match_recommendation';
 
 export interface NotificationMeta {
   activityLegacyId?: number;
@@ -365,7 +365,11 @@ export interface AppNotification {
   createdAt: string;
 }
 
-export type LiveInfoCategoryId = "entry_crowd" | "toilet_queue" | "water_queue" | "smoke_drink";
+export type LiveInfoCategoryId =
+  | 'entry_crowd'
+  | 'toilet_queue'
+  | 'water_queue'
+  | 'smoke_drink';
 
 export interface LiveInfoSummaryRow {
   categoryId: LiveInfoCategoryId;
@@ -384,7 +388,7 @@ export interface LiveInfoFeedItem {
   liked?: boolean;
 }
 
-export type LiveInfoCertStatus = "none" | "pending" | "approved" | "rejected";
+export type LiveInfoCertStatus = 'none' | 'pending' | 'approved' | 'rejected';
 
 export interface LiveInfoViewerState {
   isCertified: boolean;
@@ -407,7 +411,7 @@ export interface SubmitLiveInfoWristbandPayload {
   imageUrl: string;
 }
 
-export type SubmitLiveInfoWristbandRejectCode = "duplicate_image";
+export type SubmitLiveInfoWristbandRejectCode = 'duplicate_image';
 
 export interface SubmitLiveInfoWristbandResult {
   ok: boolean;
@@ -421,7 +425,7 @@ export interface PublishLiveInfoPayload {
   remark?: string;
 }
 
-export type ItineraryStage = "main" | "bass" | "late" | "outdoor";
+export type ItineraryStage = 'main' | 'bass' | 'late' | 'outdoor';
 
 export interface ItineraryDj {
   id: string;
@@ -472,11 +476,11 @@ export interface ItineraryScheduleSnapshot {
   conflicts: ItineraryConflict[];
 }
 
-export type ItineraryTimelineDotColor = "pink" | "cyan" | "purple";
+export type ItineraryTimelineDotColor = 'pink' | 'cyan' | 'purple';
 
 export interface ItineraryTimelinePill {
   label: string;
-  variant: "green" | "pink";
+  variant: 'green' | 'pink';
 }
 
 export interface ItineraryTimelineItem {
@@ -511,7 +515,6 @@ export interface GenerateItineraryResult {
   };
   conflicts: ItineraryConflict[];
   cached: boolean;
-  llmUsed: boolean;
 }
 
 export interface SaveItineraryPayload {

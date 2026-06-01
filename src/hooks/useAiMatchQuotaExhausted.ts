@@ -1,4 +1,4 @@
-import { useAiMatchQuota } from "./useAiMatchQuota";
+import { useAiMatchQuota } from './useAiMatchQuota';
 
 /**
  * Whether the user has used all AI match quota for the current activity scope.

@@ -1,7 +1,10 @@
-import type { EventMapViewport } from "./eventMapViewport";
-import { applyViewportTransform } from "./eventMapViewport";
-import { getMapWorldDimensions } from "./eventMapWorld";
-import { createMapOffscreenCanvas, isMapOffscreenSupported } from "./mapOffscreenCanvas";
+import type { EventMapViewport } from './eventMapViewport';
+import { applyViewportTransform } from './eventMapViewport';
+import { getMapWorldDimensions } from './eventMapWorld';
+import {
+  createMapOffscreenCanvas,
+  isMapOffscreenSupported,
+} from './mapOffscreenCanvas';
 import {
   EVENT_MAP_BG,
   paintEventMapDecorLayer,
@@ -9,7 +12,7 @@ import {
   paintEventMapScene,
   paintEventMapStormLogoLayer,
   paintEventMapStormLogoLayerStatic,
-} from "./eventMapPaint";
+} from './eventMapPaint';
 
 /** 离屏 Canvas 可用时启用；blit 失败会自动降级 */
 let sceneCacheRuntimeEnabled = isMapOffscreenSupported();
@@ -30,7 +33,7 @@ export function disableEventMapSceneCacheRuntime(): void {
   sceneCache = null;
 }
 
-type CanvasImageSource = Parameters<CanvasRenderingContext2D["drawImage"]>[0];
+type CanvasImageSource = Parameters<CanvasRenderingContext2D['drawImage']>[0];
 
 export type EventMapSceneCache = {
   key: string;
@@ -53,7 +56,7 @@ function sceneCacheKey(
   avatarCount: number,
   hasStormLogo: boolean,
 ): string {
-  return [width, height, eventTitle, avatarCount, hasStormLogo ? 1 : 0].join("|");
+  return [width, height, eventTitle, avatarCount, hasStormLogo ? 1 : 0].join('|');
 }
 
 export function invalidateEventMapSceneCache(): void {
@@ -102,13 +105,21 @@ export function rebuildEventMapSceneCache(
       canvas.height = worldH;
     }
 
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext('2d');
     if (!ctx) {
       sceneCache = null;
       return false;
     }
 
-    paintEventMapScene(ctx, width, height, eventTitle, avatars, SCENE_CACHE_VIEWPORT, stormLogo);
+    paintEventMapScene(
+      ctx,
+      width,
+      height,
+      eventTitle,
+      avatars,
+      SCENE_CACHE_VIEWPORT,
+      stormLogo,
+    );
     sceneCache = {
       key,
       canvas,
@@ -120,7 +131,7 @@ export function rebuildEventMapSceneCache(
     };
     return true;
   } catch (error) {
-    console.warn("[eventMapSceneCache] rebuild failed", error);
+    console.warn('[eventMapSceneCache] rebuild failed', error);
     sceneCache = null;
     return false;
   }
@@ -139,7 +150,8 @@ export function canUseEventMapSceneCache(
   return (
     sceneCache.cssW === width &&
     sceneCache.cssH === height &&
-    sceneCache.key === sceneCacheKey(width, height, eventTitle, avatarCount, hasStormLogo)
+    sceneCache.key ===
+      sceneCacheKey(width, height, eventTitle, avatarCount, hasStormLogo)
   );
 }
 
@@ -196,12 +208,22 @@ export function paintEventMapSceneBlitOnly(
   try {
     blitSceneCache(ctx, width, height, viewport);
     paintEventMapStormLogoLayerStatic(ctx, width, height, viewport, stormLogo);
-    paintVenueOverlayLayers(ctx, width, height, eventTitle, avatars, viewport, 0, stormLogo, {
-      logo: false,
-    });
+    paintVenueOverlayLayers(
+      ctx,
+      width,
+      height,
+      eventTitle,
+      avatars,
+      viewport,
+      0,
+      stormLogo,
+      {
+        logo: false,
+      },
+    );
     return true;
   } catch (error) {
-    console.warn("[eventMapSceneCache] gesture blit failed", error);
+    console.warn('[eventMapSceneCache] gesture blit failed', error);
     disableEventMapSceneCacheRuntime();
     return false;
   }
@@ -227,19 +249,35 @@ export function paintEventMapWithSceneCache(
     return false;
   }
 
-  const expectedKey = sceneCacheKey(width, height, eventTitle, avatars.size, !!stormLogo);
+  const expectedKey = sceneCacheKey(
+    width,
+    height,
+    eventTitle,
+    avatars.size,
+    !!stormLogo,
+  );
   if (sceneCache.key !== expectedKey) {
     return false;
   }
 
   try {
     blitSceneCache(ctx, width, height, viewport);
-    paintVenueOverlayLayers(ctx, width, height, eventTitle, avatars, viewport, time, stormLogo, {
-      logo: true,
-    });
+    paintVenueOverlayLayers(
+      ctx,
+      width,
+      height,
+      eventTitle,
+      avatars,
+      viewport,
+      time,
+      stormLogo,
+      {
+        logo: true,
+      },
+    );
     return true;
   } catch (error) {
-    console.warn("[eventMapSceneCache] blit failed", error);
+    console.warn('[eventMapSceneCache] blit failed', error);
     disableEventMapSceneCacheRuntime();
     return false;
   }

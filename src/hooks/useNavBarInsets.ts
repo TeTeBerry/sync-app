@@ -1,5 +1,5 @@
-import Taro from "@tarojs/taro";
-import { useMemo } from "react";
+import Taro from '@tarojs/taro';
+import { useMemo } from 'react';
 
 export type NavBarInsets = {
   /** 状态栏 + 导航内容区顶部留白 */

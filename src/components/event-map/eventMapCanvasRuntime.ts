@@ -1,11 +1,11 @@
-import Taro from "@tarojs/taro";
-import { EVENT_MAP_CANVAS_ID } from "./eventMapCanvasId";
-import { STORM_LOGO_SRC } from "./eventMapStormLogo";
+import Taro from '@tarojs/taro';
+import { EVENT_MAP_CANVAS_ID } from './eventMapCanvasId';
+import { STORM_LOGO_SRC } from './eventMapStormLogo';
 import {
   invalidateEventMapTerrainCache,
   paintEventMap,
   paintEventMapMinimal,
-} from "./eventMapPaint";
+} from './eventMapPaint';
 import {
   canUseEventMapSceneCache,
   invalidateEventMapSceneCache,
@@ -13,13 +13,13 @@ import {
   paintEventMapSceneBlitOnly,
   paintEventMapWithSceneCache,
   rebuildEventMapSceneCache,
-} from "./eventMapSceneCache";
-import { EVENT_MAP_MARKERS, markerAvatarUrl } from "./eventMapMarkers";
-import { clampEventMapViewport, getDefaultEventMapViewport } from "./eventMapWorld";
-import type { EventMapViewport } from "./eventMapViewport";
-import { MAP_SCALE_MIN } from "./eventMapViewport";
+} from './eventMapSceneCache';
+import { EVENT_MAP_MARKERS, markerAvatarUrl } from './eventMapMarkers';
+import { clampEventMapViewport, getDefaultEventMapViewport } from './eventMapWorld';
+import type { EventMapViewport } from './eventMapViewport';
+import { MAP_SCALE_MIN } from './eventMapViewport';
 
-type CanvasImageSource = Parameters<CanvasRenderingContext2D["drawImage"]>[0];
+type CanvasImageSource = Parameters<CanvasRenderingContext2D['drawImage']>[0];
 
 type WeappCanvas = HTMLCanvasElement & {
   createImage: () => HTMLImageElement;
@@ -48,7 +48,7 @@ let retryTimer: ReturnType<typeof setTimeout> | null = null;
 let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 let gestureTimer: ReturnType<typeof setTimeout> | null = null;
 let assetRepaintTimer: ReturnType<typeof setTimeout> | null = null;
-let pendingTitle = "";
+let pendingTitle = '';
 let active = false;
 let mapInteracting = false;
 let painting = false;
@@ -65,7 +65,6 @@ const ASSET_REPAINT_DEBOUNCE_MS = 100;
 const MAX_CANVAS_DPR = 2;
 const CANVAS_BIND_MAX_ATTEMPTS = 80;
 
-let viewportDirty = true;
 let viewport: EventMapViewport = {
   offsetX: 0,
   offsetY: 0,
@@ -75,14 +74,14 @@ const EMPTY_AVATARS = new Map<string, CanvasImageSource>();
 let logoAnimFrameId: number | null = null;
 
 function requestMapAnimationFrame(callback: () => void): number {
-  if (typeof requestAnimationFrame === "function") {
+  if (typeof requestAnimationFrame === 'function') {
     return requestAnimationFrame(callback);
   }
   return setTimeout(callback, 32) as unknown as number;
 }
 
 function cancelMapAnimationFrame(id: number): void {
-  if (typeof cancelAnimationFrame === "function") {
+  if (typeof cancelAnimationFrame === 'function') {
     cancelAnimationFrame(id);
   } else {
     clearTimeout(id);
@@ -114,7 +113,17 @@ function paintLogoRotationFrame(): void {
   const { ctx, cssW, cssH } = surface;
   const avatars = avatarsCache;
   try {
-    paintEventMap(ctx, cssW, cssH, pendingTitle, avatars, viewport, Date.now(), stormLogo, false);
+    paintEventMap(
+      ctx,
+      cssW,
+      cssH,
+      pendingTitle,
+      avatars,
+      viewport,
+      Date.now(),
+      stormLogo,
+      false,
+    );
   } catch {
     // ignore frame errors
   }
@@ -160,11 +169,17 @@ function getCanvasDpr(): number {
 
 function isCanvas2dNode(node: unknown): node is WeappCanvas {
   return (
-    !!node && typeof node === "object" && typeof (node as WeappCanvas).getContext === "function"
+    !!node &&
+    typeof node === 'object' &&
+    typeof (node as WeappCanvas).getContext === 'function'
   );
 }
 
-const CANVAS_SELECTORS = [`#${EVENT_MAP_CANVAS_ID}`, ".s-event-map__canvas", "canvas"] as const;
+const CANVAS_SELECTORS = [
+  `#${EVENT_MAP_CANVAS_ID}`,
+  '.s-event-map__canvas',
+  'canvas',
+] as const;
 
 export function setEventMapPageScope(
   pageScope: object | null | undefined,
@@ -179,7 +194,9 @@ function runCanvasSelectorQuery(
   selector: string,
 ): Promise<CanvasNodeResult | undefined> {
   return new Promise((resolve) => {
-    const query = scope ? Taro.createSelectorQuery().in(scope) : Taro.createSelectorQuery();
+    const query = scope
+      ? Taro.createSelectorQuery().in(scope)
+      : Taro.createSelectorQuery();
     query
       .select(selector)
       .fields({ node: true, size: true })
@@ -207,7 +224,11 @@ async function queryCanvasNodeGlobal(): Promise<CanvasNodeResult | undefined> {
     };
   }
 
-  const scopes: Array<object | null> = [eventMapPageScope, eventMapComponentScope, null];
+  const scopes: Array<object | null> = [
+    eventMapPageScope,
+    eventMapComponentScope,
+    null,
+  ];
   for (const scope of scopes) {
     for (const selector of CANVAS_SELECTORS) {
       const raw = await runCanvasSelectorQuery(scope, selector);
@@ -221,13 +242,16 @@ async function queryCanvasNodeGlobal(): Promise<CanvasNodeResult | undefined> {
 }
 
 function createCanvasImageSource(canvas: HTMLCanvasElement): HTMLImageElement {
-  if (typeof (canvas as WeappCanvas).createImage === "function") {
+  if (typeof (canvas as WeappCanvas).createImage === 'function') {
     return (canvas as WeappCanvas).createImage();
   }
-  throw new Error("canvas.createImage is required on WeChat");
+  throw new Error('canvas.createImage is required on WeChat');
 }
 
-function loadCanvasImage(canvas: HTMLCanvasElement, src: string): Promise<CanvasImageSource> {
+function loadCanvasImage(
+  canvas: HTMLCanvasElement,
+  src: string,
+): Promise<CanvasImageSource> {
   return new Promise((resolve, reject) => {
     const img = createCanvasImageSource(canvas) as HTMLImageElement & {
       onload: (() => void) | null;
@@ -240,7 +264,12 @@ function loadCanvasImage(canvas: HTMLCanvasElement, src: string): Promise<Canvas
   });
 }
 
-function syncSurfaceSize(next: CanvasSurface, cssW: number, cssH: number, dpr: number): void {
+function syncSurfaceSize(
+  next: CanvasSurface,
+  cssW: number,
+  cssH: number,
+  dpr: number,
+): void {
   const bufferW = Math.floor(cssW * dpr);
   const bufferH = Math.floor(cssH * dpr);
 
@@ -249,7 +278,6 @@ function syncSurfaceSize(next: CanvasSurface, cssW: number, cssH: number, dpr: n
     next.canvas.height = bufferH;
     invalidateEventMapTerrainCache();
     invalidateEventMapSceneCache();
-    viewportDirty = true;
     hasPaintedOnce = false;
     richAssetsEnabled = false;
   }
@@ -264,7 +292,7 @@ function resetCtxState(next: CanvasSurface) {
   const { ctx, dpr } = next;
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.globalAlpha = 1;
-  ctx.globalCompositeOperation = "source-over";
+  ctx.globalCompositeOperation = 'source-over';
 }
 
 function paintSurfaceWithSceneCache(eventTitle: string): boolean {
@@ -293,7 +321,15 @@ function paintSurfaceWithSceneCache(eventTitle: string): boolean {
   }
 
   if (mapInteracting) {
-    return paintEventMapSceneBlitOnly(ctx, cssW, cssH, viewport, eventTitle, avatars, stormLogo);
+    return paintEventMapSceneBlitOnly(
+      ctx,
+      cssW,
+      cssH,
+      viewport,
+      eventTitle,
+      avatars,
+      stormLogo,
+    );
   }
 
   return paintEventMapWithSceneCache(
@@ -324,7 +360,6 @@ function paintSurface(eventTitle: string): boolean {
     if (isEventMapSceneCacheEnabled()) {
       const cached = paintSurfaceWithSceneCache(eventTitle);
       if (cached) {
-        viewportDirty = false;
         hasPaintedOnce = true;
         return true;
       }
@@ -342,17 +377,16 @@ function paintSurface(eventTitle: string): boolean {
       gestureLite,
     );
   } catch (error) {
-    console.warn("[eventMapCanvasRuntime] full paint failed, fallback", error);
+    console.warn('[eventMapCanvasRuntime] full paint failed, fallback', error);
     try {
       resetCtxState(surface);
       paintEventMapMinimal(ctx, cssW, cssH);
     } catch (fallbackError) {
-      console.error("[eventMapCanvasRuntime] fallback paint failed", fallbackError);
+      console.error('[eventMapCanvasRuntime] fallback paint failed', fallbackError);
       return false;
     }
   }
 
-  viewportDirty = false;
   hasPaintedOnce = true;
   return true;
 }
@@ -415,7 +449,6 @@ function scheduleAssetRepaint() {
       return;
     }
     invalidateEventMapSceneCache();
-    viewportDirty = true;
     enqueuePaint();
   }, ASSET_REPAINT_DEBOUNCE_MS);
 }
@@ -437,7 +470,6 @@ function applyViewport(next: EventMapViewport) {
   const cssW = surface?.cssW ?? 375;
   const cssH = surface?.cssH ?? 667;
   viewport = clampEventMapViewport(next, cssW, cssH);
-  viewportDirty = true;
 }
 
 export function setEventMapViewport(next: EventMapViewport) {
@@ -446,11 +478,14 @@ export function setEventMapViewport(next: EventMapViewport) {
 
 export function resetEventMapViewport(cssW?: number, cssH?: number) {
   if (cssW != null && cssH != null && cssW > 0 && cssH > 0) {
-    viewport = clampEventMapViewport(getDefaultEventMapViewport(cssW, cssH), cssW, cssH);
+    viewport = clampEventMapViewport(
+      getDefaultEventMapViewport(cssW, cssH),
+      cssW,
+      cssH,
+    );
   } else {
     viewport = { offsetX: 0, offsetY: 0, scale: MAP_SCALE_MIN };
   }
-  viewportDirty = true;
 }
 
 function clearRuntimeTimers() {
@@ -472,7 +507,10 @@ function clearRuntimeTimers() {
   }
 }
 
-async function setupSurfaceFromNode(item: CanvasNodeResult, eventTitle: string): Promise<boolean> {
+async function setupSurfaceFromNode(
+  item: CanvasNodeResult,
+  eventTitle: string,
+): Promise<boolean> {
   const canvas = item.node;
   if (!canvas || !isCanvas2dNode(canvas)) {
     return false;
@@ -481,7 +519,8 @@ async function setupSurfaceFromNode(item: CanvasNodeResult, eventTitle: string):
   const { width: cssW, height: cssH } = resolveCanvasCssSize(item.width, item.height);
   const dpr = getCanvasDpr();
 
-  const ctx = surface && surface.canvas === canvas ? surface.ctx : canvas.getContext("2d");
+  const ctx =
+    surface && surface.canvas === canvas ? surface.ctx : canvas.getContext('2d');
 
   if (!ctx) {
     return false;
@@ -505,7 +544,10 @@ async function setupSurfaceFromNode(item: CanvasNodeResult, eventTitle: string):
 }
 
 /** 绑定 Canvas 节点并绘制（页面 useReady / useDidShow 调用） */
-export async function bindEventMapCanvasAndPaint(eventTitle: string, attempt = 0): Promise<void> {
+export async function bindEventMapCanvasAndPaint(
+  eventTitle: string,
+  attempt = 0,
+): Promise<void> {
   if (!active) {
     return;
   }
@@ -521,7 +563,7 @@ export async function bindEventMapCanvasAndPaint(eventTitle: string, attempt = 0
   }
 
   if (attempt >= CANVAS_BIND_MAX_ATTEMPTS) {
-    console.error("[eventMapCanvasRuntime] canvas node not found");
+    console.error('[eventMapCanvasRuntime] canvas node not found');
     return;
   }
 
@@ -543,7 +585,7 @@ function prefetchStormLogo() {
       stormLogoImage = img;
     })
     .catch((error) => {
-      console.warn("[eventMapCanvasRuntime] storm logo load failed", error);
+      console.warn('[eventMapCanvasRuntime] storm logo load failed', error);
     })
     .finally(() => {
       stormLogoLoading = null;
@@ -584,7 +626,6 @@ function prefetchAvatars() {
 export function bootstrapEventMapCanvas(eventTitle: string) {
   active = true;
   mapInteracting = false;
-  viewportDirty = true;
   pendingTitle = eventTitle;
   clearRuntimeTimers();
 
@@ -611,7 +652,6 @@ export function requestEventMapPaint(eventTitle: string) {
     return;
   }
   if (surface) {
-    viewportDirty = true;
     enqueuePaint();
     return;
   }
@@ -631,7 +671,6 @@ export function repaintEventMapNow(eventTitle: string) {
     if (!active) {
       return;
     }
-    viewportDirty = true;
     enqueuePaint();
   }, GESTURE_PAINT_MS);
 }
@@ -648,7 +687,6 @@ export function pauseEventMapCanvas() {
 export function resumeEventMapCanvas(eventTitle: string) {
   active = true;
   pendingTitle = eventTitle;
-  viewportDirty = true;
   if (surface && cachedCanvasNode) {
     enqueuePaint();
     return;
@@ -675,6 +713,5 @@ export function disposeEventMapCanvas() {
   resetEventMapViewport();
   invalidateEventMapTerrainCache();
   invalidateEventMapSceneCache();
-  viewportDirty = true;
   clearRuntimeTimers();
 }

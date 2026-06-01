@@ -1,9 +1,9 @@
-import { useEffect, useRef } from "react";
-import { EventPostCard, type EventPostCardProps } from "./EventPostCard";
-import { Text, View } from "@tarojs/components";
+import { useEffect, useRef } from 'react';
+import { EventPostCard, type EventPostCardProps } from './EventPostCard';
+import { Text, View } from '@tarojs/components';
 
 export type EventPostListItem = {
-  post: import("../../../../types/backend").EventDetailPost;
+  post: import('../../../../types/backend').EventDetailPost;
   publishTimeLabel: string;
 };
 
@@ -16,12 +16,12 @@ type EventPostsVirtualListProps = {
   appliedPostIds: Set<string>;
   apiEnabled: boolean;
   currentUserAvatar?: string;
-  onLike: EventPostCardProps["onLike"];
-  onToggleComments: EventPostCardProps["onToggleComments"];
-  onDelete: EventPostCardProps["onDelete"];
-  onApply: EventPostCardProps["onApply"];
-  onComplete?: EventPostCardProps["onComplete"];
-  onCommentSubmitted: EventPostCardProps["onCommentSubmitted"];
+  onLike: EventPostCardProps['onLike'];
+  onToggleComments: EventPostCardProps['onToggleComments'];
+  onDelete: EventPostCardProps['onDelete'];
+  onApply: EventPostCardProps['onApply'];
+  onComplete?: EventPostCardProps['onComplete'];
+  onCommentSubmitted: EventPostCardProps['onCommentSubmitted'];
   hasMore?: boolean;
   isLoadingMore?: boolean;
 };
@@ -84,7 +84,9 @@ export function EventPostsVirtualList({
           </View>
         );
       })}
-      {isLoadingMore ? <Text className="s-event-posts-list__more">加载更多…</Text> : null}
+      {isLoadingMore ? (
+        <Text className="s-event-posts-list__more">加载更多…</Text>
+      ) : null}
       {!hasMore && items.length > 0 ? (
         <Text className="s-event-posts-list__more s-event-posts-list__more--end">
           没有更多帖子了

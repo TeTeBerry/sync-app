@@ -1,6 +1,6 @@
-import Taro from "@tarojs/taro";
-import { decryptJson, encryptJson } from "./encryptedStorage";
-import { getClientUserId } from "./session";
+import Taro from '@tarojs/taro';
+import { decryptJson, encryptJson } from './encryptedStorage';
+import { getClientUserId } from './session';
 
 export interface LocalProfileSnapshot {
   city?: string;
@@ -11,10 +11,10 @@ export interface LocalProfileSnapshot {
   updatedAt: string;
 }
 
-const STORAGE_KEY = "profile.encryptedSnapshot";
+const STORAGE_KEY = 'profile.encryptedSnapshot';
 
 export async function saveEncryptedProfileSnapshot(
-  snapshot: Omit<LocalProfileSnapshot, "updatedAt">,
+  snapshot: Omit<LocalProfileSnapshot, 'updatedAt'>,
 ): Promise<void> {
   const payload: LocalProfileSnapshot = {
     ...snapshot,
@@ -35,14 +35,14 @@ export async function loadEncryptedProfileSnapshot(): Promise<LocalProfileSnapsh
     const raw = Taro.getStorageSync(STORAGE_KEY);
     if (!raw) return null;
 
-    if (typeof raw === "string" && raw.startsWith("{")) {
+    if (typeof raw === 'string' && raw.startsWith('{')) {
       const parsed = JSON.parse(raw) as LocalProfileSnapshot;
-      if (parsed && typeof parsed === "object") {
+      if (parsed && typeof parsed === 'object') {
         return parsed;
       }
     }
 
-    if (typeof raw === "string") {
+    if (typeof raw === 'string') {
       return decryptJson<LocalProfileSnapshot>(getClientUserId(), raw);
     }
   } catch {

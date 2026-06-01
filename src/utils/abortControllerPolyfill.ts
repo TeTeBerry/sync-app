@@ -17,17 +17,18 @@ class AbortSignalPolyfill implements AbortSignal {
     listener: EventListenerOrEventListenerObject,
     options?: boolean | AddEventListenerOptions,
   ): void {
-    if (type !== "abort" || typeof listener !== "function") return;
+    if (type !== 'abort' || typeof listener !== 'function') return;
     const original = listener as AbortListener;
     if (this.aborted) {
       original();
       return;
     }
 
-    const once = typeof options === "object" && options != null && options.once === true;
+    const once =
+      typeof options === 'object' && options != null && options.once === true;
     const stored: AbortListener = once
       ? () => {
-          this.removeEventListener("abort", original);
+          this.removeEventListener('abort', original);
           original();
         }
       : original;
@@ -38,8 +39,11 @@ class AbortSignalPolyfill implements AbortSignal {
     this.listeners.add(stored);
   }
 
-  removeEventListener(type: string, listener: EventListenerOrEventListenerObject): void {
-    if (type !== "abort" || typeof listener !== "function") return;
+  removeEventListener(
+    type: string,
+    listener: EventListenerOrEventListenerObject,
+  ): void {
+    if (type !== 'abort' || typeof listener !== 'function') return;
     const original = listener as AbortListener;
     const stored = this.wrappedByOriginal.get(original) ?? original;
     this.listeners.delete(stored);
@@ -52,8 +56,8 @@ class AbortSignalPolyfill implements AbortSignal {
 
   throwIfAborted(): void {
     if (!this.aborted) return;
-    const err = new Error("Aborted");
-    err.name = "AbortError";
+    const err = new Error('Aborted');
+    err.name = 'AbortError';
     throw err;
   }
 
@@ -82,7 +86,7 @@ function installAbortControllerPolyfill(): void {
     AbortController?: typeof AbortController;
     AbortSignal?: typeof AbortSignal;
   };
-  if (typeof g.AbortController === "function") return;
+  if (typeof g.AbortController === 'function') return;
 
   g.AbortController = AbortControllerPolyfill as unknown as typeof AbortController;
   g.AbortSignal = AbortSignalPolyfill as unknown as typeof AbortSignal;

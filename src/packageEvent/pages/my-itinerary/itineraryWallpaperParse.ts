@@ -1,6 +1,16 @@
-import type { ItineraryTimelineDotColor, ItineraryTimelineItem } from "./myItineraryMock";
+import type {
+  ItineraryTimelineDotColor,
+  ItineraryTimelineItem,
+} from './myItineraryMock';
 
-const TITLE_STAGE_SEP = " · ";
+/** Title separators: middle dot (API/LLM), hyphen, pipe. */
+const TITLE_STAGE_SEP_PATTERNS = [
+  /\s*·\s*/,
+  /\s+-\s+/,
+  /\s*–\s*/,
+  /\s*—\s*/,
+  /\s*\|\s*/,
+];
 
 export type ItineraryWallpaperRow = {
   time: string;
@@ -19,74 +29,109 @@ export type ItineraryWallpaperSection = {
   dateKey: string;
   dateLabel: string;
   rows: ItineraryWallpaperRow[];
-  truncated: boolean;
-  hiddenCount: number;
 };
-
-/** Split mock titles like `Marshmello · A舞台 (主舞台)` into artist + stage. */
+/** Split titles like `Marshmello · A舞台` or `SLANDER - Main` into artist + stage. */
 export function parseTitleArtistStage(
   title: string,
   subtitle?: string,
 ): { artist: string; stage: string } {
   const trimmed = title.trim();
-  const sepIndex = trimmed.indexOf(TITLE_STAGE_SEP);
-  if (sepIndex >= 0) {
-    return {
-      artist: trimmed.slice(0, sepIndex).trim(),
-      stage: trimmed.slice(sepIndex + TITLE_STAGE_SEP.length).trim(),
-    };
+  for (const pattern of TITLE_STAGE_SEP_PATTERNS) {
+    const match = pattern.exec(trimmed);
+    if (match != null && match.index != null && match.index > 0) {
+      return {
+        artist: trimmed.slice(0, match.index).trim(),
+        stage: trimmed.slice(match.index + match[0].length).trim(),
+      };
+    }
   }
   const stageFromSub = subtitle?.trim();
   return {
     artist: trimmed,
-    stage: stageFromSub ?? "",
+    stage: stageFromSub ?? '',
   };
 }
 
-export function timelineItemToWallpaperRow(item: ItineraryTimelineItem): ItineraryWallpaperRow {
+function resolveWallpaperStage(
+  artist: string,
+  stage: string,
+  subtitle?: string,
+): string {
+  if (stage.trim()) return stage.trim();
+  const sub = subtitle?.trim();
+  if (!sub) return '主舞台';
+  const firstLine = sub.split(/[·|]/)[0]?.trim();
+  return firstLine || '主舞台';
+}
+
+export function timelineItemToWallpaperRow(
+  item: ItineraryTimelineItem,
+): ItineraryWallpaperRow {
   const { artist, stage } = parseTitleArtistStage(item.title, item.subtitle);
   return {
     time: item.time,
     artist,
-    stage,
+    stage: resolveWallpaperStage(artist, stage, item.subtitle),
     dotColor: item.dotColor,
   };
 }
 
-/** Performance rows only — excludes travel/departure reminders for lock-screen wallpaper. */
-export function isPerformanceTimelineItem(item: ItineraryTimelineItem): boolean {
-  if (item.title.includes("出发")) {
-    return false;
+/** Travel / rest nodes — not shown on lock-screen wallpaper. */
+export function isTravelTimelineItem(item: ItineraryTimelineItem): boolean {
+  if (item.pill?.label === '出行提醒') {
+    return true;
   }
-  if (item.pill?.label === "出行提醒") {
-    return false;
+  const title = item.title.trim();
+  if (title.includes('出发前往') || title.includes('散场返程')) {
+    return true;
   }
-  const { artist, stage } = parseTitleArtistStage(item.title, item.subtitle);
-  const hasArtistStageInTitle = item.title.includes(TITLE_STAGE_SEP);
-  return hasArtistStageInTitle && Boolean(artist.trim() && stage.trim());
+  if (/^(出发|散场|返程|午间休息)/.test(title)) {
+    return true;
+  }
+  if (item.pill?.label === '休息推荐') {
+    return true;
+  }
+  return false;
 }
 
-/**
- * Pick up to `maxRows` performance timeline nodes for one day section (time order).
- */
-export function buildWallpaperRows(
-  items: ItineraryTimelineItem[],
-  maxRows = 8,
-): { rows: ItineraryWallpaperRow[]; truncated: boolean; hiddenCount: number } {
-  const performances = items.filter(isPerformanceTimelineItem);
-  if (performances.length === 0) {
-    return { rows: [], truncated: false, hiddenCount: 0 };
+function titleHasArtistStageSeparator(title: string): boolean {
+  return TITLE_STAGE_SEP_PATTERNS.some((pattern) => {
+    const match = pattern.exec(title.trim());
+    return match != null && match.index != null && match.index > 0;
+  });
+}
+
+/** Performance rows for wallpaper — matches API fallback + LLM itinerary shapes. */
+export function isPerformanceTimelineItem(item: ItineraryTimelineItem): boolean {
+  if (isTravelTimelineItem(item)) {
+    return false;
   }
 
-  const truncated = performances.length > maxRows;
-  const slice = performances.slice(0, maxRows);
-  const hiddenCount = truncated ? performances.length - maxRows : 0;
+  const { artist, stage } = parseTitleArtistStage(item.title, item.subtitle);
+  if (titleHasArtistStageSeparator(item.title) && artist.trim()) {
+    return true;
+  }
 
-  return {
-    rows: slice.map(timelineItemToWallpaperRow),
-    truncated,
-    hiddenCount,
-  };
+  if (item.timeTag?.trim() && artist.trim()) {
+    return true;
+  }
+
+  if (item.highlighted && artist.trim()) {
+    return true;
+  }
+
+  if (item.pill?.variant === 'pink' && artist.trim()) {
+    return true;
+  }
+
+  return Boolean(artist.trim() && stage.trim());
+}
+
+/** All performance timeline nodes for one day section (time order). */
+export function buildWallpaperRows(
+  items: ItineraryTimelineItem[],
+): ItineraryWallpaperRow[] {
+  return items.filter(isPerformanceTimelineItem).map(timelineItemToWallpaperRow);
 }
 
 /**
@@ -94,12 +139,11 @@ export function buildWallpaperRows(
  */
 export function buildWallpaperSectionsByDate(
   days: ItineraryWallpaperDayInput[],
-  maxRowsPerSection = 8,
 ): ItineraryWallpaperSection[] {
   const sections: ItineraryWallpaperSection[] = [];
 
   for (const day of days) {
-    const { rows, truncated, hiddenCount } = buildWallpaperRows(day.items, maxRowsPerSection);
+    const rows = buildWallpaperRows(day.items);
     if (rows.length === 0) {
       continue;
     }
@@ -107,8 +151,6 @@ export function buildWallpaperSectionsByDate(
       dateKey: day.dateKey,
       dateLabel: day.dateLabel,
       rows,
-      truncated,
-      hiddenCount,
     });
   }
 

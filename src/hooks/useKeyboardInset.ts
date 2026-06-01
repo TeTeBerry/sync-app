@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import Taro from "@tarojs/taro";
+import { useEffect, useState } from 'react';
+import Taro from '@tarojs/taro';
 
 /** Matches BottomNav.scss + useTabPageMainHeight tab bar estimate. */
 const TABBAR_ROW_PX = 56;
@@ -9,7 +9,8 @@ function tabBarOffsetPx(): number {
   try {
     const win = Taro.getWindowInfo();
     const screenHeight = win.screenHeight ?? win.windowHeight ?? 667;
-    const safeBottom = win.safeArea != null ? Math.max(0, screenHeight - win.safeArea.bottom) : 0;
+    const safeBottom =
+      win.safeArea != null ? Math.max(0, screenHeight - win.safeArea.bottom) : 0;
     return TABBAR_ROW_PX + TABBAR_PADDING_TOP_PX + safeBottom;
   } catch {
     return TABBAR_ROW_PX + TABBAR_PADDING_TOP_PX;
@@ -25,8 +26,8 @@ export function useKeyboardInset(): number {
   const [inset, setInset] = useState(0);
 
   useEffect(() => {
-    if (process.env.TARO_ENV !== "weapp") return;
-    if (typeof Taro.onKeyboardHeightChange !== "function") return;
+    if (process.env.TARO_ENV !== 'weapp') return;
+    if (typeof Taro.onKeyboardHeightChange !== 'function') return;
 
     const tabBarPx = tabBarOffsetPx();
 

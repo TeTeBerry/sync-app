@@ -1,22 +1,25 @@
-import "./EventCard.scss";
-import React, { memo, useMemo } from "react";
-import AvatarGroup from "./AvatarGroup";
-import { ACTIVITY_GUEST_AVATARS } from "../constants/activityGuestAvatars";
-import { ImageWithFallback } from "./ImageWithFallback";
-import { Button } from "./ui";
-import { Calendar, Flame, MapPin, Sparkles, Users } from "lucide-react-taro";
-import { activityStatusCardClass, getActivityStatusFromActivity } from "../utils/activityStatus";
-import { Text, View } from "@tarojs/components";
+import './EventCard.scss';
+import React, { memo, useMemo } from 'react';
+import AvatarGroup from './AvatarGroup';
+import { ACTIVITY_GUEST_AVATARS } from '../constants/activityGuestAvatars';
+import { ImageWithFallback } from './ImageWithFallback';
+import { Button } from './ui';
+import { Calendar, Flame, MapPin, Sparkles, Users } from 'lucide-react-taro';
+import {
+  activityStatusCardClass,
+  getActivityStatusFromActivity,
+} from '../utils/activityStatus';
+import { Text, View } from '@tarojs/components';
 import {
   deriveEventCardStats,
   formatEventDateBadge,
   formatEventFullDate,
   formatEventHeroSubtitle,
-} from "../utils/eventCardDisplay";
-import { PLACEHOLDER_EVENT_HERO } from "../constants/remoteImages";
-import { thumbnailImageUrl } from "../utils/imageUrl";
-import { resolveEventCardLegacyId } from "../utils/apiMappers";
-import { useRouteTransitionActive } from "../utils/route";
+} from '../utils/eventCardDisplay';
+import { PLACEHOLDER_EVENT_HERO } from '../constants/remoteImages';
+import { thumbnailImageUrl } from '../utils/imageUrl';
+import { resolveEventCardLegacyId } from '../utils/apiMappers';
+import { useRouteTransitionActive } from '../utils/route';
 
 interface EventCardProps {
   id?: string;
@@ -26,37 +29,42 @@ interface EventCardProps {
   image?: string;
   attendees?: number;
   hot?: boolean;
-  variant?: "default" | "list";
+  variant?: 'default' | 'list';
   onTeamUp?: () => void;
   onTeamUpWarmup?: () => void;
 }
 
 const EventCardInner: React.FC<EventCardProps> = ({
-  id = "1",
-  title = "Audien",
-  date = "Sat 12/20 at 10:00 PM",
-  location = "The Ave Live",
+  id = '1',
+  title = 'Audien',
+  date = 'Sat 12/20 at 10:00 PM',
+  location = 'The Ave Live',
   image = PLACEHOLDER_EVENT_HERO,
   attendees = 70,
   hot = false,
-  variant = "list",
+  variant = 'list',
   onTeamUp,
   onTeamUpWarmup,
 }) => {
   const legacyId = resolveEventCardLegacyId(id);
   const isNavigating = useRouteTransitionActive(legacyId ?? undefined);
-  const thumbSrc = thumbnailImageUrl(image, variant === "list" ? 200 : 320);
+  const thumbSrc = thumbnailImageUrl(image, variant === 'list' ? 200 : 320);
   const status = getActivityStatusFromActivity(date, title);
   const dateBadge = useMemo(() => formatEventDateBadge(date), [date]);
   const fullDate = useMemo(() => formatEventFullDate(date, title), [date, title]);
-  const heroSubtitle = useMemo(() => formatEventHeroSubtitle(title, location), [title, location]);
+  const heroSubtitle = useMemo(
+    () => formatEventHeroSubtitle(title, location),
+    [title, location],
+  );
   const stats = useMemo(() => deriveEventCardStats(attendees), [attendees]);
 
-  if (variant !== "list") {
+  if (variant !== 'list') {
     return (
       <View
         data-cmp="EventCard"
-        className={["s-event-card", activityStatusCardClass(status)].filter(Boolean).join(" ")}
+        className={['s-event-card', activityStatusCardClass(status)]
+          .filter(Boolean)
+          .join(' ')}
       >
         <ImageWithFallback
           src={thumbSrc}
@@ -76,9 +84,9 @@ const EventCardInner: React.FC<EventCardProps> = ({
   return (
     <View
       data-cmp="EventCard"
-      className={["s-event-card", "s-event-card--list", activityStatusCardClass(status)]
+      className={['s-event-card', 's-event-card--list', activityStatusCardClass(status)]
         .filter(Boolean)
-        .join(" ")}
+        .join(' ')}
     >
       <View className="s-event-card__hero">
         <ImageWithFallback
@@ -137,11 +145,11 @@ const EventCardInner: React.FC<EventCardProps> = ({
         <View className="s-event-card__cta">
           <Button
             className={[
-              "s-event-card__team-btn",
-              isNavigating ? "s-event-card__team-btn--loading" : "",
+              's-event-card__team-btn',
+              isNavigating ? 's-event-card__team-btn--loading' : '',
             ]
               .filter(Boolean)
-              .join(" ")}
+              .join(' ')}
             disabled={isNavigating}
             onTouchStart={(event) => {
               event.stopPropagation();
@@ -153,7 +161,9 @@ const EventCardInner: React.FC<EventCardProps> = ({
             }}
           >
             <Sparkles size={15} aria-hidden />
-            <Text className="s-event-card__team-btn-text">{isNavigating ? "加入中…" : "加入"}</Text>
+            <Text className="s-event-card__team-btn-text">
+              {isNavigating ? '加入中…' : '加入'}
+            </Text>
           </Button>
         </View>
       </View>

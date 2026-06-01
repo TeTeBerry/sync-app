@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 interface CacheEntry<T> {
   data: T;
@@ -36,7 +36,7 @@ export function broadcastCacheData(queryKey: (string | number | undefined)[]) {
 }
 
 export function getCacheKey(queryKey: (string | number | undefined)[]) {
-  return queryKey.map(String).join("|");
+  return queryKey.map(String).join('|');
 }
 
 export function invalidateCache(queryKey: (string | number | undefined)[]) {
@@ -68,7 +68,9 @@ export function setCacheData<T>(
   }
 }
 
-export function getCacheData<T>(queryKey: (string | number | undefined)[]): T | undefined {
+export function getCacheData<T>(
+  queryKey: (string | number | undefined)[],
+): T | undefined {
   const key = getCacheKey(queryKey);
   return (globalCache.get(key) as CacheEntry<T> | undefined)?.data;
 }

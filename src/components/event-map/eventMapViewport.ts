@@ -47,7 +47,10 @@ export function contentToScreen(
   };
 }
 
-export function applyViewportTransform(ctx: CanvasRenderingContext2D, viewport: EventMapViewport) {
+export function applyViewportTransform(
+  ctx: CanvasRenderingContext2D,
+  viewport: EventMapViewport,
+) {
   ctx.translate(viewport.offsetX, viewport.offsetY);
   ctx.scale(viewport.scale, viewport.scale);
 }
@@ -85,10 +88,16 @@ export function panViewport(
 /** Step zoom around a screen anchor (toolbar +/-). */
 export function stepMapViewportZoom(
   viewport: EventMapViewport,
-  direction: "in" | "out",
+  direction: 'in' | 'out',
   anchorScreenX: number,
   anchorScreenY: number,
 ): EventMapViewport {
-  const factor = direction === "in" ? MAP_ZOOM_BUTTON_FACTOR : 1 / MAP_ZOOM_BUTTON_FACTOR;
-  return zoomViewportAtScreen(viewport, anchorScreenX, anchorScreenY, viewport.scale * factor);
+  const factor =
+    direction === 'in' ? MAP_ZOOM_BUTTON_FACTOR : 1 / MAP_ZOOM_BUTTON_FACTOR;
+  return zoomViewportAtScreen(
+    viewport,
+    anchorScreenX,
+    anchorScreenY,
+    viewport.scale * factor,
+  );
 }

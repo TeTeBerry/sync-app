@@ -1,13 +1,13 @@
 /** Kept under packageEvent so the PNG is emitted into the event subpackage, not the main package. */
-import stormLogoSrc from "../../packageEvent/assets/storm-logo.png";
+import stormLogoSrc from '../../packageEvent/assets/storm-logo.png';
 import {
   MAP_STORM_LOGO_CONTENT_TRIM,
   MAP_STORM_LOGO_GLOW_EXTRA_PX,
   MAP_STORM_LOGO_VISUAL_CENTER_NX,
   MAP_STORM_LOGO_VISUAL_CENTER_NY,
-} from "./eventMapLayout";
+} from './eventMapLayout';
 
-type CanvasImageSource = Parameters<CanvasRenderingContext2D["drawImage"]>[0];
+type CanvasImageSource = Parameters<CanvasRenderingContext2D['drawImage']>[0];
 
 /** 打包后的 storm-logo 资源路径（微信小程序 Canvas createImage 使用） */
 export const STORM_LOGO_SRC = stormLogoSrc;
@@ -103,7 +103,7 @@ export function drawSlowRotatingStormLogo(
   try {
     ctx.translate(x, y);
     ctx.globalAlpha = 0.14;
-    ctx.fillStyle = "#0077cc";
+    ctx.fillStyle = '#0077cc';
     ctx.beginPath();
     ctx.arc(0, 0, glowR, 0, Math.PI * 2);
     ctx.fill();
@@ -127,10 +127,10 @@ export function drawOfficialStormLogoSlowRotateSafe(
   try {
     drawSlowRotatingStormLogo(ctx, x, y, size, time, logoImage);
   } catch (error) {
-    console.warn("[eventMapStormLogo] slow-rotate fallback", error);
+    console.warn('[eventMapStormLogo] slow-rotate fallback', error);
     ctx.save();
     ctx.translate(x, y);
-    ctx.fillStyle = "#0d151c";
+    ctx.fillStyle = '#0d151c';
     ctx.beginPath();
     ctx.moveTo(0, -size);
     ctx.lineTo(size * 0.9, size * 0.75);
@@ -161,7 +161,7 @@ export function drawStaticStormLogo(
   try {
     ctx.translate(x, y);
     ctx.globalAlpha = 0.14;
-    ctx.fillStyle = "#0077cc";
+    ctx.fillStyle = '#0077cc';
     ctx.beginPath();
     ctx.arc(0, 0, glowR, 0, Math.PI * 2);
     ctx.fill();
@@ -183,10 +183,10 @@ export function drawOfficialStormLogoStaticSafe(
   try {
     drawStaticStormLogo(ctx, x, y, size, logoImage);
   } catch (error) {
-    console.warn("[eventMapStormLogo] static fallback", error);
+    console.warn('[eventMapStormLogo] static fallback', error);
     ctx.save();
     ctx.translate(x, y);
-    ctx.fillStyle = "#0d151c";
+    ctx.fillStyle = '#0d151c';
     ctx.beginPath();
     ctx.moveTo(0, -size);
     ctx.lineTo(size * 0.9, size * 0.75);
@@ -220,7 +220,7 @@ export function drawRotatingStormLogo(
 
     const pulse = 0.5 + 0.5 * Math.sin(time * 0.003);
     ctx.globalAlpha = 0.08 + pulse * 0.1;
-    ctx.fillStyle = "#0077cc";
+    ctx.fillStyle = '#0077cc';
     ctx.beginPath();
     ctx.arc(0, 0, glowR, 0, Math.PI * 2);
     ctx.fill();
@@ -256,10 +256,10 @@ export function drawOfficialStormLogoSafe(
   try {
     drawRotatingStormLogo(ctx, x, y, size, time, logoImage);
   } catch (error) {
-    console.warn("[eventMapStormLogo] fallback", error);
+    console.warn('[eventMapStormLogo] fallback', error);
     ctx.save();
     ctx.translate(x, y);
-    ctx.fillStyle = "#0d151c";
+    ctx.fillStyle = '#0d151c';
     ctx.beginPath();
     ctx.moveTo(0, -size);
     ctx.lineTo(size * 0.9, size * 0.75);
@@ -271,7 +271,10 @@ export function drawOfficialStormLogoSafe(
 }
 
 /** 旋转外接圆底边锚点（相对可视中心 y，用于连接线） */
-export function stormLogoBottomOffset(size: number, logoImage?: CanvasImageSource | null): number {
+export function stormLogoBottomOffset(
+  size: number,
+  logoImage?: CanvasImageSource | null,
+): number {
   const { drawW, drawH } = getStormLogoDrawSize(size, logoImage);
   return getStormLogoEnvelopeRadius(drawW, drawH) * 0.92;
 }

@@ -3,13 +3,13 @@ import {
   filterContentTypeTags,
   mergePostContentTypes,
   stripContentTypeHashtags,
-} from "../ContentTypeBadge";
-import { inferIntentTagsFromText } from "../../utils/inferIntentTags";
+} from '../ContentTypeBadge';
+import { inferIntentTagsFromText } from '../../utils/inferIntentTags';
 import {
   PUBLISH_CONFIRM_MARKER,
   type PublishConfirmPayload,
-} from "../../utils/parsePublishConfirmMessage";
-import { Image, Text, View } from "@tarojs/components";
+} from '../../utils/parsePublishConfirmMessage';
+import { Image, Text, View } from '@tarojs/components';
 
 const HASHTAG_TAG_RE = /#([^\s#]+)/g;
 
@@ -36,9 +36,13 @@ export function PublishConfirmCard({
   });
   const bodyText = stripContentTypeHashtags(payload.draftBody);
   const inferredTags =
-    payload.draftTags.length > 0 ? payload.draftTags : inferIntentTagsFromText(payload.draftBody);
+    payload.draftTags.length > 0
+      ? payload.draftTags
+      : inferIntentTagsFromText(payload.draftBody);
   const displayTags = filterContentTypeTags(
-    inferredTags.length ? inferredTags : extractDisplayTags(payload.draftBody, contentTypeKeys),
+    inferredTags.length
+      ? inferredTags
+      : extractDisplayTags(payload.draftBody, contentTypeKeys),
     contentTypeKeys,
   );
 
@@ -50,7 +54,11 @@ export function PublishConfirmCard({
       <View className="s-publish-confirm__preview">
         <View className="s-publish-confirm__preview-header">
           {userAvatar ? (
-            <Image className="s-publish-confirm__avatar" src={userAvatar} mode="aspectFill" />
+            <Image
+              className="s-publish-confirm__avatar"
+              src={userAvatar}
+              mode="aspectFill"
+            />
           ) : (
             <Text className="s-publish-confirm__avatar s-publish-confirm__avatar--fallback">
               {userName.slice(0, 1)}

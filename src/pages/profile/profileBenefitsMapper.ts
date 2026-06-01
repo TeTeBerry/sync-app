@@ -3,15 +3,15 @@ import type {
   FreeMonthlyQuota,
   PackageTierId,
   ProfileActivityItem,
-} from "../../types/backend";
-import { safeFiniteNumber, safeTrim } from "../../utils/safeString";
-import type { ProfileBenefits } from "./mockData";
-import { PROFILE_SEED_ACTIVITY_LEGACY_ID } from "../../constants/profilePackage";
-import { MOCK_PACKAGE_CATALOG, PACKAGE_TIER_ORDER } from "./profilePackageData";
+} from '../../types/backend';
+import { safeFiniteNumber, safeTrim } from '../../utils/safeString';
+import type { ProfileBenefits } from './mockData';
+import { PROFILE_SEED_ACTIVITY_LEGACY_ID } from '../../constants/profilePackage';
+import { MOCK_PACKAGE_CATALOG, PACKAGE_TIER_ORDER } from './profilePackageData';
 
-export type ProfileBenefitRowAccent = "purple" | "pink" | "map" | "gold";
+export type ProfileBenefitRowAccent = 'purple' | 'pink' | 'map' | 'gold';
 
-export type ProfileBenefitQuotaTone = "accent" | "muted";
+export type ProfileBenefitQuotaTone = 'accent' | 'muted';
 
 export type ProfileEventBenefitRow = {
   id: string;
@@ -53,15 +53,15 @@ export type ProfileFreeBenefitCardModel = {
   upsellText: string;
 };
 
-const GLOBAL_FREE_CARD_TITLE = "通场免费额度";
-const GLOBAL_FREE_CARD_SUBTITLE = "每月重置";
+const GLOBAL_FREE_CARD_TITLE = '通场免费额度';
+const GLOBAL_FREE_CARD_SUBTITLE = '每月重置';
 
 const FREE_MONTHLY_AI_LIMIT = 3;
 const FREE_MONTHLY_CONTACT_LIMIT = 3;
 
 const MOCK_PROFILE_SEED_ACTIVITY_LEGACY_ID = PROFILE_SEED_ACTIVITY_LEGACY_ID;
 
-const EMPTY_QUOTAS: EventPackageEntitlement["quotas"] = {
+const EMPTY_QUOTAS: EventPackageEntitlement['quotas'] = {
   aiMatch: { limit: 0, used: 0, remaining: 0 },
   contactUnlock: { limit: 0, used: 0, remaining: 0 },
   map: {
@@ -74,7 +74,7 @@ const EMPTY_QUOTAS: EventPackageEntitlement["quotas"] = {
 };
 
 function isValidQuotaSlot(slot: unknown): boolean {
-  if (!slot || typeof slot !== "object") {
+  if (!slot || typeof slot !== 'object') {
     return false;
   }
   const record = slot as {
@@ -84,21 +84,21 @@ function isValidQuotaSlot(slot: unknown): boolean {
   };
   const { limit, used, remaining } = record;
   return (
-    (limit === null || typeof limit === "number") &&
-    (remaining === null || typeof remaining === "number") &&
-    (used === undefined || typeof used === "number")
+    (limit === null || typeof limit === 'number') &&
+    (remaining === null || typeof remaining === 'number') &&
+    (used === undefined || typeof used === 'number')
   );
 }
 
 function isValidMapQuotaSlot(map: unknown): boolean {
-  if (!map || typeof map !== "object") {
+  if (!map || typeof map !== 'object') {
     return false;
   }
   const record = map as { active?: unknown; expiresAt?: unknown; days?: unknown };
   return (
-    typeof record.active === "boolean" &&
-    typeof record.expiresAt === "string" &&
-    (record.days === undefined || typeof record.days === "number")
+    typeof record.active === 'boolean' &&
+    typeof record.expiresAt === 'string' &&
+    (record.days === undefined || typeof record.days === 'number')
   );
 }
 
@@ -107,9 +107,10 @@ export function asEntitlementList(value: unknown): EventPackageEntitlement[] {
   if (Array.isArray(value)) {
     return value;
   }
-  if (value != null && typeof value === "object") {
+  if (value != null && typeof value === 'object') {
     return Object.values(value as Record<string, unknown>).filter(
-      (item): item is EventPackageEntitlement => item != null && typeof item === "object",
+      (item): item is EventPackageEntitlement =>
+        item != null && typeof item === 'object',
     );
   }
   return [];
@@ -133,28 +134,33 @@ export function isValidFreeMonthlyQuota(
   freeMonthly: FreeMonthlyQuota | null | undefined,
 ): freeMonthly is FreeMonthlyQuota {
   return Boolean(
-    freeMonthly?.aiMatch && freeMonthly?.contactUnlock && typeof freeMonthly.period === "string",
+    freeMonthly?.aiMatch &&
+    freeMonthly?.contactUnlock &&
+    typeof freeMonthly.period === 'string',
   );
 }
 
 function normalizeQuotaSlot(
-  slot: EventPackageEntitlement["quotas"]["aiMatch"] | undefined,
-  fallback: EventPackageEntitlement["quotas"]["aiMatch"],
-): EventPackageEntitlement["quotas"]["aiMatch"] {
+  slot: EventPackageEntitlement['quotas']['aiMatch'] | undefined,
+  fallback: EventPackageEntitlement['quotas']['aiMatch'],
+): EventPackageEntitlement['quotas']['aiMatch'] {
   if (!slot) {
     return fallback;
   }
   return {
-    limit: slot.limit === null ? null : safeFiniteNumber(slot.limit, fallback.limit ?? 0),
+    limit:
+      slot.limit === null ? null : safeFiniteNumber(slot.limit, fallback.limit ?? 0),
     used: safeFiniteNumber(slot.used, 0),
     remaining:
-      slot.remaining === null ? null : safeFiniteNumber(slot.remaining, fallback.remaining ?? 0),
+      slot.remaining === null
+        ? null
+        : safeFiniteNumber(slot.remaining, fallback.remaining ?? 0),
   };
 }
 
 function resolveEntitlementQuotas(
   entitlement: EventPackageEntitlement,
-): EventPackageEntitlement["quotas"] {
+): EventPackageEntitlement['quotas'] {
   if (!hasValidEntitlementQuotas(entitlement)) {
     return EMPTY_QUOTAS;
   }
@@ -165,7 +171,7 @@ function resolveEntitlementQuotas(
     map: {
       days: safeFiniteNumber(quotas.map.days, 0),
       expiresAt:
-        typeof quotas.map.expiresAt === "string" && quotas.map.expiresAt
+        typeof quotas.map.expiresAt === 'string' && quotas.map.expiresAt
           ? quotas.map.expiresAt
           : EMPTY_QUOTAS.map.expiresAt,
       active: Boolean(quotas.map.active),
@@ -189,13 +195,16 @@ function addUtcDaysFromIso(iso: string, days: number): string {
 }
 
 export function resolveEntitlementValidUntilIso(
-  entitlement: Pick<EventPackageEntitlement, "validUntil" | "purchasedAt">,
+  entitlement: Pick<EventPackageEntitlement, 'validUntil' | 'purchasedAt'>,
 ): string | undefined {
   if (entitlement.validUntil) {
     return entitlement.validUntil;
   }
   if (entitlement.purchasedAt) {
-    return addUtcDaysFromIso(entitlement.purchasedAt, PACKAGE_ENTITLEMENT_VALIDITY_DAYS);
+    return addUtcDaysFromIso(
+      entitlement.purchasedAt,
+      PACKAGE_ENTITLEMENT_VALIDITY_DAYS,
+    );
   }
   return undefined;
 }
@@ -221,14 +230,14 @@ function mapDaysRemaining(expiresAt: string): number {
 
 function displayQuotaValue(remaining: number | null): { value: number; unit: string } {
   if (remaining == null) {
-    return { value: 0, unit: "不限" };
+    return { value: 0, unit: '不限' };
   }
-  return { value: remaining, unit: "次" };
+  return { value: remaining, unit: '次' };
 }
 
 function buildMetricsFromQuotas(
-  quotas: EventPackageEntitlement["quotas"],
-): ProfileBenefits["metrics"] {
+  quotas: EventPackageEntitlement['quotas'],
+): ProfileBenefits['metrics'] {
   const ai = displayQuotaValue(quotas.aiMatch.remaining);
   const contact = displayQuotaValue(quotas.contactUnlock.remaining);
   const mapDaysLeft = quotas.map.active ? mapDaysRemaining(quotas.map.expiresAt) : 0;
@@ -236,29 +245,35 @@ function buildMetricsFromQuotas(
 
   return [
     {
-      id: "ai-match",
-      kind: "match",
+      id: 'ai-match',
+      kind: 'match',
       value: ai.value,
       unit: ai.unit,
-      label: "AI 匹配剩余",
+      label: 'AI 匹配剩余',
       remainingRatio: quotaRatio(quotas.aiMatch.remaining, quotas.aiMatch.limit),
       lowRemaining: quotaLow(quotas.aiMatch.remaining, quotas.aiMatch.limit),
     },
     {
-      id: "contact",
-      kind: "contact",
+      id: 'contact',
+      kind: 'contact',
       value: contact.value,
       unit: contact.unit,
-      label: "联系方式解锁",
-      remainingRatio: quotaRatio(quotas.contactUnlock.remaining, quotas.contactUnlock.limit),
-      lowRemaining: quotaLow(quotas.contactUnlock.remaining, quotas.contactUnlock.limit),
+      label: '联系方式解锁',
+      remainingRatio: quotaRatio(
+        quotas.contactUnlock.remaining,
+        quotas.contactUnlock.limit,
+      ),
+      lowRemaining: quotaLow(
+        quotas.contactUnlock.remaining,
+        quotas.contactUnlock.limit,
+      ),
     },
     {
-      id: "map",
-      kind: "duration",
+      id: 'map',
+      kind: 'duration',
       value: mapDaysLeft,
-      unit: "天",
-      label: "点位地图剩余",
+      unit: '天',
+      label: '点位地图剩余',
       remainingRatio: mapLimit > 0 ? Math.min(1, mapDaysLeft / mapLimit) : 0,
       lowRemaining: mapDaysLeft <= 2 && quotas.map.active,
     },
@@ -268,44 +283,46 @@ function buildMetricsFromQuotas(
 /** Offline / demo Zara — Pro per-event tier merged with full free monthly bucket. */
 export function buildMockProfileBenefits(): ProfileBenefits {
   const proTier =
-    MOCK_PACKAGE_CATALOG.tiers.find((tier) => tier.id === "pro") ?? MOCK_PACKAGE_CATALOG.tiers[0];
+    MOCK_PACKAGE_CATALOG.tiers.find((tier) => tier.id === 'pro') ??
+    MOCK_PACKAGE_CATALOG.tiers[0];
   const aiRemaining = (proTier.limits.aiMatchCount ?? 0) + FREE_MONTHLY_AI_LIMIT;
-  const contactRemaining = (proTier.limits.contactUnlockCount ?? 0) + FREE_MONTHLY_CONTACT_LIMIT;
+  const contactRemaining =
+    (proTier.limits.contactUnlockCount ?? 0) + FREE_MONTHLY_CONTACT_LIMIT;
   const mapDays = proTier.limits.mapDays;
 
   return {
     planLabel: proTier.name,
-    upgradeLabel: "更换套餐",
+    upgradeLabel: '更换套餐',
     promo: {
-      prefix: "当前场次套餐 · ",
+      prefix: '当前场次套餐 · ',
       highlight: proTier.name,
-      suffix: " · 含每月免费额度",
+      suffix: ' · 含每月免费额度',
     },
     metrics: [
       {
-        id: "ai-match",
-        kind: "match",
+        id: 'ai-match',
+        kind: 'match',
         value: aiRemaining,
-        unit: "次",
-        label: "AI 匹配剩余",
+        unit: '次',
+        label: 'AI 匹配剩余',
         remainingRatio: 1,
         lowRemaining: false,
       },
       {
-        id: "contact",
-        kind: "contact",
+        id: 'contact',
+        kind: 'contact',
         value: contactRemaining,
-        unit: "次",
-        label: "联系方式解锁",
+        unit: '次',
+        label: '联系方式解锁',
         remainingRatio: 1,
         lowRemaining: false,
       },
       {
-        id: "map",
-        kind: "duration",
+        id: 'map',
+        kind: 'duration',
         value: mapDays,
-        unit: "天",
-        label: "点位地图剩余",
+        unit: '天',
+        label: '点位地图剩余',
         remainingRatio: 1,
         lowRemaining: false,
       },
@@ -319,7 +336,9 @@ export function pickProfileEntitlement(
   summaryEntitlement: EventPackageEntitlement | null | undefined,
 ): EventPackageEntitlement | null {
   if (activityLegacyId != null && !Number.isNaN(activityLegacyId)) {
-    const scoped = entitlements?.find((item) => item.activityLegacyId === activityLegacyId);
+    const scoped = entitlements?.find(
+      (item) => item.activityLegacyId === activityLegacyId,
+    );
     if (scoped) {
       return scoped;
     }
@@ -354,7 +373,7 @@ function slotToFreeQuota(
 function resolveFreeQuotaSlots(
   entitlement: EventPackageEntitlement | null | undefined,
   freeMonthly?: FreeMonthlyQuota | null,
-): Pick<ProfileFreeBenefitCardModel, "aiMatch" | "contactUnlock"> {
+): Pick<ProfileFreeBenefitCardModel, 'aiMatch' | 'contactUnlock'> {
   const monthly = entitlement?.freeMonthly ?? freeMonthly ?? null;
 
   if (isValidFreeMonthlyQuota(monthly)) {
@@ -372,7 +391,11 @@ function resolveFreeQuotaSlots(
     };
   }
 
-  if (entitlement && !isPaidEntitlement(entitlement) && hasValidEntitlementQuotas(entitlement)) {
+  if (
+    entitlement &&
+    !isPaidEntitlement(entitlement) &&
+    hasValidEntitlementQuotas(entitlement)
+  ) {
     return {
       aiMatch: slotToFreeQuota(
         entitlement.quotas.aiMatch.remaining,
@@ -395,7 +418,7 @@ function resolveFreeQuotaSlots(
 
 export function buildProPlusUpsellText(): string {
   const proPlus =
-    MOCK_PACKAGE_CATALOG.tiers.find((tier) => tier.id === "pro_plus") ??
+    MOCK_PACKAGE_CATALOG.tiers.find((tier) => tier.id === 'pro_plus') ??
     MOCK_PACKAGE_CATALOG.tiers[1];
   const ai = proPlus.limits.aiMatchCount ?? 15;
   const contact = proPlus.limits.contactUnlockCount ?? 12;
@@ -432,45 +455,48 @@ export function buildFreeBenefitCardModel(
 }
 
 /** Offline fallback or missing API payload — assumes full free monthly bucket. */
-export function buildFreeProfileBenefits(freeMonthly?: FreeMonthlyQuota | null): ProfileBenefits {
+export function buildFreeProfileBenefits(
+  freeMonthly?: FreeMonthlyQuota | null,
+): ProfileBenefits {
   const aiRemaining = freeMonthly?.aiMatch.remaining ?? FREE_MONTHLY_AI_LIMIT;
-  const contactRemaining = freeMonthly?.contactUnlock.remaining ?? FREE_MONTHLY_CONTACT_LIMIT;
+  const contactRemaining =
+    freeMonthly?.contactUnlock.remaining ?? FREE_MONTHLY_CONTACT_LIMIT;
   const aiLimit = freeMonthly?.aiMatch.limit ?? FREE_MONTHLY_AI_LIMIT;
   const contactLimit = freeMonthly?.contactUnlock.limit ?? FREE_MONTHLY_CONTACT_LIMIT;
 
   return {
-    planLabel: "免费版",
-    upgradeLabel: "升级套餐",
+    planLabel: '免费版',
+    upgradeLabel: '升级套餐',
     promo: {
-      prefix: "每月免费额度 · ",
-      highlight: "AI 3 次",
-      suffix: " · 联系方式解锁 3 次",
+      prefix: '每月免费额度 · ',
+      highlight: 'AI 3 次',
+      suffix: ' · 联系方式解锁 3 次',
     },
     metrics: [
       {
-        id: "ai-match",
-        kind: "match",
+        id: 'ai-match',
+        kind: 'match',
         value: aiRemaining,
-        unit: "次",
-        label: "AI 匹配剩余",
+        unit: '次',
+        label: 'AI 匹配剩余',
         remainingRatio: quotaRatio(aiRemaining, aiLimit),
         lowRemaining: quotaLow(aiRemaining, aiLimit),
       },
       {
-        id: "contact",
-        kind: "contact",
+        id: 'contact',
+        kind: 'contact',
         value: contactRemaining,
-        unit: "次",
-        label: "联系方式解锁",
+        unit: '次',
+        label: '联系方式解锁',
         remainingRatio: quotaRatio(contactRemaining, contactLimit),
         lowRemaining: quotaLow(contactRemaining, contactLimit),
       },
       {
-        id: "map",
-        kind: "duration",
+        id: 'map',
+        kind: 'duration',
         value: 0,
-        unit: "天",
-        label: "点位地图剩余",
+        unit: '天',
+        label: '点位地图剩余',
         remainingRatio: 0,
         lowRemaining: true,
       },
@@ -479,11 +505,13 @@ export function buildFreeProfileBenefits(freeMonthly?: FreeMonthlyQuota | null):
 }
 
 export function isPaidEntitlement(entitlement: EventPackageEntitlement): boolean {
-  return Boolean(entitlement.paidTierId) && entitlement.tierId !== "free";
+  return Boolean(entitlement.paidTierId) && entitlement.tierId !== 'free';
 }
 
 /** Next purchasable tier for upgrade CTA; `null` at Ultra (top tier). */
-export function getNextTierId(paidTierId: PackageTierId | null | undefined): PackageTierId | null {
+export function getNextTierId(
+  paidTierId: PackageTierId | null | undefined,
+): PackageTierId | null {
   if (!paidTierId) {
     return null;
   }
@@ -513,15 +541,17 @@ export function listPaidEntitlements(
     }
   }
 
-  return Array.from(byActivity.values()).sort((a, b) => a.activityLegacyId - b.activityLegacyId);
+  return Array.from(byActivity.values()).sort(
+    (a, b) => a.activityLegacyId - b.activityLegacyId,
+  );
 }
 
 function formatQuotaLabel(remaining: number | null, limit: number | null): string {
   if (limit == null) {
-    return remaining == null ? "不限" : `剩 ${remaining} 次`;
+    return remaining == null ? '不限' : `剩 ${remaining} 次`;
   }
   if (limit <= 0) {
-    return "未包含";
+    return '未包含';
   }
   const left = remaining ?? Math.max(0, limit);
   return `剩 ${left}/${limit}`;
@@ -530,22 +560,24 @@ function formatQuotaLabel(remaining: number | null, limit: number | null): strin
 function formatValidUntilDate(iso: string): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) {
-    return "—";
+    return '—';
   }
   const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  const d = String(date.getDate()).padStart(2, "0");
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
   return `${y}-${m}-${d}`;
 }
 
-function buildMapBenefitRow(map: EventPackageEntitlement["quotas"]["map"]): ProfileEventBenefitRow {
+function buildMapBenefitRow(
+  map: EventPackageEntitlement['quotas']['map'],
+): ProfileEventBenefitRow {
   if (!map.active) {
     return {
-      id: "map",
-      label: "地图同频雷达",
-      quotaLabel: "未激活",
+      id: 'map',
+      label: '地图同频雷达',
+      quotaLabel: '未激活',
       remainingRatio: 0,
-      accent: "map",
+      accent: 'map',
     };
   }
 
@@ -554,35 +586,35 @@ function buildMapBenefitRow(map: EventPackageEntitlement["quotas"]["map"]): Prof
 
   if (daysLeft <= 1) {
     return {
-      id: "map",
-      label: "地图同频雷达",
-      quotaLabel: "当日有效",
+      id: 'map',
+      label: '地图同频雷达',
+      quotaLabel: '当日有效',
       remainingRatio: 1,
-      accent: "map",
+      accent: 'map',
       showBar: false,
-      hint: "权益今日到期",
+      hint: '权益今日到期',
     };
   }
 
   return {
-    id: "map",
-    label: "地图同频雷达",
+    id: 'map',
+    label: '地图同频雷达',
     quotaLabel: `剩 ${daysLeft} 天`,
     remainingRatio: mapLimit > 0 ? Math.min(1, daysLeft / mapLimit) : 1,
-    accent: "map",
+    accent: 'map',
     hint: mapLimit > 1 ? `共 ${mapLimit} 天场次权益` : undefined,
   };
 }
 
 function tierIncludesPostPin(
-  postPin: EventPackageEntitlement["quotas"]["postPin"] | null | undefined,
+  postPin: EventPackageEntitlement['quotas']['postPin'] | null | undefined,
 ): boolean {
   return (postPin?.limit ?? 0) > 0;
 }
 
 function resolvePaidTierDisplay(
   entitlement: EventPackageEntitlement,
-): Pick<ProfileEventBenefitCardModel, "tierId" | "tierName"> {
+): Pick<ProfileEventBenefitCardModel, 'tierId' | 'tierName'> {
   const tierId = (entitlement.paidTierId ?? entitlement.tierId) as PackageTierId;
   const catalogTier = MOCK_PACKAGE_CATALOG.tiers.find((tier) => tier.id === tierId);
   return {
@@ -592,39 +624,50 @@ function resolvePaidTierDisplay(
 }
 
 function buildPinBenefitRow(
-  postPin: EventPackageEntitlement["quotas"]["postPin"],
+  postPin: EventPackageEntitlement['quotas']['postPin'],
 ): ProfileEventBenefitRow {
   const { remaining, limit } = postPin;
   const ratio = quotaRatio(remaining, limit);
 
   return {
-    id: "post-pin",
-    label: "主页置顶",
-    quotaLabel: limit == null ? "不限" : limit <= 0 ? "未包含" : formatQuotaLabel(remaining, limit),
+    id: 'post-pin',
+    label: '主页置顶',
+    quotaLabel:
+      limit == null
+        ? '不限'
+        : limit <= 0
+          ? '未包含'
+          : formatQuotaLabel(remaining, limit),
     remainingRatio: limit != null && limit > 0 ? ratio : 0,
-    accent: "gold",
+    accent: 'gold',
     hint: undefined,
   };
 }
 
 export function buildEventBenefitRows(
-  quotas: EventPackageEntitlement["quotas"],
+  quotas: EventPackageEntitlement['quotas'],
 ): ProfileEventBenefitRow[] {
   const rows: ProfileEventBenefitRow[] = [
     {
-      id: "contact",
-      label: "联系方式解锁",
-      quotaLabel: formatQuotaLabel(quotas.contactUnlock.remaining, quotas.contactUnlock.limit),
-      remainingRatio: quotaRatio(quotas.contactUnlock.remaining, quotas.contactUnlock.limit),
-      accent: "purple",
-      quotaTone: "muted",
+      id: 'contact',
+      label: '联系方式解锁',
+      quotaLabel: formatQuotaLabel(
+        quotas.contactUnlock.remaining,
+        quotas.contactUnlock.limit,
+      ),
+      remainingRatio: quotaRatio(
+        quotas.contactUnlock.remaining,
+        quotas.contactUnlock.limit,
+      ),
+      accent: 'purple',
+      quotaTone: 'muted',
     },
     {
-      id: "ai-match",
-      label: "AI 智能匹配",
+      id: 'ai-match',
+      label: 'AI 智能匹配',
       quotaLabel: formatQuotaLabel(quotas.aiMatch.remaining, quotas.aiMatch.limit),
       remainingRatio: quotaRatio(quotas.aiMatch.remaining, quotas.aiMatch.limit),
-      accent: "pink",
+      accent: 'pink',
     },
     buildMapBenefitRow(quotas.map),
   ];
@@ -639,7 +682,7 @@ export function buildEventBenefitRows(
 /** Second offline card — Pro+ on VAC (activity 6) for “共 2 张” demo. */
 export function buildMockProPlusEntitlement(): EventPackageEntitlement {
   const proPlusTier =
-    MOCK_PACKAGE_CATALOG.tiers.find((tier) => tier.id === "pro_plus") ??
+    MOCK_PACKAGE_CATALOG.tiers.find((tier) => tier.id === 'pro_plus') ??
     MOCK_PACKAGE_CATALOG.tiers[1];
   const aiLimit = proPlusTier.limits.aiMatchCount ?? 15;
   const contactLimit = proPlusTier.limits.contactUnlockCount ?? 12;
@@ -648,9 +691,9 @@ export function buildMockProPlusEntitlement(): EventPackageEntitlement {
 
   return {
     activityLegacyId: 6,
-    tierId: "pro_plus",
+    tierId: 'pro_plus',
     tierName: proPlusTier.name,
-    paidTierId: "pro_plus",
+    paidTierId: 'pro_plus',
     purchasedAt: new Date().toISOString(),
     quotas: {
       aiMatch: { limit: aiLimit, used: 3, remaining: aiLimit - 3 },
@@ -672,16 +715,18 @@ export function buildMockProPlusEntitlement(): EventPackageEntitlement {
 
 export function buildMockPaidEntitlement(): EventPackageEntitlement {
   const proTier =
-    MOCK_PACKAGE_CATALOG.tiers.find((tier) => tier.id === "pro") ?? MOCK_PACKAGE_CATALOG.tiers[0];
+    MOCK_PACKAGE_CATALOG.tiers.find((tier) => tier.id === 'pro') ??
+    MOCK_PACKAGE_CATALOG.tiers[0];
   const aiLimit = (proTier.limits.aiMatchCount ?? 0) + FREE_MONTHLY_AI_LIMIT;
-  const contactLimit = (proTier.limits.contactUnlockCount ?? 0) + FREE_MONTHLY_CONTACT_LIMIT;
+  const contactLimit =
+    (proTier.limits.contactUnlockCount ?? 0) + FREE_MONTHLY_CONTACT_LIMIT;
   const mapDays = proTier.limits.mapDays;
 
   return {
     activityLegacyId: MOCK_PROFILE_SEED_ACTIVITY_LEGACY_ID,
-    tierId: "pro",
+    tierId: 'pro',
     tierName: proTier.name,
-    paidTierId: "pro",
+    paidTierId: 'pro',
     purchasedAt: new Date().toISOString(),
     quotas: {
       aiMatch: { limit: aiLimit, used: 0, remaining: aiLimit },
@@ -699,15 +744,18 @@ export function buildMockPaidEntitlement(): EventPackageEntitlement {
 
 export function buildEventBenefitCardModel(
   entitlement: EventPackageEntitlement,
-  activity?: Partial<Pick<ProfileActivityItem, "title" | "date" | "location" | "image">> | null,
+  activity?: Partial<
+    Pick<ProfileActivityItem, 'title' | 'date' | 'location' | 'image'>
+  > | null,
 ): ProfileEventBenefitCardModel {
   const title = safeTrim(activity?.title) || `活动 ${entitlement.activityLegacyId}`;
   const date = safeTrim(activity?.date);
   const location = safeTrim(activity?.location);
-  const eventMeta = [date, location].filter(Boolean).join(" · ");
+  const eventMeta = [date, location].filter(Boolean).join(' · ');
 
   const quotas = resolveEntitlementQuotas(entitlement);
-  const validUntilIso = resolveEntitlementValidUntilIso(entitlement) ?? quotas.map.expiresAt;
+  const validUntilIso =
+    resolveEntitlementValidUntilIso(entitlement) ?? quotas.map.expiresAt;
 
   const { tierId, tierName } = resolvePaidTierDisplay(entitlement);
 
@@ -715,10 +763,12 @@ export function buildEventBenefitCardModel(
     activityLegacyId: entitlement.activityLegacyId,
     eventTitle: title,
     eventMeta,
-    eventImage: safeTrim(activity?.image) || "https://picsum.photos/seed/sync-benefit-event/96/96",
+    eventImage:
+      safeTrim(activity?.image) ||
+      'https://picsum.photos/seed/sync-benefit-event/96/96',
     tierId,
     tierName,
-    validUntilLabel: `权益有效期至 ${formatValidUntilDate(validUntilIso ?? "")}`,
+    validUntilLabel: `权益有效期至 ${formatValidUntilDate(validUntilIso ?? '')}`,
     rows: buildEventBenefitRows(quotas),
   };
 }
@@ -727,7 +777,7 @@ export function buildProfileBenefitsFromEntitlement(
   entitlement: EventPackageEntitlement,
 ): ProfileBenefits {
   const { tierName, tierId, paidTierId } = entitlement;
-  const isFreeOnly = tierId === "free" || !paidTierId;
+  const isFreeOnly = tierId === 'free' || !paidTierId;
 
   if (isFreeOnly) {
     return buildFreeProfileBenefits(entitlement.freeMonthly ?? null);
@@ -737,11 +787,11 @@ export function buildProfileBenefitsFromEntitlement(
 
   return {
     planLabel: tierName,
-    upgradeLabel: "更换套餐",
+    upgradeLabel: '更换套餐',
     promo: {
-      prefix: "当前场次套餐 · ",
+      prefix: '当前场次套餐 · ',
       highlight: tierName,
-      suffix: " · 含每月免费额度",
+      suffix: ' · 含每月免费额度',
     },
     metrics: buildMetricsFromQuotas(quotas),
   };

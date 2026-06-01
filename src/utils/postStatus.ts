@@ -1,35 +1,39 @@
-import type { PostStatusBadgeVariant } from "./postStatusBadge";
+import type { PostStatusBadgeVariant } from './postStatusBadge';
 
 /**
  * 帖子招募状态（recruiting | completed）：
  * - 招募中
  * - 已组队：组队成功或手动标记
  */
-export type BackendPostStatusLabel = "招募中" | "已组队" | "已隐藏";
+export type BackendPostStatusLabel = '招募中' | '已组队' | '已隐藏';
 
 export function isRecruitingPostStatus(status: BackendPostStatusLabel): boolean {
-  return status === "招募中";
+  return status === '招募中';
 }
 
 export function isHiddenPostStatus(status: BackendPostStatusLabel): boolean {
-  return status === "已隐藏";
+  return status === '已隐藏';
 }
 
 /** Activity page post card shows only recruiting vs full. */
-export type EventPostCardStatus = "recruiting" | "full";
+export type EventPostCardStatus = 'recruiting' | 'full';
 
-export function toEventPostCardStatus(status: BackendPostStatusLabel): EventPostCardStatus {
-  return status === "已组队" ? "full" : "recruiting";
+export function toEventPostCardStatus(
+  status: BackendPostStatusLabel,
+): EventPostCardStatus {
+  return status === '已组队' ? 'full' : 'recruiting';
 }
 
 export function postStatusBadgeClass(status: EventPostCardStatus): string {
-  return postStatusBadgeClassForVariant(status === "full" ? "full" : "recruiting");
+  return postStatusBadgeClassForVariant(status === 'full' ? 'full' : 'recruiting');
 }
 
-export function postStatusBadgeClassForVariant(variant: PostStatusBadgeVariant): string {
+export function postStatusBadgeClassForVariant(
+  variant: PostStatusBadgeVariant,
+): string {
   return `s-post-status-badge s-post-status-badge--${variant}`;
 }
 
 export function eventPostStatusText(status: EventPostCardStatus): string {
-  return status === "full" ? "已组队" : "招募中";
+  return status === 'full' ? '已组队' : '招募中';
 }

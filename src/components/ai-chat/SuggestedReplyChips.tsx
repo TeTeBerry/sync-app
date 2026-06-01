@@ -1,8 +1,8 @@
-import { Button, cn } from "../ui";
-import { useAiChatStore } from "../../stores/aiChatStore";
-import { Text, View } from "@tarojs/components";
+import { Button, cn } from '../ui';
+import { useAiChatStore } from '../../stores/aiChatStore';
+import { Text, View } from '@tarojs/components';
 
-const PUBLISH_CONFIRM_REPLY = "确认发布";
+const PUBLISH_CONFIRM_REPLY = '确认发布';
 
 export function SuggestedReplyChips({
   replies: repliesProp,
@@ -24,8 +24,9 @@ export function SuggestedReplyChips({
         <Button
           key={reply}
           className={cn(
-            "s-ai-assistant-chat__copy-chip",
-            reply === PUBLISH_CONFIRM_REPLY && "s-ai-assistant-chat__copy-chip--primary",
+            's-ai-assistant-chat__copy-chip',
+            reply === PUBLISH_CONFIRM_REPLY &&
+              's-ai-assistant-chat__copy-chip--primary',
           )}
           disabled={disabled}
           onClick={() => onSelect(reply)}

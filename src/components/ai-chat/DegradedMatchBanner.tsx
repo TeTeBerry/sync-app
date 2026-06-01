@@ -1,5 +1,5 @@
-import { useAiChatStore } from "../../stores/aiChatStore";
-import { Text } from "@tarojs/components";
+import { useAiChatStore } from '../../stores/aiChatStore';
+import { Text } from '@tarojs/components';
 
 export function DegradedMatchBanner() {
   const degraded = useAiChatStore((state) => state.degraded);

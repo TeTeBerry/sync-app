@@ -1,5 +1,5 @@
-import { PLACEHOLDER_EVENT_HERO } from "./remoteImages";
-import { thumbnailImageUrl } from "../utils/imageUrl";
+import { PLACEHOLDER_EVENT_HERO } from './remoteImages';
+import { thumbnailImageUrl } from '../utils/imageUrl';
 
 /** Resolve list/card thumb: resized remote from API, then network placeholder (no bundled JPEGs). */
 export function resolveActivityThumb(

@@ -1,15 +1,15 @@
-import { getClientUserId, getClientUserName } from "./session";
+import { getClientUserId, getClientUserName } from './session';
 
 /** Matches backend DEFAULT_PROFILE_EXTERNAL_ID (demo owner). */
-const DEMO_OWNER_USER_ID = "demo-zara";
+const DEMO_OWNER_USER_ID = 'demo-zara';
 
 function authorNameMatches(stored: string, client?: string): boolean {
   const author = stored.trim();
   const name = client?.trim();
   if (!name || !author) return false;
   if (author === name) return true;
-  const clientFirst = name.split(/\s+/)[0] ?? "";
-  const authorFirst = author.split(/\s+/)[0] ?? "";
+  const clientFirst = name.split(/\s+/)[0] ?? '';
+  const authorFirst = author.split(/\s+/)[0] ?? '';
   return (
     clientFirst === authorFirst ||
     name.startsWith(`${authorFirst} `) ||
@@ -29,7 +29,7 @@ export function isCurrentUserPostAuthor(
   const clientUserId = getClientUserId().trim();
   const clientUserName = getClientUserName().trim();
   const postUserId = authorUserId?.trim();
-  const normalizedAuthorName = authorName?.trim() ?? "";
+  const normalizedAuthorName = authorName?.trim() ?? '';
 
   if (clientUserId && postUserId && postUserId === clientUserId) {
     return true;

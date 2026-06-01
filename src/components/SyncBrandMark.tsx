@@ -1,9 +1,9 @@
-import "./SyncBrandMark.scss";
-import { AudioWaveform } from "lucide-react-taro";
-import type { FC } from "react";
-import { Text, View } from "@tarojs/components";
+import './SyncBrandMark.scss';
+import { AudioWaveform } from 'lucide-react-taro';
+import type { FC } from 'react';
+import { Text, View } from '@tarojs/components';
 
-const BRAND_ICON_COLOR = "#4cc9f0";
+const BRAND_ICON_COLOR = '#4cc9f0';
 const BRAND_ICON_SIZE = 24;
 
 export type SyncBrandMarkProps = {
@@ -14,7 +14,7 @@ export type SyncBrandMarkProps = {
 
 /** Homepage SYNC mark: cyan waveform + bold SYNC wordmark. */
 export const SyncBrandMark: FC<SyncBrandMarkProps> = ({ subtitle, className }) => {
-  const rootClass = ["s-sync-brand", className].filter(Boolean).join(" ");
+  const rootClass = ['s-sync-brand', className].filter(Boolean).join(' ');
 
   return (
     <View className={rootClass}>

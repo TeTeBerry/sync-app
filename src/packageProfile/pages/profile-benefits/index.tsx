@@ -1,29 +1,30 @@
-import "../../../pages/profile/profile.scss";
-import Taro, { useDidShow } from "@tarojs/taro";
-import React, { useCallback, useMemo, useState } from "react";
-import PageNavigation from "../../../components/PageNavigation";
-import ProfilePackageSheet from "../../../pages/profile/components/ProfilePackageSheet";
-import ProfilePaidBenefitsSection from "../../../pages/profile/components/ProfilePaidBenefitsSection";
-import { profileActivities } from "../../../pages/profile/mockData";
-import { getNextTierId } from "../../../pages/profile/profileBenefitsMapper";
-import type { ProfileEventBenefitCardModel } from "../../../pages/profile/profileBenefitsMapper";
-import type { PackageTierId } from "../../../pages/profile/profilePackageData";
-import { useProfilePaidBenefitCards } from "../../../pages/profile/useProfilePaidBenefitCards";
-import { isApiEnabled } from "../../../constants/api";
-import { useProfileActivitiesQuery } from "../../../hooks/useSyncApi";
-import { useStackPageMainHeight } from "../../../hooks/useTabPageMainHeight";
-import { ROUTES } from "../../../utils/route";
-import { useEndRouteTransitionOnShow } from "../../../hooks/useEndRouteTransitionOnShow";
-import { invalidateProfilePackageState } from "../../../utils/queryInvalidation";
-import type { ProfileActivityItem } from "../../../types/backend";
-import { ScrollView, View } from "@tarojs/components";
+import '../../../pages/profile/profile.scss';
+import Taro, { useDidShow } from '@tarojs/taro';
+import React, { useCallback, useMemo, useState } from 'react';
+import PageNavigation from '../../../components/PageNavigation';
+import ProfilePackageSheet from '../../../pages/profile/components/ProfilePackageSheet';
+import ProfilePaidBenefitsSection from '../../../pages/profile/components/ProfilePaidBenefitsSection';
+import { profileActivities } from '../../../pages/profile/mockData';
+import { getNextTierId } from '../../../pages/profile/profileBenefitsMapper';
+import type { ProfileEventBenefitCardModel } from '../../../pages/profile/profileBenefitsMapper';
+import type { PackageTierId } from '../../../pages/profile/profilePackageData';
+import { useProfilePaidBenefitCards } from '../../../pages/profile/useProfilePaidBenefitCards';
+import { isApiEnabled } from '../../../constants/api';
+import { useProfileActivitiesQuery } from '../../../hooks/useSyncApi';
+import { useStackPageMainHeight } from '../../../hooks/useTabPageMainHeight';
+import { ROUTES } from '../../../utils/route';
+import { useEndRouteTransitionOnShow } from '../../../hooks/useEndRouteTransitionOnShow';
+import { invalidateProfilePackageState } from '../../../utils/queryInvalidation';
+import type { ProfileActivityItem } from '../../../types/backend';
+import { ScrollView, View } from '@tarojs/components';
 
 const ProfileBenefitsPage: React.FC = () => {
   useEndRouteTransitionOnShow();
   const mainScrollHeight = useStackPageMainHeight();
   const apiEnabled = isApiEnabled();
   const activitiesQuery = useProfileActivitiesQuery();
-  const { benefitsLoading, paidBenefitCards, paidEntitlements } = useProfilePaidBenefitCards();
+  const { benefitsLoading, paidBenefitCards, paidEntitlements } =
+    useProfilePaidBenefitCards();
 
   const [packageSheetOpen, setPackageSheetOpen] = useState(false);
   const [packageSheetActivityLegacyId, setPackageSheetActivityLegacyId] = useState<
@@ -61,7 +62,9 @@ const ProfileBenefitsPage: React.FC = () => {
     }) => {
       const rawActivityId = options?.activityLegacyId;
       const resolvedActivityId =
-        rawActivityId != null && !Number.isNaN(rawActivityId) ? rawActivityId : undefined;
+        rawActivityId != null && !Number.isNaN(rawActivityId)
+          ? rawActivityId
+          : undefined;
       let currentPaidTierId = options?.currentPaidTierId;
       if (currentPaidTierId == null && resolvedActivityId != null) {
         const entitlement = paidEntitlements.find(
@@ -113,7 +116,7 @@ const ProfileBenefitsPage: React.FC = () => {
   );
 
   const handleUsageHistory = useCallback(() => {
-    void Taro.showToast({ title: "使用记录敬请期待", icon: "none" });
+    void Taro.showToast({ title: '使用记录敬请期待', icon: 'none' });
   }, []);
 
   useDidShow(() => {
@@ -131,7 +134,9 @@ const ProfileBenefitsPage: React.FC = () => {
         enhanced
         showScrollbar={false}
         className="s-profile-stack__scroll s-scrollbar-none"
-        style={mainScrollHeight != null ? { height: `${mainScrollHeight}px` } : undefined}
+        style={
+          mainScrollHeight != null ? { height: `${mainScrollHeight}px` } : undefined
+        }
       >
         <View className="s-profile-stack__inner">
           <ProfilePaidBenefitsSection

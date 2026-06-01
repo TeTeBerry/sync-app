@@ -1,12 +1,12 @@
 /** @handle 展示：Mia → @mia，Zara Chen → @zara.chen */
 export function formatEventPostHandle(name?: string): string {
-  const trimmed = (name ?? "").trim();
-  if (!trimmed) return "@user";
+  const trimmed = (name ?? '').trim();
+  if (!trimmed) return '@user';
   const slug = trimmed
     .toLowerCase()
-    .replace(/\s+/g, ".")
-    .replace(/[^a-z0-9._-]/g, "");
-  return `@${slug || "user"}`;
+    .replace(/\s+/g, '.')
+    .replace(/[^a-z0-9._-]/g, '');
+  return `@${slug || 'user'}`;
 }
 
 export function parseGroupProgressFromText(text: string): {

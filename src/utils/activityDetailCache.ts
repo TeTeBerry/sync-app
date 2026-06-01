@@ -1,18 +1,21 @@
-import { setCacheData } from "../hooks/useApiQuery";
-import type { BackendActivity } from "../types/backend";
-import type { EventCardUi, FeaturedEvent } from "./apiMappers";
-import { parseActivityLegacyId } from "./activityLegacyId";
+import { setCacheData } from '../hooks/useApiQuery';
+import type { BackendActivity } from '../types/backend';
+import type { EventCardUi, FeaturedEvent } from './apiMappers';
+import { parseActivityLegacyId } from './activityLegacyId';
 
 function detailQueryKey(legacyId: number) {
-  return ["activities", "detail", legacyId] as const;
+  return ['activities', 'detail', legacyId] as const;
 }
 
-function minimalActivity(legacyId: number, fields: Partial<BackendActivity>): BackendActivity {
+function minimalActivity(
+  legacyId: number,
+  fields: Partial<BackendActivity>,
+): BackendActivity {
   return {
     _id: fields._id ?? String(legacyId),
     legacyId,
     code: fields.code ?? String(legacyId),
-    name: fields.name ?? "",
+    name: fields.name ?? '',
     date: fields.date,
     location: fields.location,
     image: fields.image,

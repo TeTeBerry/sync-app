@@ -1,4 +1,4 @@
-import Taro from "@tarojs/taro";
+import Taro from '@tarojs/taro';
 
 /**
  * 活动地图视觉比例（头像为基准，会场 LOGO 略大但不压屏）
@@ -11,11 +11,15 @@ export const EVENT_MAP_BOTTOM_BAR_CONTENT_PX = 100;
 export const EVENT_MAP_TOP_BAR_CONTENT_PX = 46;
 
 /** Canvas 可用高度 = 窗口 − 顶栏 − 底栏（控件须在 Canvas 外，否则微信端点不到） */
-export function getEventMapMapViewportHeight(windowHeight?: number, topChromePx?: number): number {
+export function getEventMapMapViewportHeight(
+  windowHeight?: number,
+  topChromePx?: number,
+): number {
   const info = Taro.getWindowInfo();
   const h = windowHeight ?? info.windowHeight ?? 667;
   const safeBottom = info.safeArea ? Math.max(0, h - info.safeArea.bottom) : 0;
-  const top = topChromePx ?? EVENT_MAP_TOP_BAR_CONTENT_PX + (info.statusBarHeight ?? 44);
+  const top =
+    topChromePx ?? EVENT_MAP_TOP_BAR_CONTENT_PX + (info.statusBarHeight ?? 44);
   return Math.max(1, h - top - EVENT_MAP_BOTTOM_BAR_CONTENT_PX - safeBottom);
 }
 

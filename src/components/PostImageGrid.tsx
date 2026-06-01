@@ -1,10 +1,14 @@
-import { useCallback, useMemo } from "react";
-import { Image } from "lucide-react-taro";
-import "./PostImageGrid.scss";
-import { featuredPostImageUrl, sanitizeRemoteImageUrl, thumbnailImageUrl } from "../utils/imageUrl";
-import { openImagePreview } from "../utils/openImagePreview";
-import { ImageWithFallback } from "./ImageWithFallback";
-import { Text, View } from "@tarojs/components";
+import { useCallback, useMemo } from 'react';
+import { Image } from 'lucide-react-taro';
+import './PostImageGrid.scss';
+import {
+  featuredPostImageUrl,
+  sanitizeRemoteImageUrl,
+  thumbnailImageUrl,
+} from '../utils/imageUrl';
+import { openImagePreview } from '../utils/openImagePreview';
+import { ImageWithFallback } from './ImageWithFallback';
+import { Text, View } from '@tarojs/components';
 
 export interface PostImageGridProps {
   images: string[];
@@ -56,7 +60,12 @@ export function PostImageGrid({ images, maxDisplay = 6 }: PostImageGridProps) {
     />
   );
 
-  const renderTile = (index: number, className: string, ariaLabel: string, priority = false) => (
+  const renderTile = (
+    index: number,
+    className: string,
+    ariaLabel: string,
+    priority = false,
+  ) => (
     <View
       key={`post-img-${index}`}
       className={className}
@@ -64,7 +73,7 @@ export function PostImageGrid({ images, maxDisplay = 6 }: PostImageGridProps) {
       aria-label={ariaLabel}
       role="button"
     >
-      {renderImage(displayImages[index], "s-post-image-grid__img", priority)}
+      {renderImage(displayImages[index], 's-post-image-grid__img', priority)}
     </View>
   );
 
@@ -72,15 +81,20 @@ export function PostImageGrid({ images, maxDisplay = 6 }: PostImageGridProps) {
   if (count <= 3) {
     const gridClass =
       count === 1
-        ? "s-post-image-grid--1"
+        ? 's-post-image-grid--1'
         : count === 2
-          ? "s-post-image-grid--2"
-          : "s-post-image-grid--3";
+          ? 's-post-image-grid--2'
+          : 's-post-image-grid--3';
 
     return (
       <View className={`s-post-image-grid ${gridClass}`}>
         {displayImages.map((_, index) =>
-          renderTile(index, "s-post-image-grid__item", `查看图片 ${index + 1}`, index === 0),
+          renderTile(
+            index,
+            's-post-image-grid__item',
+            `查看图片 ${index + 1}`,
+            index === 0,
+          ),
         )}
       </View>
     );
@@ -97,7 +111,7 @@ export function PostImageGrid({ images, maxDisplay = 6 }: PostImageGridProps) {
         aria-label="查看图片 1"
         role="button"
       >
-        {renderImage(displayImages[0], "s-post-image-grid__img", true)}
+        {renderImage(displayImages[0], 's-post-image-grid__img', true)}
         <View className="s-post-image-grid__count-badge">
           <Image size={14} />
           {images.length}
@@ -115,9 +129,11 @@ export function PostImageGrid({ images, maxDisplay = 6 }: PostImageGridProps) {
               aria-label={`查看图片 ${index + 1}`}
               role="button"
             >
-              {renderImage(displayImages[index], "s-post-image-grid__img")}
+              {renderImage(displayImages[index], 's-post-image-grid__img')}
               {thumbIndex === thumbnails.length - 1 && images.length > maxDisplay ? (
-                <View className="s-post-image-grid__more">+{images.length - maxDisplay}</View>
+                <View className="s-post-image-grid__more">
+                  +{images.length - maxDisplay}
+                </View>
               ) : null}
             </View>
           );

@@ -3,19 +3,18 @@ import {
   forEachCacheEntry,
   invalidateCache,
   setCacheDataByKey,
-} from "../hooks/useApiQuery";
+} from '../hooks/useApiQuery';
 import type {
-  HomeSummary,
   HomeFeedPost,
   EventDetailPost,
   EventPostsPage,
   ProfilePostItem,
-} from "../types/backend";
-import type { BackendPostStatusLabel } from "./postStatus";
+} from '../types/backend';
+import type { BackendPostStatusLabel } from './postStatus';
 
 /** 失效通知相关查询 */
 export function invalidateNotifications() {
-  invalidateCache(["notifications"]);
+  invalidateCache(['notifications']);
 }
 
 /** 失效用户个人资料查询 */
@@ -26,12 +25,12 @@ export function invalidateProfile() {
 
 /** 失效个人资料摘要（个人 tab 展示） */
 export function invalidateProfileSummary() {
-  invalidateCache(["profile", "summary"]);
+  invalidateCache(['profile', 'summary']);
 }
 
 /** 失效单场套餐权益查询 */
 export function invalidateProfileEntitlements() {
-  invalidateCache(["profile", "entitlements"]);
+  invalidateCache(['profile', 'entitlements']);
 }
 
 /** 失效套餐权益与个人摘要（购买后刷新） */
@@ -42,35 +41,35 @@ export function invalidateProfilePackageState() {
 
 /** 失效个人活动列表 */
 export function invalidateProfileActivities() {
-  invalidateCache(["profile", "activities"]);
+  invalidateCache(['profile', 'activities']);
 }
 
 /** 失效个人帖子列表 */
 export function invalidateProfilePosts() {
-  invalidateCache(["profile", "posts"]);
+  invalidateCache(['profile', 'posts']);
 }
 
 /** 失效当前用户查询 */
 export function invalidateUser() {
-  invalidateCache(["users", "me"]);
+  invalidateCache(['users', 'me']);
 }
 
 /** 失效首页查询 */
 export function invalidateHome() {
-  invalidateCache(["home"]);
+  invalidateCache(['home']);
 }
 
 /** 失效帖子 Feed 查询 */
 export function invalidatePostFeeds() {
-  invalidateCache(["posts", "popular"]);
-  invalidateCache(["posts", "activity"]);
+  invalidateCache(['posts', 'popular']);
+  invalidateCache(['posts', 'activity']);
 }
 
 /** 失效所有帖子及关联查询 */
 export function invalidateAllPosts() {
-  invalidateCache(["posts"]);
-  invalidateCache(["profile", "posts"]);
-  invalidateCache(["profile", "summary"]);
+  invalidateCache(['posts']);
+  invalidateCache(['profile', 'posts']);
+  invalidateCache(['profile', 'summary']);
 }
 
 /** 失效注册/活动相关查询 */
@@ -82,25 +81,30 @@ export function invalidateRegistration() {
 
 /** 失效指定帖子的评论查询 */
 export function invalidatePostComments(postId: string) {
-  invalidateCache(["posts", postId, "comments"]);
+  invalidateCache(['posts', postId, 'comments']);
 }
 
-export function patchPostStatusInCaches(postId: string, status: BackendPostStatusLabel) {
+export function patchPostStatusInCaches(
+  postId: string,
+  status: BackendPostStatusLabel,
+) {
   const patchList = <T extends { id: string; status?: BackendPostStatusLabel }>(
     posts: T[] | undefined,
   ) => posts?.map((post) => (post.id === postId ? { ...post, status } : post));
 
   forEachCacheEntry((key, data) => {
-    if (!key.startsWith("posts|") && key !== "profile|posts") return;
+    if (!key.startsWith('posts|') && key !== 'profile|posts') return;
     if (!Array.isArray(data)) return;
-    const patched = patchList(data as { id: string; status?: BackendPostStatusLabel }[]);
+    const patched = patchList(
+      data as { id: string; status?: BackendPostStatusLabel }[],
+    );
     if (patched) {
       setCacheDataByKey(key, patched);
     }
   });
 
-  broadcastCacheData(["posts"]);
-  broadcastCacheData(["profile", "posts"]);
+  broadcastCacheData(['posts']);
+  broadcastCacheData(['profile', 'posts']);
 }
 
 export function patchUpdatedProfilePostInCaches(updated: ProfilePostItem) {
@@ -117,7 +121,7 @@ export function patchUpdatedProfilePostInCaches(updated: ProfilePostItem) {
     );
 
   forEachCacheEntry((key, data) => {
-    if (key !== "profile|posts") return;
+    if (key !== 'profile|posts') return;
     const patched = patchList(data as ProfilePostItem[] | undefined);
     if (patched) {
       setCacheDataByKey(key, patched);
@@ -125,11 +129,11 @@ export function patchUpdatedProfilePostInCaches(updated: ProfilePostItem) {
   });
 
   patchPostStatusInCaches(updated.id, updated.status);
-  broadcastCacheData(["profile", "posts"]);
+  broadcastCacheData(['profile', 'posts']);
 }
 
 export function patchLikedPostInCaches(
-  updated: Pick<EventDetailPost, "id" | "likes" | "liked" | "comments">,
+  updated: Pick<EventDetailPost, 'id' | 'likes' | 'liked' | 'comments'>,
 ) {
   const patchFeedPosts = (posts: HomeFeedPost[] | undefined) =>
     posts?.map((post) =>
@@ -156,10 +160,10 @@ export function patchLikedPostInCaches(
     );
 
   forEachCacheEntry((key, entryData) => {
-    if (!key.startsWith("posts|")) return;
+    if (!key.startsWith('posts|')) return;
     if (!Array.isArray(entryData)) return;
 
-    if (key.startsWith("posts|popular|")) {
+    if (key.startsWith('posts|popular|')) {
       const patched = patchFeedPosts(entryData as HomeFeedPost[]);
       if (patched) {
         setCacheDataByKey(key, patched);
@@ -167,7 +171,7 @@ export function patchLikedPostInCaches(
       return;
     }
 
-    if (key.startsWith("posts|activity|")) {
+    if (key.startsWith('posts|activity|')) {
       if (Array.isArray(entryData)) {
         const patched = patchEventPosts(entryData as EventDetailPost[]);
         if (patched) {
@@ -185,5 +189,5 @@ export function patchLikedPostInCaches(
     }
   });
 
-  broadcastCacheData(["posts"]);
+  broadcastCacheData(['posts']);
 }

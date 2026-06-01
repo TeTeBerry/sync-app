@@ -1,11 +1,11 @@
-import Taro, { useDidShow, useShareAppMessage } from "@tarojs/taro";
-import { useCallback } from "react";
-import { usePostShareStore } from "../stores/postShareStore";
+import Taro, { useDidShow, useShareAppMessage } from '@tarojs/taro';
+import { useCallback } from 'react';
+import { usePostShareStore } from '../stores/postShareStore';
 import {
   DEFAULT_POST_PAGE_SHARE,
   type PostSharePayload,
   toPostShareAppMessage,
-} from "../utils/postShare";
+} from '../utils/postShare';
 
 export type UsePostPageShareOptions = {
   /** Used when the user opens the menu share without tapping a post button. */
@@ -14,7 +14,7 @@ export type UsePostPageShareOptions = {
 
 export function usePostPageShare(options?: UsePostPageShareOptions) {
   useDidShow(() => {
-    if (process.env.TARO_ENV !== "weapp") {
+    if (process.env.TARO_ENV !== 'weapp') {
       return;
     }
     void Taro.showShareMenu({ withShareTicket: true }).catch(() => {});
@@ -27,7 +27,7 @@ export function usePostPageShare(options?: UsePostPageShareOptions) {
       return pending;
     }
     return options?.getDefaultShare?.() ?? null;
-  }, [options?.getDefaultShare]);
+  }, [options]);
 
   useShareAppMessage(() => {
     const payload = resolveSharePayload();

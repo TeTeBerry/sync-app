@@ -1,7 +1,7 @@
-import type { FC } from "react";
-import { FeedPostList } from "../../../components/FeedPostList";
-import type { ActivityPost } from "../homeData";
-import { Text, View } from "@tarojs/components";
+import type { FC } from 'react';
+import { FeedPostList } from '../../../components/FeedPostList';
+import type { ActivityPost } from '../homeData';
+import { Text, View } from '@tarojs/components';
 
 type HomeActivityFeedProps = {
   items: ActivityPost[];

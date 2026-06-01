@@ -1,14 +1,19 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.hoisted(() => {
-  process.env.TARO_ENV = "weapp";
+  process.env.TARO_ENV = 'weapp';
 });
 
-import Taro from "@tarojs/taro";
-import { useNavigationStore } from "../stores/navigationStore";
-import { beginTabRouteTransition, endRouteTransition, ROUTES, switchTabTo } from "./route";
+import Taro from '@tarojs/taro';
+import { useNavigationStore } from '../stores/navigationStore';
+import {
+  beginTabRouteTransition,
+  endRouteTransition,
+  ROUTES,
+  switchTabTo,
+} from './route';
 
-vi.mock("@tarojs/taro", () => ({
+vi.mock('@tarojs/taro', () => ({
   default: {
     getCurrentPages: vi.fn(),
     switchTab: vi.fn(),
@@ -23,29 +28,31 @@ vi.mock("@tarojs/taro", () => ({
   }),
 }));
 
-vi.mock("../constants/api", () => ({
+vi.mock('../constants/api', () => ({
   isApiEnabled: () => false,
 }));
 
-vi.mock("./subpackagePreload", () => ({
+vi.mock('./subpackagePreload', () => ({
   preloadEventSubpackage: vi.fn(),
   preloadProfileSubpackage: vi.fn(),
   preloadAiSubpackage: vi.fn(),
   preloadStackSubpackages: vi.fn(),
 }));
 
-vi.mock("../hooks/useApiQuery", () => ({
+vi.mock('../hooks/useApiQuery', () => ({
   getCacheData: vi.fn(),
 }));
 
-describe("tab switch loading", () => {
+describe('tab switch loading', () => {
   beforeEach(() => {
     endRouteTransition();
-    vi.mocked(Taro.getCurrentPages).mockReturnValue([{ route: "pages/index/index" }] as never);
+    vi.mocked(Taro.getCurrentPages).mockReturnValue([
+      { route: 'pages/index/index' },
+    ] as never);
     vi.mocked(Taro.switchTab).mockImplementation((options) => {
-      options?.success?.({ errMsg: "switchTab:ok" } as never);
-      options?.complete?.({ errMsg: "switchTab:ok" } as never);
-      return Promise.resolve({ errMsg: "switchTab:ok" });
+      options?.success?.({ errMsg: 'switchTab:ok' } as never);
+      options?.complete?.({ errMsg: 'switchTab:ok' } as never);
+      return Promise.resolve({ errMsg: 'switchTab:ok' });
     });
   });
 
@@ -54,7 +61,7 @@ describe("tab switch loading", () => {
     vi.clearAllMocks();
   });
 
-  it("beginTabRouteTransition activates store for a different tab", () => {
+  it('beginTabRouteTransition activates store for a different tab', () => {
     beginTabRouteTransition(ROUTES.EVENTS);
     expect(useNavigationStore.getState().routeTransition).toEqual({
       active: true,
@@ -62,22 +69,24 @@ describe("tab switch loading", () => {
     });
   });
 
-  it("beginTabRouteTransition skips when already on target tab", () => {
+  it('beginTabRouteTransition skips when already on target tab', () => {
     beginTabRouteTransition(ROUTES.HOME);
     expect(useNavigationStore.getState().routeTransition.active).toBe(false);
   });
 
-  it("switchTabTo shows loading then switchTab on weapp", async () => {
+  it('switchTabTo shows loading then switchTab on weapp', async () => {
     switchTabTo(ROUTES.PROFILE);
     expect(useNavigationStore.getState().routeTransition).toMatchObject({
       active: true,
       tabTarget: ROUTES.PROFILE,
     });
     await vi.waitUntil(() => vi.mocked(Taro.switchTab).mock.calls.length > 0);
-    expect(Taro.switchTab).toHaveBeenCalledWith(expect.objectContaining({ url: ROUTES.PROFILE }));
+    expect(Taro.switchTab).toHaveBeenCalledWith(
+      expect.objectContaining({ url: ROUTES.PROFILE }),
+    );
   });
 
-  it("switchTabTo does not activate loading for the active tab", () => {
+  it('switchTabTo does not activate loading for the active tab', () => {
     switchTabTo(ROUTES.HOME);
     expect(useNavigationStore.getState().routeTransition.active).toBe(false);
     expect(Taro.switchTab).not.toHaveBeenCalled();

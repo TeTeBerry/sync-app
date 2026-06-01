@@ -1,45 +1,53 @@
-import Taro from "@tarojs/taro";
-import type { EventPackageEntitlement, FreeMonthlyQuota } from "../../types/backend";
-import { buildMockPaidEntitlement, buildMockProPlusEntitlement } from "./profileBenefitsMapper";
+import Taro from '@tarojs/taro';
+import type { EventPackageEntitlement, FreeMonthlyQuota } from '../../types/backend';
+import {
+  buildMockPaidEntitlement,
+  buildMockProPlusEntitlement,
+} from './profileBenefitsMapper';
 
 /** Dev-only: override profile paid cards + global free monthly. Set `TARO_APP_DEBUG_ENTITLEMENTS=true` or use in development. */
 export type ProfileDebugEntitlementPreset =
-  | "api"
-  | "free_only"
-  | "pro_single"
-  | "pro_plus_single"
-  | "ultra_single"
-  | "dual_cards";
+  | 'api'
+  | 'free_only'
+  | 'pro_single'
+  | 'pro_plus_single'
+  | 'ultra_single'
+  | 'dual_cards';
 
-export const PROFILE_DEBUG_ENTITLEMENT_STORAGE_KEY = "sync.profile.debugEntitlementPreset";
+export const PROFILE_DEBUG_ENTITLEMENT_STORAGE_KEY =
+  'sync.profile.debugEntitlementPreset';
 
-export const PROFILE_DEBUG_ENTITLEMENT_LABELS: Record<ProfileDebugEntitlementPreset, string> = {
-  api: "API 真实数据",
-  free_only: "纯免费",
-  pro_single: "Pro 单场",
-  pro_plus_single: "Pro+ 单场",
-  ultra_single: "Ultra 单场",
-  dual_cards: "双卡 Pro+Pro+",
+export const PROFILE_DEBUG_ENTITLEMENT_LABELS: Record<
+  ProfileDebugEntitlementPreset,
+  string
+> = {
+  api: 'API 真实数据',
+  free_only: '纯免费',
+  pro_single: 'Pro 单场',
+  pro_plus_single: 'Pro+ 单场',
+  ultra_single: 'Ultra 单场',
+  dual_cards: '双卡 Pro+Pro+',
 };
 
 const PRESET_ORDER: ProfileDebugEntitlementPreset[] = [
-  "api",
-  "free_only",
-  "pro_single",
-  "pro_plus_single",
-  "ultra_single",
-  "dual_cards",
+  'api',
+  'free_only',
+  'pro_single',
+  'pro_plus_single',
+  'ultra_single',
+  'dual_cards',
 ];
 
 export function isProfileDebugEntitlementsEnabled(): boolean {
   return (
-    process.env.NODE_ENV === "development" || process.env.TARO_APP_DEBUG_ENTITLEMENTS === "true"
+    process.env.NODE_ENV === 'development' ||
+    process.env.TARO_APP_DEBUG_ENTITLEMENTS === 'true'
   );
 }
 
 function defaultFreeMonthly(): FreeMonthlyQuota {
   return {
-    period: "2026-05",
+    period: '2026-05',
     aiMatch: { limit: 3, used: 0, remaining: 3 },
     contactUnlock: { limit: 3, used: 1, remaining: 2 },
   };
@@ -48,9 +56,9 @@ function defaultFreeMonthly(): FreeMonthlyQuota {
 function buildMockUltraEntitlement(): EventPackageEntitlement {
   return {
     activityLegacyId: 1,
-    tierId: "ultra",
-    tierName: "Ultra",
-    paidTierId: "ultra",
+    tierId: 'ultra',
+    tierName: 'Ultra',
+    paidTierId: 'ultra',
     purchasedAt: new Date().toISOString(),
     quotas: {
       aiMatch: { limit: null, used: 5, remaining: null },
@@ -74,22 +82,22 @@ export type ProfileDebugEntitlementOverride = {
 export function resolveProfileDebugEntitlements(
   preset: ProfileDebugEntitlementPreset,
 ): ProfileDebugEntitlementOverride | null {
-  if (preset === "api") {
+  if (preset === 'api') {
     return null;
   }
 
   const freeMonthly = defaultFreeMonthly();
 
   switch (preset) {
-    case "free_only":
+    case 'free_only':
       return { paid: [], freeMonthly };
-    case "pro_single":
+    case 'pro_single':
       return { paid: [buildMockPaidEntitlement()], freeMonthly };
-    case "pro_plus_single":
+    case 'pro_plus_single':
       return { paid: [buildMockProPlusEntitlement()], freeMonthly };
-    case "ultra_single":
+    case 'ultra_single':
       return { paid: [buildMockUltraEntitlement()], freeMonthly };
-    case "dual_cards":
+    case 'dual_cards':
       return {
         paid: [buildMockPaidEntitlement(), buildMockProPlusEntitlement()],
         freeMonthly,
@@ -101,20 +109,22 @@ export function resolveProfileDebugEntitlements(
 
 export function readProfileDebugEntitlementPreset(): ProfileDebugEntitlementPreset {
   if (!isProfileDebugEntitlementsEnabled()) {
-    return "api";
+    return 'api';
   }
   try {
     const stored = Taro.getStorageSync(PROFILE_DEBUG_ENTITLEMENT_STORAGE_KEY);
-    if (typeof stored === "string" && stored in PROFILE_DEBUG_ENTITLEMENT_LABELS) {
+    if (typeof stored === 'string' && stored in PROFILE_DEBUG_ENTITLEMENT_LABELS) {
       return stored as ProfileDebugEntitlementPreset;
     }
   } catch {
     // ignore
   }
-  return "api";
+  return 'api';
 }
 
-export function persistProfileDebugEntitlementPreset(preset: ProfileDebugEntitlementPreset): void {
+export function persistProfileDebugEntitlementPreset(
+  preset: ProfileDebugEntitlementPreset,
+): void {
   try {
     Taro.setStorageSync(PROFILE_DEBUG_ENTITLEMENT_STORAGE_KEY, preset);
   } catch {
@@ -138,5 +148,5 @@ export function profileDebugEntitlementActionSheetItems(): string[] {
 export function profileDebugPresetFromActionSheetIndex(
   index: number,
 ): ProfileDebugEntitlementPreset {
-  return PRESET_ORDER[index] ?? "api";
+  return PRESET_ORDER[index] ?? 'api';
 }

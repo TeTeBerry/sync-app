@@ -2,51 +2,51 @@
 
 export default {
   /** 主包：仅 3 个 Tab，缩小首包体积 */
-  pages: ["pages/index/index", "pages/events/index", "pages/profile/index"],
+  pages: ['pages/index/index', 'pages/events/index', 'pages/profile/index'],
   subPackages: [
     {
-      root: "packageEvent",
-      name: "event",
+      root: 'packageEvent',
+      name: 'event',
       pages: [
-        "pages/event-detail/index",
-        "pages/event-map/index",
-        "pages/exclusive-itinerary/index",
-        "pages/my-itinerary/index",
+        'pages/event-detail/index',
+        'pages/event-map/index',
+        'pages/exclusive-itinerary/index',
+        'pages/my-itinerary/index',
       ],
     },
     {
-      root: "packageProfile",
-      name: "profile",
+      root: 'packageProfile',
+      name: 'profile',
       pages: [
-        "pages/profile-activities/index",
-        "pages/profile-benefits/index",
-        "pages/profile-posts/index",
-        "pages/settings/index",
-        "pages/notifications/index",
+        'pages/profile-activities/index',
+        'pages/profile-benefits/index',
+        'pages/profile-posts/index',
+        'pages/settings/index',
+        'pages/notifications/index',
       ],
     },
     {
-      root: "packageAi",
-      name: "ai",
-      pages: ["pages/ai-assistant/index"],
+      root: 'packageAi',
+      name: 'ai',
+      pages: ['pages/ai-assistant/index'],
     },
   ],
   tabBar: {
     custom: true,
-    color: "#888888",
-    selectedColor: "#ffffff",
-    backgroundColor: "#000000",
-    borderStyle: "black",
+    color: '#888888',
+    selectedColor: '#ffffff',
+    backgroundColor: '#000000',
+    borderStyle: 'black',
     list: [
-      { pagePath: "pages/index/index", text: "首页" },
-      { pagePath: "pages/events/index", text: "活动" },
-      { pagePath: "pages/profile/index", text: "我的" },
+      { pagePath: 'pages/index/index', text: '首页' },
+      { pagePath: 'pages/events/index', text: '活动' },
+      { pagePath: 'pages/profile/index', text: '我的' },
     ],
   },
   window: {
-    navigationStyle: "custom",
-    backgroundTextStyle: "light",
-    backgroundColor: "#000000",
+    navigationStyle: 'custom',
+    backgroundTextStyle: 'light',
+    backgroundColor: '#000000',
   },
   /** LLM itinerary generation can exceed the default 10s request limit. */
   networkTimeout: {
@@ -56,22 +56,22 @@ export default {
     downloadFile: 60000,
   },
   permission: {
-    "scope.writePhotosAlbum": {
-      desc: "保存行程屏保图片到你的相册",
+    'scope.writePhotosAlbum': {
+      desc: '保存行程屏保图片到你的相册',
     },
   },
   preloadRule: {
-    "pages/index/index": {
-      network: "all",
-      packages: ["event", "ai"],
+    'pages/index/index': {
+      network: 'all',
+      packages: ['event', 'ai'],
     },
-    "pages/events/index": {
-      network: "all",
-      packages: ["event", "ai"],
+    'pages/events/index': {
+      network: 'all',
+      packages: ['event', 'ai'],
     },
-    "pages/profile/index": {
-      network: "all",
-      packages: ["profile", "event"],
+    'pages/profile/index': {
+      network: 'all',
+      packages: ['profile', 'event'],
     },
   },
 };

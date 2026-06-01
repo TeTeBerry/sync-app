@@ -1,22 +1,38 @@
-import "./my-itinerary.scss";
-import Taro, { useRouter } from "@tarojs/taro";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { isApiEnabled } from "../../../constants/api";
-import { useActivityDetailQuery } from "../../../hooks/useSyncApi";
-import { useItineraryMutations, useItineraryScheduleQuery } from "../../../hooks/useItineraryApi";
-import { useItineraryStore } from "../../../stores/itineraryStore";
-import { Bookmark, List, Map, RotateCcw, Share2, Sparkles, Star } from "lucide-react-taro";
-import { Button, Canvas, ScrollView, Text, View } from "@tarojs/components";
-import PageNavigation, { SUB_PAGE_HEADER_META_EXTRA_PX } from "../../../components/PageNavigation";
-import { useEndRouteTransitionOnShow } from "../../../hooks/useEndRouteTransitionOnShow";
-import { useStackPageMainHeight } from "../../../hooks/useTabPageMainHeight";
+import './my-itinerary.scss';
+import Taro, { useRouter } from '@tarojs/taro';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { isApiEnabled } from '../../../constants/api';
+import { useActivityDetailQuery } from '../../../hooks/useSyncApi';
+import {
+  useItineraryMutations,
+  useItineraryScheduleQuery,
+} from '../../../hooks/useItineraryApi';
+import { useItineraryStore } from '../../../stores/itineraryStore';
+import {
+  Bookmark,
+  List,
+  Map,
+  RotateCcw,
+  Share2,
+  Sparkles,
+  Star,
+} from 'lucide-react-taro';
+import { Button, Canvas, ScrollView, Text, View } from '@tarojs/components';
+import PageNavigation, {
+  SUB_PAGE_HEADER_META_EXTRA_PX,
+} from '../../../components/PageNavigation';
+import { useEndRouteTransitionOnShow } from '../../../hooks/useEndRouteTransitionOnShow';
+import { useStackPageMainHeight } from '../../../hooks/useTabPageMainHeight';
 import {
   EXCLUSIVE_ITINERARY_DEFAULT_SELECTED_IDS,
   EXCLUSIVE_ITINERARY_DJS,
-} from "../exclusive-itinerary/exclusiveItineraryMock";
-import { resolveEventDetailIdFromQuery, ROUTES } from "../../../utils/route";
-import { useNavigationStore } from "../../../stores/navigationStore";
-import type { ItineraryDj } from "../../../types/backend";
+} from '../exclusive-itinerary/exclusiveItineraryMock';
+import { resolveEventDetailIdFromQuery, ROUTES } from '../../../utils/route';
+import { useNavigationStore } from '../../../stores/navigationStore';
+import type {
+  ItineraryDay as ApiItineraryDay,
+  ItineraryDj,
+} from '../../../types/backend';
 import {
   buildItineraryBannerCopy,
   extractPerformanceArtistsFromDays,
@@ -28,17 +44,19 @@ import {
   type ItineraryDay,
   type ItineraryTimelineDotColor,
   type ItineraryTimelineItem,
-} from "./myItineraryMock";
+} from './myItineraryMock';
 import {
   ITINERARY_WALLPAPER_CANVAS_ID,
   runSaveItineraryWallpaperFlow,
-} from "./generateItineraryWallpaper";
+} from './generateItineraryWallpaper';
+import { sanitizeItineraryDaysForSave } from './sanitizeItineraryForSave';
+import { ApiError } from '../../../utils/apiClient';
 
 /** Footer padding + dual-button row (excludes safe-area; added at runtime). */
 const FOOTER_BASE_PX = 74;
 const SEGMENT_TOGGLE_PX = 56;
 
-type ViewMode = "timeline" | "map";
+type ViewMode = 'timeline' | 'map';
 
 function mapApiDjToNameEntry(dj: ItineraryDj): DjNameEntry {
   return { id: dj.id, name: dj.name };
@@ -47,22 +65,29 @@ function mapApiDjToNameEntry(dj: ItineraryDj): DjNameEntry {
 function TimelineCard({ item }: { item: ItineraryTimelineItem }) {
   return (
     <View
-      className={["s-my-itinerary__card", item.highlighted ? "s-my-itinerary__card--highlight" : ""]
+      className={[
+        's-my-itinerary__card',
+        item.highlighted ? 's-my-itinerary__card--highlight' : '',
+      ]
         .filter(Boolean)
-        .join(" ")}
+        .join(' ')}
     >
       <Text className="s-my-itinerary__card-title">{item.title}</Text>
-      {item.subtitle ? <Text className="s-my-itinerary__card-sub">{item.subtitle}</Text> : null}
+      {item.subtitle ? (
+        <Text className="s-my-itinerary__card-sub">{item.subtitle}</Text>
+      ) : null}
       {item.timeTag || item.pill ? (
         <View className="s-my-itinerary__card-tags">
           {item.timeTag ? (
             <Text
               className={[
-                "s-my-itinerary__time-tag",
-                item.timeTagColor ? `s-my-itinerary__time-tag--${item.timeTagColor}` : "",
+                's-my-itinerary__time-tag',
+                item.timeTagColor
+                  ? `s-my-itinerary__time-tag--${item.timeTagColor}`
+                  : '',
               ]
                 .filter(Boolean)
-                .join(" ")}
+                .join(' ')}
             >
               {item.timeTag}
             </Text>
@@ -70,11 +95,11 @@ function TimelineCard({ item }: { item: ItineraryTimelineItem }) {
           {item.pill ? (
             <View
               className={[
-                "s-my-itinerary__pill",
+                's-my-itinerary__pill',
                 `s-my-itinerary__pill--${item.pill.variant}`,
-              ].join(" ")}
+              ].join(' ')}
             >
-              {item.pill.variant === "pink" ? (
+              {item.pill.variant === 'pink' ? (
                 <Star size={11} color="var(--primary)" aria-hidden />
               ) : null}
               <Text>{item.pill.label}</Text>
@@ -89,11 +114,13 @@ function TimelineCard({ item }: { item: ItineraryTimelineItem }) {
 const MyItineraryPage = () => {
   useEndRouteTransitionOnShow();
   const router = useRouter();
-  const activeActivityLegacyId = useNavigationStore((state) => state.activeActivityLegacyId);
+  const activeActivityLegacyId = useNavigationStore(
+    (state) => state.activeActivityLegacyId,
+  );
 
   const activityLegacyId = useMemo(
     () => resolveEventDetailIdFromQuery(router.params, activeActivityLegacyId),
-    [activeActivityLegacyId, router.params.activityLegacyId, router.params.id],
+    [activeActivityLegacyId, router.params],
   );
 
   const [selectedDjIds, setSelectedDjIds] = useState<string[]>(() =>
@@ -111,7 +138,9 @@ const MyItineraryPage = () => {
   );
   const { save } = useItineraryMutations(activityLegacyId ?? 0);
 
-  const [itineraryDays, setItineraryDays] = useState<ItineraryDay[]>(() => MY_ITINERARY_DAYS);
+  const [itineraryDays, setItineraryDays] = useState<ItineraryDay[]>(
+    () => MY_ITINERARY_DAYS,
+  );
   const [eventMeta, setEventMeta] = useState(MY_ITINERARY_EVENT_META);
 
   useEffect(() => {
@@ -176,12 +205,12 @@ const MyItineraryPage = () => {
     [eventMeta, itineraryArtistNames, itineraryDays, selectedDjIds, selectedDjNames],
   );
 
-  const [viewMode, setViewMode] = useState<ViewMode>("timeline");
-  const [activeDayId, setActiveDayId] = useState(() => itineraryDays[0]?.id ?? "");
+  const [viewMode, setViewMode] = useState<ViewMode>('timeline');
+  const [activeDayId, setActiveDayId] = useState(() => itineraryDays[0]?.id ?? '');
 
   useEffect(() => {
     if (!itineraryDays.some((d) => d.id === activeDayId)) {
-      setActiveDayId(itineraryDays[0]?.id ?? "");
+      setActiveDayId(itineraryDays[0]?.id ?? '');
     }
   }, [activeDayId, itineraryDays]);
 
@@ -194,7 +223,8 @@ const MyItineraryPage = () => {
     try {
       const win = Taro.getWindowInfo();
       const screenHeight = win.screenHeight ?? win.windowHeight ?? 667;
-      const safeBottom = win.safeArea != null ? Math.max(0, screenHeight - win.safeArea.bottom) : 0;
+      const safeBottom =
+        win.safeArea != null ? Math.max(0, screenHeight - win.safeArea.bottom) : 0;
       return FOOTER_BASE_PX + safeBottom;
     } catch {
       return FOOTER_BASE_PX;
@@ -206,7 +236,7 @@ const MyItineraryPage = () => {
   );
 
   const handleShare = useCallback(() => {
-    void Taro.showToast({ title: "分享功能即将上线", icon: "none" });
+    void Taro.showToast({ title: '分享功能即将上线', icon: 'none' });
   }, []);
 
   const handleReselect = useCallback(() => {
@@ -214,27 +244,42 @@ const MyItineraryPage = () => {
   }, []);
 
   const handleSave = useCallback(async () => {
+    const daysForSave = sanitizeItineraryDaysForSave(
+      itineraryDays as ApiItineraryDay[],
+    );
+
+    let serverSaved = false;
     if (apiEnabled && Number.isFinite(activityLegacyId) && activityLegacyId > 0) {
       try {
         await save({
-          eventMeta,
-          days: itineraryDays,
+          eventMeta: eventMeta.trim().slice(0, 200),
+          days: daysForSave,
           selectedDjIds: selectedDjIds,
         });
-      } catch {
-        void Taro.showToast({ title: "保存失败，请重试", icon: "none" });
+        serverSaved = true;
+      } catch (error) {
+        const message =
+          error instanceof ApiError
+            ? error.message
+            : error instanceof Error
+              ? error.message
+              : '保存失败，请重试';
+        void Taro.showToast({ title: message, icon: 'none' });
         return;
       }
     }
 
-    void runSaveItineraryWallpaperFlow({
-      eventMeta,
-      days: itineraryDays.map((day) => ({
-        dateKey: day.id,
-        dateLabel: day.bannerDateLabel,
-        items: day.items,
-      })),
-    });
+    void runSaveItineraryWallpaperFlow(
+      {
+        eventMeta,
+        days: daysForSave.map((day) => ({
+          dateKey: day.id,
+          dateLabel: day.bannerDateLabel,
+          items: day.items,
+        })),
+      },
+      { serverSaved },
+    );
   }, [activityLegacyId, apiEnabled, eventMeta, itineraryDays, save, selectedDjIds]);
 
   const fallback =
@@ -269,28 +314,28 @@ const MyItineraryPage = () => {
       <View className="s-my-itinerary__segment">
         <Button
           className={[
-            "s-my-itinerary__segment-btn",
-            viewMode === "timeline" ? "s-my-itinerary__segment-btn--active" : "",
+            's-my-itinerary__segment-btn',
+            viewMode === 'timeline' ? 's-my-itinerary__segment-btn--active' : '',
           ]
             .filter(Boolean)
-            .join(" ")}
+            .join(' ')}
           hoverClass="s-my-itinerary__segment-btn--pressed"
-          onTap={() => setViewMode("timeline")}
+          onTap={() => setViewMode('timeline')}
         >
-          <List size={16} color={viewMode === "timeline" ? "#fff" : "#8e8e93"} />
+          <List size={16} color={viewMode === 'timeline' ? '#fff' : '#8e8e93'} />
           <Text>时间轴</Text>
         </Button>
         <Button
           className={[
-            "s-my-itinerary__segment-btn",
-            viewMode === "map" ? "s-my-itinerary__segment-btn--active" : "",
+            's-my-itinerary__segment-btn',
+            viewMode === 'map' ? 's-my-itinerary__segment-btn--active' : '',
           ]
             .filter(Boolean)
-            .join(" ")}
+            .join(' ')}
           hoverClass="s-my-itinerary__segment-btn--pressed"
-          onTap={() => setViewMode("map")}
+          onTap={() => setViewMode('map')}
         >
-          <Map size={16} color={viewMode === "map" ? "#fff" : "#8e8e93"} />
+          <Map size={16} color={viewMode === 'map' ? '#fff' : '#8e8e93'} />
           <Text>地图</Text>
         </Button>
       </View>
@@ -300,7 +345,9 @@ const MyItineraryPage = () => {
         enhanced
         showScrollbar={false}
         className="s-my-itinerary__scroll s-scrollbar-none"
-        style={mainScrollHeight != null ? { height: `${mainScrollHeight}px` } : undefined}
+        style={
+          mainScrollHeight != null ? { height: `${mainScrollHeight}px` } : undefined
+        }
       >
         <View className="s-my-itinerary__inner">
           <View className="s-my-itinerary__banner">
@@ -313,7 +360,7 @@ const MyItineraryPage = () => {
             </View>
           </View>
 
-          {viewMode === "timeline" ? (
+          {viewMode === 'timeline' ? (
             <>
               <View className="s-my-itinerary__date-tabs">
                 {itineraryDays.map((day) => {
@@ -322,11 +369,11 @@ const MyItineraryPage = () => {
                     <Button
                       key={day.id}
                       className={[
-                        "s-my-itinerary__date-tab",
-                        active ? "s-my-itinerary__date-tab--active" : "",
+                        's-my-itinerary__date-tab',
+                        active ? 's-my-itinerary__date-tab--active' : '',
                       ]
                         .filter(Boolean)
-                        .join(" ")}
+                        .join(' ')}
                       hoverClass="s-my-itinerary__date-tab--pressed"
                       onTap={() => setActiveDayId(day.id)}
                     >
@@ -342,17 +389,17 @@ const MyItineraryPage = () => {
                   <View key={item.id} className="s-my-itinerary__timeline-item">
                     <Text
                       className={[
-                        "s-my-itinerary__timeline-time",
+                        's-my-itinerary__timeline-time',
                         `s-my-itinerary__timeline-time--${item.dotColor}`,
-                      ].join(" ")}
+                      ].join(' ')}
                     >
                       {item.time}
                     </Text>
                     <View
                       className={[
-                        "s-my-itinerary__timeline-dot",
+                        's-my-itinerary__timeline-dot',
                         `s-my-itinerary__timeline-dot--${item.dotColor as ItineraryTimelineDotColor}`,
-                      ].join(" ")}
+                      ].join(' ')}
                       aria-hidden
                     />
                     <TimelineCard item={item} />
@@ -363,7 +410,9 @@ const MyItineraryPage = () => {
           ) : (
             <View className="s-my-itinerary__map-placeholder">
               <Map size={36} color="#8e8e93" aria-hidden />
-              <Text className="s-my-itinerary__map-placeholder-text">地图视图即将上线</Text>
+              <Text className="s-my-itinerary__map-placeholder-text">
+                地图视图即将上线
+              </Text>
               <Text className="s-my-itinerary__map-placeholder-sub">
                 场馆地图与演出点位导航功能开发中
               </Text>

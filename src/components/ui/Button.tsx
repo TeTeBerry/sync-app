@@ -1,8 +1,8 @@
-import React, { forwardRef } from "react";
-import { bem } from "./bem";
-import { cn } from "./cn";
-import { Button as TaroButton } from "@tarojs/components";
-import type { ButtonProps as TaroButtonProps } from "@tarojs/components";
+import React, { forwardRef } from 'react';
+import { bem } from './bem';
+import { cn } from './cn';
+import { Button as TaroButton } from '@tarojs/components';
+import type { ButtonProps as TaroButtonProps } from '@tarojs/components';
 
 export interface ButtonProps extends TaroButtonProps {
   /** BEM block prefix, e.g. `s-aim-modal` */

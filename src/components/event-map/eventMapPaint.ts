@@ -3,42 +3,50 @@ import {
   EVENT_MAP_MARKERS,
   markerAvatarUrl,
   type EventMapMarker,
-} from "./eventMapMarkers";
+} from './eventMapMarkers';
 import {
   createIsometricProjection,
   projectRect,
   type IsometricProjection,
   type ProjectedPoint,
-} from "./isometricProjection";
+} from './isometricProjection';
 import {
   applyViewportTransform,
   DEFAULT_EVENT_MAP_VIEWPORT,
   type EventMapViewport,
-} from "./eventMapViewport";
-import { decodeRouteQueryParam } from "../../utils/route";
+} from './eventMapViewport';
+import { decodeRouteQueryParam } from '../../utils/route';
 import {
   drawOfficialStormLogoSlowRotateSafe,
   drawOfficialStormLogoStaticSafe,
   stormLogoBottomOffset,
-} from "./eventMapStormLogo";
-import { getMapWorldDimensions, MAP_VENUE_NX, MAP_VENUE_NY } from "./eventMapWorld";
-import { getMapAvatarBaseRadius, getStormLogoHalfSize, MAP_VENUE_PILL_GAP } from "./eventMapLayout";
-import { createMapOffscreenCanvas, isMapOffscreenSupported } from "./mapOffscreenCanvas";
+} from './eventMapStormLogo';
+import { getMapWorldDimensions, MAP_VENUE_NX, MAP_VENUE_NY } from './eventMapWorld';
+import {
+  getMapAvatarBaseRadius,
+  getStormLogoHalfSize,
+  MAP_VENUE_PILL_GAP,
+} from './eventMapLayout';
+import { createMapOffscreenCanvas } from './mapOffscreenCanvas';
 
-export const EVENT_MAP_BG = "#0e0b16";
+export const EVENT_MAP_BG = '#0e0b16';
 const BG = EVENT_MAP_BG;
-const BLOCK = "#1b1429";
-const GRID = "rgba(140, 120, 180, 0.12)";
-const STREET = "rgba(160, 150, 190, 0.35)";
-const CONNECTOR = "rgba(167, 139, 250, 0.75)";
+const BLOCK = '#1b1429';
+const GRID = 'rgba(140, 120, 180, 0.12)';
+const STREET = 'rgba(160, 150, 190, 0.35)';
+const CONNECTOR = 'rgba(167, 139, 250, 0.75)';
 
-type CanvasImageSource = Parameters<CanvasRenderingContext2D["drawImage"]>[0];
+type CanvasImageSource = Parameters<CanvasRenderingContext2D['drawImage']>[0];
 
 const VENUE_NY = 0.44;
-const MARKERS_BY_DEPTH = Object.freeze([...EVENT_MAP_MARKERS].sort((a, b) => a.ny - b.ny));
+const MARKERS_BY_DEPTH = Object.freeze(
+  [...EVENT_MAP_MARKERS].sort((a, b) => a.ny - b.ny),
+);
 
 /** 点击检测：深度大的（靠前）优先 */
-export const EVENT_MAP_MARKERS_HIT_TEST = Object.freeze([...MARKERS_BY_DEPTH].reverse());
+export const EVENT_MAP_MARKERS_HIT_TEST = Object.freeze(
+  [...MARKERS_BY_DEPTH].reverse(),
+);
 
 const CITY_BLOCKS: Array<{ x: number; y: number; w: number; h: number }> = [
   { x: 0.05, y: 0.18, w: 0.22, h: 0.14 },
@@ -129,8 +137,8 @@ function drawProjectedText(
   }
   ctx.font = options.font;
   ctx.fillStyle = options.fillStyle;
-  ctx.textAlign = options.textAlign ?? "center";
-  ctx.textBaseline = options.textBaseline ?? "middle";
+  ctx.textAlign = options.textAlign ?? 'center';
+  ctx.textBaseline = options.textBaseline ?? 'middle';
   ctx.fillText(text, 0, 0);
   ctx.restore();
 }
@@ -139,25 +147,25 @@ function drawStreetLabels(ctx: CanvasRenderingContext2D, proj: IsometricProjecti
   const { width: w, height: h } = proj;
   const font = "600 10px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
 
-  drawProjectedText(ctx, "NW 12TH AVE", proj.project(w * 0.1, h * 0.42), {
+  drawProjectedText(ctx, 'NW 12TH AVE', proj.project(w * 0.1, h * 0.42), {
     font,
     fillStyle: STREET,
     rotateRad: -Math.PI / 2,
   });
-  drawProjectedText(ctx, "NE 11TH ST", proj.project(w * 0.72, h * 0.72), {
+  drawProjectedText(ctx, 'NE 11TH ST', proj.project(w * 0.72, h * 0.72), {
     font,
     fillStyle: STREET,
   });
-  drawProjectedText(ctx, "NE 10TH ST", proj.project(w * 0.5, h * 0.88), {
+  drawProjectedText(ctx, 'NE 10TH ST', proj.project(w * 0.5, h * 0.88), {
     font,
     fillStyle: STREET,
   });
-  drawProjectedText(ctx, "E 8TH AVE", proj.project(w * 0.88, h * 0.38), {
+  drawProjectedText(ctx, 'E 8TH AVE', proj.project(w * 0.88, h * 0.38), {
     font,
     fillStyle: STREET,
     rotateRad: -Math.PI / 2,
   });
-  drawProjectedText(ctx, "W 9TH AVE", proj.project(w * 0.06, h * 0.58), {
+  drawProjectedText(ctx, 'W 9TH AVE', proj.project(w * 0.06, h * 0.58), {
     font,
     fillStyle: STREET,
     rotateRad: -Math.PI / 2,
@@ -173,7 +181,7 @@ function roundRect(
   r: number,
 ) {
   const radius = Math.min(r, w / 2, h / 2);
-  if (radius <= 0 || w <= 0 || h <= 0 || typeof ctx.arcTo !== "function") {
+  if (radius <= 0 || w <= 0 || h <= 0 || typeof ctx.arcTo !== 'function') {
     ctx.beginPath();
     ctx.rect(x, y, w, h);
     ctx.closePath();
@@ -208,7 +216,10 @@ function drawStar(ctx: CanvasRenderingContext2D, cx: number, cy: number, size: n
   ctx.fill();
 }
 
-function getStormVenueCenter(proj: IsometricProjection, stormLogo?: CanvasImageSource | null) {
+function getStormVenueCenter(
+  proj: IsometricProjection,
+  stormLogo?: CanvasImageSource | null,
+) {
   const { width: w, height: h } = proj;
   const center = proj.projectNorm(MAP_VENUE_NX, MAP_VENUE_NY);
   const iconSize = getStormLogoHalfSize(w, h, center.scale);
@@ -241,7 +252,11 @@ function drawStormVenueDecor(
   eventTitle: string,
   stormLogo?: CanvasImageSource | null,
 ) {
-  const { w, center, label, cx, iconBottomY } = getStormVenueLayout(proj, eventTitle, stormLogo);
+  const { w, center, label, cx, iconBottomY } = getStormVenueLayout(
+    proj,
+    eventTitle,
+    stormLogo,
+  );
   const pillY = iconBottomY + MAP_VENUE_PILL_GAP * center.scale;
   ctx.font = "600 11px -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif";
   const textW = ctx.measureText(label).width;
@@ -257,14 +272,14 @@ function drawStormVenueDecor(
   ctx.save();
   ctx.translate(cx, pillY);
   ctx.scale(center.scale, center.scale);
-  ctx.fillStyle = "rgba(12, 8, 20, 0.92)";
+  ctx.fillStyle = 'rgba(12, 8, 20, 0.92)';
   roundRect(ctx, -pillW / 2, 0, pillW, 26, 13);
   ctx.fill();
-  ctx.fillStyle = "#ffffff";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
+  ctx.fillStyle = '#ffffff';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
   ctx.fillText(label, -8, 13);
-  ctx.fillStyle = "#ff2d6a";
+  ctx.fillStyle = '#ff2d6a';
   drawStar(ctx, pillW / 2 - 18, 13, 5);
   ctx.restore();
 }
@@ -367,18 +382,18 @@ function drawAvatarMarker(
   if (avatarImg) {
     ctx.drawImage(avatarImg, cx - r, cy - r, r * 2, r * 2);
   } else {
-    ctx.fillStyle = "#1a1528";
+    ctx.fillStyle = '#1a1528';
     ctx.fillRect(cx - r, cy - r, r * 2, r * 2);
-    ctx.fillStyle = "#f0eef5";
+    ctx.fillStyle = '#f0eef5';
     ctx.font = `700 ${Math.round(r * 0.72)}px -apple-system, BlinkMacSystemFont, sans-serif`;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
     ctx.fillText(marker.name.charAt(0), cx, cy + 1);
   }
   ctx.restore();
 
   if (marker.star) {
-    ctx.fillStyle = "#ff2d6a";
+    ctx.fillStyle = '#ff2d6a';
     drawStar(ctx, cx + r * 0.75, cy - r * 0.75, 4 * center.scale);
   }
 
@@ -390,27 +405,28 @@ function drawAvatarMarker(
     const tw = ctx.measureText(marker.badge).width;
     const pillW = tw + 14;
     const pillH = 18;
-    const pillX = marker.badge === "组队中" ? -pillW / 2 : -pillW / 2 + 10;
-    const pillY = marker.badge === "组队中" ? -baseR - 24 : baseR + 6;
-    ctx.fillStyle = "rgba(12, 8, 20, 0.9)";
+    const pillX = marker.badge === '组队中' ? -pillW / 2 : -pillW / 2 + 10;
+    const pillY = marker.badge === '组队中' ? -baseR - 24 : baseR + 6;
+    ctx.fillStyle = 'rgba(12, 8, 20, 0.9)';
     roundRect(ctx, pillX, pillY, pillW, pillH, 9);
     ctx.fill();
-    ctx.fillStyle = "#ffffff";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
     ctx.fillText(marker.badge, pillX + pillW / 2, pillY + pillH / 2);
     ctx.restore();
   }
 
-  const nameOffset = marker.badge === "等待队友" ? 28 : marker.badge === "组队中" ? 18 : 16;
+  const nameOffset =
+    marker.badge === '等待队友' ? 28 : marker.badge === '组队中' ? 18 : 16;
   drawProjectedText(
     ctx,
     marker.name,
     proj.project(marker.nx * w, marker.ny * h + baseR + nameOffset),
     {
-      font: "600 10px -apple-system, BlinkMacSystemFont, sans-serif",
-      fillStyle: "#ffffff",
-      textBaseline: "alphabetic",
+      font: '600 10px -apple-system, BlinkMacSystemFont, sans-serif',
+      fillStyle: '#ffffff',
+      textBaseline: 'alphabetic',
     },
   );
 }
@@ -443,21 +459,28 @@ type TerrainCacheEntry = {
 };
 
 let terrainCache: TerrainCacheEntry | null = null;
-let terrainCacheSupported: boolean | null = null;
 
 function isTerrainCacheSupported(): boolean {
   // 小程序主画布直接绘制地形，离屏地形缓存易与场景缓存叠加导致异常
   return false;
 }
 
-function paintTerrainOffscreenLayers(ctx: CanvasRenderingContext2D, cssW: number, cssH: number) {
+function paintTerrainOffscreenLayers(
+  ctx: CanvasRenderingContext2D,
+  cssW: number,
+  cssH: number,
+) {
   const proj = getProjection(cssW, cssH);
   drawGrid(ctx, proj);
   drawBlocks(ctx, proj);
   drawStreetLabels(ctx, proj);
 }
 
-function blitCachedTerrain(ctx: CanvasRenderingContext2D, cssW: number, cssH: number): boolean {
+function blitCachedTerrain(
+  ctx: CanvasRenderingContext2D,
+  cssW: number,
+  cssH: number,
+): boolean {
   if (!isTerrainCacheSupported()) {
     return false;
   }
@@ -467,11 +490,10 @@ function blitCachedTerrain(ctx: CanvasRenderingContext2D, cssW: number, cssH: nu
   if (!terrainCache || terrainCache.key !== key) {
     const offscreen = createMapOffscreenCanvas(worldW, worldH);
     if (!offscreen) {
-      terrainCacheSupported = false;
       terrainCache = null;
       return false;
     }
-    const offCtx = offscreen.getContext("2d");
+    const offCtx = offscreen.getContext('2d');
     if (!offCtx) {
       return false;
     }
@@ -484,14 +506,12 @@ function blitCachedTerrain(ctx: CanvasRenderingContext2D, cssW: number, cssH: nu
     return true;
   } catch {
     terrainCache = null;
-    terrainCacheSupported = false;
     return false;
   }
 }
 
 export function invalidateEventMapTerrainCache() {
   terrainCache = null;
-  terrainCacheSupported = null;
 }
 
 function paintMapTerrain(ctx: CanvasRenderingContext2D, cssW: number, cssH: number) {
@@ -540,7 +560,7 @@ export function paintEventMapScene(
   eventTitle: string,
   avatars: Map<string, CanvasImageSource>,
   mapViewport: EventMapViewport,
-  stormLogo?: CanvasImageSource | null,
+  _stormLogo?: CanvasImageSource | null,
 ) {
   const { worldW, worldH } = getMapWorldDimensions(width, height);
 
@@ -585,7 +605,11 @@ export function paintEventMapMarkersAfterVenueLayer(
 }
 
 /** 最小可绘制帧（无 drawImage），用于主绘制失败时的兜底 */
-export function paintEventMapMinimal(ctx: CanvasRenderingContext2D, width: number, height: number) {
+export function paintEventMapMinimal(
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+) {
   ctx.fillStyle = BG;
   ctx.fillRect(0, 0, width, height);
   paintMapTerrain(ctx, width, height);

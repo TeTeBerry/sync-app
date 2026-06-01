@@ -1,6 +1,6 @@
-import { Star } from "lucide-react-taro";
-import { Button, Text, View } from "@tarojs/components";
-import type { LiveInfoCategoryConfig } from "../liveInfoConfig";
+import { Star } from 'lucide-react-taro';
+import { Button, Text, View } from '@tarojs/components';
+import type { LiveInfoCategoryConfig } from '../liveInfoConfig';
 
 type EventLiveInfoStarRowProps = {
   category: LiveInfoCategoryConfig;
@@ -32,7 +32,7 @@ export function EventLiveInfoStarRow({
               >
                 <Star
                   size={28}
-                  color={active ? category.color : "rgba(255,255,255,0.2)"}
+                  color={active ? category.color : 'rgba(255,255,255,0.2)'}
                   filled={active}
                   className="s-live-info-stars__star"
                   aria-hidden
@@ -44,7 +44,7 @@ export function EventLiveInfoStarRow({
             <View key={index} className="s-live-info-stars__star-btn">
               <Star
                 size={12}
-                color={active ? category.color : "rgba(255,255,255,0.2)"}
+                color={active ? category.color : 'rgba(255,255,255,0.2)'}
                 filled={active}
                 className="s-live-info-stars__star"
                 aria-hidden

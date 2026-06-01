@@ -1,19 +1,19 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useDidShow } from "@tarojs/taro";
-import { fetchChatSession, clearChatSession } from "../../api/syncApi";
-import { useAiChatStore } from "../../stores/aiChatStore";
-import { mapHistoryToUiMessages } from "../../utils/aiChatHistory";
-import { isApiEnabled } from "../../constants/api";
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useDidShow } from '@tarojs/taro';
+import { fetchChatSession, clearChatSession } from '../../api/syncApi';
+import { useAiChatStore } from '../../stores/aiChatStore';
+import { mapHistoryToUiMessages } from '../../utils/aiChatHistory';
+import { isApiEnabled } from '../../constants/api';
 import {
   createFreshActivitySessionId,
   createFreshSessionId,
   getOrCreateActivitySessionId,
   getOrCreateSessionId,
   persistSessionId,
-} from "../../utils/session";
-import type { ChatUiMessage } from "../../types/aiChat";
-import { closeAiChatWsConnection } from "../../utils/aiChatWs";
-import { createMessageId } from "./createMessageId";
+} from '../../utils/session';
+import type { ChatUiMessage } from '../../types/aiChat';
+import { closeAiChatWsConnection } from '../../utils/aiChatWs';
+import { createMessageId } from './createMessageId';
 
 export interface UseChatSessionOptions {
   welcomeText: string;
@@ -54,7 +54,7 @@ export function useChatSession(options: UseChatSessionOptions) {
   const hasLoadedHistoryRef = useRef(false);
 
   const [messages, setMessages] = useState<ChatUiMessage[]>(() => [
-    { id: createMessageId(), from: "ai", text: welcomeText },
+    { id: createMessageId(), from: 'ai', text: welcomeText },
   ]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const messagesRef = useRef<ChatUiMessage[]>(messages);
@@ -78,7 +78,7 @@ export function useChatSession(options: UseChatSessionOptions) {
   }, []);
 
   const showWelcome = useCallback(() => {
-    setMessages([{ id: createMessageId(), from: "ai", text: welcomeText }]);
+    setMessages([{ id: createMessageId(), from: 'ai', text: welcomeText }]);
   }, [welcomeText]);
 
   const loadSessionHistory = useCallback(async () => {
@@ -145,7 +145,7 @@ export function useChatSession(options: UseChatSessionOptions) {
     setIsLoadingHistory(false);
     hasLoadedHistoryRef.current = false;
     sessionIdRef.current = nextSessionId;
-    const hasUserMessages = messagesRef.current.some((m) => m.from === "user");
+    const hasUserMessages = messagesRef.current.some((m) => m.from === 'user');
     if (!hasUserMessages && !isStreamingRef.current) {
       showWelcome();
     }
@@ -163,7 +163,7 @@ export function useChatSession(options: UseChatSessionOptions) {
   const resetSession = useCallback(async () => {
     historyLoadSeqRef.current += 1;
     hasLoadedHistoryRef.current = false;
-    closeAiChatWsConnection("clear chat");
+    closeAiChatWsConnection('clear chat');
 
     const previousSessionId = sessionIdRef.current;
     try {

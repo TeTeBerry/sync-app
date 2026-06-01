@@ -1,6 +1,6 @@
-import type { ConversationState } from "./conversationState";
+import type { ConversationState } from './conversationState';
 
-export type AiChatRole = "user" | "assistant" | "system";
+export type AiChatRole = 'user' | 'assistant' | 'system';
 
 export interface AiChatImageContext {
   source?: string;
@@ -24,7 +24,7 @@ export interface AiChatMessage {
   suggestedReplies?: string[];
 }
 
-export type RecommendedPostAuthorGender = "female" | "male";
+export type RecommendedPostAuthorGender = 'female' | 'male';
 
 export interface RecommendedPostCard {
   postId: string;
@@ -41,51 +41,51 @@ export interface RecommendedPostCard {
 }
 
 export type AiChatStreamEvent =
-  | { type: "delta"; content: string }
+  | { type: 'delta'; content: string }
   | {
-      type: "message_complete";
+      type: 'message_complete';
       content: string;
       requestId?: string;
     }
   | {
-      type: "done";
+      type: 'done';
       messageId?: string;
       sessionId?: string;
     }
   | {
-      type: "post_created";
+      type: 'post_created';
       postId: string;
       activityLegacyId?: number;
       post?: RecommendedPostCard;
     }
   | {
-      type: "existing_post";
+      type: 'existing_post';
       postId: string;
       activityLegacyId?: number;
     }
   | {
-      type: "post_recommendations";
+      type: 'post_recommendations';
       posts: RecommendedPostCard[];
       degraded?: boolean;
     }
   | {
-      type: "activity_recommendation";
+      type: 'activity_recommendation';
       activity: RecommendedActivityCard;
     }
   | {
-      type: "suggested_replies";
+      type: 'suggested_replies';
       replies: string[];
     }
   | {
       /** Sync with backend manually — see `types/conversationState.ts` */
-      type: "conversation_patch";
+      type: 'conversation_patch';
       state: ConversationState;
     }
-  | { type: "error"; message: string };
+  | { type: 'error'; message: string };
 
 export type ChatUiMessage = {
   id: string;
-  from: "ai" | "user";
+  from: 'ai' | 'user';
   text: string;
   imagePreview?: string;
   ocrText?: string;

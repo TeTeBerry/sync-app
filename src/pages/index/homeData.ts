@@ -1,4 +1,4 @@
-import type { AuthorGender } from "../../utils/inferAuthorGender";
+import type { AuthorGender } from '../../utils/inferAuthorGender';
 
 export type CountdownPart = {
   value: string;
@@ -6,7 +6,7 @@ export type CountdownPart = {
   accent?: boolean;
 };
 
-export type { FeaturedEvent } from "../../utils/apiMappers";
+export type { FeaturedEvent } from '../../utils/apiMappers';
 
 export type ActivityPost = {
   id: string;
@@ -22,7 +22,7 @@ export type ActivityPost = {
   liked?: boolean;
   comments: number;
   avatar: string;
-  status: "招募中" | "已组队" | "已隐藏";
+  status: '招募中' | '已组队' | '已隐藏';
   activityLegacyId?: number;
   contentTypes?: string[];
   images?: string[];

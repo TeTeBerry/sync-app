@@ -1,16 +1,16 @@
-import Taro from "@tarojs/taro";
+import Taro from '@tarojs/taro';
 
 export const PROFILE_STORAGE_KEYS = {
-  notifications: "profile.notificationsEnabled",
-  privacy: "profile.privacyLevel",
+  notifications: 'profile.notificationsEnabled',
+  privacy: 'profile.privacyLevel',
 } as const;
 
-export type ProfilePrivacyLevel = "public" | "friends" | "private";
+export type ProfilePrivacyLevel = 'public' | 'friends' | 'private';
 
 function readStorage<T>(key: string, fallback: T): T {
   try {
     const raw = Taro.getStorageSync(key);
-    return raw !== "" && raw != null ? (raw as T) : fallback;
+    return raw !== '' && raw != null ? (raw as T) : fallback;
   } catch {
     return fallback;
   }
@@ -19,7 +19,7 @@ function readStorage<T>(key: string, fallback: T): T {
 export function readProfileNotificationsEnabled(fallback = true): boolean {
   try {
     const raw = Taro.getStorageSync(PROFILE_STORAGE_KEYS.notifications);
-    if (raw === "") return fallback;
+    if (raw === '') return fallback;
     return Boolean(raw);
   } catch {
     return fallback;
@@ -27,7 +27,7 @@ export function readProfileNotificationsEnabled(fallback = true): boolean {
 }
 
 export function readProfilePrivacyLevel(
-  fallback: ProfilePrivacyLevel = "public",
+  fallback: ProfilePrivacyLevel = 'public',
 ): ProfilePrivacyLevel {
   return readStorage<ProfilePrivacyLevel>(PROFILE_STORAGE_KEYS.privacy, fallback);
 }

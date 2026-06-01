@@ -1,19 +1,19 @@
-import "./ContactUnlockQuotaExhaustedModal.scss";
-import React, { useCallback, useMemo } from "react";
-import Taro from "@tarojs/taro";
-import { ArrowRight, Crown, Lock, Map, Sparkles, Star, X } from "lucide-react-taro";
-import { Text, View } from "@tarojs/components";
-import { useOverlayLock } from "../../hooks/useOverlayLock";
-import { useProfilePackagesQuery } from "../../hooks/useSyncApi";
-import { isApiEnabled } from "../../constants/api";
-import { MOCK_PACKAGE_CATALOG } from "../../pages/profile/profilePackageData";
-import type { FreeMonthlyQuota, PackageTierId } from "../../types/backend";
+import './ContactUnlockQuotaExhaustedModal.scss';
+import React, { useCallback, useMemo } from 'react';
+import Taro from '@tarojs/taro';
+import { ArrowRight, Crown, Lock, Map, Sparkles, Star, X } from 'lucide-react-taro';
+import { Text, View } from '@tarojs/components';
+import { useOverlayLock } from '../../hooks/useOverlayLock';
+import { useProfilePackagesQuery } from '../../hooks/useSyncApi';
+import { isApiEnabled } from '../../constants/api';
+import { MOCK_PACKAGE_CATALOG } from '../../pages/profile/profilePackageData';
+import type { FreeMonthlyQuota, PackageTierId } from '../../types/backend';
 import {
   buildContactUnlockUpgradeCompare,
   resolveContactUnlockUpgradeTargetTier,
   type ContactUnlockUpgradeCompareRowId,
-} from "../../utils/contactUnlockUpgradeCompare";
-import { goProfileBenefits } from "../../utils/route";
+} from '../../utils/contactUnlockUpgradeCompare';
+import { goProfileBenefits } from '../../utils/route';
 
 const ROW_ICONS: Record<
   ContactUnlockUpgradeCompareRowId,
@@ -57,7 +57,8 @@ export function ContactUnlockQuotaExhaustedModal({
 
   const apiEnabled = isApiEnabled();
   const packagesQuery = useProfilePackagesQuery();
-  const tiers = (apiEnabled ? packagesQuery.data : MOCK_PACKAGE_CATALOG)?.tiers ?? [];
+  const catalog = apiEnabled ? packagesQuery.data : MOCK_PACKAGE_CATALOG;
+  const tiers = useMemo(() => catalog?.tiers ?? [], [catalog?.tiers]);
 
   const targetTierId = useMemo(
     () => resolveContactUnlockUpgradeTargetTier(currentPaidTierId),
@@ -111,12 +112,16 @@ export function ContactUnlockQuotaExhaustedModal({
             联系方式解锁次数已用尽
           </Text>
           <Text className="s-contact-unlock-exhausted-modal__subtitle">
-            本月联系方式解锁配额已全部用完{"\n"}升级套餐即可立即恢复解锁能力
+            本月联系方式解锁配额已全部用完{'\n'}升级套餐即可立即恢复解锁能力
           </Text>
 
           <View className="s-contact-unlock-exhausted-modal__card">
             <View className="s-contact-unlock-exhausted-modal__card-head">
-              <Star size={14} className="s-contact-unlock-exhausted-modal__card-star" aria-hidden />
+              <Star
+                size={14}
+                className="s-contact-unlock-exhausted-modal__card-star"
+                aria-hidden
+              />
               <Text className="s-contact-unlock-exhausted-modal__card-title">
                 {compareModel.targetTierName} 套餐权益
               </Text>
@@ -132,7 +137,9 @@ export function ContactUnlockQuotaExhaustedModal({
                       className="s-contact-unlock-exhausted-modal__row-icon"
                       aria-hidden
                     />
-                    <Text className="s-contact-unlock-exhausted-modal__row-label">{row.label}</Text>
+                    <Text className="s-contact-unlock-exhausted-modal__row-label">
+                      {row.label}
+                    </Text>
                   </View>
                   <View className="s-contact-unlock-exhausted-modal__row-values">
                     <Text className="s-contact-unlock-exhausted-modal__pill s-contact-unlock-exhausted-modal__pill--current">
@@ -159,8 +166,14 @@ export function ContactUnlockQuotaExhaustedModal({
             hoverClass="s-contact-unlock-exhausted-modal__cta--pressed"
             onClick={() => onUpgrade(targetTierId)}
           >
-            <Crown size={18} className="s-contact-unlock-exhausted-modal__cta-icon" aria-hidden />
-            <Text className="s-contact-unlock-exhausted-modal__cta-label">{ctaLabel}</Text>
+            <Crown
+              size={18}
+              className="s-contact-unlock-exhausted-modal__cta-icon"
+              aria-hidden
+            />
+            <Text className="s-contact-unlock-exhausted-modal__cta-label">
+              {ctaLabel}
+            </Text>
           </View>
           <Text
             className="s-contact-unlock-exhausted-modal__secondary"

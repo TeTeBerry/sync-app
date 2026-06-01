@@ -1,5 +1,5 @@
-import { create } from "zustand";
-import type { ConversationState } from "../types/conversationState";
+import { create } from 'zustand';
+import type { ConversationState } from '../types/conversationState';
 
 interface AiChatStoreState {
   conversationState: ConversationState | null;

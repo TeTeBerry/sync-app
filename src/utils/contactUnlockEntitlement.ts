@@ -1,6 +1,6 @@
-import { consumeProfileContactUnlock } from "../api/syncApi";
-import { isApiEnabled } from "../constants/api";
-import { invalidateProfileEntitlements } from "./queryInvalidation";
+import { consumeProfileContactUnlock } from '../api/syncApi';
+import { isApiEnabled } from '../constants/api';
+import { invalidateProfileEntitlements } from './queryInvalidation';
 
 /**
  * Consumes one contact-unlock quota (free monthly first, then paid per-event).
@@ -8,7 +8,9 @@ import { invalidateProfileEntitlements } from "./queryInvalidation";
  *
  * Used when applying to join a team post and when revealing contact on map / user sheets.
  */
-export async function consumeContactUnlockWithQuota(activityLegacyId: number): Promise<boolean> {
+export async function consumeContactUnlockWithQuota(
+  activityLegacyId: number,
+): Promise<boolean> {
   if (!isApiEnabled()) {
     return true;
   }

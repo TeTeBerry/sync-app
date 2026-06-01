@@ -8,3 +8,4 @@
 - [ ] 三个 Tab 可切换：首页 / 活动 / 我的
 - [ ] 进入活动详情、AI 助手 WebSocket 一轮对话无报错
 - [ ] 后端 `GET /api/health` 正常（本地或目标环境）
+- [ ] （可选）`cd sync-app-backend && npm run smoke:api` 全链路 REST 冒烟通过

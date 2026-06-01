@@ -1,6 +1,6 @@
-import { useMemo } from "react";
-import { useNavigationStore } from "../stores";
-import { useProfileActivitiesQuery } from "./useSyncApi";
+import { useMemo } from 'react';
+import { useNavigationStore } from '../stores';
+import { useProfileActivitiesQuery } from './useSyncApi';
 
 /**
  * Activity scope for per-event package entitlements.
@@ -9,7 +9,9 @@ import { useProfileActivitiesQuery } from "./useSyncApi";
  * Does not default to demo seed activity — paid quotas apply only where purchased.
  */
 export function useProfileActivityLegacyId(): number | undefined {
-  const activeActivityLegacyId = useNavigationStore((state) => state.activeActivityLegacyId);
+  const activeActivityLegacyId = useNavigationStore(
+    (state) => state.activeActivityLegacyId,
+  );
   const activitiesQuery = useProfileActivitiesQuery();
 
   return useMemo(() => {
@@ -22,7 +24,7 @@ export function useProfileActivityLegacyId(): number | undefined {
       return undefined;
     }
 
-    const registered = activities.find((item) => item.status === "registered");
+    const registered = activities.find((item) => item.status === 'registered');
     const pick = registered ?? activities[0];
     const legacyId = Number(pick.id);
     return Number.isNaN(legacyId) ? undefined : legacyId;

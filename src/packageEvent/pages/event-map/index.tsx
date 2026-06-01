@@ -1,24 +1,24 @@
-import "./event-map.scss";
-import Taro, { useRouter } from "@tarojs/taro";
-import { useCallback, useMemo, useState } from "react";
-import { Bell, Minus, Plane, Plus } from "lucide-react-taro";
-import { Button, Canvas, Image, Text, View } from "@tarojs/components";
-import { EventMapUserPostsSheet } from "../../../components/event-map/EventMapUserPostsSheet";
-import { useEventMapController } from "../../../components/event-map/useEventMapController";
-import { EVENT_MAP_TOP_BAR_CONTENT_PX } from "../../../components/event-map/eventMapLayout";
+import './event-map.scss';
+import Taro, { useRouter } from '@tarojs/taro';
+import { useCallback, useMemo, useState } from 'react';
+import { Bell, Minus, Plane, Plus } from 'lucide-react-taro';
+import { Button, Canvas, Image, Text, View } from '@tarojs/components';
+import { EventMapUserPostsSheet } from '../../../components/event-map/EventMapUserPostsSheet';
+import { useEventMapController } from '../../../components/event-map/useEventMapController';
+import { EVENT_MAP_TOP_BAR_CONTENT_PX } from '../../../components/event-map/eventMapLayout';
 import {
   EVENT_MAP_BOTTOM_ROW,
   EVENT_MAP_DEFAULT_TITLE,
   markerAvatarUrl,
   type EventMapMarker,
-} from "../../../components/event-map/eventMapMarkers";
-import PageNavigation from "../../../components/PageNavigation";
-import { useNavBarInsets } from "../../../hooks/useNavBarInsets";
-import { decodeRouteQueryParam, ROUTES } from "../../../utils/route";
-import { useEndRouteTransitionOnShow } from "../../../hooks/useEndRouteTransitionOnShow";
+} from '../../../components/event-map/eventMapMarkers';
+import PageNavigation from '../../../components/PageNavigation';
+import { useNavBarInsets } from '../../../hooks/useNavBarInsets';
+import { decodeRouteQueryParam, ROUTES } from '../../../utils/route';
+import { useEndRouteTransitionOnShow } from '../../../hooks/useEndRouteTransitionOnShow';
 
 function showMapToast(label: string) {
-  void Taro.showToast({ title: label, icon: "none", duration: 1200 });
+  void Taro.showToast({ title: label, icon: 'none', duration: 1200 });
 }
 
 const EventMapPage = () => {
@@ -73,7 +73,7 @@ const EventMapPage = () => {
             className="s-page-nav__icon-action s-page-nav__icon-action--overlay"
             aria-label="通知"
             hoverClass="s-page-nav__icon-action--pressed"
-            onTap={() => showMapToast("通知即将上线")}
+            onTap={() => showMapToast('通知即将上线')}
           >
             <Bell size={18} />
           </Button>
@@ -89,7 +89,7 @@ const EventMapPage = () => {
           disableScroll
           onReady={handleCanvasReady}
           onError={(event) => {
-            console.error("[event-map] canvas error", event.detail);
+            console.error('[event-map] canvas error', event.detail);
           }}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
@@ -127,20 +127,24 @@ const EventMapPage = () => {
               onTap={() => openUserPosts(person)}
             >
               <View className="s-event-map__bottom-avatar-wrap">
-                <View className={["s-event-map__bottom-avatar", person.ringClass].join(" ")}>
+                <View
+                  className={['s-event-map__bottom-avatar', person.ringClass].join(' ')}
+                >
                   <Image
                     className="s-event-map__bottom-avatar-img"
                     src={markerAvatarUrl(person.avatarSeed, 104)}
                     mode="aspectFill"
                   />
                 </View>
-                {person.bottomBadge === "plane" ? (
+                {person.bottomBadge === 'plane' ? (
                   <View className="s-event-map__bottom-badge" aria-hidden>
                     <Plane size={11} color="#fff" />
                   </View>
                 ) : null}
               </View>
-              <Text className="s-event-map__bottom-name">{person.shortName ?? person.name}</Text>
+              <Text className="s-event-map__bottom-name">
+                {person.shortName ?? person.name}
+              </Text>
             </View>
           ))}
         </View>

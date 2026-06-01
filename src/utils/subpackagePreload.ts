@@ -1,9 +1,9 @@
-import Taro from "@tarojs/taro";
+import Taro from '@tarojs/taro';
 
-type SubpackageName = "event" | "profile" | "ai";
+type SubpackageName = 'event' | 'profile' | 'ai';
 
 function loadSubpackage(name: SubpackageName): void {
-  if (process.env.TARO_ENV !== "weapp") {
+  if (process.env.TARO_ENV !== 'weapp') {
     return;
   }
 
@@ -13,7 +13,7 @@ function loadSubpackage(name: SubpackageName): void {
     }
   ).loadSubpackage;
 
-  if (typeof load !== "function") {
+  if (typeof load !== 'function') {
     return;
   }
 
@@ -22,15 +22,15 @@ function loadSubpackage(name: SubpackageName): void {
 
 /** Pre-download event subpackage (packageEvent, name: event in app.config). */
 export function preloadEventSubpackage(): void {
-  loadSubpackage("event");
+  loadSubpackage('event');
 }
 
 export function preloadProfileSubpackage(): void {
-  loadSubpackage("profile");
+  loadSubpackage('profile');
 }
 
 export function preloadAiSubpackage(): void {
-  loadSubpackage("ai");
+  loadSubpackage('ai');
 }
 
 /** Warm stack subpackages after main tabs settle. */

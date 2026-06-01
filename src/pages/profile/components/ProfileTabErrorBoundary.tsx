@@ -1,6 +1,6 @@
-import React, { Component, type ErrorInfo, type ReactNode } from "react";
-import Taro from "@tarojs/taro";
-import { Button, Text, View } from "@tarojs/components";
+import React, { Component, type ErrorInfo, type ReactNode } from 'react';
+import Taro from '@tarojs/taro';
+import { Button, Text, View } from '@tarojs/components';
 
 type Props = {
   children: ReactNode;
@@ -20,7 +20,7 @@ export class ProfileTabErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error("[Profile] render error", error, info.componentStack);
+    console.error('[Profile] render error', error, info.componentStack);
   }
 
   private handleRetry = () => {
@@ -33,12 +33,14 @@ export class ProfileTabErrorBoundary extends Component<Props, State> {
       return (
         <View className="s-profile-error-fallback">
           <Text className="s-profile-error-fallback__title">页面加载异常</Text>
-          <Text className="s-profile-error-fallback__hint">请重试；若仍无法打开，可重启小程序</Text>
+          <Text className="s-profile-error-fallback__hint">
+            请重试；若仍无法打开，可重启小程序
+          </Text>
           <Button
             className="s-profile-error-fallback__btn"
             onClick={() => {
               this.handleRetry();
-              void Taro.showToast({ title: "已重试", icon: "none" });
+              void Taro.showToast({ title: '已重试', icon: 'none' });
             }}
           >
             <Text className="s-btn-label">重试</Text>

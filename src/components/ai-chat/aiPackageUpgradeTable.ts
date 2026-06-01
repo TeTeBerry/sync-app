@@ -1,6 +1,10 @@
-import type { PackageFeatureIcon, PackageTierDefinition, PackageTierId } from "../../types/backend";
+import type {
+  PackageFeatureIcon,
+  PackageTierDefinition,
+  PackageTierId,
+} from '../../types/backend';
 
-export type AiPackageCompareRowId = "aiMatch" | "contactUnlock" | "mapDays" | "postPin";
+export type AiPackageCompareRowId = 'aiMatch' | 'contactUnlock' | 'mapDays' | 'postPin';
 
 export type AiPackageCompareRow = {
   id: AiPackageCompareRowId;
@@ -10,7 +14,7 @@ export type AiPackageCompareRow = {
 };
 
 function formatCount(value: number | null): string {
-  if (value == null) return "不限次";
+  if (value == null) return '不限次';
   return `${value} 次`;
 }
 
@@ -19,12 +23,14 @@ function formatMapDays(days: number): string {
 }
 
 function formatPostPin(count: number): string {
-  if (count <= 0) return "—";
+  if (count <= 0) return '—';
   return `×${count} 次`;
 }
 
 /** Comparison rows for the AI upgrade sheet (no voucher / verify / exposure). */
-export function buildAiPackageCompareRows(tiers: PackageTierDefinition[]): AiPackageCompareRow[] {
+export function buildAiPackageCompareRows(
+  tiers: PackageTierDefinition[],
+): AiPackageCompareRow[] {
   const byId = Object.fromEntries(tiers.map((tier) => [tier.id, tier])) as Record<
     PackageTierId,
     PackageTierDefinition | undefined
@@ -40,9 +46,9 @@ export function buildAiPackageCompareRows(tiers: PackageTierDefinition[]): AiPac
 
   return [
     {
-      id: "aiMatch",
-      label: "AI 匹配",
-      icon: "match",
+      id: 'aiMatch',
+      label: 'AI 匹配',
+      icon: 'match',
       values: {
         pro: formatCount(pro.limits.aiMatchCount),
         pro_plus: formatCount(proPlus.limits.aiMatchCount),
@@ -50,9 +56,9 @@ export function buildAiPackageCompareRows(tiers: PackageTierDefinition[]): AiPac
       },
     },
     {
-      id: "contactUnlock",
-      label: "联系解锁",
-      icon: "contact",
+      id: 'contactUnlock',
+      label: '联系解锁',
+      icon: 'contact',
       values: {
         pro: formatCount(pro.limits.contactUnlockCount),
         pro_plus: formatCount(proPlus.limits.contactUnlockCount),
@@ -60,9 +66,9 @@ export function buildAiPackageCompareRows(tiers: PackageTierDefinition[]): AiPac
       },
     },
     {
-      id: "mapDays",
-      label: "点位地图",
-      icon: "map",
+      id: 'mapDays',
+      label: '点位地图',
+      icon: 'map',
       values: {
         pro: formatMapDays(pro.limits.mapDays),
         pro_plus: formatMapDays(proPlus.limits.mapDays),
@@ -70,9 +76,9 @@ export function buildAiPackageCompareRows(tiers: PackageTierDefinition[]): AiPac
       },
     },
     {
-      id: "postPin",
-      label: "帖子置顶",
-      icon: "pin",
+      id: 'postPin',
+      label: '帖子置顶',
+      icon: 'pin',
       values: {
         pro: formatPostPin(pro.limits.postPinCount),
         pro_plus: formatPostPin(proPlus.limits.postPinCount),

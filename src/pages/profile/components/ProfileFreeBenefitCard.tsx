@@ -1,8 +1,8 @@
-import "./ProfileFreeBenefitCard.scss";
-import React from "react";
-import { ChevronRight, Crown, Lock, Sparkles, Ticket } from "lucide-react-taro";
-import type { ProfileFreeBenefitCardModel } from "../profileBenefitsMapper";
-import { Text, View } from "@tarojs/components";
+import './ProfileFreeBenefitCard.scss';
+import React from 'react';
+import { ChevronRight, Crown, Lock, Sparkles, Ticket } from 'lucide-react-taro';
+import type { ProfileFreeBenefitCardModel } from '../profileBenefitsMapper';
+import { Text, View } from '@tarojs/components';
 
 export type ProfileFreeBenefitCardProps = {
   card: ProfileFreeBenefitCardModel;
@@ -20,13 +20,18 @@ function QuotaFraction({
 }) {
   return (
     <View className="s-profile-free-benefit__quota">
-      <Text className={`s-profile-free-benefit__quota-remaining ${accentClass}`}>{remaining}</Text>
+      <Text className={`s-profile-free-benefit__quota-remaining ${accentClass}`}>
+        {remaining}
+      </Text>
       <Text className="s-profile-free-benefit__quota-rest"> / {limit} 次</Text>
     </View>
   );
 }
 
-const ProfileFreeBenefitCard: React.FC<ProfileFreeBenefitCardProps> = ({ card, onOpenUpgrade }) => (
+const ProfileFreeBenefitCard: React.FC<ProfileFreeBenefitCardProps> = ({
+  card,
+  onOpenUpgrade,
+}) => (
   <View className="s-profile-free-benefit">
     <View className="s-profile-free-benefit__inner">
       <View className="s-profile-free-benefit__header">

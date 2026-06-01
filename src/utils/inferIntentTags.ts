@@ -1,20 +1,20 @@
 /** Client-side mirror of backend infer-intent-tags (publish preview fallback). */
 
 const GENDER_TAG_RULES: Array<{ pattern: RegExp; tag: string }> = [
-  { pattern: /姐妹|小姐姐|妹子|女搭子/i, tag: "#女生" },
-  { pattern: /兄弟|老哥|男搭子/i, tag: "#男生" },
-  { pattern: /女生优先|限女生|只要女生|女孩子更好/i, tag: "#女生优先" },
-  { pattern: /男生优先|限男生|只要男生/i, tag: "#男生优先" },
-  { pattern: /(\d+)人女生|女生同行|我们女生|女生一起/i, tag: "#女生" },
-  { pattern: /(\d+)缺\d*男生|缺\d*男生|(\d+)人男生|男生同行/i, tag: "#男生" },
-  { pattern: /女生|女孩子/i, tag: "#女生" },
-  { pattern: /男生/i, tag: "#男生" },
+  { pattern: /姐妹|小姐姐|妹子|女搭子/i, tag: '#女生' },
+  { pattern: /兄弟|老哥|男搭子/i, tag: '#男生' },
+  { pattern: /女生优先|限女生|只要女生|女孩子更好/i, tag: '#女生优先' },
+  { pattern: /男生优先|限男生|只要男生/i, tag: '#男生优先' },
+  { pattern: /(\d+)人女生|女生同行|我们女生|女生一起/i, tag: '#女生' },
+  { pattern: /(\d+)缺\d*男生|缺\d*男生|(\d+)人男生|男生同行/i, tag: '#男生' },
+  { pattern: /女生|女孩子/i, tag: '#女生' },
+  { pattern: /男生/i, tag: '#男生' },
 ];
 
 function addTag(tags: Set<string>, tag: string): void {
   const trimmed = tag.trim();
   if (!trimmed) return;
-  tags.add(trimmed.startsWith("#") ? trimmed : `#${trimmed}`);
+  tags.add(trimmed.startsWith('#') ? trimmed : `#${trimmed}`);
 }
 
 function inferZoneAndDayTags(text: string, tags: Set<string>): void {
@@ -39,44 +39,46 @@ function inferZoneAndDayTags(text: string, tags: Set<string>): void {
 
   const zoneOnly = text.match(/\b([A-Za-z])\s*区\b/g);
   if (zoneOnly) {
-    for (const z of zoneOnly) addTag(tags, z.replace(/\s+/g, ""));
+    for (const z of zoneOnly) addTag(tags, z.replace(/\s+/g, ''));
   }
 }
 
 const TICKET_RESALE_CITIES = [
-  "香港",
-  "澳门",
-  "台湾",
-  "上海",
-  "北京",
-  "广州",
-  "深圳",
-  "成都",
-  "杭州",
-  "武汉",
-  "南京",
-  "重庆",
-  "西安",
-  "苏州",
-  "珠海",
+  '香港',
+  '澳门',
+  '台湾',
+  '上海',
+  '北京',
+  '广州',
+  '深圳',
+  '成都',
+  '杭州',
+  '武汉',
+  '南京',
+  '重庆',
+  '西安',
+  '苏州',
+  '珠海',
 ];
 
 function inferTicketResaleTags(text: string, tags: Set<string>): void {
   const hasTicket = /票|内场|看台|舞台|VIP|Stage/i.test(text);
-  const hasResale = /折价|出票|转票|转手|出一张|转让|临时有事|私我|需要的私|私聊/i.test(text);
+  const hasResale = /折价|出票|转票|转手|出一张|转让|临时有事|私我|需要的私|私聊/i.test(
+    text,
+  );
 
   if (!hasTicket && !hasResale) return;
 
-  if (/转票|转手/i.test(text)) addTag(tags, "#转票");
-  if (/出票|折价|出一张|转让/i.test(text)) addTag(tags, "#出票");
-  if (hasTicket && hasResale && !tags.has("#转票") && !tags.has("#出票")) {
-    addTag(tags, "#出票");
+  if (/转票|转手/i.test(text)) addTag(tags, '#转票');
+  if (/出票|折价|出一张|转让/i.test(text)) addTag(tags, '#出票');
+  if (hasTicket && hasResale && !tags.has('#转票') && !tags.has('#出票')) {
+    addTag(tags, '#出票');
   }
 
-  if (/折价/i.test(text)) addTag(tags, "#折价");
-  if (/\bVIP\b/i.test(text)) addTag(tags, "#VIP");
-  if (/\bStage\b/i.test(text)) addTag(tags, "#Stage");
-  if (/ASOT/i.test(text)) addTag(tags, "#ASOT");
+  if (/折价/i.test(text)) addTag(tags, '#折价');
+  if (/\bVIP\b/i.test(text)) addTag(tags, '#VIP');
+  if (/\bStage\b/i.test(text)) addTag(tags, '#Stage');
+  if (/ASOT/i.test(text)) addTag(tags, '#ASOT');
 
   for (const city of TICKET_RESALE_CITIES) {
     if (text.includes(city)) addTag(tags, `#${city}`);
@@ -94,7 +96,7 @@ export function inferIntentTagsFromText(...texts: Array<string | undefined>): st
   const haystack = texts
     .map((t) => t?.trim())
     .filter((t): t is string => Boolean(t))
-    .join("\n");
+    .join('\n');
   if (!haystack) return [];
 
   for (const { pattern, tag } of GENDER_TAG_RULES) {
@@ -103,7 +105,7 @@ export function inferIntentTagsFromText(...texts: Array<string | undefined>): st
   inferZoneAndDayTags(haystack, tags);
   inferTicketResaleTags(haystack, tags);
   if (/搭子|组队|cpdd|dd一个|缺\d|有人吗|有姐妹|找同行/i.test(haystack)) {
-    addTag(tags, "#组队");
+    addTag(tags, '#组队');
   }
   return [...tags];
 }

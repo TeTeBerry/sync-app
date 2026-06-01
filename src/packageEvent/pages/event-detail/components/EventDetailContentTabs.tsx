@@ -1,6 +1,6 @@
-import { Text, View } from "@tarojs/components";
+import { Text, View } from '@tarojs/components';
 
-export type EventDetailTabId = "posts" | "live";
+export type EventDetailTabId = 'posts' | 'live';
 
 type EventDetailContentTabsProps = {
   active: EventDetailTabId;
@@ -19,24 +19,24 @@ export function EventDetailContentTabs({
     <View className="s-event-detail-tabs">
       <View
         className={[
-          "s-event-detail-tabs__item",
-          active === "posts" && "s-event-detail-tabs__item--active",
+          's-event-detail-tabs__item',
+          active === 'posts' && 's-event-detail-tabs__item--active',
         ]
           .filter(Boolean)
-          .join(" ")}
-        onClick={() => onChange("posts")}
+          .join(' ')}
+        onClick={() => onChange('posts')}
       >
         <Text className="s-event-detail-tabs__label">活动帖子</Text>
         <Text className="s-event-detail-tabs__badge">{postsCount}</Text>
       </View>
       <View
         className={[
-          "s-event-detail-tabs__item",
-          active === "live" && "s-event-detail-tabs__item--active",
+          's-event-detail-tabs__item',
+          active === 'live' && 's-event-detail-tabs__item--active',
         ]
           .filter(Boolean)
-          .join(" ")}
-        onClick={() => onChange("live")}
+          .join(' ')}
+        onClick={() => onChange('live')}
       >
         <Text className="s-event-detail-tabs__label">实时资讯</Text>
         <Text className="s-event-detail-tabs__badge">{liveCount}</Text>

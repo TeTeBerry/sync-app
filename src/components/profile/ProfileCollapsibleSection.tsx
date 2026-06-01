@@ -1,18 +1,18 @@
-import React, { useState } from "react";
-import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp } from "lucide-react-taro";
-import { useClientPagination } from "../../hooks/useClientPagination";
-import { Button, Text, View } from "@tarojs/components";
+import React, { useState } from 'react';
+import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp } from 'lucide-react-taro';
+import { useClientPagination } from '../../hooks/useClientPagination';
+import { Button, Text, View } from '@tarojs/components';
 
 const SECTION_VARIANTS = {
   activities: {
-    modifier: "s-profile-section--activities",
-    icon: "s-profile-section__icon--pink",
-    badge: "s-profile-section__badge--pink",
+    modifier: 's-profile-section--activities',
+    icon: 's-profile-section__icon--pink',
+    badge: 's-profile-section__badge--pink',
   },
   posts: {
-    modifier: "s-profile-section--posts",
-    icon: "s-profile-section__icon--cyan",
-    badge: "s-profile-section__badge--cyan",
+    modifier: 's-profile-section--posts',
+    icon: 's-profile-section__icon--cyan',
+    badge: 's-profile-section__badge--cyan',
   },
 } as const;
 
@@ -36,10 +36,8 @@ export function ProfileCollapsibleSection<T>({
   children,
 }: ProfileCollapsibleSectionProps<T>) {
   const [expanded, setExpanded] = useState(false);
-  const { page, totalPages, pageItems, goPrev, goNext, resetPage } = useClientPagination(
-    items,
-    pageSize,
-  );
+  const { page, totalPages, pageItems, goPrev, goNext, resetPage } =
+    useClientPagination(items, pageSize);
   const styles = SECTION_VARIANTS[variant];
 
   const toggleExpanded = () => {
@@ -50,10 +48,10 @@ export function ProfileCollapsibleSection<T>({
   return (
     <View
       className={[
-        "s-profile-section",
+        's-profile-section',
         styles.modifier,
-        expanded ? " s-profile-section--expanded" : "",
-      ].join("")}
+        expanded ? ' s-profile-section--expanded' : '',
+      ].join('')}
     >
       <View
         className="s-profile-section__header"
@@ -61,7 +59,7 @@ export function ProfileCollapsibleSection<T>({
         tabIndex={0}
         onClick={toggleExpanded}
         onKeyDown={(event) => {
-          if (event.key === "Enter" || event.key === " ") {
+          if (event.key === 'Enter' || event.key === ' ') {
             event.preventDefault();
             toggleExpanded();
           }
@@ -70,7 +68,9 @@ export function ProfileCollapsibleSection<T>({
         <View className="s-profile-section__header-left">
           <View className={`s-profile-section__icon ${styles.icon}`}>{icon}</View>
           <Text className="s-profile-section__title">{title}</Text>
-          <Text className={`s-profile-section__badge ${styles.badge}`}>{items.length}</Text>
+          <Text className={`s-profile-section__badge ${styles.badge}`}>
+            {items.length}
+          </Text>
         </View>
 
         <View className="s-profile-section__header-right">

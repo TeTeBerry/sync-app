@@ -1,5 +1,5 @@
-import React from "react";
-import { Button, Text, View } from "@tarojs/components";
+import React from 'react';
+import { Button, Text, View } from '@tarojs/components';
 
 export type ListStateProps = {
   isLoading?: boolean;

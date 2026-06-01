@@ -1,4 +1,4 @@
-export type ActivityStatus = "not_started" | "in_progress" | "ended";
+export type ActivityStatus = 'not_started' | 'in_progress' | 'ended';
 
 type ParsedActivityDates = {
   start: Date;
@@ -82,18 +82,18 @@ export function getActivityStatus(
   dateStr?: string,
   options?: { yearHint?: string; now?: Date },
 ): ActivityStatus {
-  if (!dateStr?.trim()) return "not_started";
+  if (!dateStr?.trim()) return 'not_started';
 
   const parsed = parseActivityDateRange(dateStr, options?.yearHint);
-  if (!parsed) return "not_started";
+  if (!parsed) return 'not_started';
 
   const now = options?.now ?? new Date();
-  if (now > parsed.end) return "ended";
+  if (now > parsed.end) return 'ended';
 
   const preStart = new Date(parsed.start.getTime() - PRE_EVENT_WINDOW_MS);
-  if (now < preStart) return "not_started";
+  if (now < preStart) return 'not_started';
 
-  return "in_progress";
+  return 'in_progress';
 }
 
 export function getActivityStatusFromActivity(
@@ -106,25 +106,25 @@ export function getActivityStatusFromActivity(
 }
 
 export function shouldShowActivityStatusBadge(status: ActivityStatus): boolean {
-  return status !== "in_progress";
+  return status !== 'in_progress';
 }
 
 export function activityStatusBadgeClass(status: ActivityStatus): string {
-  return `s-activity-status s-activity-status--${status.replace("_", "-")}`;
+  return `s-activity-status s-activity-status--${status.replace('_', '-')}`;
 }
 
 export function activityStatusCardClass(status: ActivityStatus): string {
-  return status === "ended" ? "s-activity-card--ended" : "";
+  return status === 'ended' ? 's-activity-card--ended' : '';
 }
 
 export function activityStatusText(status: ActivityStatus): string {
   switch (status) {
-    case "in_progress":
-      return "进行中";
-    case "ended":
-      return "已结束";
+    case 'in_progress':
+      return '进行中';
+    case 'ended':
+      return '已结束';
     default:
-      return "未开始";
+      return '未开始';
   }
 }
 
@@ -138,14 +138,20 @@ export function compareActivityDateDesc(
   a: { date?: string; title?: string },
   b: { date?: string; title?: string },
 ): number {
-  return getActivitySortTimestamp(b.date, b.title) - getActivitySortTimestamp(a.date, a.title);
+  return (
+    getActivitySortTimestamp(b.date, b.title) -
+    getActivitySortTimestamp(a.date, a.title)
+  );
 }
 
 export function compareActivityDateAsc(
   a: { date?: string; title?: string },
   b: { date?: string; title?: string },
 ): number {
-  return getActivitySortTimestamp(a.date, a.title) - getActivitySortTimestamp(b.date, b.title);
+  return (
+    getActivitySortTimestamp(a.date, a.title) -
+    getActivitySortTimestamp(b.date, b.title)
+  );
 }
 
 /** Event list: upcoming/ongoing by start asc (soonest first), ended after, missing dates last. */
@@ -154,8 +160,8 @@ export function compareActivitiesNearestFirst(
   b: { date?: string; title?: string },
   now?: Date,
 ): number {
-  const aEnded = getActivityStatusFromActivity(a.date, a.title, now) === "ended";
-  const bEnded = getActivityStatusFromActivity(b.date, b.title, now) === "ended";
+  const aEnded = getActivityStatusFromActivity(a.date, a.title, now) === 'ended';
+  const bEnded = getActivityStatusFromActivity(b.date, b.title, now) === 'ended';
   if (aEnded !== bEnded) return aEnded ? 1 : -1;
 
   const aTs = getActivitySortTimestamp(a.date, a.title);
@@ -189,7 +195,7 @@ export function findNearestUpcomingActivity<T extends ActivityDateFields>(
 
   for (const item of activities) {
     const title = activityTitleFromFields(item);
-    if (getActivityStatusFromActivity(item.date, title, now) === "ended") continue;
+    if (getActivityStatusFromActivity(item.date, title, now) === 'ended') continue;
 
     const startMs = getActivitySortTimestamp(item.date, title);
     if (startMs <= 0 || startMs <= nowMs) continue;

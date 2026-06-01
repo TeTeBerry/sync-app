@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
   Check,
   CircleCheck,
@@ -11,30 +11,30 @@ import {
   Sparkles,
   Trash2,
   X,
-} from "lucide-react-taro";
-import { ContentTypeBadge } from "../../../components/ContentTypeBadge";
-import { PostStatusBadge } from "../../../components/PostStatusBadge";
-import { ProfileCollapsibleSection } from "../../../components/profile/ProfileCollapsibleSection";
-import type { ProfilePostItem } from "../../../types/backend";
-import { POST_ACTION_ICON_COLOR } from "../../../utils/postActionColors";
-import { Button, Text, Textarea, View } from "@tarojs/components";
+} from 'lucide-react-taro';
+import { ContentTypeBadge } from '../../../components/ContentTypeBadge';
+import { PostStatusBadge } from '../../../components/PostStatusBadge';
+import { ProfileCollapsibleSection } from '../../../components/profile/ProfileCollapsibleSection';
+import type { ProfilePostItem } from '../../../types/backend';
+import { POST_ACTION_ICON_COLOR } from '../../../utils/postActionColors';
+import { Button, Text, Textarea, View } from '@tarojs/components';
 
 const POST_BODY_MAX = 200;
 const PROFILE_POST_STAT_ICON_SIZE = 14;
 const PROFILE_POST_ACTION_ICON_SIZE = 16;
-const PROFILE_POST_ACTION_COMPLETE_COLOR = "#22c55e";
-const PROFILE_POST_ACTION_EDIT_COLOR = "#4cc9f0";
-const PROFILE_POST_ACTION_DELETE_COLOR = "#ff6467";
+const PROFILE_POST_ACTION_COMPLETE_COLOR = '#22c55e';
+const PROFILE_POST_ACTION_EDIT_COLOR = '#4cc9f0';
+const PROFILE_POST_ACTION_DELETE_COLOR = '#ff6467';
 
 export type ProfilePostEditDraft = {
   body: string;
-  status: "招募中" | "已组队";
+  status: '招募中' | '已组队';
 };
 
 export type ProfilePostsSectionProps = {
   items: ProfilePostItem[];
   /** `list` renders all items without collapsible chrome (detail sub-page). */
-  mode?: "collapsible" | "list";
+  mode?: 'collapsible' | 'list';
   editingPostId?: string | null;
   editDraft?: ProfilePostEditDraft | null;
   onSelect?: (item: ProfilePostItem) => void;
@@ -48,13 +48,13 @@ export type ProfilePostsSectionProps = {
 
 function isPostEditDirty(item: ProfilePostItem, draft: ProfilePostEditDraft): boolean {
   const statusMatches =
-    draft.status === "已组队" ? item.status === "已组队" : item.status === "招募中";
+    draft.status === '已组队' ? item.status === '已组队' : item.status === '招募中';
   return draft.body !== item.content || !statusMatches;
 }
 
 function renderPostItems(
   pageItems: ProfilePostItem[],
-  props: Omit<ProfilePostsSectionProps, "items" | "mode">,
+  props: Omit<ProfilePostsSectionProps, 'items' | 'mode'>,
 ) {
   const {
     editingPostId = null,
@@ -78,11 +78,11 @@ function renderPostItems(
     return (
       <View
         key={item.id}
-        className={`s-profile-post s-profile-post--clickable${isEditing ? " s-profile-post--editing" : ""}`}
+        className={`s-profile-post s-profile-post--clickable${isEditing ? ' s-profile-post--editing' : ''}`}
         role="button"
         onClick={() => onSelect?.(item)}
         onKeyDown={(event) => {
-          if (event.key !== "Enter" && event.key !== " ") return;
+          if (event.key !== 'Enter' && event.key !== ' ') return;
           event.preventDefault();
           onSelect?.(item);
         }}
@@ -103,26 +103,35 @@ function renderPostItems(
           <View className="s-profile-post__stats">
             <View className="s-profile-post__stat">
               <View className="s-profile-post__stat-icon">
-                <Heart size={PROFILE_POST_STAT_ICON_SIZE} color={POST_ACTION_ICON_COLOR} />
+                <Heart
+                  size={PROFILE_POST_STAT_ICON_SIZE}
+                  color={POST_ACTION_ICON_COLOR}
+                />
               </View>
               <Text>{item.likes}</Text>
             </View>
             <View className="s-profile-post__stat">
               <View className="s-profile-post__stat-icon">
-                <MessageCircle size={PROFILE_POST_STAT_ICON_SIZE} color={POST_ACTION_ICON_COLOR} />
+                <MessageCircle
+                  size={PROFILE_POST_STAT_ICON_SIZE}
+                  color={POST_ACTION_ICON_COLOR}
+                />
               </View>
               <Text>{item.comments}</Text>
             </View>
             <View className="s-profile-post__stat">
               <View className="s-profile-post__stat-icon">
-                <Clock size={PROFILE_POST_STAT_ICON_SIZE} color={POST_ACTION_ICON_COLOR} />
+                <Clock
+                  size={PROFILE_POST_STAT_ICON_SIZE}
+                  color={POST_ACTION_ICON_COLOR}
+                />
               </View>
               <Text>{item.date}</Text>
             </View>
           </View>
 
           <View className="s-profile-post__actions">
-            {item.status === "招募中" ? (
+            {item.status === '招募中' ? (
               <Button
                 className="s-profile-post__action s-profile-post__action--complete"
                 aria-label="标记已组队"
@@ -173,7 +182,10 @@ function renderPostItems(
         </View>
 
         {isEditing && draft ? (
-          <View className="s-profile-post-edit" onClick={(event) => event.stopPropagation()}>
+          <View
+            className="s-profile-post-edit"
+            onClick={(event) => event.stopPropagation()}
+          >
             <View className="s-profile-post-edit__header">
               <View className="s-profile-post-edit__label">
                 <View className="s-profile-post-edit__label-icon">
@@ -213,29 +225,29 @@ function renderPostItems(
             <View className="s-profile-post-edit__status-row">
               <Button
                 className={`s-profile-post-edit__status-btn${
-                  draft.status === "招募中"
-                    ? " s-profile-post-edit__status-btn--active-recruiting"
-                    : ""
+                  draft.status === '招募中'
+                    ? ' s-profile-post-edit__status-btn--active-recruiting'
+                    : ''
                 }`}
-                onClick={() => onEditDraftChange?.({ ...draft, status: "招募中" })}
+                onClick={() => onEditDraftChange?.({ ...draft, status: '招募中' })}
               >
                 <Flame size={16} />
                 <Text>招募中</Text>
-                {draft.status === "招募中" ? (
+                {draft.status === '招募中' ? (
                   <Text className="s-profile-post-edit__status-dot" />
                 ) : null}
               </Button>
               <Button
                 className={`s-profile-post-edit__status-btn${
-                  draft.status === "已组队"
-                    ? " s-profile-post-edit__status-btn--active-grouped"
-                    : ""
+                  draft.status === '已组队'
+                    ? ' s-profile-post-edit__status-btn--active-grouped'
+                    : ''
                 }`}
-                onClick={() => onEditDraftChange?.({ ...draft, status: "已组队" })}
+                onClick={() => onEditDraftChange?.({ ...draft, status: '已组队' })}
               >
                 <CircleCheck size={16} />
                 <Text>已组队</Text>
-                {draft.status === "已组队" ? (
+                {draft.status === '已组队' ? (
                   <Sparkles size={14} className="s-profile-post-edit__status-sparkle" />
                 ) : null}
               </Button>
@@ -249,11 +261,17 @@ function renderPostItems(
             ) : null}
 
             <View className="s-profile-post-edit__actions">
-              <Button className="s-profile-post-edit__save" onClick={() => onSaveEdit?.(item)}>
+              <Button
+                className="s-profile-post-edit__save"
+                onClick={() => onSaveEdit?.(item)}
+              >
                 <Check size={16} />
                 保存修改
               </Button>
-              <Button className="s-profile-post-edit__cancel" onClick={() => onCancelEdit?.()}>
+              <Button
+                className="s-profile-post-edit__cancel"
+                onClick={() => onCancelEdit?.()}
+              >
                 <X size={14} />
                 取消
               </Button>
@@ -267,7 +285,7 @@ function renderPostItems(
 
 const ProfilePostsSection: React.FC<ProfilePostsSectionProps> = ({
   items,
-  mode = "collapsible",
+  mode = 'collapsible',
   editingPostId = null,
   editDraft = null,
   onSelect,
@@ -290,7 +308,7 @@ const ProfilePostsSection: React.FC<ProfilePostsSectionProps> = ({
     onCancelEdit,
   };
 
-  if (mode === "list") {
+  if (mode === 'list') {
     return (
       <View className="s-profile-section__body s-profile-section__body--standalone">
         {items.length === 0 ? (
@@ -299,7 +317,9 @@ const ProfilePostsSection: React.FC<ProfilePostsSectionProps> = ({
               <MessageSquare size={22} />
             </View>
             <Text className="s-profile-section__empty-title">还没有发布帖子</Text>
-            <Text className="s-profile-section__empty-hint">在活动详情通过 AI 助手发布组队帖</Text>
+            <Text className="s-profile-section__empty-hint">
+              在活动详情通过 AI 助手发布组队帖
+            </Text>
           </View>
         ) : (
           renderPostItems(items, postProps)
@@ -320,7 +340,9 @@ const ProfilePostsSection: React.FC<ProfilePostsSectionProps> = ({
             <MessageSquare size={22} />
           </View>
           <Text className="s-profile-section__empty-title">还没有发布帖子</Text>
-          <Text className="s-profile-section__empty-hint">在活动详情通过 AI 助手发布组队帖</Text>
+          <Text className="s-profile-section__empty-hint">
+            在活动详情通过 AI 助手发布组队帖
+          </Text>
         </View>
       )}
     >

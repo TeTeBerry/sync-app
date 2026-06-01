@@ -1,12 +1,12 @@
-import { Zap } from "lucide-react-taro";
-import { Button, Text, View } from "@tarojs/components";
-import ThemedPageLoader from "../../../../components/ThemedPageLoader";
-import type { LiveInfoCertStatus } from "../../../../types/backend";
-import type { PublishLiveInfoPayload } from "../useEventLiveInfo";
-import type { LiveInfoFeedItem, LiveInfoSummaryRow } from "../liveInfoMock";
-import { EventLiveInfoCertCard } from "./EventLiveInfoCertCard";
-import { EventLiveInfoSummaryCard } from "./EventLiveInfoSummaryCard";
-import { EventLiveInfoFeed } from "./EventLiveInfoFeed";
+import { Zap } from 'lucide-react-taro';
+import { Button, Text, View } from '@tarojs/components';
+import ThemedPageLoader from '../../../../components/ThemedPageLoader';
+import type { LiveInfoCertStatus } from '../../../../types/backend';
+import type { PublishLiveInfoPayload } from '../useEventLiveInfo';
+import type { LiveInfoFeedItem, LiveInfoSummaryRow } from '../liveInfoMock';
+import { EventLiveInfoCertCard } from './EventLiveInfoCertCard';
+import { EventLiveInfoSummaryCard } from './EventLiveInfoSummaryCard';
+import { EventLiveInfoFeed } from './EventLiveInfoFeed';
 
 type EventLiveInfoPanelProps = {
   loading?: boolean;
@@ -49,9 +49,9 @@ export function EventLiveInfoPanel({
 
   return (
     <View
-      className={["s-live-info-panel", isCertified && "s-live-info-panel--with-fab"]
+      className={['s-live-info-panel', isCertified && 's-live-info-panel--with-fab']
         .filter(Boolean)
-        .join(" ")}
+        .join(' ')}
     >
       <EventLiveInfoCertCard
         userName={userName}

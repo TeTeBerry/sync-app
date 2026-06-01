@@ -1,13 +1,13 @@
-import Taro from "@tarojs/taro";
-import { getCacheKey, setCacheDataByKey } from "../hooks/useApiQuery";
-import { isApiEnabled } from "../constants/api";
-import { getClientUserId } from "./session";
-import type { HomeFeedPost, HomeSummary } from "../types/backend";
+import Taro from '@tarojs/taro';
+import { getCacheKey, setCacheDataByKey } from '../hooks/useApiQuery';
+import { isApiEnabled } from '../constants/api';
+import { getClientUserId } from './session';
+import type { HomeFeedPost, HomeSummary } from '../types/backend';
 
 export const HOME_POPULAR_POSTS_PERSIST_LIMIT = 8;
 export const HOME_CACHE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 
-const SUMMARY_STORAGE_KEY = "sync:home:summary:v1";
+const SUMMARY_STORAGE_KEY = 'sync:home:summary:v1';
 
 function popularStorageKey(userId: string): string {
   return `sync:home:popular:v1:${userId}`;
@@ -23,8 +23,10 @@ function readEnvelope<T>(storageKey: string): T | undefined {
     const raw = Taro.getStorageSync(storageKey);
     if (!raw) return undefined;
     const parsed =
-      typeof raw === "string" ? (JSON.parse(raw) as CacheEnvelope<T>) : (raw as CacheEnvelope<T>);
-    if (!parsed?.data || typeof parsed.savedAt !== "number") {
+      typeof raw === 'string'
+        ? (JSON.parse(raw) as CacheEnvelope<T>)
+        : (raw as CacheEnvelope<T>);
+    if (!parsed?.data || typeof parsed.savedAt !== 'number') {
       return undefined;
     }
     if (Date.now() - parsed.savedAt > HOME_CACHE_MAX_AGE_MS) {
@@ -55,7 +57,7 @@ export function hydrateHomeCachesFromStorage(): void {
 
   const summary = readEnvelope<HomeSummary>(SUMMARY_STORAGE_KEY);
   if (summary) {
-    setCacheDataByKey(getCacheKey(["home", "summary"]), summary);
+    setCacheDataByKey(getCacheKey(['home', 'summary']), summary);
   }
 
   const userId = getClientUserId();
@@ -65,7 +67,7 @@ export function hydrateHomeCachesFromStorage(): void {
 
   const popular = readEnvelope<HomeFeedPost[]>(popularStorageKey(userId));
   if (popular?.length) {
-    setCacheDataByKey(getCacheKey(["posts", "popular", userId]), popular);
+    setCacheDataByKey(getCacheKey(['posts', 'popular', userId]), popular);
   }
 }
 

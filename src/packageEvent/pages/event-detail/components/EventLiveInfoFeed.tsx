@@ -1,6 +1,6 @@
-import { Text, View } from "@tarojs/components";
-import type { LiveInfoFeedItem } from "../liveInfoMock";
-import { EventLiveInfoFeedItem } from "./EventLiveInfoFeedItem";
+import { Text, View } from '@tarojs/components';
+import type { LiveInfoFeedItem } from '../liveInfoMock';
+import { EventLiveInfoFeedItem } from './EventLiveInfoFeedItem';
 
 type EventLiveInfoFeedProps = {
   items: LiveInfoFeedItem[];

@@ -1,4 +1,4 @@
-import type { ItineraryConflict } from "../../../types/backend";
+import type { ItineraryConflict } from '../../../types/backend';
 
 type Slot = {
   artistId: string;
@@ -37,10 +37,12 @@ export function detectItineraryConflicts(
       for (let j = i + 1; j < daySlots.length; j += 1) {
         const a = daySlots[i];
         const b = daySlots[j];
-        if (!rangesOverlap(a.startMinutes, a.endMinutes, b.startMinutes, b.endMinutes)) {
+        if (
+          !rangesOverlap(a.startMinutes, a.endMinutes, b.startMinutes, b.endMinutes)
+        ) {
           continue;
         }
-        const key = [a.artistId, b.artistId].sort().join(":") + dateKey;
+        const key = [a.artistId, b.artistId].sort().join(':') + dateKey;
         if (seen.has(key)) continue;
         seen.add(key);
         conflicts.push({

@@ -1,19 +1,19 @@
-@use "./styles/globals.scss";
-@use "./styles/pages-shared.scss";
-@use "./styles/activity-status.scss";
-@use "./styles/button" as btn;
+@use './styles/globals.scss';
+@use './styles/pages-shared.scss';
+@use './styles/activity-status.scss';
+@use './styles/button' as btn;
 
 page {
   font-family:
-    -apple-system, BlinkMacSystemFont, "PingFang SC", "Source Han Sans SC", "Helvetica Neue",
-    "Roboto", sans-serif;
+    -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Source Han Sans SC',
+    'Helvetica Neue', 'Roboto', sans-serif;
   background-color: #000000;
   height: 100%;
 }
 
 /* Weapp: plugin-html button reset; business classes override below */
-button:not([class*="s-"]),
-button[type="default"]:not([class*="s-"]) {
+button:not([class*='s-']),
+button[type='default']:not([class*='s-']) {
   margin: 0 !important;
   padding: 0 !important;
   background-color: transparent !important;
@@ -27,27 +27,27 @@ button[type="default"]:not([class*="s-"]) {
   box-shadow: none !important;
 }
 
-button:not([class*="s-"])::after,
-button[type="default"]:not([class*="s-"])::after {
+button:not([class*='s-'])::after,
+button[type='default']:not([class*='s-'])::after {
   border: none !important;
   display: none !important;
 }
 
-button[class*="s-"],
-button[type="default"][class*="s-"] {
+button[class*='s-'],
+button[type='default'][class*='s-'] {
   margin: 0;
   @include btn.button-label-center;
 }
 
-button[class*="s-"]::after,
-button[type="default"][class*="s-"]::after {
+button[class*='s-']::after,
+button[type='default'][class*='s-']::after {
   border: none !important;
   display: none !important;
 }
 
-button[class*="s-"] .s-btn-label,
-button[class*="s-"] [class$="-text"],
-button[class*="s-"] [class*="__text"] {
+button[class*='s-'] .s-btn-label,
+button[class*='s-'] [class$='-text'],
+button[class*='s-'] [class*='__text'] {
   @include btn.button-label-text;
 }
 

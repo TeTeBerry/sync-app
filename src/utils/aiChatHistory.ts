@@ -1,4 +1,4 @@
-import type { AiChatImageContext, AiChatMessage, ChatUiMessage } from "../types/aiChat";
+import type { AiChatImageContext, AiChatMessage, ChatUiMessage } from '../types/aiChat';
 
 function resolveImageContext(
   message: ChatUiMessage,
@@ -18,10 +18,10 @@ export function mapHistoryToUiMessages(
   sessionId: string,
 ): ChatUiMessage[] {
   return history
-    .filter((message) => message.role === "user" || message.role === "assistant")
+    .filter((message) => message.role === 'user' || message.role === 'assistant')
     .map((message, index) => ({
       id: `${sessionId}-${index}`,
-      from: message.role === "user" ? "user" : "ai",
+      from: message.role === 'user' ? 'user' : 'ai',
       text: message.content,
       imagePreview: message.imageContext?.source,
       ocrText: message.imageContext?.ocrText,
@@ -54,12 +54,12 @@ export function buildApiChatHistory(
 
   for (let index = 0; index < settled.length; index += 1) {
     const message = settled[index];
-    if (index === 0 && message.from === "ai" && message.text === welcomeText) {
+    if (index === 0 && message.from === 'ai' && message.text === welcomeText) {
       continue;
     }
     apiMessages.push({
-      role: message.from === "user" ? "user" : "assistant",
-      content: message.text || message.ocrText || "",
+      role: message.from === 'user' ? 'user' : 'assistant',
+      content: message.text || message.ocrText || '',
       imageContext: resolveImageContext(message),
       recommendedPosts: message.recommendedPosts,
       recommendedActivity: message.recommendedActivity,
@@ -69,21 +69,21 @@ export function buildApiChatHistory(
   }
 
   if (pendingUserText || pendingImage) {
-    const trimmedPending = pendingUserText?.trim() ?? "";
+    const trimmedPending = pendingUserText?.trim() ?? '';
     const lastApi = apiMessages[apiMessages.length - 1];
     const duplicateUserText =
       Boolean(trimmedPending) &&
       !pendingImage &&
-      lastApi?.role === "user" &&
+      lastApi?.role === 'user' &&
       lastApi.content === trimmedPending;
 
     if (!duplicateUserText) {
       apiMessages.push({
-        role: "user",
+        role: 'user',
         content: trimmedPending,
         imageContext: pendingImage ? { source: pendingImage } : undefined,
       });
-    } else if (pendingImage && lastApi?.role === "user") {
+    } else if (pendingImage && lastApi?.role === 'user') {
       lastApi.imageContext = { source: pendingImage };
     }
   }

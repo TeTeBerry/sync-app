@@ -1,26 +1,29 @@
-import "./FeedPostList.scss";
-import { MessageCircle, ThumbsUp } from "lucide-react-taro";
-import { memo, useCallback, useState, type FC } from "react";
-import { Button } from "./ui";
-import { PostCommentSection } from "./PostCommentSection";
-import { PostActionMenu, PostShareButton } from "./PostActionMenu";
-import { PostStatusBadge } from "./PostStatusBadge";
+import './FeedPostList.scss';
+import { MessageCircle, ThumbsUp } from 'lucide-react-taro';
+import { memo, useCallback, useState, type FC } from 'react';
+import { Button } from './ui';
+import { PostCommentSection } from './PostCommentSection';
+import { PostActionMenu, PostShareButton } from './PostActionMenu';
+import { PostStatusBadge } from './PostStatusBadge';
 import {
   ContentTypeBadge,
   mergePostContentTypes,
   stripContentTypeHashtags,
-} from "./ContentTypeBadge";
-import { PostImageGrid, PostImageCount } from "./PostImageGrid";
-import { useCurrentUserQuery } from "../hooks/useSyncApi";
-import { isCurrentUserPostAuthor } from "../utils/postOwnership";
-import type { ActivityPost } from "../pages/index/homeData";
-import { thumbnailImageUrl } from "../utils/imageUrl";
-import { postActionIconColor } from "../utils/postActionColors";
-import { inferAuthorGenderFromPost } from "../utils/inferAuthorGender";
-import type { PostSharePayload } from "../utils/postShare";
-import { Image, Text, View } from "@tarojs/components";
+} from './ContentTypeBadge';
+import { PostImageGrid, PostImageCount } from './PostImageGrid';
+import { useCurrentUserQuery } from '../hooks/useSyncApi';
+import { isCurrentUserPostAuthor } from '../utils/postOwnership';
+import type { ActivityPost } from '../pages/index/homeData';
+import { thumbnailImageUrl } from '../utils/imageUrl';
+import { postActionIconColor } from '../utils/postActionColors';
+import { inferAuthorGenderFromPost } from '../utils/inferAuthorGender';
+import type { PostSharePayload } from '../utils/postShare';
+import { Image, Text, View } from '@tarojs/components';
 
-function feedPostSharePayload(post: ActivityPost, authorName: string): PostSharePayload {
+function feedPostSharePayload(
+  post: ActivityPost,
+  authorName: string,
+): PostSharePayload {
   return {
     postId: post.id,
     activityLegacyId: post.activityLegacyId,
@@ -58,7 +61,7 @@ function FeedPostRowInner({
   onCommentSubmitted,
   onToggleComments,
 }: FeedPostRowProps) {
-  const postName = post.name?.trim() || "用户";
+  const postName = post.name?.trim() || '用户';
   const postHandle = post.handle?.trim() || `@${postName}`;
   const isOwn = isCurrentUserPostAuthor(postName, post.userId);
   const avatarSrc = thumbnailImageUrl(post.avatar, 80) ?? post.avatar;
@@ -74,13 +77,18 @@ function FeedPostRowInner({
   const locationClassName = post.location
     ? authorGender
       ? `s-home-post__user-location s-home-post__user-location--${authorGender}`
-      : "s-home-post__user-location"
-    : "";
+      : 's-home-post__user-location'
+    : '';
 
   return (
     <View className="s-home-post">
       <View className="s-home-post__header">
-        <Image className="s-home-post__avatar" src={avatarSrc} mode="aspectFill" lazyLoad />
+        <Image
+          className="s-home-post__avatar"
+          src={avatarSrc}
+          mode="aspectFill"
+          lazyLoad
+        />
         <View className="s-home-post__head-main">
           <View className="s-home-post__top">
             <View className="s-home-post__user-line">
@@ -92,11 +100,13 @@ function FeedPostRowInner({
                 </Text>
               ) : null}
               <Text className="s-home-post__user-handle">{postHandle}</Text>
-              {post.images?.length ? <PostImageCount count={post.images.length} /> : null}
+              {post.images?.length ? (
+                <PostImageCount count={post.images.length} />
+              ) : null}
             </View>
             <View className="s-home-post__head-actions">
               <PostStatusBadge
-                post={{ status: post.status ?? "招募中" }}
+                post={{ status: post.status ?? '招募中' }}
                 variant="home"
                 isOwn={isOwn}
               />
@@ -126,7 +136,7 @@ function FeedPostRowInner({
         <Text className="s-home-post__time">{post.time}</Text>
         <View className="s-home-post__actions">
           <Button
-            className={`s-home-post__action${post.liked ? " s-home-post__action--liked" : ""}`}
+            className={`s-home-post__action${post.liked ? ' s-home-post__action--liked' : ''}`}
             onClick={() => onLike?.(post)}
           >
             <ThumbsUp
@@ -138,7 +148,7 @@ function FeedPostRowInner({
             <Text className="s-home-post__action-label">{post.likes}</Text>
           </Button>
           <Button
-            className={`s-home-post__action${commentsExpanded ? " s-home-post__action--active" : ""}`}
+            className={`s-home-post__action${commentsExpanded ? ' s-home-post__action--active' : ''}`}
             onClick={() => onToggleComments(post.id)}
           >
             <MessageCircle
@@ -166,7 +176,12 @@ function FeedPostRowInner({
 
 const FeedPostRow = memo(FeedPostRowInner);
 
-function FeedPostListInner({ items, onDelete, onLike, onCommentSubmitted }: FeedPostListProps) {
+function FeedPostListInner({
+  items,
+  onDelete,
+  onLike,
+  onCommentSubmitted,
+}: FeedPostListProps) {
   const { data: currentUser } = useCurrentUserQuery();
   const [expandedCommentPostIds, setExpandedCommentPostIds] = useState<Set<string>>(
     () => new Set(),

@@ -1,13 +1,13 @@
-import Taro from "@tarojs/taro";
-import { sanitizeRemoteImageUrl } from "./imageUrl";
+import Taro from '@tarojs/taro';
+import { sanitizeRemoteImageUrl } from './imageUrl';
 
 function isDataUrl(url: string): boolean {
   return /^data:image\//i.test(url);
 }
 
 function dataUrlToTempPath(dataUrl: string): Promise<string> {
-  const base64 = dataUrl.includes(",") ? dataUrl.split(",")[1] : dataUrl;
-  const ext = /image\/png/i.test(dataUrl) ? "png" : "jpg";
+  const base64 = dataUrl.includes(',') ? dataUrl.split(',')[1] : dataUrl;
+  const ext = /image\/png/i.test(dataUrl) ? 'png' : 'jpg';
   const filePath = `${Taro.env.USER_DATA_PATH}/preview_${Date.now()}.${ext}`;
   const fs = Taro.getFileSystemManager();
 
@@ -15,9 +15,9 @@ function dataUrlToTempPath(dataUrl: string): Promise<string> {
     fs.writeFile({
       filePath,
       data: base64,
-      encoding: "base64",
+      encoding: 'base64',
       success: () => resolve(filePath),
-      fail: (err) => reject(new Error(err.errMsg || "WRITE_FAILED")),
+      fail: (err) => reject(new Error(err.errMsg || 'WRITE_FAILED')),
     });
   });
 }
@@ -34,7 +34,7 @@ async function resolvePreviewUrl(url: string): Promise<string | null> {
   if (!trimmed) return null;
 
   if (isDataUrl(trimmed)) {
-    if (process.env.TARO_ENV === "weapp") {
+    if (process.env.TARO_ENV === 'weapp') {
       return dataUrlToTempPath(trimmed);
     }
     return trimmed;
@@ -58,7 +58,10 @@ function releasePreviewLock(): void {
 }
 
 /** Open native full-screen image preview (WeChat `previewImage` on weapp). */
-export async function openImagePreview(urls: string[], currentIndex = 0): Promise<void> {
+export async function openImagePreview(
+  urls: string[],
+  currentIndex = 0,
+): Promise<void> {
   if (!urls.length || previewInFlight) return;
 
   previewInFlight = true;
@@ -79,7 +82,9 @@ export async function openImagePreview(urls: string[], currentIndex = 0): Promis
     const safeOriginalIndex = Math.min(Math.max(0, currentIndex), urls.length - 1);
     const mappedIndex = resolvedFromOriginal[safeOriginalIndex];
     const idx =
-      mappedIndex != null ? mappedIndex : Math.min(Math.max(0, currentIndex), resolved.length - 1);
+      mappedIndex != null
+        ? mappedIndex
+        : Math.min(Math.max(0, currentIndex), resolved.length - 1);
 
     await Taro.previewImage({
       urls: resolved,

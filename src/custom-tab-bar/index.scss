@@ -2,7 +2,7 @@
  * Styles for the WeChat custom-tab-bar component.
  * This chunk is NOT linked to app.wxss/common.wxss — include tab bar layout here.
  */
-@use "../components/BottomNav.scss";
+@use '../components/BottomNav.scss';
 
 .s-tabbar-fixed-host {
   position: fixed;
@@ -22,7 +22,7 @@
 
 /* WeChat default button chrome (plugin-html) */
 button.s-bottom-nav__item,
-button[type="default"].s-bottom-nav__item {
+button[type='default'].s-bottom-nav__item {
   margin: 0 !important;
   padding: 0 !important;
   background-color: transparent !important;
@@ -39,7 +39,7 @@ button[type="default"].s-bottom-nav__item {
 }
 
 button.s-bottom-nav__item::after,
-button[type="default"].s-bottom-nav__item::after {
+button[type='default'].s-bottom-nav__item::after {
   border: none !important;
   display: none !important;
 }

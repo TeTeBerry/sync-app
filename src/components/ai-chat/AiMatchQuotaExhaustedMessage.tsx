@@ -1,8 +1,8 @@
-import "./AiMatchQuotaExhaustedMessage.scss";
-import { Rocket, Sparkles, Zap } from "lucide-react-taro";
-import { Button, Text, View } from "@tarojs/components";
-import { useAiMatchQuota } from "../../hooks/useAiMatchQuota";
-import { useAiUpgradeSheet } from "./AiUpgradeSheetContext";
+import './AiMatchQuotaExhaustedMessage.scss';
+import { Rocket, Sparkles, Zap } from 'lucide-react-taro';
+import { Button, Text, View } from '@tarojs/components';
+import { useAiMatchQuota } from '../../hooks/useAiMatchQuota';
+import { useAiUpgradeSheet } from './AiUpgradeSheetContext';
 
 export function AiMatchQuotaExhaustedMessage() {
   const { exhausted, usageLabel, loading } = useAiMatchQuota();
@@ -28,8 +28,16 @@ export function AiMatchQuotaExhaustedMessage() {
             aria-label="立即升级套餐"
             onClick={openUpgradeSheet}
           >
-            <Sparkles size={14} className="s-ai-match-quota-msg__cta-sparkle" aria-hidden />
-            <Rocket size={14} className="s-ai-match-quota-msg__cta-rocket" aria-hidden />
+            <Sparkles
+              size={14}
+              className="s-ai-match-quota-msg__cta-sparkle"
+              aria-hidden
+            />
+            <Rocket
+              size={14}
+              className="s-ai-match-quota-msg__cta-rocket"
+              aria-hidden
+            />
             <Text className="s-btn-label">🚀 立即升级套餐</Text>
           </Button>
         </View>

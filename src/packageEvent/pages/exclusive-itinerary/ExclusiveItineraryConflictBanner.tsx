@@ -1,7 +1,7 @@
-import { TriangleAlert } from "lucide-react-taro";
-import { Button, Text, View } from "@tarojs/components";
-import type { ItineraryConflict } from "../../../types/backend";
-import "./ExclusiveItineraryConflictBanner.scss";
+import { TriangleAlert } from 'lucide-react-taro';
+import { Button, Text, View } from '@tarojs/components';
+import type { ItineraryConflict } from '../../../types/backend';
+import './ExclusiveItineraryConflictBanner.scss';
 
 type Props = {
   conflicts: ItineraryConflict[];
@@ -12,7 +12,9 @@ export function ExclusiveItineraryConflictBanner({ conflicts, onDismiss }: Props
   if (conflicts.length === 0) return null;
 
   const headline =
-    conflicts.length === 1 ? "检测到演出时间冲突" : `检测到 ${conflicts.length} 处演出时间冲突`;
+    conflicts.length === 1
+      ? '检测到演出时间冲突'
+      : `检测到 ${conflicts.length} 处演出时间冲突`;
 
   return (
     <View className="s-exclusive-itinerary-conflict" role="alert">
@@ -26,7 +28,7 @@ export function ExclusiveItineraryConflictBanner({ conflicts, onDismiss }: Props
         </Text>
         {conflicts.slice(0, 2).map((c) => (
           <Text
-            key={`${c.artistIds.join("-")}-${c.dateKey}`}
+            key={`${c.artistIds.join('-')}-${c.dateKey}`}
             className="s-exclusive-itinerary-conflict__item"
           >
             {c.message}

@@ -1,14 +1,17 @@
-import { Text, View } from "@tarojs/components";
-import { getLiveInfoCategory } from "../liveInfoConfig";
-import type { LiveInfoSummaryRow } from "../liveInfoMock";
-import { EventLiveInfoStarRow } from "./EventLiveInfoStarRow";
+import { Text, View } from '@tarojs/components';
+import { getLiveInfoCategory } from '../liveInfoConfig';
+import type { LiveInfoSummaryRow } from '../liveInfoMock';
+import { EventLiveInfoStarRow } from './EventLiveInfoStarRow';
 
 type EventLiveInfoSummaryCardProps = {
   rows: LiveInfoSummaryRow[];
   certCount: number;
 };
 
-export function EventLiveInfoSummaryCard({ rows, certCount }: EventLiveInfoSummaryCardProps) {
+export function EventLiveInfoSummaryCard({
+  rows,
+  certCount,
+}: EventLiveInfoSummaryCardProps) {
   const safeRows = Array.isArray(rows) ? rows : [];
 
   return (
@@ -39,7 +42,10 @@ export function EventLiveInfoSummaryCard({ rows, certCount }: EventLiveInfoSumma
               <View className="s-live-info-summary__stars-wrap">
                 <EventLiveInfoStarRow category={category} score={row.score} />
               </View>
-              <Text className="s-live-info-summary__score" style={{ color: category.color }}>
+              <Text
+                className="s-live-info-summary__score"
+                style={{ color: category.color }}
+              >
                 {row.score.toFixed(1)}
               </Text>
             </View>

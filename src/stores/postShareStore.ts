@@ -1,5 +1,5 @@
-import { create } from "zustand";
-import type { PostSharePayload } from "../utils/postShare";
+import { create } from 'zustand';
+import type { PostSharePayload } from '../utils/postShare';
 
 export interface PostShareState {
   pendingShare: PostSharePayload | null;

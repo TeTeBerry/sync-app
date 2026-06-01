@@ -1,12 +1,12 @@
-import React from "react";
-import { Text } from "@tarojs/components";
+import React from 'react';
+import { Text } from '@tarojs/components';
 import {
   type ActivityStatus,
   activityStatusBadgeClass,
   activityStatusText,
   getActivityStatusFromActivity,
   shouldShowActivityStatusBadge,
-} from "../utils/activityStatus";
+} from '../utils/activityStatus';
 
 export type ActivityStatusBadgeProps = {
   date?: string;
@@ -29,7 +29,9 @@ export const ActivityStatusBadge: React.FC<ActivityStatusBadgeProps> = ({
     return null;
   }
 
-  const badgeClass = [activityStatusBadgeClass(status), className].filter(Boolean).join(" ");
+  const badgeClass = [activityStatusBadgeClass(status), className]
+    .filter(Boolean)
+    .join(' ');
 
   return <Text className={badgeClass}>{activityStatusText(status)}</Text>;
 };

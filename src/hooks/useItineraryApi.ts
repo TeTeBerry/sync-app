@@ -1,13 +1,13 @@
-import { useCallback } from "react";
-import { useApiQuery } from "./useApiQuery";
+import { useCallback } from 'react';
+import { useApiQuery } from './useApiQuery';
 import {
   fetchItinerarySchedule,
   fetchSavedItinerary,
   generateItinerary,
   saveItinerary,
-} from "../api/syncApi";
-import { isApiEnabled } from "../constants/api";
-import type { GenerateItineraryPayload, SaveItineraryPayload } from "../types/backend";
+} from '../api/syncApi';
+import { isApiEnabled } from '../constants/api';
+import type { GenerateItineraryPayload, SaveItineraryPayload } from '../types/backend';
 
 export function useItineraryScheduleQuery(
   activityLegacyId: number | null | undefined,
@@ -19,12 +19,12 @@ export function useItineraryScheduleQuery(
     Number.isFinite(activityLegacyId) &&
     activityLegacyId > 0;
 
-  const selectedKey = options?.selectedDjIds?.join(",") ?? "";
+  const selectedKey = options?.selectedDjIds?.join(',') ?? '';
 
   return useApiQuery({
     queryKey: [
-      "itinerary",
-      "schedule",
+      'itinerary',
+      'schedule',
       activityLegacyId ?? undefined,
       options?.dateKey,
       selectedKey,
@@ -46,7 +46,7 @@ export function useSavedItineraryQuery(activityLegacyId: number | null | undefin
     activityLegacyId > 0;
 
   return useApiQuery({
-    queryKey: ["itinerary", "saved", activityLegacyId ?? undefined],
+    queryKey: ['itinerary', 'saved', activityLegacyId ?? undefined],
     queryFn: () => fetchSavedItinerary(activityLegacyId!),
     enabled,
   });

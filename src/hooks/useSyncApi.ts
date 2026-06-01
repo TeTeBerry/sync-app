@@ -34,7 +34,6 @@ import {
   updatePost,
 } from '../api/syncApi';
 import type {
-  EventDetailPost,
   HomeFeedPost,
   HomeSummary,
   PurchaseProfilePackagePayload,

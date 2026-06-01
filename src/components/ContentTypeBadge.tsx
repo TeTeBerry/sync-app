@@ -1,27 +1,25 @@
-import "./ContentTypeBadge.scss";
-import React from "react";
-import { Text, View } from "@tarojs/components";
+import './ContentTypeBadge.scss';
+import React from 'react';
+import { Text, View } from '@tarojs/components';
 import {
   CONTENT_TYPE_STYLE_KEYS,
   formatContentTypeHashtag,
   mergePostContentTypes,
   resolveContentTypeKey,
-  stripContentTypeHashtags,
-  filterContentTypeTags,
-} from "../utils/postContentTypeDisplay";
+} from '../utils/postContentTypeDisplay';
 
 export {
   mergePostContentTypes,
   stripContentTypeHashtags,
   filterContentTypeTags,
-} from "../utils/postContentTypeDisplay";
+} from '../utils/postContentTypeDisplay';
 
 const TYPE_STYLES: Record<string, string> = {
-  team: "s-content-badge--team",
-  accommodation: "s-content-badge--accommodation",
-  carpool: "s-content-badge--carpool",
-  ticket: "s-content-badge--ticket",
-  other: "s-content-badge--other",
+  team: 's-content-badge--team',
+  accommodation: 's-content-badge--accommodation',
+  carpool: 's-content-badge--carpool',
+  ticket: 's-content-badge--ticket',
+  other: 's-content-badge--other',
 };
 
 export const ContentTypeBadge: React.FC<{
@@ -36,8 +34,13 @@ export const ContentTypeBadge: React.FC<{
         const resolved = resolveContentTypeKey(key);
         const styleKey = CONTENT_TYPE_STYLE_KEYS.has(resolved) ? resolved : key;
         return (
-          <View key={styleKey} className={`s-content-badge ${TYPE_STYLES[styleKey] ?? ""}`}>
-            <Text className="s-content-badge__label">{formatContentTypeHashtag(styleKey)}</Text>
+          <View
+            key={styleKey}
+            className={`s-content-badge ${TYPE_STYLES[styleKey] ?? ''}`}
+          >
+            <Text className="s-content-badge__label">
+              {formatContentTypeHashtag(styleKey)}
+            </Text>
           </View>
         );
       })}

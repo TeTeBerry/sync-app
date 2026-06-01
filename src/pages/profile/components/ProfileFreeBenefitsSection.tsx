@@ -1,10 +1,10 @@
-import "./ProfileFreeBenefitsSection.scss";
-import React from "react";
-import { Zap } from "lucide-react-taro";
-import type { ProfileFreeBenefitCardModel } from "../profileBenefitsMapper";
-import ProfileFreeBenefitCard from "./ProfileFreeBenefitCard";
-import ThemedPageLoader from "../../../components/ThemedPageLoader";
-import { Text, View } from "@tarojs/components";
+import './ProfileFreeBenefitsSection.scss';
+import React from 'react';
+import { Zap } from 'lucide-react-taro';
+import type { ProfileFreeBenefitCardModel } from '../profileBenefitsMapper';
+import ProfileFreeBenefitCard from './ProfileFreeBenefitCard';
+import ThemedPageLoader from '../../../components/ThemedPageLoader';
+import { Text, View } from '@tarojs/components';
 
 export type ProfileFreeBenefitsSectionProps = {
   card: ProfileFreeBenefitCardModel;

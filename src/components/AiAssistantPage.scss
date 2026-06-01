@@ -1,4 +1,4 @@
-@use "../styles/chat" as chat;
+@use '../styles/chat' as chat;
 
 .s-ai-assistant__history-loading {
   flex-shrink: 0;
@@ -19,7 +19,7 @@
   position: relative;
 
   &::after {
-    content: "";
+    content: '';
     position: absolute;
     inset: 0;
     width: 40%;
@@ -299,7 +299,7 @@
 
     &::before,
     &::after {
-      content: "";
+      content: '';
       display: inline-block;
       width: 24px;
       height: 1px;
@@ -387,7 +387,7 @@
     }
 
     &--streaming:not(&--waiting) span::after {
-      content: "";
+      content: '';
       display: inline-block;
       width: 2px;
       height: 1em;

@@ -1,55 +1,55 @@
 /** Content-type hashtag labels shown on post cards (e.g. #其他). */
 export const CONTENT_TYPE_LABELS: Record<string, string> = {
-  team: "组队",
-  accommodation: "住宿",
-  carpool: "拼车",
-  ticket: "转票",
-  groupbuy: "拼单",
-  other: "其他",
+  team: '组队',
+  accommodation: '住宿',
+  carpool: '拼车',
+  ticket: '转票',
+  groupbuy: '拼单',
+  other: '其他',
 };
 
 export const CONTENT_TYPE_STYLE_KEYS = new Set([
-  "team",
-  "accommodation",
-  "carpool",
-  "ticket",
-  "groupbuy",
-  "other",
+  'team',
+  'accommodation',
+  'carpool',
+  'ticket',
+  'groupbuy',
+  'other',
 ]);
 
 /** API may return English keys, Chinese labels, or #hashtags. */
 const LABEL_TO_TYPE: Record<string, string> = {
-  组队: "team",
-  组队队友: "team",
-  住宿: "accommodation",
-  住宿同行: "accommodation",
-  拼房: "accommodation",
-  拼车: "carpool",
-  拼车同行: "carpool",
-  转票: "ticket",
-  拼单: "groupbuy",
-  出票: "ticket",
-  票务: "ticket",
-  其他: "other",
-  "#组队": "team",
-  "#组队队友": "team",
-  "#住宿": "accommodation",
-  "#住宿同行": "accommodation",
-  "#拼房": "accommodation",
-  "#拼车": "carpool",
-  "#拼车同行": "carpool",
-  "#转票": "ticket",
-  "#拼单": "groupbuy",
-  "#出票": "ticket",
-  "#其他": "other",
+  组队: 'team',
+  组队队友: 'team',
+  住宿: 'accommodation',
+  住宿同行: 'accommodation',
+  拼房: 'accommodation',
+  拼车: 'carpool',
+  拼车同行: 'carpool',
+  转票: 'ticket',
+  拼单: 'groupbuy',
+  出票: 'ticket',
+  票务: 'ticket',
+  其他: 'other',
+  '#组队': 'team',
+  '#组队队友': 'team',
+  '#住宿': 'accommodation',
+  '#住宿同行': 'accommodation',
+  '#拼房': 'accommodation',
+  '#拼车': 'carpool',
+  '#拼车同行': 'carpool',
+  '#转票': 'ticket',
+  '#拼单': 'groupbuy',
+  '#出票': 'ticket',
+  '#其他': 'other',
 };
 
 export function resolveContentTypeKey(type: string): string {
-  const trimmed = (typeof type === "string" ? type : String(type ?? "")).trim();
-  if (!trimmed) return "other";
+  const trimmed = (typeof type === 'string' ? type : String(type ?? '')).trim();
+  if (!trimmed) return 'other';
   if (CONTENT_TYPE_STYLE_KEYS.has(trimmed)) return trimmed;
 
-  const fromLabel = LABEL_TO_TYPE[trimmed] ?? LABEL_TO_TYPE[trimmed.replace(/^#/, "")];
+  const fromLabel = LABEL_TO_TYPE[trimmed] ?? LABEL_TO_TYPE[trimmed.replace(/^#/, '')];
   if (fromLabel) return fromLabel;
 
   const lower = trimmed.toLowerCase();
@@ -63,7 +63,7 @@ export function formatContentTypeHashtag(type: string): string {
   const label = CONTENT_TYPE_LABELS[key];
   if (label) return `#${label}`;
   const raw = type.trim();
-  return raw.startsWith("#") ? raw : `#${raw.replace(/^#/, "")}`;
+  return raw.startsWith('#') ? raw : `#${raw.replace(/^#/, '')}`;
 }
 
 const CONTENT_TYPE_HASHTAG_RE =
@@ -91,7 +91,7 @@ export function mergePostContentTypes(
     if (CONTENT_TYPE_STYLE_KEYS.has(key)) keys.add(key);
   }
 
-  for (const key of contentTypeKeysFromHashtagText(sources.body ?? "")) {
+  for (const key of contentTypeKeysFromHashtagText(sources.body ?? '')) {
     keys.add(key);
   }
 
@@ -105,11 +105,11 @@ export function mergePostContentTypes(
 
 /** Remove content-type hashtags from visible post text (shown as badges instead). */
 export function stripContentTypeHashtags(text?: string): string {
-  if (!text?.trim()) return "";
+  if (!text?.trim()) return '';
   return text
-    .replace(CONTENT_TYPE_HASHTAG_RE, "")
-    .replace(/[ \t]+$/gm, "")
-    .replace(/\n{3,}/g, "\n\n")
+    .replace(CONTENT_TYPE_HASHTAG_RE, '')
+    .replace(/[ \t]+$/gm, '')
+    .replace(/\n{3,}/g, '\n\n')
     .trim();
 }
 
@@ -126,7 +126,7 @@ export function filterContentTypeTags(
   );
 
   return safeTags.filter((tag) => {
-    const normalized = tag.trim().replace(/^#/, "");
+    const normalized = tag.trim().replace(/^#/, '');
     const key = resolveContentTypeKey(tag);
     if (CONTENT_TYPE_STYLE_KEYS.has(key)) return false;
     return !badgeLabels.has(normalized);

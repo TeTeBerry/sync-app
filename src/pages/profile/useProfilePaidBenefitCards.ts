@@ -1,29 +1,29 @@
-import { useMemo } from "react";
-import { isApiEnabled } from "../../constants/api";
+import { useMemo } from 'react';
+import { isApiEnabled } from '../../constants/api';
 import {
   useProfileActivitiesQuery,
   useProfileEntitlementsQuery,
   useProfileSummaryQuery,
-} from "../../hooks/useSyncApi";
-import type { ProfileActivityItem } from "../../types/backend";
-import { profileActivities } from "./mockData";
+} from '../../hooks/useSyncApi';
+import type { ProfileActivityItem } from '../../types/backend';
+import { profileActivities } from './mockData';
 import {
   asEntitlementList,
   buildMockPaidEntitlement,
   buildMockProPlusEntitlement,
   listPaidEntitlements,
-} from "./profileBenefitsMapper";
+} from './profileBenefitsMapper';
 import {
   buildActivityByLegacyIdMap,
   buildPaidBenefitCards,
   pickRecentActivityBenefitCards,
-} from "./profileBenefitCards";
+} from './profileBenefitCards';
 import {
   isProfileDebugEntitlementsEnabled,
   readProfileDebugEntitlementPreset,
   resolveProfileDebugEntitlements,
   type ProfileDebugEntitlementPreset,
-} from "./profileDebugEntitlements";
+} from './profileDebugEntitlements';
 
 export function useProfilePaidBenefitCards(options?: {
   useDebugEntitlements?: boolean;
@@ -34,7 +34,8 @@ export function useProfilePaidBenefitCards(options?: {
   const allEntitlementsQuery = useProfileEntitlementsQuery();
   const activitiesQuery = useProfileActivitiesQuery();
 
-  const debugEnabled = options?.useDebugEntitlements ?? isProfileDebugEntitlementsEnabled();
+  const debugEnabled =
+    options?.useDebugEntitlements ?? isProfileDebugEntitlementsEnabled();
   const debugPreset = options?.debugPreset ?? readProfileDebugEntitlementPreset();
   const debugEntitlementOverride = useMemo(
     () => (debugEnabled ? resolveProfileDebugEntitlements(debugPreset) : null),
@@ -59,7 +60,10 @@ export function useProfilePaidBenefitCards(options?: {
     if (!apiEnabled) {
       return [buildMockPaidEntitlement(), buildMockProPlusEntitlement()];
     }
-    return listPaidEntitlements(entitlementList, summaryQuery.data?.packageEntitlements);
+    return listPaidEntitlements(
+      entitlementList,
+      summaryQuery.data?.packageEntitlements,
+    );
   }, [
     apiEnabled,
     debugEntitlementOverride,
@@ -69,7 +73,9 @@ export function useProfilePaidBenefitCards(options?: {
 
   const activityByLegacyId = useMemo(() => {
     const items: ProfileActivityItem[] =
-      apiEnabled && activitiesQuery.data?.length ? activitiesQuery.data : profileActivities;
+      apiEnabled && activitiesQuery.data?.length
+        ? activitiesQuery.data
+        : profileActivities;
     return buildActivityByLegacyIdMap(items);
   }, [activitiesQuery.data, apiEnabled]);
 

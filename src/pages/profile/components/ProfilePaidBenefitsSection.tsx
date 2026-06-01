@@ -1,10 +1,10 @@
-import "./ProfilePaidBenefitsSection.scss";
-import React from "react";
-import { ChevronRight, Zap } from "lucide-react-taro";
-import type { ProfileEventBenefitCardModel } from "../profileBenefitsMapper";
-import ProfileEventBenefitCard from "./ProfileEventBenefitCard";
-import ThemedPageLoader from "../../../components/ThemedPageLoader";
-import { Text, View } from "@tarojs/components";
+import './ProfilePaidBenefitsSection.scss';
+import React from 'react';
+import { ChevronRight, Zap } from 'lucide-react-taro';
+import type { ProfileEventBenefitCardModel } from '../profileBenefitsMapper';
+import ProfileEventBenefitCard from './ProfileEventBenefitCard';
+import ThemedPageLoader from '../../../components/ThemedPageLoader';
+import { Text, View } from '@tarojs/components';
 
 export type ProfilePaidBenefitsSectionProps = {
   cards: ProfileEventBenefitCardModel[];
@@ -48,7 +48,9 @@ const ProfilePaidBenefitsSection: React.FC<ProfilePaidBenefitsSectionProps> = ({
               hoverClass="s-profile-paid-benefits__view-all--pressed"
               onClick={onViewAll}
             >
-              <Text className="s-profile-paid-benefits__view-all-text">查看全部权益</Text>
+              <Text className="s-profile-paid-benefits__view-all-text">
+                查看全部权益
+              </Text>
               <ChevronRight size={14} color="#8e8e93" aria-hidden />
             </View>
           ) : null}

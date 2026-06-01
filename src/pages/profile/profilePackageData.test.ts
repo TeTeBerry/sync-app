@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 import {
   isBoundActivityLegacyId,
   MOCK_PACKAGE_CATALOG,
@@ -10,56 +10,56 @@ import {
   resolvePackageActivityPayCta,
   resolvePackageTierCta,
   resolvePackageTierStepCta,
-} from "./profilePackageData";
+} from './profilePackageData';
 
-const proTier = MOCK_PACKAGE_CATALOG.tiers.find((t) => t.id === "pro")!;
-const proPlusTier = MOCK_PACKAGE_CATALOG.tiers.find((t) => t.id === "pro_plus")!;
-const ultraTier = MOCK_PACKAGE_CATALOG.tiers.find((t) => t.id === "ultra")!;
+const proTier = MOCK_PACKAGE_CATALOG.tiers.find((t) => t.id === 'pro')!;
+const proPlusTier = MOCK_PACKAGE_CATALOG.tiers.find((t) => t.id === 'pro_plus')!;
+const ultraTier = MOCK_PACKAGE_CATALOG.tiers.find((t) => t.id === 'ultra')!;
 
-describe("isBoundActivityLegacyId", () => {
-  it("accepts finite activity ids", () => {
+describe('isBoundActivityLegacyId', () => {
+  it('accepts finite activity ids', () => {
     expect(isBoundActivityLegacyId(4)).toBe(true);
   });
 
-  it("rejects missing or invalid ids", () => {
+  it('rejects missing or invalid ids', () => {
     expect(isBoundActivityLegacyId(undefined)).toBe(false);
     expect(isBoundActivityLegacyId(null)).toBe(false);
     expect(isBoundActivityLegacyId(Number.NaN)).toBe(false);
   });
 });
 
-describe("packageTierAlreadyOwnedCtaLabel", () => {
-  it("includes tier display name", () => {
-    expect(packageTierAlreadyOwnedCtaLabel(proPlusTier)).toBe("您已是 Pro+ 套餐");
-    expect(packageTierAlreadyOwnedCtaLabel(ultraTier)).toBe("您已是 Ultra 套餐");
+describe('packageTierAlreadyOwnedCtaLabel', () => {
+  it('includes tier display name', () => {
+    expect(packageTierAlreadyOwnedCtaLabel(proPlusTier)).toBe('您已是 Pro+ 套餐');
+    expect(packageTierAlreadyOwnedCtaLabel(ultraTier)).toBe('您已是 Ultra 套餐');
   });
 });
 
-describe("resolvePackageTierCta", () => {
-  it("shows normal purchase label when no current tier", () => {
+describe('resolvePackageTierCta', () => {
+  it('shows normal purchase label when no current tier', () => {
     expect(resolvePackageTierCta({ selectedTier: proTier })).toEqual({
       label: packageTierCtaLabel(proTier),
       purchaseDisabled: false,
     });
   });
 
-  it("disables purchase when selected tier matches current paid tier", () => {
+  it('disables purchase when selected tier matches current paid tier', () => {
     expect(
       resolvePackageTierCta({
         selectedTier: proPlusTier,
-        currentPaidTierId: "pro_plus",
+        currentPaidTierId: 'pro_plus',
       }),
     ).toEqual({
-      label: "您已是 Pro+ 套餐",
+      label: '您已是 Pro+ 套餐',
       purchaseDisabled: true,
     });
   });
 
-  it("allows purchase when selecting a different tier", () => {
+  it('allows purchase when selecting a different tier', () => {
     expect(
       resolvePackageTierCta({
         selectedTier: ultraTier,
-        currentPaidTierId: "pro",
+        currentPaidTierId: 'pro',
       }),
     ).toEqual({
       label: packageTierCtaLabel(ultraTier),
@@ -67,11 +67,11 @@ describe("resolvePackageTierCta", () => {
     });
   });
 
-  it("allows purchase when downgrading selection vs current tier", () => {
+  it('allows purchase when downgrading selection vs current tier', () => {
     expect(
       resolvePackageTierCta({
         selectedTier: proTier,
-        currentPaidTierId: "ultra",
+        currentPaidTierId: 'ultra',
       }),
     ).toEqual({
       label: packageTierCtaLabel(proTier),
@@ -80,14 +80,14 @@ describe("resolvePackageTierCta", () => {
   });
 });
 
-describe("packageTierNextStepCtaLabel", () => {
-  it("prompts activity selection", () => {
-    expect(packageTierNextStepCtaLabel()).toBe("下一步：选择适用活动");
+describe('packageTierNextStepCtaLabel', () => {
+  it('prompts activity selection', () => {
+    expect(packageTierNextStepCtaLabel()).toBe('下一步：选择适用活动');
   });
 });
 
-describe("resolvePackageActivityPayCta", () => {
-  it("requires activity selection before pay", () => {
+describe('resolvePackageActivityPayCta', () => {
+  it('requires activity selection before pay', () => {
     expect(resolvePackageActivityPayCta({ selectedTier: undefined })).toEqual({
       label: packageActivitySelectCtaLabel(),
       purchaseDisabled: true,
@@ -95,28 +95,28 @@ describe("resolvePackageActivityPayCta", () => {
     });
   });
 
-  it("shows pay label with tier price", () => {
+  it('shows pay label with tier price', () => {
     expect(resolvePackageActivityPayCta({ selectedTier: proPlusTier })).toEqual({
       label: packagePayAndBindCtaLabel(proPlusTier),
       purchaseDisabled: false,
     });
   });
 
-  it("blocks repeat purchase for same tier on activity", () => {
+  it('blocks repeat purchase for same tier on activity', () => {
     expect(
       resolvePackageActivityPayCta({
         selectedTier: proPlusTier,
-        paidTierId: "pro_plus",
+        paidTierId: 'pro_plus',
       }),
     ).toEqual({
-      label: "您已是 Pro+ 套餐",
+      label: '您已是 Pro+ 套餐',
       purchaseDisabled: true,
     });
   });
 });
 
-describe("resolvePackageTierStepCta", () => {
-  it("shows next-step label for banner purchase", () => {
+describe('resolvePackageTierStepCta', () => {
+  it('shows next-step label for banner purchase', () => {
     expect(
       resolvePackageTierStepCta({
         selectedTier: proTier,
@@ -128,12 +128,12 @@ describe("resolvePackageTierStepCta", () => {
     });
   });
 
-  it("shows direct pay when activity is pre-known (upgrade)", () => {
+  it('shows direct pay when activity is pre-known (upgrade)', () => {
     expect(
       resolvePackageTierStepCta({
         selectedTier: ultraTier,
         activityPreKnown: true,
-        currentPaidTierId: "pro",
+        currentPaidTierId: 'pro',
       }),
     ).toEqual({
       label: packagePayAndBindCtaLabel(ultraTier),

@@ -1,14 +1,14 @@
-import type { CountdownPart } from "../pages/index/homeData";
+import type { CountdownPart } from '../pages/index/homeData';
 
 function pad2(n: number): string {
-  return String(Math.max(0, n)).padStart(2, "0");
+  return String(Math.max(0, n)).padStart(2, '0');
 }
 
 export const EMPTY_COUNTDOWN_PARTS: CountdownPart[] = [
-  { value: "--", unit: "d" },
-  { value: "--", unit: "h" },
-  { value: "--", unit: "m" },
-  { value: "--", unit: "s", accent: true },
+  { value: '--', unit: 'd' },
+  { value: '--', unit: 'h' },
+  { value: '--', unit: 'm' },
+  { value: '--', unit: 's', accent: true },
 ];
 
 export function getCountdownParts(target: Date, now = new Date()): CountdownPart[] {
@@ -21,9 +21,9 @@ export function getCountdownParts(target: Date, now = new Date()): CountdownPart
   const seconds = totalSeconds % 60;
 
   return [
-    { value: pad2(days), unit: "d" },
-    { value: pad2(hours), unit: "h" },
-    { value: pad2(minutes), unit: "m" },
-    { value: pad2(seconds), unit: "s", accent: true },
+    { value: pad2(days), unit: 'd' },
+    { value: pad2(hours), unit: 'h' },
+    { value: pad2(minutes), unit: 'm' },
+    { value: pad2(seconds), unit: 's', accent: true },
   ];
 }

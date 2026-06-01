@@ -1,4 +1,4 @@
-import { create } from "zustand";
+import { create } from 'zustand';
 
 interface ProfilePageState {
   notificationsEnabled: boolean;
@@ -9,7 +9,7 @@ interface ProfilePageState {
 
 export const useProfilePageStore = create<ProfilePageState>((set) => ({
   notificationsEnabled: true,
-  privacyLevel: "public",
+  privacyLevel: 'public',
 
   setNotificationsEnabled: (enabled) => set({ notificationsEnabled: enabled }),
   setPrivacyLevel: (level) => set({ privacyLevel: level }),

@@ -1,44 +1,48 @@
-import Taro, { useDidShow } from "@tarojs/taro";
-import { useCallback, useEffect, useState } from "react";
-import { useNavigationStore } from "../stores/navigationStore";
-import type { NavigationState } from "../stores/navigationStore";
-import type { AiAssistantNavIntent } from "../stores/types";
-import type { NotificationMeta } from "../types/backend";
-import { parseActivityLegacyId } from "./activityLegacyId";
-import { buildQueryString, normalizeQueryString, parseQueryString } from "./queryString";
-import { getCacheData } from "../hooks/useApiQuery";
-import { findBackendActivityByLegacyId } from "./apiMappers";
-import { seedActivityDetailCache } from "./activityDetailCache";
-import { PRELOAD_HOT_ROUTES_MS } from "./timing";
+import Taro, { useDidShow } from '@tarojs/taro';
+import { useCallback, useEffect, useState } from 'react';
+import { useNavigationStore } from '../stores/navigationStore';
+import type { NavigationState } from '../stores/navigationStore';
+import type { AiAssistantNavIntent } from '../stores/types';
+import type { NotificationMeta } from '../types/backend';
+import { parseActivityLegacyId } from './activityLegacyId';
+import { buildQueryString, normalizeQueryString } from './queryString';
+import { getCacheData } from '../hooks/useApiQuery';
+import { findBackendActivityByLegacyId } from './apiMappers';
+import { seedActivityDetailCache } from './activityDetailCache';
+import { PRELOAD_HOT_ROUTES_MS } from './timing';
 import {
   preloadAiSubpackage,
   preloadEventSubpackage,
   preloadProfileSubpackage,
   preloadStackSubpackages,
-} from "./subpackagePreload";
-import type { BackendActivity } from "../types/backend";
+} from './subpackagePreload';
+import type { BackendActivity } from '../types/backend';
 
-export { parseActivityLegacyId } from "./activityLegacyId";
+export { parseActivityLegacyId } from './activityLegacyId';
 
 export const ROUTES = {
-  HOME: "/pages/index/index",
-  EVENTS: "/pages/events/index",
-  PROFILE: "/pages/profile/index",
-  PROFILE_ACTIVITIES: "/packageProfile/pages/profile-activities/index",
-  PROFILE_BENEFITS: "/packageProfile/pages/profile-benefits/index",
-  PROFILE_POSTS: "/packageProfile/pages/profile-posts/index",
-  SETTINGS: "/packageProfile/pages/settings/index",
-  AI_ASSISTANT: "/packageAi/pages/ai-assistant/index",
-  EVENT_DETAIL: "/packageEvent/pages/event-detail/index",
-  EVENT_MAP: "/packageEvent/pages/event-map/index",
-  EXCLUSIVE_ITINERARY: "/packageEvent/pages/exclusive-itinerary/index",
-  MY_ITINERARY: "/packageEvent/pages/my-itinerary/index",
-  NOTIFICATIONS: "/packageProfile/pages/notifications/index",
+  HOME: '/pages/index/index',
+  EVENTS: '/pages/events/index',
+  PROFILE: '/pages/profile/index',
+  PROFILE_ACTIVITIES: '/packageProfile/pages/profile-activities/index',
+  PROFILE_BENEFITS: '/packageProfile/pages/profile-benefits/index',
+  PROFILE_POSTS: '/packageProfile/pages/profile-posts/index',
+  SETTINGS: '/packageProfile/pages/settings/index',
+  AI_ASSISTANT: '/packageAi/pages/ai-assistant/index',
+  EVENT_DETAIL: '/packageEvent/pages/event-detail/index',
+  EVENT_MAP: '/packageEvent/pages/event-map/index',
+  EXCLUSIVE_ITINERARY: '/packageEvent/pages/exclusive-itinerary/index',
+  MY_ITINERARY: '/packageEvent/pages/my-itinerary/index',
+  NOTIFICATIONS: '/packageProfile/pages/notifications/index',
 } as const;
 
 export type RoutePath = (typeof ROUTES)[keyof typeof ROUTES];
 
-const TAB_ROUTE_PATHS = new Set<RoutePath>([ROUTES.HOME, ROUTES.EVENTS, ROUTES.PROFILE]);
+const TAB_ROUTE_PATHS = new Set<RoutePath>([
+  ROUTES.HOME,
+  ROUTES.EVENTS,
+  ROUTES.PROFILE,
+]);
 
 /** Stack pages warmed after tab settle; event detail also preloaded on card touch. */
 const PRELOAD_HOT_ROUTES: RoutePath[] = [
@@ -72,20 +76,16 @@ const NAV_DEBOUNCE_MS = 120;
 let navigationChain: Promise<void> = Promise.resolve();
 let isNavigating = false;
 let lastNavAt = 0;
-let lastNavUrl = "";
+let lastNavUrl = '';
 let preloadTimer: ReturnType<typeof setTimeout> | null = null;
 
 function normalizePath(path: string): string {
-  const base = path.split("?")[0] ?? path;
-  return base.startsWith("/") ? base : `/${base}`;
-}
-
-function pathsEqual(a: string, b: string): boolean {
-  return normalizePath(a) === normalizePath(b);
+  const base = path.split('?')[0] ?? path;
+  return base.startsWith('/') ? base : `/${base}`;
 }
 
 function normalizeNavigationUrl(url: string): string {
-  const [rawPath, rawQuery = ""] = url.split("?");
+  const [rawPath, rawQuery = ''] = url.split('?');
   const path = normalizePath(rawPath);
   if (!rawQuery) {
     return path;
@@ -100,13 +100,13 @@ function currentPageUrl(): string {
     | { route?: string; options?: Record<string, string | undefined> }
     | undefined;
   if (!page?.route) {
-    return "";
+    return '';
   }
   const path = normalizePath(page.route);
   const options = page.options ?? {};
   const query: Record<string, string> = {};
   for (const [key, value] of Object.entries(options)) {
-    if (value != null && value !== "") {
+    if (value != null && value !== '') {
       query[key] = String(value);
     }
   }
@@ -153,7 +153,7 @@ function buildPageUrl(path: RoutePath, query?: Record<string, string>): string {
 /** Decode query params that WeChat may leave percent-encoded (e.g. Chinese titles). */
 export function decodeRouteQueryParam(value?: string): string {
   if (!value?.trim()) {
-    return "";
+    return '';
   }
   let decoded = value.trim();
   for (let pass = 0; pass < 2; pass += 1) {
@@ -161,7 +161,7 @@ export function decodeRouteQueryParam(value?: string): string {
       break;
     }
     try {
-      const next = decodeURIComponent(decoded.replace(/\+/g, " "));
+      const next = decodeURIComponent(decoded.replace(/\+/g, ' '));
       if (next === decoded) {
         break;
       }
@@ -207,11 +207,13 @@ function runSerializedNavigation(task: () => Promise<void>): void {
 
 /** WeChat preloadPage — warms page JS/WXML; never call immediately before navigateTo. */
 export function preloadPageSafe(path: RoutePath, query?: Record<string, string>) {
-  if (process.env.TARO_ENV !== "weapp" || isNavigating) {
+  if (process.env.TARO_ENV !== 'weapp' || isNavigating) {
     return;
   }
-  const preload = Taro.preloadPage as ((options: { url: string }) => Promise<void>) | undefined;
-  if (typeof preload !== "function") {
+  const preload = Taro.preloadPage as
+    | ((options: { url: string }) => Promise<void>)
+    | undefined;
+  if (typeof preload !== 'function') {
     return;
   }
   const url = buildPageUrl(path, query);
@@ -220,7 +222,7 @@ export function preloadPageSafe(path: RoutePath, query?: Record<string, string>)
 
 /** Preload common stack targets after tab pages settle (deferred to avoid webview races). */
 export function preloadHotRoutes() {
-  if (process.env.TARO_ENV !== "weapp") {
+  if (process.env.TARO_ENV !== 'weapp') {
     return;
   }
   if (preloadTimer != null) {
@@ -239,7 +241,10 @@ export function preloadHotRoutes() {
 }
 
 /** Zustand selector: only the target event card should re-render on transition. */
-export function selectRouteTransitionActive(state: NavigationState, eventId?: number): boolean {
+export function selectRouteTransitionActive(
+  state: NavigationState,
+  eventId?: number,
+): boolean {
   const { active, eventId: transitionEventId } = state.routeTransition;
   if (!active) {
     return false;
@@ -250,7 +255,10 @@ export function selectRouteTransitionActive(state: NavigationState, eventId?: nu
   return transitionEventId === eventId;
 }
 
-export function beginRouteTransition(options?: { eventId?: number; tabTarget?: RoutePath }) {
+export function beginRouteTransition(options?: {
+  eventId?: number;
+  tabTarget?: RoutePath;
+}) {
   useNavigationStore.getState().beginRouteTransition(options);
 }
 
@@ -281,7 +289,7 @@ function navigateToSafe(url: string, _options?: { eventId?: number }) {
           success: () => resolve(),
           fail: () => {
             endRouteTransition();
-            void Taro.showToast({ title: "页面打开失败", icon: "none" });
+            void Taro.showToast({ title: '页面打开失败', icon: 'none' });
             resolve();
           },
           complete: () => {
@@ -304,7 +312,7 @@ export function switchTabTo(url: RoutePath) {
 
   beginTabRouteTransition(url);
 
-  if (process.env.TARO_ENV !== "weapp") {
+  if (process.env.TARO_ENV !== 'weapp') {
     reLaunchTo(url);
     return;
   }
@@ -337,7 +345,7 @@ export function switchTabTo(url: RoutePath) {
 
 /** Non-tab or fallback: replace entire stack. Tab URLs on weapp use switchTabTo. */
 export function reLaunchTo(url: RoutePath) {
-  if (process.env.TARO_ENV === "weapp" && isTabRoute(url)) {
+  if (process.env.TARO_ENV === 'weapp' && isTabRoute(url)) {
     switchTabTo(url);
     return;
   }
@@ -369,11 +377,13 @@ export function go(url: RoutePath | string) {
 export function goEventDetail(eventId: number | string, options?: { postId?: string }) {
   const legacyId = parseActivityLegacyId(eventId);
   if (legacyId == null) {
-    void Taro.showToast({ title: "活动信息无效", icon: "none" });
+    void Taro.showToast({ title: '活动信息无效', icon: 'none' });
     return;
   }
-  const activities = getCacheData<BackendActivity[]>(["activities"]);
-  const fromList = activities ? findBackendActivityByLegacyId(activities, legacyId) : undefined;
+  const activities = getCacheData<BackendActivity[]>(['activities']);
+  const fromList = activities
+    ? findBackendActivityByLegacyId(activities, legacyId)
+    : undefined;
   if (fromList) {
     seedActivityDetailCache(fromList);
   }
@@ -401,7 +411,7 @@ export type GoEventMapOptions = {
 export function goExclusiveItinerary(activityLegacyId: number) {
   const legacyId = parseActivityLegacyId(activityLegacyId);
   if (legacyId == null) {
-    void Taro.showToast({ title: "活动信息无效", icon: "none" });
+    void Taro.showToast({ title: '活动信息无效', icon: 'none' });
     return;
   }
   const query: Record<string, string> = {
@@ -423,7 +433,7 @@ export function goMyItinerary(activityLegacyId?: number, selectedDjIds?: string[
   }
   const ids = selectedDjIds?.map((id) => id.trim()).filter(Boolean) ?? [];
   if (ids.length > 0) {
-    query.selectedDjIds = ids.join(",");
+    query.selectedDjIds = ids.join(',');
   }
   preloadEventSubpackage();
   navigateToSafe(buildPageUrl(ROUTES.MY_ITINERARY, query));
@@ -457,7 +467,7 @@ function resolveActivityLegacyId(meta?: NotificationMeta): number | null {
 
 /** Navigate from notification meta; returns true when a route was opened. */
 export function navigateFromNotification(meta?: NotificationMeta): boolean {
-  if (meta?.type === "post_hidden") {
+  if (meta?.type === 'post_hidden') {
     goProfile();
     return true;
   }
@@ -467,12 +477,12 @@ export function navigateFromNotification(meta?: NotificationMeta): boolean {
     return false;
   }
 
-  if (meta?.type === "match_recommendation") {
+  if (meta?.type === 'match_recommendation') {
     goEventDetail(legacyId, meta?.postId ? { postId: meta.postId } : undefined);
     return true;
   }
 
-  if (meta?.type === "post_rejected") {
+  if (meta?.type === 'post_rejected') {
     goAiAssistant({ activityLegacyId: legacyId });
     return true;
   }
@@ -499,7 +509,7 @@ export function goProfileUpgrade() {
 
 export type GoAiAssistantOptions = Pick<
   AiAssistantNavIntent,
-  "initialMessage" | "activityLegacyId"
+  'initialMessage' | 'activityLegacyId'
 >;
 
 /** Pre-download AI subpackage and warm ai-assistant page (touch / mount). */
@@ -550,7 +560,7 @@ export function goBack(fallback: RoutePath = ROUTES.HOME) {
     return;
   }
 
-  markNavigationStart("__back__");
+  markNavigationStart('__back__');
 
   runSerializedNavigation(
     () =>

@@ -1,13 +1,13 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { sanitizeRemoteImageUrl } from "../utils/imageUrl";
-import { Image, View } from "@tarojs/components";
-import type { ImageProps } from "@tarojs/components";
+import React, { useEffect, useMemo, useState } from 'react';
+import { sanitizeRemoteImageUrl } from '../utils/imageUrl';
+import { Image, View } from '@tarojs/components';
+import type { ImageProps } from '@tarojs/components';
 
 export type ImageWithFallbackProps = {
   src?: string;
   alt?: string;
-  mode?: ImageProps["mode"];
-  referrerPolicy?: "no-referrer";
+  mode?: ImageProps['mode'];
+  referrerPolicy?: 'no-referrer';
   imageClassName?: string;
   placeholderClassName?: string;
   placeholderAriaHidden?: boolean;
@@ -20,8 +20,8 @@ export type ImageWithFallbackProps = {
 
 export const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
   src,
-  alt = "",
-  referrerPolicy = "no-referrer",
+  alt = '',
+  referrerPolicy = 'no-referrer',
   imageClassName,
   placeholderClassName,
   placeholderAriaHidden = true,
@@ -29,7 +29,7 @@ export const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
   wrapperClassName,
   fallbackWrapperClassName,
   priority = false,
-  mode = "aspectFill",
+  mode = 'aspectFill',
 }) => {
   const [broken, setBroken] = useState(false);
   const resolvedSrc = useMemo(() => sanitizeRemoteImageUrl(src), [src]);
@@ -39,10 +39,10 @@ export const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
   }, [resolvedSrc]);
 
   const showImage = Boolean(resolvedSrc) && !broken;
-  const isH5 = process.env.TARO_ENV === "h5";
-  const imgLoading = isH5 && priority ? "eager" : undefined;
-  const imgDecoding = isH5 && priority ? "sync" : undefined;
-  const imgFetchPriority = isH5 && priority ? ("high" as const) : undefined;
+  const isH5 = process.env.TARO_ENV === 'h5';
+  const imgLoading = isH5 && priority ? 'eager' : undefined;
+  const imgDecoding = isH5 && priority ? 'sync' : undefined;
+  const imgFetchPriority = isH5 && priority ? ('high' as const) : undefined;
 
   const renderImg = (className?: string) => (
     <Image
@@ -64,7 +64,11 @@ export const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
       ? wrapperClassName
       : (fallbackWrapperClassName ?? wrapperClassName);
 
-    return <View className={wrapperClass}>{showImage ? renderImg(imageClassName) : fallback}</View>;
+    return (
+      <View className={wrapperClass}>
+        {showImage ? renderImg(imageClassName) : fallback}
+      </View>
+    );
   }
 
   if (showImage) {
@@ -72,7 +76,10 @@ export const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
   }
 
   return (
-    <View className={placeholderClassName} aria-hidden={placeholderAriaHidden ? true : undefined}>
+    <View
+      className={placeholderClassName}
+      aria-hidden={placeholderAriaHidden ? true : undefined}
+    >
       {fallback}
     </View>
   );

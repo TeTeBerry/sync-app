@@ -1,12 +1,6 @@
-import {
-  apiDelete,
-  apiGet,
-  apiPatch,
-  apiPost,
-  LONG_RUNNING_REQUEST_TIMEOUT_MS,
-} from "../utils/apiClient";
-import { uploadImageFile } from "../utils/uploadImage";
-import type { ChatSessionRecord } from "../types/aiChat";
+import { apiDelete, apiGet, apiPatch, apiPost } from '../utils/apiClient';
+import { uploadImageFile } from '../utils/uploadImage';
+import type { ChatSessionRecord } from '../types/aiChat';
 import type {
   ActivityRegistrationResult,
   ActivityUnregisterResult,
@@ -44,19 +38,19 @@ import type {
   SubmitLiveInfoWristbandResult,
   UpdateCurrentUserPayload,
   UpdatePostPayload,
-} from "../types/backend";
-import { ownerParams } from "../utils/session";
+} from '../types/backend';
+import { ownerParams } from '../utils/session';
 
 export function fetchActivities() {
-  return apiGet<BackendActivity[]>("/activities");
+  return apiGet<BackendActivity[]>('/activities');
 }
 
 export function matchActivity(keyword: string) {
-  return apiGet<BackendActivity | null>("/activities/match", { keyword });
+  return apiGet<BackendActivity | null>('/activities/match', { keyword });
 }
 
 export function fetchHomeSummary() {
-  return apiGet<HomeSummary>("/home", ownerParams());
+  return apiGet<HomeSummary>('/home', ownerParams());
 }
 
 export function fetchActivityByLegacyId(legacyId: number) {
@@ -64,27 +58,34 @@ export function fetchActivityByLegacyId(legacyId: number) {
 }
 
 export function registerForActivity(legacyId: number) {
-  return apiPost<ActivityRegistrationResult>(`/activities/${legacyId}/register`, {}, ownerParams());
+  return apiPost<ActivityRegistrationResult>(
+    `/activities/${legacyId}/register`,
+    {},
+    ownerParams(),
+  );
 }
 
 export function cancelActivityRegistration(legacyId: number) {
-  return apiDelete<ActivityUnregisterResult>(`/activities/${legacyId}/register`, ownerParams());
+  return apiDelete<ActivityUnregisterResult>(
+    `/activities/${legacyId}/register`,
+    ownerParams(),
+  );
 }
 
 export function fetchCurrentUser() {
-  return apiGet<CurrentUser>("/users/me", ownerParams());
+  return apiGet<CurrentUser>('/users/me', ownerParams());
 }
 
 export function updateCurrentUser(payload: UpdateCurrentUserPayload) {
-  return apiPatch<CurrentUser>("/users/me", payload, ownerParams());
+  return apiPatch<CurrentUser>('/users/me', payload, ownerParams());
 }
 
 export function fetchBlockedUserIds() {
-  return apiGet<BlockListResult>("/users/blocks", ownerParams());
+  return apiGet<BlockListResult>('/users/blocks', ownerParams());
 }
 
 export function blockUser(blockedUserId: string) {
-  return apiPost<{ ok: true }>("/users/blocks", { blockedUserId }, ownerParams());
+  return apiPost<{ ok: true }>('/users/blocks', { blockedUserId }, ownerParams());
 }
 
 export function unblockUser(blockedUserId: string) {
@@ -95,11 +96,11 @@ export function unblockUser(blockedUserId: string) {
 }
 
 export function submitReport(payload: ReportPayload) {
-  return apiPost<ReportResult>("/reports", payload, ownerParams());
+  return apiPost<ReportResult>('/reports', payload, ownerParams());
 }
 
 export function fetchPopularPosts(limit = 20) {
-  return apiGet<HomeFeedPost[]>("/posts/popular", {
+  return apiGet<HomeFeedPost[]>('/posts/popular', {
     limit: String(limit),
     ...ownerParams(),
   });
@@ -128,7 +129,7 @@ export function fetchPostsByActivityPage(
   if (options?.anchorPostId) {
     params.anchorPostId = options.anchorPostId;
   }
-  return apiGet<EventPostsPage>("/posts", params);
+  return apiGet<EventPostsPage>('/posts', params);
 }
 
 /** First page only — for lightweight consumers (e.g. event map sheet). */
@@ -142,11 +143,11 @@ export function fetchProfileSummary(activityLegacyId?: number) {
   if (activityLegacyId != null && !Number.isNaN(activityLegacyId)) {
     params.activityLegacyId = String(activityLegacyId);
   }
-  return apiGet<ProfileSummary>("/profile", params);
+  return apiGet<ProfileSummary>('/profile', params);
 }
 
 export function fetchProfilePackages() {
-  return apiGet<PackageCatalog>("/profile/packages", ownerParams());
+  return apiGet<PackageCatalog>('/profile/packages', ownerParams());
 }
 
 export function fetchProfileEntitlements(activityLegacyId?: number) {
@@ -154,12 +155,12 @@ export function fetchProfileEntitlements(activityLegacyId?: number) {
   if (activityLegacyId != null && !Number.isNaN(activityLegacyId)) {
     params.activityLegacyId = String(activityLegacyId);
   }
-  return apiGet<EventPackageEntitlement[]>("/profile/entitlements", params);
+  return apiGet<EventPackageEntitlement[]>('/profile/entitlements', params);
 }
 
 export function purchaseProfilePackage(payload: PurchaseProfilePackagePayload) {
   return apiPost<PurchaseProfilePackageResult>(
-    "/profile/packages/purchase",
+    '/profile/packages/purchase',
     payload,
     ownerParams(),
   );
@@ -167,7 +168,7 @@ export function purchaseProfilePackage(payload: PurchaseProfilePackagePayload) {
 
 export function consumeProfileAiMatch(payload: ConsumeProfileEntitlementPayload) {
   return apiPost<ConsumeProfileEntitlementResult>(
-    "/profile/entitlements/consume/ai-match",
+    '/profile/entitlements/consume/ai-match',
     payload,
     ownerParams(),
   );
@@ -175,18 +176,18 @@ export function consumeProfileAiMatch(payload: ConsumeProfileEntitlementPayload)
 
 export function consumeProfileContactUnlock(payload: ConsumeProfileEntitlementPayload) {
   return apiPost<ConsumeProfileEntitlementResult>(
-    "/profile/entitlements/consume/contact-unlock",
+    '/profile/entitlements/consume/contact-unlock',
     payload,
     ownerParams(),
   );
 }
 
 export function fetchProfileActivities() {
-  return apiGet<ProfileActivityItem[]>("/profile/activities", ownerParams());
+  return apiGet<ProfileActivityItem[]>('/profile/activities', ownerParams());
 }
 
 export function fetchProfilePosts() {
-  return apiGet<ProfilePostItem[]>("/profile/posts", ownerParams());
+  return apiGet<ProfilePostItem[]>('/profile/posts', ownerParams());
 }
 
 /** 指定用户的个人页帖子（地图用户弹层等） */
@@ -196,7 +197,7 @@ export function fetchUserPosts(ownerUserId: string, ownerAuthorName?: string) {
   if (name) {
     params.authorName = name;
   }
-  return apiGet<ProfilePostItem[]>("/profile/posts", params);
+  return apiGet<ProfilePostItem[]>('/profile/posts', params);
 }
 
 export function deletePost(postId: string) {
@@ -204,7 +205,7 @@ export function deletePost(postId: string) {
 }
 
 export function createPost(payload: CreatePostPayload) {
-  return apiPost<EventDetailPost>("/posts", payload, ownerParams());
+  return apiPost<EventDetailPost>('/posts', payload, ownerParams());
 }
 
 export function updatePost(postId: string, payload: UpdatePostPayload) {
@@ -240,35 +241,38 @@ export function clearChatSession(sessionId: string) {
 }
 
 export function fetchNotifications(userId?: string) {
-  return apiGet<AppNotification[]>("/notifications", { userId });
+  return apiGet<AppNotification[]>('/notifications', { userId });
 }
 
 export function fetchNotificationUnreadCount(userId?: string) {
-  return apiGet<number>("/notifications/unread-count", { userId });
+  return apiGet<number>('/notifications/unread-count', { userId });
 }
 
 export function markNotificationRead(id: string, userId?: string) {
-  const query = userId ? `?userId=${encodeURIComponent(userId)}` : "";
+  const query = userId ? `?userId=${encodeURIComponent(userId)}` : '';
   return apiPatch<AppNotification>(`/notifications/${id}/read${query}`, {});
 }
 
 export function markAllNotificationsRead(userId?: string) {
-  const query = userId ? `?userId=${encodeURIComponent(userId)}` : "";
+  const query = userId ? `?userId=${encodeURIComponent(userId)}` : '';
   return apiPatch<{ ok: true }>(`/notifications/read-all${query}`, {});
 }
 
 export function deleteNotification(id: string, userId?: string) {
-  const query = userId ? `?userId=${encodeURIComponent(userId)}` : "";
+  const query = userId ? `?userId=${encodeURIComponent(userId)}` : '';
   return apiDelete<{ ok: true }>(`/notifications/${id}${query}`);
 }
 
 export function clearAllNotifications(userId?: string) {
-  const query = userId ? `?userId=${encodeURIComponent(userId)}` : "";
+  const query = userId ? `?userId=${encodeURIComponent(userId)}` : '';
   return apiDelete<{ ok: true }>(`/notifications${query}`);
 }
 
 export function fetchLiveInfoSnapshot(activityLegacyId: number) {
-  return apiGet<LiveInfoSnapshot>(`/activities/${activityLegacyId}/live-info`, ownerParams());
+  return apiGet<LiveInfoSnapshot>(
+    `/activities/${activityLegacyId}/live-info`,
+    ownerParams(),
+  );
 }
 
 export function uploadImage(filePath: string) {
@@ -287,14 +291,17 @@ export function submitLiveInfoWristband(
 }
 
 export function clearLiveInfoWristband(activityLegacyId: number) {
-  return apiDelete<{ ok: true; viewer: LiveInfoSnapshot["viewer"] }>(
+  return apiDelete<{ ok: true; viewer: LiveInfoSnapshot['viewer'] }>(
     `/activities/${activityLegacyId}/live-info/wristband`,
     ownerParams(),
   );
 }
 
-export function publishLiveInfoUpdate(activityLegacyId: number, payload: PublishLiveInfoPayload) {
-  return apiPost<{ ok: true; update: LiveInfoSnapshot["feed"][number] }>(
+export function publishLiveInfoUpdate(
+  activityLegacyId: number,
+  payload: PublishLiveInfoPayload,
+) {
+  return apiPost<{ ok: true; update: LiveInfoSnapshot['feed'][number] }>(
     `/activities/${activityLegacyId}/live-info/updates`,
     payload,
     ownerParams(),
@@ -302,7 +309,7 @@ export function publishLiveInfoUpdate(activityLegacyId: number, payload: Publish
 }
 
 export function toggleLiveInfoUpdateLike(activityLegacyId: number, updateId: string) {
-  return apiPost<{ ok: true; update: LiveInfoSnapshot["feed"][number] }>(
+  return apiPost<{ ok: true; update: LiveInfoSnapshot['feed'][number] }>(
     `/activities/${activityLegacyId}/live-info/updates/${updateId}/like`,
     {},
     ownerParams(),
@@ -316,7 +323,7 @@ export function fetchItinerarySchedule(
   const params: Record<string, string> = { ...ownerParams() };
   if (options?.dateKey) params.dateKey = options.dateKey;
   if (options?.selectedDjIds?.length) {
-    params.selectedDjIds = options.selectedDjIds.join(",");
+    params.selectedDjIds = options.selectedDjIds.join(',');
   }
   return apiGet<ItineraryScheduleSnapshot>(
     `/activities/${activityLegacyId}/itinerary/schedule`,
@@ -324,15 +331,14 @@ export function fetchItinerarySchedule(
   );
 }
 
-export function generateItinerary(activityLegacyId: number, payload: GenerateItineraryPayload) {
+export function generateItinerary(
+  activityLegacyId: number,
+  payload: GenerateItineraryPayload,
+) {
   return apiPost<GenerateItineraryResult>(
     `/activities/${activityLegacyId}/itinerary/generate`,
     payload,
     ownerParams(),
-    {
-      timeoutMs: LONG_RUNNING_REQUEST_TIMEOUT_MS,
-      maxRetries: 0,
-    },
   );
 }
 

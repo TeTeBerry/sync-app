@@ -1,6 +1,6 @@
-import Taro from "@tarojs/taro";
+import Taro from '@tarojs/taro';
 
-const ALBUM_SCOPE = "scope.writePhotosAlbum";
+const ALBUM_SCOPE = 'scope.writePhotosAlbum';
 
 export async function ensureWritePhotosAlbumPermission(): Promise<boolean> {
   try {
@@ -17,10 +17,10 @@ export async function ensureWritePhotosAlbumPermission(): Promise<boolean> {
 
 export async function promptOpenAlbumSettings(): Promise<void> {
   const { confirm } = await Taro.showModal({
-    title: "需要相册权限",
-    content: "请在设置中允许保存图片到相册，以便保存行程屏保。",
-    confirmText: "去设置",
-    cancelText: "取消",
+    title: '需要相册权限',
+    content: '请在设置中允许保存图片到相册，以便保存行程屏保。',
+    confirmText: '去设置',
+    cancelText: '取消',
   });
   if (!confirm) {
     return;

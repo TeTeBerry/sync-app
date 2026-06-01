@@ -1,5 +1,5 @@
-@use "../../../styles/chat" as chat;
-@use "./event-detail-live-info";
+@use '../../../styles/chat' as chat;
+@use './event-detail-live-info';
 
 .s-event-detail {
   background: #000;
@@ -266,7 +266,7 @@
   overflow: hidden;
 
   &::before {
-    content: "";
+    content: '';
     position: absolute;
     top: 0;
     left: 0;
@@ -299,7 +299,11 @@
 
     &::before {
       opacity: 1;
-      background: linear-gradient(90deg, rgba(52, 199, 89, 0.9), rgba(52, 199, 89, 0.12));
+      background: linear-gradient(
+        90deg,
+        rgba(52, 199, 89, 0.9),
+        rgba(52, 199, 89, 0.12)
+      );
     }
   }
 
@@ -331,7 +335,7 @@
     }
 
     &::before {
-      content: "✓";
+      content: '✓';
       font-size: 11px;
       font-weight: 700;
       line-height: 1;

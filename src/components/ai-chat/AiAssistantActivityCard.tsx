@@ -1,15 +1,17 @@
-import "./AiAssistantActivityCard.scss";
-import { Calendar, MapPin } from "lucide-react-taro";
-import type { FC } from "react";
-import type { RecommendedActivityCard } from "../../types/aiChat";
-import { goEventDetail } from "../../utils/route";
-import { Button, Text, View } from "@tarojs/components";
+import './AiAssistantActivityCard.scss';
+import { Calendar, MapPin } from 'lucide-react-taro';
+import type { FC } from 'react';
+import type { RecommendedActivityCard } from '../../types/aiChat';
+import { goEventDetail } from '../../utils/route';
+import { Button, Text, View } from '@tarojs/components';
 
 export type AiAssistantActivityCardProps = {
   activity: RecommendedActivityCard;
 };
 
-export const AiAssistantActivityCard: FC<AiAssistantActivityCardProps> = ({ activity }) => {
+export const AiAssistantActivityCard: FC<AiAssistantActivityCardProps> = ({
+  activity,
+}) => {
   const handleOpen = () => {
     const id = activity.activityLegacyId;
     if (id != null && !Number.isNaN(id)) {

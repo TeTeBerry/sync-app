@@ -16,10 +16,12 @@ export interface TypewriterReveal {
   getTarget: () => string;
 }
 
-export function createTypewriterReveal(options: TypewriterRevealOptions): TypewriterReveal {
+export function createTypewriterReveal(
+  options: TypewriterRevealOptions,
+): TypewriterReveal {
   const charDelayMs = options.charDelayMs ?? 22;
-  let target = "";
-  let visible = "";
+  let target = '';
+  let visible = '';
   let timer: ReturnType<typeof setTimeout> | null = null;
   let resolveWait: (() => void) | null = null;
 

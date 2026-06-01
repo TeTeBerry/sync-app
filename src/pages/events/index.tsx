@@ -1,29 +1,32 @@
-import "./events.scss";
-import { useDidShow } from "@tarojs/taro";
-import React, { useCallback, useMemo, useState } from "react";
-import { Search, TrendingUp } from "lucide-react-taro";
-import TabPageHeader from "../../components/TabPageHeader";
-import { View, Text, Input, Button, ScrollView } from "@tarojs/components";
-import { useEndRouteTransitionOnShow } from "../../hooks/useEndRouteTransitionOnShow";
-import { useNavBarInsets } from "../../hooks/useNavBarInsets";
-import { useTabPageMainHeight } from "../../hooks/useTabPageMainHeight";
-import EventCard from "../../components/EventCard";
-import { ListState } from "../../components/ListState";
-import ThemedPageLoader from "../../components/ThemedPageLoader";
-import { seedActivityDetailFromEventCard } from "../../utils/activityDetailCache";
-import { preloadEventSubpackage } from "../../utils/subpackagePreload";
-import { preloadPageSafe, ROUTES } from "../../utils/route";
-import { useEventList } from "../../hooks/useSyncApi";
-import { resolveEventCardLegacyId } from "../../utils/apiMappers";
-import { goEventDetail, preloadHotRoutes } from "../../utils/route";
-import { getActivityStatusFromActivity, type ActivityStatus } from "../../utils/activityStatus";
+import './events.scss';
+import { useDidShow } from '@tarojs/taro';
+import React, { useCallback, useMemo, useState } from 'react';
+import { Search, TrendingUp } from 'lucide-react-taro';
+import TabPageHeader from '../../components/TabPageHeader';
+import { View, Text, Input, Button, ScrollView } from '@tarojs/components';
+import { useEndRouteTransitionOnShow } from '../../hooks/useEndRouteTransitionOnShow';
+import { useNavBarInsets } from '../../hooks/useNavBarInsets';
+import { useTabPageMainHeight } from '../../hooks/useTabPageMainHeight';
+import EventCard from '../../components/EventCard';
+import { ListState } from '../../components/ListState';
+import ThemedPageLoader from '../../components/ThemedPageLoader';
+import { seedActivityDetailFromEventCard } from '../../utils/activityDetailCache';
+import { preloadEventSubpackage } from '../../utils/subpackagePreload';
+import { preloadPageSafe, ROUTES } from '../../utils/route';
+import { useEventList } from '../../hooks/useSyncApi';
+import { resolveEventCardLegacyId } from '../../utils/apiMappers';
+import { goEventDetail, preloadHotRoutes } from '../../utils/route';
+import {
+  getActivityStatusFromActivity,
+  type ActivityStatus,
+} from '../../utils/activityStatus';
 
-type EventFilterTab = "all" | "upcoming" | "ended";
+type EventFilterTab = 'all' | 'upcoming' | 'ended';
 
 function matchesEventFilter(status: ActivityStatus, tab: EventFilterTab): boolean {
-  if (tab === "all") return true;
-  if (tab === "ended") return status === "ended";
-  return status !== "ended";
+  if (tab === 'all') return true;
+  if (tab === 'ended') return status === 'ended';
+  return status !== 'ended';
 }
 
 /** Fixed header + search/tabs above the event list (px, design @ 375). */
@@ -43,8 +46,8 @@ const Events: React.FC = () => {
   const listScrollHeight = useTabPageMainHeight(eventsChromePx);
 
   const { events, isLoading, isError, refetch } = useEventList();
-  const [activeTab, setActiveTab] = useState<EventFilterTab>("upcoming");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [activeTab, setActiveTab] = useState<EventFilterTab>('upcoming');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const warmEventDetail = useCallback((event: (typeof events)[number]) => {
     seedActivityDetailFromEventCard(event);
@@ -86,9 +89,9 @@ const Events: React.FC = () => {
   }, [activeTab, events, searchQuery]);
 
   const filterTabs: Array<{ id: EventFilterTab; label: string }> = [
-    { id: "all", label: "全部" },
-    { id: "upcoming", label: "即将开始" },
-    { id: "ended", label: "已结束" },
+    { id: 'all', label: '全部' },
+    { id: 'upcoming', label: '即将开始' },
+    { id: 'ended', label: '已结束' },
   ];
 
   return (
@@ -98,7 +101,10 @@ const Events: React.FC = () => {
           className="s-tab-page-header--events"
           navInsets={navInsets}
           trailing={
-            <View className="s-events__count-pill" aria-label={`${events.length} 场活动`}>
+            <View
+              className="s-events__count-pill"
+              aria-label={`${events.length} 场活动`}
+            >
               <TrendingUp size={14} aria-hidden />
               <Text>{`${events.length} 场活动`}</Text>
             </View>
@@ -118,7 +124,7 @@ const Events: React.FC = () => {
             {searchQuery && (
               <Button
                 className="s-events__search-clear"
-                onClick={() => setSearchQuery("")}
+                onClick={() => setSearchQuery('')}
                 aria-label="清空"
               >
                 <Text className="s-btn-label">×</Text>
@@ -132,9 +138,12 @@ const Events: React.FC = () => {
                 key={tab.id}
                 role="tab"
                 aria-selected={activeTab === tab.id}
-                className={["s-events__tab", activeTab === tab.id ? "s-events__tab--active" : ""]
+                className={[
+                  's-events__tab',
+                  activeTab === tab.id ? 's-events__tab--active' : '',
+                ]
                   .filter(Boolean)
-                  .join(" ")}
+                  .join(' ')}
                 onClick={() => setActiveTab(tab.id)}
               >
                 <Text className="s-btn-label">{tab.label}</Text>
@@ -148,7 +157,9 @@ const Events: React.FC = () => {
           enhanced
           showScrollbar={false}
           className="s-events__main s-scrollbar-none"
-          style={listScrollHeight != null ? { height: `${listScrollHeight}px` } : undefined}
+          style={
+            listScrollHeight != null ? { height: `${listScrollHeight}px` } : undefined
+          }
         >
           <View className="s-events__scroll-inner">
             {isLoading ? (
@@ -176,7 +187,7 @@ const Events: React.FC = () => {
                       onTouchStart={() => warmEventDetail(event)}
                       onClick={() => openDetail(event.id)}
                       onKeyDown={(e) => {
-                        if (e.key !== "Enter" && e.key !== " ") return;
+                        if (e.key !== 'Enter' && e.key !== ' ') return;
                         e.preventDefault();
                         openDetail(event.id);
                       }}

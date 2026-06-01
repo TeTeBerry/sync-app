@@ -1,10 +1,10 @@
-import "./ExclusiveItineraryInfoModal.scss";
-import { Sparkles, X } from "lucide-react-taro";
-import { Text, View } from "@tarojs/components";
-import { useOverlayLock } from "../../../hooks/useOverlayLock";
+import './ExclusiveItineraryInfoModal.scss';
+import { Sparkles, X } from 'lucide-react-taro';
+import { Text, View } from '@tarojs/components';
+import { useOverlayLock } from '../../../hooks/useOverlayLock';
 
-const DEFAULT_TITLE = "专属电音行程";
-const DEFAULT_MESSAGE = "选择最多 5 位喜爱的 DJ，AI 将根据你的偏好自动生成专属观演行程。";
+const DEFAULT_TITLE = '专属电音行程';
+const DEFAULT_MESSAGE = '选择你喜爱的 DJ，将根据官方演出表自动生成专属观演行程。';
 
 export type ExclusiveItineraryInfoModalProps = {
   open: boolean;
@@ -21,7 +21,7 @@ export function ExclusiveItineraryInfoModal({
   onClose,
   title = DEFAULT_TITLE,
   message = DEFAULT_MESSAGE,
-  confirmText = "知道了",
+  confirmText = '知道了',
   showIcon = true,
 }: ExclusiveItineraryInfoModalProps) {
   useOverlayLock(open);
@@ -49,11 +49,11 @@ export function ExclusiveItineraryInfoModal({
 
         <View
           className={[
-            "s-exclusive-itinerary-info-modal__body",
-            !showIcon ? "s-exclusive-itinerary-info-modal__body--compact" : "",
+            's-exclusive-itinerary-info-modal__body',
+            !showIcon ? 's-exclusive-itinerary-info-modal__body--compact' : '',
           ]
             .filter(Boolean)
-            .join(" ")}
+            .join(' ')}
         >
           {showIcon ? (
             <View className="s-exclusive-itinerary-info-modal__icon-wrap" aria-hidden>
@@ -76,7 +76,9 @@ export function ExclusiveItineraryInfoModal({
             hoverClass="s-exclusive-itinerary-info-modal__cta--pressed"
             onClick={onClose}
           >
-            <Text className="s-exclusive-itinerary-info-modal__cta-label">{confirmText}</Text>
+            <Text className="s-exclusive-itinerary-info-modal__cta-label">
+              {confirmText}
+            </Text>
           </View>
         </View>
       </View>

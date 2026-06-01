@@ -1,25 +1,36 @@
-import { memo } from "react";
-import { Check, CircleCheck, Heart, MapPin, MessageCircle, Users, Zap } from "lucide-react-taro";
-import { PostActionMenu, PostShareButton } from "../../../../components/PostActionMenu";
-import { PostCommentSection } from "../../../../components/PostCommentSection";
-import { PostStatusBadge } from "../../../../components/PostStatusBadge";
-import { ImageWithFallback } from "../../../../components/ImageWithFallback";
+import { memo } from 'react';
+import {
+  Check,
+  CircleCheck,
+  Heart,
+  MapPin,
+  MessageCircle,
+  Users,
+  Zap,
+} from 'lucide-react-taro';
+import { PostActionMenu, PostShareButton } from '../../../../components/PostActionMenu';
+import { PostCommentSection } from '../../../../components/PostCommentSection';
+import { PostStatusBadge } from '../../../../components/PostStatusBadge';
+import { ImageWithFallback } from '../../../../components/ImageWithFallback';
 import {
   filterContentTypeTags,
   mergePostContentTypes,
   stripContentTypeHashtags,
-} from "../../../../components/ContentTypeBadge";
+} from '../../../../components/ContentTypeBadge';
 import {
   formatContentTypeHashtag,
   resolveContentTypeKey,
-} from "../../../../utils/postContentTypeDisplay";
-import { PostImageGrid, PostImageCount } from "../../../../components/PostImageGrid";
-import { isCurrentUserPostAuthor } from "../../../../utils/postOwnership";
-import { postActionIconColor } from "../../../../utils/postActionColors";
-import type { PostSharePayload } from "../../../../utils/postShare";
-import type { EventDetailPost } from "../../../../types/backend";
-import { formatEventPostHandle, parseGroupProgressFromText } from "../utils/eventPostDisplay";
-import { Button, Text, View } from "@tarojs/components";
+} from '../../../../utils/postContentTypeDisplay';
+import { PostImageGrid, PostImageCount } from '../../../../components/PostImageGrid';
+import { isCurrentUserPostAuthor } from '../../../../utils/postOwnership';
+import { postActionIconColor } from '../../../../utils/postActionColors';
+import type { PostSharePayload } from '../../../../utils/postShare';
+import type { EventDetailPost } from '../../../../types/backend';
+import {
+  formatEventPostHandle,
+  parseGroupProgressFromText,
+} from '../utils/eventPostDisplay';
+import { Button, Text, View } from '@tarojs/components';
 
 export type EventPostCardProps = {
   post: EventDetailPost;
@@ -45,11 +56,11 @@ function GroupProgressRow({ current, total }: { current: number; total: number }
         <View
           key={index}
           className={[
-            "s-event-post__progress-dot",
-            index < current && "s-event-post__progress-dot--filled",
+            's-event-post__progress-dot',
+            index < current && 's-event-post__progress-dot--filled',
           ]
             .filter(Boolean)
-            .join(" ")}
+            .join(' ')}
         />
       ))}
       <Text className="s-event-post__progress-label">
@@ -59,7 +70,10 @@ function GroupProgressRow({ current, total }: { current: number; total: number }
   );
 }
 
-function eventPostSharePayload(post: EventDetailPost, activityLegacyId: number): PostSharePayload {
+function eventPostSharePayload(
+  post: EventDetailPost,
+  activityLegacyId: number,
+): PostSharePayload {
   return {
     postId: post.id,
     activityLegacyId,
@@ -86,11 +100,11 @@ function EventPostCardInner({
   onComplete,
   onCommentSubmitted,
 }: EventPostCardProps) {
-  const postName = post.name?.trim() || "用户";
+  const postName = post.name?.trim() || '用户';
   const postTags = post.tags ?? [];
   const isOwn = isCurrentUserPostAuthor(postName, post.userId);
-  const isRecruiting = post.status === "招募中";
-  const isCompleted = post.status === "已组队";
+  const isRecruiting = post.status === '招募中';
+  const isCompleted = post.status === '已组队';
   const contentTypeKeys = mergePostContentTypes(post.contentTypes, {
     body: post.body,
     tags: postTags,
@@ -100,22 +114,22 @@ function EventPostCardInner({
   const primaryTypeKey = contentTypeKeys[0];
   const groupProgress =
     isRecruiting && bodyText
-      ? parseGroupProgressFromText(`${bodyText} ${postTags.join(" ")}`)
+      ? parseGroupProgressFromText(`${bodyText} ${postTags.join(' ')}`)
       : null;
   const showApply = !isOwn && isRecruiting;
-  const submetaLocation = post.location?.trim() ?? "";
+  const submetaLocation = post.location?.trim() ?? '';
 
   const cardMod = isCompleted
-    ? "s-event-post--completed"
+    ? 's-event-post--completed'
     : isRecruiting
-      ? "s-event-post--recruiting"
-      : "";
+      ? 's-event-post--recruiting'
+      : '';
 
   return (
     <View
-      className={["s-event-post", cardMod, highlighted && "s-event-post--highlight"]
+      className={['s-event-post', cardMod, highlighted && 's-event-post--highlight']
         .filter(Boolean)
-        .join(" ")}
+        .join(' ')}
     >
       <View className="s-event-post__header">
         <View className="s-event-post__avatar-wrap">
@@ -148,14 +162,18 @@ function EventPostCardInner({
             <View className="s-event-post__identity">
               <View className="s-event-post__name-row">
                 <Text className="s-event-post__user-name">{postName}</Text>
-                <Text className="s-event-post__user-handle">{formatEventPostHandle(postName)}</Text>
+                <Text className="s-event-post__user-handle">
+                  {formatEventPostHandle(postName)}
+                </Text>
               </View>
               <View className="s-event-post__submeta">
                 <MapPin size={12} color="#8e8e93" aria-hidden />
                 <Text className="s-event-post__submeta-text">
-                  {submetaLocation ? `${submetaLocation} · ` : ""}
+                  {submetaLocation ? `${submetaLocation} · ` : ''}
                   {publishTimeLabel}
-                  {post.images?.length ? <PostImageCount count={post.images.length} /> : null}
+                  {post.images?.length ? (
+                    <PostImageCount count={post.images.length} />
+                  ) : null}
                 </Text>
               </View>
             </View>
@@ -185,22 +203,25 @@ function EventPostCardInner({
           {primaryTypeKey ? (
             <Text
               className={[
-                "s-event-post__type-tag",
+                's-event-post__type-tag',
                 `s-event-post__type-tag--${resolveContentTypeKey(primaryTypeKey)}`,
-              ].join(" ")}
+              ].join(' ')}
             >
               {formatContentTypeHashtag(primaryTypeKey)}
             </Text>
           ) : null}
           {groupProgress ? (
-            <GroupProgressRow current={groupProgress.current} total={groupProgress.total} />
+            <GroupProgressRow
+              current={groupProgress.current}
+              total={groupProgress.total}
+            />
           ) : null}
           {isCompleted ? (
             <Text className="s-event-post__tag s-event-post__tag--full">#已满</Text>
           ) : null}
           {displayTags.map((tag) => (
             <Text key={tag} className="s-event-post__tag s-event-post__tag--extra">
-              {tag.startsWith("#") ? tag : `#${tag}`}
+              {tag.startsWith('#') ? tag : `#${tag}`}
             </Text>
           ))}
         </View>
@@ -212,9 +233,12 @@ function EventPostCardInner({
           <View className="s-event-post__footer-left">
             <View className="s-event-post__actions">
               <Button
-                className={["s-event-post__action", post.liked && "s-event-post__action--liked"]
+                className={[
+                  's-event-post__action',
+                  post.liked && 's-event-post__action--liked',
+                ]
                   .filter(Boolean)
-                  .join(" ")}
+                  .join(' ')}
                 onClick={() => onLike(post.id)}
                 disabled={!apiEnabled}
               >
@@ -227,11 +251,11 @@ function EventPostCardInner({
               </Button>
               <Button
                 className={[
-                  "s-event-post__action",
-                  commentsExpanded && "s-event-post__action--active",
+                  's-event-post__action',
+                  commentsExpanded && 's-event-post__action--active',
                 ]
                   .filter(Boolean)
-                  .join(" ")}
+                  .join(' ')}
                 onClick={() => onToggleComments(post.id)}
               >
                 <MessageCircle

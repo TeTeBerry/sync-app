@@ -1,4 +1,4 @@
-import { cn } from "./cn";
+import { cn } from './cn';
 
 /** Build a BEM element class: `block__element` + optional `--modifier` suffixes. */
 export function bem(

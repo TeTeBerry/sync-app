@@ -1,4 +1,4 @@
-import type { EventPackageEntitlement } from "../types/backend";
+import type { EventPackageEntitlement } from '../types/backend';
 
 /** Pick entitlement row for the active activity scope (or first available). */
 export function resolveProfileEntitlement(
@@ -8,7 +8,9 @@ export function resolveProfileEntitlement(
   if (!entitlements?.length) return null;
 
   if (activityLegacyId != null && !Number.isNaN(activityLegacyId)) {
-    const scoped = entitlements.find((item) => item.activityLegacyId === activityLegacyId);
+    const scoped = entitlements.find(
+      (item) => item.activityLegacyId === activityLegacyId,
+    );
     if (scoped) return scoped;
   }
 
@@ -16,13 +18,17 @@ export function resolveProfileEntitlement(
 }
 
 /** Effective AI match remaining after free + paid merge (`null` = unlimited). */
-export function getAiMatchRemaining(entitlement: EventPackageEntitlement | null): number | null {
+export function getAiMatchRemaining(
+  entitlement: EventPackageEntitlement | null,
+): number | null {
   if (!entitlement) return null;
   return entitlement.quotas.aiMatch.remaining;
 }
 
 /** True when the user has no AI matches left (not unlimited). */
-export function isAiMatchQuotaExhausted(entitlement: EventPackageEntitlement | null): boolean {
+export function isAiMatchQuotaExhausted(
+  entitlement: EventPackageEntitlement | null,
+): boolean {
   const remaining = getAiMatchRemaining(entitlement);
   return remaining === 0;
 }

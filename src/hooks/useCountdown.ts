@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
-import type { CountdownPart } from "../pages/index/homeData";
-import { EMPTY_COUNTDOWN_PARTS, getCountdownParts } from "../utils/countdown";
+import { useEffect, useState } from 'react';
+import type { CountdownPart } from '../pages/index/homeData';
+import { EMPTY_COUNTDOWN_PARTS, getCountdownParts } from '../utils/countdown';
 
 function isValidCountdownTarget(target: Date | null | undefined): target is Date {
   return target instanceof Date && !Number.isNaN(target.getTime());

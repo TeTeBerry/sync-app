@@ -3,14 +3,14 @@ import type {
   PackageTierDefinition,
   PackageTierId,
   PackageTierLimits,
-} from "../types/backend";
-import { getNextTierId } from "../pages/profile/profileBenefitsMapper";
+} from '../types/backend';
+import { getNextTierId } from '../pages/profile/profileBenefitsMapper';
 
 /** Matches backend `free-tier.config.ts` — monthly free bucket. */
 export const FREE_MONTHLY_AI_MATCH_LIMIT = 3;
 export const FREE_MONTHLY_CONTACT_UNLOCK_LIMIT = 3;
 
-export type ContactUnlockUpgradeCompareRowId = "contactUnlock" | "aiMatch" | "map";
+export type ContactUnlockUpgradeCompareRowId = 'contactUnlock' | 'aiMatch' | 'map';
 
 export type ContactUnlockUpgradeCompareRow = {
   id: ContactUnlockUpgradeCompareRowId;
@@ -37,14 +37,14 @@ export function resolveContactUnlockUpgradeTargetTier(
   paidTierId: PackageTierId | null | undefined,
 ): PackageTierId | null {
   if (!paidTierId) {
-    return "pro";
+    return 'pro';
   }
   return getNextTierId(paidTierId);
 }
 
 function formatPerEventCount(value: number | null): string {
   if (value == null) {
-    return "无限次";
+    return '无限次';
   }
   return `${value}次/场`;
 }
@@ -55,10 +55,10 @@ function formatMonthlyCount(value: number): string {
 
 function formatMapLimit(limits: PackageTierLimits, isFreeTier: boolean): string {
   if (isFreeTier) {
-    return "限量";
+    return '限量';
   }
   if (limits.contactUnlockCount == null) {
-    return "无限使用";
+    return '无限使用';
   }
   return `${limits.mapDays}天`;
 }
@@ -69,7 +69,8 @@ function resolveFreeMonthlyLimits(freeMonthly?: FreeMonthlyQuota | null): {
 } {
   return {
     aiMatch: freeMonthly?.aiMatch.limit ?? FREE_MONTHLY_AI_MATCH_LIMIT,
-    contactUnlock: freeMonthly?.contactUnlock.limit ?? FREE_MONTHLY_CONTACT_UNLOCK_LIMIT,
+    contactUnlock:
+      freeMonthly?.contactUnlock.limit ?? FREE_MONTHLY_CONTACT_UNLOCK_LIMIT,
   };
 }
 
@@ -77,7 +78,7 @@ function buildCurrentColumn(
   paidTierId: PackageTierId | null | undefined,
   tiers: PackageTierDefinition[],
   freeMonthly?: FreeMonthlyQuota | null,
-): Pick<ContactUnlockUpgradeCompareRow, "current"> & {
+): Pick<ContactUnlockUpgradeCompareRow, 'current'> & {
   contactUnlock: string;
   aiMatch: string;
   map: string;
@@ -85,10 +86,10 @@ function buildCurrentColumn(
   if (!paidTierId) {
     const free = resolveFreeMonthlyLimits(freeMonthly);
     return {
-      current: "",
+      current: '',
       contactUnlock: formatMonthlyCount(free.contactUnlock),
       aiMatch: formatMonthlyCount(free.aiMatch),
-      map: "限量",
+      map: '限量',
     };
   }
 
@@ -96,15 +97,15 @@ function buildCurrentColumn(
   if (!tier) {
     const free = resolveFreeMonthlyLimits(freeMonthly);
     return {
-      current: "",
+      current: '',
       contactUnlock: formatMonthlyCount(free.contactUnlock),
       aiMatch: formatMonthlyCount(free.aiMatch),
-      map: "限量",
+      map: '限量',
     };
   }
 
   return {
-    current: "",
+    current: '',
     contactUnlock: formatPerEventCount(tier.limits.contactUnlockCount),
     aiMatch: formatPerEventCount(tier.limits.aiMatchCount),
     map: formatMapLimit(tier.limits, false),
@@ -113,14 +114,14 @@ function buildCurrentColumn(
 
 function buildTargetColumn(targetTier: PackageTierDefinition): Pick<
   ContactUnlockUpgradeCompareRow,
-  "target"
+  'target'
 > & {
   contactUnlock: string;
   aiMatch: string;
   map: string;
 } {
   return {
-    target: "",
+    target: '',
     contactUnlock: formatPerEventCount(targetTier.limits.contactUnlockCount),
     aiMatch: formatPerEventCount(targetTier.limits.aiMatchCount),
     map: formatMapLimit(targetTier.limits, false),
@@ -148,20 +149,20 @@ export function buildContactUnlockUpgradeCompare(params: {
     targetTierName: targetTier.name,
     rows: [
       {
-        id: "contactUnlock",
-        label: "联系方式解锁",
+        id: 'contactUnlock',
+        label: '联系方式解锁',
         current: current.contactUnlock,
         target: target.contactUnlock,
       },
       {
-        id: "aiMatch",
-        label: "AI 智能匹配",
+        id: 'aiMatch',
+        label: 'AI 智能匹配',
         current: current.aiMatch,
         target: target.aiMatch,
       },
       {
-        id: "map",
-        label: "地图实时定位",
+        id: 'map',
+        label: '地图实时定位',
         current: current.map,
         target: target.map,
       },

@@ -1,22 +1,22 @@
-import React, { useCallback, useLayoutEffect, useState } from "react";
-import { Sparkles } from "lucide-react-taro";
-import { cn } from "../ui";
-import type { ChatUiMessage } from "../../types/aiChat";
-import type { AuthorGender } from "../../utils/inferAuthorGender";
-import { ChatUserAvatar } from "./ChatUserAvatar";
-import { AiAssistantActivityCard } from "./AiAssistantActivityCard";
-import { RecommendPostCards } from "./RecommendPostCards";
-import { PublishConfirmCard } from "./PublishConfirmCard";
-import { SuggestedReplyChips } from "./SuggestedReplyChips";
-import { AiMatchQuotaExhaustedMessage } from "./AiMatchQuotaExhaustedMessage";
-import { parsePublishConfirmMessage } from "../../utils/parsePublishConfirmMessage";
-import { openSingleImagePreview } from "../../utils/openImagePreview";
-import { Button, Image, ScrollView, Text, View } from "@tarojs/components";
+import React, { useCallback, useLayoutEffect, useState } from 'react';
+import { Sparkles } from 'lucide-react-taro';
+import { cn } from '../ui';
+import type { ChatUiMessage } from '../../types/aiChat';
+import type { AuthorGender } from '../../utils/inferAuthorGender';
+import { ChatUserAvatar } from './ChatUserAvatar';
+import { AiAssistantActivityCard } from './AiAssistantActivityCard';
+import { RecommendPostCards } from './RecommendPostCards';
+import { PublishConfirmCard } from './PublishConfirmCard';
+import { SuggestedReplyChips } from './SuggestedReplyChips';
+import { AiMatchQuotaExhaustedMessage } from './AiMatchQuotaExhaustedMessage';
+import { parsePublishConfirmMessage } from '../../utils/parsePublishConfirmMessage';
+import { openSingleImagePreview } from '../../utils/openImagePreview';
+import { Button, Image, ScrollView, Text, View } from '@tarojs/components';
 
 const TIMESTAMP_GAP_MS = 5 * 60 * 1000;
 
 function messageTimestampMs(id: string): number | null {
-  const ts = Number(id.split("-")[0]);
+  const ts = Number(id.split('-')[0]);
   if (!Number.isFinite(ts) || ts <= 0) return null;
   return ts;
 }
@@ -26,8 +26,8 @@ function formatMessageTime(id: string): string | null {
   if (ts == null) return null;
   const date = new Date(ts);
   return date.toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
+    hour: '2-digit',
+    minute: '2-digit',
     hour12: false,
   });
 }
@@ -84,7 +84,7 @@ export function ChatMessageList({
     >
       <View className="s-ai-assistant-chat__scroll-inner">
         {messages.map((msg, index) => {
-          const isUser = msg.from === "user";
+          const isUser = msg.from === 'user';
           const timestamp = formatMessageTime(msg.id);
 
           const publishConfirm =
@@ -104,8 +104,8 @@ export function ChatMessageList({
               <View
                 id={`chat-msg-${msg.id}`}
                 className={cn(
-                  "s-ai-assistant-chat__row",
-                  isUser && "s-ai-assistant-chat__row--from-user",
+                  's-ai-assistant-chat__row',
+                  isUser && 's-ai-assistant-chat__row--from-user',
                 )}
               >
                 {!isUser ? (
@@ -115,31 +115,38 @@ export function ChatMessageList({
                 ) : null}
                 <View
                   className={cn(
-                    "s-ai-assistant-chat__content",
-                    isUser && "s-ai-assistant-chat__content--from-user",
+                    's-ai-assistant-chat__content',
+                    isUser && 's-ai-assistant-chat__content--from-user',
                     (hasPostCards || hasActivityCard || showPublishConfirm) &&
-                      "s-ai-assistant-chat__content--has-cards",
+                      's-ai-assistant-chat__content--has-cards',
                   )}
                 >
                   <View
                     className={cn(
-                      "s-ai-assistant-chat__bubble",
+                      's-ai-assistant-chat__bubble',
                       isUser
                         ? cn(
-                            "s-ai-assistant-chat__bubble--from-user",
-                            userGender === "female" &&
-                              "s-ai-assistant-chat__bubble--from-user--female",
-                            userGender === "male" && "s-ai-assistant-chat__bubble--from-user--male",
+                            's-ai-assistant-chat__bubble--from-user',
+                            userGender === 'female' &&
+                              's-ai-assistant-chat__bubble--from-user--female',
+                            userGender === 'male' &&
+                              's-ai-assistant-chat__bubble--from-user--male',
                           )
-                        : "s-ai-assistant-chat__bubble--from-ai",
-                      msg.streaming && "s-ai-assistant-chat__bubble--streaming",
-                      msg.streaming && !msg.text && "s-ai-assistant-chat__bubble--waiting",
-                      showEmbedBelow && "s-ai-assistant-chat__bubble--with-embed-below",
-                      showPublishConfirm && "s-ai-assistant-chat__bubble--publish-confirm",
+                        : 's-ai-assistant-chat__bubble--from-ai',
+                      msg.streaming && 's-ai-assistant-chat__bubble--streaming',
+                      msg.streaming &&
+                        !msg.text &&
+                        's-ai-assistant-chat__bubble--waiting',
+                      showEmbedBelow && 's-ai-assistant-chat__bubble--with-embed-below',
+                      showPublishConfirm &&
+                        's-ai-assistant-chat__bubble--publish-confirm',
                     )}
                   >
                     {msg.streaming && !msg.text ? (
-                      <View className="s-ai-assistant-chat__typing" aria-label="AI 正在思考">
+                      <View
+                        className="s-ai-assistant-chat__typing"
+                        aria-label="AI 正在思考"
+                      >
                         <View className="s-ai-assistant-chat__typing-dot" />
                         <View className="s-ai-assistant-chat__typing-dot" />
                         <View className="s-ai-assistant-chat__typing-dot" />
@@ -166,7 +173,9 @@ export function ChatMessageList({
                             userName={userName}
                           />
                         ) : msg.text ? (
-                          <Text className="s-ai-assistant-chat__bubble-text">{msg.text}</Text>
+                          <Text className="s-ai-assistant-chat__bubble-text">
+                            {msg.text}
+                          </Text>
                         ) : null}
                         {isUser && hasSuggestedReplies ? (
                           <SuggestedReplyChips
@@ -184,7 +193,10 @@ export function ChatMessageList({
                         <AiAssistantActivityCard activity={msg.recommendedActivity} />
                       ) : null}
                       {msg.createdPost ? (
-                        <RecommendPostCards posts={[msg.createdPost]} variant="created" />
+                        <RecommendPostCards
+                          posts={[msg.createdPost]}
+                          variant="created"
+                        />
                       ) : null}
                       {msg.recommendedPosts?.length ? (
                         <RecommendPostCards posts={msg.recommendedPosts} />
@@ -200,7 +212,11 @@ export function ChatMessageList({
                   ) : null}
                 </View>
                 {isUser ? (
-                  <ChatUserAvatar avatar={userAvatar} name={userName} userGender={userGender} />
+                  <ChatUserAvatar
+                    avatar={userAvatar}
+                    name={userName}
+                    userGender={userGender}
+                  />
                 ) : null}
               </View>
             </React.Fragment>

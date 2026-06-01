@@ -1,8 +1,8 @@
 /** Matches backend `PUBLISH_CONFIRM_PROMPT_MARKER`. */
-export const PUBLISH_CONFIRM_MARKER = "【发布确认】";
+export const PUBLISH_CONFIRM_MARKER = '【发布确认】';
 
 /** Matches backend `PUBLISH_CONFIRM_TAGS_MARKER`. */
-export const PUBLISH_CONFIRM_TAGS_MARKER = "【标签】";
+export const PUBLISH_CONFIRM_TAGS_MARKER = '【标签】';
 
 export type PublishConfirmPayload = {
   activityLabel: string;
@@ -17,7 +17,7 @@ export function parsePublishConfirmMessage(text: string): PublishConfirmPayload 
     return null;
   }
 
-  const lines = text.split("\n");
+  const lines = text.split('\n');
   const markerIndex = lines.findIndex((line) => line.includes(PUBLISH_CONFIRM_MARKER));
   if (markerIndex < 0) {
     return null;
@@ -28,10 +28,12 @@ export function parsePublishConfirmMessage(text: string): PublishConfirmPayload 
     index += 1;
   }
 
-  const activityLine = lines[index]?.trim() ?? "";
+  const activityLine = lines[index]?.trim() ?? '';
   const activityMatch = activityLine.match(/^「(.+)」帖子预览：$/);
-  const parsedActivityLabel = activityLine.replace(/帖子预览：$/, "").replace(/^「|」$/g, "");
-  const activityLabel = activityMatch?.[1] ?? (parsedActivityLabel || "活动");
+  const parsedActivityLabel = activityLine
+    .replace(/帖子预览：$/, '')
+    .replace(/^「|」$/g, '');
+  const activityLabel = activityMatch?.[1] ?? (parsedActivityLabel || '活动');
   index += 1;
 
   while (index < lines.length && !lines[index].trim()) {
@@ -40,7 +42,7 @@ export function parsePublishConfirmMessage(text: string): PublishConfirmPayload 
 
   const bodyLines: string[] = [];
   const draftTags: string[] = [];
-  let footerHint = "点「确认发布」直接发，想改什么直接说～";
+  let footerHint = '点「确认发布」直接发，想改什么直接说～';
 
   for (; index < lines.length; index += 1) {
     const line = lines[index];
@@ -50,7 +52,7 @@ export function parsePublishConfirmMessage(text: string): PublishConfirmPayload 
       for (const token of payload.split(/\s+/)) {
         const tag = token.trim();
         if (!tag) continue;
-        draftTags.push(tag.startsWith("#") ? tag : `#${tag}`);
+        draftTags.push(tag.startsWith('#') ? tag : `#${tag}`);
       }
       continue;
     }
@@ -65,7 +67,7 @@ export function parsePublishConfirmMessage(text: string): PublishConfirmPayload 
     bodyLines.pop();
   }
 
-  const draftBody = bodyLines.join("\n").trim();
+  const draftBody = bodyLines.join('\n').trim();
   if (!draftBody) {
     return null;
   }

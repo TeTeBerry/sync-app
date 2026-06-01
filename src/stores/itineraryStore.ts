@@ -1,5 +1,9 @@
-import { create } from "zustand";
-import type { GenerateItineraryResult, ItineraryConflict, ItineraryDay } from "../types/backend";
+import { create } from 'zustand';
+import type {
+  GenerateItineraryResult,
+  ItineraryConflict,
+  ItineraryDay,
+} from '../types/backend';
 
 export type PendingGeneratedItinerary = {
   activityLegacyId: number;
@@ -8,7 +12,6 @@ export type PendingGeneratedItinerary = {
   days: ItineraryDay[];
   conflicts: ItineraryConflict[];
   cached?: boolean;
-  llmUsed?: boolean;
 };
 
 interface ItineraryStoreState {
@@ -36,7 +39,6 @@ export const useItineraryStore = create<ItineraryStoreState>((set, get) => ({
         days: result.itinerary.days,
         conflicts: result.conflicts,
         cached: result.cached,
-        llmUsed: result.llmUsed,
       },
     }),
 

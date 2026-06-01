@@ -1,10 +1,10 @@
-import type { HomeSummary } from "../types/backend";
-import { ACTIVITY_GUEST_AVATARS } from "../constants/activityGuestAvatars";
-import { resolveActivityThumb } from "../constants/activityImages";
-import { parseActivityLegacyId } from "./activityLegacyId";
-import { sanitizeRemoteImageUrl } from "./imageUrl";
+import type { HomeSummary } from '../types/backend';
+import { ACTIVITY_GUEST_AVATARS } from '../constants/activityGuestAvatars';
+import { resolveActivityThumb } from '../constants/activityImages';
+import { parseActivityLegacyId } from './activityLegacyId';
+import { sanitizeRemoteImageUrl } from './imageUrl';
 
-type SignupEvent = HomeSummary["signupEvents"][number];
+type SignupEvent = HomeSummary['signupEvents'][number];
 
 export interface EventCardUi {
   id: string;
@@ -37,26 +37,26 @@ export type FeaturedEvent = {
 };
 
 export function buildActivityNameMap(
-  activities: import("../types/backend").BackendActivity[],
+  activities: import('../types/backend').BackendActivity[],
 ): Map<string, string> {
   return new Map(activities.map((item) => [item.code, item.name]));
 }
 
 export function findBackendActivityByLegacyId(
-  activities: import("../types/backend").BackendActivity[],
+  activities: import('../types/backend').BackendActivity[],
   legacyId: number,
-): import("../types/backend").BackendActivity | undefined {
+): import('../types/backend').BackendActivity | undefined {
   return activities.find((activity) => activity.legacyId === legacyId);
 }
 
 export function resolveFeaturedEventLegacyId(
-  event: Pick<FeaturedEvent, "id" | "legacyId">,
+  event: Pick<FeaturedEvent, 'id' | 'legacyId'>,
 ): number | null {
   return parseActivityLegacyId(event.legacyId ?? event.id);
 }
 
 export function mapActivitiesToEvents(
-  activities: import("../types/backend").BackendActivity[],
+  activities: import('../types/backend').BackendActivity[],
 ): EventCardUi[] {
   return activities
     .filter((activity) => parseActivityLegacyId(activity.legacyId) != null)
@@ -64,8 +64,8 @@ export function mapActivitiesToEvents(
       id: String(activity.legacyId),
       title: activity.name,
       going: false,
-      date: activity.date ?? "",
-      location: activity.location ?? "",
+      date: activity.date ?? '',
+      location: activity.location ?? '',
       image: resolveActivityThumb(
         activity.legacyId,
         sanitizeRemoteImageUrl(activity.image) ?? activity.image,
@@ -73,8 +73,8 @@ export function mapActivitiesToEvents(
       ),
       hot: Boolean(activity.hot),
       attendees: activity.attendees ?? 0,
-      distance: activity.hot ? "热门" : "",
-      category: activity.hot ? "户外电音" : "EDM节",
+      distance: activity.hot ? '热门' : '',
+      category: activity.hot ? '户外电音' : 'EDM节',
     }));
 }
 
@@ -93,9 +93,9 @@ export function mapSignupEventToFeaturedEvent(item: SignupEvent): FeaturedEvent 
     date: item.date,
     venue: item.location,
     isHot,
-    distance: item.location ?? "",
+    distance: item.location ?? '',
     attendeeCount: `${item.attendees}+`,
-    remaining: "",
+    remaining: '',
     guests: ACTIVITY_GUEST_AVATARS,
     image: resolveActivityThumb(legacyId, remote, 200),
     going: item.going,
@@ -103,15 +103,15 @@ export function mapSignupEventToFeaturedEvent(item: SignupEvent): FeaturedEvent 
 }
 
 export function mapBackendActivityToFeaturedEvent(
-  activity: import("../types/backend").BackendActivity,
+  activity: import('../types/backend').BackendActivity,
 ): FeaturedEvent {
   return mapSignupEventToFeaturedEvent({
     id: activity.legacyId,
     title: activity.name,
-    date: activity.date ?? "",
-    location: activity.location ?? "",
-    image: sanitizeRemoteImageUrl(activity.image) ?? activity.image ?? "",
-    category: "",
+    date: activity.date ?? '',
+    location: activity.location ?? '',
+    image: sanitizeRemoteImageUrl(activity.image) ?? activity.image ?? '',
+    category: '',
     hot: Boolean(activity.hot),
     attendees: activity.attendees ?? 0,
     going: false,
@@ -122,5 +122,7 @@ export function mapBackendActivityToFeaturedEvent(
 export function pickHomeFeaturedEvents(signupEvents: SignupEvent[]): FeaturedEvent[] {
   const hot = signupEvents.filter((item) => item.hot);
   const rest = signupEvents.filter((item) => !item.hot);
-  return [...hot, ...rest].slice(0, 2).map((item) => mapSignupEventToFeaturedEvent(item));
+  return [...hot, ...rest]
+    .slice(0, 2)
+    .map((item) => mapSignupEventToFeaturedEvent(item));
 }

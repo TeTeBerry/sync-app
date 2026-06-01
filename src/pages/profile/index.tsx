@@ -1,6 +1,6 @@
-import "./profile.scss";
-import Taro, { useDidShow } from "@tarojs/taro";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import './profile.scss';
+import Taro, { useDidShow } from '@tarojs/taro';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Bell,
   Check,
@@ -11,37 +11,39 @@ import {
   Music2,
   Shield,
   Zap,
-} from "lucide-react-taro";
-import TabPageHeader from "../../components/TabPageHeader";
-import ThemedPageLoader from "../../components/ThemedPageLoader";
-import { useNavBarInsets } from "../../hooks/useNavBarInsets";
-import { TAB_PAGE_HEADER_BRAND_PX, useTabPageMainHeight } from "../../hooks/useTabPageMainHeight";
-import { go, preloadHotRoutes, ROUTES } from "../../utils/route";
-import ProfileBenefitsPurchaseBanner from "./components/ProfileBenefitsPurchaseBanner";
-import ProfileFreeBenefitsSection from "./components/ProfileFreeBenefitsSection";
-import ProfilePaidBenefitsSection from "./components/ProfilePaidBenefitsSection";
-import ProfilePackageSheet from "./components/ProfilePackageSheet";
-import { ProfileTabErrorBoundary } from "./components/ProfileTabErrorBoundary";
-import { profileActivities, profilePosts, profileUser } from "./mockData";
-import { sanitizeRemoteImageUrl } from "../../utils/imageUrl";
-import ProfileActionCard from "./components/ProfileActionCard";
-import { countOngoingActivities, deriveInterestTag } from "./utils";
-import { persistUserName } from "../../utils/session";
-import { useNavigationStore, useProfilePageStore } from "../../stores";
+} from 'lucide-react-taro';
+import TabPageHeader from '../../components/TabPageHeader';
+import ThemedPageLoader from '../../components/ThemedPageLoader';
+import { useNavBarInsets } from '../../hooks/useNavBarInsets';
+import {
+  TAB_PAGE_HEADER_BRAND_PX,
+  useTabPageMainHeight,
+} from '../../hooks/useTabPageMainHeight';
+import { go, preloadHotRoutes, ROUTES } from '../../utils/route';
+import ProfileBenefitsPurchaseBanner from './components/ProfileBenefitsPurchaseBanner';
+import ProfileFreeBenefitsSection from './components/ProfileFreeBenefitsSection';
+import ProfilePaidBenefitsSection from './components/ProfilePaidBenefitsSection';
+import ProfilePackageSheet from './components/ProfilePackageSheet';
+import { ProfileTabErrorBoundary } from './components/ProfileTabErrorBoundary';
+import { profileActivities, profilePosts, profileUser } from './mockData';
+import { sanitizeRemoteImageUrl } from '../../utils/imageUrl';
+import ProfileActionCard from './components/ProfileActionCard';
+import { countOngoingActivities, deriveInterestTag } from './utils';
+import { persistUserName } from '../../utils/session';
+import { useNavigationStore, useProfilePageStore } from '../../stores';
 import {
   useProfileActivitiesQuery,
   useProfileEntitlementsQuery,
   useProfileSummaryQuery,
-} from "../../hooks/useSyncApi";
-import { useProfileActivityLegacyId } from "../../hooks/useProfileActivityLegacyId";
-import { isApiEnabled } from "../../constants/api";
-import { useConfirmDialog } from "../../hooks/useConfirmDialog";
+} from '../../hooks/useSyncApi';
+import { isApiEnabled } from '../../constants/api';
+import { useConfirmDialog } from '../../hooks/useConfirmDialog';
 import {
   readProfileNotificationsEnabled,
   readProfilePrivacyLevel,
-} from "../../utils/profileStorage";
-import { invalidateProfilePackageState } from "../../utils/queryInvalidation";
-import type { ProfileSummary } from "../../types/backend";
+} from '../../utils/profileStorage';
+import { invalidateProfilePackageState } from '../../utils/queryInvalidation';
+import type { ProfileSummary } from '../../types/backend';
 import {
   asEntitlementList,
   buildFreeBenefitCardModel,
@@ -49,9 +51,9 @@ import {
   isValidFreeMonthlyQuota,
   pickGlobalFreeMonthly,
   type ProfileEventBenefitCardModel,
-} from "./profileBenefitsMapper";
-import { useProfilePaidBenefitCards } from "./useProfilePaidBenefitCards";
-import type { PackageTierId } from "./profilePackageData";
+} from './profileBenefitsMapper';
+import { useProfilePaidBenefitCards } from './useProfilePaidBenefitCards';
+import type { PackageTierId } from './profilePackageData';
 import {
   isProfileDebugEntitlementsEnabled,
   PROFILE_DEBUG_ENTITLEMENT_LABELS,
@@ -61,23 +63,25 @@ import {
   readProfileDebugEntitlementPreset,
   resolveProfileDebugEntitlements,
   type ProfileDebugEntitlementPreset,
-} from "./profileDebugEntitlements";
-import { buildDebugContactUnlockExhaustedPreview } from "./profileDebugModals";
-import { ContactUnlockQuotaExhaustedModal } from "../../components/contact-unlock/ContactUnlockQuotaExhaustedModal";
-import AiPackageUpgradeSheet from "../../components/ai-chat/AiPackageUpgradeSheet";
-import { PROFILE_SEED_ACTIVITY_LEGACY_ID } from "../../constants/profilePackage";
-import { useEndRouteTransitionOnShow } from "../../hooks/useEndRouteTransitionOnShow";
-import { Image, ScrollView, Text, View } from "@tarojs/components";
+} from './profileDebugEntitlements';
+import { buildDebugContactUnlockExhaustedPreview } from './profileDebugModals';
+import { ContactUnlockQuotaExhaustedModal } from '../../components/contact-unlock/ContactUnlockQuotaExhaustedModal';
+import AiPackageUpgradeSheet from '../../components/ai-chat/AiPackageUpgradeSheet';
+import { PROFILE_SEED_ACTIVITY_LEGACY_ID } from '../../constants/profilePackage';
+import { useEndRouteTransitionOnShow } from '../../hooks/useEndRouteTransitionOnShow';
+import { Image, ScrollView, Text, View } from '@tarojs/components';
 
 function trimProfileField(value: unknown): string | undefined {
-  if (typeof value !== "string") {
+  if (typeof value !== 'string') {
     return undefined;
   }
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : undefined;
 }
 
-function normalizeProfileUserData(data: ProfileSummary | typeof profileUser): typeof profileUser {
+function normalizeProfileUserData(
+  data: ProfileSummary | typeof profileUser,
+): typeof profileUser {
   const stats = data.stats ?? profileUser.stats;
   return {
     name: trimProfileField(data.name) ?? profileUser.name,
@@ -86,7 +90,7 @@ function normalizeProfileUserData(data: ProfileSummary | typeof profileUser): ty
     bio: trimProfileField(data.bio) ?? profileUser.bio,
     avatar: trimProfileField(data.avatar) ?? profileUser.avatar,
     verified:
-      "verified" in data && typeof data.verified === "boolean"
+      'verified' in data && typeof data.verified === 'boolean'
         ? data.verified
         : profileUser.verified,
     stats: {
@@ -102,12 +106,18 @@ const Profile: React.FC = () => {
   const navInsets = useNavBarInsets();
   const headerChromePx = navInsets.paddingTop + TAB_PAGE_HEADER_BRAND_PX;
   const mainScrollHeight = useTabPageMainHeight(headerChromePx);
-  const notificationsEnabled = useProfilePageStore((state) => state.notificationsEnabled);
-  const setNotificationsEnabled = useProfilePageStore((state) => state.setNotificationsEnabled);
+  const notificationsEnabled = useProfilePageStore(
+    (state) => state.notificationsEnabled,
+  );
+  const setNotificationsEnabled = useProfilePageStore(
+    (state) => state.setNotificationsEnabled,
+  );
   const setPrivacyLevel = useProfilePageStore((state) => state.setPrivacyLevel);
-  const consumeProfileIntent = useNavigationStore((state) => state.consumeProfileIntent);
+  const consumeProfileIntent = useNavigationStore(
+    (state) => state.consumeProfileIntent,
+  );
   const { confirm, confirmDialog } = useConfirmDialog({
-    cancelText: "取消",
+    cancelText: '取消',
   });
   const [packageSheetOpen, setPackageSheetOpen] = useState(false);
   const [packageSheetActivityLegacyId, setPackageSheetActivityLegacyId] = useState<
@@ -122,11 +132,14 @@ const Profile: React.FC = () => {
   const debugEntitlementsEnabled = isProfileDebugEntitlementsEnabled();
   const [debugEntitlementPreset, setDebugEntitlementPreset] =
     useState<ProfileDebugEntitlementPreset>(() => readProfileDebugEntitlementPreset());
-  const [debugContactUnlockExhaustedOpen, setDebugContactUnlockExhaustedOpen] = useState(false);
+  const [debugContactUnlockExhaustedOpen, setDebugContactUnlockExhaustedOpen] =
+    useState(false);
   const [debugAiMatchExhaustedOpen, setDebugAiMatchExhaustedOpen] = useState(false);
-  const debugContactUnlockPreview = useMemo(() => buildDebugContactUnlockExhaustedPreview(), []);
+  const debugContactUnlockPreview = useMemo(
+    () => buildDebugContactUnlockExhaustedPreview(),
+    [],
+  );
 
-  const activityLegacyId = useProfileActivityLegacyId();
   /** Global summary for profile tab (not scoped to AI/event context). */
   const summaryQuery = useProfileSummaryQuery();
   /** Unscoped list: one paid card per activity with a purchase. */
@@ -135,13 +148,17 @@ const Profile: React.FC = () => {
   const apiEnabled = isApiEnabled();
   const debugEntitlementOverride = useMemo(
     () =>
-      debugEntitlementsEnabled ? resolveProfileDebugEntitlements(debugEntitlementPreset) : null,
+      debugEntitlementsEnabled
+        ? resolveProfileDebugEntitlements(debugEntitlementPreset)
+        : null,
     [debugEntitlementPreset, debugEntitlementsEnabled],
   );
 
   const profileUserData = useMemo(
     () =>
-      apiEnabled && summaryQuery.data ? normalizeProfileUserData(summaryQuery.data) : profileUser,
+      apiEnabled && summaryQuery.data
+        ? normalizeProfileUserData(summaryQuery.data)
+        : profileUser,
     [apiEnabled, summaryQuery.data],
   );
 
@@ -152,11 +169,15 @@ const Profile: React.FC = () => {
 
   const profileLoading = apiEnabled && summaryQuery.isLoading && !summaryQuery.data;
 
-  const { benefitsLoading, paidEntitlements, recentPaidBenefitCards, totalPaidCardCount } =
-    useProfilePaidBenefitCards({
-      useDebugEntitlements: debugEntitlementsEnabled,
-      debugPreset: debugEntitlementPreset,
-    });
+  const {
+    benefitsLoading,
+    paidEntitlements,
+    recentPaidBenefitCards,
+    totalPaidCardCount,
+  } = useProfilePaidBenefitCards({
+    useDebugEntitlements: debugEntitlementsEnabled,
+    debugPreset: debugEntitlementPreset,
+  });
 
   const summaryFreeMonthly = useMemo(() => {
     const scoped = summaryQuery.data?.packageEntitlement?.freeMonthly;
@@ -200,7 +221,8 @@ const Profile: React.FC = () => {
   const showPaidBenefitsSection = !apiEnabled || hasPaidEntitlement;
 
   const showFreeBenefitsSection =
-    paidEntitlements.length === 0 && (debugEntitlementOverride != null || !benefitsLoading);
+    paidEntitlements.length === 0 &&
+    (debugEntitlementOverride != null || !benefitsLoading);
 
   const showBenefitsLoading = benefitsLoading && !showPaidBenefitsSection;
 
@@ -230,7 +252,9 @@ const Profile: React.FC = () => {
     }) => {
       const rawActivityId = options?.activityLegacyId;
       const resolvedActivityId =
-        rawActivityId != null && !Number.isNaN(rawActivityId) ? rawActivityId : undefined;
+        rawActivityId != null && !Number.isNaN(rawActivityId)
+          ? rawActivityId
+          : undefined;
       let currentPaidTierId = options?.currentPaidTierId;
       if (currentPaidTierId == null && resolvedActivityId != null) {
         const entitlement = paidEntitlements.find(
@@ -308,7 +332,7 @@ const Profile: React.FC = () => {
     persistUserName(profileUserData.name);
   }, [profileUserData.name]);
 
-  const openSettings = useCallback((section: "notifications" | "privacy" | "help") => {
+  const openSettings = useCallback((section: 'notifications' | 'privacy' | 'help') => {
     go(`${ROUTES.SETTINGS}?section=${section}`);
   }, []);
 
@@ -323,16 +347,16 @@ const Profile: React.FC = () => {
 
   const handleLogout = useCallback(async () => {
     const ok = await confirm({
-      title: "退出登录",
-      message: "确定要退出当前账号吗？",
-      confirmText: "退出登录",
+      title: '退出登录',
+      message: '确定要退出当前账号吗？',
+      confirmText: '退出登录',
     });
     if (!ok) return;
-    void Taro.showToast({ title: "已退出登录", icon: "success" });
+    void Taro.showToast({ title: '已退出登录', icon: 'success' });
   }, [confirm]);
 
   const handleUsageHistory = useCallback(() => {
-    void Taro.showToast({ title: "使用记录敬请期待", icon: "none" });
+    void Taro.showToast({ title: '使用记录敬请期待', icon: 'none' });
   }, []);
 
   const handleDebugEntitlements = useCallback(() => {
@@ -345,15 +369,17 @@ const Profile: React.FC = () => {
         setDebugEntitlementPreset(preset);
         void Taro.showToast({
           title: PROFILE_DEBUG_ENTITLEMENT_LABELS[preset],
-          icon: "none",
+          icon: 'none',
         });
       },
     });
   }, [debugEntitlementsEnabled]);
 
-  const metaParts = [profileUserData.handle, profileUserData.location, profileUserData.bio].filter(
-    Boolean,
-  );
+  const metaParts = [
+    profileUserData.handle,
+    profileUserData.location,
+    profileUserData.bio,
+  ].filter(Boolean);
 
   return (
     <View data-cmp="Profile" className="s-profile s-page-with-tabbar">
@@ -365,13 +391,19 @@ const Profile: React.FC = () => {
           enhanced
           showScrollbar={false}
           className="s-profile__scroll s-scrollbar-none"
-          style={mainScrollHeight != null ? { height: `${mainScrollHeight}px` } : undefined}
+          style={
+            mainScrollHeight != null ? { height: `${mainScrollHeight}px` } : undefined
+          }
         >
           <ProfileTabErrorBoundary onRetry={handleProfileRetry}>
             <View className="s-profile__scroll-inner">
               {profileLoading ? (
                 <View className="s-profile__card s-profile__card--loading">
-                  <ThemedPageLoader variant="inline" label="加载个人资料…" minHeight={148} />
+                  <ThemedPageLoader
+                    variant="inline"
+                    label="加载个人资料…"
+                    minHeight={148}
+                  />
                 </View>
               ) : (
                 <View className="s-profile__card">
@@ -380,7 +412,8 @@ const Profile: React.FC = () => {
                       <Image
                         className="s-profile__avatar"
                         src={
-                          sanitizeRemoteImageUrl(profileUserData.avatar) ?? profileUserData.avatar
+                          sanitizeRemoteImageUrl(profileUserData.avatar) ??
+                          profileUserData.avatar
                         }
                         alt={profileUserData.name}
                       />
@@ -390,7 +423,9 @@ const Profile: React.FC = () => {
                     <View className="s-profile__info">
                       <Text className="s-profile__name">{profileUserData.name}</Text>
                       {metaParts.length > 0 ? (
-                        <Text className="s-profile__meta-line">{metaParts.join(" · ")}</Text>
+                        <Text className="s-profile__meta-line">
+                          {metaParts.join(' · ')}
+                        </Text>
                       ) : null}
                       {interestTag || verified ? (
                         <View className="s-profile__tags">
@@ -413,7 +448,9 @@ const Profile: React.FC = () => {
 
                   <View className="s-profile__stats" aria-label="个人数据">
                     <View className="s-profile__stat">
-                      <Text className="s-profile__stat-value">{profileUserData.stats.events}</Text>
+                      <Text className="s-profile__stat-value">
+                        {profileUserData.stats.events}
+                      </Text>
                       <Text className="s-profile__stat-label">参加活动</Text>
                     </View>
                     <View className="s-profile__stat s-profile__stat--accent">
@@ -423,11 +460,15 @@ const Profile: React.FC = () => {
                       <Text className="s-profile__stat-label">组队成功</Text>
                     </View>
                     <View className="s-profile__stat">
-                      <Text className="s-profile__stat-value">{profileUserData.stats.likes}</Text>
+                      <Text className="s-profile__stat-value">
+                        {profileUserData.stats.likes}
+                      </Text>
                       <Text className="s-profile__stat-label">获赞数</Text>
                     </View>
                     <View className="s-profile__stat">
-                      <Text className="s-profile__stat-value">{profileUserData.stats.posts}</Text>
+                      <Text className="s-profile__stat-value">
+                        {profileUserData.stats.posts}
+                      </Text>
                       <Text className="s-profile__stat-label">我的帖子</Text>
                     </View>
                   </View>
@@ -436,7 +477,9 @@ const Profile: React.FC = () => {
 
               {showBenefitsBlock ? (
                 <View className="s-profile-benefits">
-                  <ProfileBenefitsPurchaseBanner onOpenPurchase={() => openPackageSheet()} />
+                  <ProfileBenefitsPurchaseBanner
+                    onOpenPurchase={() => openPackageSheet()}
+                  />
 
                   {showPaidBenefitsSection ? (
                     <ProfilePaidBenefitsSection
@@ -472,7 +515,7 @@ const Profile: React.FC = () => {
                     onClick={handleDebugEntitlements}
                   >
                     <Text className="s-profile__debug-entitlements-label">
-                      调试权益 ·{" "}
+                      调试权益 ·{' '}
                       {PROFILE_DEBUG_ENTITLEMENT_LABELS[debugEntitlementPreset] ??
                         PROFILE_DEBUG_ENTITLEMENT_LABELS.api}
                     </Text>
@@ -521,14 +564,14 @@ const Profile: React.FC = () => {
                 <View
                   className="s-profile__settings-row"
                   hoverClass="s-profile__settings-row--pressed"
-                  onClick={() => openSettings("notifications")}
+                  onClick={() => openSettings('notifications')}
                 >
                   <View className="s-profile__settings-icon s-profile__settings-icon--bell">
                     <Bell size={18} />
                   </View>
                   <Text className="s-profile__settings-label">通知设置</Text>
                   <Text className="s-profile__settings-value">
-                    {notificationsEnabled ? "已开启" : "已关闭"}
+                    {notificationsEnabled ? '已开启' : '已关闭'}
                   </Text>
                   <ChevronRight size={18} className="s-profile__settings-chevron" />
                 </View>
@@ -536,7 +579,7 @@ const Profile: React.FC = () => {
                 <View
                   className="s-profile__settings-row"
                   hoverClass="s-profile__settings-row--pressed"
-                  onClick={() => openSettings("privacy")}
+                  onClick={() => openSettings('privacy')}
                 >
                   <View className="s-profile__settings-icon s-profile__settings-icon--shield">
                     <Shield size={18} />
@@ -548,7 +591,7 @@ const Profile: React.FC = () => {
                 <View
                   className="s-profile__settings-row"
                   hoverClass="s-profile__settings-row--pressed"
-                  onClick={() => openSettings("help")}
+                  onClick={() => openSettings('help')}
                 >
                   <View className="s-profile__settings-icon s-profile__settings-icon--help">
                     <Info size={18} />

@@ -1,8 +1,8 @@
-import "./ActionSheet.scss";
-import React from "react";
-import { useOverlayLock } from "../hooks/useOverlayLock";
-import { cn } from "./ui";
-import { Button, Text, View } from "@tarojs/components";
+import './ActionSheet.scss';
+import React from 'react';
+import { useOverlayLock } from '../hooks/useOverlayLock';
+import { cn } from './ui';
+import { Button, Text, View } from '@tarojs/components';
 
 export interface ActionSheetItem {
   label: string;
@@ -32,7 +32,11 @@ const ActionSheet: React.FC<ActionSheetProps> = ({
 
   return (
     <View
-      className={cn("s-overlay s-overlay--sheet", overlayClassName, !open && "s-overlay--off")}
+      className={cn(
+        's-overlay s-overlay--sheet',
+        overlayClassName,
+        !open && 's-overlay--off',
+      )}
       role="presentation"
     >
       <View className="s-overlay__backdrop" onClick={onCancel} />
@@ -42,7 +46,10 @@ const ActionSheet: React.FC<ActionSheetProps> = ({
           <Button
             key={item.label}
             role="menuitem"
-            className={cn("s-overlay-sheet__item", item.active && "s-overlay-sheet__item--active")}
+            className={cn(
+              's-overlay-sheet__item',
+              item.active && 's-overlay-sheet__item--active',
+            )}
             onClick={item.onSelect}
           >
             <Text className="s-btn-label">{item.label}</Text>

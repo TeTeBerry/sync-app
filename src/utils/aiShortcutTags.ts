@@ -1,10 +1,10 @@
-import Taro from "@tarojs/taro";
+import Taro from '@tarojs/taro';
 
-const STORAGE_KEY = "sync_ai_shortcut_tag_usage";
+const STORAGE_KEY = 'sync_ai_shortcut_tag_usage';
 const DISPLAY_COUNT = 6;
 
 /** 可选快捷标签池（含默认展示项） */
-export const AI_SHORTCUT_TAG_POOL = ["组队队友", "住宿同行", "拼车同行"] as const;
+export const AI_SHORTCUT_TAG_POOL = ['组队队友', '住宿同行', '拼车同行'] as const;
 
 export type AiShortcutTag = (typeof AI_SHORTCUT_TAG_POOL)[number];
 
@@ -12,11 +12,11 @@ type UsageMap = Record<string, number>;
 
 /** 展示文案别名 → 标准快捷标签 */
 export const AI_SHORTCUT_TAG_ALIASES: Record<string, AiShortcutTag> = {
-  帮我dd: "组队队友",
+  帮我dd: '组队队友',
 };
 
 const LEGACY_TAG_ALIASES: Record<string, string> = {
-  拼房同行: "住宿同行",
+  拼房同行: '住宿同行',
 };
 
 export function normalizeAiShortcutTag(tag: string): string {
@@ -27,7 +27,7 @@ export function normalizeAiShortcutTag(tag: string): string {
 function readUsage(): UsageMap {
   try {
     const raw = Taro.getStorageSync(STORAGE_KEY);
-    if (!raw || typeof raw !== "object") return {};
+    if (!raw || typeof raw !== 'object') return {};
     const usage = raw as UsageMap;
     const migrated: UsageMap = {};
     for (const [key, count] of Object.entries(usage)) {

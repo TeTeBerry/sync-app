@@ -1,9 +1,12 @@
-import { extractYearFromText } from "./activityStatus";
+import { extractYearFromText } from './activityStatus';
 
-export function formatEventDateBadge(date?: string): { primary: string; secondary: string } {
-  const trimmed = date?.trim() ?? "";
+export function formatEventDateBadge(date?: string): {
+  primary: string;
+  secondary: string;
+} {
+  const trimmed = date?.trim() ?? '';
   if (!trimmed) {
-    return { primary: "--", secondary: "" };
+    return { primary: '--', secondary: '' };
   }
 
   const sameMonthRange = trimmed.match(/(\d{1,2})\/(\d{1,2})\s*[–-]\s*(\d{1,2})/);
@@ -22,18 +25,20 @@ export function formatEventDateBadge(date?: string): { primary: string; secondar
     };
   }
 
-  return { primary: trimmed.slice(0, 2), secondary: "" };
+  return { primary: trimmed.slice(0, 2), secondary: '' };
 }
 
 export function formatEventFullDate(date?: string, title?: string): string {
-  const trimmed = date?.trim() ?? "";
-  if (!trimmed) return "";
+  const trimmed = date?.trim() ?? '';
+  if (!trimmed) return '';
 
   const year =
-    extractYearFromText(title) ?? extractYearFromText(trimmed) ?? new Date().getFullYear();
+    extractYearFromText(title) ??
+    extractYearFromText(trimmed) ??
+    new Date().getFullYear();
   const badge = formatEventDateBadge(trimmed);
 
-  if (badge.secondary.includes("-")) {
+  if (badge.secondary.includes('-')) {
     const days = badge.secondary.slice(1);
     return `${year}年${badge.primary}月${days}日`;
   }
@@ -53,7 +58,7 @@ export function formatEventHeroSubtitle(title?: string, location?: string): stri
     return `${locationPart} ${year}`;
   }
   if (year) return String(year);
-  return locationPart ?? "";
+  return locationPart ?? '';
 }
 
 /** Display-only stats derived from existing card fields (no API change). */

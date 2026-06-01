@@ -1,43 +1,43 @@
-import "./notifications.scss";
-import React, { useCallback, useMemo, useState } from "react";
-import ThemedPageLoader from "../../../components/ThemedPageLoader";
-import { useDeferredMount } from "../../../hooks/useDeferredMount";
-import { usePageRouteReady } from "../../../hooks/usePageRouteReady";
-import { useEndRouteTransitionOnShow } from "../../../hooks/useEndRouteTransitionOnShow";
-import { Bell, Heart, MessageCircle, Megaphone, Trash2 } from "lucide-react-taro";
-import PageNavigation from "../../../components/PageNavigation";
+import './notifications.scss';
+import React, { useCallback, useMemo, useState } from 'react';
+import ThemedPageLoader from '../../../components/ThemedPageLoader';
+import { useDeferredMount } from '../../../hooks/useDeferredMount';
+import { usePageRouteReady } from '../../../hooks/usePageRouteReady';
+import { useEndRouteTransitionOnShow } from '../../../hooks/useEndRouteTransitionOnShow';
+import { Bell, Heart, MessageCircle, Megaphone, Trash2 } from 'lucide-react-taro';
+import PageNavigation from '../../../components/PageNavigation';
 import {
   clearAllNotificationsAndInvalidate,
   deleteNotificationAndInvalidate,
   markAllNotificationsAsRead,
   markNotificationAsRead,
   useNotificationsQuery,
-} from "../../../hooks/useSyncApi";
-import { useConfirmDialog } from "../../../hooks/useConfirmDialog";
-import type { AppNotification } from "../../../types/backend";
+} from '../../../hooks/useSyncApi';
+import { useConfirmDialog } from '../../../hooks/useConfirmDialog';
+import type { AppNotification } from '../../../types/backend';
 import {
   formatNotificationTimeAgo,
   getNotificationCategory,
   resolveNotificationText,
   type NotificationCategory,
-} from "../../../utils/notificationDisplay";
-import { navigateFromNotification, ROUTES } from "../../../utils/route";
-import { DEFER_NOTIFICATIONS_MS } from "../../../utils/timing";
-import { Button, Text, View } from "@tarojs/components";
+} from '../../../utils/notificationDisplay';
+import { navigateFromNotification, ROUTES } from '../../../utils/route';
+import { DEFER_NOTIFICATIONS_MS } from '../../../utils/timing';
+import { Button, Text, View } from '@tarojs/components';
 
-type CategoryFilter = "all" | NotificationCategory;
+type CategoryFilter = 'all' | NotificationCategory;
 
-const CATEGORY_TABS: CategoryFilter[] = ["all", "comment", "like", "system"];
+const CATEGORY_TABS: CategoryFilter[] = ['all', 'comment', 'like', 'system'];
 
 function NotificationIcon({ category }: { category: NotificationCategory }) {
   const iconProps = { size: 20 as const };
 
   switch (category) {
-    case "like":
+    case 'like':
       return <Heart {...iconProps} />;
-    case "comment":
+    case 'comment':
       return <MessageCircle {...iconProps} />;
-    case "system":
+    case 'system':
       return <Megaphone {...iconProps} />;
     default:
       return <Bell {...iconProps} />;
@@ -50,9 +50,9 @@ const NotificationsPage: React.FC = () => {
   const { data: notifications = [], isLoading, refetch } = useNotificationsQuery();
   const contentReady = listReady && !isLoading;
   usePageRouteReady(contentReady);
-  const [activeCategory, setActiveCategory] = useState<CategoryFilter>("all");
+  const [activeCategory, setActiveCategory] = useState<CategoryFilter>('all');
   const { confirm, confirmDialog } = useConfirmDialog({
-    cancelText: "取消",
+    cancelText: '取消',
   });
 
   const unreadCount = useMemo(
@@ -61,8 +61,10 @@ const NotificationsPage: React.FC = () => {
   );
 
   const filteredNotifications = useMemo(() => {
-    if (activeCategory === "all") return notifications;
-    return notifications.filter((item) => getNotificationCategory(item.meta) === activeCategory);
+    if (activeCategory === 'all') return notifications;
+    return notifications.filter(
+      (item) => getNotificationCategory(item.meta) === activeCategory,
+    );
   }, [activeCategory, notifications]);
 
   const categoryCounts = useMemo(() => {
@@ -89,9 +91,9 @@ const NotificationsPage: React.FC = () => {
   const handleClearAll = useCallback(async () => {
     if (notifications.length === 0) return;
     const confirmed = await confirm({
-      title: "清空全部消息",
-      message: "确定要删除所有消息吗？此操作不可撤销。",
-      confirmText: "清空全部",
+      title: '清空全部消息',
+      message: '确定要删除所有消息吗？此操作不可撤销。',
+      confirmText: '清空全部',
     });
     if (!confirmed) return;
     await clearAllNotificationsAndInvalidate();
@@ -102,9 +104,9 @@ const NotificationsPage: React.FC = () => {
     async (event: { stopPropagation: () => void }, item: AppNotification) => {
       event.stopPropagation();
       const confirmed = await confirm({
-        title: "删除消息",
-        message: "确定要删除这条消息吗？",
-        confirmText: "删除",
+        title: '删除消息',
+        message: '确定要删除这条消息吗？',
+        confirmText: '删除',
       });
       if (!confirmed) return;
       await deleteNotificationAndInvalidate(item.id);
@@ -134,19 +136,21 @@ const NotificationsPage: React.FC = () => {
                 key={category}
                 role="tab"
                 aria-selected={isActive}
-                className={`s-notifications__tab${isActive ? " s-notifications__tab--active" : ""}`}
+                className={`s-notifications__tab${isActive ? ' s-notifications__tab--active' : ''}`}
                 onClick={() => setActiveCategory(category)}
               >
                 <Text className="s-btn-label">
-                  {category === "all"
-                    ? "全部"
-                    : category === "comment"
-                      ? "评论"
-                      : category === "like"
-                        ? "点赞"
-                        : "系统"}
+                  {category === 'all'
+                    ? '全部'
+                    : category === 'comment'
+                      ? '评论'
+                      : category === 'like'
+                        ? '点赞'
+                        : '系统'}
                 </Text>
-                {count > 0 && <Text className="s-notifications__tab-count">{count}</Text>}
+                {count > 0 && (
+                  <Text className="s-notifications__tab-count">{count}</Text>
+                )}
               </Button>
             );
           })}
@@ -155,11 +159,17 @@ const NotificationsPage: React.FC = () => {
         {notifications.length > 0 && (
           <View className="s-notifications__toolbar">
             {unreadCount > 0 && (
-              <Button className="s-notifications__toolbar-btn" onClick={() => void handleMarkAll()}>
+              <Button
+                className="s-notifications__toolbar-btn"
+                onClick={() => void handleMarkAll()}
+              >
                 <Text className="s-btn-label">全部已读</Text>
               </Button>
             )}
-            <Button className="s-notifications__toolbar-btn" onClick={() => void handleClearAll()}>
+            <Button
+              className="s-notifications__toolbar-btn"
+              onClick={() => void handleClearAll()}
+            >
               <Text className="s-btn-label">清空全部</Text>
             </Button>
           </View>
@@ -171,7 +181,9 @@ const NotificationsPage: React.FC = () => {
           <View className="s-notifications__empty">
             <Bell size={40} className="s-notifications__empty-icon" />
             <View className="s-notifications__empty-title">暂无消息</View>
-            <View className="s-notifications__empty-desc">评论、点赞和活动变更会在这里显示。</View>
+            <View className="s-notifications__empty-desc">
+              评论、点赞和活动变更会在这里显示。
+            </View>
           </View>
         ) : (
           <View className="s-notifications__list">
@@ -180,7 +192,7 @@ const NotificationsPage: React.FC = () => {
               return (
                 <View
                   key={item.id}
-                  className={`s-notifications__item${item.read ? "" : " s-notifications__item--unread"}`}
+                  className={`s-notifications__item${item.read ? '' : ' s-notifications__item--unread'}`}
                 >
                   <Button
                     className="s-notifications__item-main"
@@ -200,7 +212,9 @@ const NotificationsPage: React.FC = () => {
                       </View>
                       <View className="s-notifications__body">{display.body}</View>
                     </View>
-                    {!item.read && <Text className="s-notifications__dot" aria-hidden />}
+                    {!item.read && (
+                      <Text className="s-notifications__dot" aria-hidden />
+                    )}
                   </Button>
                   <Button
                     className="s-notifications__delete"

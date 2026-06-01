@@ -1,19 +1,19 @@
-import { useMemo } from "react";
-import { fetchUserPosts } from "../../api/syncApi";
-import { isApiEnabled } from "../../constants/api";
-import type { EventDetailPost } from "../../types/backend";
-import { formatPostPublishTime } from "../../utils/formatPostPublishTime";
-import { sanitizeImageList, sanitizeRemoteImageUrl } from "../../utils/imageUrl";
-import { useApiQuery } from "../../hooks/useApiQuery";
-import { useEventPostsQuery } from "../../hooks/useSyncApi";
-import type { EventMapMarker } from "./eventMapMarkers";
+import { useMemo } from 'react';
+import { fetchUserPosts } from '../../api/syncApi';
+import { isApiEnabled } from '../../constants/api';
+import type { EventDetailPost } from '../../types/backend';
+import { formatPostPublishTime } from '../../utils/formatPostPublishTime';
+import { sanitizeImageList, sanitizeRemoteImageUrl } from '../../utils/imageUrl';
+import { useApiQuery } from '../../hooks/useApiQuery';
+import { useEventPostsQuery } from '../../hooks/useSyncApi';
+import type { EventMapMarker } from './eventMapMarkers';
 import {
   buildEventMapUserSheetData,
   getEventMapUserSheetMockData,
   mapEventDetailPostToEventMapUserPost,
   mapProfilePostToEventMapUserPost,
   type EventMapUserPost,
-} from "./eventMapUserPostsData";
+} from './eventMapUserPostsData';
 
 const STORM_ACTIVITY_LEGACY_ID = 4;
 
@@ -61,7 +61,7 @@ export function useEventMapUserSheet(
   );
 
   const sheetEnabled = open && Boolean(marker);
-  const userId = marker?.userId ?? "";
+  const userId = marker?.userId ?? '';
 
   const activityPostsQuery = useEventPostsQuery(activityLegacyId, {
     enabled: apiEnabled && sheetEnabled,
@@ -77,7 +77,7 @@ export function useEventMapUserSheet(
     (activityPostsQuery.data !== undefined && activityPosts.length === 0);
 
   const profilePostsQuery = useApiQuery({
-    queryKey: ["profile", "posts", "user", userId, marker?.authorName],
+    queryKey: ['profile', 'posts', 'user', userId, marker?.authorName],
     queryFn: () => fetchUserPosts(userId, marker?.authorName),
     enabled:
       apiEnabled &&
@@ -119,7 +119,8 @@ export function useEventMapUserSheet(
     apiEnabled &&
     sheetEnabled &&
     !posts.length &&
-    (activityPostsQuery.isLoading || (needProfileFallback && profilePostsQuery.isLoading));
+    (activityPostsQuery.isLoading ||
+      (needProfileFallback && profilePostsQuery.isLoading));
 
   const isError =
     apiEnabled &&

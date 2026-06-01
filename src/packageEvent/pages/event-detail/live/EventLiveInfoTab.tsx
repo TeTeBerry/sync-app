@@ -1,6 +1,6 @@
-import { useEffect } from "react";
-import { EventLiveInfoPanel } from "../components/EventLiveInfoPanel";
-import { useEventLiveInfo, type PublishLiveInfoPayload } from "../useEventLiveInfo";
+import { useEffect } from 'react';
+import { EventLiveInfoPanel } from '../components/EventLiveInfoPanel';
+import { useEventLiveInfo, type PublishLiveInfoPayload } from '../useEventLiveInfo';
 
 export type EventLiveInfoTabActions = {
   publishUpdate: (payload: PublishLiveInfoPayload) => Promise<boolean>;

@@ -1,12 +1,12 @@
-import { useMemo } from "react";
-import { isApiEnabled, isDevMockQuotaExhausted } from "../constants/api";
-import { useProfileActivityLegacyId } from "./useProfileActivityLegacyId";
-import { useProfileEntitlementsQuery } from "./useSyncApi";
+import { useMemo } from 'react';
+import { isApiEnabled, isDevMockQuotaExhausted } from '../constants/api';
+import { useProfileActivityLegacyId } from './useProfileActivityLegacyId';
+import { useProfileEntitlementsQuery } from './useSyncApi';
 import {
   getContactUnlockRemaining,
   isContactUnlockQuotaExhausted,
   resolveProfileEntitlement,
-} from "../utils/profileEntitlement";
+} from '../utils/profileEntitlement';
 
 export type ContactUnlockQuotaDisplay = {
   exhausted: boolean;
@@ -38,7 +38,10 @@ export function useContactUnlockQuota(
       };
     }
 
-    const entitlement = resolveProfileEntitlement(entitlementsQuery.data, activityLegacyId);
+    const entitlement = resolveProfileEntitlement(
+      entitlementsQuery.data,
+      activityLegacyId,
+    );
     const remaining = getContactUnlockRemaining(entitlement);
 
     return {
@@ -46,5 +49,10 @@ export function useContactUnlockQuota(
       remaining,
       loading,
     };
-  }, [activityLegacyId, apiEnabled, entitlementsQuery.data, entitlementsQuery.isLoading]);
+  }, [
+    activityLegacyId,
+    apiEnabled,
+    entitlementsQuery.data,
+    entitlementsQuery.isLoading,
+  ]);
 }

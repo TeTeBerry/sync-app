@@ -1,18 +1,20 @@
-import { defineConfig } from "@tarojs/cli";
+import { defineConfig } from '@tarojs/cli';
 
 /**
  * Primary target: WeChat mini program (weapp). Design draft: 375px logical width.
  * H5 is not actively maintained — use `npm run build:weapp` for release checks.
  */
-const plugins: (string | [string, Record<string, unknown>])[] = ["@tarojs/plugin-framework-react"];
-if (process.env.TARO_ENV === "weapp") {
-  plugins.push(["@tarojs/plugin-html", {}]);
+const plugins: (string | [string, Record<string, unknown>])[] = [
+  '@tarojs/plugin-framework-react',
+];
+if (process.env.TARO_ENV === 'weapp') {
+  plugins.push(['@tarojs/plugin-html', {}]);
 }
 
 // https://docs.taro.zone/docs/config-detail
 export default defineConfig({
-  projectName: "sync-app",
-  date: "2026-5-24",
+  projectName: 'sync-app',
+  date: '2026-5-24',
   /** Figma / mockup width; SCSS px values match this draft (postcss → rpx on weapp). */
   designWidth: 375,
   deviceRatio: {
@@ -24,19 +26,19 @@ export default defineConfig({
     768: 768 / 375,
     820: 820 / 375,
   },
-  sourceRoot: "src",
-  outputRoot: "dist",
+  sourceRoot: 'src',
+  outputRoot: 'dist',
   plugins,
   compiler: {
-    type: "webpack5",
+    type: 'webpack5',
     prebundle: {
       enable: false,
     },
   },
-  framework: "react",
+  framework: 'react',
   mini: {
     // @ts-expect-error outputRoot is valid in Taro weapp build
-    outputRoot: "dist-weapp",
+    outputRoot: 'dist-weapp',
     /** 多页面共用组件时 SCSS 导入顺序不一致，忽略 css 合并顺序警告 */
     miniCssExtractPluginOption: {
       ignoreOrder: true,
@@ -53,7 +55,7 @@ export default defineConfig({
           designWidth: 375,
           onePxTransform: true,
           unitPrecision: 5,
-          propList: ["*"],
+          propList: ['*'],
           selectorBlackList: [],
           replace: true,
           mediaQuery: false,
@@ -66,14 +68,14 @@ export default defineConfig({
   /** Unmaintained; kept for `npm run build:h5` only. */
   h5: {
     // @ts-expect-error outputRoot is valid in Taro h5 build
-    outputRoot: "dist-h5",
-    publicPath: "/",
-    staticDirectory: "static",
+    outputRoot: 'dist-h5',
+    publicPath: '/',
+    staticDirectory: 'static',
     miniCssExtractPluginOption: {
       ignoreOrder: true,
     },
     router: {
-      mode: "browser",
+      mode: 'browser',
     },
     postcss: {
       pxtransform: {
@@ -81,7 +83,7 @@ export default defineConfig({
         config: {
           onePxTransform: true,
           unitPrecision: 5,
-          propList: ["*"],
+          propList: ['*'],
           selectorBlackList: [],
           replace: true,
           mediaQuery: false,
@@ -97,27 +99,27 @@ export default defineConfig({
       chain.performance.maxEntrypointSize(5 * 1024 * 1024);
       chain.performance.maxAssetSize(5 * 1024 * 1024);
       chain.optimization.splitChunks({
-        chunks: "all",
+        chunks: 'all',
         maxInitialRequests: 25,
         minSize: 20_000,
         cacheGroups: {
           taro: {
-            name: "taro-vendor",
+            name: 'taro-vendor',
             test: /[\\/]node_modules[\\/]@tarojs[\\/]/,
             priority: 20,
           },
           react: {
-            name: "react-vendor",
+            name: 'react-vendor',
             test: /[\\/]node_modules[\\/](react|react-dom|scheduler)[\\/]/,
             priority: 20,
           },
           zustand: {
-            name: "zustand-vendor",
+            name: 'zustand-vendor',
             test: /[\\/]node_modules[\\/]zustand[\\/]/,
             priority: 15,
           },
           common: {
-            name: "common",
+            name: 'common',
             minChunks: 2,
             priority: 5,
             reuseExistingChunk: true,
@@ -128,8 +130,8 @@ export default defineConfig({
     devServer: {
       historyApiFallback: true,
       proxy: {
-        "/api": {
-          target: "http://localhost:3000",
+        '/api': {
+          target: 'http://localhost:3000',
           changeOrigin: true,
           ws: true,
         },

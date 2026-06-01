@@ -1,11 +1,11 @@
-import Taro from "@tarojs/taro";
+import Taro from '@tarojs/taro';
 
-const SESSION_KEY = "sync_ai_session";
-const ACTIVITY_SESSION_KEY_PREFIX = "sync_ai_session_activity_";
-const USER_NAME_KEY = "sync_user_name";
-const USER_PHONE_KEY = "sync_user_phone";
-const DEFAULT_USER_NAME = "Zara";
-const DEFAULT_USER_PHONE = "17610941208";
+const SESSION_KEY = 'sync_ai_session';
+const ACTIVITY_SESSION_KEY_PREFIX = 'sync_ai_session_activity_';
+const USER_NAME_KEY = 'sync_user_name';
+const USER_PHONE_KEY = 'sync_user_phone';
+const DEFAULT_USER_NAME = 'Zara';
+const DEFAULT_USER_PHONE = '17610941208';
 
 let cachedUserId: string | undefined;
 let cachedUserName: string | undefined;
@@ -22,7 +22,7 @@ function activitySessionStorageKey(activityLegacyId: number): string {
 function readStoredSessionId(key: string): string | null {
   try {
     const value = Taro.getStorageSync(key);
-    return typeof value === "string" && value.trim() ? value.trim() : null;
+    return typeof value === 'string' && value.trim() ? value.trim() : null;
   } catch {
     return null;
   }
@@ -80,7 +80,7 @@ export function getClientUserName(): string {
   if (cachedUserName) return cachedUserName;
   try {
     const stored = Taro.getStorageSync(USER_NAME_KEY);
-    if (typeof stored === "string" && stored.trim()) {
+    if (typeof stored === 'string' && stored.trim()) {
       cachedUserName = stored.trim();
       return cachedUserName;
     }
@@ -96,7 +96,7 @@ export function getClientUserPhone(): string {
   if (cachedUserPhone) return cachedUserPhone;
   try {
     const stored = Taro.getStorageSync(USER_PHONE_KEY);
-    if (typeof stored === "string" && stored.trim()) {
+    if (typeof stored === 'string' && stored.trim()) {
       cachedUserPhone = stored.trim();
       return cachedUserPhone;
     }

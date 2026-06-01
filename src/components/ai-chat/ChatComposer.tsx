@@ -1,29 +1,32 @@
-import React, { useCallback, useMemo, useState } from "react";
-import Taro from "@tarojs/taro";
-import { ImagePlus, Send, Trash2, X } from "lucide-react-taro";
-import { Button, Input, cn } from "../ui";
-import { HOME_FESTIVAL_SHORTCUT_CHIPS } from "../../constants/homeFestivalShortcuts";
+import React, { useCallback, useMemo, useState } from 'react';
+import Taro from '@tarojs/taro';
+import { ImagePlus, Send, Trash2, X } from 'lucide-react-taro';
+import { Button, Input, cn } from '../ui';
+import { HOME_FESTIVAL_SHORTCUT_CHIPS } from '../../constants/homeFestivalShortcuts';
 import {
   getTopAiShortcutTags,
   normalizeAiShortcutTag,
   recordAiShortcutTagUse,
   type AiShortcutTag,
-} from "../../utils/aiShortcutTags";
-import { ChatImageTooLargeError, pickAndCompressChatImages } from "../../utils/chatImage";
-import { useAiChatStore } from "../../stores/aiChatStore";
-import { openImagePreview } from "../../utils/openImagePreview";
-import { AiMatchQuotaBanner } from "./AiMatchQuotaBanner";
-import { Image, ScrollView, Text, View } from "@tarojs/components";
+} from '../../utils/aiShortcutTags';
+import {
+  ChatImageTooLargeError,
+  pickAndCompressChatImages,
+} from '../../utils/chatImage';
+import { useAiChatStore } from '../../stores/aiChatStore';
+import { openImagePreview } from '../../utils/openImagePreview';
+import { AiMatchQuotaBanner } from './AiMatchQuotaBanner';
+import { Image, ScrollView, Text, View } from '@tarojs/components';
 
 const SHORTCUT_TAG_LABELS: Record<AiShortcutTag, string> = {
-  组队队友: "组队队友",
-  住宿同行: "住宿同行",
-  拼车同行: "拼车同行",
+  组队队友: '组队队友',
+  住宿同行: '住宿同行',
+  拼车同行: '拼车同行',
 };
 
 const activityActionChips = [
-  { key: "createOwn", label: "自己发帖", submitText: "自己发帖" },
-  { key: "searchPosts", label: "查组队帖", submitText: "看看有没有组队帖" },
+  { key: 'createOwn', label: '自己发帖', submitText: '自己发帖' },
+  { key: 'searchPosts', label: '查组队帖', submitText: '看看有没有组队帖' },
 ] as const;
 
 const MAX_IMAGES = 6;
@@ -32,7 +35,7 @@ function readComposerInputValue(event: {
   detail?: { value?: string };
   target?: EventTarget & { value?: string };
 }): string {
-  return event.detail?.value ?? event.target?.value ?? "";
+  return event.detail?.value ?? event.target?.value ?? '';
 }
 
 type QuickChip = {
@@ -74,15 +77,15 @@ export function ChatComposer({
   const trimmedActivityTitle = activityTitle?.trim();
 
   const inputPlaceholder = (() => {
-    if (conversationFlow === "collect_post_body") {
+    if (conversationFlow === 'collect_post_body') {
       return scopedToActivity && trimmedActivityTitle
         ? `描述你在「${trimmedActivityTitle}」的组队需求…`
-        : "描述你的组队需求，如出发地、人数、日期…";
+        : '描述你的组队需求，如出发地、人数、日期…';
     }
     if (scopedToActivity && trimmedActivityTitle) {
       return `为「${trimmedActivityTitle}」找队友或发帖…`;
     }
-    return "说说你想去哪、想找什么样的同行…";
+    return '说说你想去哪、想找什么样的同行…';
   })();
 
   const quickChips = useMemo((): QuickChip[] => {
@@ -122,7 +125,7 @@ export function ChatComposer({
     if (remaining <= 0) {
       void Taro.showToast({
         title: `最多上传 ${MAX_IMAGES} 张图片`,
-        icon: "none",
+        icon: 'none',
       });
       return;
     }
@@ -134,12 +137,12 @@ export function ChatComposer({
     } catch (error) {
       if (error instanceof ChatImageTooLargeError) {
         void Taro.showToast({
-          title: "图片过大，请压缩至 10MB 以内",
-          icon: "none",
+          title: '图片过大，请压缩至 10MB 以内',
+          icon: 'none',
         });
         return;
       }
-      void Taro.showToast({ title: "请求失败，请稍后重试", icon: "none" });
+      void Taro.showToast({ title: '请求失败，请稍后重试', icon: 'none' });
     }
   }, [isBusy, pendingImages, onPendingImagesChange]);
 
@@ -195,7 +198,7 @@ export function ChatComposer({
             enhanced
             showScrollbar={false}
             className="s-ai-assistant-chat__attach-preview-list s-scrollbar-none"
-            style={{ height: "160px" }}
+            style={{ height: '160px' }}
           >
             {pendingImages.map((src, index) => (
               <View
@@ -250,8 +253,8 @@ export function ChatComposer({
           </Button>
           <Button
             className={cn(
-              "s-ai-assistant-chat__send",
-              canSend && "s-ai-assistant-chat__send--active",
+              's-ai-assistant-chat__send',
+              canSend && 's-ai-assistant-chat__send--active',
             )}
             disabled={!canSend}
             onClick={() => onSubmit(input, pendingImages)}

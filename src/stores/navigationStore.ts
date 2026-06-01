@@ -1,5 +1,5 @@
-import { create } from "zustand";
-import type { AiAssistantNavIntent, ProfileNavIntent } from "./types";
+import { create } from 'zustand';
+import type { AiAssistantNavIntent, ProfileNavIntent } from './types';
 
 export type RouteTransitionState = {
   active: boolean;

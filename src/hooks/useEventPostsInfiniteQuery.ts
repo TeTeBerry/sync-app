@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { fetchPostsByActivityPage } from "../api/syncApi";
-import { isApiEnabled } from "../constants/api";
-import type { EventDetailPost } from "../types/backend";
-import { getClientUserId } from "../utils/session";
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { fetchPostsByActivityPage } from '../api/syncApi';
+import { isApiEnabled } from '../constants/api';
+import type { EventDetailPost } from '../types/backend';
+import { getClientUserId } from '../utils/session';
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -68,7 +68,13 @@ export function useEventPostsInfiniteQuery(
   }, [enabled, resetAndLoad, userId]);
 
   const loadMore = useCallback(async () => {
-    if (!enabled || activityLegacyId == null || !hasMore || !nextCursor || loadingMoreRef.current) {
+    if (
+      !enabled ||
+      activityLegacyId == null ||
+      !hasMore ||
+      !nextCursor ||
+      loadingMoreRef.current
+    ) {
       return;
     }
     loadingMoreRef.current = true;
@@ -105,8 +111,8 @@ export function useEventPostsInfiniteQuery(
 
   const patchItem = useCallback(
     (
-      updated: Pick<EventDetailPost, "id"> &
-        Partial<Pick<EventDetailPost, "likes" | "liked" | "comments" | "status">>,
+      updated: Pick<EventDetailPost, 'id'> &
+        Partial<Pick<EventDetailPost, 'likes' | 'liked' | 'comments' | 'status'>>,
     ) => {
       setItems((prev) =>
         prev.map((post) =>
@@ -115,7 +121,9 @@ export function useEventPostsInfiniteQuery(
                 ...post,
                 ...(updated.likes !== undefined ? { likes: updated.likes } : {}),
                 ...(updated.liked !== undefined ? { liked: updated.liked } : {}),
-                ...(updated.comments !== undefined ? { comments: updated.comments } : {}),
+                ...(updated.comments !== undefined
+                  ? { comments: updated.comments }
+                  : {}),
                 ...(updated.status !== undefined ? { status: updated.status } : {}),
               }
             : post,

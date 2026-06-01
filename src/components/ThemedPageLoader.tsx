@@ -1,15 +1,15 @@
-import "./ThemedPageLoader.scss";
-import { Text, View } from "@tarojs/components";
-import { SyncBrandMark } from "./SyncBrandMark";
+import './ThemedPageLoader.scss';
+import { Text, View } from '@tarojs/components';
+import { SyncBrandMark } from './SyncBrandMark';
 
 export type ThemedPageLoaderVariant =
-  | "spinner"
-  | "inline"
-  | "skeleton-event"
-  | "skeleton-event-posts"
-  | "skeleton-live-feed"
-  | "skeleton-feed"
-  | "skeleton-ai-chat";
+  | 'spinner'
+  | 'inline'
+  | 'skeleton-event'
+  | 'skeleton-event-posts'
+  | 'skeleton-live-feed'
+  | 'skeleton-feed'
+  | 'skeleton-ai-chat';
 
 type ThemedPageLoaderProps = {
   variant?: ThemedPageLoaderVariant;
@@ -29,7 +29,7 @@ function SkeletonBlocks({ rows = 3 }: { rows?: number }) {
         <View
           key={index}
           className="s-themed-loader__skeleton-line"
-          style={{ width: index === rows - 1 ? "62%" : "100%" }}
+          style={{ width: index === rows - 1 ? '62%' : '100%' }}
         />
       ))}
     </View>
@@ -163,7 +163,7 @@ function PinkSpinner() {
 }
 
 export default function ThemedPageLoader({
-  variant = "spinner",
+  variant = 'spinner',
   overlay = false,
   label,
   showBrand = false,
@@ -171,13 +171,13 @@ export default function ThemedPageLoader({
   minHeight = 120,
 }: ThemedPageLoaderProps) {
   const rootClass = [
-    "s-themed-loader",
-    overlay ? "s-themed-loader--overlay" : "",
-    variant !== "spinner" && variant !== "inline" ? "s-themed-loader--skeleton" : "",
-    className ?? "",
+    's-themed-loader',
+    overlay ? 's-themed-loader--overlay' : '',
+    variant !== 'spinner' && variant !== 'inline' ? 's-themed-loader--skeleton' : '',
+    className ?? '',
   ]
     .filter(Boolean)
-    .join(" ");
+    .join(' ');
 
   return (
     <View
@@ -186,15 +186,15 @@ export default function ThemedPageLoader({
       role="status"
       aria-live="polite"
       aria-busy="true"
-      aria-label={label ?? "加载中"}
+      aria-label={label ?? '加载中'}
     >
       {showBrand ? <SyncBrandMark className="s-themed-loader__brand" /> : null}
-      {variant === "skeleton-event" ? <EventDetailSkeleton /> : null}
-      {variant === "skeleton-event-posts" ? <EventPostsSkeleton /> : null}
-      {variant === "skeleton-live-feed" ? <LiveFeedSkeleton /> : null}
-      {variant === "skeleton-feed" ? <FeedSkeleton /> : null}
-      {variant === "skeleton-ai-chat" ? <AiChatSkeleton /> : null}
-      {variant === "spinner" || variant === "inline" ? <PinkSpinner /> : null}
+      {variant === 'skeleton-event' ? <EventDetailSkeleton /> : null}
+      {variant === 'skeleton-event-posts' ? <EventPostsSkeleton /> : null}
+      {variant === 'skeleton-live-feed' ? <LiveFeedSkeleton /> : null}
+      {variant === 'skeleton-feed' ? <FeedSkeleton /> : null}
+      {variant === 'skeleton-ai-chat' ? <AiChatSkeleton /> : null}
+      {variant === 'spinner' || variant === 'inline' ? <PinkSpinner /> : null}
       {label ? <Text className="s-themed-loader__label">{label}</Text> : null}
     </View>
   );

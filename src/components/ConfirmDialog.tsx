@@ -1,7 +1,7 @@
-import React from "react";
-import { useOverlayLock } from "../hooks/useOverlayLock";
-import { Button, cn } from "./ui";
-import { Text, View } from "@tarojs/components";
+import React from 'react';
+import { useOverlayLock } from '../hooks/useOverlayLock';
+import { Button, cn } from './ui';
+import { Text, View } from '@tarojs/components';
 
 export interface ConfirmDialogProps {
   open: boolean;
@@ -29,8 +29,8 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
 
   return (
     <View
-      className={cn("s-overlay s-confirm-dialog", !open && "s-overlay--off")}
-      style={{ zIndex: "var(--overlay-z-dialog)" }}
+      className={cn('s-overlay s-confirm-dialog', !open && 's-overlay--off')}
+      style={{ zIndex: 'var(--overlay-z-dialog)' }}
       role="presentation"
     >
       <View className="s-overlay__backdrop" onClick={onCancel} />
@@ -58,7 +58,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             type="default"
             block="s-overlay"
             element="btn"
-            modifiers={["cancel"]}
+            modifiers={['cancel']}
             onClick={onCancel}
           >
             <Text className="s-overlay__btn-text">{cancelText}</Text>
@@ -67,7 +67,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             type="default"
             block="s-overlay"
             element="btn"
-            modifiers={["confirm", danger && "danger"]}
+            modifiers={['confirm', danger && 'danger']}
             onClick={onConfirm}
           >
             <Text className="s-overlay__btn-text">{confirmText}</Text>

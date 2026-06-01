@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import Taro, { useDidHide, useDidShow, useLoad, useReady } from "@tarojs/taro";
-import { EVENT_MAP_CANVAS_ID } from "./eventMapCanvasId";
-import type { EventMapMarker } from "./eventMapMarkers";
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import Taro, { useDidHide, useDidShow, useLoad, useReady } from '@tarojs/taro';
+import { EVENT_MAP_CANVAS_ID } from './eventMapCanvasId';
+import type { EventMapMarker } from './eventMapMarkers';
 import {
   bootstrapEventMapCanvas,
   disposeEventMapCanvas,
@@ -13,10 +13,10 @@ import {
   resumeEventMapCanvas,
   setEventMapPageScope,
   setEventMapViewport,
-} from "./eventMapCanvasRuntime";
-import { stepMapViewportZoom } from "./eventMapViewport";
-import { getEventMapMapViewportHeight } from "./eventMapLayout";
-import { useEventMapGestures } from "./useEventMapGestures";
+} from './eventMapCanvasRuntime';
+import { stepMapViewportZoom } from './eventMapViewport';
+import { getEventMapMapViewportHeight } from './eventMapLayout';
+import { useEventMapGestures } from './useEventMapGestures';
 
 export type UseEventMapControllerOptions = {
   eventTitle: string;
@@ -139,10 +139,15 @@ export function useEventMapController({
   );
 
   const zoomAtMapCenter = useCallback(
-    (direction: "in" | "out") => {
+    (direction: 'in' | 'out') => {
       const anchorX = mapSize.width / 2;
       const anchorY = mapSize.height / 2;
-      const next = stepMapViewportZoom(getEventMapViewport(), direction, anchorX, anchorY);
+      const next = stepMapViewportZoom(
+        getEventMapViewport(),
+        direction,
+        anchorX,
+        anchorY,
+      );
       setEventMapViewport(next);
       repaintEventMapNow(titleRef.current);
     },
@@ -150,11 +155,11 @@ export function useEventMapController({
   );
 
   const handleZoomIn = useCallback(() => {
-    zoomAtMapCenter("in");
+    zoomAtMapCenter('in');
   }, [zoomAtMapCenter]);
 
   const handleZoomOut = useCallback(() => {
-    zoomAtMapCenter("out");
+    zoomAtMapCenter('out');
   }, [zoomAtMapCenter]);
 
   return {

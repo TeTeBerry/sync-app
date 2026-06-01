@@ -1,4 +1,4 @@
-import React, { createContext, useContext } from "react";
+import React, { createContext, useContext } from 'react';
 
 export type AiUpgradeSheetContextValue = {
   openUpgradeSheet: () => void;
@@ -23,7 +23,7 @@ export function AiUpgradeSheetProvider({
 export function useAiUpgradeSheet(): AiUpgradeSheetContextValue {
   const ctx = useContext(AiUpgradeSheetContext);
   if (!ctx) {
-    throw new Error("useAiUpgradeSheet must be used within AiUpgradeSheetProvider");
+    throw new Error('useAiUpgradeSheet must be used within AiUpgradeSheetProvider');
   }
   return ctx;
 }

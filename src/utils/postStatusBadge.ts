@@ -1,20 +1,20 @@
-import type { BackendPostStatusLabel } from "./postStatus";
+import type { BackendPostStatusLabel } from './postStatus';
 
 /** Status pill accent colors (align recruiting with --primary). */
 export const POST_STATUS_BADGE_COLORS = {
-  recruiting: "#FF0066",
-  completed: "#34C759",
-  hidden: "#8E8E93",
+  recruiting: '#FF0066',
+  completed: '#34C759',
+  hidden: '#8E8E93',
 } as const;
 
 function hexToRgb(hex: string): { r: number; g: number; b: number } {
-  const normalized = hex.replace("#", "");
+  const normalized = hex.replace('#', '');
   const expanded =
     normalized.length === 3
       ? normalized
-          .split("")
+          .split('')
           .map((char) => char + char)
-          .join("")
+          .join('')
       : normalized;
   return {
     r: Number.parseInt(expanded.slice(0, 2), 16),
@@ -37,7 +37,7 @@ export function postStatusBadgeTintStyle(color: string): {
   };
 }
 
-export type PostStatusBadgeVariant = "full" | "recruiting" | "hidden";
+export type PostStatusBadgeVariant = 'full' | 'recruiting' | 'hidden';
 
 export type PostStatusBadgeResult = {
   label: string;
@@ -50,28 +50,30 @@ export type PostStatusBadgeInput = {
 };
 
 /** Maps post `status` to a single status pill (label + color + variant). */
-export function resolvePostStatusBadge(post: PostStatusBadgeInput): PostStatusBadgeResult {
+export function resolvePostStatusBadge(
+  post: PostStatusBadgeInput,
+): PostStatusBadgeResult {
   const status = post?.status;
-  if (status === "已隐藏") {
+  if (status === '已隐藏') {
     return {
-      label: "已隐藏",
+      label: '已隐藏',
       color: POST_STATUS_BADGE_COLORS.hidden,
-      variant: "hidden",
+      variant: 'hidden',
     };
   }
 
-  if (status === "已组队") {
+  if (status === '已组队') {
     return {
-      label: "已组队",
+      label: '已组队',
       color: POST_STATUS_BADGE_COLORS.completed,
-      variant: "full",
+      variant: 'full',
     };
   }
 
   return {
-    label: "招募中",
+    label: '招募中',
     color: POST_STATUS_BADGE_COLORS.recruiting,
-    variant: "recruiting",
+    variant: 'recruiting',
   };
 }
 
@@ -79,13 +81,13 @@ export function resolvePostStatusBadge(post: PostStatusBadgeInput): PostStatusBa
 export function shouldShowPostStatusBadge(
   badge: PostStatusBadgeResult,
   isOwn: boolean,
-  options?: { variant?: "home" | "event" },
+  options?: { variant?: 'home' | 'event' },
 ): boolean {
-  if (badge.variant === "hidden") {
+  if (badge.variant === 'hidden') {
     return isOwn;
   }
-  if (badge.variant === "recruiting") {
-    return isOwn || options?.variant === "event";
+  if (badge.variant === 'recruiting') {
+    return isOwn || options?.variant === 'event';
   }
   return true;
 }

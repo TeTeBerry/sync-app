@@ -1,31 +1,37 @@
-import { Users } from "lucide-react-taro";
-import { type FC } from "react";
-import { ImageWithFallback } from "../../../components/ImageWithFallback";
-import { Button } from "../../../components/ui";
+import { Users } from 'lucide-react-taro';
+import { type FC } from 'react';
+import { ImageWithFallback } from '../../../components/ImageWithFallback';
+import { Button } from '../../../components/ui';
 import {
   activityStatusCardClass,
   getActivityStatusFromActivity,
   type ActivityStatus,
-} from "../../../utils/activityStatus";
-import { resolveFeaturedEventLegacyId, type FeaturedEvent } from "../../../utils/apiMappers";
-import { thumbnailImageUrl } from "../../../utils/imageUrl";
-import { useRouteTransitionActive } from "../../../utils/route";
-import { Image, Text, View } from "@tarojs/components";
+} from '../../../utils/activityStatus';
+import {
+  resolveFeaturedEventLegacyId,
+  type FeaturedEvent,
+} from '../../../utils/apiMappers';
+import { thumbnailImageUrl } from '../../../utils/imageUrl';
+import { useRouteTransitionActive } from '../../../utils/route';
+import { Image, Text, View } from '@tarojs/components';
 
-function featuredEventStatusTag(event: FeaturedEvent, status: ActivityStatus): string | null {
-  if (status === "ended") return "已结束";
-  if (event.isHot) return "热门";
+function featuredEventStatusTag(
+  event: FeaturedEvent,
+  status: ActivityStatus,
+): string | null {
+  if (status === 'ended') return '已结束';
+  if (event.isHot) return '热门';
   const location = event.venue?.trim();
   if (!location) return null;
   return location;
 }
 
 function featuredEventTagClassName(tag: string): string {
-  const classes = ["s-home-event__tag"];
-  if (tag !== "已结束" && tag !== "热门") {
-    classes.push("s-home-event__tag--location");
+  const classes = ['s-home-event__tag'];
+  if (tag !== '已结束' && tag !== '热门') {
+    classes.push('s-home-event__tag--location');
   }
-  return classes.join(" ");
+  return classes.join(' ');
 }
 
 type HomeFeaturedEventsProps = {
@@ -80,7 +86,7 @@ function HomeFeaturedEventRow({
 }) {
   const status = getActivityStatusFromActivity(event.date, event.title);
   const statusTag = featuredEventStatusTag(event, status);
-  const venue = event.venue?.trim() ?? "";
+  const venue = event.venue?.trim() ?? '';
   const tagIsLocation = Boolean(statusTag && statusTag === venue);
   const showVenueInline = Boolean(venue) && !tagIsLocation;
   const legacyId = resolveFeaturedEventLegacyId(event);
@@ -94,7 +100,9 @@ function HomeFeaturedEventRow({
 
   return (
     <View
-      className={["s-home-event", activityStatusCardClass(status)].filter(Boolean).join(" ")}
+      className={['s-home-event', activityStatusCardClass(status)]
+        .filter(Boolean)
+        .join(' ')}
       onTouchStart={handlePreload}
     >
       <ImageWithFallback
@@ -104,7 +112,7 @@ function HomeFeaturedEventRow({
         wrapperClassName="s-home-event__media"
         imageClassName="s-home-event__media-img"
         fallbackWrapperClassName="s-home-event__media s-home-event__media--logo"
-        fallback={<Text>{event.logo?.replace(/\n/g, " ")}</Text>}
+        fallback={<Text>{event.logo?.replace(/\n/g, ' ')}</Text>}
       />
 
       <View className="s-home-event__content">
@@ -149,10 +157,13 @@ function HomeFeaturedEventRow({
           </View>
 
           <Button
-            className={["s-home-event__join", isJoinNavigating ? "s-home-event__join--loading" : ""]
+            className={[
+              's-home-event__join',
+              isJoinNavigating ? 's-home-event__join--loading' : '',
+            ]
               .filter(Boolean)
-              .join(" ")}
-            disabled={status === "ended" || isJoinNavigating || legacyId == null}
+              .join(' ')}
+            disabled={status === 'ended' || isJoinNavigating || legacyId == null}
             onTouchStart={handlePreload}
             onClick={(clickEvent) => {
               clickEvent.stopPropagation();
@@ -160,7 +171,7 @@ function HomeFeaturedEventRow({
             }}
           >
             <Text className="s-home-event__join-text">
-              {isJoinNavigating ? "加入中…" : status === "ended" ? "已结束" : "加入"}
+              {isJoinNavigating ? '加入中…' : status === 'ended' ? '已结束' : '加入'}
             </Text>
           </Button>
         </View>
