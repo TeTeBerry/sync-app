@@ -2,6 +2,7 @@
  * Chat UI types. Stream/card contracts: `sync-app-backend/src/shared/chat/`.
  */
 import type {
+  ChatMessage as AiChatMessage,
   RecommendedActivityCard,
   RecommendedPostCard,
 } from '@sync/chat-contracts';
@@ -10,29 +11,15 @@ import type { TravelGuideChatPayload } from './travelGuide';
 
 export type {
   AiStreamEvent as AiChatStreamEvent,
+  ChatMessage as AiChatMessage,
+  ChatMessageImageContext as AiChatImageContext,
+  ChatMessageRole as AiChatRole,
   RecommendedActivityCard,
   RecommendedPostAuthorGender,
   RecommendedPostCard,
 } from '@sync/chat-contracts';
 
 export type { ConversationState };
-
-export type AiChatRole = 'user' | 'assistant' | 'system';
-
-export interface AiChatImageContext {
-  source?: string;
-  ocrText?: string;
-}
-
-export interface AiChatMessage {
-  role: AiChatRole;
-  content: string;
-  imageContext?: AiChatImageContext;
-  recommendedPosts?: RecommendedPostCard[];
-  recommendedActivity?: RecommendedActivityCard;
-  createdPost?: RecommendedPostCard;
-  suggestedReplies?: string[];
-}
 
 export type ChatUiMessage = {
   id: string;

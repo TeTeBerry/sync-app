@@ -24,17 +24,10 @@ jobs:
       - name: Install
         run: npm ci --legacy-peer-deps
 
-      - name: Typecheck
-        run: npm run typecheck
-
-      - name: Lint
-        run: npm run lint
-
-      - name: Format check
-        run: npm run format:check
-
-      - name: Unit tests
-        run: npm test
+      - name: Check
+        run: npm run check
+        env:
+          CI: true
 
   build-weapp:
     runs-on: ubuntu-latest

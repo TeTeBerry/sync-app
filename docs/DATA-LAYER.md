@@ -74,11 +74,14 @@ REST 与 React Query 的分层约定，便于 P0 鉴权时只改少数入口。
 
 ## Chat 契约（与后端共享）
 
-`ConversationState`、`AiStreamEvent`、推荐卡片类型**不得**在前端手写重复定义。
+`ConversationState`、`AiStreamEvent`、`ChatMessage`、推荐卡片类型**不得**在前端手写重复定义。
 
 - 后端真源：`sync-app-backend/src/shared/chat/`（`index.ts` 统一导出）
 - 前端：`import … from '@sync/chat-contracts'`（`conversationState.ts` / `aiChat.ts` 仅 re-export）
-- 契约测试：`sync-app-backend/test/contract/chat-conversation-state.contract.spec.ts`
+- 契约测试（`sync-app-backend/test/contract/`）：
+  - `chat-conversation-state.contract.spec.ts` — `ConversationState` 各 flow
+  - `chat-ai-stream-event.contract.spec.ts` — `AiStreamEvent` 各帧类型
+  - `chat-frontend-reexports.contract.spec.ts` — 前端仅 re-export（需同级 `sync-app` 目录，否则 skip）
 
 ## 身份命名对照
 

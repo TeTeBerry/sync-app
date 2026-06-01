@@ -18,15 +18,18 @@
 | P5 | 通知深链等收尾 | ✅ 完成 |
 | P0-H5 | Dev 登录 + Bearer | ✅ 前端已接 |
 | P0-Wx | 微信小程序 | 🟡 前端已接，联调验收 |
+| P3-dev | 开发体验（check / husky / CI） | ✅ 完成（2025-06） |
 
 **产品约定**：组队帖 **仅 AI 对话闭环创建**，不新增发帖表单 UI。
+
+**工程**：`npm run check`；pre-commit lint-staged；CI 见 `.github/workflows/ci.yml`；工作区 [`../../CONTRIBUTING.md`](../../CONTRIBUTING.md)。
 
 ---
 
 ## 当前身份
 
 - **未登录（demo REST）**：`ownerQueryParams()` / `demoActorQueryParams()` → Query **仅** `userId`（不传 Query `authorName`；后端 demo 判定只看 `userId`）
-- **已登录**：`Authorization: Bearer`；`ownerQueryParams()` 返回 `{}`（后端 JWT middleware 注入 `userId` / `authorName`）
+- **已登录**：`Authorization: Bearer`；`ownerQueryParams()` 返回 `{}`（后端 `JwtAuthGuard` 设置 `req.actor`）
 - `getClientUserId()` / `getClientUserName()` — 已 JWT-aware（session + authStorage）；**展示名**与 demo Query 分离
 - **AI WebSocket**：upgrade Bearer → actor 来自 JWT；`buildAiChatWsSendActor()`（见 [DATA-LAYER.md](./DATA-LAYER.md)）
 
