@@ -2,15 +2,15 @@ import './PostCommentSection.scss';
 import Taro from '@tarojs/taro';
 import { useCallback, useState, type FC } from 'react';
 import { ChevronUp, Heart, Send } from 'lucide-react-taro';
-import { commentPostAndInvalidate, usePostCommentsQuery } from '../hooks/useSyncApi';
-import { isApiEnabled } from '../constants/api';
-import { requireAuth } from '../utils/authGate';
-import { PLACEHOLDER_AVATAR } from '../constants/remoteImages';
-import { sanitizeRemoteImageUrl } from '../utils/imageUrl';
-import { isCurrentUserPostAuthor } from '../utils/postOwnership';
-import type { PostCommentItem } from '../types/backend';
-import { Button } from './ui';
-import { Image, Input, Text, View } from '@tarojs/components';
+import { commentPostAndInvalidate, usePostCommentsQuery } from '../../hooks/useSyncApi';
+import { isApiEnabled } from '../../constants/api';
+import { requireAuth } from '../../utils/authGate';
+import { PLACEHOLDER_AVATAR } from '../../constants/remoteImages';
+import { sanitizeRemoteImageUrl } from '../../utils/imageUrl';
+import { isCurrentUserPostAuthor } from '../../utils/postOwnership';
+import type { PostCommentItem } from '../../types/backend';
+import { Button, Input } from '../ui';
+import { Image, Text, View } from '@tarojs/components';
 
 const DEFAULT_AVATAR = PLACEHOLDER_AVATAR;
 
@@ -135,22 +135,22 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
     }
 
     const submitComment = () => {
-    setSubmitting(true);
-    void commentPostAndInvalidate(postId, body, replyTarget?.commentId)
-      .then(() => {
-        setDraft('');
-        setReplyTarget(null);
-        onCommentSubmitted?.();
-        void Taro.showToast({ title: '评论成功', icon: 'success' });
-      })
-      .catch((err: { message?: string }) => {
-        const message =
-          typeof err?.message === 'string' && err.message.trim()
-            ? err.message
-            : '评论失败';
-        void Taro.showToast({ title: message, icon: 'none' });
-      })
-      .finally(() => setSubmitting(false));
+      setSubmitting(true);
+      void commentPostAndInvalidate(postId, body, replyTarget?.commentId)
+        .then(() => {
+          setDraft('');
+          setReplyTarget(null);
+          onCommentSubmitted?.();
+          void Taro.showToast({ title: '评论成功', icon: 'success' });
+        })
+        .catch((err: { message?: string }) => {
+          const message =
+            typeof err?.message === 'string' && err.message.trim()
+              ? err.message
+              : '评论失败';
+          void Taro.showToast({ title: message, icon: 'none' });
+        })
+        .finally(() => setSubmitting(false));
     };
 
     requireAuth(submitComment, 'social');

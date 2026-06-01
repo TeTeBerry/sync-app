@@ -16,7 +16,13 @@ import {
 import { useAiChatStore } from '../../stores/aiChatStore';
 import { openImagePreview } from '../../utils/openImagePreview';
 import { AiMatchQuotaBanner } from './AiMatchQuotaBanner';
-import { Image, ScrollView, Text, View } from '@tarojs/components';
+import {
+  Image,
+  ScrollView,
+  Text,
+  View,
+  type InputProps as TaroInputProps,
+} from '@tarojs/components';
 
 const SHORTCUT_TAG_LABELS: Record<AiShortcutTag, string> = {
   组队队友: '组队队友',
@@ -31,11 +37,10 @@ const activityActionChips = [
 
 const MAX_IMAGES = 6;
 
-function readComposerInputValue(event: {
-  detail?: { value?: string };
-  target?: EventTarget & { value?: string };
-}): string {
-  return event.detail?.value ?? event.target?.value ?? '';
+function readComposerInputValue(
+  event: Parameters<NonNullable<TaroInputProps['onInput']>>[0],
+): string {
+  return event.detail?.value ?? '';
 }
 
 type QuickChip = {

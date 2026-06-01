@@ -16,7 +16,9 @@ export type EventDetailEntitlementModalsProps = {
   onClosePackageSheet: () => void;
 };
 
-export const EventDetailEntitlementModals: React.FC<EventDetailEntitlementModalsProps> = ({
+export const EventDetailEntitlementModals: React.FC<
+  EventDetailEntitlementModalsProps
+> = ({
   eventId,
   contactUnlockExhaustedOpen,
   onCloseContactUnlockExhausted,

@@ -72,7 +72,8 @@
 - [x] `ProfileSummarySection` / `ProfileSettingsSection` / `ProfileDebugSection`
 - [x] `EventDetailComposerSection` / `EventDetailEntitlementModals`
 - [x] [COMPONENT-ARCHITECTURE.md](./COMPONENT-ARCHITECTURE.md) 三层规则与决策表
-- [x] `ProfileBenefitsBlock` / `ProfileDebugModalsHost`
+- [x] `ProfileBenefitsBlock` / `ProfileOverlaysHost`（含 debug modals + 购买 Sheet）
+- [x] `useProfilePage` — profile `index.tsx` 编排 &lt;200 行
 - [x] `eventPostNormalize` + `useEventDetailPosts`
 - [x] `CountdownPart` → `types/home.ts`；Vitest Taro compile flags
 
@@ -98,8 +99,9 @@
 
 ### 后续 Phase（未排期）
 
-- [ ] `AiAssistantPage` 迁入 `packageAi/pages/ai-assistant/` 同目录
-- [ ] `my-itinerary` / `exclusive-itinerary` 拆 `components/`
+- [x] `AiAssistantPage` 迁入 `packageAi/pages/ai-assistant/` 同目录
+- [x] `my-itinerary` / `exclusive-itinerary` 拆 `components/` + page hooks
+- [x] `components/post/` — 帖子 UI 归档；`ui/Input` 扩展 Taro `onInput` + `events-search` variant
 
 ---
 
@@ -168,7 +170,7 @@ src/
 ├── pages/profile/index.tsx     个人 Tab 编排
 ├── components/profile/         个人中心域 UI + 权益
 ├── types/post.ts               帖子类型导出入口
-└── components/AiAssistantPage  activityId + post_created toast
+└── packageAi/pages/ai-assistant/AiAssistantPage  activityId + post_created toast
 ```
 
 ---

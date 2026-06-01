@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import { FeedPostList } from '../../../components/FeedPostList';
+import { FeedPostList } from '../../../components/post';
 import type { HomeFeedPost } from '../../../types/post';
 import { Text, View } from '@tarojs/components';
 

@@ -3,8 +3,8 @@ import { useDidShow } from '@tarojs/taro';
 import React, { useCallback, useMemo, useState } from 'react';
 import { Search, TrendingUp } from 'lucide-react-taro';
 import TabPageHeader from '../../components/TabPageHeader';
-import { Button } from '../../components/ui';
-import { View, Text, Input, ScrollView } from '@tarojs/components';
+import { Button, Input } from '../../components/ui';
+import { View, Text, ScrollView } from '@tarojs/components';
 import { useEndRouteTransitionOnShow } from '../../hooks/useEndRouteTransitionOnShow';
 import { useNavBarInsets } from '../../hooks/useNavBarInsets';
 import { useTabPageMainHeight } from '../../hooks/useTabPageMainHeight';
@@ -117,7 +117,7 @@ const Events: React.FC = () => {
             <Search size={18} className="s-events__search-icon" aria-hidden />
             <Input
               type="text"
-              className="s-events__search-input"
+              variant="events-search"
               placeholder="搜索活动、城市..."
               value={searchQuery}
               onInput={(e) => setSearchQuery(e.detail.value)}

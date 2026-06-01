@@ -8,20 +8,23 @@ import {
   Users,
   Zap,
 } from 'lucide-react-taro';
-import { PostActionMenu, PostShareButton } from '../../../../components/PostActionMenu';
-import { PostCommentSection } from '../../../../components/PostCommentSection';
-import { PostStatusBadge } from '../../../../components/PostStatusBadge';
+import {
+  PostActionMenu,
+  PostCommentSection,
+  PostShareButton,
+  PostStatusBadge,
+} from '../../../../components/post';
 import { ImageWithFallback } from '../../../../components/ImageWithFallback';
 import {
   filterContentTypeTags,
   mergePostContentTypes,
   stripContentTypeHashtags,
-} from '../../../../components/ContentTypeBadge';
+} from '../../../../components/post';
 import {
   formatContentTypeHashtag,
   resolveContentTypeKey,
 } from '../../../../utils/postContentTypeDisplay';
-import { PostImageGrid, PostImageCount } from '../../../../components/PostImageGrid';
+import { PostImageCount, PostImageGrid } from '../../../../components/post';
 import { isCurrentUserPostAuthor } from '../../../../utils/postOwnership';
 import { postActionIconColor } from '../../../../utils/postActionColors';
 import type { PostSharePayload } from '../../../../utils/postShare';

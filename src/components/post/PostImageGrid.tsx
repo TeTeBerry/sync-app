@@ -5,9 +5,9 @@ import {
   featuredPostImageUrl,
   sanitizeRemoteImageUrl,
   thumbnailImageUrl,
-} from '../utils/imageUrl';
-import { openImagePreview } from '../utils/openImagePreview';
-import { ImageWithFallback } from './ImageWithFallback';
+} from '../../utils/imageUrl';
+import { openImagePreview } from '../../utils/openImagePreview';
+import { ImageWithFallback } from '../ImageWithFallback';
 import { Text, View } from '@tarojs/components';
 
 export interface PostImageGridProps {

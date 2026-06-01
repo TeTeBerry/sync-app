@@ -6,13 +6,13 @@ import {
   formatContentTypeHashtag,
   mergePostContentTypes,
   resolveContentTypeKey,
-} from '../utils/postContentTypeDisplay';
+} from '../../utils/postContentTypeDisplay';
 
 export {
   mergePostContentTypes,
   stripContentTypeHashtags,
   filterContentTypeTags,
-} from '../utils/postContentTypeDisplay';
+} from '../../utils/postContentTypeDisplay';
 
 const TYPE_STYLES: Record<string, string> = {
   team: 's-content-badge--team',

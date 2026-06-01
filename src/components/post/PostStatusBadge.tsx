@@ -6,7 +6,7 @@ import {
   postStatusBadgeTintStyle,
   resolvePostStatusBadge,
   shouldShowPostStatusBadge,
-} from '../utils/postStatusBadge';
+} from '../../utils/postStatusBadge';
 
 export type PostStatusBadgeProps = {
   post: PostStatusBadgeInput;

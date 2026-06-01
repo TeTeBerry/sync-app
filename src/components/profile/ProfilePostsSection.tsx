@@ -12,8 +12,7 @@ import {
   Trash2,
   X,
 } from 'lucide-react-taro';
-import { ContentTypeBadge } from '../ContentTypeBadge';
-import { PostStatusBadge } from '../PostStatusBadge';
+import { ContentTypeBadge, PostStatusBadge } from '../post';
 import { ProfileCollapsibleSection } from './ProfileCollapsibleSection';
 import type { ProfilePostItem } from '../../types/backend';
 import { POST_ACTION_ICON_COLOR } from '../../utils/postActionColors';

@@ -6,7 +6,7 @@ import {
   type InputProps as TaroNativeInputProps,
 } from '@tarojs/components';
 
-export type InputVariant = `ai-assistant-chat` | `chat`;
+export type InputVariant = `ai-assistant-chat` | `chat` | `events-search`;
 
 const VARIANT_STYLES: Record<
   InputVariant,
@@ -14,6 +14,7 @@ const VARIANT_STYLES: Record<
 > = {
   'ai-assistant-chat': { input: `s-ai-assistant-chat__input` },
   chat: { input: `s-chat__field` },
+  'events-search': { input: `s-events__search-input` },
 };
 
 function renderIcon(icon: React.ReactNode, iconClass?: string) {
@@ -25,13 +26,20 @@ function renderIcon(icon: React.ReactNode, iconClass?: string) {
   return <Text className={iconClass}>{icon}</Text>;
 }
 
-export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+type TaroInputEventHandler = NonNullable<TaroNativeInputProps['onInput']>;
+
+export interface InputProps extends Omit<
+  React.InputHTMLAttributes<HTMLInputElement>,
+  'onInput'
+> {
   variant?: InputVariant;
   icon?: React.ReactNode;
   fieldModifier?: string;
   wrapperClassName?: string;
+  /** Taro: `onInput` receives `{ detail: { value } }`. */
+  onInput?: TaroInputEventHandler;
   /** Taro / mini program: fired when user confirms input (e.g. Enter). */
-  onConfirm?: () => void;
+  onConfirm?: TaroNativeInputProps['onConfirm'];
   /** WeChat: auto-scroll focused input above keyboard (default on weapp chat variants). */
   adjustPosition?: boolean;
   /** WeChat: min distance between cursor and keyboard (px). */
@@ -58,6 +66,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       className,
       value,
       defaultValue,
+      onInput,
       onConfirm,
       adjustPosition,
       cursorSpacing,
@@ -74,6 +83,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       ...props,
       value: toTaroInputValue(value),
       defaultValue: toTaroInputValue(defaultValue),
+      onInput,
       onConfirm,
       ...(weappChatVariant
         ? {

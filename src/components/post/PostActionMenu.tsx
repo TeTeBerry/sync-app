@@ -3,13 +3,16 @@ import { EllipsisVertical, Share2 } from 'lucide-react-taro';
 import { useCallback, useState, type FC } from 'react';
 import Taro from '@tarojs/taro';
 import { PostActionSheet } from './PostActionSheet';
-import { useConfirmDialog } from '../hooks/useConfirmDialog';
-import { blockUserAndInvalidate, submitReportAndInvalidate } from '../hooks/useSyncApi';
-import { usePostShareStore } from '../stores/postShareStore';
-import type { ReportCategory } from '../types/backend';
-import type { PostSharePayload } from '../utils/postShare';
-import { POST_ACTION_ICON_COLOR } from '../utils/postActionColors';
-import { Button } from './ui';
+import { useConfirmDialog } from '../../hooks/useConfirmDialog';
+import {
+  blockUserAndInvalidate,
+  submitReportAndInvalidate,
+} from '../../hooks/useSyncApi';
+import { usePostShareStore } from '../../stores/postShareStore';
+import type { ReportCategory } from '../../types/backend';
+import type { PostSharePayload } from '../../utils/postShare';
+import { POST_ACTION_ICON_COLOR } from '../../utils/postActionColors';
+import { Button } from '../ui';
 import { View } from '@tarojs/components';
 
 export type PostActionMenuProps = {

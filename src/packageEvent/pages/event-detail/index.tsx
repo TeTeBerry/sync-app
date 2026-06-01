@@ -1,14 +1,6 @@
 import './event-detail.scss';
 import Taro, { useRouter } from '@tarojs/taro';
-import {
-  lazy,
-  Suspense,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Map } from 'lucide-react-taro';
 import {
   goAiAssistant,
@@ -30,6 +22,8 @@ import { useNavigationStore } from '../../../stores/navigationStore';
 import { LoginInterceptHost } from '../../../components/auth/LoginInterceptHost';
 import { EventDetailComposerSection } from './components/EventDetailComposerSection';
 import { EventDetailEntitlementModals } from './components/EventDetailEntitlementModals';
+import EventDetailFallback from './components/EventDetailFallback';
+import EventDetailLiveSection from './components/EventDetailLiveSection';
 import { pickGlobalFreeMonthly } from '../../../components/profile';
 import { useContactUnlockQuota } from '../../../hooks/useContactUnlockQuota';
 import {
@@ -47,12 +41,9 @@ import {
   getActivityStatusFromActivity,
 } from '../../../utils/activityStatus';
 import { EventPostsVirtualList } from './components/EventPostsVirtualList';
-import {
-  EVENT_DETAIL_SCROLL_ID,
-  useEventDetailPosts,
-} from './useEventDetailPosts';
+import { EVENT_DETAIL_SCROLL_ID, useEventDetailPosts } from './useEventDetailPosts';
+import { useEventDetailLive } from './useEventDetailLive';
 import type { EventDetailTabId } from './components/EventDetailContentTabs';
-import { MOCK_LIVE_INFO_FEED } from './liveInfoMock';
 import PageNavigation, {
   stackPageNavChromePx,
 } from '../../../components/PageNavigation';
@@ -63,15 +54,6 @@ import { usePostPageShare } from '../../../hooks/usePostPageShare';
 import type { PostSharePayload } from '../../../utils/postShare';
 import { Button } from '../../../components/ui';
 import { ScrollView, Text, View } from '@tarojs/components';
-import { EventLiveInfoUpdateSheet } from './components/EventLiveInfoUpdateSheet';
-import type { EventLiveInfoTabActions } from './live/EventLiveInfoTab';
-import type { PublishLiveInfoPayload } from './useEventLiveInfo';
-
-const EventLiveInfoTab = lazy(() =>
-  import('./live/EventLiveInfoTab').then((mod) => ({
-    default: mod.EventLiveInfoTab,
-  })),
-);
 
 const EventDetailPage = () => {
   useEndRouteTransitionOnShow();
@@ -124,14 +106,11 @@ const EventDetailPage = () => {
   });
   const [prompt, setPrompt] = useState('');
   const [contentTab, setContentTab] = useState<EventDetailTabId>('posts');
-  const [liveFeedCount, setLiveFeedCount] = useState(MOCK_LIVE_INFO_FEED.length);
-  const [liveUpdateSheetOpen, setLiveUpdateSheetOpen] = useState(false);
   const [contactUnlockExhaustedOpen, setContactUnlockExhaustedOpen] = useState(false);
   const [packageSheetOpen, setPackageSheetOpen] = useState(false);
   const [packageSheetInitialTierId, setPackageSheetInitialTierId] = useState<
     PackageTierId | undefined
   >(undefined);
-  const liveInfoActionsRef = useRef<EventLiveInfoTabActions | null>(null);
 
   const openContactUnlockExhaustedModal = useCallback(() => {
     setContactUnlockExhaustedOpen(true);
@@ -153,43 +132,6 @@ const EventDetailPage = () => {
   }, []);
 
   const displayUserName = currentUserQuery.data?.name ?? profileUser.name ?? '用户';
-
-  const handleLiveFeedCountChange = useCallback((count: number) => {
-    setLiveFeedCount(count);
-  }, []);
-
-  const handleLiveInfoActions = useCallback(
-    (actions: EventLiveInfoTabActions | null) => {
-      liveInfoActionsRef.current = actions;
-    },
-    [],
-  );
-
-  const handleOpenLiveUpdateSheet = useCallback(() => {
-    setLiveUpdateSheetOpen(true);
-  }, []);
-
-  const handleCloseLiveUpdateSheet = useCallback(() => {
-    setLiveUpdateSheetOpen(false);
-  }, []);
-
-  const handleLiveUpdatePublish = useCallback(
-    async (payload: PublishLiveInfoPayload): Promise<boolean> => {
-      const actions = liveInfoActionsRef.current;
-      if (!actions) {
-        void Taro.showToast({ title: '请稍候再试', icon: 'none' });
-        return false;
-      }
-      return actions.publishUpdate(payload);
-    },
-    [],
-  );
-
-  useEffect(() => {
-    if (contentTab !== 'live') {
-      setLiveUpdateSheetOpen(false);
-    }
-  }, [contentTab]);
 
   const title = activityQuery.data?.name;
   const activityImage = activityQuery.data?.image;
@@ -223,6 +165,8 @@ const EventDetailPage = () => {
     (activityQuery.isError || activityQuery.data === null);
   const routeContentReady = Boolean(title) || showHeaderSkeleton || showActivityMissing;
   usePageRouteReady(routeContentReady);
+
+  const live = useEventDetailLive({ contentTab, showHeaderSkeleton });
 
   const handleBack = useCallback(() => {
     goBack(ROUTES.HOME);
@@ -300,38 +244,20 @@ const EventDetailPage = () => {
   );
 
   if (Number.isNaN(eventId) || eventId <= 0) {
-    return (
-      <View className="s-event-detail s-page-with-tabbar">
-        <View className="s-event-detail__fallback">活动不存在</View>
-        <BottomNavSlot />
-      </View>
-    );
+    return <EventDetailFallback variant="invalidId" />;
   }
 
   if (activityQuery.isError && !activityQuery.isLoading) {
     return (
-      <View className="s-event-detail s-page-with-tabbar">
-        <View className="s-event-detail__fallback">
-          <Text>活动信息加载失败</Text>
-          <Button
-            className="s-event-detail__retry"
-            onClick={() => void activityQuery.refetch()}
-          >
-            <Text className="s-btn-label">重试</Text>
-          </Button>
-        </View>
-        <BottomNavSlot />
-      </View>
+      <EventDetailFallback
+        variant="loadError"
+        onRetry={() => void activityQuery.refetch()}
+      />
     );
   }
 
   if (showActivityMissing) {
-    return (
-      <View className="s-event-detail s-page-with-tabbar">
-        <View className="s-event-detail__fallback">活动不存在</View>
-        <BottomNavSlot />
-      </View>
-    );
+    return <EventDetailFallback variant="missing" />;
   }
 
   const postsLoading = !feedReady || postsQuery.isLoading;
@@ -341,7 +267,6 @@ const EventDetailPage = () => {
     !postsLoading &&
     !postsQuery.hasMore &&
     !postsQuery.isLoadingMore;
-  const showLiveEnd = contentTab === 'live' && !showHeaderSkeleton && liveFeedCount > 0;
 
   return (
     <View
@@ -401,7 +326,7 @@ const EventDetailPage = () => {
               contentTab={contentTab}
               onContentTabChange={setContentTab}
               postsCount={postItems.length}
-              liveCount={liveFeedCount}
+              liveCount={live.liveFeedCount}
             />
 
             {!showHeaderSkeleton && contentTab === 'posts' ? (
@@ -435,26 +360,22 @@ const EventDetailPage = () => {
               </View>
             ) : null}
 
-            {!showHeaderSkeleton && contentTab === 'live' ? (
-              <Suspense
-                fallback={
-                  <ThemedPageLoader variant="skeleton-live-feed" minHeight={200} />
-                }
-              >
-                <EventLiveInfoTab
-                  eventId={eventId}
-                  userName={displayUserName}
-                  onFeedCountChange={handleLiveFeedCountChange}
-                  onOpenUpdate={handleOpenLiveUpdateSheet}
-                  onLiveInfoActions={handleLiveInfoActions}
-                />
-              </Suspense>
-            ) : null}
+            <EventDetailLiveSection
+              visible={!showHeaderSkeleton && contentTab === 'live'}
+              eventId={eventId}
+              userName={displayUserName}
+              updateSheetOpen={live.liveUpdateSheetOpen}
+              onFeedCountChange={live.handleLiveFeedCountChange}
+              onOpenUpdate={live.handleOpenLiveUpdateSheet}
+              onLiveInfoActions={live.handleLiveInfoActions}
+              onCloseUpdateSheet={live.handleCloseLiveUpdateSheet}
+              onPublishUpdate={live.handleLiveUpdatePublish}
+            />
 
             {!showHeaderSkeleton && showPostsEnd ? (
               <Text className="s-event-detail__end">已经到底啦 ~</Text>
             ) : null}
-            {!showHeaderSkeleton && showLiveEnd ? (
+            {!showHeaderSkeleton && live.showLiveEnd ? (
               <Text className="s-event-detail__end">已经到底啦 ~</Text>
             ) : null}
           </View>
@@ -473,13 +394,6 @@ const EventDetailPage = () => {
         packageSheetInitialTierId={packageSheetInitialTierId}
         onClosePackageSheet={closePackageUpgradeSheet}
       />
-      {contentTab === 'live' && liveUpdateSheetOpen ? (
-        <EventLiveInfoUpdateSheet
-          open
-          onClose={handleCloseLiveUpdateSheet}
-          onPublish={handleLiveUpdatePublish}
-        />
-      ) : null}
       <BottomNavSlot />
     </View>
   );

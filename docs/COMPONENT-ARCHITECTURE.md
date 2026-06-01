@@ -7,7 +7,7 @@
 | 层级 | 路径 | 用途 |
 |------|------|------|
 | UI 原语 | `src/components/ui/` | 无业务语义；包装 Taro 原语 + BEM/`cn` |
-| 跨页业务 | `src/components/`（`auth/`、`ai-chat/`、`profile/`、`Post*` 等） | 多页面/分包复用的领域 UI |
+| 跨页业务 | `src/components/`（`auth/`、`ai-chat/`、`profile/`、`post/` 等） | 多页面/分包复用的领域 UI |
 | 页面局部 | `src/pages/**/components/`、`src/package*/pages/**/components/` | 仅单页或单功能使用 |
 
 ### 依赖方向（必须遵守）
@@ -56,10 +56,14 @@ Barrel 导出分包/活动详情需要的组件与逻辑；仅主 profile 页使
 | 只在首页用的区块 | `pages/index/components/` |
 | 个人中心 + profile 分包共用 | `components/profile/` |
 | 只在活动详情用的块 | `packageEvent/.../event-detail/components/` |
-| 跨多 Tab/多活动的帖子 UI | `components/` 根目录 `Post*` / `FeedPostList` |
+| 跨多 Tab/多活动的帖子 UI | `components/post/`（`FeedPostList`、`PostCommentSection` 等） |
 | 新帖子 TypeScript 类型 | `types/post.ts` |
 
 **何时从页面局部升格到 `components/profile/`？** 当第二个页面（含分包页）需要 import 时，立即迁入 profile 域并改走 barrel。
+
+## Input 约定
+
+业务输入框优先 `components/ui/Input`（内部包装 Taro `Input`）。支持 Taro 的 `onInput`（`e.detail.value`）、`onConfirm` 与 `variant`（如 `events-search`、`chat`）。无 variant 时仅透传 `className`。
 
 ## Button 约定
 

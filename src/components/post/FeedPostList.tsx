@@ -1,7 +1,7 @@
 import './FeedPostList.scss';
 import { MessageCircle, ThumbsUp } from 'lucide-react-taro';
 import { memo, useCallback, useState, type FC } from 'react';
-import { Button } from './ui';
+import { Button } from '../ui';
 import { PostCommentSection } from './PostCommentSection';
 import { PostActionMenu, PostShareButton } from './PostActionMenu';
 import { PostStatusBadge } from './PostStatusBadge';
@@ -11,13 +11,13 @@ import {
   stripContentTypeHashtags,
 } from './ContentTypeBadge';
 import { PostImageGrid, PostImageCount } from './PostImageGrid';
-import { useCurrentUserQuery } from '../hooks/useSyncApi';
-import { isCurrentUserPostAuthor } from '../utils/postOwnership';
-import type { HomeFeedPost } from '../types/post';
-import { thumbnailImageUrl } from '../utils/imageUrl';
-import { postActionIconColor } from '../utils/postActionColors';
-import { inferAuthorGenderFromPost } from '../utils/inferAuthorGender';
-import type { PostSharePayload } from '../utils/postShare';
+import { useCurrentUserQuery } from '../../hooks/useSyncApi';
+import { isCurrentUserPostAuthor } from '../../utils/postOwnership';
+import type { HomeFeedPost } from '../../types/post';
+import { thumbnailImageUrl } from '../../utils/imageUrl';
+import { postActionIconColor } from '../../utils/postActionColors';
+import { inferAuthorGenderFromPost } from '../../utils/inferAuthorGender';
+import type { PostSharePayload } from '../../utils/postShare';
 import { Image, Text, View } from '@tarojs/components';
 
 function feedPostSharePayload(

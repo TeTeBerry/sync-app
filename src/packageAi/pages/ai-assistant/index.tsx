@@ -1,7 +1,7 @@
 import { lazy, Suspense } from 'react';
 import ThemedPageLoader from '../../../components/ThemedPageLoader';
 
-const AiAssistantPage = lazy(() => import('../../../components/AiAssistantPage'));
+const AiAssistantPage = lazy(() => import('./AiAssistantPage'));
 
 export default function AiAssistantRoute() {
   return (

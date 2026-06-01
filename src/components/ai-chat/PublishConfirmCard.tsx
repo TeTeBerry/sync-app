@@ -3,7 +3,7 @@ import {
   filterContentTypeTags,
   mergePostContentTypes,
   stripContentTypeHashtags,
-} from '../ContentTypeBadge';
+} from '../post';
 import { inferIntentTagsFromText } from '../../utils/inferIntentTags';
 import {
   PUBLISH_CONFIRM_MARKER,

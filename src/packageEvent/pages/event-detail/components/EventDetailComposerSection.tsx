@@ -1,7 +1,10 @@
 import React from 'react';
 import ThemedPageLoader from '../../../../components/ThemedPageLoader';
 import { EventDetailAiMatchCard } from './EventDetailAiMatchCard';
-import { EventDetailContentTabs, type EventDetailTabId } from './EventDetailContentTabs';
+import {
+  EventDetailContentTabs,
+  type EventDetailTabId,
+} from './EventDetailContentTabs';
 import { EventDetailExclusiveItineraryButton } from './EventDetailExclusiveItineraryButton';
 import { View } from '@tarojs/components';
 
