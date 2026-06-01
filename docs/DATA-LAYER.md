@@ -16,7 +16,7 @@ REST 与 React Query 的分层约定，便于 P0 鉴权时只改少数入口。
 | 通道 | 有 Bearer | 无 token（demo / mock） |
 |------|-----------|-------------------------|
 | **REST** | 不传 demo Query；后端 `JwtActorMiddleware` 将 JWT `sub` / `name` 写入 `req.query` | `demoActorQueryParams()` → `{ userId }` only |
-| **AI WebSocket** | Header 可带 Bearer；**body 仍须** `userId` / `userName`（后端 WS 未读 JWT actor） | body 带 `userId` / `userName` / `userPhone` |
+| **AI WebSocket** | Upgrade `Authorization: Bearer`；`send` body **可不传** `userId`/`userName`（后端从 JWT 解析 actor，见 `buildAiChatWsSendActor()`） | body 须 `userId`（demo）；可选 `userName` / `userPhone` |
 
 无效 JWT：middleware 校验失败时不改 query，请求可能落到 demo 或 anonymous（通知无 `userId` 时为 `anonymous`）。
 
@@ -28,6 +28,7 @@ REST 与 React Query 的分层约定，便于 P0 鉴权时只改少数入口。
 - `ownerQueryParamsWithActivity(activityLegacyId?)` — profile / entitlements 作用域
 - `resolveRequestUserId()` — React Query `queryKey` 中的用户维度
 - `notificationQueryParams()` — 通知 API：有 Bearer 时 `undefined`（不传 `userId`）；无 token 时 `{ userId }`
+- `buildAiChatWsSendActor()` — [`api/aiChatActor.ts`](../src/api/aiChatActor.ts)：已登录 WS `send` 仅传 `userPhone`（如有）；demo 传 `userId`/`userName`
 
 ## REST 按域拆分
 
@@ -66,7 +67,9 @@ REST 与 React Query 的分层约定，便于 P0 鉴权时只改少数入口。
 - [x] `apiClient` / `uploadImage` — 401 清 session + 后端 `message` toast
 - [x] 删除 `session.ownerParams()`；REST 统一走 `api/sync` + `requestContext`
 
-后续：AI WebSocket body 去 `userId`（需后端 WS 鉴权）；地图他人帖 `GET /profile/posts`（需后端 middleware 不覆盖目标 userId）。
+- [x] AI WebSocket JWT actor（upgrade Bearer；`ai-chat-ws-actor` / `buildAiChatWsSendActor`）
+
+后续（可选）：地图他人帖 `GET /profile/posts`（需后端 actor/owner 分离，前端暂不排）。
 
 ## 依赖方向
 

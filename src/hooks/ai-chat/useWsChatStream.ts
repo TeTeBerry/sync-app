@@ -17,6 +17,7 @@ import {
   formatAiChatToastError,
 } from '../../utils/aiChatErrors';
 import { buildApiChatHistory } from '../../utils/aiChatHistory';
+import { buildAiChatWsSendActor } from '../../api/aiChatActor';
 import { streamAiChatWs } from '../../utils/aiChatWs';
 import { mockAiChatStream } from '../../utils/aiChatStream';
 import type { TypewriterReveal } from '../../utils/typewriterReveal';
@@ -245,9 +246,7 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
               url: wsUrl,
               messages: history,
               sessionId: sessionIdRef.current,
-              userId: userIdRef.current,
-              userName: userNameRef.current,
-              userPhone: userPhoneRef.current,
+              ...buildAiChatWsSendActor(),
               activityLegacyId: activityId,
               image: pendingImage,
               images,

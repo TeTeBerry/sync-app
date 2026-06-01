@@ -25,9 +25,10 @@
 
 ## 当前身份
 
-- **未登录**：`ownerQueryParams()` → Query `userId` / `authorName`（demo）
-- **已登录**：`Authorization: Bearer`；`ownerQueryParams()` 返回 `{}`（后端 JWT middleware 注入 actor）
-- `getClientUserId()` / `getClientUserName()` — 已 JWT-aware（session + authStorage）
+- **未登录（demo REST）**：`ownerQueryParams()` / `demoActorQueryParams()` → Query **仅** `userId`（不传 Query `authorName`；后端 demo 判定只看 `userId`）
+- **已登录**：`Authorization: Bearer`；`ownerQueryParams()` 返回 `{}`（后端 JWT middleware 注入 `userId` / `authorName`）
+- `getClientUserId()` / `getClientUserName()` — 已 JWT-aware（session + authStorage）；**展示名**与 demo Query 分离
+- **AI WebSocket**：upgrade Bearer → actor 来自 JWT；`buildAiChatWsSendActor()`（见 [DATA-LAYER.md](./DATA-LAYER.md)）
 
 ---
 
@@ -96,6 +97,13 @@
 - [x] `packageEvent/pages/event-detail/components/**`
 
 </details>
+
+### Phase 5 收尾 ✅（2026-06）
+
+- [x] B1：AI WebSocket JWT actor（`buildAiChatWsSendActor` + upgrade Bearer）
+- [x] Checklist「当前身份」与 demo 仅 `userId` 对齐
+- [x] `api/sync/ownerQuery.contract.test.ts` — profile / notifications / activities 有/无 Bearer
+- [x] `useEventDetailRoute` / `useEventDetailActivityHeader` / `useEventDetailEntitlements` / `useEventDetailAiActions`；精简 `useEventDetailPage`
 
 ### Phase 4 数据层 + 编排 ✅（2026-06）
 
