@@ -13,7 +13,7 @@ import {
   markerAvatarUrl,
   type EventMapMarker,
 } from '../../../components/event-map/eventMapMarkers';
-import PageNavigation from '../../../components/PageNavigation';
+import PageNavigation from '../../../components/navigation/PageNavigation';
 import { useNavBarInsets } from '../../../hooks/useNavBarInsets';
 import { decodeRouteQueryParam, ROUTES } from '../../../utils/route';
 import { useEndRouteTransitionOnShow } from '../../../hooks/useEndRouteTransitionOnShow';

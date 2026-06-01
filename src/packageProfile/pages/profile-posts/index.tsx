@@ -1,7 +1,7 @@
 import '../../../components/profile/profile.scss';
 import Taro, { useDidShow } from '@tarojs/taro';
 import React, { useCallback, useState } from 'react';
-import PageNavigation from '../../../components/PageNavigation';
+import PageNavigation from '../../../components/navigation/PageNavigation';
 import ThemedPageLoader from '../../../components/ThemedPageLoader';
 import {
   ProfilePostsSection,

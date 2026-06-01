@@ -1,13 +1,7 @@
 import { memo } from 'react';
-import {
-  Check,
-  CircleCheck,
-  Heart,
-  MapPin,
-  MessageCircle,
-  Users,
-  Zap,
-} from 'lucide-react-taro';
+import { Check, CircleCheck, MapPin, Users, Zap } from 'lucide-react-taro';
+import PostCardActionBar from '../../../../components/post/PostCardActionBar';
+import { buildPostSharePayload } from '../../../../components/post/postCardShare';
 import {
   PostActionMenu,
   PostCommentSection,
@@ -26,8 +20,6 @@ import {
 } from '../../../../utils/postContentTypeDisplay';
 import { PostImageCount, PostImageGrid } from '../../../../components/post';
 import { isCurrentUserPostAuthor } from '../../../../utils/postOwnership';
-import { postActionIconColor } from '../../../../utils/postActionColors';
-import type { PostSharePayload } from '../../../../utils/postShare';
 import type { EventDetailPost } from '../../../../types/backend';
 import {
   formatEventPostHandle,
@@ -72,20 +64,6 @@ function GroupProgressRow({ current, total }: { current: number; total: number }
       </Text>
     </View>
   );
-}
-
-function eventPostSharePayload(
-  post: EventDetailPost,
-  activityLegacyId: number,
-): PostSharePayload {
-  return {
-    postId: post.id,
-    activityLegacyId,
-    body: post.body,
-    authorName: post.name,
-    images: post.images,
-    imageUrl: post.images?.[0] ?? post.avatar,
-  };
 }
 
 function EventPostCardInner({
@@ -183,7 +161,16 @@ function EventPostCardInner({
             </View>
             <View className="s-event-post__head-actions">
               <PostStatusBadge post={post} variant="event" isOwn={isOwn} />
-              <PostShareButton share={eventPostSharePayload(post, activityLegacyId)} />
+              <PostShareButton
+                share={buildPostSharePayload({
+                  postId: post.id,
+                  activityLegacyId,
+                  body: post.body,
+                  authorName: post.name,
+                  images: post.images,
+                  avatar: post.avatar,
+                })}
+              />
               {isOwn ? (
                 <PostActionMenu
                   postId={post.id}
@@ -235,40 +222,16 @@ function EventPostCardInner({
         <View className="s-event-post__footer-divider" aria-hidden />
         <View className="s-event-post__footer-row">
           <View className="s-event-post__footer-left">
-            <View className="s-event-post__actions">
-              <Button
-                className={[
-                  's-event-post__action',
-                  post.liked && 's-event-post__action--liked',
-                ]
-                  .filter(Boolean)
-                  .join(' ')}
-                onClick={() => onLike(post.id)}
-                disabled={!apiEnabled}
-              >
-                <Heart
-                  size={16}
-                  filled={post.liked}
-                  color={postActionIconColor({ liked: post.liked })}
-                />
-                <Text className="s-event-post__action-label">{post.likes}</Text>
-              </Button>
-              <Button
-                className={[
-                  's-event-post__action',
-                  commentsExpanded && 's-event-post__action--active',
-                ]
-                  .filter(Boolean)
-                  .join(' ')}
-                onClick={() => onToggleComments(post.id)}
-              >
-                <MessageCircle
-                  size={16}
-                  color={postActionIconColor({ active: commentsExpanded })}
-                />
-                <Text className="s-event-post__action-label">{post.comments}</Text>
-              </Button>
-            </View>
+            <PostCardActionBar
+              variant="event"
+              liked={Boolean(post.liked)}
+              likes={post.likes}
+              comments={post.comments}
+              commentsExpanded={commentsExpanded}
+              onLike={() => onLike(post.id)}
+              onToggleComments={() => onToggleComments(post.id)}
+              likeDisabled={!apiEnabled}
+            />
           </View>
 
           {showApply ? (

@@ -28,8 +28,7 @@ export const useLoginInterceptStore = create<
   feature: 'general',
   pendingAction: null,
 
-  show: (feature, pendingAction) =>
-    set({ isOpen: true, feature, pendingAction }),
+  show: (feature, pendingAction) => set({ isOpen: true, feature, pendingAction }),
 
   close: () => set({ isOpen: false, feature: 'general', pendingAction: null }),
 

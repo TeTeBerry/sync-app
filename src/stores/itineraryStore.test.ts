@@ -11,7 +11,13 @@ describe('useItineraryStore', () => {
       itinerary: {
         eventMeta: '风暴电音节',
         days: [
-          { id: 'jun13', label: '6/13', bannerDateLabel: '6/13', nodeCount: 0, items: [] },
+          {
+            id: 'jun13',
+            label: '6/13',
+            bannerDateLabel: '6/13',
+            nodeCount: 0,
+            items: [],
+          },
         ],
       },
       conflicts: [],

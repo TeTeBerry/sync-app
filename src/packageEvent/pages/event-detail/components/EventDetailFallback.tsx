@@ -1,5 +1,5 @@
 import React from 'react';
-import { BottomNavSlot } from '../../../../components/BottomNav';
+import { BottomNavSlot } from '../../../../components/navigation/BottomNav';
 import { Button } from '../../../../components/ui';
 import { Text, View } from '@tarojs/components';
 

@@ -17,7 +17,7 @@
 | P4 | 信息架构与文档 | ✅ 完成 |
 | P5 | 通知深链等收尾 | ✅ 完成 |
 | P0-H5 | Dev 登录 + Bearer | ✅ 前端已接 |
-| P0-Wx | 微信小程序 | ⬜ 更晚 |
+| P0-Wx | 微信小程序 | 🟡 前端已接，联调验收 |
 
 **产品约定**：组队帖 **仅 AI 对话闭环创建**，不新增发帖表单 UI。
 
@@ -97,6 +97,15 @@
 
 </details>
 
+### Phase 3 前端架构 ✅（2026-06）
+
+- [x] `useEventDetailPage` + `PostCardActionBar` / `buildPostSharePayload`（首页 Feed + 活动帖共用互动条）
+- [x] `useProfilePackageSheet` 拆分 `useProfilePage`
+- [x] `AiAssistantChat` 抽出至 `packageAi/pages/ai-assistant/AiAssistantChat.tsx`
+- [x] `apiClient.test.ts`（401 + 无 token 不清 session）；`notificationQueryParams()`
+- [x] `components/navigation/` — 导航壳迁移 + [COMPONENT-ARCHITECTURE.md](./COMPONENT-ARCHITECTURE.md) 文档
+- [x] P0-Wx：微信登录入口 / `ensureAuth` weapp 分支 + 联调文档（见 [API.md](./API.md#微信小程序)）
+
 ### 后续 Phase（未排期）
 
 - [x] `AiAssistantPage` 迁入 `packageAi/pages/ai-assistant/` 同目录
@@ -128,9 +137,13 @@
 - [x] 删除 `ownerParams()`；`ownerQueryParams()` 有 token 时不发 demo Query
 - [x] `getClientUserId()` 已优先 `getAuthUserId()`（JWT `sub`）
 
-### P0-Wx（更晚）
+### P0-Wx（微信小程序）
 
-- [ ] `wx.login` → `POST /auth/wechat`
+- [x] `LoginPromptHero`（weapp）→ `loginWithWechat({ requireProfile: true })`
+- [x] `ensureAuth`（weapp）→ `loginWithWechat({ requireProfile: false })`；`shouldSkipAutoLogin` 退出后不自动 `wx.login`
+- [x] Bearer 后通知等 REST 不传 demo `userId`（`notificationQueryParams`）
+- [x] 联调前置与构建变量 — [API.md](./API.md#微信小程序)
+- [ ] 开发者工具真机预览全流程验收（依赖后端 `POST /auth/wechat` + `AUTH_MODE`）
 
 ---
 
@@ -147,6 +160,7 @@
 | 方法 | 路径 | 前端状态 |
 |------|------|----------|
 | POST | `/auth/dev` | ✅ |
+| POST | `/auth/wechat` | 🟡 前端已接，后端环境需就绪 |
 | GET/PATCH | `/users/me` | ✅ `syncApi` + `useCurrentUserQuery` |
 | GET | `/home` | ✅ |
 | GET | `/activities`… | ✅ |

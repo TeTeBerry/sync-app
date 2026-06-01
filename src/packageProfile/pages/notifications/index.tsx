@@ -5,7 +5,7 @@ import { useDeferredMount } from '../../../hooks/useDeferredMount';
 import { usePageRouteReady } from '../../../hooks/usePageRouteReady';
 import { useEndRouteTransitionOnShow } from '../../../hooks/useEndRouteTransitionOnShow';
 import { Bell, Heart, MessageCircle, Megaphone, Trash2 } from 'lucide-react-taro';
-import PageNavigation from '../../../components/PageNavigation';
+import PageNavigation from '../../../components/navigation/PageNavigation';
 import {
   clearAllNotificationsAndInvalidate,
   deleteNotificationAndInvalidate,

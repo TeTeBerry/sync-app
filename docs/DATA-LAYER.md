@@ -16,6 +16,7 @@ REST 与 React Query 的分层约定，便于 P0 鉴权时只改少数入口。
 - `mergeOwnerQueryParams(extra)` — 合并 limit/cursor 等
 - `ownerQueryParamsWithActivity(activityLegacyId?)` — profile / entitlements 作用域
 - `resolveRequestUserId()` — React Query `queryKey` 中的用户维度
+- `notificationQueryParams()` — 通知 API：有 Bearer 时 `undefined`（不传 `userId`）；无 token 时 `{ userId }`
 
 ## REST 按域拆分
 

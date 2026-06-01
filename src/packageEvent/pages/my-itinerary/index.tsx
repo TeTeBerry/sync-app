@@ -2,7 +2,7 @@ import './my-itinerary.scss';
 import { Map, Share2, Sparkles } from 'lucide-react-taro';
 import { Button } from '../../../components/ui';
 import { Canvas, ScrollView, Text, View } from '@tarojs/components';
-import PageNavigation from '../../../components/PageNavigation';
+import PageNavigation from '../../../components/navigation/PageNavigation';
 import { useEndRouteTransitionOnShow } from '../../../hooks/useEndRouteTransitionOnShow';
 import { ITINERARY_WALLPAPER_CANVAS_ID } from './generateItineraryWallpaper';
 import MyItineraryTimeline from './components/MyItineraryTimeline';

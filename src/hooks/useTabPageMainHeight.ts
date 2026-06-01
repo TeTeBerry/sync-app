@@ -1,6 +1,6 @@
 import Taro from '@tarojs/taro';
 import { useMemo } from 'react';
-import { stackPageNavChromePx } from '../components/PageNavigation';
+import { stackPageNavChromePx } from '../components/navigation/PageNavigation';
 import { useNavBarInsets } from './useNavBarInsets';
 
 /** Matches BottomNav.scss: row + top padding (px, design @ 375). */

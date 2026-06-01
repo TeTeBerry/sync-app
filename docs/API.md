@@ -42,7 +42,35 @@ TARO_APP_WS_URL=ws://127.0.0.1:10086/api/ai/chat/ws
 H5 devServer 将 `/api`（含 WebSocket）代理到 `http://localhost:3000`。  
 未配置 `TARO_APP_API_BASE_URL` 时前端走 mock，不请求后端。
 
-**微信小程序**：在公众平台配置 `socket` 合法域名为 `wss://你的域名`；本地开发勾选开发者工具「不校验合法域名、web-view、TLS」，使用 `ws://局域网IP:3000/api/ai/chat/ws`。
+---
+
+## 微信小程序
+
+### 环境变量（`npm run dev:weapp` / 上传构建）
+
+```env
+# 必填：HTTPS 业务 API（须在微信公众平台配置 request 合法域名）
+TARO_APP_API_BASE_URL=https://your-api.example.com
+
+# 可选：AI WebSocket（须配置 socket 合法域名 wss://…）
+TARO_APP_AI_CHAT_WS_URL=wss://your-api.example.com/api/ai/chat/ws
+```
+
+本地联调：开发者工具勾选 **「不校验合法域名、web-view（业务域名）、TLS 版本以及 HTTPS 证书」**，可将 `TARO_APP_API_BASE_URL` 指向局域网 HTTP（如 `http://192.168.x.x:3000`）。
+
+### 登录
+
+- 拦截登录（`LoginPromptHero`）：`loginWithWechat({ requireProfile: true })` — 需用户授权昵称头像
+- 静默 `ensureAuth`（`app.tsx` / 个人页）：`loginWithWechat({ requireProfile: false })`
+- 用户主动退出后：`shouldSkipAutoLogin()` 为真，**不会**自动 `wx.login`
+
+### 后端前置
+
+`POST /api/auth/wechat` 在目标环境可用；`sync-app-backend` 的 `AUTH_MODE` 与微信 AppId/Secret 已配置。未就绪时前端仍可构建，但无法完成真机登录验收。
+
+### WebSocket
+
+在公众平台配置 `socket` 合法域名为 `wss://你的域名`；本地开发可配合「不校验合法域名」使用 `ws://局域网IP:3000/api/ai/chat/ws`。
 
 ---
 

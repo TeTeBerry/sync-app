@@ -1,32 +1,29 @@
-import '../../../components/profile/profile.scss';
-import Taro, { useDidShow } from '@tarojs/taro';
-import React, { useCallback, useMemo, useState } from 'react';
-import PageNavigation from '../../../components/navigation/PageNavigation';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { isApiEnabled } from '../../constants/api';
+import { useProfileActivitiesQuery } from '../../hooks/useSyncApi';
+import { useNavigationStore } from '../../stores';
+import { invalidateProfilePackageState } from '../../utils/queryInvalidation';
+import type { ProfileActivityItem } from '../../types/backend';
+import type { PackageTierId } from './profilePackageData';
+import { profileActivities } from './mockData';
 import {
   getNextTierId,
-  ProfilePackageSheet,
-  ProfilePaidBenefitsSection,
-  profileActivities,
-  useProfilePaidBenefitCards,
-  type PackageTierId,
   type ProfileEventBenefitCardModel,
-} from '../../../components/profile';
-import { isApiEnabled } from '../../../constants/api';
-import { useProfileActivitiesQuery } from '../../../hooks/useSyncApi';
-import { useStackPageMainHeight } from '../../../hooks/useTabPageMainHeight';
-import { ROUTES } from '../../../utils/route';
-import { useEndRouteTransitionOnShow } from '../../../hooks/useEndRouteTransitionOnShow';
-import { invalidateProfilePackageState } from '../../../utils/queryInvalidation';
-import type { ProfileActivityItem } from '../../../types/backend';
-import { ScrollView, View } from '@tarojs/components';
+} from './profileBenefitsMapper';
+import type { EventPackageEntitlement } from '../../types/backend';
 
-const ProfileBenefitsPage: React.FC = () => {
-  useEndRouteTransitionOnShow();
-  const mainScrollHeight = useStackPageMainHeight();
+export type UseProfilePackageSheetOptions = {
+  paidEntitlements: EventPackageEntitlement[];
+};
+
+export function useProfilePackageSheet({
+  paidEntitlements,
+}: UseProfilePackageSheetOptions) {
+  const consumeProfileIntent = useNavigationStore(
+    (state) => state.consumeProfileIntent,
+  );
   const apiEnabled = isApiEnabled();
   const activitiesQuery = useProfileActivitiesQuery();
-  const { benefitsLoading, paidBenefitCards, paidEntitlements } =
-    useProfilePaidBenefitCards();
 
   const [packageSheetOpen, setPackageSheetOpen] = useState(false);
   const [packageSheetActivityLegacyId, setPackageSheetActivityLegacyId] = useState<
@@ -39,7 +36,7 @@ const ProfileBenefitsPage: React.FC = () => {
     PackageTierId | undefined
   >(undefined);
 
-  const profileActivitiesList = useMemo((): ProfileActivityItem[] => {
+  const profileActivitiesList = useMemo(() => {
     if (apiEnabled && activitiesQuery.data?.length) {
       return activitiesQuery.data;
     }
@@ -117,57 +114,34 @@ const ProfileBenefitsPage: React.FC = () => {
     [openPackageSheet],
   );
 
-  const handleUsageHistory = useCallback(() => {
-    void Taro.showToast({ title: '使用记录敬请期待', icon: 'none' });
-  }, []);
-
-  useDidShow(() => {
-    if (apiEnabled) {
-      void invalidateProfilePackageState();
+  const applyRouteParams = useCallback(() => {
+    const intent = consumeProfileIntent();
+    if (intent?.openPackageSheet) {
+      openPackageSheet();
     }
-  });
+  }, [consumeProfileIntent, openPackageSheet]);
 
-  return (
-    <View data-cmp="ProfileBenefitsPage" className="s-profile-stack">
-      <PageNavigation title="我的权益" fallback={ROUTES.PROFILE} tone="surface" />
+  useEffect(() => {
+    applyRouteParams();
+  }, [applyRouteParams]);
 
-      <ScrollView
-        scrollY
-        enhanced
-        showScrollbar={false}
-        className="s-profile-stack__scroll s-scrollbar-none"
-        style={
-          mainScrollHeight != null ? { height: `${mainScrollHeight}px` } : undefined
-        }
-      >
-        <View className="s-profile-stack__inner">
-          <ProfilePaidBenefitsSection
-            cards={paidBenefitCards}
-            loading={benefitsLoading}
-            showSectionHead={false}
-            onUpgrade={handleBenefitUpgrade}
-            onUsageHistory={handleUsageHistory}
-          />
-        </View>
-      </ScrollView>
-
-      {packageSheetOpen ? (
-        <ProfilePackageSheet
-          open
-          activityLegacyId={packageSheetActivityLegacyId}
-          initialSelectedTierId={packageSheetInitialTierId}
-          currentPaidTierId={packageSheetResolvedCurrentPaidTierId}
-          activities={profileActivitiesList}
-          activitiesLoading={apiEnabled && activitiesQuery.isLoading}
-          paidTierByActivityLegacyId={paidTierByActivityLegacyId}
-          onClose={closePackageSheet}
-          onPurchaseSuccess={() => {
-            void invalidateProfilePackageState();
-          }}
-        />
-      ) : null}
-    </View>
-  );
-};
-
-export default ProfileBenefitsPage;
+  return {
+    packageSheetOpen,
+    packageSheet: {
+      activityLegacyId: packageSheetActivityLegacyId,
+      initialSelectedTierId: packageSheetInitialTierId,
+      currentPaidTierId: packageSheetResolvedCurrentPaidTierId,
+      activities: profileActivitiesList,
+      activitiesLoading: apiEnabled && activitiesQuery.isLoading,
+      paidTierByActivityLegacyId,
+      onClose: closePackageSheet,
+      onPurchaseSuccess: () => {
+        void invalidateProfilePackageState();
+      },
+    },
+    openPackageSheet,
+    closePackageSheet,
+    handleBenefitUpgrade,
+    applyRouteParams,
+  };
+}

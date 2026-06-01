@@ -3,14 +3,13 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { isApiEnabled } from '../../constants/api';
 import { PROFILE_SEED_ACTIVITY_LEGACY_ID } from '../../constants/profilePackage';
 import {
-  useProfileActivitiesQuery,
   useProfileEntitlementsQuery,
   useProfileSummaryQuery,
 } from '../../hooks/useSyncApi';
 import type { ConfirmDialogOptions } from '../../hooks/useConfirmDialog';
 import { useAuthSession } from '../../hooks/useAuthSession';
 import { useEndRouteTransitionOnShow } from '../../hooks/useEndRouteTransitionOnShow';
-import { useNavigationStore, useProfilePageStore } from '../../stores';
+import { useProfilePageStore } from '../../stores';
 import { ensureAuth, logout } from '../../utils/auth';
 import { shouldSkipAutoLogin } from '../../utils/authStorage';
 import { invalidateProfilePackageState } from '../../utils/queryInvalidation';
@@ -25,10 +24,8 @@ import { profileActivities, profilePosts, profileUser } from './mockData';
 import {
   asEntitlementList,
   buildFreeBenefitCardModel,
-  getNextTierId,
   isValidFreeMonthlyQuota,
   pickGlobalFreeMonthly,
-  type ProfileEventBenefitCardModel,
   type ProfileFreeBenefitCardModel,
 } from './profileBenefitsMapper';
 import type { PackageTierId } from './profilePackageData';
@@ -52,6 +49,7 @@ import {
 } from './profileSummaryUtils';
 import { countOngoingActivities, deriveInterestTag } from './utils';
 import { useProfilePaidBenefitCards } from './useProfilePaidBenefitCards';
+import { useProfilePackageSheet } from './useProfilePackageSheet';
 
 export type UseProfilePageOptions = {
   confirm: (options: ConfirmDialogOptions) => Promise<boolean>;
@@ -90,20 +88,6 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
     (state) => state.setNotificationsEnabled,
   );
   const setPrivacyLevel = useProfilePageStore((state) => state.setPrivacyLevel);
-  const consumeProfileIntent = useNavigationStore(
-    (state) => state.consumeProfileIntent,
-  );
-
-  const [packageSheetOpen, setPackageSheetOpen] = useState(false);
-  const [packageSheetActivityLegacyId, setPackageSheetActivityLegacyId] = useState<
-    number | undefined
-  >(undefined);
-  const [packageSheetInitialTierId, setPackageSheetInitialTierId] = useState<
-    PackageTierId | undefined
-  >(undefined);
-  const [packageSheetCurrentPaidTierId, setPackageSheetCurrentPaidTierId] = useState<
-    PackageTierId | undefined
-  >(undefined);
   const debugEntitlementsEnabled = isProfileDebugEntitlementsEnabled();
   const [debugEntitlementPreset, setDebugEntitlementPreset] =
     useState<ProfileDebugEntitlementPreset>(() => readProfileDebugEntitlementPreset());
@@ -117,7 +101,6 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
 
   const summaryQuery = useProfileSummaryQuery();
   const allEntitlementsQuery = useProfileEntitlementsQuery();
-  const activitiesQuery = useProfileActivitiesQuery();
   const apiEnabled = isApiEnabled();
   const { loggedIn, refresh: refreshAuthSession } = useAuthSession();
   const showGuestProfile = apiEnabled && !loggedIn;
@@ -156,6 +139,8 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
     debugPreset: debugEntitlementPreset,
   });
 
+  const packageSheet = useProfilePackageSheet({ paidEntitlements });
+
   const summaryFreeMonthly = useMemo(() => {
     const scoped = summaryQuery.data?.packageEntitlement?.freeMonthly;
     if (isValidFreeMonthlyQuota(scoped)) {
@@ -175,23 +160,6 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
     }
     return pickGlobalFreeMonthly(entitlementList, summaryFreeMonthly);
   }, [debugEntitlementOverride, entitlementList, summaryFreeMonthly]);
-
-  const profileActivitiesList = useMemo(() => {
-    if (apiEnabled && activitiesQuery.data?.length) {
-      return activitiesQuery.data;
-    }
-    return profileActivities;
-  }, [activitiesQuery.data, apiEnabled]);
-
-  const paidTierByActivityLegacyId = useMemo(() => {
-    const map = new Map<number, PackageTierId>();
-    for (const entitlement of paidEntitlements) {
-      if (entitlement.paidTierId) {
-        map.set(entitlement.activityLegacyId, entitlement.paidTierId);
-      }
-    }
-    return map;
-  }, [paidEntitlements]);
 
   const hasPaidEntitlement = paidEntitlements.length > 0;
   const showPaidBenefitsSection = !apiEnabled || hasPaidEntitlement;
@@ -215,85 +183,13 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
   const postsCount = apiEnabled ? profileUserData.stats.posts : profilePosts.length;
   const interestTag = deriveInterestTag(profileUserData.bio);
 
-  const openPackageSheet = useCallback(
-    (options?: {
-      activityLegacyId?: number;
-      initialSelectedTierId?: PackageTierId;
-      currentPaidTierId?: PackageTierId;
-    }) => {
-      const rawActivityId = options?.activityLegacyId;
-      const resolvedActivityId =
-        rawActivityId != null && !Number.isNaN(rawActivityId)
-          ? rawActivityId
-          : undefined;
-      let currentPaidTierId = options?.currentPaidTierId;
-      if (currentPaidTierId == null && resolvedActivityId != null) {
-        const entitlement = paidEntitlements.find(
-          (item) => item.activityLegacyId === resolvedActivityId,
-        );
-        currentPaidTierId = entitlement?.paidTierId ?? undefined;
-      }
-      setPackageSheetActivityLegacyId(resolvedActivityId);
-      setPackageSheetInitialTierId(options?.initialSelectedTierId);
-      setPackageSheetCurrentPaidTierId(currentPaidTierId);
-      setPackageSheetOpen(true);
-    },
-    [paidEntitlements],
-  );
-
-  const closePackageSheet = useCallback(() => {
-    setPackageSheetOpen(false);
-    setPackageSheetActivityLegacyId(undefined);
-    setPackageSheetInitialTierId(undefined);
-    setPackageSheetCurrentPaidTierId(undefined);
-  }, []);
-
-  const packageSheetResolvedCurrentPaidTierId = useMemo(() => {
-    if (packageSheetCurrentPaidTierId != null) {
-      return packageSheetCurrentPaidTierId;
-    }
-    if (packageSheetActivityLegacyId == null) {
-      return undefined;
-    }
-    const entitlement = paidEntitlements.find(
-      (item) => item.activityLegacyId === packageSheetActivityLegacyId,
-    );
-    return entitlement?.paidTierId ?? undefined;
-  }, [packageSheetActivityLegacyId, packageSheetCurrentPaidTierId, paidEntitlements]);
-
-  const handleBenefitUpgrade = useCallback(
-    (card: ProfileEventBenefitCardModel) => {
-      const nextTierId = getNextTierId(card.tierId);
-      if (!nextTierId) {
-        return;
-      }
-      openPackageSheet({
-        activityLegacyId: card.activityLegacyId,
-        initialSelectedTierId: nextTierId,
-        currentPaidTierId: card.tierId,
-      });
-    },
-    [openPackageSheet],
-  );
-
-  const applyRouteParams = useCallback(() => {
-    const intent = consumeProfileIntent();
-    if (intent?.openPackageSheet) {
-      openPackageSheet();
-    }
-  }, [consumeProfileIntent, openPackageSheet]);
-
-  useEffect(() => {
-    applyRouteParams();
-  }, [applyRouteParams]);
-
   useEndRouteTransitionOnShow();
 
   useDidShow(() => {
     preloadHotRoutes();
     setNotificationsEnabled(readProfileNotificationsEnabled());
     setPrivacyLevel(readProfilePrivacyLevel());
-    applyRouteParams();
+    packageSheet.applyRouteParams();
     if (apiEnabled && loggedIn) {
       void invalidateProfilePackageState();
       return;
@@ -323,9 +219,8 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
       void invalidateProfilePackageState();
       void summaryQuery.refetch();
       void allEntitlementsQuery.refetch();
-      void activitiesQuery.refetch();
     }
-  }, [activitiesQuery, allEntitlementsQuery, apiEnabled, loggedIn, summaryQuery]);
+  }, [allEntitlementsQuery, apiEnabled, loggedIn, summaryQuery]);
 
   const handleLogout = useCallback(async () => {
     const ok = await confirm({
@@ -368,9 +263,9 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
     totalPaidCount: totalPaidCardCount,
     benefitsLoading,
     freeCard: freeBenefitCard,
-    onOpenPurchase: () => openPackageSheet(),
+    onOpenPurchase: () => packageSheet.openPackageSheet(),
     onViewAllBenefits: () => go(ROUTES.PROFILE_BENEFITS),
-    onUpgrade: handleBenefitUpgrade,
+    onUpgrade: packageSheet.handleBenefitUpgrade,
     onUsageHistory: handleUsageHistory,
   };
 
@@ -392,19 +287,8 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
     : null;
 
   const overlays: ProfileOverlaysViewModel = {
-    packageSheetOpen,
-    packageSheet: {
-      activityLegacyId: packageSheetActivityLegacyId,
-      initialSelectedTierId: packageSheetInitialTierId,
-      currentPaidTierId: packageSheetResolvedCurrentPaidTierId,
-      activities: profileActivitiesList,
-      activitiesLoading: apiEnabled && activitiesQuery.isLoading,
-      paidTierByActivityLegacyId,
-      onClose: closePackageSheet,
-      onPurchaseSuccess: () => {
-        void invalidateProfilePackageState();
-      },
-    },
+    packageSheetOpen: packageSheet.packageSheetOpen,
+    packageSheet: packageSheet.packageSheet,
     debug: {
       enabled: debugEntitlementsEnabled,
       contactUnlockOpen: debugContactUnlockExhaustedOpen,
@@ -415,7 +299,7 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
       onCloseAiMatch: () => setDebugAiMatchExhaustedOpen(false),
       onUpgradeContactUnlock: (tierId) => {
         setDebugContactUnlockExhaustedOpen(false);
-        openPackageSheet({ initialSelectedTierId: tierId });
+        packageSheet.openPackageSheet({ initialSelectedTierId: tierId });
       },
       onViewAllBenefits: () => {
         setDebugAiMatchExhaustedOpen(false);

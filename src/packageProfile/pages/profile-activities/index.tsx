@@ -1,9 +1,12 @@
 import '../../../components/profile/profile.scss';
 import { useDidShow } from '@tarojs/taro';
 import React from 'react';
-import PageNavigation from '../../../components/PageNavigation';
+import PageNavigation from '../../../components/navigation/PageNavigation';
 import ThemedPageLoader from '../../../components/ThemedPageLoader';
-import { ProfileActivitiesSection, profileActivities } from '../../../components/profile';
+import {
+  ProfileActivitiesSection,
+  profileActivities,
+} from '../../../components/profile';
 import { isApiEnabled } from '../../../constants/api';
 import { useProfileActivitiesQuery } from '../../../hooks/useSyncApi';
 import { invalidateProfileActivities } from '../../../utils/queryInvalidation';

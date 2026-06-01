@@ -10,7 +10,7 @@ import { isApiEnabled } from './constants/api';
 import { View } from '@tarojs/components';
 import { LucideTaroProvider } from 'lucide-react-taro';
 import type { PropsWithChildren } from 'react';
-import NavigationLoadingOverlay from './components/NavigationLoadingOverlay';
+import NavigationLoadingOverlay from './components/navigation/NavigationLoadingOverlay';
 import { preloadHotRoutes } from './utils/route';
 import { preloadEventSubpackage } from './utils/subpackagePreload';
 
@@ -18,8 +18,7 @@ export default function App({ children }: PropsWithChildren) {
   useLaunch(() => {
     if (isApiEnabled()) {
       void ensureAuth().catch((error) => {
-        const message =
-          error instanceof Error ? error.message : '登录失败，请稍后重试';
+        const message = error instanceof Error ? error.message : '登录失败，请稍后重试';
         console.warn('[auth] ensureAuth failed:', message);
       });
     }

@@ -12,7 +12,10 @@ const taroCompileFlags = {
 
 export default defineConfig({
   define: Object.fromEntries(
-    Object.entries(taroCompileFlags).map(([key, value]) => [key, JSON.stringify(value)]),
+    Object.entries(taroCompileFlags).map(([key, value]) => [
+      key,
+      JSON.stringify(value),
+    ]),
   ),
   test: {
     include: ['src/**/*.test.ts'],

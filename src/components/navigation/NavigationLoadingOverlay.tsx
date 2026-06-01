@@ -1,8 +1,8 @@
 import './NavigationLoadingOverlay.scss';
 import { useEffect, useMemo } from 'react';
-import { useNavigationStore } from '../stores/navigationStore';
-import { endRouteTransition, ROUTES } from '../utils/route';
-import ThemedPageLoader, { type ThemedPageLoaderVariant } from './ThemedPageLoader';
+import { useNavigationStore } from '../../stores/navigationStore';
+import { endRouteTransition, ROUTES } from '../../utils/route';
+import ThemedPageLoader, { type ThemedPageLoaderVariant } from '../ThemedPageLoader';
 
 const ROUTE_TRANSITION_MAX_MS = 12_000;
 

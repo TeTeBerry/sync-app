@@ -1,3 +1,11 @@
+export {
+  default as PostCardActionBar,
+  type PostCardActionBarProps,
+} from './PostCardActionBar';
+export {
+  buildPostSharePayload,
+  type BuildPostSharePayloadInput,
+} from './postCardShare';
 export { FeedPostList, type FeedPostListProps } from './FeedPostList';
 export { PostCommentSection, type PostCommentSectionProps } from './PostCommentSection';
 export {

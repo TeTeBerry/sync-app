@@ -22,7 +22,7 @@ export function useNotificationsQuery() {
 
   return useApiQuery({
     queryKey: ['notifications', 'list', userId],
-    queryFn: () => fetchNotifications(userId),
+    queryFn: () => fetchNotifications(),
     enabled,
     staleTime: 30_000,
   });
@@ -35,32 +35,28 @@ export function useNotificationUnreadCount(options?: QueryEnableOptions) {
 
   return useApiQuery({
     queryKey: ['notifications', 'unread', userId],
-    queryFn: () => fetchNotificationUnreadCount(userId),
+    queryFn: () => fetchNotificationUnreadCount(),
     enabled,
     staleTime: 30_000,
   });
 }
 
 export async function markNotificationAsRead(id: string) {
-  const userId = resolveRequestUserId();
-  await markNotificationRead(id, userId);
+  await markNotificationRead(id);
   await invalidateNotificationQueries();
 }
 
 export async function markAllNotificationsAsRead() {
-  const userId = resolveRequestUserId();
-  await markAllNotificationsRead(userId);
+  await markAllNotificationsRead();
   await invalidateNotificationQueries();
 }
 
 export async function deleteNotificationAndInvalidate(id: string) {
-  const userId = resolveRequestUserId();
-  await deleteNotification(id, userId);
+  await deleteNotification(id);
   await invalidateNotificationQueries();
 }
 
 export async function clearAllNotificationsAndInvalidate() {
-  const userId = resolveRequestUserId();
-  await clearAllNotifications(userId);
+  await clearAllNotifications();
   await invalidateNotificationQueries();
 }

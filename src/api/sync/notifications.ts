@@ -1,30 +1,35 @@
+import { notificationQueryParams } from '../requestContext';
 import { apiDelete, apiGet, apiPatch } from '../../utils/apiClient';
 import type { AppNotification } from '../../types/backend';
 
-export function fetchNotifications(userId?: string) {
-  return apiGet<AppNotification[]>('/notifications', { userId });
+export function fetchNotifications() {
+  return apiGet<AppNotification[]>('/notifications', notificationQueryParams());
 }
 
-export function fetchNotificationUnreadCount(userId?: string) {
-  return apiGet<number>('/notifications/unread-count', { userId });
+export function fetchNotificationUnreadCount() {
+  return apiGet<number>('/notifications/unread-count', notificationQueryParams());
 }
 
-export function markNotificationRead(id: string, userId?: string) {
-  const query = userId ? `?userId=${encodeURIComponent(userId)}` : '';
-  return apiPatch<AppNotification>(`/notifications/${id}/read${query}`, {});
+export function markNotificationRead(id: string) {
+  return apiPatch<AppNotification>(
+    `/notifications/${id}/read`,
+    {},
+    notificationQueryParams(),
+  );
 }
 
-export function markAllNotificationsRead(userId?: string) {
-  const query = userId ? `?userId=${encodeURIComponent(userId)}` : '';
-  return apiPatch<{ ok: true }>(`/notifications/read-all${query}`, {});
+export function markAllNotificationsRead() {
+  return apiPatch<{ ok: true }>(
+    '/notifications/read-all',
+    {},
+    notificationQueryParams(),
+  );
 }
 
-export function deleteNotification(id: string, userId?: string) {
-  const query = userId ? `?userId=${encodeURIComponent(userId)}` : '';
-  return apiDelete<{ ok: true }>(`/notifications/${id}${query}`);
+export function deleteNotification(id: string) {
+  return apiDelete<{ ok: true }>(`/notifications/${id}`, notificationQueryParams());
 }
 
-export function clearAllNotifications(userId?: string) {
-  const query = userId ? `?userId=${encodeURIComponent(userId)}` : '';
-  return apiDelete<{ ok: true }>(`/notifications${query}`);
+export function clearAllNotifications() {
+  return apiDelete<{ ok: true }>('/notifications', notificationQueryParams());
 }

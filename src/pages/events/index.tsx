@@ -2,7 +2,7 @@ import './events.scss';
 import { useDidShow } from '@tarojs/taro';
 import React, { useCallback, useMemo, useState } from 'react';
 import { Search, TrendingUp } from 'lucide-react-taro';
-import TabPageHeader from '../../components/TabPageHeader';
+import TabPageHeader from '../../components/navigation/TabPageHeader';
 import { Button, Input } from '../../components/ui';
 import { View, Text, ScrollView } from '@tarojs/components';
 import { useEndRouteTransitionOnShow } from '../../hooks/useEndRouteTransitionOnShow';

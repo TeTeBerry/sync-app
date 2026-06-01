@@ -29,7 +29,7 @@ import {
 import { DEFER_BELOW_FOLD_MS, DEFER_SECONDARY_API_MS } from '../../utils/timing';
 import { HomeCountdownCard } from './components/HomeCountdownCard';
 import { HomeFeaturedEvents } from './components/HomeFeaturedEvents';
-import TabPageHeader from '../../components/TabPageHeader';
+import TabPageHeader from '../../components/navigation/TabPageHeader';
 import { LoginInterceptHost } from '../../components/auth/LoginInterceptHost';
 import { HomeHeaderActions } from './components/HomeHeaderActions';
 import type { HomeFeedPost } from '../../types/post';

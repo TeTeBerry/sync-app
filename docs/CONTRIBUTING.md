@@ -28,6 +28,10 @@ git push -u origin feat/简短描述
 
 新 UI / 组件放置规则见 [COMPONENT-ARCHITECTURE.md](./COMPONENT-ARCHITECTURE.md)。帖子相关类型从 `src/types/post.ts` 导入。
 
+## 微信小程序联调
+
+构建变量与登录流程见 [API.md](./API.md#微信小程序)。发版前执行 `npm run build:weapp:size`。
+
 ## 发版冒烟
 
 见 [RELEASE-SMOKE.md](./RELEASE-SMOKE.md)。

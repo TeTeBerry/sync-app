@@ -107,12 +107,9 @@ export async function loginWithWechat(
     body.avatarUrl = profile.avatarUrl.trim();
   }
 
-  const result = await apiPost<AuthLoginResult>(
-    '/auth/wechat',
-    body,
-    undefined,
-    { maxRetries: 0 },
-  );
+  const result = await apiPost<AuthLoginResult>('/auth/wechat', body, undefined, {
+    maxRetries: 0,
+  });
   saveAuthResult(result);
   return result;
 }
@@ -149,9 +146,7 @@ export async function ensureAuth(): Promise<AuthLoginResult | null> {
           return await loginWithWechat({ requireProfile: false });
         }
         if (process.env.TARO_APP_AUTH_DEV === 'true') {
-          return await loginWithDev(
-            process.env.TARO_APP_DEV_USER_NAME || '开发用户',
-          );
+          return await loginWithDev(process.env.TARO_APP_DEV_USER_NAME || '开发用户');
         }
         return null;
       } finally {

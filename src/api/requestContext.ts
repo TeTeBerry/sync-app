@@ -24,6 +24,14 @@ export function resolveRequestUserId(): string {
   return getClientUserId();
 }
 
+/** Notification scope: omit userId query when Bearer (JWT middleware injects actor). */
+export function notificationQueryParams(): Record<string, string> | undefined {
+  if (getAccessToken()) {
+    return undefined;
+  }
+  return { userId: resolveRequestUserId() };
+}
+
 export function mergeOwnerQueryParams(
   extra?: Record<string, string | undefined>,
 ): Record<string, string> {

@@ -1,8 +1,8 @@
 import './TabPageHeader.scss';
 import React, { type CSSProperties, type ReactNode } from 'react';
 import { Text, View } from '@tarojs/components';
-import SyncBrandMark from './SyncBrandMark';
-import type { NavBarInsets } from '../hooks/useNavBarInsets';
+import SyncBrandMark from '../SyncBrandMark';
+import type { NavBarInsets } from '../../hooks/useNavBarInsets';
 
 export interface TabPageHeaderProps {
   /** Optional line below SYNC on the brand mark (e.g. events tab). */

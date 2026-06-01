@@ -7,7 +7,7 @@
 | 层级 | 路径 | 用途 |
 |------|------|------|
 | UI 原语 | `src/components/ui/` | 无业务语义；包装 Taro 原语 + BEM/`cn` |
-| 跨页业务 | `src/components/`（`auth/`、`ai-chat/`、`profile/`、`post/` 等） | 多页面/分包复用的领域 UI |
+| 跨页业务 | `src/components/`（`auth/`、`ai-chat/`、`profile/`、`post/`、`navigation/` 等） | 多页面/分包复用的领域 UI |
 | 页面局部 | `src/pages/**/components/`、`src/package*/pages/**/components/` | 仅单页或单功能使用 |
 
 ### 依赖方向（必须遵守）
@@ -43,10 +43,20 @@ Barrel 导出分包/活动详情需要的组件与逻辑；仅主 profile 页使
 
 纯函数/常量单测优先直引子模块（如 `profilePackageData.ts`），避免 `import from '@/components/profile'` 拉起 Taro 组件树。
 
+### Navigation（跨页导航壳）
+
+- 目录：`src/components/navigation/`
+- 内容：`PageNavigation`、`TabPageHeader`、`BottomNav`（`BottomNavSlot`）、`NavigationLoadingOverlay`
+- Barrel：`src/components/navigation/index.ts`（可选；页面也可直引子模块）
+
+### Event（规划）
+
+- 目录：`src/components/event/`（待建）— 活动卡片、状态条等第二个消费者出现时再升格
+
 ### 活动详情
 
 - 页面：`packageEvent/pages/event-detail/index.tsx`
-- 局部组件：`packageEvent/pages/event-detail/components/`（如 `EventDetailComposerSection`、`EventPostsVirtualList`）
+- 编排：`useEventDetailPage.ts`；局部组件：`packageEvent/pages/event-detail/components/`
 
 ## 决策表
 
@@ -56,10 +66,11 @@ Barrel 导出分包/活动详情需要的组件与逻辑；仅主 profile 页使
 | 只在首页用的区块 | `pages/index/components/` |
 | 个人中心 + profile 分包共用 | `components/profile/` |
 | 只在活动详情用的块 | `packageEvent/.../event-detail/components/` |
-| 跨多 Tab/多活动的帖子 UI | `components/post/`（`FeedPostList`、`PostCommentSection` 等） |
+| 跨多 Tab/多活动的帖子 UI | `components/post/`（`FeedPostList`、`PostCardActionBar` 等） |
+| 顶栏 / 底栏 / Tab 页头 | `components/navigation/` |
 | 新帖子 TypeScript 类型 | `types/post.ts` |
 
-**何时从页面局部升格到 `components/profile/`？** 当第二个页面（含分包页）需要 import 时，立即迁入 profile 域并改走 barrel。
+**何时从页面局部升格？** 当**第二个消费者**（含分包页）需要 import 时，再迁入对应域（`profile/`、`post/`、`navigation/`、`event/` 等）并改走 barrel。
 
 ## Input 约定
 

@@ -15,9 +15,7 @@ describe('parseStreamEventPayload', () => {
 
   it('ignores connected and REST envelopes', () => {
     expect(parseStreamEventPayload({ type: 'connected', sessionId: 's1' })).toBeNull();
-    expect(
-      parseStreamEventPayload({ code: 200, message: 'ok', data: {} }),
-    ).toBeNull();
+    expect(parseStreamEventPayload({ code: 200, message: 'ok', data: {} })).toBeNull();
   });
 
   it('parses post_recommendations and server error', () => {

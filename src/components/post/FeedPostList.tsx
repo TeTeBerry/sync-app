@@ -1,7 +1,7 @@
 import './FeedPostList.scss';
-import { MessageCircle, ThumbsUp } from 'lucide-react-taro';
 import { memo, useCallback, useState, type FC } from 'react';
-import { Button } from '../ui';
+import PostCardActionBar from './PostCardActionBar';
+import { buildPostSharePayload } from './postCardShare';
 import { PostCommentSection } from './PostCommentSection';
 import { PostActionMenu, PostShareButton } from './PostActionMenu';
 import { PostStatusBadge } from './PostStatusBadge';
@@ -15,25 +15,8 @@ import { useCurrentUserQuery } from '../../hooks/useSyncApi';
 import { isCurrentUserPostAuthor } from '../../utils/postOwnership';
 import type { HomeFeedPost } from '../../types/post';
 import { thumbnailImageUrl } from '../../utils/imageUrl';
-import { postActionIconColor } from '../../utils/postActionColors';
 import { inferAuthorGenderFromPost } from '../../utils/inferAuthorGender';
-import type { PostSharePayload } from '../../utils/postShare';
 import { Image, Text, View } from '@tarojs/components';
-
-function feedPostSharePayload(
-  post: HomeFeedPost,
-  authorName: string,
-): PostSharePayload {
-  return {
-    postId: post.id,
-    activityLegacyId: post.activityLegacyId,
-    body: post.body,
-    eventTitle: post.event,
-    authorName,
-    images: post.images,
-    imageUrl: post.images?.[0] ?? post.avatar,
-  };
-}
 
 export type FeedPostListProps = {
   items: HomeFeedPost[];
@@ -110,7 +93,17 @@ function FeedPostRowInner({
                 variant="home"
                 isOwn={isOwn}
               />
-              <PostShareButton share={feedPostSharePayload(post, postName)} />
+              <PostShareButton
+                share={buildPostSharePayload({
+                  postId: post.id,
+                  activityLegacyId: post.activityLegacyId,
+                  body: post.body,
+                  eventTitle: post.event,
+                  authorName: postName,
+                  images: post.images,
+                  avatar: post.avatar,
+                })}
+              />
               {isOwn && onDelete ? (
                 <PostActionMenu
                   postId={post.id}
@@ -134,31 +127,15 @@ function FeedPostRowInner({
 
       <View className="s-home-post__footer">
         <Text className="s-home-post__time">{post.time}</Text>
-        <View className="s-home-post__actions">
-          <Button
-            className={`s-home-post__action${post.liked ? ' s-home-post__action--liked' : ''}`}
-            onClick={() => onLike?.(post)}
-          >
-            <ThumbsUp
-              size={16}
-              className="s-home-post__action-icon"
-              filled={post.liked}
-              color={postActionIconColor({ liked: post.liked })}
-            />
-            <Text className="s-home-post__action-label">{post.likes}</Text>
-          </Button>
-          <Button
-            className={`s-home-post__action${commentsExpanded ? ' s-home-post__action--active' : ''}`}
-            onClick={() => onToggleComments(post.id)}
-          >
-            <MessageCircle
-              size={16}
-              className="s-home-post__action-icon"
-              color={postActionIconColor({ active: commentsExpanded })}
-            />
-            <Text className="s-home-post__action-label">{post.comments}</Text>
-          </Button>
-        </View>
+        <PostCardActionBar
+          variant="home"
+          liked={Boolean(post.liked)}
+          likes={post.likes}
+          comments={post.comments}
+          commentsExpanded={commentsExpanded}
+          onLike={() => onLike?.(post)}
+          onToggleComments={() => onToggleComments(post.id)}
+        />
       </View>
 
       <PostCommentSection

@@ -4,7 +4,9 @@ import type { HomeSummary } from '../types/backend';
 
 type SignupEvent = HomeSummary['signupEvents'][number];
 
-function signupEvent(partial: Partial<SignupEvent> & Pick<SignupEvent, 'id' | 'title'>): SignupEvent {
+function signupEvent(
+  partial: Partial<SignupEvent> & Pick<SignupEvent, 'id' | 'title'>,
+): SignupEvent {
   return {
     date: '06/01',
     location: 'SZ',

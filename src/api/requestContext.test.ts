@@ -15,6 +15,7 @@ vi.mock('../utils/authStorage', () => ({
 
 import {
   mergeOwnerQueryParams,
+  notificationQueryParams,
   ownerQueryParams,
   ownerQueryParamsWithActivity,
   resolveRequestUserId,
@@ -97,6 +98,22 @@ describe('mergeOwnerQueryParams', () => {
       userId: 'u1',
       authorName: 'Alice',
     });
+  });
+});
+
+describe('notificationQueryParams', () => {
+  beforeEach(() => {
+    mockGetAccessToken.mockReturnValue(null);
+    mockGetClientUserId.mockReturnValue('notify-user');
+  });
+
+  it('returns userId when no bearer token', () => {
+    expect(notificationQueryParams()).toEqual({ userId: 'notify-user' });
+  });
+
+  it('returns undefined when bearer token is present', () => {
+    mockGetAccessToken.mockReturnValue('jwt-token');
+    expect(notificationQueryParams()).toBeUndefined();
   });
 });
 

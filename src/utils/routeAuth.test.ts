@@ -2,11 +2,13 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mockIsLoggedIn = vi.fn(() => false);
 const mockShow = vi.fn();
-const mockNavigateTo = vi.fn((options: { success?: () => void; complete?: () => void }) => {
-  options?.success?.();
-  options?.complete?.();
-  return Promise.resolve({ errMsg: 'navigateTo:ok' });
-});
+const mockNavigateTo = vi.fn(
+  (options: { success?: () => void; complete?: () => void }) => {
+    options?.success?.();
+    options?.complete?.();
+    return Promise.resolve({ errMsg: 'navigateTo:ok' });
+  },
+);
 
 vi.mock('./authStorage', () => ({
   isLoggedIn: () => mockIsLoggedIn(),

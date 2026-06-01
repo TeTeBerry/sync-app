@@ -2,7 +2,7 @@
  * Styles for the WeChat custom-tab-bar component.
  * This chunk is NOT linked to app.wxss/common.wxss — include tab bar layout here.
  */
-@use '../components/BottomNav.scss';
+@use '../components/navigation/BottomNav.scss';
 
 .s-tabbar-fixed-host {
   position: fixed;

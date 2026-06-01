@@ -3,7 +3,7 @@ import { Info } from 'lucide-react-taro';
 import { Button } from '../../../components/ui';
 import { ScrollView, View } from '@tarojs/components';
 import ActionSheet from '../../../components/ActionSheet';
-import PageNavigation from '../../../components/PageNavigation';
+import PageNavigation from '../../../components/navigation/PageNavigation';
 import { ExclusiveItineraryInfoModal } from './ExclusiveItineraryInfoModal';
 import { useEndRouteTransitionOnShow } from '../../../hooks/useEndRouteTransitionOnShow';
 import { ExclusiveItineraryConflictBanner } from './ExclusiveItineraryConflictBanner';
