@@ -57,10 +57,6 @@ const ProfileGuestSection: React.FC<ProfileGuestSectionProps> = ({
   onLoggedIn,
   onOpenHelp,
 }) => {
-  const promptLogin = useCallback((feature: LockedFeature['feature']) => {
-    requireAuth(() => undefined, feature);
-  }, []);
-
   const openLockedRoute = useCallback((feature: LockedFeature['feature']) => {
     const routes = {
       activity: ROUTES.PROFILE_ACTIVITIES,

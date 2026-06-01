@@ -2,23 +2,11 @@ import type {
   EventPackageEntitlement,
   FreeMonthlyQuota,
   PackageTierId,
-  ProfileActivityItem,
 } from '../../types/backend';
-import { safeFiniteNumber, safeTrim } from '../../utils/safeString';
+import { safeFiniteNumber } from '../../utils/safeString';
 import { PROFILE_SEED_ACTIVITY_LEGACY_ID } from '../../constants/profilePackage';
-import { MOCK_PACKAGE_CATALOG, PACKAGE_TIER_ORDER } from './profilePackageData';
+import { PACKAGE_TIER_ORDER } from './profilePackageData';
 import type { ProfileBenefits } from './mockData';
-import type {
-  ProfileBenefitRowAccent,
-  ProfileEventBenefitRow,
-  ProfileEventBenefitCardModel,
-  ProfileFreeBenefitQuota,
-  ProfileFreeBenefitCardModel,
-} from './profileBenefitsTypes';
-
-const GLOBAL_FREE_CARD_TITLE = '通场免费额度';
-const GLOBAL_FREE_CARD_SUBTITLE = '每月重置';
-
 export const FREE_MONTHLY_AI_LIMIT = 3;
 export const FREE_MONTHLY_CONTACT_LIMIT = 3;
 
@@ -266,67 +254,6 @@ export function pickProfileEntitlement(
   }
 
   return summaryEntitlement ?? entitlements[0] ?? null;
-}
-
-function slotToFreeQuota(
-  remaining: number | null,
-  limit: number | null,
-  fallbackLimit: number,
-): ProfileFreeBenefitQuota {
-  const resolvedLimit = limit != null && limit > 0 ? limit : fallbackLimit;
-  const resolvedRemaining =
-    remaining != null ? Math.max(0, Math.min(resolvedLimit, remaining)) : resolvedLimit;
-  return {
-    remaining: resolvedRemaining,
-    limit: resolvedLimit,
-    remainingRatio: quotaRatio(resolvedRemaining, resolvedLimit),
-  };
-}
-
-function resolveFreeQuotaSlots(
-  entitlement: EventPackageEntitlement | null | undefined,
-  freeMonthly?: FreeMonthlyQuota | null,
-): Pick<ProfileFreeBenefitCardModel, 'aiMatch' | 'contactUnlock'> {
-  const monthly = entitlement?.freeMonthly ?? freeMonthly ?? null;
-
-  if (isValidFreeMonthlyQuota(monthly)) {
-    return {
-      aiMatch: slotToFreeQuota(
-        monthly.aiMatch.remaining,
-        monthly.aiMatch.limit,
-        FREE_MONTHLY_AI_LIMIT,
-      ),
-      contactUnlock: slotToFreeQuota(
-        monthly.contactUnlock.remaining,
-        monthly.contactUnlock.limit,
-        FREE_MONTHLY_CONTACT_LIMIT,
-      ),
-    };
-  }
-
-  if (
-    entitlement &&
-    !isPaidEntitlement(entitlement) &&
-    hasValidEntitlementQuotas(entitlement)
-  ) {
-    return {
-      aiMatch: slotToFreeQuota(
-        entitlement.quotas.aiMatch.remaining,
-        entitlement.quotas.aiMatch.limit,
-        FREE_MONTHLY_AI_LIMIT,
-      ),
-      contactUnlock: slotToFreeQuota(
-        entitlement.quotas.contactUnlock.remaining,
-        entitlement.quotas.contactUnlock.limit,
-        FREE_MONTHLY_CONTACT_LIMIT,
-      ),
-    };
-  }
-
-  return {
-    aiMatch: slotToFreeQuota(null, null, FREE_MONTHLY_AI_LIMIT),
-    contactUnlock: slotToFreeQuota(null, null, FREE_MONTHLY_CONTACT_LIMIT),
-  };
 }
 
 export function pickGlobalFreeMonthly(

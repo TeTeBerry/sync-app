@@ -88,7 +88,9 @@ export function useChatSession(options: UseChatSessionOptions) {
   }, [welcomeText]);
 
   const hasInFlightChatTurn = useCallback(
-    () => isStreamingRef.current || messagesRef.current.some((message) => message.streaming),
+    () =>
+      isStreamingRef.current ||
+      messagesRef.current.some((message) => message.streaming),
     [],
   );
 
@@ -168,7 +170,7 @@ export function useChatSession(options: UseChatSessionOptions) {
         }
       }
     },
-    [applyHydratedMessages, hasInFlightChatTurn, showWelcome],
+    [applyHydratedMessages, hasInFlightChatTurn],
   );
 
   useEffect(() => {
@@ -184,7 +186,13 @@ export function useChatSession(options: UseChatSessionOptions) {
       showWelcome();
     }
     void loadSessionHistory({ force: true });
-  }, [activityLegacyId, hasInFlightChatTurn, loadSessionHistory, options.sessionId, showWelcome]);
+  }, [
+    activityLegacyId,
+    hasInFlightChatTurn,
+    loadSessionHistory,
+    options.sessionId,
+    showWelcome,
+  ]);
 
   useDidShow(() => {
     void loadSessionHistory({ force: true });

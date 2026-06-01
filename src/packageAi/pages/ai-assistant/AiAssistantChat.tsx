@@ -146,8 +146,7 @@ export function AiAssistantChat({
     initialMessageHandledRef.current = true;
     onInitialMessageSent?.();
 
-    const scoped =
-      activityLegacyId != null && !Number.isNaN(activityLegacyId);
+    const scoped = activityLegacyId != null && !Number.isNaN(activityLegacyId);
     if (isTravelGuideIntent(trimmed) && scoped) {
       travelGuide.openGuideSheetFromText(trimmed);
       return;
@@ -188,13 +187,8 @@ export function AiAssistantChat({
         return;
       }
 
-      const scoped =
-        activityLegacyId != null && !Number.isNaN(activityLegacyId);
-      if (
-        scoped &&
-        !hasImages &&
-        isTravelGuideIntent(trimmed)
-      ) {
+      const scoped = activityLegacyId != null && !Number.isNaN(activityLegacyId);
+      if (scoped && !hasImages && isTravelGuideIntent(trimmed)) {
         setInput('');
         setPendingImages([]);
         travelGuide.openGuideSheetFromText(trimmed);
@@ -216,7 +210,14 @@ export function AiAssistantChat({
         submitLockRef.current = false;
       }
     },
-    [activityLegacyId, aiMatchQuotaExhausted, isStreaming, isStreamingRef, send, travelGuide],
+    [
+      activityLegacyId,
+      aiMatchQuotaExhausted,
+      isStreaming,
+      isStreamingRef,
+      send,
+      travelGuide,
+    ],
   );
 
   const handleClearChat = useCallback(async () => {
@@ -235,8 +236,7 @@ export function AiAssistantChat({
         return;
       }
       const trimmed = reply.trim();
-      const scoped =
-        activityLegacyId != null && !Number.isNaN(activityLegacyId);
+      const scoped = activityLegacyId != null && !Number.isNaN(activityLegacyId);
       if (scoped && isTravelGuideIntent(trimmed)) {
         travelGuide.openGuideSheetFromText(trimmed);
         return;
@@ -249,7 +249,14 @@ export function AiAssistantChat({
         submitLockRef.current = false;
       }
     },
-    [activityLegacyId, aiMatchQuotaExhausted, isStreaming, isStreamingRef, send, travelGuide],
+    [
+      activityLegacyId,
+      aiMatchQuotaExhausted,
+      isStreaming,
+      isStreamingRef,
+      send,
+      travelGuide,
+    ],
   );
 
   return (

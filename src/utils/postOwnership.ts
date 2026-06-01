@@ -21,7 +21,11 @@ function isDemoOwnerClient(userId?: string): boolean {
   return userId?.trim() === DEMO_OWNER_USER_ID;
 }
 
-/** Whether a feed/event post was authored by the current client user. */
+/**
+ * Whether a feed/event post was authored by the current client user.
+ * When `authorUserId` is present, only compares ids (ignores display name).
+ * `authorName` fallback is for legacy rows without stored userId (demo / old data).
+ */
 export function isCurrentUserPostAuthor(
   authorName?: string | null,
   authorUserId?: string,

@@ -24,10 +24,7 @@ vi.mock('../utils/session', () => ({
   getClientUserPhone: () => mockGetClientUserPhone(),
 }));
 
-import {
-  buildAiChatWsSendActor,
-  getClientSessionIdentity,
-} from './requestActor';
+import { buildAiChatWsSendActor, getClientSessionIdentity } from './requestActor';
 
 describe('requestActor', () => {
   beforeEach(() => {

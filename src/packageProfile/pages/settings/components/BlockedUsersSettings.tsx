@@ -98,10 +98,7 @@ export function BlockedUsersSettings() {
     return (
       <View className="s-settings-blocked__empty">
         <Text className="s-settings-blocked__empty-text">加载失败</Text>
-        <Button
-          className="s-settings-blocked__retry"
-          onClick={() => void refetch()}
-        >
+        <Button className="s-settings-blocked__retry" onClick={() => void refetch()}>
           <Text className="s-btn-label">重试</Text>
         </Button>
       </View>

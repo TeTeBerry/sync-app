@@ -272,8 +272,7 @@ export function useEventLiveInfo(
               item.id === feedId
                 ? {
                     ...item,
-                    likes:
-                      typeof likes === 'number' && likes >= 0 ? likes : item.likes,
+                    likes: typeof likes === 'number' && likes >= 0 ? likes : item.likes,
                     liked: Boolean(liked),
                   }
                 : item,

@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import type { TravelGuidePlan } from '../../../types/travelGuide';
 import { measureTravelGuideWallpaperHeight } from './travelGuideWallpaperDraw';
 

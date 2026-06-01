@@ -4,10 +4,7 @@ import { useCallback, useState, type FC } from 'react';
 import Taro from '@tarojs/taro';
 import { PostActionSheet } from './PostActionSheet';
 import { useConfirmDialog } from '../../hooks/useConfirmDialog';
-import {
-  blockUserAndInvalidate,
-  submitReport,
-} from '../../hooks/useSyncApi';
+import { blockUserAndInvalidate, submitReport } from '../../hooks/useSyncApi';
 import { isApiEnabled } from '../../constants/api';
 import { requireAuth } from '../../utils/authGate';
 import { getApiErrorMessage } from '../../utils/apiErrorMessage';

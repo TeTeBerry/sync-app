@@ -15,7 +15,9 @@ type GuideCanvas = HTMLCanvasElement & {
 function exportCanvas(canvas: GuideCanvas): Promise<string> {
   return new Promise((resolve, reject) => {
     Taro.canvasToTempFilePath({
-      canvas,
+      canvas: canvas as unknown as Parameters<
+        typeof Taro.canvasToTempFilePath
+      >[0]['canvas'],
       x: 0,
       y: 0,
       width: canvas.width,

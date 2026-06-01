@@ -26,12 +26,7 @@ vi.mock('../../constants/api', () => ({
   API_BASE_URL: 'https://api.test',
 }));
 
-import {
-  blockUser,
-  fetchBlockedUserIds,
-  submitReport,
-  unblockUser,
-} from './users';
+import { blockUser, fetchBlockedUserIds, submitReport, unblockUser } from './users';
 
 function mockSuccessResponse(data: unknown, statusCode = 200) {
   mockRequest.mockImplementation(

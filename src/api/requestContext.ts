@@ -15,7 +15,7 @@ export function demoActorQueryParams(): { userId: string } {
 
 /**
  * Query-string identity for REST.
- * With Bearer: returns `{}` (backend JwtActorMiddleware injects actor from JWT).
+ * With Bearer: returns `{}` (backend JwtAuthGuard sets req.actor from JWT).
  * Without token: demo `userId` only.
  */
 export function ownerQueryParams(): OwnerQueryParams {

@@ -89,7 +89,10 @@ export function useClientSessionIdentity(): ClientSessionIdentity {
 
   useEffect(() => subscribeAuthSessionChange(refresh), [refresh]);
 
-  return useMemo(() => getClientSessionIdentity(), [revision]);
+  return useMemo(() => {
+    void revision;
+    return getClientSessionIdentity();
+  }, [revision]);
 }
 
 /** @deprecated Use `useClientSessionIdentity`. */

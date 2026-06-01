@@ -34,8 +34,14 @@ export function useAiTravelGuide(options: {
   messagesRef: MutableRefObject<ChatUiMessage[]>;
   isStreaming: boolean;
 }) {
-  const { activityLegacyId, activityTitle, defaultNights, setMessages, messagesRef, isStreaming } =
-    options;
+  const {
+    activityLegacyId,
+    activityTitle,
+    defaultNights,
+    setMessages,
+    messagesRef,
+    isStreaming,
+  } = options;
 
   const [sheetOpen, setSheetOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -144,9 +150,7 @@ export function useAiTravelGuide(options: {
         const message =
           error instanceof Error ? error.message : '攻略生成失败，请稍后重试';
         messagesRef.current = messagesRef.current.map((m) =>
-          m.id === aiMsgId
-            ? { ...m, text: message, streaming: false }
-            : m,
+          m.id === aiMsgId ? { ...m, text: message, streaming: false } : m,
         );
         setMessages(messagesRef.current);
         void Taro.showToast({ title: message, icon: 'none' });
@@ -175,8 +179,7 @@ export function useAiTravelGuide(options: {
     try {
       await shareTravelGuideImage(imagePath);
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : '分享失败，请稍后重试';
+      const message = error instanceof Error ? error.message : '分享失败，请稍后重试';
       if (/取消|cancel/i.test(message)) {
         return;
       }

@@ -157,8 +157,7 @@ export function patchLikedPostInCaches(
     };
   };
 
-  const patchFeedPosts = (posts: HomeFeedPost[] | undefined) =>
-    posts?.map(patchPost);
+  const patchFeedPosts = (posts: HomeFeedPost[] | undefined) => posts?.map(patchPost);
 
   const patchEventPosts = (posts: EventDetailPost[] | undefined) =>
     posts?.map(patchPost);

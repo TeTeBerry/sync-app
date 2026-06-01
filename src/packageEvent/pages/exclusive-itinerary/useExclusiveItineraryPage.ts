@@ -87,9 +87,7 @@ export function useExclusiveItineraryPage() {
   const [generating, setGenerating] = useState(false);
 
   const apiEnabled = isApiEnabled();
-  const scheduleQuery = useItineraryScheduleQuery(
-    apiEnabled ? activityLegacyId : null,
-  );
+  const scheduleQuery = useItineraryScheduleQuery(apiEnabled ? activityLegacyId : null);
   const { generate } = useItineraryMutations(activityLegacyId ?? 0);
   const setFromGenerateResult = useItineraryStore((s) => s.setFromGenerateResult);
 

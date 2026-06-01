@@ -171,80 +171,80 @@ const SettingsPage: React.FC = () => {
           </View>
         </ScrollView>
       ) : (
-      <View className="s-settings__main">
-        {section === 'notifications' && (
-          <View className="s-settings__card">
-            <View className="s-settings__row">
-              <View>
-                <View className="s-settings__row-label">推送通知</View>
-                <View className="s-settings__row-desc">接收活动提醒、互动消息等</View>
-              </View>
-              <Button
-                role="switch"
-                aria-checked={notificationsEnabled}
-                className={`s-settings__toggle${notificationsEnabled ? ' s-settings__toggle--on' : ''}`}
-                onClick={toggleNotifications}
-              >
-                <Text className="s-settings__toggle-knob" />
-              </Button>
-            </View>
-            <View className="s-settings__row">
-              <View>
-                <View className="s-settings__row-label">活动提醒</View>
-                <View className="s-settings__row-desc">活动开始前 24 小时提醒</View>
-              </View>
-              <Button
-                role="switch"
-                aria-checked={notificationsEnabled}
-                className={`s-settings__toggle${notificationsEnabled ? ' s-settings__toggle--on' : ''}`}
-                onClick={toggleNotifications}
-              >
-                <Text className="s-settings__toggle-knob" />
-              </Button>
-            </View>
-          </View>
-        )}
-
-        {section === 'privacy' && (
-          <View className="s-settings__card">
-            {privacyOptions.map((level) => (
-              <Button
-                key={level}
-                className={`s-settings__option${privacyLevel === level ? ' s-settings__option--selected' : ''}`}
-                onClick={() => selectPrivacy(level)}
-              >
+        <View className="s-settings__main">
+          {section === 'notifications' && (
+            <View className="s-settings__card">
+              <View className="s-settings__row">
                 <View>
-                  <View className="s-settings__option-label">
-                    {PRIVACY_LABELS[level]}
-                  </View>
-                  <View className="s-settings__option-desc">
-                    {PRIVACY_DESCS[level]}
-                  </View>
+                  <View className="s-settings__row-label">推送通知</View>
+                  <View className="s-settings__row-desc">接收活动提醒、互动消息等</View>
                 </View>
-                {privacyLevel === level && (
-                  <Check size={20} className="s-settings__check" />
-                )}
-              </Button>
-            ))}
-          </View>
-        )}
+                <Button
+                  role="switch"
+                  aria-checked={notificationsEnabled}
+                  className={`s-settings__toggle${notificationsEnabled ? ' s-settings__toggle--on' : ''}`}
+                  onClick={toggleNotifications}
+                >
+                  <Text className="s-settings__toggle-knob" />
+                </Button>
+              </View>
+              <View className="s-settings__row">
+                <View>
+                  <View className="s-settings__row-label">活动提醒</View>
+                  <View className="s-settings__row-desc">活动开始前 24 小时提醒</View>
+                </View>
+                <Button
+                  role="switch"
+                  aria-checked={notificationsEnabled}
+                  className={`s-settings__toggle${notificationsEnabled ? ' s-settings__toggle--on' : ''}`}
+                  onClick={toggleNotifications}
+                >
+                  <Text className="s-settings__toggle-knob" />
+                </Button>
+              </View>
+            </View>
+          )}
 
-        {section === 'help' && (
-          <>
-            <View className="s-settings__card s-settings__faq">
-              {FAQ_QA.map((item, idx) => (
-                <View key={idx} className="s-settings__faq-item">
-                  <View className="s-settings__faq-q">{item.q}</View>
-                  <View className="s-settings__faq-a">{item.a}</View>
-                </View>
+          {section === 'privacy' && (
+            <View className="s-settings__card">
+              {privacyOptions.map((level) => (
+                <Button
+                  key={level}
+                  className={`s-settings__option${privacyLevel === level ? ' s-settings__option--selected' : ''}`}
+                  onClick={() => selectPrivacy(level)}
+                >
+                  <View>
+                    <View className="s-settings__option-label">
+                      {PRIVACY_LABELS[level]}
+                    </View>
+                    <View className="s-settings__option-desc">
+                      {PRIVACY_DESCS[level]}
+                    </View>
+                  </View>
+                  {privacyLevel === level && (
+                    <Check size={20} className="s-settings__check" />
+                  )}
+                </Button>
               ))}
             </View>
-            <Button className="s-settings__feedback-btn" onClick={submitFeedback}>
-              <Text className="s-btn-label">提交反馈</Text>
-            </Button>
-          </>
-        )}
-      </View>
+          )}
+
+          {section === 'help' && (
+            <>
+              <View className="s-settings__card s-settings__faq">
+                {FAQ_QA.map((item, idx) => (
+                  <View key={idx} className="s-settings__faq-item">
+                    <View className="s-settings__faq-q">{item.q}</View>
+                    <View className="s-settings__faq-a">{item.a}</View>
+                  </View>
+                ))}
+              </View>
+              <Button className="s-settings__feedback-btn" onClick={submitFeedback}>
+                <Text className="s-btn-label">提交反馈</Text>
+              </Button>
+            </>
+          )}
+        </View>
       )}
     </View>
   );

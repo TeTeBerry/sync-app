@@ -13,10 +13,8 @@ import {
 } from '../../api/sync/profile';
 import type { PurchaseProfilePackagePayload } from '../../types/backend';
 import {
-  invalidateProfile,
   invalidateProfileEntitlements,
   invalidateProfilePackageState,
-  invalidateUser,
 } from '../../utils/queryInvalidation';
 import { useApiQuery } from '../useApiQuery';
 

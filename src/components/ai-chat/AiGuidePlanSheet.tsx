@@ -21,7 +21,10 @@ import {
   normalizeDepartureForSubmit,
   type DepartureSuggestionItem,
 } from '../../utils/travelGuideDepartureSuggestions';
-import type { AiGuidePlanFormValues, TravelGuideBudgetTier } from '../../types/travelGuide';
+import type {
+  AiGuidePlanFormValues,
+  TravelGuideBudgetTier,
+} from '../../types/travelGuide';
 import { TRAVEL_GUIDE_BUDGET_OPTIONS } from '../../types/travelGuide';
 import { Input, ScrollView, Text, View } from '@tarojs/components';
 
@@ -179,7 +182,15 @@ export function AiGuidePlanSheet({
       selfDrive,
       accommodationNights,
     });
-  }, [accommodationNights, budgetTier, canSubmit, departure, headcount, onSubmit, selfDrive]);
+  }, [
+    accommodationNights,
+    budgetTier,
+    canSubmit,
+    departure,
+    headcount,
+    onSubmit,
+    selfDrive,
+  ]);
 
   if (!open) return null;
 
@@ -200,9 +211,17 @@ export function AiGuidePlanSheet({
         <View className="s-ai-guide-plan-sheet__top">
           <View className="s-ai-guide-plan-sheet__title-row">
             <View className="s-ai-guide-plan-sheet__title-icon" aria-hidden>
-              <Sparkles size={16} className="s-ai-guide-plan-sheet__title-icon-sparkle" color="#ff0066" aria-hidden />
+              <Sparkles
+                size={16}
+                className="s-ai-guide-plan-sheet__title-icon-sparkle"
+                color="#ff0066"
+                aria-hidden
+              />
             </View>
-            <Text id="ai-guide-plan-sheet-title" className="s-ai-guide-plan-sheet__title">
+            <Text
+              id="ai-guide-plan-sheet-title"
+              className="s-ai-guide-plan-sheet__title"
+            >
               AI出行攻略
             </Text>
             <Text className="s-ai-guide-plan-sheet__beta">Beta</Text>
@@ -231,7 +250,11 @@ export function AiGuidePlanSheet({
                 跨城请填出发城市（如「上海」），勿选会场附近地址
               </Text>
               <View className="s-ai-guide-plan-sheet__input-wrap">
-                <MapPin size={18} className="s-ai-guide-plan-sheet__input-icon" aria-hidden />
+                <MapPin
+                  size={18}
+                  className="s-ai-guide-plan-sheet__input-icon"
+                  aria-hidden
+                />
                 <Input
                   className="s-ai-guide-plan-sheet__input"
                   type="text"
@@ -277,7 +300,11 @@ export function AiGuidePlanSheet({
               <View className="s-ai-guide-plan-sheet__card">
                 <View className="s-ai-guide-plan-sheet__card-row">
                   <View className="s-ai-guide-plan-sheet__card-summary">
-                    <Users size={18} className="s-ai-guide-plan-sheet__card-icon" aria-hidden />
+                    <Users
+                      size={18}
+                      className="s-ai-guide-plan-sheet__card-icon"
+                      aria-hidden
+                    />
                     <Text className="s-ai-guide-plan-sheet__card-summary-text">
                       {headcount} 人
                     </Text>
@@ -307,8 +334,12 @@ export function AiGuidePlanSheet({
                       hoverClass="s-ai-guide-plan-sheet__budget--pressed"
                       onClick={() => setBudgetTier(opt.id)}
                     >
-                      <Text className="s-ai-guide-plan-sheet__budget-label">{opt.label}</Text>
-                      <Text className="s-ai-guide-plan-sheet__budget-hint">{opt.hint}</Text>
+                      <Text className="s-ai-guide-plan-sheet__budget-label">
+                        {opt.label}
+                      </Text>
+                      <Text className="s-ai-guide-plan-sheet__budget-hint">
+                        {opt.hint}
+                      </Text>
                     </Button>
                   );
                 })}
@@ -318,10 +349,16 @@ export function AiGuidePlanSheet({
             <View className="s-ai-guide-plan-sheet__card s-ai-guide-plan-sheet__card--drive">
               <View className="s-ai-guide-plan-sheet__card-row">
                 <View className="s-ai-guide-plan-sheet__drive-copy">
-                  <Car size={18} className="s-ai-guide-plan-sheet__card-icon" aria-hidden />
+                  <Car
+                    size={18}
+                    className="s-ai-guide-plan-sheet__card-icon"
+                    aria-hidden
+                  />
                   <View className="s-ai-guide-plan-sheet__drive-text">
                     <Text className="s-ai-guide-plan-sheet__drive-title">是否自驾</Text>
-                    <Text className="s-ai-guide-plan-sheet__drive-hint">影响交通路线推荐</Text>
+                    <Text className="s-ai-guide-plan-sheet__drive-hint">
+                      影响交通路线推荐
+                    </Text>
                   </View>
                 </View>
                 <ThemeToggle

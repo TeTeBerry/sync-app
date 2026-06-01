@@ -29,7 +29,7 @@ GET /api/profile
 Authorization: Bearer eyJ...
 ```
 
-后端 [`JwtActorMiddleware`](../sync-app-backend/src/common/middleware/jwt-actor.middleware.ts) 将 JWT `sub` → `req.query.userId`、`name` → `req.query.authorName`；**前端 REST 不再传** demo Query（`activityLegacyId` 等业务参数仍可有）。  
+后端全局 [`JwtAuthGuard`](../sync-app-backend/src/common/auth/jwt-auth.guard.ts) 校验 Bearer 并设置 `req.actor`（`RequestActor`）；**前端 REST 不再传** demo Query（`activityLegacyId` 等业务参数仍可有）。详见 [`AUTH.md`](../sync-app-backend/docs/AUTH.md)。  
 AI WebSocket：upgrade 带 Bearer 时 actor 来自 JWT；`send` 仅需业务字段（`messages`、`activityLegacyId` 等）。前端 [`buildAiChatWsSendActor()`](../src/api/aiChatActor.ts) 已登录时不传 body `userId`/`userName`。
 
 ---

@@ -1,20 +1,24 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+const storage = new Map<string, unknown>();
+
+vi.mock('@tarojs/taro', () => ({
+  default: {
+    getStorageSync: (key: string) => storage.get(key),
+    setStorageSync: (key: string, value: unknown) => {
+      storage.set(key, value);
+    },
+    removeStorageSync: (key: string) => {
+      storage.delete(key);
+    },
+  },
+}));
+
 import {
   clearLocalChatHistory,
   readLocalChatHistory,
   writeLocalChatHistory,
 } from './aiChatLocalHistory';
-
-const storage = new Map<string, unknown>();
-
-jest.mock('@tarojs/taro', () => ({
-  getStorageSync: (key: string) => storage.get(key),
-  setStorageSync: (key: string, value: unknown) => {
-    storage.set(key, value);
-  },
-  removeStorageSync: (key: string) => {
-    storage.delete(key);
-  },
-}));
 
 describe('aiChatLocalHistory', () => {
   beforeEach(() => {

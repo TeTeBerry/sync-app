@@ -578,7 +578,11 @@ export function goAiAssistant(options?: GoAiAssistantOptions) {
   if (options?.openAiGuideSheet) {
     intent.openAiGuideSheet = true;
   }
-  if (intent.initialMessage || intent.activityLegacyId != null || intent.openAiGuideSheet) {
+  if (
+    intent.initialMessage ||
+    intent.activityLegacyId != null ||
+    intent.openAiGuideSheet
+  ) {
     useNavigationStore.getState().setAiAssistantIntent(intent);
   }
 

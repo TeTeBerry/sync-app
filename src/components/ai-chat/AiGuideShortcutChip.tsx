@@ -26,7 +26,11 @@ export function AiGuideShortcutChip({
     >
       <Map size={14} className="s-ai-guide-shortcut-chip__icon" aria-hidden />
       <Text className="s-ai-guide-shortcut-chip__label">AI攻略</Text>
-      <ChevronRight size={14} className="s-ai-guide-shortcut-chip__chevron" aria-hidden />
+      <ChevronRight
+        size={14}
+        className="s-ai-guide-shortcut-chip__chevron"
+        aria-hidden
+      />
     </Button>
   );
 }

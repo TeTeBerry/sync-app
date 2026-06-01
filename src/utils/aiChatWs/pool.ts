@@ -73,7 +73,9 @@ function routePooledSocketMessage(res: { data: unknown }): void {
     if (wsPool) {
       wsPool.handshake = {
         sessionId:
-          typeof json.sessionId === 'string' ? json.sessionId : wsPool.handshake?.sessionId,
+          typeof json.sessionId === 'string'
+            ? json.sessionId
+            : wsPool.handshake?.sessionId,
         activityLegacyId:
           typeof json.activityLegacyId === 'number'
             ? json.activityLegacyId

@@ -2,7 +2,6 @@
  * Chat UI types. Stream/card contracts: `sync-app-backend/src/shared/chat/`.
  */
 import type {
-  AiStreamEvent as AiChatStreamEvent,
   RecommendedActivityCard,
   RecommendedPostCard,
 } from '@sync/chat-contracts';
@@ -10,7 +9,7 @@ import type { ConversationState } from './conversationState';
 import type { TravelGuideChatPayload } from './travelGuide';
 
 export type {
-  AiChatStreamEvent,
+  AiStreamEvent as AiChatStreamEvent,
   RecommendedActivityCard,
   RecommendedPostAuthorGender,
   RecommendedPostCard,

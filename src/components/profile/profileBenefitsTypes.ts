@@ -1,13 +1,4 @@
-import type {
-  EventPackageEntitlement,
-  FreeMonthlyQuota,
-  PackageTierId,
-  ProfileActivityItem,
-} from '../../types/backend';
-import { safeFiniteNumber, safeTrim } from '../../utils/safeString';
-import type { ProfileBenefits } from './mockData';
-import { PROFILE_SEED_ACTIVITY_LEGACY_ID } from '../../constants/profilePackage';
-import { MOCK_PACKAGE_CATALOG, PACKAGE_TIER_ORDER } from './profilePackageData';
+import type { PackageTierId } from '../../types/backend';
 
 export type ProfileBenefitRowAccent = 'purple' | 'pink' | 'map' | 'gold';
 

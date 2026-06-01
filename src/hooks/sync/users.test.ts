@@ -31,9 +31,7 @@ describe('unblockUserAndInvalidate', () => {
 
 describe('normalizeBlockList', () => {
   it('builds items from ids when API omits items', () => {
-    expect(
-      normalizeBlockList({ blockedUserIds: ['u1', 'u2'], items: [] }),
-    ).toEqual({
+    expect(normalizeBlockList({ blockedUserIds: ['u1', 'u2'], items: [] })).toEqual({
       blockedUserIds: ['u1', 'u2'],
       items: [
         { userId: 'u1', name: '用户' },

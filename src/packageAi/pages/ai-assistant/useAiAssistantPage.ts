@@ -27,9 +27,7 @@ export function useAiAssistantPage() {
   const [navBoot] = useState(() => {
     const intent = useNavigationStore.getState().consumeAiAssistantIntent();
     if (intent?.activityLegacyId != null && !Number.isNaN(intent.activityLegacyId)) {
-      useNavigationStore
-        .getState()
-        .setActiveActivityLegacyId(intent.activityLegacyId);
+      useNavigationStore.getState().setActiveActivityLegacyId(intent.activityLegacyId);
     } else if (intent) {
       useNavigationStore.getState().setActiveActivityLegacyId(null);
     }

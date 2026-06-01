@@ -4,7 +4,7 @@ import { hydrateHomeCachesFromStorage } from './utils/homeCacheStorage';
 hydrateHomeCachesFromStorage();
 
 import './app.scss';
-import Taro, { useLaunch } from '@tarojs/taro';
+import { useLaunch } from '@tarojs/taro';
 import { ensureAuth } from './utils/auth';
 import { isApiEnabled } from './constants/api';
 import { View } from '@tarojs/components';

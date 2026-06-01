@@ -69,9 +69,6 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
     resetSession,
     persistSessionFromStream,
     sessionIdRef,
-    userIdRef,
-    userNameRef,
-    userPhoneRef,
     setIsStreamingRef,
     isStreamingRef,
     cancelHistoryLoad,
@@ -166,14 +163,7 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
         abortRef.current = null;
       }
     },
-    [
-      cancelHistoryLoad,
-      messagesRef,
-      runStream,
-      setIsStreamingRef,
-      setMessages,
-      streamErrorText,
-    ],
+    [cancelHistoryLoad, messagesRef, runStream, setIsStreamingRef, setMessages],
   );
 
   const send = useCallback(

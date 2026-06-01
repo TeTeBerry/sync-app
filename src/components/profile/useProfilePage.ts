@@ -26,7 +26,6 @@ import { persistUserName } from '../../utils/session';
 import type { ProfileActivityItem } from '../../types/backend';
 import { profileActivities, profilePosts, profileUser } from './mockData';
 import type { PackageTierId } from './profilePackageData';
-import { buildDebugContactUnlockExhaustedPreview } from './profileDebugModals';
 import type { ProfileSettingsSectionProps } from './ProfileSettingsSection';
 import {
   normalizeProfileUserData,
@@ -153,8 +152,10 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
 
   const openSettings = useCallback(
     (section: 'notifications' | 'privacy' | 'help' | 'blocked') => {
-    go(`${ROUTES.SETTINGS}?section=${section}`);
-  }, []);
+      go(`${ROUTES.SETTINGS}?section=${section}`);
+    },
+    [],
+  );
 
   const handleAuthLoggedIn = useCallback(() => {
     refreshAuthSession();

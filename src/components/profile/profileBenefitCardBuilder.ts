@@ -4,7 +4,7 @@ import type {
   PackageTierId,
   ProfileActivityItem,
 } from '../../types/backend';
-import { safeFiniteNumber, safeTrim } from '../../utils/safeString';
+import { safeTrim } from '../../utils/safeString';
 import type { ProfileBenefits } from './mockData';
 import { MOCK_PACKAGE_CATALOG } from './profilePackageData';
 import type {

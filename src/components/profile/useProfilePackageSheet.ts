@@ -3,7 +3,6 @@ import { isApiEnabled } from '../../constants/api';
 import { useProfileActivitiesQuery } from '../../hooks/useSyncApi';
 import { useNavigationStore } from '../../stores';
 import { invalidateProfilePackageState } from '../../utils/queryInvalidation';
-import type { ProfileActivityItem } from '../../types/backend';
 import type { PackageTierId } from './profilePackageData';
 import { profileActivities } from './mockData';
 import {

@@ -11,13 +11,13 @@ function isPersistableMessage(message: ChatUiMessage): boolean {
   if (message.streaming) return false;
   return Boolean(
     message.text?.trim() ||
-      message.imagePreview ||
-      message.ocrText ||
-      message.recommendedPosts?.length ||
-      message.recommendedActivity ||
-      message.createdPost ||
-      message.suggestedReplies?.length ||
-      message.travelGuide,
+    message.imagePreview ||
+    message.ocrText ||
+    message.recommendedPosts?.length ||
+    message.recommendedActivity ||
+    message.createdPost ||
+    message.suggestedReplies?.length ||
+    message.travelGuide,
   );
 }
 
@@ -31,7 +31,8 @@ export function readLocalChatHistory(sessionId: string): ChatUiMessage[] | null 
         Boolean(item) &&
         typeof item === 'object' &&
         typeof (item as ChatUiMessage).id === 'string' &&
-        ((item as ChatUiMessage).from === 'user' || (item as ChatUiMessage).from === 'ai'),
+        ((item as ChatUiMessage).from === 'user' ||
+          (item as ChatUiMessage).from === 'ai'),
     );
   } catch {
     return null;

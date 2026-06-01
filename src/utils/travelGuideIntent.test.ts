@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import { isTravelGuideIntent } from './travelGuideIntent';
 
 describe('isTravelGuideIntent', () => {

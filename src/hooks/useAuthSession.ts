@@ -19,8 +19,14 @@ export function useAuthSession() {
 
   useEffect(() => subscribeAuthSessionChange(refresh), [refresh]);
 
-  const loggedIn = useMemo(() => isLoggedIn(), [revision]);
-  const user = useMemo(() => (loggedIn ? getAuthUser() : null), [loggedIn, revision]);
+  const loggedIn = useMemo(() => {
+    void revision;
+    return isLoggedIn();
+  }, [revision]);
+  const user = useMemo(() => {
+    void revision;
+    return loggedIn ? getAuthUser() : null;
+  }, [loggedIn, revision]);
 
   return { loggedIn, user, refresh };
 }
