@@ -586,7 +586,7 @@ export function goProfileUpgrade() {
 
 export type GoAiAssistantOptions = Pick<
   AiAssistantNavIntent,
-  'initialMessage' | 'activityLegacyId' | 'openAiGuideSheet'
+  'initialMessage' | 'activityLegacyId' | 'openAiGuideSheet' | 'autoRunTravelGuideForm'
 >;
 
 /** Pre-download AI subpackage and warm ai-assistant page (touch / mount). */
@@ -609,10 +609,14 @@ export function goAiAssistant(options?: GoAiAssistantOptions) {
   if (options?.openAiGuideSheet) {
     intent.openAiGuideSheet = true;
   }
+  if (options?.autoRunTravelGuideForm) {
+    intent.autoRunTravelGuideForm = options.autoRunTravelGuideForm;
+  }
   if (
     intent.initialMessage ||
     intent.activityLegacyId != null ||
-    intent.openAiGuideSheet
+    intent.openAiGuideSheet ||
+    intent.autoRunTravelGuideForm
   ) {
     useNavigationStore.getState().setAiAssistantIntent(intent);
   }

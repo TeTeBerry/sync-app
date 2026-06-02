@@ -12,6 +12,7 @@ import { useEventDetailRoute } from './useEventDetailRoute';
 import { useEventDetailActivityHeader } from './useEventDetailActivityHeader';
 import { useEventDetailEntitlements } from './useEventDetailEntitlements';
 import { useEventDetailAiActions } from './useEventDetailAiActions';
+import { useEventDetailTravelGuide } from './useEventDetailTravelGuide';
 
 export type UseEventDetailPageOptions = {
   confirm: (options: ConfirmDialogOptions) => Promise<boolean>;
@@ -38,7 +39,10 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
   const contactUnlockQuota = useContactUnlockQuota(eventId);
   const { entitlements, openContactUnlockExhaustedModal } =
     useEventDetailEntitlements(eventId);
-  const ai = useEventDetailAiActions(eventId);
+  const travelGuide = useEventDetailTravelGuide(eventId);
+  const ai = useEventDetailAiActions(eventId, {
+    openGuideSheet: travelGuide.openGuideSheet,
+  });
 
   const currentUserQuery = useCurrentUserQuery();
   const profileUser = useResolvedProfile();
@@ -99,6 +103,11 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     handleShortcutTag: ai.handleShortcutTag,
     handleOpenAiGuide: ai.handleOpenAiGuide,
     handleOpenExclusiveItinerary: ai.handleOpenExclusiveItinerary,
+    guideSheetOpen: travelGuide.guideSheetOpen,
+    closeGuideSheet: travelGuide.closeGuideSheet,
+    handleGuideSheetSubmit: travelGuide.handleGuideSheetSubmit,
+    guideDefaultNights: travelGuide.guideDefaultNights,
+    guideEventCity: travelGuide.guideEventCity,
     invalidEventId: route.invalidEventId,
     entitlements,
   };

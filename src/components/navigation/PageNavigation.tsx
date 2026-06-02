@@ -100,6 +100,7 @@ const PageNavigation: React.FC<PageNavigationProps> = ({
       aria-label={backAriaLabel}
       hoverClass="s-page-nav__back--pressed"
       onTap={handleBack}
+      onClick={handleBack}
     >
       <ChevronLeft size={22} />
     </Button>

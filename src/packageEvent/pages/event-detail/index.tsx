@@ -13,6 +13,7 @@ import EventDetailLiveSection from './components/EventDetailLiveSection';
 import { EventPostsVirtualList } from './components/EventPostsVirtualList';
 import { EVENT_DETAIL_SCROLL_ID } from './useEventDetailPosts';
 import { useEventDetailPage } from './useEventDetailPage';
+import { AiGuidePlanSheet } from '../../../components/ai-chat/AiGuidePlanSheet';
 import PageNavigation from '../../../components/navigation/PageNavigation';
 import { Button } from '../../../components/ui';
 import { ScrollView, Text, View } from '@tarojs/components';
@@ -62,6 +63,11 @@ const EventDetailPage = () => {
     handleShortcutTag,
     handleOpenAiGuide,
     handleOpenExclusiveItinerary,
+    guideSheetOpen,
+    closeGuideSheet,
+    handleGuideSheetSubmit,
+    guideDefaultNights,
+    guideEventCity,
     entitlements,
   } = page;
 
@@ -188,6 +194,13 @@ const EventDetailPage = () => {
         packageSheetOpen={entitlements.packageSheetOpen}
         packageSheetInitialTierId={entitlements.packageSheetInitialTierId}
         onClosePackageSheet={entitlements.closePackageUpgradeSheet}
+      />
+      <AiGuidePlanSheet
+        open={guideSheetOpen}
+        defaultNights={guideDefaultNights}
+        eventCity={guideEventCity}
+        onClose={closeGuideSheet}
+        onSubmit={handleGuideSheetSubmit}
       />
       <BottomNavSlot />
     </View>

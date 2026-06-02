@@ -96,9 +96,11 @@ const AiAssistantPage: FC = () => {
                 <AiAssistantChat
                   initialMessage={page.pendingInitialMessage}
                   initialOpenAiGuideSheet={page.pendingOpenAiGuideSheet}
+                  initialAutoRunTravelGuideForm={page.pendingAutoGuideForm}
                   activityLegacyId={page.activityLegacyId}
                   activityTitle={page.activityTitle}
                   onInitialMessageSent={page.handleInitialMessageSent}
+                  registerReloadChatHistory={page.registerReloadChatHistory}
                   onMessageCountChange={page.setMessageCount}
                   chatBodyHeight={page.chatBodyHeight}
                   userAvatar={page.profileUserData.avatar}

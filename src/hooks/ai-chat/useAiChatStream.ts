@@ -68,6 +68,7 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
     loadSessionHistory,
     resetSession,
     persistSessionFromStream,
+    onTurnPersisted,
     sessionIdRef,
     setIsStreamingRef,
     isStreamingRef,
@@ -98,6 +99,7 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
     onExistingPost,
     onMatchResults,
     persistSessionFromStream,
+    onTurnPersisted,
     createTypewriter,
     typewriterCharDelayMs,
   });

@@ -3,7 +3,14 @@ import { useCallback, useState } from 'react';
 import { goAiAssistant, goExclusiveItinerary } from '../../../utils/route';
 import { isAiShortcutTag, recordAiShortcutTagUse } from '../../../utils/aiShortcutTags';
 
-export function useEventDetailAiActions(eventId: number) {
+export type UseEventDetailAiActionsOptions = {
+  openGuideSheet: () => void;
+};
+
+export function useEventDetailAiActions(
+  eventId: number,
+  { openGuideSheet }: UseEventDetailAiActionsOptions,
+) {
   const [prompt, setPrompt] = useState('');
 
   const bumpShortcutTagUsage = useCallback((tag: string) => {
@@ -36,18 +43,18 @@ export function useEventDetailAiActions(eventId: number) {
   const handleShortcutTag = useCallback(
     (tag: string) => {
       if (tag === 'AI攻略') {
-        goAiAssistant({ activityLegacyId: eventId, openAiGuideSheet: true });
+        openGuideSheet();
         return;
       }
       bumpShortcutTagUsage(tag);
       goAiAssistant({ initialMessage: tag, activityLegacyId: eventId });
     },
-    [bumpShortcutTagUsage, eventId],
+    [bumpShortcutTagUsage, eventId, openGuideSheet],
   );
 
   const handleOpenAiGuide = useCallback(() => {
-    goAiAssistant({ activityLegacyId: eventId, openAiGuideSheet: true });
-  }, [eventId]);
+    openGuideSheet();
+  }, [openGuideSheet]);
 
   return {
     prompt,

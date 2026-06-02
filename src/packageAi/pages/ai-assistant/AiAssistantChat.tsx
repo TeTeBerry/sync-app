@@ -11,6 +11,7 @@ import { useKeyboardInset } from '../../../hooks/useKeyboardInset';
 import { API_BASE_URL } from '../../../constants/api';
 import { uploadChatImageRefs } from '../../../utils/chatImage';
 import type { inferUserGenderFromName } from '../../../utils/inferAuthorGender';
+import type { AiGuidePlanFormValues } from '../../../types/travelGuide';
 import { Canvas, Text, View } from '@tarojs/components';
 import { invalidateProfileEntitlements } from '../../../utils/queryInvalidation';
 import { invalidateCache } from '../../../hooks/useApiQuery';
@@ -23,9 +24,12 @@ import { eventCityFromLocation } from '../../../utils/travelGuideDepartureSugges
 export type AiAssistantChatProps = {
   initialMessage?: string | null;
   initialOpenAiGuideSheet?: boolean;
+  initialAutoRunTravelGuideForm?: AiGuidePlanFormValues | null;
   activityLegacyId?: number;
   activityTitle?: string;
   onInitialMessageSent?: () => void;
+  /** Page-level useDidShow — reload Mongo/local history (hooks in child components are unreliable). */
+  registerReloadChatHistory?: (reload: (() => void) | null) => void;
   onMessageCountChange?: (count: number) => void;
   chatBodyHeight?: number;
   userAvatar?: string;
@@ -37,9 +41,11 @@ export type AiAssistantChatProps = {
 export function AiAssistantChat({
   initialMessage,
   initialOpenAiGuideSheet = false,
+  initialAutoRunTravelGuideForm = null,
   activityLegacyId,
   activityTitle,
   onInitialMessageSent,
+  registerReloadChatHistory,
   onMessageCountChange,
   chatBodyHeight,
   userAvatar,
@@ -52,6 +58,7 @@ export function AiAssistantChat({
   const keyboardInset = useKeyboardInset();
   const initialMessageHandledRef = useRef(false);
   const initialGuideSheetHandledRef = useRef(false);
+  const initialAutoGuideHandledRef = useRef(false);
   const submitLockRef = useRef(false);
 
   const activityQuery = useActivityDetailQuery(activityLegacyId);
@@ -92,6 +99,7 @@ export function AiAssistantChat({
     isStreamingRef,
     send,
     clearChat,
+    reloadHistory,
   } = useAiChatStream({
     welcomeText,
     mockReply,
@@ -133,6 +141,14 @@ export function AiAssistantChat({
   }, [messages.length, onMessageCountChange]);
 
   useEffect(() => {
+    if (!registerReloadChatHistory) return;
+    registerReloadChatHistory(() => {
+      void reloadHistory({ force: true });
+    });
+    return () => registerReloadChatHistory(null);
+  }, [registerReloadChatHistory, reloadHistory]);
+
+  useEffect(() => {
     if (!initialMessage) {
       return;
     }
@@ -165,10 +181,25 @@ export function AiAssistantChat({
 
   useEffect(() => {
     if (!initialOpenAiGuideSheet || initialGuideSheetHandledRef.current) return;
+    if (activityLegacyId == null || Number.isNaN(activityLegacyId)) return;
     initialGuideSheetHandledRef.current = true;
     onInitialMessageSent?.();
     travelGuide.openGuideSheet();
-  }, [initialOpenAiGuideSheet, onInitialMessageSent, travelGuide]);
+  }, [activityLegacyId, initialOpenAiGuideSheet, onInitialMessageSent, travelGuide]);
+
+  useEffect(() => {
+    const form = initialAutoRunTravelGuideForm;
+    if (!form || initialAutoGuideHandledRef.current) return;
+    if (activityLegacyId == null || Number.isNaN(activityLegacyId)) return;
+    initialAutoGuideHandledRef.current = true;
+    onInitialMessageSent?.();
+    travelGuide.handleSheetSubmit(form);
+  }, [
+    activityLegacyId,
+    initialAutoRunTravelGuideForm,
+    onInitialMessageSent,
+    travelGuide,
+  ]);
 
   const submit = useCallback(
     async (text: string, images?: string[]) => {

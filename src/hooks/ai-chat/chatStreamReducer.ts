@@ -17,6 +17,7 @@ export interface ProcessChatStreamEventsOptions {
   setMessages: Dispatch<SetStateAction<ChatUiMessage[]>>;
   activityLegacyId?: number;
   persistSessionFromStream: (sessionId: string) => void;
+  onTurnPersisted?: () => void;
   onPostCreated?: (event: Extract<AiChatStreamEvent, { type: 'post_created' }>) => void;
   onExistingPost?: (
     event: Extract<AiChatStreamEvent, { type: 'existing_post' }>,
@@ -148,6 +149,7 @@ export async function processChatStreamEvents(
       if (event.sessionId) {
         persistSessionFromStream(event.sessionId);
       }
+      onTurnPersisted?.();
       break;
     }
   }

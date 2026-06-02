@@ -40,6 +40,7 @@ export interface UseWsChatStreamOptions {
   ) => void;
   onMatchResults?: (activityLegacyId?: number) => void | Promise<void>;
   persistSessionFromStream: (sessionId: string) => void;
+  onTurnPersisted?: () => void;
   createTypewriter: (options: {
     charDelayMs?: number;
     onUpdate: (visible: string) => void;
@@ -62,6 +63,7 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
     onExistingPost,
     onMatchResults,
     persistSessionFromStream,
+    onTurnPersisted,
     createTypewriter,
     typewriterCharDelayMs = 22,
   } = options;
@@ -136,6 +138,7 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
           setMessages,
           activityLegacyId: activityId,
           persistSessionFromStream,
+          onTurnPersisted,
           onPostCreated,
           onExistingPost,
           onMatchResults,
@@ -172,6 +175,7 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
       onMatchResults,
       onPostCreated,
       persistSessionFromStream,
+      onTurnPersisted,
       sessionIdRef,
       setMessages,
       streamErrorText,

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useDidShow } from '@tarojs/taro';
+import { useDidHide } from '@tarojs/taro';
 import { fetchChatSession, clearChatSession } from '../../api/syncApi';
 import { useAiChatStore } from '../../stores/aiChatStore';
 import { mapHistoryToUiMessages } from '../../utils/aiChatHistory';
@@ -174,6 +174,10 @@ export function useChatSession(options: UseChatSessionOptions) {
   );
 
   useEffect(() => {
+    void loadSessionHistory({ force: true });
+  }, [loadSessionHistory]);
+
+  useEffect(() => {
     const nextSessionId = resolveSessionId(options.sessionId, activityLegacyId);
     if (sessionIdRef.current === nextSessionId) return;
 
@@ -194,8 +198,16 @@ export function useChatSession(options: UseChatSessionOptions) {
     showWelcome,
   ]);
 
-  useDidShow(() => {
-    void loadSessionHistory({ force: true });
+  const flushLocalPersist = useCallback(() => {
+    if (persistTimerRef.current != null) {
+      clearTimeout(persistTimerRef.current);
+      persistTimerRef.current = null;
+    }
+    writeLocalChatHistory(sessionIdRef.current, messagesRef.current);
+  }, []);
+
+  useDidHide(() => {
+    flushLocalPersist();
   });
 
   useEffect(() => {
@@ -209,7 +221,6 @@ export function useChatSession(options: UseChatSessionOptions) {
   }, []);
 
   useEffect(() => {
-    if (!hasLoadedHistoryRef.current) return;
     if (hasInFlightChatTurn()) return;
     if (!messages.some((m) => m.from === 'user' && !m.streaming)) return;
 
@@ -254,6 +265,10 @@ export function useChatSession(options: UseChatSessionOptions) {
     persistSessionId(sessionId, activityLegacyIdRef.current);
   }, []);
 
+  const onTurnPersisted = useCallback(() => {
+    flushLocalPersist();
+  }, [flushLocalPersist]);
+
   return {
     messages,
     setMessages,
@@ -263,6 +278,8 @@ export function useChatSession(options: UseChatSessionOptions) {
     showWelcome,
     resetSession,
     persistSessionFromStream,
+    onTurnPersisted,
+    flushLocalPersist,
     sessionIdRef,
     userIdRef,
     userNameRef,

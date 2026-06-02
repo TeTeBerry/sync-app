@@ -1,4 +1,5 @@
 import './AiGuidePlanSheet.scss';
+import Taro from '@tarojs/taro';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   BedDouble,
@@ -17,6 +18,8 @@ import {
   type TravelGuidePlaceSuggestion,
 } from '../../api/sync/travelGuide';
 import {
+  departurePickCoercedFromPlace,
+  departureValueForSubmit,
   mapPlaceSuggestionsToDepartureItems,
   normalizeDepartureForSubmit,
   type DepartureSuggestionItem,
@@ -168,9 +171,17 @@ export function AiGuidePlanSheet({
   const canSubmit = Boolean(departure.trim());
 
   const pickSuggestion = useCallback((item: DepartureSuggestionItem) => {
-    setDeparture(item.label);
+    const value = departureValueForSubmit(item);
+    setDeparture(value);
     setPlaceSuggestions([]);
     setShowSuggestions(false);
+    if (departurePickCoercedFromPlace(item)) {
+      void Taro.showToast({
+        title: `已使用出发城市：${value}`,
+        icon: 'none',
+        duration: 2000,
+      });
+    }
   }, []);
 
   const handleSubmit = useCallback(() => {

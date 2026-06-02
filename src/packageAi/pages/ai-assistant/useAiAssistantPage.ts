@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Taro, { useDidShow } from '@tarojs/taro';
 import { useDeferredMount } from '../../../hooks/useDeferredMount';
 import { useNavBarInsets } from '../../../hooks/useNavBarInsets';
@@ -13,7 +13,13 @@ import {
   selectSetActiveActivityLegacyId,
   useNavigationStore,
 } from '../../../stores';
-import { goBack, goEventDetail, goProfileBenefits, ROUTES } from '../../../utils/route';
+import {
+  endRouteTransition,
+  goBack,
+  goEventDetail,
+  goProfileBenefits,
+  ROUTES,
+} from '../../../utils/route';
 import { DEFER_AI_CHAT_MS } from '../../../utils/timing';
 import { resolveAiChatWsUrl } from '../../../constants/api';
 import { isAiChatWsDevLog } from '../../../utils/aiChatWs';
@@ -39,6 +45,7 @@ export function useAiAssistantPage() {
     return {
       initialMessage: intent?.initialMessage?.trim() ?? null,
       openAiGuideSheet: Boolean(intent?.openAiGuideSheet),
+      autoRunTravelGuideForm: intent?.autoRunTravelGuideForm ?? null,
     };
   });
   const [pendingInitialMessage, setPendingInitialMessage] = useState(
@@ -47,7 +54,11 @@ export function useAiAssistantPage() {
   const [pendingOpenAiGuideSheet, setPendingOpenAiGuideSheet] = useState(
     navBoot.openAiGuideSheet,
   );
+  const [pendingAutoGuideForm, setPendingAutoGuideForm] = useState(
+    navBoot.autoRunTravelGuideForm,
+  );
   const [messageCount, setMessageCount] = useState(0);
+  const reloadChatHistoryRef = useRef<(() => void) | null>(null);
   const [upgradeSheetOpen, setUpgradeSheetOpen] = useState(false);
   const profileActivityLegacyId = useProfileActivityLegacyId();
   const aiMatchQuota = useAiMatchQuota();
@@ -108,6 +119,7 @@ export function useAiAssistantPage() {
   const handleInitialMessageSent = useCallback(() => {
     setPendingInitialMessage(null);
     setPendingOpenAiGuideSheet(false);
+    setPendingAutoGuideForm(null);
   }, []);
 
   const applyAiAssistantIntent = useCallback(() => {
@@ -118,6 +130,9 @@ export function useAiAssistantPage() {
     }
     if (intent.openAiGuideSheet) {
       setPendingOpenAiGuideSheet(true);
+    }
+    if (intent.autoRunTravelGuideForm) {
+      setPendingAutoGuideForm(intent.autoRunTravelGuideForm);
     }
     if (intent.activityLegacyId != null && !Number.isNaN(intent.activityLegacyId)) {
       setActiveActivityLegacyId(intent.activityLegacyId);
@@ -130,9 +145,17 @@ export function useAiAssistantPage() {
     applyAiAssistantIntent();
   }, [applyAiAssistantIntent]);
 
-  useDidShow(applyAiAssistantIntent);
+  const registerReloadChatHistory = useCallback((reload: (() => void) | null) => {
+    reloadChatHistoryRef.current = reload;
+  }, []);
+
+  useDidShow(() => {
+    applyAiAssistantIntent();
+    reloadChatHistoryRef.current?.();
+  });
 
   const handleBack = useCallback(() => {
+    endRouteTransition();
     const pages = Taro.getCurrentPages();
     if (pages.length <= 1) {
       if (activityLegacyId != null && !Number.isNaN(activityLegacyId)) {
@@ -142,7 +165,16 @@ export function useAiAssistantPage() {
       goBack(ROUTES.HOME);
       return;
     }
-    goBack();
+    void Taro.navigateBack({
+      delta: 1,
+      fail: () => {
+        if (activityLegacyId != null && !Number.isNaN(activityLegacyId)) {
+          goEventDetail(activityLegacyId);
+          return;
+        }
+        goBack(ROUTES.HOME);
+      },
+    });
   }, [activityLegacyId]);
 
   return {
@@ -150,6 +182,7 @@ export function useAiAssistantPage() {
     chatReady,
     pendingInitialMessage,
     pendingOpenAiGuideSheet,
+    pendingAutoGuideForm,
     messageCount,
     setMessageCount,
     upgradeSheetOpen,
@@ -169,5 +202,6 @@ export function useAiAssistantPage() {
     activityLegacyId,
     handleInitialMessageSent,
     handleBack,
+    registerReloadChatHistory,
   };
 }
