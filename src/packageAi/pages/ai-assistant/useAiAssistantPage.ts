@@ -7,7 +7,12 @@ import { useEndRouteTransitionOnShow } from '../../../hooks/useEndRouteTransitio
 import { useTabPageMainHeight } from '../../../hooks/useTabPageMainHeight';
 import { useResolvedProfile } from '../../../hooks/useResolvedProfile';
 import { useActivityDetailQuery } from '../../../hooks/useSyncApi';
-import { useNavigationStore } from '../../../stores';
+import {
+  selectActiveActivityLegacyId,
+  selectConsumeAiAssistantIntent,
+  selectSetActiveActivityLegacyId,
+  useNavigationStore,
+} from '../../../stores';
 import { goBack, goEventDetail, goProfileBenefits, ROUTES } from '../../../utils/route';
 import { DEFER_AI_CHAT_MS } from '../../../utils/timing';
 import { resolveAiChatWsUrl } from '../../../constants/api';
@@ -58,15 +63,10 @@ export function useAiAssistantPage() {
     });
   }, []);
 
-  const consumeAiAssistantIntent = useNavigationStore(
-    (state) => state.consumeAiAssistantIntent,
-  );
-  const activityLegacyId = useNavigationStore(
-    (state) => state.activeActivityLegacyId ?? undefined,
-  );
-  const setActiveActivityLegacyId = useNavigationStore(
-    (state) => state.setActiveActivityLegacyId,
-  );
+  const consumeAiAssistantIntent = useNavigationStore(selectConsumeAiAssistantIntent);
+  const activityLegacyId =
+    useNavigationStore(selectActiveActivityLegacyId) ?? undefined;
+  const setActiveActivityLegacyId = useNavigationStore(selectSetActiveActivityLegacyId);
 
   const profileUserData = useResolvedProfile();
   const userGender = useMemo(

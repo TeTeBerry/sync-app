@@ -4,6 +4,7 @@ import {
   seedActivityDetailCache,
   seedActivityDetailFromEventCard,
   seedActivityDetailFromFeaturedEvent,
+  seedActivityDetailFromHomeSignupEvent,
 } from './activityDetailCache';
 
 describe('activityDetailCache', () => {
@@ -47,6 +48,23 @@ describe('activityDetailCache', () => {
     ]);
     expect(cached?.name).toBe('Home Fest');
     expect(cached?.location).toBe('Shanghai');
+  });
+
+  it('seeds detail cache from home signup event', () => {
+    seedActivityDetailFromHomeSignupEvent({
+      id: 12,
+      title: 'Signup Fest',
+      date: '07/01',
+      location: 'Beijing',
+      image: '',
+      category: 'EDM节',
+      hot: false,
+      attendees: 5,
+      going: false,
+    });
+
+    const cached = getCacheData<{ name: string }>(['activities', 'detail', 12]);
+    expect(cached?.name).toBe('Signup Fest');
   });
 
   it('merges into existing detail cache', () => {

@@ -1,4 +1,4 @@
-import { Check, MessageCircle, ThumbsUp } from 'lucide-react-taro';
+import { Check, MessageCircle, ThumbsUp } from '../../../../components/icons';
 import { Button } from '../../../../components/ui';
 import { postActionIconColor } from '../../../../utils/postActionColors';
 import { Text, View } from '@tarojs/components';

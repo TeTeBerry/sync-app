@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from 'react';
-import { Image } from 'lucide-react-taro';
+import { ImageIcon } from '../../components/icons';
 import './PostImageGrid.scss';
 import {
   featuredPostImageUrl,
@@ -18,7 +18,7 @@ export interface PostImageGridProps {
 const THUMB_ROW_WIDTH = 200;
 const FEATURED_WIDTH = 480;
 
-export function PostImageGrid({ images, maxDisplay = 6 }: PostImageGridProps) {
+export function PostImageGrid({ images, maxDisplay = 4 }: PostImageGridProps) {
   const validImages = useMemo(
     () =>
       images
@@ -113,7 +113,7 @@ export function PostImageGrid({ images, maxDisplay = 6 }: PostImageGridProps) {
       >
         {renderImage(displayImages[0], 's-post-image-grid__img', true)}
         <View className="s-post-image-grid__count-badge">
-          <Image size={14} />
+          <ImageIcon size={14} />
           {images.length}
         </View>
       </View>
@@ -147,7 +147,7 @@ export function PostImageCount({ count }: { count: number }) {
   if (count <= 0) return null;
   return (
     <Text className="s-post-image-count">
-      <Image size={12} />
+      <ImageIcon size={12} />
       {count}
     </Text>
   );

@@ -1,5 +1,5 @@
 import type { TravelGuidePlan } from '../../../types/travelGuide';
-import { createMapOffscreenCanvas } from '../../event-map/mapOffscreenCanvas';
+import { createOffscreenCanvas } from '../../../utils/offscreenCanvas';
 
 const W = 750;
 const PAD = 40;
@@ -100,7 +100,7 @@ function buildWallpaperSections(
  * 按与绘制相同的换行规则测量内容高度（避免 estimate 偏小导致导出被裁切）。
  */
 export function measureTravelGuideWallpaperHeight(plan: TravelGuidePlan): number {
-  const measureCanvas = createMapOffscreenCanvas(W, 64);
+  const measureCanvas = createOffscreenCanvas(W, 64);
   const ctx = measureCanvas?.getContext('2d');
   if (!ctx) {
     return conservativeHeightEstimate(plan);

@@ -1,5 +1,5 @@
 import './AiGuideShortcutChip.scss';
-import { ChevronRight, Map } from 'lucide-react-taro';
+import { ChevronRight, Map } from '../../components/icons';
 import { Button, cn } from '../ui';
 import { Text } from '@tarojs/components';
 

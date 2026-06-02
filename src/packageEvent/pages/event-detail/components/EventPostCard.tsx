@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { Check, CircleCheck, MapPin, Users, Zap } from 'lucide-react-taro';
+import { Check, CircleCheck, MapPin, Users, Zap } from '../../../../components/icons';
 import PostCardActionBar from '../../../../components/post/PostCardActionBar';
 import { buildPostSharePayload } from '../../../../components/post/postCardShare';
 import {
@@ -19,6 +19,7 @@ import {
   resolveContentTypeKey,
 } from '../../../../utils/postContentTypeDisplay';
 import { PostImageCount, PostImageGrid } from '../../../../components/post';
+import { EVENT_POST_IMAGE_MAX_DISPLAY } from '../../../../constants/listPerf';
 import { isCurrentUserPostAuthor } from '../../../../utils/postOwnership';
 import type { EventDetailPost } from '../../../../types/backend';
 import {
@@ -189,7 +190,9 @@ function EventPostCardInner({
 
       {bodyText ? <Text className="s-event-post__text">{bodyText}</Text> : null}
 
-      {post.images?.length ? <PostImageGrid images={post.images} /> : null}
+      {post.images?.length ? (
+        <PostImageGrid images={post.images} maxDisplay={EVENT_POST_IMAGE_MAX_DISPLAY} />
+      ) : null}
 
       {primaryTypeKey || groupProgress || isCompleted || displayTags.length ? (
         <View className="s-event-post__meta-row">

@@ -4,7 +4,7 @@ import AvatarGroup from '../AvatarGroup';
 import { ACTIVITY_GUEST_AVATARS } from '../../constants/activityGuestAvatars';
 import { ImageWithFallback } from '../ImageWithFallback';
 import { Button } from '../ui';
-import { Calendar, Flame, MapPin, Sparkles, Users } from 'lucide-react-taro';
+import { Calendar, Flame, MapPin, Sparkles, Users } from '../../components/icons';
 import {
   activityStatusCardClass,
   getActivityStatusFromActivity,

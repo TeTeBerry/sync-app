@@ -1,7 +1,7 @@
 import './events.scss';
 import { useDidShow } from '@tarojs/taro';
 import React, { useCallback, useMemo, useState } from 'react';
-import { Search, TrendingUp } from 'lucide-react-taro';
+import { Search, TrendingUp } from '../../components/icons';
 import TabPageHeader from '../../components/navigation/TabPageHeader';
 import { Button, Input } from '../../components/ui';
 import { View, Text, ScrollView } from '@tarojs/components';
@@ -42,7 +42,7 @@ const Events: React.FC = () => {
   useEndRouteTransitionOnShow();
 
   useDidShow(() => {
-    preloadHotRoutes();
+    preloadHotRoutes(ROUTES.EVENTS);
   });
 
   const navInsets = useNavBarInsets();

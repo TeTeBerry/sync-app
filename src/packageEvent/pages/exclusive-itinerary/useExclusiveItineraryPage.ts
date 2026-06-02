@@ -12,7 +12,7 @@ import {
   resolveEventDetailIdFromQuery,
   ROUTES,
 } from '../../../utils/route';
-import { useNavigationStore } from '../../../stores/navigationStore';
+import { selectActiveActivityLegacyId, useNavigationStore } from '../../../stores';
 import {
   EXCLUSIVE_ITINERARY_DEFAULT_SELECTED_IDS,
   EXCLUSIVE_ITINERARY_DJS,
@@ -62,9 +62,7 @@ function mapApiDj(dj: ItineraryDj): ExclusiveItineraryDj {
 
 export function useExclusiveItineraryPage() {
   const router = useRouter();
-  const activeActivityLegacyId = useNavigationStore(
-    (state) => state.activeActivityLegacyId,
-  );
+  const activeActivityLegacyId = useNavigationStore(selectActiveActivityLegacyId);
 
   const activityLegacyId = useMemo(
     () => resolveEventDetailIdFromQuery(router.params, activeActivityLegacyId),

@@ -1,4 +1,4 @@
-import { Beer, Droplet, Footprints, Toilet } from 'lucide-react-taro';
+import { Beer, Droplet, Footprints, Toilet } from '../../../components/icons';
 
 type LiveInfoIcon = typeof Footprints;
 

@@ -17,6 +17,7 @@ import {
   invalidateProfilePackageState,
 } from '../../utils/queryInvalidation';
 import { useApiQuery } from '../useApiQuery';
+import type { QueryEnableOptions } from './types';
 
 function profileApiEnabled(): boolean {
   return isApiEnabled() && isLoggedIn();
@@ -59,8 +60,12 @@ export function useProfilePackagesQuery() {
   });
 }
 
-export function useProfileEntitlementsQuery(activityLegacyId?: number) {
-  const enabled = profileApiEnabled();
+export function useProfileEntitlementsQuery(
+  activityLegacyId?: number,
+  options?: QueryEnableOptions,
+) {
+  const tabEnabled = options?.enabled ?? true;
+  const enabled = profileApiEnabled() && tabEnabled;
   const scopedId =
     activityLegacyId != null && !Number.isNaN(activityLegacyId)
       ? activityLegacyId
@@ -102,8 +107,9 @@ export async function consumeProfileContactUnlockAndInvalidate(
   return result;
 }
 
-export function useProfileActivitiesQuery() {
-  const enabled = profileApiEnabled();
+export function useProfileActivitiesQuery(options?: QueryEnableOptions) {
+  const tabEnabled = options?.enabled ?? true;
+  const enabled = profileApiEnabled() && tabEnabled;
 
   return useApiQuery({
     queryKey: ['profile', 'activities'],

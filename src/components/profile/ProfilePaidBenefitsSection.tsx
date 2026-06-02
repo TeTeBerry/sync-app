@@ -1,6 +1,6 @@
 import './ProfilePaidBenefitsSection.scss';
 import React from 'react';
-import { ChevronRight, Zap } from 'lucide-react-taro';
+import { ChevronRight, Zap } from '../../components/icons';
 import type { ProfileEventBenefitCardModel } from './profileBenefitsMapper';
 import ProfileEventBenefitCard from './ProfileEventBenefitCard';
 import ThemedPageLoader from '../ThemedPageLoader';

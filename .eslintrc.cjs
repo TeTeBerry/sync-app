@@ -36,11 +36,27 @@ module.exports = {
     'react/react-in-jsx-scope': 'off',
     'react/prop-types': 'off',
     'react-hooks/exhaustive-deps': 'warn',
+    'no-restricted-imports': [
+      'error',
+      {
+        paths: [
+          {
+            name: 'lucide-react-taro',
+            message:
+              'Import icons from @/components/icons (tree-shake + bundle audit).',
+          },
+        ],
+      },
+    ],
   },
   overrides: [
     {
       files: ['**/*.test.ts', '**/*.test.tsx'],
       env: { jest: true },
+    },
+    {
+      files: ['src/components/icons/**/*.ts'],
+      rules: { 'no-restricted-imports': 'off' },
     },
   ],
 };

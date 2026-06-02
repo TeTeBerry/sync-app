@@ -1,5 +1,5 @@
 import React from 'react';
-import { Check, ChevronDown } from 'lucide-react-taro';
+import { Check, ChevronDown } from '../../../../components/icons';
 import { Button } from '../../../../components/ui';
 import { Image, ScrollView, Text, View } from '@tarojs/components';
 import { picsumUrl } from '../../../../utils/imageUrl';

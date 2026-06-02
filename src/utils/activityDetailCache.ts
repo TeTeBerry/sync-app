@@ -1,5 +1,5 @@
 import { setCacheData } from '../hooks/useApiQuery';
-import type { BackendActivity } from '../types/backend';
+import type { BackendActivity, HomeSummary } from '../types/backend';
 import type { EventCardUi, FeaturedEvent } from './apiMappers';
 import { parseActivityLegacyId } from './activityLegacyId';
 
@@ -62,6 +62,31 @@ export function seedActivityDetailFromEventCard(event: EventCardUi): void {
       attendees: event.attendees,
     }),
   );
+}
+
+export function seedActivityDetailFromHomeSignupEvent(
+  event: HomeSummary['signupEvents'][number],
+): void {
+  const legacyId = parseActivityLegacyId(event.id);
+  if (legacyId == null) {
+    return;
+  }
+  seedActivityDetailCache(
+    minimalActivity(legacyId, {
+      name: event.title,
+      date: event.date,
+      location: event.location,
+      image: event.image,
+      hot: event.hot,
+      attendees: event.attendees,
+    }),
+  );
+}
+
+export function seedActivityDetailsFromHomeSummary(summary: HomeSummary): void {
+  for (const event of summary.signupEvents) {
+    seedActivityDetailFromHomeSignupEvent(event);
+  }
 }
 
 export function seedActivityDetailFromFeaturedEvent(event: FeaturedEvent): void {

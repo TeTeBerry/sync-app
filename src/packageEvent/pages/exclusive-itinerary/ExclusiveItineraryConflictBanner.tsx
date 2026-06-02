@@ -1,4 +1,4 @@
-import { TriangleAlert } from 'lucide-react-taro';
+import { TriangleAlert } from '../../../components/icons';
 import { Button } from '../../../components/ui';
 import { Text, View } from '@tarojs/components';
 import type { ItineraryConflict } from '../../../types/backend';

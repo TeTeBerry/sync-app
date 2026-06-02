@@ -28,7 +28,12 @@ import {
   patchUpdatedProfilePostInCaches,
 } from '../../utils/queryInvalidation';
 import { isCurrentUserPostAuthor } from '../../utils/postOwnership';
+import {
+  STALE_POST_COMMENTS_MS,
+  STALE_POSTS_FEED_MS,
+} from '../../constants/queryCache';
 import { useApiQuery } from '../useApiQuery';
+import { useHomeSummary } from './activities';
 import type { QueryEnableOptions } from './types';
 import { invalidateNotificationQueries } from './notifications';
 
@@ -45,19 +50,25 @@ export function usePopularPostsQuery(options?: QueryEnableOptions) {
       return result;
     },
     enabled,
-    staleTime: 30_000,
+    staleTime: STALE_POSTS_FEED_MS,
   });
 }
 
 export function usePopularPosts(options?: QueryEnableOptions) {
-  const query = usePopularPostsQuery(options);
+  const tabEnabled = options?.enabled ?? true;
+  const { data: summary, isLoading: summaryLoading } = useHomeSummary();
+  const embedded = summary?.popularPosts;
+  const query = usePopularPostsQuery({
+    enabled: tabEnabled && (embedded == null || embedded.length === 0),
+  });
 
-  const posts: HomeFeedPost[] = (query.data ?? []).map(mapHomeFeedPost);
+  const posts: HomeFeedPost[] = (embedded ?? query.data ?? []).map(mapHomeFeedPost);
+  const usesEmbedded = embedded != null && embedded.length > 0;
 
   return {
     posts,
-    isLoading: query.isLoading,
-    isError: query.isError,
+    isLoading: tabEnabled && !usesEmbedded && (query.isLoading || summaryLoading),
+    isError: tabEnabled && !usesEmbedded && query.isError,
     refetch: query.refetch,
   };
 }
@@ -102,7 +113,7 @@ export function useEventPostsQuery(
     queryKey: ['posts', 'activity', activityLegacyId, userId],
     queryFn: () => fetchPostsByActivity(activityLegacyId as number),
     enabled,
-    staleTime: 30_000,
+    staleTime: STALE_POSTS_FEED_MS,
   });
 }
 
@@ -113,7 +124,7 @@ export function usePostCommentsQuery(postId: string, enabled: boolean) {
     queryKey: ['posts', postId, 'comments'],
     queryFn: () => fetchPostComments(postId),
     enabled: apiEnabled && enabled && Boolean(postId),
-    staleTime: 10_000,
+    staleTime: STALE_POST_COMMENTS_MS,
   });
 }
 

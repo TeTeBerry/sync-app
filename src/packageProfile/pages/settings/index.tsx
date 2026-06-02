@@ -1,7 +1,7 @@
 import './settings.scss';
 import Taro, { useRouter } from '@tarojs/taro';
 import React, { useCallback, useEffect, useState } from 'react';
-import { Check } from 'lucide-react-taro';
+import { Check } from '../../../components/icons';
 import PageNavigation from '../../../components/navigation/PageNavigation';
 import { ROUTES } from '../../../utils/route';
 import {

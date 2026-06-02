@@ -2,15 +2,16 @@ import './BottomNav.scss';
 import React from 'react';
 import { Button } from '../ui';
 import { View, Text } from '@tarojs/components';
-import { CalendarDays, House, User } from 'lucide-react-taro';
+import { CalendarDays, House, User } from '../../components/icons';
 import {
   preloadAiSubpackage,
   preloadEventSubpackage,
   preloadProfileSubpackage,
 } from '../../utils/subpackagePreload';
+import type { RoutePath } from '../../utils/route';
 import { ROUTES, switchTabTo, useActiveRoutePath } from '../../utils/route';
 
-function preloadSubpackagesForTab(path: (typeof ROUTES)[keyof typeof ROUTES]) {
+function preloadSubpackagesForTab(path: RoutePath) {
   if (path === ROUTES.HOME || path === ROUTES.EVENTS) {
     preloadEventSubpackage();
     return;

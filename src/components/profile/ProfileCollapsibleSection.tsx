@@ -1,5 +1,10 @@
 import React, { useState } from 'react';
-import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp } from 'lucide-react-taro';
+import {
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  ChevronUp,
+} from '../../components/icons';
 import { useClientPagination } from '../../hooks/useClientPagination';
 import { Button } from '../ui';
 import { Text, View } from '@tarojs/components';

@@ -335,6 +335,8 @@ export interface HomeSummary {
     attendees: number;
     going: boolean;
   }>;
+  /** Present when loaded via `GET /home` (merged to avoid extra `/posts/popular` RTT). */
+  popularPosts?: HomeFeedPost[];
 }
 
 export type NotificationType = 'general' | 'interaction' | 'system' | 'match';

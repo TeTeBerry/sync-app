@@ -1,4 +1,4 @@
-import { Users } from 'lucide-react-taro';
+import { Users } from '../../../components/icons';
 import { type FC } from 'react';
 import { ImageWithFallback } from '../../../components/ImageWithFallback';
 import { Button } from '../../../components/ui';

@@ -8,10 +8,9 @@ import { useLaunch } from '@tarojs/taro';
 import { ensureAuth } from './utils/auth';
 import { isApiEnabled } from './constants/api';
 import { View } from '@tarojs/components';
-import { LucideTaroProvider } from 'lucide-react-taro';
+import { LucideTaroProvider } from './components/icons';
 import type { PropsWithChildren } from 'react';
 import NavigationLoadingOverlay from './components/navigation/NavigationLoadingOverlay';
-import { preloadHotRoutes } from './utils/route';
 import { preloadEventSubpackage } from './utils/subpackagePreload';
 
 export default function App({ children }: PropsWithChildren) {
@@ -23,7 +22,6 @@ export default function App({ children }: PropsWithChildren) {
       });
     }
     preloadEventSubpackage();
-    preloadHotRoutes();
   });
 
   return (

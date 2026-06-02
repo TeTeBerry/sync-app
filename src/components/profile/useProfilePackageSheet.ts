@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { isApiEnabled } from '../../constants/api';
 import { useProfileActivitiesQuery } from '../../hooks/useSyncApi';
-import { useNavigationStore } from '../../stores';
+import { selectConsumeProfileIntent, useNavigationStore } from '../../stores';
 import { invalidateProfilePackageState } from '../../utils/queryInvalidation';
 import type { PackageTierId } from './profilePackageData';
 import { profileActivities } from './mockData';
@@ -18,13 +18,13 @@ export type UseProfilePackageSheetOptions = {
 export function useProfilePackageSheet({
   paidEntitlements,
 }: UseProfilePackageSheetOptions) {
-  const consumeProfileIntent = useNavigationStore(
-    (state) => state.consumeProfileIntent,
-  );
+  const consumeProfileIntent = useNavigationStore(selectConsumeProfileIntent);
   const apiEnabled = isApiEnabled();
-  const activitiesQuery = useProfileActivitiesQuery();
 
   const [packageSheetOpen, setPackageSheetOpen] = useState(false);
+  const activitiesQuery = useProfileActivitiesQuery({
+    enabled: packageSheetOpen,
+  });
   const [packageSheetActivityLegacyId, setPackageSheetActivityLegacyId] = useState<
     number | undefined
   >(undefined);

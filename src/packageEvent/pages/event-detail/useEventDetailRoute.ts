@@ -3,13 +3,11 @@ import { useEffect, useMemo, useState } from 'react';
 import { resolveEventDetailIdFromQuery, warmAiAssistant } from '../../../utils/route';
 import { useDeferredMount } from '../../../hooks/useDeferredMount';
 import { DEFER_EVENT_POSTS_MS } from '../../../utils/timing';
-import { useNavigationStore } from '../../../stores/navigationStore';
+import { selectActiveActivityLegacyId, useNavigationStore } from '../../../stores';
 
 export function useEventDetailRoute() {
   const router = useRouter();
-  const activeActivityLegacyId = useNavigationStore(
-    (state) => state.activeActivityLegacyId,
-  );
+  const activeActivityLegacyId = useNavigationStore(selectActiveActivityLegacyId);
   const [scrollTop, setScrollTop] = useState<number | undefined>();
   const feedReady = useDeferredMount(DEFER_EVENT_POSTS_MS);
   const composerReady = useDeferredMount(0);

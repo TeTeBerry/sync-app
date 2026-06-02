@@ -1,5 +1,5 @@
 import './AiGuideResultCard.scss';
-import { RefreshCw, Share2 } from 'lucide-react-taro';
+import { RefreshCw, Share2 } from '../../components/icons';
 import { Button } from '../ui';
 import { openSingleImagePreview } from '../../utils/openImagePreview';
 import { Image, Text, View } from '@tarojs/components';

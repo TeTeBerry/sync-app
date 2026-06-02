@@ -1,5 +1,5 @@
 import './PostActionMenu.scss';
-import { EllipsisVertical, Share2 } from 'lucide-react-taro';
+import { EllipsisVertical, Share2 } from '../../components/icons';
 import { useCallback, useState, type FC } from 'react';
 import Taro from '@tarojs/taro';
 import { PostActionSheet } from './PostActionSheet';

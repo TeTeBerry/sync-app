@@ -7,7 +7,7 @@ import {
   MapPin,
   Sparkles,
   Star,
-} from 'lucide-react-taro';
+} from '../../components/icons';
 import {
   getNextTierId,
   type ProfileEventBenefitRow,

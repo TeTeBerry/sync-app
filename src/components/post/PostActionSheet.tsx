@@ -7,7 +7,7 @@ import {
   ShieldAlert,
   Trash2,
   X,
-} from 'lucide-react-taro';
+} from '../../components/icons';
 import React, { useMemo } from 'react';
 import { useOverlayLock } from '../../hooks/useOverlayLock';
 import type { ReportCategory } from '../../types/backend';

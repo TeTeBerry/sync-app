@@ -21,6 +21,7 @@ type EventPostsVirtualListProps = {
   onComplete?: EventPostCardProps['onComplete'];
   onCommentSubmitted: EventPostCardProps['onCommentSubmitted'];
   hasMore?: boolean;
+  hasMoreLocal?: boolean;
   isLoadingMore?: boolean;
 };
 
@@ -40,19 +41,17 @@ export function EventPostsVirtualList({
   onComplete,
   onCommentSubmitted,
   hasMore = false,
+  hasMoreLocal = false,
   isLoadingMore = false,
 }: EventPostsVirtualListProps) {
   const highlightScrolledRef = useRef<string | null>(null);
 
   useEffect(() => {
-    if (!highlightPostId || items.length === 0) return;
+    if (!highlightPostId) return;
     if (highlightScrolledRef.current === highlightPostId) return;
-
-    const index = items.findIndex((item) => item.post.id === highlightPostId);
-    if (index < 0) return;
+    if (!items.some((item) => item.post.id === highlightPostId)) return;
 
     highlightScrolledRef.current = highlightPostId;
-
     const elId = `post-${highlightPostId}`;
     setTimeout(() => onScrollToPostId?.(elId), 150);
   }, [highlightPostId, items, onScrollToPostId]);
@@ -85,7 +84,7 @@ export function EventPostsVirtualList({
       {isLoadingMore ? (
         <Text className="s-event-posts-list__more">加载更多…</Text>
       ) : null}
-      {!hasMore && items.length > 0 ? (
+      {!hasMore && !hasMoreLocal && items.length > 0 ? (
         <Text className="s-event-posts-list__more s-event-posts-list__more--end">
           没有更多帖子了
         </Text>

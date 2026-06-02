@@ -14,6 +14,11 @@ import { scrollElementToCenter } from '../../../utils/scrollToCenter';
 import type { EventDetailPost } from '../../../types/post';
 import type { EventDetailTabId } from './components/EventDetailContentTabs';
 import {
+  EVENT_POSTS_INITIAL_RENDER,
+  EVENT_POSTS_RENDER_STEP,
+} from '../../../constants/listPerf';
+import { useWindowedList } from '../../../hooks/useWindowedList';
+import {
   normalizeEventPostList,
   type EventPostListItem,
 } from './utils/eventPostNormalize';
@@ -48,15 +53,29 @@ export function useEventDetailPosts({
     () => new Set(),
   );
 
-  const postItems = useMemo(
+  const allPostItems = useMemo(
     (): EventPostListItem[] => normalizeEventPostList(postsQuery.items),
     [postsQuery.items],
   );
 
+  const {
+    visibleItems: postItems,
+    hasMoreToShow: hasMoreVisiblePosts,
+    showMore: showMoreVisiblePosts,
+    ensureIndexVisible,
+  } = useWindowedList(allPostItems, {
+    initialSize: EVENT_POSTS_INITIAL_RENDER,
+    step: EVENT_POSTS_RENDER_STEP,
+  });
+
   const handleScrollToLower = useCallback(() => {
     if (contentTab !== 'posts') return;
+    if (hasMoreVisiblePosts) {
+      showMoreVisiblePosts();
+      return;
+    }
     void postsQuery.loadMore();
-  }, [contentTab, postsQuery]);
+  }, [contentTab, hasMoreVisiblePosts, showMoreVisiblePosts, postsQuery]);
 
   const handleApply = useCallback(
     (postId: string) => {
@@ -113,6 +132,12 @@ export function useEventDetailPosts({
 
   const scrollToElement = useCallback(
     (elementId: string) => {
+      const postId = elementId.startsWith('post-')
+        ? elementId.slice('post-'.length)
+        : elementId;
+      const index = allPostItems.findIndex((item) => item.post.id === postId);
+      if (index >= 0) ensureIndexVisible(index);
+
       const targetSelector = `#${elementId}`;
       void scrollElementToCenter(
         `#${EVENT_DETAIL_SCROLL_ID}`,
@@ -131,20 +156,26 @@ export function useEventDetailPosts({
         }
       });
     },
-    [setScrollTop],
+    [allPostItems, ensureIndexVisible, setScrollTop],
   );
 
-  const togglePostComments = useCallback((postId: string) => {
-    setExpandedCommentPostIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(postId)) {
-        next.delete(postId);
-      } else {
-        next.add(postId);
-      }
-      return next;
-    });
-  }, []);
+  const togglePostComments = useCallback(
+    (postId: string) => {
+      const index = allPostItems.findIndex((item) => item.post.id === postId);
+      if (index >= 0) ensureIndexVisible(index);
+
+      setExpandedCommentPostIds((prev) => {
+        const next = new Set(prev);
+        if (next.has(postId)) {
+          next.delete(postId);
+        } else {
+          next.add(postId);
+        }
+        return next;
+      });
+    },
+    [allPostItems, ensureIndexVisible],
+  );
 
   const handleDeletePost = useCallback(
     async (post: EventDetailPost) => {
@@ -204,6 +235,8 @@ export function useEventDetailPosts({
 
   return {
     postItems,
+    totalPostCount: allPostItems.length,
+    hasMoreVisiblePosts,
     appliedPostIds,
     expandedCommentPostIds,
     handleScrollToLower,

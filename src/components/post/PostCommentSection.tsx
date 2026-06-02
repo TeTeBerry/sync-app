@@ -1,7 +1,7 @@
 import './PostCommentSection.scss';
 import Taro from '@tarojs/taro';
 import { useCallback, useState, type FC } from 'react';
-import { ChevronUp, Heart, Send } from 'lucide-react-taro';
+import { ChevronUp, Heart, Send } from '../../components/icons';
 import { commentPostAndInvalidate, usePostCommentsQuery } from '../../hooks/useSyncApi';
 import { isApiEnabled } from '../../constants/api';
 import { requireAuth } from '../../utils/authGate';
@@ -205,7 +205,12 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
       </View>
 
       <View className="s-post-comments__composer">
-        <Image className="s-post-comments__avatar" src={userAvatar} />
+        <Image
+          className="s-post-comments__avatar"
+          src={userAvatar}
+          mode="aspectFill"
+          lazyLoad
+        />
         <View className="s-post-comments__input-wrap">
           <Input
             className="s-post-comments__input"

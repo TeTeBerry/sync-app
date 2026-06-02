@@ -1,6 +1,6 @@
 import Taro, { useDidShow } from '@tarojs/taro';
 import { useCallback, useState } from 'react';
-import { Ban } from 'lucide-react-taro';
+import { Ban } from '../../../../components/icons';
 import ThemedPageLoader from '../../../../components/ThemedPageLoader';
 import { ImageWithFallback } from '../../../../components/ImageWithFallback';
 import { useConfirmDialog } from '../../../../hooks/useConfirmDialog';

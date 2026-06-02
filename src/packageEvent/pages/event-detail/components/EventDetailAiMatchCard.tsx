@@ -1,4 +1,4 @@
-import { Send, Sparkles } from 'lucide-react-taro';
+import { Send, Sparkles } from '../../../../components/icons';
 import { AiGuideShortcutChip } from '../../../../components/ai-chat/AiGuideShortcutChip';
 import { Button } from '../../../../components/ui';
 import { Text, Textarea, View } from '@tarojs/components';

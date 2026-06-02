@@ -1,4 +1,4 @@
-import { ChevronRight, Music2 } from 'lucide-react-taro';
+import { ChevronRight, Music2 } from '../../../../components/icons';
 import { Button } from '../../../../components/ui';
 import { Text, View } from '@tarojs/components';
 

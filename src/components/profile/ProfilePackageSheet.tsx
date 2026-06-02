@@ -13,7 +13,7 @@ import {
   Sparkles,
   Ticket,
   X,
-} from 'lucide-react-taro';
+} from '../../components/icons';
 import { useOverlayLock } from '../../hooks/useOverlayLock';
 import {
   useProfilePackagesQuery,

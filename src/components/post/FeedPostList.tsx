@@ -1,5 +1,10 @@
 import './FeedPostList.scss';
 import { memo, useCallback, useState, type FC } from 'react';
+import {
+  FEED_POST_IMAGE_MAX_DISPLAY,
+  HOME_FEED_INITIAL_RENDER,
+} from '../../constants/listPerf';
+import { useWindowedList } from '../../hooks/useWindowedList';
 import PostCardActionBar from './PostCardActionBar';
 import { buildPostSharePayload } from './postCardShare';
 import { PostCommentSection } from './PostCommentSection';
@@ -124,7 +129,9 @@ function FeedPostRowInner({
 
       {bodyText ? <Text className="s-home-post__text">{bodyText}</Text> : null}
 
-      {post.images?.length ? <PostImageGrid images={post.images} /> : null}
+      {post.images?.length ? (
+        <PostImageGrid images={post.images} maxDisplay={FEED_POST_IMAGE_MAX_DISPLAY} />
+      ) : null}
 
       <ContentTypeBadge types={contentTypeKeys} />
 
@@ -141,15 +148,17 @@ function FeedPostRowInner({
         />
       </View>
 
-      <PostCommentSection
-        postId={post.id}
-        postAuthorName={postName}
-        postAuthorUserId={post.userId}
-        expanded={commentsExpanded}
-        onToggleExpanded={() => onToggleComments(post.id)}
-        currentUserAvatar={currentUserAvatar}
-        onCommentSubmitted={onCommentSubmitted}
-      />
+      {commentsExpanded ? (
+        <PostCommentSection
+          postId={post.id}
+          postAuthorName={postName}
+          postAuthorUserId={post.userId}
+          expanded
+          onToggleExpanded={() => onToggleComments(post.id)}
+          currentUserAvatar={currentUserAvatar}
+          onCommentSubmitted={onCommentSubmitted}
+        />
+      ) : null}
     </View>
   );
 }
@@ -167,21 +176,33 @@ function FeedPostListInner({
     () => new Set(),
   );
 
-  const togglePostComments = useCallback((postId: string) => {
-    setExpandedCommentPostIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(postId)) {
-        next.delete(postId);
-      } else {
-        next.add(postId);
-      }
-      return next;
+  const { visibleItems, hasMoreToShow, hiddenCount, showMore, ensureIndexVisible } =
+    useWindowedList(items, {
+      initialSize: HOME_FEED_INITIAL_RENDER,
+      step: HOME_FEED_INITIAL_RENDER,
     });
-  }, []);
+
+  const togglePostComments = useCallback(
+    (postId: string) => {
+      const index = items.findIndex((post) => post.id === postId);
+      if (index >= 0) ensureIndexVisible(index);
+
+      setExpandedCommentPostIds((prev) => {
+        const next = new Set(prev);
+        if (next.has(postId)) {
+          next.delete(postId);
+        } else {
+          next.add(postId);
+        }
+        return next;
+      });
+    },
+    [items, ensureIndexVisible],
+  );
 
   return (
     <View className="s-feed-post-list">
-      {items.map((post) => (
+      {visibleItems.map((post) => (
         <FeedPostRow
           key={post.id}
           post={post}
@@ -193,6 +214,16 @@ function FeedPostListInner({
           onToggleComments={togglePostComments}
         />
       ))}
+      {hasMoreToShow ? (
+        <View
+          className="s-feed-post-list__more"
+          onClick={showMore}
+          role="button"
+          aria-label={`展开更多帖子，还有 ${hiddenCount} 条`}
+        >
+          <Text className="s-feed-post-list__more-text">展开更多（{hiddenCount}）</Text>
+        </View>
+      ) : null}
     </View>
   );
 }

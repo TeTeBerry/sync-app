@@ -20,6 +20,8 @@ import { buildAiChatWsSendActor } from '../../api/requestActor';
 import { streamAiChatWs } from '../../utils/aiChatWs';
 import { mockAiChatStream } from '../../utils/aiChatStream';
 import type { TypewriterReveal } from '../../utils/typewriterReveal';
+import { patchChatMessage } from '../../utils/chatMessages';
+import { throttleRaf } from '../../utils/throttleRaf';
 import { processChatStreamEvents } from './chatStreamReducer';
 
 export interface UseWsChatStreamOptions {
@@ -81,15 +83,29 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
       );
 
       const finishAiMessage = (updater: (current: ChatUiMessage) => ChatUiMessage) => {
-        setMessages((prev) =>
-          prev.map((message) => (message.id === aiMsgId ? updater(message) : message)),
-        );
+        setMessages((prev) => {
+          const index = prev.findIndex((message) => message.id === aiMsgId);
+          if (index < 0) return prev;
+          const next = updater(prev[index]);
+          if (next === prev[index]) return prev;
+          const copy = prev.slice();
+          copy[index] = next;
+          return copy;
+        });
       };
+
+      const pushTypewriterText = throttleRaf((visible: string) => {
+        setMessages((prev) =>
+          patchChatMessage(prev, aiMsgId, (message) =>
+            message.text === visible ? message : { ...message, text: visible },
+          ),
+        );
+      });
 
       const typewriter = createTypewriter({
         charDelayMs: typewriterCharDelayMs,
         onUpdate: (visible) => {
-          finishAiMessage((message) => ({ ...message, text: visible }));
+          pushTypewriterText(visible);
         },
       });
 

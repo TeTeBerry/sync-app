@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles } from 'lucide-react-taro';
+import { Sparkles } from '../../../../components/icons';
 import { Button } from '../../../../components/ui';
 import { Text, View } from '@tarojs/components';
 

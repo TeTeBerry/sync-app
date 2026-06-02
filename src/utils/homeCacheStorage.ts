@@ -58,6 +58,7 @@ export function hydrateHomeCachesFromStorage(): void {
   const summary = readEnvelope<HomeSummary>(SUMMARY_STORAGE_KEY);
   if (summary) {
     setCacheDataByKey(getCacheKey(['home', 'summary']), summary);
+    seedPopularPostsCache(summary.popularPosts);
   }
 
   const userId = getClientUserId();
@@ -88,4 +89,18 @@ export function persistPopularPosts(data: HomeFeedPost[]): void {
   }
   const trimmed = data.slice(0, HOME_POPULAR_POSTS_PERSIST_LIMIT);
   writeEnvelope(popularStorageKey(userId), trimmed);
+}
+
+/** Seed React Query cache when `/home` embeds `popularPosts`. */
+export function seedPopularPostsCache(posts: HomeFeedPost[] | undefined): void {
+  if (!isApiEnabled() || !posts?.length) {
+    return;
+  }
+  const userId = getClientUserId();
+  if (!userId) {
+    return;
+  }
+  const trimmed = posts.slice(0, HOME_POPULAR_POSTS_PERSIST_LIMIT);
+  persistPopularPosts(trimmed);
+  setCacheDataByKey(getCacheKey(['posts', 'popular', userId]), trimmed);
 }

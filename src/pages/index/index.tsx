@@ -53,7 +53,7 @@ const Home = () => {
   useEndRouteTransitionOnShow();
 
   useDidShow(() => {
-    preloadHotRoutes();
+    preloadHotRoutes(ROUTES.HOME);
   });
 
   const belowFoldReady = useDeferredMount(DEFER_BELOW_FOLD_MS);

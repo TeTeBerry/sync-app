@@ -15,6 +15,7 @@
     "clean:weapp": "rm -rf dist-weapp",
     "build:weapp:size": "npm run build:weapp && npm run size:weapp",
     "size:weapp": "node scripts/size-weapp.mjs",
+    "verify:bundle": "node scripts/verify-bundle-boundaries.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint \"src/**/*.{ts,tsx}\" \"config/**/*.{ts,js}\" vitest.config.ts",
     "lint:fix": "npm run lint -- --fix",
@@ -22,7 +23,7 @@
     "format:check": "prettier --check \"src/**/*.{ts,tsx,scss}\" \"config/**/*.{ts,js}\" \"vitest.config.ts\"",
     "test": "vitest run",
     "test:watch": "vitest",
-    "check": "npm run typecheck && npm run lint && npm run format:check && npm test",
+    "check": "npm run verify:bundle && npm run typecheck && npm run lint && npm run format:check && npm test",
     "prepare": "husky"
   },
   "lint-staged": {

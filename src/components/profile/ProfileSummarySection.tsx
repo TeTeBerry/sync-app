@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Check, Music2 } from 'lucide-react-taro';
+import { Check, Music2 } from '../../components/icons';
 import { sanitizeRemoteImageUrl } from '../../utils/imageUrl';
 import type { ProfileDisplayUser } from './profileSummaryUtils';
 import { Image, Text, View } from '@tarojs/components';

@@ -8,7 +8,7 @@ import {
   Lock,
   Ticket,
   Zap,
-} from 'lucide-react-taro';
+} from '../../components/icons';
 import { LoginPromptHero } from '../auth/LoginPromptHero';
 import { requireAuth } from '../../utils/authGate';
 import { go, ROUTES } from '../../utils/route';

@@ -1,4 +1,4 @@
-import { Zap } from 'lucide-react-taro';
+import { Zap } from '../../../../components/icons';
 import { Button } from '../../../../components/ui';
 import { Text, View } from '@tarojs/components';
 import ThemedPageLoader from '../../../../components/ThemedPageLoader';

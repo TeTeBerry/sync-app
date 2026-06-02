@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Calendar, MapPin, Ticket } from 'lucide-react-taro';
+import { Calendar, MapPin, Ticket } from '../../components/icons';
 import { ImageWithFallback } from '../ImageWithFallback';
 import { MetaRow } from '../MetaRow';
 import { ProfileCollapsibleSection } from './ProfileCollapsibleSection';

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronRight } from 'lucide-react-taro';
+import { ChevronRight } from '../../components/icons';
 import { Text, View } from '@tarojs/components';
 
 export type ProfileActionCardAccent = 'activities' | 'posts';

@@ -28,11 +28,18 @@ import {
 export function useProfilePaidBenefitCards(options?: {
   useDebugEntitlements?: boolean;
   debugPreset?: ProfileDebugEntitlementPreset;
+  /** When false, skips entitlements + activities fetch (profile tab defers below fold). */
+  entitlementsEnabled?: boolean;
 }) {
   const apiEnabled = isApiEnabled();
+  const entitlementsEnabled = options?.entitlementsEnabled ?? true;
   const summaryQuery = useProfileSummaryQuery();
-  const allEntitlementsQuery = useProfileEntitlementsQuery();
-  const activitiesQuery = useProfileActivitiesQuery();
+  const allEntitlementsQuery = useProfileEntitlementsQuery(undefined, {
+    enabled: entitlementsEnabled,
+  });
+  const activitiesQuery = useProfileActivitiesQuery({
+    enabled: entitlementsEnabled,
+  });
 
   const debugEnabled =
     options?.useDebugEntitlements ?? isProfileDebugEntitlementsEnabled();
@@ -95,7 +102,9 @@ export function useProfilePaidBenefitCards(options?: {
     paidBenefitCards,
     recentPaidBenefitCards,
     paidEntitlements,
+    entitlementsData: allEntitlementsQuery.data,
     activityByLegacyId,
     totalPaidCardCount: paidBenefitCards.length,
+    refetchEntitlements: allEntitlementsQuery.refetch,
   };
 }

@@ -1,4 +1,4 @@
-import { Star } from 'lucide-react-taro';
+import { Star } from '../../../../components/icons';
 import { Button } from '../../../../components/ui';
 import { Text, View } from '@tarojs/components';
 import type { LiveInfoCategoryConfig } from '../liveInfoConfig';

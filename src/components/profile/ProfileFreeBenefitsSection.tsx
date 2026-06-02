@@ -1,6 +1,6 @@
 import './ProfileFreeBenefitsSection.scss';
 import React from 'react';
-import { Zap } from 'lucide-react-taro';
+import { Zap } from '../../components/icons';
 import type { ProfileFreeBenefitCardModel } from './profileBenefitsMapper';
 import ProfileFreeBenefitCard from './ProfileFreeBenefitCard';
 import ThemedPageLoader from '../ThemedPageLoader';

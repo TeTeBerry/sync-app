@@ -1,11 +1,8 @@
 import Taro, { useDidShow } from '@tarojs/taro';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { isApiEnabled } from '../../constants/api';
-import {
-  useBlockedUsersQuery,
-  useProfileEntitlementsQuery,
-  useProfileSummaryQuery,
-} from '../../hooks/useSyncApi';
+import { useBlockedUsersQuery, useProfileSummaryQuery } from '../../hooks/useSyncApi';
+import { useDeferredMount } from '../../hooks/useDeferredMount';
 import type { ConfirmDialogOptions } from '../../hooks/useConfirmDialog';
 import { useAuthSession } from '../../hooks/useAuthSession';
 import { useEndRouteTransitionOnShow } from '../../hooks/useEndRouteTransitionOnShow';
@@ -22,6 +19,7 @@ import {
   readProfilePrivacyLevel,
 } from '../../utils/profileStorage';
 import { go, preloadHotRoutes, ROUTES } from '../../utils/route';
+import { DEFER_PROFILE_ENTITLEMENTS_MS } from '../../utils/timing';
 import { persistUserName } from '../../utils/session';
 import type { ProfileActivityItem } from '../../types/backend';
 import { profileActivities, profilePosts, profileUser } from './mockData';
@@ -78,7 +76,7 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
 
   const summaryQuery = useProfileSummaryQuery();
   const blockedUsersQuery = useBlockedUsersQuery();
-  const allEntitlementsQuery = useProfileEntitlementsQuery();
+  const entitlementsReady = useDeferredMount(DEFER_PROFILE_ENTITLEMENTS_MS);
   const apiEnabled = isApiEnabled();
   const { loggedIn, refresh: refreshAuthSession } = useAuthSession();
   const showGuestProfile = apiEnabled && !loggedIn;
@@ -99,9 +97,12 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
     paidEntitlements,
     recentPaidBenefitCards,
     totalPaidCardCount,
+    entitlementsData: paidEntitlementsData,
+    refetchEntitlements,
   } = useProfilePaidBenefitCards({
     useDebugEntitlements: debug.debugEntitlementsEnabled,
     debugPreset: debug.debugEntitlementPreset,
+    entitlementsEnabled: entitlementsReady && loggedIn,
   });
 
   const packageSheet = useProfilePackageSheet({ paidEntitlements });
@@ -116,7 +117,7 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
     recentPaidBenefitCards,
     totalPaidCardCount,
     summaryData: summaryQuery.data,
-    entitlementsData: allEntitlementsQuery.data,
+    entitlementsData: paidEntitlementsData,
     onOpenPackageSheet: () => packageSheet.openPackageSheet(),
     onUpgrade: packageSheet.handleBenefitUpgrade,
   });
@@ -130,7 +131,7 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
   useEndRouteTransitionOnShow();
 
   useDidShow(() => {
-    preloadHotRoutes();
+    preloadHotRoutes(ROUTES.PROFILE);
     setNotificationsEnabled(readProfileNotificationsEnabled());
     setPrivacyLevel(readProfilePrivacyLevel());
     packageSheet.applyRouteParams();
@@ -166,9 +167,9 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
     if (apiEnabled && loggedIn) {
       void invalidateProfilePackageState();
       void summaryQuery.refetch();
-      void allEntitlementsQuery.refetch();
+      void refetchEntitlements();
     }
-  }, [allEntitlementsQuery, apiEnabled, loggedIn, summaryQuery]);
+  }, [apiEnabled, loggedIn, refetchEntitlements, summaryQuery]);
 
   const handleLogout = useCallback(async () => {
     const ok = await confirm({

@@ -1,5 +1,5 @@
 import './exclusive-itinerary.scss';
-import { Info } from 'lucide-react-taro';
+import { Info } from '../../../components/icons';
 import { Button } from '../../../components/ui';
 import { ScrollView, View } from '@tarojs/components';
 import ActionSheet from '../../../components/ActionSheet';

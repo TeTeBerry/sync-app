@@ -12,13 +12,16 @@ import {
 } from './queryString';
 import { getCacheData } from '../hooks/useApiQuery';
 import { findBackendActivityByLegacyId } from './apiMappers';
-import { seedActivityDetailCache } from './activityDetailCache';
+import {
+  seedActivityDetailCache,
+  seedActivityDetailFromHomeSignupEvent,
+} from './activityDetailCache';
+import type { HomeSummary } from '../types/backend';
 import { PRELOAD_HOT_ROUTES_MS } from './timing';
 import {
   preloadAiSubpackage,
   preloadEventSubpackage,
   preloadProfileSubpackage,
-  preloadStackSubpackages,
 } from './subpackagePreload';
 import type { BackendActivity } from '../types/backend';
 import { isAuthGated, requireAuth } from './authGate';
@@ -50,12 +53,31 @@ const TAB_ROUTE_PATHS = new Set<RoutePath>([
   ROUTES.PROFILE,
 ]);
 
-/** Stack pages warmed after tab settle; event detail also preloaded on card touch. */
-const PRELOAD_HOT_ROUTES: RoutePath[] = [
-  ROUTES.EVENT_DETAIL,
-  ROUTES.NOTIFICATIONS,
-  ROUTES.AI_ASSISTANT,
-];
+type PreloadTabPath = typeof ROUTES.HOME | typeof ROUTES.EVENTS | typeof ROUTES.PROFILE;
+
+/** Stack pages per tab; AI 分包/页面在 `goAiAssistant` 时按需加载 */
+const PRELOAD_PAGE_ROUTES_BY_TAB: Record<PreloadTabPath, RoutePath[]> = {
+  [ROUTES.HOME]: [ROUTES.EVENT_DETAIL, ROUTES.NOTIFICATIONS],
+  [ROUTES.EVENTS]: [ROUTES.EVENT_DETAIL],
+  [ROUTES.PROFILE]: [ROUTES.NOTIFICATIONS],
+};
+
+function preloadSubpackagesForTab(tab: PreloadTabPath): void {
+  preloadEventSubpackage();
+  if (tab === ROUTES.PROFILE) {
+    preloadProfileSubpackage();
+  }
+}
+
+function resolvePreloadTab(path?: string): PreloadTabPath {
+  if (path === ROUTES.EVENTS) {
+    return ROUTES.EVENTS;
+  }
+  if (path === ROUTES.PROFILE) {
+    return ROUTES.PROFILE;
+  }
+  return ROUTES.HOME;
+}
 
 const tabRouteListeners = new Set<() => void>();
 
@@ -226,11 +248,14 @@ export function preloadPageSafe(path: RoutePath, query?: Record<string, string>)
   void preload({ url }).catch(() => {});
 }
 
-/** Preload common stack targets after tab pages settle (deferred to avoid webview races). */
-export function preloadHotRoutes() {
+/** Preload stack targets for the current (or given) tab after settle. */
+export function preloadHotRoutes(tabPath?: PreloadTabPath) {
   if (process.env.TARO_ENV !== 'weapp') {
     return;
   }
+  const tab = tabPath ?? (resolvePreloadTab(currentRoutePath()) as PreloadTabPath);
+  const routes =
+    PRELOAD_PAGE_ROUTES_BY_TAB[tab] ?? PRELOAD_PAGE_ROUTES_BY_TAB[ROUTES.HOME];
   if (preloadTimer != null) {
     clearTimeout(preloadTimer);
   }
@@ -239,8 +264,8 @@ export function preloadHotRoutes() {
     if (isNavigating) {
       return;
     }
-    preloadStackSubpackages();
-    for (const route of PRELOAD_HOT_ROUTES) {
+    preloadSubpackagesForTab(tab);
+    for (const route of routes) {
       preloadPageSafe(route);
     }
   }, PRELOAD_HOT_ROUTES_MS);
@@ -438,6 +463,12 @@ export function goEventDetail(eventId: number | string, options?: { postId?: str
     : undefined;
   if (fromList) {
     seedActivityDetailCache(fromList);
+  } else {
+    const summary = getCacheData<HomeSummary>(['home', 'summary']);
+    const fromHome = summary?.signupEvents.find((event) => event.id === legacyId);
+    if (fromHome) {
+      seedActivityDetailFromHomeSignupEvent(fromHome);
+    }
   }
   useNavigationStore.getState().setActiveActivityLegacyId(legacyId);
   const query = buildEventDetailQuery(legacyId, options);

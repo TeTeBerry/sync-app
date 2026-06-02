@@ -4,7 +4,13 @@ import ThemedPageLoader from '../../../components/ThemedPageLoader';
 import { useDeferredMount } from '../../../hooks/useDeferredMount';
 import { usePageRouteReady } from '../../../hooks/usePageRouteReady';
 import { useEndRouteTransitionOnShow } from '../../../hooks/useEndRouteTransitionOnShow';
-import { Bell, Heart, MessageCircle, Megaphone, Trash2 } from 'lucide-react-taro';
+import {
+  Bell,
+  Heart,
+  MessageCircle,
+  Megaphone,
+  Trash2,
+} from '../../../components/icons';
 import PageNavigation from '../../../components/navigation/PageNavigation';
 import {
   clearAllNotificationsAndInvalidate,

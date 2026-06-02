@@ -71,8 +71,9 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
   const postsLoading = !feedReady || postsQuery.isLoading;
   const showPostsEnd =
     contentTab === 'posts' &&
-    posts.postItems.length > 0 &&
+    posts.totalPostCount > 0 &&
     !postsLoading &&
+    !posts.hasMoreVisiblePosts &&
     !postsQuery.hasMore &&
     !postsQuery.isLoadingMore;
 

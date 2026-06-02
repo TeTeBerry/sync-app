@@ -1,5 +1,5 @@
 import React from 'react';
-import { Heart, MessageCircle, ThumbsUp } from 'lucide-react-taro';
+import { Heart, MessageCircle, ThumbsUp } from '../../components/icons';
 import { Button } from '../ui';
 import { postActionIconColor } from '../../utils/postActionColors';
 import { Text, View } from '@tarojs/components';

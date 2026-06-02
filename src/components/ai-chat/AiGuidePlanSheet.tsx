@@ -9,7 +9,7 @@ import {
   Sparkles,
   Users,
   X,
-} from 'lucide-react-taro';
+} from '../../components/icons';
 import { Button, cn } from '../ui';
 import { useOverlayLock } from '../../hooks/useOverlayLock';
 import {

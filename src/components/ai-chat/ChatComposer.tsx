@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import Taro from '@tarojs/taro';
-import { ImagePlus, Send, Trash2, X } from 'lucide-react-taro';
+import { ImagePlus, Send, Trash2, X } from '../../components/icons';
 import { Button, Input, cn } from '../ui';
 import { HOME_FESTIVAL_SHORTCUT_CHIPS } from '../../constants/homeFestivalShortcuts';
 import {

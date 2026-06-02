@@ -1,7 +1,7 @@
 import './loginPromptShared.scss';
 import Taro from '@tarojs/taro';
 import React, { useCallback, useState } from 'react';
-import { Bot, ChevronRight, Zap } from 'lucide-react-taro';
+import { Bot, ChevronRight, Zap } from '../../components/icons';
 import { Button } from '../ui';
 import { Text, View } from '@tarojs/components';
 import { isApiEnabled } from '../../constants/api';

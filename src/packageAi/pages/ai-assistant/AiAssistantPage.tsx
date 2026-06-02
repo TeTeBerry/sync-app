@@ -1,7 +1,7 @@
 import './AiAssistantPage.scss';
 import { type FC } from 'react';
 import { BottomNavSlot } from '../../../components/navigation/BottomNav';
-import { CalendarDays, Sparkles, Zap } from 'lucide-react-taro';
+import { CalendarDays, Sparkles, Zap } from '../../../components/icons';
 import PageNavigation from '../../../components/navigation/PageNavigation';
 import ThemedPageLoader from '../../../components/ThemedPageLoader';
 import { Text, View } from '@tarojs/components';

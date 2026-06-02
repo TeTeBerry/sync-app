@@ -1,5 +1,5 @@
 import Taro from '@tarojs/taro';
-import { createMapOffscreenCanvas } from '../../event-map/mapOffscreenCanvas';
+import { createOffscreenCanvas } from '../../../utils/offscreenCanvas';
 import {
   drawTravelGuideWallpaper,
   measureTravelGuideWallpaperHeight,
@@ -62,7 +62,7 @@ async function renderOnPageCanvas(plan: TravelGuidePlan): Promise<string> {
 
 export async function renderTravelGuideImage(plan: TravelGuidePlan): Promise<string> {
   const height = measureTravelGuideWallpaperHeight(plan);
-  const offscreen = createMapOffscreenCanvas(750, height) as GuideCanvas | null;
+  const offscreen = createOffscreenCanvas(750, height) as GuideCanvas | null;
   if (offscreen) {
     drawTravelGuideWallpaper(offscreen, plan);
     return exportCanvas(offscreen);

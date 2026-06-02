@@ -1,5 +1,5 @@
 import React from 'react';
-import { Bookmark, List, Map, RotateCcw } from 'lucide-react-taro';
+import { Bookmark, List, Map, RotateCcw } from '../../../../components/icons';
 import { Button } from '../../../../components/ui';
 import { Text, View } from '@tarojs/components';
 

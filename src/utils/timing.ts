@@ -15,3 +15,6 @@ export const DEFER_AI_CHAT_MS = 0;
 
 /** Hot-route preload after tab settle (see route.ts). */
 export const PRELOAD_HOT_ROUTES_MS = 500;
+
+/** Profile tab: defer entitlements / activities APIs until after summary paints. */
+export const DEFER_PROFILE_ENTITLEMENTS_MS = 400;

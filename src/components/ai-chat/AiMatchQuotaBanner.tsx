@@ -1,5 +1,5 @@
 import './AiMatchQuotaBanner.scss';
-import { Zap } from 'lucide-react-taro';
+import { Zap } from '../../components/icons';
 import { Button } from '../ui';
 import { Text, View } from '@tarojs/components';
 import { useAiMatchQuotaExhausted } from '../../hooks/useAiMatchQuotaExhausted';

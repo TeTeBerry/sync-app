@@ -18,6 +18,10 @@
 | P5 | 通知深链等收尾 | ✅ 完成 |
 | P0-H5 | Dev 登录 + Bearer | ✅ 前端已接 |
 | P0-Wx | 微信小程序 | 🟡 前端已接，联调验收 |
+| P0-perf | 列表 + AI 流式渲染性能 | ✅ 完成（2025-06） |
+| P1-perf | 网络与数据（预加载 / 缓存 / 首页合并） | ✅ 完成（2025-06） |
+| P3-perf | 体验细节（图片 / 个人中心 / Zustand） | ✅ 完成（2025-06） |
+| P2-perf | 包体与依赖（持续治理） | ✅ 完成（2025-06） |
 | P3-dev | 开发体验（check / husky / CI） | ✅ 完成（2025-06） |
 
 **产品约定**：组队帖 **仅 AI 对话闭环创建**，不新增发帖表单 UI。
@@ -119,6 +123,63 @@
 - [x] `useProfileBenefitsSection` / `useProfileDebugOverlays`；`useAiAssistantPage`
 - [x] `components/event/`；`profileBenefitsMapper` 子模块拆分
 
+### P2-perf 包体与依赖 ✅（2025-06）
+
+> 持续治理：图标单入口、Canvas 工具与地图分包解耦、主包 import 边界、CI 包体门禁。
+
+- [x] **Lucide**：`components/icons/index.ts` 统一 re-export；ESLint `no-restricted-imports` + `npm run verify:bundle`
+- [x] **离屏 Canvas**：`utils/offscreenCanvas.ts`；AI 出行攻略不再经 `event-map` 路径引用
+- [x] **主包边界**：`scripts/verify-bundle-boundaries.mjs` 禁止主 Tab 代码 import 地图/行程/壁纸重模块
+- [x] **CI**：`.github/workflows/ci.yml` 已有 `build:weapp:size`；`npm run check` 含 `verify:bundle`
+
+详见 [BUNDLE-SIZE.md](./BUNDLE-SIZE.md)。
+
+### P3-perf 体验细节 ✅（2025-06）
+
+> 按需优化：图片懒加载与首屏张数、个人中心 API 推迟、导航 store 细粒度订阅。
+
+- [x] **帖子图片**：`PostImageGrid` 默认最多 4 张（`lazyLoad` 经 `ImageWithFallback`）；首页 `FEED_POST_IMAGE_MAX_DISPLAY`、活动帖 `EVENT_POST_IMAGE_MAX_DISPLAY`；评论头像 `lazyLoad` + `aspectFill`
+- [x] **个人中心**：`DEFER_PROFILE_ENTITLEMENTS_MS`（400ms）后再请求 entitlements / activities；套餐 Sheet 打开时才拉 `profile/activities`
+- [x] **Zustand**：`stores/navigationSelectors.ts`；`NavigationLoadingOverlay` 等按字段订阅，避免 `routeTransition` 对象引用导致多余重渲染
+- [x] **H5 说明**：[`README.md`](../README.md) 标明性能投入集中在 weapp
+
+### P1-perf 网络与数据 ✅（2025-06）
+
+> 降低弱网并行争抢、减少 Tab 切换重复请求、首页少一次 RTT。
+
+- [x] **预加载策略**：`app.config.ts` `preloadRule` 改为 `network: 'wifi'`；首页/活动仅 `event` 分包，个人仅 `profile`；启动只 `preloadEventSubpackage`；`preloadHotRoutes(tab)` 按 Tab 预热页面（不含 AI 助手，首次 `goAiAssistant` 再加载）
+- [x] **接口合并**：`GET /home` 并行返回 `popularPosts`（8 条）；`usePopularPosts` 优先用 summary 嵌入数据，无则回退 `GET /posts/popular`
+- [x] **staleTime 分层**：`constants/queryCache.ts` — 首页 summary 90s、活动列表/详情 120s、帖流 90s、评论 30s
+- [x] **详情种子**：`seedActivityDetailsFromHomeSummary` + `goEventDetail` 从 home summary 补种缓存
+
+### P0-perf 运行时性能 ✅（2025-06）
+
+> 目标：降低小程序 `setData` 频率与长列表首屏成本；AI 打字机流式更新不触发全列表重绘。  
+> 包体与分包策略见 [BUNDLE-SIZE.md](./BUNDLE-SIZE.md)。
+
+- [x] `hooks/useWindowedList.ts` + `constants/listPerf.ts` — 通用窗口化（首屏 N 条、`showMore` / `ensureIndexVisible`）
+- [x] 首页 `FeedPostList` — 首屏 5 条 +「展开更多」；评论区仅在 `commentsExpanded` 时挂载 `PostCommentSection`
+- [x] 活动详情 `useEventDetailPosts` — 首屏 6 条、步进 +6；`onScrollToLower` 先扩本地窗口再 `postsQuery.loadMore()`；Tab 计数用 `totalPostCount`
+- [x] `EventPostsVirtualList` — 「没有更多」需 `!hasMore && !hasMoreLocal`；高亮帖滚动前 `ensureIndexVisible`
+- [x] AI 聊天：`utils/throttleRaf.ts` — 打字机 `onUpdate` 每帧最多一次 `setState`
+- [x] AI 聊天：`utils/chatMessages.ts` — `patchChatMessage` 单条更新，保留其它行引用供 `memo`
+- [x] `ChatMessageRow`（`memo`）+ `ChatMessageList` 滚动依赖收窄 + rAF 节流
+- [x] `utils/chatMessages.test.ts` — patch 不变式单测
+
+**常量**（`src/constants/listPerf.ts`）：
+
+| 常量 | 值 | 用途 |
+|------|-----|------|
+| `HOME_FEED_INITIAL_RENDER` | 5 | 首页热帖首屏（API 最多 8 条） |
+| `EVENT_POSTS_INITIAL_RENDER` | 6 | 活动帖首屏 |
+| `EVENT_POSTS_RENDER_STEP` | 6 | 活动帖本地窗口步进 |
+
+**建议验收**（微信开发者工具）：
+
+- [ ] 首页：默认 ≤5 条帖子，点「展开更多」后显示剩余
+- [ ] 活动详情：帖子多时下拉先出现更多已加载帖，再触发分页 API
+- [ ] AI 助手：长回复流式时列表滚动顺畅、非流式消息行不闪烁
+
 ### Phase 3 前端架构 ✅（2026-06）
 
 - [x] `useEventDetailPage` + `PostCardActionBar` / `buildPostSharePayload`（首页 Feed + 活动帖共用互动条）
@@ -207,7 +268,16 @@ src/
 ├── api/syncApi.ts              barrel
 ├── hooks/sync/*.ts             React Query 按域
 ├── hooks/useSyncApi.ts         barrel
-├── hooks/useAiChatStream.ts    WebSocket + post_created
+├── hooks/useWindowedList.ts    列表窗口化（首页 / 活动帖）
+├── constants/listPerf.ts       HOME / EVENT 首屏条数
+├── constants/queryCache.ts     staleTime 分层常量
+├── components/icons/index.ts   Lucide 单入口（tree-shake）
+├── utils/offscreenCanvas.ts    离屏 Canvas（与 event-map 解耦）
+├── hooks/ai-chat/useWsChatStream.ts  WS 流 + rAF 打字机
+├── utils/throttleRaf.ts        rAF 节流（AI onUpdate）
+├── utils/chatMessages.ts       patchChatMessage（单行更新）
+├── components/ai-chat/ChatMessageRow.tsx  memo 消息行
+├── hooks/useAiChatStream.ts    WebSocket + post_created（barrel 入口）
 ├── utils/aiChatStream.ts       流解析
 ├── stores/navigationStore.ts   AI 跳转 activityLegacyId
 ├── pages/events/               活动列表 API
@@ -245,6 +315,28 @@ npm run dev:h5
 
 - [x] Bearer 鉴权；已登录业务请求无 demo Query 身份
 - [x] 401 有清晰提示并清 session
+
+### P0-perf（运行时）✅
+
+- [x] 首页 / 活动帖列表窗口化渲染；评论懒挂载
+- [x] AI 流式：`throttleRaf` + `patchChatMessage` + `ChatMessageRow` memo
+- [ ] 微信开发者工具三项手动验收（见上文 P0-perf「建议验收」）
+
+### P1-perf（网络与数据）✅
+
+- [x] Wi‑Fi 分包预加载 + Tab 级 `preloadHotRoutes`
+- [x] `/home` 含 `popularPosts`；staleTime 分层
+- [x] 活动详情从 home / 列表种子缓存
+
+### P3-perf（体验细节）✅
+
+- [x] 帖图首屏张数 + 懒加载；个人中心权益 API 推迟
+- [x] `navigationSelectors` 细粒度订阅
+
+### P2-perf（包体）✅
+
+- [x] `@/components/icons` 单入口；`verify:bundle` 主包 import 边界
+- [x] CI `build:weapp:size` 阈值门禁
 
 ---
 

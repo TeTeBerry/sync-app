@@ -8,7 +8,15 @@ import {
 } from '../../api/sync/activities';
 import { isApiEnabled } from '../../constants/api';
 import type { BackendActivity } from '../../types/backend';
-import { seedActivityDetailsFromList } from '../../utils/activityDetailCache';
+import {
+  seedActivityDetailsFromHomeSummary,
+  seedActivityDetailsFromList,
+} from '../../utils/activityDetailCache';
+import {
+  STALE_ACTIVITIES_LIST_MS,
+  STALE_ACTIVITY_DETAIL_MS,
+  STALE_HOME_SUMMARY_MS,
+} from '../../constants/queryCache';
 import {
   compareActivitiesNearestFirst,
   findNearestUpcomingActivity,
@@ -21,7 +29,10 @@ import {
   type EventCardUi,
   type FeaturedEvent,
 } from '../../utils/apiMappers';
-import { persistHomeSummary } from '../../utils/homeCacheStorage';
+import {
+  persistHomeSummary,
+  seedPopularPostsCache,
+} from '../../utils/homeCacheStorage';
 import type { HomeSummary } from '../../types/backend';
 import {
   invalidateRegistration,
@@ -45,7 +56,7 @@ export function useActivitiesQuery(options?: QueryEnableOptions) {
       return activities;
     },
     enabled,
-    staleTime: 60_000,
+    staleTime: STALE_ACTIVITIES_LIST_MS,
   });
 }
 
@@ -72,10 +83,12 @@ export function useHomeSummary() {
     queryFn: async () => {
       const result = await fetchHomeSummary();
       persistHomeSummary(result);
+      seedActivityDetailsFromHomeSummary(result);
+      seedPopularPostsCache(result.popularPosts);
       return result;
     },
     enabled: isApiEnabled(),
-    staleTime: 60_000,
+    staleTime: STALE_HOME_SUMMARY_MS,
   });
 }
 
@@ -155,7 +168,7 @@ export function useActivityDetailQuery(legacyId?: number) {
       return seeded ?? null;
     },
     enabled,
-    staleTime: 60_000,
+    staleTime: STALE_ACTIVITY_DETAIL_MS,
   });
 }
 

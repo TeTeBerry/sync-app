@@ -15,7 +15,7 @@ import {
   EXCLUSIVE_ITINERARY_DJS,
 } from '../exclusive-itinerary/exclusiveItineraryMock';
 import { resolveEventDetailIdFromQuery, ROUTES } from '../../../utils/route';
-import { useNavigationStore } from '../../../stores/navigationStore';
+import { selectActiveActivityLegacyId, useNavigationStore } from '../../../stores';
 import type {
   ItineraryDay as ApiItineraryDay,
   ItineraryDj,
@@ -44,9 +44,7 @@ function mapApiDjToNameEntry(dj: ItineraryDj): DjNameEntry {
 
 export function useMyItineraryPage() {
   const router = useRouter();
-  const activeActivityLegacyId = useNavigationStore(
-    (state) => state.activeActivityLegacyId,
-  );
+  const activeActivityLegacyId = useNavigationStore(selectActiveActivityLegacyId);
 
   const activityLegacyId = useMemo(
     () => resolveEventDetailIdFromQuery(router.params, activeActivityLegacyId),

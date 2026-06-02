@@ -61,18 +61,19 @@ export default {
       desc: '保存行程屏保图片到你的相册',
     },
   },
+  /** Wi‑Fi only: avoid competing with home API on cellular; AI 分包在首次进入助手时再加载 */
   preloadRule: {
     'pages/index/index': {
-      network: 'all',
-      packages: ['event', 'ai'],
+      network: 'wifi',
+      packages: ['event'],
     },
     'pages/events/index': {
-      network: 'all',
-      packages: ['event', 'ai'],
+      network: 'wifi',
+      packages: ['event'],
     },
     'pages/profile/index': {
-      network: 'all',
-      packages: ['profile', 'event'],
+      network: 'wifi',
+      packages: ['profile'],
     },
   },
 };

@@ -1,6 +1,6 @@
 import '../../components/profile/profile.scss';
 import React from 'react';
-import { FileText, Zap } from 'lucide-react-taro';
+import { FileText, Zap } from '../../components/icons';
 import TabPageHeader from '../../components/navigation/TabPageHeader';
 import ThemedPageLoader from '../../components/ThemedPageLoader';
 import { useNavBarInsets } from '../../hooks/useNavBarInsets';

@@ -1,6 +1,6 @@
 import './EventLiveInfoUpdateSheet.scss';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Check, X, Zap } from 'lucide-react-taro';
+import { Check, X, Zap } from '../../../../components/icons';
 import { cn } from '../../../../components/ui';
 import { useOverlayLock } from '../../../../hooks/useOverlayLock';
 import {

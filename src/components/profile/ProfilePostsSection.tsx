@@ -11,7 +11,7 @@ import {
   Sparkles,
   Trash2,
   X,
-} from 'lucide-react-taro';
+} from '../../components/icons';
 import { ContentTypeBadge, PostStatusBadge } from '../post';
 import { ProfileCollapsibleSection } from './ProfileCollapsibleSection';
 import type { ProfilePostItem } from '../../types/backend';

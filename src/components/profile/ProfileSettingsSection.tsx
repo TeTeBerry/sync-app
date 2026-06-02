@@ -1,5 +1,5 @@
 import React from 'react';
-import { Ban, Bell, ChevronRight, Info, LogOut, Shield } from 'lucide-react-taro';
+import { Ban, Bell, ChevronRight, Info, LogOut, Shield } from '../../components/icons';
 import { Text, View } from '@tarojs/components';
 
 export type ProfileSettingsSectionProps = {

@@ -1,6 +1,6 @@
 import './PageNavigation.scss';
 import React, { type CSSProperties, type ReactNode } from 'react';
-import { ChevronLeft } from 'lucide-react-taro';
+import { ChevronLeft } from '../../components/icons';
 import { Button } from '../ui';
 import { Text, View } from '@tarojs/components';
 import { useNavBarInsets, type NavBarInsets } from '../../hooks/useNavBarInsets';

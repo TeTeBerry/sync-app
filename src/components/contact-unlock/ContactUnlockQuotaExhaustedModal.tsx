@@ -1,7 +1,15 @@
 import './ContactUnlockQuotaExhaustedModal.scss';
 import React, { useCallback, useMemo } from 'react';
 import Taro from '@tarojs/taro';
-import { ArrowRight, Crown, Lock, Map, Sparkles, Star, X } from 'lucide-react-taro';
+import {
+  ArrowRight,
+  Crown,
+  Lock,
+  Map,
+  Sparkles,
+  Star,
+  X,
+} from '../../components/icons';
 import { Text, View } from '@tarojs/components';
 import { useOverlayLock } from '../../hooks/useOverlayLock';
 import { useProfilePackagesQuery } from '../../hooks/useSyncApi';

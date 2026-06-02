@@ -1,6 +1,6 @@
 import './ProfileFreeBenefitCard.scss';
 import React from 'react';
-import { ChevronRight, Crown, Lock, Sparkles, Ticket } from 'lucide-react-taro';
+import { ChevronRight, Crown, Lock, Sparkles, Ticket } from '../../components/icons';
 import type { ProfileFreeBenefitCardModel } from './profileBenefitsMapper';
 import { Text, View } from '@tarojs/components';
 

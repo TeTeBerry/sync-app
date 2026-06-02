@@ -211,7 +211,7 @@ AI 匹配配额：服务端在 `post_recommendations` 且 `posts.length > 0` 时
 
 | 方法 | 路径 | 说明 |
 |------|------|------|
-| GET | `/api/home` | 首页聚合（热度、报名活动列表；热度优先 Redis，Mongo 兜底） |
+| GET | `/api/home` | 首页聚合（热度、`signupEvents`、**`popularPosts`（8 条）**；并行拉取，减少首页额外 `/posts/popular` RTT） |
 | GET | `/api/activities` | 活动列表 |
 | GET | `/api/activities/match?keyword=` | 活动关键词匹配 |
 | GET | `/api/activities/:legacyId` | 活动详情 |

@@ -6,6 +6,7 @@ import { handleApiUnauthorized } from '../../api/handleApiUnauthorized';
 import { closeAiChatWsConnection } from '../../utils/aiChatWs';
 import { shouldClearSessionOnWsError } from '../../utils/wsAuthError';
 import type { TypewriterReveal } from '../../utils/typewriterReveal';
+import { patchChatMessage } from '../../utils/chatMessages';
 import { applyStreamEventToSessionStore } from './useChatStreamStoreSync';
 
 export interface ProcessChatStreamEventsOptions {
@@ -41,7 +42,10 @@ export async function processChatStreamEvents(
 
   const finishAiMessage = (updater: (current: ChatUiMessage) => ChatUiMessage) => {
     setMessages((prev) =>
-      prev.map((message) => (message.id === aiMsgId ? updater(message) : message)),
+      patchChatMessage(prev, aiMsgId, (message) => {
+        const next = updater(message);
+        return next === message ? message : next;
+      }),
     );
   };
 

@@ -1,5 +1,5 @@
 import './event-detail.scss';
-import { Map } from 'lucide-react-taro';
+import { Map } from '../../../components/icons';
 import { goEventMap } from '../../../utils/route';
 import { useEndRouteTransitionOnShow } from '../../../hooks/useEndRouteTransitionOnShow';
 import { BottomNavSlot } from '../../../components/navigation/BottomNav';
@@ -119,7 +119,7 @@ const EventDetailPage = () => {
               onOpenExclusiveItinerary={handleOpenExclusiveItinerary}
               contentTab={contentTab}
               onContentTabChange={setContentTab}
-              postsCount={posts.postItems.length}
+              postsCount={posts.totalPostCount}
               liveCount={live.liveFeedCount}
             />
 
@@ -127,7 +127,7 @@ const EventDetailPage = () => {
               <View className="s-event-detail__posts">
                 {postsLoading ? (
                   <ThemedPageLoader variant="skeleton-event-posts" minHeight={200} />
-                ) : posts.postItems.length === 0 ? (
+                ) : posts.totalPostCount === 0 ? (
                   <Text className="s-event-detail__empty">
                     暂无组队帖，来发布第一条吧
                   </Text>
@@ -142,6 +142,7 @@ const EventDetailPage = () => {
                     apiEnabled={apiEnabled}
                     currentUserAvatar={currentUserAvatar}
                     hasMore={postsQuery.hasMore}
+                    hasMoreLocal={posts.hasMoreVisiblePosts}
                     isLoadingMore={postsQuery.isLoadingMore}
                     onLike={posts.handleLikePost}
                     onToggleComments={posts.togglePostComments}

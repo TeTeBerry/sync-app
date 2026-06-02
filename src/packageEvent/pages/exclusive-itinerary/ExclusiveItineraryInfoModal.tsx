@@ -1,5 +1,5 @@
 import './ExclusiveItineraryInfoModal.scss';
-import { Sparkles, X } from 'lucide-react-taro';
+import { Sparkles, X } from '../../../components/icons';
 import { Text, View } from '@tarojs/components';
 import { useOverlayLock } from '../../../hooks/useOverlayLock';
 

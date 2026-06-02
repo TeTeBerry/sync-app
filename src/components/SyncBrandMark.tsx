@@ -1,5 +1,5 @@
 import './SyncBrandMark.scss';
-import { AudioWaveform } from 'lucide-react-taro';
+import { AudioWaveform } from '../components/icons';
 import type { FC } from 'react';
 import { Text, View } from '@tarojs/components';
 

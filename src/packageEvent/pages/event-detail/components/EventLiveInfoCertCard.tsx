@@ -1,4 +1,4 @@
-import { CircleAlert, Shield, ShieldCheck, Upload } from 'lucide-react-taro';
+import { CircleAlert, Shield, ShieldCheck, Upload } from '../../../../components/icons';
 import { Button } from '../../../../components/ui';
 import { Text, View } from '@tarojs/components';
 import type { LiveInfoCertStatus } from '../../../../types/backend';

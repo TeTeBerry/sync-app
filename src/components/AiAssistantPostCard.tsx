@@ -1,5 +1,5 @@
 import './AiAssistantPostCard.scss';
-import { MapPin } from 'lucide-react-taro';
+import { MapPin } from '../components/icons';
 import type { FC } from 'react';
 import type { RecommendedPostCard } from '../types/aiChat';
 import { inferAuthorGenderFromPost } from '../utils/inferAuthorGender';

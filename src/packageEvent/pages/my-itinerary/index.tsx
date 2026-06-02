@@ -1,5 +1,5 @@
 import './my-itinerary.scss';
-import { Map, Share2, Sparkles } from 'lucide-react-taro';
+import { Map, Share2, Sparkles } from '../../../components/icons';
 import { Button } from '../../../components/ui';
 import { Canvas, ScrollView, Text, View } from '@tarojs/components';
 import PageNavigation from '../../../components/navigation/PageNavigation';

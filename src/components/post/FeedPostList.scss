@@ -3,6 +3,19 @@
   flex-direction: column;
 }
 
+.s-feed-post-list__more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px var(--s-page-gutter) 24px;
+  cursor: pointer;
+}
+
+.s-feed-post-list__more-text {
+  color: var(--muted-foreground);
+  font-size: var(--s-type-body-sm);
+}
+
 .s-home-post {
   display: flex;
   flex-direction: column;

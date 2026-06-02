@@ -1,5 +1,5 @@
 import './AiAssistantActivityCard.scss';
-import { Calendar, MapPin } from 'lucide-react-taro';
+import { Calendar, MapPin } from '../../components/icons';
 import type { FC } from 'react';
 import type { RecommendedActivityCard } from '../../types/aiChat';
 import { goEventDetail } from '../../utils/route';

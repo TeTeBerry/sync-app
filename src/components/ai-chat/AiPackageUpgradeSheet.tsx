@@ -1,7 +1,7 @@
 import './AiPackageUpgradeSheet.scss';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import Taro from '@tarojs/taro';
-import { Crown, LockOpen, Map, Pin, Shield, Sparkles, X } from 'lucide-react-taro';
+import { Crown, LockOpen, Map, Pin, Shield, Sparkles, X } from '../../components/icons';
 import { Text, View } from '@tarojs/components';
 import { useOverlayLock } from '../../hooks/useOverlayLock';
 import {

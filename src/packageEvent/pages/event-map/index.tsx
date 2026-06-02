@@ -1,7 +1,7 @@
 import './event-map.scss';
 import Taro, { useRouter } from '@tarojs/taro';
 import { useCallback, useMemo, useState } from 'react';
-import { Bell, Minus, Plane, Plus } from 'lucide-react-taro';
+import { Bell, Minus, Plane, Plus } from '../../../components/icons';
 import { Button } from '../../../components/ui';
 import { Canvas, Image, Text, View } from '@tarojs/components';
 import { EventMapUserPostsSheet } from '../../../components/event-map/EventMapUserPostsSheet';

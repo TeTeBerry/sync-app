@@ -1,6 +1,6 @@
 import './ProfileBenefitsPurchaseBanner.scss';
 import React from 'react';
-import { ChevronRight, Crown } from 'lucide-react-taro';
+import { ChevronRight, Crown } from '../../components/icons';
 import { Text, View } from '@tarojs/components';
 
 export type ProfileBenefitsPurchaseBannerProps = {

@@ -1,10 +1,10 @@
 import './EventMapUserPostsSheet.scss';
 import { memo } from 'react';
-import { Heart, MapPin, MessageCircle, X } from 'lucide-react-taro';
+import { Heart, MapPin, MessageCircle, X } from '../../components/icons';
 import { Button } from '../ui';
 import { Image, ScrollView, Text, View } from '@tarojs/components';
 import { useOverlayLock } from '../../hooks/useOverlayLock';
-import { useNavigationStore } from '../../stores';
+import { selectActiveActivityLegacyId, useNavigationStore } from '../../stores';
 import { ContentTypeBadge, PostImageGrid, stripContentTypeHashtags } from '../post';
 import type { EventMapMarker } from './eventMapMarkers';
 import { markerAvatarUrl } from './eventMapMarkers';
@@ -68,9 +68,7 @@ export function EventMapUserPostsSheet({
 }: EventMapUserPostsSheetProps) {
   useOverlayLock(open);
 
-  const activeActivityLegacyId = useNavigationStore(
-    (state) => state.activeActivityLegacyId,
-  );
+  const activeActivityLegacyId = useNavigationStore(selectActiveActivityLegacyId);
   const { sheet, isLoading, isError } = useEventMapUserSheet(
     marker,
     open,

@@ -1,4 +1,4 @@
-import { Bell, Sparkles } from 'lucide-react-taro';
+import { Bell, Sparkles } from '../../../components/icons';
 import type { FC } from 'react';
 import { Text, View } from '@tarojs/components';
 import { Button } from '../../../components/ui';
