@@ -38,7 +38,7 @@ describe('registerForActivityWithFeedback', () => {
     );
   });
 
-  it('shows already-registered toast when duplicate', async () => {
+  it('does not toast when already registered on server', async () => {
     vi.mocked(registerForActivityAndInvalidate).mockResolvedValue({
       ok: true,
       activityLegacyId: 4,
@@ -46,10 +46,9 @@ describe('registerForActivityWithFeedback', () => {
       alreadyRegistered: true,
     });
 
-    await registerForActivityWithFeedback(4);
+    const ok = await registerForActivityWithFeedback(4);
 
-    expect(Taro.showToast).toHaveBeenCalledWith(
-      expect.objectContaining({ title: '你已报名本场活动' }),
-    );
+    expect(ok).toBe(true);
+    expect(Taro.showToast).not.toHaveBeenCalled();
   });
 });

@@ -6,6 +6,7 @@ import { throttleRaf } from '../../utils/throttleRaf';
 import { ChatMessageRow } from './ChatMessageRow';
 import { AiMatchQuotaExhaustedMessage } from './AiMatchQuotaExhaustedMessage';
 import { CHAT_SCROLL_BOTTOM_ID } from './chatScrollBottom';
+import { shouldSuppressAutoScrollForMessage } from './chatMessageListScroll';
 import { ScrollView, View } from '@tarojs/components';
 
 const SCROLL_TOP_STEP = 100_000;
@@ -14,6 +15,7 @@ export function ChatMessageList({
   messages,
   isStreaming,
   isTravelGuideGenerating = false,
+  scrollAreaHeight,
   keyboardInset = 0,
   /** Bump when re-entering the page or after history sync — scrolls to latest messages. */
   forceScrollToBottomKey = 0,
@@ -27,6 +29,7 @@ export function ChatMessageList({
   messages: ChatUiMessage[];
   isStreaming: boolean;
   isTravelGuideGenerating?: boolean;
+  scrollAreaHeight?: number;
   keyboardInset?: number;
   forceScrollToBottomKey?: number;
   userAvatar?: string;
@@ -68,9 +71,13 @@ export function ChatMessageList({
     [scrollToBottom],
   );
 
+  const suppressAutoScroll = shouldSuppressAutoScrollForMessage(lastMessage);
+
   useLayoutEffect(() => {
+    if (suppressAutoScroll) return;
     scrollToBottomThrottled();
   }, [
+    suppressAutoScroll,
     scrollAnchorKey,
     isStreaming,
     isTravelGuideGenerating,
@@ -80,6 +87,7 @@ export function ChatMessageList({
 
   useLayoutEffect(() => {
     if (!forceScrollToBottomKey) return;
+    if (suppressAutoScroll) return;
     scrollToBottom();
     const t1 = setTimeout(() => scrollToBottom(), 120);
     const t2 = setTimeout(() => scrollToBottom(), 320);
@@ -89,7 +97,7 @@ export function ChatMessageList({
       clearTimeout(t2);
       clearTimeout(t3);
     };
-  }, [forceScrollToBottomKey, scrollToBottom]);
+  }, [forceScrollToBottomKey, suppressAutoScroll, scrollToBottom]);
 
   return (
     <ScrollView
@@ -100,6 +108,7 @@ export function ChatMessageList({
       scrollIntoView={scrollIntoView}
       scrollWithAnimation={false}
       className="s-ai-assistant-chat__scroll s-scrollbar-none"
+      style={scrollAreaHeight != null ? { height: `${scrollAreaHeight}px` } : undefined}
     >
       <View className="s-ai-assistant-chat__scroll-inner">
         {messages.map((msg, index) => (

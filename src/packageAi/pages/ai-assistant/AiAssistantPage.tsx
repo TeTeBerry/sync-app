@@ -3,10 +3,10 @@ import { type FC } from 'react';
 import { BottomNavSlot } from '../../../components/navigation/BottomNav';
 import { CalendarDays, Sparkles, Zap } from '../../../components/icons';
 import PageNavigation from '../../../components/navigation/PageNavigation';
-import ThemedPageLoader from '../../../components/ThemedPageLoader';
 import { Text, View } from '@tarojs/components';
 import { AiUpgradeSheetProvider } from '../../../components/ai-chat/AiUpgradeSheetContext';
 import AiPackageUpgradeSheet from '../../../components/ai-chat/AiPackageUpgradeSheet';
+import { ProfileTabErrorBoundary } from '../../../components/profile/ProfileTabErrorBoundary';
 import { AiAssistantChat } from './AiAssistantChat';
 import { useAiAssistantPage } from './useAiAssistantPage';
 
@@ -91,7 +91,7 @@ const AiAssistantPage: FC = () => {
 
         <View className="s-ai-assistant__body">
           <View className="s-ai-assistant__panel">
-            {page.chatReady ? (
+            <ProfileTabErrorBoundary logTag="AiAssistant">
               <AiUpgradeSheetProvider openUpgradeSheet={page.openUpgradeSheet}>
                 <AiAssistantChat
                   initialMessage={page.pendingInitialMessage}
@@ -101,22 +101,15 @@ const AiAssistantPage: FC = () => {
                   activityLegacyId={page.activityLegacyId}
                   activityTitle={page.activityTitle}
                   onInitialMessageSent={page.handleInitialMessageSent}
-                  registerReloadChatHistory={page.registerReloadChatHistory}
                   onMessageCountChange={page.setMessageCount}
-                  chatBodyHeight={page.chatBodyHeight}
+                  chatScrollHeight={page.chatScrollHeight}
                   userAvatar={page.profileUserData.avatar}
                   userName={page.profileUserData.name}
                   userGender={page.userGender}
                   aiMatchQuotaExhausted={page.aiMatchQuota.exhausted}
                 />
               </AiUpgradeSheetProvider>
-            ) : (
-              <ThemedPageLoader
-                variant="skeleton-ai-chat"
-                className="s-ai-assistant__chat-skeleton"
-                minHeight={page.chatBodyHeight ?? 320}
-              />
-            )}
+            </ProfileTabErrorBoundary>
           </View>
         </View>
       </View>

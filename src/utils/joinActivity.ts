@@ -19,10 +19,12 @@ export async function registerForActivityWithFeedback(
 
   try {
     const result = await registerForActivityAndInvalidate(legacyId);
-    void Taro.showToast({
-      title: result.alreadyRegistered ? '你已报名本场活动' : '已报名本场活动',
-      icon: 'success',
-    });
+    if (!result.alreadyRegistered) {
+      void Taro.showToast({
+        title: '已报名本场活动',
+        icon: 'success',
+      });
+    }
     return true;
   } catch (error) {
     void Taro.showToast({
@@ -38,9 +40,15 @@ export function joinActivityWithAuth(
   options?: {
     onSuccess?: () => void;
     feature?: LoginInterceptFeature;
+    /** 本地已展示「已加入」时跳过报名请求与提示，仅执行 onSuccess */
+    alreadyJoined?: boolean;
   },
 ): void {
   requireAuth(() => {
+    if (options?.alreadyJoined) {
+      options.onSuccess?.();
+      return;
+    }
     void registerForActivityWithFeedback(legacyId).then((ok) => {
       if (ok) {
         options?.onSuccess?.();

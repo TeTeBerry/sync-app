@@ -67,9 +67,15 @@ $chat-pill-border: rgba(255, 255, 255, 0.1);
   color: #fff;
 }
 
+/** AI 助手头像（顶栏 + 气泡旁）— 统一主题粉，不随用户性别切蓝 */
 @mixin chat-ai-avatar-surface {
-  background: rgb(30, 30, 32);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(var(--primary-rgb), 0.24);
+  border: 1px solid rgba(var(--primary-rgb), 0.42);
+  box-shadow: 0 2px 12px rgba(var(--primary-rgb), 0.28);
+
+  svg {
+    color: var(--primary);
+  }
 }
 
 @mixin chat-send-active {

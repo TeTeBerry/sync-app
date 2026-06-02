@@ -6,6 +6,9 @@ describe('isTravelGuideIntent', () => {
     expect(isTravelGuideIntent('AI攻略')).toBe(true);
     expect(isTravelGuideIntent('帮我规划行程')).toBe(true);
     expect(isTravelGuideIntent('帮我生成出行攻略')).toBe(true);
+    expect(isTravelGuideIntent('规划')).toBe(true);
+    expect(isTravelGuideIntent('规划一下')).toBe(true);
+    expect(isTravelGuideIntent('攻略')).toBe(true);
   });
 
   it('does not match buddy shortcuts', () => {

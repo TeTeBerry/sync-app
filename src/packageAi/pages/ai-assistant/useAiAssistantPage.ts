@@ -1,6 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import Taro, { useDidShow } from '@tarojs/taro';
-import { useDeferredMount } from '../../../hooks/useDeferredMount';
 import { useNavBarInsets } from '../../../hooks/useNavBarInsets';
 import { usePageRouteReady } from '../../../hooks/usePageRouteReady';
 import { useEndRouteTransitionOnShow } from '../../../hooks/useEndRouteTransitionOnShow';
@@ -20,7 +19,6 @@ import {
   goProfileBenefits,
   ROUTES,
 } from '../../../utils/route';
-import { DEFER_AI_CHAT_MS } from '../../../utils/timing';
 import { resolveAiChatWsUrl } from '../../../constants/api';
 import { isAiChatWsDevLog } from '../../../utils/aiChatWs';
 import { inferUserGenderFromName } from '../../../utils/inferAuthorGender';
@@ -31,10 +29,11 @@ import { useProfileActivityLegacyId } from '../../../hooks/useProfileActivityLeg
 export const AI_HEADER_CONTENT_PX = 56;
 /** Event context strip below header when scoped to an activity. */
 export const AI_EVENT_CONTEXT_PX = 44;
+/** Quick chips + composer row inside chat footer (px @ 375). */
+export const AI_CHAT_COMPOSER_CHROME_PX = 136;
 
 export function useAiAssistantPage() {
   const navInsets = useNavBarInsets();
-  const chatReady = useDeferredMount(DEFER_AI_CHAT_MS);
   const [navBoot] = useState(() => {
     const intent = useNavigationStore.getState().consumeAiAssistantIntent();
     if (intent?.activityLegacyId != null && !Number.isNaN(intent.activityLegacyId)) {
@@ -59,7 +58,6 @@ export function useAiAssistantPage() {
   );
   const [messageCount, setMessageCount] = useState(0);
   const [pageShowSeq, setPageShowSeq] = useState(0);
-  const reloadChatHistoryRef = useRef<(() => void) | null>(null);
   const [upgradeSheetOpen, setUpgradeSheetOpen] = useState(false);
   const profileActivityLegacyId = useProfileActivityLegacyId();
   const aiMatchQuota = useAiMatchQuota();
@@ -103,7 +101,9 @@ export function useAiAssistantPage() {
     return navInsets.paddingTop + 12 + AI_HEADER_CONTENT_PX + eventBar;
   }, [navInsets.paddingTop, showEventContext]);
 
-  const chatBodyHeight = useTabPageMainHeight({ subtractPx: headerSubtractPx });
+  const chatScrollHeight = useTabPageMainHeight({
+    subtractPx: headerSubtractPx + AI_CHAT_COMPOSER_CHROME_PX,
+  });
 
   usePageRouteReady(true);
   useEndRouteTransitionOnShow();
@@ -146,14 +146,9 @@ export function useAiAssistantPage() {
     applyAiAssistantIntent();
   }, [applyAiAssistantIntent]);
 
-  const registerReloadChatHistory = useCallback((reload: (() => void) | null) => {
-    reloadChatHistoryRef.current = reload;
-  }, []);
-
   useDidShow(() => {
     applyAiAssistantIntent();
     setPageShowSeq((n) => n + 1);
-    reloadChatHistoryRef.current?.();
   });
 
   const handleBack = useCallback(() => {
@@ -181,7 +176,6 @@ export function useAiAssistantPage() {
 
   return {
     navInsets,
-    chatReady,
     pendingInitialMessage,
     pendingOpenAiGuideSheet,
     pendingAutoGuideForm,
@@ -201,10 +195,9 @@ export function useAiAssistantPage() {
     activityMeta,
     hasEventScope,
     showEventContext,
-    chatBodyHeight,
+    chatScrollHeight,
     activityLegacyId,
     handleInitialMessageSent,
     handleBack,
-    registerReloadChatHistory,
   };
 }

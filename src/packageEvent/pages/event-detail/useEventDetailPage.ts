@@ -12,6 +12,7 @@ import { useEventDetailRoute } from './useEventDetailRoute';
 import { useEventDetailActivityHeader } from './useEventDetailActivityHeader';
 import { useEventDetailEntitlements } from './useEventDetailEntitlements';
 import { useEventDetailAiActions } from './useEventDetailAiActions';
+import { useEventDetailBuddyPost } from './useEventDetailBuddyPost';
 import { useEventDetailTravelGuide } from './useEventDetailTravelGuide';
 
 export type UseEventDetailPageOptions = {
@@ -40,12 +41,20 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
   const { entitlements, openContactUnlockExhaustedModal } =
     useEventDetailEntitlements(eventId);
   const travelGuide = useEventDetailTravelGuide(eventId);
-  const ai = useEventDetailAiActions(eventId, {
-    openGuideSheet: travelGuide.openGuideSheet,
-  });
-
   const currentUserQuery = useCurrentUserQuery();
   const profileUser = useResolvedProfile();
+  const displayUserName = currentUserQuery.data?.name ?? profileUser.name ?? '用户';
+
+  const buddyPost = useEventDetailBuddyPost(eventId, {
+    authorName: displayUserName,
+    authorAvatar: currentUserQuery.data?.avatar,
+  });
+
+  const ai = useEventDetailAiActions(eventId, {
+    openGuideSheet: travelGuide.openGuideSheet,
+    openBuddyPostSheet: buddyPost.openBuddyPostSheet,
+  });
+
   const apiEnabled = isApiEnabled();
 
   const [contentTab, setContentTab] = useState<EventDetailTabId>('posts');
@@ -71,7 +80,6 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     setScrollTop,
   });
 
-  const displayUserName = currentUserQuery.data?.name ?? profileUser.name ?? '用户';
   const postsLoading = !feedReady || postsQuery.isLoading;
   const showPostsEnd =
     contentTab === 'posts' &&
@@ -102,7 +110,14 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     openAi: ai.openAi,
     handleShortcutTag: ai.handleShortcutTag,
     handleOpenAiGuide: ai.handleOpenAiGuide,
+    handleOpenBuddyPost: ai.handleOpenBuddyPost,
     handleOpenExclusiveItinerary: ai.handleOpenExclusiveItinerary,
+    buddyPostSheetOpen: buddyPost.buddyPostSheetOpen,
+    closeBuddyPostSheet: buddyPost.closeBuddyPostSheet,
+    handleBuddyPostSheetSubmit: buddyPost.handleBuddyPostSheetSubmit,
+    buddyPostActivityDate: buddyPost.buddyPostActivityDate,
+    buddyPostActivityTitle: buddyPost.buddyPostActivityTitle,
+    isBuddyPostPublishing: buddyPost.isBuddyPostPublishing,
     guideSheetOpen: travelGuide.guideSheetOpen,
     closeGuideSheet: travelGuide.closeGuideSheet,
     handleGuideSheetSubmit: travelGuide.handleGuideSheetSubmit,

@@ -78,7 +78,8 @@ function ChatMessageRowInner({
   const hasPostCards = Boolean(msg.createdPost || msg.recommendedPosts?.length);
   const hasActivityCard = Boolean(msg.recommendedActivity);
   const hasSuggestedReplies = Boolean(msg.suggestedReplies?.length);
-  const hasTravelGuide = Boolean(msg.travelGuide?.imagePath);
+  const travelGuideImagePath = msg.travelGuide?.imagePath?.trim();
+  const hasTravelGuide = Boolean(travelGuideImagePath);
   const showEmbedBelow =
     !isUser &&
     (hasPostCards || hasActivityCard || hasSuggestedReplies || hasTravelGuide);
@@ -192,12 +193,12 @@ function ChatMessageRowInner({
                   onSelect={onSelectSuggestedReply}
                 />
               ) : null}
-              {msg.travelGuide ? (
+              {travelGuideImagePath && msg.travelGuide?.form ? (
                 <AiGuideResultCard
-                  imagePath={msg.travelGuide.imagePath}
+                  imagePath={travelGuideImagePath}
                   disabled={isStreaming}
                   onRegenerate={() => onRegenerateTravelGuide?.(msg.travelGuide!.form)}
-                  onShare={() => onShareTravelGuide?.(msg.travelGuide!.imagePath)}
+                  onShare={() => onShareTravelGuide?.(travelGuideImagePath)}
                 />
               ) : null}
             </View>

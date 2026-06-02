@@ -5,11 +5,12 @@ import { isAiShortcutTag, recordAiShortcutTagUse } from '../../../utils/aiShortc
 
 export type UseEventDetailAiActionsOptions = {
   openGuideSheet: () => void;
+  openBuddyPostSheet: () => void;
 };
 
 export function useEventDetailAiActions(
   eventId: number,
-  { openGuideSheet }: UseEventDetailAiActionsOptions,
+  { openGuideSheet, openBuddyPostSheet }: UseEventDetailAiActionsOptions,
 ) {
   const [prompt, setPrompt] = useState('');
 
@@ -46,15 +47,23 @@ export function useEventDetailAiActions(
         openGuideSheet();
         return;
       }
+      if (tag === '组队发帖') {
+        openBuddyPostSheet();
+        return;
+      }
       bumpShortcutTagUsage(tag);
       goAiAssistant({ initialMessage: tag, activityLegacyId: eventId });
     },
-    [bumpShortcutTagUsage, eventId, openGuideSheet],
+    [bumpShortcutTagUsage, eventId, openBuddyPostSheet, openGuideSheet],
   );
 
   const handleOpenAiGuide = useCallback(() => {
     openGuideSheet();
   }, [openGuideSheet]);
+
+  const handleOpenBuddyPost = useCallback(() => {
+    openBuddyPostSheet();
+  }, [openBuddyPostSheet]);
 
   return {
     prompt,
@@ -62,6 +71,7 @@ export function useEventDetailAiActions(
     openAi,
     handleShortcutTag,
     handleOpenAiGuide,
+    handleOpenBuddyPost,
     handleOpenExclusiveItinerary,
   };
 }

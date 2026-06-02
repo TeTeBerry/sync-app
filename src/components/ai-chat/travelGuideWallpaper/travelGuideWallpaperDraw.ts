@@ -10,7 +10,8 @@ const META_LINE = 34;
 const SECTION_TITLE = 44;
 const FOOTER_BLOCK = 56;
 /** 微信单张 canvas 建议不超过 4096，留余量 */
-const MAX_CANVAS_HEIGHT = 4096;
+export const TRAVEL_GUIDE_MAX_CANVAS_HEIGHT = 4096;
+const MAX_CANVAS_HEIGHT = TRAVEL_GUIDE_MAX_CANVAS_HEIGHT;
 
 type GuideCanvas = {
   width: number;

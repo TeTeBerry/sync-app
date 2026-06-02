@@ -1,14 +1,6 @@
-import { lazy, Suspense } from 'react';
-import ThemedPageLoader from '../../../components/ThemedPageLoader';
+import AiAssistantPage from './AiAssistantPage';
 
-const AiAssistantPage = lazy(() => import('./AiAssistantPage'));
-
+/** 同步加载，避免从活动页「生成攻略」进入时长时间停在 Suspense 骨架屏 */
 export default function AiAssistantRoute() {
-  return (
-    <Suspense
-      fallback={<ThemedPageLoader variant="skeleton-ai-chat" minHeight={400} />}
-    >
-      <AiAssistantPage />
-    </Suspense>
-  );
+  return <AiAssistantPage />;
 }

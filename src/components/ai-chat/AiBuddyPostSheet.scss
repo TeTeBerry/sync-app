@@ -1,0 +1,80 @@
+@use '../../styles/chat' as chat;
+
+.s-ai-buddy-post-sheet {
+  &__date-row {
+    display: flex;
+    gap: 10px;
+  }
+
+  &__date-col {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__picker {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-sizing: border-box;
+  }
+
+  &__picker-value {
+    font-size: 14px;
+    color: #fff;
+    font-weight: 600;
+  }
+
+  &__picker-hint {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.45);
+  }
+
+  &__tag-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  &__tag {
+    padding: 8px 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.04);
+
+    &--on {
+      border-color: rgba(100, 210, 255, 0.65);
+      background: rgba(100, 210, 255, 0.16);
+    }
+
+    &--pressed {
+      opacity: 0.85;
+    }
+  }
+
+  &__tag-text {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.85);
+    font-weight: 600;
+  }
+
+  &__textarea-wrap {
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-sizing: border-box;
+  }
+
+  &__textarea {
+    width: 100%;
+    min-height: 72px;
+    font-size: 14px;
+    color: #fff;
+    line-height: 1.45;
+  }
+}

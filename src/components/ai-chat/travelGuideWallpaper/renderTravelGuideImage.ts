@@ -8,6 +8,9 @@ import type { TravelGuidePlan } from '../../../types/travelGuide';
 
 export const TRAVEL_GUIDE_CANVAS_ID = 'sync-travel-guide-canvas';
 
+/** 微信单张 canvas 建议不超过 4096，留余量（页面 Canvas 回退时用） */
+export const TRAVEL_GUIDE_MAX_CANVAS_HEIGHT = 4096;
+
 type GuideCanvas = HTMLCanvasElement & {
   getContext(contextId: '2d'): CanvasRenderingContext2D | null;
 };

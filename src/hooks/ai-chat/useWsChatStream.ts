@@ -15,7 +15,7 @@ import {
   formatAiChatStreamError,
   formatAiChatToastError,
 } from '../../utils/aiChatErrors';
-import { buildApiChatHistory } from '../../utils/aiChatHistory';
+import { buildSingleTurnUserMessage } from '../../utils/aiChatHistory';
 import { buildAiChatWsSendActor } from '../../api/requestActor';
 import { streamAiChatWs } from '../../utils/aiChatWs';
 import { mockAiChatStream } from '../../utils/aiChatStream';
@@ -40,7 +40,6 @@ export interface UseWsChatStreamOptions {
   ) => void;
   onMatchResults?: (activityLegacyId?: number) => void | Promise<void>;
   persistSessionFromStream: (sessionId: string) => void;
-  onTurnPersisted?: () => void;
   createTypewriter: (options: {
     charDelayMs?: number;
     onUpdate: (visible: string) => void;
@@ -63,7 +62,6 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
     onExistingPost,
     onMatchResults,
     persistSessionFromStream,
-    onTurnPersisted,
     createTypewriter,
     typewriterCharDelayMs = 22,
   } = options;
@@ -77,12 +75,7 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
         activityId != null ? { 'X-Activity-Id': String(activityId) } : undefined;
 
       const pendingImage = image ?? images?.[0];
-      const history = buildApiChatHistory(
-        messagesRef.current,
-        welcomeText,
-        trimmed,
-        pendingImage,
-      );
+      const history = buildSingleTurnUserMessage(trimmed, pendingImage);
 
       const finishAiMessage = (updater: (current: ChatUiMessage) => ChatUiMessage) => {
         setMessages((prev) => {
@@ -138,7 +131,6 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
           setMessages,
           activityLegacyId: activityId,
           persistSessionFromStream,
-          onTurnPersisted,
           onPostCreated,
           onExistingPost,
           onMatchResults,
@@ -169,18 +161,15 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
       wsUrl,
       createTypewriter,
       getAuthHeaders,
-      messagesRef,
       mockReply,
       onExistingPost,
       onMatchResults,
       onPostCreated,
       persistSessionFromStream,
-      onTurnPersisted,
       sessionIdRef,
       setMessages,
       streamErrorText,
       typewriterCharDelayMs,
-      welcomeText,
     ],
   );
 

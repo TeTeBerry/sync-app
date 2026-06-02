@@ -6,6 +6,8 @@ import { Text, View } from '@tarojs/components';
 type Props = {
   children: ReactNode;
   onRetry?: () => void;
+  /** Console label prefix (default Profile). */
+  logTag?: string;
 };
 
 type State = {
@@ -21,7 +23,8 @@ export class ProfileTabErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error('[Profile] render error', error, info.componentStack);
+    const tag = this.props.logTag ?? 'Profile';
+    console.error(`[${tag}] render error`, error, info.componentStack);
   }
 
   private handleRetry = () => {

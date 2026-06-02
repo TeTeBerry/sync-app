@@ -13,6 +13,7 @@ import EventDetailLiveSection from './components/EventDetailLiveSection';
 import { EventPostsVirtualList } from './components/EventPostsVirtualList';
 import { EVENT_DETAIL_SCROLL_ID } from './useEventDetailPosts';
 import { useEventDetailPage } from './useEventDetailPage';
+import { AiBuddyPostSheet } from '../../../components/ai-chat/AiBuddyPostSheet';
 import { AiGuidePlanSheet } from '../../../components/ai-chat/AiGuidePlanSheet';
 import PageNavigation from '../../../components/navigation/PageNavigation';
 import { Button } from '../../../components/ui';
@@ -62,7 +63,14 @@ const EventDetailPage = () => {
     openAi,
     handleShortcutTag,
     handleOpenAiGuide,
+    handleOpenBuddyPost,
     handleOpenExclusiveItinerary,
+    buddyPostSheetOpen,
+    closeBuddyPostSheet,
+    handleBuddyPostSheetSubmit,
+    buddyPostActivityDate,
+    buddyPostActivityTitle,
+    isBuddyPostPublishing,
     guideSheetOpen,
     closeGuideSheet,
     handleGuideSheetSubmit,
@@ -122,6 +130,8 @@ const EventDetailPage = () => {
               onAiSubmit={() => openAi(prompt)}
               onShortcutTag={handleShortcutTag}
               onAiGuideClick={handleOpenAiGuide}
+              onBuddyPostClick={handleOpenBuddyPost}
+              buddyPostDisabled={isBuddyPostPublishing}
               onOpenExclusiveItinerary={handleOpenExclusiveItinerary}
               contentTab={contentTab}
               onContentTabChange={setContentTab}
@@ -194,6 +204,13 @@ const EventDetailPage = () => {
         packageSheetOpen={entitlements.packageSheetOpen}
         packageSheetInitialTierId={entitlements.packageSheetInitialTierId}
         onClosePackageSheet={entitlements.closePackageUpgradeSheet}
+      />
+      <AiBuddyPostSheet
+        open={buddyPostSheetOpen}
+        activityDate={buddyPostActivityDate}
+        activityTitle={buddyPostActivityTitle}
+        onClose={closeBuddyPostSheet}
+        onSubmit={handleBuddyPostSheetSubmit}
       />
       <AiGuidePlanSheet
         open={guideSheetOpen}

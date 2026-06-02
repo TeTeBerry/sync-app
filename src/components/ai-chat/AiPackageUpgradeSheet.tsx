@@ -265,7 +265,7 @@ const AiPackageUpgradeSheet: React.FC<AiPackageUpgradeSheetProps> = ({
               aria-hidden
             />
             <Text className="s-ai-package-upgrade-sheet__info-text">
-              按场次购买，灵活叠加，资金微信官方担保
+              按场次购买，灵活叠加
             </Text>
           </View>
         </View>

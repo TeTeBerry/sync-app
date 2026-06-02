@@ -6,21 +6,25 @@ import { invalidatePostQueries } from '../../../hooks/useSyncApi';
 import { ChatMessageList } from '../../../components/ai-chat/ChatMessageList';
 import { ChatComposer } from '../../../components/ai-chat/ChatComposer';
 import { DegradedMatchBanner } from '../../../components/ai-chat/DegradedMatchBanner';
+import { AiBuddyPostSheet } from '../../../components/ai-chat/AiBuddyPostSheet';
 import { AiGuidePlanSheet } from '../../../components/ai-chat/AiGuidePlanSheet';
 import { useKeyboardInset } from '../../../hooks/useKeyboardInset';
 import { API_BASE_URL } from '../../../constants/api';
 import { uploadChatImageRefs } from '../../../utils/chatImage';
 import type { inferUserGenderFromName } from '../../../utils/inferAuthorGender';
 import type { AiGuidePlanFormValues } from '../../../types/travelGuide';
-import { Canvas, Text, View } from '@tarojs/components';
+import { Canvas, View } from '@tarojs/components';
 import { invalidateProfileEntitlements } from '../../../utils/queryInvalidation';
 import { invalidateCache } from '../../../hooks/useApiQuery';
+import { useAiBuddyPost } from '../../../hooks/useAiBuddyPost';
 import { useAiTravelGuide } from '../../../hooks/useAiTravelGuide';
 import { parseActivityDayCount } from '../../../utils/parseActivityDayCount';
 import { useActivityDetailQuery } from '../../../hooks/useSyncApi';
 import { TRAVEL_GUIDE_CANVAS_ID } from '../../../components/ai-chat/travelGuideWallpaper/renderTravelGuideImage';
-import { isTravelGuideIntent } from '../../../utils/travelGuideIntent';
+import { TRAVEL_GUIDE_MAX_CANVAS_HEIGHT } from '../../../components/ai-chat/travelGuideWallpaper/renderTravelGuideImage';
 import { eventCityFromLocation } from '../../../utils/travelGuideDepartureSuggestions';
+import { shouldSuppressAutoScrollForMessage } from '../../../components/ai-chat/chatMessageListScroll';
+import { isOffscreenCanvasSupported } from '../../../utils/offscreenCanvas';
 export type AiAssistantChatProps = {
   initialMessage?: string | null;
   initialOpenAiGuideSheet?: boolean;
@@ -28,12 +32,11 @@ export type AiAssistantChatProps = {
   activityLegacyId?: number;
   activityTitle?: string;
   onInitialMessageSent?: () => void;
-  /** Page-level useDidShow — reload Mongo/local history (hooks in child components are unreliable). */
-  registerReloadChatHistory?: (reload: (() => void) | null) => void;
   /** Increments on each page useDidShow — drives scroll-to-bottom after return. */
   pageShowSeq?: number;
   onMessageCountChange?: (count: number) => void;
-  chatBodyHeight?: number;
+  /** Explicit ScrollView height — required on WeChat when disableScroll is true. */
+  chatScrollHeight?: number;
   userAvatar?: string;
   userName: string;
   userGender?: ReturnType<typeof inferUserGenderFromName>;
@@ -47,10 +50,9 @@ export function AiAssistantChat({
   activityLegacyId,
   activityTitle,
   onInitialMessageSent,
-  registerReloadChatHistory,
   pageShowSeq = 0,
   onMessageCountChange,
-  chatBodyHeight,
+  chatScrollHeight,
   userAvatar,
   userName,
   userGender,
@@ -63,19 +65,12 @@ export function AiAssistantChat({
   const initialGuideSheetHandledRef = useRef(false);
   const initialAutoGuideHandledRef = useRef(false);
   const submitLockRef = useRef(false);
-  const wasLoadingHistoryRef = useRef(false);
   const pendingPageShowScrollRef = useRef(false);
   const [forceScrollToBottomKey, setForceScrollToBottomKey] = useState(0);
 
   const bumpScrollToBottom = useCallback(() => {
     setForceScrollToBottomKey((k) => k + 1);
   }, []);
-
-  const scheduleScrollToBottom = useCallback(() => {
-    bumpScrollToBottom();
-    setTimeout(bumpScrollToBottom, 100);
-    setTimeout(bumpScrollToBottom, 300);
-  }, [bumpScrollToBottom]);
 
   const activityQuery = useActivityDetailQuery(activityLegacyId);
   const defaultGuideNights = useMemo(
@@ -96,7 +91,7 @@ export function AiAssistantChat({
 
   const welcomeText = useMemo(() => {
     if (activityTitle?.trim()) {
-      return `👋 已为你锁定「${activityTitle.trim()}」。可以说「帮我规划行程」生成出行攻略，或说说想找什么样的队友、住宿方式，我来帮你匹配或发帖。`;
+      return `👋 已为你锁定「${activityTitle.trim()}」。一句话可生成出行攻略（如：上海2人舒适自驾住2晚）或发布组队帖（如：6.13-6.14 上海 2人 拼房）；也可点「AI攻略」「组队发帖」用表单填写。`;
     }
     return '👋 我是你的 AI 智能助手，帮你发现活动、找队友、规划行程，说出需求，我来搞定。';
   }, [activityTitle]);
@@ -111,11 +106,10 @@ export function AiAssistantChat({
     setMessages,
     messagesRef,
     isStreaming,
-    isLoadingHistory,
     isStreamingRef,
     send,
     clearChat,
-    reloadHistory,
+    sessionIdRef,
   } = useAiChatStream({
     welcomeText,
     mockReply,
@@ -143,6 +137,42 @@ export function AiAssistantChat({
     onMatchResults: handleMatchResults,
   });
 
+  const scheduleScrollToBottom = useCallback(() => {
+    const last = messagesRef.current[messagesRef.current.length - 1];
+    if (shouldSuppressAutoScrollForMessage(last)) return;
+    bumpScrollToBottom();
+    setTimeout(() => {
+      const latest = messagesRef.current[messagesRef.current.length - 1];
+      if (shouldSuppressAutoScrollForMessage(latest)) return;
+      bumpScrollToBottom();
+    }, 100);
+    setTimeout(() => {
+      const latest = messagesRef.current[messagesRef.current.length - 1];
+      if (shouldSuppressAutoScrollForMessage(latest)) return;
+      bumpScrollToBottom();
+    }, 300);
+  }, [bumpScrollToBottom, messagesRef]);
+
+  const handleBuddyPostPublished = useCallback(async () => {
+    await invalidatePostQueries();
+    if (activityLegacyId != null) {
+      invalidateCache(['posts', 'activity', activityLegacyId]);
+    }
+  }, [activityLegacyId]);
+
+  const buddyPost = useAiBuddyPost({
+    activityLegacyId,
+    activityTitle,
+    activityDate: activityQuery.data?.date,
+    authorName: userName,
+    authorAvatar: userAvatar,
+    setMessages,
+    messagesRef,
+    isStreaming,
+    onPublished: handleBuddyPostPublished,
+    onPlanningMessagesShown: scheduleScrollToBottom,
+  });
+
   const travelGuide = useAiTravelGuide({
     activityLegacyId,
     activityTitle,
@@ -150,6 +180,7 @@ export function AiAssistantChat({
     setMessages,
     messagesRef,
     isStreaming,
+    sessionIdRef,
     onPlanningMessagesShown: scheduleScrollToBottom,
   });
 
@@ -164,26 +195,10 @@ export function AiAssistantChat({
 
   useEffect(() => {
     if (!pendingPageShowScrollRef.current) return;
-    if (isLoadingHistory || messages.length === 0) return;
+    if (messages.length === 0) return;
     pendingPageShowScrollRef.current = false;
     scheduleScrollToBottom();
-  }, [isLoadingHistory, messages.length, pageShowSeq, scheduleScrollToBottom]);
-
-  useEffect(() => {
-    const wasLoading = wasLoadingHistoryRef.current;
-    wasLoadingHistoryRef.current = isLoadingHistory;
-    if (wasLoading && !isLoadingHistory && messages.length > 0) {
-      scheduleScrollToBottom();
-    }
-  }, [isLoadingHistory, messages.length, scheduleScrollToBottom]);
-
-  useEffect(() => {
-    if (!registerReloadChatHistory) return;
-    registerReloadChatHistory(() => {
-      void reloadHistory({ force: true });
-    });
-    return () => registerReloadChatHistory(null);
-  }, [registerReloadChatHistory, reloadHistory]);
+  }, [messages.length, pageShowSeq, scheduleScrollToBottom]);
 
   useEffect(() => {
     if (!initialMessage) {
@@ -200,15 +215,19 @@ export function AiAssistantChat({
     onInitialMessageSent?.();
 
     const scoped = activityLegacyId != null && !Number.isNaN(activityLegacyId);
-    if (isTravelGuideIntent(trimmed) && scoped) {
-      travelGuide.openGuideSheetFromText(trimmed);
-      return;
-    }
-
-    void send({ text: trimmed });
+    void (async () => {
+      if (scoped) {
+        const buddyHandled = await buddyPost.handleBuddyPostChatMessage(trimmed);
+        if (buddyHandled) return;
+        const guideHandled = await travelGuide.handleTravelGuideChatMessage(trimmed);
+        if (guideHandled) return;
+      }
+      await send({ text: trimmed });
+    })();
   }, [
     activityLegacyId,
     aiMatchQuotaExhausted,
+    buddyPost,
     initialMessage,
     isStreaming,
     onInitialMessageSent,
@@ -228,7 +247,6 @@ export function AiAssistantChat({
     const form = initialAutoRunTravelGuideForm;
     if (!form || initialAutoGuideHandledRef.current) return;
     if (activityLegacyId == null || Number.isNaN(activityLegacyId)) return;
-    if (isLoadingHistory) return;
     initialAutoGuideHandledRef.current = true;
     onInitialMessageSent?.();
     Taro.nextTick(() => {
@@ -237,7 +255,6 @@ export function AiAssistantChat({
   }, [
     activityLegacyId,
     initialAutoRunTravelGuideForm,
-    isLoadingHistory,
     onInitialMessageSent,
     travelGuide,
   ]);
@@ -260,11 +277,19 @@ export function AiAssistantChat({
       }
 
       const scoped = activityLegacyId != null && !Number.isNaN(activityLegacyId);
-      if (scoped && !hasImages && isTravelGuideIntent(trimmed)) {
-        setInput('');
-        setPendingImages([]);
-        travelGuide.openGuideSheetFromText(trimmed);
-        return;
+      if (scoped && !hasImages) {
+        const buddyHandled = await buddyPost.handleBuddyPostChatMessage(trimmed);
+        if (buddyHandled) {
+          setInput('');
+          setPendingImages([]);
+          return;
+        }
+        const guideHandled = await travelGuide.handleTravelGuideChatMessage(trimmed);
+        if (guideHandled) {
+          setInput('');
+          setPendingImages([]);
+          return;
+        }
       }
 
       submitLockRef.current = true;
@@ -288,14 +313,17 @@ export function AiAssistantChat({
       isStreaming,
       isStreamingRef,
       send,
+      buddyPost,
       travelGuide,
     ],
   );
 
   const handleClearChat = useCallback(async () => {
     if (isStreaming || isStreamingRef.current) return;
+    buddyPost.clearCollect();
+    travelGuide.clearGuideCollect();
     await clearChat();
-  }, [clearChat, isStreaming, isStreamingRef]);
+  }, [buddyPost, clearChat, isStreaming, isStreamingRef, travelGuide]);
 
   const handleSelectSuggestedReply = useCallback(
     async (reply: string) => {
@@ -309,9 +337,11 @@ export function AiAssistantChat({
       }
       const trimmed = reply.trim();
       const scoped = activityLegacyId != null && !Number.isNaN(activityLegacyId);
-      if (scoped && isTravelGuideIntent(trimmed)) {
-        travelGuide.openGuideSheetFromText(trimmed);
-        return;
+      if (scoped) {
+        const buddyHandled = await buddyPost.handleBuddyPostChatMessage(trimmed);
+        if (buddyHandled) return;
+        const guideHandled = await travelGuide.handleTravelGuideChatMessage(trimmed);
+        if (guideHandled) return;
       }
 
       submitLockRef.current = true;
@@ -324,6 +354,7 @@ export function AiAssistantChat({
     [
       activityLegacyId,
       aiMatchQuotaExhausted,
+      buddyPost,
       isStreaming,
       isStreamingRef,
       send,
@@ -331,36 +362,33 @@ export function AiAssistantChat({
     ],
   );
 
-  return (
-    <View
-      className="s-ai-assistant-chat"
-      style={chatBodyHeight != null ? { height: `${chatBodyHeight}px` } : undefined}
-    >
-      <Canvas
-        type="2d"
-        id={TRAVEL_GUIDE_CANVAS_ID}
-        canvasId={TRAVEL_GUIDE_CANVAS_ID}
-        style={{
-          position: 'fixed',
-          left: '-9999px',
-          top: 0,
-          width: '750px',
-          height: '8192px',
-          pointerEvents: 'none',
-        }}
-      />
+  const needsPageGuideCanvas =
+    !isOffscreenCanvasSupported() && travelGuide.isGenerating;
 
-      {isLoadingHistory ? (
-        <View className="s-ai-assistant__history-loading" aria-live="polite">
-          <View className="s-ai-assistant__history-loading-bar" />
-          <Text className="s-ai-assistant__history-loading-text">同步对话记录…</Text>
-        </View>
+  return (
+    <View className="s-ai-assistant-chat">
+      {needsPageGuideCanvas ? (
+        <Canvas
+          type="2d"
+          id={TRAVEL_GUIDE_CANVAS_ID}
+          canvasId={TRAVEL_GUIDE_CANVAS_ID}
+          style={{
+            position: 'fixed',
+            left: '-9999px',
+            top: 0,
+            width: '750px',
+            height: `${TRAVEL_GUIDE_MAX_CANVAS_HEIGHT}px`,
+            pointerEvents: 'none',
+          }}
+        />
       ) : null}
+
       <DegradedMatchBanner />
       <ChatMessageList
         messages={messages}
         isStreaming={isStreaming}
-        isTravelGuideGenerating={travelGuide.isGenerating}
+        isTravelGuideGenerating={travelGuide.isGenerating || buddyPost.isPublishing}
+        scrollAreaHeight={chatScrollHeight}
         keyboardInset={keyboardInset}
         forceScrollToBottomKey={forceScrollToBottomKey}
         userAvatar={userAvatar}
@@ -377,18 +405,29 @@ export function AiAssistantChat({
         <ChatComposer
           input={input}
           pendingImages={pendingImages}
-          isStreaming={isStreaming || travelGuide.isGenerating}
-          isLoadingHistory={isLoadingHistory}
+          isStreaming={
+            isStreaming || travelGuide.isGenerating || buddyPost.isPublishing
+          }
           activityLegacyId={activityLegacyId}
           activityTitle={activityTitle}
           onInputChange={setInput}
           onSubmit={submit}
           onPendingImagesChange={setPendingImages}
           onClearChat={handleClearChat}
-          clearDisabled={isStreaming || isLoadingHistory}
+          clearDisabled={isStreaming}
           onAiGuideClick={travelGuide.openGuideSheet}
+          onBuddyPostClick={buddyPost.openBuddyPostSheet}
         />
       </View>
+
+      <AiBuddyPostSheet
+        open={buddyPost.sheetOpen}
+        activityDate={activityQuery.data?.date}
+        activityTitle={activityTitle}
+        initialValues={buddyPost.sheetInitialValues}
+        onClose={() => buddyPost.setSheetOpen(false)}
+        onSubmit={buddyPost.handleSheetSubmit}
+      />
 
       <AiGuidePlanSheet
         open={travelGuide.sheetOpen}

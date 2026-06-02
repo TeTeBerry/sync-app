@@ -16,6 +16,8 @@ export type EventDetailComposerSectionProps = {
   onAiSubmit: () => void;
   onShortcutTag: (tag: string) => void;
   onAiGuideClick: () => void;
+  onBuddyPostClick: () => void;
+  buddyPostDisabled?: boolean;
   onOpenExclusiveItinerary: () => void;
   contentTab: EventDetailTabId;
   onContentTabChange: (tab: EventDetailTabId) => void;
@@ -31,6 +33,8 @@ export const EventDetailComposerSection: React.FC<EventDetailComposerSectionProp
   onAiSubmit,
   onShortcutTag,
   onAiGuideClick,
+  onBuddyPostClick,
+  buddyPostDisabled,
   onOpenExclusiveItinerary,
   contentTab,
   onContentTabChange,
@@ -50,6 +54,8 @@ export const EventDetailComposerSection: React.FC<EventDetailComposerSectionProp
           onSubmit={onAiSubmit}
           onTagClick={onShortcutTag}
           onAiGuideClick={onAiGuideClick}
+          onBuddyPostClick={onBuddyPostClick}
+          buddyPostDisabled={buddyPostDisabled}
         />
       ) : null}
       <View className="s-event-detail__feed-section">

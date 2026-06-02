@@ -110,6 +110,7 @@ const Home = () => {
         return;
       }
       joinActivityWithAuth(legacyId, {
+        alreadyJoined: event.going,
         onSuccess: () => openEventDetail(event),
       });
     },

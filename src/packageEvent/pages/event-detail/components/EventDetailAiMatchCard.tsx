@@ -1,4 +1,5 @@
 import { Send, Sparkles } from '../../../../components/icons';
+import { AiBuddyPostShortcutChip } from '../../../../components/ai-chat/AiBuddyPostShortcutChip';
 import { AiGuideShortcutChip } from '../../../../components/ai-chat/AiGuideShortcutChip';
 import { Button } from '../../../../components/ui';
 import { Text, Textarea, View } from '@tarojs/components';
@@ -13,6 +14,8 @@ type EventDetailAiMatchCardProps = {
   onSubmit: () => void;
   onTagClick: (tag: string) => void;
   onAiGuideClick: () => void;
+  onBuddyPostClick: () => void;
+  buddyPostDisabled?: boolean;
 };
 
 export function EventDetailAiMatchCard({
@@ -21,6 +24,7 @@ export function EventDetailAiMatchCard({
   onSubmit,
   onTagClick,
   onAiGuideClick,
+  onBuddyPostClick,
 }: EventDetailAiMatchCardProps) {
   const hasContent = Boolean(prompt.trim());
 
@@ -34,6 +38,10 @@ export function EventDetailAiMatchCard({
       </View>
       <View className="s-event-detail__ai-tags" onTouchStart={warmAiAssistant}>
         <AiGuideShortcutChip onTouchStart={warmAiAssistant} onClick={onAiGuideClick} />
+        <AiBuddyPostShortcutChip
+          disabled={buddyPostDisabled}
+          onClick={onBuddyPostClick}
+        />
         {EVENT_AI_TAGS.map((tag) => (
           <Button
             key={tag}

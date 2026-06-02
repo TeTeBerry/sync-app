@@ -17,6 +17,18 @@ import {
   shareTravelGuideImage,
 } from '../components/ai-chat/travelGuideWallpaper/renderTravelGuideImage';
 import { isApiEnabled } from '../constants/api';
+import { persistTravelGuideImage } from '../utils/travelGuideImageStorage';
+import {
+  buildTravelGuideCollectPrompt,
+  buildTravelGuideSuggestedReplies,
+  isTravelGuideChatInterrupt,
+  listMissingTravelGuideSlots,
+  mergeTravelGuideDraft,
+  parseTravelGuideChatMessage,
+  shouldHandleAsTravelGuideChat,
+  travelGuideDraftToForm,
+  type TravelGuideChatDraft,
+} from '../utils/travelGuideChatParse';
 
 const PLANNING_TEXT = 'AI 正在为你规划...';
 
@@ -33,7 +45,7 @@ export function useAiTravelGuide(options: {
   setMessages: Dispatch<SetStateAction<ChatUiMessage[]>>;
   messagesRef: MutableRefObject<ChatUiMessage[]>;
   isStreaming: boolean;
-  /** Fired after user +「正在规划」气泡写入列表，用于滚动到底部 */
+  sessionIdRef: MutableRefObject<string>;
   onPlanningMessagesShown?: () => void;
 }) {
   const {
@@ -43,6 +55,7 @@ export function useAiTravelGuide(options: {
     setMessages,
     messagesRef,
     isStreaming,
+    sessionIdRef,
     onPlanningMessagesShown,
   } = options;
 
@@ -52,6 +65,22 @@ export function useAiTravelGuide(options: {
     useState<AiGuidePlanFormValues | null>(null);
   const lastFormRef = useRef<AiGuidePlanFormValues | null>(null);
   const generatingRef = useRef(false);
+  const guideCollectActiveRef = useRef(false);
+  const guideDraftRef = useRef<TravelGuideChatDraft>({});
+
+  const clearGuideCollect = useCallback(() => {
+    guideCollectActiveRef.current = false;
+    guideDraftRef.current = {};
+  }, []);
+
+  const appendMessages = useCallback(
+    (items: ChatUiMessage[]) => {
+      const next = [...messagesRef.current, ...items];
+      messagesRef.current = next;
+      setMessages(next);
+    },
+    [messagesRef, setMessages],
+  );
 
   const openGuideSheet = useCallback(() => {
     if (isStreaming || generatingRef.current) {
@@ -62,48 +91,16 @@ export function useAiTravelGuide(options: {
       void Taro.showToast({ title: '请先进入活动后再生成攻略', icon: 'none' });
       return;
     }
+    clearGuideCollect();
     setSheetInitialValues(lastFormRef.current);
     setSheetOpen(true);
-  }, [activityLegacyId, isStreaming]);
-
-  /** 自然语言触发：展示用户话术 + 引导语，并打开规划表单 */
-  const openGuideSheetFromText = useCallback(
-    (userText: string) => {
-      const trimmed = userText.trim();
-      if (!trimmed) {
-        openGuideSheet();
-        return;
-      }
-      if (isStreaming || generatingRef.current) {
-        void Taro.showToast({ title: '请等待当前操作完成', icon: 'none' });
-        return;
-      }
-      if (activityLegacyId == null || Number.isNaN(activityLegacyId)) {
-        void Taro.showToast({ title: '请先进入活动后再生成攻略', icon: 'none' });
-        return;
-      }
-
-      const userMsg: ChatUiMessage = {
-        id: createMessageId(),
-        from: 'user',
-        text: trimmed,
-      };
-      const aiMsg: ChatUiMessage = {
-        id: createMessageId(),
-        from: 'ai',
-        text: '好的，请填写下方出行信息，我来为你生成可分享的攻略长图～',
-      };
-      const next = [...messagesRef.current, userMsg, aiMsg];
-      messagesRef.current = next;
-      setMessages(next);
-      setSheetInitialValues(lastFormRef.current);
-      setSheetOpen(true);
-    },
-    [activityLegacyId, isStreaming, messagesRef, openGuideSheet, setMessages],
-  );
+  }, [activityLegacyId, clearGuideCollect, isStreaming]);
 
   const runGeneration = useCallback(
-    async (form: AiGuidePlanFormValues) => {
+    async (
+      form: AiGuidePlanFormValues,
+      options?: { skipUserBubble?: boolean; userBubbleText?: string },
+    ) => {
       if (activityLegacyId == null || Number.isNaN(activityLegacyId)) return;
       if (generatingRef.current) return;
 
@@ -111,12 +108,15 @@ export function useAiTravelGuide(options: {
       generatingRef.current = true;
       setIsGenerating(true);
       lastFormRef.current = form;
+      clearGuideCollect();
 
-      const userMsg: ChatUiMessage = {
-        id: createMessageId(),
-        from: 'user',
-        text: buildUserSummary(form, title),
-      };
+      const userMsg: ChatUiMessage | null = options?.skipUserBubble
+        ? null
+        : {
+            id: createMessageId(),
+            from: 'user',
+            text: options?.userBubbleText?.trim() || buildUserSummary(form, title),
+          };
       const aiMsgId = createMessageId();
       const planningMsg: ChatUiMessage = {
         id: aiMsgId,
@@ -125,7 +125,9 @@ export function useAiTravelGuide(options: {
         streaming: true,
       };
 
-      const base = [...messagesRef.current, userMsg, planningMsg];
+      const base = options?.skipUserBubble
+        ? [...messagesRef.current, planningMsg]
+        : [...messagesRef.current, userMsg!, planningMsg];
       messagesRef.current = base;
       setMessages(base);
       Taro.nextTick(() => onPlanningMessagesShown?.());
@@ -136,7 +138,12 @@ export function useAiTravelGuide(options: {
         }
 
         const { plan } = await generateTravelGuide(activityLegacyId, form);
-        const imagePath = await renderTravelGuideImage(plan);
+        const tempImagePath = await renderTravelGuideImage(plan);
+        const imagePath = await persistTravelGuideImage(
+          tempImagePath,
+          sessionIdRef.current,
+          aiMsgId,
+        );
 
         const doneMsg: ChatUiMessage = {
           id: aiMsgId,
@@ -167,9 +174,79 @@ export function useAiTravelGuide(options: {
     [
       activityLegacyId,
       activityTitle,
+      clearGuideCollect,
       messagesRef,
       onPlanningMessagesShown,
+      sessionIdRef,
       setMessages,
+    ],
+  );
+
+  /**
+   * 对话生成攻略：解析出发地/人数/预算等，齐全则直接生成长图；否则多轮追问。
+   * @returns true 表示已消费该条消息，勿再走组队聊天流。
+   */
+  const handleTravelGuideChatMessage = useCallback(
+    async (userText: string): Promise<boolean> => {
+      const trimmed = userText.trim();
+      if (!trimmed) return false;
+      if (activityLegacyId == null || Number.isNaN(activityLegacyId)) {
+        return false;
+      }
+      if (isStreaming || generatingRef.current) {
+        void Taro.showToast({ title: '请等待当前操作完成', icon: 'none' });
+        return true;
+      }
+
+      if (isTravelGuideChatInterrupt(trimmed)) {
+        clearGuideCollect();
+        return false;
+      }
+
+      const collecting = guideCollectActiveRef.current;
+      if (!shouldHandleAsTravelGuideChat({ text: trimmed, collecting })) {
+        return false;
+      }
+
+      const parsed = parseTravelGuideChatMessage(trimmed);
+      const merged = mergeTravelGuideDraft(guideDraftRef.current, parsed);
+      guideDraftRef.current = merged;
+      guideCollectActiveRef.current = true;
+
+      appendMessages([
+        {
+          id: createMessageId(),
+          from: 'user',
+          text: trimmed,
+        },
+      ]);
+
+      const form = travelGuideDraftToForm(merged, defaultNights);
+      if (form) {
+        await runGeneration(form, { skipUserBubble: true });
+        return true;
+      }
+
+      const missing = listMissingTravelGuideSlots(merged);
+      appendMessages([
+        {
+          id: createMessageId(),
+          from: 'ai',
+          text: buildTravelGuideCollectPrompt(missing),
+          suggestedReplies: buildTravelGuideSuggestedReplies(missing),
+        },
+      ]);
+      Taro.nextTick(() => onPlanningMessagesShown?.());
+      return true;
+    },
+    [
+      activityLegacyId,
+      appendMessages,
+      clearGuideCollect,
+      defaultNights,
+      isStreaming,
+      onPlanningMessagesShown,
+      runGeneration,
     ],
   );
 
@@ -203,7 +280,8 @@ export function useAiTravelGuide(options: {
     setSheetOpen,
     isGenerating,
     openGuideSheet,
-    openGuideSheetFromText,
+    handleTravelGuideChatMessage,
+    clearGuideCollect,
     handleSheetSubmit,
     handleRegenerate,
     handleShareGuide,

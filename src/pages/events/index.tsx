@@ -101,10 +101,11 @@ const Events: React.FC = () => {
         return;
       }
       joinActivityWithAuth(id, {
+        alreadyJoined: registeredLegacyIds.has(id),
         onSuccess: () => openDetail(legacyId),
       });
     },
-    [openDetail],
+    [openDetail, registeredLegacyIds],
   );
 
   const filteredEvents = useMemo(() => {

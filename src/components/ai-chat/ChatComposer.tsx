@@ -15,6 +15,7 @@ import {
 } from '../../utils/chatImage';
 import { useAiChatStore } from '../../stores/aiChatStore';
 import { openImagePreview } from '../../utils/openImagePreview';
+import { AiBuddyPostShortcutChip } from './AiBuddyPostShortcutChip';
 import { AiGuideShortcutChip } from './AiGuideShortcutChip';
 import { AiMatchQuotaBanner } from './AiMatchQuotaBanner';
 import {
@@ -36,6 +37,12 @@ const AI_GUIDE_CHIP = {
   key: 'aiGuide',
   label: 'AI攻略',
   submitText: 'AI攻略',
+} as const;
+
+const BUDDY_POST_CHIP = {
+  key: 'buddyPost',
+  label: '组队发帖',
+  submitText: '组队发帖',
 } as const;
 
 const activityActionChips = [
@@ -72,6 +79,7 @@ export function ChatComposer({
   clearDisabled = false,
   isLoadingHistory = false,
   onAiGuideClick,
+  onBuddyPostClick,
 }: {
   input: string;
   pendingImages: string[];
@@ -85,6 +93,7 @@ export function ChatComposer({
   clearDisabled?: boolean;
   isLoadingHistory?: boolean;
   onAiGuideClick?: () => void;
+  onBuddyPostClick?: () => void;
 }) {
   const [shortcutTags, setShortcutTags] = useState(() => getTopAiShortcutTags());
   const conversationFlow = useAiChatStore((state) => state.conversationState?.flow);
@@ -122,7 +131,16 @@ export function ChatComposer({
         submitText: chip.submitText,
       }));
 
-      return [actionChips[0], ...tagChips, ...actionChips.slice(1)];
+      return [
+        actionChips[0],
+        {
+          key: BUDDY_POST_CHIP.key,
+          label: BUDDY_POST_CHIP.label,
+          submitText: BUDDY_POST_CHIP.submitText,
+        },
+        ...tagChips,
+        ...actionChips.slice(1),
+      ];
     }
 
     return [
@@ -185,13 +203,26 @@ export function ChatComposer({
           return;
         }
       }
+      if (chip.key === BUDDY_POST_CHIP.key) {
+        if (activityLegacyId != null && !Number.isNaN(activityLegacyId)) {
+          onBuddyPostClick?.();
+          return;
+        }
+      }
       if (chip.isShortcutTag) {
         recordAiShortcutTagUse(chip.submitText);
         setShortcutTags(getTopAiShortcutTags());
       }
       onSubmit(chip.submitText, pendingImages);
     },
-    [activityLegacyId, isBusy, onAiGuideClick, onSubmit, pendingImages],
+    [
+      activityLegacyId,
+      isBusy,
+      onAiGuideClick,
+      onBuddyPostClick,
+      onSubmit,
+      pendingImages,
+    ],
   );
 
   const canSend = Boolean(input.trim() || pendingImages.length) && !isComposerDisabled;
@@ -208,6 +239,12 @@ export function ChatComposer({
           {quickChips.map((chip) =>
             chip.key === AI_GUIDE_CHIP.key ? (
               <AiGuideShortcutChip
+                key={chip.key}
+                disabled={isBusy}
+                onClick={() => handleQuickChipClick(chip)}
+              />
+            ) : chip.key === BUDDY_POST_CHIP.key ? (
+              <AiBuddyPostShortcutChip
                 key={chip.key}
                 disabled={isBusy}
                 onClick={() => handleQuickChipClick(chip)}

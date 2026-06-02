@@ -26,7 +26,7 @@ vi.mock('../../constants/api', () => ({
   API_BASE_URL: 'https://api.test',
 }));
 
-import { fetchPopularPosts, likePost } from './posts';
+import { createPost, fetchPopularPosts, likePost } from './posts';
 
 function mockSuccessResponse(data: unknown, statusCode = 200) {
   mockRequest.mockImplementation(
@@ -64,5 +64,53 @@ describe('api/sync/posts query params', () => {
     expect(url).not.toContain('userId=');
     expect(url).not.toContain('authorName=');
     expect(url).toContain('limit=10');
+  });
+});
+
+describe('api/sync/posts createPost (组队发帖 REST)', () => {
+  beforeEach(() => {
+    mockRequest.mockReset();
+    mockGetAccessToken.mockReturnValue('jwt-token');
+    mockGetAuthHeaders.mockReturnValue({ Authorization: 'Bearer jwt-token' });
+    mockSuccessResponse({
+      id: 'post-new',
+      name: '风暴电音节',
+      location: '上海',
+      time: '',
+      body: 'test',
+      tags: ['#组队'],
+      likes: 0,
+      comments: 0,
+      avatar: '',
+      status: '招募中',
+    });
+  });
+
+  it('POST /posts with JSON body and auth headers', async () => {
+    await createPost({
+      body: '找同行\n\n#组队',
+      activityLegacyId: 9,
+      eventTitle: '风暴电音节',
+      location: '上海',
+      tags: ['#组队'],
+      contentTypes: ['team'],
+    });
+
+    const call = mockRequest.mock.calls[0][0] as {
+      url: string;
+      method: string;
+      data: unknown;
+      header: Record<string, string>;
+    };
+    expect(call.method).toBe('POST');
+    expect(call.url).toContain('/posts');
+    expect(call.header.Authorization).toBe('Bearer jwt-token');
+    expect(call.data).toEqual(
+      expect.objectContaining({
+        activityLegacyId: 9,
+        location: '上海',
+        contentTypes: ['team'],
+      }),
+    );
   });
 });
