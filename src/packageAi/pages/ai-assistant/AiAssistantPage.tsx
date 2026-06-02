@@ -97,6 +97,7 @@ const AiAssistantPage: FC = () => {
                   initialMessage={page.pendingInitialMessage}
                   initialOpenAiGuideSheet={page.pendingOpenAiGuideSheet}
                   initialAutoRunTravelGuideForm={page.pendingAutoGuideForm}
+                  pageShowSeq={page.pageShowSeq}
                   activityLegacyId={page.activityLegacyId}
                   activityTitle={page.activityTitle}
                   onInitialMessageSent={page.handleInitialMessageSent}

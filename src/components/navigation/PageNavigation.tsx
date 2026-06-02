@@ -1,5 +1,5 @@
 import './PageNavigation.scss';
-import React, { type CSSProperties, type ReactNode } from 'react';
+import React, { useCallback, useRef, type CSSProperties, type ReactNode } from 'react';
 import { ChevronLeft } from '../../components/icons';
 import { Button } from '../ui';
 import { Text, View } from '@tarojs/components';
@@ -74,13 +74,20 @@ const PageNavigation: React.FC<PageNavigationProps> = ({
     ...style,
   };
 
-  const handleBack = () => {
+  const backOnceRef = useRef(false);
+  const handleBack = useCallback(() => {
+    if (backOnceRef.current) return;
+    backOnceRef.current = true;
+    setTimeout(() => {
+      backOnceRef.current = false;
+    }, 400);
+
     if (onBack) {
       onBack();
       return;
     }
     goBack(fallback);
-  };
+  }, [fallback, onBack]);
 
   const usePageCenterTitle = !center && Boolean(title || meta);
 
@@ -100,7 +107,6 @@ const PageNavigation: React.FC<PageNavigationProps> = ({
       aria-label={backAriaLabel}
       hoverClass="s-page-nav__back--pressed"
       onTap={handleBack}
-      onClick={handleBack}
     >
       <ChevronLeft size={22} />
     </Button>

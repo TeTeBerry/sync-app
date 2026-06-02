@@ -30,6 +30,8 @@ export type AiAssistantChatProps = {
   onInitialMessageSent?: () => void;
   /** Page-level useDidShow — reload Mongo/local history (hooks in child components are unreliable). */
   registerReloadChatHistory?: (reload: (() => void) | null) => void;
+  /** Increments on each page useDidShow — drives scroll-to-bottom after return. */
+  pageShowSeq?: number;
   onMessageCountChange?: (count: number) => void;
   chatBodyHeight?: number;
   userAvatar?: string;
@@ -46,6 +48,7 @@ export function AiAssistantChat({
   activityTitle,
   onInitialMessageSent,
   registerReloadChatHistory,
+  pageShowSeq = 0,
   onMessageCountChange,
   chatBodyHeight,
   userAvatar,
@@ -60,6 +63,19 @@ export function AiAssistantChat({
   const initialGuideSheetHandledRef = useRef(false);
   const initialAutoGuideHandledRef = useRef(false);
   const submitLockRef = useRef(false);
+  const wasLoadingHistoryRef = useRef(false);
+  const pendingPageShowScrollRef = useRef(false);
+  const [forceScrollToBottomKey, setForceScrollToBottomKey] = useState(0);
+
+  const bumpScrollToBottom = useCallback(() => {
+    setForceScrollToBottomKey((k) => k + 1);
+  }, []);
+
+  const scheduleScrollToBottom = useCallback(() => {
+    bumpScrollToBottom();
+    setTimeout(bumpScrollToBottom, 100);
+    setTimeout(bumpScrollToBottom, 300);
+  }, [bumpScrollToBottom]);
 
   const activityQuery = useActivityDetailQuery(activityLegacyId);
   const defaultGuideNights = useMemo(
@@ -134,11 +150,32 @@ export function AiAssistantChat({
     setMessages,
     messagesRef,
     isStreaming,
+    onPlanningMessagesShown: scheduleScrollToBottom,
   });
 
   useEffect(() => {
     onMessageCountChange?.(messages.length);
   }, [messages.length, onMessageCountChange]);
+
+  useEffect(() => {
+    if (pageShowSeq === 0) return;
+    pendingPageShowScrollRef.current = true;
+  }, [pageShowSeq]);
+
+  useEffect(() => {
+    if (!pendingPageShowScrollRef.current) return;
+    if (isLoadingHistory || messages.length === 0) return;
+    pendingPageShowScrollRef.current = false;
+    scheduleScrollToBottom();
+  }, [isLoadingHistory, messages.length, pageShowSeq, scheduleScrollToBottom]);
+
+  useEffect(() => {
+    const wasLoading = wasLoadingHistoryRef.current;
+    wasLoadingHistoryRef.current = isLoadingHistory;
+    if (wasLoading && !isLoadingHistory && messages.length > 0) {
+      scheduleScrollToBottom();
+    }
+  }, [isLoadingHistory, messages.length, scheduleScrollToBottom]);
 
   useEffect(() => {
     if (!registerReloadChatHistory) return;
@@ -191,12 +228,16 @@ export function AiAssistantChat({
     const form = initialAutoRunTravelGuideForm;
     if (!form || initialAutoGuideHandledRef.current) return;
     if (activityLegacyId == null || Number.isNaN(activityLegacyId)) return;
+    if (isLoadingHistory) return;
     initialAutoGuideHandledRef.current = true;
     onInitialMessageSent?.();
-    travelGuide.handleSheetSubmit(form);
+    Taro.nextTick(() => {
+      travelGuide.handleSheetSubmit(form);
+    });
   }, [
     activityLegacyId,
     initialAutoRunTravelGuideForm,
+    isLoadingHistory,
     onInitialMessageSent,
     travelGuide,
   ]);
@@ -319,7 +360,9 @@ export function AiAssistantChat({
       <ChatMessageList
         messages={messages}
         isStreaming={isStreaming}
+        isTravelGuideGenerating={travelGuide.isGenerating}
         keyboardInset={keyboardInset}
+        forceScrollToBottomKey={forceScrollToBottomKey}
         userAvatar={userAvatar}
         userName={userName}
         userGender={userGender}

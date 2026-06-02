@@ -1,16 +1,22 @@
-import { useCallback, useLayoutEffect, useMemo, useState } from 'react';
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { ChatUiMessage } from '../../types/aiChat';
 import type { AiGuidePlanFormValues } from '../../types/travelGuide';
 import type { AuthorGender } from '../../utils/inferAuthorGender';
 import { throttleRaf } from '../../utils/throttleRaf';
 import { ChatMessageRow } from './ChatMessageRow';
 import { AiMatchQuotaExhaustedMessage } from './AiMatchQuotaExhaustedMessage';
+import { CHAT_SCROLL_BOTTOM_ID } from './chatScrollBottom';
 import { ScrollView, View } from '@tarojs/components';
+
+const SCROLL_TOP_STEP = 100_000;
 
 export function ChatMessageList({
   messages,
   isStreaming,
+  isTravelGuideGenerating = false,
   keyboardInset = 0,
+  /** Bump when re-entering the page or after history sync — scrolls to latest messages. */
+  forceScrollToBottomKey = 0,
   userAvatar,
   userName,
   userGender,
@@ -20,7 +26,9 @@ export function ChatMessageList({
 }: {
   messages: ChatUiMessage[];
   isStreaming: boolean;
+  isTravelGuideGenerating?: boolean;
   keyboardInset?: number;
+  forceScrollToBottomKey?: number;
   userAvatar?: string;
   userName: string;
   userGender?: AuthorGender;
@@ -29,20 +37,31 @@ export function ChatMessageList({
   onShareTravelGuide?: (imagePath: string) => void;
 }) {
   const [scrollIntoView, setScrollIntoView] = useState<string | undefined>();
+  const [scrollTop, setScrollTop] = useState(0);
+  const scrollTopRef = useRef(0);
 
   const lastMessage = messages[messages.length - 1];
   const scrollAnchorKey = useMemo(() => {
     if (!lastMessage) return '0';
     const streamLen = lastMessage.streaming ? (lastMessage.text?.length ?? 0) : 0;
-    return `${messages.length}:${lastMessage.id}:${streamLen}`;
+    const guide = lastMessage.travelGuide ? 'guide' : '';
+    return `${messages.length}:${lastMessage.id}:${streamLen}:${guide}`;
   }, [messages.length, lastMessage]);
 
   const scrollToBottom = useCallback(() => {
-    if (!lastMessage) return;
-    const targetId = `chat-msg-${lastMessage.id}`;
+    if (messages.length === 0) return;
+    scrollTopRef.current =
+      scrollTopRef.current >= 5_000_000
+        ? SCROLL_TOP_STEP
+        : scrollTopRef.current + SCROLL_TOP_STEP;
+    setScrollTop(scrollTopRef.current);
     setScrollIntoView(undefined);
-    setTimeout(() => setScrollIntoView(targetId), 0);
-  }, [lastMessage]);
+    const apply = () => setScrollIntoView(CHAT_SCROLL_BOTTOM_ID);
+    setTimeout(apply, 0);
+    setTimeout(apply, 80);
+    setTimeout(apply, 220);
+    setTimeout(apply, 450);
+  }, [messages.length]);
 
   const scrollToBottomThrottled = useMemo(
     () => throttleRaf(scrollToBottom),
@@ -51,15 +70,35 @@ export function ChatMessageList({
 
   useLayoutEffect(() => {
     scrollToBottomThrottled();
-  }, [scrollAnchorKey, isStreaming, keyboardInset, scrollToBottomThrottled]);
+  }, [
+    scrollAnchorKey,
+    isStreaming,
+    isTravelGuideGenerating,
+    keyboardInset,
+    scrollToBottomThrottled,
+  ]);
+
+  useLayoutEffect(() => {
+    if (!forceScrollToBottomKey) return;
+    scrollToBottom();
+    const t1 = setTimeout(() => scrollToBottom(), 120);
+    const t2 = setTimeout(() => scrollToBottom(), 320);
+    const t3 = setTimeout(() => scrollToBottom(), 520);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+    };
+  }, [forceScrollToBottomKey, scrollToBottom]);
 
   return (
     <ScrollView
       scrollY
       enhanced
       showScrollbar={false}
+      scrollTop={scrollTop}
       scrollIntoView={scrollIntoView}
-      scrollWithAnimation
+      scrollWithAnimation={false}
       className="s-ai-assistant-chat__scroll s-scrollbar-none"
     >
       <View className="s-ai-assistant-chat__scroll-inner">
@@ -79,6 +118,10 @@ export function ChatMessageList({
           />
         ))}
         <AiMatchQuotaExhaustedMessage />
+        <View
+          id={CHAT_SCROLL_BOTTOM_ID}
+          className="s-ai-assistant-chat__scroll-bottom"
+        />
       </View>
     </ScrollView>
   );

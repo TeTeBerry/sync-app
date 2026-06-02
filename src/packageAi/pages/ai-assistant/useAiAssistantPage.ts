@@ -58,6 +58,7 @@ export function useAiAssistantPage() {
     navBoot.autoRunTravelGuideForm,
   );
   const [messageCount, setMessageCount] = useState(0);
+  const [pageShowSeq, setPageShowSeq] = useState(0);
   const reloadChatHistoryRef = useRef<(() => void) | null>(null);
   const [upgradeSheetOpen, setUpgradeSheetOpen] = useState(false);
   const profileActivityLegacyId = useProfileActivityLegacyId();
@@ -151,6 +152,7 @@ export function useAiAssistantPage() {
 
   useDidShow(() => {
     applyAiAssistantIntent();
+    setPageShowSeq((n) => n + 1);
     reloadChatHistoryRef.current?.();
   });
 
@@ -183,6 +185,7 @@ export function useAiAssistantPage() {
     pendingInitialMessage,
     pendingOpenAiGuideSheet,
     pendingAutoGuideForm,
+    pageShowSeq,
     messageCount,
     setMessageCount,
     upgradeSheetOpen,

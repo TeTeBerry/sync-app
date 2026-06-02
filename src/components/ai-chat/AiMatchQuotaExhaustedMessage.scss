@@ -28,30 +28,4 @@
     line-height: 1.5;
     color: var(--foreground);
   }
-
-  &__cta {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    width: 100%;
-    margin-top: 12px;
-    min-height: 44px;
-    padding: 0 16px;
-    border-radius: 14px;
-    border: none;
-    background: var(--primary);
-    color: var(--primary-foreground);
-    box-shadow: 0 6px 22px rgba(var(--primary-rgb), 0.45);
-
-    &::after {
-      border: none;
-    }
-  }
-
-  &__cta-sparkle,
-  &__cta-rocket {
-    flex-shrink: 0;
-    color: #fff;
-  }
 }

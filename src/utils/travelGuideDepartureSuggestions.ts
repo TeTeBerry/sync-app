@@ -36,39 +36,80 @@ export function mapPlaceSuggestionsToDepartureItems(
     .filter((row): row is DepartureSuggestionItem => row != null);
 }
 
-/**
- * Value stored on submit / sent to generate API.
- * Cross-city guide uses city-level departure; POI picks coerce to city when possible.
- */
-export function departureValueForSubmit(item: DepartureSuggestionItem): string {
+/** 输入框回显：POI 优先完整 address，城市用 label */
+export function departureDisplayValue(item: DepartureSuggestionItem): string {
+  const label = item.label.trim();
   if (item.kind === 'city') {
-    return item.label.trim();
+    return label;
   }
-
-  const fromCity = normalizeCityLabel(item.city);
-  if (fromCity) return fromCity;
-
-  const fromAddress = extractCityFromAddress(item.address);
-  if (fromAddress) return fromAddress;
-
   const address = item.address?.trim();
-  if (address && address.length > item.label.length) {
-    return address;
-  }
-
-  return item.label.trim();
+  if (!address) return label;
+  if (address === label) return label;
+  if (address.includes(label)) return address;
+  if (label.includes(address)) return label;
+  return address.length >= label.length ? address : label;
 }
 
-/** Whether picking this row will change the visible label (POI → city). */
-export function departurePickCoercedFromPlace(item: DepartureSuggestionItem): boolean {
-  if (item.kind !== 'place') return false;
-  return departureValueForSubmit(item) !== item.label.trim();
+/**
+ * 提交给后端的 departure 文本（与回显一致，便于 geocode）。
+ */
+export function departureValueForSubmit(item: DepartureSuggestionItem): string {
+  return departureDisplayValue(item);
+}
+
+/** 补全行里的城市（腾讯 `city` 字段），供地理编码与后续搜索 region */
+export function departureCityFromSuggestion(
+  item: DepartureSuggestionItem,
+): string | undefined {
+  if (item.kind === 'city') {
+    return normalizeCityLabel(item.label) ?? item.label.trim();
+  }
+  const city = item.city?.trim();
+  if (!city) return undefined;
+  return normalizeCityLabel(city) ?? city;
+}
+
+/** place-suggestions 请求的 region：已选城市 > 关键词锚点 > 空关键词时用活动城市 */
+export function suggestionRegionForKeyword(
+  keyword: string,
+  options?: { departureCity?: string; eventCity?: string },
+): string | undefined {
+  const picked = options?.departureCity?.trim();
+  if (picked) return normalizeCityLabel(picked) ?? picked;
+  const q = keyword.trim();
+  if (!q) return options?.eventCity?.trim() || undefined;
+  return findDepartureCityAnchorInText(q);
+}
+
+function findDepartureCityAnchorInText(query: string): string | undefined {
+  const q = query.trim();
+  if (!q) return undefined;
+  if (
+    q.endsWith('市') ||
+    q.endsWith('省') ||
+    q.endsWith('自治区') ||
+    q.endsWith('特别行政区')
+  ) {
+    return normalizeCityLabel(q);
+  }
+  return undefined;
 }
 
 export function normalizeDepartureForSubmit(value: string): string {
   const trimmed = value.trim();
-  const anchor = normalizeCityLabel(trimmed);
-  return anchor || trimmed;
+  if (!trimmed) return trimmed;
+  const endsWithAdmin =
+    trimmed.endsWith('市') ||
+    trimmed.endsWith('省') ||
+    trimmed.endsWith('自治区') ||
+    trimmed.endsWith('特别行政区');
+  if (endsWithAdmin && !/[区县路街号站]/.test(trimmed)) {
+    return normalizeCityLabel(trimmed) ?? trimmed;
+  }
+  if (trimmed.length <= 4 && !/[区县路街号站]/.test(trimmed)) {
+    return normalizeCityLabel(trimmed) ?? trimmed;
+  }
+  return trimmed;
 }
 
 function isCitySuggestionRow(item: TravelGuidePlaceSuggestion): boolean {
@@ -79,24 +120,11 @@ function isCitySuggestionRow(item: TravelGuidePlaceSuggestion): boolean {
   return !city || city === title || normalizeCityLabel(city) === title;
 }
 
-function normalizeCityLabel(city?: string): string | undefined {
+export function normalizeCityLabel(city?: string): string | undefined {
   const trimmed = city?.trim();
   if (!trimmed) return undefined;
   const stripped = trimmed
     .replace(/(特别行政区|自治州|地区|盟)$/, '')
     .replace(/[省市]$/, '');
   return stripped || trimmed;
-}
-
-function extractCityFromAddress(address?: string): string | undefined {
-  const trimmed = address?.trim();
-  if (!trimmed) return undefined;
-
-  const adminMatch = trimmed.match(/^(.+?(?:市|省|自治区|特别行政区))/);
-  if (adminMatch?.[1]) {
-    return normalizeCityLabel(adminMatch[1]);
-  }
-
-  const first = trimmed.split(/[,，]/)[0]?.trim();
-  return first ? normalizeCityLabel(first) : undefined;
 }

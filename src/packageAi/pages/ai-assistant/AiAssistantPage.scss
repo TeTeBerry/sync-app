@@ -288,6 +288,12 @@
     padding: 12px 16px 20px;
   }
 
+  &__scroll-bottom {
+    height: 1px;
+    width: 100%;
+    flex-shrink: 0;
+  }
+
   &__timestamp {
     margin: 2px 0 4px;
     text-align: center;

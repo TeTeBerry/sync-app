@@ -1,6 +1,5 @@
 import './AiGuidePlanSheet.scss';
-import Taro from '@tarojs/taro';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   BedDouble,
   Car,
@@ -18,10 +17,11 @@ import {
   type TravelGuidePlaceSuggestion,
 } from '../../api/sync/travelGuide';
 import {
-  departurePickCoercedFromPlace,
-  departureValueForSubmit,
+  departureCityFromSuggestion,
+  departureDisplayValue,
   mapPlaceSuggestionsToDepartureItems,
   normalizeDepartureForSubmit,
+  suggestionRegionForKeyword,
   type DepartureSuggestionItem,
 } from '../../utils/travelGuideDepartureSuggestions';
 import type {
@@ -115,6 +115,7 @@ export function AiGuidePlanSheet({
 
   const [scrollTop, setScrollTop] = useState(0);
   const [departure, setDeparture] = useState('');
+  const [departureCity, setDepartureCity] = useState<string | undefined>();
   const [headcount, setHeadcount] = useState(2);
   const [accommodationNights, setAccommodationNights] = useState(defaultNights);
   const [budgetTier, setBudgetTier] = useState<TravelGuideBudgetTier>('standard');
@@ -123,12 +124,14 @@ export function AiGuidePlanSheet({
   const [placeSuggestions, setPlaceSuggestions] = useState<
     TravelGuidePlaceSuggestion[]
   >([]);
+  const pickingSuggestionRef = useRef(false);
 
   useEffect(() => {
     if (!open) return;
     setScrollTop(0);
     if (initialValues) {
       setDeparture(initialValues.departure);
+      setDepartureCity(initialValues.departureCity);
       setHeadcount(initialValues.headcount);
       setAccommodationNights(initialValues.accommodationNights);
       setBudgetTier(initialValues.budgetTier);
@@ -136,6 +139,7 @@ export function AiGuidePlanSheet({
       return;
     }
     setDeparture('');
+    setDepartureCity(undefined);
     setHeadcount(2);
     setAccommodationNights(defaultNights);
     setBudgetTier('standard');
@@ -148,7 +152,10 @@ export function AiGuidePlanSheet({
       return;
     }
     const q = departure.trim();
-    const region = eventCity?.trim() || undefined;
+    const region = suggestionRegionForKeyword(q, {
+      departureCity,
+      eventCity,
+    });
     const timer = setTimeout(
       () => {
         void fetchTravelGuidePlaceSuggestions(q, region)
@@ -160,7 +167,7 @@ export function AiGuidePlanSheet({
       q ? 280 : 0,
     );
     return () => clearTimeout(timer);
-  }, [departure, eventCity, open, showSuggestions]);
+  }, [departure, departureCity, eventCity, open, showSuggestions]);
 
   const departureSuggestions = useMemo(
     (): DepartureSuggestionItem[] =>
@@ -171,23 +178,21 @@ export function AiGuidePlanSheet({
   const canSubmit = Boolean(departure.trim());
 
   const pickSuggestion = useCallback((item: DepartureSuggestionItem) => {
-    const value = departureValueForSubmit(item);
-    setDeparture(value);
+    pickingSuggestionRef.current = true;
+    setDeparture(departureDisplayValue(item));
+    setDepartureCity(departureCityFromSuggestion(item));
     setPlaceSuggestions([]);
     setShowSuggestions(false);
-    if (departurePickCoercedFromPlace(item)) {
-      void Taro.showToast({
-        title: `已使用出发城市：${value}`,
-        icon: 'none',
-        duration: 2000,
-      });
-    }
+    setTimeout(() => {
+      pickingSuggestionRef.current = false;
+    }, 400);
   }, []);
 
   const handleSubmit = useCallback(() => {
     if (!canSubmit) return;
     onSubmit({
       departure: normalizeDepartureForSubmit(departure),
+      departureCity: departureCity?.trim() || undefined,
       headcount,
       budgetTier,
       selfDrive,
@@ -198,6 +203,7 @@ export function AiGuidePlanSheet({
     budgetTier,
     canSubmit,
     departure,
+    departureCity,
     headcount,
     onSubmit,
     selfDrive,
@@ -258,7 +264,7 @@ export function AiGuidePlanSheet({
             <View className="s-ai-guide-plan-sheet__field">
               <Text className="s-ai-guide-plan-sheet__label">出发地</Text>
               <Text className="s-ai-guide-plan-sheet__hint">
-                跨城请填出发城市（如「上海」），勿选会场附近地址
+                跨城填出发城市（如「上海」）；同城可填公司、车站等具体地点
               </Text>
               <View className="s-ai-guide-plan-sheet__input-wrap">
                 <MapPin
@@ -275,11 +281,16 @@ export function AiGuidePlanSheet({
                   confirmType="done"
                   onFocus={() => setShowSuggestions(true)}
                   onInput={(e) => {
+                    if (pickingSuggestionRef.current) return;
                     setDeparture(e.detail.value ?? '');
+                    setDepartureCity(undefined);
                     setShowSuggestions(true);
                   }}
                   onBlur={() => {
-                    setTimeout(() => setShowSuggestions(false), 280);
+                    setTimeout(() => {
+                      if (pickingSuggestionRef.current) return;
+                      setShowSuggestions(false);
+                    }, 320);
                   }}
                 />
               </View>
@@ -289,18 +300,27 @@ export function AiGuidePlanSheet({
                   enhanced
                   showScrollbar={false}
                   className="s-ai-guide-plan-sheet__suggest-list s-scrollbar-none"
+                  catchMove
                 >
                   {departureSuggestions.map((item) => (
-                    <Button
-                      key={`${item.kind}-${item.label}`}
+                    <View
+                      key={`${item.kind}-${item.label}-${item.address ?? ''}`}
                       className="s-ai-guide-plan-sheet__suggest-item"
                       hoverClass="s-ai-guide-plan-sheet__suggest-item--pressed"
+                      hoverStayTime={80}
                       onTouchStart={() => pickSuggestion(item)}
                     >
-                      <Text className="s-btn-label">
+                      <Text className="s-ai-guide-plan-sheet__suggest-title">
                         {item.kind === 'city' ? `${item.label}（城市）` : item.label}
                       </Text>
-                    </Button>
+                      {item.kind === 'place' &&
+                      item.address &&
+                      item.address !== item.label ? (
+                        <Text className="s-ai-guide-plan-sheet__suggest-meta s-line-clamp-2">
+                          {item.address}
+                        </Text>
+                      ) : null}
+                    </View>
                   ))}
                 </ScrollView>
               ) : null}

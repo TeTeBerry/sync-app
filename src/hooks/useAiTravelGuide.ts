@@ -33,6 +33,8 @@ export function useAiTravelGuide(options: {
   setMessages: Dispatch<SetStateAction<ChatUiMessage[]>>;
   messagesRef: MutableRefObject<ChatUiMessage[]>;
   isStreaming: boolean;
+  /** Fired after user +「正在规划」气泡写入列表，用于滚动到底部 */
+  onPlanningMessagesShown?: () => void;
 }) {
   const {
     activityLegacyId,
@@ -41,6 +43,7 @@ export function useAiTravelGuide(options: {
     setMessages,
     messagesRef,
     isStreaming,
+    onPlanningMessagesShown,
   } = options;
 
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -125,6 +128,7 @@ export function useAiTravelGuide(options: {
       const base = [...messagesRef.current, userMsg, planningMsg];
       messagesRef.current = base;
       setMessages(base);
+      Taro.nextTick(() => onPlanningMessagesShown?.());
 
       try {
         if (!isApiEnabled()) {
@@ -146,6 +150,7 @@ export function useAiTravelGuide(options: {
           m.id === aiMsgId ? doneMsg : m,
         );
         setMessages(messagesRef.current);
+        Taro.nextTick(() => onPlanningMessagesShown?.());
       } catch (error) {
         const message =
           error instanceof Error ? error.message : '攻略生成失败，请稍后重试';
@@ -159,7 +164,13 @@ export function useAiTravelGuide(options: {
         setIsGenerating(false);
       }
     },
-    [activityLegacyId, activityTitle, messagesRef, setMessages],
+    [
+      activityLegacyId,
+      activityTitle,
+      messagesRef,
+      onPlanningMessagesShown,
+      setMessages,
+    ],
   );
 
   const handleSheetSubmit = useCallback(

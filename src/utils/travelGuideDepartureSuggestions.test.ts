@@ -1,9 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import {
-  departurePickCoercedFromPlace,
+  departureCityFromSuggestion,
+  departureDisplayValue,
   departureValueForSubmit,
   eventCityFromLocation,
   mapPlaceSuggestionsToDepartureItems,
+  normalizeDepartureForSubmit,
+  suggestionRegionForKeyword,
 } from './travelGuideDepartureSuggestions';
 
 describe('travelGuideDepartureSuggestions', () => {
@@ -28,14 +31,39 @@ describe('travelGuideDepartureSuggestions', () => {
     ]);
   });
 
-  it('coerces POI suggestion to city for submit', () => {
+  it('uses full address for POI display and submit', () => {
     const item = {
-      label: '拼多多公司',
+      label: '周秀北路',
       kind: 'place' as const,
       city: '上海市',
-      address: '上海市长宁区',
+      address: '上海市浦东新区周秀北路',
     };
-    expect(departureValueForSubmit(item)).toBe('上海');
-    expect(departurePickCoercedFromPlace(item)).toBe(true);
+    expect(departureDisplayValue(item)).toBe('上海市浦东新区周秀北路');
+    expect(departureValueForSubmit(item)).toBe('上海市浦东新区周秀北路');
+  });
+
+  it('normalizes city-only manual input', () => {
+    expect(normalizeDepartureForSubmit('上海市')).toBe('上海');
+    expect(normalizeDepartureForSubmit('拼多多公司')).toBe('拼多多公司');
+  });
+
+  it('reads city from POI suggestion row', () => {
+    expect(
+      departureCityFromSuggestion({
+        label: '拼多多公司',
+        kind: 'place',
+        city: '上海市',
+      }),
+    ).toBe('上海');
+  });
+
+  it('uses picked city for suggestion region instead of event city', () => {
+    expect(
+      suggestionRegionForKeyword('拼多多', {
+        departureCity: '上海',
+        eventCity: '深圳',
+      }),
+    ).toBe('上海');
+    expect(suggestionRegionForKeyword('拼多多', { eventCity: '深圳' })).toBeUndefined();
   });
 });

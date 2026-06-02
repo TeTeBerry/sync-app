@@ -1,13 +1,10 @@
 import './AiMatchQuotaExhaustedMessage.scss';
-import { Rocket, Sparkles, Zap } from '../../components/icons';
-import { Button } from '../ui';
+import { Sparkles, Zap } from '../../components/icons';
 import { Text, View } from '@tarojs/components';
 import { useAiMatchQuota } from '../../hooks/useAiMatchQuota';
-import { useAiUpgradeSheet } from './AiUpgradeSheetContext';
 
 export function AiMatchQuotaExhaustedMessage() {
   const { exhausted, usageLabel, loading } = useAiMatchQuota();
-  const { openUpgradeSheet } = useAiUpgradeSheet();
 
   if (loading || !exhausted) return null;
 
@@ -24,23 +21,6 @@ export function AiMatchQuotaExhaustedMessage() {
               你的 AI 匹配次数已用完 ({usageLabel})，升级套餐后可继续使用。
             </Text>
           </View>
-          <Button
-            className="s-ai-match-quota-msg__cta"
-            aria-label="立即升级套餐"
-            onClick={openUpgradeSheet}
-          >
-            <Sparkles
-              size={14}
-              className="s-ai-match-quota-msg__cta-sparkle"
-              aria-hidden
-            />
-            <Rocket
-              size={14}
-              className="s-ai-match-quota-msg__cta-rocket"
-              aria-hidden
-            />
-            <Text className="s-btn-label">🚀 立即升级套餐</Text>
-          </Button>
         </View>
       </View>
     </View>

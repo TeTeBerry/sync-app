@@ -36,6 +36,7 @@ export async function processChatStreamEvents(
     setMessages,
     activityLegacyId,
     persistSessionFromStream,
+    onTurnPersisted,
     onPostCreated,
     onExistingPost,
     onMatchResults,
