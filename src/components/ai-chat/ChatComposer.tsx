@@ -27,10 +27,10 @@ import {
 } from '@tarojs/components';
 
 const SHORTCUT_TAG_LABELS: Record<AiShortcutTag, string> = {
-  组队队友: '组队队友',
-  住宿同行: '住宿同行',
-  拼车同行: '拼车同行',
-  拼卡: '拼卡',
+  找队友: '找队友',
+  找拼房: '找拼房',
+  找拼车: '找拼车',
+  找拼卡: '找拼卡',
 };
 
 const AI_GUIDE_CHIP = {

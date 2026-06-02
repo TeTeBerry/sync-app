@@ -4,7 +4,6 @@ import {
   invalidatePostQueries,
   useActivityDetailQuery,
 } from '../../../hooks/useSyncApi';
-import { invalidateCache } from '../../../hooks/useApiQuery';
 import { publishBuddyPostFromForm } from '../../../utils/publishBuddyPost';
 import { isApiEnabled } from '../../../constants/api';
 import type { AiBuddyPostFormValues } from '../../../types/buddyPost';
@@ -12,7 +11,12 @@ import type { AiBuddyPostFormValues } from '../../../types/buddyPost';
 /** Buddy-post plan sheet on event detail — publish in place, refresh post list. */
 export function useEventDetailBuddyPost(
   eventId: number,
-  options: { authorName: string; authorAvatar?: string },
+  options: {
+    authorName: string;
+    authorAvatar?: string;
+    /** Refetch activity post list (useEventPostsInfiniteQuery is not on useApiQuery cache). */
+    refreshPosts?: () => Promise<void>;
+  },
 ) {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
@@ -53,7 +57,7 @@ export function useEventDetailBuddyPost(
         });
 
         await invalidatePostQueries();
-        invalidateCache(['posts', 'activity', eventId]);
+        await options.refreshPosts?.();
 
         void Taro.showToast({ title: '组队帖已发布', icon: 'success' });
       } catch (error) {
@@ -70,6 +74,7 @@ export function useEventDetailBuddyPost(
       isPublishing,
       options.authorAvatar,
       options.authorName,
+      options.refreshPosts,
     ],
   );
 

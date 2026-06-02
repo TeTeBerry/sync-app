@@ -45,16 +45,6 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
   const profileUser = useResolvedProfile();
   const displayUserName = currentUserQuery.data?.name ?? profileUser.name ?? '用户';
 
-  const buddyPost = useEventDetailBuddyPost(eventId, {
-    authorName: displayUserName,
-    authorAvatar: currentUserQuery.data?.avatar,
-  });
-
-  const ai = useEventDetailAiActions(eventId, {
-    openGuideSheet: travelGuide.openGuideSheet,
-    openBuddyPostSheet: buddyPost.openBuddyPostSheet,
-  });
-
   const apiEnabled = isApiEnabled();
 
   const [contentTab, setContentTab] = useState<EventDetailTabId>('posts');
@@ -62,6 +52,17 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
   const postsQuery = useEventPostsInfiniteQuery(eventId, {
     enabled: feedReady,
     anchorPostId: highlightPostId || undefined,
+  });
+
+  const buddyPost = useEventDetailBuddyPost(eventId, {
+    authorName: displayUserName,
+    authorAvatar: currentUserQuery.data?.avatar,
+    refreshPosts: postsQuery.refetch,
+  });
+
+  const ai = useEventDetailAiActions(eventId, {
+    openGuideSheet: travelGuide.openGuideSheet,
+    openBuddyPostSheet: buddyPost.openBuddyPostSheet,
   });
 
   const live = useEventDetailLive({

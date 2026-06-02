@@ -25,6 +25,7 @@ export function EventDetailAiMatchCard({
   onTagClick,
   onAiGuideClick,
   onBuddyPostClick,
+  buddyPostDisabled = false,
 }: EventDetailAiMatchCardProps) {
   const hasContent = Boolean(prompt.trim());
 

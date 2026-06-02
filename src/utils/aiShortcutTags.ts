@@ -3,31 +3,38 @@ import Taro from '@tarojs/taro';
 const STORAGE_KEY = 'sync_ai_shortcut_tag_usage';
 const DISPLAY_COUNT = 6;
 
-/** 可选快捷标签池（含默认展示项） */
-export const AI_SHORTCUT_TAG_POOL = [
-  '组队队友',
-  '住宿同行',
-  '拼车同行',
-  '拼卡',
-] as const;
+/** 活动详情 / AI 助手快捷标签（展示与提交文案一致） */
+export const AI_SHORTCUT_TAG_POOL = ['找队友', '找拼房', '找拼车', '找拼卡'] as const;
 
 export type AiShortcutTag = (typeof AI_SHORTCUT_TAG_POOL)[number];
 
 type UsageMap = Record<string, number>;
 
-/** 展示文案别名 → 标准快捷标签 */
-export const AI_SHORTCUT_TAG_ALIASES: Record<string, AiShortcutTag> = {
-  帮我dd: '组队队友',
-  拼车: '拼卡',
+/** 旧标签 / 别名 → 标准快捷标签 */
+const LEGACY_TAG_ALIASES: Record<string, AiShortcutTag> = {
+  组队队友: '找队友',
+  住宿同行: '找拼房',
+  拼房同行: '找拼房',
+  拼车同行: '找拼车',
+  拼卡: '找拼卡',
 };
 
-const LEGACY_TAG_ALIASES: Record<string, string> = {
-  拼房同行: '住宿同行',
+/** 展示文案别名 → 标准快捷标签 */
+export const AI_SHORTCUT_TAG_ALIASES: Record<string, AiShortcutTag> = {
+  帮我dd: '找队友',
+  拼车: '找拼车',
 };
 
 export function normalizeAiShortcutTag(tag: string): string {
   const trimmed = tag.trim();
-  return AI_SHORTCUT_TAG_ALIASES[trimmed] ?? LEGACY_TAG_ALIASES[trimmed] ?? trimmed;
+  if (!trimmed) return trimmed;
+  if (AI_SHORTCUT_TAG_ALIASES[trimmed]) {
+    return AI_SHORTCUT_TAG_ALIASES[trimmed];
+  }
+  if (LEGACY_TAG_ALIASES[trimmed]) {
+    return LEGACY_TAG_ALIASES[trimmed];
+  }
+  return trimmed;
 }
 
 function readUsage(): UsageMap {
@@ -37,7 +44,7 @@ function readUsage(): UsageMap {
     const usage = raw as UsageMap;
     const migrated: UsageMap = {};
     for (const [key, count] of Object.entries(usage)) {
-      const nextKey = LEGACY_TAG_ALIASES[key] ?? key;
+      const nextKey = normalizeAiShortcutTag(key);
       migrated[nextKey] = (migrated[nextKey] ?? 0) + count;
     }
     return migrated;
@@ -63,7 +70,7 @@ export function isAiShortcutTag(tag: string): boolean {
 
 /** 记录一次快捷标签使用 */
 export function recordAiShortcutTagUse(tag: string): void {
-  const trimmed = tag.trim();
+  const trimmed = normalizeAiShortcutTag(tag);
   if (!trimmed) return;
   const usage = readUsage();
   usage[trimmed] = (usage[trimmed] ?? 0) + 1;

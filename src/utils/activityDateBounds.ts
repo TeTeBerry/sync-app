@@ -63,6 +63,18 @@ export function formatBuddyPostDateRange(dateStart: string, dateEnd: string): st
   return `${start.month}月${start.day}日-${end.month}月${end.day}日`;
 }
 
+/** 帖子正文日期：6.13 或 6.13-6.14 */
+export function formatBuddyPostDateShort(dateStart: string, dateEnd: string): string {
+  const start = parseIsoDateParts(dateStart);
+  const end = parseIsoDateParts(dateEnd);
+  if (!start) return dateStart;
+  const short = (month: number, day: number) => `${month}.${day}`;
+  if (!end || (start.month === end.month && start.day === end.day)) {
+    return short(start.month, start.day);
+  }
+  return `${short(start.month, start.day)}-${short(end.month, end.day)}`;
+}
+
 function parseIsoDateParts(iso: string): { month: number; day: number } | null {
   const m = iso.match(/^(\d{4})-(\d{2})-(\d{2})$/);
   if (!m) return null;

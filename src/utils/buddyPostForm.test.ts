@@ -24,14 +24,19 @@ describe('buddyPostForm', () => {
     expect(form?.tags).toEqual(['team']);
   });
 
-  it('buildBuddyPostBody includes time, location, headcount, tags, note', () => {
-    const body = buildBuddyPostBody(sampleForm, '风暴电音节');
-    expect(body).toContain('6月13日-14日');
-    expect(body).toContain('地点：上海');
-    expect(body).toContain('人数：2人');
-    expect(body).toContain('#组队');
-    expect(body).toContain('#拼房');
-    expect(body).toContain('备注：女生优先');
+  it('buildBuddyPostBody uses intent, short date, location, headcount, note', () => {
+    const body = buildBuddyPostBody(sampleForm);
+    expect(body).toBe('找队友、找拼房，6.13-6.14，上海，2人，女生优先');
+  });
+
+  it('buildBuddyPostBody single team tag', () => {
+    const body = buildBuddyPostBody({
+      ...sampleForm,
+      tags: ['team'],
+      headcount: '1',
+      note: undefined,
+    });
+    expect(body).toBe('找队友，6.13-6.14，上海，1人');
   });
 
   it('maps tags to hashTags and contentTypes', () => {
@@ -45,8 +50,8 @@ describe('buddyPostForm', () => {
 
   it('buildBuddyPostUserSummary for chat bubble', () => {
     const summary = buildBuddyPostUserSummary(sampleForm, '风暴电音节');
-    expect(summary).toContain('风暴电音节');
-    expect(summary).toContain('上海');
-    expect(summary).toContain('2人');
+    expect(summary).toBe(
+      '发布「风暴电音节」组队帖 · 找队友、找拼房，6.13-6.14，上海，2人，女生优先',
+    );
   });
 });

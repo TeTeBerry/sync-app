@@ -49,7 +49,7 @@ describe('publishBuddyPostFromForm', () => {
         location: '上海',
         tags: ['#组队', '#拼房'],
         contentTypes: ['team', 'accommodation'],
-        body: expect.stringContaining('6月13日-14日'),
+        body: expect.stringMatching(/找队友、找拼房，6\.13-6\.14，上海，2人/),
       }),
     );
     expect(card.postId).toBe('post-1');

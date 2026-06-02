@@ -1,37 +1,112 @@
 @use '../../styles/chat' as chat;
 
 .s-ai-buddy-post-sheet {
+  .s-ai-guide-plan-sheet__title-icon {
+    background: rgba(var(--primary-rgb), 0.2);
+    border-color: rgba(var(--primary-rgb), 0.45);
+    box-shadow: 0 4px 14px rgba(var(--primary-rgb), 0.28);
+  }
+
+  .s-ai-guide-plan-sheet__scroll {
+    flex: 1;
+    min-height: 0;
+    height: 0;
+  }
+
+  .s-ai-guide-plan-sheet__body {
+    padding-bottom: 8px;
+  }
+
+  &__field--note {
+    margin-bottom: 4px;
+  }
+
+  .s-ai-guide-plan-sheet__footer {
+    position: relative;
+    z-index: 3;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 -10px 28px rgba(0, 0, 0, 0.45);
+  }
+
+  &__label {
+    font-size: var(--s-type-small);
+    font-weight: var(--s-fw-semibold);
+    color: #fff;
+    line-height: 1.35;
+  }
+
+  &__field-head {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  &__field-hint-inline {
+    flex: 1;
+    text-align: right;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.32);
+    line-height: 1.35;
+  }
+
   &__date-row {
     display: flex;
-    gap: 10px;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 8px;
   }
 
   &__date-col {
     flex: 1;
     min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  &__date-dash {
+    flex-shrink: 0;
+    margin-top: 16px;
+    font-size: 14px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.35);
+    line-height: 1;
   }
 
   &__picker {
     display: flex;
+    flex-direction: row;
     align-items: center;
-    justify-content: space-between;
+    gap: 8px;
     width: 100%;
-    padding: 12px 14px;
+    min-height: 48px;
+    padding: 10px 12px;
     border-radius: 12px;
-    background: rgba(255, 255, 255, 0.06);
+    background: #1e1e20;
     border: 1px solid rgba(255, 255, 255, 0.08);
     box-sizing: border-box;
   }
 
+  &__picker-icon {
+    flex-shrink: 0;
+    color: var(--s-post-action-active, #64d2ff);
+  }
+
   &__picker-value {
+    flex: 1;
     font-size: 14px;
     color: #fff;
     font-weight: 600;
+    line-height: 1.3;
   }
 
-  &__picker-hint {
+  &__picker-caption {
     font-size: 11px;
-    color: rgba(255, 255, 255, 0.45);
+    color: rgba(255, 255, 255, 0.4);
+    text-align: center;
+    line-height: 1.2;
   }
 
   &__tag-row {
@@ -41,40 +116,91 @@
   }
 
   &__tag {
-    padding: 8px 14px;
+    padding: 8px 16px;
     border-radius: 999px;
     border: 1px solid rgba(255, 255, 255, 0.12);
     background: rgba(255, 255, 255, 0.04);
 
-    &--on {
-      border-color: rgba(100, 210, 255, 0.65);
-      background: rgba(100, 210, 255, 0.16);
+    &--pressed {
+      opacity: 0.88;
     }
 
-    &--pressed {
-      opacity: 0.85;
+    &--team {
+      border-color: rgba(255, 45, 85, 0.55);
+      background: rgba(255, 45, 85, 0.2);
+      box-shadow: inset 0 0 0 1px rgba(255, 45, 85, 0.35);
+    }
+
+    &--accommodation {
+      border-color: rgba(100, 210, 255, 0.55);
+      background: rgba(100, 210, 255, 0.18);
+      box-shadow: inset 0 0 0 1px rgba(100, 210, 255, 0.35);
+    }
+
+    &--carpool {
+      border-color: rgba(255, 204, 0, 0.55);
+      background: rgba(255, 204, 0, 0.18);
+      box-shadow: inset 0 0 0 1px rgba(255, 204, 0, 0.35);
+    }
+
+    &--vip {
+      border-color: rgba(191, 90, 242, 0.55);
+      background: rgba(191, 90, 242, 0.18);
+      box-shadow: inset 0 0 0 1px rgba(191, 90, 242, 0.35);
     }
   }
 
   &__tag-text {
     font-size: 13px;
-    color: rgba(255, 255, 255, 0.85);
     font-weight: 600;
+    line-height: 1;
+    color: rgba(255, 255, 255, 0.55);
+
+    &--team {
+      color: #ff2d55;
+      font-weight: var(--s-fw-bold);
+    }
+
+    &--accommodation {
+      color: #64d2ff;
+      font-weight: var(--s-fw-bold);
+    }
+
+    &--carpool {
+      color: #ffcc00;
+      font-weight: var(--s-fw-bold);
+    }
+
+    &--vip {
+      color: #bf5af2;
+      font-weight: var(--s-fw-bold);
+    }
   }
 
   &__textarea-wrap {
-    padding: 12px 14px;
+    position: relative;
+    padding: 12px 14px 28px;
     border-radius: 12px;
-    background: rgba(255, 255, 255, 0.06);
+    background: #1e1e20;
     border: 1px solid rgba(255, 255, 255, 0.08);
     box-sizing: border-box;
   }
 
   &__textarea {
     width: 100%;
-    min-height: 72px;
+    min-height: 64px;
+    max-height: 96px;
     font-size: 14px;
     color: #fff;
     line-height: 1.45;
+  }
+
+  &__note-count {
+    position: absolute;
+    right: 12px;
+    bottom: 8px;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.32);
+    line-height: 1;
   }
 }

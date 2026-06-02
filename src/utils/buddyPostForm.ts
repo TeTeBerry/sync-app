@@ -3,9 +3,23 @@ import type { AiBuddyPostFormValues, BuddyPostTagId } from '../types/buddyPost';
 import { BUDDY_POST_TAG_OPTIONS } from '../types/buddyPost';
 import {
   boundsToIsoDate,
-  formatBuddyPostDateRange,
+  formatBuddyPostDateShort,
   parseActivityDateBounds,
 } from './activityDateBounds';
+
+export function formatBuddyPostHeadcount(raw: string): string {
+  const trimmed = raw.trim();
+  if (!trimmed) return trimmed;
+  if (/人$/.test(trimmed)) return trimmed;
+  return `${trimmed}人`;
+}
+
+function buddyPostIntentPhrases(tags: BuddyPostTagId[]): string {
+  const phrases = BUDDY_POST_TAG_OPTIONS.filter((opt) => tags.includes(opt.id)).map(
+    (opt) => opt.intentPhrase,
+  );
+  return phrases.length ? phrases.join('、') : '找队友';
+}
 
 export function defaultBuddyPostForm(
   activityDate?: string,
@@ -24,31 +38,21 @@ export function defaultBuddyPostForm(
   };
 }
 
-export function buildBuddyPostBody(
-  form: AiBuddyPostFormValues,
-  activityTitle: string,
-): string {
-  const timeLabel = formatBuddyPostDateRange(form.dateStart, form.dateEnd);
-  const lines = [
-    `找「${activityTitle.trim() || '活动'}」同行`,
-    `时间：${timeLabel}`,
-    `地点：${form.location.trim()}`,
-    `人数：${form.headcount.trim()}`,
-  ];
-
-  const tagLabels = form.tags
-    .map((id) => BUDDY_POST_TAG_OPTIONS.find((o) => o.id === id)?.hashTag)
-    .filter(Boolean);
-  if (tagLabels.length) {
-    lines.push(`类型：${tagLabels.join(' ')}`);
-  }
+/** 帖子正文：找队友，6.13-6.14，上海，2人（多类型则「找队友、找拼房，…」） */
+export function buildBuddyPostBody(form: AiBuddyPostFormValues): string {
+  const parts = [
+    buddyPostIntentPhrases(form.tags),
+    formatBuddyPostDateShort(form.dateStart, form.dateEnd),
+    form.location.trim(),
+    formatBuddyPostHeadcount(form.headcount),
+  ].filter(Boolean);
 
   const note = form.note?.trim();
   if (note) {
-    lines.push(`备注：${note}`);
+    parts.push(note);
   }
 
-  return lines.join('\n');
+  return parts.join('，');
 }
 
 export function buddyPostHashTags(tags: BuddyPostTagId[]): string[] {
@@ -74,17 +78,6 @@ export function buildBuddyPostUserSummary(
   form: AiBuddyPostFormValues,
   activityTitle: string,
 ): string {
-  const tagText = form.tags
-    .map((id) => BUDDY_POST_TAG_OPTIONS.find((o) => o.id === id)?.label)
-    .filter(Boolean)
-    .join('、');
-  const time = formatBuddyPostDateRange(form.dateStart, form.dateEnd);
-  const parts = [
-    `发布「${activityTitle}」组队帖`,
-    time,
-    form.location.trim(),
-    form.headcount.trim(),
-  ];
-  if (tagText) parts.push(tagText);
-  return parts.filter(Boolean).join(' · ');
+  const title = activityTitle.trim() || '活动';
+  return `发布「${title}」组队帖 · ${buildBuddyPostBody(form)}`;
 }

@@ -7,8 +7,10 @@ import { useOverlayLock } from '../../hooks/useOverlayLock';
 import type { AiBuddyPostFormValues, BuddyPostTagId } from '../../types/buddyPost';
 import { BUDDY_POST_TAG_OPTIONS } from '../../types/buddyPost';
 import { defaultBuddyPostForm } from '../../utils/buddyPostForm';
-import { formatBuddyPostDateRange } from '../../utils/activityDateBounds';
 import { Input, Picker, ScrollView, Text, Textarea, View } from '@tarojs/components';
+
+const NOTE_MAX_LENGTH = 120;
+const BUDDY_PICKER_ICON_COLOR = '#64d2ff';
 
 export type AiBuddyPostSheetProps = {
   open: boolean;
@@ -28,7 +30,7 @@ function displayDate(iso: string): string {
 export function AiBuddyPostSheet({
   open,
   activityDate,
-  activityTitle,
+  activityTitle: _activityTitle,
   initialValues,
   onClose,
   onSubmit,
@@ -94,11 +96,6 @@ export function AiBuddyPostSheet({
     });
   }, [canSubmit, dateEnd, dateStart, headcount, location, note, onSubmit, tags]);
 
-  const rangePreview = useMemo(() => {
-    if (!dateStart || !dateEnd) return '';
-    return formatBuddyPostDateRange(dateStart, dateEnd);
-  }, [dateEnd, dateStart]);
-
   if (!open) return null;
 
   return (
@@ -109,7 +106,7 @@ export function AiBuddyPostSheet({
     >
       <View className="s-overlay__backdrop" onClick={onClose} />
       <View
-        className="s-overlay__panel s-ai-guide-plan-sheet__panel s-ai-buddy-post-sheet__panel"
+        className="s-overlay__panel s-ai-guide-plan-sheet__panel"
         role="dialog"
         aria-modal="true"
         aria-labelledby="ai-buddy-post-sheet-title"
@@ -118,7 +115,7 @@ export function AiBuddyPostSheet({
         <View className="s-ai-guide-plan-sheet__top">
           <View className="s-ai-guide-plan-sheet__title-row">
             <View className="s-ai-guide-plan-sheet__title-icon" aria-hidden>
-              <Users size={16} color="#64d2ff" aria-hidden />
+              <Users size={16} color="#ff0066" aria-hidden />
             </View>
             <Text
               id="ai-buddy-post-sheet-title"
@@ -145,21 +142,15 @@ export function AiBuddyPostSheet({
           className="s-ai-guide-plan-sheet__scroll s-scrollbar-none"
         >
           <View className="s-ai-guide-plan-sheet__body">
-            {activityTitle?.trim() ? (
-              <Text className="s-ai-guide-plan-sheet__hint">
-                当前活动：{activityTitle.trim()}
-                {rangePreview ? ` · ${rangePreview}` : ''}
-              </Text>
-            ) : null}
-
             <View className="s-ai-guide-plan-sheet__field">
-              <Text className="s-ai-guide-plan-sheet__label">活动时间</Text>
-              <Text className="s-ai-guide-plan-sheet__hint">
-                可选择区间，例如 6月13日-14日
-              </Text>
+              <View className="s-ai-buddy-post-sheet__field-head">
+                <Text className="s-ai-buddy-post-sheet__label">活动时间</Text>
+                <Text className="s-ai-buddy-post-sheet__field-hint-inline">
+                  可选择区间，例如 6月13日-14日
+                </Text>
+              </View>
               <View className="s-ai-buddy-post-sheet__date-row">
                 <View className="s-ai-buddy-post-sheet__date-col">
-                  <Text className="s-ai-buddy-post-sheet__picker-hint">开始</Text>
                   <Picker
                     mode="date"
                     value={dateStart}
@@ -170,15 +161,23 @@ export function AiBuddyPostSheet({
                     }}
                   >
                     <View className="s-ai-buddy-post-sheet__picker">
-                      <CalendarDays size={16} color="#64d2ff" aria-hidden />
+                      <CalendarDays
+                        size={16}
+                        color={BUDDY_PICKER_ICON_COLOR}
+                        className="s-ai-buddy-post-sheet__picker-icon"
+                        aria-hidden
+                      />
                       <Text className="s-ai-buddy-post-sheet__picker-value">
                         {displayDate(dateStart)}
                       </Text>
                     </View>
                   </Picker>
+                  <Text className="s-ai-buddy-post-sheet__picker-caption">开始</Text>
                 </View>
+                <Text className="s-ai-buddy-post-sheet__date-dash" aria-hidden>
+                  —
+                </Text>
                 <View className="s-ai-buddy-post-sheet__date-col">
-                  <Text className="s-ai-buddy-post-sheet__picker-hint">结束</Text>
                   <Picker
                     mode="date"
                     value={dateEnd}
@@ -186,18 +185,24 @@ export function AiBuddyPostSheet({
                     onChange={(e) => setDateEnd(e.detail.value)}
                   >
                     <View className="s-ai-buddy-post-sheet__picker">
-                      <CalendarDays size={16} color="#64d2ff" aria-hidden />
+                      <CalendarDays
+                        size={16}
+                        color={BUDDY_PICKER_ICON_COLOR}
+                        className="s-ai-buddy-post-sheet__picker-icon"
+                        aria-hidden
+                      />
                       <Text className="s-ai-buddy-post-sheet__picker-value">
                         {displayDate(dateEnd)}
                       </Text>
                     </View>
                   </Picker>
+                  <Text className="s-ai-buddy-post-sheet__picker-caption">结束</Text>
                 </View>
               </View>
             </View>
 
             <View className="s-ai-guide-plan-sheet__field">
-              <Text className="s-ai-guide-plan-sheet__label">地点</Text>
+              <Text className="s-ai-buddy-post-sheet__label">地点</Text>
               <View className="s-ai-guide-plan-sheet__input-wrap">
                 <MapPin
                   size={18}
@@ -216,7 +221,7 @@ export function AiBuddyPostSheet({
             </View>
 
             <View className="s-ai-guide-plan-sheet__field">
-              <Text className="s-ai-guide-plan-sheet__label">人数</Text>
+              <Text className="s-ai-buddy-post-sheet__label">人数</Text>
               <View className="s-ai-guide-plan-sheet__input-wrap">
                 <Users
                   size={18}
@@ -235,7 +240,7 @@ export function AiBuddyPostSheet({
             </View>
 
             <View className="s-ai-guide-plan-sheet__field">
-              <Text className="s-ai-guide-plan-sheet__label">组队类型（可选）</Text>
+              <Text className="s-ai-buddy-post-sheet__label">组队类型（可选）</Text>
               <View className="s-ai-buddy-post-sheet__tag-row">
                 {BUDDY_POST_TAG_OPTIONS.map((opt) => {
                   const active = tags.includes(opt.id);
@@ -244,12 +249,17 @@ export function AiBuddyPostSheet({
                       key={opt.id}
                       className={cn(
                         's-ai-buddy-post-sheet__tag',
-                        active && 's-ai-buddy-post-sheet__tag--on',
+                        active && `s-ai-buddy-post-sheet__tag--${opt.id}`,
                       )}
                       hoverClass="s-ai-buddy-post-sheet__tag--pressed"
                       onClick={() => toggleTag(opt.id)}
                     >
-                      <Text className="s-ai-buddy-post-sheet__tag-text">
+                      <Text
+                        className={cn(
+                          's-ai-buddy-post-sheet__tag-text',
+                          active && `s-ai-buddy-post-sheet__tag-text--${opt.id}`,
+                        )}
+                      >
                         {opt.label}
                       </Text>
                     </Button>
@@ -258,17 +268,20 @@ export function AiBuddyPostSheet({
               </View>
             </View>
 
-            <View className="s-ai-guide-plan-sheet__field">
-              <Text className="s-ai-guide-plan-sheet__label">备注（可选）</Text>
+            <View className="s-ai-guide-plan-sheet__field s-ai-buddy-post-sheet__field--note">
+              <Text className="s-ai-buddy-post-sheet__label">备注（可选）</Text>
               <View className="s-ai-buddy-post-sheet__textarea-wrap">
                 <Textarea
                   className="s-ai-buddy-post-sheet__textarea"
                   value={note}
-                  maxlength={200}
+                  maxlength={NOTE_MAX_LENGTH}
                   placeholder="性别偏好、预算、其他说明…"
                   placeholderClass="s-ai-guide-plan-sheet__input-placeholder"
                   onInput={(e) => setNote(e.detail.value ?? '')}
                 />
+                <Text className="s-ai-buddy-post-sheet__note-count" aria-hidden>
+                  {note.length}/{NOTE_MAX_LENGTH}
+                </Text>
               </View>
             </View>
           </View>

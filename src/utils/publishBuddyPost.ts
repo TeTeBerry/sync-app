@@ -18,7 +18,7 @@ export async function publishBuddyPostFromForm(params: {
 }): Promise<{ post: EventDetailPost; card: RecommendedPostCard }> {
   const { form, activityLegacyId, activityTitle, authorName, authorAvatar } = params;
   const title = activityTitle.trim() || '本场活动';
-  const body = buildBuddyPostBody(form, title);
+  const body = buildBuddyPostBody(form);
   const hashTags = buddyPostHashTags(form.tags);
 
   const post = await createPost({
