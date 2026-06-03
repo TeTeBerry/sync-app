@@ -1,6 +1,5 @@
 import Taro from '@tarojs/taro';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { MOCK_LIVE_INFO_FEED } from './liveInfoMock';
 import type { EventLiveInfoTabActions } from './live/EventLiveInfoTab';
 import type { PublishLiveInfoPayload } from './useEventLiveInfo';
 import type { EventDetailTabId } from './components/EventDetailContentTabs';
@@ -14,7 +13,7 @@ export function useEventDetailLive({
   contentTab,
   showHeaderSkeleton,
 }: UseEventDetailLiveOptions) {
-  const [liveFeedCount, setLiveFeedCount] = useState(MOCK_LIVE_INFO_FEED.length);
+  const [liveFeedCount, setLiveFeedCount] = useState(0);
   const [liveUpdateSheetOpen, setLiveUpdateSheetOpen] = useState(false);
   const liveInfoActionsRef = useRef<EventLiveInfoTabActions | null>(null);
 

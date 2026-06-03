@@ -96,10 +96,13 @@ export interface ReportResult {
   id: string;
 }
 
+export type ReportReviewStatus = 'pending' | 'acknowledged';
+
 export interface ReportStatusResult {
   reported: boolean;
   category?: ReportCategory;
   createdAt?: string;
+  reviewStatus?: ReportReviewStatus;
 }
 
 export interface ActivityRegistrationResult {
@@ -458,7 +461,14 @@ export type LiveInfoCategoryId =
   | 'entry_crowd'
   | 'toilet_queue'
   | 'water_queue'
-  | 'smoke_drink';
+  | 'smoke_drink'
+  | 'sound_level'
+  | 'stage_view';
+
+export interface LiveInfoZone {
+  id: string;
+  label: string;
+}
 
 export interface LiveInfoSummaryRow {
   categoryId: LiveInfoCategoryId;
@@ -470,6 +480,9 @@ export interface LiveInfoFeedItem {
   userName: string;
   avatar?: string;
   certified: boolean;
+  authorOnSiteVerified?: boolean;
+  zoneTag: string;
+  zoneLabel: string;
   timeLabel: string;
   ratings: { categoryId: LiveInfoCategoryId; score: number }[];
   remark?: string;
@@ -490,11 +503,18 @@ export interface LiveInfoViewerState {
 export interface LiveInfoSnapshot {
   activityLegacyId: number;
   eventDate: string;
+  zones: LiveInfoZone[];
   viewer: LiveInfoViewerState;
   summary: LiveInfoSummaryRow[];
   certCount: number;
   feed: LiveInfoFeedItem[];
 }
+
+export type LiveInfoFeedFilters = {
+  zoneTag?: string;
+  categoryId?: LiveInfoCategoryId;
+  certifiedOnly?: boolean;
+};
 
 export interface SubmitLiveInfoWristbandPayload {
   imageUrl: string;
@@ -510,6 +530,7 @@ export interface SubmitLiveInfoWristbandResult {
 }
 
 export interface PublishLiveInfoPayload {
+  zoneTag: string;
   ratings: { categoryId: LiveInfoCategoryId; score: number }[];
   remark?: string;
 }
@@ -590,6 +611,12 @@ export interface ItineraryDay {
   bannerDateLabel: string;
   nodeCount: number;
   items: ItineraryTimelineItem[];
+}
+
+export interface ItineraryBuddyRecruitHint {
+  recruitingCount: number;
+  highlightGenre: string;
+  genreLabels: string[];
 }
 
 export interface GenerateItineraryPayload {

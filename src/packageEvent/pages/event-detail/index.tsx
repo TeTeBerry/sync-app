@@ -69,6 +69,11 @@ const EventDetailPage = () => {
     buddySheetForApplyFlow,
     handleOpenExclusiveItinerary,
     buddyPostSheetOpen,
+    buddySheetInitialValues,
+    buddySheetPrefillLines,
+    buddySheetPrefillTitle,
+    buddySheetShowOnSiteBadgeHint,
+    buddySheetSubmitLabel,
     closeBuddyPostSheet,
     handleBuddyPostSheetSubmit,
     buddyPostActivityDate,
@@ -192,7 +197,6 @@ const EventDetailPage = () => {
               onOpenUpdate={live.handleOpenLiveUpdateSheet}
               onLiveInfoActions={live.handleLiveInfoActions}
               onCloseUpdateSheet={live.handleCloseLiveUpdateSheet}
-              onPublishUpdate={live.handleLiveUpdatePublish}
               onCertifiedSuccess={page.handleOnSiteCertifiedSuccess}
             />
 
@@ -222,6 +226,11 @@ const EventDetailPage = () => {
         open={buddyPostSheetOpen}
         activityDate={buddyPostActivityDate}
         activityTitle={buddyPostActivityTitle}
+        initialValues={buddySheetInitialValues}
+        prefillSummaryLines={buddySheetPrefillLines}
+        prefillBannerTitle={buddySheetPrefillTitle}
+        showOnSiteBadgeHint={buddySheetShowOnSiteBadgeHint}
+        submitLabel={buddySheetSubmitLabel}
         showSyncToFeedOption={buddySheetForApplyFlow}
         onClose={closeBuddyPostSheet}
         onSubmit={handleBuddyPostSheetSubmit}

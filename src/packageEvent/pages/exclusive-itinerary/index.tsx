@@ -99,7 +99,9 @@ const ExclusiveItineraryPage = () => {
         onClose={closeModal}
         title={hintModal?.title}
         message={hintModal?.message}
-        showIcon={hintModal == null}
+        confirmText={hintModal?.confirmText}
+        secondaryCta={hintModal?.secondaryCta}
+        showIcon={hintModal?.showIcon ?? hintModal == null}
       />
 
       <ActionSheet

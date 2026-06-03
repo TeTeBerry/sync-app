@@ -69,6 +69,9 @@ export function EventDetailAiMatchCard({
       {isOnSite && onOnsiteIntentClick ? (
         <View className="s-event-detail__ai-onsite">
           <Text className="s-event-detail__ai-onsite-title">现场快捷发帖</Text>
+          <Text className="s-event-detail__ai-onsite-hint">
+            手环认证仅管当天标识；不认证也能发结伴帖
+          </Text>
           <View className="s-event-detail__ai-onsite-tags">
             {ONSITE_BUDDY_POST_INTENTS.map((intent) => (
               <Button

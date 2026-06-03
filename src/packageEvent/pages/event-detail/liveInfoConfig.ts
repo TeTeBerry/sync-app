@@ -1,4 +1,11 @@
-import { Beer, Droplet, Footprints, Toilet } from '../../../components/icons';
+import {
+  AudioWaveform,
+  Beer,
+  Droplet,
+  Footprints,
+  Star,
+  Toilet,
+} from '../../../components/icons';
 
 type LiveInfoIcon = typeof Footprints;
 
@@ -6,7 +13,9 @@ export type LiveInfoCategoryId =
   | 'entry_crowd'
   | 'toilet_queue'
   | 'water_queue'
-  | 'smoke_drink';
+  | 'smoke_drink'
+  | 'sound_level'
+  | 'stage_view';
 
 export type LiveInfoCategoryConfig = {
   id: LiveInfoCategoryId;
@@ -91,7 +100,40 @@ export const LIVE_INFO_CATEGORIES: LiveInfoCategoryConfig[] = [
               ? '较严格'
               : '严格',
   },
+  {
+    id: 'sound_level',
+    label: '音量/听感',
+    icon: AudioWaveform,
+    color: '#ffca28',
+    scaleLeft: '很轻',
+    scaleRight: '很响/震',
+    scoreLabel: (s) =>
+      s <= 1 ? '很轻' : s <= 2 ? '偏轻' : s <= 3 ? '适中' : s <= 4 ? '偏响' : '很响/震',
+  },
+  {
+    id: 'stage_view',
+    label: '视野',
+    icon: Star,
+    color: '#66bb6a',
+    scaleLeft: '很差',
+    scaleRight: '很好',
+    scoreLabel: (s) =>
+      s <= 1 ? '很差' : s <= 2 ? '一般' : s <= 3 ? '还行' : s <= 4 ? '较好' : '很好',
+  },
 ];
+
+const SCORE_DEFAULTS: Record<LiveInfoCategoryId, number> = {
+  entry_crowd: 3,
+  toilet_queue: 3,
+  water_queue: 3,
+  smoke_drink: 3,
+  sound_level: 3,
+  stage_view: 3,
+};
+
+export function defaultLiveInfoScores(): Record<LiveInfoCategoryId, number> {
+  return { ...SCORE_DEFAULTS };
+}
 
 export function getLiveInfoCategory(id: LiveInfoCategoryId): LiveInfoCategoryConfig {
   return LIVE_INFO_CATEGORIES.find((c) => c.id === id) ?? LIVE_INFO_CATEGORIES[0];

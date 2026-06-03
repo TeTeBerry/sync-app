@@ -74,10 +74,35 @@ export function buildOnsiteBuddyPostForm(
   };
 }
 
-export function formatOnsiteIntentModalContent(form: AiBuddyPostFormValues): string {
-  const tagLabels = form.tags
+export function formatOnsiteIntentTagLabels(form: AiBuddyPostFormValues): string {
+  return form.tags
     .map((id) => BUDDY_POST_TAG_OPTIONS.find((o) => o.id === id)?.label ?? id)
     .join('、');
+}
+
+/** Summary lines for buddy sheet prefill banner (chip → sheet → confirm). */
+export function buildOnsiteIntentPrefillSummaryLines(
+  intentId: OnsiteBuddyPostIntentId,
+  form: AiBuddyPostFormValues,
+): string[] {
+  const intentLabel =
+    ONSITE_BUDDY_POST_INTENTS.find((item) => item.id === intentId)?.label ?? '现场招募';
+  const tagLabels = formatOnsiteIntentTagLabels(form);
+  const lines = [intentLabel, form.location.trim() || '现场', tagLabels];
+  if (form.note?.trim()) {
+    lines.push(form.note.trim());
+  }
+  return lines;
+}
+
+export const ONSITE_INTENT_PREFILL_BANNER_TITLE = '现场快捷发帖 · 已预填';
+
+export const ONSITE_INTENT_ONSITE_BADGE_HINT =
+  '若今日已完成手环认证，发布后将显示「我在现场」标识';
+
+/** @deprecated Prefer sheet prefill; kept for quick modal copy if needed. */
+export function formatOnsiteIntentModalContent(form: AiBuddyPostFormValues): string {
+  const tagLabels = formatOnsiteIntentTagLabels(form);
   const lines = [
     `地点：${form.location.trim() || '现场'}`,
     `类型：${tagLabels}`,

@@ -3,7 +3,9 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Check, X, Zap } from '../../../../components/icons';
 import { cn } from '../../../../components/ui';
 import { useOverlayLock } from '../../../../hooks/useOverlayLock';
+import type { LiveInfoZone } from '../../../../types/backend';
 import {
+  defaultLiveInfoScores,
   LIVE_INFO_CATEGORIES,
   LIVE_INFO_REMARKS_MAX,
   type LiveInfoCategoryId,
@@ -15,6 +17,7 @@ import { ScrollView, Text, Textarea, View } from '@tarojs/components';
 
 type EventLiveInfoUpdateSheetProps = {
   open: boolean;
+  zones: LiveInfoZone[];
   onClose: () => void;
   /** Resolves true when publish succeeded; sheet stays open on false. */
   onPublish: (payload: PublishLiveInfoPayload) => boolean | Promise<boolean>;
@@ -24,36 +27,32 @@ const DEFAULT_SCORE = 3;
 
 export function EventLiveInfoUpdateSheet({
   open,
+  zones,
   onClose,
   onPublish,
 }: EventLiveInfoUpdateSheetProps) {
   useOverlayLock(open);
 
+  const safeZones = zones.length > 0 ? zones : [{ id: 'venue', label: '全场' }];
+  const defaultZoneId = safeZones[0]?.id ?? 'venue';
+
+  const [zoneTag, setZoneTag] = useState(defaultZoneId);
   const [selected, setSelected] = useState<LiveInfoCategoryId[]>([
     'entry_crowd',
     'toilet_queue',
   ]);
-  const [scores, setScores] = useState<Record<LiveInfoCategoryId, number>>({
-    entry_crowd: DEFAULT_SCORE,
-    toilet_queue: DEFAULT_SCORE,
-    water_queue: DEFAULT_SCORE,
-    smoke_drink: DEFAULT_SCORE,
-  });
+  const [scores, setScores] = useState(defaultLiveInfoScores);
   const [remark, setRemark] = useState('');
   const [publishing, setPublishing] = useState(false);
 
   useEffect(() => {
     if (!open) return;
+    setZoneTag(safeZones[0]?.id ?? 'venue');
     setSelected(['entry_crowd', 'toilet_queue']);
-    setScores({
-      entry_crowd: DEFAULT_SCORE,
-      toilet_queue: DEFAULT_SCORE,
-      water_queue: DEFAULT_SCORE,
-      smoke_drink: DEFAULT_SCORE,
-    });
+    setScores(defaultLiveInfoScores());
     setRemark('');
     setPublishing(false);
-  }, [open]);
+  }, [open, zones]);
 
   const toggleCategory = useCallback((id: LiveInfoCategoryId) => {
     setSelected((prev) => {
@@ -76,6 +75,7 @@ export function EventLiveInfoUpdateSheet({
     try {
       const ok = await Promise.resolve(
         onPublish({
+          zoneTag,
           ratings: selected.map((categoryId) => ({
             categoryId,
             score: scores[categoryId] ?? DEFAULT_SCORE,
@@ -87,7 +87,7 @@ export function EventLiveInfoUpdateSheet({
     } finally {
       setPublishing(false);
     }
-  }, [onClose, onPublish, publishing, remark, scores, selected]);
+  }, [onClose, onPublish, publishing, remark, scores, selected, zoneTag]);
 
   if (!open) {
     return null;
@@ -125,8 +125,34 @@ export function EventLiveInfoUpdateSheet({
           className="s-live-info-update-sheet__scroll s-scrollbar-none"
         >
           <View className="s-live-info-update-sheet__body">
+            <Text className="s-live-info-update-sheet__section">① 选择区域</Text>
+            <View className="s-live-info-update-sheet__chips">
+              {safeZones.map((zone) => {
+                const active = zoneTag === zone.id;
+                return (
+                  <Button
+                    key={zone.id}
+                    className={[
+                      's-live-info-update-sheet__chip',
+                      active && 's-live-info-update-sheet__chip--on',
+                    ]
+                      .filter(Boolean)
+                      .join(' ')}
+                    onClick={() => setZoneTag(zone.id)}
+                  >
+                    <Text className="s-live-info-update-sheet__chip-label">
+                      {zone.label}
+                    </Text>
+                    {active ? (
+                      <Check size={14} color="var(--primary)" aria-hidden />
+                    ) : null}
+                  </Button>
+                );
+              })}
+            </View>
+
             <Text className="s-live-info-update-sheet__section">
-              ① 选择要更新的类别 (可多选)
+              ② 选择要更新的类别 (可多选)
             </Text>
             <View className="s-live-info-update-sheet__chips">
               {LIVE_INFO_CATEGORIES.map((category) => {
@@ -169,7 +195,7 @@ export function EventLiveInfoUpdateSheet({
 
             {selectedCategories.length > 0 ? (
               <>
-                <Text className="s-live-info-update-sheet__section">② 给每项打分</Text>
+                <Text className="s-live-info-update-sheet__section">③ 给每项打分</Text>
                 {selectedCategories.map((category) => {
                   const score = scores[category.id] ?? DEFAULT_SCORE;
                   const Icon = category.icon;
@@ -209,7 +235,7 @@ export function EventLiveInfoUpdateSheet({
               </>
             ) : null}
 
-            <Text className="s-live-info-update-sheet__section">③ 备注 (选填)</Text>
+            <Text className="s-live-info-update-sheet__section">④ 备注 (选填)</Text>
             <View className="s-live-info-update-sheet__remark-wrap">
               <Textarea
                 className="s-live-info-update-sheet__remark"

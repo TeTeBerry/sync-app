@@ -36,20 +36,32 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     setScrollTop,
     feedReady,
     composerReady,
+    secondaryReady,
   } = route;
 
   const activityQuery = useActivityDetailQuery(eventId);
+  const activityTitle = activityQuery.data?.name;
+  const activityDate = activityQuery.data?.date;
+  const activityLocation = activityQuery.data?.location;
   const header = useEventDetailActivityHeader({
     eventId,
     hasValidEventId: route.hasValidEventId,
     activityQuery,
   });
 
-  const contactUnlockQuota = useContactUnlockQuota(eventId);
-  const { entitlements, openContactUnlockExhaustedModal } =
-    useEventDetailEntitlements(eventId);
-  const travelGuide = useEventDetailTravelGuide(eventId);
-  const currentUserQuery = useCurrentUserQuery();
+  const contactUnlockQuota = useContactUnlockQuota(eventId, {
+    enabled: secondaryReady,
+  });
+  const { entitlements, openContactUnlockExhaustedModal } = useEventDetailEntitlements(
+    eventId,
+    { enabled: secondaryReady },
+  );
+  const travelGuide = useEventDetailTravelGuide({
+    eventId,
+    activityDate,
+    activityLocation,
+  });
+  const currentUserQuery = useCurrentUserQuery({ enabled: feedReady });
   const applyDefaultDepartureCity =
     currentUserQuery.data?.city?.trim() ||
     eventCityFromLocation(activityQuery.data?.location);
@@ -64,10 +76,15 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
   });
 
   const buddyPost = useEventDetailBuddyPost(eventId, {
+    activityTitle,
+    activityDate,
+    activityLocation,
     authorName: displayUserName,
     authorAvatar: currentUserQuery.data?.avatar,
     refreshPosts: postsQuery.refetch,
     prependPost: postsQuery.prependItem,
+    accountRiskEnabled: secondaryReady,
+    hintOnSiteBadge: header.isOnSite,
   });
 
   const handleOnSiteCertifiedSuccess = useCallback(async () => {
@@ -194,7 +211,9 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
         resumeApplyPostIdRef.current = null;
         deferPostsRefreshRef.current = !syncToPostList;
 
-        teamApply.openApplySheet(targetPostId, buddyPreviewFromForm(form));
+        teamApply.openApplySheet(targetPostId, {
+          preview: buddyPreviewFromForm(form),
+        });
         setApplyBuddyPublishPending(true);
 
         let published = false;
@@ -262,6 +281,11 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     buddySheetForApplyFlow,
     handleOpenExclusiveItinerary: ai.handleOpenExclusiveItinerary,
     buddyPostSheetOpen: buddyPost.buddyPostSheetOpen,
+    buddySheetInitialValues: buddyPost.buddySheetInitialValues,
+    buddySheetPrefillLines: buddyPost.buddySheetPrefillLines,
+    buddySheetPrefillTitle: buddyPost.buddySheetPrefillTitle,
+    buddySheetShowOnSiteBadgeHint: buddyPost.buddySheetShowOnSiteBadgeHint,
+    buddySheetSubmitLabel: buddyPost.buddySheetSubmitLabel,
     closeBuddyPostSheet,
     handleBuddyPostSheetSubmit,
     buddyPostActivityDate: buddyPost.buddyPostActivityDate,

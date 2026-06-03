@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { isApiEnabled } from '../constants/api';
 import { useProfileActivityLegacyId } from './useProfileActivityLegacyId';
+import type { QueryEnableOptions } from './sync/types';
 import { useProfileEntitlementsQuery } from './useSyncApi';
 import {
   getContactUnlockRemaining,
@@ -20,10 +21,11 @@ export type ContactUnlockQuotaDisplay = {
  */
 export function useContactUnlockQuota(
   activityLegacyIdOverride?: number,
+  options?: QueryEnableOptions,
 ): ContactUnlockQuotaDisplay {
   const storeActivityLegacyId = useProfileActivityLegacyId();
   const activityLegacyId = activityLegacyIdOverride ?? storeActivityLegacyId;
-  const entitlementsQuery = useProfileEntitlementsQuery(activityLegacyId);
+  const entitlementsQuery = useProfileEntitlementsQuery(activityLegacyId, options);
 
   return useMemo(() => {
     const loading = isApiEnabled() && entitlementsQuery.isLoading;

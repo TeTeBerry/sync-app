@@ -1,24 +1,32 @@
 import { useCallback, useMemo, useState } from 'react';
 import Taro from '@tarojs/taro';
-import { useActivityDetailQuery } from '../../../hooks/useSyncApi';
 import { goAiAssistant } from '../../../utils/route';
 import { parseActivityDayCount } from '../../../utils/parseActivityDayCount';
 import { eventCityFromLocation } from '../../../utils/travelGuideDepartureSuggestions';
 import type { AiGuidePlanFormValues } from '../../../types/travelGuide';
 
+export type UseEventDetailTravelGuideOptions = {
+  eventId: number;
+  activityDate?: string;
+  activityLocation?: string;
+};
+
 /** Travel-guide plan sheet on event detail — no navigation until the user submits. */
-export function useEventDetailTravelGuide(eventId: number) {
+export function useEventDetailTravelGuide({
+  eventId,
+  activityDate,
+  activityLocation,
+}: UseEventDetailTravelGuideOptions) {
   const [sheetOpen, setSheetOpen] = useState(false);
-  const activityQuery = useActivityDetailQuery(eventId);
 
   const defaultNights = useMemo(
-    () => parseActivityDayCount(activityQuery.data?.date),
-    [activityQuery.data?.date],
+    () => parseActivityDayCount(activityDate),
+    [activityDate],
   );
 
   const eventCity = useMemo(
-    () => eventCityFromLocation(activityQuery.data?.location),
-    [activityQuery.data?.location],
+    () => eventCityFromLocation(activityLocation),
+    [activityLocation],
   );
 
   const openGuideSheet = useCallback(() => {

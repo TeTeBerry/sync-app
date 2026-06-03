@@ -1,9 +1,6 @@
 import React, { lazy, Suspense } from 'react';
 import ThemedPageLoader from '../../../../components/ThemedPageLoader';
-import { EventLiveInfoUpdateSheet } from './EventLiveInfoUpdateSheet';
 import type { EventLiveInfoTabActions } from '../live/EventLiveInfoTab';
-import type { PublishLiveInfoPayload } from '../useEventLiveInfo';
-
 const EventLiveInfoTab = lazy(() =>
   import('../live/EventLiveInfoTab').then((mod) => ({
     default: mod.EventLiveInfoTab,
@@ -19,7 +16,6 @@ export type EventDetailLiveSectionProps = {
   onOpenUpdate: () => void;
   onLiveInfoActions: (actions: EventLiveInfoTabActions | null) => void;
   onCloseUpdateSheet: () => void;
-  onPublishUpdate: (payload: PublishLiveInfoPayload) => Promise<boolean>;
   onCertifiedSuccess?: () => void | Promise<void>;
 };
 
@@ -32,7 +28,6 @@ const EventDetailLiveSection: React.FC<EventDetailLiveSectionProps> = ({
   onOpenUpdate,
   onLiveInfoActions,
   onCloseUpdateSheet,
-  onPublishUpdate,
   onCertifiedSuccess,
 }) => {
   if (!visible) {
@@ -40,27 +35,20 @@ const EventDetailLiveSection: React.FC<EventDetailLiveSectionProps> = ({
   }
 
   return (
-    <>
-      <Suspense
-        fallback={<ThemedPageLoader variant="skeleton-live-feed" minHeight={200} />}
-      >
-        <EventLiveInfoTab
-          eventId={eventId}
-          userName={userName}
-          onFeedCountChange={onFeedCountChange}
-          onOpenUpdate={onOpenUpdate}
-          onLiveInfoActions={onLiveInfoActions}
-          onCertifiedSuccess={onCertifiedSuccess}
-        />
-      </Suspense>
-      {updateSheetOpen ? (
-        <EventLiveInfoUpdateSheet
-          open
-          onClose={onCloseUpdateSheet}
-          onPublish={onPublishUpdate}
-        />
-      ) : null}
-    </>
+    <Suspense
+      fallback={<ThemedPageLoader variant="skeleton-live-feed" minHeight={200} />}
+    >
+      <EventLiveInfoTab
+        eventId={eventId}
+        userName={userName}
+        updateSheetOpen={updateSheetOpen}
+        onFeedCountChange={onFeedCountChange}
+        onOpenUpdate={onOpenUpdate}
+        onLiveInfoActions={onLiveInfoActions}
+        onCloseUpdateSheet={onCloseUpdateSheet}
+        onCertifiedSuccess={onCertifiedSuccess}
+      />
+    </Suspense>
   );
 };
 

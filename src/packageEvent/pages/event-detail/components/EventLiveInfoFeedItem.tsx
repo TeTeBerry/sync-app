@@ -33,8 +33,11 @@ export function EventLiveInfoFeedItem({
   const userName = item.userName?.trim() || '用户';
   const likes = typeof item.likes === 'number' && item.likes >= 0 ? item.likes : 0;
   const liked = Boolean(item.liked);
-  const certified = Boolean(item.certified);
+  const onSiteVerified =
+    item.authorOnSiteVerified !== false &&
+    (item.authorOnSiteVerified === true || Boolean(item.certified));
   const remark = item.remark?.trim();
+  const zoneLabel = item.zoneLabel?.trim();
 
   return (
     <View className="s-live-info-post">
@@ -47,7 +50,7 @@ export function EventLiveInfoFeedItem({
             placeholderClassName="s-live-info-post__avatar s-live-info-post__avatar--placeholder"
             fallback={userName.slice(0, 1)}
           />
-          {certified ? (
+          {onSiteVerified ? (
             <View className="s-live-info-post__avatar-badge" aria-hidden>
               <Check size={10} color="#fff" strokeWidth={3} />
             </View>
@@ -57,7 +60,10 @@ export function EventLiveInfoFeedItem({
         <View className="s-live-info-post__identity">
           <View className="s-live-info-post__name-row">
             <Text className="s-live-info-post__name">{userName}</Text>
-            {certified ? <OnSiteVerifiedBadge /> : null}
+            {zoneLabel ? (
+              <Text className="s-live-info-post__zone-pill">{zoneLabel}</Text>
+            ) : null}
+            {onSiteVerified ? <OnSiteVerifiedBadge /> : null}
           </View>
           <Text className="s-live-info-post__meta">
             {formatUpdateMeta(item.timeLabel, ratings.length)}

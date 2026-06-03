@@ -2,6 +2,7 @@ import { apiGet, apiPost } from '../../utils/apiClient';
 import type {
   GenerateItineraryPayload,
   GenerateItineraryResult,
+  ItineraryBuddyRecruitHint,
   ItineraryScheduleSnapshot,
   SaveItineraryPayload,
   SaveItineraryResult,
@@ -47,5 +48,19 @@ export function fetchSavedItinerary(activityLegacyId: number) {
   return apiGet<SavedItineraryResult>(
     `/activities/${activityLegacyId}/itinerary/saved`,
     ownerQueryParams(),
+  );
+}
+
+export function fetchItineraryBuddyRecruitHint(
+  activityLegacyId: number,
+  selectedDjIds: string[],
+) {
+  const params = mergeOwnerQueryParams();
+  if (selectedDjIds.length) {
+    params.selectedDjIds = selectedDjIds.join(',');
+  }
+  return apiGet<ItineraryBuddyRecruitHint>(
+    `/activities/${activityLegacyId}/itinerary/buddy-recruit-hint`,
+    params,
   );
 }

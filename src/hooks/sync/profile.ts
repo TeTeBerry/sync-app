@@ -23,8 +23,9 @@ function profileApiEnabled(): boolean {
   return isLiveApi() && isLoggedIn();
 }
 
-export function useCurrentUserQuery() {
-  const enabled = profileApiEnabled();
+export function useCurrentUserQuery(options?: QueryEnableOptions) {
+  const tabEnabled = options?.enabled ?? true;
+  const enabled = profileApiEnabled() && tabEnabled;
 
   return useApiQuery({
     queryKey: ['users', 'me'],

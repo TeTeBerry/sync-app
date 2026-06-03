@@ -6,10 +6,11 @@ import {
   handleAccountRiskApiError,
   isAccountPublishRestricted,
 } from '../utils/accountRisk';
+import type { QueryEnableOptions } from './sync/types';
 import { useCurrentUserQuery } from './useSyncApi';
 
-export function useAccountRisk() {
-  const query = useCurrentUserQuery();
+export function useAccountRisk(options?: QueryEnableOptions) {
+  const query = useCurrentUserQuery(options);
   const accountRisk = query.data?.accountRisk;
   const isPublishRestricted = isAccountPublishRestricted(accountRisk);
 

@@ -1,11 +1,15 @@
 import { useCallback, useMemo, useState } from 'react';
 import { pickGlobalFreeMonthly } from '../../../components/profile';
+import type { QueryEnableOptions } from '../../../hooks/sync/types';
 import { useProfileEntitlementsQuery } from '../../../hooks/useSyncApi';
 import type { PackageTierId } from '../../../types/backend';
 import { resolveProfileEntitlement } from '../../../utils/profileEntitlement';
 
-export function useEventDetailEntitlements(eventId: number) {
-  const entitlementsQuery = useProfileEntitlementsQuery(eventId);
+export function useEventDetailEntitlements(
+  eventId: number,
+  options?: QueryEnableOptions,
+) {
+  const entitlementsQuery = useProfileEntitlementsQuery(eventId, options);
   const profileEntitlement = useMemo(
     () => resolveProfileEntitlement(entitlementsQuery.data, eventId),
     [entitlementsQuery.data, eventId],

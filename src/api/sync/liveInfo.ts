@@ -1,18 +1,29 @@
 import { apiDelete, apiGet, apiPost } from '../../utils/apiClient';
 import type {
+  LiveInfoFeedFilters,
   LiveInfoSnapshot,
   PublishLiveInfoPayload,
   SubmitLiveInfoWristbandPayload,
   SubmitLiveInfoWristbandResult,
 } from '../../types/backend';
-import { ownerQueryParams } from '../requestContext';
+import { mergeOwnerQueryParams, ownerQueryParams } from '../requestContext';
 import { uploadImageFile } from '../../utils/uploadImage';
 
-export function fetchLiveInfoSnapshot(activityLegacyId: number) {
-  return apiGet<LiveInfoSnapshot>(
-    `/activities/${activityLegacyId}/live-info`,
-    ownerQueryParams(),
-  );
+export function fetchLiveInfoSnapshot(
+  activityLegacyId: number,
+  filters?: LiveInfoFeedFilters,
+) {
+  const params = mergeOwnerQueryParams();
+  if (filters?.zoneTag?.trim()) {
+    params.zoneTag = filters.zoneTag.trim();
+  }
+  if (filters?.categoryId) {
+    params.categoryId = filters.categoryId;
+  }
+  if (filters?.certifiedOnly) {
+    params.certifiedOnly = 'true';
+  }
+  return apiGet<LiveInfoSnapshot>(`/activities/${activityLegacyId}/live-info`, params);
 }
 
 export function uploadImage(filePath: string) {

@@ -7,11 +7,14 @@ import {
 } from '../../../hooks/useItineraryApi';
 import { useItineraryStore } from '../../../stores/itineraryStore';
 import { useStackPageMainHeight } from '../../../hooks/useTabPageMainHeight';
+import { fetchItineraryBuddyRecruitHint } from '../../../api/sync/itinerary';
 import {
+  goEventDetail,
   goMyItinerary,
   resolveEventDetailIdFromQuery,
   ROUTES,
 } from '../../../utils/route';
+import { formatItineraryBuddyRecruitHintMessage } from '../../../utils/itineraryBuddyRecruitHint';
 import { selectActiveActivityLegacyId, useNavigationStore } from '../../../stores';
 import {
   EXCLUSIVE_ITINERARY_DEFAULT_SELECTED_IDS,
@@ -80,6 +83,9 @@ export function useExclusiveItineraryPage() {
   const [hintModal, setHintModal] = useState<{
     title: string;
     message: string;
+    confirmText?: string;
+    secondaryCta?: { label: string; onClick: () => void };
+    showIcon?: boolean;
   } | null>(null);
   const [conflictDismissed, setConflictDismissed] = useState(false);
   const [generating, setGenerating] = useState(false);
@@ -154,9 +160,13 @@ export function useExclusiveItineraryPage() {
   }, []);
 
   const closeModal = useCallback(() => {
+    const wasBuddyHint = hintModal?.secondaryCta != null;
     setInfoOpen(false);
     setHintModal(null);
-  }, []);
+    if (wasBuddyHint && Number.isFinite(activityLegacyId) && activityLegacyId > 0) {
+      goMyItinerary(activityLegacyId, selectedIds);
+    }
+  }, [activityLegacyId, hintModal?.secondaryCta, selectedIds]);
 
   const handleGenerate = useCallback(async () => {
     if (selectedIds.length === 0) {
@@ -175,7 +185,40 @@ export function useExclusiveItineraryPage() {
     try {
       const result = await generate({ selectedDjIds: selectedIds });
       setFromGenerateResult(activityLegacyId, selectedIds, result);
-      goMyItinerary(activityLegacyId, selectedIds);
+
+      const continueToItinerary = () => {
+        goMyItinerary(activityLegacyId, selectedIds);
+      };
+
+      if (apiEnabled) {
+        try {
+          const hint = await fetchItineraryBuddyRecruitHint(
+            activityLegacyId,
+            selectedIds,
+          );
+          const buddyMessage = formatItineraryBuddyRecruitHintMessage(hint);
+          if (buddyMessage) {
+            setHintModal({
+              title: '也许能结伴同行',
+              message: buddyMessage,
+              confirmText: '继续看行程',
+              showIcon: false,
+              secondaryCta: {
+                label: '去看招募',
+                onClick: () => {
+                  setHintModal(null);
+                  goEventDetail(activityLegacyId);
+                },
+              },
+            });
+            return;
+          }
+        } catch {
+          // Best-effort buddy hint; still navigate to itinerary.
+        }
+      }
+
+      continueToItinerary();
     } catch (error) {
       const message =
         error instanceof Error ? error.message : '行程生成失败，请稍后重试';

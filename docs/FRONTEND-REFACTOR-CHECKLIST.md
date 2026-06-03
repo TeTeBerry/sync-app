@@ -160,6 +160,7 @@
 - [x] `hooks/useWindowedList.ts` + `constants/listPerf.ts` — 通用窗口化（首屏 N 条、`showMore` / `ensureIndexVisible`）
 - [x] 首页 `FeedPostList` — 首屏 5 条 +「展开更多」；评论区仅在 `commentsExpanded` 时挂载 `PostCommentSection`
 - [x] 活动详情 `useEventDetailPosts` — 首屏 6 条、步进 +6；`onScrollToLower` 先扩本地窗口再 `postsQuery.loadMore()`；Tab 计数用 `totalPostCount`
+- [x] 活动详情首屏分步：`composerReady` / `feedReady` / `secondaryReady`（`timing.ts`）；首屏仅活动详情 REST，帖子 +240ms，权益/users/me +400ms；现场 Tab 才拉 live-info（见 `BUNDLE-SIZE.md`）
 - [x] `EventPostsVirtualList` — 「没有更多」需 `!hasMore && !hasMoreLocal`；高亮帖滚动前 `ensureIndexVisible`
 - [x] AI 聊天：`utils/throttleRaf.ts` — 打字机 `onUpdate` 每帧最多一次 `setState`
 - [x] AI 聊天：`utils/chatMessages.ts` — `patchChatMessage` 单条更新，保留其它行引用供 `memo`

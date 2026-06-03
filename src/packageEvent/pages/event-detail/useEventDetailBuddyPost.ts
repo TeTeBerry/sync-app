@@ -1,51 +1,71 @@
 import { useCallback, useState } from 'react';
 import Taro from '@tarojs/taro';
-import {
-  invalidatePostQueries,
-  useActivityDetailQuery,
-} from '../../../hooks/useSyncApi';
+import { invalidatePostQueries } from '../../../hooks/useSyncApi';
 import { useAccountRisk } from '../../../hooks/useSyncApi';
 import { publishBuddyPostFromForm } from '../../../utils/publishBuddyPost';
 import { isApiEnabled } from '../../../constants/api';
 import type { EventDetailPost } from '../../../types/post';
 import type { AiBuddyPostFormValues } from '../../../types/buddyPost';
 import {
-  ONSITE_BUDDY_POST_INTENTS,
+  ONSITE_INTENT_PREFILL_BANNER_TITLE,
   buildOnsiteBuddyPostForm,
-  formatOnsiteIntentModalContent,
+  buildOnsiteIntentPrefillSummaryLines,
   type OnsiteBuddyPostIntentId,
 } from '../../../constants/onsiteBuddyPostIntents';
+
+export type BuddySheetPrefillState = {
+  initialValues: AiBuddyPostFormValues;
+  summaryLines: string[];
+  bannerTitle: string;
+  showOnSiteBadgeHint: boolean;
+  submitLabel: string;
+};
 
 /** Buddy-post plan sheet on event detail — publish in place, refresh post list. */
 export function useEventDetailBuddyPost(
   eventId: number,
   options: {
+    activityTitle?: string;
+    activityDate?: string;
+    activityLocation?: string;
     authorName: string;
     authorAvatar?: string;
     /** Refetch activity post list (useEventPostsInfiniteQuery is not on useApiQuery cache). */
     refreshPosts?: () => Promise<void>;
     /** Optimistic insert so the feed updates before refetch completes. */
     prependPost?: (post: EventDetailPost) => void;
+    /** Defer users/me until secondaryReady to cut first-screen requests. */
+    accountRiskEnabled?: boolean;
+    /** When true, chip prefill copy mentions wristband →「我在现场」badge. */
+    hintOnSiteBadge?: boolean;
   },
 ) {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
-  const activityQuery = useActivityDetailQuery(eventId);
-  const { guardPublish, handlePublishError } = useAccountRisk();
+  const [sheetPrefill, setSheetPrefill] = useState<BuddySheetPrefillState | null>(null);
+  const { guardPublish, handlePublishError } = useAccountRisk({
+    enabled: options.accountRiskEnabled ?? true,
+  });
+
+  const clearSheetPrefill = useCallback(() => {
+    setSheetPrefill(null);
+  }, []);
 
   const openBuddyPostSheet = useCallback(() => {
     if (!Number.isFinite(eventId) || eventId <= 0) {
       void Taro.showToast({ title: '活动信息无效', icon: 'none' });
       return;
     }
+    clearSheetPrefill();
     void guardPublish().then((allowed) => {
       if (allowed) setSheetOpen(true);
     });
-  }, [eventId, guardPublish]);
+  }, [clearSheetPrefill, eventId, guardPublish]);
 
   const closeBuddyPostSheet = useCallback(() => {
     setSheetOpen(false);
-  }, []);
+    clearSheetPrefill();
+  }, [clearSheetPrefill]);
 
   const handleBuddyPostSheetSubmit = useCallback(
     async (
@@ -63,13 +83,14 @@ export function useEventDetailBuddyPost(
 
       setIsPublishing(true);
       setSheetOpen(false);
+      clearSheetPrefill();
 
       try {
         if (!isApiEnabled()) {
           throw new Error('请先配置 API 地址');
         }
 
-        const title = activityQuery.data?.name?.trim() || '本场活动';
+        const title = options.activityTitle?.trim() || '本场活动';
         const listedInFeed = submitOptions?.listedInFeed !== false;
         const { post } = await publishBuddyPostFromForm({
           form,
@@ -114,7 +135,7 @@ export function useEventDetailBuddyPost(
       }
     },
     [
-      activityQuery.data?.name,
+      clearSheetPrefill,
       eventId,
       guardPublish,
       handlePublishError,
@@ -132,47 +153,48 @@ export function useEventDetailBuddyPost(
       if (isPublishing) return;
       if (!(await guardPublish())) return;
 
-      const activityDate = activityQuery.data?.date;
-      const activityLocation = activityQuery.data?.location;
-      const form = buildOnsiteBuddyPostForm(intentId, activityDate, activityLocation);
+      const form = buildOnsiteBuddyPostForm(
+        intentId,
+        options.activityDate,
+        options.activityLocation,
+      );
       if (!form) {
         void Taro.showToast({ title: '无法解析活动日期', icon: 'none' });
         return;
       }
 
-      const intentLabel =
-        ONSITE_BUDDY_POST_INTENTS.find((item) => item.id === intentId)?.label ??
-        '发布组队帖';
-      const summary = formatOnsiteIntentModalContent(form);
-
-      const { confirm } = await Taro.showModal({
-        title: `确认发布：${intentLabel}`,
-        content: summary,
-        confirmText: '发布',
-        cancelText: '取消',
+      setSheetPrefill({
+        initialValues: form,
+        summaryLines: buildOnsiteIntentPrefillSummaryLines(intentId, form),
+        bannerTitle: ONSITE_INTENT_PREFILL_BANNER_TITLE,
+        showOnSiteBadgeHint: options.hintOnSiteBadge !== false,
+        submitLabel: '确认发布',
       });
-      if (!confirm) return;
-
-      await handleBuddyPostSheetSubmit(form, { listedInFeed: true });
+      setSheetOpen(true);
     },
     [
-      activityQuery.data?.date,
-      activityQuery.data?.location,
       eventId,
       guardPublish,
-      handleBuddyPostSheetSubmit,
       isPublishing,
+      options.activityDate,
+      options.activityLocation,
+      options.hintOnSiteBadge,
     ],
   );
 
   return {
     buddyPostSheetOpen: sheetOpen,
+    buddySheetInitialValues: sheetPrefill?.initialValues ?? null,
+    buddySheetPrefillLines: sheetPrefill?.summaryLines ?? null,
+    buddySheetPrefillTitle: sheetPrefill?.bannerTitle ?? null,
+    buddySheetShowOnSiteBadgeHint: sheetPrefill?.showOnSiteBadgeHint ?? false,
+    buddySheetSubmitLabel: sheetPrefill?.submitLabel ?? null,
     isBuddyPostPublishing: isPublishing,
     openBuddyPostSheet,
     closeBuddyPostSheet,
     handleBuddyPostSheetSubmit,
     publishOnsiteIntent,
-    buddyPostActivityDate: activityQuery.data?.date,
-    buddyPostActivityTitle: activityQuery.data?.name,
+    buddyPostActivityDate: options.activityDate,
+    buddyPostActivityTitle: options.activityTitle,
   };
 }

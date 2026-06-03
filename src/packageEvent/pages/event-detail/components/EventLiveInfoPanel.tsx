@@ -2,12 +2,17 @@ import { Zap } from '../../../../components/icons';
 import { Button } from '../../../../components/ui';
 import { Text, View } from '@tarojs/components';
 import ThemedPageLoader from '../../../../components/ThemedPageLoader';
-import type { LiveInfoCertStatus } from '../../../../types/backend';
-import type { PublishLiveInfoPayload } from '../useEventLiveInfo';
+import type {
+  LiveInfoCertStatus,
+  LiveInfoFeedFilters,
+} from '../../../../types/backend';
+import type { LiveInfoZone } from '../../../../types/backend';
 import type { LiveInfoFeedItem, LiveInfoSummaryRow } from '../liveInfoMock';
 import { EventLiveInfoCertCard } from './EventLiveInfoCertCard';
-import { EventLiveInfoSummaryCard } from './EventLiveInfoSummaryCard';
+import { OnSiteVerificationInfoCard } from './OnSiteVerificationInfoCard';
 import { EventLiveInfoFeed } from './EventLiveInfoFeed';
+import { EventLiveInfoFeedFilters } from './EventLiveInfoFeedFilters';
+import { EventLiveInfoSummaryCard } from './EventLiveInfoSummaryCard';
 
 type EventLiveInfoPanelProps = {
   loading?: boolean;
@@ -19,6 +24,11 @@ type EventLiveInfoPanelProps = {
   summary: LiveInfoSummaryRow[];
   certCount: number;
   feed: LiveInfoFeedItem[];
+  zones: LiveInfoZone[];
+  filters: LiveInfoFeedFilters;
+  filtersActive: boolean;
+  filterSubtitle?: string;
+  onFiltersChange: (next: LiveInfoFeedFilters) => void;
   onUploadWristband: () => void;
   onReuploadWristband: () => void;
   onOpenUpdate: () => void;
@@ -35,6 +45,11 @@ export function EventLiveInfoPanel({
   summary,
   certCount,
   feed,
+  zones,
+  filters,
+  filtersActive,
+  filterSubtitle,
+  onFiltersChange,
   onUploadWristband,
   onReuploadWristband,
   onOpenUpdate,
@@ -63,8 +78,22 @@ export function EventLiveInfoPanel({
         onUpload={onUploadWristband}
         onReupload={onReuploadWristband}
       />
-      <EventLiveInfoSummaryCard rows={summary} certCount={certCount} />
-      <EventLiveInfoFeed items={feed} onToggleLike={onToggleLike} />
+      <OnSiteVerificationInfoCard />
+      <EventLiveInfoSummaryCard
+        rows={summary}
+        certCount={certCount}
+        filterSubtitle={filterSubtitle}
+      />
+      <EventLiveInfoFeedFilters
+        zones={zones}
+        filters={filters}
+        onChange={onFiltersChange}
+      />
+      <EventLiveInfoFeed
+        items={feed}
+        filtersActive={filtersActive}
+        onToggleLike={onToggleLike}
+      />
       {isCertified ? (
         <Button
           className="s-live-info-panel__fab"
@@ -78,5 +107,3 @@ export function EventLiveInfoPanel({
     </View>
   );
 }
-
-export type { PublishLiveInfoPayload };

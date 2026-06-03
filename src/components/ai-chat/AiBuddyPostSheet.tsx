@@ -11,6 +11,7 @@ import type {
   BuddyPostTagId,
 } from '../../types/buddyPost';
 import { BUDDY_POST_TAG_OPTIONS } from '../../types/buddyPost';
+import { ONSITE_INTENT_ONSITE_BADGE_HINT } from '../../constants/onsiteBuddyPostIntents';
 import { defaultBuddyPostForm } from '../../utils/buddyPostForm';
 import { Input, Picker, ScrollView, Text, Textarea, View } from '@tarojs/components';
 
@@ -22,8 +23,12 @@ export type AiBuddyPostSheetProps = {
   activityDate?: string;
   activityTitle?: string;
   initialValues?: AiBuddyPostFormValues | null;
-  /** Shown when opened via travel-guide「一键组队」. */
+  /** Shown when opened via travel-guide「一键组队」or onsite chips. */
   prefillSummaryLines?: string[] | null;
+  prefillBannerTitle?: string | null;
+  /** Extra line under prefill banner (e.g. wristband →「我在现场」). */
+  showOnSiteBadgeHint?: boolean;
+  submitLabel?: string | null;
   /** Apply-team flow: let user choose whether the post appears on the activity feed. */
   showSyncToFeedOption?: boolean;
   onClose: () => void;
@@ -66,6 +71,9 @@ export function AiBuddyPostSheet({
   activityTitle: _activityTitle,
   initialValues,
   prefillSummaryLines = null,
+  prefillBannerTitle = null,
+  showOnSiteBadgeHint = false,
+  submitLabel = null,
   showSyncToFeedOption = false,
   onClose,
   onSubmit,
@@ -205,11 +213,16 @@ export function AiBuddyPostSheet({
             {prefillSummaryLines?.length ? (
               <View className="s-ai-buddy-post-sheet__prefill-banner">
                 <Text className="s-ai-buddy-post-sheet__prefill-title">
-                  已从攻略预填
+                  {prefillBannerTitle?.trim() || '已从攻略预填'}
                 </Text>
                 <Text className="s-ai-buddy-post-sheet__prefill-desc">
-                  {prefillSummaryLines.join(' · ')}。请确认活动日期与需求标签后发布。
+                  {prefillSummaryLines.join(' · ')}。请确认日期、标签与备注后发布。
                 </Text>
+                {showOnSiteBadgeHint ? (
+                  <Text className="s-ai-buddy-post-sheet__prefill-onsite">
+                    {ONSITE_INTENT_ONSITE_BADGE_HINT}
+                  </Text>
+                ) : null}
               </View>
             ) : null}
             <View className="s-ai-guide-plan-sheet__field">
@@ -382,7 +395,7 @@ export function AiBuddyPostSheet({
           >
             <Send size={18} color="#fff" aria-hidden />
             <Text className="s-ai-guide-plan-sheet__submit-text">
-              {showSyncToFeedOption ? '保存' : '发布组队帖'}
+              {showSyncToFeedOption ? '保存' : submitLabel?.trim() || '发布组队帖'}
             </Text>
           </Button>
         </View>

@@ -94,6 +94,12 @@ $ei-info-muted: #8e8e93;
   flex-shrink: 0;
   padding: 8px 20px calc(16px + env(safe-area-inset-bottom, 0px));
   box-sizing: border-box;
+
+  &--dual {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
 }
 
 .s-exclusive-itinerary-info-modal__cta {
@@ -112,6 +118,16 @@ $ei-info-muted: #8e8e93;
 
   &--pressed {
     opacity: 0.9;
+  }
+
+  &--secondary {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(var(--primary-rgb), 0.45);
+    box-shadow: none;
+
+    .s-exclusive-itinerary-info-modal__cta-label {
+      color: var(--primary);
+    }
   }
 }
 

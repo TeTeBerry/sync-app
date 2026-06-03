@@ -13,7 +13,11 @@ import { usePostShareStore } from '../../stores/postShareStore';
 import type { ReportCategory } from '../../types/backend';
 import type { PostSharePayload } from '../../utils/postShare';
 import { POST_ACTION_ICON_COLOR } from '../../utils/postActionColors';
-import { REPORT_SUBMITTED_MODAL } from '../../utils/reportFeedback';
+import {
+  REPORT_SUBMITTED_MODAL,
+  formatReportStatusModalContent,
+} from '../../utils/reportFeedback';
+import type { ReportReviewStatus } from '../../types/backend';
 import { Button } from '../ui';
 import { View } from '@tarojs/components';
 
@@ -69,6 +73,9 @@ export const PostActionMenu: FC<PostActionMenuProps> = ({
   const [menuOpen, setMenuOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const [alreadyReported, setAlreadyReported] = useState(false);
+  const [reportReviewStatus, setReportReviewStatus] = useState<ReportReviewStatus>();
+  const [reportCategory, setReportCategory] = useState<ReportCategory>();
+  const [reportCreatedAt, setReportCreatedAt] = useState<string>();
   const [statusLoading, setStatusLoading] = useState(false);
   const { confirm, confirmDialog } = useConfirmDialog({
     cancelText: '取消',
@@ -91,8 +98,12 @@ export const PostActionMenu: FC<PostActionMenuProps> = ({
     try {
       const status = await fetchReportStatus('post', postId);
       setAlreadyReported(status.reported);
+      setReportReviewStatus(status.reviewStatus);
+      setReportCategory(status.category);
+      setReportCreatedAt(status.createdAt);
     } catch {
       setAlreadyReported(false);
+      setReportReviewStatus(undefined);
     } finally {
       setStatusLoading(false);
     }
@@ -160,6 +171,9 @@ export const PostActionMenu: FC<PostActionMenuProps> = ({
           category,
         });
         setAlreadyReported(true);
+        setReportReviewStatus('pending');
+        setReportCategory(category);
+        setReportCreatedAt(new Date().toISOString());
         showReportSubmittedModal();
       } catch (error) {
         void Taro.showToast({
@@ -188,8 +202,24 @@ export const PostActionMenu: FC<PostActionMenuProps> = ({
     setReportOpen(true);
   }, [alreadyReported]);
 
+  const showReportStatusModal = useCallback(() => {
+    void Taro.showModal({
+      title: reportReviewStatus === 'acknowledged' ? '举报已受理' : '举报进度',
+      content: formatReportStatusModalContent({
+        category: reportCategory,
+        reviewStatus: reportReviewStatus,
+        createdAt: reportCreatedAt,
+      }),
+      showCancel: false,
+      confirmText: '知道了',
+    });
+  }, [reportCategory, reportCreatedAt, reportReviewStatus]);
+
   useEffect(() => {
     setAlreadyReported(false);
+    setReportReviewStatus(undefined);
+    setReportCategory(undefined);
+    setReportCreatedAt(undefined);
   }, [postId]);
 
   if (disabled) return null;
@@ -215,7 +245,9 @@ export const PostActionMenu: FC<PostActionMenuProps> = ({
         step={sheetStep}
         mode={sheetMode}
         reportAlreadySubmitted={alreadyReported}
+        reportReviewStatus={reportReviewStatus}
         reportStatusLoading={statusLoading}
+        onViewReportStatus={alreadyReported ? showReportStatusModal : undefined}
         onCancel={closeAll}
         onBack={
           reportOpen

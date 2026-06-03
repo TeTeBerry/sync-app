@@ -10,7 +10,7 @@ import {
 } from '../../components/icons';
 import React, { useMemo } from 'react';
 import { useOverlayLock } from '../../hooks/useOverlayLock';
-import type { ReportCategory } from '../../types/backend';
+import type { ReportCategory, ReportReviewStatus } from '../../types/backend';
 import { cn } from '../ui';
 import { Button } from '../ui';
 import { Text, View } from '@tarojs/components';
@@ -40,7 +40,9 @@ export type PostActionSheetProps = {
   onBlock?: () => void;
   onReportCategory?: (category: ReportCategory) => void;
   reportAlreadySubmitted?: boolean;
+  reportReviewStatus?: ReportReviewStatus;
   reportStatusLoading?: boolean;
+  onViewReportStatus?: () => void;
 };
 
 const REPORT_META: Record<
@@ -106,9 +108,14 @@ export const PostActionSheet: React.FC<PostActionSheetProps> = ({
   onBlock,
   onReportCategory,
   reportAlreadySubmitted = false,
+  reportReviewStatus,
   reportStatusLoading = false,
+  onViewReportStatus,
 }) => {
   useOverlayLock(open);
+
+  const reportAcknowledged =
+    reportAlreadySubmitted && reportReviewStatus === 'acknowledged';
 
   const header = useMemo(() => {
     if (step === 'report') {
@@ -161,15 +168,21 @@ export const PostActionSheet: React.FC<PostActionSheetProps> = ({
     if (onOpenReport || reportAlreadySubmitted) {
       list.push({
         id: 'report',
-        label: reportAlreadySubmitted ? '已举报' : '举报这条帖子',
-        hint: reportAlreadySubmitted
-          ? '我们已记录，无需重复提交'
-          : reportStatusLoading
-            ? '正在检查举报状态…'
-            : '广告、欺诈或不当内容',
+        label: reportAcknowledged
+          ? '已受理'
+          : reportAlreadySubmitted
+            ? '已举报'
+            : '举报这条帖子',
+        hint: reportAcknowledged
+          ? '平台已处理，点击查看说明'
+          : reportAlreadySubmitted
+            ? '核实中，点击查看进度'
+            : reportStatusLoading
+              ? '正在检查举报状态…'
+              : '广告、欺诈或不当内容',
         tone: reportAlreadySubmitted ? 'default' : 'accent',
         icon: <Flag size={18} color="#ff0066" aria-hidden />,
-        onPress: reportAlreadySubmitted ? () => undefined : onOpenReport!,
+        onPress: reportAlreadySubmitted ? () => onViewReportStatus?.() : onOpenReport!,
       });
     }
     if (onBlock) {
@@ -189,8 +202,11 @@ export const PostActionSheet: React.FC<PostActionSheetProps> = ({
     onDelete,
     onOpenReport,
     onReportCategory,
+    reportAcknowledged,
     reportAlreadySubmitted,
+    reportReviewStatus,
     reportStatusLoading,
+    onViewReportStatus,
     step,
   ]);
 

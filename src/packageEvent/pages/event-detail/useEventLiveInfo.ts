@@ -1,5 +1,5 @@
 import Taro from '@tarojs/taro';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   clearLiveInfoWristband,
   fetchLiveInfoSnapshot,
@@ -8,21 +8,28 @@ import {
   toggleLiveInfoUpdateLike,
 } from '../../../api/syncApi';
 import { isApiEnabled } from '../../../constants/api';
-import type { LiveInfoCertStatus, LiveInfoViewerState } from '../../../types/backend';
+import type {
+  LiveInfoCertStatus,
+  LiveInfoFeedFilters,
+  LiveInfoViewerState,
+  LiveInfoZone,
+  PublishLiveInfoPayload,
+} from '../../../types/backend';
 import { pickWristbandImagePath, uploadImageFile } from '../../../utils/uploadImage';
-import type { LiveInfoCategoryId } from './liveInfoConfig';
+import {
+  buildLiveInfoFilterSubtitle,
+  isLiveInfoFilterActive,
+} from './liveInfoFilterLabels';
 import {
   resolveLiveInfoCertCount,
   resolveLiveInfoFeed,
   resolveLiveInfoSummary,
+  resolveLiveInfoZones,
   type LiveInfoFeedItem,
   type LiveInfoSummaryRow,
 } from './liveInfoMock';
 
-export type PublishLiveInfoPayload = {
-  ratings: { categoryId: LiveInfoCategoryId; score: number }[];
-  remark?: string;
-};
+export type { PublishLiveInfoPayload };
 
 type UseEventLiveInfoOptions = {
   /** When false, skips API reload (e.g. until user opens the live tab). */
@@ -45,6 +52,14 @@ export function useEventLiveInfo(
   const [summary, setSummary] = useState<LiveInfoSummaryRow[]>([]);
   const [certCount, setCertCount] = useState(0);
   const [feed, setFeed] = useState<LiveInfoFeedItem[]>([]);
+  const [zones, setZones] = useState<LiveInfoZone[]>([]);
+  const [filters, setFilters] = useState<LiveInfoFeedFilters>({});
+
+  const filtersActive = isLiveInfoFilterActive(filters);
+  const filterSubtitle = useMemo(
+    () => buildLiveInfoFilterSubtitle(filters, zones),
+    [filters, zones],
+  );
 
   const applyViewer = useCallback((viewer?: LiveInfoViewerState) => {
     setViewerCertified(Boolean(viewer?.isCertified));
@@ -56,9 +71,12 @@ export function useEventLiveInfo(
   const applySnapshot = useCallback(
     (snap: Awaited<ReturnType<typeof fetchLiveInfoSnapshot>>) => {
       applyViewer(snap?.viewer);
-      const nextFeed = resolveLiveInfoFeed(snap?.feed);
-      setSummary(resolveLiveInfoSummary(snap?.summary));
-      setCertCount(resolveLiveInfoCertCount(snap?.certCount, snap?.feed));
+      const apiMode = isApiEnabled();
+      const nextZones = resolveLiveInfoZones(snap?.zones, apiMode);
+      setZones(nextZones);
+      const nextFeed = resolveLiveInfoFeed(snap?.feed, { apiMode });
+      setSummary(resolveLiveInfoSummary(snap?.summary, { apiMode }));
+      setCertCount(resolveLiveInfoCertCount(snap?.certCount, snap?.feed, { apiMode }));
       setFeed(nextFeed);
     },
     [applyViewer],
@@ -69,7 +87,7 @@ export function useEventLiveInfo(
       if (!isApiEnabled() || !Number.isFinite(eventId) || eventId <= 0) return;
       if (!opts?.silent) setLoading(true);
       try {
-        const snap = await fetchLiveInfoSnapshot(eventId);
+        const snap = await fetchLiveInfoSnapshot(eventId, filters);
         applySnapshot(snap);
       } catch {
         void Taro.showToast({ title: '加载现场实时资讯失败', icon: 'none' });
@@ -77,7 +95,7 @@ export function useEventLiveInfo(
         if (!opts?.silent) setLoading(false);
       }
     },
-    [applySnapshot, eventId],
+    [applySnapshot, eventId, filters],
   );
 
   useEffect(() => {
@@ -148,7 +166,7 @@ export function useEventLiveInfo(
 
   const publishUpdate = useCallback(
     async (payload: PublishLiveInfoPayload): Promise<boolean> => {
-      if (!payload.ratings.length) return false;
+      if (!payload.ratings.length || !payload.zoneTag?.trim()) return false;
       if (!isApiEnabled() || eventId <= 0) {
         void Taro.showToast({ title: '请配置 API 地址', icon: 'none' });
         return false;
@@ -204,6 +222,11 @@ export function useEventLiveInfo(
     summary,
     certCount,
     feed,
+    zones,
+    filters,
+    setFilters,
+    filtersActive,
+    filterSubtitle,
     liveInfoCount: Array.isArray(feed) ? feed.length : 0,
     uploadWristband,
     reuploadWristband,

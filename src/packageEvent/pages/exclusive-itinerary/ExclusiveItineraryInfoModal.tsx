@@ -12,6 +12,8 @@ export type ExclusiveItineraryInfoModalProps = {
   title?: string;
   message?: string;
   confirmText?: string;
+  /** Secondary action (e.g. jump to activity buddy feed). */
+  secondaryCta?: { label: string; onClick: () => void };
   /** Feature explainer uses the sparkles icon; short hints omit it. */
   showIcon?: boolean;
 };
@@ -22,6 +24,7 @@ export function ExclusiveItineraryInfoModal({
   title = DEFAULT_TITLE,
   message = DEFAULT_MESSAGE,
   confirmText = '知道了',
+  secondaryCta,
   showIcon = true,
 }: ExclusiveItineraryInfoModalProps) {
   useOverlayLock(open);
@@ -70,7 +73,25 @@ export function ExclusiveItineraryInfoModal({
           <Text className="s-exclusive-itinerary-info-modal__message">{message}</Text>
         </View>
 
-        <View className="s-exclusive-itinerary-info-modal__foot">
+        <View
+          className={[
+            's-exclusive-itinerary-info-modal__foot',
+            secondaryCta && 's-exclusive-itinerary-info-modal__foot--dual',
+          ]
+            .filter(Boolean)
+            .join(' ')}
+        >
+          {secondaryCta ? (
+            <View
+              className="s-exclusive-itinerary-info-modal__cta s-exclusive-itinerary-info-modal__cta--secondary"
+              hoverClass="s-exclusive-itinerary-info-modal__cta--pressed"
+              onClick={secondaryCta.onClick}
+            >
+              <Text className="s-exclusive-itinerary-info-modal__cta-label">
+                {secondaryCta.label}
+              </Text>
+            </View>
+          ) : null}
           <View
             className="s-exclusive-itinerary-info-modal__cta"
             hoverClass="s-exclusive-itinerary-info-modal__cta--pressed"

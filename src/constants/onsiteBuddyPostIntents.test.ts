@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { buildOnsiteBuddyPostForm } from './onsiteBuddyPostIntents';
+import {
+  buildOnsiteBuddyPostForm,
+  buildOnsiteIntentPrefillSummaryLines,
+} from './onsiteBuddyPostIntents';
 
 describe('buildOnsiteBuddyPostForm', () => {
   const now = new Date(2026, 5, 13, 15, 0, 0, 0);
@@ -22,6 +25,15 @@ describe('buildOnsiteBuddyPostForm', () => {
     const form = buildOnsiteBuddyPostForm('onsite_carpool', '06/13', undefined, now);
     expect(form?.tags).toEqual(['carpool', 'team']);
     expect(form?.note).toContain('散场');
+  });
+
+  it('builds prefill summary lines for sheet banner', () => {
+    const form = buildOnsiteBuddyPostForm('onsite_team', '06/13', '深圳', now);
+    expect(form).not.toBeNull();
+    const lines = buildOnsiteIntentPrefillSummaryLines('onsite_team', form!);
+    expect(lines[0]).toBe('现场找队友');
+    expect(lines).toContain('深圳');
+    expect(lines.some((l) => l.includes('找队友') || l.includes('组队'))).toBe(true);
   });
 
   it('fills main-stage carpool preset', () => {

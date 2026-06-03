@@ -36,7 +36,7 @@ export function EventLiveInfoCertCard({
             </Text>
           </View>
           <Text className="s-live-info-cert__hint">
-            已完成「我在现场」认证，今日 {certExpiryLabel} 失效
+            手环认证有效至今日 {certExpiryLabel}；可发现场资讯，组队帖显示「我在现场」
           </Text>
         </View>
       </View>
@@ -84,7 +84,7 @@ export function EventLiveInfoCertCard({
           <Text className="s-live-info-cert__badge">未认证</Text>
         </View>
         <Text className="s-live-info-cert__hint">
-          上传手环照片参与现场实时资讯更新，认证后可发布
+          上传当日手环照片完成认证后可发现场资讯；不认证也可发组队帖（无现场标识）
         </Text>
       </View>
       <Button
