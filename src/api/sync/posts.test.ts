@@ -27,7 +27,13 @@ vi.mock('../../constants/api', () => ({
 }));
 
 import type { EventDetailPost } from '../../types/backend';
-import { addPostComment, createPost, fetchPopularPosts, likePost } from './posts';
+import {
+  addPostComment,
+  createPost,
+  fetchPopularPosts,
+  fetchPostComments,
+  likePost,
+} from './posts';
 
 const sampleEventDetailPost: EventDetailPost = {
   id: 'post-1',
@@ -126,6 +132,16 @@ describe('api/sync/posts createPost (组队发帖 REST)', () => {
       avatar: '',
       status: '招募中',
     });
+  });
+
+  it('GET /posts/:id/comments passes limit and cursor query', async () => {
+    mockSuccessResponse({ items: [], hasMore: false });
+    await fetchPostComments('post-9', { limit: 20, cursor: 'abc' });
+
+    const call = mockRequest.mock.calls[0][0] as { url: string };
+    expect(call.url).toContain('/posts/post-9/comments');
+    expect(call.url).toContain('limit=20');
+    expect(call.url).toContain('cursor=abc');
   });
 
   it('POST /posts with JSON body and auth headers', async () => {

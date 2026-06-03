@@ -28,9 +28,6 @@ export type ClientSessionIdentity = {
   userPhone: string;
 };
 
-/** @deprecated Use `ClientSessionIdentity` — collides with backend `RequestActor`. */
-export type RequestActor = ClientSessionIdentity;
-
 export {
   demoActorQueryParams,
   hasAuthenticatedRequest,
@@ -50,9 +47,6 @@ export function getClientSessionIdentity(): ClientSessionIdentity {
     userPhone: getClientUserPhone(),
   };
 }
-
-/** @deprecated Use `getClientSessionIdentity`. */
-export const getRequestActor = getClientSessionIdentity;
 
 /** WebSocket `send` body identity — JWT on upgrade; demo uses body fields. */
 export function buildAiChatWsSendActor(): {
@@ -94,6 +88,3 @@ export function useClientSessionIdentity(): ClientSessionIdentity {
     return getClientSessionIdentity();
   }, [revision]);
 }
-
-/** @deprecated Use `useClientSessionIdentity`. */
-export const useRequestActor = useClientSessionIdentity;

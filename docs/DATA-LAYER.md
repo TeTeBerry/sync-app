@@ -1,6 +1,6 @@
-# 数据层（登录前）
+# 数据层
 
-REST 与 React Query 的分层约定，便于 P0 鉴权时只改少数入口。
+REST 与 React Query 的分层约定；身份为 **JWT + demo Query 双轨**（见 [`API.md`](./API.md)）。
 
 ## 请求身份
 
@@ -10,6 +10,7 @@ REST 与 React Query 的分层约定，便于 P0 鉴权时只改少数入口。
 | [`api/handleApiUnauthorized.ts`](../src/api/handleApiUnauthorized.ts) | 401 清 storage + toast（仅当请求前已有 token） |
 | [`utils/apiClient.ts`](../src/utils/apiClient.ts)       | **`getAuthHeaders()`** + 解析 envelope 401 |
 | [`utils/session.ts`](../src/utils/session.ts)           | `getClientUserId()` / `getClientUserName()` — JWT-aware（展示名，非 demo Query） |
+| [`utils/auth.ts`](../src/utils/auth.ts)                 | `loginWithWechat` / `loginWithDev` / `logout`（`POST /auth/logout` 吊销 JWT） |
 
 ### REST vs WebSocket
 
@@ -28,7 +29,16 @@ REST 与 React Query 的分层约定，便于 P0 鉴权时只改少数入口。
 - `ownerQueryParamsWithActivity(activityLegacyId?)` — profile / entitlements 作用域
 - `resolveRequestUserId()` — React Query `queryKey` 中的用户维度
 - `notificationQueryParams()` — 通知 API：有 Bearer 时 `undefined`（不传 `userId`）；无 token 时 `{ userId }`
-- `buildAiChatWsSendActor()` — [`api/aiChatActor.ts`](../src/api/aiChatActor.ts)：已登录 WS `send` 仅传 `userPhone`（如有）；demo 传 `userId`/`userName`
+- `buildAiChatWsSendActor()` — [`api/requestActor.ts`](../src/api/requestActor.ts)：已登录 WS `send` 仅传 `userPhone`（如有）；demo 传 `userId`/`userName`
+- `getClientSessionIdentity()` / `useClientSessionIdentity()` — 前端会话身份（勿与后端 `RequestActor` 混用）
+
+### AI WebSocket 可靠性
+
+| 层级 | 模块 | 说明 |
+|------|------|------|
+| 连接重试 | `utils/aiChatWs/pool.ts` | 建连失败最多 2 次，指数退避 |
+| 整轮重试 | `utils/aiChatWs/stream.ts` | 零事件传输失败再试 1 轮；有部分 `delta` 不自动重发 |
+| 历史恢复 | `api/sync/chat.ts` + `useChatSession` | `GET /chat/sessions/:id`；`sessionId` 持久化 |
 
 ## REST 按域拆分
 
@@ -54,21 +64,20 @@ REST 与 React Query 的分层约定，便于 P0 鉴权时只改少数入口。
 | 文件               | 内容                                        |
 | ------------------ | ------------------------------------------- |
 | `activities.ts`    | 活动列表、首页 summary、详情、报名          |
-| `posts.ts`         | 热帖、活动帖、评论、帖互动 mutation         |
+| `posts.ts`         | 热帖、活动帖、评论分页、帖互动 mutation     |
 | `profile.ts`       | 个人中心、权益、套餐（`profileApiEnabled`） |
 | `notifications.ts` | 通知列表与已读                              |
 
 对外仍从 [`hooks/useSyncApi.ts`](../src/hooks/useSyncApi.ts) 导出。
 
-## P0-H5（前端已实现）
+## 鉴权（前端已实现）
 
 - [x] `ownerQueryParams()` — 有 Bearer 时不发 demo Query
 - [x] Demo Query 仅 `userId`（不再传 Query `authorName`；后端 demo 判定只看 `userId`）
 - [x] `apiClient` / `uploadImage` — 401 清 session + 后端 `message` toast
-- [x] 删除 `session.ownerParams()`；REST 统一走 `api/sync` + `requestContext`
-
-- [x] AI WebSocket JWT actor（upgrade Bearer；`ai-chat-ws-actor` / `buildAiChatWsSendActor`）
-- [x] 无效 Bearer → REST 401 + WS error（B2）；`useRequestActor` / `api/requestActor.ts`（F1）
+- [x] `logout()` — `POST /auth/logout` + 清本地 session
+- [x] AI WebSocket JWT actor（upgrade Bearer；`buildAiChatWsSendActor`）
+- [x] 无效 Bearer → REST 401 + WS error；`api/requestActor.ts` + `useClientSessionIdentity`
 
 后续（可选）：地图他人帖 `GET /profile/posts`（需后端 actor/owner 分离，前端暂不排）。
 

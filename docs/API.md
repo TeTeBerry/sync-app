@@ -1,9 +1,9 @@
 # Sync App — API 契约（H5 先行）
 
-> **开发策略**：先 H5 业务联调，**登录后置**；微信登录更晚。  
-> **未登录**：Query `userId`（demo；不再传 Query `authorName`）。  
-> **已登录**：`Authorization: Bearer`；业务 REST **不再**附带 demo Query（由 `ownerQueryParams()` 控制）。  
-> 登录：`POST /auth/dev`（H5）/ `POST /auth/wechat`（小程序）。  
+> **身份**：JWT（Bearer）与 demo Query 双轨并存。  
+> **已登录**：`Authorization: Bearer`；业务 REST **不再**附带 demo Query（`ownerQueryParams()`）。  
+> **未登录（开发）**：Query 仅 `userId`（需后端 `AUTH_ALLOW_DEMO=true`；不传 Query `authorName`）。  
+> 登录：`POST /auth/dev`（H5 开发）/ `POST /auth/wechat`（小程序）/ `POST /auth/logout`（吊销 JWT）。  
 > 清单：`docs/FRONTEND-REFACTOR-CHECKLIST.md` / 后端 `docs/BACKEND-REFACTOR-CHECKLIST.md`  
 > 架构：`../sync-app-backend/docs/ARCHITECTURE.md`
 
@@ -30,7 +30,7 @@ Authorization: Bearer eyJ...
 ```
 
 后端全局 [`JwtAuthGuard`](../sync-app-backend/src/common/auth/jwt-auth.guard.ts) 校验 Bearer 并设置 `req.actor`（`RequestActor`）；**前端 REST 不再传** demo Query（`activityLegacyId` 等业务参数仍可有）。详见 [`AUTH.md`](../sync-app-backend/docs/AUTH.md)。  
-AI WebSocket：upgrade 带 Bearer 时 actor 来自 JWT；`send` 仅需业务字段（`messages`、`activityLegacyId` 等）。前端 [`buildAiChatWsSendActor()`](../src/api/aiChatActor.ts) 已登录时不传 body `userId`/`userName`。
+AI WebSocket：upgrade 带 Bearer 时 actor 来自 JWT；`send` 仅需业务字段（`messages`、`activityLegacyId` 等）。前端 [`buildAiChatWsSendActor()`](../src/api/requestActor.ts) 已登录时不传 body `userId`/`userName`。
 
 ---
 
@@ -115,7 +115,7 @@ TARO_APP_AI_CHAT_WS_URL=wss://your-api.example.com/api/ai/chat/ws
 - 仅开发环境或 `AUTH_MODE=dev` 开启  
 - 生产不可用；微信上线后由 `/auth/wechat` 替代
 
-### POST `/api/auth/wechat`（小程序，后置）
+### POST `/api/auth/wechat`（小程序）
 
 ```json
 { "code": "<wx.login code>" }
@@ -123,11 +123,26 @@ TARO_APP_AI_CHAT_WS_URL=wss://your-api.example.com/api/ai/chat/ws
 
 响应格式与 `/auth/dev` 相同。
 
+### POST `/api/auth/logout`（已登录）
+
+```http
+POST /api/auth/logout
+Authorization: Bearer eyJ...
+```
+
+```json
+{ "code": 200, "data": { "ok": true } }
+```
+
+- 需要 Bearer（`JwtAuthGuard`）；服务端递增用户 `tokenVersion`，使其它设备上的旧 JWT 失效
+- 客户端应在成功后清除本地 token；网络失败时仍建议清本地 session
+- Demo Query 身份（`AUTH_ALLOW_DEMO`）退出为无操作，仅客户端清 session
+
 ### 请求头
 
 ```http
 Authorization: Bearer <token>
-X-Activity-Id: 2          # 可选，活动 legacyId（AI 聊天已发送；后端 middleware 登录期启用）
+X-Activity-Id: 2          # 可选，活动 legacyId（REST + AI WebSocket upgrade）
 ```
 
 ---
@@ -201,6 +216,18 @@ AI 匹配配额：服务端在 `post_recommendations` 且 `posts.length > 0` 时
 
 **环境变量**：`TARO_APP_WS_URL`（或 `TARO_APP_AI_CHAT_WS_URL`），或从 `TARO_APP_API_BASE_URL` 自动推导 `ws(s)://…/api/ai/chat/ws`。
 
+### AI WebSocket 可靠性（客户端）
+
+两层重试，均复用同一 `sessionId`（`sessionStorage` / `useChatSession`）：
+
+| 层级 | 位置 | 行为 |
+|------|------|------|
+| 连接 | `utils/aiChatWs/pool.ts` | `connectSocket` 失败时最多重试 2 次，退避 400ms × 2^n |
+| 整轮 | `utils/aiChatWs/stream.ts` | 传输失败且**未收到任何流式帧**时再试 1 次（共 2 轮）；已收到 `delta` 等部分内容则不自动重发（避免重复发帖/扣配额），用户可手动再发 |
+| 会话恢复 | `GET /api/chat/sessions/:id` | 进入 AI 页拉历史；每轮 `send` 带持久化 `sessionId` |
+
+不重试：`AbortError`、业务 `error` 帧、401 / 登录过期。
+
 ### GET `/api/chat/sessions/:sessionId`
 
 恢复 AI 对话历史（进入 AI 页时调用）。
@@ -223,6 +250,7 @@ AI 匹配配额：服务端在 `post_recommendations` 且 `posts.length > 0` 时
 | PATCH | `/api/posts/:id` | 编辑帖子 / 更新 status |
 | DELETE | `/api/posts/:id` | 删除自己的帖子 |
 | POST | `/api/posts/:id/like` | 点赞/取消；响应 `{ post: EventDetailPost }` |
+| GET | `/api/posts/:id/comments` | 评论分页：`{ items, nextCursor?, hasMore }`；Query `limit`（默认 20，最大 50）、`cursor` |
 | POST | `/api/posts/:id/comments` | 发表评论 `{ "body": "..." }`；响应 `{ post: EventDetailPost }` |
 | POST | `/api/posts/:id/applications` | 申请加入（可选 `{ "message": "..." }`；创建首条会话消息） |
 | POST | `/api/posts/:id/applications/:applicantUserId/accept` | 帖主接受组队 |
@@ -239,6 +267,34 @@ AI 匹配配额：服务端在 `post_recommendations` 且 `posts.length > 0` 时
 | GET | `/api/notifications/unread-count` | 未读数 |
 | PATCH | `/api/notifications/:id/read` | 单条已读 |
 | PATCH | `/api/notifications/read-all` | 全部已读 |
+| POST | `/api/auth/logout` | 退出登录（Bearer）；吊销其它设备 JWT |
+
+### GET `/api/posts/:id/comments`（分页）
+
+Query：`limit`（默认 20，最大 50）、`cursor`（上一页 `nextCursor`）。
+
+```json
+{
+  "code": 200,
+  "data": {
+    "items": [
+      {
+        "id": "…",
+        "userId": "…",
+        "authorName": "…",
+        "avatar": "…",
+        "body": "…",
+        "time": "刚刚",
+        "replies": []
+      }
+    ],
+    "nextCursor": "eyJj…",
+    "hasMore": true
+  }
+}
+```
+
+仅分页**顶层评论**（`createdAt` 升序）；每条顶层评论的 `replies` 仍随页返回。
 
 通知 `meta`（深链，可选）：
 
@@ -257,16 +313,12 @@ AI 匹配配额：服务端在 `post_recommendations` 且 `posts.length > 0` 时
 
 ---
 
-## REST 接口（登录期规划，未实现）
-
-| 方法 | 路径 | 模块 |
-|------|------|------|
-| POST | `/api/auth/dev` | Auth |
-| POST | `/api/auth/logout` | Auth |
+## REST 接口（用户与报名）
 
 ### `GET/PATCH /api/users/me`
 
-Query：`userId`、`authorName`（与 `/profile` 相同）。
+- **已登录**：仅 `Authorization: Bearer`（无 demo Query）
+- **未登录（开发）**：Query `userId`（`AUTH_ALLOW_DEMO=true`）；Query `authorName` 已废弃
 
 GET 响应 `data`：`{ id, name, handle, location, bio, avatar, city?, favorGenres?, budgetLevel?, likeMate? }`
 
@@ -274,7 +326,8 @@ PATCH body（均可选）：`name`, `handle`, `location`, `bio`, `avatar`, `city
 
 ### `POST/DELETE /api/activities/:legacyId/register`
 
-Query：`userId`、`authorName`。
+- **已登录**：仅 Bearer
+- **未登录（开发）**：Query `userId` only
 
 POST 响应 `data`：`{ ok: true, activityLegacyId, status: "registered", alreadyRegistered?: boolean }`
 
@@ -288,8 +341,8 @@ DELETE 响应 `data`：`{ ok: true, activityLegacyId, wasRegistered?: boolean }`
 |------|------|
 | REST | `src/api/syncApi.ts`、`src/hooks/useSyncApi.ts` |
 | WebSocket | `src/utils/aiChatWs.ts`、`src/hooks/ai-chat/useWsChatStream.ts` |
-| 身份（当前 demo） | `src/utils/session.ts` |
-| 身份（规划） | `src/utils/auth.ts` |
+| 身份 / 登录登出 | `src/utils/auth.ts`、`src/api/requestActor.ts`、`src/api/requestContext.ts` |
+| 展示用 userId/昵称 | `src/utils/session.ts`（非 demo Query） |
 | 活动上下文 | `src/stores/navigationStore.ts`（`activeActivityLegacyId`） |
 
 ---

@@ -7,6 +7,7 @@ import type {
   PostActionResult,
   PostApplicationItem,
   PostCommentItem,
+  PostCommentsPage,
   ProfilePostItem,
   UpdatePostPayload,
 } from '../../types/backend';
@@ -98,8 +99,23 @@ export function acceptPostApplication(postId: string, applicantUserId: string) {
   );
 }
 
-export function fetchPostComments(postId: string) {
-  return apiGet<PostCommentItem[]>(`/posts/${postId}/comments`);
+export type FetchPostCommentsOptions = {
+  limit?: number;
+  cursor?: string;
+};
+
+export function fetchPostComments(postId: string, options?: FetchPostCommentsOptions) {
+  const params: Record<string, string> = {};
+  if (options?.limit != null) {
+    params.limit = String(options.limit);
+  }
+  if (options?.cursor) {
+    params.cursor = options.cursor;
+  }
+  return apiGet<PostCommentsPage>(
+    `/posts/${postId}/comments`,
+    Object.keys(params).length ? params : undefined,
+  );
 }
 
 export function addPostComment(postId: string, body: string, parentCommentId?: string) {

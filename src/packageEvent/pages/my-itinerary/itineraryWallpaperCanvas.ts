@@ -1,5 +1,5 @@
 import Taro from '@tarojs/taro';
-import { createMapOffscreenCanvas } from '../../../components/event-map/mapOffscreenCanvas';
+import { createOffscreenCanvas } from '../../../components/event-map/mapOffscreenCanvas';
 import { drawItineraryWallpaper } from './itineraryWallpaperDraw';
 import type { ItineraryWallpaperDrawParams } from './itineraryWallpaperDraw';
 import type { ItineraryWallpaperSection } from './itineraryWallpaperParse';
@@ -46,14 +46,6 @@ export function getWallpaperCanvasSize(
   }
 }
 
-/** @deprecated Use getWallpaperCanvasSize */
-export function resolveWallpaperPixelSize(
-  sections: ItineraryWallpaperSection[] = [],
-  eventMeta?: string,
-): WallpaperCanvasSize {
-  return getWallpaperCanvasSize(sections, eventMeta);
-}
-
 function paintWallpaper(
   canvas: WallpaperCanvas,
   params: ItineraryWallpaperDrawParams,
@@ -73,7 +65,7 @@ export function createOffscreenWallpaperCanvas(
   width: number,
   height: number,
 ): WallpaperCanvas | null {
-  return createMapOffscreenCanvas(width, height) as WallpaperCanvas | null;
+  return createOffscreenCanvas(width, height) as WallpaperCanvas | null;
 }
 
 export function exportWallpaperCanvasToTempFile(

@@ -117,6 +117,7 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
   onCommentSubmitted,
 }) => {
   const commentsQuery = usePostCommentsQuery(postId, expanded);
+  const { hasMore, loadMore, loadingMore } = commentsQuery;
   const isPostAuthor = isCurrentUserPostAuthor(postAuthorName, postAuthorUserId);
   const [draft, setDraft] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -183,17 +184,30 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
         ) : comments.length === 0 ? (
           <Text className="s-post-comments__status">暂无评论，来抢沙发吧</Text>
         ) : (
-          comments.map((comment) => (
-            <CommentRow
-              key={comment.id}
-              comment={comment}
-              isPostAuthor={isPostAuthor}
-              likedCommentIds={likedCommentIds}
-              replyTargetId={replyTarget?.commentId}
-              onToggleLike={toggleCommentLike}
-              onStartReply={startReply}
-            />
-          ))
+          <>
+            {comments.map((comment) => (
+              <CommentRow
+                key={comment.id}
+                comment={comment}
+                isPostAuthor={isPostAuthor}
+                likedCommentIds={likedCommentIds}
+                replyTargetId={replyTarget?.commentId}
+                onToggleLike={toggleCommentLike}
+                onStartReply={startReply}
+              />
+            ))}
+            {hasMore ? (
+              <Button
+                className="s-post-comments__load-more"
+                disabled={loadingMore}
+                onClick={() => void loadMore()}
+              >
+                <Text className="s-btn-label">
+                  {loadingMore ? '加载中…' : '加载更多评论'}
+                </Text>
+              </Button>
+            ) : null}
+          </>
         )}
       </View>
 

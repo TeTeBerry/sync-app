@@ -135,19 +135,3 @@ export function resolveUserBuddyPreviewForTargetPost(
   }
   return buddyPreviewFromProfilePost(best.post);
 }
-
-/** @deprecated Use resolveUserBuddyPreviewForTargetPost with the host post. */
-export function resolveUserBuddyPreviewForActivity(
-  activityLegacyId: number,
-  feedPosts: EventDetailPost[],
-  profilePosts?: ProfilePostItem[],
-): TeamApplyBuddyPreview | null {
-  const host = feedPosts[0];
-  if (!host) return null;
-  return resolveUserBuddyPreviewForTargetPost(
-    host,
-    activityLegacyId,
-    feedPosts,
-    profilePosts,
-  );
-}

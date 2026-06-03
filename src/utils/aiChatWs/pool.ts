@@ -10,9 +10,9 @@ import {
 } from './log';
 import { createEventQueue } from './queue';
 
+import { WS_CONNECT_RETRY_MAX, wsReconnectDelayMs } from './reconnect';
+
 const WS_CONNECT_TIMEOUT_MS = 12_000;
-const WS_RECONNECT_MAX = 2;
-const WS_RECONNECT_BASE_MS = 400;
 
 export type PooledConnection = {
   wsUrl: string;
@@ -161,10 +161,6 @@ function headersKey(headers?: Record<string, string>): string {
   );
 }
 
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
 export function closeAiChatWsConnection(reason = 'client close'): void {
   if (!wsPool) return;
   try {
@@ -219,7 +215,7 @@ export async function ensureWsPool(
   }
 
   let lastError: Error | undefined;
-  for (let attempt = 0; attempt <= WS_RECONNECT_MAX; attempt += 1) {
+  for (let attempt = 0; attempt <= WS_CONNECT_RETRY_MAX; attempt += 1) {
     try {
       devLogWarn('connecting', { url: wsUrl, attempt });
       const task = await connectSocket(wsUrl, headers);
@@ -235,8 +231,10 @@ export async function ensureWsPool(
       return connection;
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error));
-      if (attempt < WS_RECONNECT_MAX) {
-        await sleep(WS_RECONNECT_BASE_MS * 2 ** attempt);
+      if (attempt < WS_CONNECT_RETRY_MAX) {
+        await new Promise((resolve) =>
+          setTimeout(resolve, wsReconnectDelayMs(attempt)),
+        );
       }
     }
   }

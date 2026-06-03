@@ -2,8 +2,8 @@ import type { EventMapViewport } from './eventMapViewport';
 import { applyViewportTransform } from './eventMapViewport';
 import { getMapWorldDimensions } from './eventMapWorld';
 import {
-  createMapOffscreenCanvas,
-  isMapOffscreenSupported,
+  createOffscreenCanvas,
+  isOffscreenCanvasSupported,
 } from './mapOffscreenCanvas';
 import {
   EVENT_MAP_BG,
@@ -15,7 +15,7 @@ import {
 } from './eventMapPaint';
 
 /** 离屏 Canvas 可用时启用；blit 失败会自动降级 */
-let sceneCacheRuntimeEnabled = isMapOffscreenSupported();
+let sceneCacheRuntimeEnabled = isOffscreenCanvasSupported();
 
 /** 静态层在默认视口下烘焙，平移/缩放由 blit 时 transform 完成 */
 const SCENE_CACHE_VIEWPORT: EventMapViewport = {
@@ -96,7 +96,7 @@ export function rebuildEventMapSceneCache(
       sceneCache!.worldW !== worldW ||
       sceneCache!.worldH !== worldH
     ) {
-      canvas = createMapOffscreenCanvas(worldW, worldH);
+      canvas = createOffscreenCanvas(worldW, worldH);
       if (!canvas) {
         sceneCache = null;
         return false;

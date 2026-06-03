@@ -160,6 +160,15 @@ export async function ensureAuth(): Promise<AuthLoginResult | null> {
 }
 
 export async function logout(): Promise<void> {
+  if (isApiEnabled() && getAccessToken()) {
+    try {
+      await apiPost<{ ok: true }>('/auth/logout', {}, undefined, {
+        maxRetries: 0,
+      });
+    } catch {
+      // Always clear local session even when revoke fails (offline / expired token).
+    }
+  }
   clearHomeCachesOnLogout();
   clearAuth();
 }

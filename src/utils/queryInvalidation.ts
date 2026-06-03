@@ -10,11 +10,7 @@ export {
   getPopularPostsFromCache,
   setPopularPostsCache,
   readPostEngagementFromCache,
-  stripPopularPostsFromHomeSummaryCache,
 } from '../cache/postCache';
-
-/** @deprecated Use patchPostEngagementInCaches */
-export { patchPostEngagementInCaches as patchLikedPostInCaches } from '../cache/postCache';
 
 export {
   markNotificationReadInCache,

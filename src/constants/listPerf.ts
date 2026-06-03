@@ -6,6 +6,9 @@ export const EVENT_POSTS_INITIAL_RENDER = 6;
 
 export const EVENT_POSTS_RENDER_STEP = 6;
 
+/** Top-level comments per page when a post comment section is expanded. */
+export const POST_COMMENTS_PAGE_SIZE = 20;
+
 /** Feed / list cards: cap rendered tiles (full set still in preview). */
 export const FEED_POST_IMAGE_MAX_DISPLAY = 4;
 

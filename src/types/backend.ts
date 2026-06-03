@@ -295,6 +295,12 @@ export interface PostCommentItem {
   replies?: PostCommentItem[];
 }
 
+export interface PostCommentsPage {
+  items: PostCommentItem[];
+  nextCursor?: string;
+  hasMore: boolean;
+}
+
 export interface EventPostsPage {
   items: EventDetailPost[];
   nextCursor?: string;

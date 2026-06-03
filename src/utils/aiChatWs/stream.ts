@@ -10,21 +10,21 @@ import {
   type PooledConnection,
 } from './pool';
 import { createEventQueue } from './queue';
+import {
+  isWsTurnRetryableError,
+  WS_TURN_RETRY_MAX,
+  wsReconnectDelayMs,
+} from './reconnect';
 import type { StreamAiChatWsOptions } from './types';
 
 const WS_CONNECTED_ACK_TIMEOUT_MS = 5_000;
 const WS_TURN_TIMEOUT_MS = 90_000;
 
-export async function* streamAiChatWs(
-  options: StreamAiChatWsOptions,
-): AsyncGenerator<AiChatStreamEvent> {
-  devLogWarn('stream start', {
-    taroEnv: process.env.TARO_ENV,
-    nodeEnv: process.env.NODE_ENV,
-    hasSessionId: Boolean(options.sessionId),
-    messageCount: options.messages.length,
-  });
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
+function resolveWsUrl(options: StreamAiChatWsOptions): string {
   const wsUrl = (options.url?.trim() || resolveAiChatWsUrl()).trim();
   if (!wsUrl) {
     throw new Error('AI chat WebSocket URL is not configured');
@@ -39,7 +39,18 @@ export async function* streamAiChatWs(
       '小程序需配置完整 WebSocket 地址（TARO_APP_WS_URL 或 TARO_APP_API_BASE_URL）',
     );
   }
+  return wsUrl;
+}
 
+type TurnStats = {
+  sawAnyEvent: boolean;
+};
+
+async function* runSingleWsTurn(
+  options: StreamAiChatWsOptions,
+  wsUrl: string,
+  stats: TurnStats,
+): AsyncGenerator<AiChatStreamEvent> {
   const queue = createEventQueue();
 
   const onAbort = () => {
@@ -79,7 +90,6 @@ export async function* streamAiChatWs(
   };
 
   try {
-    // Fresh socket each turn — avoids server `busy` stuck on reused connections.
     closeAiChatWsConnection('new turn');
 
     const connection = await ensureWsPool(wsUrl, options.headers);
@@ -117,7 +127,6 @@ export async function* streamAiChatWs(
     });
 
     let sawTerminal = false;
-    let sawAnyEvent = false;
 
     while (true) {
       if (options.signal?.aborted) {
@@ -134,7 +143,7 @@ export async function* streamAiChatWs(
         break;
       }
 
-      sawAnyEvent = true;
+      stats.sawAnyEvent = true;
       if (item.event.type === 'done' || item.event.type === 'error') {
         sawTerminal = true;
       }
@@ -142,7 +151,7 @@ export async function* streamAiChatWs(
       if (sawTerminal) break;
     }
 
-    if (!sawAnyEvent) {
+    if (!stats.sawAnyEvent) {
       const hint = isAiChatWsDevLog()
         ? `（无服务端事件，请检查 WebSocket 路径是否为 /api/ai/chat/ws: ${wsUrl}）`
         : '';
@@ -164,4 +173,38 @@ export async function* streamAiChatWs(
       clearActiveTurn();
     }
   }
+}
+
+export async function* streamAiChatWs(
+  options: StreamAiChatWsOptions,
+): AsyncGenerator<AiChatStreamEvent> {
+  devLogWarn('stream start', {
+    taroEnv: process.env.TARO_ENV,
+    nodeEnv: process.env.NODE_ENV,
+    hasSessionId: Boolean(options.sessionId),
+    messageCount: options.messages.length,
+  });
+
+  const wsUrl = resolveWsUrl(options);
+  let lastError: unknown;
+
+  for (let attempt = 0; attempt <= WS_TURN_RETRY_MAX; attempt += 1) {
+    const stats: TurnStats = { sawAnyEvent: false };
+    try {
+      yield* runSingleWsTurn(options, wsUrl, stats);
+      return;
+    } catch (error) {
+      lastError = error;
+      const canRetry =
+        attempt < WS_TURN_RETRY_MAX && isWsTurnRetryableError(error, stats.sawAnyEvent);
+      if (!canRetry) {
+        throw error;
+      }
+      devLogWarn('turn retry', { attempt: attempt + 1, wsUrl });
+      closeAiChatWsConnection('turn retry');
+      await sleep(wsReconnectDelayMs(attempt));
+    }
+  }
+
+  throw lastError ?? new Error('AI chat WebSocket failed');
 }

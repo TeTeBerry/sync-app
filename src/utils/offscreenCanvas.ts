@@ -70,9 +70,3 @@ export function isOffscreenCanvasSupported(): boolean {
     return false;
   }
 }
-
-/** @deprecated Use `createOffscreenCanvas` */
-export const createMapOffscreenCanvas = createOffscreenCanvas;
-
-/** @deprecated Use `isOffscreenCanvasSupported` */
-export const isMapOffscreenSupported = isOffscreenCanvasSupported;

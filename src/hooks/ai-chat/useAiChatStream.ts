@@ -7,7 +7,7 @@ import type {
   ChatUiMessage,
   SendChatOptions,
 } from '../../types/aiChat';
-import { getRequestActor } from '../../api/requestActor';
+import { getClientSessionIdentity } from '../../api/requestActor';
 import { createMessageId } from './createMessageId';
 import { useChatSession } from './useChatSession';
 import { useWsChatStream } from './useWsChatStream';
@@ -21,8 +21,6 @@ export interface UseAiChatStreamOptions {
   mockReply: (query: string) => string;
   streamErrorText: string;
   wsUrl?: string;
-  /** @deprecated Use `wsUrl` */
-  apiUrl?: string;
   sessionId?: string;
   userId?: string;
   userName?: string;
@@ -43,7 +41,6 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
     mockReply,
     streamErrorText,
     wsUrl: wsUrlOption,
-    apiUrl: apiUrlDeprecated,
     sessionId: sessionIdOption,
     userId: userIdOption,
     userName: userNameOption,
@@ -75,12 +72,12 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
     welcomeText,
     sessionId: sessionIdOption,
     activityLegacyId,
-    userId: userIdOption ?? getRequestActor().userId,
-    userName: userNameOption ?? getRequestActor().displayName,
-    userPhone: userPhoneOption ?? getRequestActor().userPhone,
+    userId: userIdOption ?? getClientSessionIdentity().userId,
+    userName: userNameOption ?? getClientSessionIdentity().displayName,
+    userPhone: userPhoneOption ?? getClientSessionIdentity().userPhone,
   });
 
-  const wsUrl = wsUrlOption ?? apiUrlDeprecated ?? AI_CHAT_WS_URL;
+  const wsUrl = wsUrlOption ?? AI_CHAT_WS_URL;
 
   const { createTypewriter } = useTypewriterReply();
   const { runStream } = useWsChatStream({
@@ -188,7 +185,10 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
 
   const clearChat = useCallback(async () => {
     abortRef.current?.abort();
-    useAiChatStore.getState().resetOnClearSession();
+    const scopeKey = useAiChatStore.getState().activeScopeKey;
+    if (scopeKey) {
+      useAiChatStore.getState().resetScope(scopeKey);
+    }
     await resetSession();
     setIsStreaming(false);
   }, [resetSession]);

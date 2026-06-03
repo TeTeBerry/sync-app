@@ -27,7 +27,7 @@ import {
   getStormLogoHalfSize,
   MAP_VENUE_PILL_GAP,
 } from './eventMapLayout';
-import { createMapOffscreenCanvas } from './mapOffscreenCanvas';
+import { createOffscreenCanvas } from './mapOffscreenCanvas';
 
 export const EVENT_MAP_BG = '#0e0b16';
 const BG = EVENT_MAP_BG;
@@ -488,7 +488,7 @@ function blitCachedTerrain(
   const { worldW, worldH } = getMapWorldDimensions(cssW, cssH);
   const key = `${worldW}x${worldH}`;
   if (!terrainCache || terrainCache.key !== key) {
-    const offscreen = createMapOffscreenCanvas(worldW, worldH);
+    const offscreen = createOffscreenCanvas(worldW, worldH);
     if (!offscreen) {
       terrainCache = null;
       return false;

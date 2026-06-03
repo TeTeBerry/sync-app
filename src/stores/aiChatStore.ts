@@ -30,8 +30,6 @@ interface AiChatStoreState {
   applyConversationPatch: (state: ConversationState) => void;
   setPostRecommendationsMeta: (degraded?: boolean) => void;
   resetScope: (scopeKey: AiChatScopeKey) => void;
-  /** @deprecated Prefer resetScope; clears active scope bucket. */
-  resetOnClearSession: () => void;
   clearAllEphemeralChat: () => void;
 }
 
@@ -94,12 +92,6 @@ export const useAiChatStore = create<AiChatStoreState>((set, get) => ({
         [scopeKey]: emptyBucket(),
       },
     })),
-
-  resetOnClearSession: () => {
-    const scopeKey = get().activeScopeKey;
-    if (!scopeKey) return;
-    get().resetScope(scopeKey);
-  },
 
   clearAllEphemeralChat: () =>
     set({

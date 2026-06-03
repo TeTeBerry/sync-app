@@ -228,6 +228,13 @@
 - [x] 联调前置与构建变量 — [API.md](./API.md#微信小程序)
 - [ ] 开发者工具真机预览全流程验收（依赖后端 `POST /auth/wechat` + `AUTH_MODE`；步骤见 [WECHAT-E2E.md](./WECHAT-E2E.md)）
 
+### 文档与 deprecated 清理 ✅
+
+- [x] `API.md` / `DATA-LAYER.md` / `COMPONENT-ARCHITECTURE.md` 与实现对齐（JWT、logout、评论分页、WS 可靠性）
+- [x] 删除 `aiChatActor.ts`、`patchLikedPostInCaches` 等零引用 deprecated
+- [x] `requestActor` 统一 `ClientSessionIdentity` 命名
+- [x] AI WebSocket 整轮重试（零事件可重试）
+
 ---
 
 ## 明确不做
