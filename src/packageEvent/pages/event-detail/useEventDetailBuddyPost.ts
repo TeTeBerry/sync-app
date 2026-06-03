@@ -9,6 +9,12 @@ import { publishBuddyPostFromForm } from '../../../utils/publishBuddyPost';
 import { isApiEnabled } from '../../../constants/api';
 import type { EventDetailPost } from '../../../types/post';
 import type { AiBuddyPostFormValues } from '../../../types/buddyPost';
+import {
+  ONSITE_BUDDY_POST_INTENTS,
+  buildOnsiteBuddyPostForm,
+  formatOnsiteIntentModalContent,
+  type OnsiteBuddyPostIntentId,
+} from '../../../constants/onsiteBuddyPostIntents';
 
 /** Buddy-post plan sheet on event detail — publish in place, refresh post list. */
 export function useEventDetailBuddyPost(
@@ -114,12 +120,55 @@ export function useEventDetailBuddyPost(
     ],
   );
 
+  const publishOnsiteIntent = useCallback(
+    async (intentId: OnsiteBuddyPostIntentId) => {
+      if (!Number.isFinite(eventId) || eventId <= 0) {
+        void Taro.showToast({ title: '活动信息无效', icon: 'none' });
+        return;
+      }
+      if (isPublishing) return;
+      if (!(await guardPublish())) return;
+
+      const activityDate = activityQuery.data?.date;
+      const activityLocation = activityQuery.data?.location;
+      const form = buildOnsiteBuddyPostForm(intentId, activityDate, activityLocation);
+      if (!form) {
+        void Taro.showToast({ title: '无法解析活动日期', icon: 'none' });
+        return;
+      }
+
+      const intentLabel =
+        ONSITE_BUDDY_POST_INTENTS.find((item) => item.id === intentId)?.label ??
+        '发布组队帖';
+      const summary = formatOnsiteIntentModalContent(form);
+
+      const { confirm } = await Taro.showModal({
+        title: `确认发布：${intentLabel}`,
+        content: summary,
+        confirmText: '发布',
+        cancelText: '取消',
+      });
+      if (!confirm) return;
+
+      await handleBuddyPostSheetSubmit(form, { listedInFeed: true });
+    },
+    [
+      activityQuery.data?.date,
+      activityQuery.data?.location,
+      eventId,
+      guardPublish,
+      handleBuddyPostSheetSubmit,
+      isPublishing,
+    ],
+  );
+
   return {
     buddyPostSheetOpen: sheetOpen,
     isBuddyPostPublishing: isPublishing,
     openBuddyPostSheet,
     closeBuddyPostSheet,
     handleBuddyPostSheetSubmit,
+    publishOnsiteIntent,
     buddyPostActivityDate: activityQuery.data?.date,
     buddyPostActivityTitle: activityQuery.data?.name,
   };

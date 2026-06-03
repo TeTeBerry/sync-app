@@ -68,18 +68,35 @@ export function likePost(postId: string) {
   ).then(unwrapPostMutation);
 }
 
+export type LightApplyPayload = {
+  departureCity: string;
+  tripDays?: number;
+  genderPref?: '女生优先' | '男生优先' | '不限';
+};
+
 export type ApplyToPostPayload = {
   message?: string;
+  lightApply?: LightApplyPayload;
 };
 
 export function applyToPost(postId: string, payload?: ApplyToPostPayload) {
-  const body =
-    payload?.message?.trim() != null && payload.message.trim() !== ''
-      ? { message: payload.message.trim() }
-      : {};
+  const body: ApplyToPostPayload = {};
+  const message = payload?.message?.trim();
+  if (message) body.message = message;
+  if (payload?.lightApply?.departureCity?.trim()) {
+    body.lightApply = {
+      departureCity: payload.lightApply.departureCity.trim(),
+      ...(payload.lightApply.tripDays != null
+        ? { tripDays: payload.lightApply.tripDays }
+        : {}),
+      ...(payload.lightApply.genderPref
+        ? { genderPref: payload.lightApply.genderPref }
+        : {}),
+    };
+  }
   return apiPost<PostActionResult>(
     `/posts/${postId}/applications`,
-    body,
+    Object.keys(body).length ? body : {},
     ownerQueryParams(),
   );
 }

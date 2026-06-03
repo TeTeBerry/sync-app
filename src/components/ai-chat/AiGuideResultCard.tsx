@@ -1,5 +1,5 @@
 import './AiGuideResultCard.scss';
-import { RefreshCw, Share2 } from '../../components/icons';
+import { RefreshCw, Share2, Users } from '../../components/icons';
 import { Button } from '../ui';
 import { openSingleImagePreview } from '../../utils/openImagePreview';
 import { Image, Text, View } from '@tarojs/components';
@@ -9,6 +9,7 @@ export type AiGuideResultCardProps = {
   disabled?: boolean;
   onRegenerate: () => void;
   onShare: () => void;
+  onBuddyPostFromGuide?: () => void;
 };
 
 export function AiGuideResultCard({
@@ -16,6 +17,7 @@ export function AiGuideResultCard({
   disabled = false,
   onRegenerate,
   onShare,
+  onBuddyPostFromGuide,
 }: AiGuideResultCardProps) {
   return (
     <View className="s-ai-guide-result">
@@ -32,6 +34,22 @@ export function AiGuideResultCard({
           alt="AI 出行攻略长图"
         />
       </Button>
+      {onBuddyPostFromGuide ? (
+        <Button
+          className="s-ai-guide-result__buddy-cta"
+          disabled={disabled}
+          hoverClass="s-ai-guide-result__buddy-cta--pressed"
+          onClick={onBuddyPostFromGuide}
+        >
+          <Users size={18} color="#fff" aria-hidden />
+          <View className="s-ai-guide-result__buddy-cta-text">
+            <Text className="s-ai-guide-result__buddy-cta-title">一键组队</Text>
+            <Text className="s-ai-guide-result__buddy-cta-sub">
+              用攻略里的出发地、人数预填发帖
+            </Text>
+          </View>
+        </Button>
+      ) : null}
       <View className="s-ai-guide-result__actions">
         <Button
           className="s-ai-guide-result__action"

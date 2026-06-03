@@ -4,7 +4,6 @@ import {
   applyToPostAndInvalidate,
   useProfilePostsQuery,
 } from '../../../hooks/useSyncApi';
-import type { ConfirmDialogOptions } from '../../../hooks/useConfirmDialog';
 import { requireAuth } from '../../../utils/authGate';
 import { consumeContactUnlockWithQuota } from '../../../utils/contactUnlockEntitlement';
 import {
@@ -12,7 +11,10 @@ import {
   type TeamApplyBuddyPreview,
 } from '../../../utils/teamApplyBuddyPreview';
 import { userHasRecruitingBuddyPost } from '../../../utils/userRecruitingPost';
+import { promptOpenTeamChatAfterApply } from '../../../utils/promptTeamChatAfterApply';
+import type { LightApplyDraft } from '../../../utils/lightApplyDraft';
 import type { EventDetailPost } from '../../../types/post';
+import type { TeamApplySheetMode } from '../../../components/post/TeamApplySheet';
 
 export type UseEventDetailTeamApplyParams = {
   eventId: number;
@@ -21,15 +23,10 @@ export type UseEventDetailTeamApplyParams = {
   setAppliedPostIds: Dispatch<SetStateAction<Set<string>>>;
   contactUnlockQuota: { exhausted: boolean };
   openContactUnlockExhaustedModal: () => void;
-  /** Pin list scroll to the post being applied to. */
+  defaultDepartureCity?: string;
   onPrepareApplyAnchor: (postId: string) => void;
-  /** Open buddy sheet while remembering which post the user intends to apply to. */
-  onRequestBuddyPostForApply: (postId: string) => void;
-  /** User cancelled before buddy sheet (e.g. dismiss confirm). */
-  onAbortApplyFlow?: () => void;
-  /** After apply sheet closes or application succeeds (e.g. refresh list without scrolling mid-flow). */
+  onRequestCompleteBuddyPost?: () => void;
   onApplyFlowSettled?: () => void;
-  confirm: (options: ConfirmDialogOptions) => Promise<boolean>;
 };
 
 export function useEventDetailTeamApply({
@@ -39,33 +36,46 @@ export function useEventDetailTeamApply({
   setAppliedPostIds,
   contactUnlockQuota,
   openContactUnlockExhaustedModal,
+  defaultDepartureCity,
   onPrepareApplyAnchor,
-  onRequestBuddyPostForApply,
-  onAbortApplyFlow,
+  onRequestCompleteBuddyPost,
   onApplyFlowSettled,
-  confirm,
 }: UseEventDetailTeamApplyParams) {
   const profilePostsQuery = useProfilePostsQuery();
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [sheetMode, setSheetMode] = useState<TeamApplySheetMode>('full');
   const [targetPostId, setTargetPostId] = useState<string | null>(null);
   const [buddyPreview, setBuddyPreview] = useState<TeamApplyBuddyPreview | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const openApplySheet = useCallback(
-    (postId: string, preview?: TeamApplyBuddyPreview | null) => {
+    (
+      postId: string,
+      options?: {
+        mode?: TeamApplySheetMode;
+        preview?: TeamApplyBuddyPreview | null;
+      },
+    ) => {
       setTargetPostId(postId);
+      const mode = options?.mode ?? 'full';
+      setSheetMode(mode);
+
       const targetPost = feedPosts.find((post) => post.id === postId);
-      setBuddyPreview(
-        preview ??
-          (targetPost
-            ? resolveUserBuddyPreviewForTargetPost(
-                targetPost,
-                eventId,
-                feedPosts,
-                profilePostsQuery.data,
-              )
-            : null),
-      );
+      if (mode === 'light') {
+        setBuddyPreview(null);
+      } else {
+        setBuddyPreview(
+          options?.preview ??
+            (targetPost
+              ? resolveUserBuddyPreviewForTargetPost(
+                  targetPost,
+                  eventId,
+                  feedPosts,
+                  profilePostsQuery.data,
+                )
+              : null),
+        );
+      }
       setSheetOpen(true);
     },
     [eventId, feedPosts, profilePostsQuery.data],
@@ -80,13 +90,32 @@ export function useEventDetailTeamApply({
   }, [onApplyFlowSettled, submitting]);
 
   const submitApplication = useCallback(
-    async (postId: string, message: string) => {
+    async (
+      postId: string,
+      payload: { message: string; lightApply?: LightApplyDraft },
+    ) => {
       setSubmitting(true);
+      const usedLightApply = Boolean(payload.lightApply?.departureCity?.trim());
+
       try {
-        const result = await applyToPostAndInvalidate(
-          postId,
-          message ? { message } : undefined,
-        );
+        const apiPayload = payload.lightApply
+          ? {
+              lightApply: {
+                departureCity: payload.lightApply.departureCity.trim(),
+                ...(payload.lightApply.tripDays != null
+                  ? { tripDays: payload.lightApply.tripDays }
+                  : {}),
+                ...(payload.lightApply.genderPref
+                  ? { genderPref: payload.lightApply.genderPref }
+                  : {}),
+              },
+              ...(payload.message ? { message: payload.message } : {}),
+            }
+          : payload.message
+            ? { message: payload.message }
+            : undefined;
+
+        const result = await applyToPostAndInvalidate(postId, apiPayload);
         if (!result.alreadyApplied) {
           const consumed = await consumeContactUnlockWithQuota(eventId);
           if (!consumed) {
@@ -100,21 +129,38 @@ export function useEventDetailTeamApply({
         setTargetPostId(null);
         setBuddyPreview(null);
         onApplyFlowSettled?.();
-        const toastTitle = result.alreadyApplied ? '已申请' : '申请成功';
-        void Taro.showToast({ title: toastTitle, icon: 'success' });
+
+        if (usedLightApply) {
+          await promptOpenTeamChatAfterApply({
+            teamChat: result.teamChat,
+            lightApply: true,
+            onCompleteBuddyPost: onRequestCompleteBuddyPost,
+          });
+        } else if (result.teamChat) {
+          await promptOpenTeamChatAfterApply(result.teamChat);
+        } else {
+          const toastTitle = result.alreadyApplied ? '已申请' : '申请成功';
+          void Taro.showToast({ title: toastTitle, icon: 'success' });
+        }
       } catch {
         void Taro.showToast({ title: '申请失败', icon: 'none' });
       } finally {
         setSubmitting(false);
       }
     },
-    [eventId, onApplyFlowSettled, openContactUnlockExhaustedModal, setAppliedPostIds],
+    [
+      eventId,
+      onApplyFlowSettled,
+      onRequestCompleteBuddyPost,
+      openContactUnlockExhaustedModal,
+      setAppliedPostIds,
+    ],
   );
 
   const handleConfirmApply = useCallback(
-    (message: string) => {
+    (payload: { message: string; lightApply?: LightApplyDraft }) => {
       if (!targetPostId || submitting) return;
-      void submitApplication(targetPostId, message);
+      void submitApplication(targetPostId, payload);
     },
     [submitApplication, submitting, targetPostId],
   );
@@ -138,30 +184,19 @@ export function useEventDetailTeamApply({
         onPrepareApplyAnchor(postId);
 
         if (!hasBuddyPost) {
-          void confirm({
-            title: '先填写组队信息',
-            message: '申请组队前需要先发布你的组队信息，方便对方了解你的需求。',
-            confirmText: '去填写',
-            cancelText: '取消',
-          }).then((ok) => {
-            if (ok) onRequestBuddyPostForApply(postId);
-            else onAbortApplyFlow?.();
-          });
+          openApplySheet(postId, { mode: 'light' });
           return;
         }
 
-        openApplySheet(postId);
+        openApplySheet(postId, { mode: 'full' });
       }, 'post');
     },
     [
       appliedPostIds,
-      confirm,
       contactUnlockQuota.exhausted,
       eventId,
       feedPosts,
-      onAbortApplyFlow,
       onPrepareApplyAnchor,
-      onRequestBuddyPostForApply,
       openApplySheet,
       openContactUnlockExhaustedModal,
       profilePostsQuery.data,
@@ -170,11 +205,13 @@ export function useEventDetailTeamApply({
 
   return {
     applySheetOpen: sheetOpen,
+    applySheetMode: sheetMode,
     applyBuddyPreview: buddyPreview,
     applySubmitting: submitting,
     handleApply,
     closeApplySheet,
     handleConfirmApply,
     openApplySheet,
+    defaultDepartureCity,
   };
 }

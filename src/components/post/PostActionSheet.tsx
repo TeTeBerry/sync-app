@@ -39,6 +39,8 @@ export type PostActionSheetProps = {
   onOpenReport?: () => void;
   onBlock?: () => void;
   onReportCategory?: (category: ReportCategory) => void;
+  reportAlreadySubmitted?: boolean;
+  reportStatusLoading?: boolean;
 };
 
 const REPORT_META: Record<
@@ -103,6 +105,8 @@ export const PostActionSheet: React.FC<PostActionSheetProps> = ({
   onOpenReport,
   onBlock,
   onReportCategory,
+  reportAlreadySubmitted = false,
+  reportStatusLoading = false,
 }) => {
   useOverlayLock(open);
 
@@ -154,14 +158,18 @@ export const PostActionSheet: React.FC<PostActionSheetProps> = ({
     }
 
     const list: PostActionSheetRow[] = [];
-    if (onOpenReport) {
+    if (onOpenReport || reportAlreadySubmitted) {
       list.push({
         id: 'report',
-        label: '举报这条帖子',
-        hint: '广告、欺诈或不当内容',
-        tone: 'accent',
+        label: reportAlreadySubmitted ? '已举报' : '举报这条帖子',
+        hint: reportAlreadySubmitted
+          ? '我们已记录，无需重复提交'
+          : reportStatusLoading
+            ? '正在检查举报状态…'
+            : '广告、欺诈或不当内容',
+        tone: reportAlreadySubmitted ? 'default' : 'accent',
         icon: <Flag size={18} color="#ff0066" aria-hidden />,
-        onPress: onOpenReport,
+        onPress: reportAlreadySubmitted ? () => undefined : onOpenReport!,
       });
     }
     if (onBlock) {
@@ -175,7 +183,16 @@ export const PostActionSheet: React.FC<PostActionSheetProps> = ({
       });
     }
     return list;
-  }, [mode, onBlock, onDelete, onOpenReport, onReportCategory, step]);
+  }, [
+    mode,
+    onBlock,
+    onDelete,
+    onOpenReport,
+    onReportCategory,
+    reportAlreadySubmitted,
+    reportStatusLoading,
+    step,
+  ]);
 
   return (
     <View

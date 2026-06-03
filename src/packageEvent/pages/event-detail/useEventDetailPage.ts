@@ -17,6 +17,8 @@ import { useEventDetailScrollPreserve } from './useEventDetailScrollPreserve';
 import { buddyPreviewFromForm } from '../../../utils/teamApplyBuddyPreview';
 import type { AiBuddyPostSubmitPayload } from '../../../types/buddyPost';
 import { useEventDetailTravelGuide } from './useEventDetailTravelGuide';
+import { eventCityFromLocation } from '../../../utils/travelGuideDepartureSuggestions';
+
 export type UseEventDetailPageOptions = {
   confirm: (options: ConfirmDialogOptions) => Promise<boolean>;
 };
@@ -44,6 +46,9 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     useEventDetailEntitlements(eventId);
   const travelGuide = useEventDetailTravelGuide(eventId);
   const currentUserQuery = useCurrentUserQuery();
+  const applyDefaultDepartureCity =
+    currentUserQuery.data?.city?.trim() ||
+    eventCityFromLocation(activityQuery.data?.location);
   const profileUser = useResolvedProfile();
   const displayUserName = currentUserQuery.data?.name ?? profileUser.name ?? '用户';
 
@@ -143,6 +148,11 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     })();
   }, [flushDeferredPostsRefresh, unfreezeScroll]);
 
+  const handleOpenCompleteBuddyPost = useCallback(() => {
+    setBuddySheetForApplyFlow(false);
+    buddyPost.openBuddyPostSheet();
+  }, [buddyPost]);
+
   const teamApply = useEventDetailTeamApply({
     eventId,
     feedPosts: postsQuery.items,
@@ -150,11 +160,10 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     setAppliedPostIds: posts.setAppliedPostIds,
     contactUnlockQuota,
     openContactUnlockExhaustedModal,
+    defaultDepartureCity: applyDefaultDepartureCity,
     onPrepareApplyAnchor: prepareApplyAnchor,
-    onRequestBuddyPostForApply,
-    onAbortApplyFlow: endApplyFlow,
+    onRequestCompleteBuddyPost: handleOpenCompleteBuddyPost,
     onApplyFlowSettled: handleApplyFlowSettled,
-    confirm,
   });
 
   const closeBuddyPostSheet = useCallback(() => {
@@ -252,5 +261,7 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     guideEventCity: travelGuide.guideEventCity,
     invalidEventId: route.invalidEventId,
     entitlements,
+    isOnSite: header.isOnSite,
+    publishOnsiteIntent: buddyPost.publishOnsiteIntent,
   };
 }

@@ -4,6 +4,7 @@ import { useNavigationStore } from '../stores/navigationStore';
 import type { NavigationState } from '../stores/navigationStore';
 import type { AiAssistantNavIntent } from '../stores/types';
 import type { NotificationMeta } from '../types/backend';
+import { buildTeamChatSessionId } from './teamChatSessionId';
 import { parseActivityLegacyId } from './activityLegacyId';
 import {
   buildQueryString,
@@ -564,6 +565,12 @@ export function navigateFromNotification(meta?: NotificationMeta): boolean {
 
   if (meta?.type === 'post_rejected') {
     goAiAssistant({ activityLegacyId: legacyId });
+    return true;
+  }
+
+  if (meta?.type === 'application' && meta.postId?.trim() && meta.actorUserId?.trim()) {
+    preloadMessageSubpackage();
+    goTempChat(buildTeamChatSessionId(meta.postId.trim(), meta.actorUserId.trim()));
     return true;
   }
 

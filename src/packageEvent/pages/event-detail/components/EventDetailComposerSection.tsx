@@ -6,6 +6,7 @@ import {
   type EventDetailTabId,
 } from './EventDetailContentTabs';
 import { EventDetailExclusiveItineraryButton } from './EventDetailExclusiveItineraryButton';
+import type { OnsiteBuddyPostIntentId } from '../../../../constants/onsiteBuddyPostIntents';
 import { View } from '@tarojs/components';
 
 export type EventDetailComposerSectionProps = {
@@ -18,6 +19,9 @@ export type EventDetailComposerSectionProps = {
   onAiGuideClick: () => void;
   onBuddyPostClick: () => void;
   buddyPostDisabled?: boolean;
+  isOnSite?: boolean;
+  onOnsiteIntentClick?: (intentId: OnsiteBuddyPostIntentId) => void;
+  onsitePublishDisabled?: boolean;
   onOpenExclusiveItinerary: () => void;
   contentTab: EventDetailTabId;
   onContentTabChange: (tab: EventDetailTabId) => void;
@@ -35,6 +39,9 @@ export const EventDetailComposerSection: React.FC<EventDetailComposerSectionProp
   onAiGuideClick,
   onBuddyPostClick,
   buddyPostDisabled,
+  isOnSite,
+  onOnsiteIntentClick,
+  onsitePublishDisabled,
   onOpenExclusiveItinerary,
   contentTab,
   onContentTabChange,
@@ -56,6 +63,9 @@ export const EventDetailComposerSection: React.FC<EventDetailComposerSectionProp
           onAiGuideClick={onAiGuideClick}
           onBuddyPostClick={onBuddyPostClick}
           buddyPostDisabled={buddyPostDisabled}
+          isOnSite={isOnSite}
+          onOnsiteIntentClick={onOnsiteIntentClick}
+          onsitePublishDisabled={onsitePublishDisabled}
         />
       ) : null}
       <View className="s-event-detail__feed-section">

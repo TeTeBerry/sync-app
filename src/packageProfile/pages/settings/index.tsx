@@ -25,8 +25,16 @@ import { ScrollView, Text, View } from '@tarojs/components';
 import { AccountRiskBanner } from '../../../components/account-risk/AccountRiskBanner';
 import { useAccountRisk } from '../../../hooks/useSyncApi';
 import { BlockedUsersSettings } from './components/BlockedUsersSettings';
+import { MatchPreferencesSettings } from './components/MatchPreferencesSettings';
+import { AppealSettings } from './components/AppealSettings';
 
-type SettingsSection = 'notifications' | 'privacy' | 'help' | 'blocked';
+type SettingsSection =
+  | 'notifications'
+  | 'privacy'
+  | 'help'
+  | 'blocked'
+  | 'match'
+  | 'appeal';
 type PrivacyLevel = ProfilePrivacyLevel;
 
 const SECTION_TITLES: Record<SettingsSection, string> = {
@@ -34,6 +42,8 @@ const SECTION_TITLES: Record<SettingsSection, string> = {
   privacy: '隐私设置',
   help: '帮助与反馈',
   blocked: '已屏蔽用户',
+  match: '组队偏好',
+  appeal: '申诉说明',
 };
 
 const PRIVACY_LABELS: Record<PrivacyLevel, string> = {
@@ -65,16 +75,16 @@ const FAQ_QA = [
 
 const SettingsPage: React.FC = () => {
   useEndRouteTransitionOnShow();
+  const router = useRouter();
+  const section = (router.params.section ?? 'notifications') as SettingsSection;
+  const { data: currentUser } = useCurrentUserQuery();
+  const { accountRisk, refreshAccountRisk } = useAccountRisk();
 
   useEffect(() => {
     if (isLiveApi() && isLoggedIn()) {
       void refreshAccountRisk();
     }
   }, [refreshAccountRisk]);
-  const router = useRouter();
-  const section = (router.params.section ?? 'notifications') as SettingsSection;
-  const { data: currentUser } = useCurrentUserQuery();
-  const { accountRisk, refreshAccountRisk } = useAccountRisk();
   const setStoreNotificationsEnabled = useProfilePageStore(
     (state) => state.setNotificationsEnabled,
   );
@@ -90,7 +100,10 @@ const SettingsPage: React.FC = () => {
 
   useEffect(() => {
     if (!isLiveApi()) return; // skip login guard when API is not configured
-    if (section === 'blocked' && !isLoggedIn()) {
+    if (
+      (section === 'blocked' || section === 'match' || section === 'appeal') &&
+      !isLoggedIn()
+    ) {
       void Taro.showToast({ title: '请先登录', icon: 'none' });
       void Taro.navigateBack();
     }
@@ -181,6 +194,14 @@ const SettingsPage: React.FC = () => {
             <BlockedUsersSettings />
           </View>
         </ScrollView>
+      ) : section === 'match' ? (
+        <View className="s-settings__main s-settings__main--match">
+          <MatchPreferencesSettings />
+        </View>
+      ) : section === 'appeal' ? (
+        <View className="s-settings__main s-settings__main--appeal">
+          <AppealSettings />
+        </View>
       ) : (
         <View className="s-settings__main">
           {section === 'notifications' && (

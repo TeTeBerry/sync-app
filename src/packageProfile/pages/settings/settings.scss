@@ -9,6 +9,13 @@
 .s-settings__main {
   flex: 1;
   padding: 16px;
+
+  &--match {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    padding-bottom: 0;
+  }
 }
 
 .s-settings__scroll {

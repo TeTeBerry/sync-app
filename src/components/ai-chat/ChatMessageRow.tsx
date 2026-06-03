@@ -55,6 +55,7 @@ export type ChatMessageRowProps = {
   onSelectSuggestedReply: (reply: string) => void;
   onRegenerateTravelGuide?: (form: AiGuidePlanFormValues) => void;
   onShareTravelGuide?: (imagePath: string) => void;
+  onBuddyPostFromTravelGuide?: (form: AiGuidePlanFormValues) => void;
 };
 
 function ChatMessageRowInner({
@@ -68,6 +69,7 @@ function ChatMessageRowInner({
   onSelectSuggestedReply,
   onRegenerateTravelGuide,
   onShareTravelGuide,
+  onBuddyPostFromTravelGuide,
 }: ChatMessageRowProps) {
   const isUser = msg.from === 'user';
   const timestamp = formatMessageTime(msg.id);
@@ -199,6 +201,11 @@ function ChatMessageRowInner({
                   disabled={isStreaming}
                   onRegenerate={() => onRegenerateTravelGuide?.(msg.travelGuide!.form)}
                   onShare={() => onShareTravelGuide?.(travelGuideImagePath)}
+                  onBuddyPostFromGuide={
+                    onBuddyPostFromTravelGuide
+                      ? () => onBuddyPostFromTravelGuide(msg.travelGuide!.form)
+                      : undefined
+                  }
                 />
               ) : null}
             </View>

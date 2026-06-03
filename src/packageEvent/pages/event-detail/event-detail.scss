@@ -175,6 +175,43 @@
   }
 }
 
+.s-event-detail__ai-onsite {
+  margin: 0 0 12px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.s-event-detail__ai-onsite-title {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.72);
+  margin-bottom: 8px;
+}
+
+.s-event-detail__ai-onsite-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.s-event-detail__ai-onsite-chip {
+  @include chat.chat-pill-chip;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: var(--s-fw-semibold);
+  color: var(--primary);
+  background: rgba(var(--primary-rgb), 0.08);
+  border: 1px solid rgba(var(--primary-rgb), 0.45);
+  box-shadow: 0 0 10px rgba(var(--primary-rgb), 0.12);
+
+  &--pressed,
+  &:active {
+    background: rgba(var(--primary-rgb), 0.18);
+    border-color: rgba(var(--primary-rgb), 0.6);
+  }
+}
+
 .s-event-detail__ai-compose {
   position: relative;
   min-height: 88px;

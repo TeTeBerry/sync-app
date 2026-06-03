@@ -82,6 +82,8 @@ const EventDetailPage = () => {
     entitlements,
     teamApply,
     applyBuddyPublishPending,
+    isOnSite,
+    publishOnsiteIntent,
   } = page;
 
   return (
@@ -138,6 +140,11 @@ const EventDetailPage = () => {
               onAiGuideClick={handleOpenAiGuide}
               onBuddyPostClick={handleOpenBuddyPost}
               buddyPostDisabled={isBuddyPostPublishing}
+              isOnSite={isOnSite}
+              onOnsiteIntentClick={(intentId) => {
+                void publishOnsiteIntent(intentId);
+              }}
+              onsitePublishDisabled={isBuddyPostPublishing}
               onOpenExclusiveItinerary={handleOpenExclusiveItinerary}
               contentTab={contentTab}
               onContentTabChange={setContentTab}
@@ -220,7 +227,9 @@ const EventDetailPage = () => {
       />
       <TeamApplySheet
         open={teamApply.applySheetOpen}
+        mode={teamApply.applySheetMode}
         buddyPreview={teamApply.applyBuddyPreview}
+        defaultDepartureCity={teamApply.defaultDepartureCity}
         submitting={teamApply.applySubmitting}
         publishPending={applyBuddyPublishPending}
         onClose={teamApply.closeApplySheet}

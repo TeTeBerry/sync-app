@@ -26,7 +26,13 @@ vi.mock('../../constants/api', () => ({
   API_BASE_URL: 'https://api.test',
 }));
 
-import { blockUser, fetchBlockedUserIds, submitReport, unblockUser } from './users';
+import {
+  blockUser,
+  fetchBlockedUserIds,
+  fetchReportStatus,
+  submitReport,
+  unblockUser,
+} from './users';
 
 function mockSuccessResponse(data: unknown, statusCode = 200) {
   mockRequest.mockImplementation(
@@ -84,6 +90,17 @@ describe('api/sync/users moderation', () => {
       targetUserId: 'user-x',
       category: 'ads',
     });
+  });
+
+  it('fetchReportStatus GETs /reports/status with target query', async () => {
+    mockSuccessResponse({ reported: true, category: 'ads' });
+    const result = await fetchReportStatus('post', 'post-abc');
+    const { url, method } = lastRequest();
+    expect(method).toBe('GET');
+    expect(url).toContain('/reports/status');
+    expect(url).toContain('targetType=post');
+    expect(url).toContain('targetId=post-abc');
+    expect(result.reported).toBe(true);
   });
 
   it('blockUser POSTs /users/blocks with blockedUserId', async () => {

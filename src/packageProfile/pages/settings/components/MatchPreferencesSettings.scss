@@ -1,0 +1,116 @@
+.s-match-prefs__scroll {
+  flex: 1;
+  height: 0;
+}
+
+.s-match-prefs {
+  padding-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.s-match-prefs__banner {
+  padding: 14px 16px;
+  border-radius: var(--radius-2xl);
+  background: rgba(var(--primary-rgb), 0.1);
+  border: 1px solid rgba(var(--primary-rgb), 0.22);
+}
+
+.s-match-prefs__banner-title {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 6px;
+}
+
+.s-match-prefs__banner-desc {
+  display: block;
+  font-size: 12px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.s-match-prefs__banner-preview {
+  display: block;
+  margin-top: 8px;
+  font-size: 12px;
+  color: rgba(var(--primary-rgb), 1);
+}
+
+.s-match-prefs__section {
+  padding: 14px 16px 16px;
+}
+
+.s-match-prefs__label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 10px;
+}
+
+.s-match-prefs__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.s-match-prefs__chip {
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+
+  &--active {
+    background: rgba(var(--primary-rgb), 0.2);
+    border-color: rgba(var(--primary-rgb), 0.45);
+  }
+}
+
+.s-match-prefs__chip-text {
+  font-size: 13px;
+  color: #fff;
+}
+
+.s-match-prefs__input {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  font-size: 14px;
+}
+
+.s-match-prefs__mate-row {
+  display: flex;
+  gap: 10px;
+}
+
+.s-match-prefs__mate-btn {
+  flex: 1;
+  padding: 10px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
+
+  &--active {
+    background: rgba(var(--primary-rgb), 0.18);
+    border-color: rgba(var(--primary-rgb), 0.4);
+  }
+}
+
+.s-match-prefs__mate-btn-text {
+  font-size: 14px;
+  color: #fff;
+}
+
+.s-match-prefs__save {
+  margin-top: 4px;
+
+  &[disabled] {
+    opacity: 0.45;
+  }
+}

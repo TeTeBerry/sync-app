@@ -4,23 +4,36 @@ import { MapPin, Users, X } from '../icons';
 import { Button } from '../ui';
 import { useOverlayLock } from '../../hooks/useOverlayLock';
 import type { TeamApplyBuddyPreview } from '../../utils/teamApplyBuddyPreview';
-import { Text, Textarea, View } from '@tarojs/components';
+import {
+  LIGHT_APPLY_GENDER_OPTIONS,
+  LIGHT_APPLY_TRIP_DAY_OPTIONS,
+  defaultLightApplyDraft,
+  type LightApplyDraft,
+  type LightApplyGenderPref,
+} from '../../utils/lightApplyDraft';
+import Taro from '@tarojs/taro';
+import { Input, Text, Textarea, View } from '@tarojs/components';
 
 const MESSAGE_MAX_LENGTH = 120;
 
+export type TeamApplySheetMode = 'full' | 'light';
+
 export type TeamApplySheetProps = {
   open: boolean;
+  mode?: TeamApplySheetMode;
   buddyPreview?: TeamApplyBuddyPreview | null;
+  defaultDepartureCity?: string;
   submitting?: boolean;
-  /** Buddy post still publishing before apply can be sent. */
   publishPending?: boolean;
   onClose: () => void;
-  onConfirm: (message: string) => void;
+  onConfirm: (payload: { message: string; lightApply?: LightApplyDraft }) => void;
 };
 
 export function TeamApplySheet({
   open,
+  mode = 'full',
   buddyPreview = null,
+  defaultDepartureCity,
   submitting = false,
   publishPending = false,
   onClose,
@@ -29,19 +42,43 @@ export function TeamApplySheet({
   const busy = submitting || publishPending;
   useOverlayLock(open);
   const [message, setMessage] = useState('');
+  const [lightDraft, setLightDraft] = useState<LightApplyDraft>(() =>
+    defaultLightApplyDraft({ departureCity: defaultDepartureCity }),
+  );
 
   useEffect(() => {
     if (open) {
       setMessage('');
+      setLightDraft(defaultLightApplyDraft({ departureCity: defaultDepartureCity }));
     }
-  }, [open]);
+  }, [defaultDepartureCity, open]);
 
   const handleConfirm = useCallback(() => {
     if (busy) return;
-    onConfirm(message.trim());
-  }, [busy, message, onConfirm]);
+
+    if (mode === 'light') {
+      const city = lightDraft.departureCity.trim();
+      if (!city) {
+        void Taro.showToast({ title: '请填写出发地', icon: 'none' });
+        return;
+      }
+      onConfirm({
+        message: message.trim(),
+        lightApply: {
+          departureCity: city,
+          tripDays: lightDraft.tripDays,
+          genderPref: lightDraft.genderPref,
+        },
+      });
+      return;
+    }
+
+    onConfirm({ message: message.trim() });
+  }, [busy, lightDraft, message, mode, onConfirm]);
 
   if (!open) return null;
+
+  const isLight = mode === 'light';
 
   return (
     <View
@@ -67,7 +104,9 @@ export function TeamApplySheet({
             </Text>
           </View>
           <Text className="s-team-apply-sheet__subtitle">
-            你的组队信息将发送给发帖人
+            {isLight
+              ? '填写简要信息即可申请，之后可再完善组队帖'
+              : '你的组队信息将发送给发帖人'}
           </Text>
           <Button
             className="s-team-apply-sheet__close"
@@ -80,7 +119,73 @@ export function TeamApplySheet({
         </View>
 
         <View className="s-team-apply-sheet__body">
-          {buddyPreview?.body ? (
+          {isLight ? (
+            <View className="s-team-apply-sheet__light">
+              <Text className="s-team-apply-sheet__label">出发地（必填）</Text>
+              <View className="s-team-apply-sheet__light-input-wrap">
+                <MapPin size={14} color="#8e8e93" aria-hidden />
+                <Input
+                  className="s-team-apply-sheet__light-input"
+                  value={lightDraft.departureCity}
+                  placeholder="如：广州、上海"
+                  placeholderClass="s-team-apply-sheet__light-placeholder"
+                  disabled={busy}
+                  onInput={(e) =>
+                    setLightDraft((prev) => ({
+                      ...prev,
+                      departureCity: e.detail.value ?? '',
+                    }))
+                  }
+                />
+              </View>
+
+              <Text className="s-team-apply-sheet__label">出行天数（选填）</Text>
+              <View className="s-team-apply-sheet__chips">
+                {LIGHT_APPLY_TRIP_DAY_OPTIONS.map((opt) => {
+                  const selected = lightDraft.tripDays === opt.value;
+                  return (
+                    <Button
+                      key={opt.label}
+                      className={`s-team-apply-sheet__chip${selected ? ' s-team-apply-sheet__chip--on' : ''}`}
+                      hoverClass="s-team-apply-sheet__chip--pressed"
+                      disabled={busy}
+                      onClick={() =>
+                        setLightDraft((prev) => ({
+                          ...prev,
+                          tripDays: opt.value,
+                        }))
+                      }
+                    >
+                      <Text className="s-btn-label">{opt.label}</Text>
+                    </Button>
+                  );
+                })}
+              </View>
+
+              <Text className="s-team-apply-sheet__label">性别偏好（选填）</Text>
+              <View className="s-team-apply-sheet__chips">
+                {LIGHT_APPLY_GENDER_OPTIONS.map((pref) => {
+                  const selected = (lightDraft.genderPref ?? '不限') === pref;
+                  return (
+                    <Button
+                      key={pref}
+                      className={`s-team-apply-sheet__chip${selected ? ' s-team-apply-sheet__chip--on' : ''}`}
+                      hoverClass="s-team-apply-sheet__chip--pressed"
+                      disabled={busy}
+                      onClick={() =>
+                        setLightDraft((prev) => ({
+                          ...prev,
+                          genderPref: pref as LightApplyGenderPref,
+                        }))
+                      }
+                    >
+                      <Text className="s-btn-label">{pref}</Text>
+                    </Button>
+                  );
+                })}
+              </View>
+            </View>
+          ) : buddyPreview?.body ? (
             <View className="s-team-apply-sheet__buddy-card" aria-label="我的组队信息">
               <Text className="s-team-apply-sheet__buddy-card-label">我的组队信息</Text>
               <Text className="s-team-apply-sheet__buddy-card-body">
@@ -112,7 +217,9 @@ export function TeamApplySheet({
               className="s-team-apply-sheet__textarea"
               value={message}
               maxlength={MESSAGE_MAX_LENGTH}
-              placeholder="我也从广州出发，可以一起走"
+              placeholder={
+                isLight ? '我也从现场出发，可以一起走' : '我也从广州出发，可以一起走'
+              }
               placeholderStyle="color: rgba(255,255,255,0.28)"
               disabled={busy}
               onInput={(e) => setMessage(e.detail.value ?? '')}

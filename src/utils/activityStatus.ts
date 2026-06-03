@@ -105,6 +105,22 @@ export function getActivityStatusFromActivity(
   return getActivityStatus(date, { yearHint, now });
 }
 
+/** True only while the event is within its calendar date range (excludes pre-event 45-day window). */
+export function isActivityOnSite(
+  dateStr?: string,
+  title?: string,
+  now?: Date,
+): boolean {
+  if (!dateStr?.trim()) return false;
+
+  const yearHint = extractYearFromText(title) ?? extractYearFromText(dateStr);
+  const parsed = parseActivityDateRange(dateStr, yearHint);
+  if (!parsed) return false;
+
+  const at = now ?? new Date();
+  return at >= parsed.start && at <= parsed.end;
+}
+
 export function shouldShowActivityStatusBadge(status: ActivityStatus): boolean {
   return status !== 'in_progress';
 }

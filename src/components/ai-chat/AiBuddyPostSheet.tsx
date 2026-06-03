@@ -22,6 +22,8 @@ export type AiBuddyPostSheetProps = {
   activityDate?: string;
   activityTitle?: string;
   initialValues?: AiBuddyPostFormValues | null;
+  /** Shown when opened via travel-guide「一键组队」. */
+  prefillSummaryLines?: string[] | null;
   /** Apply-team flow: let user choose whether the post appears on the activity feed. */
   showSyncToFeedOption?: boolean;
   onClose: () => void;
@@ -63,6 +65,7 @@ export function AiBuddyPostSheet({
   activityDate,
   activityTitle: _activityTitle,
   initialValues,
+  prefillSummaryLines = null,
   showSyncToFeedOption = false,
   onClose,
   onSubmit,
@@ -199,6 +202,16 @@ export function AiBuddyPostSheet({
           style={{ height: `${scrollHeightPx}px` }}
         >
           <View className="s-ai-guide-plan-sheet__body">
+            {prefillSummaryLines?.length ? (
+              <View className="s-ai-buddy-post-sheet__prefill-banner">
+                <Text className="s-ai-buddy-post-sheet__prefill-title">
+                  已从攻略预填
+                </Text>
+                <Text className="s-ai-buddy-post-sheet__prefill-desc">
+                  {prefillSummaryLines.join(' · ')}。请确认活动日期与需求标签后发布。
+                </Text>
+              </View>
+            ) : null}
             <View className="s-ai-guide-plan-sheet__field">
               <View className="s-ai-buddy-post-sheet__field-head">
                 <Text className="s-ai-buddy-post-sheet__label">活动时间</Text>

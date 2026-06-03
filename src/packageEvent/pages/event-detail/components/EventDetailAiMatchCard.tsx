@@ -5,6 +5,10 @@ import { Button } from '../../../../components/ui';
 import { Text, Textarea, View } from '@tarojs/components';
 import { warmAiAssistant } from '../../../../utils/route';
 import { AI_SHORTCUT_TAG_POOL } from '../../../../utils/aiShortcutTags';
+import {
+  ONSITE_BUDDY_POST_INTENTS,
+  type OnsiteBuddyPostIntentId,
+} from '../../../../constants/onsiteBuddyPostIntents';
 
 const EVENT_AI_TAGS = AI_SHORTCUT_TAG_POOL;
 
@@ -16,6 +20,9 @@ type EventDetailAiMatchCardProps = {
   onAiGuideClick: () => void;
   onBuddyPostClick: () => void;
   buddyPostDisabled?: boolean;
+  isOnSite?: boolean;
+  onOnsiteIntentClick?: (intentId: OnsiteBuddyPostIntentId) => void;
+  onsitePublishDisabled?: boolean;
 };
 
 export function EventDetailAiMatchCard({
@@ -26,6 +33,9 @@ export function EventDetailAiMatchCard({
   onAiGuideClick,
   onBuddyPostClick,
   buddyPostDisabled = false,
+  isOnSite = false,
+  onOnsiteIntentClick,
+  onsitePublishDisabled = false,
 }: EventDetailAiMatchCardProps) {
   const hasContent = Boolean(prompt.trim());
 
@@ -55,6 +65,26 @@ export function EventDetailAiMatchCard({
           </Button>
         ))}
       </View>
+
+      {isOnSite && onOnsiteIntentClick ? (
+        <View className="s-event-detail__ai-onsite">
+          <Text className="s-event-detail__ai-onsite-title">现场快捷发帖</Text>
+          <View className="s-event-detail__ai-onsite-tags">
+            {ONSITE_BUDDY_POST_INTENTS.map((intent) => (
+              <Button
+                key={intent.id}
+                className="s-event-detail__ai-onsite-chip"
+                hoverClass="s-event-detail__ai-onsite-chip--pressed"
+                disabled={onsitePublishDisabled}
+                onClick={() => onOnsiteIntentClick(intent.id)}
+              >
+                <Text className="s-btn-label">{intent.label}</Text>
+              </Button>
+            ))}
+          </View>
+        </View>
+      ) : null}
+
       <View className="s-event-detail__ai-compose" onTouchStart={warmAiAssistant}>
         <Textarea
           className="s-event-detail__ai-compose__field"

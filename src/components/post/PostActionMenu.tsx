@@ -1,10 +1,11 @@
 import './PostActionMenu.scss';
 import { EllipsisVertical, Share2 } from '../../components/icons';
-import { useCallback, useState, type FC } from 'react';
+import { useCallback, useEffect, useState, type FC } from 'react';
 import Taro from '@tarojs/taro';
 import { PostActionSheet } from './PostActionSheet';
 import { useConfirmDialog } from '../../hooks/useConfirmDialog';
 import { blockUserAndInvalidate, submitReport } from '../../hooks/useSyncApi';
+import { fetchReportStatus } from '../../api/sync/users';
 import { isLiveApi } from '../../constants/api';
 import { requireAuth } from '../../utils/authGate';
 import { getApiErrorMessage } from '../../utils/apiErrorMessage';
@@ -12,6 +13,7 @@ import { usePostShareStore } from '../../stores/postShareStore';
 import type { ReportCategory } from '../../types/backend';
 import type { PostSharePayload } from '../../utils/postShare';
 import { POST_ACTION_ICON_COLOR } from '../../utils/postActionColors';
+import { REPORT_SUBMITTED_MODAL } from '../../utils/reportFeedback';
 import { Button } from '../ui';
 import { View } from '@tarojs/components';
 
@@ -66,6 +68,8 @@ export const PostActionMenu: FC<PostActionMenuProps> = ({
 }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
+  const [alreadyReported, setAlreadyReported] = useState(false);
+  const [statusLoading, setStatusLoading] = useState(false);
   const { confirm, confirmDialog } = useConfirmDialog({
     cancelText: '取消',
   });
@@ -80,6 +84,26 @@ export const PostActionMenu: FC<PostActionMenuProps> = ({
     void Taro.showToast({ title: '请配置 API 地址', icon: 'none' });
     return false;
   }, []);
+
+  const loadReportStatus = useCallback(async () => {
+    if (!isLiveApi() || onDelete) return;
+    setStatusLoading(true);
+    try {
+      const status = await fetchReportStatus('post', postId);
+      setAlreadyReported(status.reported);
+    } catch {
+      setAlreadyReported(false);
+    } finally {
+      setStatusLoading(false);
+    }
+  }, [onDelete, postId]);
+
+  const openMenu = useCallback(() => {
+    setMenuOpen(true);
+    if (!onDelete) {
+      void loadReportStatus();
+    }
+  }, [loadReportStatus, onDelete]);
 
   const runBlock = useCallback(async () => {
     if (!ensureApiReady()) return;
@@ -115,6 +139,15 @@ export const PostActionMenu: FC<PostActionMenuProps> = ({
     }, 'social');
   }, [closeAll, runBlock]);
 
+  const showReportSubmittedModal = useCallback(() => {
+    void Taro.showModal({
+      title: REPORT_SUBMITTED_MODAL.title,
+      content: REPORT_SUBMITTED_MODAL.content,
+      showCancel: false,
+      confirmText: REPORT_SUBMITTED_MODAL.confirmText,
+    });
+  }, []);
+
   const runReport = useCallback(
     async (category: ReportCategory) => {
       if (!ensureApiReady()) return;
@@ -126,7 +159,8 @@ export const PostActionMenu: FC<PostActionMenuProps> = ({
           targetUserId: authorUserId?.trim() || undefined,
           category,
         });
-        void Taro.showToast({ title: '举报已提交', icon: 'success' });
+        setAlreadyReported(true);
+        showReportSubmittedModal();
       } catch (error) {
         void Taro.showToast({
           title: getApiErrorMessage(error, '举报失败，请稍后重试'),
@@ -134,18 +168,29 @@ export const PostActionMenu: FC<PostActionMenuProps> = ({
         });
       }
     },
-    [authorUserId, ensureApiReady, postId],
+    [authorUserId, ensureApiReady, postId, showReportSubmittedModal],
   );
 
   const handleReport = useCallback(
     (category: ReportCategory) => {
+      if (alreadyReported) return;
       closeAll();
       requireAuth(() => {
         void runReport(category);
       }, 'social');
     },
-    [closeAll, runReport],
+    [alreadyReported, closeAll, runReport],
   );
+
+  const handleOpenReport = useCallback(() => {
+    if (alreadyReported) return;
+    setMenuOpen(false);
+    setReportOpen(true);
+  }, [alreadyReported]);
+
+  useEffect(() => {
+    setAlreadyReported(false);
+  }, [postId]);
 
   if (disabled) return null;
 
@@ -160,7 +205,7 @@ export const PostActionMenu: FC<PostActionMenuProps> = ({
         plain
         hoverClass="none"
         aria-label="更多"
-        onClick={() => setMenuOpen(true)}
+        onClick={openMenu}
       >
         <EllipsisVertical size={18} color={POST_ACTION_ICON_COLOR} />
       </Button>
@@ -169,6 +214,8 @@ export const PostActionMenu: FC<PostActionMenuProps> = ({
         open={sheetOpen}
         step={sheetStep}
         mode={sheetMode}
+        reportAlreadySubmitted={alreadyReported}
+        reportStatusLoading={statusLoading}
         onCancel={closeAll}
         onBack={
           reportOpen
@@ -186,14 +233,7 @@ export const PostActionMenu: FC<PostActionMenuProps> = ({
               }
             : undefined
         }
-        onOpenReport={
-          !onDelete
-            ? () => {
-                setMenuOpen(false);
-                setReportOpen(true);
-              }
-            : undefined
-        }
+        onOpenReport={!onDelete ? handleOpenReport : undefined}
         onBlock={!onDelete ? handleBlock : undefined}
         onReportCategory={handleReport}
       />

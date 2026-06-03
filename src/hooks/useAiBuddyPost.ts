@@ -10,6 +10,8 @@ import Taro from '@tarojs/taro';
 import { createMessageId } from './ai-chat/createMessageId';
 import type { ChatUiMessage } from '../types/aiChat';
 import type { AiBuddyPostFormValues } from '../types/buddyPost';
+import type { AiGuidePlanFormValues } from '../types/travelGuide';
+import { travelGuideFormToBuddyPrefill } from '../utils/travelGuideToBuddyPost';
 import { isApiEnabled } from '../constants/api';
 import { buildBuddyPostUserSummary } from '../utils/buddyPostForm';
 import { useAccountRisk } from './useAccountRisk';
@@ -59,6 +61,7 @@ export function useAiBuddyPost(options: {
   const [isPublishing, setIsPublishing] = useState(false);
   const [sheetInitialValues, setSheetInitialValues] =
     useState<AiBuddyPostFormValues | null>(null);
+  const [sheetPrefillHint, setSheetPrefillHint] = useState<string[] | null>(null);
   const lastFormRef = useRef<AiBuddyPostFormValues | null>(null);
   const publishingRef = useRef(false);
   const collectActiveRef = useRef(false);
@@ -97,11 +100,39 @@ export function useAiBuddyPost(options: {
       return;
     }
     clearCollect();
+    setSheetPrefillHint(null);
     setSheetInitialValues(lastFormRef.current);
     void guardPublish().then((allowed) => {
       if (allowed) setSheetOpen(true);
     });
   }, [activityLegacyId, clearCollect, guardPublish, isStreaming]);
+
+  const openBuddyPostSheetFromTravelGuide = useCallback(
+    (guideForm: AiGuidePlanFormValues) => {
+      if (isStreaming || publishingRef.current) {
+        void Taro.showToast({ title: '请等待当前操作完成', icon: 'none' });
+        return;
+      }
+      if (activityLegacyId == null || Number.isNaN(activityLegacyId)) {
+        void Taro.showToast({ title: '请先进入活动后再发帖', icon: 'none' });
+        return;
+      }
+      clearCollect();
+      const prefill = travelGuideFormToBuddyPrefill(guideForm, activityDate);
+      setSheetInitialValues(prefill.form);
+      setSheetPrefillHint(prefill.summaryLines);
+      void guardPublish().then((allowed) => {
+        if (!allowed) return;
+        setSheetOpen(true);
+        void Taro.showToast({
+          title: '已根据攻略预填，确认后发布',
+          icon: 'none',
+          duration: 2000,
+        });
+      });
+    },
+    [activityDate, activityLegacyId, clearCollect, guardPublish, isStreaming],
+  );
 
   const runPublish = useCallback(
     async (
@@ -282,19 +313,28 @@ export function useAiBuddyPost(options: {
   const handleSheetSubmit = useCallback(
     (form: AiBuddyPostFormValues) => {
       setSheetOpen(false);
+      setSheetPrefillHint(null);
       void runPublish(form);
     },
     [runPublish],
   );
 
+  const closeBuddyPostSheet = useCallback(() => {
+    setSheetOpen(false);
+    setSheetPrefillHint(null);
+  }, []);
+
   return {
     sheetOpen,
     setSheetOpen,
+    closeBuddyPostSheet,
     isPublishing,
     openBuddyPostSheet,
+    openBuddyPostSheetFromTravelGuide,
     handleBuddyPostChatMessage,
     clearCollect,
     handleSheetSubmit,
     sheetInitialValues,
+    sheetPrefillHint,
   };
 }

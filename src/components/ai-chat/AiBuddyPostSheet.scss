@@ -18,6 +18,29 @@
     padding-bottom: 8px;
   }
 
+  &__prefill-banner {
+    margin-bottom: 14px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: rgba(var(--primary-rgb), 0.12);
+    border: 1px solid rgba(var(--primary-rgb), 0.28);
+  }
+
+  &__prefill-title {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 4px;
+  }
+
+  &__prefill-desc {
+    display: block;
+    font-size: 12px;
+    line-height: 1.45;
+    color: rgba(255, 255, 255, 0.78);
+  }
+
   &__field--note {
     margin-bottom: 4px;
   }

@@ -4,6 +4,7 @@ import type {
   CurrentUser,
   ReportPayload,
   ReportResult,
+  ReportStatusResult,
   UpdateCurrentUserPayload,
 } from '../../types/backend';
 import { ownerQueryParams } from '../requestContext';
@@ -33,4 +34,12 @@ export function unblockUser(blockedUserId: string) {
 
 export function submitReport(payload: ReportPayload) {
   return apiPost<ReportResult>('/reports', payload, ownerQueryParams());
+}
+
+export function fetchReportStatus(targetType: 'post', targetId: string) {
+  return apiGet<ReportStatusResult>('/reports/status', {
+    targetType,
+    targetId,
+    ...ownerQueryParams(),
+  });
 }

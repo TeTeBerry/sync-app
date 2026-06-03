@@ -1,5 +1,5 @@
 import './AiAssistantPostCard.scss';
-import { MapPin } from '../components/icons';
+import { MapPin, Sparkles } from '../components/icons';
 import type { FC } from 'react';
 import type { RecommendedPostCard } from '../types/aiChat';
 import { inferAuthorGenderFromPost } from '../utils/inferAuthorGender';
@@ -60,7 +60,12 @@ export const AiAssistantPostCard: FC<AiAssistantPostCardProps> = ({
             ) : null}
           </View>
           {post.matchReason ? (
-            <Text className="s-ai-assistant-post-card__match">{post.matchReason}</Text>
+            <View className="s-ai-assistant-post-card__match-badge">
+              <Sparkles size={11} color="#ff3385" aria-hidden />
+              <Text className="s-ai-assistant-post-card__match-badge-text">
+                {post.matchReason}
+              </Text>
+            </View>
           ) : null}
         </View>
       </View>

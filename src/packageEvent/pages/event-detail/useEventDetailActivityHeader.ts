@@ -4,6 +4,7 @@ import { usePageRouteReady } from '../../../hooks/usePageRouteReady';
 import {
   activityStatusCardClass,
   getActivityStatusFromActivity,
+  isActivityOnSite,
 } from '../../../utils/activityStatus';
 import { stackPageNavChromePx } from '../../../components/navigation/PageNavigation';
 import { useNavBarInsets } from '../../../hooks/useNavBarInsets';
@@ -28,6 +29,8 @@ export function useEventDetailActivityHeader({
   const title = activityQuery.data?.name;
   const activityImage = activityQuery.data?.image;
   const activityDate = activityQuery.data?.date;
+  const activityLocation = activityQuery.data?.location;
+  const isOnSite = isActivityOnSite(activityDate, title);
 
   const getDefaultShare = useCallback((): PostSharePayload | null => {
     if (!Number.isFinite(eventId) || eventId <= 0) {
@@ -86,6 +89,9 @@ export function useEventDetailActivityHeader({
     metaLine,
     scrollHeight,
     activityStatus,
+    isOnSite,
+    activityLocation,
+    activityDate,
     activityStatusClass: activityStatusCardClass(activityStatus),
     showHeaderSkeleton,
     loadError,

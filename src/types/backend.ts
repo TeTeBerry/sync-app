@@ -27,10 +27,14 @@ export type ReportTargetType = 'post' | 'user' | 'comment';
 
 export type AccountRiskStatus = 'normal' | 'restricted' | 'banned';
 
+export type AccountRiskReasonCode = 'scalper' | 'content' | 'reports';
+
 export interface AccountRiskPublicStatus {
   status: AccountRiskStatus;
   postBlockedUntil?: string;
   message?: string;
+  reasonCode?: AccountRiskReasonCode;
+  appealHint?: string;
 }
 
 export interface CurrentUser {
@@ -90,6 +94,12 @@ export interface ReportPayload {
 export interface ReportResult {
   ok: true;
   id: string;
+}
+
+export interface ReportStatusResult {
+  reported: boolean;
+  category?: ReportCategory;
+  createdAt?: string;
 }
 
 export interface ActivityRegistrationResult {
@@ -360,6 +370,11 @@ export interface UpdatePostPayload {
 export interface PostActionResult {
   ok: true;
   alreadyApplied?: boolean;
+  teamChat?: {
+    sessionId: string;
+    postId: string;
+    applicantUserId: string;
+  };
 }
 
 export interface HomeSummary {

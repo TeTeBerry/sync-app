@@ -94,7 +94,7 @@ export function AiAssistantChat({
 
   const welcomeText = useMemo(() => {
     if (activityTitle?.trim()) {
-      return `👋 已为你锁定「${activityTitle.trim()}」。一句话可生成出行攻略（如：上海2人舒适自驾住2晚）或发布组队帖（如：6.13-6.14 上海 2人 拼房）；也可点「AI攻略」「组队发帖」用表单填写。`;
+      return `👋 已为你锁定「${activityTitle.trim()}」。可先生成出行攻略，生成后点「一键组队」自动预填发帖；也可直接描述需求或点「AI攻略」「组队发帖」。`;
     }
     return '👋 我是你的 AI 智能助手，帮你发现活动、找队友、规划行程，说出需求，我来搞定。';
   }, [activityTitle]);
@@ -405,6 +405,7 @@ export function AiAssistantChat({
         onSelectSuggestedReply={handleSelectSuggestedReply}
         onRegenerateTravelGuide={travelGuide.handleRegenerate}
         onShareTravelGuide={(path) => void travelGuide.handleShareGuide(path)}
+        onBuddyPostFromTravelGuide={buddyPost.openBuddyPostSheetFromTravelGuide}
       />
       <View
         className="s-ai-assistant-chat__footer"
@@ -433,7 +434,8 @@ export function AiAssistantChat({
         activityDate={activityQuery.data?.date}
         activityTitle={activityTitle}
         initialValues={buddyPost.sheetInitialValues}
-        onClose={() => buddyPost.setSheetOpen(false)}
+        prefillSummaryLines={buddyPost.sheetPrefillHint}
+        onClose={buddyPost.closeBuddyPostSheet}
         onSubmit={buddyPost.handleSheetSubmit}
       />
 

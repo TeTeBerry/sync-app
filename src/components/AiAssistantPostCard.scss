@@ -82,15 +82,33 @@
     }
   }
 
-  &__handle,
-  &__match {
+  &__handle {
     font-size: var(--s-type-meta);
     line-height: 1.3;
     color: #8e8e93;
   }
 
-  &__match {
-    display: block;
+  &__match-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    max-width: 100%;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: rgba(255, 0, 102, 0.1);
+    border: 1px solid rgba(255, 0, 102, 0.28);
+    box-sizing: border-box;
+  }
+
+  &__match-badge-text {
+    flex: 1;
+    min-width: 0;
+    font-size: 11px;
+    line-height: 1.3;
+    color: #ff9ec4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   &__title {

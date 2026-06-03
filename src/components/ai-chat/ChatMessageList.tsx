@@ -25,6 +25,7 @@ export function ChatMessageList({
   onSelectSuggestedReply,
   onRegenerateTravelGuide,
   onShareTravelGuide,
+  onBuddyPostFromTravelGuide,
 }: {
   messages: ChatUiMessage[];
   isStreaming: boolean;
@@ -38,6 +39,7 @@ export function ChatMessageList({
   onSelectSuggestedReply: (reply: string) => void;
   onRegenerateTravelGuide?: (form: AiGuidePlanFormValues) => void;
   onShareTravelGuide?: (imagePath: string) => void;
+  onBuddyPostFromTravelGuide?: (form: AiGuidePlanFormValues) => void;
 }) {
   const [scrollIntoView, setScrollIntoView] = useState<string | undefined>();
   const [scrollTop, setScrollTop] = useState(0);
@@ -124,6 +126,7 @@ export function ChatMessageList({
             onSelectSuggestedReply={onSelectSuggestedReply}
             onRegenerateTravelGuide={onRegenerateTravelGuide}
             onShareTravelGuide={onShareTravelGuide}
+            onBuddyPostFromTravelGuide={onBuddyPostFromTravelGuide}
           />
         ))}
         <AiMatchQuotaExhaustedMessage />

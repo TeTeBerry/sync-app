@@ -4,6 +4,7 @@ import { isLiveApi } from '../../constants/api';
 import {
   useAccountRisk,
   useBlockedUsersQuery,
+  useCurrentUserQuery,
   useProfileSummaryQuery,
 } from '../../hooks/useSyncApi';
 import { useDeferredMount } from '../../hooks/useDeferredMount';
@@ -30,9 +31,15 @@ import type { ProfileActivityItem, ProfileSummary } from '../../types/backend';
 import type { PackageTierId } from './profilePackageData';
 import type { ProfileSettingsSectionProps } from './ProfileSettingsSection';
 import {
+  accountRiskStatusTitle,
+  formatAccountRiskUntil,
+} from '../../utils/accountRiskDisplay';
+import { isAccountPublishRestricted } from '../../utils/accountRisk';
+import {
   normalizeProfileUserData,
   type ProfileDisplayUser,
 } from './profileSummaryUtils';
+import { formatMatchPreferencesSummary } from '../../constants/matchPreferences';
 import { deriveInterestTag } from './utils';
 import { useProfilePaidBenefitCards } from './useProfilePaidBenefitCards';
 import { useProfilePackageSheet } from './useProfilePackageSheet';
@@ -79,6 +86,7 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
   });
 
   const summaryQuery = useProfileSummaryQuery();
+  const currentUserQuery = useCurrentUserQuery();
   const { accountRisk } = useAccountRisk();
   const blockedUsersQuery = useBlockedUsersQuery();
   const entitlementsReady = useDeferredMount(DEFER_PROFILE_ENTITLEMENTS_MS);
@@ -154,7 +162,9 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
   }, [profileUserData.name]);
 
   const openSettings = useCallback(
-    (section: 'notifications' | 'privacy' | 'help' | 'blocked') => {
+    (
+      section: 'notifications' | 'privacy' | 'help' | 'blocked' | 'match' | 'appeal',
+    ) => {
       go(`${ROUTES.SETTINGS}?section=${section}`);
     },
     [],
@@ -187,13 +197,31 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
 
   const blockedCount = blockedUsersQuery.data?.blockedUserIds?.length ?? 0;
 
+  const matchPreferencesSummary = formatMatchPreferencesSummary(
+    currentUserQuery.data ?? null,
+  );
+
+  const publishRestricted = isAccountPublishRestricted(accountRisk);
+  const untilLabel = formatAccountRiskUntil(accountRisk?.postBlockedUntil);
+
   const settings: ProfileSettingsSectionProps = {
     notificationsEnabled,
     blockedCount,
+    matchPreferencesSummary,
+    showAccountStatusRow: publishRestricted,
+    accountStatusSummary: untilLabel
+      ? `${accountRiskStatusTitle(accountRisk)} · ${untilLabel}`
+      : accountRiskStatusTitle(accountRisk),
     onOpenNotifications: () => openSettings('notifications'),
+    onOpenMatchPreferences: () => {
+      requireAuth(() => openSettings('match'), 'general');
+    },
     onOpenPrivacy: () => openSettings('privacy'),
     onOpenBlockedUsers: () => {
       requireAuth(() => openSettings('blocked'), 'general');
+    },
+    onOpenAccountAppeal: () => {
+      requireAuth(() => openSettings('appeal'), 'general');
     },
     onOpenHelp: () => openSettings('help'),
     onLogout: handleLogout,

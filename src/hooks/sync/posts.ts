@@ -275,4 +275,4 @@ export async function blockUserAndInvalidate(blockedUserId: string) {
   return result;
 }
 
-export { submitReport } from '../../api/sync/users';
+export { fetchReportStatus, submitReport } from '../../api/sync/users';

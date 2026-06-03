@@ -1,0 +1,90 @@
+.s-appeal-settings__scroll {
+  flex: 1;
+  height: 0;
+}
+
+.s-appeal-settings {
+  padding-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.s-appeal-settings__banner {
+  padding: 14px 16px;
+  border-radius: var(--radius-2xl);
+  background: rgba(255, 107, 107, 0.08);
+  border: 1px solid rgba(255, 107, 107, 0.22);
+}
+
+.s-appeal-settings__banner-title {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 6px;
+}
+
+.s-appeal-settings__banner-desc {
+  display: block;
+  font-size: 13px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.s-appeal-settings__section-title {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 10px;
+}
+
+.s-appeal-settings__steps {
+  padding: 14px 16px;
+}
+
+.s-appeal-settings__step {
+  display: block;
+  font-size: 13px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.78);
+  margin-bottom: 8px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.s-appeal-settings__faq {
+  padding: 4px 0;
+}
+
+.s-appeal-settings__faq-item {
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.s-appeal-settings__faq-q {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 6px;
+}
+
+.s-appeal-settings__faq-a {
+  display: block;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--muted-foreground);
+}
+
+.s-appeal-settings__copy-btn {
+  margin-top: -4px;
+  background: rgba(255, 255, 255, 0.08);
+}

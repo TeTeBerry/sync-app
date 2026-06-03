@@ -1237,6 +1237,12 @@
   flex-shrink: 0;
   color: var(--foreground);
 
+  &--match {
+    background: rgba(var(--primary-rgb), 0.15);
+    box-shadow: inset 0 0 0 1px rgba(var(--primary-rgb), 0.32);
+    color: rgb(var(--primary-rgb));
+  }
+
   &--bell {
     background: rgba(var(--secondary-rgb), 0.18);
     box-shadow: inset 0 0 0 1px rgba(var(--secondary-rgb), 0.3);
@@ -1259,6 +1265,12 @@
     background: rgba(var(--destructive-rgb), 0.12);
     box-shadow: inset 0 0 0 1px rgba(var(--destructive-rgb), 0.25);
     color: var(--destructive);
+  }
+
+  &--risk {
+    background: rgba(255, 107, 107, 0.12);
+    box-shadow: inset 0 0 0 1px rgba(255, 107, 107, 0.28);
+    color: #ff6b6b;
   }
 
   &--logout {
@@ -1289,6 +1301,21 @@
   color: var(--muted-foreground);
   margin-right: 2px;
   flex-shrink: 0;
+
+  &--truncate {
+    max-width: 42%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &--risk {
+    max-width: 52%;
+    font-size: 11px;
+    color: #ff8a8a;
+    text-align: right;
+    line-height: 1.3;
+  }
 }
 
 .s-profile__settings-chevron {
