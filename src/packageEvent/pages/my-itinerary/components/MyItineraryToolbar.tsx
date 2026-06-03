@@ -68,7 +68,7 @@ export const MyItineraryFooter: React.FC<MyItineraryFooterProps> = ({
       onTap={onSave}
     >
       <Bookmark size={16} color="#fff" aria-hidden />
-      <Text>保存行程</Text>
+      <Text>生成屏保</Text>
     </Button>
   </View>
 );

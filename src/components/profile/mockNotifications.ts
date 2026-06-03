@@ -11,6 +11,7 @@ export const mockNotifications: AppNotification[] = [
     read: false,
     createdAt: new Date(Date.now() - 12 * 60 * 1000).toISOString(),
     meta: {
+      category: 'application',
       type: 'application',
       activityLegacyId: 4,
       postId: 'post-3',

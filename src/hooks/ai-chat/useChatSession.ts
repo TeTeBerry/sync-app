@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import type { Dispatch, SetStateAction } from 'react';
 import { clearChatSession } from '../../api/syncApi';
 import { useAiChatStore } from '../../stores/aiChatStore';
 import { isLiveApi } from '../../constants/api';
@@ -9,6 +10,7 @@ import {
   getOrCreateSessionId,
   persistSessionId,
 } from '../../utils/session';
+import { buildAiChatScopeKey } from '../../utils/aiChatScope';
 import type { ChatUiMessage } from '../../types/aiChat';
 import { closeAiChatWsConnection } from '../../utils/aiChatWs';
 import { createMessageId } from './createMessageId';
@@ -40,20 +42,39 @@ function createFreshSessionIdForScope(activityLegacyId: number | undefined): str
   return createFreshSessionId();
 }
 
+function createWelcomeMessage(welcomeText: string): ChatUiMessage {
+  return { id: createMessageId(), from: 'ai', text: welcomeText };
+}
+
 export function useChatSession(options: UseChatSessionOptions) {
   const { welcomeText, activityLegacyId } = options;
   const activityLegacyIdRef = useRef(activityLegacyId);
+  const scopeKey = buildAiChatScopeKey(activityLegacyId);
 
   const sessionIdRef = useRef(resolveSessionId(options.sessionId, activityLegacyId));
   const userIdRef = useRef(options.userId);
   const userNameRef = useRef(options.userName);
   const userPhoneRef = useRef(options.userPhone);
 
-  const [messages, setMessages] = useState<ChatUiMessage[]>(() => [
-    { id: createMessageId(), from: 'ai', text: welcomeText },
-  ]);
+  const [messages, setMessagesState] = useState<ChatUiMessage[]>(() => {
+    const stored = useAiChatStore.getState().getScopeMessages(scopeKey);
+    if (stored.length > 0) return stored;
+    return [createWelcomeMessage(welcomeText)];
+  });
   const messagesRef = useRef<ChatUiMessage[]>(messages);
   const isStreamingRef = useRef(false);
+
+  const setMessages = useCallback<Dispatch<SetStateAction<ChatUiMessage[]>>>(
+    (action) => {
+      setMessagesState((prev) => {
+        const next = typeof action === 'function' ? action(prev) : action;
+        messagesRef.current = next;
+        useAiChatStore.getState().setScopeMessages(scopeKey, next);
+        return next;
+      });
+    },
+    [scopeKey],
+  );
 
   useEffect(() => {
     messagesRef.current = messages;
@@ -63,13 +84,29 @@ export function useChatSession(options: UseChatSessionOptions) {
     activityLegacyIdRef.current = activityLegacyId;
   }, [activityLegacyId]);
 
+  useEffect(() => {
+    useAiChatStore.getState().setActiveScope(scopeKey);
+  }, [scopeKey]);
+
   const setIsStreamingRef = useCallback((value: boolean) => {
     isStreamingRef.current = value;
   }, []);
 
   const showWelcome = useCallback(() => {
-    setMessages([{ id: createMessageId(), from: 'ai', text: welcomeText }]);
-  }, [welcomeText]);
+    const welcome = [createWelcomeMessage(welcomeText)];
+    messagesRef.current = welcome;
+    setMessages(welcome);
+  }, [setMessages, welcomeText]);
+
+  const hydrateScopeMessages = useCallback(() => {
+    const stored = useAiChatStore.getState().getScopeMessages(scopeKey);
+    if (stored.length > 0) {
+      messagesRef.current = stored;
+      setMessages(stored);
+      return;
+    }
+    showWelcome();
+  }, [scopeKey, setMessages, showWelcome]);
 
   const hasInFlightChatTurn = useCallback(
     () =>
@@ -79,19 +116,21 @@ export function useChatSession(options: UseChatSessionOptions) {
   );
 
   useEffect(() => {
-    useAiChatStore.getState().resetOnClearSession();
-  }, []);
-
-  useEffect(() => {
     const nextSessionId = resolveSessionId(options.sessionId, activityLegacyId);
-    if (sessionIdRef.current === nextSessionId) return;
-
+    const sessionChanged = sessionIdRef.current !== nextSessionId;
     sessionIdRef.current = nextSessionId;
-    useAiChatStore.getState().resetOnClearSession();
-    if (!hasInFlightChatTurn()) {
-      showWelcome();
-    }
-  }, [activityLegacyId, hasInFlightChatTurn, options.sessionId, showWelcome]);
+
+    useAiChatStore.getState().setActiveScope(scopeKey);
+
+    if (!sessionChanged || hasInFlightChatTurn()) return;
+    hydrateScopeMessages();
+  }, [
+    activityLegacyId,
+    hasInFlightChatTurn,
+    hydrateScopeMessages,
+    options.sessionId,
+    scopeKey,
+  ]);
 
   const resetSession = useCallback(async () => {
     closeAiChatWsConnection('clear chat');
@@ -108,12 +147,11 @@ export function useChatSession(options: UseChatSessionOptions) {
     const nextSessionId = createFreshSessionIdForScope(activityLegacyIdRef.current);
     sessionIdRef.current = nextSessionId;
     persistSessionId(nextSessionId, activityLegacyIdRef.current);
-    useAiChatStore.getState().resetOnClearSession();
+    useAiChatStore.getState().resetScope(scopeKey);
     messagesRef.current = [];
-    setMessages([]);
     showWelcome();
     return nextSessionId;
-  }, [showWelcome]);
+  }, [scopeKey, showWelcome]);
 
   const persistSessionFromStream = useCallback((sessionId: string) => {
     sessionIdRef.current = sessionId;

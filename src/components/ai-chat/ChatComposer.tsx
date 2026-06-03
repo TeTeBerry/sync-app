@@ -96,7 +96,11 @@ export function ChatComposer({
   onBuddyPostClick?: () => void;
 }) {
   const [shortcutTags, setShortcutTags] = useState(() => getTopAiShortcutTags());
-  const conversationFlow = useAiChatStore((state) => state.conversationState?.flow);
+  const conversationFlow = useAiChatStore((state) =>
+    state.activeScopeKey
+      ? state.buckets[state.activeScopeKey]?.conversationState?.flow
+      : undefined,
+  );
 
   const scopedToActivity = activityLegacyId != null && !Number.isNaN(activityLegacyId);
   const trimmedActivityTitle = activityTitle?.trim();

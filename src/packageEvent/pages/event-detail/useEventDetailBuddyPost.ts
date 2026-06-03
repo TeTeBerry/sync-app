@@ -6,6 +6,7 @@ import {
 } from '../../../hooks/useSyncApi';
 import { publishBuddyPostFromForm } from '../../../utils/publishBuddyPost';
 import { isApiEnabled } from '../../../constants/api';
+import type { EventDetailPost } from '../../../types/post';
 import type { AiBuddyPostFormValues } from '../../../types/buddyPost';
 
 /** Buddy-post plan sheet on event detail — publish in place, refresh post list. */
@@ -16,6 +17,8 @@ export function useEventDetailBuddyPost(
     authorAvatar?: string;
     /** Refetch activity post list (useEventPostsInfiniteQuery is not on useApiQuery cache). */
     refreshPosts?: () => Promise<void>;
+    /** Optimistic insert so the feed updates before refetch completes. */
+    prependPost?: (post: EventDetailPost) => void;
   },
 ) {
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -55,26 +58,32 @@ export function useEventDetailBuddyPost(
         }
 
         const title = activityQuery.data?.name?.trim() || '本场活动';
-        await publishBuddyPostFromForm({
+        const listedInFeed = submitOptions?.listedInFeed !== false;
+        const { post } = await publishBuddyPostFromForm({
           form,
           activityLegacyId: eventId,
           activityTitle: title,
           authorName: options.authorName,
           authorAvatar: options.authorAvatar,
-          listedInFeed: submitOptions?.listedInFeed,
+          listedInFeed,
         });
-
-        if (!submitOptions?.skipListRefresh) {
-          await invalidatePostQueries();
-          try {
-            await options.refreshPosts?.();
-          } catch {
-            // List refresh is best-effort; publish already succeeded.
-          }
-        }
 
         if (!submitOptions?.quiet) {
           void Taro.showToast({ title: '组队帖已发布', icon: 'success' });
+        }
+
+        if (!submitOptions?.skipListRefresh) {
+          if (listedInFeed) {
+            options.prependPost?.(post);
+          }
+          void (async () => {
+            await invalidatePostQueries();
+            try {
+              await options.refreshPosts?.();
+            } catch {
+              // List refresh is best-effort; publish already succeeded.
+            }
+          })();
         }
         return true;
       } catch (error) {

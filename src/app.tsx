@@ -4,7 +4,8 @@ import { hydrateHomeCachesFromStorage } from './utils/homeCacheStorage';
 hydrateHomeCachesFromStorage();
 
 import './app.scss';
-import { useLaunch } from '@tarojs/taro';
+import { useDidHide, useLaunch } from '@tarojs/taro';
+import { clearAiChatEphemeralState } from './utils/aiChatEphemeral';
 import { ensureAuth } from './utils/auth';
 import { isLiveApi } from './constants/api';
 import { View } from '@tarojs/components';
@@ -22,6 +23,10 @@ export default function App({ children }: PropsWithChildren) {
       });
     }
     preloadEventSubpackage();
+  });
+
+  useDidHide(() => {
+    clearAiChatEphemeralState();
   });
 
   return (

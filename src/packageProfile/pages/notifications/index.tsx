@@ -165,7 +165,7 @@ const NotificationsPage: React.FC = () => {
                   {category === 'all'
                     ? '全部'
                     : category === 'application'
-                      ? '申请'
+                      ? '组队'
                       : category === 'comment'
                         ? '评论'
                         : category === 'like'

@@ -156,3 +156,22 @@ export function clearClientSessionId(): void {
     // ignore
   }
 }
+
+/** 退出小程序时清除各活动维度的 AI session id（消息仅存内存，一并由 ephemeral 清理）。 */
+export function clearAllPersistedAiSessionIds(): void {
+  clearClientSessionId();
+  try {
+    const info = Taro.getStorageInfoSync();
+    for (const key of info.keys) {
+      if (typeof key === 'string' && key.startsWith(ACTIVITY_SESSION_KEY_PREFIX)) {
+        try {
+          Taro.removeStorageSync(key);
+        } catch {
+          // ignore per-key failures
+        }
+      }
+    }
+  } catch {
+    // ignore
+  }
+}

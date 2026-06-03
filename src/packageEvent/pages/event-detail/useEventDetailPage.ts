@@ -58,6 +58,7 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     authorName: displayUserName,
     authorAvatar: currentUserQuery.data?.avatar,
     refreshPosts: postsQuery.refetch,
+    prependPost: postsQuery.prependItem,
   });
 
   const ai = useEventDetailAiActions(eventId, {

@@ -1,8 +1,8 @@
-import { useAiChatStore } from '../../stores/aiChatStore';
+import { selectActiveDegraded, useAiChatStore } from '../../stores/aiChatStore';
 import { Text } from '@tarojs/components';
 
 export function DegradedMatchBanner() {
-  const degraded = useAiChatStore((state) => state.degraded);
+  const degraded = useAiChatStore(selectActiveDegraded);
 
   if (!degraded) return null;
 

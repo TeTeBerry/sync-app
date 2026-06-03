@@ -31,6 +31,7 @@ export function useAiBuddyPost(options: {
   activityLegacyId?: number;
   activityTitle?: string;
   activityDate?: string;
+  activityLocation?: string;
   authorName: string;
   authorAvatar?: string;
   setMessages: Dispatch<SetStateAction<ChatUiMessage[]>>;
@@ -43,6 +44,7 @@ export function useAiBuddyPost(options: {
     activityLegacyId,
     activityTitle,
     activityDate,
+    activityLocation,
     authorName,
     authorAvatar,
     setMessages,
@@ -60,6 +62,14 @@ export function useAiBuddyPost(options: {
   const publishingRef = useRef(false);
   const collectActiveRef = useRef(false);
   const draftRef = useRef<BuddyPostChatDraft>({});
+
+  const suggestContext = useCallback(
+    () => ({
+      activityDate,
+      activityLocation,
+    }),
+    [activityDate, activityLocation],
+  );
 
   const clearCollect = useCallback(() => {
     collectActiveRef.current = false;
@@ -235,8 +245,8 @@ export function useAiBuddyPost(options: {
         {
           id: createMessageId(),
           from: 'ai',
-          text: buildBuddyPostCollectPrompt(missing),
-          suggestedReplies: buildBuddyPostSuggestedReplies(missing),
+          text: buildBuddyPostCollectPrompt(missing, suggestContext()),
+          suggestedReplies: buildBuddyPostSuggestedReplies(missing, suggestContext()),
         },
       ]);
       Taro.nextTick(() => onPlanningMessagesShown?.());
@@ -250,6 +260,7 @@ export function useAiBuddyPost(options: {
       isStreaming,
       onPlanningMessagesShown,
       runPublish,
+      suggestContext,
     ],
   );
 

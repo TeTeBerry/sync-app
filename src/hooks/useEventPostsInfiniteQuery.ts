@@ -145,6 +145,13 @@ export function useEventPostsInfiniteQuery(
     setItems((prev) => prev.filter((post) => post.id !== postId));
   }, []);
 
+  const prependItem = useCallback((post: EventDetailPost) => {
+    setItems((prev) => {
+      if (prev.some((item) => item.id === post.id)) return prev;
+      return [post, ...prev];
+    });
+  }, []);
+
   return {
     items,
     hasMore,
@@ -155,5 +162,6 @@ export function useEventPostsInfiniteQuery(
     refetch,
     patchItem,
     removeItem,
+    prependItem,
   };
 }

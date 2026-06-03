@@ -1,6 +1,7 @@
-import type { AppNotification, NotificationMeta } from '../types/backend';
+import type { AppNotification, NotificationInteractionType } from '../types/backend';
 import { formatTimeAgo } from './dayTime';
 
+/** UI tab categories — aligned with backend NotificationCategory (except buddy_recommend). */
 export type NotificationCategory =
   | 'comment'
   | 'like'
@@ -8,22 +9,75 @@ export type NotificationCategory =
   | 'system'
   | 'general';
 
-export function getNotificationCategory(meta?: NotificationMeta): NotificationCategory {
-  const type = meta?.type;
-  if (type === 'like') return 'like';
-  if (type === 'application' || type === 'team_dissolved' || type === 'team_accepted') {
-    return 'application';
+export type NotificationMetaCategory = NotificationCategory | 'buddy_recommend';
+
+const UI_CATEGORIES = new Set<NotificationCategory>([
+  'comment',
+  'like',
+  'application',
+  'system',
+  'general',
+]);
+
+/** Same rules as backend `categoryForInteractionType`. */
+export function categoryFromInteractionType(
+  type?: NotificationInteractionType,
+): NotificationCategory {
+  switch (type) {
+    case 'like':
+      return 'like';
+    case 'comment':
+    case 'comment_reply':
+      return 'comment';
+    case 'application':
+    case 'team_dissolved':
+    case 'team_accepted':
+      return 'application';
+    case 'activity_update':
+    case 'post_rejected':
+    case 'post_hidden':
+    case 'activity':
+      return 'system';
+    case 'match_recommendation':
+      return 'general';
+    default:
+      return 'general';
   }
-  if (type === 'comment' || type === 'comment_reply') return 'comment';
-  if (
-    type === 'activity_update' ||
-    type === 'post_rejected' ||
-    type === 'post_hidden' ||
-    type === 'activity'
-  ) {
-    return 'system';
+}
+
+function normalizeStoredCategory(
+  category?: NotificationMetaCategory,
+): NotificationCategory | undefined {
+  if (!category) return undefined;
+  if (category === 'buddy_recommend') return 'general';
+  if (UI_CATEGORIES.has(category)) return category;
+  return undefined;
+}
+
+/**
+ * Resolve list-tab category: prefer meta.type (business kind), reconcile legacy
+ * meta.category mismatches (e.g. application stored as comment).
+ */
+export function getNotificationCategory(
+  meta?: AppNotification['meta'],
+): NotificationCategory {
+  const fromType = categoryFromInteractionType(meta?.type);
+  const fromCategory = normalizeStoredCategory(
+    meta?.category as NotificationMetaCategory | undefined,
+  );
+
+  if (meta?.type) {
+    if (
+      fromCategory &&
+      fromCategory !== fromType &&
+      (fromType === 'application' || fromCategory === 'comment')
+    ) {
+      return fromType;
+    }
+    return fromType;
   }
-  return 'general';
+
+  return fromCategory ?? 'general';
 }
 
 export function resolveNotificationText(item: AppNotification): {

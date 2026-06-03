@@ -367,6 +367,15 @@ export interface HomeSummary {
 
 export type NotificationType = 'general' | 'interaction' | 'system' | 'match';
 
+/** In-app notification tab grouping (matches backend NotificationCategory). */
+export type NotificationCategory =
+  | 'comment'
+  | 'like'
+  | 'application'
+  | 'buddy_recommend'
+  | 'system'
+  | 'general';
+
 export type NotificationInteractionType =
   | 'like'
   | 'comment'
@@ -383,6 +392,8 @@ export type NotificationInteractionType =
 export interface NotificationMeta {
   activityLegacyId?: number;
   postId?: string;
+  /** Tab grouping; should match type (see notificationDisplay.getNotificationCategory). */
+  category?: NotificationCategory;
   type?: NotificationInteractionType;
   /** @deprecated Prefer activityLegacyId (number). */
   activityId?: string;

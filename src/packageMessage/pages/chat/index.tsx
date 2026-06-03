@@ -4,6 +4,7 @@ import Taro, { useDidShow, useRouter } from '@tarojs/taro';
 import { Send } from '../../../components/icons';
 import { ChatBuddyCard } from '../../../components/message/ChatBuddyCard';
 import { TempChatRetentionBanner } from '../../../components/message/TempChatRetentionBanner';
+import { BottomNavSlot } from '../../../components/navigation/BottomNav';
 import PageNavigation from '../../../components/navigation/PageNavigation';
 import { PLACEHOLDER_AVATAR } from '../../../constants/remoteImages';
 import { useConfirmDialog } from '../../../hooks/useConfirmDialog';
@@ -39,7 +40,7 @@ const TempChatPage: React.FC = () => {
   const postsQuery = useProfilePostsQuery();
   const myAvatar =
     sanitizeRemoteImageUrl(profileUser.avatar?.trim()) || PLACEHOLDER_AVATAR;
-  const keyboardInset = useKeyboardInset({ subtractTabBar: false });
+  const keyboardInset = useKeyboardInset();
   const [draft, setDraft] = useState('');
   const [accepting, setAccepting] = useState(false);
   const [sending, setSending] = useState(false);
@@ -166,121 +167,132 @@ const TempChatPage: React.FC = () => {
 
   if (showInitialLoading) {
     return (
-      <View data-cmp="TempChatPage" className="s-temp-chat">
-        <PageNavigation title="私信" fallback={ROUTES.MESSAGES} tone="surface" />
-        <Text className="s-temp-chat__missing">加载中…</Text>
+      <View data-cmp="TempChatPage" className="s-page-with-tabbar">
+        <View className="s-page-with-tabbar__main s-temp-chat">
+          <PageNavigation title="私信" fallback={ROUTES.MESSAGES} tone="surface" />
+          <Text className="s-temp-chat__missing">加载中…</Text>
+        </View>
+        <BottomNavSlot />
       </View>
     );
   }
 
   if (!session) {
     return (
-      <View data-cmp="TempChatPage" className="s-temp-chat">
-        <PageNavigation title="私信" fallback={ROUTES.MESSAGES} tone="surface" />
-        <Text className="s-temp-chat__missing">会话不存在或已失效</Text>
+      <View data-cmp="TempChatPage" className="s-page-with-tabbar">
+        <View className="s-page-with-tabbar__main s-temp-chat">
+          <PageNavigation title="私信" fallback={ROUTES.MESSAGES} tone="surface" />
+          <Text className="s-temp-chat__missing">会话不存在或已失效</Text>
+        </View>
+        <BottomNavSlot />
       </View>
     );
   }
 
   return (
-    <View data-cmp="TempChatPage" className="s-temp-chat">
-      <PageNavigation
-        title={session.peerName}
-        fallback={ROUTES.MESSAGES}
-        tone="surface"
-        trailing={acceptTrailing}
-      />
+    <View data-cmp="TempChatPage" className="s-page-with-tabbar">
+      <View className="s-page-with-tabbar__main s-temp-chat">
+        <PageNavigation
+          title={session.peerName}
+          fallback={ROUTES.MESSAGES}
+          tone="surface"
+          trailing={acceptTrailing}
+        />
 
-      <View className="s-temp-chat__main">
-        <ScrollView
-          scrollY
-          enhanced
-          showScrollbar={false}
-          scrollTop={scrollTop}
-          scrollIntoView={scrollIntoView}
-          scrollWithAnimation={false}
-          className="s-temp-chat__scroll s-scrollbar-none"
-          onScroll={(event) => onScroll(event.detail)}
-        >
-          <View className="s-temp-chat__inner">
-            <TempChatRetentionBanner session={session} />
-            <ChatBuddyCard
-              peerName={session.peerName}
-              peerAvatar={session.peerAvatar}
-              postTitle={session.postTitle}
-              buddyInfo={session.buddyInfo}
-            />
-            {displayMessages.map((message) => {
-              const isPeer = message.role === 'peer';
-              return (
-                <View
-                  key={message.id}
-                  id={`msg-${message.id}`}
-                  className={`s-temp-chat__bubble-row${
-                    isPeer ? '' : ' s-temp-chat__bubble-row--me'
-                  }`}
-                >
-                  {isPeer ? (
-                    <View
-                      className="s-temp-chat__bubble-avatar"
-                      style={
-                        session.peerAvatar
-                          ? { backgroundImage: `url(${session.peerAvatar})` }
-                          : undefined
-                      }
-                      aria-hidden
-                    />
-                  ) : null}
+        <View className="s-temp-chat__main">
+          <ScrollView
+            scrollY
+            enhanced
+            showScrollbar={false}
+            scrollTop={scrollTop}
+            scrollIntoView={scrollIntoView}
+            scrollWithAnimation={false}
+            className="s-temp-chat__scroll s-scrollbar-none"
+            onScroll={(event) => onScroll(event.detail)}
+          >
+            <View className="s-temp-chat__inner">
+              <TempChatRetentionBanner session={session} />
+              <ChatBuddyCard
+                peerName={session.peerName}
+                peerAvatar={session.peerAvatar}
+                postTitle={session.postTitle}
+                buddyInfo={session.buddyInfo}
+              />
+              {displayMessages.map((message) => {
+                const isPeer = message.role === 'peer';
+                return (
                   <View
-                    className={`s-temp-chat__bubble${
-                      isPeer ? ' s-temp-chat__bubble--peer' : ' s-temp-chat__bubble--me'
+                    key={message.id}
+                    id={`msg-${message.id}`}
+                    className={`s-temp-chat__bubble-row${
+                      isPeer ? '' : ' s-temp-chat__bubble-row--me'
                     }`}
                   >
-                    <Text className="s-temp-chat__bubble-text">{message.body}</Text>
-                  </View>
-                  {!isPeer ? (
+                    {isPeer ? (
+                      <View
+                        className="s-temp-chat__bubble-avatar"
+                        style={
+                          session.peerAvatar
+                            ? { backgroundImage: `url(${session.peerAvatar})` }
+                            : undefined
+                        }
+                        aria-hidden
+                      />
+                    ) : null}
                     <View
-                      className="s-temp-chat__bubble-avatar"
-                      style={{ backgroundImage: `url(${myAvatar})` }}
-                      aria-hidden
-                    />
-                  ) : null}
-                </View>
-              );
-            })}
-            <View
-              id={TEMP_CHAT_SCROLL_BOTTOM_ID}
-              className="s-temp-chat__scroll-bottom"
-            />
-          </View>
-        </ScrollView>
+                      className={`s-temp-chat__bubble${
+                        isPeer
+                          ? ' s-temp-chat__bubble--peer'
+                          : ' s-temp-chat__bubble--me'
+                      }`}
+                    >
+                      <Text className="s-temp-chat__bubble-text">{message.body}</Text>
+                    </View>
+                    {!isPeer ? (
+                      <View
+                        className="s-temp-chat__bubble-avatar"
+                        style={{ backgroundImage: `url(${myAvatar})` }}
+                        aria-hidden
+                      />
+                    ) : null}
+                  </View>
+                );
+              })}
+              <View
+                id={TEMP_CHAT_SCROLL_BOTTOM_ID}
+                className="s-temp-chat__scroll-bottom"
+              />
+            </View>
+          </ScrollView>
 
-        <View className="s-temp-chat__composer" style={composerStyle}>
-          <View className="s-temp-chat__input-wrap">
-            <Input
-              className="s-temp-chat__input"
-              value={draft}
-              placeholder="发消息…"
-              placeholderStyle="color: rgba(255,255,255,0.28)"
-              confirmType="send"
-              adjustPosition={false}
-              cursorSpacing={16}
-              onInput={(event) => setDraft(event.detail.value ?? '')}
-              onConfirm={() => void handleSend()}
-            />
+          <View className="s-temp-chat__composer" style={composerStyle}>
+            <View className="s-temp-chat__input-wrap">
+              <Input
+                className="s-temp-chat__input"
+                value={draft}
+                placeholder="发消息…"
+                placeholderStyle="color: rgba(255,255,255,0.28)"
+                confirmType="send"
+                adjustPosition={false}
+                cursorSpacing={16}
+                onInput={(event) => setDraft(event.detail.value ?? '')}
+                onConfirm={() => void handleSend()}
+              />
+            </View>
+            <Button
+              className={`s-temp-chat__send${canSend ? '' : ' s-temp-chat__send--disabled'}`}
+              disabled={!canSend || sending || !parsed}
+              aria-label="发送"
+              onClick={() => void handleSend()}
+            >
+              <Send size={18} color="#fff" aria-hidden />
+            </Button>
           </View>
-          <Button
-            className={`s-temp-chat__send${canSend ? '' : ' s-temp-chat__send--disabled'}`}
-            disabled={!canSend || sending || !parsed}
-            aria-label="发送"
-            onClick={() => void handleSend()}
-          >
-            <Send size={18} color="#fff" aria-hidden />
-          </Button>
         </View>
       </View>
 
       {confirmDialog}
+      <BottomNavSlot />
     </View>
   );
 };

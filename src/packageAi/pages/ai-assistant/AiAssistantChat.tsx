@@ -164,6 +164,7 @@ export function AiAssistantChat({
     activityLegacyId,
     activityTitle,
     activityDate: activityQuery.data?.date,
+    activityLocation: activityQuery.data?.location,
     authorName: userName,
     authorAvatar: userAvatar,
     setMessages,
