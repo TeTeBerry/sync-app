@@ -1,6 +1,6 @@
 import { fetchBlockedUserIds, unblockUser } from '../../api/sync/users';
 import type { BlockListResult } from '../../types/backend';
-import { isApiEnabled } from '../../constants/api';
+import { isLiveApi } from '../../constants/api';
 import { isLoggedIn } from '../../utils/authStorage';
 import {
   invalidateBlockedUsers,
@@ -9,7 +9,7 @@ import {
 import { useApiQuery } from '../useApiQuery';
 
 function blocksApiEnabled(): boolean {
-  return isApiEnabled() && isLoggedIn();
+  return isLiveApi() && isLoggedIn();
 }
 
 export function normalizeBlockList(data: BlockListResult): BlockListResult {

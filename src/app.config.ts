@@ -31,6 +31,11 @@ export default {
       name: 'ai',
       pages: ['pages/ai-assistant/index'],
     },
+    {
+      root: 'packageMessage',
+      name: 'message',
+      pages: ['pages/messages/index', 'pages/chat/index'],
+    },
   ],
   tabBar: {
     custom: true,
@@ -65,7 +70,7 @@ export default {
   preloadRule: {
     'pages/index/index': {
       network: 'wifi',
-      packages: ['event'],
+      packages: ['event', 'message'],
     },
     'pages/events/index': {
       network: 'wifi',
@@ -73,7 +78,7 @@ export default {
     },
     'pages/profile/index': {
       network: 'wifi',
-      packages: ['profile'],
+      packages: ['profile', 'message'],
     },
   },
 };

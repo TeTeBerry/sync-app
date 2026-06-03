@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { clearChatSession } from '../../api/syncApi';
 import { useAiChatStore } from '../../stores/aiChatStore';
-import { isApiEnabled } from '../../constants/api';
+import { isLiveApi } from '../../constants/api';
 import {
   createFreshActivitySessionId,
   createFreshSessionId,
@@ -97,7 +97,7 @@ export function useChatSession(options: UseChatSessionOptions) {
     closeAiChatWsConnection('clear chat');
 
     const previousSessionId = sessionIdRef.current;
-    if (isApiEnabled()) {
+    if (isLiveApi()) {
       try {
         await clearChatSession(previousSessionId);
       } catch {

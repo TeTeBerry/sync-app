@@ -1,7 +1,13 @@
 import Taro from '@tarojs/taro';
-import { getCacheKey, setCacheDataByKey } from '../hooks/useApiQuery';
-import { isApiEnabled } from '../constants/api';
+import {
+  broadcastCacheData,
+  getCacheKey,
+  setCacheData,
+  setCacheDataByKey,
+} from '../hooks/useApiQuery';
+import { isLiveApi } from '../constants/api';
 import { getClientUserId } from './session';
+import { invalidateHome } from './queryInvalidation';
 import type { HomeFeedPost, HomeSummary } from '../types/backend';
 
 export const HOME_POPULAR_POSTS_PERSIST_LIMIT = 8;
@@ -51,7 +57,7 @@ function writeEnvelope<T>(storageKey: string, data: T): void {
 }
 
 export function hydrateHomeCachesFromStorage(): void {
-  if (!isApiEnabled()) {
+  if (!isLiveApi()) {
     return;
   }
 
@@ -73,14 +79,46 @@ export function hydrateHomeCachesFromStorage(): void {
 }
 
 export function persistHomeSummary(data: HomeSummary): void {
-  if (!isApiEnabled()) {
+  if (!isLiveApi()) {
     return;
   }
   writeEnvelope(SUMMARY_STORAGE_KEY, data);
 }
 
+/** Clear persisted home summary (e.g. on logout so `going` is not shown to guests). */
+export function clearPersistedHomeSummary(): void {
+  try {
+    Taro.removeStorageSync(SUMMARY_STORAGE_KEY);
+  } catch {
+    // storage unavailable
+  }
+}
+
+/** Reset cached `going` flags on home summary after logout. */
+export function resetHomeSummaryGoingFlagsInCache(): void {
+  setCacheData<HomeSummary>(['home', 'summary'], (prev) => {
+    if (!prev?.signupEvents?.length) {
+      return prev;
+    }
+    return {
+      ...prev,
+      signupEvents: prev.signupEvents.map((event) =>
+        event.going ? { ...event, going: false } : event,
+      ),
+    };
+  });
+  broadcastCacheData(['home', 'summary']);
+}
+
+/** Clear persisted + in-memory home caches on logout (keeps `auth.ts` free of hook imports). */
+export function clearHomeCachesOnLogout(): void {
+  clearPersistedHomeSummary();
+  resetHomeSummaryGoingFlagsInCache();
+  invalidateHome();
+}
+
 export function persistPopularPosts(data: HomeFeedPost[]): void {
-  if (!isApiEnabled()) {
+  if (!isLiveApi()) {
     return;
   }
   const userId = getClientUserId();
@@ -93,7 +131,7 @@ export function persistPopularPosts(data: HomeFeedPost[]): void {
 
 /** Seed React Query cache when `/home` embeds `popularPosts`. */
 export function seedPopularPostsCache(posts: HomeFeedPost[] | undefined): void {
-  if (!isApiEnabled() || !posts?.length) {
+  if (!isLiveApi() || !posts?.length) {
     return;
   }
   const userId = getClientUserId();

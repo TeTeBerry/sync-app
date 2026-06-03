@@ -224,7 +224,11 @@ AI 匹配配额：服务端在 `post_recommendations` 且 `posts.length > 0` 时
 | DELETE | `/api/posts/:id` | 删除自己的帖子 |
 | POST | `/api/posts/:id/like` | 点赞 |
 | POST | `/api/posts/:id/comments` | 发表评论 `{ "body": "..." }` |
-| POST | `/api/posts/:id/applications` | 申请加入 |
+| POST | `/api/posts/:id/applications` | 申请加入（可选 `{ "message": "..." }`；创建首条会话消息） |
+| POST | `/api/posts/:id/applications/:applicantUserId/accept` | 帖主接受组队 |
+| GET | `/api/team-chats` | 当前用户相关的临时组队会话列表（不含已过期线程；过期消息会从库中删除） |
+| GET | `/api/team-chats/:postId/:applicantUserId/messages` | 会话消息（双方可读；过期返回 400 并删除该线程消息） |
+| POST | `/api/team-chats/:postId/:applicantUserId/messages` | 发送消息 `{ "body": "..." }`（过期不可发） |
 | GET | `/api/profile` | 个人资料摘要 |
 | GET | `/api/profile/activities` | 我的报名活动 |
 | GET | `/api/profile/posts` | 我的帖子 |

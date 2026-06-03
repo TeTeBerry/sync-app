@@ -54,7 +54,13 @@ const PostCardActionBar: React.FC<PostCardActionBarProps> = ({
 
   return (
     <View className={isHome ? 's-home-post__actions' : 's-event-post__actions'}>
-      <Button className={likeClassName} onClick={onLike} disabled={likeDisabled}>
+      <Button
+        plain
+        hoverClass="none"
+        className={likeClassName}
+        onClick={onLike}
+        disabled={likeDisabled}
+      >
         <LikeIcon
           size={16}
           className={iconClass}
@@ -63,7 +69,12 @@ const PostCardActionBar: React.FC<PostCardActionBarProps> = ({
         />
         <Text className={labelClass}>{likes}</Text>
       </Button>
-      <Button className={commentClassName} onClick={onToggleComments}>
+      <Button
+        plain
+        hoverClass="none"
+        className={commentClassName}
+        onClick={onToggleComments}
+      >
         <MessageCircle
           size={16}
           className={iconClass}

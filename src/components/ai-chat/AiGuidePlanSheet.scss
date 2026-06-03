@@ -481,6 +481,11 @@
     &--pressed {
       opacity: 0.92;
     }
+
+    &--loading {
+      opacity: 0.88;
+      pointer-events: none;
+    }
   }
 
   &__submit-text {

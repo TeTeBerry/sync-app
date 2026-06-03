@@ -9,8 +9,9 @@
 
   .s-ai-guide-plan-sheet__scroll {
     flex: 1;
-    min-height: 0;
-    height: 0;
+    min-height: 280px;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .s-ai-guide-plan-sheet__body {
@@ -24,8 +25,42 @@
   .s-ai-guide-plan-sheet__footer {
     position: relative;
     z-index: 3;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
     border-top: 1px solid rgba(255, 255, 255, 0.08);
     box-shadow: 0 -10px 28px rgba(0, 0, 0, 0.45);
+  }
+
+  &__sync-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 0 2px;
+    box-sizing: border-box;
+  }
+
+  &__sync-copy {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  &__sync-label {
+    font-size: var(--s-type-body-sm);
+    font-weight: var(--s-fw-semibold);
+    color: rgba(255, 255, 255, 0.92);
+    line-height: 1.3;
+  }
+
+  &__sync-hint {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.42);
+    line-height: 1.35;
   }
 
   &__label {

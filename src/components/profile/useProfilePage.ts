@@ -1,6 +1,6 @@
 import Taro, { useDidShow } from '@tarojs/taro';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { isApiEnabled } from '../../constants/api';
+import { isLiveApi } from '../../constants/api';
 import { useBlockedUsersQuery, useProfileSummaryQuery } from '../../hooks/useSyncApi';
 import { useDeferredMount } from '../../hooks/useDeferredMount';
 import type { ConfirmDialogOptions } from '../../hooks/useConfirmDialog';
@@ -77,7 +77,7 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
   const summaryQuery = useProfileSummaryQuery();
   const blockedUsersQuery = useBlockedUsersQuery();
   const entitlementsReady = useDeferredMount(DEFER_PROFILE_ENTITLEMENTS_MS);
-  const apiEnabled = isApiEnabled();
+  const apiEnabled = isLiveApi();
   const { loggedIn, refresh: refreshAuthSession } = useAuthSession();
   const showGuestProfile = apiEnabled && !loggedIn;
 

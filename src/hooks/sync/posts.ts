@@ -1,4 +1,5 @@
 import {
+  acceptPostApplication,
   addPostComment,
   applyToPost,
   deletePost,
@@ -11,7 +12,7 @@ import {
 import { blockUser } from '../../api/sync/users';
 import { resolveRequestUserId } from '../../api/requestContext';
 import type { HomeFeedPost } from '../../types/backend';
-import { isApiEnabled } from '../../constants/api';
+import { isLiveApi } from '../../constants/api';
 import {
   HOME_POPULAR_POSTS_PERSIST_LIMIT,
   persistPopularPosts,
@@ -22,9 +23,11 @@ import {
   invalidatePostComments,
   invalidateBlockedUsers,
   invalidatePostFeeds,
+  invalidateProfilePosts,
   invalidateProfileSummary,
   patchLikedPostInCaches,
   patchPostStatusInCaches,
+  patchProfilePostApplicationAccepted,
   patchUpdatedProfilePostInCaches,
 } from '../../utils/queryInvalidation';
 import { isCurrentUserPostAuthor } from '../../utils/postOwnership';
@@ -36,10 +39,11 @@ import { useApiQuery } from '../useApiQuery';
 import { useHomeSummary } from './activities';
 import type { QueryEnableOptions } from './types';
 import { invalidateNotificationQueries } from './notifications';
+import { invalidateTeamChatQueries } from './teamChats';
 
 export function usePopularPostsQuery(options?: QueryEnableOptions) {
   const tabEnabled = options?.enabled ?? true;
-  const enabled = isApiEnabled() && tabEnabled;
+  const enabled = isLiveApi() && tabEnabled;
   const userId = resolveRequestUserId();
 
   return useApiQuery({
@@ -103,7 +107,7 @@ export function useEventPostsQuery(
 ) {
   const tabEnabled = options?.enabled ?? true;
   const enabled =
-    isApiEnabled() &&
+    isLiveApi() &&
     activityLegacyId != null &&
     !Number.isNaN(activityLegacyId) &&
     tabEnabled;
@@ -118,7 +122,7 @@ export function useEventPostsQuery(
 }
 
 export function usePostCommentsQuery(postId: string, enabled: boolean) {
-  const apiEnabled = isApiEnabled();
+  const apiEnabled = isLiveApi();
 
   return useApiQuery({
     queryKey: ['posts', postId, 'comments'],
@@ -158,8 +162,25 @@ export async function commentPostAndInvalidate(
   return updated;
 }
 
-export async function applyToPostAndInvalidate(postId: string) {
-  return applyToPost(postId);
+export async function applyToPostAndInvalidate(
+  postId: string,
+  payload?: Parameters<typeof applyToPost>[1],
+) {
+  const result = await applyToPost(postId, payload);
+  invalidateTeamChatQueries();
+  return result;
+}
+
+export async function acceptPostApplicationAndInvalidate(
+  postId: string,
+  applicantUserId: string,
+) {
+  const result = await acceptPostApplication(postId, applicantUserId);
+  patchProfilePostApplicationAccepted(postId, applicantUserId);
+  invalidateProfilePosts();
+  invalidatePostFeeds();
+  invalidateTeamChatQueries();
+  return result;
 }
 
 export async function updatePostAndInvalidate(

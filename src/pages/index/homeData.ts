@@ -1,1 +1,2 @@
-export type { CountdownPart, FeaturedEvent } from '../../types/home';
+export type { CountdownPart } from '../../types/countdown';
+export type { FeaturedEvent } from '../../utils/apiMappers';

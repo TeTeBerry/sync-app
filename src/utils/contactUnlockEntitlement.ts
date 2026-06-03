@@ -1,5 +1,5 @@
 import { consumeProfileContactUnlock } from '../api/syncApi';
-import { isApiEnabled } from '../constants/api';
+import { isLiveApi } from '../constants/api';
 import { invalidateProfileEntitlements } from './queryInvalidation';
 
 /**
@@ -11,7 +11,7 @@ import { invalidateProfileEntitlements } from './queryInvalidation';
 export async function consumeContactUnlockWithQuota(
   activityLegacyId: number,
 ): Promise<boolean> {
-  if (!isApiEnabled()) {
+  if (!isLiveApi()) {
     return true;
   }
 

@@ -18,7 +18,7 @@ import {
 } from '../../../utils/profileStorage';
 import { useProfilePageStore } from '../../../stores/profilePageStore';
 import { useEndRouteTransitionOnShow } from '../../../hooks/useEndRouteTransitionOnShow';
-import { isApiEnabled } from '../../../constants/api';
+import { isLiveApi } from '../../../constants/api';
 import { isLoggedIn } from '../../../utils/authStorage';
 import { Button } from '../../../components/ui';
 import { ScrollView, Text, View } from '@tarojs/components';
@@ -80,7 +80,7 @@ const SettingsPage: React.FC = () => {
   const setStorePrivacyLevel = useProfilePageStore((state) => state.setPrivacyLevel);
 
   useEffect(() => {
-    if (!isApiEnabled()) return;
+    if (!isLiveApi()) return;
     if (section === 'blocked' && !isLoggedIn()) {
       void Taro.showToast({ title: '请先登录', icon: 'none' });
       void Taro.navigateBack();

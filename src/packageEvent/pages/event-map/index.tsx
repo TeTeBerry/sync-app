@@ -1,109 +1,186 @@
 import './event-map.scss';
 import Taro, { useRouter } from '@tarojs/taro';
 import { useCallback, useMemo, useState } from 'react';
-import { Bell, Minus, Plane, Plus } from '../../../components/icons';
+import { Image, Text, View, Canvas } from '@tarojs/components';
+import { Minus, Plus, Share2 } from '../../../components/icons';
 import { Button } from '../../../components/ui';
-import { Canvas, Image, Text, View } from '@tarojs/components';
-import { EventMapUserPostsSheet } from '../../../components/event-map/EventMapUserPostsSheet';
-import { useEventMapController } from '../../../components/event-map/useEventMapController';
-import { EVENT_MAP_TOP_BAR_CONTENT_PX } from '../../../components/event-map/eventMapLayout';
-import {
-  EVENT_MAP_BOTTOM_ROW,
-  EVENT_MAP_DEFAULT_TITLE,
-  markerAvatarUrl,
-  type EventMapMarker,
-} from '../../../components/event-map/eventMapMarkers';
 import PageNavigation from '../../../components/navigation/PageNavigation';
 import { useNavBarInsets } from '../../../hooks/useNavBarInsets';
 import { decodeRouteQueryParam, ROUTES } from '../../../utils/route';
 import { useEndRouteTransitionOnShow } from '../../../hooks/useEndRouteTransitionOnShow';
+import { usePageRouteReady } from '../../../hooks/usePageRouteReady';
+import { VENUE_MAP_IMAGE_SRC } from '../../../components/venue-map/venueMapAsset';
+import { useVenueMap } from '../../../components/venue-map/useVenueMap';
+import { VenueMapNameSheet } from '../../../components/venue-map/VenueMapNameSheet';
+import {
+  renderVenueMapShareImage,
+  VENUE_MAP_EXPORT_CANVAS_ID,
+} from '../../../components/venue-map/renderVenueMapShareImage';
+import {
+  saveTravelGuideImageToAlbum,
+  shareTravelGuideImage,
+} from '../../../utils/travelGuideShare';
 
-function showMapToast(label: string) {
-  void Taro.showToast({ title: label, icon: 'none', duration: 1200 });
-}
+const TOP_BAR_CONTENT_PX = 52;
+const BOTTOM_ACTION_BAR_PX = 88;
 
 const EventMapPage = () => {
   useEndRouteTransitionOnShow();
   const router = useRouter();
   const navInsets = useNavBarInsets();
-  const [postsSheetMarker, setPostsSheetMarker] = useState<EventMapMarker | null>(null);
+  const [exporting, setExporting] = useState(false);
 
   const eventTitle = useMemo(() => {
     const fromRoute = decodeRouteQueryParam(router.params.title);
-    return fromRoute || EVENT_MAP_DEFAULT_TITLE;
+    return fromRoute || 'STORM 电音节';
   }, [router.params.title]);
 
-  const activityLegacyId = useMemo(() => {
-    const fromRoute = Number(router.params.activityLegacyId);
-    return Number.isFinite(fromRoute) && fromRoute > 0 ? fromRoute : undefined;
-  }, [router.params.activityLegacyId]);
+  const win = Taro.getWindowInfo();
+  const windowWidth = win.windowWidth;
+  const windowHeight = win.windowHeight;
+  const safeBottom =
+    win.safeArea != null ? Math.max(0, windowHeight - win.safeArea.bottom) : 0;
+  const topChromePx = navInsets.paddingTop + TOP_BAR_CONTENT_PX;
+  const mapViewHeight = Math.max(
+    200,
+    windowHeight - topChromePx - BOTTOM_ACTION_BAR_PX - safeBottom,
+  );
 
-  const openUserPosts = useCallback((marker: EventMapMarker) => {
-    setPostsSheetMarker(marker);
-  }, []);
-
-  const closeUserPosts = useCallback(() => {
-    setPostsSheetMarker(null);
-  }, []);
-
-  const topChromePx = navInsets.paddingTop + EVENT_MAP_TOP_BAR_CONTENT_PX;
-
-  const {
-    canvasId,
-    canvasStyle,
-    handleCanvasReady,
-    handleTouchStart,
-    handleTouchMove,
-    handleTouchEnd,
-    handleTouchCancel,
-    handleZoomIn,
-    handleZoomOut,
-  } = useEventMapController({
-    eventTitle,
-    onMarkerTap: openUserPosts,
-    topChromePx,
+  const venue = useVenueMap({
+    viewWidth: windowWidth,
+    viewHeight: mapViewHeight,
+    stageTopFallbackPx: topChromePx,
   });
+
+  const exportAndRun = useCallback(
+    async (runner: (path: string) => Promise<void>) => {
+      if (!venue.marker || venue.phase !== 'placed') {
+        void Taro.showToast({ title: '请先长按地图添加集合点', icon: 'none' });
+        return;
+      }
+      setExporting(true);
+      void Taro.showLoading({ title: '生成图片…', mask: true });
+      try {
+        await new Promise<void>((resolve) => {
+          Taro.nextTick(() => setTimeout(resolve, 60));
+        });
+        const path = await renderVenueMapShareImage(venue.marker, {
+          displayMapWidthPx: venue.mapSize.width || windowWidth,
+        });
+        await runner(path);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : '生成失败';
+        void Taro.showToast({ title: message, icon: 'none' });
+      } finally {
+        Taro.hideLoading();
+        setExporting(false);
+      }
+    },
+    [venue.mapSize.width, venue.marker, venue.phase, windowWidth],
+  );
+
+  const handleSave = useCallback(() => {
+    void exportAndRun(async (path) => {
+      await saveTravelGuideImageToAlbum(path);
+      void Taro.showToast({
+        title: '已保存到相册',
+        icon: 'success',
+      });
+    });
+  }, [exportAndRun]);
+
+  const handleShare = useCallback(() => {
+    void exportAndRun(async (path) => {
+      await shareTravelGuideImage(path);
+    });
+  }, [exportAndRun]);
+
+  const mapReady = venue.mapSize.width > 0;
+  usePageRouteReady(mapReady);
 
   return (
     <View className="s-event-map">
       <PageNavigation
         className="s-event-map__top"
+        title={eventTitle}
         fallback={ROUTES.EVENT_DETAIL}
-        trailing={
-          <Button
-            className="s-page-nav__icon-action s-page-nav__icon-action--overlay"
-            aria-label="通知"
-            hoverClass="s-page-nav__icon-action--pressed"
-            onTap={() => showMapToast('通知即将上线')}
-          >
-            <Bell size={18} />
-          </Button>
-        }
       />
 
-      <View className="s-event-map__stage">
-        <Canvas
-          type="2d"
-          id={canvasId}
-          className="s-event-map__canvas"
-          style={canvasStyle}
-          disableScroll
-          onReady={handleCanvasReady}
-          onError={(event) => {
-            console.error('[event-map] canvas error', event.detail);
-          }}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-          onTouchCancel={handleTouchCancel}
-        />
+      <View
+        className="s-event-map__stage"
+        style={{ height: `${mapViewHeight}px` }}
+        catchMove
+        onTouchStart={venue.handleTouchStart}
+        onTouchMove={venue.handleTouchMove}
+        onTouchEnd={venue.handleTouchEnd}
+        onTouchCancel={venue.handleTouchCancel}
+      >
+        {mapReady ? (
+          <View className="s-event-map__world" style={venue.worldLayoutStyle}>
+            <Image
+              className="s-event-map__image"
+              src={VENUE_MAP_IMAGE_SRC}
+              mode="aspectFill"
+              showMenuByLongpress={false}
+            />
+          </View>
+        ) : (
+          <View className="s-event-map__loading">
+            <Text className="s-event-map__loading-text">加载场馆图…</Text>
+          </View>
+        )}
+
+        {venue.pinScreen && venue.marker ? (
+          <View
+            className={[
+              's-event-map__pin',
+              venue.phase === 'naming' ? 's-event-map__pin--pending' : '',
+            ]
+              .filter(Boolean)
+              .join(' ')}
+            style={{
+              left: `${venue.pinScreen.x}px`,
+              top: `${venue.pinScreen.y}px`,
+            }}
+          >
+            {venue.phase === 'placed' && venue.marker.label ? (
+              <Text className="s-event-map__pin-label">{venue.marker.label}</Text>
+            ) : (
+              <Text className="s-event-map__pin-label s-event-map__pin-label--temp">
+                集合点
+              </Text>
+            )}
+            <View className="s-event-map__pin-bubble" aria-hidden />
+          </View>
+        ) : null}
+
+        <View className="s-event-map__hint-bar">
+          <Text className="s-event-map__hint">
+            {venue.phase === 'naming'
+              ? venue.nameSheetOpen
+                ? '可拖动标记微调位置'
+                : '拖动标记调整位置，完成后点击命名'
+              : venue.phase === 'placed'
+                ? '拖动标记可微调位置'
+                : '长按地图选择集合位置'}
+          </Text>
+          {venue.phase === 'naming' && !venue.nameSheetOpen ? (
+            <Button
+              className="s-event-map__name-cta"
+              hoverClass="s-event-map__name-cta--pressed"
+              onTap={venue.openNameSheet}
+            >
+              为标记命名
+            </Button>
+          ) : null}
+        </View>
 
         <View className="s-event-map__zoom">
           <Button
             className="s-event-map__zoom-btn"
             aria-label="放大"
             hoverClass="s-event-map__zoom-btn--pressed"
-            onTap={handleZoomIn}
+            onTap={venue.handleZoomIn}
           >
             <Plus size={20} />
           </Button>
@@ -111,7 +188,7 @@ const EventMapPage = () => {
             className="s-event-map__zoom-btn"
             aria-label="缩小"
             hoverClass="s-event-map__zoom-btn--pressed"
-            onTap={handleZoomOut}
+            onTap={venue.handleZoomOut}
           >
             <Minus size={20} />
           </Button>
@@ -119,44 +196,50 @@ const EventMapPage = () => {
       </View>
 
       <View className="s-event-map__bottom">
-        <View className="s-event-map__bottom-row">
-          {EVENT_MAP_BOTTOM_ROW.map((person) => (
-            <View
-              key={person.name}
-              className="s-event-map__bottom-person"
-              hoverClass="s-event-map__bottom-person--pressed"
-              onTap={() => openUserPosts(person)}
-            >
-              <View className="s-event-map__bottom-avatar-wrap">
-                <View
-                  className={['s-event-map__bottom-avatar', person.ringClass].join(' ')}
-                >
-                  <Image
-                    className="s-event-map__bottom-avatar-img"
-                    src={markerAvatarUrl(person.avatarSeed, 104)}
-                    mode="aspectFill"
-                  />
-                </View>
-                {person.bottomBadge === 'plane' ? (
-                  <View className="s-event-map__bottom-badge" aria-hidden>
-                    <Plane size={11} color="#fff" />
-                  </View>
-                ) : null}
-              </View>
-              <Text className="s-event-map__bottom-name">
-                {person.shortName ?? person.name}
-              </Text>
-            </View>
-          ))}
-        </View>
+        <Button
+          className={[
+            's-event-map__action',
+            's-event-map__action--secondary',
+            venue.canShare && !exporting ? '' : 's-event-map__action--disabled',
+          ]
+            .filter(Boolean)
+            .join(' ')}
+          hoverClass="s-event-map__action--pressed"
+          onTap={venue.canShare && !exporting ? handleSave : undefined}
+        >
+          保存图片
+        </Button>
+        <Button
+          className={[
+            's-event-map__action',
+            's-event-map__action--primary',
+            venue.canShare && !exporting ? '' : 's-event-map__action--disabled',
+          ]
+            .filter(Boolean)
+            .join(' ')}
+          hoverClass="s-event-map__action--pressed"
+          onTap={venue.canShare && !exporting ? handleShare : undefined}
+        >
+          <Share2 size={18} color="#fff" />
+          <Text>分享到微信群</Text>
+        </Button>
       </View>
 
-      <EventMapUserPostsSheet
-        open={postsSheetMarker !== null}
-        marker={postsSheetMarker}
-        activityLegacyId={activityLegacyId}
-        onClose={closeUserPosts}
+      <VenueMapNameSheet
+        open={venue.nameSheetOpen}
+        value={venue.draftLabel}
+        onChange={venue.setDraftLabel}
+        onConfirm={venue.confirmMarkerName}
+        onCancel={venue.cancelMarkerNaming}
       />
+
+      {exporting ? (
+        <Canvas
+          type="2d"
+          id={VENUE_MAP_EXPORT_CANVAS_ID}
+          className="s-event-map__export-canvas"
+        />
+      ) : null}
     </View>
   );
 };

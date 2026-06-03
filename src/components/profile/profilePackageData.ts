@@ -13,7 +13,7 @@ export const PACKAGE_TIER_ORDER: readonly PackageTierId[] = [
   'ultra',
 ] as const;
 
-/** Offline / mock-mode catalog when `isApiEnabled()` is false. */
+/** Offline / mock-mode catalog when `isLiveApi()` is false. */
 export const MOCK_PACKAGE_CATALOG: PackageCatalog = {
   sheet: {
     title: '单场套餐',

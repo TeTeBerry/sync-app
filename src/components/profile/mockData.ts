@@ -104,6 +104,27 @@ export const profilePosts: ProfilePostItem[] = [
     date: '2026-05-18',
     activityLegacyId: 4,
     contentTypes: ['team'],
+    pendingApplicationCount: 2,
+    applications: [
+      {
+        id: 'mock-apply-1',
+        userId: 'demo-luna',
+        name: 'Luna',
+        avatar: 'https://picsum.photos/seed/sync-avatar-luna/200/200',
+        message: '我也从广州出发，可以一起走～',
+        status: 'pending',
+        appliedAt: new Date(Date.now() - 12 * 60 * 1000).toISOString(),
+      },
+      {
+        id: 'mock-apply-2',
+        userId: 'demo-ryan',
+        name: 'Ryan',
+        avatar: 'https://picsum.photos/seed/sync-avatar-ryan/200/200',
+        message: '深圳本地，可以一起拼车进场',
+        status: 'pending',
+        appliedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+      },
+    ],
   },
   {
     id: 'post-4',

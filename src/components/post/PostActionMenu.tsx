@@ -5,7 +5,7 @@ import Taro from '@tarojs/taro';
 import { PostActionSheet } from './PostActionSheet';
 import { useConfirmDialog } from '../../hooks/useConfirmDialog';
 import { blockUserAndInvalidate, submitReport } from '../../hooks/useSyncApi';
-import { isApiEnabled } from '../../constants/api';
+import { isLiveApi } from '../../constants/api';
 import { requireAuth } from '../../utils/authGate';
 import { getApiErrorMessage } from '../../utils/apiErrorMessage';
 import { usePostShareStore } from '../../stores/postShareStore';
@@ -38,14 +38,23 @@ export const PostShareButton: FC<PostShareButtonProps> = ({ share }) => {
   }, [isWeapp, setPendingShare, share]);
 
   return (
-    <Button
+    <View
       className="s-post-share-btn"
       aria-label="分享"
-      openType={isWeapp ? 'share' : undefined}
-      onClick={handleShareTap}
+      onClick={!isWeapp ? handleShareTap : undefined}
     >
       <Share2 size={18} color={POST_ACTION_ICON_COLOR} />
-    </Button>
+      {isWeapp ? (
+        <Button
+          className="s-post-share-btn__hit"
+          plain
+          hoverClass="none"
+          aria-label="分享"
+          openType="share"
+          onClick={handleShareTap}
+        />
+      ) : null}
+    </View>
   );
 };
 
@@ -67,7 +76,7 @@ export const PostActionMenu: FC<PostActionMenuProps> = ({
   }, []);
 
   const ensureApiReady = useCallback((): boolean => {
-    if (isApiEnabled()) return true;
+    if (isLiveApi()) return true;
     void Taro.showToast({ title: '请配置 API 地址', icon: 'none' });
     return false;
   }, []);
@@ -145,9 +154,11 @@ export const PostActionMenu: FC<PostActionMenuProps> = ({
   const sheetMode = onDelete ? 'owner' : 'viewer';
 
   return (
-    <View>
+    <View className="s-post-action-menu__trigger-wrap">
       <Button
-        className="s-post-action-menu__trigger"
+        className="s-post-action-menu__trigger--plain"
+        plain
+        hoverClass="none"
         aria-label="更多"
         onClick={() => setMenuOpen(true)}
       >

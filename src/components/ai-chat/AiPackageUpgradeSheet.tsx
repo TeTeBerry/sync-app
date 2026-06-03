@@ -8,7 +8,7 @@ import {
   purchaseProfilePackageAndInvalidate,
   useProfilePackagesQuery,
 } from '../../hooks/useSyncApi';
-import { isApiEnabled } from '../../constants/api';
+import { isLiveApi } from '../../constants/api';
 import { MOCK_PACKAGE_CATALOG, packageTierCtaLabel } from '../profile';
 import type {
   PackageFeatureIcon,
@@ -113,7 +113,7 @@ const AiPackageUpgradeSheet: React.FC<AiPackageUpgradeSheetProps> = ({
   onViewAllBenefits,
 }) => {
   useOverlayLock(open);
-  const apiEnabled = isApiEnabled();
+  const apiEnabled = isLiveApi();
   const packagesQuery = useProfilePackagesQuery();
   const catalog = apiEnabled ? packagesQuery.data : MOCK_PACKAGE_CATALOG;
   const tiers = useMemo(() => catalog?.tiers ?? [], [catalog?.tiers]);

@@ -5,7 +5,7 @@ import {
   type SetStateAction,
 } from 'react';
 import Taro from '@tarojs/taro';
-import { AI_CHAT_WS_URL, isApiEnabled } from '../../constants/api';
+import { AI_CHAT_WS_URL, isLiveApi } from '../../constants/api';
 import type {
   AiChatStreamEvent,
   ChatUiMessage,
@@ -49,13 +49,11 @@ export interface UseWsChatStreamOptions {
 
 export function useWsChatStream(options: UseWsChatStreamOptions) {
   const {
-    welcomeText,
     mockReply,
     streamErrorText,
     wsUrl = AI_CHAT_WS_URL,
     activityLegacyIdRef,
     sessionIdRef,
-    messagesRef,
     setMessages,
     getAuthHeaders,
     onPostCreated,
@@ -105,8 +103,8 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
       });
 
       try {
-        const useLiveApi = Boolean(wsUrl?.trim()) && isApiEnabled();
-        const stream = useLiveApi
+        const wsLiveApi = Boolean(wsUrl?.trim()) && isLiveApi();
+        const stream = wsLiveApi
           ? streamAiChatWs({
               url: wsUrl,
               messages: history,

@@ -3,7 +3,7 @@ import Taro from '@tarojs/taro';
 import { useCallback, useState, type FC } from 'react';
 import { ChevronUp, Heart, Send } from '../../components/icons';
 import { commentPostAndInvalidate, usePostCommentsQuery } from '../../hooks/useSyncApi';
-import { isApiEnabled } from '../../constants/api';
+import { isLiveApi } from '../../constants/api';
 import { requireAuth } from '../../utils/authGate';
 import { PLACEHOLDER_AVATAR } from '../../constants/remoteImages';
 import { sanitizeRemoteImageUrl } from '../../utils/imageUrl';
@@ -117,7 +117,7 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
   currentUserAvatar,
   onCommentSubmitted,
 }) => {
-  const apiEnabled = isApiEnabled();
+  const apiEnabled = isLiveApi();
   const commentsQuery = usePostCommentsQuery(postId, expanded);
   const isPostAuthor = isCurrentUserPostAuthor(postAuthorName, postAuthorUserId);
   const [draft, setDraft] = useState('');

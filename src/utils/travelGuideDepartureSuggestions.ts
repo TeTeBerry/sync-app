@@ -19,21 +19,21 @@ export function eventCityFromLocation(location?: string): string | undefined {
 export function mapPlaceSuggestionsToDepartureItems(
   items: TravelGuidePlaceSuggestion[],
 ): DepartureSuggestionItem[] {
-  return items
-    .map((item) => {
-      const label = item.title.trim();
-      if (!label) return null;
-      const kind: DepartureSuggestionItem['kind'] = isCitySuggestionRow(item)
-        ? 'city'
-        : 'place';
-      return {
-        label,
-        kind,
-        city: item.city?.trim() || undefined,
-        address: item.address?.trim() || undefined,
-      };
-    })
-    .filter((row): row is DepartureSuggestionItem => row != null);
+  const rows: DepartureSuggestionItem[] = [];
+  for (const item of items) {
+    const label = item.title.trim();
+    if (!label) continue;
+    const kind: DepartureSuggestionItem['kind'] = isCitySuggestionRow(item)
+      ? 'city'
+      : 'place';
+    rows.push({
+      label,
+      kind,
+      city: item.city?.trim() || undefined,
+      address: item.address?.trim() || undefined,
+    });
+  }
+  return rows;
 }
 
 /** 输入框回显：POI 优先完整 address，城市用 label */

@@ -35,9 +35,16 @@ export function useEventDetailBuddyPost(
   }, []);
 
   const handleBuddyPostSheetSubmit = useCallback(
-    async (form: AiBuddyPostFormValues) => {
-      if (!Number.isFinite(eventId) || eventId <= 0) return;
-      if (isPublishing) return;
+    async (
+      form: AiBuddyPostFormValues,
+      submitOptions?: {
+        quiet?: boolean;
+        skipListRefresh?: boolean;
+        listedInFeed?: boolean;
+      },
+    ): Promise<boolean> => {
+      if (!Number.isFinite(eventId) || eventId <= 0) return false;
+      if (isPublishing) return false;
 
       setIsPublishing(true);
       setSheetOpen(false);
@@ -54,28 +61,32 @@ export function useEventDetailBuddyPost(
           activityTitle: title,
           authorName: options.authorName,
           authorAvatar: options.authorAvatar,
+          listedInFeed: submitOptions?.listedInFeed,
         });
 
-        await invalidatePostQueries();
-        await options.refreshPosts?.();
+        if (!submitOptions?.skipListRefresh) {
+          await invalidatePostQueries();
+          try {
+            await options.refreshPosts?.();
+          } catch {
+            // List refresh is best-effort; publish already succeeded.
+          }
+        }
 
-        void Taro.showToast({ title: '组队帖已发布', icon: 'success' });
+        if (!submitOptions?.quiet) {
+          void Taro.showToast({ title: '组队帖已发布', icon: 'success' });
+        }
+        return true;
       } catch (error) {
         const message = error instanceof Error ? error.message : '发帖失败，请稍后重试';
         void Taro.showToast({ title: message, icon: 'none' });
         setSheetOpen(true);
+        return false;
       } finally {
         setIsPublishing(false);
       }
     },
-    [
-      activityQuery.data?.name,
-      eventId,
-      isPublishing,
-      options.authorAvatar,
-      options.authorName,
-      options.refreshPosts,
-    ],
+    [activityQuery.data?.name, eventId, isPublishing, options],
   );
 
   return {

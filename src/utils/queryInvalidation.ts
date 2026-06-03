@@ -13,6 +13,7 @@ import type {
   ProfileSummary,
 } from '../types/backend';
 import { sumProfilePostLikes } from './profileLikes';
+import { patchProfilePostAfterAcceptApplication } from './profilePostApplications';
 import type { BackendPostStatusLabel } from './postStatus';
 
 /** 失效通知相关查询 */
@@ -112,6 +113,25 @@ export function patchPostStatusInCaches(
   });
 
   broadcastCacheData(['posts']);
+  broadcastCacheData(['profile', 'posts']);
+}
+
+/** After owner accepts one applicant: mark applicant accepted and close recruitment on profile caches. */
+export function patchProfilePostApplicationAccepted(
+  postId: string,
+  applicantUserId: string,
+) {
+  forEachCacheEntry((key, data) => {
+    if (key !== 'profile|posts' || !Array.isArray(data)) return;
+    const patched = patchProfilePostAfterAcceptApplication(
+      data as ProfilePostItem[],
+      postId,
+      applicantUserId,
+    );
+    setCacheDataByKey(key, patched);
+  });
+
+  patchPostStatusInCaches(postId, '已组队');
   broadcastCacheData(['profile', 'posts']);
 }
 

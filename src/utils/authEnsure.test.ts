@@ -21,6 +21,7 @@ vi.mock('./authStorage', () => ({
 
 vi.mock('../constants/api', () => ({
   isApiEnabled: () => true,
+  isLiveApi: () => true,
 }));
 
 vi.mock('./apiClient', () => ({
@@ -72,6 +73,7 @@ describe('ensureAuth', () => {
   it('returns null when API is disabled', async () => {
     vi.doMock('../constants/api', () => ({
       isApiEnabled: () => false,
+      isLiveApi: () => false,
     }));
 
     const { ensureAuth } = await import('./auth');

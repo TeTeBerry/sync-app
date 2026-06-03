@@ -19,7 +19,7 @@ import {
   useProfilePackagesQuery,
   purchaseProfilePackageAndInvalidate,
 } from '../../hooks/useSyncApi';
-import { isApiEnabled } from '../../constants/api';
+import { isLiveApi } from '../../constants/api';
 import {
   isBoundActivityLegacyId,
   MOCK_PACKAGE_CATALOG,
@@ -214,7 +214,7 @@ const ProfilePackageSheet: React.FC<ProfilePackageSheetProps> = ({
   onPurchaseSuccess,
 }) => {
   useOverlayLock(open);
-  const apiEnabled = isApiEnabled();
+  const apiEnabled = isLiveApi();
   const packagesQuery = useProfilePackagesQuery();
   const catalog = apiEnabled ? packagesQuery.data : MOCK_PACKAGE_CATALOG;
   const tiers = useMemo(() => catalog?.tiers ?? [], [catalog?.tiers]);

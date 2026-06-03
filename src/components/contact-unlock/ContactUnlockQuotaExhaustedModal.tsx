@@ -13,7 +13,7 @@ import {
 import { Text, View } from '@tarojs/components';
 import { useOverlayLock } from '../../hooks/useOverlayLock';
 import { useProfilePackagesQuery } from '../../hooks/useSyncApi';
-import { isApiEnabled } from '../../constants/api';
+import { isLiveApi } from '../../constants/api';
 import { MOCK_PACKAGE_CATALOG } from '../profile';
 import type { FreeMonthlyQuota, PackageTierId } from '../../types/backend';
 import {
@@ -63,7 +63,7 @@ export function ContactUnlockQuotaExhaustedModal({
     });
   }, [onClose, onViewAllBenefits]);
 
-  const apiEnabled = isApiEnabled();
+  const apiEnabled = isLiveApi();
   const packagesQuery = useProfilePackagesQuery();
   const catalog = apiEnabled ? packagesQuery.data : MOCK_PACKAGE_CATALOG;
   const tiers = useMemo(() => catalog?.tiers ?? [], [catalog?.tiers]);

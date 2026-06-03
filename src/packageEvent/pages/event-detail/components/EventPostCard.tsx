@@ -1,5 +1,11 @@
 import { memo } from 'react';
-import { Check, CircleCheck, MapPin, Users, Zap } from '../../../../components/icons';
+import {
+  CircleCheck,
+  MapPin,
+  MessageCircle,
+  Users,
+  Zap,
+} from '../../../../components/icons';
 import PostCardActionBar from '../../../../components/post/PostCardActionBar';
 import { buildPostSharePayload } from '../../../../components/post/postCardShare';
 import {
@@ -42,6 +48,7 @@ export type EventPostCardProps = {
   onToggleComments: (postId: string) => void;
   onDelete: (post: EventDetailPost) => void;
   onApply: (postId: string) => void;
+  onOpenAppliedChat?: (post: EventDetailPost) => void;
   onComplete?: (postId: string) => void;
   onCommentSubmitted: (
     updated: Pick<EventDetailPost, 'id' | 'comments' | 'likes' | 'liked'>,
@@ -82,6 +89,7 @@ function EventPostCardInner({
   onToggleComments,
   onDelete,
   onApply,
+  onOpenAppliedChat,
   onComplete,
   onCommentSubmitted,
 }: EventPostCardProps) {
@@ -241,9 +249,12 @@ function EventPostCardInner({
 
           {showApply ? (
             applied ? (
-              <Button className="s-event-post__cta s-event-post__cta--applied" disabled>
-                <Check size={14} color="#ccc" aria-hidden />
-                <Text className="s-event-post__cta-text">已申请</Text>
+              <Button
+                className="s-event-post__cta s-event-post__cta--applied-chat"
+                onClick={() => onOpenAppliedChat?.(post)}
+              >
+                <MessageCircle size={14} color="#ff0066" aria-hidden />
+                <Text className="s-event-post__cta-text">查看沟通</Text>
               </Button>
             ) : (
               <Button

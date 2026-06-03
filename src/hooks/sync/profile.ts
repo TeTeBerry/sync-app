@@ -1,4 +1,4 @@
-import { isApiEnabled } from '../../constants/api';
+import { isLiveApi } from '../../constants/api';
 import { isLoggedIn } from '../../utils/authStorage';
 import { fetchCurrentUser } from '../../api/sync/users';
 import {
@@ -20,7 +20,7 @@ import { useApiQuery } from '../useApiQuery';
 import type { QueryEnableOptions } from './types';
 
 function profileApiEnabled(): boolean {
-  return isApiEnabled() && isLoggedIn();
+  return isLiveApi() && isLoggedIn();
 }
 
 export function useCurrentUserQuery() {

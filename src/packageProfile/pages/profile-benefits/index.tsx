@@ -11,7 +11,7 @@ import {
   type PackageTierId,
   type ProfileEventBenefitCardModel,
 } from '../../../components/profile';
-import { isApiEnabled } from '../../../constants/api';
+import { isLiveApi } from '../../../constants/api';
 import { useProfileActivitiesQuery } from '../../../hooks/useSyncApi';
 import { useStackPageMainHeight } from '../../../hooks/useTabPageMainHeight';
 import { ROUTES } from '../../../utils/route';
@@ -23,7 +23,7 @@ import { ScrollView, View } from '@tarojs/components';
 const ProfileBenefitsPage: React.FC = () => {
   useEndRouteTransitionOnShow();
   const mainScrollHeight = useStackPageMainHeight();
-  const apiEnabled = isApiEnabled();
+  const apiEnabled = isLiveApi();
   const activitiesQuery = useProfileActivitiesQuery();
   const { benefitsLoading, paidBenefitCards, paidEntitlements } =
     useProfilePaidBenefitCards();

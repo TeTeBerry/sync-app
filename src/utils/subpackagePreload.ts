@@ -1,6 +1,6 @@
 import Taro from '@tarojs/taro';
 
-type SubpackageName = 'event' | 'profile' | 'ai';
+type SubpackageName = 'event' | 'profile' | 'ai' | 'message';
 
 function loadSubpackage(name: SubpackageName): void {
   if (process.env.TARO_ENV !== 'weapp') {
@@ -33,9 +33,14 @@ export function preloadAiSubpackage(): void {
   loadSubpackage('ai');
 }
 
+export function preloadMessageSubpackage(): void {
+  loadSubpackage('message');
+}
+
 /** Warm stack subpackages after main tabs settle. */
 export function preloadStackSubpackages(): void {
   preloadEventSubpackage();
   preloadProfileSubpackage();
   preloadAiSubpackage();
+  preloadMessageSubpackage();
 }

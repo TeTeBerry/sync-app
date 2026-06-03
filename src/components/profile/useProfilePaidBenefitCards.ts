@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { isApiEnabled } from '../../constants/api';
+import { isLiveApi } from '../../constants/api';
 import {
   useProfileActivitiesQuery,
   useProfileEntitlementsQuery,
@@ -31,7 +31,7 @@ export function useProfilePaidBenefitCards(options?: {
   /** When false, skips entitlements + activities fetch (profile tab defers below fold). */
   entitlementsEnabled?: boolean;
 }) {
-  const apiEnabled = isApiEnabled();
+  const apiEnabled = isLiveApi();
   const entitlementsEnabled = options?.entitlementsEnabled ?? true;
   const summaryQuery = useProfileSummaryQuery();
   const allEntitlementsQuery = useProfileEntitlementsQuery(undefined, {

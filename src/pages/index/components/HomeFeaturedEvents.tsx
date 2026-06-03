@@ -13,6 +13,7 @@ import {
 } from '../../../utils/apiMappers';
 import { thumbnailImageUrl } from '../../../utils/imageUrl';
 import { useRouteTransitionActive } from '../../../utils/route';
+import { useAuthSession } from '../../../hooks/useAuthSession';
 import { Image, Text, View } from '@tarojs/components';
 
 function featuredEventStatusTag(
@@ -47,6 +48,8 @@ export const HomeFeaturedEvents: FC<HomeFeaturedEventsProps> = ({
   onJoinClick,
   onEventPreload,
 }) => {
+  const { loggedIn } = useAuthSession();
+
   if (items.length === 0) {
     return (
       <View className="s-home-featured" aria-label="Featured events">
@@ -62,6 +65,7 @@ export const HomeFeaturedEvents: FC<HomeFeaturedEventsProps> = ({
           key={event.id}
           event={event}
           index={index}
+          loggedIn={loggedIn}
           onEventClick={onEventClick}
           onJoinClick={onJoinClick}
           onEventPreload={onEventPreload}
@@ -74,12 +78,14 @@ export const HomeFeaturedEvents: FC<HomeFeaturedEventsProps> = ({
 function HomeFeaturedEventRow({
   event,
   index,
+  loggedIn,
   onEventClick,
   onJoinClick,
   onEventPreload,
 }: {
   event: FeaturedEvent;
   index: number;
+  loggedIn: boolean;
   onEventClick: (item: FeaturedEvent) => void;
   onJoinClick: (item: FeaturedEvent) => void;
   onEventPreload?: (item: FeaturedEvent) => void;
@@ -92,6 +98,7 @@ function HomeFeaturedEventRow({
   const legacyId = resolveFeaturedEventLegacyId(event);
   const isJoinNavigating = useRouteTransitionActive(legacyId ?? undefined);
   const thumbSrc = thumbnailImageUrl(event.image, 200);
+  const showJoined = loggedIn && event.going;
 
   const handlePreload = () => {
     if (legacyId == null) return;
@@ -175,7 +182,7 @@ function HomeFeaturedEventRow({
                 ? '加入中…'
                 : status === 'ended'
                   ? '已结束'
-                  : event.going
+                  : showJoined
                     ? '已加入'
                     : '加入'}
             </Text>

@@ -1,0 +1,125 @@
+.s-venue-map-name-sheet {
+  &.s-overlay--sheet .s-overlay__panel {
+    max-height: 52vh;
+  }
+
+  &__panel {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 4px 16px 20px;
+    background: #161222;
+    color: #fff;
+  }
+
+  &__handle {
+    width: 36px;
+    height: 4px;
+    margin: 6px auto 0;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  &__title-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  &__title-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(255, 45, 106, 0.15);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  &__title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  &__close {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    padding: 0;
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  &__close--pressed {
+    opacity: 0.8;
+  }
+
+  &__hint {
+    font-size: 13px;
+    line-height: 1.45;
+    color: rgba(255, 255, 255, 0.62);
+  }
+
+  &__input {
+    width: 100%;
+    box-sizing: border-box;
+    height: 48px;
+    padding: 0 14px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    font-size: 16px;
+  }
+
+  &__actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 4px;
+  }
+
+  &__btn {
+    flex: 1;
+    height: 46px;
+    border-radius: 12px;
+    border: none;
+    font-size: 15px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+  }
+
+  &__btn--ghost {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+  }
+
+  &__btn--primary {
+    background: linear-gradient(135deg, #ff2d6a, #ff4d8d);
+    color: #fff;
+  }
+
+  &__btn--disabled {
+    opacity: 0.45;
+  }
+
+  &__btn--pressed {
+    opacity: 0.86;
+  }
+}

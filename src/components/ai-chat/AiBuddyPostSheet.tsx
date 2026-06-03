@@ -1,10 +1,15 @@
 import './AiGuidePlanSheet.scss';
 import './AiBuddyPostSheet.scss';
+import Taro from '@tarojs/taro';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { CalendarDays, MapPin, Send, Users, X } from '../../components/icons';
 import { Button, cn } from '../ui';
 import { useOverlayLock } from '../../hooks/useOverlayLock';
-import type { AiBuddyPostFormValues, BuddyPostTagId } from '../../types/buddyPost';
+import type {
+  AiBuddyPostFormValues,
+  AiBuddyPostSubmitPayload,
+  BuddyPostTagId,
+} from '../../types/buddyPost';
 import { BUDDY_POST_TAG_OPTIONS } from '../../types/buddyPost';
 import { defaultBuddyPostForm } from '../../utils/buddyPostForm';
 import { Input, Picker, ScrollView, Text, Textarea, View } from '@tarojs/components';
@@ -17,9 +22,35 @@ export type AiBuddyPostSheetProps = {
   activityDate?: string;
   activityTitle?: string;
   initialValues?: AiBuddyPostFormValues | null;
+  /** Apply-team flow: let user choose whether the post appears on the activity feed. */
+  showSyncToFeedOption?: boolean;
   onClose: () => void;
-  onSubmit: (values: AiBuddyPostFormValues) => void;
+  onSubmit: (values: AiBuddyPostSubmitPayload) => void | Promise<void>;
 };
+
+function FeedSyncToggle({
+  checked,
+  onChange,
+}: {
+  checked: boolean;
+  onChange: (next: boolean) => void;
+}) {
+  return (
+    <Button
+      className={cn(
+        's-ai-guide-plan-sheet__toggle',
+        checked && 's-ai-guide-plan-sheet__toggle--on',
+      )}
+      role="switch"
+      aria-checked={checked}
+      aria-label="同步到帖子列表"
+      hoverClass="s-ai-guide-plan-sheet__toggle--pressed"
+      onClick={() => onChange(!checked)}
+    >
+      <View className="s-ai-guide-plan-sheet__toggle-knob" aria-hidden />
+    </Button>
+  );
+}
 
 function displayDate(iso: string): string {
   const m = iso.match(/^(\d{4})-(\d{2})-(\d{2})$/);
@@ -32,12 +63,21 @@ export function AiBuddyPostSheet({
   activityDate,
   activityTitle: _activityTitle,
   initialValues,
+  showSyncToFeedOption = false,
   onClose,
   onSubmit,
 }: AiBuddyPostSheetProps) {
   useOverlayLock(open);
 
   const defaults = useMemo(() => defaultBuddyPostForm(activityDate), [activityDate]);
+
+  /** 微信 scroll-view 须明确高度，flex 子项不能为 height:0 */
+  const scrollHeightPx = useMemo(() => {
+    const win = Taro.getWindowInfo();
+    const panelMax = Math.min(win.windowHeight * 0.82, 640);
+    const chrome = 8 + 52 + 76 + 20;
+    return Math.max(300, Math.floor(panelMax - chrome));
+  }, []);
 
   const [scrollTop, setScrollTop] = useState(0);
   const [dateStart, setDateStart] = useState('');
@@ -46,10 +86,12 @@ export function AiBuddyPostSheet({
   const [headcount, setHeadcount] = useState('');
   const [tags, setTags] = useState<BuddyPostTagId[]>(['team']);
   const [note, setNote] = useState('');
+  const [syncToPostList, setSyncToPostList] = useState(true);
 
   useEffect(() => {
     if (!open) return;
     setScrollTop(0);
+    setSyncToPostList(true);
     const seed = initialValues ?? defaults;
     if (seed) {
       setDateStart(seed.dateStart);
@@ -86,15 +128,29 @@ export function AiBuddyPostSheet({
 
   const handleSubmit = useCallback(() => {
     if (!canSubmit) return;
-    onSubmit({
-      dateStart,
-      dateEnd,
-      location: location.trim(),
-      headcount: headcount.trim(),
-      tags: tags.length ? tags : ['team'],
-      note: note.trim() || undefined,
-    });
-  }, [canSubmit, dateEnd, dateStart, headcount, location, note, onSubmit, tags]);
+    void Promise.resolve(
+      onSubmit({
+        dateStart,
+        dateEnd,
+        location: location.trim(),
+        headcount: headcount.trim(),
+        tags: tags.length ? tags : ['team'],
+        note: note.trim() || undefined,
+        ...(showSyncToFeedOption ? { syncToPostList } : {}),
+      }),
+    );
+  }, [
+    canSubmit,
+    dateEnd,
+    dateStart,
+    headcount,
+    location,
+    note,
+    onSubmit,
+    showSyncToFeedOption,
+    syncToPostList,
+    tags,
+  ]);
 
   if (!open) return null;
 
@@ -121,7 +177,7 @@ export function AiBuddyPostSheet({
               id="ai-buddy-post-sheet-title"
               className="s-ai-guide-plan-sheet__title"
             >
-              组队发帖
+              组队信息
             </Text>
           </View>
           <Button
@@ -140,6 +196,7 @@ export function AiBuddyPostSheet({
           showScrollbar={false}
           scrollTop={scrollTop}
           className="s-ai-guide-plan-sheet__scroll s-scrollbar-none"
+          style={{ height: `${scrollHeightPx}px` }}
         >
           <View className="s-ai-guide-plan-sheet__body">
             <View className="s-ai-guide-plan-sheet__field">
@@ -288,6 +345,19 @@ export function AiBuddyPostSheet({
         </ScrollView>
 
         <View className="s-ai-guide-plan-sheet__footer">
+          {showSyncToFeedOption ? (
+            <View className="s-ai-buddy-post-sheet__sync-row">
+              <View className="s-ai-buddy-post-sheet__sync-copy">
+                <Text className="s-ai-buddy-post-sheet__sync-label">
+                  同步到帖子列表
+                </Text>
+                <Text className="s-ai-buddy-post-sheet__sync-hint">
+                  关闭后仍会保存并参与匹配推荐，但不会出现在活动帖子列表
+                </Text>
+              </View>
+              <FeedSyncToggle checked={syncToPostList} onChange={setSyncToPostList} />
+            </View>
+          ) : null}
           <Button
             className={cn(
               's-ai-guide-plan-sheet__submit',
@@ -295,10 +365,12 @@ export function AiBuddyPostSheet({
             )}
             disabled={!canSubmit}
             hoverClass={canSubmit ? 's-ai-guide-plan-sheet__submit--pressed' : ''}
-            onClick={handleSubmit}
+            onTap={handleSubmit}
           >
             <Send size={18} color="#fff" aria-hidden />
-            <Text className="s-ai-guide-plan-sheet__submit-text">发布组队帖</Text>
+            <Text className="s-ai-guide-plan-sheet__submit-text">
+              {showSyncToFeedOption ? '保存' : '发布组队帖'}
+            </Text>
           </Button>
         </View>
       </View>

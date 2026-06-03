@@ -5,6 +5,7 @@ import type {
   EventPostsPage,
   HomeFeedPost,
   PostActionResult,
+  PostApplicationItem,
   PostCommentItem,
   ProfilePostItem,
   UpdatePostPayload,
@@ -58,9 +59,32 @@ export function likePost(postId: string) {
   return apiPost<EventDetailPost>(`/posts/${postId}/like`, {}, ownerQueryParams());
 }
 
-export function applyToPost(postId: string) {
+export type ApplyToPostPayload = {
+  message?: string;
+};
+
+export function applyToPost(postId: string, payload?: ApplyToPostPayload) {
+  const body =
+    payload?.message?.trim() != null && payload.message.trim() !== ''
+      ? { message: payload.message.trim() }
+      : {};
   return apiPost<PostActionResult>(
     `/posts/${postId}/applications`,
+    body,
+    ownerQueryParams(),
+  );
+}
+
+export function fetchPostApplications(postId: string) {
+  return apiGet<PostApplicationItem[]>(
+    `/posts/${postId}/applications`,
+    ownerQueryParams(),
+  );
+}
+
+export function acceptPostApplication(postId: string, applicantUserId: string) {
+  return apiPost<{ ok: true }>(
+    `/posts/${postId}/applications/${encodeURIComponent(applicantUserId)}/accept`,
     {},
     ownerQueryParams(),
   );

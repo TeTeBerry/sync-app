@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Check,
+  ChevronDown,
   CircleCheck,
   Clock,
   Flame,
@@ -10,8 +11,11 @@ import {
   Pencil,
   Sparkles,
   Trash2,
+  Users,
   X,
 } from '../../components/icons';
+import type { PostApplicationItem } from '../../types/backend';
+import { formatTimeAgo } from '../../utils/dayTime';
 import { ContentTypeBadge, PostStatusBadge } from '../post';
 import { ProfileCollapsibleSection } from './ProfileCollapsibleSection';
 import type { ProfilePostItem } from '../../types/backend';
@@ -39,12 +43,136 @@ export type ProfilePostsSectionProps = {
   editDraft?: ProfilePostEditDraft | null;
   onSelect?: (item: ProfilePostItem) => void;
   onComplete?: (item: ProfilePostItem) => void;
+  onChatWithApplication?: (
+    post: ProfilePostItem,
+    application: PostApplicationItem,
+  ) => void;
   onEdit?: (item: ProfilePostItem) => void;
   onDelete?: (item: ProfilePostItem) => void;
   onEditDraftChange?: (draft: ProfilePostEditDraft) => void;
   onSaveEdit?: (item: ProfilePostItem) => void;
   onCancelEdit?: () => void;
 };
+
+function PostApplicationsBlock({
+  post,
+  applications,
+  onChatWithApplication,
+}: {
+  post: ProfilePostItem;
+  applications: PostApplicationItem[];
+  onChatWithApplication?: ProfilePostsSectionProps['onChatWithApplication'];
+}) {
+  const pending = applications.filter((item) => item.status === 'pending');
+  const accepted = applications.filter((item) => item.status === 'accepted');
+  const isRecruiting = post.status === '招募中';
+  const [expanded, setExpanded] = useState(isRecruiting);
+
+  useEffect(() => {
+    if (!isRecruiting) {
+      setExpanded(false);
+    }
+  }, [isRecruiting, post.id]);
+
+  if (!applications.length) return null;
+
+  const headSummary =
+    !isRecruiting && accepted.length > 0
+      ? `已接受 ${accepted[0]?.name ?? ''}${accepted.length > 1 ? ` 等 ${accepted.length} 人` : ''}`
+      : pending.length > 0
+        ? `${pending.length} 人待处理`
+        : null;
+
+  return (
+    <View
+      className={`s-profile-post__applications${
+        expanded ? '' : ' s-profile-post__applications--collapsed'
+      }`}
+      onClick={(event) => event.stopPropagation()}
+    >
+      <Button
+        className="s-profile-post__applications-head"
+        aria-expanded={expanded}
+        onClick={() => setExpanded((value) => !value)}
+      >
+        <View className="s-profile-post__applications-head-main">
+          <Users size={14} color="#ff0066" aria-hidden />
+          <View className="s-profile-post__applications-head-text">
+            <Text className="s-profile-post__applications-title">
+              {applications.length} 人申请组队
+            </Text>
+            {headSummary ? (
+              <Text className="s-profile-post__applications-subtitle">
+                {headSummary}
+              </Text>
+            ) : null}
+          </View>
+        </View>
+        <ChevronDown
+          size={16}
+          color="rgba(255, 255, 255, 0.5)"
+          className={`s-profile-post__applications-chevron${
+            expanded ? ' s-profile-post__applications-chevron--expanded' : ''
+          }`}
+          aria-hidden
+        />
+      </Button>
+      {expanded ? (
+        <View className="s-profile-post__applications-list">
+          {applications.map((applicant) => {
+            const isAccepted = applicant.status === 'accepted';
+            const canChat =
+              applicant.status === 'pending' && Boolean(onChatWithApplication);
+
+            return (
+              <View key={applicant.id} className="s-profile-post__application">
+                <View
+                  className="s-profile-post__application-avatar"
+                  style={
+                    applicant.avatar
+                      ? { backgroundImage: `url(${applicant.avatar})` }
+                      : undefined
+                  }
+                  aria-hidden
+                />
+                <View className="s-profile-post__application-main">
+                  <View className="s-profile-post__application-body">
+                    <View className="s-profile-post__application-meta">
+                      <Text className="s-profile-post__application-name">
+                        {applicant.name}
+                      </Text>
+                      <Text className="s-profile-post__application-time">
+                        {formatTimeAgo(applicant.appliedAt)}
+                      </Text>
+                    </View>
+                    {applicant.message ? (
+                      <Text className="s-profile-post__application-message">
+                        {applicant.message}
+                      </Text>
+                    ) : null}
+                  </View>
+                  {isAccepted ? (
+                    <Text className="s-profile-post__application-status">已接受</Text>
+                  ) : canChat ? (
+                    <Button
+                      className="s-profile-post__application-chat"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        onChatWithApplication?.(post, applicant);
+                      }}
+                    >
+                      <Text className="s-btn-label">沟通</Text>
+                    </Button>
+                  ) : null}
+                </View>
+              </View>
+            );
+          })}
+        </View>
+      ) : null}
+    </View>
+  );
+}
 
 function isPostEditDirty(item: ProfilePostItem, draft: ProfilePostEditDraft): boolean {
   const statusMatches =
@@ -61,6 +189,7 @@ function renderPostItems(
     editDraft = null,
     onSelect,
     onComplete,
+    onChatWithApplication,
     onEdit,
     onDelete,
     onEditDraftChange,
@@ -98,6 +227,14 @@ function renderPostItems(
         <Text className="s-profile-post__content">{item.content}</Text>
 
         <ContentTypeBadge types={item.contentTypes} />
+
+        {item.applications?.length ? (
+          <PostApplicationsBlock
+            post={item}
+            applications={item.applications}
+            onChatWithApplication={onChatWithApplication}
+          />
+        ) : null}
 
         <View className="s-profile-post__footer">
           <View className="s-profile-post__stats">
@@ -290,6 +427,7 @@ const ProfilePostsSection: React.FC<ProfilePostsSectionProps> = ({
   editDraft = null,
   onSelect,
   onComplete,
+  onChatWithApplication,
   onEdit,
   onDelete,
   onEditDraftChange,
@@ -301,6 +439,7 @@ const ProfilePostsSection: React.FC<ProfilePostsSectionProps> = ({
     editDraft,
     onSelect,
     onComplete,
+    onChatWithApplication,
     onEdit,
     onDelete,
     onEditDraftChange,

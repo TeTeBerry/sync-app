@@ -17,6 +17,7 @@ import {
   shouldSkipAutoLogin,
 } from './authStorage';
 import { notifyAuthSessionChange } from './authSession';
+import { clearHomeCachesOnLogout } from './homeCacheStorage';
 
 export {
   getAccessToken,
@@ -159,5 +160,6 @@ export async function ensureAuth(): Promise<AuthLoginResult | null> {
 }
 
 export async function logout(): Promise<void> {
+  clearHomeCachesOnLogout();
   clearAuth();
 }

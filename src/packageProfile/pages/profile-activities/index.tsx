@@ -7,7 +7,7 @@ import {
   ProfileActivitiesSection,
   profileActivities,
 } from '../../../components/profile';
-import { isApiEnabled } from '../../../constants/api';
+import { isLiveApi } from '../../../constants/api';
 import { useProfileActivitiesQuery } from '../../../hooks/useSyncApi';
 import { invalidateProfileActivities } from '../../../utils/queryInvalidation';
 import { useStackPageMainHeight } from '../../../hooks/useTabPageMainHeight';
@@ -18,7 +18,7 @@ import { ScrollView, View } from '@tarojs/components';
 const ProfileActivitiesPage: React.FC = () => {
   useEndRouteTransitionOnShow();
   const mainScrollHeight = useStackPageMainHeight();
-  const apiEnabled = isApiEnabled();
+  const apiEnabled = isLiveApi();
   const activitiesQuery = useProfileActivitiesQuery();
   const activities =
     apiEnabled && activitiesQuery.data ? activitiesQuery.data : profileActivities;

@@ -4,7 +4,7 @@ import React, { useCallback, useState } from 'react';
 import { Bot, ChevronRight, Zap } from '../../components/icons';
 import { Button } from '../ui';
 import { Text, View } from '@tarojs/components';
-import { isApiEnabled } from '../../constants/api';
+import { isLiveApi } from '../../constants/api';
 import { SyncBrandMark } from '../SyncBrandMark';
 import { loginWithDev, loginWithWechat } from '../../utils/auth';
 import { switchTabTo, ROUTES } from '../../utils/route';
@@ -24,7 +24,7 @@ export function LoginPromptHero({
   const [loggingIn, setLoggingIn] = useState(false);
 
   const handleLogin = useCallback(async () => {
-    if (!isApiEnabled()) {
+    if (!isLiveApi()) {
       void Taro.showToast({ title: '请配置 API 地址', icon: 'none' });
       return;
     }

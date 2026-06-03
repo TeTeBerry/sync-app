@@ -29,5 +29,6 @@ export {
 } from './profilePackageData';
 
 export { profileActivities, profilePosts, profileUser } from './mockData';
+export { mockNotifications } from './mockNotifications';
 export { useProfilePaidBenefitCards } from './useProfilePaidBenefitCards';
 export { countOngoingActivities, deriveInterestTag } from './utils';

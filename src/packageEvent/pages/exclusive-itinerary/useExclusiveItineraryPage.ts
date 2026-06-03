@@ -1,6 +1,6 @@
 import Taro, { useRouter } from '@tarojs/taro';
 import { useCallback, useMemo, useState } from 'react';
-import { isApiEnabled } from '../../../constants/api';
+import { isLiveApi } from '../../../constants/api';
 import {
   useItineraryMutations,
   useItineraryScheduleQuery,
@@ -84,7 +84,7 @@ export function useExclusiveItineraryPage() {
   const [conflictDismissed, setConflictDismissed] = useState(false);
   const [generating, setGenerating] = useState(false);
 
-  const apiEnabled = isApiEnabled();
+  const apiEnabled = isLiveApi();
   const scheduleQuery = useItineraryScheduleQuery(apiEnabled ? activityLegacyId : null);
   const { generate } = useItineraryMutations(activityLegacyId ?? 0);
   const setFromGenerateResult = useItineraryStore((s) => s.setFromGenerateResult);

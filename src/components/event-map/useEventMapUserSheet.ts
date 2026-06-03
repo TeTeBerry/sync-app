@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { fetchUserPosts } from '../../api/syncApi';
-import { isApiEnabled } from '../../constants/api';
+import { isLiveApi } from '../../constants/api';
 import type { EventDetailPost } from '../../types/backend';
 import { formatPostPublishTime } from '../../utils/formatPostPublishTime';
 import { sanitizeImageList, sanitizeRemoteImageUrl } from '../../utils/imageUrl';
@@ -54,7 +54,7 @@ export function useEventMapUserSheet(
   activityLegacyIdFromRoute?: number,
   activeActivityLegacyId?: number | null,
 ) {
-  const apiEnabled = isApiEnabled();
+  const apiEnabled = isLiveApi();
   const activityLegacyId = resolveActivityLegacyId(
     activityLegacyIdFromRoute,
     activeActivityLegacyId ?? null,

@@ -15,7 +15,7 @@ import { seedActivityDetailFromEventCard } from '../../utils/activityDetailCache
 import { preloadEventSubpackage } from '../../utils/subpackagePreload';
 import { buildEventDetailQuery, preloadPageSafe, ROUTES } from '../../utils/route';
 import { useEventList, useHomeSummary } from '../../hooks/useSyncApi';
-import { isApiEnabled } from '../../constants/api';
+import { isLiveApi } from '../../constants/api';
 import { joinActivityWithAuth } from '../../utils/joinActivity';
 import { parseActivityLegacyId } from '../../utils/activityLegacyId';
 import { resolveEventCardLegacyId } from '../../utils/apiMappers';
@@ -52,7 +52,7 @@ const Events: React.FC = () => {
   const { events, isLoading, isError, refetch } = useEventList();
   const { data: homeSummary } = useHomeSummary();
   const registeredLegacyIds = useMemo(() => {
-    if (!isApiEnabled()) {
+    if (!isLiveApi()) {
       return new Set<number>();
     }
     const ids = new Set<number>();

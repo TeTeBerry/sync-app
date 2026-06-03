@@ -300,7 +300,6 @@ export function AiGuidePlanSheet({
                   enhanced
                   showScrollbar={false}
                   className="s-ai-guide-plan-sheet__suggest-list s-scrollbar-none"
-                  catchMove
                 >
                   {departureSuggestions.map((item) => (
                     <View

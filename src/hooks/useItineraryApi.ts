@@ -6,7 +6,7 @@ import {
   generateItinerary,
   saveItinerary,
 } from '../api/syncApi';
-import { isApiEnabled } from '../constants/api';
+import { isLiveApi } from '../constants/api';
 import type { GenerateItineraryPayload, SaveItineraryPayload } from '../types/backend';
 
 export function useItineraryScheduleQuery(
@@ -14,7 +14,7 @@ export function useItineraryScheduleQuery(
   options?: { dateKey?: string; selectedDjIds?: string[] },
 ) {
   const enabled =
-    isApiEnabled() &&
+    isLiveApi() &&
     activityLegacyId != null &&
     Number.isFinite(activityLegacyId) &&
     activityLegacyId > 0;
@@ -40,7 +40,7 @@ export function useItineraryScheduleQuery(
 
 export function useSavedItineraryQuery(activityLegacyId: number | null | undefined) {
   const enabled =
-    isApiEnabled() &&
+    isLiveApi() &&
     activityLegacyId != null &&
     Number.isFinite(activityLegacyId) &&
     activityLegacyId > 0;

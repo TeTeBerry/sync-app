@@ -1,43 +1,75 @@
 import '../../../components/profile/profile.scss';
 import Taro, { useDidShow } from '@tarojs/taro';
-import React, { useCallback, useState } from 'react';
-import PageNavigation from '../../../components/navigation/PageNavigation';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { BottomNavSlot } from '../../../components/navigation/BottomNav';
+import PageNavigation, {
+  stackPageNavChromePx,
+} from '../../../components/navigation/PageNavigation';
 import ThemedPageLoader from '../../../components/ThemedPageLoader';
 import {
   ProfilePostsSection,
   profilePosts,
   type ProfilePostEditDraft,
 } from '../../../components/profile';
-import { isApiEnabled } from '../../../constants/api';
+import { isLiveApi } from '../../../constants/api';
 import { useConfirmDialog } from '../../../hooks/useConfirmDialog';
 import {
   deletePostAndInvalidate,
   updatePostAndInvalidate,
   useProfilePostsQuery,
 } from '../../../hooks/useSyncApi';
+import type { PostApplicationItem } from '../../../types/backend';
 import { invalidateProfilePosts } from '../../../utils/queryInvalidation';
-import { useStackPageMainHeight } from '../../../hooks/useTabPageMainHeight';
+import { useNavBarInsets } from '../../../hooks/useNavBarInsets';
+import { useTabPageMainHeight } from '../../../hooks/useTabPageMainHeight';
 import type { ProfilePostItem } from '../../../types/backend';
-import { goEventDetail, ROUTES } from '../../../utils/route';
+import { mergeProfilePostsFromTempChatSessions } from '../../../utils/profilePostApplications';
+import { useTempChatStore } from '../../../stores/tempChatStore';
+import {
+  buildTempChatRouteSessionId,
+  openTempChatWithApplicant,
+} from '../../../utils/tempChatNavigation';
+import { invalidateTeamChatQueries } from '../../../hooks/sync/teamChats';
+import { goEventDetail, goTempChat, ROUTES } from '../../../utils/route';
 import { useEndRouteTransitionOnShow } from '../../../hooks/useEndRouteTransitionOnShow';
 import { ScrollView, View } from '@tarojs/components';
 
 const ProfilePostsPage: React.FC = () => {
   useEndRouteTransitionOnShow();
-  const mainScrollHeight = useStackPageMainHeight();
-  const apiEnabled = isApiEnabled();
+  const navInsets = useNavBarInsets();
+  const headerChromePx = stackPageNavChromePx(navInsets);
+  const mainScrollHeight = useTabPageMainHeight(headerChromePx);
+  const apiEnabled = isLiveApi();
   const postsQuery = useProfilePostsQuery();
-  const posts = apiEnabled && postsQuery.data ? postsQuery.data : profilePosts;
+  const [mockPosts, setMockPosts] = useState<ProfilePostItem[] | null>(null);
+  const [postsOverride, setPostsOverride] = useState<ProfilePostItem[] | null>(null);
+  const basePosts = useMemo(() => {
+    if (apiEnabled && postsQuery.data) return postsQuery.data;
+    return mockPosts ?? profilePosts;
+  }, [apiEnabled, mockPosts, postsQuery.data]);
+
+  useEffect(() => {
+    setPostsOverride(null);
+  }, [basePosts]);
+
+  const posts = postsOverride ?? basePosts;
   const loading = apiEnabled && postsQuery.isLoading && !postsQuery.data;
   const { confirm, confirmDialog } = useConfirmDialog({ cancelText: '取消' });
 
   const [editingPostId, setEditingPostId] = useState<string | null>(null);
   const [editDraft, setEditDraft] = useState<ProfilePostEditDraft | null>(null);
+  const hydrateTempChat = useTempChatStore((state) => state.hydrate);
+  const tempChatSessions = useTempChatStore((state) => state.sessions);
 
   useDidShow(() => {
+    hydrateTempChat();
     if (apiEnabled) {
       invalidateProfilePosts();
+      return;
     }
+    setMockPosts((prev) =>
+      mergeProfilePostsFromTempChatSessions(prev ?? profilePosts, tempChatSessions),
+    );
   });
 
   const handlePostAction = useCallback((action: string, item: ProfilePostItem) => {
@@ -118,6 +150,19 @@ const ProfilePostsPage: React.FC = () => {
     [apiEnabled, editDraft, handleCancelPostEdit, handlePostAction],
   );
 
+  const handleChatWithApplication = useCallback(
+    (post: ProfilePostItem, application: PostApplicationItem) => {
+      if (apiEnabled) {
+        invalidateTeamChatQueries();
+        goTempChat(buildTempChatRouteSessionId(post.id, application.userId));
+        return;
+      }
+      const sessionId = openTempChatWithApplicant(post, application);
+      goTempChat(sessionId);
+    },
+    [apiEnabled],
+  );
+
   const handleDeletePost = useCallback(
     async (item: ProfilePostItem) => {
       const ok = await confirm({
@@ -141,40 +186,44 @@ const ProfilePostsPage: React.FC = () => {
   );
 
   return (
-    <View data-cmp="ProfilePostsPage" className="s-profile-stack">
-      <PageNavigation title="我的帖子" fallback={ROUTES.PROFILE} tone="surface" />
+    <View data-cmp="ProfilePostsPage" className="s-profile-stack s-page-with-tabbar">
+      <View className="s-page-with-tabbar__main">
+        <PageNavigation title="我的帖子" fallback={ROUTES.PROFILE} tone="surface" />
 
-      <ScrollView
-        scrollY
-        enhanced
-        showScrollbar={false}
-        className="s-profile-stack__scroll s-scrollbar-none"
-        style={
-          mainScrollHeight != null ? { height: `${mainScrollHeight}px` } : undefined
-        }
-      >
-        <View className="s-profile-stack__inner">
-          {loading ? (
-            <ThemedPageLoader variant="inline" label="加载帖子…" minHeight={120} />
-          ) : (
-            <ProfilePostsSection
-              mode="list"
-              items={posts}
-              editingPostId={editingPostId}
-              editDraft={editDraft}
-              onSelect={handleSelectPost}
-              onComplete={handleCompletePost}
-              onEdit={handleEditPost}
-              onDelete={handleDeletePost}
-              onEditDraftChange={setEditDraft}
-              onSaveEdit={handleSavePostEdit}
-              onCancelEdit={handleCancelPostEdit}
-            />
-          )}
-        </View>
-      </ScrollView>
+        <ScrollView
+          scrollY
+          enhanced
+          showScrollbar={false}
+          className="s-profile-stack__scroll s-scrollbar-none"
+          style={
+            mainScrollHeight != null ? { height: `${mainScrollHeight}px` } : undefined
+          }
+        >
+          <View className="s-profile-stack__inner">
+            {loading ? (
+              <ThemedPageLoader variant="inline" label="加载帖子…" minHeight={120} />
+            ) : (
+              <ProfilePostsSection
+                mode="list"
+                items={posts}
+                editingPostId={editingPostId}
+                editDraft={editDraft}
+                onSelect={handleSelectPost}
+                onComplete={handleCompletePost}
+                onChatWithApplication={handleChatWithApplication}
+                onEdit={handleEditPost}
+                onDelete={handleDeletePost}
+                onEditDraftChange={setEditDraft}
+                onSaveEdit={handleSavePostEdit}
+                onCancelEdit={handleCancelPostEdit}
+              />
+            )}
+          </View>
+        </ScrollView>
+      </View>
 
       {confirmDialog}
+      <BottomNavSlot />
     </View>
   );
 };

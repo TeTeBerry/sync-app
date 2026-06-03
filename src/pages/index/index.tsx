@@ -15,7 +15,7 @@ import {
   useNotificationUnreadCount,
   usePopularPosts,
 } from '../../hooks/useSyncApi';
-import { isApiEnabled } from '../../constants/api';
+import { isLiveApi } from '../../constants/api';
 import { requireAuth } from '../../utils/authGate';
 import {
   buildEventDetailQuery,
@@ -27,6 +27,7 @@ import {
   ROUTES,
 } from '../../utils/route';
 import { joinActivityWithAuth } from '../../utils/joinActivity';
+import { useAuthSession } from '../../hooks/useAuthSession';
 import { DEFER_BELOW_FOLD_MS, DEFER_SECONDARY_API_MS } from '../../utils/timing';
 import { HomeCountdownCard } from './components/HomeCountdownCard';
 import { HomeFeaturedEvents } from './components/HomeFeaturedEvents';
@@ -63,6 +64,7 @@ const Home = () => {
   });
   const { data: summary } = useHomeSummary();
   const heat = summary?.heat;
+  const { loggedIn } = useAuthSession();
   const { items: featuredEvents } = useFeaturedEvents();
   const nearestUpcoming = useNearestUpcomingForCountdown();
   const { data: unreadCount = 0 } = useNotificationUnreadCount({
@@ -110,11 +112,11 @@ const Home = () => {
         return;
       }
       joinActivityWithAuth(legacyId, {
-        alreadyJoined: event.going,
+        alreadyJoined: loggedIn && event.going,
         onSuccess: () => openEventDetail(event),
       });
     },
-    [openEventDetail],
+    [loggedIn, openEventDetail],
   );
 
   const handleDeletePost = useCallback(
@@ -139,7 +141,7 @@ const Home = () => {
 
   const handleLikePost = useCallback((post: HomeFeedPost) => {
     requireAuth(() => {
-      if (!isApiEnabled()) {
+      if (!isLiveApi()) {
         return;
       }
       void likePostAndInvalidate(post.id).catch(

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { fetchPostsByActivityPage } from '../api/syncApi';
-import { isApiEnabled } from '../constants/api';
+import { isLiveApi } from '../constants/api';
 import type { EventDetailPost } from '../types/backend';
 import { getClientUserId } from '../utils/session';
 
@@ -17,7 +17,7 @@ export function useEventPostsInfiniteQuery(
   const tabEnabled = options?.enabled ?? true;
   const pageSize = options?.pageSize ?? DEFAULT_PAGE_SIZE;
   const anchorPostId = options?.anchorPostId?.trim() || undefined;
-  const apiEnabled = isApiEnabled();
+  const apiEnabled = isLiveApi();
   const enabled =
     apiEnabled &&
     activityLegacyId != null &&

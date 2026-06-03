@@ -4,4 +4,5 @@ export * from './navigationSelectors';
 export * from './aiChatStore';
 export * from './profilePageStore';
 export * from './postShareStore';
+export * from './tempChatStore';
 export * from './loginInterceptStore';

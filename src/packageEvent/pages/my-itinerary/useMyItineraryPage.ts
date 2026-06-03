@@ -1,6 +1,6 @@
 import Taro, { useRouter } from '@tarojs/taro';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { isApiEnabled } from '../../../constants/api';
+import { isLiveApi } from '../../../constants/api';
 import { useActivityDetailQuery } from '../../../hooks/useSyncApi';
 import {
   useItineraryMutations,
@@ -55,7 +55,7 @@ export function useMyItineraryPage() {
     parseSelectedDjIds(router.params.selectedDjIds),
   );
 
-  const apiEnabled = isApiEnabled();
+  const apiEnabled = isLiveApi();
   const consumePending = useItineraryStore((s) => s.consumePending);
   const activityQuery = useActivityDetailQuery(
     apiEnabled && Number.isFinite(activityLegacyId) ? activityLegacyId : undefined,

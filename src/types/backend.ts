@@ -226,6 +226,25 @@ export interface ProfileActivityItem {
   status: 'registered' | 'attended';
 }
 
+export type PostApplicationStatus = 'pending' | 'accepted' | 'rejected';
+
+export type PostBuddyPreview = {
+  body: string;
+  location?: string;
+  tags: string[];
+};
+
+export interface PostApplicationItem {
+  id: string;
+  userId: string;
+  name: string;
+  avatar?: string;
+  message?: string;
+  status: PostApplicationStatus;
+  appliedAt: string;
+  buddyPreview?: PostBuddyPreview;
+}
+
 export interface ProfilePostItem {
   id: string;
   title: string;
@@ -237,6 +256,9 @@ export interface ProfilePostItem {
   activityLegacyId?: number;
   contentTypes?: PostContentType[];
   images?: string[];
+  /** Applicants on posts owned by the current user (newest first). */
+  applications?: PostApplicationItem[];
+  pendingApplicationCount?: number;
 }
 
 export type HomeFeedPostAuthorGender = 'female' | 'male';
@@ -306,6 +328,8 @@ export interface CreatePostPayload {
   tags?: string[];
   contentTypes?: PostContentType[];
   images?: string[];
+  /** Default true. False = stored but hidden from activity/popular feeds. */
+  listedInFeed?: boolean;
 }
 
 export interface UpdatePostPayload {

@@ -2,14 +2,15 @@ import './BottomNav.scss';
 import React from 'react';
 import { Button } from '../ui';
 import { View, Text } from '@tarojs/components';
-import { CalendarDays, House, User } from '../../components/icons';
+import { CalendarDays, House, MessageCircle, User } from '../../components/icons';
 import {
   preloadAiSubpackage,
   preloadEventSubpackage,
+  preloadMessageSubpackage,
   preloadProfileSubpackage,
 } from '../../utils/subpackagePreload';
 import type { RoutePath } from '../../utils/route';
-import { ROUTES, switchTabTo, useActiveRoutePath } from '../../utils/route';
+import { ROUTES, goMessages, switchTabTo, useActiveRoutePath } from '../../utils/route';
 
 function preloadSubpackagesForTab(path: RoutePath) {
   if (path === ROUTES.HOME || path === ROUTES.EVENTS) {
@@ -22,20 +23,33 @@ function preloadSubpackagesForTab(path: RoutePath) {
   }
 }
 
+function isMessagesRouteActive(activePath: string): boolean {
+  return activePath === ROUTES.MESSAGES || activePath.startsWith('/packageMessage/');
+}
+
 const BottomNav: React.FC = () => {
   const activePath = useActiveRoutePath();
 
   const navItems = [
-    { path: ROUTES.HOME, icon: House, label: '首页' },
-    { path: ROUTES.EVENTS, icon: CalendarDays, label: '活动' },
-    { path: ROUTES.PROFILE, icon: User, label: '我的' },
-  ] as const;
+    { path: ROUTES.HOME, icon: House, label: '首页', kind: 'tab' as const },
+    { path: ROUTES.EVENTS, icon: CalendarDays, label: '活动', kind: 'tab' as const },
+    {
+      path: ROUTES.MESSAGES,
+      icon: MessageCircle,
+      label: '私信',
+      kind: 'stack' as const,
+    },
+    { path: ROUTES.PROFILE, icon: User, label: '我的', kind: 'tab' as const },
+  ];
 
   return (
     <View data-cmp="BottomNav" className="s-bottom-nav">
       <View className="s-bottom-nav__row">
         {navItems.map((item) => {
-          const isActive = activePath === item.path;
+          const isActive =
+            item.kind === 'stack'
+              ? isMessagesRouteActive(activePath)
+              : activePath === item.path;
           const Icon = item.icon;
           return (
             <Button
@@ -43,10 +57,20 @@ const BottomNav: React.FC = () => {
               disabled={isActive}
               onTouchStart={() => {
                 if (!isActive) {
-                  preloadSubpackagesForTab(item.path);
+                  if (item.kind === 'stack') {
+                    preloadMessageSubpackage();
+                  } else {
+                    preloadSubpackagesForTab(item.path);
+                  }
                 }
               }}
-              onClick={() => switchTabTo(item.path)}
+              onClick={() => {
+                if (item.kind === 'stack') {
+                  goMessages();
+                  return;
+                }
+                switchTabTo(item.path);
+              }}
               className="s-bottom-nav__item"
             >
               <Icon

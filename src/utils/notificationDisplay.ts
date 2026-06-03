@@ -1,11 +1,17 @@
 import type { AppNotification, NotificationMeta } from '../types/backend';
 import { formatTimeAgo } from './dayTime';
 
-export type NotificationCategory = 'comment' | 'like' | 'system' | 'general';
+export type NotificationCategory =
+  | 'comment'
+  | 'like'
+  | 'application'
+  | 'system'
+  | 'general';
 
 export function getNotificationCategory(meta?: NotificationMeta): NotificationCategory {
   const type = meta?.type;
   if (type === 'like') return 'like';
+  if (type === 'application') return 'application';
   if (type === 'comment' || type === 'comment_reply') return 'comment';
   if (
     type === 'activity_update' ||

@@ -18,6 +18,7 @@ type EventPostsVirtualListProps = {
   onToggleComments: EventPostCardProps['onToggleComments'];
   onDelete: EventPostCardProps['onDelete'];
   onApply: EventPostCardProps['onApply'];
+  onOpenAppliedChat?: EventPostCardProps['onOpenAppliedChat'];
   onComplete?: EventPostCardProps['onComplete'];
   onCommentSubmitted: EventPostCardProps['onCommentSubmitted'];
   hasMore?: boolean;
@@ -38,6 +39,7 @@ export function EventPostsVirtualList({
   onToggleComments,
   onDelete,
   onApply,
+  onOpenAppliedChat,
   onComplete,
   onCommentSubmitted,
   hasMore = false,
@@ -75,6 +77,7 @@ export function EventPostsVirtualList({
               onToggleComments={onToggleComments}
               onDelete={onDelete}
               onApply={onApply}
+              onOpenAppliedChat={onOpenAppliedChat}
               onComplete={onComplete}
               onCommentSubmitted={onCommentSubmitted}
             />

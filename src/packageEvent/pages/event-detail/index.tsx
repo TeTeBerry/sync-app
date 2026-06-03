@@ -14,6 +14,7 @@ import { EventPostsVirtualList } from './components/EventPostsVirtualList';
 import { EVENT_DETAIL_SCROLL_ID } from './useEventDetailPosts';
 import { useEventDetailPage } from './useEventDetailPage';
 import { AiBuddyPostSheet } from '../../../components/ai-chat/AiBuddyPostSheet';
+import { TeamApplySheet } from '../../../components/post/TeamApplySheet';
 import { AiGuidePlanSheet } from '../../../components/ai-chat/AiGuidePlanSheet';
 import PageNavigation from '../../../components/navigation/PageNavigation';
 import { Button } from '../../../components/ui';
@@ -45,6 +46,8 @@ const EventDetailPage = () => {
     metaLine,
     scrollHeight,
     scrollTop,
+    scrollFrozen,
+    handleScroll,
     activityStatusClass,
     showHeaderSkeleton,
     composerReady,
@@ -64,6 +67,7 @@ const EventDetailPage = () => {
     handleShortcutTag,
     handleOpenAiGuide,
     handleOpenBuddyPost,
+    buddySheetForApplyFlow,
     handleOpenExclusiveItinerary,
     buddyPostSheetOpen,
     closeBuddyPostSheet,
@@ -77,6 +81,8 @@ const EventDetailPage = () => {
     guideDefaultNights,
     guideEventCity,
     entitlements,
+    teamApply,
+    applyBuddyPublishPending,
   } = page;
 
   return (
@@ -115,8 +121,9 @@ const EventDetailPage = () => {
           enhanced
           showScrollbar={false}
           scrollTop={scrollTop}
-          scrollWithAnimation
+          scrollWithAnimation={!scrollFrozen}
           lowerThreshold={80}
+          onScroll={(event) => handleScroll(event.detail.scrollTop)}
           onScrollToLower={posts.handleScrollToLower}
           className="s-event-detail__main s-scrollbar-none"
           style={scrollHeight != null ? { height: `${scrollHeight}px` } : undefined}
@@ -164,6 +171,7 @@ const EventDetailPage = () => {
                     onToggleComments={posts.togglePostComments}
                     onDelete={posts.handleDeletePost}
                     onApply={posts.handleApply}
+                    onOpenAppliedChat={posts.handleOpenAppliedChat}
                     onComplete={posts.handleCompletePost}
                     onCommentSubmitted={posts.handleCommentSubmitted}
                   />
@@ -209,8 +217,17 @@ const EventDetailPage = () => {
         open={buddyPostSheetOpen}
         activityDate={buddyPostActivityDate}
         activityTitle={buddyPostActivityTitle}
+        showSyncToFeedOption={buddySheetForApplyFlow}
         onClose={closeBuddyPostSheet}
         onSubmit={handleBuddyPostSheetSubmit}
+      />
+      <TeamApplySheet
+        open={teamApply.applySheetOpen}
+        buddyPreview={teamApply.applyBuddyPreview}
+        submitting={teamApply.applySubmitting}
+        publishPending={applyBuddyPublishPending}
+        onClose={teamApply.closeApplySheet}
+        onConfirm={teamApply.handleConfirmApply}
       />
       <AiGuidePlanSheet
         open={guideSheetOpen}

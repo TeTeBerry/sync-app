@@ -14,7 +14,7 @@ vi.mock('@tarojs/taro', () => ({
 }));
 
 vi.mock('../constants/api', () => ({
-  isApiEnabled: () => false,
+  isLiveApi: () => false,
 }));
 
 vi.mock('./subpackagePreload', () => ({

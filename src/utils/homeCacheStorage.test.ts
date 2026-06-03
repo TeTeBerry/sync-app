@@ -18,7 +18,7 @@ vi.mock('@tarojs/taro', () => ({
 }));
 
 vi.mock('../constants/api', () => ({
-  isApiEnabled: () => true,
+  isLiveApi: () => true,
 }));
 
 vi.mock('./session', () => ({

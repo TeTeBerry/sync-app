@@ -69,6 +69,19 @@ export function isApiEnabled(): boolean {
   return Boolean(API_BASE_URL || AI_CHAT_WS_URL);
 }
 
+/**
+ * Dev-only: `TARO_APP_USE_MOCK=true` uses fixture/mock data even when API URL is set.
+ * Does not block manual API calls (e.g. publish); disables useApiQuery fetches.
+ */
+export function isMockForced(): boolean {
+  return process.env.TARO_APP_USE_MOCK === 'true';
+}
+
+/** Fetch lists and profile from backend (respects mock force). Not a React hook. */
+export function isLiveApi(): boolean {
+  return isApiEnabled() && !isMockForced();
+}
+
 /** When API is off, force AI quota exhausted UI for local testing. */
 export function isDevMockQuotaExhausted(): boolean {
   return process.env.TARO_APP_MOCK_QUOTA_EXHAUSTED === 'true';

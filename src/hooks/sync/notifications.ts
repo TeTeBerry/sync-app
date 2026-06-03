@@ -7,7 +7,7 @@ import {
   markNotificationRead,
 } from '../../api/sync/notifications';
 import { resolveRequestUserId } from '../../api/requestContext';
-import { isApiEnabled } from '../../constants/api';
+import { isLiveApi } from '../../constants/api';
 import { invalidateNotifications } from '../../utils/queryInvalidation';
 import { useApiQuery } from '../useApiQuery';
 import type { QueryEnableOptions } from './types';
@@ -17,7 +17,7 @@ export async function invalidateNotificationQueries() {
 }
 
 export function useNotificationsQuery() {
-  const enabled = isApiEnabled();
+  const enabled = isLiveApi();
   const userId = resolveRequestUserId();
 
   return useApiQuery({
@@ -30,7 +30,7 @@ export function useNotificationsQuery() {
 
 export function useNotificationUnreadCount(options?: QueryEnableOptions) {
   const tabEnabled = options?.enabled ?? true;
-  const enabled = isApiEnabled() && tabEnabled;
+  const enabled = isLiveApi() && tabEnabled;
   const userId = resolveRequestUserId();
 
   return useApiQuery({

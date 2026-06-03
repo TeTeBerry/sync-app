@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { isApiEnabled, isDevMockQuotaExhausted } from '../constants/api';
+import { isLiveApi, isDevMockQuotaExhausted } from '../constants/api';
 import { useProfileActivityLegacyId } from './useProfileActivityLegacyId';
 import { useProfileEntitlementsQuery } from './useSyncApi';
 import {
@@ -30,7 +30,7 @@ function buildUsageLabel(entitlement: EventPackageEntitlement | null): string {
  * `exhausted` is false while loading or when API is disabled.
  */
 export function useAiMatchQuota(): AiMatchQuotaDisplay {
-  const apiEnabled = isApiEnabled();
+  const apiEnabled = isLiveApi();
   const activityLegacyId = useProfileActivityLegacyId();
   const entitlementsQuery = useProfileEntitlementsQuery(activityLegacyId);
 

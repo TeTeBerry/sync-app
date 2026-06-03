@@ -154,6 +154,11 @@
     color: var(--secondary);
   }
 
+  &--application {
+    background: rgba(var(--primary-rgb), 0.15);
+    color: var(--primary);
+  }
+
   &--system {
     background: rgba(255, 193, 7, 0.15);
     color: #ffc107;

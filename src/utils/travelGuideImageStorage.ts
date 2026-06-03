@@ -44,8 +44,8 @@ export function persistTravelGuideImage(
 
   return new Promise((resolve) => {
     fs.copyFile({
-      src: tempPath,
-      dest,
+      srcPath: tempPath,
+      destPath: dest,
       success: () => resolve(dest),
       fail: () => resolve(tempPath),
     });

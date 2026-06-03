@@ -1,7 +1,6 @@
 import Taro from '@tarojs/taro';
 import { useCallback, useMemo, useState } from 'react';
 import {
-  applyToPostAndInvalidate,
   deletePostAndInvalidate,
   likePostAndInvalidate,
   updatePostAndInvalidate,
@@ -9,7 +8,6 @@ import {
 import type { ConfirmDialogOptions } from '../../../hooks/useConfirmDialog';
 import { useEventPostsInfiniteQuery } from '../../../hooks/useEventPostsInfiniteQuery';
 import { requireAuth } from '../../../utils/authGate';
-import { consumeContactUnlockWithQuota } from '../../../utils/contactUnlockEntitlement';
 import { scrollElementToCenter } from '../../../utils/scrollToCenter';
 import type { EventDetailPost } from '../../../types/post';
 import type { EventDetailTabId } from './components/EventDetailContentTabs';
@@ -28,24 +26,18 @@ export const EVENT_DETAIL_SCROLL_ID = 'event-detail-scroll';
 type EventPostsQuery = ReturnType<typeof useEventPostsInfiniteQuery>;
 
 export type UseEventDetailPostsParams = {
-  eventId: number;
   contentTab: EventDetailTabId;
   postsQuery: EventPostsQuery;
   apiEnabled: boolean;
   confirm: (options: ConfirmDialogOptions) => Promise<boolean>;
-  contactUnlockQuota: { exhausted: boolean };
-  openContactUnlockExhaustedModal: () => void;
   setScrollTop: (value: number | undefined) => void;
 };
 
 export function useEventDetailPosts({
-  eventId,
   contentTab,
   postsQuery,
   apiEnabled,
   confirm,
-  contactUnlockQuota,
-  openContactUnlockExhaustedModal,
   setScrollTop,
 }: UseEventDetailPostsParams) {
   const [appliedPostIds, setAppliedPostIds] = useState<Set<string>>(() => new Set());
@@ -77,43 +69,6 @@ export function useEventDetailPosts({
     void postsQuery.loadMore();
   }, [contentTab, hasMoreVisiblePosts, showMoreVisiblePosts, postsQuery]);
 
-  const handleApply = useCallback(
-    (postId: string) => {
-      if (appliedPostIds.has(postId)) return;
-
-      if (contactUnlockQuota.exhausted) {
-        openContactUnlockExhaustedModal();
-        return;
-      }
-
-      const runApply = () => {
-        void applyToPostAndInvalidate(postId)
-          .then(async (result) => {
-            if (!result.alreadyApplied) {
-              const consumed = await consumeContactUnlockWithQuota(eventId);
-              if (!consumed) {
-                openContactUnlockExhaustedModal();
-                return;
-              }
-            }
-
-            setAppliedPostIds((prev) => new Set(prev).add(postId));
-            const toastTitle = result.alreadyApplied ? '已申请' : '申请成功';
-            void Taro.showToast({ title: toastTitle, icon: 'success' });
-          })
-          .catch(() => void Taro.showToast({ title: '申请失败', icon: 'none' }));
-      };
-
-      requireAuth(runApply, 'post');
-    },
-    [
-      appliedPostIds,
-      contactUnlockQuota.exhausted,
-      eventId,
-      openContactUnlockExhaustedModal,
-    ],
-  );
-
   const handleLikePost = useCallback(
     (postId: string) => {
       requireAuth(() => {
@@ -128,6 +83,16 @@ export function useEventDetailPosts({
       }, 'social');
     },
     [apiEnabled, postsQuery],
+  );
+
+  const ensurePostVisible = useCallback(
+    (postId: string) => {
+      const index = allPostItems.findIndex((item) => item.post.id === postId);
+      if (index >= 0) {
+        ensureIndexVisible(index);
+      }
+    },
+    [allPostItems, ensureIndexVisible],
   );
 
   const scrollToElement = useCallback(
@@ -238,10 +203,11 @@ export function useEventDetailPosts({
     totalPostCount: allPostItems.length,
     hasMoreVisiblePosts,
     appliedPostIds,
+    setAppliedPostIds,
     expandedCommentPostIds,
     handleScrollToLower,
-    handleApply,
     handleLikePost,
+    ensurePostVisible,
     scrollToElement,
     togglePostComments,
     handleDeletePost,

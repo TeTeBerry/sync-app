@@ -6,7 +6,7 @@ import {
   fetchHomeSummary,
   registerForActivity,
 } from '../../api/sync/activities';
-import { isApiEnabled } from '../../constants/api';
+import { isLiveApi } from '../../constants/api';
 import type { BackendActivity } from '../../types/backend';
 import {
   seedActivityDetailsFromHomeSummary,
@@ -46,7 +46,7 @@ import { updateCurrentUser } from '../../api/sync/users';
 
 export function useActivitiesQuery(options?: QueryEnableOptions) {
   const tabEnabled = options?.enabled ?? true;
-  const enabled = isApiEnabled() && tabEnabled;
+  const enabled = isLiveApi() && tabEnabled;
 
   return useApiQuery({
     queryKey: ['activities'],
@@ -87,7 +87,7 @@ export function useHomeSummary() {
       seedPopularPostsCache(result.popularPosts);
       return result;
     },
-    enabled: isApiEnabled(),
+    enabled: isLiveApi(),
     staleTime: STALE_HOME_SUMMARY_MS,
   });
 }
@@ -151,7 +151,7 @@ export function useNearestUpcomingForCountdown() {
 
 export function useActivityDetailQuery(legacyId?: number) {
   const enabled =
-    isApiEnabled() && legacyId != null && !Number.isNaN(legacyId) && legacyId > 0;
+    isLiveApi() && legacyId != null && !Number.isNaN(legacyId) && legacyId > 0;
 
   return useApiQuery({
     queryKey: ['activities', 'detail', legacyId],

@@ -15,6 +15,12 @@ export type AiBuddyPostFormValues = {
   note?: string;
 };
 
+/** Submit payload from buddy sheet (apply-flow may include feed sync). */
+export type AiBuddyPostSubmitPayload = AiBuddyPostFormValues & {
+  /** When false, post is created but activity feed is not refreshed until later. */
+  syncToPostList?: boolean;
+};
+
 export const BUDDY_POST_TAG_OPTIONS: Array<{
   id: BuddyPostTagId;
   label: string;
@@ -49,7 +55,6 @@ export const BUDDY_POST_TAG_OPTIONS: Array<{
     label: '拼卡',
     intentPhrase: '找拼卡',
     hashTag: '#拼卡',
-    /** 与 #拼卡 / post-content-type 一致：找进场搭子，非转票 */
     contentType: 'carpool',
   },
 ];

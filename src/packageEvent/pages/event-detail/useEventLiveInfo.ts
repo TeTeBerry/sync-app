@@ -7,7 +7,7 @@ import {
   submitLiveInfoWristband,
   toggleLiveInfoUpdateLike,
 } from '../../../api/syncApi';
-import { isApiEnabled } from '../../../constants/api';
+import { isLiveApi } from '../../../constants/api';
 import type { LiveInfoCertStatus, LiveInfoViewerState } from '../../../types/backend';
 import { pickWristbandImagePath, uploadImageFile } from '../../../utils/uploadImage';
 import type { LiveInfoCategoryId } from './liveInfoConfig';
@@ -99,7 +99,7 @@ export function useEventLiveInfo(
   options?: UseEventLiveInfoOptions,
 ) {
   const enabled = options?.enabled ?? true;
-  const apiEnabled = isApiEnabled();
+  const apiEnabled = isLiveApi();
   const [loading, setLoading] = useState(false);
   const [localCert, setLocalCert] = useState<StoredCert | null>(() =>
     apiEnabled ? null : readCert(eventId),
