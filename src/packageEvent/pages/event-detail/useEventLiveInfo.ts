@@ -27,6 +27,8 @@ export type PublishLiveInfoPayload = {
 type UseEventLiveInfoOptions = {
   /** When false, skips API reload (e.g. until user opens the live tab). */
   enabled?: boolean;
+  /** Called after wristband certification succeeds (e.g. refresh activity posts). */
+  onCertifiedSuccess?: () => void | Promise<void>;
 };
 
 export function useEventLiveInfo(
@@ -100,7 +102,11 @@ export function useEventLiveInfo(
       const res = await submitLiveInfoWristband(eventId, { imageUrl });
       applyViewer(res.viewer);
       if (res.ok && res.viewer.isCertified) {
-        void Taro.showToast({ title: '手环认证成功', icon: 'success' });
+        void Taro.showToast({
+          title: '已认证，你的组队帖将显示现场标识',
+          icon: 'success',
+        });
+        void options?.onCertifiedSuccess?.();
       } else {
         const msg =
           res.message?.trim() ||
@@ -123,7 +129,7 @@ export function useEventLiveInfo(
     } finally {
       Taro.hideLoading();
     }
-  }, [applyViewer, eventId]);
+  }, [applyViewer, eventId, options?.onCertifiedSuccess]);
 
   const reuploadWristband = useCallback(async () => {
     await uploadWristband();

@@ -1,6 +1,10 @@
 import { useCallback, useRef, useState } from 'react';
 import { useContactUnlockQuota } from '../../../hooks/useContactUnlockQuota';
-import { useActivityDetailQuery, useCurrentUserQuery } from '../../../hooks/useSyncApi';
+import {
+  invalidatePostQueries,
+  useActivityDetailQuery,
+  useCurrentUserQuery,
+} from '../../../hooks/useSyncApi';
 import { useEventPostsInfiniteQuery } from '../../../hooks/useEventPostsInfiniteQuery';
 import { useEventDetailPosts } from './useEventDetailPosts';
 import { useEventDetailLive } from './useEventDetailLive';
@@ -65,6 +69,15 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     refreshPosts: postsQuery.refetch,
     prependPost: postsQuery.prependItem,
   });
+
+  const handleOnSiteCertifiedSuccess = useCallback(async () => {
+    await invalidatePostQueries();
+    try {
+      await postsQuery.refetch();
+    } catch {
+      // Best-effort refresh so buddy posts pick up on-site badge.
+    }
+  }, [postsQuery]);
 
   const ai = useEventDetailAiActions(eventId, {
     openGuideSheet: travelGuide.openGuideSheet,
@@ -263,5 +276,6 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     entitlements,
     isOnSite: header.isOnSite,
     publishOnsiteIntent: buddyPost.publishOnsiteIntent,
+    handleOnSiteCertifiedSuccess,
   };
 }

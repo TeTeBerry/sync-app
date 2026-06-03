@@ -12,6 +12,7 @@ export type EventLiveInfoTabProps = {
   onFeedCountChange?: (count: number) => void;
   onOpenUpdate: () => void;
   onLiveInfoActions?: (actions: EventLiveInfoTabActions | null) => void;
+  onCertifiedSuccess?: () => void | Promise<void>;
 };
 
 export function EventLiveInfoTab({
@@ -20,8 +21,12 @@ export function EventLiveInfoTab({
   onFeedCountChange,
   onOpenUpdate,
   onLiveInfoActions,
+  onCertifiedSuccess,
 }: EventLiveInfoTabProps) {
-  const liveInfo = useEventLiveInfo(eventId, userName, { enabled: true });
+  const liveInfo = useEventLiveInfo(eventId, userName, {
+    enabled: true,
+    onCertifiedSuccess,
+  });
 
   useEffect(() => {
     onFeedCountChange?.(liveInfo.liveInfoCount);

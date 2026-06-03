@@ -25,6 +25,7 @@ export function normalizeEventPostListItem(item: EventDetailPost): EventPostList
     status: item.status,
     contentTypes: item.contentTypes,
     images: sanitizeImageList(item.images),
+    authorOnSiteVerified: item.authorOnSiteVerified,
   };
   const publishTimeLabel = post.createdAt
     ? formatPostPublishTime(post.createdAt)

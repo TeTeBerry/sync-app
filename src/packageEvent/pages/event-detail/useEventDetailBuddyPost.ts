@@ -81,7 +81,10 @@ export function useEventDetailBuddyPost(
         });
 
         if (!submitOptions?.quiet) {
-          void Taro.showToast({ title: '组队帖已发布', icon: 'success' });
+          const toastTitle = post.authorOnSiteVerified
+            ? '已发布 · 我在现场'
+            : '组队帖已发布';
+          void Taro.showToast({ title: toastTitle, icon: 'success' });
         }
 
         if (!submitOptions?.skipListRefresh) {

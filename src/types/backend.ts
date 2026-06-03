@@ -302,6 +302,8 @@ export interface HomeFeedPost {
   activityLegacyId?: number;
   contentTypes?: PostContentType[];
   images?: string[];
+  /** Author passed wristband on-site verification for this activity today. */
+  authorOnSiteVerified?: boolean;
 }
 
 export interface PostCommentItem {
@@ -345,6 +347,8 @@ export interface EventDetailPost {
   avatar: string;
   status: '招募中' | '已组队' | '已隐藏';
   images?: string[];
+  /** Author passed wristband on-site verification for this activity today. */
+  authorOnSiteVerified?: boolean;
 }
 
 export type PostContentType = 'team' | 'accommodation' | 'carpool' | 'ticket' | 'other';

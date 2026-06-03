@@ -23,4 +23,16 @@ describe('buildOnsiteBuddyPostForm', () => {
     expect(form?.tags).toEqual(['carpool', 'team']);
     expect(form?.note).toContain('散场');
   });
+
+  it('fills main-stage carpool preset', () => {
+    const form = buildOnsiteBuddyPostForm(
+      'onsite_carpool_stage',
+      '06/13',
+      '上海·梅赛德斯奔驰文化中心',
+      now,
+    );
+    expect(form?.tags).toEqual(['carpool', 'team']);
+    expect(form?.location).toBe('上海');
+    expect(form?.note).toContain('主舞台');
+  });
 });

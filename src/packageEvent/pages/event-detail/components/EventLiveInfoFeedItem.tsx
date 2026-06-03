@@ -5,6 +5,7 @@ import { Text, View } from '@tarojs/components';
 import { ImageWithFallback } from '../../../../components/ImageWithFallback';
 import { getLiveInfoCategory } from '../liveInfoConfig';
 import type { LiveInfoFeedItem } from '../liveInfoMock';
+import { OnSiteVerifiedBadge } from '../../../../components/OnSiteVerifiedBadge';
 import { EventLiveInfoStarRow } from './EventLiveInfoStarRow';
 
 type EventLiveInfoFeedItemProps = {
@@ -56,9 +57,7 @@ export function EventLiveInfoFeedItem({
         <View className="s-live-info-post__identity">
           <View className="s-live-info-post__name-row">
             <Text className="s-live-info-post__name">{userName}</Text>
-            {certified ? (
-              <Text className="s-live-info-post__cert-pill">手环认证</Text>
-            ) : null}
+            {certified ? <OnSiteVerifiedBadge /> : null}
           </View>
           <Text className="s-live-info-post__meta">
             {formatUpdateMeta(item.timeLabel, ratings.length)}

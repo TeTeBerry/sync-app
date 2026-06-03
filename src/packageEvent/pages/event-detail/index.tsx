@@ -193,6 +193,7 @@ const EventDetailPage = () => {
               onLiveInfoActions={live.handleLiveInfoActions}
               onCloseUpdateSheet={live.handleCloseLiveUpdateSheet}
               onPublishUpdate={live.handleLiveUpdatePublish}
+              onCertifiedSuccess={page.handleOnSiteCertifiedSuccess}
             />
 
             {!showHeaderSkeleton && showPostsEnd ? (

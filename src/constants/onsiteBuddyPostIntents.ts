@@ -5,6 +5,7 @@ import { BUDDY_POST_TAG_OPTIONS } from '../types/buddyPost';
 
 export type OnsiteBuddyPostIntentId =
   | 'onsite_team'
+  | 'onsite_carpool_stage'
   | 'onsite_carpool'
   | 'onsite_accommodation';
 
@@ -15,6 +16,7 @@ export type OnsiteBuddyPostIntent = {
 
 export const ONSITE_BUDDY_POST_INTENTS: OnsiteBuddyPostIntent[] = [
   { id: 'onsite_team', label: '现场找队友' },
+  { id: 'onsite_carpool_stage', label: '主舞台附近拼车' },
   { id: 'onsite_carpool', label: '散场拼车' },
   { id: 'onsite_accommodation', label: '现场拼房' },
 ];
@@ -33,6 +35,10 @@ const INTENT_PRESETS: Record<
   onsite_team: {
     tags: ['team'],
     note: '主舞台/现场附近找队友',
+  },
+  onsite_carpool_stage: {
+    tags: ['carpool', 'team'],
+    note: '现在在主舞台附近找拼车',
   },
   onsite_carpool: {
     tags: ['carpool', 'team'],

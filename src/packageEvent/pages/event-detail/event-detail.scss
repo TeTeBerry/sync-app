@@ -191,12 +191,16 @@
 
 .s-event-detail__ai-onsite-tags {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 8px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 2px;
 }
 
 .s-event-detail__ai-onsite-chip {
   @include chat.chat-pill-chip;
+  flex-shrink: 0;
   padding: 6px 12px;
   font-size: 12px;
   font-weight: var(--s-fw-semibold);

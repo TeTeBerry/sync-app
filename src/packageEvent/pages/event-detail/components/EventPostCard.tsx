@@ -28,6 +28,7 @@ import {
   parseGroupProgressFromText,
 } from '../utils/eventPostDisplay';
 import { Button } from '../../../../components/ui';
+import { OnSiteVerifiedBadge } from '../../../../components/OnSiteVerifiedBadge';
 import { Text, View } from '@tarojs/components';
 
 export type EventPostCardProps = {
@@ -146,6 +147,7 @@ function EventPostCardInner({
             <View className="s-event-post__identity">
               <View className="s-event-post__name-row">
                 <Text className="s-event-post__user-name">{postName}</Text>
+                {post.authorOnSiteVerified ? <OnSiteVerifiedBadge /> : null}
                 <Text className="s-event-post__user-handle">
                   {formatEventPostHandle(postName)}
                 </Text>

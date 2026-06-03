@@ -20,6 +20,7 @@ export type EventDetailLiveSectionProps = {
   onLiveInfoActions: (actions: EventLiveInfoTabActions | null) => void;
   onCloseUpdateSheet: () => void;
   onPublishUpdate: (payload: PublishLiveInfoPayload) => Promise<boolean>;
+  onCertifiedSuccess?: () => void | Promise<void>;
 };
 
 const EventDetailLiveSection: React.FC<EventDetailLiveSectionProps> = ({
@@ -32,6 +33,7 @@ const EventDetailLiveSection: React.FC<EventDetailLiveSectionProps> = ({
   onLiveInfoActions,
   onCloseUpdateSheet,
   onPublishUpdate,
+  onCertifiedSuccess,
 }) => {
   if (!visible) {
     return null;
@@ -48,6 +50,7 @@ const EventDetailLiveSection: React.FC<EventDetailLiveSectionProps> = ({
           onFeedCountChange={onFeedCountChange}
           onOpenUpdate={onOpenUpdate}
           onLiveInfoActions={onLiveInfoActions}
+          onCertifiedSuccess={onCertifiedSuccess}
         />
       </Suspense>
       {updateSheetOpen ? (
