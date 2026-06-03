@@ -2,6 +2,7 @@ import {
   fetchTeamChatMessages,
   fetchTeamChatSessions,
   markTeamChatRead,
+  openTeamChatByOwner,
   sendTeamChatMessage,
 } from '../../api/sync/teamChats';
 import { isLiveApi } from '../../constants/api';
@@ -141,9 +142,14 @@ export async function markTeamChatReadAndInvalidate(
   applicantUserId: string,
 ) {
   patchTeamChatSessionUnreadInCache(postId, applicantUserId, 0);
-  try {
-    return await markTeamChatRead(postId, applicantUserId);
-  } finally {
-    invalidateTeamChatQueries();
-  }
+  return markTeamChatRead(postId, applicantUserId);
+}
+
+export async function openTeamChatByOwnerAndInvalidate(
+  postId: string,
+  applicantUserId: string,
+): Promise<TeamChatSession> {
+  const session = await openTeamChatByOwner(postId, applicantUserId);
+  invalidateTeamChatQueries();
+  return session;
 }

@@ -19,8 +19,8 @@ const MessagesPage: React.FC = () => {
   useEndRouteTransitionOnShow();
   const navInsets = useNavBarInsets();
   const headerChromePx = stackPageNavChromePx(navInsets);
-  const mainScrollHeight = useTabPageMainHeight(headerChromePx);
-  const { sessions, isLoading, refetch } = useTeamChatSessionList();
+  const mainScrollHeight = useTabPageMainHeight(headerChromePx) ?? 480;
+  const { sessions, isLoading, isError, refetch } = useTeamChatSessionList();
 
   useDidShow(() => {
     void refetch({ background: true });
@@ -41,16 +41,24 @@ const MessagesPage: React.FC = () => {
 
         <ScrollView
           scrollY
-          enhanced
           showScrollbar={false}
           className="s-messages__scroll s-scrollbar-none"
-          style={
-            mainScrollHeight != null ? { height: `${mainScrollHeight}px` } : undefined
-          }
+          style={{ height: `${mainScrollHeight}px` }}
         >
           <View className="s-messages__inner">
             {isLoading ? (
               <Text className="s-messages__empty-hint">加载中…</Text>
+            ) : isError ? (
+              <View className="s-messages__empty">
+                <Text className="s-messages__empty-title">加载失败</Text>
+                <Text className="s-messages__empty-hint">请检查网络后重试</Text>
+                <Button
+                  className="s-messages__item"
+                  onClick={() => void refetch({ background: false })}
+                >
+                  <Text className="s-btn-label">重新加载</Text>
+                </Button>
+              </View>
             ) : sortedSessions.length === 0 ? (
               <View className="s-messages__empty">
                 <View className="s-messages__empty-icon">
@@ -58,7 +66,7 @@ const MessagesPage: React.FC = () => {
                 </View>
                 <Text className="s-messages__empty-title">暂无会话</Text>
                 <Text className="s-messages__empty-hint">
-                  申请组队或收到申请后，可在这里与对方沟通
+                  发起沟通后，会话会出现在这里
                 </Text>
               </View>
             ) : (

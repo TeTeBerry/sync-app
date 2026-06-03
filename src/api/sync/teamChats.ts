@@ -32,3 +32,11 @@ export function markTeamChatRead(postId: string, applicantUserId: string) {
     ownerQueryParams(),
   );
 }
+
+export function openTeamChatByOwner(postId: string, applicantUserId: string) {
+  return apiPost<TeamChatSession>(
+    `/team-chats/${encodeURIComponent(postId)}/${encodeURIComponent(applicantUserId)}/open`,
+    {},
+    ownerQueryParams(),
+  );
+}

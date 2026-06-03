@@ -7,6 +7,7 @@ import {
 } from '../hooks/useApiQuery';
 import type {
   HomeFeedPost,
+  HomeSummary,
   EventDetailPost,
   EventPostsPage,
   ProfilePostItem,
@@ -183,6 +184,17 @@ export function patchLikedPostInCaches(
     posts?.map(patchPost);
 
   forEachCacheEntry((key, entryData) => {
+    if (key === 'home|summary' && entryData && typeof entryData === 'object') {
+      const summary = entryData as HomeSummary;
+      if (summary.popularPosts?.length) {
+        const patchedPopular = patchFeedPosts(summary.popularPosts);
+        if (patchedPopular) {
+          setCacheDataByKey(key, { ...summary, popularPosts: patchedPopular });
+        }
+      }
+      return;
+    }
+
     if (!key.startsWith('posts|')) return;
     if (!Array.isArray(entryData)) return;
 
@@ -230,6 +242,7 @@ export function patchLikedPostInCaches(
   }
 
   broadcastCacheData(['posts']);
+  broadcastCacheData(['home', 'summary']);
 }
 
 /** Recompute profile summary 获赞数 from cached /profile/posts (same rule as backend). */

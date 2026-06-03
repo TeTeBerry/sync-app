@@ -474,7 +474,8 @@
 }
 
 .s-event-post__text {
-  margin: 0 0 12px;
+  display: block;
+  margin: 0;
   font-size: 14px;
   line-height: 1.55;
   color: rgba(255, 255, 255, 0.95);
@@ -485,6 +486,7 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 10px;
+  margin-top: 12px;
   margin-bottom: 12px;
 }
 

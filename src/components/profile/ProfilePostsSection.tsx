@@ -17,6 +17,10 @@ import {
 import type { PostApplicationItem } from '../../types/backend';
 import { formatTimeAgo } from '../../utils/dayTime';
 import { ContentTypeBadge, PostStatusBadge } from '../post';
+import {
+  mergePostContentTypes,
+  stripContentTypeHashtags,
+} from '../../utils/postContentTypeDisplay';
 import { ProfileCollapsibleSection } from './ProfileCollapsibleSection';
 import type { ProfilePostItem } from '../../types/backend';
 import { POST_ACTION_ICON_COLOR } from '../../utils/postActionColors';
@@ -203,6 +207,10 @@ function renderPostItems(
     const charCount = draft?.body.length ?? 0;
     const charProgress = Math.min(charCount / POST_BODY_MAX, 1);
     const isDirty = isEditing && draft ? isPostEditDirty(item, draft) : false;
+    const contentTypeKeys = mergePostContentTypes(item.contentTypes, {
+      body: item.content,
+    });
+    const contentText = stripContentTypeHashtags(item.content);
 
     return (
       <View
@@ -224,9 +232,11 @@ function renderPostItems(
           <PostStatusBadge post={item} variant="home" isOwn />
         </View>
 
-        <Text className="s-profile-post__content">{item.content}</Text>
+        {contentText ? (
+          <Text className="s-profile-post__content">{contentText}</Text>
+        ) : null}
 
-        <ContentTypeBadge types={item.contentTypes} />
+        <ContentTypeBadge types={contentTypeKeys} />
 
         {item.applications?.length ? (
           <PostApplicationsBlock

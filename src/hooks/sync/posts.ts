@@ -30,6 +30,8 @@ import {
   patchProfilePostApplicationAccepted,
   patchUpdatedProfilePostInCaches,
 } from '../../utils/queryInvalidation';
+import { getCacheData } from '../useApiQuery';
+import type { HomeSummary } from '../../types/backend';
 import { isCurrentUserPostAuthor } from '../../utils/postOwnership';
 import {
   STALE_POST_COMMENTS_MS,
@@ -141,7 +143,48 @@ export async function deletePostAndInvalidate(postId: string) {
   await invalidatePostQueries();
 }
 
+function readPostLikeStateFromCaches(
+  postId: string,
+  userId: string,
+): Pick<HomeFeedPost, 'likes' | 'liked' | 'comments'> | null {
+  const fromPopular = getCacheData<HomeFeedPost[]>(['posts', 'popular', userId])?.find(
+    (post) => post.id === postId,
+  );
+  if (fromPopular) {
+    return {
+      likes: fromPopular.likes,
+      liked: Boolean(fromPopular.liked),
+      comments: fromPopular.comments ?? 0,
+    };
+  }
+
+  const fromSummary = getCacheData<HomeSummary>([
+    'home',
+    'summary',
+  ])?.popularPosts?.find((post) => post.id === postId);
+  if (fromSummary) {
+    return {
+      likes: fromSummary.likes,
+      liked: Boolean(fromSummary.liked),
+      comments: fromSummary.comments ?? 0,
+    };
+  }
+
+  return null;
+}
+
 export async function likePostAndInvalidate(postId: string) {
+  const userId = resolveRequestUserId();
+  const current = readPostLikeStateFromCaches(postId, userId);
+  if (current) {
+    patchLikedPostInCaches({
+      id: postId,
+      likes: current.liked ? Math.max(0, current.likes - 1) : current.likes + 1,
+      liked: !current.liked,
+      comments: current.comments,
+    });
+  }
+
   const updated = await likePost(postId);
   patchLikedPostInCaches(updated);
   if (isCurrentUserPostAuthor(undefined, updated.userId)) {

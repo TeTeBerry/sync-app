@@ -1,7 +1,7 @@
 /** Content-type hashtag labels shown on post cards (e.g. #其他). */
 export const CONTENT_TYPE_LABELS: Record<string, string> = {
   team: '组队',
-  accommodation: '住宿',
+  accommodation: '拼房',
   carpool: '拼车',
   ticket: '转票',
   groupbuy: '拼单',

@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { TempChatMessage } from '../types/tempChat';
 
-const SCROLL_TOP_STEP = 100_000;
 const NEAR_BOTTOM_PX = 80;
 export const TEMP_CHAT_SCROLL_BOTTOM_ID = 'temp-chat-scroll-bottom';
 
@@ -14,8 +13,6 @@ type ScrollEventDetail = {
  */
 export function useTempChatScroll(messages: TempChatMessage[], sessionId: string) {
   const [scrollIntoView, setScrollIntoView] = useState<string | undefined>();
-  const [scrollTop, setScrollTop] = useState(0);
-  const scrollTopRef = useRef(0);
   const stickToBottomRef = useRef(true);
   const maxScrollTopRef = useRef(0);
   const prevCountRef = useRef(0);
@@ -24,22 +21,12 @@ export function useTempChatScroll(messages: TempChatMessage[], sessionId: string
     stickToBottomRef.current = true;
     maxScrollTopRef.current = 0;
     prevCountRef.current = 0;
-    scrollTopRef.current = 0;
-    setScrollTop(0);
     setScrollIntoView(undefined);
   }, [sessionId]);
 
   const scrollToBottom = useCallback(() => {
     if (messages.length === 0) return;
-    scrollTopRef.current =
-      scrollTopRef.current >= 5_000_000
-        ? SCROLL_TOP_STEP
-        : scrollTopRef.current + SCROLL_TOP_STEP;
-    setScrollTop(scrollTopRef.current);
-    setScrollIntoView(undefined);
-    const apply = () => setScrollIntoView(TEMP_CHAT_SCROLL_BOTTOM_ID);
-    setTimeout(apply, 0);
-    setTimeout(apply, 80);
+    setScrollIntoView(TEMP_CHAT_SCROLL_BOTTOM_ID);
   }, [messages.length]);
 
   const onScroll = useCallback((detail: ScrollEventDetail) => {
@@ -74,7 +61,6 @@ export function useTempChatScroll(messages: TempChatMessage[], sessionId: string
 
   return {
     scrollIntoView,
-    scrollTop,
     onScroll,
     markStickToBottom,
   };

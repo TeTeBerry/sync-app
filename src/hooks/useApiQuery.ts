@@ -168,9 +168,11 @@ export function useApiQuery<T>(options: UseApiQueryOptions<T>) {
     const entry = globalCache.get(cacheKey) as CacheEntry<T> | undefined;
     setData(entry?.data);
     lastFetchRef.current = entry?.timestamp ?? 0;
-    if (enabled) {
-      void fetch({ background: entry?.data !== undefined });
+    if (!enabled) {
+      setIsLoading(false);
+      return;
     }
+    void fetch({ background: entry?.data !== undefined });
   }, [cacheKey, enabled, fetch]);
 
   useEffect(() => {
@@ -194,12 +196,17 @@ export function useApiQuery<T>(options: UseApiQueryOptions<T>) {
     });
   }, [cacheKey, enabled]);
 
+  const refetch = useCallback(
+    (options?: { background?: boolean }) =>
+      fetch({ force: true, background: options?.background ?? false }),
+    [fetch],
+  );
+
   return {
     data,
     isLoading,
     isError,
     error,
-    refetch: (options?: { background?: boolean }) =>
-      fetch({ force: true, background: options?.background ?? false }),
+    refetch,
   };
 }

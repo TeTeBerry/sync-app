@@ -86,9 +86,9 @@ const NotificationsPage: React.FC = () => {
     );
   }, [activeCategory, notifications]);
 
-  const categoryCounts = useMemo(() => {
+  const unreadTabCounts = useMemo(() => {
     const counts: Record<CategoryFilter, number> = {
-      all: notifications.length,
+      all: 0,
       application: 0,
       comment: 0,
       like: 0,
@@ -96,6 +96,8 @@ const NotificationsPage: React.FC = () => {
       general: 0,
     };
     for (const item of notifications) {
+      if (item.read) continue;
+      counts.all += 1;
       const category = getNotificationCategory(item.meta);
       if (category !== 'general') {
         counts[category] += 1;
@@ -151,7 +153,7 @@ const NotificationsPage: React.FC = () => {
       <View className="s-notifications__main">
         <View className="s-notifications__tabs" role="tablist">
           {CATEGORY_TABS.map((category) => {
-            const count = categoryCounts[category];
+            const count = unreadTabCounts[category];
             const isActive = activeCategory === category;
             return (
               <Button

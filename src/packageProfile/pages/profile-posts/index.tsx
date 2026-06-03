@@ -22,7 +22,13 @@ import { useNavBarInsets } from '../../../hooks/useNavBarInsets';
 import { useTabPageMainHeight } from '../../../hooks/useTabPageMainHeight';
 import type { ProfilePostItem } from '../../../types/backend';
 import { buildTempChatRouteSessionId } from '../../../utils/tempChatNavigation';
-import { invalidateTeamChatQueries } from '../../../hooks/sync/teamChats';
+import {
+  invalidateTeamChatQueries,
+  openTeamChatByOwnerAndInvalidate,
+} from '../../../hooks/sync/teamChats';
+import { isLiveApi } from '../../../constants/api';
+import { useTempChatStore } from '../../../stores/tempChatStore';
+import { resolveApplicantBuddyInfo } from '../../../utils/tempChatApplicantBuddy';
 import { goEventDetail, goTempChat, ROUTES } from '../../../utils/route';
 import { useEndRouteTransitionOnShow } from '../../../hooks/useEndRouteTransitionOnShow';
 import { ScrollView, View } from '@tarojs/components';
@@ -126,9 +132,34 @@ const ProfilePostsPage: React.FC = () => {
   );
 
   const handleChatWithApplication = useCallback(
-    (post: ProfilePostItem, application: PostApplicationItem) => {
-      invalidateTeamChatQueries();
-      goTempChat(buildTempChatRouteSessionId(post.id, application.userId));
+    async (post: ProfilePostItem, application: PostApplicationItem) => {
+      const sessionId = buildTempChatRouteSessionId(post.id, application.userId);
+      if (isLiveApi()) {
+        try {
+          await openTeamChatByOwnerAndInvalidate(post.id, application.userId);
+        } catch {
+          void Taro.showToast({ title: '发起沟通失败', icon: 'none' });
+          return;
+        }
+      } else {
+        useTempChatStore.getState().openSessionFromApplication({
+          postId: post.id,
+          applicantUserId: application.userId,
+          peerUserId: application.userId,
+          peerName: application.name,
+          peerAvatar: application.avatar,
+          postTitle: post.title,
+          buddyInfo:
+            application.buddyPreview ?? resolveApplicantBuddyInfo(application.userId),
+          applicationMessage: application.message,
+          activityLegacyId: post.activityLegacyId,
+          applicationStatus: application.status,
+          postRecruitmentStatus: post.status === '已组队' ? '已组队' : '招募中',
+          isOwner: true,
+        });
+        invalidateTeamChatQueries();
+      }
+      goTempChat(sessionId);
     },
     [],
   );

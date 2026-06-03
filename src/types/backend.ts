@@ -242,6 +242,8 @@ export interface PostApplicationItem {
   message?: string;
   status: PostApplicationStatus;
   appliedAt: string;
+  /** Set when post owner opened chat from profile posts. */
+  ownerOpenedChatAt?: string;
   buddyPreview?: PostBuddyPreview;
 }
 

@@ -1,5 +1,5 @@
 import './chat.scss';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Taro, { useDidShow, useRouter } from '@tarojs/taro';
 import { Send } from '../../../components/icons';
 import { ChatBuddyCard } from '../../../components/message/ChatBuddyCard';
@@ -28,6 +28,7 @@ import {
 } from '../../../hooks/sync/teamChats';
 import { acceptTeamApplicationInChat } from '../../../utils/acceptTeamApplicationInChat';
 import { sanitizeRemoteImageUrl } from '../../../utils/imageUrl';
+import { resolveRequestUserId } from '../../../api/requestContext';
 import { ROUTES } from '../../../utils/route';
 import { Button } from '../../../components/ui';
 import { Input, ScrollView, Text, View } from '@tarojs/components';
@@ -51,10 +52,11 @@ const TempChatPage: React.FC = () => {
   const {
     messages: sourceMessages,
     messagesQuery,
+    isLoading: messagesLoading,
     refetchMessages,
   } = useResolvedTempChatMessages(sessionId, parsed);
   const displayMessages = useMergedTempChatMessages(sessionId, sourceMessages);
-  const { scrollIntoView, scrollTop, onScroll, markStickToBottom } = useTempChatScroll(
+  const { scrollIntoView, onScroll, markStickToBottom } = useTempChatScroll(
     displayMessages,
     sessionId,
   );
@@ -65,21 +67,22 @@ const TempChatPage: React.FC = () => {
     pollEnabled,
     hasCachedMessages: displayMessages.length > 0,
     refetchMessages,
-    refetchSession: sessionsQuery.refetch,
   });
 
-  const markThreadAsRead = useCallback(() => {
-    if (!parsed) return;
-    void markTeamChatReadAndInvalidate(parsed.postId, parsed.applicantUserId);
-  }, [parsed]);
-
-  useDidShow(() => {
-    markThreadAsRead();
-  });
+  const markedReadKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
-    markThreadAsRead();
-  }, [markThreadAsRead]);
+    if (!parsed || !session) return;
+    const key = `${parsed.postId}:${parsed.applicantUserId}`;
+    if (markedReadKeyRef.current === key) return;
+    markedReadKeyRef.current = key;
+    void markTeamChatReadAndInvalidate(parsed.postId, parsed.applicantUserId);
+  }, [parsed, session]);
+
+  useDidShow(() => {
+    if (!parsed || !session) return;
+    void markTeamChatReadAndInvalidate(parsed.postId, parsed.applicantUserId);
+  });
 
   const canSend = draft.trim().length > 0;
   const showAcceptTeam =
@@ -163,7 +166,7 @@ const TempChatPage: React.FC = () => {
   ) : null;
 
   const showInitialLoading =
-    (isLoading || messagesQuery.isLoading) && displayMessages.length === 0;
+    (isLoading || messagesLoading) && displayMessages.length === 0;
 
   if (showInitialLoading) {
     return (
@@ -178,11 +181,19 @@ const TempChatPage: React.FC = () => {
   }
 
   if (!session) {
+    const myUserId = resolveRequestUserId();
+    const isApplicantViewer = Boolean(parsed) && myUserId === parsed?.applicantUserId;
+    const missingHint = isApplicantViewer
+      ? '帖主尚未发起沟通，请耐心等待'
+      : parsed
+        ? '请先在「我的组队帖」中点击「沟通」发起会话'
+        : '会话不存在或已失效';
+
     return (
       <View data-cmp="TempChatPage" className="s-page-with-tabbar">
         <View className="s-page-with-tabbar__main s-temp-chat">
           <PageNavigation title="私信" fallback={ROUTES.MESSAGES} tone="surface" />
-          <Text className="s-temp-chat__missing">会话不存在或已失效</Text>
+          <Text className="s-temp-chat__missing">{missingHint}</Text>
         </View>
         <BottomNavSlot />
       </View>
@@ -202,9 +213,7 @@ const TempChatPage: React.FC = () => {
         <View className="s-temp-chat__main">
           <ScrollView
             scrollY
-            enhanced
             showScrollbar={false}
-            scrollTop={scrollTop}
             scrollIntoView={scrollIntoView}
             scrollWithAnimation={false}
             className="s-temp-chat__scroll s-scrollbar-none"

@@ -1,4 +1,5 @@
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
+import { isLiveApi } from '../constants/api';
 import {
   mapTeamChatSessionToTemp,
   useTeamChatMessagesQuery,
@@ -25,7 +26,7 @@ function buildOwnerFallbackSession(
   const application = post.applications?.find(
     (item) => item.userId === applicantUserId,
   );
-  if (!application) return undefined;
+  if (!application?.ownerOpenedChatAt) return undefined;
 
   return {
     id: buildTeamChatSessionId(postId, applicantUserId),
@@ -53,13 +54,20 @@ export function useResolvedTempChatSession(sessionId: string) {
 
   const sessionsQuery = useTeamChatSessionsQuery();
   const postsQuery = useProfilePostsQuery();
+  const sessionStickyRef = useRef<TempChatSession | undefined>(undefined);
 
   const session = useMemo(() => {
-    if (!parsed) return undefined;
+    if (!parsed) {
+      sessionStickyRef.current = undefined;
+      return undefined;
+    }
     const fromList = sessionsQuery.data?.find((item) => item.sessionId === sessionId);
     if (fromList) {
       const mapped = mapTeamChatSessionToTemp(fromList);
-      return isActiveTempChatSession(mapped) ? mapped : undefined;
+      if (isActiveTempChatSession(mapped)) {
+        sessionStickyRef.current = mapped;
+        return mapped;
+      }
     }
 
     const fallback = buildOwnerFallbackSession(
@@ -67,15 +75,28 @@ export function useResolvedTempChatSession(sessionId: string) {
       parsed.applicantUserId,
       postsQuery.data,
     );
-    return fallback && isActiveTempChatSession(fallback) ? fallback : undefined;
+    if (fallback && isActiveTempChatSession(fallback)) {
+      sessionStickyRef.current = fallback;
+      return fallback;
+    }
+
+    return sessionStickyRef.current;
   }, [parsed, postsQuery.data, sessionId, sessionsQuery.data]);
+
+  const apiEnabled = isLiveApi();
+  const isLoading =
+    apiEnabled &&
+    !session &&
+    (sessionsQuery.isLoading || postsQuery.isLoading) &&
+    sessionsQuery.data === undefined &&
+    postsQuery.data === undefined;
 
   return {
     parsed,
     session,
     sessionsQuery,
     postsQuery,
-    isLoading: sessionsQuery.isLoading && !session,
+    isLoading,
   };
 }
 
@@ -83,6 +104,7 @@ export function useResolvedTempChatMessages(
   sessionId: string,
   parsed: { postId: string; applicantUserId: string } | null,
 ) {
+  const apiEnabled = isLiveApi();
   const messagesQuery = useTeamChatMessagesQuery(
     parsed?.postId,
     parsed?.applicantUserId,
@@ -104,10 +126,22 @@ export function useResolvedTempChatMessages(
       );
   }, [messagesQuery.data, sessionId]);
 
-  return { messages, messagesQuery, refetchMessages: messagesQuery.refetch };
+  const isLoading =
+    apiEnabled &&
+    Boolean(parsed) &&
+    messagesQuery.isLoading &&
+    messagesQuery.data === undefined;
+
+  return {
+    messages,
+    messagesQuery,
+    isLoading,
+    refetchMessages: messagesQuery.refetch,
+  };
 }
 
 export function useTeamChatSessionList() {
+  const apiEnabled = isLiveApi();
   const sessionsQuery = useTeamChatSessionsQuery();
 
   const sessions = useMemo((): TempChatSession[] => {
@@ -115,9 +149,13 @@ export function useTeamChatSessionList() {
     return filterActiveTempChatSessions(raw);
   }, [sessionsQuery.data]);
 
+  const isLoading =
+    apiEnabled && sessionsQuery.isLoading && sessionsQuery.data === undefined;
+
   return {
     sessions,
-    isLoading: sessionsQuery.isLoading,
+    isLoading,
+    isError: apiEnabled && sessionsQuery.isError,
     refetch: sessionsQuery.refetch,
   };
 }

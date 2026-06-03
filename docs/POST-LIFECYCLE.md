@@ -67,7 +67,7 @@ POST /api/posts
 2. 幂等：已申请 → `{ alreadyApplied: true }`
 3. 创建 `PostApplication`（`pending`）
 4. 通知帖主（`notifyApplication`）
-5. `TeamChatService.createInitialMessageOnApply` — 创建会话首条消息
+5. **不**自动创建私信会话；申请人无法在私信里发起沟通
 
 ### 申请卡片匹配规则
 
@@ -76,7 +76,9 @@ POST /api/posts
 ## 五、私信（临时组队会话）
 
 - 会话 ID：`postId:applicantUserId`（`buildTempChatRouteSessionId`）
-- 列表：`GET /api/team-chats/sessions`
+- **仅帖主**可在「我的组队帖」对某申请人点 **沟通** 发起会话：`POST /api/team-chats/:postId/:applicantUserId/open`（写入 `ownerOpenedChatAt`，并带入申请附言为首条消息）
+- 申请人申请成功后**不会**出现在私信列表，也不能发消息，直到帖主发起沟通
+- 列表：`GET /api/team-chats`
 - 消息：`GET/POST .../messages`，已读 `POST .../read`
 - 帖主侧 `buddyPreview`：申请人最佳匹配招募帖；申请人侧：帖主原帖
 

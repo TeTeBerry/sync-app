@@ -15,14 +15,8 @@ export function useTeamChatPoll(options: {
   /** When true, refresh uses background fetch (no full-page loading). */
   hasCachedMessages?: boolean;
   refetchMessages: RefetchMessages;
-  refetchSession?: () => void | Promise<unknown>;
 }) {
-  const {
-    pollEnabled,
-    hasCachedMessages = false,
-    refetchMessages,
-    refetchSession,
-  } = options;
+  const { pollEnabled, hasCachedMessages = false, refetchMessages } = options;
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const pageVisibleRef = useRef(false);
   const apiEnabled = isApiEnabled();
@@ -46,8 +40,7 @@ export function useTeamChatPoll(options: {
   const refreshNow = useCallback(() => {
     if (!apiEnabled || !pollEnabled) return;
     void refetchMessages({ background: hasCachedMessages });
-    void refetchSession?.();
-  }, [apiEnabled, hasCachedMessages, pollEnabled, refetchMessages, refetchSession]);
+  }, [apiEnabled, hasCachedMessages, pollEnabled, refetchMessages]);
 
   useDidShow(() => {
     pageVisibleRef.current = true;

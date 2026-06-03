@@ -226,9 +226,10 @@ AI 匹配配额：服务端在 `post_recommendations` 且 `posts.length > 0` 时
 | POST | `/api/posts/:id/comments` | 发表评论 `{ "body": "..." }` |
 | POST | `/api/posts/:id/applications` | 申请加入（可选 `{ "message": "..." }`；创建首条会话消息） |
 | POST | `/api/posts/:id/applications/:applicantUserId/accept` | 帖主接受组队 |
-| GET | `/api/team-chats` | 当前用户相关的临时组队会话列表（不含已过期线程；过期消息会从库中删除） |
-| GET | `/api/team-chats/:postId/:applicantUserId/messages` | 会话消息（双方可读；过期返回 400 并删除该线程消息） |
-| POST | `/api/team-chats/:postId/:applicantUserId/messages` | 发送消息 `{ "body": "..." }`（过期不可发） |
+| GET | `/api/team-chats` | 当前用户相关的临时组队会话列表（仅帖主已发起的线程；不含已过期） |
+| POST | `/api/team-chats/:postId/:applicantUserId/open` | **帖主**从组队帖发起沟通（写入 `ownerOpenedChatAt`，可选写入申请附言为首条消息） |
+| GET | `/api/team-chats/:postId/:applicantUserId/messages` | 会话消息（帖主发起后才可读；过期返回 400） |
+| POST | `/api/team-chats/:postId/:applicantUserId/messages` | 发送消息 `{ "body": "..." }`（帖主发起后才可发） |
 | GET | `/api/profile` | 个人资料摘要 |
 | GET | `/api/profile/activities` | 我的报名活动 |
 | GET | `/api/profile/posts` | 我的帖子 |
