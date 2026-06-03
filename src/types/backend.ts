@@ -25,6 +25,14 @@ export type ReportCategory = 'ads' | 'scalper' | 'vulgar';
 
 export type ReportTargetType = 'post' | 'user' | 'comment';
 
+export type AccountRiskStatus = 'normal' | 'restricted' | 'banned';
+
+export interface AccountRiskPublicStatus {
+  status: AccountRiskStatus;
+  postBlockedUntil?: string;
+  message?: string;
+}
+
 export interface CurrentUser {
   id: string;
   name: string;
@@ -38,6 +46,7 @@ export interface CurrentUser {
   likeMate?: boolean;
   notificationsEnabled?: boolean;
   privacyLevel?: PrivacyLevel;
+  accountRisk?: AccountRiskPublicStatus;
 }
 
 export interface AuthLoginResult {

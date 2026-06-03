@@ -4,6 +4,7 @@ import {
   invalidatePostQueries,
   useActivityDetailQuery,
 } from '../../../hooks/useSyncApi';
+import { useAccountRisk } from '../../../hooks/useSyncApi';
 import { publishBuddyPostFromForm } from '../../../utils/publishBuddyPost';
 import { isApiEnabled } from '../../../constants/api';
 import type { EventDetailPost } from '../../../types/post';
@@ -24,14 +25,17 @@ export function useEventDetailBuddyPost(
   const [sheetOpen, setSheetOpen] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const activityQuery = useActivityDetailQuery(eventId);
+  const { guardPublish, handlePublishError } = useAccountRisk();
 
   const openBuddyPostSheet = useCallback(() => {
     if (!Number.isFinite(eventId) || eventId <= 0) {
       void Taro.showToast({ title: '活动信息无效', icon: 'none' });
       return;
     }
-    setSheetOpen(true);
-  }, [eventId]);
+    void guardPublish().then((allowed) => {
+      if (allowed) setSheetOpen(true);
+    });
+  }, [eventId, guardPublish]);
 
   const closeBuddyPostSheet = useCallback(() => {
     setSheetOpen(false);
@@ -48,6 +52,8 @@ export function useEventDetailBuddyPost(
     ): Promise<boolean> => {
       if (!Number.isFinite(eventId) || eventId <= 0) return false;
       if (isPublishing) return false;
+
+      if (!(await guardPublish())) return false;
 
       setIsPublishing(true);
       setSheetOpen(false);
@@ -87,6 +93,9 @@ export function useEventDetailBuddyPost(
         }
         return true;
       } catch (error) {
+        if (await handlePublishError(error)) {
+          return false;
+        }
         const message = error instanceof Error ? error.message : '发帖失败，请稍后重试';
         void Taro.showToast({ title: message, icon: 'none' });
         setSheetOpen(true);
@@ -95,7 +104,14 @@ export function useEventDetailBuddyPost(
         setIsPublishing(false);
       }
     },
-    [activityQuery.data?.name, eventId, isPublishing, options],
+    [
+      activityQuery.data?.name,
+      eventId,
+      guardPublish,
+      handlePublishError,
+      isPublishing,
+      options,
+    ],
   );
 
   return {

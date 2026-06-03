@@ -2,7 +2,11 @@ import './PostCommentSection.scss';
 import Taro from '@tarojs/taro';
 import { useCallback, useState, type FC } from 'react';
 import { ChevronUp, Heart, Send } from '../../components/icons';
-import { commentPostAndInvalidate, usePostCommentsQuery } from '../../hooks/useSyncApi';
+import {
+  commentPostAndInvalidate,
+  useAccountRisk,
+  usePostCommentsQuery,
+} from '../../hooks/useSyncApi';
 import { requireAuth } from '../../utils/authGate';
 import { PLACEHOLDER_AVATAR } from '../../constants/remoteImages';
 import { sanitizeRemoteImageUrl } from '../../utils/imageUrl';
@@ -117,6 +121,7 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
   onCommentSubmitted,
 }) => {
   const commentsQuery = usePostCommentsQuery(postId, expanded);
+  const { guardPublish, handlePublishError } = useAccountRisk();
   const { hasMore, loadMore, loadingMore } = commentsQuery;
   const isPostAuthor = isCurrentUserPostAuthor(postAuthorName, postAuthorUserId);
   const [draft, setDraft] = useState('');
@@ -131,26 +136,42 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
     if (!body || submitting) return;
 
     const submitComment = () => {
-      setSubmitting(true);
-      void commentPostAndInvalidate(postId, body, replyTarget?.commentId)
-        .then((updated) => {
+      void (async () => {
+        if (!(await guardPublish())) return;
+        setSubmitting(true);
+        try {
+          const updated = await commentPostAndInvalidate(
+            postId,
+            body,
+            replyTarget?.commentId,
+          );
           setDraft('');
           setReplyTarget(null);
           onCommentSubmitted?.(updated);
           void Taro.showToast({ title: '评论成功', icon: 'success' });
-        })
-        .catch((err: { message?: string }) => {
+        } catch (err: unknown) {
+          if (await handlePublishError(err)) return;
           const message =
-            typeof err?.message === 'string' && err.message.trim()
-              ? err.message
+            err instanceof Error && err.message.trim()
+              ? err.message.trim()
               : '评论失败';
           void Taro.showToast({ title: message, icon: 'none' });
-        })
-        .finally(() => setSubmitting(false));
+        } finally {
+          setSubmitting(false);
+        }
+      })();
     };
 
     requireAuth(submitComment, 'social');
-  }, [draft, onCommentSubmitted, postId, replyTarget, submitting]);
+  }, [
+    draft,
+    guardPublish,
+    handlePublishError,
+    onCommentSubmitted,
+    postId,
+    replyTarget,
+    submitting,
+  ]);
 
   const toggleCommentLike = useCallback((commentId: string) => {
     setLikedCommentIds((prev) => {

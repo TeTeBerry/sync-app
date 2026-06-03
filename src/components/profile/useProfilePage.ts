@@ -1,7 +1,11 @@
 import Taro, { useDidShow } from '@tarojs/taro';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { isLiveApi } from '../../constants/api';
-import { useBlockedUsersQuery, useProfileSummaryQuery } from '../../hooks/useSyncApi';
+import {
+  useAccountRisk,
+  useBlockedUsersQuery,
+  useProfileSummaryQuery,
+} from '../../hooks/useSyncApi';
 import { useDeferredMount } from '../../hooks/useDeferredMount';
 import type { ConfirmDialogOptions } from '../../hooks/useConfirmDialog';
 import { useAuthSession } from '../../hooks/useAuthSession';
@@ -13,6 +17,7 @@ import { shouldSkipAutoLogin } from '../../utils/authStorage';
 import {
   invalidateProfilePackageState,
   invalidateProfileSummary,
+  invalidateUser,
 } from '../../utils/queryInvalidation';
 import {
   readProfileNotificationsEnabled,
@@ -74,6 +79,7 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
   });
 
   const summaryQuery = useProfileSummaryQuery();
+  const { accountRisk } = useAccountRisk();
   const blockedUsersQuery = useBlockedUsersQuery();
   const entitlementsReady = useDeferredMount(DEFER_PROFILE_ENTITLEMENTS_MS);
   const apiEnabled = isLiveApi();
@@ -133,6 +139,7 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
     if (apiEnabled && loggedIn) {
       void invalidateProfilePackageState();
       invalidateProfileSummary();
+      invalidateUser();
       return;
     }
     if (apiEnabled && !loggedIn && !shouldSkipAutoLogin()) {
@@ -206,6 +213,7 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
     benefits,
     ongoingCount,
     postsCount,
+    accountRisk,
     settings,
     debugSection: debug.debugSection,
     overlays,

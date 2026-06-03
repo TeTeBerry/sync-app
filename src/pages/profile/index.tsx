@@ -16,6 +16,7 @@ import { ProfileTabErrorBoundary } from '../../components/profile/ProfileTabErro
 import ProfileActionCard from '../../components/profile/ProfileActionCard';
 import ProfileDebugSection from '../../components/profile/ProfileDebugSection';
 import ProfileSettingsSection from '../../components/profile/ProfileSettingsSection';
+import { AccountRiskBanner } from '../../components/account-risk/AccountRiskBanner';
 import ProfileSummarySection from '../../components/profile/ProfileSummarySection';
 import { useProfilePage } from '../../components/profile/useProfilePage';
 import { LoginInterceptHost } from '../../components/auth/LoginInterceptHost';
@@ -36,6 +37,7 @@ const Profile: React.FC = () => {
     benefits,
     ongoingCount,
     postsCount,
+    accountRisk,
     settings,
     debugSection,
     overlays,
@@ -79,6 +81,7 @@ const Profile: React.FC = () => {
                   </View>
                 ) : (
                   <>
+                    <AccountRiskBanner accountRisk={accountRisk} />
                     <ProfileSummarySection
                       user={profileUserData}
                       interestTag={interestTag}

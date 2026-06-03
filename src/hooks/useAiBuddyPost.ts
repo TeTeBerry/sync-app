@@ -12,6 +12,7 @@ import type { ChatUiMessage } from '../types/aiChat';
 import type { AiBuddyPostFormValues } from '../types/buddyPost';
 import { isApiEnabled } from '../constants/api';
 import { buildBuddyPostUserSummary } from '../utils/buddyPostForm';
+import { useAccountRisk } from './useAccountRisk';
 import { publishBuddyPostFromForm } from '../utils/publishBuddyPost';
 import {
   buildBuddyPostCollectPrompt,
@@ -62,6 +63,7 @@ export function useAiBuddyPost(options: {
   const publishingRef = useRef(false);
   const collectActiveRef = useRef(false);
   const draftRef = useRef<BuddyPostChatDraft>({});
+  const { guardPublish, handlePublishError } = useAccountRisk();
 
   const suggestContext = useCallback(
     () => ({
@@ -96,8 +98,10 @@ export function useAiBuddyPost(options: {
     }
     clearCollect();
     setSheetInitialValues(lastFormRef.current);
-    setSheetOpen(true);
-  }, [activityLegacyId, clearCollect, isStreaming]);
+    void guardPublish().then((allowed) => {
+      if (allowed) setSheetOpen(true);
+    });
+  }, [activityLegacyId, clearCollect, guardPublish, isStreaming]);
 
   const runPublish = useCallback(
     async (
@@ -106,6 +110,7 @@ export function useAiBuddyPost(options: {
     ) => {
       if (activityLegacyId == null || Number.isNaN(activityLegacyId)) return;
       if (publishingRef.current) return;
+      if (!(await guardPublish())) return;
 
       const title = activityTitle?.trim() || '本场活动';
       publishingRef.current = true;
@@ -169,12 +174,20 @@ export function useAiBuddyPost(options: {
         Taro.nextTick(() => onPlanningMessagesShown?.());
         void Taro.showToast({ title: '组队帖已发布', icon: 'success' });
       } catch (error) {
-        const message = error instanceof Error ? error.message : '发帖失败，请稍后重试';
-        messagesRef.current = messagesRef.current.map((m) =>
-          m.id === aiMsgId ? { ...m, text: message, streaming: false } : m,
-        );
-        setMessages(messagesRef.current);
-        void Taro.showToast({ title: message, icon: 'none' });
+        if (await handlePublishError(error)) {
+          messagesRef.current = messagesRef.current.map((m) =>
+            m.id === aiMsgId ? { ...m, text: '发帖功能已受限', streaming: false } : m,
+          );
+          setMessages(messagesRef.current);
+        } else {
+          const message =
+            error instanceof Error ? error.message : '发帖失败，请稍后重试';
+          messagesRef.current = messagesRef.current.map((m) =>
+            m.id === aiMsgId ? { ...m, text: message, streaming: false } : m,
+          );
+          setMessages(messagesRef.current);
+          void Taro.showToast({ title: message, icon: 'none' });
+        }
       } finally {
         publishingRef.current = false;
         setIsPublishing(false);
@@ -186,6 +199,8 @@ export function useAiBuddyPost(options: {
       authorAvatar,
       authorName,
       clearCollect,
+      guardPublish,
+      handlePublishError,
       messagesRef,
       onPlanningMessagesShown,
       onPublished,

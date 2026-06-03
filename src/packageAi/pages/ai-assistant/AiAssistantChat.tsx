@@ -5,7 +5,9 @@ import { getAuthHeaders } from '../../../utils/authStorage';
 import { invalidatePostQueries } from '../../../hooks/useSyncApi';
 import { ChatMessageList } from '../../../components/ai-chat/ChatMessageList';
 import { ChatComposer } from '../../../components/ai-chat/ChatComposer';
+import { AccountRiskBanner } from '../../../components/account-risk/AccountRiskBanner';
 import { DegradedMatchBanner } from '../../../components/ai-chat/DegradedMatchBanner';
+import { useAccountRisk } from '../../../hooks/useSyncApi';
 import { AiBuddyPostSheet } from '../../../components/ai-chat/AiBuddyPostSheet';
 import { AiGuidePlanSheet } from '../../../components/ai-chat/AiGuidePlanSheet';
 import { useKeyboardInset } from '../../../hooks/useKeyboardInset';
@@ -73,6 +75,7 @@ export function AiAssistantChat({
   }, []);
 
   const activityQuery = useActivityDetailQuery(activityLegacyId);
+  const { accountRisk } = useAccountRisk();
   const defaultGuideNights = useMemo(
     () => parseActivityDayCount(activityQuery.data?.date),
     [activityQuery.data?.date],
@@ -385,6 +388,10 @@ export function AiAssistantChat({
       ) : null}
 
       <DegradedMatchBanner />
+      <AccountRiskBanner
+        accountRisk={accountRisk}
+        className="s-account-risk-banner--chat"
+      />
       <ChatMessageList
         messages={messages}
         isStreaming={isStreaming}

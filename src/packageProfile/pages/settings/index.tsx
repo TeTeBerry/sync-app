@@ -22,6 +22,8 @@ import { isLiveApi } from '../../../constants/api';
 import { isLoggedIn } from '../../../utils/authStorage';
 import { Button } from '../../../components/ui';
 import { ScrollView, Text, View } from '@tarojs/components';
+import { AccountRiskBanner } from '../../../components/account-risk/AccountRiskBanner';
+import { useAccountRisk } from '../../../hooks/useSyncApi';
 import { BlockedUsersSettings } from './components/BlockedUsersSettings';
 
 type SettingsSection = 'notifications' | 'privacy' | 'help' | 'blocked';
@@ -63,9 +65,16 @@ const FAQ_QA = [
 
 const SettingsPage: React.FC = () => {
   useEndRouteTransitionOnShow();
+
+  useEffect(() => {
+    if (isLiveApi() && isLoggedIn()) {
+      void refreshAccountRisk();
+    }
+  }, [refreshAccountRisk]);
   const router = useRouter();
   const section = (router.params.section ?? 'notifications') as SettingsSection;
   const { data: currentUser } = useCurrentUserQuery();
+  const { accountRisk, refreshAccountRisk } = useAccountRisk();
   const setStoreNotificationsEnabled = useProfilePageStore(
     (state) => state.setNotificationsEnabled,
   );
@@ -158,6 +167,8 @@ const SettingsPage: React.FC = () => {
         fallback={ROUTES.PROFILE}
         tone="surface"
       />
+
+      <AccountRiskBanner accountRisk={accountRisk} />
 
       {section === 'blocked' ? (
         <ScrollView
