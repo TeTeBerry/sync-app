@@ -105,7 +105,7 @@ export function mapEventDetailPostToEventMapUserPost(
   post: EventDetailPost,
   formatTime: (iso: string) => string,
 ): EventMapUserPost {
-  const timeLabel = post.createdAt ? formatTime(post.createdAt) : post.time;
+  const timeLabel = post.createdAt ? formatTime(post.createdAt) : '';
 
   return {
     id: post.id,

@@ -15,7 +15,7 @@ import {
   mergePostContentTypes,
   stripContentTypeHashtags,
 } from './ContentTypeBadge';
-import { PostImageGrid, PostImageCount } from './PostImageGrid';
+import { PostImageGrid } from './PostImageGrid';
 import { MapPin } from '../icons';
 import { useCurrentUserQuery } from '../../hooks/useSyncApi';
 import { isCurrentUserPostAuthor } from '../../utils/postOwnership';
@@ -75,9 +75,6 @@ function FeedPostRowInner({
             <View className="s-home-post__user-line">
               <Text className="s-home-post__user-name">{postName}</Text>
               <Text className="s-home-post__user-handle">{postHandle}</Text>
-              {post.images?.length ? (
-                <PostImageCount count={post.images.length} />
-              ) : null}
             </View>
             <View className="s-home-post__head-actions">
               <PostStatusBadge

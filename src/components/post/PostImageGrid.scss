@@ -139,14 +139,3 @@
   border-radius: 12px;
   overflow: hidden;
 }
-
-/* Image count badge in post header (legacy, kept for EventPostCard header) */
-.s-post-image-count {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  margin-left: 6px;
-  font-size: var(--s-type-meta);
-  color: #8e8e93;
-  vertical-align: middle;
-}

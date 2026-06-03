@@ -8,7 +8,7 @@ describe('eventDetailPostToCard', () => {
         id: 'p1',
         name: '风暴电音节',
         location: '上海',
-        time: '',
+        createdAt: '2026-06-01T10:00:00.000Z',
         body: '2人 拼房',
         tags: ['#拼房'],
         likes: 0,

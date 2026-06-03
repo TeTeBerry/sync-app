@@ -7,7 +7,7 @@ function basePost(overrides: Partial<EventDetailPost> = {}): EventDetailPost {
     id: 'p1',
     name: '  Mia  ',
     location: '上海',
-    time: '2小时前',
+    createdAt: '2026-06-01T10:00:00.000Z',
     body: 'hello',
     tags: [],
     likes: 1,
@@ -25,11 +25,10 @@ describe('normalizeEventPostListItem', () => {
     expect(normalizeEventPostListItem(basePost()).post.name).toBe('Mia');
   });
 
-  it('prefers createdAt for publishTimeLabel', () => {
+  it('formats publishTimeLabel from createdAt', () => {
     const { publishTimeLabel } = normalizeEventPostListItem(
-      basePost({ createdAt: '2026-06-01T12:00:00.000Z', time: 'legacy' }),
+      basePost({ createdAt: '2026-06-01T12:00:00.000Z' }),
     );
-    expect(publishTimeLabel).not.toBe('legacy');
     expect(publishTimeLabel.length).toBeGreaterThan(0);
   });
 });

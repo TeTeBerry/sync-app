@@ -14,11 +14,7 @@ export {
   type PostActionMenuProps,
 } from './PostActionMenu';
 export { PostActionSheet, type PostActionSheetProps } from './PostActionSheet';
-export {
-  PostImageGrid,
-  PostImageCount,
-  type PostImageGridProps,
-} from './PostImageGrid';
+export { PostImageGrid, type PostImageGridProps } from './PostImageGrid';
 export { PostStatusBadge, type PostStatusBadgeProps } from './PostStatusBadge';
 export {
   ContentTypeBadge,

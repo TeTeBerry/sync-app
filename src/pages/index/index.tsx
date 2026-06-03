@@ -1,7 +1,8 @@
 import './home.scss';
 import Taro, { useDidShow } from '@tarojs/taro';
-import { lazy, Suspense, useCallback } from 'react';
+import { useCallback } from 'react';
 import ThemedPageLoader from '../../components/ThemedPageLoader';
+import { HomeActivityFeed } from './components/HomeActivityFeed';
 import { seedActivityDetailFromFeaturedEvent } from '../../utils/activityDetailCache';
 import { preloadEventSubpackage } from '../../utils/subpackagePreload';
 import { useConfirmDialog } from '../../hooks/useConfirmDialog';
@@ -41,12 +42,7 @@ import {
 import { useNavBarInsets } from '../../hooks/useNavBarInsets';
 import { useEndRouteTransitionOnShow } from '../../hooks/useEndRouteTransitionOnShow';
 import { usePostPageShare } from '../../hooks/usePostPageShare';
-import { ScrollView, View } from '@tarojs/components';
-
-const LazyHomeActivityFeed = lazy(async () => {
-  const mod = await import('./components/HomeActivityFeed');
-  return { default: mod.HomeActivityFeed };
-});
+import { ScrollView, Text, View } from '@tarojs/components';
 
 const Home = () => {
   usePostPageShare();
@@ -69,7 +65,12 @@ const Home = () => {
   const { data: unreadCount = 0 } = useNotificationUnreadCount({
     enabled: secondaryApiReady,
   });
-  const { posts, refetch: refetchPosts } = usePopularPosts({ enabled: belowFoldReady });
+  const {
+    posts,
+    isLoading: postsLoading,
+    isError: postsError,
+    refetch: refetchPosts,
+  } = usePopularPosts({ enabled: belowFoldReady });
 
   const openAiAssistant = useCallback((message?: string) => {
     requireAuth(() => {
@@ -110,8 +111,11 @@ const Home = () => {
       if (legacyId == null) {
         return;
       }
+      if (loggedIn && event.going) {
+        openEventDetail(event);
+        return;
+      }
       joinActivityWithAuth(legacyId, {
-        alreadyJoined: loggedIn && event.going,
         onSuccess: () => openEventDetail(event),
       });
     },
@@ -183,18 +187,23 @@ const Home = () => {
             onEventPreload={handleEventPreload}
           />
 
-          {belowFoldReady ? (
-            <Suspense
-              fallback={<ThemedPageLoader variant="skeleton-feed" minHeight={240} />}
-            >
-              <LazyHomeActivityFeed
-                items={posts}
-                onDelete={handleDeletePost}
-                onLike={handleLikePost}
-              />
-            </Suspense>
-          ) : (
+          {!belowFoldReady || postsLoading ? (
             <ThemedPageLoader variant="skeleton-feed" minHeight={240} />
+          ) : postsError ? (
+            <View
+              className="s-home-feed s-home-feed--error"
+              onClick={() => void refetchPosts()}
+              role="button"
+              aria-label="加载失败，点击重试"
+            >
+              <Text className="s-home-feed__error-text">帖子加载失败，点击重试</Text>
+            </View>
+          ) : (
+            <HomeActivityFeed
+              items={posts}
+              onDelete={handleDeletePost}
+              onLike={handleLikePost}
+            />
           )}
 
           <View className="s-home__heat s-tabbar-offset" aria-label="Today heat">

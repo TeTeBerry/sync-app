@@ -12,7 +12,6 @@ export function normalizeEventPostListItem(item: EventDetailPost): EventPostList
     id: item.id,
     userId: item.userId,
     location: item.location,
-    time: item.time,
     createdAt: item.createdAt,
     body: item.body ?? '',
     tags: item.tags ?? [],
@@ -27,9 +26,7 @@ export function normalizeEventPostListItem(item: EventDetailPost): EventPostList
     images: sanitizeImageList(item.images),
     authorOnSiteVerified: item.authorOnSiteVerified,
   };
-  const publishTimeLabel = post.createdAt
-    ? formatPostPublishTime(post.createdAt)
-    : post.time;
+  const publishTimeLabel = post.createdAt ? formatPostPublishTime(post.createdAt) : '';
   return { post, publishTimeLabel };
 }
 

@@ -83,7 +83,7 @@ function eventPostToMatchCandidate(post: EventDetailPost): FeedMatchCandidate {
       contentTypes: post.contentTypes,
       location: post.location,
     }),
-    createdAt: post.createdAt ?? post.time,
+    createdAt: post.createdAt,
     post,
   };
 }

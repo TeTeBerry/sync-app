@@ -33,9 +33,7 @@ export function EventLiveInfoFeedItem({
   const userName = item.userName?.trim() || '用户';
   const likes = typeof item.likes === 'number' && item.likes >= 0 ? item.likes : 0;
   const liked = Boolean(item.liked);
-  const onSiteVerified =
-    item.authorOnSiteVerified !== false &&
-    (item.authorOnSiteVerified === true || Boolean(item.certified));
+  const onSiteVerified = item.authorOnSiteVerified === true;
   const remark = item.remark?.trim();
   const zoneLabel = item.zoneLabel?.trim();
 

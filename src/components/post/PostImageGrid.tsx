@@ -8,7 +8,7 @@ import {
 } from '../../utils/imageUrl';
 import { openImagePreview } from '../../utils/openImagePreview';
 import { ImageWithFallback } from '../ImageWithFallback';
-import { Text, View } from '@tarojs/components';
+import { View } from '@tarojs/components';
 
 export interface PostImageGridProps {
   images: string[];
@@ -140,15 +140,5 @@ export function PostImageGrid({ images, maxDisplay = 4 }: PostImageGridProps) {
         })}
       </View>
     </View>
-  );
-}
-
-export function PostImageCount({ count }: { count: number }) {
-  if (count <= 0) return null;
-  return (
-    <Text className="s-post-image-count">
-      <ImageIcon size={12} />
-      {count}
-    </Text>
   );
 }

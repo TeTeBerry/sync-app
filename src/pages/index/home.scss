@@ -469,6 +469,16 @@
   white-space: nowrap;
 }
 
+.s-home-feed--error {
+  padding: 24px var(--s-page-gutter);
+  text-align: center;
+}
+
+.s-home-feed__error-text {
+  color: #8e8e93;
+  font-size: var(--s-type-meta);
+}
+
 // ── Heat footer ───────────────────────────────────────────────────────────────
 
 .s-home__heat {

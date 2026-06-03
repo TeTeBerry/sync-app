@@ -10,7 +10,6 @@ import type {
   EventDetailPost,
   EventPostsPage,
   HomeFeedPost,
-  HomeSummary,
   ProfilePostItem,
   ProfileSummary,
 } from '../types/backend';
@@ -199,16 +198,6 @@ export function syncProfileSummaryLikesFromPostsCache(): void {
     });
   });
   broadcastCacheData(['profile', 'summary']);
-}
-
-/** @deprecated Home summary no longer mirrors popular posts; kept for legacy cache cleanup. */
-export function stripPopularPostsFromHomeSummaryCache(): void {
-  setCacheData<HomeSummary>(['home', 'summary'], (prev) => {
-    if (!prev?.popularPosts?.length) return prev;
-    const { popularPosts: _removed, ...rest } = prev;
-    return rest as HomeSummary;
-  });
-  broadcastCacheData(['home', 'summary']);
 }
 
 function getCacheKeyString(queryKey: readonly (string | number | undefined)[]): string {

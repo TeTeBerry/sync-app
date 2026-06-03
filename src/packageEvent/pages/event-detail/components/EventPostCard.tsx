@@ -18,7 +18,7 @@ import {
   formatContentTypeHashtag,
   resolveContentTypeKey,
 } from '../../../../utils/postContentTypeDisplay';
-import { PostImageCount, PostImageGrid } from '../../../../components/post';
+import { PostImageGrid } from '../../../../components/post';
 import { EVENT_POST_IMAGE_MAX_DISPLAY } from '../../../../constants/listPerf';
 import { isApiEnabled } from '../../../../constants/api';
 import { isCurrentUserPostAuthor } from '../../../../utils/postOwnership';
@@ -157,9 +157,6 @@ function EventPostCardInner({
                 <Text className="s-event-post__submeta-text">
                   {submetaLocation ? `${submetaLocation} · ` : ''}
                   {publishTimeLabel}
-                  {post.images?.length ? (
-                    <PostImageCount count={post.images.length} />
-                  ) : null}
                 </Text>
               </View>
             </View>

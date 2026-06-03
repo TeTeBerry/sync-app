@@ -542,8 +542,7 @@ function resolveActivityLegacyId(meta?: NotificationMeta): number | null {
   if (meta?.activityLegacyId != null && !Number.isNaN(meta.activityLegacyId)) {
     return meta.activityLegacyId;
   }
-  const legacy = Number(meta?.activityId);
-  return Number.isFinite(legacy) && legacy > 0 ? legacy : null;
+  return null;
 }
 
 /** Navigate from notification meta; returns true when a route was opened. */

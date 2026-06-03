@@ -336,8 +336,6 @@ export interface EventDetailPost {
   userId?: string;
   name: string;
   location: string;
-  /** @deprecated Prefer createdAt; kept for backward compatibility. */
-  time: string;
   createdAt?: string;
   body: string;
   tags: string[];
@@ -434,8 +432,6 @@ export interface NotificationMeta {
   /** Tab grouping; should match type (see notificationDisplay.getNotificationCategory). */
   category?: NotificationCategory;
   type?: NotificationInteractionType;
-  /** @deprecated Prefer activityLegacyId (number). */
-  activityId?: string;
   actorUserId?: string;
   actorUserName?: string;
   displayEventName?: string;
@@ -479,7 +475,6 @@ export interface LiveInfoFeedItem {
   id: string;
   userName: string;
   avatar?: string;
-  certified: boolean;
   authorOnSiteVerified?: boolean;
   zoneTag: string;
   zoneLabel: string;

@@ -10,7 +10,6 @@ export type LiveInfoFeedItem = {
   id: string;
   userName: string;
   avatar?: string;
-  certified: boolean;
   authorOnSiteVerified?: boolean;
   zoneTag: string;
   zoneLabel: string;
@@ -87,7 +86,6 @@ export const MOCK_LIVE_INFO_FEED: LiveInfoFeedItem[] = [
     id: 'live-1',
     userName: '深圳老炮',
     avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80',
-    certified: true,
     authorOnSiteVerified: true,
     zoneTag: 'stage_a',
     zoneLabel: 'A 舞台',
@@ -104,7 +102,6 @@ export const MOCK_LIVE_INFO_FEED: LiveInfoFeedItem[] = [
     id: 'live-2',
     userName: 'Luna',
     avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&q=80',
-    certified: true,
     authorOnSiteVerified: true,
     zoneTag: 'stage_b',
     zoneLabel: 'B 舞台',
@@ -120,7 +117,7 @@ export const MOCK_LIVE_INFO_FEED: LiveInfoFeedItem[] = [
     id: 'live-3',
     userName: '现场小白',
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&q=80',
-    certified: true,
+    authorOnSiteVerified: true,
     zoneTag: 'venue',
     zoneLabel: '全场',
     timeLabel: '15分钟前',
@@ -137,7 +134,6 @@ export const MOCK_LIVE_INFO_FEED: LiveInfoFeedItem[] = [
     id: 'live-4',
     userName: '蹦迪选手阿凯',
     avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=80',
-    certified: true,
     authorOnSiteVerified: true,
     zoneTag: 'vip_booth',
     zoneLabel: '卡座',
@@ -155,7 +151,6 @@ export const MOCK_LIVE_INFO_FEED: LiveInfoFeedItem[] = [
     id: 'live-5',
     userName: '啤酒爱好者',
     avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&q=80',
-    certified: false,
     zoneTag: 'venue',
     zoneLabel: '全场',
     timeLabel: '31分钟前',
@@ -170,7 +165,7 @@ export const MOCK_LIVE_INFO_FEED: LiveInfoFeedItem[] = [
     id: 'live-6',
     userName: '小雨',
     avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&q=80',
-    certified: true,
+    authorOnSiteVerified: true,
     zoneTag: 'stage_a',
     zoneLabel: 'A 舞台',
     timeLabel: '38分钟前',
@@ -182,7 +177,6 @@ export const MOCK_LIVE_INFO_FEED: LiveInfoFeedItem[] = [
     id: 'live-7',
     userName: '主理人 Nico',
     avatar: 'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=200&q=80',
-    certified: true,
     authorOnSiteVerified: true,
     zoneTag: 'stage_b',
     zoneLabel: 'B 舞台',
@@ -200,7 +194,7 @@ export const MOCK_LIVE_INFO_FEED: LiveInfoFeedItem[] = [
     id: 'live-8',
     userName: 'Jade',
     avatar: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=200&q=80',
-    certified: true,
+    authorOnSiteVerified: true,
     zoneTag: 'venue',
     zoneLabel: '全场',
     timeLabel: '55分钟前',
@@ -212,7 +206,7 @@ export const MOCK_LIVE_INFO_FEED: LiveInfoFeedItem[] = [
     id: 'live-9',
     userName: '电音迷妹',
     avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80',
-    certified: true,
+    authorOnSiteVerified: true,
     zoneTag: 'stage_a',
     zoneLabel: 'A 舞台',
     timeLabel: '1小时前',

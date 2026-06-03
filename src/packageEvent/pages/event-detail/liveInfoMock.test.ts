@@ -20,7 +20,9 @@ describe('resolveLiveInfoFeed', () => {
       {
         id: 'api-1',
         userName: 'Tester',
-        certified: true,
+        authorOnSiteVerified: true,
+        zoneTag: 'venue',
+        zoneLabel: '全场',
         timeLabel: '刚刚',
         ratings: [{ categoryId: 'entry_crowd' as const, score: 3 }],
         likes: 0,
@@ -43,9 +45,11 @@ describe('resolveLiveInfoSummary', () => {
 });
 
 describe('resolveLiveInfoCertCount', () => {
-  it('returns mock cert count when both count and feed are empty', () => {
+  it('returns mock cert count when certCount is missing and feed is empty', () => {
     expect(resolveLiveInfoCertCount(undefined, [])).toBe(MOCK_LIVE_INFO_CERT_COUNT);
-    expect(resolveLiveInfoCertCount(0, undefined)).toBe(MOCK_LIVE_INFO_CERT_COUNT);
+    expect(resolveLiveInfoCertCount(undefined, undefined)).toBe(
+      MOCK_LIVE_INFO_CERT_COUNT,
+    );
   });
 
   it('uses positive certCount from API', () => {
