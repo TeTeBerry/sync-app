@@ -1,15 +1,14 @@
 import { useMemo } from 'react';
-import { isLiveApi } from '../constants/api';
-import { profileUser } from '../components/profile';
+import { normalizeProfileUserData } from '../components/profile/profileSummaryUtils';
+import type { ProfileSummary } from '../types/backend';
 import { useProfileSummaryQuery } from './useSyncApi';
 
-/** Profile summary from API with mock fallback (same as profile page). */
+/** Profile summary from API (empty skeleton while loading). */
 export function useResolvedProfile() {
   const summaryQuery = useProfileSummaryQuery();
-  const apiEnabled = isLiveApi();
 
   return useMemo(
-    () => (apiEnabled && summaryQuery.data ? summaryQuery.data : profileUser),
-    [apiEnabled, summaryQuery.data],
+    () => normalizeProfileUserData((summaryQuery.data ?? {}) as ProfileSummary),
+    [summaryQuery.data],
   );
 }

@@ -9,7 +9,6 @@ import { useEventPostsQuery } from '../../hooks/useSyncApi';
 import type { EventMapMarker } from './eventMapMarkers';
 import {
   buildEventMapUserSheetData,
-  getEventMapUserSheetMockData,
   mapEventDetailPostToEventMapUserPost,
   mapProfilePostToEventMapUserPost,
   type EventMapUserPost,
@@ -54,7 +53,7 @@ export function useEventMapUserSheet(
   activityLegacyIdFromRoute?: number,
   activeActivityLegacyId?: number | null,
 ) {
-  const apiEnabled = isLiveApi();
+  const apiEnabled = isLiveApi(); // gates useApiQuery when API base URL is configured
   const activityLegacyId = resolveActivityLegacyId(
     activityLegacyIdFromRoute,
     activeActivityLegacyId ?? null,
@@ -106,9 +105,6 @@ export function useEventMapUserSheet(
 
   const sheet = useMemo(() => {
     if (!marker) return null;
-    if (!apiEnabled) {
-      return getEventMapUserSheetMockData(marker);
-    }
     return buildEventMapUserSheetData(marker, posts, {
       authorDisplayName: authorFromActivity?.name,
       authorAvatar: authorFromActivity?.avatar,

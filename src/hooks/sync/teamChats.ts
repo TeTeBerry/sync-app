@@ -1,13 +1,20 @@
 import {
   fetchTeamChatMessages,
   fetchTeamChatSessions,
+  markTeamChatRead,
   sendTeamChatMessage,
 } from '../../api/sync/teamChats';
 import { isLiveApi } from '../../constants/api';
 import { resolveRequestUserId } from '../../api/requestContext';
 import type { TeamChatMessage, TeamChatSession } from '../../types/teamChat';
 import type { TempChatMessage, TempChatSession } from '../../types/tempChat';
-import { invalidateCache, useApiQuery } from '../useApiQuery';
+import {
+  broadcastCacheData,
+  invalidateCache,
+  setCacheData,
+  useApiQuery,
+} from '../useApiQuery';
+import { buildTeamChatSessionId } from '../../utils/teamChatSessionId';
 
 const TEAM_CHAT_STALE_MS = 15_000;
 
@@ -40,7 +47,7 @@ export function mapTeamChatSessionToTemp(session: TeamChatSession): TempChatSess
     buddyInfo: session.buddyPreview,
     lastMessage: session.lastMessage,
     lastMessageAt: session.lastMessageAt,
-    unreadCount: 0,
+    unreadCount: Math.max(0, session.unreadCount ?? 0),
     applicationStatus: session.applicationStatus,
     postRecruitmentStatus: recruitmentStatus,
     activityLegacyId: session.activityLegacyId,
@@ -97,6 +104,28 @@ export function invalidateTeamChatQueries() {
   invalidateCache(['team-chats']);
 }
 
+function patchTeamChatSessionUnreadInCache(
+  postId: string,
+  applicantUserId: string,
+  unreadCount: number,
+) {
+  const userId = resolveRequestUserId();
+  const sessionId = buildTeamChatSessionId(postId, applicantUserId);
+  const queryKey = [...teamChatSessionsQueryKey(userId)];
+
+  setCacheData<TeamChatSession[]>(queryKey, (prev) => {
+    if (!prev?.length) return prev;
+    const next = prev.map((session) =>
+      session.sessionId === sessionId ? { ...session, unreadCount } : session,
+    );
+    const changed = next.some(
+      (session, index) => session.unreadCount !== prev[index]?.unreadCount,
+    );
+    return changed ? next : prev;
+  });
+  broadcastCacheData(queryKey);
+}
+
 export async function sendTeamChatMessageAndInvalidate(
   postId: string,
   applicantUserId: string,
@@ -105,4 +134,16 @@ export async function sendTeamChatMessageAndInvalidate(
   const result = await sendTeamChatMessage(postId, applicantUserId, body);
   invalidateTeamChatQueries();
   return result;
+}
+
+export async function markTeamChatReadAndInvalidate(
+  postId: string,
+  applicantUserId: string,
+) {
+  patchTeamChatSessionUnreadInCache(postId, applicantUserId, 0);
+  try {
+    return await markTeamChatRead(postId, applicantUserId);
+  } finally {
+    invalidateTeamChatQueries();
+  }
 }

@@ -3,7 +3,6 @@ import Taro from '@tarojs/taro';
 import { useCallback, useState, type FC } from 'react';
 import { ChevronUp, Heart, Send } from '../../components/icons';
 import { commentPostAndInvalidate, usePostCommentsQuery } from '../../hooks/useSyncApi';
-import { isLiveApi } from '../../constants/api';
 import { requireAuth } from '../../utils/authGate';
 import { PLACEHOLDER_AVATAR } from '../../constants/remoteImages';
 import { sanitizeRemoteImageUrl } from '../../utils/imageUrl';
@@ -117,7 +116,6 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
   currentUserAvatar,
   onCommentSubmitted,
 }) => {
-  const apiEnabled = isLiveApi();
   const commentsQuery = usePostCommentsQuery(postId, expanded);
   const isPostAuthor = isCurrentUserPostAuthor(postAuthorName, postAuthorUserId);
   const [draft, setDraft] = useState('');
@@ -130,11 +128,6 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
   const handleSubmit = useCallback(() => {
     const body = draft.trim();
     if (!body || submitting) return;
-
-    if (!apiEnabled) {
-      void Taro.showToast({ title: '请开启 API 模式', icon: 'none' });
-      return;
-    }
 
     const submitComment = () => {
       setSubmitting(true);
@@ -156,7 +149,7 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
     };
 
     requireAuth(submitComment, 'social');
-  }, [apiEnabled, draft, onCommentSubmitted, postId, replyTarget, submitting]);
+  }, [draft, onCommentSubmitted, postId, replyTarget, submitting]);
 
   const toggleCommentLike = useCallback((commentId: string) => {
     setLikedCommentIds((prev) => {

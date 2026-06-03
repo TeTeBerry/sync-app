@@ -98,15 +98,7 @@ export function useMyItineraryPage() {
       }
       return;
     }
-
-    if (!apiEnabled) {
-      setItineraryDays(MY_ITINERARY_DAYS);
-      setEventMeta(MY_ITINERARY_EVENT_META);
-      setSelectedDjIds((prev) =>
-        prev.length > 0 ? prev : [...EXCLUSIVE_ITINERARY_DEFAULT_SELECTED_IDS],
-      );
-    }
-  }, [activityLegacyId, apiEnabled, consumePending]);
+  }, [activityLegacyId, consumePending]);
 
   useEffect(() => {
     if (!apiEnabled || hydratedFromPendingRef.current) return;

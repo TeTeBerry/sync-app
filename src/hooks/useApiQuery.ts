@@ -199,6 +199,7 @@ export function useApiQuery<T>(options: UseApiQueryOptions<T>) {
     isLoading,
     isError,
     error,
-    refetch: () => fetch({ force: true }),
+    refetch: (options?: { background?: boolean }) =>
+      fetch({ force: true, background: options?.background ?? false }),
   };
 }

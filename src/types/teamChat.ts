@@ -27,6 +27,7 @@ export interface TeamChatSession {
   buddyPreview: TeamApplyBuddyPreview;
   lastMessage: string;
   lastMessageAt: string;
+  unreadCount: number;
   applicationStatus: PostApplicationStatus;
   postRecruitmentStatus: TeamChatPostRecruitmentStatus;
   isOwner: boolean;

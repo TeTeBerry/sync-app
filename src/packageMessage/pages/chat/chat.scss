@@ -30,6 +30,11 @@
   box-sizing: border-box;
 }
 
+.s-temp-chat__scroll-bottom {
+  height: 1px;
+  width: 100%;
+}
+
 .s-temp-chat__bubble-row {
   display: flex;
   flex-direction: row;

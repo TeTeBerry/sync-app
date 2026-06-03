@@ -6,7 +6,6 @@ import {
   getNextTierId,
   ProfilePackageSheet,
   ProfilePaidBenefitsSection,
-  profileActivities,
   useProfilePaidBenefitCards,
   type PackageTierId,
   type ProfileEventBenefitCardModel,
@@ -39,12 +38,10 @@ const ProfileBenefitsPage: React.FC = () => {
     PackageTierId | undefined
   >(undefined);
 
-  const profileActivitiesList = useMemo((): ProfileActivityItem[] => {
-    if (apiEnabled && activitiesQuery.data?.length) {
-      return activitiesQuery.data;
-    }
-    return profileActivities;
-  }, [activitiesQuery.data, apiEnabled]);
+  const profileActivitiesList = useMemo(
+    (): ProfileActivityItem[] => activitiesQuery.data ?? [],
+    [activitiesQuery.data],
+  );
 
   const paidTierByActivityLegacyId = useMemo(() => {
     const map = new Map<number, PackageTierId>();

@@ -1,5 +1,4 @@
 import { useMemo } from 'react';
-import { isLiveApi } from '../constants/api';
 import {
   mapTeamChatSessionToTemp,
   useTeamChatMessagesQuery,
@@ -7,7 +6,6 @@ import {
 } from './sync/teamChats';
 import { useProfilePostsQuery } from './useSyncApi';
 import type { TempChatMessage, TempChatSession } from '../types/tempChat';
-import { useTempChatStore } from '../stores/tempChatStore';
 import { parseTeamChatSessionId } from '../utils/teamChatSessionId';
 import { resolveApplicantBuddyInfo } from '../utils/tempChatApplicantBuddy';
 import { buildTeamChatSessionId } from '../utils/teamChatSessionId';
@@ -51,14 +49,13 @@ function buildOwnerFallbackSession(
 }
 
 export function useResolvedTempChatSession(sessionId: string) {
-  const apiEnabled = isLiveApi();
   const parsed = useMemo(() => parseTeamChatSessionId(sessionId), [sessionId]);
 
   const sessionsQuery = useTeamChatSessionsQuery();
   const postsQuery = useProfilePostsQuery();
 
-  const apiSession = useMemo(() => {
-    if (!apiEnabled || !parsed) return undefined;
+  const session = useMemo(() => {
+    if (!parsed) return undefined;
     const fromList = sessionsQuery.data?.find((item) => item.sessionId === sessionId);
     if (fromList) {
       const mapped = mapTeamChatSessionToTemp(fromList);
@@ -71,85 +68,56 @@ export function useResolvedTempChatSession(sessionId: string) {
       postsQuery.data,
     );
     return fallback && isActiveTempChatSession(fallback) ? fallback : undefined;
-  }, [apiEnabled, parsed, postsQuery.data, sessionId, sessionsQuery.data]);
-
-  const localSession = useTempChatStore((state) =>
-    state.sessions.find((item) => item.id === sessionId),
-  );
-
-  const session = useMemo(() => {
-    const raw = apiEnabled ? apiSession : localSession;
-    if (!raw) return undefined;
-    return isActiveTempChatSession(raw) ? raw : undefined;
-  }, [apiEnabled, apiSession, localSession]);
+  }, [parsed, postsQuery.data, sessionId, sessionsQuery.data]);
 
   return {
-    apiEnabled,
     parsed,
     session,
     sessionsQuery,
     postsQuery,
-    isLoading: apiEnabled && sessionsQuery.isLoading && !session,
+    isLoading: sessionsQuery.isLoading && !session,
   };
 }
 
 export function useResolvedTempChatMessages(
   sessionId: string,
-  session: TempChatSession | undefined,
   parsed: { postId: string; applicantUserId: string } | null,
-  apiEnabled: boolean,
 ) {
   const messagesQuery = useTeamChatMessagesQuery(
     parsed?.postId,
     parsed?.applicantUserId,
   );
 
-  const localMessages = useTempChatStore((state) => state.messages);
-
   const messages = useMemo((): TempChatMessage[] => {
     if (!sessionId) return [];
-    if (apiEnabled) {
-      const rows = messagesQuery.data ?? [];
-      return rows
-        .map((message) => ({
-          id: message.id,
-          sessionId,
-          role: message.role,
-          body: message.body,
-          createdAt: message.createdAt,
-        }))
-        .sort(
-          (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
-        );
-    }
-    return localMessages
-      .filter((item) => item.sessionId === sessionId)
+    const rows = messagesQuery.data ?? [];
+    return rows
+      .map((message) => ({
+        id: message.id,
+        sessionId,
+        role: message.role,
+        body: message.body,
+        createdAt: message.createdAt,
+      }))
       .sort(
         (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
       );
-  }, [apiEnabled, localMessages, messagesQuery.data, sessionId]);
+  }, [messagesQuery.data, sessionId]);
 
   return { messages, messagesQuery, refetchMessages: messagesQuery.refetch };
 }
 
 export function useTeamChatSessionList() {
-  const apiEnabled = isLiveApi();
   const sessionsQuery = useTeamChatSessionsQuery();
-  const hydrate = useTempChatStore((state) => state.hydrate);
-  const localSessions = useTempChatStore((state) => state.sessions);
 
   const sessions = useMemo((): TempChatSession[] => {
-    const raw = apiEnabled
-      ? (sessionsQuery.data ?? []).map(mapTeamChatSessionToTemp)
-      : localSessions;
+    const raw = (sessionsQuery.data ?? []).map(mapTeamChatSessionToTemp);
     return filterActiveTempChatSessions(raw);
-  }, [apiEnabled, localSessions, sessionsQuery.data]);
+  }, [sessionsQuery.data]);
 
   return {
-    apiEnabled,
     sessions,
-    isLoading: apiEnabled ? sessionsQuery.isLoading : false,
+    isLoading: sessionsQuery.isLoading,
     refetch: sessionsQuery.refetch,
-    hydrate,
   };
 }

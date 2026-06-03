@@ -2,12 +2,10 @@ import './messages.scss';
 import React, { useCallback } from 'react';
 import { useDidShow } from '@tarojs/taro';
 import { MessageCircle } from '../../../components/icons';
-import { TempChatRetentionBanner } from '../../../components/message/TempChatRetentionBanner';
 import PageNavigation from '../../../components/navigation/PageNavigation';
 import { useEndRouteTransitionOnShow } from '../../../hooks/useEndRouteTransitionOnShow';
 import { useStackPageMainHeight } from '../../../hooks/useTabPageMainHeight';
 import { useTeamChatSessionList } from '../../../hooks/useResolvedTempChat';
-import { useTempChatStore } from '../../../stores/tempChatStore';
 import { formatTimeAgo } from '../../../utils/dayTime';
 import { goTempChat, ROUTES } from '../../../utils/route';
 import { Button } from '../../../components/ui';
@@ -16,16 +14,10 @@ import { ScrollView, Text, View } from '@tarojs/components';
 const MessagesPage: React.FC = () => {
   useEndRouteTransitionOnShow();
   const mainScrollHeight = useStackPageMainHeight();
-  const { apiEnabled, sessions, isLoading, refetch, hydrate } =
-    useTeamChatSessionList();
-  const purgeExpired = useTempChatStore((state) => state.purgeExpiredSessions);
+  const { sessions, isLoading, refetch } = useTeamChatSessionList();
 
   useDidShow(() => {
-    hydrate();
-    purgeExpired();
-    if (apiEnabled) {
-      void refetch();
-    }
+    void refetch({ background: true });
   });
 
   const sortedSessions = [...sessions].sort(
@@ -63,12 +55,19 @@ const MessagesPage: React.FC = () => {
               </Text>
             </View>
           ) : (
-            <>
-              <TempChatRetentionBanner session={sortedSessions[0]} />
-              {sortedSessions.map((session) => (
+            sortedSessions.map((session) => {
+              const hasUnread = session.unreadCount > 0;
+              const badgeLabel =
+                session.unreadCount > 99 ? '99+' : String(session.unreadCount);
+
+              return (
                 <Button
                   key={session.id}
-                  className="s-messages__item"
+                  className={
+                    hasUnread
+                      ? 's-messages__item s-messages__item--unread'
+                      : 's-messages__item'
+                  }
                   onClick={() => handleOpenSession(session.id)}
                 >
                   <View
@@ -82,19 +81,21 @@ const MessagesPage: React.FC = () => {
                   />
                   <View className="s-messages__body">
                     <View className="s-messages__row">
-                      <Text className="s-messages__name">{session.peerName}</Text>
+                      <View className="s-messages__title">
+                        <Text className="s-messages__name">{session.peerName}</Text>
+                        {hasUnread ? (
+                          <Text className="s-messages__badge">{badgeLabel}</Text>
+                        ) : null}
+                      </View>
                       <Text className="s-messages__time">
                         {formatTimeAgo(session.lastMessageAt)}
                       </Text>
                     </View>
                     <Text className="s-messages__preview">{session.lastMessage}</Text>
                   </View>
-                  {session.unreadCount > 0 ? (
-                    <Text className="s-messages__badge">{session.unreadCount}</Text>
-                  ) : null}
                 </Button>
-              ))}
-            </>
+              );
+            })
           )}
         </View>
       </ScrollView>

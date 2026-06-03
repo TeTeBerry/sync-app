@@ -14,7 +14,6 @@ import { Text, View } from '@tarojs/components';
 import { useOverlayLock } from '../../hooks/useOverlayLock';
 import { useProfilePackagesQuery } from '../../hooks/useSyncApi';
 import { isLiveApi } from '../../constants/api';
-import { MOCK_PACKAGE_CATALOG } from '../profile';
 import type { FreeMonthlyQuota, PackageTierId } from '../../types/backend';
 import {
   buildContactUnlockUpgradeCompare,
@@ -65,7 +64,7 @@ export function ContactUnlockQuotaExhaustedModal({
 
   const apiEnabled = isLiveApi();
   const packagesQuery = useProfilePackagesQuery();
-  const catalog = apiEnabled ? packagesQuery.data : MOCK_PACKAGE_CATALOG;
+  const catalog = packagesQuery.data;
   const tiers = useMemo(() => catalog?.tiers ?? [], [catalog?.tiers]);
 
   const targetTierId = useMemo(

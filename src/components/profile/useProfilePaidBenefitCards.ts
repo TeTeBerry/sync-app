@@ -6,13 +6,7 @@ import {
   useProfileSummaryQuery,
 } from '../../hooks/useSyncApi';
 import type { ProfileActivityItem } from '../../types/backend';
-import { profileActivities } from './mockData';
-import {
-  asEntitlementList,
-  buildMockPaidEntitlement,
-  buildMockProPlusEntitlement,
-  listPaidEntitlements,
-} from './profileBenefitsMapper';
+import { asEntitlementList, listPaidEntitlements } from './profileBenefitsMapper';
 import {
   buildActivityByLegacyIdMap,
   buildPaidBenefitCards,
@@ -64,27 +58,19 @@ export function useProfilePaidBenefitCards(options?: {
     if (debugEntitlementOverride) {
       return debugEntitlementOverride.paid;
     }
-    if (!apiEnabled) {
-      return [buildMockPaidEntitlement(), buildMockProPlusEntitlement()];
-    }
     return listPaidEntitlements(
       entitlementList,
       summaryQuery.data?.packageEntitlements,
     );
   }, [
-    apiEnabled,
     debugEntitlementOverride,
     entitlementList,
     summaryQuery.data?.packageEntitlements,
   ]);
 
   const activityByLegacyId = useMemo(() => {
-    const items: ProfileActivityItem[] =
-      apiEnabled && activitiesQuery.data?.length
-        ? activitiesQuery.data
-        : profileActivities;
-    return buildActivityByLegacyIdMap(items);
-  }, [activitiesQuery.data, apiEnabled]);
+    return buildActivityByLegacyIdMap(activitiesQuery.data ?? []);
+  }, [activitiesQuery.data]);
 
   const paidBenefitCards = useMemo(
     () => buildPaidBenefitCards(paidEntitlements, activityByLegacyId),

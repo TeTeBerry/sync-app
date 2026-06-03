@@ -10,13 +10,21 @@ import { useConfirmDialog } from '../../../hooks/useConfirmDialog';
 import { useResolvedProfile } from '../../../hooks/useResolvedProfile';
 import { useEndRouteTransitionOnShow } from '../../../hooks/useEndRouteTransitionOnShow';
 import { useKeyboardInset } from '../../../hooks/useKeyboardInset';
+import { useMergedTempChatMessages } from '../../../hooks/useMergedTempChatMessages';
+import { useTeamChatPoll } from '../../../hooks/useTeamChatPoll';
+import {
+  TEMP_CHAT_SCROLL_BOTTOM_ID,
+  useTempChatScroll,
+} from '../../../hooks/useTempChatScroll';
 import {
   useResolvedTempChatMessages,
   useResolvedTempChatSession,
 } from '../../../hooks/useResolvedTempChat';
 import { useProfilePostsQuery } from '../../../hooks/useSyncApi';
-import { sendTeamChatMessageAndInvalidate } from '../../../hooks/sync/teamChats';
-import { useTempChatStore } from '../../../stores/tempChatStore';
+import {
+  markTeamChatReadAndInvalidate,
+  sendTeamChatMessageAndInvalidate,
+} from '../../../hooks/sync/teamChats';
 import { acceptTeamApplicationInChat } from '../../../utils/acceptTeamApplicationInChat';
 import { sanitizeRemoteImageUrl } from '../../../utils/imageUrl';
 import { ROUTES } from '../../../utils/route';
@@ -37,39 +45,40 @@ const TempChatPage: React.FC = () => {
   const [sending, setSending] = useState(false);
   const { confirm, confirmDialog } = useConfirmDialog({ cancelText: '取消' });
 
-  const { apiEnabled, parsed, session, sessionsQuery, isLoading } =
+  const { parsed, session, sessionsQuery, isLoading } =
     useResolvedTempChatSession(sessionId);
-  const { messages, messagesQuery, refetchMessages } = useResolvedTempChatMessages(
+  const {
+    messages: sourceMessages,
+    messagesQuery,
+    refetchMessages,
+  } = useResolvedTempChatMessages(sessionId, parsed);
+  const displayMessages = useMergedTempChatMessages(sessionId, sourceMessages);
+  const { scrollIntoView, scrollTop, onScroll, markStickToBottom } = useTempChatScroll(
+    displayMessages,
     sessionId,
-    session,
-    parsed,
-    apiEnabled,
   );
 
-  const hydrate = useTempChatStore((state) => state.hydrate);
-  const purgeExpired = useTempChatStore((state) => state.purgeExpiredSessions);
-  const markSessionRead = useTempChatStore((state) => state.markSessionRead);
-  const sendLocalMessage = useTempChatStore((state) => state.sendMessage);
+  const pollEnabled = Boolean(parsed && session);
 
-  useEffect(() => {
-    if (!apiEnabled) hydrate();
-  }, [apiEnabled, hydrate]);
+  useTeamChatPoll({
+    pollEnabled,
+    hasCachedMessages: displayMessages.length > 0,
+    refetchMessages,
+    refetchSession: sessionsQuery.refetch,
+  });
+
+  const markThreadAsRead = useCallback(() => {
+    if (!parsed) return;
+    void markTeamChatReadAndInvalidate(parsed.postId, parsed.applicantUserId);
+  }, [parsed]);
 
   useDidShow(() => {
-    if (apiEnabled) {
-      void sessionsQuery.refetch();
-      void refetchMessages();
-    } else {
-      hydrate();
-      purgeExpired();
-    }
+    markThreadAsRead();
   });
 
   useEffect(() => {
-    if (sessionId && !apiEnabled) {
-      markSessionRead(sessionId);
-    }
-  }, [apiEnabled, markSessionRead, sessionId]);
+    markThreadAsRead();
+  }, [markThreadAsRead]);
 
   const canSend = draft.trim().length > 0;
   const showAcceptTeam =
@@ -79,40 +88,26 @@ const TempChatPage: React.FC = () => {
     session.postRecruitmentStatus === '招募中';
 
   const handleSend = useCallback(async () => {
-    if (!sessionId || !canSend || sending) return;
+    if (!sessionId || !canSend || sending || !parsed) return;
     const body = draft.trim();
     if (!body) return;
 
-    if (apiEnabled && parsed) {
-      setSending(true);
-      try {
-        await sendTeamChatMessageAndInvalidate(
-          parsed.postId,
-          parsed.applicantUserId,
-          body,
-        );
-        setDraft('');
-        void refetchMessages();
-      } catch {
-        void Taro.showToast({ title: '发送失败', icon: 'none' });
-      } finally {
-        setSending(false);
-      }
-      return;
+    setSending(true);
+    try {
+      await sendTeamChatMessageAndInvalidate(
+        parsed.postId,
+        parsed.applicantUserId,
+        body,
+      );
+      setDraft('');
+      void refetchMessages({ background: true });
+      markStickToBottom();
+    } catch {
+      void Taro.showToast({ title: '发送失败', icon: 'none' });
+    } finally {
+      setSending(false);
     }
-
-    sendLocalMessage(sessionId, body);
-    setDraft('');
-  }, [
-    apiEnabled,
-    canSend,
-    draft,
-    parsed,
-    refetchMessages,
-    sendLocalMessage,
-    sending,
-    sessionId,
-  ]);
+  }, [canSend, draft, parsed, markStickToBottom, refetchMessages, sending, sessionId]);
 
   const handleAcceptTeam = useCallback(async () => {
     if (!session || accepting) return;
@@ -125,12 +120,10 @@ const TempChatPage: React.FC = () => {
 
     setAccepting(true);
     try {
-      await acceptTeamApplicationInChat(session, apiEnabled);
-      if (apiEnabled) {
-        void postsQuery.refetch();
-        void sessionsQuery.refetch();
-        void refetchMessages();
-      }
+      await acceptTeamApplicationInChat(session);
+      void postsQuery.refetch();
+      void sessionsQuery.refetch();
+      void refetchMessages({ background: displayMessages.length > 0 });
       void Taro.showToast({ title: '已组队', icon: 'success' });
     } catch {
       void Taro.showToast({ title: '操作失败', icon: 'none' });
@@ -139,9 +132,9 @@ const TempChatPage: React.FC = () => {
     }
   }, [
     accepting,
-    apiEnabled,
     confirm,
     postsQuery,
+    displayMessages.length,
     refetchMessages,
     session,
     sessionsQuery,
@@ -168,7 +161,10 @@ const TempChatPage: React.FC = () => {
     <Text className="s-temp-chat__accepted-label">已组队</Text>
   ) : null;
 
-  if (isLoading || messagesQuery.isLoading) {
+  const showInitialLoading =
+    (isLoading || messagesQuery.isLoading) && displayMessages.length === 0;
+
+  if (showInitialLoading) {
     return (
       <View data-cmp="TempChatPage" className="s-temp-chat">
         <PageNavigation title="私信" fallback={ROUTES.MESSAGES} tone="surface" />
@@ -200,10 +196,11 @@ const TempChatPage: React.FC = () => {
           scrollY
           enhanced
           showScrollbar={false}
+          scrollTop={scrollTop}
+          scrollIntoView={scrollIntoView}
+          scrollWithAnimation={false}
           className="s-temp-chat__scroll s-scrollbar-none"
-          scrollIntoView={
-            messages.length > 0 ? `msg-${messages[messages.length - 1]?.id}` : undefined
-          }
+          onScroll={(event) => onScroll(event.detail)}
         >
           <View className="s-temp-chat__inner">
             <TempChatRetentionBanner session={session} />
@@ -213,7 +210,7 @@ const TempChatPage: React.FC = () => {
               postTitle={session.postTitle}
               buddyInfo={session.buddyInfo}
             />
-            {messages.map((message) => {
+            {displayMessages.map((message) => {
               const isPeer = message.role === 'peer';
               return (
                 <View
@@ -251,6 +248,10 @@ const TempChatPage: React.FC = () => {
                 </View>
               );
             })}
+            <View
+              id={TEMP_CHAT_SCROLL_BOTTOM_ID}
+              className="s-temp-chat__scroll-bottom"
+            />
           </View>
         </ScrollView>
 
@@ -270,7 +271,7 @@ const TempChatPage: React.FC = () => {
           </View>
           <Button
             className={`s-temp-chat__send${canSend ? '' : ' s-temp-chat__send--disabled'}`}
-            disabled={!canSend || sending}
+            disabled={!canSend || sending || !parsed}
             aria-label="发送"
             onClick={() => void handleSend()}
           >

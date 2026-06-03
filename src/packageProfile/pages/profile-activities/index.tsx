@@ -3,10 +3,7 @@ import { useDidShow } from '@tarojs/taro';
 import React from 'react';
 import PageNavigation from '../../../components/navigation/PageNavigation';
 import ThemedPageLoader from '../../../components/ThemedPageLoader';
-import {
-  ProfileActivitiesSection,
-  profileActivities,
-} from '../../../components/profile';
+import { ProfileActivitiesSection } from '../../../components/profile';
 import { isLiveApi } from '../../../constants/api';
 import { useProfileActivitiesQuery } from '../../../hooks/useSyncApi';
 import { invalidateProfileActivities } from '../../../utils/queryInvalidation';
@@ -20,9 +17,8 @@ const ProfileActivitiesPage: React.FC = () => {
   const mainScrollHeight = useStackPageMainHeight();
   const apiEnabled = isLiveApi();
   const activitiesQuery = useProfileActivitiesQuery();
-  const activities =
-    apiEnabled && activitiesQuery.data ? activitiesQuery.data : profileActivities;
-  const loading = apiEnabled && activitiesQuery.isLoading && !activitiesQuery.data;
+  const activities = activitiesQuery.data ?? [];
+  const loading = activitiesQuery.isLoading && !activitiesQuery.data;
 
   useDidShow(() => {
     if (apiEnabled) {

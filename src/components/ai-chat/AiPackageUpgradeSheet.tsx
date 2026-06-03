@@ -9,7 +9,7 @@ import {
   useProfilePackagesQuery,
 } from '../../hooks/useSyncApi';
 import { isLiveApi } from '../../constants/api';
-import { MOCK_PACKAGE_CATALOG, packageTierCtaLabel } from '../profile';
+import { packageTierCtaLabel } from '../profile/profilePackageData';
 import type {
   PackageFeatureIcon,
   PackageTierDefinition,
@@ -115,7 +115,7 @@ const AiPackageUpgradeSheet: React.FC<AiPackageUpgradeSheetProps> = ({
   useOverlayLock(open);
   const apiEnabled = isLiveApi();
   const packagesQuery = useProfilePackagesQuery();
-  const catalog = apiEnabled ? packagesQuery.data : MOCK_PACKAGE_CATALOG;
+  const catalog = packagesQuery.data;
   const tiers = useMemo(() => catalog?.tiers ?? [], [catalog?.tiers]);
 
   const [selectedId, setSelectedId] = useState<PackageTierId>('pro_plus');
@@ -139,14 +139,6 @@ const AiPackageUpgradeSheet: React.FC<AiPackageUpgradeSheetProps> = ({
   const handlePurchase = useCallback(async () => {
     if (!selectedTier) {
       void Taro.showToast({ title: '套餐加载中，请稍候', icon: 'none' });
-      return;
-    }
-    if (!apiEnabled) {
-      void Taro.showToast({
-        title: `${selectedTier.name} 购买即将上线`,
-        icon: 'none',
-      });
-      onClose();
       return;
     }
     if (activityLegacyId == null || Number.isNaN(activityLegacyId)) {
@@ -176,14 +168,7 @@ const AiPackageUpgradeSheet: React.FC<AiPackageUpgradeSheetProps> = ({
     } finally {
       setPurchasing(false);
     }
-  }, [
-    activityLegacyId,
-    apiEnabled,
-    onClose,
-    onPurchaseSuccess,
-    purchasing,
-    selectedTier,
-  ]);
+  }, [activityLegacyId, onClose, onPurchaseSuccess, purchasing, selectedTier]);
 
   if (!open) return null;
 

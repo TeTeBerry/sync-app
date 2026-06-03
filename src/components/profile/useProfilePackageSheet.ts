@@ -4,7 +4,6 @@ import { useProfileActivitiesQuery } from '../../hooks/useSyncApi';
 import { selectConsumeProfileIntent, useNavigationStore } from '../../stores';
 import { invalidateProfilePackageState } from '../../utils/queryInvalidation';
 import type { PackageTierId } from './profilePackageData';
-import { profileActivities } from './mockData';
 import {
   getNextTierId,
   type ProfileEventBenefitCardModel,
@@ -35,12 +34,10 @@ export function useProfilePackageSheet({
     PackageTierId | undefined
   >(undefined);
 
-  const profileActivitiesList = useMemo(() => {
-    if (apiEnabled && activitiesQuery.data?.length) {
-      return activitiesQuery.data;
-    }
-    return profileActivities;
-  }, [activitiesQuery.data, apiEnabled]);
+  const profileActivitiesList = useMemo(
+    () => activitiesQuery.data ?? [],
+    [activitiesQuery.data],
+  );
 
   const paidTierByActivityLegacyId = useMemo(() => {
     const map = new Map<number, PackageTierId>();

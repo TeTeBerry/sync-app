@@ -728,12 +728,13 @@
   color: #fff;
 }
 
-.s-event-post__cta--applied-chat {
-  border-color: rgba(255, 0, 102, 0.35);
-}
+.s-event-post__cta--applied {
+  cursor: default;
 
-.s-event-post__cta--applied-chat .s-event-post__cta-text {
-  color: #ff0066;
+  &[disabled] {
+    opacity: 1;
+    background: #333;
+  }
 }
 
 .s-event-post__cta--applied .s-event-post__cta-text {

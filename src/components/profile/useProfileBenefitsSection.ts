@@ -74,7 +74,7 @@ export function useProfileBenefitsSection({
   }, [debugEntitlementOverride, entitlementList, summaryFreeMonthly]);
 
   const hasPaidEntitlement = paidEntitlements.length > 0;
-  const showPaidBenefitsSection = !apiEnabled || hasPaidEntitlement;
+  const showPaidBenefitsSection = hasPaidEntitlement;
   const showFreeBenefitsSection =
     paidEntitlements.length === 0 &&
     (debugEntitlementOverride != null || !benefitsLoading);

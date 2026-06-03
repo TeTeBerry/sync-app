@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { isLiveApi, isDevMockQuotaExhausted } from '../constants/api';
+import { isApiEnabled } from '../constants/api';
 import { useProfileActivityLegacyId } from './useProfileActivityLegacyId';
 import { useProfileEntitlementsQuery } from './useSyncApi';
 import {
@@ -21,19 +21,17 @@ export type ContactUnlockQuotaDisplay = {
 export function useContactUnlockQuota(
   activityLegacyIdOverride?: number,
 ): ContactUnlockQuotaDisplay {
-  const apiEnabled = isLiveApi();
   const storeActivityLegacyId = useProfileActivityLegacyId();
   const activityLegacyId = activityLegacyIdOverride ?? storeActivityLegacyId;
   const entitlementsQuery = useProfileEntitlementsQuery(activityLegacyId);
 
   return useMemo(() => {
-    const loading = apiEnabled && entitlementsQuery.isLoading;
+    const loading = isApiEnabled() && entitlementsQuery.isLoading;
 
-    if (!apiEnabled) {
-      const mockExhausted = isDevMockQuotaExhausted();
+    if (!isApiEnabled()) {
       return {
-        exhausted: mockExhausted,
-        remaining: mockExhausted ? 0 : null,
+        exhausted: false,
+        remaining: null,
         loading: false,
       };
     }
@@ -49,10 +47,5 @@ export function useContactUnlockQuota(
       remaining,
       loading,
     };
-  }, [
-    activityLegacyId,
-    apiEnabled,
-    entitlementsQuery.data,
-    entitlementsQuery.isLoading,
-  ]);
+  }, [activityLegacyId, entitlementsQuery.data, entitlementsQuery.isLoading]);
 }

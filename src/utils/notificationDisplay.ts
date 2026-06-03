@@ -11,7 +11,9 @@ export type NotificationCategory =
 export function getNotificationCategory(meta?: NotificationMeta): NotificationCategory {
   const type = meta?.type;
   if (type === 'like') return 'like';
-  if (type === 'application') return 'application';
+  if (type === 'application' || type === 'team_dissolved' || type === 'team_accepted') {
+    return 'application';
+  }
   if (type === 'comment' || type === 'comment_reply') return 'comment';
   if (
     type === 'activity_update' ||

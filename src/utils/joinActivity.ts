@@ -1,6 +1,6 @@
 import Taro from '@tarojs/taro';
 import { registerForActivityAndInvalidate } from '../hooks/sync/activities';
-import { isLiveApi } from '../constants/api';
+import { isApiEnabled } from '../constants/api';
 import type { LoginInterceptFeature } from '../stores/loginInterceptStore';
 import { getApiErrorMessage } from './apiErrorMessage';
 import { requireAuth } from './authGate';
@@ -12,9 +12,9 @@ export async function registerForActivityWithFeedback(
     return false;
   }
 
-  if (!isLiveApi()) {
-    void Taro.showToast({ title: '已加入本场活动', icon: 'success' });
-    return true;
+  if (!isApiEnabled()) {
+    void Taro.showToast({ title: '请配置 API 地址', icon: 'none' });
+    return false;
   }
 
   try {

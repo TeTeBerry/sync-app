@@ -19,6 +19,7 @@ export function normalizeEventPostListItem(item: EventDetailPost): EventPostList
     name: item.name?.trim() || '用户',
     likes: item.likes,
     liked: item.liked,
+    appliedByMe: item.appliedByMe,
     comments: item.comments,
     avatar: sanitizeRemoteImageUrl(item.avatar) ?? item.avatar,
     status: item.status,

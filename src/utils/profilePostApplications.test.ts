@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { patchProfilePostAfterAcceptApplication } from './profilePostApplications';
+import {
+  applyOwnerAcceptedSessionsToProfilePosts,
+  patchProfilePostAfterAcceptApplication,
+} from './profilePostApplications';
 import type { ProfilePostItem } from '../types/backend';
+import type { TempChatSession } from '../types/tempChat';
 
 const basePost: ProfilePostItem = {
   id: 'post-3',
@@ -36,5 +40,60 @@ describe('patchProfilePostAfterAcceptApplication', () => {
     expect(next.applications?.[0]?.status).toBe('accepted');
     expect(next.applications?.[1]?.status).toBe('pending');
     expect(next.pendingApplicationCount).toBe(1);
+  });
+});
+
+describe('applyOwnerAcceptedSessionsToProfilePosts', () => {
+  const ownerPendingChat: TempChatSession = {
+    id: 'chat__post-3__u1',
+    postId: 'post-3',
+    applicantUserId: 'u1',
+    peerUserId: 'u1',
+    peerName: 'Luna',
+    postTitle: 'Storm',
+    lastMessage: 'hi',
+    lastMessageAt: new Date().toISOString(),
+    unreadCount: 0,
+    applicationStatus: 'pending',
+    postRecruitmentStatus: '招募中',
+    isOwner: true,
+  };
+
+  const ownerAcceptedChat: TempChatSession = {
+    ...ownerPendingChat,
+    applicationStatus: 'accepted',
+    postRecruitmentStatus: '已组队',
+  };
+
+  it('does not change posts when owner only opened chat (pending session)', () => {
+    const next = applyOwnerAcceptedSessionsToProfilePosts(
+      [basePost],
+      [ownerPendingChat],
+    );
+    expect(next[0]?.status).toBe('招募中');
+    expect(next[0]?.applications?.[0]?.status).toBe('pending');
+  });
+
+  it('updates posts after owner accepted in chat session', () => {
+    const next = applyOwnerAcceptedSessionsToProfilePosts(
+      [basePost],
+      [ownerAcceptedChat],
+    )[0];
+    expect(next.status).toBe('已组队');
+    expect(next.applications?.[0]?.status).toBe('accepted');
+  });
+
+  it('ignores applicant-side sessions even if marked accepted locally', () => {
+    const applicantSession: TempChatSession = {
+      ...ownerAcceptedChat,
+      isOwner: false,
+      applicantUserId: 'u1',
+      peerUserId: 'owner-zara',
+    };
+    const next = applyOwnerAcceptedSessionsToProfilePosts(
+      [basePost],
+      [applicantSession],
+    );
+    expect(next[0]?.status).toBe('招募中');
   });
 });

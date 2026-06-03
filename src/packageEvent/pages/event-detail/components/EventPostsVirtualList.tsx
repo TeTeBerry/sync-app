@@ -12,13 +12,11 @@ type EventPostsVirtualListProps = {
   highlightPostId: string;
   expandedCommentPostIds: Set<string>;
   appliedPostIds: Set<string>;
-  apiEnabled: boolean;
   currentUserAvatar?: string;
   onLike: EventPostCardProps['onLike'];
   onToggleComments: EventPostCardProps['onToggleComments'];
   onDelete: EventPostCardProps['onDelete'];
   onApply: EventPostCardProps['onApply'];
-  onOpenAppliedChat?: EventPostCardProps['onOpenAppliedChat'];
   onComplete?: EventPostCardProps['onComplete'];
   onCommentSubmitted: EventPostCardProps['onCommentSubmitted'];
   hasMore?: boolean;
@@ -33,13 +31,11 @@ export function EventPostsVirtualList({
   highlightPostId,
   expandedCommentPostIds,
   appliedPostIds,
-  apiEnabled,
   currentUserAvatar,
   onLike,
   onToggleComments,
   onDelete,
   onApply,
-  onOpenAppliedChat,
   onComplete,
   onCommentSubmitted,
   hasMore = false,
@@ -71,13 +67,11 @@ export function EventPostsVirtualList({
               highlighted={highlighted}
               commentsExpanded={expandedCommentPostIds.has(item.post.id)}
               applied={appliedPostIds.has(item.post.id)}
-              apiEnabled={apiEnabled}
               currentUserAvatar={currentUserAvatar}
               onLike={onLike}
               onToggleComments={onToggleComments}
               onDelete={onDelete}
               onApply={onApply}
-              onOpenAppliedChat={onOpenAppliedChat}
               onComplete={onComplete}
               onCommentSubmitted={onCommentSubmitted}
             />

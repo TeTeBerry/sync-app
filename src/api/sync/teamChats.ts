@@ -24,3 +24,11 @@ export function sendTeamChatMessage(
     ownerQueryParams(),
   );
 }
+
+export function markTeamChatRead(postId: string, applicantUserId: string) {
+  return apiPost<{ ok: true; unreadCount: 0 }>(
+    `/team-chats/${encodeURIComponent(postId)}/${encodeURIComponent(applicantUserId)}/read`,
+    {},
+    ownerQueryParams(),
+  );
+}

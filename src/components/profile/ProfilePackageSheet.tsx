@@ -22,7 +22,6 @@ import {
 import { isLiveApi } from '../../constants/api';
 import {
   isBoundActivityLegacyId,
-  MOCK_PACKAGE_CATALOG,
   PACKAGE_SHEET_ACTIVITY_STEP,
   resolvePackageActivityPayCta,
   resolvePackageTierStepCta,
@@ -216,7 +215,7 @@ const ProfilePackageSheet: React.FC<ProfilePackageSheetProps> = ({
   useOverlayLock(open);
   const apiEnabled = isLiveApi();
   const packagesQuery = useProfilePackagesQuery();
-  const catalog = apiEnabled ? packagesQuery.data : MOCK_PACKAGE_CATALOG;
+  const catalog = packagesQuery.data;
   const tiers = useMemo(() => catalog?.tiers ?? [], [catalog?.tiers]);
   const sheetMeta = catalog?.sheet;
 
@@ -322,14 +321,6 @@ const ProfilePackageSheet: React.FC<ProfilePackageSheetProps> = ({
       void Taro.showToast({ title: '套餐加载中，请稍候', icon: 'none' });
       return;
     }
-    if (!apiEnabled) {
-      void Taro.showToast({
-        title: `${selectedTier.name} 购买即将上线`,
-        icon: 'none',
-      });
-      onClose();
-      return;
-    }
     if (effectiveActivityLegacyId == null || Number.isNaN(effectiveActivityLegacyId)) {
       void Taro.showToast({
         title: '请先选择适用活动',
@@ -359,7 +350,6 @@ const ProfilePackageSheet: React.FC<ProfilePackageSheetProps> = ({
     }
   }, [
     activeCta.purchaseDisabled,
-    apiEnabled,
     effectiveActivityLegacyId,
     onClose,
     onPurchaseSuccess,

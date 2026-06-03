@@ -1,6 +1,6 @@
 import '../../../components/profile/profile.scss';
 import Taro, { useDidShow } from '@tarojs/taro';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { BottomNavSlot } from '../../../components/navigation/BottomNav';
 import PageNavigation, {
   stackPageNavChromePx,
@@ -8,10 +8,8 @@ import PageNavigation, {
 import ThemedPageLoader from '../../../components/ThemedPageLoader';
 import {
   ProfilePostsSection,
-  profilePosts,
   type ProfilePostEditDraft,
 } from '../../../components/profile';
-import { isLiveApi } from '../../../constants/api';
 import { useConfirmDialog } from '../../../hooks/useConfirmDialog';
 import {
   deletePostAndInvalidate,
@@ -23,12 +21,7 @@ import { invalidateProfilePosts } from '../../../utils/queryInvalidation';
 import { useNavBarInsets } from '../../../hooks/useNavBarInsets';
 import { useTabPageMainHeight } from '../../../hooks/useTabPageMainHeight';
 import type { ProfilePostItem } from '../../../types/backend';
-import { mergeProfilePostsFromTempChatSessions } from '../../../utils/profilePostApplications';
-import { useTempChatStore } from '../../../stores/tempChatStore';
-import {
-  buildTempChatRouteSessionId,
-  openTempChatWithApplicant,
-} from '../../../utils/tempChatNavigation';
+import { buildTempChatRouteSessionId } from '../../../utils/tempChatNavigation';
 import { invalidateTeamChatQueries } from '../../../hooks/sync/teamChats';
 import { goEventDetail, goTempChat, ROUTES } from '../../../utils/route';
 import { useEndRouteTransitionOnShow } from '../../../hooks/useEndRouteTransitionOnShow';
@@ -39,42 +32,22 @@ const ProfilePostsPage: React.FC = () => {
   const navInsets = useNavBarInsets();
   const headerChromePx = stackPageNavChromePx(navInsets);
   const mainScrollHeight = useTabPageMainHeight(headerChromePx);
-  const apiEnabled = isLiveApi();
   const postsQuery = useProfilePostsQuery();
-  const [mockPosts, setMockPosts] = useState<ProfilePostItem[] | null>(null);
   const [postsOverride, setPostsOverride] = useState<ProfilePostItem[] | null>(null);
-  const basePosts = useMemo(() => {
-    if (apiEnabled && postsQuery.data) return postsQuery.data;
-    return mockPosts ?? profilePosts;
-  }, [apiEnabled, mockPosts, postsQuery.data]);
-
-  useEffect(() => {
-    setPostsOverride(null);
-  }, [basePosts]);
-
-  const posts = postsOverride ?? basePosts;
-  const loading = apiEnabled && postsQuery.isLoading && !postsQuery.data;
+  const posts = postsOverride ?? postsQuery.data ?? [];
+  const loading = postsQuery.isLoading && !postsQuery.data;
   const { confirm, confirmDialog } = useConfirmDialog({ cancelText: '取消' });
 
   const [editingPostId, setEditingPostId] = useState<string | null>(null);
   const [editDraft, setEditDraft] = useState<ProfilePostEditDraft | null>(null);
-  const hydrateTempChat = useTempChatStore((state) => state.hydrate);
-  const tempChatSessions = useTempChatStore((state) => state.sessions);
 
   useDidShow(() => {
-    hydrateTempChat();
-    if (apiEnabled) {
-      invalidateProfilePosts();
-      return;
-    }
-    setMockPosts((prev) =>
-      mergeProfilePostsFromTempChatSessions(prev ?? profilePosts, tempChatSessions),
-    );
+    invalidateProfilePosts();
   });
 
-  const handlePostAction = useCallback((action: string, item: ProfilePostItem) => {
-    void Taro.showToast({ title: `${action}: ${item.title}`, icon: 'none' });
-  }, []);
+  useEffect(() => {
+    setPostsOverride(null);
+  }, [postsQuery.data]);
 
   const handleSelectPost = useCallback((item: ProfilePostItem) => {
     const activityLegacyId = item.activityLegacyId;
@@ -87,10 +60,6 @@ const ProfilePostsPage: React.FC = () => {
 
   const handleCompletePost = useCallback(
     async (item: ProfilePostItem) => {
-      if (!apiEnabled) {
-        handlePostAction('标记已组队', item);
-        return;
-      }
       const ok = await confirm({
         title: '标记已组队',
         message: '确认将该帖子标记为已组队？',
@@ -101,7 +70,7 @@ const ProfilePostsPage: React.FC = () => {
         .then(() => void Taro.showToast({ title: '已更新', icon: 'success' }))
         .catch(() => void Taro.showToast({ title: '更新失败', icon: 'none' }));
     },
-    [apiEnabled, confirm, handlePostAction],
+    [confirm],
   );
 
   const handleEditPost = useCallback(
@@ -126,20 +95,26 @@ const ProfilePostsPage: React.FC = () => {
   }, []);
 
   const handleSavePostEdit = useCallback(
-    (item: ProfilePostItem) => {
+    async (item: ProfilePostItem) => {
       if (!editDraft) return;
       const body = editDraft.body.trim();
       if (!body) {
         void Taro.showToast({ title: '帖子内容不能为空', icon: 'none' });
         return;
       }
-      if (!apiEnabled) {
-        handlePostAction('保存修改', item);
-        handleCancelPostEdit();
-        return;
-      }
       const status =
         editDraft.status === '已组队' ? 'completed' : ('recruiting' as const);
+
+      if (item.status === '已组队' && status === 'recruiting') {
+        const ok = await confirm({
+          title: '改回招募中',
+          message:
+            '若你们已互相组队，双方帖子将恢复招募，组队关系解散，对方会收到通知。确定继续吗？',
+          confirmText: '确定',
+        });
+        if (!ok) return;
+      }
+
       void updatePostAndInvalidate(item.id, { body, status })
         .then(() => {
           handleCancelPostEdit();
@@ -147,20 +122,15 @@ const ProfilePostsPage: React.FC = () => {
         })
         .catch(() => void Taro.showToast({ title: '保存失败', icon: 'none' }));
     },
-    [apiEnabled, editDraft, handleCancelPostEdit, handlePostAction],
+    [confirm, editDraft, handleCancelPostEdit],
   );
 
   const handleChatWithApplication = useCallback(
     (post: ProfilePostItem, application: PostApplicationItem) => {
-      if (apiEnabled) {
-        invalidateTeamChatQueries();
-        goTempChat(buildTempChatRouteSessionId(post.id, application.userId));
-        return;
-      }
-      const sessionId = openTempChatWithApplicant(post, application);
-      goTempChat(sessionId);
+      invalidateTeamChatQueries();
+      goTempChat(buildTempChatRouteSessionId(post.id, application.userId));
     },
-    [apiEnabled],
+    [],
   );
 
   const handleDeletePost = useCallback(
@@ -171,10 +141,6 @@ const ProfilePostsPage: React.FC = () => {
         confirmText: '删除',
       });
       if (!ok) return;
-      if (!apiEnabled) {
-        handlePostAction('删除', item);
-        return;
-      }
       void deletePostAndInvalidate(item.id)
         .then(() => void Taro.showToast({ title: '已删除', icon: 'success' }))
         .catch(() => {
@@ -182,7 +148,7 @@ const ProfilePostsPage: React.FC = () => {
           void Taro.showToast({ title: '删除失败', icon: 'none' });
         });
     },
-    [apiEnabled, confirm, handlePostAction, postsQuery],
+    [confirm, postsQuery],
   );
 
   return (

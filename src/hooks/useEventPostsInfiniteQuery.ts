@@ -112,7 +112,12 @@ export function useEventPostsInfiniteQuery(
   const patchItem = useCallback(
     (
       updated: Pick<EventDetailPost, 'id'> &
-        Partial<Pick<EventDetailPost, 'likes' | 'liked' | 'comments' | 'status'>>,
+        Partial<
+          Pick<
+            EventDetailPost,
+            'likes' | 'liked' | 'comments' | 'status' | 'appliedByMe'
+          >
+        >,
     ) => {
       setItems((prev) =>
         prev.map((post) =>
@@ -125,6 +130,9 @@ export function useEventPostsInfiniteQuery(
                   ? { comments: updated.comments }
                   : {}),
                 ...(updated.status !== undefined ? { status: updated.status } : {}),
+                ...(updated.appliedByMe !== undefined
+                  ? { appliedByMe: updated.appliedByMe }
+                  : {}),
               }
             : post,
         ),

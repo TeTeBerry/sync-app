@@ -2,7 +2,6 @@ import { useCallback, useRef, useState } from 'react';
 import { useContactUnlockQuota } from '../../../hooks/useContactUnlockQuota';
 import { useActivityDetailQuery, useCurrentUserQuery } from '../../../hooks/useSyncApi';
 import { useEventPostsInfiniteQuery } from '../../../hooks/useEventPostsInfiniteQuery';
-import { isLiveApi } from '../../../constants/api';
 import { useEventDetailPosts } from './useEventDetailPosts';
 import { useEventDetailLive } from './useEventDetailLive';
 import type { EventDetailTabId } from './components/EventDetailContentTabs';
@@ -18,15 +17,6 @@ import { useEventDetailScrollPreserve } from './useEventDetailScrollPreserve';
 import { buddyPreviewFromForm } from '../../../utils/teamApplyBuddyPreview';
 import type { AiBuddyPostSubmitPayload } from '../../../types/buddyPost';
 import { useEventDetailTravelGuide } from './useEventDetailTravelGuide';
-import type { EventDetailPost } from '../../../types/backend';
-import { invalidateTeamChatQueries } from '../../../hooks/sync/teamChats';
-import { getClientUserId } from '../../../utils/session';
-import { goTempChat } from '../../../utils/route';
-import {
-  buildTempChatRouteSessionId,
-  openTempChatAsApplicant,
-} from '../../../utils/tempChatNavigation';
-
 export type UseEventDetailPageOptions = {
   confirm: (options: ConfirmDialogOptions) => Promise<boolean>;
 };
@@ -56,8 +46,6 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
   const currentUserQuery = useCurrentUserQuery();
   const profileUser = useResolvedProfile();
   const displayUserName = currentUserQuery.data?.name ?? profileUser.name ?? '用户';
-
-  const apiEnabled = isLiveApi();
 
   const [contentTab, setContentTab] = useState<EventDetailTabId>('posts');
 
@@ -94,7 +82,6 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
   const posts = useEventDetailPosts({
     contentTab,
     postsQuery,
-    apiEnabled,
     confirm,
     setScrollTop,
   });
@@ -154,20 +141,6 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
       applyAnchorPostIdRef.current = null;
     })();
   }, [flushDeferredPostsRefresh, unfreezeScroll]);
-
-  const handleOpenAppliedChat = useCallback(
-    (post: EventDetailPost) => {
-      const applicantUserId = getClientUserId().trim();
-      if (!applicantUserId) return;
-      if (apiEnabled) {
-        invalidateTeamChatQueries();
-        goTempChat(buildTempChatRouteSessionId(post.id, applicantUserId));
-        return;
-      }
-      goTempChat(openTempChatAsApplicant(post, eventId));
-    },
-    [apiEnabled, eventId],
-  );
 
   const teamApply = useEventDetailTeamApply({
     eventId,
@@ -251,13 +224,11 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     posts: {
       ...posts,
       handleApply: teamApply.handleApply,
-      handleOpenAppliedChat,
     },
     teamApply,
     applyBuddyPublishPending,
     postsLoading,
     showPostsEnd,
-    apiEnabled,
     currentUserAvatar: currentUserQuery.data?.avatar,
     postsQuery,
     displayUserName,

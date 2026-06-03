@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { isLiveApi, isDevMockQuotaExhausted } from '../constants/api';
+import { isApiEnabled } from '../constants/api';
 import { useProfileActivityLegacyId } from './useProfileActivityLegacyId';
 import { useProfileEntitlementsQuery } from './useSyncApi';
 import {
@@ -30,21 +30,19 @@ function buildUsageLabel(entitlement: EventPackageEntitlement | null): string {
  * `exhausted` is false while loading or when API is disabled.
  */
 export function useAiMatchQuota(): AiMatchQuotaDisplay {
-  const apiEnabled = isLiveApi();
   const activityLegacyId = useProfileActivityLegacyId();
   const entitlementsQuery = useProfileEntitlementsQuery(activityLegacyId);
 
   return useMemo(() => {
-    const loading = apiEnabled && entitlementsQuery.isLoading;
+    const loading = isApiEnabled() && entitlementsQuery.isLoading;
 
-    if (!apiEnabled) {
-      const mockExhausted = isDevMockQuotaExhausted();
+    if (!isApiEnabled()) {
       return {
-        exhausted: mockExhausted,
-        remaining: mockExhausted ? 0 : null,
-        limit: mockExhausted ? 3 : null,
-        used: mockExhausted ? 3 : 0,
-        usageLabel: mockExhausted ? '3/3' : '0/0',
+        exhausted: false,
+        remaining: null,
+        limit: null,
+        used: 0,
+        usageLabel: '0/0',
         loading: false,
       };
     }
@@ -66,10 +64,5 @@ export function useAiMatchQuota(): AiMatchQuotaDisplay {
       usageLabel: buildUsageLabel(entitlement),
       loading,
     };
-  }, [
-    activityLegacyId,
-    apiEnabled,
-    entitlementsQuery.data,
-    entitlementsQuery.isLoading,
-  ]);
+  }, [activityLegacyId, entitlementsQuery.data, entitlementsQuery.isLoading]);
 }

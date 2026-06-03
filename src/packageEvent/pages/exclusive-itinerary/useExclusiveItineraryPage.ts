@@ -171,11 +171,6 @@ export function useExclusiveItineraryPage() {
       return;
     }
 
-    if (!apiEnabled) {
-      goMyItinerary(activityLegacyId, selectedIds);
-      return;
-    }
-
     setGenerating(true);
     try {
       const result = await generate({ selectedDjIds: selectedIds });

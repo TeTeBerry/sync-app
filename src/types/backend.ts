@@ -312,6 +312,8 @@ export interface EventDetailPost {
   contentTypes?: PostContentType[];
   likes: number;
   liked?: boolean;
+  /** Current user has submitted a team application for this post. */
+  appliedByMe?: boolean;
   comments: number;
   avatar: string;
   status: '招募中' | '已组队' | '已隐藏';
@@ -374,6 +376,8 @@ export type NotificationInteractionType =
   | 'activity_update'
   | 'post_rejected'
   | 'post_hidden'
+  | 'team_dissolved'
+  | 'team_accepted'
   | 'match_recommendation';
 
 export interface NotificationMeta {

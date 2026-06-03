@@ -1,5 +1,5 @@
 import Taro from '@tarojs/taro';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   deletePostAndInvalidate,
   likePostAndInvalidate,
@@ -28,7 +28,6 @@ type EventPostsQuery = ReturnType<typeof useEventPostsInfiniteQuery>;
 export type UseEventDetailPostsParams = {
   contentTab: EventDetailTabId;
   postsQuery: EventPostsQuery;
-  apiEnabled: boolean;
   confirm: (options: ConfirmDialogOptions) => Promise<boolean>;
   setScrollTop: (value: number | undefined) => void;
 };
@@ -36,7 +35,6 @@ export type UseEventDetailPostsParams = {
 export function useEventDetailPosts({
   contentTab,
   postsQuery,
-  apiEnabled,
   confirm,
   setScrollTop,
 }: UseEventDetailPostsParams) {
@@ -44,6 +42,16 @@ export function useEventDetailPosts({
   const [expandedCommentPostIds, setExpandedCommentPostIds] = useState<Set<string>>(
     () => new Set(),
   );
+
+  useEffect(() => {
+    setAppliedPostIds((prev) => {
+      const next = new Set(prev);
+      for (const post of postsQuery.items) {
+        if (post.appliedByMe) next.add(post.id);
+      }
+      return next;
+    });
+  }, [postsQuery.items]);
 
   const allPostItems = useMemo(
     (): EventPostListItem[] => normalizeEventPostList(postsQuery.items),
@@ -72,7 +80,6 @@ export function useEventDetailPosts({
   const handleLikePost = useCallback(
     (postId: string) => {
       requireAuth(() => {
-        if (!apiEnabled) return;
         void likePostAndInvalidate(postId)
           .then((updated) => {
             postsQuery.patchItem(updated);
@@ -82,7 +89,7 @@ export function useEventDetailPosts({
           );
       }, 'social');
     },
-    [apiEnabled, postsQuery],
+    [postsQuery],
   );
 
   const ensurePostVisible = useCallback(
@@ -150,10 +157,6 @@ export function useEventDetailPosts({
         confirmText: '删除',
       });
       if (!ok) return;
-      if (!apiEnabled) {
-        void Taro.showToast({ title: '已删除', icon: 'success' });
-        return;
-      }
       void deletePostAndInvalidate(post.id)
         .then(() => {
           postsQuery.removeItem(post.id);
@@ -164,7 +167,7 @@ export function useEventDetailPosts({
           void Taro.showToast({ title: '删除失败', icon: 'none' });
         });
     },
-    [apiEnabled, confirm, postsQuery],
+    [confirm, postsQuery],
   );
 
   const handleCommentSubmitted = useCallback(
@@ -182,10 +185,6 @@ export function useEventDetailPosts({
         confirmText: '确认',
       });
       if (!ok) return;
-      if (!apiEnabled) {
-        void Taro.showToast({ title: '已标记为已组队', icon: 'success' });
-        return;
-      }
       void updatePostAndInvalidate(postId, { status: 'completed' })
         .then((updated) => {
           postsQuery.patchItem({ id: postId, status: updated.status });
@@ -195,7 +194,7 @@ export function useEventDetailPosts({
           void Taro.showToast({ title: '标记失败', icon: 'none' });
         });
     },
-    [apiEnabled, confirm, postsQuery],
+    [confirm, postsQuery],
   );
 
   return {

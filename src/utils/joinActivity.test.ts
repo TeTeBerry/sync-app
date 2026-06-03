@@ -8,7 +8,7 @@ vi.mock('../hooks/sync/activities', () => ({
 }));
 
 vi.mock('../constants/api', () => ({
-  isLiveApi: vi.fn(() => true),
+  isApiEnabled: vi.fn(() => true),
 }));
 
 vi.mock('@tarojs/taro', () => ({

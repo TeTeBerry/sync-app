@@ -80,7 +80,7 @@ const SettingsPage: React.FC = () => {
   const setStorePrivacyLevel = useProfilePageStore((state) => state.setPrivacyLevel);
 
   useEffect(() => {
-    if (!isLiveApi()) return;
+    if (!isLiveApi()) return; // skip login guard when API is not configured
     if (section === 'blocked' && !isLoggedIn()) {
       void Taro.showToast({ title: '请先登录', icon: 'none' });
       void Taro.navigateBack();

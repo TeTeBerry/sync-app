@@ -33,18 +33,25 @@ export function profileApplicationKey(
   return `${postId}:${application.userId}`;
 }
 
-/** Sync mock/API profile posts with accepted applications recorded in temp chat. */
-export function mergeProfilePostsFromTempChatSessions(
+/**
+ * Mock profile posts: reflect accept actions taken on the chat page (owner only).
+ * Opening a chat ("沟通") does not change posts — only sessions marked accepted after
+ * 「接受组队」 are applied.
+ */
+export function applyOwnerAcceptedSessionsToProfilePosts(
   posts: ProfilePostItem[],
   sessions: TempChatSession[],
 ): ProfilePostItem[] {
   let next = posts;
   for (const session of sessions) {
+    if (session.isOwner === false) continue;
     if (session.applicationStatus !== 'accepted') continue;
+    const applicantUserId = session.applicantUserId?.trim();
+    if (!applicantUserId) continue;
     next = patchProfilePostAfterAcceptApplication(
       next,
       session.postId,
-      session.peerUserId,
+      applicantUserId,
     );
   }
   return next;

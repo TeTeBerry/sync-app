@@ -8,7 +8,7 @@ import type { ConfirmDialogOptions } from '../../../hooks/useConfirmDialog';
 import { requireAuth } from '../../../utils/authGate';
 import { consumeContactUnlockWithQuota } from '../../../utils/contactUnlockEntitlement';
 import {
-  resolveUserBuddyPreviewForActivity,
+  resolveUserBuddyPreviewForTargetPost,
   type TeamApplyBuddyPreview,
 } from '../../../utils/teamApplyBuddyPreview';
 import { userHasRecruitingBuddyPost } from '../../../utils/userRecruitingPost';
@@ -54,13 +54,17 @@ export function useEventDetailTeamApply({
   const openApplySheet = useCallback(
     (postId: string, preview?: TeamApplyBuddyPreview | null) => {
       setTargetPostId(postId);
+      const targetPost = feedPosts.find((post) => post.id === postId);
       setBuddyPreview(
         preview ??
-          resolveUserBuddyPreviewForActivity(
-            eventId,
-            feedPosts,
-            profilePostsQuery.data,
-          ),
+          (targetPost
+            ? resolveUserBuddyPreviewForTargetPost(
+                targetPost,
+                eventId,
+                feedPosts,
+                profilePostsQuery.data,
+              )
+            : null),
       );
       setSheetOpen(true);
     },

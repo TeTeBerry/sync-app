@@ -21,15 +21,14 @@ import {
 import { go, preloadHotRoutes, ROUTES } from '../../utils/route';
 import { DEFER_PROFILE_ENTITLEMENTS_MS } from '../../utils/timing';
 import { persistUserName } from '../../utils/session';
-import type { ProfileActivityItem } from '../../types/backend';
-import { profileActivities, profilePosts, profileUser } from './mockData';
+import type { ProfileActivityItem, ProfileSummary } from '../../types/backend';
 import type { PackageTierId } from './profilePackageData';
 import type { ProfileSettingsSectionProps } from './ProfileSettingsSection';
 import {
   normalizeProfileUserData,
   type ProfileDisplayUser,
 } from './profileSummaryUtils';
-import { countOngoingActivities, deriveInterestTag } from './utils';
+import { deriveInterestTag } from './utils';
 import { useProfilePaidBenefitCards } from './useProfilePaidBenefitCards';
 import { useProfilePackageSheet } from './useProfilePackageSheet';
 import { useProfileBenefitsSection } from './useProfileBenefitsSection';
@@ -83,10 +82,8 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
 
   const profileUserData = useMemo(
     (): ProfileDisplayUser =>
-      apiEnabled && summaryQuery.data
-        ? normalizeProfileUserData(summaryQuery.data)
-        : profileUser,
-    [apiEnabled, summaryQuery.data],
+      normalizeProfileUserData((summaryQuery.data ?? {}) as ProfileSummary),
+    [summaryQuery.data],
   );
 
   const profileLoading =
@@ -122,10 +119,8 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
     onUpgrade: packageSheet.handleBenefitUpgrade,
   });
 
-  const ongoingCount = apiEnabled
-    ? profileUserData.stats.events
-    : countOngoingActivities(profileActivities);
-  const postsCount = apiEnabled ? profileUserData.stats.posts : profilePosts.length;
+  const ongoingCount = profileUserData.stats.events;
+  const postsCount = profileUserData.stats.posts;
   const interestTag = deriveInterestTag(profileUserData.bio);
 
   useEndRouteTransitionOnShow();

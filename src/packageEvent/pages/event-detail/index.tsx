@@ -59,7 +59,6 @@ const EventDetailPage = () => {
     posts,
     postsLoading,
     showPostsEnd,
-    apiEnabled,
     currentUserAvatar,
     postsQuery,
     handleBack,
@@ -162,7 +161,6 @@ const EventDetailPage = () => {
                     highlightPostId={highlightPostId}
                     expandedCommentPostIds={posts.expandedCommentPostIds}
                     appliedPostIds={posts.appliedPostIds}
-                    apiEnabled={apiEnabled}
                     currentUserAvatar={currentUserAvatar}
                     hasMore={postsQuery.hasMore}
                     hasMoreLocal={posts.hasMoreVisiblePosts}
@@ -171,7 +169,6 @@ const EventDetailPage = () => {
                     onToggleComments={posts.togglePostComments}
                     onDelete={posts.handleDeletePost}
                     onApply={posts.handleApply}
-                    onOpenAppliedChat={posts.handleOpenAppliedChat}
                     onComplete={posts.handleCompletePost}
                     onCommentSubmitted={posts.handleCommentSubmitted}
                   />

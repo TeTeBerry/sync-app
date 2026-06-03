@@ -1,11 +1,5 @@
 import { memo } from 'react';
-import {
-  CircleCheck,
-  MapPin,
-  MessageCircle,
-  Users,
-  Zap,
-} from '../../../../components/icons';
+import { CircleCheck, MapPin, Users, Zap } from '../../../../components/icons';
 import PostCardActionBar from '../../../../components/post/PostCardActionBar';
 import { buildPostSharePayload } from '../../../../components/post/postCardShare';
 import {
@@ -26,6 +20,7 @@ import {
 } from '../../../../utils/postContentTypeDisplay';
 import { PostImageCount, PostImageGrid } from '../../../../components/post';
 import { EVENT_POST_IMAGE_MAX_DISPLAY } from '../../../../constants/listPerf';
+import { isApiEnabled } from '../../../../constants/api';
 import { isCurrentUserPostAuthor } from '../../../../utils/postOwnership';
 import type { EventDetailPost } from '../../../../types/backend';
 import {
@@ -42,13 +37,11 @@ export type EventPostCardProps = {
   highlighted: boolean;
   commentsExpanded: boolean;
   applied: boolean;
-  apiEnabled: boolean;
   currentUserAvatar?: string;
   onLike: (postId: string) => void;
   onToggleComments: (postId: string) => void;
   onDelete: (post: EventDetailPost) => void;
   onApply: (postId: string) => void;
-  onOpenAppliedChat?: (post: EventDetailPost) => void;
   onComplete?: (postId: string) => void;
   onCommentSubmitted: (
     updated: Pick<EventDetailPost, 'id' | 'comments' | 'likes' | 'liked'>,
@@ -83,13 +76,11 @@ function EventPostCardInner({
   highlighted,
   commentsExpanded,
   applied,
-  apiEnabled,
   currentUserAvatar,
   onLike,
   onToggleComments,
   onDelete,
   onApply,
-  onOpenAppliedChat,
   onComplete,
   onCommentSubmitted,
 }: EventPostCardProps) {
@@ -243,18 +234,14 @@ function EventPostCardInner({
               commentsExpanded={commentsExpanded}
               onLike={() => onLike(post.id)}
               onToggleComments={() => onToggleComments(post.id)}
-              likeDisabled={!apiEnabled}
+              likeDisabled={!isApiEnabled()}
             />
           </View>
 
           {showApply ? (
             applied ? (
-              <Button
-                className="s-event-post__cta s-event-post__cta--applied-chat"
-                onClick={() => onOpenAppliedChat?.(post)}
-              >
-                <MessageCircle size={14} color="#ff0066" aria-hidden />
-                <Text className="s-event-post__cta-text">查看沟通</Text>
+              <Button className="s-event-post__cta s-event-post__cta--applied" disabled>
+                <Text className="s-event-post__cta-text">已申请</Text>
               </Button>
             ) : (
               <Button

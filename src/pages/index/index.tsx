@@ -15,7 +15,6 @@ import {
   useNotificationUnreadCount,
   usePopularPosts,
 } from '../../hooks/useSyncApi';
-import { isLiveApi } from '../../constants/api';
 import { requireAuth } from '../../utils/authGate';
 import {
   buildEventDetailQuery,
@@ -141,9 +140,6 @@ const Home = () => {
 
   const handleLikePost = useCallback((post: HomeFeedPost) => {
     requireAuth(() => {
-      if (!isLiveApi()) {
-        return;
-      }
       void likePostAndInvalidate(post.id).catch(
         () => void Taro.showToast({ title: '请求失败，请稍后重试', icon: 'none' }),
       );

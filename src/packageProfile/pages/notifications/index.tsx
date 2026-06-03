@@ -12,8 +12,6 @@ import {
   Trash2,
   Users,
 } from '../../../components/icons';
-import { mockNotifications } from '../../../components/profile/mockNotifications';
-import { isLiveApi } from '../../../constants/api';
 import PageNavigation from '../../../components/navigation/PageNavigation';
 import {
   clearAllNotificationsAndInvalidate,
@@ -65,17 +63,9 @@ function NotificationIcon({ category }: { category: NotificationCategory }) {
 const NotificationsPage: React.FC = () => {
   useEndRouteTransitionOnShow();
   const listReady = useDeferredMount(DEFER_NOTIFICATIONS_MS);
-  const apiEnabled = isLiveApi();
   const notificationsQuery = useNotificationsQuery();
-  const [mockReadIds, setMockReadIds] = useState<Set<string>>(() => new Set());
-  const notifications = useMemo(() => {
-    const source = apiEnabled ? (notificationsQuery.data ?? []) : mockNotifications;
-    if (apiEnabled) return source;
-    return source.map((item) =>
-      mockReadIds.has(item.id) ? { ...item, read: true } : item,
-    );
-  }, [apiEnabled, mockReadIds, notificationsQuery.data]);
-  const isLoading = apiEnabled && notificationsQuery.isLoading;
+  const notifications = notificationsQuery.data ?? [];
+  const isLoading = notificationsQuery.isLoading;
   const refetch = notificationsQuery.refetch;
   const contentReady = listReady && !isLoading;
   usePageRouteReady(contentReady);
@@ -147,19 +137,12 @@ const NotificationsPage: React.FC = () => {
     [confirm, refetch],
   );
 
-  const handleItemClick = useCallback(
-    async (item: AppNotification) => {
-      if (!item.read) {
-        if (apiEnabled) {
-          await markNotificationAsRead(item.id);
-        } else {
-          setMockReadIds((prev) => new Set(prev).add(item.id));
-        }
-      }
-      navigateFromNotification(item.meta);
-    },
-    [apiEnabled],
-  );
+  const handleItemClick = useCallback(async (item: AppNotification) => {
+    if (!item.read) {
+      await markNotificationAsRead(item.id);
+    }
+    navigateFromNotification(item.meta);
+  }, []);
 
   return (
     <View data-cmp="Notifications" className="s-notifications">
