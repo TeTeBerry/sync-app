@@ -222,8 +222,8 @@ AI 匹配配额：服务端在 `post_recommendations` 且 `posts.length > 0` 时
 | POST | `/api/posts` | 创建组队帖（Query 身份；**前端 UI 不调用**，由 AI 闭环创建） |
 | PATCH | `/api/posts/:id` | 编辑帖子 / 更新 status |
 | DELETE | `/api/posts/:id` | 删除自己的帖子 |
-| POST | `/api/posts/:id/like` | 点赞 |
-| POST | `/api/posts/:id/comments` | 发表评论 `{ "body": "..." }` |
+| POST | `/api/posts/:id/like` | 点赞/取消；响应 `{ post: EventDetailPost }` |
+| POST | `/api/posts/:id/comments` | 发表评论 `{ "body": "..." }`；响应 `{ post: EventDetailPost }` |
 | POST | `/api/posts/:id/applications` | 申请加入（可选 `{ "message": "..." }`；创建首条会话消息） |
 | POST | `/api/posts/:id/applications/:applicantUserId/accept` | 帖主接受组队 |
 | GET | `/api/team-chats` | 当前用户相关的临时组队会话列表（仅帖主已发起的线程；不含已过期） |

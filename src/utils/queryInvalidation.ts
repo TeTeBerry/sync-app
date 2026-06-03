@@ -1,21 +1,27 @@
-import {
-  broadcastCacheData,
-  forEachCacheEntry,
-  getCacheData,
-  invalidateCache,
-  setCacheDataByKey,
-} from '../hooks/useApiQuery';
-import type {
-  HomeFeedPost,
-  HomeSummary,
-  EventDetailPost,
-  EventPostsPage,
-  ProfilePostItem,
-  ProfileSummary,
-} from '../types/backend';
-import { sumProfilePostLikes } from './profileLikes';
-import { patchProfilePostAfterAcceptApplication } from './profilePostApplications';
-import type { BackendPostStatusLabel } from './postStatus';
+import { invalidateCache } from '../hooks/useApiQuery';
+
+export {
+  patchPostEngagementInCaches,
+  patchPostStatusInCaches,
+  patchProfilePostApplicationAccepted,
+  patchUpdatedProfilePostInCaches,
+  syncProfileSummaryLikesFromPostsCache,
+  popularPostsQueryKey,
+  getPopularPostsFromCache,
+  setPopularPostsCache,
+  readPostEngagementFromCache,
+  stripPopularPostsFromHomeSummaryCache,
+} from '../cache/postCache';
+
+/** @deprecated Use patchPostEngagementInCaches */
+export { patchPostEngagementInCaches as patchLikedPostInCaches } from '../cache/postCache';
+
+export {
+  markNotificationReadInCache,
+  markAllNotificationsReadInCache,
+  removeNotificationFromCache,
+  clearNotificationsInCache,
+} from '../cache/notificationCache';
 
 /** 失效通知相关查询 */
 export function invalidateNotifications() {
@@ -92,174 +98,4 @@ export function invalidateRegistration() {
 /** 失效指定帖子的评论查询 */
 export function invalidatePostComments(postId: string) {
   invalidateCache(['posts', postId, 'comments']);
-}
-
-export function patchPostStatusInCaches(
-  postId: string,
-  status: BackendPostStatusLabel,
-) {
-  const patchList = <T extends { id: string; status?: BackendPostStatusLabel }>(
-    posts: T[] | undefined,
-  ) => posts?.map((post) => (post.id === postId ? { ...post, status } : post));
-
-  forEachCacheEntry((key, data) => {
-    if (!key.startsWith('posts|') && key !== 'profile|posts') return;
-    if (!Array.isArray(data)) return;
-    const patched = patchList(
-      data as { id: string; status?: BackendPostStatusLabel }[],
-    );
-    if (patched) {
-      setCacheDataByKey(key, patched);
-    }
-  });
-
-  broadcastCacheData(['posts']);
-  broadcastCacheData(['profile', 'posts']);
-}
-
-/** After owner accepts one applicant: mark applicant accepted and close recruitment on profile caches. */
-export function patchProfilePostApplicationAccepted(
-  postId: string,
-  applicantUserId: string,
-) {
-  forEachCacheEntry((key, data) => {
-    if (key !== 'profile|posts' || !Array.isArray(data)) return;
-    const patched = patchProfilePostAfterAcceptApplication(
-      data as ProfilePostItem[],
-      postId,
-      applicantUserId,
-    );
-    setCacheDataByKey(key, patched);
-  });
-
-  patchPostStatusInCaches(postId, '已组队');
-  broadcastCacheData(['profile', 'posts']);
-}
-
-export function patchUpdatedProfilePostInCaches(updated: ProfilePostItem) {
-  const patchList = (posts: ProfilePostItem[] | undefined) =>
-    posts?.map((post) =>
-      post.id === updated.id
-        ? {
-            ...post,
-            content: updated.content,
-            status: updated.status,
-            title: updated.title,
-          }
-        : post,
-    );
-
-  forEachCacheEntry((key, data) => {
-    if (key !== 'profile|posts') return;
-    const patched = patchList(data as ProfilePostItem[] | undefined);
-    if (patched) {
-      setCacheDataByKey(key, patched);
-    }
-  });
-
-  patchPostStatusInCaches(updated.id, updated.status);
-  broadcastCacheData(['profile', 'posts']);
-}
-
-export function patchLikedPostInCaches(
-  updated: Pick<EventDetailPost, 'id' | 'likes' | 'liked' | 'comments'>,
-) {
-  const patchPost = <
-    T extends { id: string; likes: number; liked?: boolean; comments: number },
-  >(
-    post: T,
-  ): T => {
-    if (post.id !== updated.id) return post;
-    return {
-      ...post,
-      ...(updated.likes !== undefined ? { likes: updated.likes } : {}),
-      ...(updated.liked !== undefined ? { liked: updated.liked } : {}),
-      ...(updated.comments !== undefined ? { comments: updated.comments } : {}),
-    };
-  };
-
-  const patchFeedPosts = (posts: HomeFeedPost[] | undefined) => posts?.map(patchPost);
-
-  const patchEventPosts = (posts: EventDetailPost[] | undefined) =>
-    posts?.map(patchPost);
-
-  forEachCacheEntry((key, entryData) => {
-    if (key === 'home|summary' && entryData && typeof entryData === 'object') {
-      const summary = entryData as HomeSummary;
-      if (summary.popularPosts?.length) {
-        const patchedPopular = patchFeedPosts(summary.popularPosts);
-        if (patchedPopular) {
-          setCacheDataByKey(key, { ...summary, popularPosts: patchedPopular });
-        }
-      }
-      return;
-    }
-
-    if (!key.startsWith('posts|')) return;
-    if (!Array.isArray(entryData)) return;
-
-    if (key.startsWith('posts|popular|')) {
-      const patched = patchFeedPosts(entryData as HomeFeedPost[]);
-      if (patched) {
-        setCacheDataByKey(key, patched);
-      }
-      return;
-    }
-
-    if (key.startsWith('posts|activity|')) {
-      if (Array.isArray(entryData)) {
-        const patched = patchEventPosts(entryData as EventDetailPost[]);
-        if (patched) {
-          setCacheDataByKey(key, patched);
-        }
-        return;
-      }
-      const page = entryData as EventPostsPage;
-      if (page?.items && Array.isArray(page.items)) {
-        const patchedItems = patchEventPosts(page.items);
-        if (patchedItems) {
-          setCacheDataByKey(key, { ...page, items: patchedItems });
-        }
-      }
-    }
-  });
-
-  let profilePostsPatched = false;
-  forEachCacheEntry((key, entryData) => {
-    if (key !== 'profile|posts' || !Array.isArray(entryData)) return;
-    const patched = (entryData as ProfilePostItem[]).map((post) =>
-      post.id === updated.id && updated.likes !== undefined
-        ? { ...post, likes: updated.likes }
-        : post,
-    );
-    setCacheDataByKey(key, patched);
-    profilePostsPatched = true;
-  });
-
-  if (profilePostsPatched) {
-    syncProfileSummaryLikesFromPostsCache();
-    broadcastCacheData(['profile', 'posts']);
-  }
-
-  broadcastCacheData(['posts']);
-  broadcastCacheData(['home', 'summary']);
-}
-
-/** Recompute profile summary 获赞数 from cached /profile/posts (same rule as backend). */
-export function syncProfileSummaryLikesFromPostsCache(): void {
-  const posts = getCacheData<ProfilePostItem[]>(['profile', 'posts']);
-  if (!posts) {
-    return;
-  }
-  const likes = sumProfilePostLikes(posts);
-  forEachCacheEntry((key, data) => {
-    if (!key.startsWith('profile|summary|')) return;
-    const summary = data as ProfileSummary | undefined;
-    if (!summary?.stats) return;
-    setCacheDataByKey(key, {
-      ...summary,
-      stats: { ...summary.stats, likes },
-    });
-  });
-  broadcastCacheData(['profile', 'summary']);
 }

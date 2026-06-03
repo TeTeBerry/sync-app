@@ -10,6 +10,10 @@ import type {
   ProfilePostItem,
   UpdatePostPayload,
 } from '../../types/backend';
+import {
+  unwrapPostMutation,
+  type PostMutationResponse,
+} from '../../types/contracts/postMutation';
 import { mergeOwnerQueryParams, ownerQueryParams } from '../requestContext';
 
 export function fetchPopularPosts(limit = 20) {
@@ -56,7 +60,11 @@ export function updatePost(postId: string, payload: UpdatePostPayload) {
 }
 
 export function likePost(postId: string) {
-  return apiPost<EventDetailPost>(`/posts/${postId}/like`, {}, ownerQueryParams());
+  return apiPost<PostMutationResponse | EventDetailPost>(
+    `/posts/${postId}/like`,
+    {},
+    ownerQueryParams(),
+  ).then(unwrapPostMutation);
 }
 
 export type ApplyToPostPayload = {
@@ -95,9 +103,9 @@ export function fetchPostComments(postId: string) {
 }
 
 export function addPostComment(postId: string, body: string, parentCommentId?: string) {
-  return apiPost<EventDetailPost>(
+  return apiPost<PostMutationResponse | EventDetailPost>(
     `/posts/${postId}/comments`,
     { body, ...(parentCommentId ? { parentCommentId } : {}) },
     ownerQueryParams(),
-  );
+  ).then(unwrapPostMutation);
 }

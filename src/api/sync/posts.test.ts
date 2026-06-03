@@ -26,7 +26,26 @@ vi.mock('../../constants/api', () => ({
   API_BASE_URL: 'https://api.test',
 }));
 
-import { createPost, fetchPopularPosts, likePost } from './posts';
+import type { EventDetailPost } from '../../types/backend';
+import { addPostComment, createPost, fetchPopularPosts, likePost } from './posts';
+
+const sampleEventDetailPost: EventDetailPost = {
+  id: 'post-1',
+  name: '风暴电音节',
+  location: '上海',
+  time: '',
+  body: '找同行',
+  tags: ['#组队'],
+  likes: 1,
+  liked: true,
+  comments: 0,
+  avatar: '',
+  status: '招募中',
+};
+
+function postMutationMock(post: EventDetailPost): { post: EventDetailPost } {
+  return { post };
+}
 
 function mockSuccessResponse(data: unknown, statusCode = 200) {
   mockRequest.mockImplementation(
@@ -51,10 +70,13 @@ describe('api/sync/posts query params', () => {
   });
 
   it('likePost includes userId and not authorName when no token', async () => {
-    await likePost('post-1');
+    mockSuccessResponse(postMutationMock(sampleEventDetailPost));
+    const result = await likePost('post-1');
     const url = lastRequestUrl();
     expect(url).toContain('userId=');
     expect(url).not.toContain('authorName=');
+    expect(result).toEqual(sampleEventDetailPost);
+    expect(result.liked).toBe(true);
   });
 
   it('fetchPopularPosts omits userId and authorName when bearer token present', async () => {
@@ -64,6 +86,26 @@ describe('api/sync/posts query params', () => {
     expect(url).not.toContain('userId=');
     expect(url).not.toContain('authorName=');
     expect(url).toContain('limit=10');
+  });
+});
+
+describe('api/sync/posts post mutations ({ post })', () => {
+  beforeEach(() => {
+    mockRequest.mockReset();
+    mockGetAccessToken.mockReturnValue(null);
+    mockGetAuthHeaders.mockReturnValue({});
+    mockGetClientUserId.mockReturnValue('demo-client-id');
+  });
+
+  it('addPostComment unwraps { post } mutation response', async () => {
+    const postAfterComment: EventDetailPost = {
+      ...sampleEventDetailPost,
+      comments: 2,
+    };
+    mockSuccessResponse(postMutationMock(postAfterComment));
+    const result = await addPostComment('post-1', 'nice');
+    expect(result).toEqual(postAfterComment);
+    expect(result.comments).toBe(2);
   });
 });
 

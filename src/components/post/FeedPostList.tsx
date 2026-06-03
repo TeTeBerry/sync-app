@@ -16,12 +16,13 @@ import {
   stripContentTypeHashtags,
 } from './ContentTypeBadge';
 import { PostImageGrid, PostImageCount } from './PostImageGrid';
+import { MapPin } from '../icons';
 import { useCurrentUserQuery } from '../../hooks/useSyncApi';
 import { isCurrentUserPostAuthor } from '../../utils/postOwnership';
 import type { EventDetailPost } from '../../types/backend';
 import type { HomeFeedPost } from '../../types/post';
 import { thumbnailImageUrl } from '../../utils/imageUrl';
-import { inferAuthorGenderFromPost } from '../../utils/inferAuthorGender';
+import { POST_ACTION_ICON_COLOR } from '../../utils/postActionColors';
 import { Image, Text, View } from '@tarojs/components';
 
 export type FeedPostListProps = {
@@ -58,18 +59,7 @@ function FeedPostRowInner({
   const avatarSrc = thumbnailImageUrl(post.avatar, 80) ?? post.avatar;
   const contentTypeKeys = mergePostContentTypes(post.contentTypes, { body: post.body });
   const bodyText = stripContentTypeHashtags(post.body);
-  const authorGender = inferAuthorGenderFromPost({
-    userId: post.userId,
-    authorName: postName,
-    authorGender: post.authorGender,
-    body: post.body,
-    tags: post.contentTypes,
-  });
-  const locationClassName = post.location
-    ? authorGender
-      ? `s-home-post__user-location s-home-post__user-location--${authorGender}`
-      : 's-home-post__user-location'
-    : '';
+  const eventLocation = post.location?.trim();
 
   return (
     <View className="s-home-post">
@@ -84,12 +74,6 @@ function FeedPostRowInner({
           <View className="s-home-post__top">
             <View className="s-home-post__user-line">
               <Text className="s-home-post__user-name">{postName}</Text>
-              {post.location ? (
-                <Text className={locationClassName}>
-                  <Text className="s-home-post__user-location-sep"> · </Text>
-                  {post.location}
-                </Text>
-              ) : null}
               <Text className="s-home-post__user-handle">{postHandle}</Text>
               {post.images?.length ? (
                 <PostImageCount count={post.images.length} />
@@ -123,7 +107,20 @@ function FeedPostRowInner({
               ) : null}
             </View>
           </View>
-          <Text className="s-home-post__event-name">{post.event}</Text>
+          <View className="s-home-post__event-line">
+            {eventLocation ? (
+              <View className="s-home-post__event-address-wrap">
+                <MapPin
+                  size={12}
+                  color={POST_ACTION_ICON_COLOR}
+                  className="s-home-post__event-address-icon"
+                />
+                <Text className="s-home-post__event-address">{eventLocation}</Text>
+                <Text className="s-home-post__event-address-sep"> · </Text>
+              </View>
+            ) : null}
+            <Text className="s-home-post__event-name">{post.event}</Text>
+          </View>
         </View>
       </View>
 

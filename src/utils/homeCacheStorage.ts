@@ -1,4 +1,5 @@
 import Taro from '@tarojs/taro';
+import { setPopularPostsCache } from '../cache/postCache';
 import {
   broadcastCacheData,
   getCacheKey,
@@ -138,7 +139,10 @@ export function seedPopularPostsCache(posts: HomeFeedPost[] | undefined): void {
   if (!userId) {
     return;
   }
-  const trimmed = posts.slice(0, HOME_POPULAR_POSTS_PERSIST_LIMIT);
+  const trimmed = posts.slice(0, HOME_POPULAR_POSTS_PERSIST_LIMIT).map((item) => ({
+    ...item,
+    comments: item.comments ?? 0,
+  }));
   persistPopularPosts(trimmed);
-  setCacheDataByKey(getCacheKey(['posts', 'popular', userId]), trimmed);
+  setPopularPostsCache(trimmed, userId);
 }

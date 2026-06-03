@@ -25,20 +25,21 @@ import {
   invalidatePostFeeds,
   invalidateProfilePosts,
   invalidateProfileSummary,
-  patchLikedPostInCaches,
+  patchPostEngagementInCaches,
   patchPostStatusInCaches,
   patchProfilePostApplicationAccepted,
   patchUpdatedProfilePostInCaches,
+  popularPostsQueryKey,
+  readPostEngagementFromCache,
+  setPopularPostsCache,
 } from '../../utils/queryInvalidation';
-import { getCacheData } from '../useApiQuery';
-import type { HomeSummary } from '../../types/backend';
+import { unwrapPostMutation } from '../../types/contracts/postMutation';
 import { isCurrentUserPostAuthor } from '../../utils/postOwnership';
 import {
   STALE_POST_COMMENTS_MS,
   STALE_POSTS_FEED_MS,
 } from '../../constants/queryCache';
 import { useApiQuery } from '../useApiQuery';
-import { useHomeSummary } from './activities';
 import type { QueryEnableOptions } from './types';
 import { invalidateNotificationQueries } from './notifications';
 import { invalidateTeamChatQueries } from './teamChats';
@@ -49,32 +50,28 @@ export function usePopularPostsQuery(options?: QueryEnableOptions) {
   const userId = resolveRequestUserId();
 
   return useApiQuery({
-    queryKey: ['posts', 'popular', userId],
+    queryKey: [...popularPostsQueryKey(userId)],
     queryFn: async () => {
       const result = await fetchPopularPosts(HOME_POPULAR_POSTS_PERSIST_LIMIT);
-      persistPopularPosts(result);
-      return result;
+      const mapped = result.map(mapHomeFeedPost);
+      persistPopularPosts(mapped);
+      setPopularPostsCache(mapped, userId);
+      return mapped;
     },
     enabled,
     staleTime: STALE_POSTS_FEED_MS,
   });
 }
 
+/** Home popular feed — canonical source is `posts/popular` cache (seeded from `/home`). */
 export function usePopularPosts(options?: QueryEnableOptions) {
   const tabEnabled = options?.enabled ?? true;
-  const { data: summary, isLoading: summaryLoading } = useHomeSummary();
-  const embedded = summary?.popularPosts;
-  const query = usePopularPostsQuery({
-    enabled: tabEnabled && (embedded == null || embedded.length === 0),
-  });
-
-  const posts: HomeFeedPost[] = (embedded ?? query.data ?? []).map(mapHomeFeedPost);
-  const usesEmbedded = embedded != null && embedded.length > 0;
+  const query = usePopularPostsQuery({ enabled: tabEnabled });
 
   return {
-    posts,
-    isLoading: tabEnabled && !usesEmbedded && (query.isLoading || summaryLoading),
-    isError: tabEnabled && !usesEmbedded && query.isError,
+    posts: (query.data ?? []).map(mapHomeFeedPost),
+    isLoading: tabEnabled && query.isLoading && query.data === undefined,
+    isError: tabEnabled && query.isError,
     refetch: query.refetch,
   };
 }
@@ -143,41 +140,11 @@ export async function deletePostAndInvalidate(postId: string) {
   await invalidatePostQueries();
 }
 
-function readPostLikeStateFromCaches(
-  postId: string,
-  userId: string,
-): Pick<HomeFeedPost, 'likes' | 'liked' | 'comments'> | null {
-  const fromPopular = getCacheData<HomeFeedPost[]>(['posts', 'popular', userId])?.find(
-    (post) => post.id === postId,
-  );
-  if (fromPopular) {
-    return {
-      likes: fromPopular.likes,
-      liked: Boolean(fromPopular.liked),
-      comments: fromPopular.comments ?? 0,
-    };
-  }
-
-  const fromSummary = getCacheData<HomeSummary>([
-    'home',
-    'summary',
-  ])?.popularPosts?.find((post) => post.id === postId);
-  if (fromSummary) {
-    return {
-      likes: fromSummary.likes,
-      liked: Boolean(fromSummary.liked),
-      comments: fromSummary.comments ?? 0,
-    };
-  }
-
-  return null;
-}
-
 export async function likePostAndInvalidate(postId: string) {
   const userId = resolveRequestUserId();
-  const current = readPostLikeStateFromCaches(postId, userId);
+  const current = readPostEngagementFromCache(postId, userId);
   if (current) {
-    patchLikedPostInCaches({
+    patchPostEngagementInCaches({
       id: postId,
       likes: current.liked ? Math.max(0, current.likes - 1) : current.likes + 1,
       liked: !current.liked,
@@ -185,8 +152,8 @@ export async function likePostAndInvalidate(postId: string) {
     });
   }
 
-  const updated = await likePost(postId);
-  patchLikedPostInCaches(updated);
+  const updated = unwrapPostMutation(await likePost(postId));
+  patchPostEngagementInCaches(updated);
   if (isCurrentUserPostAuthor(undefined, updated.userId)) {
     invalidateProfileSummary();
   }
@@ -199,8 +166,10 @@ export async function commentPostAndInvalidate(
   body: string,
   parentCommentId?: string,
 ) {
-  const updated = await addPostComment(postId, body, parentCommentId);
-  patchLikedPostInCaches(updated);
+  const updated = unwrapPostMutation(
+    await addPostComment(postId, body, parentCommentId),
+  );
+  patchPostEngagementInCaches(updated);
   await Promise.all([invalidateNotificationQueries(), invalidatePostComments(postId)]);
   return updated;
 }
