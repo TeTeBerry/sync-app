@@ -18,6 +18,7 @@ import {
 } from './authStorage';
 import { notifyAuthSessionChange } from './authSession';
 import { clearHomeCachesOnLogout } from './homeCacheStorage';
+import { hasLegalConsent } from './legalConsentStorage';
 
 export {
   getAccessToken,
@@ -137,6 +138,10 @@ export async function ensureAuth(): Promise<AuthLoginResult | null> {
   }
 
   if (shouldSkipAutoLogin()) {
+    return null;
+  }
+
+  if (process.env.TARO_ENV === 'weapp' && !hasLegalConsent()) {
     return null;
   }
 

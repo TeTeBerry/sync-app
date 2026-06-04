@@ -56,6 +56,7 @@ const Profile: React.FC = () => {
               <ProfileGuestSection
                 onLoggedIn={handleAuthLoggedIn}
                 onOpenHelp={settings.onOpenHelp}
+                onOpenLegal={settings.onOpenLegal}
               />
             </ProfileTabErrorBoundary>
           </View>

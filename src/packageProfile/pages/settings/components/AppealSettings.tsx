@@ -6,7 +6,7 @@ import {
   SUPPORT_FEEDBACK_HINT,
 } from '../../../../constants/supportContact';
 import { ROUTES, go } from '../../../../utils/route';
-import { ScrollView, Text, View } from '@tarojs/components';
+import { Text, View } from '@tarojs/components';
 
 const FAQ = [
   {
@@ -38,47 +38,40 @@ export function AppealSettings() {
   };
 
   return (
-    <ScrollView
-      scrollY
-      enhanced
-      showScrollbar={false}
-      className="s-appeal-settings__scroll s-scrollbar-none"
-    >
-      <View className="s-appeal-settings">
-        <View className="s-appeal-settings__banner">
-          <Text className="s-appeal-settings__banner-title">误伤申诉说明</Text>
-          <Text className="s-appeal-settings__banner-desc">
-            平台依据内容审核与用户举报对账号采取临时限制。若你认为是误判，可按以下步骤申诉。
-          </Text>
-        </View>
-
-        <View className="s-settings__card s-appeal-settings__steps">
-          <Text className="s-appeal-settings__section-title">申诉步骤</Text>
-          <Text className="s-appeal-settings__step">
-            1. 打开「我的 → 我的帖子」，检查并修改违规表述
-          </Text>
-          <Text className="s-appeal-settings__step">2. {SUPPORT_FEEDBACK_HINT}</Text>
-          <Text className="s-appeal-settings__step">
-            3. 我们将在 1–3 个工作日内复核，结果通过站内通知或你留下的联系方式反馈
-          </Text>
-        </View>
-
-        <View className="s-settings__card s-appeal-settings__faq">
-          {FAQ.map((item) => (
-            <View key={item.q} className="s-appeal-settings__faq-item">
-              <Text className="s-appeal-settings__faq-q">{item.q}</Text>
-              <Text className="s-appeal-settings__faq-a">{item.a}</Text>
-            </View>
-          ))}
-        </View>
-
-        <Button className="s-settings__feedback-btn" onClick={openHelp}>
-          <Text className="s-btn-label">前往帮助与反馈</Text>
-        </Button>
-        <Button className="s-appeal-settings__copy-btn" onClick={copyEmail}>
-          <Text className="s-btn-label">复制客服邮箱</Text>
-        </Button>
+    <View className="s-appeal-settings">
+      <View className="s-appeal-settings__banner">
+        <Text className="s-appeal-settings__banner-title">误伤申诉说明</Text>
+        <Text className="s-appeal-settings__banner-desc">
+          平台依据内容审核与用户举报对账号采取临时限制。若你认为是误判，可按以下步骤申诉。
+        </Text>
       </View>
-    </ScrollView>
+
+      <View className="s-settings__card s-appeal-settings__steps">
+        <Text className="s-appeal-settings__section-title">申诉步骤</Text>
+        <Text className="s-appeal-settings__step">
+          1. 打开「我的 → 我的帖子」，检查并修改违规表述
+        </Text>
+        <Text className="s-appeal-settings__step">2. {SUPPORT_FEEDBACK_HINT}</Text>
+        <Text className="s-appeal-settings__step">
+          3. 我们将在 1–3 个工作日内复核，结果通过站内通知或你留下的联系方式反馈
+        </Text>
+      </View>
+
+      <View className="s-settings__card s-appeal-settings__faq">
+        {FAQ.map((item) => (
+          <View key={item.q} className="s-appeal-settings__faq-item">
+            <Text className="s-appeal-settings__faq-q">{item.q}</Text>
+            <Text className="s-appeal-settings__faq-a">{item.a}</Text>
+          </View>
+        ))}
+      </View>
+
+      <Button className="s-settings__feedback-btn" onClick={openHelp}>
+        <Text className="s-btn-label">前往帮助与反馈</Text>
+      </Button>
+      <Button className="s-appeal-settings__copy-btn" onClick={copyEmail}>
+        <Text className="s-btn-label">复制客服邮箱</Text>
+      </Button>
+    </View>
   );
 }

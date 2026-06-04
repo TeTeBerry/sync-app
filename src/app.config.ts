@@ -23,6 +23,7 @@ export default {
         'pages/profile-benefits/index',
         'pages/profile-posts/index',
         'pages/settings/index',
+        'pages/legal-document/index',
         'pages/notifications/index',
       ],
     },

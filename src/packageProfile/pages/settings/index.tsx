@@ -1,7 +1,7 @@
 import './settings.scss';
 import Taro, { useRouter } from '@tarojs/taro';
 import React, { useCallback, useEffect, useState } from 'react';
-import { Check } from '../../../components/icons';
+import { Check, ChevronRight } from '../../../components/icons';
 import PageNavigation from '../../../components/navigation/PageNavigation';
 import { ROUTES } from '../../../utils/route';
 import {
@@ -27,11 +27,13 @@ import { useAccountRisk } from '../../../hooks/useSyncApi';
 import { BlockedUsersSettings } from './components/BlockedUsersSettings';
 import { MatchPreferencesSettings } from './components/MatchPreferencesSettings';
 import { AppealSettings } from './components/AppealSettings';
-
+import { LEGAL_DOC_LIST } from '../../../legal';
+import { goLegalDocument } from '../../../utils/legalRoute';
 type SettingsSection =
   | 'notifications'
   | 'privacy'
   | 'help'
+  | 'legal'
   | 'blocked'
   | 'match'
   | 'appeal';
@@ -41,6 +43,7 @@ const SECTION_TITLES: Record<SettingsSection, string> = {
   notifications: '消息通知',
   privacy: '隐私设置',
   help: '帮助与反馈',
+  legal: '法律与协议',
   blocked: '已屏蔽用户',
   match: '组队偏好',
   appeal: '申诉说明',
@@ -195,13 +198,27 @@ const SettingsPage: React.FC = () => {
           </View>
         </ScrollView>
       ) : section === 'match' ? (
-        <View className="s-settings__main s-settings__main--match">
-          <MatchPreferencesSettings />
-        </View>
+        <ScrollView
+          scrollY
+          enhanced
+          showScrollbar={false}
+          className="s-settings__scroll s-scrollbar-none"
+        >
+          <View className="s-settings__main">
+            <MatchPreferencesSettings />
+          </View>
+        </ScrollView>
       ) : section === 'appeal' ? (
-        <View className="s-settings__main s-settings__main--appeal">
-          <AppealSettings />
-        </View>
+        <ScrollView
+          scrollY
+          enhanced
+          showScrollbar={false}
+          className="s-settings__scroll s-scrollbar-none"
+        >
+          <View className="s-settings__main">
+            <AppealSettings />
+          </View>
+        </ScrollView>
       ) : (
         <View className="s-settings__main">
           {section === 'notifications' && (
@@ -256,6 +273,26 @@ const SettingsPage: React.FC = () => {
                   {privacyLevel === level && (
                     <Check size={20} className="s-settings__check" />
                   )}
+                </Button>
+              ))}
+            </View>
+          )}
+
+          {section === 'legal' && (
+            <View className="s-settings__card">
+              {LEGAL_DOC_LIST.map((doc) => (
+                <Button
+                  key={doc.id}
+                  className="s-settings__option"
+                  onClick={() => goLegalDocument(doc.id)}
+                >
+                  <View>
+                    <View className="s-settings__option-label">{doc.title}</View>
+                    <View className="s-settings__option-desc">
+                      更新于 {doc.updatedAt}
+                    </View>
+                  </View>
+                  <ChevronRight size={18} color="#636366" />
                 </Button>
               ))}
             </View>

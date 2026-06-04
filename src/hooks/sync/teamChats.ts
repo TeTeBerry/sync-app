@@ -55,6 +55,8 @@ export function mapTeamChatSessionToTemp(session: TeamChatSession): TempChatSess
     activityEndAt: session.activityEndAt,
     destroysAt: session.destroysAt,
     isOwner: session.isOwner,
+    canSendMessage: session.canSendMessage,
+    messagingHint: session.messagingHint,
   };
 }
 

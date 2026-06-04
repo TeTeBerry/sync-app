@@ -3,6 +3,7 @@ import {
   Ban,
   Bell,
   ChevronRight,
+  FileText,
   Info,
   LogOut,
   Music2,
@@ -23,6 +24,7 @@ export type ProfileSettingsSectionProps = {
   onOpenBlockedUsers: () => void;
   onOpenAccountAppeal?: () => void;
   onOpenHelp: () => void;
+  onOpenLegal: () => void;
   onLogout: () => void;
 };
 
@@ -38,6 +40,7 @@ const ProfileSettingsSection: React.FC<ProfileSettingsSectionProps> = ({
   onOpenBlockedUsers,
   onOpenAccountAppeal,
   onOpenHelp,
+  onOpenLegal,
   onLogout,
 }) => (
   <View className="s-profile__settings-card">
@@ -112,6 +115,18 @@ const ProfileSettingsSection: React.FC<ProfileSettingsSectionProps> = ({
       {blockedCount > 0 ? (
         <Text className="s-profile__settings-value">{blockedCount} 人</Text>
       ) : null}
+      <ChevronRight size={18} className="s-profile__settings-chevron" />
+    </View>
+
+    <View
+      className="s-profile__settings-row"
+      hoverClass="s-profile__settings-row--pressed"
+      onClick={onOpenLegal}
+    >
+      <View className="s-profile__settings-icon s-profile__settings-icon--help">
+        <FileText size={18} />
+      </View>
+      <Text className="s-profile__settings-label">法律与协议</Text>
       <ChevronRight size={18} className="s-profile__settings-chevron" />
     </View>
 

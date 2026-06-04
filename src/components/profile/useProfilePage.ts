@@ -163,7 +163,14 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
 
   const openSettings = useCallback(
     (
-      section: 'notifications' | 'privacy' | 'help' | 'blocked' | 'match' | 'appeal',
+      section:
+        | 'notifications'
+        | 'privacy'
+        | 'help'
+        | 'legal'
+        | 'blocked'
+        | 'match'
+        | 'appeal',
     ) => {
       go(`${ROUTES.SETTINGS}?section=${section}`);
     },
@@ -224,6 +231,7 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
       requireAuth(() => openSettings('appeal'), 'general');
     },
     onOpenHelp: () => openSettings('help'),
+    onOpenLegal: () => openSettings('legal'),
     onLogout: handleLogout,
   };
 

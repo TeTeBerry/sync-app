@@ -1,0 +1,39 @@
+.s-ai-disclosure-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  padding: 2px 8px;
+  border-radius: 999px;
+  box-sizing: border-box;
+
+  &--recommend {
+    background: rgba(var(--primary-rgb), 0.12);
+    border: 1px solid rgba(var(--primary-rgb), 0.35);
+  }
+
+  &__text {
+    font-size: 10px;
+    font-weight: var(--s-fw-semibold);
+    line-height: 1.2;
+    color: var(--primary);
+  }
+}
+
+.s-ai-disclosure-section {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  margin-bottom: 6px;
+  box-sizing: border-box;
+
+  &__hint {
+    flex: 1;
+    min-width: 0;
+    font-size: 11px;
+    line-height: 1.35;
+    color: var(--muted-foreground);
+  }
+}

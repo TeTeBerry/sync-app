@@ -27,12 +27,7 @@ export function AiGuideResultCard({
         aria-label="查看攻略大图"
         onClick={() => void openSingleImagePreview(imagePath)}
       >
-        <Image
-          className="s-ai-guide-result__image"
-          src={imagePath}
-          mode="widthFix"
-          alt="AI 出行攻略长图"
-        />
+        <Image className="s-ai-guide-result__image" src={imagePath} mode="widthFix" />
       </Button>
       {onBuddyPostFromGuide ? (
         <Button
@@ -41,7 +36,7 @@ export function AiGuideResultCard({
           hoverClass="s-ai-guide-result__buddy-cta--pressed"
           onClick={onBuddyPostFromGuide}
         >
-          <Users size={18} color="#fff" aria-hidden />
+          <Users size={18} color="#fff" />
           <View className="s-ai-guide-result__buddy-cta-text">
             <Text className="s-ai-guide-result__buddy-cta-title">一键组队</Text>
             <Text className="s-ai-guide-result__buddy-cta-sub">
@@ -57,7 +52,7 @@ export function AiGuideResultCard({
           hoverClass="s-ai-guide-result__action--pressed"
           onClick={onRegenerate}
         >
-          <RefreshCw size={16} color="#fff" aria-hidden />
+          <RefreshCw size={16} color="#fff" />
           <Text className="s-ai-guide-result__action-label">重新生成</Text>
         </Button>
         <Button
@@ -66,7 +61,7 @@ export function AiGuideResultCard({
           hoverClass="s-ai-guide-result__action--pressed"
           onClick={onShare}
         >
-          <Share2 size={16} color="#fff" aria-hidden />
+          <Share2 size={16} color="#fff" />
           <Text className="s-ai-guide-result__action-label">分享给朋友</Text>
         </Button>
       </View>

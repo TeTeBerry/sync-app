@@ -79,7 +79,8 @@ POST /api/posts
 
 - 会话 ID：`postId:applicantUserId`（`buildTempChatRouteSessionId`）
 - **仅帖主**可在「我的组队帖」对某申请人点 **沟通** 发起会话：`POST /api/team-chats/:postId/:applicantUserId/open`（写入 `ownerOpenedChatAt`，并带入申请附言为首条消息）
-- 申请人申请成功后**不会**出现在私信列表，也不能发消息，直到帖主发起沟通
+- 申请人申请时会写入首条留言（计为 24 小时内 1 条）；**帖主回复前**申请人不能再发私信，前端展示提示「对方回复你之前，24小时内最多只能发1条文字消息」
+- 帖主回复后双方可正常聊天
 - 列表：`GET /api/team-chats`
 - 消息：`GET/POST .../messages`，已读 `POST .../read`
 - 帖主侧 `buddyPreview`：申请人最佳匹配招募帖；申请人侧：帖主原帖

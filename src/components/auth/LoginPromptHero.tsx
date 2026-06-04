@@ -6,7 +6,9 @@ import { Button } from '../ui';
 import { Text, View } from '@tarojs/components';
 import { isLiveApi } from '../../constants/api';
 import { SyncBrandMark } from '../SyncBrandMark';
+import { LegalConsentRow } from '../legal/LegalConsentRow';
 import { loginWithDev, loginWithWechat } from '../../utils/auth';
+import { hasLegalConsent, writeLegalConsent } from '../../utils/legalConsentStorage';
 import { switchTabTo, ROUTES } from '../../utils/route';
 
 export type LoginPromptHeroProps = {
@@ -22,8 +24,17 @@ export function LoginPromptHero({
   onBrowseEvents,
 }: LoginPromptHeroProps) {
   const [loggingIn, setLoggingIn] = useState(false);
+  const [legalAccepted, setLegalAccepted] = useState(() => hasLegalConsent());
 
   const handleLogin = useCallback(async () => {
+    if (!legalAccepted) {
+      void Taro.showToast({
+        title: '请先阅读并同意用户协议与隐私政策',
+        icon: 'none',
+      });
+      return;
+    }
+
     if (!isLiveApi()) {
       void Taro.showToast({ title: '请配置 API 地址', icon: 'none' });
       return;
@@ -42,6 +53,7 @@ export function LoginPromptHero({
         });
         return;
       }
+      writeLegalConsent();
       onLoggedIn?.();
       void Taro.showToast({ title: '登录成功', icon: 'success' });
     } catch (error) {
@@ -53,7 +65,7 @@ export function LoginPromptHero({
     } finally {
       setLoggingIn(false);
     }
-  }, [onLoggedIn]);
+  }, [legalAccepted, onLoggedIn]);
 
   const browseEvents = useCallback(() => {
     if (onBrowseEvents) {
@@ -92,10 +104,12 @@ export function LoginPromptHero({
         </View>
       </View>
 
+      <LegalConsentRow checked={legalAccepted} onCheckedChange={setLegalAccepted} />
+
       <Button
         className="s-login-prompt-hero__login-btn"
         loading={loggingIn}
-        disabled={loggingIn}
+        disabled={loggingIn || !legalAccepted}
         onClick={handleLogin}
       >
         <Text className="s-login-prompt-hero__login-btn-text">

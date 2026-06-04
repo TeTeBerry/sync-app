@@ -35,6 +35,8 @@ export interface TempChatSession {
   destroysAt?: string;
   /** Post owner viewing the thread (default true for local-only mock). */
   isOwner?: boolean;
+  canSendMessage?: boolean;
+  messagingHint?: string;
 }
 
 export type OpenTempChatSessionInput = {

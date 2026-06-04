@@ -17,6 +17,7 @@ import { Text, View } from '@tarojs/components';
 export type ProfileGuestSectionProps = {
   onLoggedIn: () => void;
   onOpenHelp: () => void;
+  onOpenLegal: () => void;
 };
 
 type LockedFeature = {
@@ -56,6 +57,7 @@ const LOCKED_FEATURES: LockedFeature[] = [
 const ProfileGuestSection: React.FC<ProfileGuestSectionProps> = ({
   onLoggedIn,
   onOpenHelp,
+  onOpenLegal,
 }) => {
   const openLockedRoute = useCallback((feature: LockedFeature['feature']) => {
     const routes = {
@@ -93,6 +95,17 @@ const ProfileGuestSection: React.FC<ProfileGuestSectionProps> = ({
       </View>
 
       <View className="s-profile-guest__settings-card">
+        <View
+          className="s-profile-guest__settings-row"
+          hoverClass="s-profile-guest__settings-row--pressed"
+          onClick={onOpenLegal}
+        >
+          <View className="s-profile-guest__settings-icon">
+            <FileText size={18} />
+          </View>
+          <Text className="s-profile-guest__settings-label">法律与协议</Text>
+          <ChevronRight size={18} color="#636366" />
+        </View>
         <View
           className="s-profile-guest__settings-row"
           hoverClass="s-profile-guest__settings-row--pressed"

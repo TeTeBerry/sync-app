@@ -12,11 +12,13 @@ import {
 } from '../../../utils/teamApplyBuddyPreview';
 import { userHasRecruitingBuddyPost } from '../../../utils/userRecruitingPost';
 import { promptOpenTeamChatAfterApply } from '../../../utils/promptTeamChatAfterApply';
+import type { ConfirmDialogOptions } from '../../../hooks/useConfirmDialog';
 import type { LightApplyDraft } from '../../../utils/lightApplyDraft';
 import type { EventDetailPost } from '../../../types/post';
 import type { TeamApplySheetMode } from '../../../components/post/TeamApplySheet';
 
 export type UseEventDetailTeamApplyParams = {
+  confirm: (options: ConfirmDialogOptions) => Promise<boolean>;
   eventId: number;
   feedPosts: EventDetailPost[];
   appliedPostIds: Set<string>;
@@ -30,6 +32,7 @@ export type UseEventDetailTeamApplyParams = {
 };
 
 export function useEventDetailTeamApply({
+  confirm,
   eventId,
   feedPosts,
   appliedPostIds,
@@ -132,12 +135,13 @@ export function useEventDetailTeamApply({
 
         if (usedLightApply) {
           await promptOpenTeamChatAfterApply({
+            confirm,
             teamChat: result.teamChat,
             lightApply: true,
             onCompleteBuddyPost: onRequestCompleteBuddyPost,
           });
         } else if (result.teamChat) {
-          await promptOpenTeamChatAfterApply(result.teamChat);
+          await promptOpenTeamChatAfterApply({ confirm, teamChat: result.teamChat });
         } else {
           const toastTitle = result.alreadyApplied ? '已申请' : '申请成功';
           void Taro.showToast({ title: toastTitle, icon: 'success' });
@@ -149,6 +153,7 @@ export function useEventDetailTeamApply({
       }
     },
     [
+      confirm,
       eventId,
       onApplyFlowSettled,
       onRequestCompleteBuddyPost,

@@ -41,11 +41,7 @@ export const AiAssistantPostCard: FC<AiAssistantPostCardProps> = ({
     >
       <View className="s-ai-assistant-post-card__header">
         {post.authorAvatar ? (
-          <Image
-            className="s-ai-assistant-post-card__avatar"
-            src={post.authorAvatar}
-            decoding="async"
-          />
+          <Image className="s-ai-assistant-post-card__avatar" src={post.authorAvatar} />
         ) : (
           <Text className="s-ai-assistant-post-card__avatar s-ai-assistant-post-card__avatar--fallback">
             {post.authorName.slice(0, 1)}

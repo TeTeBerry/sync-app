@@ -1,17 +1,35 @@
+import { AI_TRAVEL_GUIDE_DISCLAIMER } from '../../../constants/aiDisclosure';
 import type { TravelGuidePlan } from '../../../types/travelGuide';
 import { createOffscreenCanvas } from '../../../utils/offscreenCanvas';
+import { TRAVEL_GUIDE_WALLPAPER_THEME as T } from './travelGuideWallpaperTheme';
 
 const W = 750;
-const PAD = 40;
-const LINE = 36;
-const SECTION_GAP = 28;
-const HEADER_BLOCK = 72 + 40 * 2;
-const META_LINE = 34;
-const SECTION_TITLE = 44;
-const FOOTER_BLOCK = 56;
+const PAD = 48;
+const BODY_FONT = '22px sans-serif';
+const BODY_LINE = 44;
+const BODY_INDENT = 18;
+const SECTION_GAP = 48;
+const SECTION_TITLE = 56;
+const META_FONT = '24px sans-serif';
+const META_LINE = 42;
+const TITLE_FONT = 'bold 32px sans-serif';
+const TITLE_LINE = 46;
+const HEADER_FONT = 'bold 40px sans-serif';
+const HEADER_BLOCK = 52;
+const FOOTER_BLOCK = 100;
+const ITEM_GAP = 14;
+const MAX_BULLET_CHARS = 88;
+
 /** 微信单张 canvas 建议不超过 4096，留余量 */
 export const TRAVEL_GUIDE_MAX_CANVAS_HEIGHT = 4096;
 const MAX_CANVAS_HEIGHT = TRAVEL_GUIDE_MAX_CANVAS_HEIGHT;
+
+const SECTION_LIMITS = {
+  transportLines: 3,
+  hotels: 3,
+  nightlifeSpots: 4,
+  tips: 4,
+} as const;
 
 type GuideCanvas = {
   width: number;
@@ -39,6 +57,12 @@ function wrapText(
   return lines.length ? lines : [''];
 }
 
+function truncateWallpaperText(text: string, max = MAX_BULLET_CHARS): string {
+  const trimmed = text.trim();
+  if (trimmed.length <= max) return trimmed;
+  return `${trimmed.slice(0, max - 1)}…`;
+}
+
 function formatGuideLine(line: unknown): string {
   if (typeof line === 'string') return line.trim();
   if (line && typeof line === 'object') {
@@ -60,13 +84,14 @@ function buildWallpaperSections(
       lines: plan.transport.lines
         .map((l) => formatGuideLine(l))
         .filter(Boolean)
-        .map((l) => `· ${l}`),
+        .slice(0, SECTION_LIMITS.transportLines)
+        .map((l) => truncateWallpaperText(`· ${l}`)),
     },
     {
       title: plan.accommodation.title,
-      lines: plan.accommodation.hotels.flatMap((h) => {
+      lines: plan.accommodation.hotels.slice(0, SECTION_LIMITS.hotels).flatMap((h) => {
         const hint = h.bookingHint ? `（${h.bookingHint}）` : '';
-        return [`· ${h.name}：${h.note}${hint}`];
+        return [`· ${h.name}`, `  ${truncateWallpaperText(`${h.note}${hint}`, 72)}`];
       }),
     },
   ];
@@ -77,13 +102,16 @@ function buildWallpaperSections(
       lines: plan.parking.lines
         .map((l) => formatGuideLine(l))
         .filter(Boolean)
-        .map((l) => `· ${l}`),
+        .slice(0, 2)
+        .map((l) => truncateWallpaperText(`· ${l}`)),
     });
   }
 
   sections.push({
     title: plan.nightlife.title,
-    lines: plan.nightlife.spots.map((s) => `· ${s.name}：${s.note}`),
+    lines: plan.nightlife.spots
+      .slice(0, SECTION_LIMITS.nightlifeSpots)
+      .flatMap((s) => [`· ${s.name}`, `  ${truncateWallpaperText(s.note, 72)}`]),
   });
 
   sections.push({
@@ -91,10 +119,85 @@ function buildWallpaperSections(
     lines: plan.tips.items
       .map((t) => formatGuideLine(t))
       .filter(Boolean)
-      .map((t) => `· ${t}`),
+      .slice(0, SECTION_LIMITS.tips)
+      .map((t) => truncateWallpaperText(`· ${t}`)),
   });
 
   return sections;
+}
+
+function measureWrappedLines(
+  ctx: CanvasRenderingContext2D,
+  lines: string[],
+  maxText: number,
+  lineHeight: number,
+  indent = 0,
+): number {
+  let h = 0;
+  for (const raw of lines) {
+    const xIndent = raw.startsWith('  ') ? BODY_INDENT : 0;
+    ctx.font = BODY_FONT;
+    for (const line of wrapText(ctx, raw.trim(), maxText - xIndent)) {
+      h += lineHeight;
+    }
+    h += ITEM_GAP;
+  }
+  return h;
+}
+
+function layoutTravelGuideContent(
+  ctx: CanvasRenderingContext2D,
+  plan: TravelGuidePlan,
+): number {
+  const maxText = W - PAD * 2;
+  let y = PAD;
+
+  y += HEADER_BLOCK + 24;
+
+  ctx.font = TITLE_FONT;
+  y += wrapText(ctx, plan.activityName, maxText).length * TITLE_LINE;
+
+  ctx.font = META_FONT;
+  const meta = [
+    `📅 ${plan.eventDates}`,
+    `📍 ${truncateWallpaperText(plan.venue, 40)}`,
+    `🚩 ${plan.departure}出发 · ${plan.headcount}人 · 住${plan.accommodationNights}晚`,
+    `💰 ${plan.budgetLabel} · ${plan.selfDrive ? '自驾' : '公共交通'}`,
+  ];
+  y += meta.length * META_LINE;
+  y += SECTION_GAP;
+
+  for (const section of buildWallpaperSections(plan)) {
+    y += SECTION_TITLE;
+    ctx.font = BODY_FONT;
+    y += measureWrappedLines(ctx, section.lines, maxText, BODY_LINE);
+    y += SECTION_GAP - ITEM_GAP;
+  }
+
+  y += FOOTER_BLOCK;
+  return Math.min(MAX_CANVAS_HEIGHT, Math.max(1200, y + PAD));
+}
+
+function conservativeHeightEstimate(plan: TravelGuidePlan): number {
+  const sections = buildWallpaperSections(plan);
+  let lines = 0;
+  for (const s of sections) {
+    lines += s.lines.length;
+  }
+  return Math.min(
+    MAX_CANVAS_HEIGHT,
+    Math.max(
+      1400,
+      PAD * 2 +
+        HEADER_BLOCK +
+        80 +
+        4 * META_LINE +
+        sections.length * (SECTION_TITLE + SECTION_GAP) +
+        lines * BODY_LINE +
+        lines * ITEM_GAP +
+        FOOTER_BLOCK,
+    ),
+  );
 }
 
 /**
@@ -109,62 +212,26 @@ export function measureTravelGuideWallpaperHeight(plan: TravelGuidePlan): number
   return layoutTravelGuideContent(ctx, plan);
 }
 
-function conservativeHeightEstimate(plan: TravelGuidePlan): number {
-  const sections = buildWallpaperSections(plan);
-  let chars = plan.activityName.length + 200;
-  for (const s of sections) {
-    for (const line of s.lines) {
-      chars += line.length;
-    }
-  }
-  const wrappedLines = Math.ceil(chars / 22);
-  return Math.min(
-    MAX_CANVAS_HEIGHT,
-    Math.max(
-      1200,
-      PAD * 2 +
-        HEADER_BLOCK +
-        4 * META_LINE +
-        wrappedLines * LINE +
-        sections.length * (SECTION_TITLE + SECTION_GAP) +
-        FOOTER_BLOCK,
-    ),
-  );
-}
-
-function layoutTravelGuideContent(
+function drawBodyLines(
   ctx: CanvasRenderingContext2D,
-  plan: TravelGuidePlan,
+  bodyLines: string[],
+  maxText: number,
+  yStart: number,
 ): number {
-  const maxText = W - PAD * 2;
-  let y = PAD + 8;
+  let y = yStart;
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+  ctx.font = BODY_FONT;
 
-  y += 72;
-
-  ctx.font = 'bold 32px sans-serif';
-  y += wrapText(ctx, plan.activityName, maxText).length * 40;
-
-  ctx.font = '24px sans-serif';
-  const meta = [
-    `📅 ${plan.eventDates}`,
-    `📍 ${plan.venue}`,
-    `🚩 ${plan.departure}出发 · ${plan.headcount}人 · 住${plan.accommodationNights}晚`,
-    `💰 ${plan.budgetLabel} · ${plan.selfDrive ? '自驾' : '公共交通'}`,
-  ];
-  y += meta.length * META_LINE;
-  y += SECTION_GAP;
-
-  ctx.font = '24px sans-serif';
-  for (const section of buildWallpaperSections(plan)) {
-    y += SECTION_TITLE;
-    for (const raw of section.lines) {
-      y += wrapText(ctx, raw, maxText).length * LINE;
+  for (const raw of bodyLines) {
+    const indent = raw.startsWith('  ') ? BODY_INDENT : 0;
+    const text = raw.trim();
+    for (const line of wrapText(ctx, text, maxText - indent)) {
+      ctx.fillText(line, PAD + indent, y + 20);
+      y += BODY_LINE;
     }
-    y += SECTION_GAP;
+    y += ITEM_GAP;
   }
-
-  y += FOOTER_BLOCK;
-  return Math.min(MAX_CANVAS_HEIGHT, Math.max(1200, y + PAD));
+  return y;
 }
 
 export function drawTravelGuideWallpaper(
@@ -180,65 +247,62 @@ export function drawTravelGuideWallpaper(
   const maxText = W - PAD * 2;
 
   const bg = ctx.createLinearGradient(0, 0, 0, height);
-  bg.addColorStop(0, '#1a1033');
-  bg.addColorStop(0.45, '#12082a');
-  bg.addColorStop(1, '#0a0618');
+  bg.addColorStop(0, T.bgTop);
+  bg.addColorStop(0.42, T.bgMid);
+  bg.addColorStop(1, T.bgBottom);
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, W, height);
 
-  let y = PAD + 8;
+  let y = PAD;
 
-  ctx.fillStyle = '#f472b6';
-  ctx.font = 'bold 40px sans-serif';
+  ctx.fillStyle = T.headerTitle;
+  ctx.font = HEADER_FONT;
   ctx.fillText('AI 出行攻略', PAD, y + 40);
-  y += 72;
+  y += HEADER_BLOCK + 24;
 
-  ctx.fillStyle = '#ffffff';
-  ctx.font = 'bold 32px sans-serif';
+  ctx.fillStyle = T.text;
+  ctx.font = TITLE_FONT;
   for (const line of wrapText(ctx, plan.activityName, maxText)) {
-    ctx.fillText(line, PAD, y + 28);
-    y += 40;
+    ctx.fillText(line, PAD, y + 30);
+    y += TITLE_LINE;
   }
+  y += 8;
 
-  ctx.fillStyle = 'rgba(255,255,255,0.75)';
-  ctx.font = '24px sans-serif';
+  ctx.fillStyle = T.textMuted;
+  ctx.font = META_FONT;
   const driveLabel = plan.selfDrive ? '自驾' : '公共交通';
   const meta = [
     `📅 ${plan.eventDates}`,
-    `📍 ${plan.venue}`,
+    `📍 ${truncateWallpaperText(plan.venue, 40)}`,
     `🚩 ${plan.departure}出发 · ${plan.headcount}人 · 住${plan.accommodationNights}晚`,
     `💰 ${plan.budgetLabel} · ${driveLabel}`,
   ];
   for (const line of meta) {
-    ctx.fillText(line, PAD, y + 24);
+    ctx.fillText(line, PAD, y + 26);
     y += META_LINE;
   }
   y += SECTION_GAP;
 
-  const drawSection = (title: string, bodyLines: string[]) => {
-    ctx.fillStyle = '#c084fc';
-    ctx.font = 'bold 28px sans-serif';
-    ctx.fillText(title, PAD, y + 26);
-    y += SECTION_TITLE;
-    ctx.fillStyle = 'rgba(255,255,255,0.9)';
-    ctx.font = '24px sans-serif';
-    for (const raw of bodyLines) {
-      for (const line of wrapText(ctx, raw, maxText)) {
-        ctx.fillText(line, PAD + 8, y + 22);
-        y += LINE;
-      }
-    }
-    y += SECTION_GAP;
-  };
-
   for (const section of buildWallpaperSections(plan)) {
-    drawSection(section.title, section.lines);
+    ctx.fillStyle = T.sectionTitle;
+    ctx.font = 'bold 26px sans-serif';
+    ctx.fillText(section.title, PAD, y + 24);
+    y += SECTION_TITLE;
+    y = drawBodyLines(ctx, section.lines, maxText, y);
+    y += SECTION_GAP - ITEM_GAP;
   }
 
-  y += 12;
-  ctx.fillStyle = 'rgba(255,255,255,0.45)';
+  y += 16;
+  ctx.fillStyle = T.textDim;
   ctx.font = '20px sans-serif';
   ctx.textAlign = 'center';
+  for (const line of wrapText(ctx, AI_TRAVEL_GUIDE_DISCLAIMER, maxText)) {
+    ctx.fillText(line, W / 2, y + 20);
+    y += 32;
+  }
+  y += 12;
+  ctx.fillStyle = T.footerBrand;
+  ctx.font = 'bold 20px sans-serif';
   ctx.fillText('Sync · AI 攻略', W / 2, y + 20);
   ctx.textAlign = 'left';
 }

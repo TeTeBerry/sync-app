@@ -31,15 +31,15 @@ describe('travelGuideDepartureSuggestions', () => {
     ]);
   });
 
-  it('uses full address for POI display and submit', () => {
+  it('uses POI title for display and submit', () => {
     const item = {
-      label: '周秀北路',
+      label: '上海尘世货物运输代理有限公司',
       kind: 'place' as const,
       city: '上海市',
-      address: '上海市浦东新区周秀北路',
+      address: '上海市闵行区航南路568号',
     };
-    expect(departureDisplayValue(item)).toBe('上海市浦东新区周秀北路');
-    expect(departureValueForSubmit(item)).toBe('上海市浦东新区周秀北路');
+    expect(departureDisplayValue(item)).toBe('上海尘世货物运输代理有限公司');
+    expect(departureValueForSubmit(item)).toBe('上海尘世货物运输代理有限公司');
   });
 
   it('normalizes city-only manual input', () => {

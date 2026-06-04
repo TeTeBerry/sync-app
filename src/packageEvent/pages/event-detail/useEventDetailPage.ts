@@ -184,6 +184,7 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
   }, [buddyPost]);
 
   const teamApply = useEventDetailTeamApply({
+    confirm,
     eventId,
     feedPosts: postsQuery.items,
     appliedPostIds: posts.appliedPostIds,

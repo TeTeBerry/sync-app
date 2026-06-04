@@ -31,4 +31,6 @@ export interface TeamChatSession {
   applicationStatus: PostApplicationStatus;
   postRecruitmentStatus: TeamChatPostRecruitmentStatus;
   isOwner: boolean;
+  canSendMessage: boolean;
+  messagingHint?: string;
 }

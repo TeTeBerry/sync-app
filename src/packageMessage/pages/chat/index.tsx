@@ -1,11 +1,11 @@
 import './chat.scss';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Taro, { useDidShow, useRouter } from '@tarojs/taro';
 import { Send } from '../../../components/icons';
 import { ChatBuddyCard } from '../../../components/message/ChatBuddyCard';
 import { TempChatRetentionBanner } from '../../../components/message/TempChatRetentionBanner';
-import { BottomNavSlot } from '../../../components/navigation/BottomNav';
 import PageNavigation from '../../../components/navigation/PageNavigation';
+import { useStackPageMainHeight } from '../../../hooks/useTabPageMainHeight';
 import { PLACEHOLDER_AVATAR } from '../../../constants/remoteImages';
 import { useConfirmDialog } from '../../../hooks/useConfirmDialog';
 import { useResolvedProfile } from '../../../hooks/useResolvedProfile';
@@ -30,8 +30,16 @@ import { acceptTeamApplicationInChat } from '../../../utils/acceptTeamApplicatio
 import { sanitizeRemoteImageUrl } from '../../../utils/imageUrl';
 import { resolveRequestUserId } from '../../../api/requestContext';
 import { ROUTES } from '../../../utils/route';
+import { ApiError } from '../../../utils/apiClient';
+import {
+  applicantMessagingHint,
+  canApplicantSendTeamChatMessage,
+} from '../../../utils/teamChatApplicantMessaging';
 import { Button } from '../../../components/ui';
 import { Input, ScrollView, Text, View } from '@tarojs/components';
+
+/** Footer chrome subtracted from stack scroll height on WeChat. */
+const TEMP_CHAT_COMPOSER_PX = 76;
 
 const TempChatPage: React.FC = () => {
   useEndRouteTransitionOnShow();
@@ -41,7 +49,7 @@ const TempChatPage: React.FC = () => {
   const postsQuery = useProfilePostsQuery();
   const myAvatar =
     sanitizeRemoteImageUrl(profileUser.avatar?.trim()) || PLACEHOLDER_AVATAR;
-  const keyboardInset = useKeyboardInset();
+  const keyboardInset = useKeyboardInset({ subtractTabBar: false });
   const [draft, setDraft] = useState('');
   const [accepting, setAccepting] = useState(false);
   const [sending, setSending] = useState(false);
@@ -51,7 +59,6 @@ const TempChatPage: React.FC = () => {
     useResolvedTempChatSession(sessionId);
   const {
     messages: sourceMessages,
-    messagesQuery,
     isLoading: messagesLoading,
     refetchMessages,
   } = useResolvedTempChatMessages(sessionId, parsed);
@@ -67,6 +74,7 @@ const TempChatPage: React.FC = () => {
     pollEnabled,
     hasCachedMessages: displayMessages.length > 0,
     refetchMessages,
+    refetchSession: sessionsQuery.refetch,
   });
 
   const markedReadKeyRef = useRef<string | null>(null);
@@ -84,7 +92,33 @@ const TempChatPage: React.FC = () => {
     void markTeamChatReadAndInvalidate(parsed.postId, parsed.applicantUserId);
   });
 
-  const canSend = draft.trim().length > 0;
+  const canComposeMessages = useMemo(() => {
+    if (!session) return false;
+    if (session.isOwner) return true;
+    return canApplicantSendTeamChatMessage({
+      messages: displayMessages,
+      canSendMessage: session.canSendMessage,
+    });
+  }, [displayMessages, session]);
+
+  const messagingHintText = useMemo(
+    () =>
+      session
+        ? applicantMessagingHint({
+            isOwner: session.isOwner,
+            canSendMessage: session.canSendMessage,
+            messagingHint: session.messagingHint,
+            messages: displayMessages,
+          })
+        : undefined,
+    [displayMessages, session],
+  );
+
+  const scrollHeight = useStackPageMainHeight({
+    subtractPx: canComposeMessages ? TEMP_CHAT_COMPOSER_PX : 0,
+  });
+
+  const canSend = draft.trim().length > 0 && canComposeMessages;
   const showAcceptTeam =
     session != null &&
     session.isOwner !== false &&
@@ -92,7 +126,7 @@ const TempChatPage: React.FC = () => {
     session.postRecruitmentStatus === '招募中';
 
   const handleSend = useCallback(async () => {
-    if (!sessionId || !canSend || sending || !parsed) return;
+    if (!sessionId || !canSend || sending || !parsed || !canComposeMessages) return;
     const body = draft.trim();
     if (!body) return;
 
@@ -105,13 +139,28 @@ const TempChatPage: React.FC = () => {
       );
       setDraft('');
       void refetchMessages({ background: true });
+      void sessionsQuery.refetch({ background: true });
       markStickToBottom();
-    } catch {
-      void Taro.showToast({ title: '发送失败', icon: 'none' });
+    } catch (error) {
+      const title =
+        error instanceof ApiError && error.message.trim()
+          ? error.message.trim()
+          : '发送失败';
+      void Taro.showToast({ title, icon: 'none' });
     } finally {
       setSending(false);
     }
-  }, [canSend, draft, parsed, markStickToBottom, refetchMessages, sending, sessionId]);
+  }, [
+    canComposeMessages,
+    canSend,
+    draft,
+    parsed,
+    markStickToBottom,
+    refetchMessages,
+    sending,
+    sessionId,
+    sessionsQuery,
+  ]);
 
   const handleAcceptTeam = useCallback(async () => {
     if (!session || accepting) return;
@@ -147,7 +196,7 @@ const TempChatPage: React.FC = () => {
   const composerStyle =
     keyboardInset > 0
       ? {
-          paddingBottom: `calc(10px + env(safe-area-inset-bottom, 0px) + ${keyboardInset}px)`,
+          paddingBottom: `calc(24px + env(safe-area-inset-bottom, 0px) + ${keyboardInset}px)`,
         }
       : undefined;
 
@@ -168,14 +217,14 @@ const TempChatPage: React.FC = () => {
   const showInitialLoading =
     (isLoading || messagesLoading) && displayMessages.length === 0;
 
+  const scrollStyle =
+    scrollHeight != null ? { height: `${scrollHeight}px` } : undefined;
+
   if (showInitialLoading) {
     return (
-      <View data-cmp="TempChatPage" className="s-page-with-tabbar">
-        <View className="s-page-with-tabbar__main s-temp-chat">
-          <PageNavigation title="私信" fallback={ROUTES.MESSAGES} tone="surface" />
-          <Text className="s-temp-chat__missing">加载中…</Text>
-        </View>
-        <BottomNavSlot />
+      <View data-cmp="TempChatPage" className="s-temp-chat-page">
+        <PageNavigation title="私信" fallback={ROUTES.MESSAGES} tone="surface" />
+        <Text className="s-temp-chat__missing">加载中…</Text>
       </View>
     );
   }
@@ -190,90 +239,89 @@ const TempChatPage: React.FC = () => {
         : '会话不存在或已失效';
 
     return (
-      <View data-cmp="TempChatPage" className="s-page-with-tabbar">
-        <View className="s-page-with-tabbar__main s-temp-chat">
-          <PageNavigation title="私信" fallback={ROUTES.MESSAGES} tone="surface" />
-          <Text className="s-temp-chat__missing">{missingHint}</Text>
-        </View>
-        <BottomNavSlot />
+      <View data-cmp="TempChatPage" className="s-temp-chat-page">
+        <PageNavigation title="私信" fallback={ROUTES.MESSAGES} tone="surface" />
+        <Text className="s-temp-chat__missing">{missingHint}</Text>
       </View>
     );
   }
 
   return (
-    <View data-cmp="TempChatPage" className="s-page-with-tabbar">
-      <View className="s-page-with-tabbar__main s-temp-chat">
-        <PageNavigation
-          title={session.peerName}
-          fallback={ROUTES.MESSAGES}
-          tone="surface"
-          trailing={acceptTrailing}
-        />
+    <View data-cmp="TempChatPage" className="s-temp-chat-page">
+      <PageNavigation
+        title={session.peerName}
+        fallback={ROUTES.MESSAGES}
+        tone="surface"
+        trailing={acceptTrailing}
+      />
 
-        <View className="s-temp-chat__main">
-          <ScrollView
-            scrollY
-            showScrollbar={false}
-            scrollIntoView={scrollIntoView}
-            scrollWithAnimation={false}
-            className="s-temp-chat__scroll s-scrollbar-none"
-            onScroll={(event) => onScroll(event.detail)}
-          >
-            <View className="s-temp-chat__inner">
-              <TempChatRetentionBanner session={session} />
-              <ChatBuddyCard
-                peerName={session.peerName}
-                peerAvatar={session.peerAvatar}
-                postTitle={session.postTitle}
-                buddyInfo={session.buddyInfo}
-              />
-              {displayMessages.map((message) => {
-                const isPeer = message.role === 'peer';
-                return (
+      <View className="s-temp-chat__main">
+        <ScrollView
+          scrollY
+          showScrollbar={false}
+          scrollIntoView={scrollIntoView}
+          scrollWithAnimation={false}
+          className="s-temp-chat__scroll s-scrollbar-none"
+          style={scrollStyle}
+          onScroll={(event) => onScroll(event.detail)}
+        >
+          <View className="s-temp-chat__inner">
+            <TempChatRetentionBanner session={session} />
+            <ChatBuddyCard
+              peerName={session.peerName}
+              peerAvatar={session.peerAvatar}
+              postTitle={session.postTitle}
+              buddyInfo={session.buddyInfo}
+            />
+            {displayMessages.map((message) => {
+              const isPeer = message.role === 'peer';
+              return (
+                <View
+                  key={message.id}
+                  id={`msg-${message.id}`}
+                  className={`s-temp-chat__bubble-row${
+                    isPeer ? '' : ' s-temp-chat__bubble-row--me'
+                  }`}
+                >
+                  {isPeer ? (
+                    <View
+                      className="s-temp-chat__bubble-avatar"
+                      style={
+                        session.peerAvatar
+                          ? { backgroundImage: `url(${session.peerAvatar})` }
+                          : undefined
+                      }
+                      aria-hidden
+                    />
+                  ) : null}
                   <View
-                    key={message.id}
-                    id={`msg-${message.id}`}
-                    className={`s-temp-chat__bubble-row${
-                      isPeer ? '' : ' s-temp-chat__bubble-row--me'
+                    className={`s-temp-chat__bubble${
+                      isPeer ? ' s-temp-chat__bubble--peer' : ' s-temp-chat__bubble--me'
                     }`}
                   >
-                    {isPeer ? (
-                      <View
-                        className="s-temp-chat__bubble-avatar"
-                        style={
-                          session.peerAvatar
-                            ? { backgroundImage: `url(${session.peerAvatar})` }
-                            : undefined
-                        }
-                        aria-hidden
-                      />
-                    ) : null}
-                    <View
-                      className={`s-temp-chat__bubble${
-                        isPeer
-                          ? ' s-temp-chat__bubble--peer'
-                          : ' s-temp-chat__bubble--me'
-                      }`}
-                    >
-                      <Text className="s-temp-chat__bubble-text">{message.body}</Text>
-                    </View>
-                    {!isPeer ? (
-                      <View
-                        className="s-temp-chat__bubble-avatar"
-                        style={{ backgroundImage: `url(${myAvatar})` }}
-                        aria-hidden
-                      />
-                    ) : null}
+                    <Text className="s-temp-chat__bubble-text">{message.body}</Text>
                   </View>
-                );
-              })}
-              <View
-                id={TEMP_CHAT_SCROLL_BOTTOM_ID}
-                className="s-temp-chat__scroll-bottom"
-              />
-            </View>
-          </ScrollView>
+                  {!isPeer ? (
+                    <View
+                      className="s-temp-chat__bubble-avatar"
+                      style={{ backgroundImage: `url(${myAvatar})` }}
+                      aria-hidden
+                    />
+                  ) : null}
+                </View>
+              );
+            })}
+            {!canComposeMessages && messagingHintText ? (
+              <Text className="s-temp-chat__messaging-hint">{messagingHintText}</Text>
+            ) : null}
+            <View
+              id={TEMP_CHAT_SCROLL_BOTTOM_ID}
+              className="s-temp-chat__scroll-bottom"
+            />
+          </View>
+        </ScrollView>
 
+        {canComposeMessages ? (
           <View className="s-temp-chat__composer" style={composerStyle}>
             <View className="s-temp-chat__input-wrap">
               <Input
@@ -297,11 +345,10 @@ const TempChatPage: React.FC = () => {
               <Send size={18} color="#fff" aria-hidden />
             </Button>
           </View>
-        </View>
+        ) : null}
       </View>
 
       {confirmDialog}
-      <BottomNavSlot />
     </View>
   );
 };

@@ -36,23 +36,12 @@ export function mapPlaceSuggestionsToDepartureItems(
   return rows;
 }
 
-/** 输入框回显：POI 优先完整 address，城市用 label */
+/** 输入框回显：与下拉主标题一致（POI 名称 / 城市名） */
 export function departureDisplayValue(item: DepartureSuggestionItem): string {
-  const label = item.label.trim();
-  if (item.kind === 'city') {
-    return label;
-  }
-  const address = item.address?.trim();
-  if (!address) return label;
-  if (address === label) return label;
-  if (address.includes(label)) return address;
-  if (label.includes(address)) return label;
-  return address.length >= label.length ? address : label;
+  return item.label.trim();
 }
 
-/**
- * 提交给后端的 departure 文本（与回显一致，便于 geocode）。
- */
+/** 提交给后端的 departure 文本（与回显一致） */
 export function departureValueForSubmit(item: DepartureSuggestionItem): string {
   return departureDisplayValue(item);
 }

@@ -3,7 +3,7 @@ import { useDidHide, useDidShow } from '@tarojs/taro';
 import { isApiEnabled } from '../constants/api';
 import { TEAM_CHAT_POLL_INTERVAL_MS } from '../constants/queryCache';
 
-type RefetchMessages = (options?: { background?: boolean }) => void | Promise<unknown>;
+type RefetchFn = (options?: { background?: boolean }) => void | Promise<unknown>;
 
 /**
  * Poll team chat messages while the chat page is visible.
@@ -14,9 +14,16 @@ export function useTeamChatPoll(options: {
   pollEnabled: boolean;
   /** When true, refresh uses background fetch (no full-page loading). */
   hasCachedMessages?: boolean;
-  refetchMessages: RefetchMessages;
+  refetchMessages: RefetchFn;
+  /** Optional session refetch (e.g. `canSendMessage` after owner replies). */
+  refetchSession?: RefetchFn;
 }) {
-  const { pollEnabled, hasCachedMessages = false, refetchMessages } = options;
+  const {
+    pollEnabled,
+    hasCachedMessages = false,
+    refetchMessages,
+    refetchSession,
+  } = options;
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const pageVisibleRef = useRef(false);
   const apiEnabled = isApiEnabled();
@@ -34,13 +41,15 @@ export function useTeamChatPoll(options: {
 
     intervalRef.current = setInterval(() => {
       void refetchMessages({ background: true });
+      void refetchSession?.({ background: true });
     }, TEAM_CHAT_POLL_INTERVAL_MS);
-  }, [apiEnabled, clearPoll, pollEnabled, refetchMessages]);
+  }, [apiEnabled, clearPoll, pollEnabled, refetchMessages, refetchSession]);
 
   const refreshNow = useCallback(() => {
     if (!apiEnabled || !pollEnabled) return;
     void refetchMessages({ background: hasCachedMessages });
-  }, [apiEnabled, hasCachedMessages, pollEnabled, refetchMessages]);
+    void refetchSession?.({ background: true });
+  }, [apiEnabled, hasCachedMessages, pollEnabled, refetchMessages, refetchSession]);
 
   useDidShow(() => {
     pageVisibleRef.current = true;
