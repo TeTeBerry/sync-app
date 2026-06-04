@@ -120,7 +120,7 @@ export const profilePosts: ProfilePostItem[] = [
         userId: 'demo-ryan',
         name: 'Ryan',
         avatar: 'https://picsum.photos/seed/sync-avatar-ryan/200/200',
-        message: '深圳本地，可以一起拼车进场',
+        message: '深圳本地，可以一起同路进场',
         status: 'pending',
         appliedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
       },

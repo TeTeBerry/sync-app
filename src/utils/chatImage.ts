@@ -1,5 +1,6 @@
 import Taro from '@tarojs/taro';
 import { uploadImageFile } from './uploadImage';
+import { isTrustedUploadImageUrl } from './userUploadImageUrl';
 
 /** 与后端一致：Base64 解码后不超过 10MB */
 export const MAX_IMAGE_BASE64_BYTES = 10 * 1024 * 1024;
@@ -91,13 +92,20 @@ function isRemoteImageRef(ref: string): boolean {
   return /^https?:\/\//i.test(ref.trim());
 }
 
-/** Upload local temp paths; pass through existing server URLs. */
+/** Upload local temp paths; only trust URLs from POST /uploads/images (wx-checked). */
 export async function uploadChatImageRefs(refs: string[]): Promise<string[]> {
   const uploaded: string[] = [];
   for (const ref of refs) {
     if (isRemoteImageRef(ref)) {
-      uploaded.push(ref.trim());
+      const trimmed = ref.trim();
+      if (!isTrustedUploadImageUrl(trimmed)) {
+        throw new Error('图片须先通过上传接口提交');
+      }
+      uploaded.push(trimmed);
       continue;
+    }
+    if (/^data:/i.test(ref.trim())) {
+      throw new Error('图片须先通过上传接口提交');
     }
     uploaded.push(await uploadImageFile(ref));
   }

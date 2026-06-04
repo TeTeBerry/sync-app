@@ -24,7 +24,7 @@ export type AiBuddyPostSubmitPayload = AiBuddyPostFormValues & {
 export const BUDDY_POST_TAG_OPTIONS: Array<{
   id: BuddyPostTagId;
   label: string;
-  /** 正文首段，如「找队友」 */
+  /** 正文首段，如「找组队」 */
   intentPhrase: string;
   hashTag: string;
   contentType: PostContentType;
@@ -32,7 +32,7 @@ export const BUDDY_POST_TAG_OPTIONS: Array<{
   {
     id: 'team',
     label: '组队',
-    intentPhrase: '找队友',
+    intentPhrase: '找组队',
     hashTag: '#组队',
     contentType: 'team',
   },
@@ -45,9 +45,9 @@ export const BUDDY_POST_TAG_OPTIONS: Array<{
   },
   {
     id: 'carpool',
-    label: '拼车',
-    intentPhrase: '找拼车',
-    hashTag: '#拼车',
+    label: '同路',
+    intentPhrase: '找同路伙伴',
+    hashTag: '#同路',
     contentType: 'carpool',
   },
   {

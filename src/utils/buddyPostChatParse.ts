@@ -118,7 +118,7 @@ function buildBuddyOneLiner(
   dateLabel: string,
   city: string,
   headcount: string,
-  intent: '拼房' | '组队' | '拼车',
+  intent: '拼房' | '组队' | '同路',
 ): string {
   return `${dateLabel} ${city} ${headcount} ${intent}`;
 }
@@ -174,7 +174,7 @@ export function buildBuddyPostSuggestedReplies(
     d.bounds && d.bounds.dayEnd !== d.bounds.dayStart
       ? `${d.bounds.month}.${d.bounds.dayEnd}`
       : d.dateShort;
-  const carpool = buildBuddyOneLiner(carpoolDate, d.cityB, '2人', '拼车');
+  const carpool = buildBuddyOneLiner(carpoolDate, d.cityB, '2人', '同路');
 
   return [primary, teamLine, carpool];
 }
@@ -337,7 +337,7 @@ function parseBuddyTags(text: string): BuddyPostTagId[] {
       found.add(opt.id);
     }
   }
-  if (/组队队友|找队友|求组队/.test(text)) found.add('team');
+  if (/组队队友|找组队|求组队/.test(text)) found.add('team');
   if (/住宿同行/.test(text)) found.add('accommodation');
   return [...found];
 }
@@ -370,7 +370,7 @@ export function shouldHandleAsBuddyPostChat(input: {
     hasDate ||
     Boolean(slots.tags?.length) ||
     /[A-Za-z]\s*区/.test(trimmed) ||
-    /拼房|拼车|拼卡|组队/.test(trimmed);
+    /拼房|同路|拼卡|组队/.test(trimmed);
 
   if (!hasBuddySignal) return false;
 

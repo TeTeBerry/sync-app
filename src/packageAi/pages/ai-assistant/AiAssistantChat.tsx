@@ -96,7 +96,7 @@ export function AiAssistantChat({
     if (activityTitle?.trim()) {
       return `👋 已为你锁定「${activityTitle.trim()}」。可先生成出行攻略，生成后点「一键组队」自动预填发帖；也可直接描述需求或点「AI攻略」「组队发帖」。`;
     }
-    return '👋 我是你的 AI 智能助手，帮你发现活动、找队友、规划行程，说出需求，我来搞定。';
+    return '👋 我是你的 AI 智能助手，帮你发现活动、找组队、规划行程，说出需求，我来搞定。';
   }, [activityTitle]);
 
   const handleMatchResults = useCallback(async () => {

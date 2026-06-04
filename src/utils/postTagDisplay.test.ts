@@ -3,7 +3,7 @@ import { resolvePostTagStyleKey } from './postTagDisplay';
 
 describe('resolvePostTagStyleKey', () => {
   it('maps content-type tags', () => {
-    expect(resolvePostTagStyleKey('#拼车')).toBe('carpool');
+    expect(resolvePostTagStyleKey('#同路')).toBe('carpool');
     expect(resolvePostTagStyleKey('#转票')).toBe('ticket');
     expect(resolvePostTagStyleKey('#组队')).toBe('team');
   });

@@ -18,7 +18,7 @@ function buddyPostIntentPhrases(tags: BuddyPostTagId[]): string {
   const phrases = BUDDY_POST_TAG_OPTIONS.filter((opt) => tags.includes(opt.id)).map(
     (opt) => opt.intentPhrase,
   );
-  return phrases.length ? phrases.join('、') : '找队友';
+  return phrases.length ? phrases.join('、') : '找组队';
 }
 
 export function defaultBuddyPostForm(
@@ -38,7 +38,7 @@ export function defaultBuddyPostForm(
   };
 }
 
-/** 帖子正文：找队友，6.13-6.14，上海，2人（多类型则「找队友、找拼房，…」） */
+/** 帖子正文：找组队，6.13-6.14，上海，2人（多类型则「找组队、找拼房，…」） */
 export function buildBuddyPostBody(form: AiBuddyPostFormValues): string {
   const parts = [
     buddyPostIntentPhrases(form.tags),

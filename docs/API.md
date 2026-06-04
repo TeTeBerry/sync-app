@@ -118,8 +118,12 @@ TARO_APP_AI_CHAT_WS_URL=wss://your-api.example.com/api/ai/chat/ws
 ### POST `/api/auth/wechat`（小程序）
 
 ```json
-{ "code": "<wx.login code>" }
+{ "code": "<wx.login code>", "nickName": "可选", "avatarUrl": "可选" }
 ```
+
+登录成功前服务端会调用微信 [`getuserriskrank`](https://developers.weixin.qq.com/miniprogram/dev/server/API/sec-center/safety-control-capability/api_getuserriskrank.html)（`scene=2` UGC，`client_ip` 取自请求 IP）。`risk_rank` 大于配置上限（默认 `WECHAT_USER_RISK_MAX_RANK=2`，即仅允许 0–2）时返回 **403**，文案：「当前账号安全风险较高，暂无法使用本小程序」。已登录用户访问受保护 REST / AI WebSocket 时按 `WECHAT_USER_RISK_RECHECK_HOURS`（默认 24h）复检。
+
+需配置：`WECHAT_USER_RISK_ENABLED=true`、`WECHAT_MINI_APP_ID` / `SECRET`（与内容安全共用）。
 
 响应格式与 `/auth/dev` 相同。
 
@@ -191,7 +195,7 @@ X-Activity-Id: 2          # 可选，活动 legacyId（REST + AI WebSocket upgra
 
 若已登录且 body `userId` 与 JWT `sub` 不一致，服务端返回 `{ "type": "error", "message": "用户身份与登录态不一致" }`。
 
-`image` / `images`：优先使用 `POST /api/uploads/images` 返回的 URL；服务端仍兼容 legacy data URL。
+`image` / `images`：必须使用 `POST /api/uploads/images` 返回的 URL（上传时走微信 `img_sec_check`）；不支持 data URL 或外链。
 
 AI 匹配配额：服务端在 `post_recommendations` 且 `posts.length > 0` 时扣次；客户端收到后仅需刷新 `GET /profile/entitlements`，勿再调用 `POST /profile/entitlements/consume/ai-match`。
 
@@ -244,7 +248,9 @@ AI 匹配配额：服务端在 `post_recommendations` 且 `posts.length > 0` 时
 | GET | `/api/activities/:legacyId` | 活动详情 |
 | GET | `/api/posts/popular?limit=` | 首页热门帖子 |
 | GET | `/api/posts?activityLegacyId=&limit=&cursor=&anchorPostId=` | 活动下组队帖（分页：`{ items, nextCursor?, hasMore }`）；`EventDetailPost` 可选 `authorOnSiteVerified`（作者当日已通过该活动手环认证） |
-| POST | `/api/uploads/images` | multipart 字段 `file`，返回 `{ url }`；已配置 `WECHAT_MINI_APP_*` 时先调用微信 `img_sec_check`（≤1MB） |
+| POST | `/api/uploads/images` | multipart 字段 `file`，返回 `{ url }`；已配置 `WECHAT_MINI_APP_*` 时先调用微信 `img_sec_check`（≤1MB）。**所有 UGC 图片**（AI 聊天、手环、帖子 `images`）须先走此接口 |
+
+**UGC 文本**（发帖/评论/私信/现场资讯备注/AI 用户消息/资料编辑/举报说明等）在落库前会调用微信 `msg_sec_check`（需 `WECHAT_CONTENT_SECURITY_ENABLED=true` 且配置小程序 AppId/Secret）。
 | GET | `/api/posts?userId=&authorName=` | 我的帖子（owner 过滤） |
 | POST | `/api/posts` | 创建组队帖（Query 身份；**前端 UI 不调用**，由 AI 闭环创建） |
 | PATCH | `/api/posts/:id` | 编辑帖子 / 更新 status |

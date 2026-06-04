@@ -4,7 +4,12 @@ const STORAGE_KEY = 'sync_ai_shortcut_tag_usage';
 const DISPLAY_COUNT = 6;
 
 /** 活动详情 / AI 助手快捷标签（展示与提交文案一致） */
-export const AI_SHORTCUT_TAG_POOL = ['找队友', '找拼房', '找拼车', '找拼卡'] as const;
+export const AI_SHORTCUT_TAG_POOL = [
+  '找组队',
+  '找拼房',
+  '找同路伙伴',
+  '找拼卡',
+] as const;
 
 export type AiShortcutTag = (typeof AI_SHORTCUT_TAG_POOL)[number];
 
@@ -12,17 +17,17 @@ type UsageMap = Record<string, number>;
 
 /** 旧标签 / 别名 → 标准快捷标签 */
 const LEGACY_TAG_ALIASES: Record<string, AiShortcutTag> = {
-  组队队友: '找队友',
+  组队队友: '找组队',
   住宿同行: '找拼房',
   拼房同行: '找拼房',
-  拼车同行: '找拼车',
+  同路同行: '找同路伙伴',
   拼卡: '找拼卡',
 };
 
 /** 展示文案别名 → 标准快捷标签 */
 export const AI_SHORTCUT_TAG_ALIASES: Record<string, AiShortcutTag> = {
-  帮我dd: '找队友',
-  拼车: '找拼车',
+  帮我dd: '找组队',
+  同路: '找同路伙伴',
 };
 
 export function normalizeAiShortcutTag(tag: string): string {

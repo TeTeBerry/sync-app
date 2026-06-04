@@ -17,7 +17,7 @@ const recruitingPost: EventDetailPost = {
   name: '当前用户',
   location: '上海',
   time: '1h',
-  body: '找队友',
+  body: '找组队',
   tags: [],
   likes: 0,
   comments: 0,
@@ -40,7 +40,7 @@ describe('userRecruitingPost', () => {
       {
         id: 'pp1',
         title: 'Storm',
-        content: '找队友',
+        content: '找组队',
         status: '招募中',
         likes: 0,
         comments: 0,

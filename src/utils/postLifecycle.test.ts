@@ -30,8 +30,8 @@ function hostPost(): EventDetailPost {
     name: '帖主',
     location: '上海',
     createdAt: '2026-06-01T10:00:00.000Z',
-    body: '上海出发求拼车',
-    tags: ['#拼车'],
+    body: '上海出发求同路',
+    tags: ['#同路'],
     contentTypes: ['carpool'],
     likes: 0,
     comments: 0,
@@ -71,7 +71,7 @@ describe('post lifecycle (frontend orchestration)', () => {
       name: '申请人',
       location: '上海',
       body: 'mock',
-      tags: payload.contentTypes?.includes('carpool') ? ['#拼车'] : ['#组队'],
+      tags: payload.contentTypes?.includes('carpool') ? ['#同路'] : ['#组队'],
       contentTypes: payload.contentTypes,
       likes: 0,
       comments: 0,
@@ -89,7 +89,7 @@ describe('post lifecycle (frontend orchestration)', () => {
         location: '上海',
         headcount: '2人',
         tags: ['carpool'],
-        note: '拼车去场馆',
+        note: '同路去场馆',
       },
       activityLegacyId: ACTIVITY_ID,
       activityTitle: '测试活动',
@@ -110,28 +110,28 @@ describe('post lifecycle (frontend orchestration)', () => {
     const feed = [
       host,
       applicantPost('post-team', {
-        body: '找队友',
+        body: '找组队',
         tags: ['#组队'],
         contentTypes: ['team'],
       }),
       applicantPost('post-carpool', {
-        body: '拼车同行',
-        tags: ['#拼车'],
+        body: '同路同行',
+        tags: ['#同路'],
         contentTypes: ['carpool'],
       }),
     ];
 
     const preview = resolveUserBuddyPreviewForTargetPost(host, ACTIVITY_ID, feed, []);
 
-    expect(preview?.body).toContain('拼车');
-    expect(preview?.tags.some((t) => t.includes('拼车'))).toBe(true);
+    expect(preview?.body).toContain('同路');
+    expect(preview?.tags.some((t) => t.includes('同路'))).toBe(true);
   });
 
   it('4: submit application calls POST applications with optional message', async () => {
-    await applyToPost('post-host', { message: '你好，可以一起拼车吗？' });
+    await applyToPost('post-host', { message: '你好，可以一起同路吗？' });
 
     expect(mockApplyToPost).toHaveBeenCalledWith('post-host', {
-      message: '你好，可以一起拼车吗？',
+      message: '你好，可以一起同路吗？',
     });
   });
 });

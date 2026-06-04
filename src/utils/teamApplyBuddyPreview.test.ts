@@ -13,8 +13,8 @@ describe('resolveUserBuddyPreviewForTargetPost', () => {
     name: 'Host',
     location: '上海',
     createdAt: '2026-06-01T10:00:00.000Z',
-    body: '求拼车去场馆',
-    tags: ['#拼车'],
+    body: '求同路去场馆',
+    tags: ['#同路'],
     contentTypes: ['carpool'],
     likes: 0,
     comments: 0,
@@ -28,8 +28,8 @@ describe('resolveUserBuddyPreviewForTargetPost', () => {
     name: 'Me',
     location: '上海',
     createdAt: '2026-06-01T09:00:00.000Z',
-    body: '拼车同行',
-    tags: ['#拼车'],
+    body: '同路同行',
+    tags: ['#同路'],
     contentTypes: ['carpool'],
     likes: 0,
     comments: 0,
@@ -40,7 +40,7 @@ describe('resolveUserBuddyPreviewForTargetPost', () => {
   const myTeam: EventDetailPost = {
     ...myCarpool,
     id: 'mine-team',
-    body: '找队友',
+    body: '找组队',
     tags: ['#组队'],
     contentTypes: ['team'],
   };
@@ -52,15 +52,15 @@ describe('resolveUserBuddyPreviewForTargetPost', () => {
       [host, myTeam, myCarpool],
       [],
     );
-    expect(preview?.body).toContain('拼车');
-    expect(preview?.tags).toContain('#拼车');
+    expect(preview?.body).toContain('同路');
+    expect(preview?.tags).toContain('#同路');
   });
 
   it('includes profile recruiting posts not in the feed', () => {
     const profileOnly: ProfilePostItem = {
       id: 'pp-carpool',
       title: 'Storm',
-      content: '虹桥拼车',
+      content: '虹桥同路',
       status: '招募中',
       likes: 0,
       comments: 0,

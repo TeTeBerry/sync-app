@@ -31,9 +31,9 @@ describe('buildOnsiteBuddyPostForm', () => {
     const form = buildOnsiteBuddyPostForm('onsite_team', '06/13', '深圳', now);
     expect(form).not.toBeNull();
     const lines = buildOnsiteIntentPrefillSummaryLines('onsite_team', form!);
-    expect(lines[0]).toBe('现场找队友');
+    expect(lines[0]).toBe('现场找组队');
     expect(lines).toContain('深圳');
-    expect(lines.some((l) => l.includes('找队友') || l.includes('组队'))).toBe(true);
+    expect(lines.some((l) => l.includes('找组队') || l.includes('组队'))).toBe(true);
   });
 
   it('fills main-stage carpool preset', () => {

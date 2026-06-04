@@ -96,7 +96,7 @@ describe('buddyPostChatParse routing', () => {
     const replies = buildBuddyPostSuggestedReplies(['dateRange', 'headcount'], ctx);
     expect(replies[0]).toBe('6.13-6.14 深圳 2人 拼房');
     expect(replies[1]).toContain('13号');
-    expect(replies[2]).toMatch(/6\.14.*2人 拼车/);
+    expect(replies[2]).toMatch(/6\.14.*2人 同路/);
   });
 
   it('buildBuddyPostCollectPrompt uses activity-scoped example', () => {

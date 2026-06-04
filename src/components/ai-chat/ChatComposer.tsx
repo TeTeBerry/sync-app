@@ -27,9 +27,9 @@ import {
 } from '@tarojs/components';
 
 const SHORTCUT_TAG_LABELS: Record<AiShortcutTag, string> = {
-  找队友: '找队友',
+  找组队: '找组队',
   找拼房: '找拼房',
-  找拼车: '找拼车',
+  找同路伙伴: '找同路伙伴',
   找拼卡: '找拼卡',
 };
 
@@ -112,7 +112,7 @@ export function ChatComposer({
         : '描述你的组队需求，如出发地、人数、日期…';
     }
     if (scopedToActivity && trimmedActivityTitle) {
-      return `为「${trimmedActivityTitle}」找队友或发帖…`;
+      return `为「${trimmedActivityTitle}」找组队或发帖…`;
     }
     return '说说你想去哪、想找什么样的同行…';
   })();
