@@ -19,17 +19,19 @@ const TYPE_STYLES: Record<string, string> = {
   accommodation: 's-content-badge--accommodation',
   carpool: 's-content-badge--carpool',
   ticket: 's-content-badge--ticket',
+  groupbuy: 's-content-badge--groupbuy',
   other: 's-content-badge--other',
 };
 
 export const ContentTypeBadge: React.FC<{
   types?: string[];
-}> = ({ types }) => {
+  className?: string;
+}> = ({ types, className }) => {
   const keys = mergePostContentTypes(types);
   if (!keys.length) return null;
 
   return (
-    <View className="s-content-badges">
+    <View className={['s-content-badges', className].filter(Boolean).join(' ')}>
       {keys.map((key) => {
         const resolved = resolveContentTypeKey(key);
         const styleKey = CONTENT_TYPE_STYLE_KEYS.has(resolved) ? resolved : key;

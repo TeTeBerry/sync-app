@@ -22,3 +22,4 @@ export {
   stripContentTypeHashtags,
   filterContentTypeTags,
 } from './ContentTypeBadge';
+export { PostTagBadge, type PostTagBadgeProps } from './PostTagBadge';

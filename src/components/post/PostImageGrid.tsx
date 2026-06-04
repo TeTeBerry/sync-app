@@ -49,14 +49,19 @@ export function PostImageGrid({ images, maxDisplay = 4 }: PostImageGridProps) {
 
   const count = validImages.length;
 
-  const renderImage = (src: string, className: string, priority = false) => (
+  const renderImage = (
+    src: string,
+    className: string,
+    priority = false,
+    mode: 'aspectFill' | 'widthFix' = 'aspectFill',
+  ) => (
     <ImageWithFallback
       src={src}
       imageClassName={className}
       placeholderClassName={`${className} s-post-image-grid__img--placeholder`}
       fallback=""
       priority={priority}
-      mode="aspectFill"
+      mode={mode}
     />
   );
 
@@ -77,14 +82,30 @@ export function PostImageGrid({ images, maxDisplay = 4 }: PostImageGridProps) {
     </View>
   );
 
-  // 1-3张：统一网格布局
+  // 单图：widthFix 适配小程序（避免 aspect-ratio 失效导致错位）
+  if (count === 1) {
+    return (
+      <View className="s-post-image-grid s-post-image-grid--1">
+        <View
+          className="s-post-image-grid__item s-post-image-grid__item--width-fix"
+          onClick={() => handleOpen(0)}
+          aria-label="查看图片 1"
+          role="button"
+        >
+          {renderImage(
+            displayImages[0],
+            's-post-image-grid__img s-post-image-grid__img--width-fix',
+            true,
+            'widthFix',
+          )}
+        </View>
+      </View>
+    );
+  }
+
+  // 2-3 张：网格布局
   if (count <= 3) {
-    const gridClass =
-      count === 1
-        ? 's-post-image-grid--1'
-        : count === 2
-          ? 's-post-image-grid--2'
-          : 's-post-image-grid--3';
+    const gridClass = count === 2 ? 's-post-image-grid--2' : 's-post-image-grid--3';
 
     return (
       <View className={`s-post-image-grid ${gridClass}`}>

@@ -12,9 +12,11 @@ import { PostActionMenu, PostShareButton } from './PostActionMenu';
 import { PostStatusBadge } from './PostStatusBadge';
 import {
   ContentTypeBadge,
+  filterContentTypeTags,
   mergePostContentTypes,
   stripContentTypeHashtags,
 } from './ContentTypeBadge';
+import { PostTagBadge } from './PostTagBadge';
 import { PostImageGrid } from './PostImageGrid';
 import { MapPin } from '../icons';
 import { useCurrentUserQuery } from '../../hooks/useSyncApi';
@@ -57,9 +59,15 @@ function FeedPostRowInner({
   const postHandle = post.handle?.trim() || `@${postName}`;
   const isOwn = isCurrentUserPostAuthor(postName, post.userId);
   const avatarSrc = thumbnailImageUrl(post.avatar, 80) ?? post.avatar;
-  const contentTypeKeys = mergePostContentTypes(post.contentTypes, { body: post.body });
+  const contentTypeKeys = mergePostContentTypes(post.contentTypes, {
+    body: post.body,
+    tags: post.tags,
+  });
   const bodyText = stripContentTypeHashtags(post.body);
+  const displayTags = filterContentTypeTags(post.tags, contentTypeKeys);
   const eventLocation = post.location?.trim();
+
+  const hasImages = Boolean(post.images?.length);
 
   return (
     <View className="s-home-post">
@@ -77,11 +85,6 @@ function FeedPostRowInner({
               <Text className="s-home-post__user-handle">{postHandle}</Text>
             </View>
             <View className="s-home-post__head-actions">
-              <PostStatusBadge
-                post={{ status: post.status ?? '招募中' }}
-                variant="home"
-                isOwn={isOwn}
-              />
               <PostShareButton
                 share={buildPostSharePayload({
                   postId: post.id,
@@ -105,32 +108,64 @@ function FeedPostRowInner({
             </View>
           </View>
           <View className="s-home-post__event-line">
-            {eventLocation ? (
-              <View className="s-home-post__event-address-wrap">
-                <MapPin
-                  size={12}
-                  color={POST_ACTION_ICON_COLOR}
-                  className="s-home-post__event-address-icon"
-                />
-                <Text className="s-home-post__event-address">{eventLocation}</Text>
-                <Text className="s-home-post__event-address-sep"> · </Text>
-              </View>
-            ) : null}
-            <Text className="s-home-post__event-name">{post.event}</Text>
+            <View className="s-home-post__event-line-main">
+              {eventLocation ? (
+                <View className="s-home-post__event-address-wrap">
+                  <MapPin
+                    size={10}
+                    color={POST_ACTION_ICON_COLOR}
+                    className="s-home-post__event-address-icon"
+                  />
+                  <Text className="s-home-post__event-address">{eventLocation}</Text>
+                  <Text className="s-home-post__event-address-sep"> · </Text>
+                </View>
+              ) : null}
+              <Text className="s-home-post__event-name">{post.event}</Text>
+            </View>
+            <PostStatusBadge
+              post={{ status: post.status ?? '招募中' }}
+              variant="home"
+              isOwn={isOwn}
+            />
           </View>
         </View>
       </View>
 
-      {bodyText ? <Text className="s-home-post__text">{bodyText}</Text> : null}
+      <View
+        className={[
+          's-home-post__content',
+          hasImages && 's-home-post__content--with-media',
+        ]
+          .filter(Boolean)
+          .join(' ')}
+      >
+        {bodyText ? (
+          <View className="s-home-post__body">
+            <Text className="s-home-post__text">{bodyText}</Text>
+          </View>
+        ) : null}
 
-      {post.images?.length ? (
-        <PostImageGrid images={post.images} maxDisplay={FEED_POST_IMAGE_MAX_DISPLAY} />
-      ) : null}
+        {post.images?.length ? (
+          <PostImageGrid
+            images={post.images}
+            maxDisplay={FEED_POST_IMAGE_MAX_DISPLAY}
+          />
+        ) : null}
 
-      <ContentTypeBadge types={contentTypeKeys} />
+        {contentTypeKeys.length || displayTags.length ? (
+          <View className="s-home-post__tags">
+            <ContentTypeBadge
+              types={contentTypeKeys}
+              className="s-content-badges--flush"
+            />
+            {displayTags.map((tag) => (
+              <PostTagBadge key={tag} tag={tag} />
+            ))}
+          </View>
+        ) : null}
+      </View>
 
       <View className="s-home-post__footer">
-        <Text className="s-home-post__time">{post.time}</Text>
         <PostCardActionBar
           variant="home"
           liked={Boolean(post.liked)}
@@ -140,6 +175,7 @@ function FeedPostRowInner({
           onLike={() => onLike?.(post)}
           onToggleComments={() => onToggleComments(post.id)}
         />
+        <Text className="s-home-post__time">{post.time}</Text>
       </View>
 
       {commentsExpanded ? (

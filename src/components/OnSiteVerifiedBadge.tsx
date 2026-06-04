@@ -10,7 +10,7 @@ export function OnSiteVerifiedBadge({ className }: OnSiteVerifiedBadgeProps) {
     <Text
       className={['s-live-info-post__cert-pill', className].filter(Boolean).join(' ')}
     >
-      我在现场
+      手环认证
     </Text>
   );
 }

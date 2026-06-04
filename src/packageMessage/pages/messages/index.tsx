@@ -53,10 +53,11 @@ const MessagesPage: React.FC = () => {
                 <Text className="s-messages__empty-title">加载失败</Text>
                 <Text className="s-messages__empty-hint">请检查网络后重试</Text>
                 <Button
-                  className="s-messages__item"
+                  className="s-messages__retry"
+                  hoverClass="s-messages__retry--pressed"
                   onClick={() => void refetch({ background: false })}
                 >
-                  <Text className="s-btn-label">重新加载</Text>
+                  <Text className="s-messages__retry-label">重新加载</Text>
                 </Button>
               </View>
             ) : sortedSessions.length === 0 ? (
@@ -70,47 +71,55 @@ const MessagesPage: React.FC = () => {
                 </Text>
               </View>
             ) : (
-              sortedSessions.map((session) => {
-                const hasUnread = session.unreadCount > 0;
-                const badgeLabel =
-                  session.unreadCount > 99 ? '99+' : String(session.unreadCount);
+              <View className="s-messages__list">
+                {sortedSessions.map((session) => {
+                  const hasUnread = session.unreadCount > 0;
+                  const badgeLabel =
+                    session.unreadCount > 99 ? '99+' : String(session.unreadCount);
 
-                return (
-                  <Button
-                    key={session.id}
-                    className={
-                      hasUnread
-                        ? 's-messages__item s-messages__item--unread'
-                        : 's-messages__item'
-                    }
-                    onClick={() => handleOpenSession(session.id)}
-                  >
-                    <View
-                      className="s-messages__avatar"
-                      style={
-                        session.peerAvatar
-                          ? { backgroundImage: `url(${session.peerAvatar})` }
-                          : undefined
-                      }
-                      aria-hidden
-                    />
-                    <View className="s-messages__body">
-                      <View className="s-messages__row">
-                        <View className="s-messages__title">
+                  return (
+                    <Button
+                      key={session.id}
+                      className={[
+                        's-messages__item',
+                        hasUnread && 's-messages__item--unread',
+                      ]
+                        .filter(Boolean)
+                        .join(' ')}
+                      hoverClass="s-messages__item--pressed"
+                      onClick={() => handleOpenSession(session.id)}
+                    >
+                      <View className="s-messages__avatar-wrap" aria-hidden>
+                        <View
+                          className="s-messages__avatar"
+                          style={
+                            session.peerAvatar
+                              ? { backgroundImage: `url(${session.peerAvatar})` }
+                              : undefined
+                          }
+                        />
+                        {hasUnread ? <View className="s-messages__avatar-dot" /> : null}
+                      </View>
+                      <View className="s-messages__body">
+                        <View className="s-messages__row">
                           <Text className="s-messages__name">{session.peerName}</Text>
+                          <Text className="s-messages__time">
+                            {formatTimeAgo(session.lastMessageAt)}
+                          </Text>
+                        </View>
+                        <View className="s-messages__preview-row">
+                          <Text className="s-messages__preview">
+                            {session.lastMessage}
+                          </Text>
                           {hasUnread ? (
                             <Text className="s-messages__badge">{badgeLabel}</Text>
                           ) : null}
                         </View>
-                        <Text className="s-messages__time">
-                          {formatTimeAgo(session.lastMessageAt)}
-                        </Text>
                       </View>
-                      <Text className="s-messages__preview">{session.lastMessage}</Text>
-                    </View>
-                  </Button>
-                );
-              })
+                    </Button>
+                  );
+                })}
+              </View>
             )}
           </View>
         </ScrollView>

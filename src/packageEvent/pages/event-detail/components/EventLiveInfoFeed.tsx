@@ -16,10 +16,10 @@ export function EventLiveInfoFeed({
   const safeItems = Array.isArray(items) ? items : [];
 
   return (
-    <View className="s-live-info-card">
-      <View className="s-live-info-card__head">
-        <Text className="s-live-info-card__title">最新动态</Text>
-        <Text className="s-live-info-card__meta">由认证用户持续更新</Text>
+    <View className="s-live-info-feed-section">
+      <View className="s-live-info-feed-section__head">
+        <Text className="s-live-info-feed-section__title">最新动态</Text>
+        <Text className="s-live-info-feed-section__meta">由认证用户持续更新</Text>
       </View>
       {safeItems.length === 0 ? (
         <Text className="s-live-info-feed__empty">

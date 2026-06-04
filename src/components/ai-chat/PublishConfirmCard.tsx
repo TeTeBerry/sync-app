@@ -2,6 +2,7 @@ import {
   ContentTypeBadge,
   filterContentTypeTags,
   mergePostContentTypes,
+  PostTagBadge,
   stripContentTypeHashtags,
 } from '../post';
 import { inferIntentTagsFromText } from '../../utils/inferIntentTags';
@@ -74,14 +75,14 @@ export function PublishConfirmCard({
 
         {bodyText ? <Text className="s-publish-confirm__body">{bodyText}</Text> : null}
 
-        <ContentTypeBadge types={contentTypeKeys} />
-
-        {displayTags.length ? (
+        {contentTypeKeys.length || displayTags.length ? (
           <View className="s-publish-confirm__tags">
+            <ContentTypeBadge
+              types={contentTypeKeys}
+              className="s-publish-confirm__content-badges"
+            />
             {displayTags.map((tag) => (
-              <Text key={tag} className="s-publish-confirm__tag">
-                {tag}
-              </Text>
+              <PostTagBadge key={tag} tag={tag} />
             ))}
           </View>
         ) : null}

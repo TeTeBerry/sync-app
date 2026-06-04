@@ -1,5 +1,5 @@
 import Taro from '@tarojs/taro';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   clearLiveInfoWristband,
   fetchLiveInfoSnapshot,
@@ -54,6 +54,8 @@ export function useEventLiveInfo(
   const [feed, setFeed] = useState<LiveInfoFeedItem[]>([]);
   const [zones, setZones] = useState<LiveInfoZone[]>([]);
   const [filters, setFilters] = useState<LiveInfoFeedFilters>({});
+  const filtersRef = useRef(filters);
+  filtersRef.current = filters;
 
   const filtersActive = isLiveInfoFilterActive(filters);
   const filterSubtitle = useMemo(
@@ -87,7 +89,7 @@ export function useEventLiveInfo(
       if (!isApiEnabled() || !Number.isFinite(eventId) || eventId <= 0) return;
       if (!opts?.silent) setLoading(true);
       try {
-        const snap = await fetchLiveInfoSnapshot(eventId, filters);
+        const snap = await fetchLiveInfoSnapshot(eventId, filtersRef.current);
         applySnapshot(snap);
       } catch {
         void Taro.showToast({ title: '加载现场实时资讯失败', icon: 'none' });
@@ -95,13 +97,27 @@ export function useEventLiveInfo(
         if (!opts?.silent) setLoading(false);
       }
     },
-    [applySnapshot, eventId, filters],
+    [applySnapshot, eventId],
   );
 
   useEffect(() => {
     if (!enabled) return;
     void reload();
   }, [enabled, eventId, reload]);
+
+  const skipFilterReloadRef = useRef(true);
+  useEffect(() => {
+    skipFilterReloadRef.current = true;
+  }, [eventId]);
+
+  useEffect(() => {
+    if (!enabled) return;
+    if (skipFilterReloadRef.current) {
+      skipFilterReloadRef.current = false;
+      return;
+    }
+    void reload({ silent: true });
+  }, [enabled, filters, reload]);
 
   const isCertified = viewerCertified;
 

@@ -82,10 +82,16 @@
   align-self: flex-start;
   gap: 4px;
   flex-shrink: 0;
+}
+
+.s-home-post__head-actions {
+  max-width: 36%;
+}
+
+.s-event-post__head-actions {
   max-width: 46%;
 }
 
-.s-home-post__head-actions .s-post-status-badge,
 .s-event-post__head-actions .s-post-status-badge {
   flex-shrink: 0;
   max-width: 100%;

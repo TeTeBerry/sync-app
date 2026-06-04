@@ -304,6 +304,7 @@ export interface HomeFeedPost {
   status: '招募中' | '已组队' | '已隐藏';
   activityLegacyId?: number;
   contentTypes?: PostContentType[];
+  tags?: string[];
   images?: string[];
   /** Author passed wristband on-site verification for this activity today. */
   authorOnSiteVerified?: boolean;

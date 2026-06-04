@@ -23,7 +23,7 @@ export function buildLiveInfoFilterSubtitle(
     parts.push(getLiveInfoCategory(filters.categoryId as LiveInfoCategoryId).label);
   }
   if (filters.certifiedOnly) {
-    parts.push('仅我在现场');
+    parts.push('仅现场用户');
   }
   return parts.length > 0 ? parts.join(' · ') : undefined;
 }

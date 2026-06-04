@@ -835,17 +835,13 @@
   &__tags {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
+    align-items: center;
+    gap: 8px;
   }
 
-  &__tag {
-    padding: 3px 8px;
-    border-radius: 9999px;
-    background: rgba(100, 210, 255, 0.12);
-    color: #64d2ff;
-    font-size: var(--s-type-caption);
-    font-weight: var(--s-fw-semibold);
-    line-height: 1.2;
+  &__content-badges.s-content-badges {
+    margin: 0;
+    gap: 8px;
   }
 
   &__hint {

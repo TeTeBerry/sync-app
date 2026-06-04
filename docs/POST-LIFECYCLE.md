@@ -7,7 +7,7 @@
 | 入口 | 组件 / Hook | 说明 |
 |------|-------------|------|
 | 活动详情 | `useEventDetailBuddyPost` | 底部/引导打开 `AiBuddyPostSheet`，提交后 `publishBuddyPostFromForm` |
-| 活动详情 · 节中 | `publishOnsiteIntent` + 现场快捷芯片 | 预填打开 `AiBuddyPostSheet`（意图/地点/标签/备注），用户确认后 `publishBuddyPostFromForm` → `POST /posts`；不强制手环；已认证作者帖展示「我在现场」 |
+| 活动详情 · 节中 | `publishOnsiteIntent` + 现场快捷芯片 | 预填打开 `AiBuddyPostSheet`（意图/地点/标签/备注），用户确认后 `publishBuddyPostFromForm` → `POST /posts`；不强制手环；已认证作者帖展示「手环认证」 |
 | 活动详情 · 申请前补帖 | `useEventDetailPage` → `handleBuddyPostSheetSubmit` | 无招募帖时先发帖，`listedInFeed` 可为 false（仅用于申请） |
 | AI 助手 | `useAiBuddyPost` | 对话收集槽位或表单，`runPublish` → 同一 `publishBuddyPostFromForm` |
 | AI WebSocket | 后端 `create-post-from-chat` | 与 REST 共用 `PostWriteService.createPost` |

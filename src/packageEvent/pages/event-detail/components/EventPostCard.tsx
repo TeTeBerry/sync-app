@@ -10,14 +10,12 @@ import {
 } from '../../../../components/post';
 import { ImageWithFallback } from '../../../../components/ImageWithFallback';
 import {
+  ContentTypeBadge,
   filterContentTypeTags,
   mergePostContentTypes,
+  PostTagBadge,
   stripContentTypeHashtags,
 } from '../../../../components/post';
-import {
-  formatContentTypeHashtag,
-  resolveContentTypeKey,
-} from '../../../../utils/postContentTypeDisplay';
 import { PostImageGrid } from '../../../../components/post';
 import { EVENT_POST_IMAGE_MAX_DISPLAY } from '../../../../constants/listPerf';
 import { isApiEnabled } from '../../../../constants/api';
@@ -96,7 +94,6 @@ function EventPostCardInner({
   });
   const bodyText = stripContentTypeHashtags(post.body);
   const displayTags = filterContentTypeTags(postTags, contentTypeKeys);
-  const primaryTypeKey = contentTypeKeys[0];
   const groupProgress =
     isRecruiting && bodyText
       ? parseGroupProgressFromText(`${bodyText} ${postTags.join(' ')}`)
@@ -192,17 +189,13 @@ function EventPostCardInner({
         <PostImageGrid images={post.images} maxDisplay={EVENT_POST_IMAGE_MAX_DISPLAY} />
       ) : null}
 
-      {primaryTypeKey || groupProgress || isCompleted || displayTags.length ? (
+      {contentTypeKeys.length || groupProgress || isCompleted || displayTags.length ? (
         <View className="s-event-post__meta-row">
-          {primaryTypeKey ? (
-            <Text
-              className={[
-                's-event-post__type-tag',
-                `s-event-post__type-tag--${resolveContentTypeKey(primaryTypeKey)}`,
-              ].join(' ')}
-            >
-              {formatContentTypeHashtag(primaryTypeKey)}
-            </Text>
+          {contentTypeKeys.length ? (
+            <ContentTypeBadge
+              types={contentTypeKeys}
+              className="s-event-post__content-badges"
+            />
           ) : null}
           {groupProgress ? (
             <GroupProgressRow
@@ -210,13 +203,9 @@ function EventPostCardInner({
               total={groupProgress.total}
             />
           ) : null}
-          {isCompleted ? (
-            <Text className="s-event-post__tag s-event-post__tag--full">#已满</Text>
-          ) : null}
+          {isCompleted ? <PostTagBadge tag="#已满" /> : null}
           {displayTags.map((tag) => (
-            <Text key={tag} className="s-event-post__tag s-event-post__tag--extra">
-              {tag.startsWith('#') ? tag : `#${tag}`}
-            </Text>
+            <PostTagBadge key={tag} tag={tag} />
           ))}
         </View>
       ) : null}

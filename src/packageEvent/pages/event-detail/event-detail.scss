@@ -534,48 +534,14 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   margin-top: 12px;
   margin-bottom: 12px;
 }
 
-.s-event-post__type-tag {
-  padding: 4px 10px;
-  border-radius: var(--radius-full);
-  font-size: 11px;
-  font-weight: var(--s-fw-bold);
-  line-height: 1.2;
-
-  &--groupbuy,
-  &--ticket {
-    color: #ffcc00;
-    background: rgba(255, 204, 0, 0.12);
-    border: 1px solid rgba(255, 204, 0, 0.28);
-  }
-
-  &--team {
-    color: var(--primary);
-    background: rgba(var(--primary-rgb), 0.12);
-    border: 1px solid rgba(var(--primary-rgb), 0.28);
-  }
-
-  &--accommodation {
-    color: #64d2ff;
-    background: rgba(100, 210, 255, 0.12);
-    border: 1px solid rgba(100, 210, 255, 0.28);
-  }
-
-  &--carpool {
-    color: #ffcc00;
-    background: rgba(255, 204, 0, 0.12);
-    border: 1px solid rgba(255, 204, 0, 0.28);
-  }
-
-  &--other {
-    color: #8e8e93;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-  }
+.s-event-post__content-badges.s-content-badges {
+  margin: 0;
+  gap: 8px;
 }
 
 .s-event-post__progress {
@@ -604,25 +570,6 @@
   font-weight: var(--s-fw-bold);
   color: #fff;
   margin-left: 2px;
-}
-
-.s-event-post__tag {
-  padding: 4px 10px;
-  border-radius: var(--radius-full);
-  font-size: 11px;
-  font-weight: var(--s-fw-bold);
-  line-height: 1.2;
-
-  &--full {
-    color: #8e8e93;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
-
-  &--extra {
-    color: #8e8e93;
-    background: rgba(255, 255, 255, 0.06);
-  }
 }
 
 .s-event-post__footer {

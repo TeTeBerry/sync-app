@@ -36,7 +36,7 @@ export function EventLiveInfoCertCard({
             </Text>
           </View>
           <Text className="s-live-info-cert__hint">
-            手环认证有效至今日 {certExpiryLabel}；可发现场资讯，组队帖显示「我在现场」
+            手环认证有效至今日 {certExpiryLabel}；可发现场资讯，组队帖显示「手环认证」
           </Text>
         </View>
       </View>

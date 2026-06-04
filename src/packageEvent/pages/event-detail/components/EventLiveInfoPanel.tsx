@@ -100,8 +100,8 @@ export function EventLiveInfoPanel({
           hoverClass="s-live-info-panel__fab--pressed"
           onClick={onOpenUpdate}
         >
-          <Zap size={18} color="#fff" aria-hidden />
-          <Text className="s-live-info-panel__fab-text">我要更新现场实时资讯</Text>
+          <Zap size={16} color="#fff" aria-hidden />
+          <Text className="s-live-info-panel__fab-text">更新现场实时资讯</Text>
         </Button>
       ) : null}
     </View>

@@ -103,7 +103,7 @@ export function useEventDetailBuddyPost(
 
         if (!submitOptions?.quiet) {
           const toastTitle = post.authorOnSiteVerified
-            ? '已发布 · 我在现场'
+            ? '已发布 · 手环认证'
             : '组队帖已发布';
           void Taro.showToast({ title: toastTitle, icon: 'success' });
         }

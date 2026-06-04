@@ -98,4 +98,4 @@ export function buildOnsiteIntentPrefillSummaryLines(
 export const ONSITE_INTENT_PREFILL_BANNER_TITLE = '现场快捷发帖 · 已预填';
 
 export const ONSITE_INTENT_ONSITE_BADGE_HINT =
-  '若今日已完成手环认证，发布后将显示「我在现场」标识';
+  '若今日已完成手环认证，发布后将显示「手环认证」标识';

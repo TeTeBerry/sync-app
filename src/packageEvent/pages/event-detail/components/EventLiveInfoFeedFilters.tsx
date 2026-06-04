@@ -114,7 +114,7 @@ export function EventLiveInfoFeedFilters({
       </View>
 
       <View className="s-live-info-filters__row s-live-info-filters__row--toggle">
-        <Text className="s-live-info-filters__label">仅我在现场</Text>
+        <Text className="s-live-info-filters__label">仅现场用户</Text>
         <Button
           className={[
             's-live-info-filters__toggle',

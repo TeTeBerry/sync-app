@@ -26,7 +26,7 @@ export type AiBuddyPostSheetProps = {
   /** Shown when opened via travel-guide「一键组队」or onsite chips. */
   prefillSummaryLines?: string[] | null;
   prefillBannerTitle?: string | null;
-  /** Extra line under prefill banner (e.g. wristband →「我在现场」). */
+  /** Extra line under prefill banner (e.g. wristband →「手环认证」). */
   showOnSiteBadgeHint?: boolean;
   submitLabel?: string | null;
   /** Apply-team flow: let user choose whether the post appears on the activity feed. */
