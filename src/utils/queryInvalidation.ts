@@ -69,6 +69,7 @@ export function invalidateHome() {
 /** 失效帖子 Feed 查询 */
 export function invalidatePostFeeds() {
   invalidateCache(['posts', 'popular']);
+  invalidateCache(['posts', 'all']);
   invalidateCache(['posts', 'activity']);
 }
 

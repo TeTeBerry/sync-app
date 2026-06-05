@@ -1,31 +1,12 @@
 import type { ProfileActivityItem, ProfilePostItem } from '../../types/backend';
-import { buildMockProfileBenefits } from './profileBenefitsMapper';
+import { buildMockProfileBenefits } from './profileBenefitsMock';
 
 export type { ProfileActivityItem, ProfilePostItem };
-
-export type ProfileBenefitMetricKind = 'match' | 'contact' | 'duration';
-
-export type ProfileBenefitMetric = {
-  id: string;
-  kind: ProfileBenefitMetricKind;
-  value: number;
-  unit: string;
-  label: string;
-  /** Remaining quota ratio (0–1), drives progress bar fill. */
-  remainingRatio: number;
-  lowRemaining: boolean;
-};
-
-export type ProfileBenefits = {
-  planLabel: string;
-  upgradeLabel: string;
-  promo: {
-    prefix: string;
-    highlight: string;
-    suffix: string;
-  };
-  metrics: ProfileBenefitMetric[];
-};
+export type {
+  ProfileBenefitMetric,
+  ProfileBenefitMetricKind,
+  ProfileBenefits,
+} from './profileBenefitsTypes';
 
 /** 我的权益 — mock 用户 Zara 展示 Pro 单场额度（风暴电音节 activity 4，含每月免费额度） */
 export const profileBenefits = buildMockProfileBenefits();

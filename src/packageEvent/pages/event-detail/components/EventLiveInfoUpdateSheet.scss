@@ -108,15 +108,36 @@
   font-size: var(--s-type-small);
   font-weight: var(--s-fw-semibold);
   box-sizing: border-box;
+  transition:
+    transform 140ms ease,
+    background 140ms ease,
+    border-color 140ms ease,
+    box-shadow 140ms ease,
+    opacity 140ms ease;
 
   &--on {
-    background: rgba(255, 255, 255, 0.04);
+    background: rgba(var(--primary-rgb), 0.12);
+    border-color: rgba(var(--primary-rgb), 0.42);
+    box-shadow: 0 0 14px rgba(var(--primary-rgb), 0.18);
   }
 
   &::after {
     display: none;
     border: 0;
   }
+}
+
+.s-live-info-update-sheet__chip--pressed {
+  transform: scale(0.96);
+  opacity: 0.86;
+}
+
+.s-live-info-update-sheet__chip--on-pressed {
+  transform: scale(0.95);
+  opacity: 1;
+  background: rgba(var(--primary-rgb), 0.24) !important;
+  border-color: rgba(var(--primary-rgb), 0.55) !important;
+  box-shadow: 0 0 18px rgba(var(--primary-rgb), 0.32) !important;
 }
 
 .s-live-info-update-sheet__chip-label {

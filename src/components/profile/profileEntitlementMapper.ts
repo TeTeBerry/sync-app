@@ -6,7 +6,7 @@ import type {
 import { safeFiniteNumber } from '../../utils/safeString';
 import { PROFILE_SEED_ACTIVITY_LEGACY_ID } from '../../constants/profilePackage';
 import { PACKAGE_TIER_ORDER } from './profilePackageData';
-import type { ProfileBenefits } from './mockData';
+import type { ProfileBenefits } from './profileBenefitsTypes';
 export const FREE_MONTHLY_AI_LIMIT = 3;
 export const FREE_MONTHLY_CONTACT_LIMIT = 3;
 

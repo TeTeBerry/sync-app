@@ -2,7 +2,13 @@ import './BottomNav.scss';
 import React from 'react';
 import { Button } from '../ui';
 import { View, Text } from '@tarojs/components';
-import { CalendarDays, House, MessageCircle, User } from '../../components/icons';
+import {
+  CalendarDays,
+  Compass,
+  House,
+  MessageCircle,
+  User,
+} from '../../components/icons';
 import {
   preloadAiSubpackage,
   preloadEventSubpackage,
@@ -10,7 +16,13 @@ import {
   preloadProfileSubpackage,
 } from '../../utils/subpackagePreload';
 import type { RoutePath } from '../../utils/route';
-import { ROUTES, goMessages, switchTabTo, useActiveRoutePath } from '../../utils/route';
+import {
+  ROUTES,
+  goExplore,
+  goMessages,
+  switchTabTo,
+  useActiveRoutePath,
+} from '../../utils/route';
 
 function preloadSubpackagesForTab(path: RoutePath) {
   if (path === ROUTES.HOME || path === ROUTES.EVENTS) {
@@ -27,6 +39,10 @@ function isMessagesRouteActive(activePath: string): boolean {
   return activePath === ROUTES.MESSAGES || activePath.startsWith('/packageMessage/');
 }
 
+function isExploreRouteActive(activePath: string): boolean {
+  return activePath === ROUTES.EXPLORE;
+}
+
 const BottomNav: React.FC = () => {
   const activePath = useActiveRoutePath();
 
@@ -39,6 +55,12 @@ const BottomNav: React.FC = () => {
       label: '私信',
       kind: 'stack' as const,
     },
+    {
+      path: ROUTES.EXPLORE,
+      icon: Compass,
+      label: '探索',
+      kind: 'stack' as const,
+    },
     { path: ROUTES.PROFILE, icon: User, label: '我的', kind: 'tab' as const },
   ];
 
@@ -48,7 +70,9 @@ const BottomNav: React.FC = () => {
         {navItems.map((item) => {
           const isActive =
             item.kind === 'stack'
-              ? isMessagesRouteActive(activePath)
+              ? item.path === ROUTES.MESSAGES
+                ? isMessagesRouteActive(activePath)
+                : isExploreRouteActive(activePath)
               : activePath === item.path;
           const Icon = item.icon;
           return (
@@ -57,16 +81,22 @@ const BottomNav: React.FC = () => {
               disabled={isActive}
               onTouchStart={() => {
                 if (!isActive) {
-                  if (item.kind === 'stack') {
+                  if (item.path === ROUTES.MESSAGES) {
                     preloadMessageSubpackage();
+                  } else if (item.path === ROUTES.EXPLORE) {
+                    preloadEventSubpackage();
                   } else {
                     preloadSubpackagesForTab(item.path);
                   }
                 }
               }}
               onClick={() => {
-                if (item.kind === 'stack') {
+                if (item.path === ROUTES.MESSAGES) {
                   goMessages();
+                  return;
+                }
+                if (item.path === ROUTES.EXPLORE) {
+                  goExplore();
                   return;
                 }
                 switchTabTo(item.path);

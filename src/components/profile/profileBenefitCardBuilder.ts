@@ -5,7 +5,7 @@ import type {
   ProfileActivityItem,
 } from '../../types/backend';
 import { safeTrim } from '../../utils/safeString';
-import type { ProfileBenefits } from './mockData';
+import type { ProfileBenefits } from './profileBenefitsTypes';
 import { MOCK_PACKAGE_CATALOG } from './profilePackageData';
 import type {
   ProfileEventBenefitRow,

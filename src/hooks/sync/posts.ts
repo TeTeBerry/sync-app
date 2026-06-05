@@ -5,6 +5,7 @@ import {
   applyToPost,
   deletePost,
   fetchPostComments,
+  fetchAllPosts,
   fetchPostsByActivity,
   fetchPopularPosts,
   likePost,
@@ -64,6 +65,28 @@ export function usePopularPostsQuery(options?: QueryEnableOptions) {
     enabled,
     staleTime: STALE_POSTS_FEED_MS,
   });
+}
+
+export function useAllPostsQuery() {
+  const enabled = isLiveApi();
+  const userId = resolveRequestUserId();
+
+  const query = useApiQuery({
+    queryKey: ['posts', 'all', userId],
+    queryFn: async () => {
+      const result = await fetchAllPosts();
+      return result.map(mapHomeFeedPost);
+    },
+    enabled,
+    staleTime: STALE_POSTS_FEED_MS,
+  });
+
+  return {
+    posts: (query.data ?? []).map(mapHomeFeedPost),
+    isLoading: query.isLoading && query.data === undefined,
+    isError: query.isError,
+    refetch: query.refetch,
+  };
 }
 
 /** Home popular feed — canonical source is `posts/popular` cache (seeded from `/home`). */

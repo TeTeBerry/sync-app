@@ -45,6 +45,7 @@ export const ROUTES = {
   EVENT_MAP: '/packageEvent/pages/event-map/index',
   EXCLUSIVE_ITINERARY: '/packageEvent/pages/exclusive-itinerary/index',
   MY_ITINERARY: '/packageEvent/pages/my-itinerary/index',
+  EXPLORE: '/packageEvent/pages/explore/index',
   NOTIFICATIONS: '/packageProfile/pages/notifications/index',
   MESSAGES: '/packageMessage/pages/messages/index',
   TEMP_CHAT: '/packageMessage/pages/chat/index',
@@ -647,6 +648,12 @@ export function goMessages() {
   preloadMessageSubpackage();
   preloadPageSafe(ROUTES.MESSAGES);
   navigateToSafe(ROUTES.MESSAGES);
+}
+
+export function goExplore() {
+  preloadEventSubpackage();
+  preloadPageSafe(ROUTES.EXPLORE);
+  navigateToSafe(ROUTES.EXPLORE);
 }
 
 export function goTempChat(sessionId: string) {

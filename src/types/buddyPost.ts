@@ -53,7 +53,7 @@ export const BUDDY_POST_TAG_OPTIONS: Array<{
   {
     id: 'vip',
     label: '拼卡',
-    intentPhrase: '找拼卡',
+    intentPhrase: '找卡座',
     hashTag: '#拼卡',
     contentType: 'carpool',
   },

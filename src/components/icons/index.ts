@@ -25,6 +25,7 @@ export {
   CircleCheck,
   Clock,
   CloudLightning,
+  Compass,
   Crown,
   Droplet,
   EllipsisVertical,

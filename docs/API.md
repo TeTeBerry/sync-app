@@ -272,7 +272,7 @@ AI 匹配配额：服务端在 `post_recommendations` 且 `posts.length > 0` 时
 | GET | `/api/activities/:legacyId/live-info` | 现场资讯快照：`zones`、`viewer`、`summary`、`certCount`、`feed`；Query 可选 `zoneTag`、`categoryId`、`certifiedOnly=true` |
 | POST | `/api/activities/:legacyId/live-info/wristband` | 提交手环图 `{ imageUrl }`（当日认证） |
 | DELETE | `/api/activities/:legacyId/live-info/wristband` | 清除当日认证 |
-| POST | `/api/activities/:legacyId/live-info/updates` | 发布 `{ zoneTag, ratings: [{ categoryId, score }], remark? }`（须当日认证；15 分钟冷却、每小时上限、同内容 24h 内不可重复） |
+| POST | `/api/activities/:legacyId/live-info/updates` | 发布 `{ zoneTag, ratings: [{ categoryId, score }], remark? }`（须当日认证；5 分钟冷却、每小时上限、同内容 24h 内不可重复） |
 | POST | `/api/activities/:legacyId/live-info/updates/:updateId/like` | 点赞切换 |
 | GET | `/api/notifications` | 通知列表 |
 | GET | `/api/notifications/unread-count` | 未读数 |

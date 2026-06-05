@@ -30,7 +30,7 @@ const SHORTCUT_TAG_LABELS: Record<AiShortcutTag, string> = {
   找组队: '找组队',
   找拼房: '找拼房',
   找同路伙伴: '找同路伙伴',
-  找拼卡: '找拼卡',
+  找卡座: '找卡座',
 };
 
 const AI_GUIDE_CHIP = {

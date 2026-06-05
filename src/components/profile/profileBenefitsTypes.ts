@@ -43,3 +43,27 @@ export type ProfileFreeBenefitCardModel = {
   contactUnlock: ProfileFreeBenefitQuota;
   upsellText: string;
 };
+
+export type ProfileBenefitMetricKind = 'match' | 'contact' | 'duration';
+
+export type ProfileBenefitMetric = {
+  id: string;
+  kind: ProfileBenefitMetricKind;
+  value: number;
+  unit: string;
+  label: string;
+  /** Remaining quota ratio (0–1), drives progress bar fill. */
+  remainingRatio: number;
+  lowRemaining: boolean;
+};
+
+export type ProfileBenefits = {
+  planLabel: string;
+  upgradeLabel: string;
+  promo: {
+    prefix: string;
+    highlight: string;
+    suffix: string;
+  };
+  metrics: ProfileBenefitMetric[];
+};

@@ -1,5 +1,5 @@
 import type { EventPackageEntitlement } from '../../types/backend';
-import type { ProfileBenefits } from './mockData';
+import type { ProfileBenefits } from './profileBenefitsTypes';
 import { MOCK_PACKAGE_CATALOG } from './profilePackageData';
 import {
   FREE_MONTHLY_AI_LIMIT,

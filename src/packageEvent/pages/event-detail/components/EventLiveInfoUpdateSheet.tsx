@@ -132,12 +132,16 @@ export function EventLiveInfoUpdateSheet({
                 return (
                   <Button
                     key={zone.id}
-                    className={[
+                    className={cn(
                       's-live-info-update-sheet__chip',
                       active && 's-live-info-update-sheet__chip--on',
-                    ]
-                      .filter(Boolean)
-                      .join(' ')}
+                    )}
+                    hoverClass={
+                      active
+                        ? 's-live-info-update-sheet__chip--pressed s-live-info-update-sheet__chip--on-pressed'
+                        : 's-live-info-update-sheet__chip--pressed'
+                    }
+                    hoverStayTime={70}
                     onClick={() => setZoneTag(zone.id)}
                   >
                     <Text className="s-live-info-update-sheet__chip-label">
@@ -161,17 +165,18 @@ export function EventLiveInfoUpdateSheet({
                 return (
                   <Button
                     key={category.id}
-                    className={[
+                    className={cn(
                       's-live-info-update-sheet__chip',
                       active && 's-live-info-update-sheet__chip--on',
-                    ]
-                      .filter(Boolean)
-                      .join(' ')}
+                    )}
+                    hoverClass="s-live-info-update-sheet__chip--pressed"
+                    hoverStayTime={70}
                     style={
                       active
                         ? ({
                             borderColor: category.color,
                             color: category.color,
+                            backgroundColor: `${category.color}18`,
                           } as Record<string, string>)
                         : undefined
                     }

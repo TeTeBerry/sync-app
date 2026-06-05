@@ -30,7 +30,7 @@ const LABEL_TO_TYPE: Record<string, string> = {
   同路同行: 'carpool',
   找同路伙伴: 'carpool',
   拼卡: 'carpool',
-  找拼卡: 'carpool',
+  找卡座: 'carpool',
   转票: 'ticket',
   拼单: 'groupbuy',
   出票: 'ticket',
