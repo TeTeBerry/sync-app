@@ -1,5 +1,11 @@
 {
   "extends": "./tsconfig.json",
-  "include": ["src/**/*", "config/**/*", "types/**/*", "vitest.config.ts"],
+  "include": [
+    "src/**/*",
+    "config/**/*",
+    "types/**/*",
+    "test/**/*",
+    "vitest.config.ts"
+  ],
   "exclude": ["node_modules", "dist", "dist-weapp", "dist-h5"]
 }
