@@ -92,24 +92,23 @@ function isRemoteImageRef(ref: string): boolean {
   return /^https?:\/\//i.test(ref.trim());
 }
 
-/** Upload local temp paths; only trust URLs from POST /uploads/images (wx-checked). */
-export async function uploadChatImageRefs(refs: string[]): Promise<string[]> {
-  const uploaded: string[] = [];
-  for (const ref of refs) {
-    if (isRemoteImageRef(ref)) {
-      const trimmed = ref.trim();
-      if (!isTrustedUploadImageUrl(trimmed)) {
-        throw new Error('图片须先通过上传接口提交');
-      }
-      uploaded.push(trimmed);
-      continue;
-    }
-    if (/^data:/i.test(ref.trim())) {
+async function uploadOneImageRef(ref: string): Promise<string> {
+  if (isRemoteImageRef(ref)) {
+    const trimmed = ref.trim();
+    if (!isTrustedUploadImageUrl(trimmed)) {
       throw new Error('图片须先通过上传接口提交');
     }
-    uploaded.push(await uploadImageFile(ref));
+    return trimmed;
   }
-  return uploaded;
+  if (/^data:/i.test(ref.trim())) {
+    throw new Error('图片须先通过上传接口提交');
+  }
+  return uploadImageFile(ref);
+}
+
+/** Upload local temp paths; only trust URLs from POST /uploads/images (wx-checked). */
+export async function uploadChatImageRefs(refs: string[]): Promise<string[]> {
+  return Promise.all(refs.map((ref) => uploadOneImageRef(ref)));
 }
 
 export function validateChatImageDataUrl(dataUrl: string): void {

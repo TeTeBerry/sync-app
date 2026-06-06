@@ -4,5 +4,8 @@ export default {
   navigationBarTitleText: '',
   navigationStyle: 'custom',
   disableScroll: true,
+  usingComponents: {
+    'swipe-delete-row': '../../components/swipe-delete-row/index',
+  },
   ...PAGE_WINDOW_DARK,
 };

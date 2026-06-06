@@ -30,15 +30,15 @@ describe('pickRecentActivityBenefitCards', () => {
         status: 'registered',
       },
       {
-        id: '6',
-        title: 'VAC',
-        date: '12/11-13',
-        location: '珠海',
+        id: '5',
+        title: 'EDC Thailand 2026',
+        date: '12/18-20',
+        location: '普吉岛',
         image: '',
         status: 'registered',
       },
     ]);
-    const all = [card(4), card(6)];
+    const all = [card(4), card(5)];
     const recent = pickRecentActivityBenefitCards(all, activities);
     expect(recent).toHaveLength(1);
     expect(recent[0]?.activityLegacyId).toBe(4);

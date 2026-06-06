@@ -1,4 +1,4 @@
-/** Stable remote placeholders (WeChat-safe; no Unsplash). */
+/** Default avatar placeholder (remote). */
 export const PLACEHOLDER_AVATAR =
   'https://picsum.photos/seed/sync-avatar-default/200/200';
 

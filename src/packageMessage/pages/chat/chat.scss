@@ -15,12 +15,15 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  box-sizing: border-box;
+  transition: padding-bottom 0.2s ease;
 }
 
 .s-temp-chat__scroll {
   flex-shrink: 0;
   width: 100%;
   box-sizing: border-box;
+  transition: height 0.2s ease;
 }
 
 .s-temp-chat__inner {

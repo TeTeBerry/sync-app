@@ -193,12 +193,17 @@ const TempChatPage: React.FC = () => {
     sessionsQuery,
   ]);
 
-  const composerStyle =
-    keyboardInset > 0
-      ? {
-          paddingBottom: `calc(24px + env(safe-area-inset-bottom, 0px) + ${keyboardInset}px)`,
-        }
-      : undefined;
+  const mainStyle =
+    keyboardInset > 0 ? { paddingBottom: `${keyboardInset}px` } : undefined;
+
+  const effectiveScrollHeight =
+    scrollHeight != null ? Math.max(160, scrollHeight - keyboardInset) : undefined;
+
+  useEffect(() => {
+    if (keyboardInset > 0) {
+      markStickToBottom();
+    }
+  }, [keyboardInset, markStickToBottom]);
 
   const acceptTrailing = showAcceptTeam ? (
     <Button
@@ -218,7 +223,9 @@ const TempChatPage: React.FC = () => {
     (isLoading || messagesLoading) && displayMessages.length === 0;
 
   const scrollStyle =
-    scrollHeight != null ? { height: `${scrollHeight}px` } : undefined;
+    effectiveScrollHeight != null
+      ? { height: `${effectiveScrollHeight}px` }
+      : undefined;
 
   if (showInitialLoading) {
     return (
@@ -255,7 +262,7 @@ const TempChatPage: React.FC = () => {
         trailing={acceptTrailing}
       />
 
-      <View className="s-temp-chat__main">
+      <View className="s-temp-chat__main" style={mainStyle}>
         <ScrollView
           scrollY
           showScrollbar={false}
@@ -322,7 +329,7 @@ const TempChatPage: React.FC = () => {
         </ScrollView>
 
         {canComposeMessages ? (
-          <View className="s-temp-chat__composer" style={composerStyle}>
+          <View className="s-temp-chat__composer">
             <View className="s-temp-chat__input-wrap">
               <Input
                 className="s-temp-chat__input"

@@ -1,5 +1,5 @@
 import './messages.scss';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import Taro, { useDidShow } from '@tarojs/taro';
 import { MessageCircle } from '../../../components/icons';
 import { BottomNavSlot } from '../../../components/navigation/BottomNav';
@@ -19,6 +19,7 @@ import { goTempChat, ROUTES } from '../../../utils/route';
 import { Button } from '../../../components/ui';
 import { ScrollView, Text, View } from '@tarojs/components';
 import MessageSessionRow from './MessageSessionRow';
+import { useSwipeDeleteRegistry } from './swipeDeleteRegistry';
 
 const MessagesPage: React.FC = () => {
   useEndRouteTransitionOnShow();
@@ -28,15 +29,30 @@ const MessagesPage: React.FC = () => {
   const { sessions, isLoading, isError, refetch } = useTeamChatSessionList();
   const { confirm, confirmDialog } = useConfirmDialog({ cancelText: '取消' });
   const [openRowId, setOpenRowId] = useState<string | null>(null);
+  const { closeOpenRow, registerRow, setOpenRow } = useSwipeDeleteRegistry();
   const apiEnabled = isLiveApi();
+  const isWeapp = process.env.TARO_ENV === 'weapp';
+
+  const closeRows = useCallback(() => {
+    if (isWeapp) {
+      setOpenRowId(null);
+      return;
+    }
+    closeOpenRow();
+  }, [closeOpenRow, isWeapp]);
 
   useDidShow(() => {
     void refetch({ background: true });
-    setOpenRowId(null);
+    closeRows();
   });
 
-  const sortedSessions = [...sessions].sort(
-    (a, b) => new Date(b.lastMessageAt).getTime() - new Date(a.lastMessageAt).getTime(),
+  const sortedSessions = useMemo(
+    () =>
+      [...sessions].sort(
+        (a, b) =>
+          new Date(b.lastMessageAt).getTime() - new Date(a.lastMessageAt).getTime(),
+      ),
+    [sessions],
   );
 
   const handleOpenSession = useCallback((sessionId: string) => {
@@ -55,7 +71,6 @@ const MessagesPage: React.FC = () => {
         title: '删除对话',
         message: `确定删除与「${session.peerName}」的会话？对方发来新消息后会重新出现。`,
         confirmText: '删除',
-        danger: true,
       });
       if (!confirmed) return;
 
@@ -69,19 +84,17 @@ const MessagesPage: React.FC = () => {
           parsed.postId,
           parsed.applicantUserId,
         );
-        setOpenRowId(null);
+        closeRows();
       } catch {
         void Taro.showToast({ title: '删除失败，请重试', icon: 'none' });
       }
     },
-    [apiEnabled, confirm],
+    [apiEnabled, closeRows, confirm],
   );
 
   const handleScroll = useCallback(() => {
-    if (openRowId) {
-      setOpenRowId(null);
-    }
-  }, [openRowId]);
+    closeRows();
+  }, [closeRows]);
 
   return (
     <View data-cmp="MessagesPage" className="s-page-with-tabbar">
@@ -127,7 +140,9 @@ const MessagesPage: React.FC = () => {
                     key={session.id}
                     session={session}
                     openRowId={openRowId}
-                    setOpenRowId={setOpenRowId}
+                    onOpenRowChange={setOpenRowId}
+                    registerRow={isWeapp ? undefined : registerRow}
+                    setOpenRow={isWeapp ? undefined : setOpenRow}
                     onOpen={handleOpenSession}
                     onDelete={handleDeleteSession}
                   />

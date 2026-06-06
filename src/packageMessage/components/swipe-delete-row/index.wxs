@@ -1,0 +1,110 @@
+var LOCK_THRESHOLD = 8;
+var actionWidth = 80;
+var startX = 0;
+var startY = 0;
+var startOffset = 0;
+var lock = '';
+var currentOffset = 0;
+
+function clamp(value, min, max) {
+  if (value < min) return min;
+  if (value > max) return max;
+  return value;
+}
+
+function contentInstance(ownerInstance) {
+  return ownerInstance.selectComponent('.s-messages__swipe-content');
+}
+
+function applyOffset(instance, offset, dragging) {
+  if (!instance) return;
+  instance.setStyle({
+    transform: 'translate3d(' + offset + 'px, 0, 0)',
+    transition: dragging ? 'none' : 'transform 0.18s ease-out',
+  });
+  if (dragging) {
+    instance.addClass('s-messages__swipe-content--dragging');
+  } else {
+    instance.removeClass('s-messages__swipe-content--dragging');
+  }
+}
+
+function readActionWidth(instance) {
+  if (!instance) return;
+  var dataset = instance.getDataset();
+  if (dataset && dataset.actionWidth) {
+    actionWidth = dataset.actionWidth;
+  }
+}
+
+function touchStart(event, ownerInstance) {
+  var touch = event.touches[0];
+  if (!touch) return;
+  var instance = contentInstance(ownerInstance);
+  readActionWidth(instance);
+  startX = touch.clientX;
+  startY = touch.clientY;
+  startOffset = currentOffset;
+  lock = '';
+}
+
+function touchMove(event, ownerInstance) {
+  var touch = event.touches[0];
+  if (!touch) return;
+  var dx = touch.clientX - startX;
+  var dy = touch.clientY - startY;
+
+  if (!lock) {
+    if (Math.abs(dx) > LOCK_THRESHOLD || Math.abs(dy) > LOCK_THRESHOLD) {
+      lock = Math.abs(dx) > Math.abs(dy) ? 'h' : 'v';
+    }
+  }
+
+  if (lock !== 'h') {
+    return;
+  }
+
+  var next = clamp(startOffset + dx, -actionWidth, 0);
+  currentOffset = next;
+  applyOffset(contentInstance(ownerInstance), next, true);
+  return false;
+}
+
+function touchEnd(event, ownerInstance) {
+  if (lock !== 'h') {
+    lock = '';
+    return;
+  }
+
+  var shouldOpen = currentOffset <= -actionWidth / 2;
+  var finalOffset = shouldOpen ? -actionWidth : 0;
+  currentOffset = finalOffset;
+  applyOffset(contentInstance(ownerInstance), finalOffset, false);
+  lock = '';
+  ownerInstance.callMethod('handleSwipeEnd', { open: shouldOpen });
+}
+
+function contentTap(event, ownerInstance) {
+  var instance = contentInstance(ownerInstance);
+  if (currentOffset < 0) {
+    currentOffset = 0;
+    applyOffset(instance, 0, false);
+    ownerInstance.callMethod('handleSwipeClose', {});
+    return false;
+  }
+  ownerInstance.callMethod('handleOpen', {});
+}
+
+function propObserver(newValue, oldValue, ownerInstance, instance) {
+  if (newValue === oldValue) return;
+  currentOffset = newValue;
+  applyOffset(instance, newValue, false);
+}
+
+module.exports = {
+  touchStart: touchStart,
+  touchMove: touchMove,
+  touchEnd: touchEnd,
+  contentTap: contentTap,
+  propObserver: propObserver,
+};

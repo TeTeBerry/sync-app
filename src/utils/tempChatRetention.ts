@@ -8,13 +8,11 @@ export const TEMP_CHAT_RETENTION_DAYS_AFTER_EVENT = 3;
 
 const DEFAULT_FESTIVAL_YEAR = 2026;
 
-/** Fallback when activity cache is empty (matches backend seed). */
+/** Fallback when activity cache is empty (matches backend seed: legacyIds 1, 4, 5). */
 const MOCK_ACTIVITY_DATE_BY_LEGACY_ID: Record<number, string> = {
   1: '12/11-13',
-  2: '03/22-23',
   4: '06/13-14',
   5: '12/18-20',
-  6: '04/18-19',
 };
 
 function inferYearFromActivityName(name?: string): number {

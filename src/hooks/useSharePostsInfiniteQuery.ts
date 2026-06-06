@@ -39,26 +39,39 @@ export function useSharePostsInfiniteQuery(options?: {
   const loadingMoreRef = useRef(false);
   const userId = getClientUserId();
 
-  const resetAndLoad = useCallback(async () => {
-    if (!enabled) return;
-    setIsLoading(true);
-    setIsError(false);
-    try {
-      const page = await fetchSharePostsPage({ limit: pageSize, sort });
-      setItems(page.items.map(mapShareFeedPost));
-      setNextCursor(page.nextCursor);
-      setHasMore(page.hasMore);
-      setSharerCount(page.sharerCount ?? 0);
-    } catch {
-      setIsError(true);
-      setItems([]);
-      setNextCursor(undefined);
-      setHasMore(false);
-      setSharerCount(0);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [enabled, pageSize, sort]);
+  const resetAndLoad = useCallback(
+    async (options?: { background?: boolean }) => {
+      if (!enabled) return;
+      const background = options?.background ?? false;
+      if (!background) {
+        setIsLoading(true);
+      }
+      setIsError(false);
+      try {
+        const page = await fetchSharePostsPage({ limit: pageSize, sort });
+        setItems(page.items.map(mapShareFeedPost));
+        setNextCursor(page.nextCursor);
+        setHasMore(page.hasMore);
+        setSharerCount(page.sharerCount ?? 0);
+      } catch {
+        if (!background) {
+          setIsError(true);
+          setItems([]);
+          setNextCursor(undefined);
+          setHasMore(false);
+          setSharerCount(0);
+        }
+      } finally {
+        if (!background) {
+          setIsLoading(false);
+        }
+      }
+    },
+    [enabled, pageSize, sort],
+  );
+
+  const itemsRef = useRef(items);
+  itemsRef.current = items;
 
   useEffect(() => {
     if (!enabled) {
@@ -69,7 +82,8 @@ export function useSharePostsInfiniteQuery(options?: {
       setIsLoading(false);
       return;
     }
-    void resetAndLoad();
+    const background = itemsRef.current.length > 0;
+    void resetAndLoad({ background });
   }, [enabled, resetAndLoad, userId]);
 
   const loadMore = useCallback(async () => {
@@ -105,9 +119,12 @@ export function useSharePostsInfiniteQuery(options?: {
     }
   }, [enabled, hasMore, nextCursor, pageSize, sort]);
 
-  const refetch = useCallback(async () => {
-    await resetAndLoad();
-  }, [resetAndLoad]);
+  const refetch = useCallback(
+    async (options?: { background?: boolean }) => {
+      await resetAndLoad(options);
+    },
+    [resetAndLoad],
+  );
 
   const patchItem = useCallback(
     (
@@ -136,6 +153,13 @@ export function useSharePostsInfiniteQuery(options?: {
     setItems((prev) => prev.filter((post) => post.id !== postId));
   }, []);
 
+  const prependItem = useCallback((post: HomeFeedPost) => {
+    setItems((prev) => {
+      if (prev.some((item) => item.id === post.id)) return prev;
+      return [mapShareFeedPost(post), ...prev];
+    });
+  }, []);
+
   return {
     items,
     hasMore,
@@ -147,5 +171,6 @@ export function useSharePostsInfiniteQuery(options?: {
     refetch,
     patchItem,
     removeItem,
+    prependItem,
   };
 }

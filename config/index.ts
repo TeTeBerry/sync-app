@@ -15,6 +15,7 @@ const plugins: (string | [string, Record<string, unknown>])[] = [
 ];
 if (process.env.TARO_ENV === 'weapp') {
   plugins.push(['@tarojs/plugin-html', {}]);
+  plugins.push(path.resolve(__dirname, 'plugins/weapp-swipe-row-void.js'));
 }
 
 // https://docs.taro.zone/docs/config-detail
@@ -51,6 +52,12 @@ export default defineConfig({
     /** 多页面共用组件时 SCSS 导入顺序不一致，忽略 css 合并顺序警告 */
     miniCssExtractPluginOption: {
       ignoreOrder: true,
+    },
+    /** Native hybrid .wxss still uses @import; silence Dart Sass 3 deprecation noise. */
+    sassLoaderOption: {
+      sassOptions: {
+        silenceDeprecations: ['import'],
+      },
     },
     /** Taro weapp already emits common + per-page chunks; keep vendor sideEffects for tree-shake. */
     webpackChain(chain) {

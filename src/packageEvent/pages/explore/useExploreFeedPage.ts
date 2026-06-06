@@ -18,7 +18,10 @@ import { isApiEnabled, isLiveApi } from '../../../constants/api';
 import type { HomeFeedPost } from '../../../types/post';
 import { requireAuth } from '../../../utils/authGate';
 import { getApiErrorMessage } from '../../../utils/apiErrorMessage';
-import { publishSharePost } from '../../../utils/publishSharePost';
+import {
+  publishSharePost,
+  sharePostToHomeFeedItem,
+} from '../../../utils/publishSharePost';
 import { useExploreShareActivity } from './useExploreShareActivity';
 
 export type ExploreFeedTab = 'all' | 'hot' | 'nearby' | 'following';
@@ -157,7 +160,7 @@ export function useExploreFeedPage() {
           throw new Error('请先配置 API 地址');
         }
 
-        await publishSharePost({
+        const post = await publishSharePost({
           body: trimmed,
           imageRefs: payload.images,
           activityLegacyId: shareActivity.activityLegacyId,
@@ -166,9 +169,25 @@ export function useExploreFeedPage() {
           tags: ['#现场'],
         });
 
-        await invalidatePostQueries();
-        await postsQuery.refetch();
+        const feedItem = sharePostToHomeFeedItem(post, {
+          eventTitle: shareActivity.eventTitle,
+          activityLegacyId: shareActivity.activityLegacyId,
+        });
+        const onNewSortTab = activeTab !== 'hot';
         setActiveTab('all');
+        if (onNewSortTab) {
+          postsQuery.prependItem(feedItem);
+        }
+        void (async () => {
+          await invalidatePostQueries();
+          if (onNewSortTab) {
+            try {
+              await postsQuery.refetch({ background: true });
+            } catch {
+              // Best-effort sync; optimistic row is already visible when prepended.
+            }
+          }
+        })();
         return true;
       } catch (error) {
         if (await handlePublishError(error)) {
@@ -182,6 +201,7 @@ export function useExploreFeedPage() {
       }
     },
     [
+      activeTab,
       guardPublish,
       handlePublishError,
       postsQuery,

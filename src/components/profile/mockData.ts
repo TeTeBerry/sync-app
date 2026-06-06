@@ -46,12 +46,12 @@ export const profileActivities: ProfileActivityItem[] = [
     status: 'registered',
   },
   {
-    id: '2',
-    title: 'Ultra Miami 2026',
-    date: '2025-03-28',
-    location: '迈阿密',
-    image: 'https://picsum.photos/seed/sync-act-2/144/144',
-    status: 'attended',
+    id: '5',
+    title: 'EDC Thailand 2026',
+    date: '2026-12-18',
+    location: '普吉岛 Rhythm Park',
+    image: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=600&q=80',
+    status: 'registered',
   },
 ];
 
