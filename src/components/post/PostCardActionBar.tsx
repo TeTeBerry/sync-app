@@ -1,5 +1,5 @@
 import React from 'react';
-import { Heart, MessageCircle, ThumbsUp } from '../../components/icons';
+import { Heart, MessageCircle } from '../../components/icons';
 import { Button } from '../ui';
 import { postActionIconColor } from '../../utils/postActionColors';
 import { Text, View } from '@tarojs/components';
@@ -50,7 +50,7 @@ const PostCardActionBar: React.FC<PostCardActionBarProps> = ({
     .filter(Boolean)
     .join('');
 
-  const LikeIcon = isHome ? ThumbsUp : Heart;
+  const LikeIcon = Heart;
 
   return (
     <View className={isHome ? 's-home-post__actions' : 's-event-post__actions'}>

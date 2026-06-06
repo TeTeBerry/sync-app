@@ -11,7 +11,7 @@ function signupEvent(
     date: '06/01',
     location: 'SZ',
     image: '',
-    category: 'edm',
+    category: '电音节',
     hot: false,
     attendees: 0,
     going: false,
@@ -20,29 +20,39 @@ function signupEvent(
 }
 
 describe('pickHomeFeaturedEvents', () => {
-  it('returns at most two events with hot items first', () => {
+  it('orders hot items before non-hot', () => {
     const events = [
       signupEvent({ id: 1, title: 'Regular A', hot: false }),
       signupEvent({ id: 2, title: 'Hot B', hot: true }),
       signupEvent({ id: 3, title: 'Regular C', hot: false }),
-      signupEvent({ id: 4, title: 'Hot D', hot: true }),
+      signupEvent({ id: 5, title: 'Hot E', hot: true }),
     ];
 
     const picked = pickHomeFeaturedEvents(events);
-    expect(picked).toHaveLength(2);
-    expect(picked.map((item) => item.title)).toEqual(['Hot B', 'Hot D']);
-    expect(picked.every((item) => item.isHot)).toBe(true);
+    expect(picked.map((item) => item.title)).toEqual([
+      'Hot B',
+      'Hot E',
+      'Regular A',
+      'Regular C',
+    ]);
   });
 
-  it('fills remaining slots with non-hot events when fewer than two hot', () => {
+  it('pins storm fest (legacyId 4) to the first card', () => {
     const events = [
       signupEvent({ id: 1, title: 'Regular A', hot: false }),
       signupEvent({ id: 2, title: 'Hot B', hot: true }),
+      signupEvent({ id: 4, title: '风暴电音节 深圳站', hot: true }),
       signupEvent({ id: 3, title: 'Regular C', hot: false }),
     ];
 
     const picked = pickHomeFeaturedEvents(events);
-    expect(picked.map((item) => item.title)).toEqual(['Hot B', 'Regular A']);
+    expect(picked[0]?.title).toBe('风暴电音节 深圳站');
+    expect(picked.map((item) => item.title)).toEqual([
+      '风暴电音节 深圳站',
+      'Hot B',
+      'Regular A',
+      'Regular C',
+    ]);
   });
 
   it('maps signup fields into featured event shape', () => {

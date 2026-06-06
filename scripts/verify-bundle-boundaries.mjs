@@ -24,14 +24,16 @@ const MAIN_PACKAGE_GLOBS = [
   'components/post',
   'components/event',
   'components/auth',
+  'utils/activityMapMarkers.ts',
+  'utils/activityMapRoutePlan.ts',
+  'utils/tencentMap.ts',
+  'utils/tencentMapRoutePlan.ts',
 ];
 
 /** Path segments that pull heavy event subpackage / canvas into main chunk */
 const FORBIDDEN_IN_MAIN = [
+  /packageEvent\//,
   /packageEvent\/pages\/(my-itinerary|exclusive-itinerary|event-map)\//,
-  /components\/event-map\/eventMapPaint/,
-  /components\/event-map\/eventMapCanvasRuntime/,
-  /components\/event-map\/useEventMapController/,
   /itineraryWallpaperDraw/,
   /generateItineraryWallpaper/,
 ];
@@ -61,9 +63,6 @@ function isUnderIcons(file) {
 
 function isMainPackageFile(file) {
   const r = rel(file).replace(/\\/g, '/');
-  if (r.startsWith('src/components/event-map/')) {
-    return false;
-  }
   if (r.startsWith('src/components/event/')) {
     return true;
   }

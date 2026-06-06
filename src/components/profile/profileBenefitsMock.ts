@@ -57,7 +57,7 @@ export function buildMockProfileBenefits(): ProfileBenefits {
   };
 }
 
-/** Second offline card — Pro+ on VAC (activity 6) for “共 2 张” demo. */
+/** Second offline card — Pro+ on EDC Thailand (activity 5) for “共 2 张” demo. */
 export function buildMockProPlusEntitlement(): EventPackageEntitlement {
   const proPlusTier =
     MOCK_PACKAGE_CATALOG.tiers.find((tier) => tier.id === 'pro_plus') ??
@@ -68,7 +68,7 @@ export function buildMockProPlusEntitlement(): EventPackageEntitlement {
   const pinLimit = proPlusTier.limits.postPinCount ?? 1;
 
   return {
-    activityLegacyId: 6,
+    activityLegacyId: 5,
     tierId: 'pro_plus',
     tierName: proPlusTier.name,
     paidTierId: 'pro_plus',

@@ -34,6 +34,7 @@ describe('activityDetailCache', () => {
       date: '06/01',
       venue: 'Shanghai',
       distance: '',
+      category: 'EDM节',
       isHot: true,
       attendeeCount: '10+',
       remaining: '',

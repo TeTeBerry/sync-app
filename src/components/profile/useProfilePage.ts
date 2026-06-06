@@ -1,8 +1,8 @@
 import Taro, { useDidShow } from '@tarojs/taro';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { isLiveApi } from '../../constants/api';
+import { useAccountRisk } from '../../hooks/useAccountRisk';
 import {
-  useAccountRisk,
   useBlockedUsersQuery,
   useCurrentUserQuery,
   useProfileSummaryQuery,

@@ -1,5 +1,5 @@
 import Taro from '@tarojs/taro';
-import { createOffscreenCanvas } from '../../../components/event-map/mapOffscreenCanvas';
+import { createOffscreenCanvas } from '../../../utils/offscreenCanvas';
 import { drawItineraryWallpaper } from './itineraryWallpaperDraw';
 import type { ItineraryWallpaperDrawParams } from './itineraryWallpaperDraw';
 import type { ItineraryWallpaperSection } from './itineraryWallpaperParse';

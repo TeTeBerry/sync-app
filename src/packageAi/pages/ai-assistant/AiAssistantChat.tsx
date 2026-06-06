@@ -7,7 +7,7 @@ import { ChatMessageList } from '../../../components/ai-chat/ChatMessageList';
 import { ChatComposer } from '../../../components/ai-chat/ChatComposer';
 import { AccountRiskBanner } from '../../../components/account-risk/AccountRiskBanner';
 import { DegradedMatchBanner } from '../../../components/ai-chat/DegradedMatchBanner';
-import { useAccountRisk } from '../../../hooks/useSyncApi';
+import { useAccountRisk } from '../../../hooks/useAccountRisk';
 import { AiBuddyPostSheet } from '../../../components/ai-chat/AiBuddyPostSheet';
 import { AiGuidePlanSheet } from '../../../components/ai-chat/AiGuidePlanSheet';
 import { useKeyboardInset } from '../../../hooks/useKeyboardInset';

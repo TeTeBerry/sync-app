@@ -63,6 +63,7 @@ export {
   Shield,
   ShieldAlert,
   ShieldCheck,
+  Smile,
   Sparkles,
   Star,
   ThumbsUp,

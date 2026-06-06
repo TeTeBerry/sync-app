@@ -1,6 +1,33 @@
 .s-explore-page {
-  background: #06040f;
+  background: #000000;
   color: var(--foreground);
+}
+
+.s-explore-page__scroll {
+  width: 100%;
+  box-sizing: border-box;
+  background: #000;
+}
+
+.s-explore-page__inner {
+  width: 100%;
+  box-sizing: border-box;
+  /* ScrollView already ends above tab bar; only a small tail gutter. */
+  padding-bottom: 12px;
+}
+
+.s-explore-page .s-feed-post-list__end {
+  padding: 8px 0 0;
+}
+
+.s-explore-page__empty {
+  padding: 48px var(--s-page-gutter) 24px;
+  text-align: center;
+}
+
+.s-explore-page__empty-text {
+  color: var(--muted-foreground);
+  font-size: var(--s-type-body-sm);
 }
 
 .s-explore-page__main {
@@ -8,86 +35,4 @@
   flex-direction: column;
   min-height: 0;
   flex: 1;
-}
-
-.s-explore-map {
-  position: relative;
-  flex: 1;
-  min-height: 280px;
-  width: 100%;
-}
-
-.s-explore-map__map {
-  width: 100%;
-  height: 100%;
-}
-
-.s-explore-map__hud {
-  position: absolute;
-  left: 12px;
-  right: 12px;
-  top: 8px;
-  z-index: 2;
-  pointer-events: none;
-}
-
-.s-explore-map__hud-title {
-  color: #fff;
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-}
-
-.s-explore-map__hud-sub {
-  margin-top: 4px;
-  color: rgba(255, 255, 255, 0.55);
-  font-size: 11px;
-}
-
-.s-explore-map__chips {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 10px;
-}
-
-.s-explore-map__chip {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  padding: 4px 8px;
-  border-radius: 999px;
-  background: rgba(12, 6, 24, 0.72);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-}
-
-.s-explore-map__chip-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  margin-right: 5px;
-}
-
-.s-explore-map__chip-dot--onsite {
-  background-color: #ff4899;
-}
-
-.s-explore-map__chip-dot--want {
-  background-color: #ff9944;
-}
-
-.s-explore-map__chip-dot--pulse {
-  background-color: #7b4dff;
-}
-
-.s-explore-map__chip-text {
-  color: rgba(255, 255, 255, 0.88);
-  font-size: 10px;
-}
-
-.s-explore-map__loading {
-  margin-top: 8px;
-  color: rgba(255, 255, 255, 0.45);
-  font-size: 11px;
 }

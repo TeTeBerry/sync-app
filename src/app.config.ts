@@ -1,5 +1,20 @@
+import {
+  EXPLORE_ROUTE_PLAN_APP_CONFIG,
+  isExploreRoutePlanPluginBuildEnabled,
+} from './packageEvent/pages/explore/exploreRoutePlanPlugin';
+
 /** 应用配置文件：不要从这里 `import @tarojs/taro`，会连带加载运行时并在构建阶段触发浏览器 API */
+const routePlanPluginBuildEnabled = isExploreRoutePlanPluginBuildEnabled();
+
 export default {
+  /** 微信 DarkMode：window / tabBar / 页面背景随系统深浅色切换 */
+  darkmode: true,
+  themeLocation: 'theme.json',
+  /** 未授权时写入 app.json 会导致模拟器无法启动，默认关闭；见 TARO_APP_ENABLE_ROUTE_PLAN_PLUGIN */
+  ...(routePlanPluginBuildEnabled ? { plugins: EXPLORE_ROUTE_PLAN_APP_CONFIG } : {}),
+  ...(routePlanPluginBuildEnabled
+    ? { requiredPrivateInfos: ['getLocation'] as const }
+    : {}),
   /** 微信「代码质量」要求开启按需注入，见开发者工具 → 代码质量 → 组件 */
   lazyCodeLoading: 'requiredComponents',
   /** 主包：仅 3 个 Tab，缩小首包体积 */
@@ -14,6 +29,7 @@ export default {
         'pages/exclusive-itinerary/index',
         'pages/my-itinerary/index',
         'pages/explore/index',
+        'pages/explore-storm-floor/index',
       ],
     },
     {
@@ -41,10 +57,10 @@ export default {
   ],
   tabBar: {
     custom: true,
-    color: '#888888',
-    selectedColor: '#ffffff',
-    backgroundColor: '#000000',
-    borderStyle: 'black',
+    color: '@tabFontColor',
+    selectedColor: '@tabSelectedColor',
+    backgroundColor: '@tabBgColor',
+    borderStyle: '@tabBorderStyle',
     list: [
       { pagePath: 'pages/index/index', text: '首页' },
       { pagePath: 'pages/events/index', text: '活动' },
@@ -53,8 +69,10 @@ export default {
   },
   window: {
     navigationStyle: 'custom',
-    backgroundTextStyle: 'light',
-    backgroundColor: '#000000',
+    backgroundTextStyle: '@bgTxtStyle',
+    backgroundColor: '@bgColor',
+    backgroundColorTop: '@bgColorTop',
+    backgroundColorBottom: '@bgColorBottom',
   },
   /** LLM itinerary generation can exceed the default 10s request limit. */
   networkTimeout: {
@@ -64,6 +82,9 @@ export default {
     downloadFile: 60000,
   },
   permission: {
+    'scope.userLocation': {
+      desc: '你的位置信息将用于路线规划起点',
+    },
     'scope.writePhotosAlbum': {
       desc: '保存行程屏保图片到你的相册',
     },

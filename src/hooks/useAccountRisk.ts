@@ -7,7 +7,7 @@ import {
   isAccountPublishRestricted,
 } from '../utils/accountRisk';
 import type { QueryEnableOptions } from './sync/types';
-import { useCurrentUserQuery } from './useSyncApi';
+import { useCurrentUserQuery } from './sync/profile';
 
 export function useAccountRisk(options?: QueryEnableOptions) {
   const query = useCurrentUserQuery(options);

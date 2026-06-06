@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 import Taro from '@tarojs/taro';
+import { useAccountRisk } from '../../../hooks/useAccountRisk';
 import { invalidatePostQueries } from '../../../hooks/useSyncApi';
-import { useAccountRisk } from '../../../hooks/useSyncApi';
 import { publishBuddyPostFromForm } from '../../../utils/publishBuddyPost';
 import { isApiEnabled } from '../../../constants/api';
 import type { EventDetailPost } from '../../../types/post';

@@ -1,6 +1,9 @@
+import type { ActivityMapRegion } from '../constants/activityMapRegion';
 import type { HomeSummary } from '../types/backend';
 import { ACTIVITY_GUEST_AVATARS } from '../constants/activityGuestAvatars';
 import { resolveActivityThumb } from '../constants/activityImages';
+import { getActivityTypeLabel } from '../constants/activityType';
+import { HOME_FEATURED_PIN_LEGACY_ID } from '../constants/homeFeatured';
 import { parseActivityLegacyId } from './activityLegacyId';
 import { sanitizeRemoteImageUrl } from './imageUrl';
 
@@ -11,6 +14,9 @@ export interface EventCardUi {
   title: string;
   date: string;
   location: string;
+  latitude?: number;
+  longitude?: number;
+  region?: ActivityMapRegion;
   distance: string;
   image: string;
   attendees: number;
@@ -27,6 +33,7 @@ export type FeaturedEvent = {
   date: string;
   venue: string;
   distance: string;
+  category: string;
   isHot: boolean;
   attendeeCount: string;
   remaining: string;
@@ -66,6 +73,9 @@ export function mapActivitiesToEvents(
       going: false,
       date: activity.date ?? '',
       location: activity.location ?? '',
+      latitude: activity.latitude,
+      longitude: activity.longitude,
+      region: activity.region as ActivityMapRegion | undefined,
       image: resolveActivityThumb(
         activity.legacyId,
         sanitizeRemoteImageUrl(activity.image) ?? activity.image,
@@ -74,7 +84,7 @@ export function mapActivitiesToEvents(
       hot: Boolean(activity.hot),
       attendees: activity.attendees ?? 0,
       distance: activity.hot ? '热门' : '',
-      category: activity.hot ? '户外电音' : 'EDM节',
+      category: getActivityTypeLabel(activity.activityType),
     }));
 }
 
@@ -92,6 +102,7 @@ export function mapSignupEventToFeaturedEvent(item: SignupEvent): FeaturedEvent 
     title: item.title,
     date: item.date,
     venue: item.location,
+    category: item.category ?? '',
     isHot,
     distance: item.location ?? '',
     attendeeCount: `${item.attendees}+`,
@@ -111,18 +122,24 @@ export function mapBackendActivityToFeaturedEvent(
     date: activity.date ?? '',
     location: activity.location ?? '',
     image: sanitizeRemoteImageUrl(activity.image) ?? activity.image ?? '',
-    category: '',
+    category: getActivityTypeLabel(activity.activityType),
     hot: Boolean(activity.hot),
     attendees: activity.attendees ?? 0,
     going: false,
   });
 }
 
-/** 首页精选：优先 hot，最多 2 条 */
+/** 首页热门活动：风暴电音节置顶，其余热门优先，支持横向滑动展示多场 */
 export function pickHomeFeaturedEvents(signupEvents: SignupEvent[]): FeaturedEvent[] {
   const hot = signupEvents.filter((item) => item.hot);
   const rest = signupEvents.filter((item) => !item.hot);
-  return [...hot, ...rest]
-    .slice(0, 2)
-    .map((item) => mapSignupEventToFeaturedEvent(item));
+  const ordered = [...hot, ...rest];
+  const pinIndex = ordered.findIndex(
+    (item) => parseActivityLegacyId(item.id) === HOME_FEATURED_PIN_LEGACY_ID,
+  );
+  if (pinIndex > 0) {
+    const [pinned] = ordered.splice(pinIndex, 1);
+    ordered.unshift(pinned);
+  }
+  return ordered.map((item) => mapSignupEventToFeaturedEvent(item));
 }

@@ -163,6 +163,7 @@ export function ChatComposer({
 
   const isBusy = isStreaming;
   const isComposerDisabled = isStreaming || isLoadingHistory;
+  const isTeamPostFlow = conversationFlow === 'collect_post_body';
 
   const handlePickImages = useCallback(async () => {
     if (isBusy) return;
@@ -217,7 +218,7 @@ export function ChatComposer({
         recordAiShortcutTagUse(chip.submitText);
         setShortcutTags(getTopAiShortcutTags());
       }
-      onSubmit(chip.submitText, pendingImages);
+      onSubmit(chip.submitText, isTeamPostFlow ? undefined : pendingImages);
     },
     [
       activityLegacyId,
@@ -225,11 +226,14 @@ export function ChatComposer({
       onAiGuideClick,
       onBuddyPostClick,
       onSubmit,
+      isTeamPostFlow,
       pendingImages,
     ],
   );
 
-  const canSend = Boolean(input.trim() || pendingImages.length) && !isComposerDisabled;
+  const canSend =
+    Boolean(input.trim() || (!isTeamPostFlow && pendingImages.length)) &&
+    !isComposerDisabled;
 
   return (
     <>
@@ -270,7 +274,7 @@ export function ChatComposer({
       <AiMatchQuotaBanner />
 
       <View className="s-ai-assistant-chat__composer">
-        {pendingImages.length > 0 ? (
+        {!isTeamPostFlow && pendingImages.length > 0 ? (
           <ScrollView
             scrollY
             enhanced
@@ -302,14 +306,16 @@ export function ChatComposer({
           </ScrollView>
         ) : null}
         <View className="s-ai-assistant-chat__composer-inner">
-          <Button
-            className="s-ai-assistant-chat__attach-btn"
-            disabled={isComposerDisabled || pendingImages.length >= MAX_IMAGES}
-            aria-label="上传图片"
-            onClick={() => void handlePickImages()}
-          >
-            <ImagePlus size={18} />
-          </Button>
+          {!isTeamPostFlow ? (
+            <Button
+              className="s-ai-assistant-chat__attach-btn"
+              disabled={isComposerDisabled || pendingImages.length >= MAX_IMAGES}
+              aria-label="上传图片"
+              onClick={() => void handlePickImages()}
+            >
+              <ImagePlus size={18} />
+            </Button>
+          ) : null}
           <Input
             variant="ai-assistant-chat"
             type="text"
@@ -319,7 +325,9 @@ export function ChatComposer({
             adjustPosition={false}
             cursorSpacing={12}
             onInput={(e) => onInputChange(readComposerInputValue(e))}
-            onConfirm={() => onSubmit(input, pendingImages)}
+            onConfirm={() =>
+              onSubmit(input, isTeamPostFlow ? undefined : pendingImages)
+            }
           />
           <Button
             className="s-ai-assistant-chat__clear-btn"
@@ -335,7 +343,7 @@ export function ChatComposer({
               canSend && 's-ai-assistant-chat__send--active',
             )}
             disabled={!canSend}
-            onClick={() => onSubmit(input, pendingImages)}
+            onClick={() => onSubmit(input, isTeamPostFlow ? undefined : pendingImages)}
           >
             <Send size={16} />
           </Button>

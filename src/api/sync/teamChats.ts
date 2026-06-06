@@ -33,6 +33,14 @@ export function markTeamChatRead(postId: string, applicantUserId: string) {
   );
 }
 
+export function dismissTeamChatSession(postId: string, applicantUserId: string) {
+  return apiPost<{ ok: true }>(
+    `/team-chats/${encodeURIComponent(postId)}/${encodeURIComponent(applicantUserId)}/dismiss`,
+    {},
+    ownerQueryParams(),
+  );
+}
+
 export function openTeamChatByOwner(postId: string, applicantUserId: string) {
   return apiPost<TeamChatSession>(
     `/team-chats/${encodeURIComponent(postId)}/${encodeURIComponent(applicantUserId)}/open`,

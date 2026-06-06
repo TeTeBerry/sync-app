@@ -293,7 +293,7 @@ describe('listPaidEntitlements', () => {
   };
 
   const freeScoped: EventPackageEntitlement = {
-    activityLegacyId: 6,
+    activityLegacyId: 5,
     tierId: 'free',
     tierName: '免费版',
     paidTierId: null,
@@ -384,11 +384,11 @@ describe('buildEventBenefitCardModel tier display', () => {
     expect(card.rows.find((row) => row.id === 'post-pin')?.quotaLabel).toBe('剩 1/2');
   });
 
-  it('buildMockProPlusEntitlement is Pro+ on activity 6 with pin', () => {
+  it('buildMockProPlusEntitlement is Pro+ on activity 5 with pin', () => {
     const ent = buildMockProPlusEntitlement();
-    expect(ent.activityLegacyId).toBe(6);
+    expect(ent.activityLegacyId).toBe(5);
     expect(ent.paidTierId).toBe('pro_plus');
-    const card = buildEventBenefitCardModel(ent, { title: '2026横琴VAC电音节' });
+    const card = buildEventBenefitCardModel(ent, { title: 'EDC Thailand 2026' });
     expect(card.tierId).toBe('pro_plus');
     expect(card.rows.find((row) => row.id === 'post-pin')?.label).toBe('主页置顶');
   });

@@ -46,14 +46,6 @@ export const profileActivities: ProfileActivityItem[] = [
     status: 'registered',
   },
   {
-    id: '6',
-    title: '2026横琴VAC电音节',
-    date: '2026-04-18',
-    location: '珠海',
-    image: 'https://picsum.photos/seed/sync-act-6/144/144',
-    status: 'registered',
-  },
-  {
     id: '2',
     title: 'Ultra Miami 2026',
     date: '2025-03-28',
@@ -106,15 +98,5 @@ export const profilePosts: ProfilePostItem[] = [
         appliedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
       },
     ],
-  },
-  {
-    id: 'post-4',
-    title: '2026横琴VAC电音节',
-    content: '4月横琴 VAC 已组队，还可以一起现场集合，想认识同频朋友的可以来。',
-    status: '已组队',
-    likes: 18,
-    comments: 3,
-    date: '2026-04-20',
-    activityLegacyId: 6,
   },
 ];

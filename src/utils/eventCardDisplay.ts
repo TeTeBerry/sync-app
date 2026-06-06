@@ -51,6 +51,15 @@ export function formatEventFullDate(date?: string, title?: string): string {
   return `${year}年${trimmed}`;
 }
 
+export function formatEventHeroMetaLine(date?: string, location?: string): string {
+  const datePart = date?.trim() ?? '';
+  const locationPart = location?.trim() ?? '';
+  if (datePart && locationPart) {
+    return `${datePart} · ${locationPart}`;
+  }
+  return datePart || locationPart;
+}
+
 export function formatEventHeroSubtitle(title?: string, location?: string): string {
   const year = extractYearFromText(title);
   const locationPart = location?.split(/[·,，]/)[0]?.trim();

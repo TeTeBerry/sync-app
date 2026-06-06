@@ -1,0 +1,28 @@
+{
+  "light": {
+    "navBgColor": "#000000",
+    "navTxtStyle": "white",
+    "bgColor": "#000000",
+    "bgColorContent": "#000000",
+    "bgTxtStyle": "light",
+    "bgColorTop": "#000000",
+    "bgColorBottom": "#000000",
+    "tabFontColor": "#888888",
+    "tabSelectedColor": "#ffffff",
+    "tabBgColor": "#000000",
+    "tabBorderStyle": "black"
+  },
+  "dark": {
+    "navBgColor": "#000000",
+    "navTxtStyle": "white",
+    "bgColor": "#000000",
+    "bgColorContent": "#000000",
+    "bgTxtStyle": "light",
+    "bgColorTop": "#000000",
+    "bgColorBottom": "#000000",
+    "tabFontColor": "#888888",
+    "tabSelectedColor": "#ffffff",
+    "tabBgColor": "#000000",
+    "tabBorderStyle": "black"
+  }
+}

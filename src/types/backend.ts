@@ -12,7 +12,12 @@ export interface BackendActivity {
   alias?: string[];
   date?: string;
   location?: string;
+  latitude?: number;
+  longitude?: number;
+  region?: 'domestic' | 'overseas' | 'hmt';
   image?: string;
+  /** Catalog type: outdoor festival (`festival`) or indoor EDM (`indoor`). */
+  activityType?: 'festival' | 'indoor';
   hot?: boolean;
   attendees?: number;
   damaiProjectId?: string;
@@ -92,6 +97,15 @@ export interface ReportPayload {
 }
 
 export interface ReportResult {
+  ok: true;
+  id: string;
+}
+
+export interface FeedbackPayload {
+  content: string;
+}
+
+export interface FeedbackResult {
   ok: true;
   id: string;
 }
@@ -332,6 +346,14 @@ export interface EventPostsPage {
   hasMore: boolean;
 }
 
+export interface SharePostsPage {
+  items: HomeFeedPost[];
+  nextCursor?: string;
+  hasMore: boolean;
+  /** Distinct share authors — present on the first page only. */
+  sharerCount?: number;
+}
+
 export interface EventDetailPost {
   id: string;
   userId?: string;
@@ -353,7 +375,13 @@ export interface EventDetailPost {
   authorOnSiteVerified?: boolean;
 }
 
-export type PostContentType = 'team' | 'accommodation' | 'carpool' | 'ticket' | 'other';
+export type PostContentType =
+  | 'team'
+  | 'accommodation'
+  | 'carpool'
+  | 'ticket'
+  | 'share'
+  | 'other';
 
 export interface CreatePostPayload {
   body: string;

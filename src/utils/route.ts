@@ -28,6 +28,7 @@ import {
 import type { BackendActivity } from '../types/backend';
 import { isAuthGated, requireAuth } from './authGate';
 import type { LoginInterceptFeature } from '../stores/loginInterceptStore';
+import { setEventsViewTabIntent } from './eventsTabIntent';
 
 export { parseActivityLegacyId } from './activityLegacyId';
 
@@ -46,6 +47,7 @@ export const ROUTES = {
   EXCLUSIVE_ITINERARY: '/packageEvent/pages/exclusive-itinerary/index',
   MY_ITINERARY: '/packageEvent/pages/my-itinerary/index',
   EXPLORE: '/packageEvent/pages/explore/index',
+  EXPLORE_STORM_FLOOR: '/packageEvent/pages/explore-storm-floor/index',
   NOTIFICATIONS: '/packageProfile/pages/notifications/index',
   MESSAGES: '/packageMessage/pages/messages/index',
   TEMP_CHAT: '/packageMessage/pages/chat/index',
@@ -370,6 +372,12 @@ function navigateToSafe(url: string, _options?: { eventId?: number }) {
 }
 
 /** Tab pages: switchTab keeps tab stacks alive (smoother than reLaunch). */
+/** Open activities tab on the list view (e.g. home 「全部」). */
+export function goEventsListTab() {
+  setEventsViewTabIntent('list');
+  switchTabTo(ROUTES.EVENTS);
+}
+
 export function switchTabTo(url: RoutePath) {
   if (!isTabRoute(url)) {
     reLaunchTo(url);
@@ -654,6 +662,12 @@ export function goExplore() {
   preloadEventSubpackage();
   preloadPageSafe(ROUTES.EXPLORE);
   navigateToSafe(ROUTES.EXPLORE);
+}
+
+export function goExploreStormFloor() {
+  preloadEventSubpackage();
+  preloadPageSafe(ROUTES.EXPLORE_STORM_FLOOR);
+  navigateToSafe(ROUTES.EXPLORE_STORM_FLOOR);
 }
 
 export function goTempChat(sessionId: string) {

@@ -56,6 +56,8 @@ export default defineConfig({
     webpackChain(chain) {
       chain.optimization.usedExports(true);
       chain.optimization.sideEffects(true);
+      // Weapp emits per-page + subpackage chunks; async splitChunks hints are noisy in dev.
+      chain.performance.hints(false);
     },
     postcss: {
       pxtransform: {

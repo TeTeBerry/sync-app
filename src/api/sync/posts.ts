@@ -4,6 +4,7 @@ import type {
   EventDetailPost,
   EventPostsPage,
   HomeFeedPost,
+  SharePostsPage,
   PostActionResult,
   PostApplicationItem,
   PostCommentItem,
@@ -26,6 +27,21 @@ export function fetchPopularPosts(limit = 20) {
 
 export function fetchAllPosts() {
   return apiGet<HomeFeedPost[]>('/posts/all', ownerQueryParams());
+}
+
+export type FetchSharePostsOptions = {
+  limit?: number;
+  sort?: 'new' | 'hot';
+  cursor?: string;
+};
+
+export function fetchSharePostsPage(options?: FetchSharePostsOptions) {
+  const params = mergeOwnerQueryParams({
+    ...(options?.limit != null ? { limit: String(options.limit) } : {}),
+    ...(options?.sort ? { sort: options.sort } : {}),
+    ...(options?.cursor ? { cursor: options.cursor } : {}),
+  });
+  return apiGet<SharePostsPage>('/posts/share', params);
 }
 
 export type FetchPostsByActivityPageOptions = {

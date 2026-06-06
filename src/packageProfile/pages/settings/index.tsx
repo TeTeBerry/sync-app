@@ -23,10 +23,11 @@ import { isLoggedIn } from '../../../utils/authStorage';
 import { Button } from '../../../components/ui';
 import { ScrollView, Text, View } from '@tarojs/components';
 import { AccountRiskBanner } from '../../../components/account-risk/AccountRiskBanner';
-import { useAccountRisk } from '../../../hooks/useSyncApi';
+import { useAccountRisk } from '../../../hooks/useAccountRisk';
 import { BlockedUsersSettings } from './components/BlockedUsersSettings';
 import { MatchPreferencesSettings } from './components/MatchPreferencesSettings';
 import { AppealSettings } from './components/AppealSettings';
+import { HelpFeedbackSettings } from './components/HelpFeedbackSettings';
 import { LEGAL_DOC_LIST } from '../../../legal';
 import { goLegalDocument } from '../../../utils/legalRoute';
 type SettingsSection =
@@ -60,21 +61,6 @@ const PRIVACY_DESCS: Record<PrivacyLevel, string> = {
   friends: '仅互相关注的用户可见',
   private: '仅自己可见',
 };
-
-const FAQ_QA = [
-  {
-    q: '如何发布组队帖？',
-    a: '进入活动详情页，通过 AI 助手描述你的需求，或在「我的帖子」中管理已发布内容。',
-  },
-  {
-    q: '如何找到同行伙伴？',
-    a: '浏览热门帖子或在活动详情页使用 AI 精准匹配，找到志同道合的队友。',
-  },
-  {
-    q: '如何提升个人影响力？',
-    a: '参与活动、成功组队、发布优质帖子均可获得互动与认可。',
-  },
-] as const;
 
 const SettingsPage: React.FC = () => {
   useEndRouteTransitionOnShow();
@@ -169,10 +155,6 @@ const SettingsPage: React.FC = () => {
     },
     [setStorePrivacyLevel],
   );
-
-  const submitFeedback = useCallback(() => {
-    void Taro.showToast({ title: '反馈已提交，感谢！', icon: 'success' });
-  }, []);
 
   const privacyOptions: PrivacyLevel[] = ['public', 'friends', 'private'];
 
@@ -298,21 +280,7 @@ const SettingsPage: React.FC = () => {
             </View>
           )}
 
-          {section === 'help' && (
-            <>
-              <View className="s-settings__card s-settings__faq">
-                {FAQ_QA.map((item, idx) => (
-                  <View key={idx} className="s-settings__faq-item">
-                    <View className="s-settings__faq-q">{item.q}</View>
-                    <View className="s-settings__faq-a">{item.a}</View>
-                  </View>
-                ))}
-              </View>
-              <Button className="s-settings__feedback-btn" onClick={submitFeedback}>
-                <Text className="s-btn-label">提交反馈</Text>
-              </Button>
-            </>
-          )}
+          {section === 'help' && <HelpFeedbackSettings />}
         </View>
       )}
     </View>

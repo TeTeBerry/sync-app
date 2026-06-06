@@ -1,4 +1,5 @@
 import {
+  dismissTeamChatSession,
   fetchTeamChatMessages,
   fetchTeamChatSessions,
   markTeamChatRead,
@@ -145,6 +146,32 @@ export async function markTeamChatReadAndInvalidate(
 ) {
   patchTeamChatSessionUnreadInCache(postId, applicantUserId, 0);
   return markTeamChatRead(postId, applicantUserId);
+}
+
+function removeTeamChatSessionFromCache(sessionId: string) {
+  const userId = resolveRequestUserId();
+  const queryKey = [...teamChatSessionsQueryKey(userId)];
+
+  setCacheData<TeamChatSession[]>(queryKey, (prev) => {
+    if (!prev?.length) return prev;
+    const next = prev.filter((session) => session.sessionId !== sessionId);
+    return next.length === prev.length ? prev : next;
+  });
+  broadcastCacheData(queryKey);
+}
+
+export async function dismissTeamChatSessionAndInvalidate(
+  postId: string,
+  applicantUserId: string,
+) {
+  const sessionId = buildTeamChatSessionId(postId, applicantUserId);
+  removeTeamChatSessionFromCache(sessionId);
+  try {
+    await dismissTeamChatSession(postId, applicantUserId);
+  } catch (error) {
+    invalidateTeamChatQueries();
+    throw error;
+  }
 }
 
 export async function openTeamChatByOwnerAndInvalidate(

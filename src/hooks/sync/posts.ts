@@ -22,6 +22,7 @@ import {
   persistPopularPosts,
 } from '../../utils/homeCacheStorage';
 import { sanitizeImageList, sanitizeRemoteImageUrl } from '../../utils/imageUrl';
+import { isSharePost } from '../../utils/postContentTypeDisplay';
 import {
   invalidateAllPosts,
   invalidatePostComments,
@@ -122,7 +123,8 @@ function mapHomeFeedPost(item: HomeFeedPost): HomeFeedPost {
     status: item.status ?? '招募中',
     activityLegacyId: item.activityLegacyId,
     contentTypes: item.contentTypes,
-    images: sanitizeImageList(item.images),
+    tags: item.tags,
+    images: isSharePost(item) ? sanitizeImageList(item.images) : undefined,
   };
 }
 

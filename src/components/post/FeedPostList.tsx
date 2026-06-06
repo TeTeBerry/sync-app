@@ -11,21 +11,29 @@ import { PostCommentSection } from './PostCommentSection';
 import { PostActionMenu, PostShareButton } from './PostActionMenu';
 import { PostStatusBadge } from './PostStatusBadge';
 import {
-  ContentTypeBadge,
   filterContentTypeTags,
   mergePostContentTypes,
   stripContentTypeHashtags,
 } from './ContentTypeBadge';
+import { formatContentTypeHashtag } from '../../utils/postContentTypeDisplay';
 import { PostTagBadge } from './PostTagBadge';
 import { PostImageGrid } from './PostImageGrid';
-import { MapPin } from '../icons';
+import { MapPin, Ticket } from '../icons';
 import { useCurrentUserQuery } from '../../hooks/useSyncApi';
 import { isCurrentUserPostAuthor } from '../../utils/postOwnership';
 import type { EventDetailPost } from '../../types/backend';
 import type { HomeFeedPost } from '../../types/post';
 import { thumbnailImageUrl } from '../../utils/imageUrl';
+import { isSharePost } from '../../utils/postContentTypeDisplay';
 import { POST_ACTION_ICON_COLOR } from '../../utils/postActionColors';
+import { WechatEmojiText } from '../wechat-emoji/WechatEmojiText';
 import { Image, Text, View } from '@tarojs/components';
+
+export type FeedPostListInfiniteFooter = {
+  isLoadingMore: boolean;
+  showEnd: boolean;
+  sharerCount: number;
+};
 
 export type FeedPostListProps = {
   items: HomeFeedPost[];
@@ -34,6 +42,9 @@ export type FeedPostListProps = {
   onCommentSubmitted?: (
     updated: Pick<EventDetailPost, 'id' | 'comments' | 'likes' | 'liked'>,
   ) => void;
+  /** Parent-controlled windowing for scroll-driven infinite lists (e.g. explore share). */
+  scrollWindow?: boolean;
+  infiniteFooter?: FeedPostListInfiniteFooter;
 };
 
 type FeedPostRowProps = {
@@ -66,8 +77,10 @@ function FeedPostRowInner({
   const bodyText = stripContentTypeHashtags(post.body);
   const displayTags = filterContentTypeTags(post.tags, contentTypeKeys);
   const eventLocation = post.location?.trim();
-
-  const hasImages = Boolean(post.images?.length);
+  const eventTitle = post.event?.trim();
+  const sharePost = isSharePost(post);
+  const headerTypeKey = contentTypeKeys[0];
+  const shareImages = sharePost ? post.images : undefined;
 
   return (
     <View className="s-home-post">
@@ -79,85 +92,76 @@ function FeedPostRowInner({
           lazyLoad
         />
         <View className="s-home-post__head-main">
-          <View className="s-home-post__top">
-            <View className="s-home-post__user-line">
-              <Text className="s-home-post__user-name">{postName}</Text>
-              <Text className="s-home-post__user-handle">{postHandle}</Text>
-            </View>
-            <View className="s-home-post__head-actions">
-              <PostShareButton
-                share={buildPostSharePayload({
-                  postId: post.id,
-                  activityLegacyId: post.activityLegacyId,
-                  body: post.body,
-                  eventTitle: post.event,
-                  authorName: postName,
-                  images: post.images,
-                  avatar: post.avatar,
-                })}
-              />
-              {isOwn && onDelete ? (
-                <PostActionMenu
-                  postId={post.id}
-                  authorUserId={post.userId}
-                  onDelete={() => onDelete(post)}
-                />
-              ) : !isOwn ? (
-                <PostActionMenu postId={post.id} authorUserId={post.userId} />
-              ) : null}
-            </View>
+          <View className="s-home-post__title-row">
+            <Text className="s-home-post__user-name">{postName}</Text>
+            <Text className="s-home-post__user-handle">{postHandle}</Text>
           </View>
-          <View className="s-home-post__event-line">
-            <View className="s-home-post__event-line-main">
-              {eventLocation ? (
-                <View className="s-home-post__event-address-wrap">
-                  <MapPin
-                    size={10}
-                    color={POST_ACTION_ICON_COLOR}
-                    className="s-home-post__event-address-icon"
-                  />
-                  <Text className="s-home-post__event-address">{eventLocation}</Text>
-                  <Text className="s-home-post__event-address-sep"> · </Text>
-                </View>
-              ) : null}
-              <Text className="s-home-post__event-name">{post.event}</Text>
+          <View className="s-home-post__meta">
+            {eventLocation ? (
+              <>
+                <MapPin
+                  size={10}
+                  color={POST_ACTION_ICON_COLOR}
+                  className="s-home-post__meta-icon"
+                />
+                <Text className="s-home-post__meta-text">{eventLocation}</Text>
+                <Text className="s-home-post__meta-sep"> · </Text>
+              </>
+            ) : null}
+            <Text className="s-home-post__meta-text">{post.time}</Text>
+          </View>
+        </View>
+        <View className="s-home-post__head-badge">
+          {sharePost && headerTypeKey ? (
+            <View className="s-home-post__type-badge">
+              <Text className="s-home-post__type-badge-text">
+                {formatContentTypeHashtag(headerTypeKey)}
+              </Text>
             </View>
+          ) : !sharePost ? (
             <PostStatusBadge
               post={{ status: post.status ?? '招募中' }}
               variant="home"
               isOwn={isOwn}
             />
-          </View>
+          ) : null}
         </View>
       </View>
 
       <View
         className={[
           's-home-post__content',
-          hasImages && 's-home-post__content--with-media',
+          shareImages?.length && 's-home-post__content--with-media',
         ]
           .filter(Boolean)
           .join(' ')}
       >
         {bodyText ? (
           <View className="s-home-post__body">
-            <Text className="s-home-post__text">{bodyText}</Text>
+            <WechatEmojiText text={bodyText} className="s-home-post__text" />
           </View>
         ) : null}
 
-        {post.images?.length ? (
+        {eventTitle ? (
+          <View className="s-home-post__event-pill">
+            <Ticket
+              size={12}
+              color="#8e8e93"
+              className="s-home-post__event-pill-icon"
+            />
+            <Text className="s-home-post__event-pill-text">{eventTitle}</Text>
+          </View>
+        ) : null}
+
+        {shareImages?.length ? (
           <PostImageGrid
-            images={post.images}
+            images={shareImages}
             maxDisplay={FEED_POST_IMAGE_MAX_DISPLAY}
           />
         ) : null}
 
-        {contentTypeKeys.length || displayTags.length ? (
+        {displayTags.length ? (
           <View className="s-home-post__tags">
-            <ContentTypeBadge
-              types={contentTypeKeys}
-              className="s-content-badges--flush"
-            />
             {displayTags.map((tag) => (
               <PostTagBadge key={tag} tag={tag} />
             ))}
@@ -175,7 +179,28 @@ function FeedPostRowInner({
           onLike={() => onLike?.(post)}
           onToggleComments={() => onToggleComments(post.id)}
         />
-        <Text className="s-home-post__time">{post.time}</Text>
+        <View className="s-home-post__footer-end">
+          {isOwn && onDelete ? (
+            <PostActionMenu
+              postId={post.id}
+              authorUserId={post.userId}
+              onDelete={() => onDelete(post)}
+            />
+          ) : !isOwn ? (
+            <PostActionMenu postId={post.id} authorUserId={post.userId} />
+          ) : null}
+          <PostShareButton
+            share={buildPostSharePayload({
+              postId: post.id,
+              activityLegacyId: post.activityLegacyId,
+              body: post.body,
+              eventTitle: post.event,
+              authorName: postName,
+              images: shareImages,
+              avatar: post.avatar,
+            })}
+          />
+        </View>
       </View>
 
       {commentsExpanded ? (
@@ -200,17 +225,23 @@ function FeedPostListInner({
   onDelete,
   onLike,
   onCommentSubmitted,
+  scrollWindow = false,
+  infiniteFooter,
 }: FeedPostListProps) {
   const { data: currentUser } = useCurrentUserQuery();
   const [expandedCommentPostIds, setExpandedCommentPostIds] = useState<Set<string>>(
     () => new Set(),
   );
 
-  const { visibleItems, hasMoreToShow, hiddenCount, showMore, ensureIndexVisible } =
-    useWindowedList(items, {
-      initialSize: HOME_FEED_INITIAL_RENDER,
-      step: HOME_FEED_INITIAL_RENDER,
-    });
+  const windowed = useWindowedList(items, {
+    initialSize: HOME_FEED_INITIAL_RENDER,
+    step: HOME_FEED_INITIAL_RENDER,
+  });
+  const visibleItems = scrollWindow ? items : windowed.visibleItems;
+  const hasMoreToShow = scrollWindow ? false : windowed.hasMoreToShow;
+  const hiddenCount = scrollWindow ? 0 : windowed.hiddenCount;
+  const showMore = windowed.showMore;
+  const ensureIndexVisible = windowed.ensureIndexVisible;
 
   const togglePostComments = useCallback(
     (postId: string) => {
@@ -244,7 +275,7 @@ function FeedPostListInner({
           onToggleComments={togglePostComments}
         />
       ))}
-      {hasMoreToShow ? (
+      {!scrollWindow && hasMoreToShow ? (
         <View
           className="s-feed-post-list__more"
           onClick={showMore}
@@ -252,6 +283,17 @@ function FeedPostListInner({
           aria-label={`展开更多帖子，还有 ${hiddenCount} 条`}
         >
           <Text className="s-feed-post-list__more-text">展开更多（{hiddenCount}）</Text>
+        </View>
+      ) : null}
+      {scrollWindow && infiniteFooter?.isLoadingMore ? (
+        <Text className="s-feed-post-list__footer-line">加载更多…</Text>
+      ) : null}
+      {scrollWindow && infiniteFooter?.showEnd ? (
+        <View className="s-feed-post-list__end">
+          <Text className="s-feed-post-list__footer-line">
+            已经有{infiniteFooter.sharerCount}人正在分享
+          </Text>
+          <Text className="s-feed-post-list__footer-line">已经到底啦 ~</Text>
         </View>
       ) : null}
     </View>

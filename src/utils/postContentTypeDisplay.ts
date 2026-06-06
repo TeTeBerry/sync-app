@@ -5,6 +5,7 @@ export const CONTENT_TYPE_LABELS: Record<string, string> = {
   carpool: '同路',
   ticket: '转票',
   groupbuy: '拼单',
+  share: '现场',
   other: '其他',
 };
 
@@ -14,6 +15,7 @@ export const CONTENT_TYPE_STYLE_KEYS = new Set([
   'carpool',
   'ticket',
   'groupbuy',
+  'share',
   'other',
 ]);
 
@@ -36,6 +38,10 @@ const LABEL_TO_TYPE: Record<string, string> = {
   出票: 'ticket',
   票务: 'ticket',
   其他: 'other',
+  现场: 'share',
+  分享: 'share',
+  '#现场': 'share',
+  '#分享': 'share',
   '#组队': 'team',
   '#组队队友': 'team',
   '#住宿': 'accommodation',
@@ -73,7 +79,7 @@ export function formatContentTypeHashtag(type: string): string {
 }
 
 const CONTENT_TYPE_HASHTAG_RE =
-  /#(组队队友|组队|住宿同行|拼房|住宿|同路同行|同路|拼卡|拼单|转票|出票|票务|其他)/g;
+  /#(组队队友|组队|住宿同行|拼房|住宿|同路同行|同路|拼卡|拼单|转票|出票|票务|现场|分享|其他)/g;
 
 function contentTypeKeysFromHashtagText(text: string): string[] {
   const keys = new Set<string>();
@@ -137,4 +143,15 @@ export function filterContentTypeTags(
     if (CONTENT_TYPE_STYLE_KEYS.has(key)) return false;
     return !badgeLabels.has(normalized);
   });
+}
+
+export function isSharePost(post: {
+  contentTypes?: string[];
+  body?: string;
+  tags?: string[];
+}): boolean {
+  return mergePostContentTypes(post.contentTypes, {
+    body: post.body,
+    tags: post.tags,
+  }).includes('share');
 }

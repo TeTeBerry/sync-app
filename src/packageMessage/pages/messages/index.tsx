@@ -1,19 +1,24 @@
 import './messages.scss';
-import React, { useCallback } from 'react';
-import { useDidShow } from '@tarojs/taro';
+import React, { useCallback, useState } from 'react';
+import Taro, { useDidShow } from '@tarojs/taro';
 import { MessageCircle } from '../../../components/icons';
 import { BottomNavSlot } from '../../../components/navigation/BottomNav';
 import PageNavigation, {
   stackPageNavChromePx,
 } from '../../../components/navigation/PageNavigation';
+import { isLiveApi } from '../../../constants/api';
+import { useConfirmDialog } from '../../../hooks/useConfirmDialog';
 import { useEndRouteTransitionOnShow } from '../../../hooks/useEndRouteTransitionOnShow';
 import { useNavBarInsets } from '../../../hooks/useNavBarInsets';
 import { useTabPageMainHeight } from '../../../hooks/useTabPageMainHeight';
+import { dismissTeamChatSessionAndInvalidate } from '../../../hooks/sync/teamChats';
 import { useTeamChatSessionList } from '../../../hooks/useResolvedTempChat';
-import { formatTimeAgo } from '../../../utils/dayTime';
+import type { TempChatSession } from '../../../types/tempChat';
+import { parseTeamChatSessionId } from '../../../utils/teamChatSessionId';
 import { goTempChat, ROUTES } from '../../../utils/route';
 import { Button } from '../../../components/ui';
 import { ScrollView, Text, View } from '@tarojs/components';
+import MessageSessionRow from './MessageSessionRow';
 
 const MessagesPage: React.FC = () => {
   useEndRouteTransitionOnShow();
@@ -21,9 +26,13 @@ const MessagesPage: React.FC = () => {
   const headerChromePx = stackPageNavChromePx(navInsets);
   const mainScrollHeight = useTabPageMainHeight(headerChromePx) ?? 480;
   const { sessions, isLoading, isError, refetch } = useTeamChatSessionList();
+  const { confirm, confirmDialog } = useConfirmDialog({ cancelText: '取消' });
+  const [openRowId, setOpenRowId] = useState<string | null>(null);
+  const apiEnabled = isLiveApi();
 
   useDidShow(() => {
     void refetch({ background: true });
+    setOpenRowId(null);
   });
 
   const sortedSessions = [...sessions].sort(
@@ -33,6 +42,46 @@ const MessagesPage: React.FC = () => {
   const handleOpenSession = useCallback((sessionId: string) => {
     goTempChat(sessionId);
   }, []);
+
+  const handleDeleteSession = useCallback(
+    async (session: TempChatSession) => {
+      const parsed = parseTeamChatSessionId(session.id);
+      if (!parsed) {
+        void Taro.showToast({ title: '无法删除该会话', icon: 'none' });
+        return;
+      }
+
+      const confirmed = await confirm({
+        title: '删除对话',
+        message: `确定删除与「${session.peerName}」的会话？对方发来新消息后会重新出现。`,
+        confirmText: '删除',
+        danger: true,
+      });
+      if (!confirmed) return;
+
+      if (!apiEnabled) {
+        void Taro.showToast({ title: '当前环境无法删除', icon: 'none' });
+        return;
+      }
+
+      try {
+        await dismissTeamChatSessionAndInvalidate(
+          parsed.postId,
+          parsed.applicantUserId,
+        );
+        setOpenRowId(null);
+      } catch {
+        void Taro.showToast({ title: '删除失败，请重试', icon: 'none' });
+      }
+    },
+    [apiEnabled, confirm],
+  );
+
+  const handleScroll = useCallback(() => {
+    if (openRowId) {
+      setOpenRowId(null);
+    }
+  }, [openRowId]);
 
   return (
     <View data-cmp="MessagesPage" className="s-page-with-tabbar">
@@ -44,6 +93,7 @@ const MessagesPage: React.FC = () => {
           showScrollbar={false}
           className="s-messages__scroll s-scrollbar-none"
           style={{ height: `${mainScrollHeight}px` }}
+          onScroll={handleScroll}
         >
           <View className="s-messages__inner">
             {isLoading ? (
@@ -72,53 +122,16 @@ const MessagesPage: React.FC = () => {
               </View>
             ) : (
               <View className="s-messages__list">
-                {sortedSessions.map((session) => {
-                  const hasUnread = session.unreadCount > 0;
-                  const badgeLabel =
-                    session.unreadCount > 99 ? '99+' : String(session.unreadCount);
-
-                  return (
-                    <Button
-                      key={session.id}
-                      className={[
-                        's-messages__item',
-                        hasUnread && 's-messages__item--unread',
-                      ]
-                        .filter(Boolean)
-                        .join(' ')}
-                      hoverClass="s-messages__item--pressed"
-                      onClick={() => handleOpenSession(session.id)}
-                    >
-                      <View className="s-messages__avatar-wrap" aria-hidden>
-                        <View
-                          className="s-messages__avatar"
-                          style={
-                            session.peerAvatar
-                              ? { backgroundImage: `url(${session.peerAvatar})` }
-                              : undefined
-                          }
-                        />
-                        {hasUnread ? <View className="s-messages__avatar-dot" /> : null}
-                      </View>
-                      <View className="s-messages__body">
-                        <View className="s-messages__row">
-                          <Text className="s-messages__name">{session.peerName}</Text>
-                          <Text className="s-messages__time">
-                            {formatTimeAgo(session.lastMessageAt)}
-                          </Text>
-                        </View>
-                        <View className="s-messages__preview-row">
-                          <Text className="s-messages__preview">
-                            {session.lastMessage}
-                          </Text>
-                          {hasUnread ? (
-                            <Text className="s-messages__badge">{badgeLabel}</Text>
-                          ) : null}
-                        </View>
-                      </View>
-                    </Button>
-                  );
-                })}
+                {sortedSessions.map((session) => (
+                  <MessageSessionRow
+                    key={session.id}
+                    session={session}
+                    openRowId={openRowId}
+                    setOpenRowId={setOpenRowId}
+                    onOpen={handleOpenSession}
+                    onDelete={handleDeleteSession}
+                  />
+                ))}
               </View>
             )}
           </View>
@@ -126,6 +139,7 @@ const MessagesPage: React.FC = () => {
       </View>
 
       <BottomNavSlot />
+      {confirmDialog}
     </View>
   );
 };

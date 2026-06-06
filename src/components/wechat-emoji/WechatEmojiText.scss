@@ -1,0 +1,21 @@
+.s-wechat-emoji-text {
+  display: inline;
+  line-height: 1.55;
+  word-break: break-word;
+}
+
+.s-wechat-emoji-text__segment {
+  display: inline;
+  color: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  white-space: pre-wrap;
+}
+
+.s-wechat-emoji-text__emoji {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  margin: 0 1px;
+  vertical-align: -4px;
+}

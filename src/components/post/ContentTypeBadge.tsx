@@ -20,6 +20,7 @@ const TYPE_STYLES: Record<string, string> = {
   carpool: 's-content-badge--carpool',
   ticket: 's-content-badge--ticket',
   groupbuy: 's-content-badge--groupbuy',
+  share: 's-content-badge--share',
   other: 's-content-badge--other',
 };
 

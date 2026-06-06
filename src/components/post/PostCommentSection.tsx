@@ -2,11 +2,8 @@ import './PostCommentSection.scss';
 import Taro from '@tarojs/taro';
 import { useCallback, useState, type FC } from 'react';
 import { ChevronUp, Heart, Send } from '../../components/icons';
-import {
-  commentPostAndInvalidate,
-  useAccountRisk,
-  usePostCommentsQuery,
-} from '../../hooks/useSyncApi';
+import { useAccountRisk } from '../../hooks/useAccountRisk';
+import { commentPostAndInvalidate, usePostCommentsQuery } from '../../hooks/useSyncApi';
 import { requireAuth } from '../../utils/authGate';
 import { PLACEHOLDER_AVATAR } from '../../constants/remoteImages';
 import { sanitizeRemoteImageUrl } from '../../utils/imageUrl';

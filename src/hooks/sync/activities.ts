@@ -97,10 +97,10 @@ export function useFeaturedEvents() {
 
   const items = useMemo((): FeaturedEvent[] => {
     const signupEvents = summary?.signupEvents ?? [];
-    const inProgress = signupEvents.filter(
-      (item) => getActivityStatusFromActivity(item.date, item.title) === 'in_progress',
+    const active = signupEvents.filter(
+      (item) => getActivityStatusFromActivity(item.date, item.title) !== 'ended',
     );
-    return pickHomeFeaturedEvents(inProgress);
+    return pickHomeFeaturedEvents(active);
   }, [summary]);
 
   return {
