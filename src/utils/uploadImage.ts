@@ -1,9 +1,7 @@
 import Taro from '@tarojs/taro';
-import { API_BASE_URL } from '../constants/api';
-import type { ApiResponse } from '../types/backend';
-import { handleApiUnauthorized } from '../api/handleApiUnauthorized';
-import { ownerQueryParams } from '../api/requestActor';
-import { getAccessToken, getAuthHeaders } from './authStorage';
+import { verifyCosUpload } from '../api/sync/uploads';
+import { ApiError } from './apiClient';
+import { uploadImagesToCos } from './cosUpload';
 
 /** 选择手环图，返回临时文件路径（已尽量压缩）。 */
 export async function pickWristbandImagePath(): Promise<string | null> {
@@ -22,48 +20,28 @@ export async function pickWristbandImagePath(): Promise<string | null> {
   return compressed?.tempFilePath ?? path;
 }
 
+/**
+ * STS direct upload to COS, then POST /api/uploads/verify (WeChat img_sec_check).
+ * Returns canonical COS URL for post payload.
+ */
 export async function uploadImageFile(filePath: string): Promise<string> {
-  const base = API_BASE_URL.replace(/\/$/, '');
-  const url = `${base}/uploads/images`;
-  const formData = ownerQueryParams();
+  const trimmed = filePath.trim();
+  if (!trimmed) {
+    throw new Error('图片路径为空');
+  }
 
-  const res = await Taro.uploadFile({
-    url,
-    filePath,
-    name: 'file',
-    formData,
-    header: {
-      Accept: 'application/json',
-      ...getAuthHeaders(),
-    },
-  });
+  const [cosUrl] = await uploadImagesToCos([trimmed]);
 
-  let parsed: ApiResponse<{ url: string }> | null = null;
   try {
-    parsed = JSON.parse(res.data) as ApiResponse<{ url: string }>;
-  } catch {
-    parsed = null;
-  }
-
-  if (res.statusCode < 200 || res.statusCode >= 300) {
-    const message = parsed?.message?.trim() || `上传失败 (${res.statusCode})`;
-    if (res.statusCode === 401 && getAccessToken()) {
-      handleApiUnauthorized(message);
+    const verified = await verifyCosUpload(cosUrl);
+    if (verified.status !== 'approved') {
+      throw new Error('图片未通过安全检测，请更换后重试');
     }
-    throw new Error(message);
-  }
-
-  if (!parsed) {
-    throw new Error('上传响应解析失败');
-  }
-
-  if (parsed.code !== 200 || !parsed.data?.url) {
-    const message = parsed.message || '上传失败';
-    if (parsed.code === 401 && getAccessToken()) {
-      handleApiUnauthorized(message);
+    return verified.url;
+  } catch (error) {
+    if (error instanceof ApiError) {
+      throw new Error(error.message);
     }
-    throw new Error(message);
+    throw error;
   }
-
-  return parsed.data.url;
 }

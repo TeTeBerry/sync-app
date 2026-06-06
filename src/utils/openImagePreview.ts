@@ -1,5 +1,11 @@
 import Taro from '@tarojs/taro';
-import { sanitizeRemoteImageUrl } from './imageUrl';
+import {
+  isCosPostImageUrl,
+  isCosSignedImageUrl,
+  needsWeappDownloadBeforeDisplay,
+  sanitizeRemoteImageUrl,
+} from './imageUrl';
+import { resolveSignedCosImageUrls } from './resolveSignedCosImageUrls';
 
 function isDataUrl(url: string): boolean {
   return /^data:image\//i.test(url);
@@ -22,11 +28,18 @@ function dataUrlToTempPath(dataUrl: string): Promise<string> {
   });
 }
 
-function resolvePreviewUrlSync(url: string): string | null {
-  const trimmed = url.trim();
-  if (!trimmed) return null;
-  if (isDataUrl(trimmed)) return null;
-  return sanitizeRemoteImageUrl(trimmed) ?? trimmed;
+async function weappDownloadImageUrl(url: string): Promise<string> {
+  if (!needsWeappDownloadBeforeDisplay(url)) return url;
+
+  try {
+    const res = await Taro.downloadFile({ url });
+    if (res.statusCode === 200 && res.tempFilePath) {
+      return res.tempFilePath;
+    }
+  } catch {
+    // fall through to original URL
+  }
+  return url;
 }
 
 async function resolvePreviewUrl(url: string): Promise<string | null> {
@@ -40,7 +53,16 @@ async function resolvePreviewUrl(url: string): Promise<string | null> {
     return trimmed;
   }
 
-  return resolvePreviewUrlSync(trimmed);
+  const sanitized = sanitizeRemoteImageUrl(trimmed) ?? trimmed;
+  let displayUrl = sanitized;
+
+  if (isCosPostImageUrl(sanitized) && !isCosSignedImageUrl(sanitized)) {
+    const [signed] = await resolveSignedCosImageUrls([sanitized]);
+    if (!signed?.trim()) return null;
+    displayUrl = signed;
+  }
+
+  return weappDownloadImageUrl(displayUrl);
 }
 
 const PREVIEW_COOLDOWN_MS = 400;

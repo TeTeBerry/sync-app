@@ -1,22 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { fetchSharePostsPage } from '../api/sync/posts';
+import { mapHomeFeedPost } from './sync/posts';
 import { isLiveApi } from '../constants/api';
 import type { HomeFeedPost } from '../types/backend';
 import { getClientUserId } from '../utils/session';
 
 const DEFAULT_PAGE_SIZE = 10;
-
-function mapShareFeedPost(item: HomeFeedPost): HomeFeedPost {
-  const name = item.name?.trim() || '用户';
-  const handle = item.handle?.trim() || `@${name}`;
-  return {
-    ...item,
-    name,
-    handle,
-    comments: item.comments ?? 0,
-    status: item.status ?? '招募中',
-  };
-}
 
 export function useSharePostsInfiniteQuery(options?: {
   enabled?: boolean;
@@ -49,7 +38,7 @@ export function useSharePostsInfiniteQuery(options?: {
       setIsError(false);
       try {
         const page = await fetchSharePostsPage({ limit: pageSize, sort });
-        setItems(page.items.map(mapShareFeedPost));
+        setItems(page.items.map(mapHomeFeedPost));
         setNextCursor(page.nextCursor);
         setHasMore(page.hasMore);
         setSharerCount(page.sharerCount ?? 0);
@@ -101,7 +90,7 @@ export function useSharePostsInfiniteQuery(options?: {
       setItems((prev) => {
         const seen = new Set(prev.map((post) => post.id));
         const merged = [...prev];
-        for (const post of page.items.map(mapShareFeedPost)) {
+        for (const post of page.items.map(mapHomeFeedPost)) {
           if (!seen.has(post.id)) {
             merged.push(post);
             seen.add(post.id);
@@ -156,7 +145,7 @@ export function useSharePostsInfiniteQuery(options?: {
   const prependItem = useCallback((post: HomeFeedPost) => {
     setItems((prev) => {
       if (prev.some((item) => item.id === post.id)) return prev;
-      return [mapShareFeedPost(post), ...prev];
+      return [mapHomeFeedPost(post), ...prev];
     });
   }, []);
 

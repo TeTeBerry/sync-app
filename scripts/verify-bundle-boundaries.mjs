@@ -33,7 +33,7 @@ const MAIN_PACKAGE_GLOBS = [
 /** Path segments that pull heavy event subpackage / canvas into main chunk */
 const FORBIDDEN_IN_MAIN = [
   /packageEvent\//,
-  /packageEvent\/pages\/(my-itinerary|exclusive-itinerary|event-map)\//,
+  /packageEvent\/pages\/(my-itinerary|exclusive-itinerary)\//,
   /itineraryWallpaperDraw/,
   /generateItineraryWallpaper/,
 ];

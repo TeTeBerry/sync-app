@@ -25,11 +25,9 @@ export default {
       name: 'event',
       pages: [
         'pages/event-detail/index',
-        'pages/event-map/index',
         'pages/exclusive-itinerary/index',
         'pages/my-itinerary/index',
         'pages/explore/index',
-        'pages/explore-storm-floor/index',
       ],
     },
     {

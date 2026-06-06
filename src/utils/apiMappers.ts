@@ -77,7 +77,6 @@ export function mapActivitiesToEvents(
       longitude: activity.longitude,
       region: activity.region as ActivityMapRegion | undefined,
       image: resolveActivityThumb(
-        activity.legacyId,
         sanitizeRemoteImageUrl(activity.image) ?? activity.image,
         200,
       ),
@@ -108,7 +107,7 @@ export function mapSignupEventToFeaturedEvent(item: SignupEvent): FeaturedEvent 
     attendeeCount: `${item.attendees}+`,
     remaining: '',
     guests: ACTIVITY_GUEST_AVATARS,
-    image: resolveActivityThumb(legacyId, remote, 200),
+    image: resolveActivityThumb(remote, 200),
     going: item.going,
   };
 }

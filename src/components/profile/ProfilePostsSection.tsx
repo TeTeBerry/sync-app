@@ -16,7 +16,8 @@ import {
 } from '../../components/icons';
 import type { PostApplicationItem } from '../../types/backend';
 import { formatTimeAgo } from '../../utils/dayTime';
-import { ContentTypeBadge, PostStatusBadge } from '../post';
+import { ContentTypeBadge, PostImageGrid, PostStatusBadge } from '../post';
+import { FEED_POST_IMAGE_MAX_DISPLAY } from '../../constants/listPerf';
 import {
   mergePostContentTypes,
   stripContentTypeHashtags,
@@ -234,6 +235,18 @@ function renderPostItems(
 
         {contentText ? (
           <Text className="s-profile-post__content">{contentText}</Text>
+        ) : null}
+
+        {item.images?.length ? (
+          <View
+            className="s-profile-post__images"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <PostImageGrid
+              images={item.images}
+              maxDisplay={FEED_POST_IMAGE_MAX_DISPLAY}
+            />
+          </View>
         ) : null}
 
         <ContentTypeBadge types={contentTypeKeys} />

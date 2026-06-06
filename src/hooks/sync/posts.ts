@@ -103,7 +103,7 @@ export function usePopularPosts(options?: QueryEnableOptions) {
   };
 }
 
-function mapHomeFeedPost(item: HomeFeedPost): HomeFeedPost {
+export function mapHomeFeedPost(item: HomeFeedPost): HomeFeedPost {
   const name = item.name?.trim() || '用户';
   const handle = item.handle?.trim() || `@${name}`;
   return {

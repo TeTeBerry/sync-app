@@ -1,8 +1,7 @@
 import React from 'react';
 import { Check, ChevronDown } from '../../../../components/icons';
 import { Button } from '../../../../components/ui';
-import { Image, ScrollView, Text, View } from '@tarojs/components';
-import { picsumUrl } from '../../../../utils/imageUrl';
+import { ScrollView, Text, View } from '@tarojs/components';
 import {
   EXCLUSIVE_ITINERARY_GENRES,
   EXCLUSIVE_ITINERARY_STAGES,
@@ -140,26 +139,20 @@ const ExclusiveItineraryDjGrid: React.FC<ExclusiveItineraryDjGridProps> = ({
             aria-label={`${dj.name}，${dj.genreLabel}`}
             onClick={() => onToggleDj(dj.id)}
           >
-            <View className="s-exclusive-itinerary__avatar-wrap">
-              <Image
-                className="s-exclusive-itinerary__avatar"
-                src={picsumUrl(dj.avatarSeed, 144, 144)}
-                mode="aspectFill"
-              />
-              {isSelected ? (
-                <View
-                  className={[
-                    's-exclusive-itinerary__check',
-                    showPurple
-                      ? 's-exclusive-itinerary__check--purple'
-                      : 's-exclusive-itinerary__check--pink',
-                  ].join(' ')}
-                  aria-hidden
-                >
-                  <Check size={13} color="#fff" strokeWidth={3} />
-                </View>
-              ) : null}
-            </View>
+            {isSelected ? (
+              <View
+                className={[
+                  's-exclusive-itinerary__check',
+                  's-exclusive-itinerary__check--corner',
+                  showPurple
+                    ? 's-exclusive-itinerary__check--purple'
+                    : 's-exclusive-itinerary__check--pink',
+                ].join(' ')}
+                aria-hidden
+              >
+                <Check size={13} color="#fff" strokeWidth={3} />
+              </View>
+            ) : null}
             <Text className="s-exclusive-itinerary__name">{dj.name}</Text>
             <Text
               className="s-exclusive-itinerary__genre"

@@ -1,6 +1,6 @@
 /** Official WeChat emoji sprite CDN (wx_fed we-emoji). */
 export const WECHAT_EMOJI_CDN_BASE =
-  'https://res.wx.qq.com/t/wx_fed/we-emoji/v1.3.0/assets/Expression';
+  'https://res.wx.qq.com/t/wx_fed/we-emoji/res/v1.3.0/assets/Expression';
 
 export type WechatEmojiItem = {
   /** Bracket label inserted into text, e.g. `[微笑]`. */

@@ -182,24 +182,7 @@
     }
   }
 
-  &__avatar-wrap {
-    position: relative;
-    width: 72px;
-    height: 72px;
-    margin-bottom: 10px;
-  }
-
-  &__avatar {
-    width: 72px;
-    height: 72px;
-    border-radius: var(--radius-full);
-    background: #2c2c2e;
-  }
-
   &__check {
-    position: absolute;
-    top: -2px;
-    right: -2px;
     width: 22px;
     height: 22px;
     border-radius: var(--radius-full);
@@ -207,6 +190,12 @@
     align-items: center;
     justify-content: center;
     box-sizing: border-box;
+
+    &--corner {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+    }
 
     &--pink {
       background: var(--primary);
@@ -226,6 +215,7 @@
     color: #fff;
     line-height: 1.25;
     margin-bottom: 4px;
+    padding-top: 4px;
   }
 
   &__genre {

@@ -1,8 +1,10 @@
 import { useCallback, useMemo } from 'react';
+import { useSignedCosImageUrls } from '../../hooks/useSignedCosImageUrls';
 import { ImageIcon } from '../../components/icons';
 import './PostImageGrid.scss';
 import {
   featuredPostImageUrl,
+  resolvePostGridImageSrc,
   sanitizeRemoteImageUrl,
   thumbnailImageUrl,
 } from '../../utils/imageUrl';
@@ -19,7 +21,7 @@ const THUMB_ROW_WIDTH = 200;
 const FEATURED_WIDTH = 480;
 
 export function PostImageGrid({ images, maxDisplay = 4 }: PostImageGridProps) {
-  const validImages = useMemo(
+  const sanitizedImages = useMemo(
     () =>
       images
         .map((src) => sanitizeRemoteImageUrl(src) ?? src)
@@ -27,43 +29,63 @@ export function PostImageGrid({ images, maxDisplay = 4 }: PostImageGridProps) {
         .slice(0, maxDisplay),
     [images, maxDisplay],
   );
+  const signedImages = useSignedCosImageUrls(sanitizedImages);
+  const previewImages = useMemo(
+    () =>
+      sanitizedImages.map((src, index) => {
+        const signed = signedImages[index]?.trim();
+        return signed || src;
+      }),
+    [sanitizedImages, signedImages],
+  );
   const displayImages = useMemo(
     () =>
-      validImages.map((src, index) => {
-        if (index === 0 && validImages.length >= 4) {
-          return featuredPostImageUrl(src, FEATURED_WIDTH) ?? src;
+      sanitizedImages.map((src, index) => {
+        const resolved = resolvePostGridImageSrc(src, signedImages[index]);
+        if (!resolved) return '';
+        if (index === 0 && sanitizedImages.length >= 4) {
+          return featuredPostImageUrl(resolved, FEATURED_WIDTH) ?? resolved;
         }
-        return thumbnailImageUrl(src, THUMB_ROW_WIDTH) ?? src;
+        return thumbnailImageUrl(resolved, THUMB_ROW_WIDTH) ?? resolved;
       }),
-    [validImages],
+    [sanitizedImages, signedImages],
   );
 
   const handleOpen = useCallback(
     (index: number) => {
-      void openImagePreview(validImages, index);
+      void openImagePreview(previewImages, index);
     },
-    [validImages],
+    [previewImages],
   );
 
-  if (!validImages.length) return null;
+  if (!sanitizedImages.length) return null;
 
-  const count = validImages.length;
+  const count = sanitizedImages.length;
 
   const renderImage = (
     src: string,
     className: string,
     priority = false,
     mode: 'aspectFill' | 'widthFix' = 'aspectFill',
-  ) => (
-    <ImageWithFallback
-      src={src}
-      imageClassName={className}
-      placeholderClassName={`${className} s-post-image-grid__img--placeholder`}
-      fallback=""
-      priority={priority}
-      mode={mode}
-    />
-  );
+    widthFix = false,
+  ) => {
+    const wrapClass = widthFix
+      ? 's-post-image-grid__img-wrap s-post-image-grid__img-wrap--width-fix'
+      : 's-post-image-grid__img-wrap';
+    const placeholderWrapClass = `${wrapClass} s-post-image-grid__img-wrap--placeholder`;
+
+    return (
+      <ImageWithFallback
+        src={src}
+        wrapperClassName={wrapClass}
+        fallbackWrapperClassName={placeholderWrapClass}
+        imageClassName={`${className} s-post-image-grid__img-inner`}
+        fallback=""
+        priority={priority}
+        mode={mode}
+      />
+    );
+  };
 
   const renderTile = (
     index: number,
@@ -97,6 +119,7 @@ export function PostImageGrid({ images, maxDisplay = 4 }: PostImageGridProps) {
             's-post-image-grid__img s-post-image-grid__img--width-fix',
             true,
             'widthFix',
+            true,
           )}
         </View>
       </View>

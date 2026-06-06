@@ -153,12 +153,12 @@
   }
 
   &--destructive {
-    background: rgba(255, 100, 103, 0.08);
-    box-shadow: inset 0 0 0 1px rgba(255, 100, 103, 0.18);
+    background: rgba(var(--primary-rgb), 0.08);
+    box-shadow: inset 0 0 0 1px rgba(var(--primary-rgb), 0.18);
   }
 
   &--destructive.s-post-action-sheet__row--pressed {
-    background: rgba(255, 100, 103, 0.14);
+    background: rgba(var(--primary-rgb), 0.14);
   }
 
   &--accent {
@@ -182,7 +182,7 @@
   justify-content: center;
 
   &--destructive {
-    background: rgba(255, 100, 103, 0.14);
+    background: rgba(var(--primary-rgb), 0.14);
   }
 
   &--accent {
@@ -207,7 +207,7 @@
 }
 
 .s-post-action-sheet__row--destructive .s-post-action-sheet__row-label {
-  color: var(--destructive);
+  color: var(--primary);
 }
 
 .s-post-action-sheet__row-hint {

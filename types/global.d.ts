@@ -36,6 +36,11 @@ declare namespace NodeJS {
     TARO_APP_QQ_MAP_LAYER_STYLE?: string;
     /** 为 true 时把腾讯路线规划插件写入 app.json（须已在公众平台授权） */
     TARO_APP_ENABLE_ROUTE_PLAN_PLUGIN?: string;
+    /** Tencent COS — align with backend COS_BUCKET / COS_REGION */
+    TARO_APP_COS_BUCKET?: string;
+    TARO_APP_COS_REGION?: string;
+    /** Optional CDN origin; align with backend COS_PUBLIC_BASE_URL */
+    TARO_APP_COS_PUBLIC_BASE_URL?: string;
     TARO_ENV?:
       | 'weapp'
       | 'swan'

@@ -1,5 +1,6 @@
 import './my-itinerary.scss';
-import { Map, Share2, Sparkles } from '../../../components/icons';
+import { Share2, Sparkles } from '../../../components/icons';
+import MapFeatureDeveloping from '../../../components/MapFeatureDeveloping';
 import { Button } from '../../../components/ui';
 import { Canvas, ScrollView, Text, View } from '@tarojs/components';
 import PageNavigation from '../../../components/navigation/PageNavigation';
@@ -79,15 +80,7 @@ const MyItineraryPage = () => {
               onActiveDayChange={setActiveDayId}
             />
           ) : (
-            <View className="s-my-itinerary__map-placeholder">
-              <Map size={36} color="#8e8e93" aria-hidden />
-              <Text className="s-my-itinerary__map-placeholder-text">
-                地图视图即将上线
-              </Text>
-              <Text className="s-my-itinerary__map-placeholder-sub">
-                场馆地图与演出点位导航功能开发中
-              </Text>
-            </View>
+            <MapFeatureDeveloping className="s-my-itinerary__map-placeholder" />
           )}
         </View>
       </ScrollView>

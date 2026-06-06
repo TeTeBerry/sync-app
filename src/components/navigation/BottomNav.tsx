@@ -24,6 +24,9 @@ import {
   useActiveRoutePath,
 } from '../../utils/route';
 
+/** 暂时隐藏探索 tab；恢复时改为 true */
+const EXPLORE_TAB_VISIBLE = false;
+
 function preloadSubpackagesForTab(path: RoutePath) {
   if (path === ROUTES.HOME || path === ROUTES.EVENTS) {
     preloadEventSubpackage();
@@ -55,12 +58,16 @@ const BottomNav: React.FC = () => {
       label: '私信',
       kind: 'stack' as const,
     },
-    {
-      path: ROUTES.EXPLORE,
-      icon: Compass,
-      label: '探索',
-      kind: 'stack' as const,
-    },
+    ...(EXPLORE_TAB_VISIBLE
+      ? [
+          {
+            path: ROUTES.EXPLORE,
+            icon: Compass,
+            label: '探索',
+            kind: 'stack' as const,
+          },
+        ]
+      : []),
     { path: ROUTES.PROFILE, icon: User, label: '我的', kind: 'tab' as const },
   ];
 

@@ -14,6 +14,7 @@ const taroCompileFlags = {
 export default defineConfig({
   resolve: {
     alias: {
+      '@': path.resolve(__dirname, 'src'),
       '@sync/chat-contracts': path.resolve(
         __dirname,
         '../sync-app-backend/src/shared/chat/index.ts',
@@ -27,7 +28,7 @@ export default defineConfig({
     ]),
   ),
   test: {
-    include: ['src/**/*.test.ts'],
+    include: ['test/**/*.test.ts', 'test/**/*.spec.ts'],
     setupFiles: ['./vitest.setup.ts'],
   },
 });

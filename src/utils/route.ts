@@ -43,11 +43,9 @@ export const ROUTES = {
   LEGAL_DOCUMENT: '/packageProfile/pages/legal-document/index',
   AI_ASSISTANT: '/packageAi/pages/ai-assistant/index',
   EVENT_DETAIL: '/packageEvent/pages/event-detail/index',
-  EVENT_MAP: '/packageEvent/pages/event-map/index',
   EXCLUSIVE_ITINERARY: '/packageEvent/pages/exclusive-itinerary/index',
   MY_ITINERARY: '/packageEvent/pages/my-itinerary/index',
   EXPLORE: '/packageEvent/pages/explore/index',
-  EXPLORE_STORM_FLOOR: '/packageEvent/pages/explore-storm-floor/index',
   NOTIFICATIONS: '/packageProfile/pages/notifications/index',
   MESSAGES: '/packageMessage/pages/messages/index',
   TEMP_CHAT: '/packageMessage/pages/chat/index',
@@ -494,11 +492,6 @@ export function goEventDetail(eventId: number | string, options?: { postId?: str
   });
 }
 
-export type GoEventMapOptions = {
-  title?: string;
-  dateRange?: string;
-};
-
 export function goExclusiveItinerary(activityLegacyId: number) {
   const legacyId = parseActivityLegacyId(activityLegacyId);
   if (legacyId == null) {
@@ -528,24 +521,6 @@ export function goMyItinerary(activityLegacyId?: number, selectedDjIds?: string[
   }
   preloadEventSubpackage();
   navigateToSafe(buildPageUrl(ROUTES.MY_ITINERARY, query));
-}
-
-export function goEventMap(activityLegacyId: number, options?: GoEventMapOptions) {
-  const query: Record<string, string> = {
-    activityLegacyId: String(activityLegacyId),
-  };
-  const title = options?.title?.trim();
-  if (title) {
-    query.title = title;
-  }
-  const dateRange = options?.dateRange?.trim();
-  if (dateRange) {
-    query.dateRange = dateRange;
-  }
-  if (activityLegacyId > 0) {
-    useNavigationStore.getState().setActiveActivityLegacyId(activityLegacyId);
-  }
-  navigateToSafe(buildPageUrl(ROUTES.EVENT_MAP, query));
 }
 
 function resolveActivityLegacyId(meta?: NotificationMeta): number | null {
@@ -662,12 +637,6 @@ export function goExplore() {
   preloadEventSubpackage();
   preloadPageSafe(ROUTES.EXPLORE);
   navigateToSafe(ROUTES.EXPLORE);
-}
-
-export function goExploreStormFloor() {
-  preloadEventSubpackage();
-  preloadPageSafe(ROUTES.EXPLORE_STORM_FLOOR);
-  navigateToSafe(ROUTES.EXPLORE_STORM_FLOOR);
 }
 
 export function goTempChat(sessionId: string) {

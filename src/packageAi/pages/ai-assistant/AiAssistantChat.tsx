@@ -12,7 +12,6 @@ import { AiBuddyPostSheet } from '../../../components/ai-chat/AiBuddyPostSheet';
 import { AiGuidePlanSheet } from '../../../components/ai-chat/AiGuidePlanSheet';
 import { useKeyboardInset } from '../../../hooks/useKeyboardInset';
 import { API_BASE_URL } from '../../../constants/api';
-import { uploadChatImageRefs } from '../../../utils/chatImage';
 import type { inferUserGenderFromName } from '../../../utils/inferAuthorGender';
 import type { AiGuidePlanFormValues } from '../../../types/travelGuide';
 import { Canvas, View } from '@tarojs/components';
@@ -61,7 +60,6 @@ export function AiAssistantChat({
   aiMatchQuotaExhausted,
 }: AiAssistantChatProps) {
   const [input, setInput] = useState('');
-  const [pendingImages, setPendingImages] = useState<string[]>([]);
   const keyboardInset = useKeyboardInset();
   const initialMessageHandledRef = useRef(false);
   const initialGuideSheetHandledRef = useRef(false);
@@ -264,11 +262,10 @@ export function AiAssistantChat({
   ]);
 
   const submit = useCallback(
-    async (text: string, images?: string[]) => {
+    async (text: string) => {
       if (submitLockRef.current) return;
       const trimmed = text.trim();
-      const hasImages = images && images.length > 0;
-      if ((!trimmed && !hasImages) || isStreaming || isStreamingRef.current) {
+      if (!trimmed || isStreaming || isStreamingRef.current) {
         return;
       }
 
@@ -281,17 +278,15 @@ export function AiAssistantChat({
       }
 
       const scoped = activityLegacyId != null && !Number.isNaN(activityLegacyId);
-      if (scoped && !hasImages) {
+      if (scoped) {
         const buddyHandled = await buddyPost.handleBuddyPostChatMessage(trimmed);
         if (buddyHandled) {
           setInput('');
-          setPendingImages([]);
           return;
         }
         const guideHandled = await travelGuide.handleTravelGuideChatMessage(trimmed);
         if (guideHandled) {
           setInput('');
-          setPendingImages([]);
           return;
         }
       }
@@ -299,14 +294,7 @@ export function AiAssistantChat({
       submitLockRef.current = true;
       try {
         setInput('');
-        const localImages = images?.length ? [...images] : [];
-        setPendingImages([]);
-        const imageUrls =
-          localImages.length > 0 ? await uploadChatImageRefs(localImages) : undefined;
-        await send({
-          text: trimmed,
-          images: imageUrls?.length ? imageUrls : undefined,
-        });
+        await send({ text: trimmed });
       } finally {
         submitLockRef.current = false;
       }
@@ -413,7 +401,6 @@ export function AiAssistantChat({
       >
         <ChatComposer
           input={input}
-          pendingImages={pendingImages}
           isStreaming={
             isStreaming || travelGuide.isGenerating || buddyPost.isPublishing
           }
@@ -421,7 +408,6 @@ export function AiAssistantChat({
           activityTitle={activityTitle}
           onInputChange={setInput}
           onSubmit={submit}
-          onPendingImagesChange={setPendingImages}
           onClearChat={handleClearChat}
           clearDisabled={isStreaming}
           onAiGuideClick={travelGuide.openGuideSheet}

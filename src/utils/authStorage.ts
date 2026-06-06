@@ -33,6 +33,28 @@ export function getAuthUserId(): string | null {
   return getAuthUser()?.id ?? null;
 }
 
+function decodeJwtSub(token: string): string | null {
+  const segment = token.split('.')[1];
+  if (!segment) return null;
+  try {
+    const normalized = segment.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = normalized.padEnd(
+      normalized.length + ((4 - (normalized.length % 4)) % 4),
+      '=',
+    );
+    const json = JSON.parse(atob(padded)) as { sub?: string };
+    const sub = json.sub?.trim();
+    return sub || null;
+  } catch {
+    return null;
+  }
+}
+
+/** JWT `sub` when profile cache is missing — keeps COS path aligned with verify. */
+export function getResolvedAuthUserId(): string | null {
+  return getAuthUserId() ?? decodeJwtSub(getAccessToken() ?? '') ?? null;
+}
+
 export function getAuthUserName(): string | null {
   return getAuthUser()?.name ?? null;
 }

@@ -2,6 +2,7 @@ import { createPost } from '../api/sync/posts';
 import type { EventDetailPost, HomeFeedPost } from '../types/backend';
 import { formatTimeAgo } from './dayTime';
 import { uploadChatImageRefs } from './chatImage';
+import { sanitizeImageList, sanitizeRemoteImageUrl } from './imageUrl';
 
 export type PublishSharePostParams = {
   body: string;
@@ -31,11 +32,11 @@ export function sharePostToHomeFeedItem(
     likes: post.likes ?? 0,
     liked: post.liked ?? false,
     comments: post.comments ?? 0,
-    avatar: post.avatar ?? '',
+    avatar: sanitizeRemoteImageUrl(post.avatar) ?? post.avatar ?? '',
     status: post.status ?? '招募中',
     contentTypes: post.contentTypes ?? ['share'],
     tags: post.tags ?? [],
-    images: post.images,
+    images: sanitizeImageList(post.images),
     ...(post.authorOnSiteVerified ? { authorOnSiteVerified: true } : {}),
   };
 }
@@ -53,7 +54,7 @@ export async function publishSharePost(
     throw new Error('EMPTY_SHARE_POST');
   }
 
-  return createPost({
+  const post = await createPost({
     body,
     activityLegacyId: params.activityLegacyId,
     eventTitle: params.eventTitle.trim() || '现场分享',
@@ -63,4 +64,10 @@ export async function publishSharePost(
     images,
     listedInFeed: true,
   });
+
+  if (!post.images?.length && images?.length) {
+    return { ...post, images };
+  }
+
+  return post;
 }

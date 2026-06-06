@@ -1,6 +1,6 @@
 import './event-detail.scss';
+import Taro from '@tarojs/taro';
 import { Map } from '../../../components/icons';
-import { goEventMap } from '../../../utils/route';
 import { useEndRouteTransitionOnShow } from '../../../hooks/useEndRouteTransitionOnShow';
 import { BottomNavSlot } from '../../../components/navigation/BottomNav';
 import ThemedPageLoader from '../../../components/ThemedPageLoader';
@@ -109,11 +109,10 @@ const EventDetailPage = () => {
               aria-label="地图"
               hoverClass="s-page-nav__icon-action--pressed"
               onClick={() => {
-                if (Number.isFinite(eventId) && eventId > 0) {
-                  goEventMap(eventId, { title: title ?? undefined });
-                } else {
-                  goEventMap(0, { title: title ?? undefined });
-                }
+                void Taro.showToast({
+                  title: '地图功能正在开发中',
+                  icon: 'none',
+                });
               }}
             >
               <Map size={26} />

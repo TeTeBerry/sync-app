@@ -1,10 +1,11 @@
 import type { FC } from 'react';
-import { useEffect, useMemo, useState } from 'react';
-import { CoverView, Map, ScrollView, Text, View } from '@tarojs/components';
+import { useMemo, useState } from 'react';
+import { ScrollView, Text, View } from '@tarojs/components';
 import type { ActivityMapRegion } from '../../../constants/activityMapRegion';
+import MapFeatureDeveloping from '../../../components/MapFeatureDeveloping';
 import { getActivityStatusFromActivity } from '../../../utils/activityStatus';
 import type { EventCardUi } from '../../../utils/apiMappers';
-import { useEventsActivityMap } from '../hooks/useEventsActivityMap';
+import { filterMappableActivitiesByRegion } from '../../../utils/activityMapMarkers';
 import { EventsActivityList } from './EventsActivityList';
 import { EventsMapRegionTabs } from './EventsMapRegionTabs';
 
@@ -39,37 +40,15 @@ export const EventsActivityMapTab: FC<EventsActivityMapTabProps> = ({
     [events],
   );
 
-  const {
-    mapProps,
-    mapRegionKey,
-    regionActivities,
-    openRoutePlan,
-    moveToUserLocation,
-  } = useEventsActivityMap({
-    events: upcomingEvents,
-    region,
-    onMarkerOpenDetail: onOpenDetail,
-  });
-
-  const [mapReady, setMapReady] = useState(false);
-
-  useEffect(() => {
-    setMapReady(false);
-    const timer = setTimeout(() => setMapReady(true), 80);
-    return () => clearTimeout(timer);
-  }, [mapRegionKey, upcomingEvents.length]);
+  const regionActivities = useMemo(
+    () => filterMappableActivitiesByRegion(upcomingEvents, region),
+    [upcomingEvents, region],
+  );
 
   const listScrollHeight =
     listHeight != null
       ? Math.max(listHeight - EVENTS_MAP_STAGE_PX - 52, 160)
       : undefined;
-
-  const regionHint =
-    region === 'domestic'
-      ? '国内近期活动 — 点击地图标记查看详情'
-      : region === 'overseas'
-        ? '海外近期活动 — 点击地图标记查看详情'
-        : '港澳台近期活动 — 点击地图标记查看详情';
 
   return (
     <View
@@ -87,13 +66,7 @@ export const EventsActivityMapTab: FC<EventsActivityMapTabProps> = ({
         className="s-events-map-tab__stage"
         style={{ height: `${EVENTS_MAP_STAGE_PX}px` }}
       >
-        {mapReady ? <Map key={mapRegionKey} {...mapProps} /> : null}
-        <CoverView className="s-events-map-tab__locate" onClick={moveToUserLocation}>
-          <CoverView className="s-events-map-tab__locate-text">我的位置</CoverView>
-        </CoverView>
-        <CoverView className="s-events-map-tab__nav" onClick={openRoutePlan}>
-          <CoverView className="s-events-map-tab__nav-text">导航</CoverView>
-        </CoverView>
+        <MapFeatureDeveloping className="s-events-map-tab__developing" />
       </View>
 
       <ScrollView
@@ -106,7 +79,9 @@ export const EventsActivityMapTab: FC<EventsActivityMapTabProps> = ({
         }
       >
         <View className="s-events-map-tab__list-inner">
-          <Text className="s-events-map-tab__hint">{regionHint}</Text>
+          <Text className="s-events-map-tab__hint">
+            地图功能开发中，可先浏览下方活动列表
+          </Text>
           <EventsActivityList
             events={regionActivities}
             isError={isError}

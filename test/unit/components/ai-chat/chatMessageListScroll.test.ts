@@ -1,0 +1,84 @@
+import { describe, expect, it } from 'vitest';
+import { shouldSuppressAutoScrollForMessage } from '@/components/ai-chat/chatMessageListScroll';
+import type { ChatUiMessage } from '@/types/aiChat';
+
+describe('shouldSuppressAutoScrollForMessage', () => {
+  it('suppresses when match post cards are present', () => {
+    const msg: ChatUiMessage = {
+      id: '1',
+      from: 'ai',
+      text: '为你找到以下队友',
+      recommendedPosts: [
+        {
+          postId: 'p1',
+          snippet: '求组队',
+          authorName: 'A',
+          eventTitle: '活动',
+        },
+      ],
+    };
+    expect(shouldSuppressAutoScrollForMessage(msg)).toBe(true);
+  });
+
+  it('does not suppress when match list is empty', () => {
+    expect(
+      shouldSuppressAutoScrollForMessage({
+        id: '1',
+        from: 'ai',
+        text: '暂未找到合适队友',
+        recommendedPosts: [],
+      }),
+    ).toBe(false);
+  });
+
+  it('suppresses for activity recommendation and travel guide', () => {
+    expect(
+      shouldSuppressAutoScrollForMessage({
+        id: '1',
+        from: 'ai',
+        text: '推荐活动',
+        recommendedActivity: {
+          activityLegacyId: 1,
+          title: 'Storm',
+          date: '2026-01-01',
+          location: '深圳',
+        },
+      }),
+    ).toBe(true);
+
+    expect(
+      shouldSuppressAutoScrollForMessage({
+        id: '2',
+        from: 'ai',
+        text: '攻略已生成',
+        travelGuide: {
+          imagePath: '/tmp/guide.png',
+          form: {
+            departure: '上海',
+            headcount: 2,
+            budgetTier: 'standard',
+            nights: 2,
+            selfDrive: false,
+          },
+          plan: {
+            transport: { title: '', lines: [] },
+            hotels: [],
+            nightlife: { title: '', spots: [] },
+            tips: [],
+          },
+        },
+      }),
+    ).toBe(true);
+  });
+
+  it('does not suppress for plain streaming text', () => {
+    expect(
+      shouldSuppressAutoScrollForMessage({
+        id: '1',
+        from: 'ai',
+        text: '正在搜索…',
+        streaming: true,
+      }),
+    ).toBe(false);
+  });
+});

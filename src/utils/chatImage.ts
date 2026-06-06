@@ -92,21 +92,40 @@ function isRemoteImageRef(ref: string): boolean {
   return /^https?:\/\//i.test(ref.trim());
 }
 
+/** WeChat sandbox paths: wxfile:// on device, http(s)://tmp|usr|store in devtools. */
+export function isLocalImageFileRef(ref: string): boolean {
+  const trimmed = ref.trim();
+  if (!trimmed) return false;
+  if (/^wxfile:\/\//i.test(trimmed) || /^blob:/i.test(trimmed)) return true;
+
+  if (!/^https?:\/\//i.test(trimmed)) return false;
+
+  try {
+    const host = new URL(trimmed).hostname.toLowerCase();
+    return host === 'tmp' || host === 'usr' || host === 'store';
+  } catch {
+    return false;
+  }
+}
+
 async function uploadOneImageRef(ref: string): Promise<string> {
-  if (isRemoteImageRef(ref)) {
-    const trimmed = ref.trim();
+  const trimmed = ref.trim();
+  if (isLocalImageFileRef(trimmed)) {
+    return uploadImageFile(trimmed);
+  }
+  if (isRemoteImageRef(trimmed)) {
     if (!isTrustedUploadImageUrl(trimmed)) {
       throw new Error('图片须先通过上传接口提交');
     }
     return trimmed;
   }
-  if (/^data:/i.test(ref.trim())) {
+  if (/^data:/i.test(trimmed)) {
     throw new Error('图片须先通过上传接口提交');
   }
-  return uploadImageFile(ref);
+  return uploadImageFile(trimmed);
 }
 
-/** Upload local temp paths; only trust URLs from POST /uploads/images (wx-checked). */
+/** Upload local temp paths to COS and verify; only trust prior COS upload URLs. */
 export async function uploadChatImageRefs(refs: string[]): Promise<string[]> {
   return Promise.all(refs.map((ref) => uploadOneImageRef(ref)));
 }

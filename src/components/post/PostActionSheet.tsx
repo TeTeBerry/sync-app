@@ -11,6 +11,7 @@ import {
 import React, { useMemo } from 'react';
 import { useOverlayLock } from '../../hooks/useOverlayLock';
 import type { ReportCategory, ReportReviewStatus } from '../../types/backend';
+import { POST_ACTION_DESTRUCTIVE_COLOR } from '../../utils/postActionColors';
 import { cn } from '../ui';
 import { Button } from '../ui';
 import { Text, View } from '@tarojs/components';
@@ -158,7 +159,7 @@ export const PostActionSheet: React.FC<PostActionSheetProps> = ({
           label: '删除帖子',
           hint: '从活动页移除这条组队信息',
           tone: 'destructive',
-          icon: <Trash2 size={18} color="#ff6467" aria-hidden />,
+          icon: <Trash2 size={18} color={POST_ACTION_DESTRUCTIVE_COLOR} aria-hidden />,
           onPress: onDelete,
         },
       ];
