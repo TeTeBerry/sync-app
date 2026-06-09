@@ -11,23 +11,6 @@ export type ExclusiveItineraryDj = {
   genreColor: string;
 };
 
-export const EXCLUSIVE_ITINERARY_STAGES = [
-  { id: 'all', label: '全部舞台' },
-  { id: 'main', label: '主舞台' },
-] as const;
-
-export const EXCLUSIVE_ITINERARY_GENRES = [
-  { id: 'all', label: '全部风格' },
-  { id: 'Future Bass', label: 'Future Bass' },
-  { id: 'Techno', label: 'Techno' },
-  { id: 'Dubstep', label: 'Dubstep' },
-  { id: 'House', label: 'House' },
-  { id: 'Drum & Bass', label: 'Drum & Bass' },
-] as const;
-
-/** Default selection — Day1 headliner + Day2 headliner. */
-export const EXCLUSIVE_ITINERARY_DEFAULT_SELECTED_IDS = ['marshmello', 'illenium'];
-
 /** 风暴电音节 深圳站 2026 — 可选国际阵容（与 backend seed 一致）。 */
 export const EXCLUSIVE_ITINERARY_DJS: ExclusiveItineraryDj[] = [
   {
@@ -134,7 +117,7 @@ export const EXCLUSIVE_ITINERARY_DJS: ExclusiveItineraryDj[] = [
 
 /**
  * Offline conflict preview — overlaps aligned with festival seed times.
- * Default selection (marshmello + illenium) has no conflict; add eric-prydz or excision to demo.
+ * marshmello + illenium has no conflict; add eric-prydz or excision to demo overlaps.
  */
 export const EXCLUSIVE_ITINERARY_MOCK_CONFLICT_SLOTS: Array<{
   artistId: string;

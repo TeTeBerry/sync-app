@@ -22,7 +22,6 @@ import {
 const SHORTCUT_TAG_LABELS: Record<AiShortcutTag, string> = {
   找组队: '找组队',
   找拼房: '找拼房',
-  找同路伙伴: '找同路伙伴',
   找卡座: '找卡座',
 };
 
@@ -40,7 +39,6 @@ const BUDDY_POST_CHIP = {
 
 const activityActionChips = [
   AI_GUIDE_CHIP,
-  { key: 'createOwn', label: '自己发帖', submitText: '自己发帖' },
   { key: 'searchPosts', label: '查组队帖', submitText: '看看有没有组队帖' },
 ] as const;
 
@@ -99,7 +97,7 @@ export function ChatComposer({
         : '描述你的组队需求，如出发地、人数、日期…';
     }
     if (scopedToActivity && trimmedActivityTitle) {
-      return `为「${trimmedActivityTitle}」找组队或发帖…`;
+      return `为「${trimmedActivityTitle}」找组队…`;
     }
     return '说说你想去哪、想找什么样的同行…';
   })();
@@ -134,18 +132,11 @@ export function ChatComposer({
       ];
     }
 
-    return [
-      {
-        key: AI_GUIDE_CHIP.key,
-        label: AI_GUIDE_CHIP.label,
-        submitText: AI_GUIDE_CHIP.submitText,
-      },
-      ...HOME_FESTIVAL_SHORTCUT_CHIPS.map((chip) => ({
-        key: chip.key,
-        label: chip.label,
-        submitText: chip.submitText,
-      })),
-    ];
+    return HOME_FESTIVAL_SHORTCUT_CHIPS.map((chip) => ({
+      key: chip.key,
+      label: chip.label,
+      submitText: chip.submitText,
+    }));
   }, [activityLegacyId, shortcutTags]);
 
   const isBusy = isStreaming;

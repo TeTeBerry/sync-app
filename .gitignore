@@ -19,6 +19,7 @@ dist-h5
 .env.local
 .env.*.local
 .env.example
+.env.production
 
 # Editor directories and files
 .vscode/*

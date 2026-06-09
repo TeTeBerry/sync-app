@@ -478,7 +478,7 @@ const ProfilePostsSection: React.FC<ProfilePostsSectionProps> = ({
             <View className="s-profile-section__empty-icon s-profile-section__empty-icon--posts">
               <MessageSquare size={22} />
             </View>
-            <Text className="s-profile-section__empty-title">还没有发布帖子</Text>
+            <Text className="s-profile-section__empty-title">还没有组队帖</Text>
             <Text className="s-profile-section__empty-hint">
               在活动详情通过 AI 助手发布组队帖
             </Text>
@@ -494,14 +494,14 @@ const ProfilePostsSection: React.FC<ProfilePostsSectionProps> = ({
     <ProfileCollapsibleSection
       variant="posts"
       icon={<MessageSquare size={14} />}
-      title="我的帖子"
+      title="我的组队帖"
       items={items}
       renderEmpty={() => (
         <View className="s-profile-section__empty">
           <View className="s-profile-section__empty-icon s-profile-section__empty-icon--posts">
             <MessageSquare size={22} />
           </View>
-          <Text className="s-profile-section__empty-title">还没有发布帖子</Text>
+          <Text className="s-profile-section__empty-title">还没有组队帖</Text>
           <Text className="s-profile-section__empty-hint">
             在活动详情通过 AI 助手发布组队帖
           </Text>

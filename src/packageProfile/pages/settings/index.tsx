@@ -18,6 +18,7 @@ import {
 } from '../../../utils/profileStorage';
 import { useProfilePageStore } from '../../../stores/profilePageStore';
 import { useEndRouteTransitionOnShow } from '../../../hooks/useEndRouteTransitionOnShow';
+import { useStackPageMainHeight } from '../../../hooks/useTabPageMainHeight';
 import { isLiveApi } from '../../../constants/api';
 import { isLoggedIn } from '../../../utils/authStorage';
 import { Button } from '../../../components/ui';
@@ -64,6 +65,7 @@ const PRIVACY_DESCS: Record<PrivacyLevel, string> = {
 
 const SettingsPage: React.FC = () => {
   useEndRouteTransitionOnShow();
+  const mainScrollHeight = useStackPageMainHeight();
   const router = useRouter();
   const section = (router.params.section ?? 'notifications') as SettingsSection;
   const { data: currentUser } = useCurrentUserQuery();
@@ -158,6 +160,9 @@ const SettingsPage: React.FC = () => {
 
   const privacyOptions: PrivacyLevel[] = ['public', 'friends', 'private'];
 
+  const scrollStyle =
+    mainScrollHeight != null ? { height: `${mainScrollHeight}px` } : undefined;
+
   return (
     <View data-cmp="Settings" className="s-settings">
       <PageNavigation
@@ -174,6 +179,7 @@ const SettingsPage: React.FC = () => {
           enhanced
           showScrollbar={false}
           className="s-settings__scroll s-scrollbar-none"
+          style={scrollStyle}
         >
           <View className="s-settings__main">
             <BlockedUsersSettings />
@@ -185,6 +191,7 @@ const SettingsPage: React.FC = () => {
           enhanced
           showScrollbar={false}
           className="s-settings__scroll s-scrollbar-none"
+          style={scrollStyle}
         >
           <View className="s-settings__main">
             <MatchPreferencesSettings />
@@ -196,92 +203,104 @@ const SettingsPage: React.FC = () => {
           enhanced
           showScrollbar={false}
           className="s-settings__scroll s-scrollbar-none"
+          style={scrollStyle}
         >
           <View className="s-settings__main">
             <AppealSettings />
           </View>
         </ScrollView>
       ) : (
-        <View className="s-settings__main">
-          {section === 'notifications' && (
-            <View className="s-settings__card">
-              <View className="s-settings__row">
-                <View>
-                  <View className="s-settings__row-label">推送通知</View>
-                  <View className="s-settings__row-desc">接收活动提醒、互动消息等</View>
-                </View>
-                <Button
-                  role="switch"
-                  aria-checked={notificationsEnabled}
-                  className={`s-settings__toggle${notificationsEnabled ? ' s-settings__toggle--on' : ''}`}
-                  onClick={toggleNotifications}
-                >
-                  <Text className="s-settings__toggle-knob" />
-                </Button>
-              </View>
-              <View className="s-settings__row">
-                <View>
-                  <View className="s-settings__row-label">活动提醒</View>
-                  <View className="s-settings__row-desc">活动开始前 24 小时提醒</View>
-                </View>
-                <Button
-                  role="switch"
-                  aria-checked={notificationsEnabled}
-                  className={`s-settings__toggle${notificationsEnabled ? ' s-settings__toggle--on' : ''}`}
-                  onClick={toggleNotifications}
-                >
-                  <Text className="s-settings__toggle-knob" />
-                </Button>
-              </View>
-            </View>
-          )}
-
-          {section === 'privacy' && (
-            <View className="s-settings__card">
-              {privacyOptions.map((level) => (
-                <Button
-                  key={level}
-                  className={`s-settings__option${privacyLevel === level ? ' s-settings__option--selected' : ''}`}
-                  onClick={() => selectPrivacy(level)}
-                >
+        <ScrollView
+          scrollY
+          enhanced
+          showScrollbar={false}
+          className="s-settings__scroll s-scrollbar-none"
+          style={scrollStyle}
+        >
+          <View className="s-settings__main">
+            {section === 'notifications' && (
+              <View className="s-settings__card">
+                <View className="s-settings__row">
                   <View>
-                    <View className="s-settings__option-label">
-                      {PRIVACY_LABELS[level]}
-                    </View>
-                    <View className="s-settings__option-desc">
-                      {PRIVACY_DESCS[level]}
+                    <View className="s-settings__row-label">推送通知</View>
+                    <View className="s-settings__row-desc">
+                      接收活动提醒、互动消息等
                     </View>
                   </View>
-                  {privacyLevel === level && (
-                    <Check size={20} className="s-settings__check" />
-                  )}
-                </Button>
-              ))}
-            </View>
-          )}
-
-          {section === 'legal' && (
-            <View className="s-settings__card">
-              {LEGAL_DOC_LIST.map((doc) => (
-                <Button
-                  key={doc.id}
-                  className="s-settings__option"
-                  onClick={() => goLegalDocument(doc.id)}
-                >
+                  <Button
+                    role="switch"
+                    aria-checked={notificationsEnabled}
+                    className={`s-settings__toggle${notificationsEnabled ? ' s-settings__toggle--on' : ''}`}
+                    onClick={toggleNotifications}
+                  >
+                    <Text className="s-settings__toggle-knob" />
+                  </Button>
+                </View>
+                <View className="s-settings__row">
                   <View>
-                    <View className="s-settings__option-label">{doc.title}</View>
-                    <View className="s-settings__option-desc">
-                      更新于 {doc.updatedAt}
-                    </View>
+                    <View className="s-settings__row-label">活动提醒</View>
+                    <View className="s-settings__row-desc">活动开始前 24 小时提醒</View>
                   </View>
-                  <ChevronRight size={18} color="#636366" />
-                </Button>
-              ))}
-            </View>
-          )}
+                  <Button
+                    role="switch"
+                    aria-checked={notificationsEnabled}
+                    className={`s-settings__toggle${notificationsEnabled ? ' s-settings__toggle--on' : ''}`}
+                    onClick={toggleNotifications}
+                  >
+                    <Text className="s-settings__toggle-knob" />
+                  </Button>
+                </View>
+              </View>
+            )}
 
-          {section === 'help' && <HelpFeedbackSettings />}
-        </View>
+            {section === 'privacy' && (
+              <View className="s-settings__card">
+                {privacyOptions.map((level) => (
+                  <Button
+                    key={level}
+                    className={`s-settings__option${privacyLevel === level ? ' s-settings__option--selected' : ''}`}
+                    onClick={() => selectPrivacy(level)}
+                  >
+                    <View>
+                      <View className="s-settings__option-label">
+                        {PRIVACY_LABELS[level]}
+                      </View>
+                      <View className="s-settings__option-desc">
+                        {PRIVACY_DESCS[level]}
+                      </View>
+                    </View>
+                    {privacyLevel === level && (
+                      <Check size={20} className="s-settings__check" />
+                    )}
+                  </Button>
+                ))}
+              </View>
+            )}
+
+            {section === 'legal' && (
+              <View className="s-settings__card">
+                {LEGAL_DOC_LIST.map((doc) => (
+                  <View
+                    key={doc.id}
+                    className="s-settings__option s-settings__option--row"
+                    hoverClass="s-settings__option--pressed"
+                    onClick={() => goLegalDocument(doc.id)}
+                  >
+                    <View className="s-settings__option-copy">
+                      <Text className="s-settings__option-label">{doc.title}</Text>
+                      <Text className="s-settings__option-desc">
+                        更新于 {doc.updatedAt}
+                      </Text>
+                    </View>
+                    <ChevronRight size={18} color="#636366" />
+                  </View>
+                ))}
+              </View>
+            )}
+
+            {section === 'help' && <HelpFeedbackSettings />}
+          </View>
+        </ScrollView>
       )}
     </View>
   );

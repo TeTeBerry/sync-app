@@ -1,6 +1,7 @@
 import React from 'react';
 import { ContactUnlockQuotaExhaustedModal } from '../../../../components/contact-unlock/ContactUnlockQuotaExhaustedModal';
 import { ProfilePackageSheet } from '../../../../components/profile';
+import { isProfileBenefitsEnabled } from '../../../../constants/featureFlags';
 import { invalidateProfilePackageState } from '../../../../utils/queryInvalidation';
 import type { FreeMonthlyQuota, PackageTierId } from '../../../../types/backend';
 
@@ -28,26 +29,32 @@ export const EventDetailEntitlementModals: React.FC<
   packageSheetOpen,
   packageSheetInitialTierId,
   onClosePackageSheet,
-}) => (
-  <>
-    <ContactUnlockQuotaExhaustedModal
-      open={contactUnlockExhaustedOpen}
-      onClose={onCloseContactUnlockExhausted}
-      onUpgrade={onUpgradeFromContactUnlock}
-      currentPaidTierId={currentPaidTierId}
-      freeMonthly={freeMonthly}
-    />
-    {packageSheetOpen ? (
-      <ProfilePackageSheet
-        open
-        activityLegacyId={eventId}
-        initialSelectedTierId={packageSheetInitialTierId}
-        currentPaidTierId={currentPaidTierId ?? undefined}
-        onClose={onClosePackageSheet}
-        onPurchaseSuccess={() => {
-          void invalidateProfilePackageState();
-        }}
+}) => {
+  if (!isProfileBenefitsEnabled()) {
+    return null;
+  }
+
+  return (
+    <>
+      <ContactUnlockQuotaExhaustedModal
+        open={contactUnlockExhaustedOpen}
+        onClose={onCloseContactUnlockExhausted}
+        onUpgrade={onUpgradeFromContactUnlock}
+        currentPaidTierId={currentPaidTierId}
+        freeMonthly={freeMonthly}
       />
-    ) : null}
-  </>
-);
+      {packageSheetOpen ? (
+        <ProfilePackageSheet
+          open
+          activityLegacyId={eventId}
+          initialSelectedTierId={packageSheetInitialTierId}
+          currentPaidTierId={currentPaidTierId ?? undefined}
+          onClose={onClosePackageSheet}
+          onPurchaseSuccess={() => {
+            void invalidateProfilePackageState();
+          }}
+        />
+      ) : null}
+    </>
+  );
+};

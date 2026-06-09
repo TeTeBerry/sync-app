@@ -1,12 +1,13 @@
 import './AiMatchQuotaExhaustedMessage.scss';
 import { Sparkles, Zap } from '../../components/icons';
 import { Text, View } from '@tarojs/components';
+import { isProfileBenefitsEnabled } from '../../constants/featureFlags';
 import { useAiMatchQuota } from '../../hooks/useAiMatchQuota';
 
 export function AiMatchQuotaExhaustedMessage() {
   const { exhausted, usageLabel, loading } = useAiMatchQuota();
 
-  if (loading || !exhausted) return null;
+  if (!isProfileBenefitsEnabled() || loading || !exhausted) return null;
 
   return (
     <View className="s-ai-assistant-chat__row" role="status">

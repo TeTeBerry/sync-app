@@ -272,6 +272,13 @@ export function thumbnailImageUrl(
     }
 
     const host = url.hostname;
+    if (host.includes('imagekit.io')) {
+      if (!url.searchParams.has('tr')) {
+        url.searchParams.set('tr', `w-${width},h-${height},c-at_max`);
+      }
+      return url.toString();
+    }
+
     if (
       host.includes('alicdn.com') ||
       host.includes('tbcdn.cn') ||

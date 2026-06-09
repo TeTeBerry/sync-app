@@ -185,7 +185,7 @@ const ProfilePostsPage: React.FC = () => {
   return (
     <View data-cmp="ProfilePostsPage" className="s-profile-stack s-page-with-tabbar">
       <View className="s-page-with-tabbar__main">
-        <PageNavigation title="我的帖子" fallback={ROUTES.PROFILE} tone="surface" />
+        <PageNavigation title="我的组队帖" fallback={ROUTES.PROFILE} tone="surface" />
 
         <ScrollView
           scrollY

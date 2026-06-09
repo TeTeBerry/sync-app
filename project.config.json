@@ -2,7 +2,7 @@
   "miniprogramRoot": "dist-weapp/",
   "projectname": "sync-app",
   "description": "SYNC Taro mini program",
-  "appid": "touristappid",
+  "appid": "wx2f7acc70969d9bf8",
   "compileType": "miniprogram",
   "setting": {
     "urlCheck": false,

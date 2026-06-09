@@ -11,6 +11,7 @@ import {
 } from '../../components/icons';
 import { LoginPromptHero } from '../auth/LoginPromptHero';
 import { requireAuth } from '../../utils/authGate';
+import { isProfileBenefitsEnabled } from '../../constants/featureFlags';
 import { go, ROUTES } from '../../utils/route';
 import { Text, View } from '@tarojs/components';
 
@@ -27,7 +28,7 @@ type LockedFeature = {
   feature: 'activity' | 'post' | 'benefits' | 'notification';
 };
 
-const LOCKED_FEATURES: LockedFeature[] = [
+const ALL_LOCKED_FEATURES: LockedFeature[] = [
   {
     icon: <Zap size={18} color="#ff0066" />,
     title: '我的活动',
@@ -36,8 +37,8 @@ const LOCKED_FEATURES: LockedFeature[] = [
   },
   {
     icon: <FileText size={18} color="#bf5af2" />,
-    title: '我的帖子',
-    desc: '组队帖与互动数据',
+    title: '我的组队帖',
+    desc: '组队帖与申请管理',
     feature: 'post',
   },
   {
@@ -53,6 +54,10 @@ const LOCKED_FEATURES: LockedFeature[] = [
     feature: 'notification',
   },
 ];
+
+const LOCKED_FEATURES = ALL_LOCKED_FEATURES.filter(
+  (item) => item.feature !== 'benefits' || isProfileBenefitsEnabled(),
+);
 
 const ProfileGuestSection: React.FC<ProfileGuestSectionProps> = ({
   onLoggedIn,

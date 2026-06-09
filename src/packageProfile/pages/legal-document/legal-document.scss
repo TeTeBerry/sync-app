@@ -1,14 +1,20 @@
 .s-legal-doc {
   width: 100%;
+  height: 100vh;
+  height: 100dvh;
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+  box-sizing: border-box;
   background-color: var(--background);
+  color: #fff;
 }
 
 .s-legal-doc__scroll {
-  flex: 1;
-  height: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .s-legal-doc__main {
@@ -59,6 +65,12 @@
   padding-top: 16px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   font-size: var(--s-type-caption);
+  color: #636366;
+  line-height: 1.6;
+}
+
+.s-legal-doc__footer-text {
+  display: block;
   color: #636366;
   line-height: 1.6;
 }

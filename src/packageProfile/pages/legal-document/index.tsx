@@ -3,6 +3,7 @@ import { useRouter } from '@tarojs/taro';
 import React, { useMemo } from 'react';
 import PageNavigation from '../../../components/navigation/PageNavigation';
 import { useEndRouteTransitionOnShow } from '../../../hooks/useEndRouteTransitionOnShow';
+import { useStackPageMainHeight } from '../../../hooks/useTabPageMainHeight';
 import {
   APP_DISPLAY_NAME,
   LEGAL_CONTACT_EMAIL,
@@ -15,6 +16,7 @@ import { ScrollView, Text, View } from '@tarojs/components';
 
 const LegalDocumentPage: React.FC = () => {
   useEndRouteTransitionOnShow();
+  const mainScrollHeight = useStackPageMainHeight();
   const router = useRouter();
   const docId = router.params.doc as LegalDocId | undefined;
 
@@ -34,7 +36,15 @@ const LegalDocumentPage: React.FC = () => {
   return (
     <View data-cmp="LegalDocument" className="s-legal-doc">
       <PageNavigation title={document.title} fallback={ROUTES.PROFILE} />
-      <ScrollView scrollY className="s-legal-doc__scroll s-scrollbar-none">
+      <ScrollView
+        scrollY
+        enhanced
+        showScrollbar={false}
+        className="s-legal-doc__scroll s-scrollbar-none"
+        style={
+          mainScrollHeight != null ? { height: `${mainScrollHeight}px` } : undefined
+        }
+      >
         <View className="s-legal-doc__main">
           <Text className="s-legal-doc__meta">
             {APP_DISPLAY_NAME} · 更新日期：{document.updatedAt} · 版本{' '}
@@ -54,7 +64,7 @@ const LegalDocumentPage: React.FC = () => {
             </View>
           ))}
           <View className="s-legal-doc__footer">
-            <Text>
+            <Text className="s-legal-doc__footer-text">
               运营者：{LEGAL_OPERATOR_NAME}
               {'\n'}
               联系邮箱：{LEGAL_CONTACT_EMAIL}

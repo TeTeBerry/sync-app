@@ -29,6 +29,7 @@ import {
   type EventCardUi,
   type FeaturedEvent,
 } from '../../utils/apiMappers';
+import { resolveCatalogActivityImage } from '../../constants/activityCatalogImages';
 import {
   persistHomeSummary,
   seedPopularPostsCache,
@@ -44,6 +45,26 @@ import type { QueryEnableOptions } from './types';
 import type { UpdateCurrentUserPayload } from '../../types/backend';
 import { updateCurrentUser } from '../../api/sync/users';
 
+function withCatalogActivityImage(activity: BackendActivity): BackendActivity {
+  return {
+    ...activity,
+    image: resolveCatalogActivityImage(activity.legacyId, activity.image),
+  };
+}
+
+function withCatalogHomeSummary(summary: HomeSummary): HomeSummary {
+  if (!summary.signupEvents?.length) {
+    return summary;
+  }
+  return {
+    ...summary,
+    signupEvents: summary.signupEvents.map((event) => ({
+      ...event,
+      image: resolveCatalogActivityImage(event.id, event.image),
+    })),
+  };
+}
+
 export function useActivitiesQuery(options?: QueryEnableOptions) {
   const tabEnabled = options?.enabled ?? true;
   const enabled = isLiveApi() && tabEnabled;
@@ -51,7 +72,7 @@ export function useActivitiesQuery(options?: QueryEnableOptions) {
   return useApiQuery({
     queryKey: ['activities'],
     queryFn: async () => {
-      const activities = await fetchActivities();
+      const activities = (await fetchActivities()).map(withCatalogActivityImage);
       seedActivityDetailsFromList(activities);
       return activities;
     },
@@ -81,7 +102,7 @@ export function useHomeSummary() {
   return useApiQuery({
     queryKey: ['home', 'summary'],
     queryFn: async () => {
-      const result = await fetchHomeSummary();
+      const result = withCatalogHomeSummary(await fetchHomeSummary());
       persistHomeSummary(result);
       seedActivityDetailsFromHomeSummary(result);
       seedPopularPostsCache(result.popularPosts);
@@ -158,7 +179,7 @@ export function useActivityDetailQuery(legacyId?: number) {
     queryFn: async () => {
       const result = await fetchActivityByLegacyId(legacyId as number);
       if (result != null) {
-        return result;
+        return withCatalogActivityImage(result);
       }
       const seeded = getCacheData<BackendActivity | null>([
         'activities',

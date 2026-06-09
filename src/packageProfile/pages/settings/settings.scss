@@ -18,7 +18,8 @@
 
 .s-settings__scroll {
   flex: 1;
-  height: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .s-settings__card {
@@ -86,7 +87,8 @@
 
 /* Override app.scss button[class*='s-'] { justify-content: center } */
 button.s-settings__option,
-button[type='default'].s-settings__option {
+button[type='default'].s-settings__option,
+.s-settings__option--row {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -103,14 +105,24 @@ button[type='default'].s-settings__option {
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   }
 
-  &:active {
+  &:active,
+  &--pressed {
     background: rgba(255, 255, 255, 0.04);
   }
 
   &--selected .s-settings__option-label {
     color: var(--primary);
   }
+}
 
+.s-settings__option-copy {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+}
+
+button.s-settings__option,
+button[type='default'].s-settings__option {
   > view:first-child {
     flex: 1;
     min-width: 0;
@@ -119,15 +131,19 @@ button[type='default'].s-settings__option {
 }
 
 .s-settings__option-label {
+  display: block;
   font-size: var(--s-type-body);
   font-weight: 500;
   color: #fff;
+  line-height: 1.35;
 }
 
 .s-settings__option-desc {
+  display: block;
   font-size: var(--s-type-meta);
   color: var(--muted-foreground);
   margin-top: 2px;
+  line-height: 1.35;
 }
 
 .s-settings__check {

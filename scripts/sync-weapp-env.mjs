@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 /**
- * Write sync-app/.env.local with LAN IP for WeChat mini program dev.
- * Keeps API/WS URLs aligned with sync-app-backend UPLOAD_PUBLIC_BASE_URL when possible.
+ * Write sync-app/.env.local for WeChat mini program builds.
+ *
+ * SYNC_WEAPP_ENV=development  npm run dev:weapp   → LAN / local backend
+ * SYNC_WEAPP_ENV=production   npm run prd:weapp   → sync-app/.env.production (cloud)
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -9,8 +11,20 @@ import { execSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const backendEnvPath = path.resolve(root, '../sync-app-backend/.env');
+const backendRoot = path.resolve(root, '../sync-app-backend');
+const backendDevEnvPath = path.join(backendRoot, '.env');
+const sharedEnvPath = path.join(root, '.env');
 const localEnvPath = path.join(root, '.env.local');
+
+const mode = (process.env.SYNC_WEAPP_ENV || 'development').toLowerCase();
+if (mode !== 'development' && mode !== 'production') {
+  console.error(
+    '[sync-weapp-env] SYNC_WEAPP_ENV must be "development" or "production"',
+  );
+  process.exit(1);
+}
+
+const modeEnvPath = path.join(root, `.env.${mode}`);
 
 function detectLanIp() {
   const cmds = ['ipconfig getifaddr en0', 'ipconfig getifaddr en1'];
@@ -25,52 +39,117 @@ function detectLanIp() {
   return '192.168.1.7';
 }
 
-function readBackendPublicHost() {
-  if (!fs.existsSync(backendEnvPath)) return null;
-  const text = fs.readFileSync(backendEnvPath, 'utf8');
-  const match = text.match(/^UPLOAD_PUBLIC_BASE_URL=(\S+)/m);
-  if (!match?.[1]) return null;
-  try {
-    return new URL(match[1].startsWith('http') ? match[1] : `http://${match[1]}`);
-  } catch {
-    return null;
-  }
-}
-
 function readEnvFileKeys(filePath, keys) {
   if (!fs.existsSync(filePath)) return {};
   const text = fs.readFileSync(filePath, 'utf8');
   const out = {};
   for (const key of keys) {
     const match = text.match(new RegExp(`^${key}=(.*)$`, 'm'));
-    if (match?.[1]) out[key] = match[1].trim();
+    if (match?.[1]) {
+      const value = match[1].split('#')[0]?.trim();
+      if (value) out[key] = value;
+    }
   }
   return out;
 }
 
-const backendUrl = readBackendPublicHost();
-const ip = backendUrl?.hostname || detectLanIp();
-const port = backendUrl?.port || '3000';
-const apiBase = `http://${ip}:${port}/api`;
-const wsUrl = `ws://${ip}:${port}/api/ai/chat/ws`;
+function readBackendPublicUrl(devOnly) {
+  const paths = devOnly
+    ? [backendDevEnvPath]
+    : [backendDevEnvPath, path.join(backendRoot, '.env.production')];
+  for (const filePath of paths) {
+    const env = readEnvFileKeys(filePath, ['UPLOAD_PUBLIC_BASE_URL']);
+    const raw = env.UPLOAD_PUBLIC_BASE_URL;
+    if (!raw) continue;
+    try {
+      return new URL(raw.startsWith('http') ? raw : `http://${raw}`);
+    } catch {
+      /* try next file */
+    }
+  }
+  return null;
+}
 
-const appEnvPath = path.join(root, '.env');
+function apiBaseToWsUrl(apiBase) {
+  const trimmed = apiBase.replace(/\/$/, '');
+  const httpRoot = trimmed.replace(/\/api$/, '');
+  if (httpRoot.startsWith('https://')) {
+    return `${httpRoot.replace('https://', 'wss://')}/api/ai/chat/ws`;
+  }
+  if (httpRoot.startsWith('http://')) {
+    return `${httpRoot.replace('http://', 'ws://')}/api/ai/chat/ws`;
+  }
+  return '';
+}
+
+function resolveApiAndWs() {
+  const apiKeys = ['TARO_APP_API_BASE_URL', 'TARO_APP_AI_CHAT_WS_URL'];
+  const sharedApi = readEnvFileKeys(sharedEnvPath, apiKeys);
+  const modeApi = readEnvFileKeys(modeEnvPath, apiKeys);
+  const appApiEnv = { ...sharedApi, ...modeApi };
+
+  if (appApiEnv.TARO_APP_API_BASE_URL) {
+    const apiBase = appApiEnv.TARO_APP_API_BASE_URL.replace(/\/$/, '');
+    const wsUrl = appApiEnv.TARO_APP_AI_CHAT_WS_URL || apiBaseToWsUrl(apiBase) || '';
+    return {
+      apiBase,
+      wsUrl,
+      source: `sync-app/.env.${mode} (TARO_APP_API_BASE_URL)`,
+    };
+  }
+
+  if (mode === 'production') {
+    console.error(
+      `[sync-weapp-env] production mode requires TARO_APP_API_BASE_URL in sync-app/.env.${mode}`,
+    );
+    console.error('  Example: TARO_APP_API_BASE_URL=http://124.223.205.158:3000/api');
+    process.exit(1);
+  }
+
+  const backendUrl = readBackendPublicUrl(true);
+  if (backendUrl) {
+    const ip = backendUrl.hostname;
+    const port = backendUrl.port || '3000';
+    const apiBase = `http://${ip}:${port}/api`;
+    return {
+      apiBase,
+      wsUrl: `ws://${ip}:${port}/api/ai/chat/ws`,
+      source: 'sync-app-backend/.env UPLOAD_PUBLIC_BASE_URL',
+    };
+  }
+
+  const ip = detectLanIp();
+  const port = '3000';
+  return {
+    apiBase: `http://${ip}:${port}/api`,
+    wsUrl: `ws://${ip}:${port}/api/ai/chat/ws`,
+    source: 'detected LAN IP',
+  };
+}
+
 const passthroughKeys = [
+  'TARO_APP_USE_MOCK',
+  'TARO_APP_AUTH_DEV',
+  'TARO_APP_DEV_USER_NAME',
   'TARO_APP_QQ_MAP_KEY',
   'TARO_APP_QQ_MAP_LAYER_STYLE',
   'TARO_APP_ENABLE_ROUTE_PLAN_PLUGIN',
+  'TARO_APP_ENABLE_PROFILE_BENEFITS',
   'TARO_APP_COS_BUCKET',
   'TARO_APP_COS_REGION',
   'TARO_APP_COS_PUBLIC_BASE_URL',
 ];
-const appEnv = readEnvFileKeys(appEnvPath, passthroughKeys);
-const backendCos = readEnvFileKeys(backendEnvPath, [
+
+const sharedEnv = readEnvFileKeys(sharedEnvPath, passthroughKeys);
+const modeEnv = readEnvFileKeys(modeEnvPath, passthroughKeys);
+const appEnv = { ...sharedEnv, ...modeEnv };
+
+const backendCos = readEnvFileKeys(backendDevEnvPath, [
   'COS_BUCKET',
   'COS_REGION',
   'COS_PUBLIC_BASE_URL',
 ]);
 
-/** Prefer sync-app/.env; fall back to sync-app-backend/.env COS_* */
 const cosEnv = {
   TARO_APP_COS_BUCKET: appEnv.TARO_APP_COS_BUCKET || backendCos.COS_BUCKET,
   TARO_APP_COS_REGION: appEnv.TARO_APP_COS_REGION || backendCos.COS_REGION,
@@ -78,8 +157,17 @@ const cosEnv = {
     appEnv.TARO_APP_COS_PUBLIC_BASE_URL || backendCos.COS_PUBLIC_BASE_URL,
 };
 
-const mapEnvLines = passthroughKeys
-  .filter((key) => !key.startsWith('TARO_APP_COS_'))
+const { apiBase, wsUrl, source } = resolveApiAndWs();
+
+const generalPassthroughLines = [
+  'TARO_APP_USE_MOCK',
+  'TARO_APP_AUTH_DEV',
+  'TARO_APP_DEV_USER_NAME',
+  'TARO_APP_QQ_MAP_KEY',
+  'TARO_APP_QQ_MAP_LAYER_STYLE',
+  'TARO_APP_ENABLE_ROUTE_PLAN_PLUGIN',
+  'TARO_APP_ENABLE_PROFILE_BENEFITS',
+]
   .filter((key) => appEnv[key])
   .map((key) => `${key}=${appEnv[key]}`)
   .join('\n');
@@ -89,15 +177,22 @@ const cosEnvLines = Object.entries(cosEnv)
   .map(([key, value]) => `${key}=${value}`)
   .join('\n');
 
-const body = `# Auto-generated by scripts/sync-weapp-env.mjs — do not use localhost in weapp
+const body = `# Auto-generated by scripts/sync-weapp-env.mjs
+# mode: ${mode} | source: ${source}
+# dev:  npm run dev:weapp  → .env.development / LAN
+# prd:  npm run prd:weapp  → .env.production / cloud
 TARO_APP_API_BASE_URL=${apiBase}
 TARO_APP_AI_CHAT_WS_URL=${wsUrl}
-${mapEnvLines ? `\n# 探索页腾讯地图（来自 .env）\n${mapEnvLines}\n` : ''}${cosEnvLines ? `\n# COS（来自 .env 或 sync-app-backend/.env）\n${cosEnvLines}\n` : ''}# 开发者工具 → 详情 → 本地设置 → 勾选「不校验合法域名、web-view、TLS」
+${generalPassthroughLines ? `\n${generalPassthroughLines}\n` : ''}${cosEnvLines ? `\n# COS\n${cosEnvLines}\n` : ''}# 开发者工具 → 详情 → 本地设置 → 勾选「不校验合法域名、web-view、TLS」
 `;
 
 fs.writeFileSync(localEnvPath, body, 'utf8');
 // eslint-disable-next-line no-console
-console.log(`[sync-weapp-env] wrote ${path.relative(process.cwd(), localEnvPath)}`);
+console.log(
+  `[sync-weapp-env] mode=${mode} wrote ${path.relative(process.cwd(), localEnvPath)}`,
+);
+// eslint-disable-next-line no-console
+console.log(`  source: ${source}`);
 // eslint-disable-next-line no-console
 console.log(`  TARO_APP_API_BASE_URL=${apiBase}`);
 // eslint-disable-next-line no-console

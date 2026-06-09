@@ -60,6 +60,52 @@
     line-height: 1.2;
   }
 
+  &__style-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 40px;
+    margin-bottom: 10px;
+    padding: 0 12px;
+    border-radius: 12px;
+    background: #1c1c1e;
+    box-sizing: border-box;
+  }
+
+  &__style-search-input {
+    flex: 1;
+    min-width: 0;
+    height: 40px;
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: #fff;
+    font-size: var(--s-type-small);
+    line-height: 1.2;
+  }
+
+  &__style-search-placeholder {
+    color: rgba(255, 255, 255, 0.38);
+    font-size: var(--s-type-small);
+  }
+
+  &__style-search-clear {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-full);
+    background: #2c2c2e;
+    -webkit-tap-highlight-color: transparent;
+
+    &--pressed {
+      opacity: 0.8;
+    }
+  }
+
   &__chip-scroll {
     width: 100%;
     white-space: nowrap;

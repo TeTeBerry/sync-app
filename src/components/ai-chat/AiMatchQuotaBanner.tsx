@@ -2,6 +2,7 @@ import './AiMatchQuotaBanner.scss';
 import { Zap } from '../../components/icons';
 import { Button } from '../ui';
 import { Text, View } from '@tarojs/components';
+import { isProfileBenefitsEnabled } from '../../constants/featureFlags';
 import { useAiMatchQuotaExhausted } from '../../hooks/useAiMatchQuotaExhausted';
 import { useAiUpgradeSheet } from './AiUpgradeSheetContext';
 
@@ -9,7 +10,7 @@ export function AiMatchQuotaBanner() {
   const exhausted = useAiMatchQuotaExhausted();
   const { openUpgradeSheet } = useAiUpgradeSheet();
 
-  if (!exhausted) return null;
+  if (!isProfileBenefitsEnabled() || !exhausted) return null;
 
   return (
     <View className="s-ai-match-quota-banner" role="status">

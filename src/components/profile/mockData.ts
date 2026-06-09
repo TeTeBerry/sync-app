@@ -50,7 +50,8 @@ export const profileActivities: ProfileActivityItem[] = [
     title: 'EDC Thailand 2026',
     date: '2026-12-18',
     location: '普吉岛 Rhythm Park',
-    image: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=600&q=80',
+    image:
+      'https://ik.imagekit.io/TBR/Island%20Events/EDC%20Thailand%202026.png?updatedAt=1763068886366',
     status: 'registered',
   },
 ];

@@ -70,7 +70,7 @@ const ProfileSummarySection: React.FC<ProfileSummarySectionProps> = ({
         </View>
         <View className="s-profile__stat">
           <Text className="s-profile__stat-value">{user.stats.posts}</Text>
-          <Text className="s-profile__stat-label">我的帖子</Text>
+          <Text className="s-profile__stat-label">组队帖</Text>
         </View>
       </View>
     </View>

@@ -1,0 +1,12 @@
+import type { PostContentType, ProfilePostItem } from '../types/backend';
+
+/** Explore share posts — excluded from「我的组队帖」. */
+export function isProfileSharePost(contentTypes?: PostContentType[] | null): boolean {
+  return (contentTypes ?? []).includes('share');
+}
+
+export function filterProfileTeamPosts<T extends Pick<ProfilePostItem, 'contentTypes'>>(
+  items: T[],
+): T[] {
+  return items.filter((item) => !isProfileSharePost(item.contentTypes));
+}

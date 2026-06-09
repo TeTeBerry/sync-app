@@ -10,10 +10,7 @@ import {
 import { useItineraryStore } from '../../../stores/itineraryStore';
 import { SUB_PAGE_HEADER_META_EXTRA_PX } from '../../../components/navigation/PageNavigation';
 import { useStackPageMainHeight } from '../../../hooks/useTabPageMainHeight';
-import {
-  EXCLUSIVE_ITINERARY_DEFAULT_SELECTED_IDS,
-  EXCLUSIVE_ITINERARY_DJS,
-} from '../exclusive-itinerary/exclusiveItineraryMock';
+import { EXCLUSIVE_ITINERARY_DJS } from '../exclusive-itinerary/exclusiveItineraryMock';
 import { resolveEventDetailIdFromQuery, ROUTES } from '../../../utils/route';
 import { selectActiveActivityLegacyId, useNavigationStore } from '../../../stores';
 import type {

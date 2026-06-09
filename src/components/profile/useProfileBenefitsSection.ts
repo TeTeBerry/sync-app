@@ -8,17 +8,11 @@ import {
   pickGlobalFreeMonthly,
   type ProfileEventBenefitCardModel,
 } from './profileBenefitsMapper';
-import {
-  resolveProfileDebugEntitlements,
-  type ProfileDebugEntitlementPreset,
-} from './profileDebugEntitlements';
 import type { ProfileBenefitsBlockProps } from './ProfileBenefitsBlock';
+import { isProfileBenefitsEnabled } from '../../constants/featureFlags';
 import { go, ROUTES } from '../../utils/route';
 
 export type UseProfileBenefitsSectionOptions = {
-  apiEnabled: boolean;
-  debugEntitlementsEnabled: boolean;
-  debugPreset: ProfileDebugEntitlementPreset;
   benefitsLoading: boolean;
   paidEntitlements: EventPackageEntitlement[];
   recentPaidBenefitCards: ProfileEventBenefitCardModel[];
@@ -30,9 +24,6 @@ export type UseProfileBenefitsSectionOptions = {
 };
 
 export function useProfileBenefitsSection({
-  apiEnabled,
-  debugEntitlementsEnabled,
-  debugPreset,
   benefitsLoading,
   paidEntitlements,
   recentPaidBenefitCards,
@@ -42,12 +33,6 @@ export function useProfileBenefitsSection({
   onOpenPackageSheet,
   onUpgrade,
 }: UseProfileBenefitsSectionOptions): ProfileBenefitsBlockProps {
-  const debugEntitlementOverride = useMemo(
-    () =>
-      debugEntitlementsEnabled ? resolveProfileDebugEntitlements(debugPreset) : null,
-    [debugPreset, debugEntitlementsEnabled],
-  );
-
   const entitlementList = useMemo(
     () => asEntitlementList(entitlementsData),
     [entitlementsData],
@@ -66,18 +51,14 @@ export function useProfileBenefitsSection({
     return undefined;
   }, [summaryData]);
 
-  const globalFreeMonthly = useMemo(() => {
-    if (debugEntitlementOverride) {
-      return debugEntitlementOverride.freeMonthly;
-    }
-    return pickGlobalFreeMonthly(entitlementList, summaryFreeMonthly);
-  }, [debugEntitlementOverride, entitlementList, summaryFreeMonthly]);
+  const globalFreeMonthly = useMemo(
+    () => pickGlobalFreeMonthly(entitlementList, summaryFreeMonthly),
+    [entitlementList, summaryFreeMonthly],
+  );
 
   const hasPaidEntitlement = paidEntitlements.length > 0;
   const showPaidBenefitsSection = hasPaidEntitlement;
-  const showFreeBenefitsSection =
-    paidEntitlements.length === 0 &&
-    (debugEntitlementOverride != null || !benefitsLoading);
+  const showFreeBenefitsSection = paidEntitlements.length === 0 && !benefitsLoading;
   const showBenefitsLoading = benefitsLoading && !showPaidBenefitsSection;
   const showBenefitsBlock =
     showPaidBenefitsSection || showFreeBenefitsSection || showBenefitsLoading;
@@ -94,7 +75,7 @@ export function useProfileBenefitsSection({
   };
 
   return {
-    visible: showBenefitsBlock,
+    visible: isProfileBenefitsEnabled() && showBenefitsBlock,
     showPaid: showPaidBenefitsSection,
     showFree: showFreeBenefitsSection,
     showFreeLoading: showBenefitsLoading,

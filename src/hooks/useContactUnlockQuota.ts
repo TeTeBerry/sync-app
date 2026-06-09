@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { isApiEnabled } from '../constants/api';
+import { isProfileBenefitsEnabled } from '../constants/featureFlags';
 import { useProfileActivityLegacyId } from './useProfileActivityLegacyId';
 import type { QueryEnableOptions } from './sync/types';
 import { useProfileEntitlementsQuery } from './useSyncApi';
@@ -30,7 +31,7 @@ export function useContactUnlockQuota(
   return useMemo(() => {
     const loading = isApiEnabled() && entitlementsQuery.isLoading;
 
-    if (!isApiEnabled()) {
+    if (!isApiEnabled() || !isProfileBenefitsEnabled()) {
       return {
         exhausted: false,
         remaining: null,

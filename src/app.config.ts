@@ -12,9 +12,7 @@ export default {
   themeLocation: 'theme.json',
   /** 未授权时写入 app.json 会导致模拟器无法启动，默认关闭；见 TARO_APP_ENABLE_ROUTE_PLAN_PLUGIN */
   ...(routePlanPluginBuildEnabled ? { plugins: EXPLORE_ROUTE_PLAN_APP_CONFIG } : {}),
-  ...(routePlanPluginBuildEnabled
-    ? { requiredPrivateInfos: ['getLocation'] as const }
-    : {}),
+  requiredPrivateInfos: ['getLocation'] as const,
   /** 微信「代码质量」要求开启按需注入，见开发者工具 → 代码质量 → 组件 */
   lazyCodeLoading: 'requiredComponents',
   /** 主包：仅 3 个 Tab，缩小首包体积 */
@@ -81,7 +79,7 @@ export default {
   },
   permission: {
     'scope.userLocation': {
-      desc: '你的位置信息将用于路线规划起点',
+      desc: '你的位置信息将用于活动地图定位与路线规划起点',
     },
     'scope.writePhotosAlbum': {
       desc: '保存行程屏保图片到你的相册',

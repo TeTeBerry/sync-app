@@ -1,6 +1,7 @@
 import Taro, { useDidShow } from '@tarojs/taro';
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { isLiveApi } from '../../constants/api';
+import { isProfileBenefitsEnabled } from '../../constants/featureFlags';
 import { useAccountRisk } from '../../hooks/useAccountRisk';
 import {
   useBlockedUsersQuery,
@@ -44,10 +45,6 @@ import { deriveInterestTag } from './utils';
 import { useProfilePaidBenefitCards } from './useProfilePaidBenefitCards';
 import { useProfilePackageSheet } from './useProfilePackageSheet';
 import { useProfileBenefitsSection } from './useProfileBenefitsSection';
-import {
-  useProfileDebugOverlays,
-  type ProfileDebugOverlayViewModel,
-} from './useProfileDebugOverlays';
 
 export type UseProfilePageOptions = {
   confirm: (options: ConfirmDialogOptions) => Promise<boolean>;
@@ -65,7 +62,6 @@ export type ProfileOverlaysViewModel = {
     onClose: () => void;
     onPurchaseSuccess: () => void;
   };
-  debug: ProfileDebugOverlayViewModel;
 };
 
 export function useProfilePage({ confirm }: UseProfilePageOptions) {
@@ -76,14 +72,6 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
     (state) => state.setNotificationsEnabled,
   );
   const setPrivacyLevel = useProfilePageStore((state) => state.setPrivacyLevel);
-
-  const openPackageSheetRef = useRef<
-    (options?: { initialSelectedTierId?: PackageTierId }) => void
-  >(() => {});
-
-  const debug = useProfileDebugOverlays({
-    openPackageSheet: (options) => openPackageSheetRef.current(options),
-  });
 
   const summaryQuery = useProfileSummaryQuery();
   const currentUserQuery = useCurrentUserQuery();
@@ -111,18 +99,12 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
     entitlementsData: paidEntitlementsData,
     refetchEntitlements,
   } = useProfilePaidBenefitCards({
-    useDebugEntitlements: debug.debugEntitlementsEnabled,
-    debugPreset: debug.debugEntitlementPreset,
-    entitlementsEnabled: entitlementsReady && loggedIn,
+    entitlementsEnabled: isProfileBenefitsEnabled() && entitlementsReady && loggedIn,
   });
 
   const packageSheet = useProfilePackageSheet({ paidEntitlements });
-  openPackageSheetRef.current = packageSheet.openPackageSheet;
 
   const benefits = useProfileBenefitsSection({
-    apiEnabled,
-    debugEntitlementsEnabled: debug.debugEntitlementsEnabled,
-    debugPreset: debug.debugEntitlementPreset,
     benefitsLoading,
     paidEntitlements,
     recentPaidBenefitCards,
@@ -238,7 +220,6 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
   const overlays: ProfileOverlaysViewModel = {
     packageSheetOpen: packageSheet.packageSheetOpen,
     packageSheet: packageSheet.packageSheet,
-    debug: debug.debugOverlay,
   };
 
   return {
@@ -251,7 +232,6 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
     postsCount,
     accountRisk,
     settings,
-    debugSection: debug.debugSection,
     overlays,
     handleAuthLoggedIn,
     handleProfileRetry,

@@ -1,9 +1,14 @@
+import { isProfileBenefitsEnabled } from '../constants/featureFlags';
+
 /** User-facing fallback when stream fails (prod) or dev detail is empty. */
 export function formatAiChatStreamError(error: unknown, fallback: string): string {
   const message =
     error instanceof Error ? error.message : typeof error === 'string' ? error : '';
   if (!message.trim()) return fallback;
   if (/匹配次数已用完|quota exhausted/i.test(message)) {
+    if (!isProfileBenefitsEnabled()) {
+      return fallback;
+    }
     return message.trim();
   }
   if (process.env.NODE_ENV === 'production') return fallback;

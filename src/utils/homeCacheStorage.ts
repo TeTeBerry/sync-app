@@ -14,7 +14,7 @@ import type { HomeFeedPost, HomeSummary } from '../types/backend';
 export const HOME_POPULAR_POSTS_PERSIST_LIMIT = 8;
 export const HOME_CACHE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 
-const SUMMARY_STORAGE_KEY = 'sync:home:summary:v1';
+const SUMMARY_STORAGE_KEY = 'sync:home:summary:v2';
 
 function popularStorageKey(userId: string): string {
   return `sync:home:popular:v1:${userId}`;

@@ -41,8 +41,22 @@ if (fs.existsSync(privateConfigPath)) {
   }
 }
 
-if (process.env.TARO_APP_ID) {
-  distConfig.appid = process.env.TARO_APP_ID;
+const resolvedAppId =
+  process.env.TARO_APP_ID ||
+  (fs.existsSync(privateConfigPath)
+    ? JSON.parse(fs.readFileSync(privateConfigPath, 'utf8')).appid
+    : null) ||
+  base.appid;
+
+if (resolvedAppId && resolvedAppId !== 'touristappid') {
+  distConfig.appid = resolvedAppId;
+  if (base.appid !== resolvedAppId) {
+    fs.writeFileSync(
+      srcConfigPath,
+      `${JSON.stringify({ ...base, appid: resolvedAppId }, null, 2)}\n`,
+      'utf8',
+    );
+  }
 }
 
 fs.writeFileSync(destConfigPath, `${JSON.stringify(distConfig, null, 2)}\n`, 'utf8');

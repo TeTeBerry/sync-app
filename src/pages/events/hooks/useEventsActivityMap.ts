@@ -1,9 +1,13 @@
 import type { MapProps } from '@tarojs/components';
 import Taro, { getCurrentInstance } from '@tarojs/taro';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ActivityMapRegion } from '../../../constants/activityMapRegion';
 import {
+  ensureUserLocationAuthorized,
+  getUserGcj02Location,
   isWechatDevtoolsMapLimited,
+  resolveTencentMapSubkeyForRuntime,
+  safeMapIncludePoints,
   safeMapMoveToLocation,
 } from '../../../utils/tencentMap';
 import type { EventCardUi } from '../../../utils/apiMappers';
@@ -49,6 +53,20 @@ export function useEventsActivityMap({
     [regionActivities],
   );
 
+  const [mapCenter, setMapCenter] = useState(() => ({
+    latitude: viewport.latitude,
+    longitude: viewport.longitude,
+    scale: viewport.scale,
+  }));
+
+  useEffect(() => {
+    setMapCenter({
+      latitude: viewport.latitude,
+      longitude: viewport.longitude,
+      scale: viewport.scale,
+    });
+  }, [region, viewport.latitude, viewport.longitude, viewport.scale]);
+
   const markers = useMemo(
     () => buildActivityMapMarkers(regionActivities),
     [regionActivities],
@@ -67,30 +85,50 @@ export function useEventsActivityMap({
     promptMappableActivitiesRoutePlan(regionActivities);
   }, [regionActivities]);
 
-  const moveToUserLocation = useCallback(() => {
-    if (isWechatDevtoolsMapLimited()) {
-      void Taro.showToast({
-        title: '模拟器不支持定位，请用真机预览',
-        icon: 'none',
-      });
+  const moveToUserLocation = useCallback(async () => {
+    const authorized =
+      await ensureUserLocationAuthorized('用于在活动地图上定位到您当前的位置');
+    if (!authorized) {
+      void Taro.showToast({ title: '需要定位权限', icon: 'none' });
       return;
     }
-    const ctx = Taro.createMapContext(EVENTS_MAP_ID, getMapScope());
-    safeMapMoveToLocation(ctx);
+
+    try {
+      const coords = await getUserGcj02Location();
+      setMapCenter({
+        latitude: coords.latitude,
+        longitude: coords.longitude,
+        scale: 14,
+      });
+      if (!isWechatDevtoolsMapLimited()) {
+        const ctx = Taro.createMapContext(EVENTS_MAP_ID, getMapScope());
+        safeMapMoveToLocation(ctx, coords);
+      }
+    } catch {
+      void Taro.showToast({
+        title: isWechatDevtoolsMapLimited()
+          ? '模拟器请在顶部菜单设置模拟定位'
+          : '定位失败，请检查系统定位是否开启',
+        icon: 'none',
+      });
+    }
   }, []);
+
+  const mapSubkey = resolveTencentMapSubkeyForRuntime();
 
   const mapProps: MapProps = useMemo(
     () => ({
       id: EVENTS_MAP_ID,
       className: 's-events-map__canvas',
-      latitude: viewport.latitude,
-      longitude: viewport.longitude,
-      scale: viewport.scale,
+      latitude: mapCenter.latitude,
+      longitude: mapCenter.longitude,
+      scale: mapCenter.scale,
       minScale: 3,
       maxScale: 18,
-      showLocation: false,
+      showLocation: true,
       enablePoi: true,
       markers,
+      ...(mapSubkey ? { subkey: mapSubkey } : {}),
       setting: MAP_SETTING,
       onMarkerTap,
       onError: () => {
@@ -99,8 +137,24 @@ export function useEventsActivityMap({
         }
       },
     }),
-    [markers, onMarkerTap, viewport.latitude, viewport.longitude, viewport.scale],
+    [
+      mapCenter.latitude,
+      mapCenter.longitude,
+      mapCenter.scale,
+      mapSubkey,
+      markers,
+      onMarkerTap,
+    ],
   );
+
+  useEffect(() => {
+    if (!viewport.includePoints.length) return;
+    const ctx = Taro.createMapContext(EVENTS_MAP_ID, getMapScope());
+    safeMapIncludePoints(ctx, {
+      points: viewport.includePoints,
+      padding: [48, 32, 56, 32],
+    });
+  }, [region, regionActivities.length, viewport.includePoints]);
 
   return {
     mapProps,

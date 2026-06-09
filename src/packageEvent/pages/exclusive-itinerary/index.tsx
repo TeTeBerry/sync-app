@@ -21,11 +21,15 @@ const ExclusiveItineraryPage = () => {
     onDismissConflicts,
     stageFilter,
     genreFilter,
+    styleSearchQuery,
+    stageOptions,
+    genreOptions,
     sortMode,
     selectedIds,
     filteredDjs,
     setStageFilter,
     setGenreFilter,
+    setStyleSearchQuery,
     toggleDj,
     openSortSheet,
     closeSortSheet,
@@ -77,11 +81,15 @@ const ExclusiveItineraryPage = () => {
             selectedCount={selectedIds.length}
             stageFilter={stageFilter}
             genreFilter={genreFilter}
+            styleSearchQuery={styleSearchQuery}
+            stageOptions={stageOptions}
+            genreOptions={genreOptions}
             sortMode={sortMode}
             filteredDjs={filteredDjs}
             selectedIds={selectedIds}
             onStageFilterChange={setStageFilter}
             onGenreFilterChange={setGenreFilter}
+            onStyleSearchQueryChange={setStyleSearchQuery}
             onOpenSortSheet={openSortSheet}
             onToggleDj={toggleDj}
           />

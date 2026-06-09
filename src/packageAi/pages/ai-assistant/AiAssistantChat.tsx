@@ -12,6 +12,7 @@ import { AiBuddyPostSheet } from '../../../components/ai-chat/AiBuddyPostSheet';
 import { AiGuidePlanSheet } from '../../../components/ai-chat/AiGuidePlanSheet';
 import { useKeyboardInset } from '../../../hooks/useKeyboardInset';
 import { API_BASE_URL } from '../../../constants/api';
+import { isProfileBenefitsEnabled } from '../../../constants/featureFlags';
 import type { inferUserGenderFromName } from '../../../utils/inferAuthorGender';
 import type { AiGuidePlanFormValues } from '../../../types/travelGuide';
 import { Canvas, View } from '@tarojs/components';
@@ -94,7 +95,7 @@ export function AiAssistantChat({
     if (activityTitle?.trim()) {
       return `👋 已为你锁定「${activityTitle.trim()}」。可先生成出行攻略，生成后点「一键组队」自动预填发帖；也可直接描述需求或点「AI攻略」「组队发帖」。`;
     }
-    return '👋 我是你的 AI 智能助手，帮你发现活动、找组队、规划行程，说出需求，我来搞定。';
+    return '👋 我是你的 AI 智能助手，帮你发现活动、找组队，说出需求，我来搞定。';
   }, [activityTitle]);
 
   const handleMatchResults = useCallback(async () => {
@@ -269,7 +270,7 @@ export function AiAssistantChat({
         return;
       }
 
-      if (aiMatchQuotaExhausted) {
+      if (isProfileBenefitsEnabled() && aiMatchQuotaExhausted) {
         void Taro.showToast({
           title: 'AI 匹配次数已用完，请升级套餐',
           icon: 'none',
@@ -320,7 +321,7 @@ export function AiAssistantChat({
   const handleSelectSuggestedReply = useCallback(
     async (reply: string) => {
       if (submitLockRef.current || isStreaming || isStreamingRef.current) return;
-      if (aiMatchQuotaExhausted) {
+      if (isProfileBenefitsEnabled() && aiMatchQuotaExhausted) {
         void Taro.showToast({
           title: 'AI 匹配次数已用完，请升级套餐',
           icon: 'none',

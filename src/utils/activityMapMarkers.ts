@@ -20,7 +20,6 @@ export function shortenActivityMapTitle(title: string): string {
   if (/风暴|storm/i.test(trimmed)) return '风暴';
   if (/tomorrowland|tml|明日世界/i.test(trimmed)) return 'TML';
   if (/edc.*thailand|泰国edc/i.test(trimmed)) return 'EDC TH';
-  if (/guan/i.test(trimmed)) return 'GUAN';
   return trimmed.length > 6 ? `${trimmed.slice(0, 6)}…` : trimmed;
 }
 

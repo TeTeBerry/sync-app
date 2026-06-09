@@ -1,5 +1,5 @@
 import Taro, { useRouter } from '@tarojs/taro';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { isLiveApi } from '../../../constants/api';
 import {
   useItineraryMutations,
@@ -17,7 +17,14 @@ import {
 import { formatItineraryBuddyRecruitHintMessage } from '../../../utils/itineraryBuddyRecruitHint';
 import { selectActiveActivityLegacyId, useNavigationStore } from '../../../stores';
 import {
-  EXCLUSIVE_ITINERARY_DEFAULT_SELECTED_IDS,
+  buildGenreFilterOptions,
+  buildStageFilterOptions,
+  djMatchesStyleFilter,
+  djMatchesStyleSearch,
+  filterGenreOptionsBySearch,
+  isValidFilterId,
+} from './exclusiveItineraryFilters';
+import {
   EXCLUSIVE_ITINERARY_DJS,
   EXCLUSIVE_ITINERARY_MOCK_CONFLICT_SLOTS,
   type ExclusiveItineraryDj,
@@ -28,16 +35,6 @@ import type { ItineraryConflict, ItineraryDj } from '../../../types/backend';
 const CTA_FOOTER_BASE_PX = 74;
 const SORT_OPTIONS = ['按人气排序', '按名字排序'] as const;
 export type ExclusiveSortMode = (typeof SORT_OPTIONS)[number];
-
-function djMatchesGenre(dj: ExclusiveItineraryDj, genreId: string): boolean {
-  if (genreId === 'all') {
-    return true;
-  }
-  if (dj.genre === genreId) {
-    return true;
-  }
-  return dj.genreLabel.toLowerCase().includes(genreId.toLowerCase());
-}
 
 function djMatchesStage(dj: ExclusiveItineraryDj, stageId: string): boolean {
   if (stageId === 'all') {
@@ -74,10 +71,9 @@ export function useExclusiveItineraryPage() {
 
   const [stageFilter, setStageFilter] = useState('all');
   const [genreFilter, setGenreFilter] = useState('all');
+  const [styleSearchQuery, setStyleSearchQuery] = useState('');
   const [sortMode, setSortMode] = useState<ExclusiveSortMode>('按人气排序');
-  const [selectedIds, setSelectedIds] = useState<string[]>(() => [
-    ...EXCLUSIVE_ITINERARY_DEFAULT_SELECTED_IDS,
-  ]);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [infoOpen, setInfoOpen] = useState(false);
   const [sortSheetOpen, setSortSheetOpen] = useState(false);
   const [hintModal, setHintModal] = useState<{
@@ -101,6 +97,41 @@ export function useExclusiveItineraryPage() {
     }
     return EXCLUSIVE_ITINERARY_DJS;
   }, [apiEnabled, scheduleQuery.data?.djs]);
+
+  const stageOptions = useMemo(() => buildStageFilterOptions(djCatalog), [djCatalog]);
+
+  const genreOptions = useMemo(() => {
+    const base = buildGenreFilterOptions(djCatalog);
+    return filterGenreOptionsBySearch(base, styleSearchQuery);
+  }, [djCatalog, styleSearchQuery]);
+
+  useEffect(() => {
+    setSelectedIds([]);
+    setConflictDismissed(false);
+    setStyleSearchQuery('');
+    setGenreFilter('all');
+    setStageFilter('all');
+  }, [activityLegacyId]);
+
+  useEffect(() => {
+    const catalogIds = new Set(djCatalog.map((dj) => dj.id));
+    setSelectedIds((prev) => {
+      const next = prev.filter((id) => catalogIds.has(id));
+      return next.length === prev.length ? prev : next;
+    });
+  }, [djCatalog]);
+
+  useEffect(() => {
+    if (!isValidFilterId(stageOptions, stageFilter)) {
+      setStageFilter('all');
+    }
+  }, [stageFilter, stageOptions]);
+
+  useEffect(() => {
+    if (!isValidFilterId(genreOptions, genreFilter)) {
+      setGenreFilter('all');
+    }
+  }, [genreFilter, genreOptions]);
 
   const conflicts: ItineraryConflict[] = useMemo(() => {
     const slots =
@@ -126,7 +157,10 @@ export function useExclusiveItineraryPage() {
 
   const filteredDjs = useMemo(() => {
     const list = djCatalog.filter(
-      (dj) => djMatchesStage(dj, stageFilter) && djMatchesGenre(dj, genreFilter),
+      (dj) =>
+        djMatchesStage(dj, stageFilter) &&
+        djMatchesStyleFilter(dj, genreFilter) &&
+        djMatchesStyleSearch(dj, styleSearchQuery),
     );
     const sorted = [...list];
     if (sortMode === '按名字排序') {
@@ -135,7 +169,7 @@ export function useExclusiveItineraryPage() {
       sorted.sort((a, b) => b.popularity - a.popularity);
     }
     return sorted;
-  }, [djCatalog, genreFilter, sortMode, stageFilter]);
+  }, [djCatalog, genreFilter, sortMode, stageFilter, styleSearchQuery]);
 
   const toggleDj = useCallback((id: string) => {
     setConflictDismissed(false);
@@ -257,11 +291,15 @@ export function useExclusiveItineraryPage() {
     onDismissConflicts: () => setConflictDismissed(true),
     stageFilter,
     genreFilter,
+    styleSearchQuery,
+    stageOptions,
+    genreOptions,
     sortMode,
     selectedIds,
     filteredDjs,
     setStageFilter,
     setGenreFilter,
+    setStyleSearchQuery,
     toggleDj,
     openSortSheet,
     closeSortSheet,

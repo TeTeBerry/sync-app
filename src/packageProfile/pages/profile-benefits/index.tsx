@@ -11,9 +11,10 @@ import {
   type ProfileEventBenefitCardModel,
 } from '../../../components/profile';
 import { isLiveApi } from '../../../constants/api';
+import { isProfileBenefitsEnabled } from '../../../constants/featureFlags';
 import { useProfileActivitiesQuery } from '../../../hooks/useSyncApi';
 import { useStackPageMainHeight } from '../../../hooks/useTabPageMainHeight';
-import { ROUTES } from '../../../utils/route';
+import { go, ROUTES } from '../../../utils/route';
 import { useEndRouteTransitionOnShow } from '../../../hooks/useEndRouteTransitionOnShow';
 import { invalidateProfilePackageState } from '../../../utils/queryInvalidation';
 import type { ProfileActivityItem } from '../../../types/backend';
@@ -21,6 +22,7 @@ import { ScrollView, View } from '@tarojs/components';
 
 const ProfileBenefitsPage: React.FC = () => {
   useEndRouteTransitionOnShow();
+  const benefitsEnabled = isProfileBenefitsEnabled();
   const mainScrollHeight = useStackPageMainHeight();
   const apiEnabled = isLiveApi();
   const activitiesQuery = useProfileActivitiesQuery();
@@ -119,10 +121,18 @@ const ProfileBenefitsPage: React.FC = () => {
   }, []);
 
   useDidShow(() => {
+    if (!isProfileBenefitsEnabled()) {
+      go(ROUTES.PROFILE);
+      return;
+    }
     if (apiEnabled) {
       void invalidateProfilePackageState();
     }
   });
+
+  if (!benefitsEnabled) {
+    return null;
+  }
 
   return (
     <View data-cmp="ProfileBenefitsPage" className="s-profile-stack">

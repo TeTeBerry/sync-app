@@ -27,6 +27,38 @@ export function isWechatDevtoolsMapLimited(): boolean {
   }
 }
 
+/** `<Map subkey>`：开发者工具传 key 易报「鉴权失败」，真机再注入。 */
+export function resolveTencentMapSubkeyForRuntime(): string | undefined {
+  if (isWechatDevtoolsMapLimited()) return undefined;
+  return getTencentMapSubkey();
+}
+
+export async function ensureUserLocationAuthorized(
+  purpose = '在地图上显示您的位置',
+): Promise<boolean> {
+  try {
+    const { authSetting } = await Taro.getSetting();
+    if (authSetting['scope.userLocation']) return true;
+    await Taro.authorize({ scope: 'scope.userLocation' });
+    return true;
+  } catch {
+    const { confirm } = await Taro.showModal({
+      title: '需要定位权限',
+      content: purpose,
+      confirmText: '去设置',
+    });
+    if (!confirm) return false;
+    await Taro.openSetting();
+    const { authSetting } = await Taro.getSetting();
+    return Boolean(authSetting['scope.userLocation']);
+  }
+}
+
+export async function getUserGcj02Location(): Promise<MapPoint> {
+  const loc = await Taro.getLocation({ type: 'gcj02' });
+  return { latitude: loc.latitude, longitude: loc.longitude };
+}
+
 export function safeMapMoveToLocation(ctx: Taro.MapContext, coords?: MapPoint): void {
   if (isWechatDevtoolsMapLimited()) return;
   const task = coords ? ctx.moveToLocation(coords) : ctx.moveToLocation({});

@@ -1,15 +1,21 @@
 import Taro from '@tarojs/taro';
 
 const STORAGE_KEY = 'sync_ai_shortcut_tag_usage';
-const DISPLAY_COUNT = 6;
+const DISPLAY_COUNT = 4;
 
-/** 活动详情 / AI 助手快捷标签（展示与提交文案一致） */
-export const AI_SHORTCUT_TAG_POOL = [
-  '找组队',
-  '找拼房',
+/** 活动详情 / AI 助手快捷标签（提交文案；展示名见 ChatComposer） */
+export const AI_SHORTCUT_TAG_POOL = ['找组队', '找拼房', '找卡座'] as const;
+
+/** 已下线快捷标签：不再展示，使用记录迁移时忽略 */
+const DEPRECATED_AI_SHORTCUT_TAGS = new Set([
+  '找队友',
+  '找拼车',
   '找同路伙伴',
-  '找卡座',
-] as const;
+  '组队队友',
+  '同路同行',
+  '住宿同行',
+  '拼房同行',
+]);
 
 export type AiShortcutTag = (typeof AI_SHORTCUT_TAG_POOL)[number];
 
@@ -18,16 +24,16 @@ type UsageMap = Record<string, number>;
 /** 旧标签 / 别名 → 标准快捷标签 */
 const LEGACY_TAG_ALIASES: Record<string, AiShortcutTag> = {
   组队队友: '找组队',
+  找队友: '找组队',
   住宿同行: '找拼房',
   拼房同行: '找拼房',
-  同路同行: '找同路伙伴',
   拼卡: '找卡座',
+  找拼卡: '找卡座',
 };
 
 /** 展示文案别名 → 标准快捷标签 */
 export const AI_SHORTCUT_TAG_ALIASES: Record<string, AiShortcutTag> = {
   帮我dd: '找组队',
-  同路: '找同路伙伴',
 };
 
 export function normalizeAiShortcutTag(tag: string): string {
@@ -50,6 +56,7 @@ function readUsage(): UsageMap {
     const migrated: UsageMap = {};
     for (const [key, count] of Object.entries(usage)) {
       const nextKey = normalizeAiShortcutTag(key);
+      if (DEPRECATED_AI_SHORTCUT_TAGS.has(nextKey)) continue;
       migrated[nextKey] = (migrated[nextKey] ?? 0) + count;
     }
     return migrated;
@@ -86,7 +93,9 @@ export function recordAiShortcutTagUse(tag: string): void {
 export function getTopAiShortcutTags(limit = DISPLAY_COUNT): string[] {
   const usage = readUsage();
   const pool = [...AI_SHORTCUT_TAG_POOL];
-  const extras = Object.keys(usage).filter((k) => !pool.includes(k as AiShortcutTag));
+  const extras = Object.keys(usage).filter(
+    (k) => !pool.includes(k as AiShortcutTag) && !DEPRECATED_AI_SHORTCUT_TAGS.has(k),
+  );
   const candidates = [...pool, ...extras];
 
   const sorted = [...candidates].sort((a, b) => {

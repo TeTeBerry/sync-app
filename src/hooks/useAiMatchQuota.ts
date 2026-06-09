@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { isApiEnabled } from '../constants/api';
+import { isProfileBenefitsEnabled } from '../constants/featureFlags';
 import { useProfileActivityLegacyId } from './useProfileActivityLegacyId';
 import { useProfileEntitlementsQuery } from './useSyncApi';
 import {
@@ -36,7 +37,7 @@ export function useAiMatchQuota(): AiMatchQuotaDisplay {
   return useMemo(() => {
     const loading = isApiEnabled() && entitlementsQuery.isLoading;
 
-    if (!isApiEnabled()) {
+    if (!isApiEnabled() || !isProfileBenefitsEnabled()) {
       return {
         exhausted: false,
         remaining: null,

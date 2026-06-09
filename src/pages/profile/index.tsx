@@ -14,7 +14,6 @@ import ProfileBenefitsBlock from '../../components/profile/ProfileBenefitsBlock'
 import ProfileOverlaysHost from '../../components/profile/ProfileOverlaysHost';
 import { ProfileTabErrorBoundary } from '../../components/profile/ProfileTabErrorBoundary';
 import ProfileActionCard from '../../components/profile/ProfileActionCard';
-import ProfileDebugSection from '../../components/profile/ProfileDebugSection';
 import ProfileSettingsSection from '../../components/profile/ProfileSettingsSection';
 import { AccountRiskBanner } from '../../components/account-risk/AccountRiskBanner';
 import ProfileSummarySection from '../../components/profile/ProfileSummarySection';
@@ -39,7 +38,6 @@ const Profile: React.FC = () => {
     postsCount,
     accountRisk,
     settings,
-    debugSection,
     overlays,
     handleAuthLoggedIn,
     handleProfileRetry,
@@ -88,7 +86,6 @@ const Profile: React.FC = () => {
                       interestTag={interestTag}
                     />
                     <ProfileBenefitsBlock {...benefits} />
-                    {debugSection ? <ProfileDebugSection {...debugSection} /> : null}
                     <ProfileActionCard
                       accent="activities"
                       icon={<Zap size={20} />}
@@ -100,9 +97,9 @@ const Profile: React.FC = () => {
                     <ProfileActionCard
                       accent="posts"
                       icon={<FileText size={20} />}
-                      title="我的帖子"
+                      title="我的组队帖"
                       badge={postsCount}
-                      subtitle={`${postsCount} 篇发布的帖子`}
+                      subtitle={`${postsCount} 条组队帖`}
                       onClick={() => go(ROUTES.PROFILE_POSTS)}
                     />
                     <ProfileSettingsSection {...settings} />
@@ -120,7 +117,6 @@ const Profile: React.FC = () => {
       <ProfileOverlaysHost
         packageSheetOpen={overlays.packageSheetOpen}
         packageSheet={overlays.packageSheet}
-        debug={overlays.debug}
       />
     </View>
   );

@@ -1,5 +1,9 @@
 import Taro from '@tarojs/taro';
-import { getTencentMapLayerStyle, getTencentMapSubkey } from './tencentMap';
+import {
+  ensureUserLocationAuthorized,
+  getTencentMapLayerStyle,
+  getTencentMapSubkey,
+} from './tencentMap';
 
 export type TencentRoutePlanMode = 'driving' | 'walking';
 
@@ -58,27 +62,6 @@ export function isTencentRoutePlanPluginReady(): boolean {
   }
 }
 
-async function ensureUserLocationAuthorized(): Promise<boolean> {
-  try {
-    const { authSetting } = await Taro.getSetting();
-    if (authSetting['scope.userLocation']) return true;
-    await Taro.authorize({ scope: 'scope.userLocation' });
-    return true;
-  } catch {
-    const { confirm } = await Taro.showModal({
-      title: '需要定位权限',
-      content: '路线规划将使用您的当前位置作为起点',
-      confirmText: '去设置',
-    });
-    if (confirm) {
-      await Taro.openSetting();
-      const { authSetting } = await Taro.getSetting();
-      return Boolean(authSetting['scope.userLocation']);
-    }
-    return false;
-  }
-}
-
 function routePlanSetupHint(): string {
   if (!isTencentRoutePlanPluginBuildEnabled()) {
     return (
@@ -128,7 +111,8 @@ export async function openTencentRoutePlan(
     return;
   }
 
-  const hasLocation = await ensureUserLocationAuthorized();
+  const hasLocation =
+    await ensureUserLocationAuthorized('路线规划将使用您的当前位置作为起点');
   if (!hasLocation) {
     void Taro.showToast({ title: '未授权定位，可在插件内选手动起点', icon: 'none' });
   }

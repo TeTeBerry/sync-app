@@ -14,6 +14,7 @@ import { Text, View } from '@tarojs/components';
 import { useOverlayLock } from '../../hooks/useOverlayLock';
 import { useProfilePackagesQuery } from '../../hooks/useSyncApi';
 import { isLiveApi } from '../../constants/api';
+import { isProfileBenefitsEnabled } from '../../constants/featureFlags';
 import type { FreeMonthlyQuota, PackageTierId } from '../../types/backend';
 import {
   buildContactUnlockUpgradeCompare,
@@ -182,12 +183,14 @@ export function ContactUnlockQuotaExhaustedModal({
               {ctaLabel}
             </Text>
           </View>
-          <Text
-            className="s-contact-unlock-exhausted-modal__secondary"
-            onClick={handleViewAllBenefits}
-          >
-            查看我的全部权益 &gt;
-          </Text>
+          {isProfileBenefitsEnabled() ? (
+            <Text
+              className="s-contact-unlock-exhausted-modal__secondary"
+              onClick={handleViewAllBenefits}
+            >
+              查看我的全部权益 &gt;
+            </Text>
+          ) : null}
         </View>
       </View>
     </View>

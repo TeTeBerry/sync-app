@@ -1,6 +1,7 @@
 import type { ActivityMapRegion } from '../constants/activityMapRegion';
 import type { HomeSummary } from '../types/backend';
 import { ACTIVITY_GUEST_AVATARS } from '../constants/activityGuestAvatars';
+import { resolveCatalogActivityImage } from '../constants/activityCatalogImages';
 import { resolveActivityThumb } from '../constants/activityImages';
 import { getActivityTypeLabel } from '../constants/activityType';
 import { HOME_FEATURED_PIN_LEGACY_ID } from '../constants/homeFeatured';
@@ -77,7 +78,9 @@ export function mapActivitiesToEvents(
       longitude: activity.longitude,
       region: activity.region as ActivityMapRegion | undefined,
       image: resolveActivityThumb(
-        sanitizeRemoteImageUrl(activity.image) ?? activity.image,
+        sanitizeRemoteImageUrl(
+          resolveCatalogActivityImage(activity.legacyId, activity.image),
+        ) ?? resolveCatalogActivityImage(activity.legacyId, activity.image),
         200,
       ),
       hot: Boolean(activity.hot),
@@ -94,7 +97,8 @@ export function resolveEventCardLegacyId(id?: string): number | null {
 export function mapSignupEventToFeaturedEvent(item: SignupEvent): FeaturedEvent {
   const isHot = Boolean(item.hot);
   const legacyId = parseActivityLegacyId(item.id) ?? 0;
-  const remote = sanitizeRemoteImageUrl(item.image) || item.image;
+  const catalogImage = resolveCatalogActivityImage(legacyId, item.image);
+  const remote = sanitizeRemoteImageUrl(catalogImage) || catalogImage;
   return {
     id: legacyId,
     legacyId,
@@ -120,7 +124,12 @@ export function mapBackendActivityToFeaturedEvent(
     title: activity.name,
     date: activity.date ?? '',
     location: activity.location ?? '',
-    image: sanitizeRemoteImageUrl(activity.image) ?? activity.image ?? '',
+    image:
+      sanitizeRemoteImageUrl(
+        resolveCatalogActivityImage(activity.legacyId, activity.image),
+      ) ??
+      resolveCatalogActivityImage(activity.legacyId, activity.image) ??
+      '',
     category: getActivityTypeLabel(activity.activityType),
     hot: Boolean(activity.hot),
     attendees: activity.attendees ?? 0,

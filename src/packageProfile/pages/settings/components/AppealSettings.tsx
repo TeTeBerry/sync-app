@@ -19,7 +19,7 @@ const FAQ = [
   },
   {
     q: '如何申诉误伤？',
-    a: '先检查「我的帖子」正文是否含票务交易、微信号等违规表述；然后在帮助与反馈中说明情况，我们会人工复核。',
+    a: '先检查「我的组队帖」正文是否含票务交易、微信号等违规表述；然后在帮助与反馈中说明情况，我们会人工复核。',
   },
 ] as const;
 
@@ -49,7 +49,7 @@ export function AppealSettings() {
       <View className="s-settings__card s-appeal-settings__steps">
         <Text className="s-appeal-settings__section-title">申诉步骤</Text>
         <Text className="s-appeal-settings__step">
-          1. 打开「我的 → 我的帖子」，检查并修改违规表述
+          1. 打开「我的 → 我的组队帖」，检查并修改违规表述
         </Text>
         <Text className="s-appeal-settings__step">2. {SUPPORT_FEEDBACK_HINT}</Text>
         <Text className="s-appeal-settings__step">

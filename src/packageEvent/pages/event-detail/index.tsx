@@ -1,6 +1,4 @@
 import './event-detail.scss';
-import Taro from '@tarojs/taro';
-import { Map } from '../../../components/icons';
 import { useEndRouteTransitionOnShow } from '../../../hooks/useEndRouteTransitionOnShow';
 import { BottomNavSlot } from '../../../components/navigation/BottomNav';
 import ThemedPageLoader from '../../../components/ThemedPageLoader';
@@ -17,7 +15,6 @@ import { AiBuddyPostSheet } from '../../../components/ai-chat/AiBuddyPostSheet';
 import { TeamApplySheet } from '../../../components/post/TeamApplySheet';
 import { AiGuidePlanSheet } from '../../../components/ai-chat/AiGuidePlanSheet';
 import PageNavigation from '../../../components/navigation/PageNavigation';
-import { Button } from '../../../components/ui';
 import { ScrollView, Text, View } from '@tarojs/components';
 
 const EventDetailPage = () => {
@@ -103,21 +100,6 @@ const EventDetailPage = () => {
           title={title ?? ''}
           meta={metaLine || undefined}
           onBack={handleBack}
-          trailing={
-            <Button
-              className="s-page-nav__icon-action s-page-nav__icon-action--map"
-              aria-label="地图"
-              hoverClass="s-page-nav__icon-action--pressed"
-              onClick={() => {
-                void Taro.showToast({
-                  title: '地图功能正在开发中',
-                  icon: 'none',
-                });
-              }}
-            >
-              <Map size={26} />
-            </Button>
-          }
         />
 
         <ScrollView

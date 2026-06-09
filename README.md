@@ -22,8 +22,9 @@
 
 ```bash
 npm install
-npm run dev:weapp        # 微信小程序开发（会先写入 .env.local 局域网 IP，勿用 localhost）
-npm run build:weapp      # 微信小程序生产构建
+npm run dev:weapp        # 本地开发 → .env.development / 局域网 IP
+npm run prd:weapp        # 连云服务器 → .env.production（监听编译）
+npm run build:weapp      # 生产构建（同 prd，使用 .env.production）
 npm run build:weapp:size # 构建 + 包体阈值检查
 npm run check            # typecheck + lint + format:check + test
 npm run dev:h5           # H5 开发（未维护）

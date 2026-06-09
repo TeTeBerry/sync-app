@@ -1,6 +1,16 @@
 @use '../../styles/chat' as chat;
 
 .s-ai-buddy-post-sheet {
+  /* 贴底展示：去掉 tabbar 区多余 10px，按钮更靠近底部导航 */
+  &.s-overlay--sheet {
+    padding: 0 0 calc(var(--s-tabbar-row, 56px) + env(safe-area-inset-bottom, 0px));
+  }
+
+  .s-overlay__panel.s-ai-guide-plan-sheet__panel {
+    height: auto;
+    max-height: min(82vh, 640px);
+  }
+
   .s-ai-guide-plan-sheet__title-icon {
     background: rgba(var(--primary-rgb), 0.2);
     border-color: rgba(var(--primary-rgb), 0.45);
@@ -58,7 +68,9 @@
     z-index: 3;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
+    margin-top: auto;
+    padding: 10px 16px 8px;
     border-top: 1px solid rgba(255, 255, 255, 0.08);
     box-shadow: 0 -10px 28px rgba(0, 0, 0, 0.45);
   }

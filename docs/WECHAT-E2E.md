@@ -12,6 +12,7 @@
 | `TARO_APP_AI_CHAT_WS_URL` | `wss://…/api/ai/chat/ws`（socket 合法域名） |
 | 后端 `AUTH_MODE` | 含 `wechat`；`POST /api/auth/wechat` 可用 |
 | 本地联调 | 开发者工具勾选 **不校验合法域名** 时可用 `http://` / `ws://` 局域网 |
+| 真机 / 体验版 | ICP 备案 + HTTPS 合法域名（见 [API.md](./API.md#微信小程序)） |
 
 ## 流程
 

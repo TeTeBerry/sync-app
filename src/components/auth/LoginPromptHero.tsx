@@ -5,6 +5,7 @@ import { Bot, ChevronRight, Zap } from '../../components/icons';
 import { Button } from '../ui';
 import { Text, View } from '@tarojs/components';
 import { isLiveApi } from '../../constants/api';
+import { isProfileBenefitsEnabled } from '../../constants/featureFlags';
 import { SyncBrandMark } from '../SyncBrandMark';
 import { LegalConsentRow } from '../legal/LegalConsentRow';
 import { loginWithDev, loginWithWechat } from '../../utils/auth';
@@ -82,7 +83,9 @@ export function LoginPromptHero({
       </View>
       <Text className="s-login-prompt-hero__title">登录后开启你的电音之旅</Text>
       <Text className="s-login-prompt-hero__subtitle">
-        参加活动、发布组队帖、使用 AI 匹配，并管理专属权益
+        {isProfileBenefitsEnabled()
+          ? '参加活动、发布组队帖、使用 AI 匹配，并管理专属权益'
+          : '参加活动、发布组队帖、使用 AI 智能匹配'}
       </Text>
 
       <View className="s-login-prompt-hero__highlights" aria-hidden>

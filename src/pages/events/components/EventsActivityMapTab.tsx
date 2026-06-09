@@ -1,13 +1,12 @@
 import type { FC } from 'react';
 import { useMemo, useState } from 'react';
-import { ScrollView, Text, View } from '@tarojs/components';
+import { Map, ScrollView, Text, View } from '@tarojs/components';
 import type { ActivityMapRegion } from '../../../constants/activityMapRegion';
-import MapFeatureDeveloping from '../../../components/MapFeatureDeveloping';
 import { getActivityStatusFromActivity } from '../../../utils/activityStatus';
 import type { EventCardUi } from '../../../utils/apiMappers';
-import { filterMappableActivitiesByRegion } from '../../../utils/activityMapMarkers';
 import { EventsActivityList } from './EventsActivityList';
 import { EventsMapRegionTabs } from './EventsMapRegionTabs';
+import { useEventsActivityMap } from '../hooks/useEventsActivityMap';
 
 const EVENTS_MAP_STAGE_PX = 300;
 
@@ -40,10 +39,17 @@ export const EventsActivityMapTab: FC<EventsActivityMapTabProps> = ({
     [events],
   );
 
-  const regionActivities = useMemo(
-    () => filterMappableActivitiesByRegion(upcomingEvents, region),
-    [upcomingEvents, region],
-  );
+  const {
+    mapProps,
+    mapRegionKey,
+    regionActivities,
+    openRoutePlan,
+    moveToUserLocation,
+  } = useEventsActivityMap({
+    events: upcomingEvents,
+    region,
+    onMarkerOpenDetail: onOpenDetail,
+  });
 
   const listScrollHeight =
     listHeight != null
@@ -66,7 +72,31 @@ export const EventsActivityMapTab: FC<EventsActivityMapTabProps> = ({
         className="s-events-map-tab__stage"
         style={{ height: `${EVENTS_MAP_STAGE_PX}px` }}
       >
-        <MapFeatureDeveloping className="s-events-map-tab__developing" />
+        <Map key={mapRegionKey} {...mapProps} />
+        {regionActivities.length > 0 ? (
+          <>
+            <View
+              className="s-events-map-tab__locate"
+              onClick={moveToUserLocation}
+              role="button"
+              aria-label="定位到当前位置"
+            >
+              <Text className="s-events-map-tab__locate-text">定位</Text>
+            </View>
+            <View
+              className="s-events-map-tab__nav"
+              onClick={openRoutePlan}
+              role="button"
+              aria-label="导航到活动"
+            >
+              <Text className="s-events-map-tab__nav-text">导航</Text>
+            </View>
+          </>
+        ) : (
+          <View className="s-events-map-tab__empty-map" aria-hidden>
+            <Text className="s-events-map-tab__empty-map-text">该区域暂无活动坐标</Text>
+          </View>
+        )}
       </View>
 
       <ScrollView
@@ -79,9 +109,6 @@ export const EventsActivityMapTab: FC<EventsActivityMapTabProps> = ({
         }
       >
         <View className="s-events-map-tab__list-inner">
-          <Text className="s-events-map-tab__hint">
-            地图功能开发中，可先浏览下方活动列表
-          </Text>
           <EventsActivityList
             events={regionActivities}
             isError={isError}

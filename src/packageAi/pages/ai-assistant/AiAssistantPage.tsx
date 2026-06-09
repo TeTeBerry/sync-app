@@ -106,7 +106,9 @@ const AiAssistantPage: FC = () => {
                   userAvatar={page.profileUserData.avatar}
                   userName={page.profileUserData.name}
                   userGender={page.userGender}
-                  aiMatchQuotaExhausted={page.aiMatchQuota.exhausted}
+                  aiMatchQuotaExhausted={
+                    page.profileBenefitsEnabled && page.aiMatchQuota.exhausted
+                  }
                 />
               </AiUpgradeSheetProvider>
             </ProfileTabErrorBoundary>
@@ -116,12 +118,14 @@ const AiAssistantPage: FC = () => {
 
       <BottomNavSlot />
 
-      <AiPackageUpgradeSheet
-        open={page.upgradeSheetOpen}
-        onClose={() => page.setUpgradeSheetOpen(false)}
-        activityLegacyId={page.profileActivityLegacyId ?? page.activityLegacyId}
-        onViewAllBenefits={page.handleViewAllBenefits}
-      />
+      {page.profileBenefitsEnabled ? (
+        <AiPackageUpgradeSheet
+          open={page.upgradeSheetOpen}
+          onClose={() => page.setUpgradeSheetOpen(false)}
+          activityLegacyId={page.profileActivityLegacyId ?? page.activityLegacyId}
+          onViewAllBenefits={page.handleViewAllBenefits}
+        />
+      ) : null}
     </View>
   );
 };

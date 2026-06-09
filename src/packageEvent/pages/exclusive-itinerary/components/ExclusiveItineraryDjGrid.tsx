@@ -1,22 +1,23 @@
 import React from 'react';
-import { Check, ChevronDown } from '../../../../components/icons';
-import { Button } from '../../../../components/ui';
+import { Check, ChevronDown, Search, X } from '../../../../components/icons';
+import { Button, Input } from '../../../../components/ui';
 import { ScrollView, Text, View } from '@tarojs/components';
-import {
-  EXCLUSIVE_ITINERARY_GENRES,
-  EXCLUSIVE_ITINERARY_STAGES,
-  type ExclusiveItineraryDj,
-} from '../exclusiveItineraryMock';
+import type { ExclusiveItineraryFilterChip } from '../exclusiveItineraryFilters';
+import type { ExclusiveItineraryDj } from '../exclusiveItineraryMock';
 
 export type ExclusiveItineraryDjGridProps = {
   selectedCount: number;
   stageFilter: string;
   genreFilter: string;
+  styleSearchQuery: string;
+  stageOptions: ExclusiveItineraryFilterChip[];
+  genreOptions: ExclusiveItineraryFilterChip[];
   sortMode: string;
   filteredDjs: ExclusiveItineraryDj[];
   selectedIds: string[];
   onStageFilterChange: (stageId: string) => void;
   onGenreFilterChange: (genreId: string) => void;
+  onStyleSearchQueryChange: (query: string) => void;
   onOpenSortSheet: () => void;
   onToggleDj: (id: string) => void;
 };
@@ -25,11 +26,15 @@ const ExclusiveItineraryDjGrid: React.FC<ExclusiveItineraryDjGridProps> = ({
   selectedCount,
   stageFilter,
   genreFilter,
+  styleSearchQuery,
+  stageOptions,
+  genreOptions,
   sortMode,
   filteredDjs,
   selectedIds,
   onStageFilterChange,
   onGenreFilterChange,
+  onStyleSearchQueryChange,
   onOpenSortSheet,
   onToggleDj,
 }) => (
@@ -48,7 +53,7 @@ const ExclusiveItineraryDjGrid: React.FC<ExclusiveItineraryDjGridProps> = ({
         className="s-exclusive-itinerary__chip-scroll s-scrollbar-none"
       >
         <View className="s-exclusive-itinerary__chip-row">
-          {EXCLUSIVE_ITINERARY_STAGES.map((stage) => {
+          {stageOptions.map((stage) => {
             const active = stageFilter === stage.id;
             return (
               <Button
@@ -72,6 +77,29 @@ const ExclusiveItineraryDjGrid: React.FC<ExclusiveItineraryDjGridProps> = ({
 
     <View className="s-exclusive-itinerary__filter-block">
       <Text className="s-exclusive-itinerary__filter-label">音乐风格</Text>
+      <View className="s-exclusive-itinerary__style-search">
+        <Search size={16} color="#8e8e93" aria-hidden />
+        <Input
+          className="s-exclusive-itinerary__style-search-input"
+          placeholder="搜索风格，如 Techno、House、dnb"
+          placeholderClass="s-exclusive-itinerary__style-search-placeholder"
+          value={styleSearchQuery}
+          confirmType="search"
+          onInput={(event) => onStyleSearchQueryChange(event.detail.value)}
+          onConfirm={(event) => onStyleSearchQueryChange(event.detail.value)}
+        />
+        {styleSearchQuery.trim() ? (
+          <View
+            className="s-exclusive-itinerary__style-search-clear"
+            hoverClass="s-exclusive-itinerary__style-search-clear--pressed"
+            hoverStayTime={80}
+            aria-label="清除风格搜索"
+            onClick={() => onStyleSearchQueryChange('')}
+          >
+            <X size={14} color="#8e8e93" aria-hidden />
+          </View>
+        ) : null}
+      </View>
       <ScrollView
         scrollX
         enhanced
@@ -79,7 +107,7 @@ const ExclusiveItineraryDjGrid: React.FC<ExclusiveItineraryDjGridProps> = ({
         className="s-exclusive-itinerary__chip-scroll s-scrollbar-none"
       >
         <View className="s-exclusive-itinerary__chip-row">
-          {EXCLUSIVE_ITINERARY_GENRES.map((genre) => {
+          {genreOptions.map((genre) => {
             const active = genreFilter === genre.id;
             return (
               <Button

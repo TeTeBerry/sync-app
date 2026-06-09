@@ -27,7 +27,10 @@ export function SuggestedReplyChips({
           disabled={disabled}
           onClick={() => onSelect(reply)}
         >
-          <Text className="s-btn-label">{reply}</Text>
+          <Text className="s-ai-assistant-chat__copy-chip-label">{reply}</Text>
+          <Text className="s-ai-assistant-chat__copy-chip-arrow" aria-hidden>
+            →
+          </Text>
         </Button>
       ))}
     </View>
