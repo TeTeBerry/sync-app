@@ -16,7 +16,7 @@ const recruitingPost: EventDetailPost = {
   userId: 'me',
   name: '当前用户',
   location: '上海',
-  time: '1h',
+  createdAt: '1h',
   body: '找组队',
   tags: [],
   likes: 0,

@@ -15,11 +15,13 @@ const samplePost: HomeFeedPost = {
   name: 'A',
   handle: '@a',
   event: 'Fest',
+  location: '上海',
   body: 'body',
   time: '1m',
   likes: 1,
   liked: false,
   comments: 0,
+  avatar: '',
   status: '招募中',
 };
 

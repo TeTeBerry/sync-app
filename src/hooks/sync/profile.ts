@@ -136,8 +136,7 @@ export function useProfilePostsQuery() {
 
   return useApiQuery({
     queryKey: ['profile', 'posts'],
-    queryFn: fetchProfilePosts,
-    select: (items) => filterProfileTeamPosts(items),
+    queryFn: async () => filterProfileTeamPosts(await fetchProfilePosts()),
     enabled,
     staleTime: 30_000,
   });

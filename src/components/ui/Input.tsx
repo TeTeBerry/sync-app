@@ -46,6 +46,10 @@ export interface InputProps extends Omit<
   cursorSpacing?: number;
   /** WeChat: keep keyboard open when tapping other controls. */
   holdKeyboard?: boolean;
+  /** WeChat: placeholder text style class. */
+  placeholderClass?: string;
+  /** WeChat: keyboard confirm button type. */
+  confirmType?: TaroNativeInputProps['confirmType'];
 }
 
 function toTaroInputValue(

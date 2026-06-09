@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import type { AiBuddyPostFormValues } from '@/types/buddyPost';
 import {
   buildBuddyPostBody,
   buildBuddyPostUserSummary,
@@ -7,12 +8,12 @@ import {
   defaultBuddyPostForm,
 } from '@/utils/buddyPostForm';
 
-const sampleForm = {
+const sampleForm: AiBuddyPostFormValues = {
   dateStart: '2026-06-13',
   dateEnd: '2026-06-14',
   location: '上海',
   headcount: '2人',
-  tags: ['team', 'accommodation'] as const,
+  tags: ['team', 'accommodation'],
   note: '女生优先',
 };
 

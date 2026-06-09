@@ -51,6 +51,7 @@ describe('applyOwnerAcceptedSessionsToProfilePosts', () => {
     peerUserId: 'u1',
     peerName: 'Luna',
     postTitle: 'Storm',
+    buddyInfo: { body: '找组队', tags: ['#组队'] },
     lastMessage: 'hi',
     lastMessageAt: new Date().toISOString(),
     unreadCount: 0,

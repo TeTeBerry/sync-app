@@ -6,6 +6,7 @@ vi.mock('@/api/sync/posts', () => ({
   createPost: (...args: unknown[]) => mockCreatePost(...args),
 }));
 
+import type { AiBuddyPostFormValues } from '@/types/buddyPost';
 import { publishBuddyPostFromForm } from '@/utils/publishBuddyPost';
 
 describe('publishBuddyPostFromForm', () => {
@@ -25,12 +26,12 @@ describe('publishBuddyPostFromForm', () => {
   });
 
   it('calls createPost with structured payload from form', async () => {
-    const form = {
+    const form: AiBuddyPostFormValues = {
       dateStart: '2026-06-13',
       dateEnd: '2026-06-14',
       location: '上海',
       headcount: '2人',
-      tags: ['team', 'accommodation'] as const,
+      tags: ['team', 'accommodation'],
       note: '',
     };
 

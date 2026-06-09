@@ -31,11 +31,9 @@ declare namespace NodeJS {
     /** Full WebSocket URL; defaults to ws(s) derived from API_BASE_URL + /ai/chat/ws */
     TARO_APP_WS_URL?: string;
     TARO_APP_AI_CHAT_WS_URL?: string;
-    /** 腾讯位置服务 key（路线规划插件等） */
+    /** 腾讯位置服务 key（地图组件等） */
     TARO_APP_QQ_MAP_KEY?: string;
     TARO_APP_QQ_MAP_LAYER_STYLE?: string;
-    /** 为 true 时把腾讯路线规划插件写入 app.json（须已在公众平台授权） */
-    TARO_APP_ENABLE_ROUTE_PLAN_PLUGIN?: string;
     /** 为 true 时展示个人页「我的权益」及相关入口；默认不展示 */
     TARO_APP_ENABLE_PROFILE_BENEFITS?: string;
     /** Tencent COS — align with backend COS_BUCKET / COS_REGION */

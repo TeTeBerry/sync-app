@@ -1,17 +1,8 @@
-import {
-  EXPLORE_ROUTE_PLAN_APP_CONFIG,
-  isExploreRoutePlanPluginBuildEnabled,
-} from './packageEvent/pages/explore/exploreRoutePlanPlugin';
-
 /** 应用配置文件：不要从这里 `import @tarojs/taro`，会连带加载运行时并在构建阶段触发浏览器 API */
-const routePlanPluginBuildEnabled = isExploreRoutePlanPluginBuildEnabled();
-
 export default {
   /** 微信 DarkMode：window / tabBar / 页面背景随系统深浅色切换 */
   darkmode: true,
   themeLocation: 'theme.json',
-  /** 未授权时写入 app.json 会导致模拟器无法启动，默认关闭；见 TARO_APP_ENABLE_ROUTE_PLAN_PLUGIN */
-  ...(routePlanPluginBuildEnabled ? { plugins: EXPLORE_ROUTE_PLAN_APP_CONFIG } : {}),
   requiredPrivateInfos: ['getLocation'] as const,
   /** 微信「代码质量」要求开启按需注入，见开发者工具 → 代码质量 → 组件 */
   lazyCodeLoading: 'requiredComponents',
@@ -79,7 +70,7 @@ export default {
   },
   permission: {
     'scope.userLocation': {
-      desc: '你的位置信息将用于活动地图定位与路线规划起点',
+      desc: '你的位置信息将用于活动地图定位',
     },
     'scope.writePhotosAlbum': {
       desc: '保存行程屏保图片到你的相册',

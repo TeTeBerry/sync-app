@@ -9,22 +9,28 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: .
     steps:
       - uses: actions/checkout@v4
+        with:
+          path: sync-app
+
+      - uses: actions/checkout@v4
+        with:
+          repository: TeTeBerry/sync-app-backend
+          path: sync-app-backend
 
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: npm
-          cache-dependency-path: package-lock.json
+          cache-dependency-path: sync-app/package-lock.json
 
       - name: Install
+        working-directory: sync-app
         run: npm ci --legacy-peer-deps
 
       - name: Check
+        working-directory: sync-app
         run: npm run check
         env:
           CI: true
@@ -34,15 +40,24 @@ jobs:
     needs: check
     steps:
       - uses: actions/checkout@v4
+        with:
+          path: sync-app
+
+      - uses: actions/checkout@v4
+        with:
+          repository: TeTeBerry/sync-app-backend
+          path: sync-app-backend
 
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: npm
-          cache-dependency-path: package-lock.json
+          cache-dependency-path: sync-app/package-lock.json
 
       - name: Install
+        working-directory: sync-app
         run: npm ci --legacy-peer-deps
 
       - name: Build weapp and check bundle size
+        working-directory: sync-app
         run: npm run build:weapp:size

@@ -14,7 +14,7 @@ function toRouteDestination(activity: MappableActivity): TencentRoutePlanDestina
   };
 }
 
-/** 当前区域 1 场活动直接规划；多场先选活动再选驾车/步行。 */
+/** 当前区域 1 场活动直接打开地图；多场先选活动。 */
 export function promptMappableActivitiesRoutePlan(
   activities: MappableActivity[],
 ): void {

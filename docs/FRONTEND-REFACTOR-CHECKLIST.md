@@ -130,7 +130,7 @@
 - [x] **Lucide**：`components/icons/index.ts` 统一 re-export；ESLint `no-restricted-imports` + `npm run verify:bundle`
 - [x] **离屏 Canvas**：`utils/offscreenCanvas.ts`；AI 出行攻略不再经 `event-map` 路径引用
 - [x] **主包边界**：`scripts/verify-bundle-boundaries.mjs` 禁止主 Tab 代码 import 地图/行程/壁纸重模块
-- [x] **CI**：`.github/workflows/ci.yml` 已有 `build:weapp:size`；`npm run check` 含 `verify:bundle`
+- [x] **CI**：`.github/workflows/ci.yml` checkout `sync-app` + `sync-app-backend` 兄弟目录；`npm run check` + `build:weapp:size`
 
 详见 [BUNDLE-SIZE.md](./BUNDLE-SIZE.md)。
 
@@ -227,7 +227,8 @@
 - [x] `ensureAuth`（weapp）→ `loginWithWechat({ requireProfile: false })`；`shouldSkipAutoLogin` 退出后不自动 `wx.login`
 - [x] Bearer 后通知等 REST 不传 demo `userId`（`notificationQueryParams`）
 - [x] 联调前置与构建变量 — [API.md](./API.md#微信小程序)
-- [ ] 开发者工具真机预览全流程验收（依赖后端 `POST /auth/wechat` + `AUTH_MODE`；步骤见 [WECHAT-E2E.md](./WECHAT-E2E.md)）
+- [x] `smoke:ws` 自动化（REST + AI WebSocket；见 [WECHAT-E2E.md](./WECHAT-E2E.md#自动化-smoke已通过)）
+- [ ] 开发者工具 / 真机人工 6 步（依赖 HTTPS 合法域名 + `POST /auth/wechat`；步骤见 [WECHAT-E2E.md](./WECHAT-E2E.md#流程)）
 
 ### 文档与 deprecated 清理 ✅
 

@@ -70,7 +70,7 @@ describe('homeCacheStorage', () => {
 
     const stored = vi.mocked(Taro.setStorageSync).mock.calls[0]?.[1] as string;
     vi.mocked(Taro.getStorageSync).mockImplementation((key: string) => {
-      if (key === 'sync:home:summary:v1') return stored;
+      if (key === 'sync:home:summary:v2') return stored;
       return '';
     });
 

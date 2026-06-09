@@ -4,6 +4,17 @@
 > 本文档为**人工**真机/开发者工具清单。  
 > 对照：[API.md](./API.md#微信小程序) · [FRONTEND-REFACTOR-CHECKLIST.md](./FRONTEND-REFACTOR-CHECKLIST.md)
 
+## 自动化 smoke（已通过）
+
+| 项 | 说明 |
+|----|------|
+| 日期 | 2026-06-07 |
+| 命令 | `cd sync-app-backend && npm run dev:all`（或已有实例）→ `npm run smoke:ws` |
+| 覆盖 | REST 健康检查、AI WebSocket upgrade（Bearer JWT）、`connected` + `auth: "jwt"`、无效 token 返回登录过期 |
+| 环境 | 本地 `http://localhost:3000/api`；`SMOKE_API_BASE` 可覆盖 |
+
+真机 / 体验版 HTTPS 合法域名配置完成后，再补跑下文 **6 步人工清单**。
+
 ## 环境
 
 | 项 | 要求 |
