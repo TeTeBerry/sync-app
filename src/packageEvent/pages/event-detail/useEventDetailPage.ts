@@ -1,5 +1,5 @@
-import { useCallback, useRef, useState } from 'react';
-import { useContactUnlockQuota } from '../../../hooks/useContactUnlockQuota';
+import { useCallback } from 'react';
+import Taro from '@tarojs/taro';
 import {
   invalidatePostQueries,
   useActivityDetailQuery,
@@ -14,14 +14,12 @@ import type { ConfirmDialogOptions } from '../../../hooks/useConfirmDialog';
 import { useEventDetailRoute } from './useEventDetailRoute';
 import { useEventDetailActivityHeader } from './useEventDetailActivityHeader';
 import { useEventDetailEntitlements } from './useEventDetailEntitlements';
-import { useEventDetailAiActions } from './useEventDetailAiActions';
 import { useEventDetailBuddyPost } from './useEventDetailBuddyPost';
-import { useEventDetailTeamApply } from './useEventDetailTeamApply';
+import { useEventDetailMessageBoard } from './useEventDetailMessageBoard';
 import { useEventDetailScrollPreserve } from './useEventDetailScrollPreserve';
-import { buddyPreviewFromForm } from '../../../utils/teamApplyBuddyPreview';
-import type { AiBuddyPostSubmitPayload } from '../../../types/buddyPost';
 import { useEventDetailTravelGuide } from './useEventDetailTravelGuide';
-import { eventCityFromLocation } from '../../../utils/travelGuideDepartureSuggestions';
+import { goExclusiveItinerary, goMyItinerary } from '../../../utils/route';
+import { useState } from 'react';
 
 export type UseEventDetailPageOptions = {
   confirm: (options: ConfirmDialogOptions) => Promise<boolean>;
@@ -49,22 +47,15 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     activityQuery,
   });
 
-  const contactUnlockQuota = useContactUnlockQuota(eventId, {
+  const { entitlements } = useEventDetailEntitlements(eventId, {
     enabled: secondaryReady,
   });
-  const { entitlements, openContactUnlockExhaustedModal } = useEventDetailEntitlements(
-    eventId,
-    { enabled: secondaryReady },
-  );
   const travelGuide = useEventDetailTravelGuide({
     eventId,
     activityDate,
     activityLocation,
   });
   const currentUserQuery = useCurrentUserQuery({ enabled: feedReady });
-  const applyDefaultDepartureCity =
-    currentUserQuery.data?.city?.trim() ||
-    eventCityFromLocation(activityQuery.data?.location);
   const profileUser = useResolvedProfile();
   const displayUserName = currentUserQuery.data?.name ?? profileUser.name ?? '用户';
 
@@ -75,7 +66,18 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     anchorPostId: highlightPostId || undefined,
   });
 
-  const buddyPost = useEventDetailBuddyPost(eventId, {
+  const messageBoard = useEventDetailMessageBoard(eventId, {
+    activityTitle,
+    authorName: displayUserName,
+    authorAvatar: currentUserQuery.data?.avatar,
+    refreshPosts: postsQuery.refetch,
+    prependPost: postsQuery.prependItem,
+    replacePost: postsQuery.replaceItem,
+    removePost: postsQuery.removeItem,
+    accountRiskEnabled: secondaryReady,
+  });
+
+  const templatePost = useEventDetailBuddyPost(eventId, {
     activityTitle,
     activityDate,
     activityLocation,
@@ -83,6 +85,8 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     authorAvatar: currentUserQuery.data?.avatar,
     refreshPosts: postsQuery.refetch,
     prependPost: postsQuery.prependItem,
+    replacePost: postsQuery.replaceItem,
+    removePost: postsQuery.removeItem,
     accountRiskEnabled: secondaryReady,
     hintOnSiteBadge: header.isOnSite,
   });
@@ -90,30 +94,18 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
   const handleOnSiteCertifiedSuccess = useCallback(async () => {
     await invalidatePostQueries();
     try {
-      await postsQuery.refetch();
+      await postsQuery.refetch({ silent: true });
     } catch {
-      // Best-effort refresh so buddy posts pick up on-site badge.
+      // Best-effort refresh so messages pick up on-site badge.
     }
   }, [postsQuery]);
-
-  const ai = useEventDetailAiActions(eventId, {
-    openGuideSheet: travelGuide.openGuideSheet,
-    openBuddyPostSheet: buddyPost.openBuddyPostSheet,
-  });
 
   const live = useEventDetailLive({
     contentTab,
     showHeaderSkeleton: header.showHeaderSkeleton,
   });
 
-  const resumeApplyPostIdRef = useRef<string | null>(null);
-  const applyAnchorPostIdRef = useRef<string | null>(null);
-  const deferPostsRefreshRef = useRef(false);
-  const [applyBuddyPublishPending, setApplyBuddyPublishPending] = useState(false);
-  const [buddySheetForApplyFlow, setBuddySheetForApplyFlow] = useState(false);
-
-  const { handleScroll, frozenTop, scrollFrozen, freezeScroll, unfreezeScroll } =
-    useEventDetailScrollPreserve();
+  const { handleScroll, frozenTop, scrollFrozen } = useEventDetailScrollPreserve();
 
   const posts = useEventDetailPosts({
     contentTab,
@@ -122,127 +114,10 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     setScrollTop,
   });
 
-  const endApplyFlow = useCallback(() => {
-    unfreezeScroll();
-    resumeApplyPostIdRef.current = null;
-    applyAnchorPostIdRef.current = null;
-    deferPostsRefreshRef.current = false;
-    setApplyBuddyPublishPending(false);
-    setBuddySheetForApplyFlow(false);
-  }, [unfreezeScroll]);
-
-  const prepareApplyAnchor = useCallback(
-    (postId: string) => {
-      applyAnchorPostIdRef.current = postId;
-      freezeScroll();
-      posts.ensurePostVisible(postId);
-    },
-    [freezeScroll, posts],
-  );
-
-  const onRequestBuddyPostForApply = useCallback(
-    (postId: string) => {
-      setBuddySheetForApplyFlow(true);
-      resumeApplyPostIdRef.current = postId;
-      prepareApplyAnchor(postId);
-      buddyPost.openBuddyPostSheet();
-    },
-    [buddyPost, prepareApplyAnchor],
-  );
-
-  const handleOpenBuddyPost = useCallback(() => {
-    setBuddySheetForApplyFlow(false);
-    ai.handleOpenBuddyPost();
-  }, [ai]);
-
-  const flushDeferredPostsRefresh = useCallback(async () => {
-    if (!deferPostsRefreshRef.current) return;
-    deferPostsRefreshRef.current = false;
-    const anchorPostId = applyAnchorPostIdRef.current;
-    unfreezeScroll();
-    await postsQuery.refetch();
-    if (anchorPostId) {
-      posts.ensurePostVisible(anchorPostId);
-    }
-    applyAnchorPostIdRef.current = null;
-  }, [posts, postsQuery, unfreezeScroll]);
-
-  const handleApplyFlowSettled = useCallback(() => {
-    void (async () => {
-      if (deferPostsRefreshRef.current) {
-        await flushDeferredPostsRefresh();
-        return;
-      }
-      unfreezeScroll();
-      applyAnchorPostIdRef.current = null;
-    })();
-  }, [flushDeferredPostsRefresh, unfreezeScroll]);
-
-  const handleOpenCompleteBuddyPost = useCallback(() => {
-    setBuddySheetForApplyFlow(false);
-    buddyPost.openBuddyPostSheet();
-  }, [buddyPost]);
-
-  const teamApply = useEventDetailTeamApply({
-    confirm,
-    eventId,
-    feedPosts: postsQuery.items,
-    appliedPostIds: posts.appliedPostIds,
-    setAppliedPostIds: posts.setAppliedPostIds,
-    contactUnlockQuota,
-    openContactUnlockExhaustedModal,
-    defaultDepartureCity: applyDefaultDepartureCity,
-    onPrepareApplyAnchor: prepareApplyAnchor,
-    onRequestCompleteBuddyPost: handleOpenCompleteBuddyPost,
-    onApplyFlowSettled: handleApplyFlowSettled,
-  });
-
-  const closeBuddyPostSheet = useCallback(() => {
-    endApplyFlow();
-    buddyPost.closeBuddyPostSheet();
-  }, [buddyPost, endApplyFlow]);
-
-  const handleBuddyPostSheetSubmit = useCallback(
-    async (payload: AiBuddyPostSubmitPayload) => {
-      const { syncToPostList = true, ...form } = payload;
-      const resumeApplyPostId = resumeApplyPostIdRef.current;
-
-      if (resumeApplyPostId) {
-        const targetPostId = resumeApplyPostId;
-        resumeApplyPostIdRef.current = null;
-        deferPostsRefreshRef.current = !syncToPostList;
-
-        teamApply.openApplySheet(targetPostId, {
-          preview: buddyPreviewFromForm(form),
-        });
-        setApplyBuddyPublishPending(true);
-
-        let published = false;
-        try {
-          published = await buddyPost.handleBuddyPostSheetSubmit(form, {
-            quiet: true,
-            skipListRefresh: !syncToPostList,
-            listedInFeed: syncToPostList,
-          });
-        } finally {
-          setApplyBuddyPublishPending(false);
-        }
-
-        if (!published) {
-          teamApply.closeApplySheet();
-          endApplyFlow();
-        }
-        return;
-      }
-
-      await buddyPost.handleBuddyPostSheetSubmit(form);
-    },
-    [buddyPost, endApplyFlow, teamApply],
-  );
-
   const scrollTop = scrollFrozen && frozenTop != null ? frozenTop : routeScrollTop;
 
-  const postsLoading = !feedReady || postsQuery.isLoading;
+  const postsLoading =
+    !feedReady || (postsQuery.isLoading && postsQuery.items.length === 0);
   const showPostsEnd =
     contentTab === 'posts' &&
     posts.totalPostCount > 0 &&
@@ -250,6 +125,34 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     !posts.hasMoreVisiblePosts &&
     !postsQuery.hasMore &&
     !postsQuery.isLoadingMore;
+
+  const assertValidEventId = useCallback(() => {
+    if (!Number.isFinite(eventId) || eventId <= 0) {
+      void Taro.showToast({ title: '活动信息无效', icon: 'none' });
+      return false;
+    }
+    return true;
+  }, [eventId]);
+
+  const handleOpenMyItinerary = useCallback(() => {
+    if (!assertValidEventId()) {
+      return;
+    }
+    goMyItinerary(eventId);
+  }, [assertValidEventId, eventId]);
+
+  const handleOpenExclusiveItinerary = useCallback(() => {
+    if (!assertValidEventId()) {
+      return;
+    }
+    goExclusiveItinerary(eventId);
+  }, [assertValidEventId, eventId]);
+
+  const handlePublishMessage = useCallback(() => {
+    void messageBoard.publishMessage();
+  }, [messageBoard]);
+
+  const isPublishing = messageBoard.isPublishing || templatePost.isBuddyPostPublishing;
 
   return {
     ...header,
@@ -259,39 +162,38 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     scrollFrozen,
     handleScroll,
     composerReady,
-    prompt: ai.prompt,
-    setPrompt: ai.setPrompt,
+    messageDraft: messageBoard.draft,
+    setMessageDraft: messageBoard.setDraft,
+    messageImageRefs: messageBoard.imageRefs,
+    pickMessageImages: messageBoard.pickImages,
+    removeMessageImage: messageBoard.removeImage,
+    handlePublishMessage,
+    messagePublishing: isPublishing,
+    handleOpenTemplateSheet: templatePost.openBuddyPostSheet,
+    publishOnsiteIntent: templatePost.publishOnsiteIntent,
+    buddyPostSheetOpen: templatePost.buddyPostSheetOpen,
+    buddySheetInitialValues: templatePost.buddySheetInitialValues,
+    buddySheetPrefillLines: templatePost.buddySheetPrefillLines,
+    buddySheetPrefillTitle: templatePost.buddySheetPrefillTitle,
+    buddySheetShowOnSiteBadgeHint: templatePost.buddySheetShowOnSiteBadgeHint,
+    buddySheetSubmitLabel: templatePost.buddySheetSubmitLabel,
+    closeBuddyPostSheet: templatePost.closeBuddyPostSheet,
+    handleBuddyPostSheetSubmit: templatePost.handleBuddyPostSheetSubmit,
+    buddyPostActivityDate: templatePost.buddyPostActivityDate,
+    buddyPostActivityTitle: templatePost.buddyPostActivityTitle,
     contentTab,
     setContentTab,
     live,
-    posts: {
-      ...posts,
-      handleApply: teamApply.handleApply,
-    },
-    teamApply,
-    applyBuddyPublishPending,
+    posts,
     postsLoading,
     showPostsEnd,
     currentUserAvatar: currentUserQuery.data?.avatar,
     postsQuery,
     displayUserName,
-    openAi: ai.openAi,
-    handleShortcutTag: ai.handleShortcutTag,
-    handleOpenAiGuide: ai.handleOpenAiGuide,
-    handleOpenBuddyPost,
-    buddySheetForApplyFlow,
-    handleOpenExclusiveItinerary: ai.handleOpenExclusiveItinerary,
-    buddyPostSheetOpen: buddyPost.buddyPostSheetOpen,
-    buddySheetInitialValues: buddyPost.buddySheetInitialValues,
-    buddySheetPrefillLines: buddyPost.buddySheetPrefillLines,
-    buddySheetPrefillTitle: buddyPost.buddySheetPrefillTitle,
-    buddySheetShowOnSiteBadgeHint: buddyPost.buddySheetShowOnSiteBadgeHint,
-    buddySheetSubmitLabel: buddyPost.buddySheetSubmitLabel,
-    closeBuddyPostSheet,
-    handleBuddyPostSheetSubmit,
-    buddyPostActivityDate: buddyPost.buddyPostActivityDate,
-    buddyPostActivityTitle: buddyPost.buddyPostActivityTitle,
-    isBuddyPostPublishing: buddyPost.isBuddyPostPublishing,
+    handleOpenAiGuide: travelGuide.openGuideSheet,
+    activityTitle,
+    handleOpenMyItinerary,
+    handleOpenExclusiveItinerary,
     guideSheetOpen: travelGuide.guideSheetOpen,
     closeGuideSheet: travelGuide.closeGuideSheet,
     handleGuideSheetSubmit: travelGuide.handleGuideSheetSubmit,
@@ -300,7 +202,6 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     invalidEventId: route.invalidEventId,
     entitlements,
     isOnSite: header.isOnSite,
-    publishOnsiteIntent: buddyPost.publishOnsiteIntent,
     handleOnSiteCertifiedSuccess,
   };
 }

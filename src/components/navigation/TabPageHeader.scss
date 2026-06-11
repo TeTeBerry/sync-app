@@ -1,5 +1,7 @@
 .s-tab-page-header {
   display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
   align-items: center;
   justify-content: space-between;
   gap: 12px;

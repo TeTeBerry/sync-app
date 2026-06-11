@@ -12,7 +12,6 @@ import {
   type TeamApplyBuddyPreview,
 } from '../../../utils/teamApplyBuddyPreview';
 import { userHasRecruitingBuddyPost } from '../../../utils/userRecruitingPost';
-import { promptOpenTeamChatAfterApply } from '../../../utils/promptTeamChatAfterApply';
 import type { ConfirmDialogOptions } from '../../../hooks/useConfirmDialog';
 import type { LightApplyDraft } from '../../../utils/lightApplyDraft';
 import type { EventDetailPost } from '../../../types/post';
@@ -134,15 +133,16 @@ export function useEventDetailTeamApply({
         setBuddyPreview(null);
         onApplyFlowSettled?.();
 
-        if (usedLightApply) {
-          await promptOpenTeamChatAfterApply({
-            confirm,
-            teamChat: result.teamChat,
-            lightApply: true,
-            onCompleteBuddyPost: onRequestCompleteBuddyPost,
+        if (usedLightApply && onRequestCompleteBuddyPost) {
+          const complete = await confirm({
+            title: '完善组队帖',
+            message: '申请已发送。是否现在补充更完整的组队信息？',
+            confirmText: '去完善',
+            cancelText: '稍后再说',
           });
-        } else if (result.teamChat) {
-          await promptOpenTeamChatAfterApply({ confirm, teamChat: result.teamChat });
+          if (complete) {
+            onRequestCompleteBuddyPost();
+          }
         } else {
           const toastTitle = result.alreadyApplied ? '已申请' : '申请成功';
           void Taro.showToast({ title: toastTitle, icon: 'success' });

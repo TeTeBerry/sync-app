@@ -22,7 +22,7 @@ export function AiBuddyPostShortcutChip({
       onClick={onClick}
     >
       <Users size={14} className="s-ai-buddy-post-shortcut-chip__icon" aria-hidden />
-      <Text className="s-ai-buddy-post-shortcut-chip__label">组队发帖</Text>
+      <Text className="s-ai-buddy-post-shortcut-chip__label">模板发帖</Text>
       <ChevronRight
         size={14}
         className="s-ai-buddy-post-shortcut-chip__chevron"

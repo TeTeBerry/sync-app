@@ -42,7 +42,7 @@
 
 .s-home-showcase__swiper {
   width: 100%;
-  height: 228px;
+  height: 244px;
 }
 
 .s-home-showcase-card {
@@ -51,7 +51,7 @@
   flex-direction: column;
   justify-content: flex-end;
   width: calc(100% - 4px);
-  height: 212px;
+  height: 228px;
   margin: 0 auto;
   border-radius: 22px;
   overflow: hidden;
@@ -155,30 +155,35 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 6px;
+  gap: 0;
   width: 100%;
-  padding: 0 14px;
+  padding: 0 14px 2px;
   box-sizing: border-box;
 }
 
 .s-home-showcase-card__event-title {
-  display: block;
   width: 100%;
   color: #fff;
-  font-size: 22px;
+  font-size: 18px;
   font-weight: var(--s-fw-black);
-  line-height: 1.15;
-  white-space: nowrap;
+  line-height: 1.3;
   overflow: hidden;
   text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  white-space: normal;
+  word-break: break-word;
 }
 
 .s-home-showcase-card__meta-line {
   display: flex;
   align-items: center;
+  flex-wrap: nowrap;
   gap: 4px;
   width: 100%;
   min-width: 0;
+  margin-top: 6px;
   overflow: hidden;
 }
 

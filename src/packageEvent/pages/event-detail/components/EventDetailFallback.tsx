@@ -1,5 +1,5 @@
 import React from 'react';
-import { BottomNavSlot } from '../../../../components/navigation/BottomNav';
+import { PageTabBarChrome } from '../../../../components/navigation/BottomNav';
 import { Button } from '../../../../components/ui';
 import { Text, View } from '@tarojs/components';
 
@@ -27,7 +27,7 @@ const EventDetailFallback: React.FC<EventDetailFallbackProps> = ({
         '活动不存在'
       )}
     </View>
-    <BottomNavSlot />
+    <PageTabBarChrome />
   </View>
 );
 

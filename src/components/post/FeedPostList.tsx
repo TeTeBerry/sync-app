@@ -29,12 +29,6 @@ import { POST_ACTION_ICON_COLOR } from '../../utils/postActionColors';
 import { WechatEmojiText } from '../wechat-emoji/WechatEmojiText';
 import { Image, Text, View } from '@tarojs/components';
 
-export type FeedPostListInfiniteFooter = {
-  isLoadingMore: boolean;
-  showEnd: boolean;
-  sharerCount: number;
-};
-
 export type FeedPostListProps = {
   items: HomeFeedPost[];
   onDelete?: (post: HomeFeedPost) => void;
@@ -42,9 +36,6 @@ export type FeedPostListProps = {
   onCommentSubmitted?: (
     updated: Pick<EventDetailPost, 'id' | 'comments' | 'likes' | 'liked'>,
   ) => void;
-  /** Parent-controlled windowing for scroll-driven infinite lists (e.g. explore share). */
-  scrollWindow?: boolean;
-  infiniteFooter?: FeedPostListInfiniteFooter;
 };
 
 type FeedPostRowProps = {
@@ -80,7 +71,7 @@ function FeedPostRowInner({
   const eventTitle = post.event?.trim();
   const sharePost = isSharePost(post);
   const headerTypeKey = contentTypeKeys[0];
-  const shareImages = sharePost ? post.images : undefined;
+  const postImages = post.images?.length ? post.images : undefined;
 
   return (
     <View className="s-home-post">
@@ -131,7 +122,7 @@ function FeedPostRowInner({
       <View
         className={[
           's-home-post__content',
-          shareImages?.length && 's-home-post__content--with-media',
+          postImages?.length && 's-home-post__content--with-media',
         ]
           .filter(Boolean)
           .join(' ')}
@@ -153,11 +144,8 @@ function FeedPostRowInner({
           </View>
         ) : null}
 
-        {shareImages?.length ? (
-          <PostImageGrid
-            images={shareImages}
-            maxDisplay={FEED_POST_IMAGE_MAX_DISPLAY}
-          />
+        {postImages?.length ? (
+          <PostImageGrid images={postImages} maxDisplay={FEED_POST_IMAGE_MAX_DISPLAY} />
         ) : null}
 
         {displayTags.length ? (
@@ -196,7 +184,7 @@ function FeedPostRowInner({
               body: post.body,
               eventTitle: post.event,
               authorName: postName,
-              images: shareImages,
+              images: postImages,
               avatar: post.avatar,
             })}
           />
@@ -225,8 +213,6 @@ function FeedPostListInner({
   onDelete,
   onLike,
   onCommentSubmitted,
-  scrollWindow = false,
-  infiniteFooter,
 }: FeedPostListProps) {
   const { data: currentUser } = useCurrentUserQuery();
   const [expandedCommentPostIds, setExpandedCommentPostIds] = useState<Set<string>>(
@@ -237,9 +223,9 @@ function FeedPostListInner({
     initialSize: HOME_FEED_INITIAL_RENDER,
     step: HOME_FEED_INITIAL_RENDER,
   });
-  const visibleItems = scrollWindow ? items : windowed.visibleItems;
-  const hasMoreToShow = scrollWindow ? false : windowed.hasMoreToShow;
-  const hiddenCount = scrollWindow ? 0 : windowed.hiddenCount;
+  const visibleItems = windowed.visibleItems;
+  const hasMoreToShow = windowed.hasMoreToShow;
+  const hiddenCount = windowed.hiddenCount;
   const showMore = windowed.showMore;
   const ensureIndexVisible = windowed.ensureIndexVisible;
 
@@ -275,7 +261,7 @@ function FeedPostListInner({
           onToggleComments={togglePostComments}
         />
       ))}
-      {!scrollWindow && hasMoreToShow ? (
+      {hasMoreToShow ? (
         <View
           className="s-feed-post-list__more"
           onClick={showMore}
@@ -283,17 +269,6 @@ function FeedPostListInner({
           aria-label={`展开更多帖子，还有 ${hiddenCount} 条`}
         >
           <Text className="s-feed-post-list__more-text">展开更多（{hiddenCount}）</Text>
-        </View>
-      ) : null}
-      {scrollWindow && infiniteFooter?.isLoadingMore ? (
-        <Text className="s-feed-post-list__footer-line">加载更多…</Text>
-      ) : null}
-      {scrollWindow && infiniteFooter?.showEnd ? (
-        <View className="s-feed-post-list__end">
-          <Text className="s-feed-post-list__footer-line">
-            已经有{infiniteFooter.sharerCount}人正在分享
-          </Text>
-          <Text className="s-feed-post-list__footer-line">已经到底啦 ~</Text>
         </View>
       ) : null}
     </View>

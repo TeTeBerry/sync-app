@@ -8,8 +8,9 @@ import {
   useSavedItineraryQuery,
 } from '../../../hooks/useItineraryApi';
 import { useItineraryStore } from '../../../stores/itineraryStore';
-import { SUB_PAGE_HEADER_META_EXTRA_PX } from '../../../components/navigation/PageNavigation';
-import { useStackPageMainHeight } from '../../../hooks/useTabPageMainHeight';
+import { stackPageNavChromePx } from '../../../components/navigation/PageNavigation';
+import { useNavBarInsets } from '../../../hooks/useNavBarInsets';
+import { useTabPageMainHeight } from '../../../hooks/useTabPageMainHeight';
 import { EXCLUSIVE_ITINERARY_DJS } from '../exclusive-itinerary/exclusiveItineraryMock';
 import { resolveEventDetailIdFromQuery, ROUTES } from '../../../utils/route';
 import { selectActiveActivityLegacyId, useNavigationStore } from '../../../stores';
@@ -41,6 +42,7 @@ function mapApiDjToNameEntry(dj: ItineraryDj): DjNameEntry {
 
 export function useMyItineraryPage() {
   const router = useRouter();
+  const navInsets = useNavBarInsets();
   const activeActivityLegacyId = useNavigationStore(selectActiveActivityLegacyId);
 
   const activityLegacyId = useMemo(
@@ -66,6 +68,12 @@ export function useMyItineraryPage() {
   );
   const { save } = useItineraryMutations(activityLegacyId ?? 0);
   const hydratedFromPendingRef = useRef(false);
+  const initialPerformanceIntent =
+    parseSelectedDjIds(router.params.selectedDjIds).length > 0;
+
+  const [pageKind, setPageKind] = useState<'travel' | 'performance'>(() =>
+    initialPerformanceIntent ? 'performance' : 'travel',
+  );
 
   const [itineraryDays, setItineraryDays] = useState<ItineraryDay[]>(
     () => MY_ITINERARY_DAYS,
@@ -88,6 +96,7 @@ export function useMyItineraryPage() {
     const pending = consumePending(activityLegacyId);
     if (pending) {
       hydratedFromPendingRef.current = true;
+      setPageKind('performance');
       setItineraryDays(pending.days as ItineraryDay[]);
       setEventMeta(pending.eventMeta);
       if (pending.selectedDjIds.length > 0) {
@@ -167,9 +176,13 @@ export function useMyItineraryPage() {
     }
   }, []);
 
-  const mainScrollHeight = useStackPageMainHeight(
-    footerChromePx + SEGMENT_TOGGLE_PX + SUB_PAGE_HEADER_META_EXTRA_PX,
+  const headerChromePx = stackPageNavChromePx(navInsets, { meta: true });
+  const travelScrollHeight = useTabPageMainHeight(headerChromePx);
+  const performanceScrollHeight = useTabPageMainHeight(
+    headerChromePx + SEGMENT_TOGGLE_PX + footerChromePx,
   );
+  const mainScrollHeight =
+    pageKind === 'travel' ? travelScrollHeight : performanceScrollHeight;
 
   const handleShare = useCallback(() => {
     void Taro.showToast({ title: '分享功能即将上线', icon: 'none' });
@@ -229,10 +242,14 @@ export function useMyItineraryPage() {
 
   const navFallback =
     Number.isFinite(activityLegacyId) && activityLegacyId > 0
-      ? ROUTES.EXCLUSIVE_ITINERARY
+      ? pageKind === 'travel'
+        ? ROUTES.EVENT_DETAIL
+        : ROUTES.EXCLUSIVE_ITINERARY
       : ROUTES.EVENTS;
 
   return {
+    pageKind,
+    activityLegacyId,
     eventMeta,
     bannerCopy,
     itineraryDays,

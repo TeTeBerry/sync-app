@@ -3,6 +3,12 @@
  * This chunk is NOT linked to app.wxss/common.wxss — include tab bar layout here.
  */
 @use '../components/navigation/BottomNav.scss';
+@use '../components/navigation/GlobalAiAgentFab.scss';
+
+.s-tabbar-chrome {
+  /* Wrapper only — children use viewport-fixed positioning. */
+  width: 100%;
+}
 
 .s-tabbar-fixed-host {
   position: fixed;
@@ -15,7 +21,13 @@
 
 /* Tokens on the host so layout works under component style isolation */
 .s-tabbar-fixed-host,
-.s-bottom-nav {
+.s-bottom-nav,
+.s-tabbar-chrome {
+  --s-page-gutter: 16px;
+  --s-global-ai-fab-size: 52px;
+  --s-global-ai-fab-offset: 12px;
+  --s-global-ai-fab-right: 16px;
+  --s-global-ai-fab-z: 10000;
   --s-tabbar-row: 56px;
   --s-tabbar-total: calc(var(--s-tabbar-row) + 10px + env(safe-area-inset-bottom, 0px));
 }

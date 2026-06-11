@@ -3,6 +3,7 @@ import { isTravelGuideIntent } from '@/utils/travelGuideIntent';
 
 describe('isTravelGuideIntent', () => {
   it('matches shortcut and natural phrases', () => {
+    expect(isTravelGuideIntent('AI出行攻略')).toBe(true);
     expect(isTravelGuideIntent('AI攻略')).toBe(true);
     expect(isTravelGuideIntent('帮我规划行程')).toBe(true);
     expect(isTravelGuideIntent('帮我生成出行攻略')).toBe(true);

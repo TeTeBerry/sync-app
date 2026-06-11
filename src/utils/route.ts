@@ -4,7 +4,6 @@ import { useNavigationStore } from '../stores/navigationStore';
 import type { NavigationState } from '../stores/navigationStore';
 import type { AiAssistantNavIntent } from '../stores/types';
 import type { NotificationMeta } from '../types/backend';
-import { buildTeamChatSessionId } from './teamChatSessionId';
 import { parseActivityLegacyId } from './activityLegacyId';
 import {
   buildQueryString,
@@ -22,7 +21,6 @@ import { PRELOAD_HOT_ROUTES_MS } from './timing';
 import {
   preloadAiSubpackage,
   preloadEventSubpackage,
-  preloadMessageSubpackage,
   preloadProfileSubpackage,
 } from './subpackagePreload';
 import type { BackendActivity } from '../types/backend';
@@ -46,10 +44,7 @@ export const ROUTES = {
   EVENT_DETAIL: '/packageEvent/pages/event-detail/index',
   EXCLUSIVE_ITINERARY: '/packageEvent/pages/exclusive-itinerary/index',
   MY_ITINERARY: '/packageEvent/pages/my-itinerary/index',
-  EXPLORE: '/packageEvent/pages/explore/index',
   NOTIFICATIONS: '/packageProfile/pages/notifications/index',
-  MESSAGES: '/packageMessage/pages/messages/index',
-  TEMP_CHAT: '/packageMessage/pages/chat/index',
 } as const;
 
 export type RoutePath = (typeof ROUTES)[keyof typeof ROUTES];
@@ -315,8 +310,6 @@ export function endRouteTransition() {
 const AUTH_PROTECTED_ROUTES: Partial<Record<RoutePath, LoginInterceptFeature>> = {
   [ROUTES.AI_ASSISTANT]: 'ai_match',
   [ROUTES.NOTIFICATIONS]: 'notification',
-  [ROUTES.MESSAGES]: 'notification',
-  [ROUTES.TEMP_CHAT]: 'notification',
   [ROUTES.PROFILE_ACTIVITIES]: 'activity',
   [ROUTES.PROFILE_POSTS]: 'post',
   [ROUTES.PROFILE_BENEFITS]: 'benefits',
@@ -553,9 +546,8 @@ export function navigateFromNotification(meta?: NotificationMeta): boolean {
     return true;
   }
 
-  if (meta?.type === 'application' && meta.postId?.trim() && meta.actorUserId?.trim()) {
-    preloadMessageSubpackage();
-    goTempChat(buildTeamChatSessionId(meta.postId.trim(), meta.actorUserId.trim()));
+  if (meta?.type === 'application' && meta.postId?.trim()) {
+    goProfilePosts();
     return true;
   }
 
@@ -565,6 +557,12 @@ export function navigateFromNotification(meta?: NotificationMeta): boolean {
 
 export function goProfile() {
   switchTabTo(ROUTES.PROFILE);
+}
+
+export function goProfilePosts() {
+  preloadProfileSubpackage();
+  preloadPageSafe(ROUTES.PROFILE_POSTS);
+  navigateToSafe(ROUTES.PROFILE_POSTS);
 }
 
 /** Full benefits list (e.g. from upgrade sheets or profile preview link). */
@@ -634,28 +632,6 @@ export function goNotifications() {
   preloadProfileSubpackage();
   preloadPageSafe(ROUTES.NOTIFICATIONS);
   navigateToSafe(ROUTES.NOTIFICATIONS);
-}
-
-export function goMessages() {
-  preloadMessageSubpackage();
-  preloadPageSafe(ROUTES.MESSAGES);
-  navigateToSafe(ROUTES.MESSAGES);
-}
-
-export function goExplore() {
-  preloadEventSubpackage();
-  preloadPageSafe(ROUTES.EXPLORE);
-  navigateToSafe(ROUTES.EXPLORE);
-}
-
-export function goTempChat(sessionId: string) {
-  const id = sessionId.trim();
-  if (!id) {
-    goMessages();
-    return;
-  }
-  preloadMessageSubpackage();
-  navigateToSafe(buildPageUrl(ROUTES.TEMP_CHAT, { sessionId: id }));
 }
 
 function relaunchOrSwitchTab(target: RoutePath) {

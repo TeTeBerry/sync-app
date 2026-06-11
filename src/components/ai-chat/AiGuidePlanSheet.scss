@@ -5,7 +5,7 @@
 
   &.s-overlay--sheet {
     align-items: flex-end;
-    padding: 0 0 calc(var(--s-tabbar-total, 56px));
+    padding: 0 0 var(--s-tabbar-total);
   }
 
   .s-overlay__panel.s-ai-guide-plan-sheet__panel {
@@ -116,18 +116,10 @@
   }
 
   &__body {
-    padding: 0 16px calc(12px + env(safe-area-inset-bottom, 0px));
+    padding: 0 16px 12px;
     display: flex;
     flex-direction: column;
     gap: 16px;
-    box-sizing: border-box;
-  }
-
-  /** 提交按钮在滚动区内，避免 weapp 底部 footer 盖住最后一项 */
-  &__submit-wrap {
-    margin-top: 20px;
-    padding-top: 4px;
-    flex-shrink: 0;
     box-sizing: border-box;
   }
 
@@ -468,8 +460,11 @@
     position: relative;
     z-index: 2;
     flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
     margin-top: 0;
-    padding: 16px 16px calc(16px + env(safe-area-inset-bottom, 0px));
+    padding: 16px 16px 16px;
     background: #121214;
     border-top: 1px solid rgba(255, 255, 255, 0.08);
     box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.35);

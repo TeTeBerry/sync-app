@@ -20,6 +20,7 @@ const TRAVEL_GUIDE_INTENT_PATTERNS: RegExp[] = [
 export function isTravelGuideIntent(input: string): boolean {
   const text = input.trim();
   if (!text) return false;
-  if (text.replace(/\s+/g, '') === 'AI攻略') return true;
+  const compact = text.replace(/\s+/g, '');
+  if (compact === 'AI攻略' || compact === 'AI出行攻略') return true;
   return TRAVEL_GUIDE_INTENT_PATTERNS.some((pattern) => pattern.test(text));
 }

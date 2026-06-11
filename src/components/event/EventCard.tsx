@@ -173,7 +173,7 @@ const EventCardInner: React.FC<EventCardProps> = ({
             <View className="s-event-card__detail-tags">
               <Text className="s-event-card__detail-tag">{category}</Text>
               <Text className="s-event-card__detail-tag s-event-card__detail-tag--ai">
-                ✨ AI攻略
+                ✨ AI出行攻略
               </Text>
             </View>
           </View>

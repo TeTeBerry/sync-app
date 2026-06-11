@@ -3,8 +3,8 @@ import { Sparkles, X } from '../../../components/icons';
 import { Text, View } from '@tarojs/components';
 import { useOverlayLock } from '../../../hooks/useOverlayLock';
 
-const DEFAULT_TITLE = '专属电音行程';
-const DEFAULT_MESSAGE = '选择你喜爱的 DJ，将根据官方演出表自动生成专属观演行程。';
+const DEFAULT_TITLE = '我的电音时间表';
+const DEFAULT_MESSAGE = '选择你喜爱的 DJ，将根据官方演出表自动生成你的电音观演时间表。';
 
 export type ExclusiveItineraryInfoModalProps = {
   open: boolean;

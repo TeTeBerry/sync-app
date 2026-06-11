@@ -109,18 +109,12 @@ export function PostImageGrid({ images, maxDisplay = 4 }: PostImageGridProps) {
     return (
       <View className="s-post-image-grid s-post-image-grid--1">
         <View
-          className="s-post-image-grid__item s-post-image-grid__item--width-fix"
+          className="s-post-image-grid__item s-post-image-grid__item--single"
           onClick={() => handleOpen(0)}
           aria-label="查看图片 1"
           role="button"
         >
-          {renderImage(
-            displayImages[0],
-            's-post-image-grid__img s-post-image-grid__img--width-fix',
-            true,
-            'widthFix',
-            true,
-          )}
+          {renderImage(displayImages[0], 's-post-image-grid__img', true)}
         </View>
       </View>
     );

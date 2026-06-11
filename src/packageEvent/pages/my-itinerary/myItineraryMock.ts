@@ -171,7 +171,7 @@ export function buildItineraryBannerCopy(input: {
     input.selectedDjIds.length > 0 ? input.selectedDjIds.length : names.length;
 
   const title =
-    count > 0 ? `已根据你选择的 ${count} 位 DJ 生成专属行程` : '你的专属行程已生成';
+    count > 0 ? `已根据你选择的 ${count} 位 DJ 生成电音时间表` : '你的电音时间表已生成';
 
   const namesLine = names.length > 0 ? names.join(' · ') : '';
   const daysLine =

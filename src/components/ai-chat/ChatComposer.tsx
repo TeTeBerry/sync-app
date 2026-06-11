@@ -1,17 +1,9 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Send, Trash2 } from '../../components/icons';
 import { Button, Input, cn } from '../ui';
 import { HOME_FESTIVAL_SHORTCUT_CHIPS } from '../../constants/homeFestivalShortcuts';
-import {
-  getTopAiShortcutTags,
-  normalizeAiShortcutTag,
-  recordAiShortcutTagUse,
-  type AiShortcutTag,
-} from '../../utils/aiShortcutTags';
 import { useAiChatStore } from '../../stores/aiChatStore';
-import { AiBuddyPostShortcutChip } from './AiBuddyPostShortcutChip';
 import { AiGuideShortcutChip } from './AiGuideShortcutChip';
-import { AiMatchQuotaBanner } from './AiMatchQuotaBanner';
 import {
   ScrollView,
   Text,
@@ -19,28 +11,11 @@ import {
   type InputProps as TaroInputProps,
 } from '@tarojs/components';
 
-const SHORTCUT_TAG_LABELS: Record<AiShortcutTag, string> = {
-  找组队: '找组队',
-  找拼房: '找拼房',
-  找卡座: '找卡座',
-};
-
 const AI_GUIDE_CHIP = {
   key: 'aiGuide',
-  label: 'AI攻略',
-  submitText: 'AI攻略',
+  label: 'AI出行攻略',
+  submitText: 'AI出行攻略',
 } as const;
-
-const BUDDY_POST_CHIP = {
-  key: 'buddyPost',
-  label: '组队发帖',
-  submitText: '组队发帖',
-} as const;
-
-const activityActionChips = [
-  AI_GUIDE_CHIP,
-  { key: 'searchPosts', label: '查组队帖', submitText: '看看有没有组队帖' },
-] as const;
 
 function readComposerInputValue(
   event: Parameters<NonNullable<TaroInputProps['onInput']>>[0],
@@ -66,7 +41,6 @@ export function ChatComposer({
   clearDisabled = false,
   isLoadingHistory = false,
   onAiGuideClick,
-  onBuddyPostClick,
 }: {
   input: string;
   isStreaming: boolean;
@@ -78,9 +52,7 @@ export function ChatComposer({
   clearDisabled?: boolean;
   isLoadingHistory?: boolean;
   onAiGuideClick?: () => void;
-  onBuddyPostClick?: () => void;
 }) {
-  const [shortcutTags, setShortcutTags] = useState(() => getTopAiShortcutTags());
   const conversationFlow = useAiChatStore((state) =>
     state.activeScopeKey
       ? state.buckets[state.activeScopeKey]?.conversationState?.flow
@@ -97,38 +69,19 @@ export function ChatComposer({
         : '描述你的组队需求，如出发地、人数、日期…';
     }
     if (scopedToActivity && trimmedActivityTitle) {
-      return `为「${trimmedActivityTitle}」找组队…`;
+      return `聊聊「${trimmedActivityTitle}」相关问题…`;
     }
-    return '说说你想去哪、想找什么样的同行…';
+    return '说说你想去哪、有什么想了解的…';
   })();
 
   const quickChips = useMemo((): QuickChip[] => {
     if (activityLegacyId != null && !Number.isNaN(activityLegacyId)) {
-      const tagChips: QuickChip[] = shortcutTags.map((tag) => {
-        const label = SHORTCUT_TAG_LABELS[tag as AiShortcutTag] ?? tag;
-        return {
-          key: `tag-${tag}`,
-          label,
-          submitText: normalizeAiShortcutTag(tag),
-          isShortcutTag: true,
-        };
-      });
-
-      const actionChips: QuickChip[] = activityActionChips.map((chip) => ({
-        key: chip.key,
-        label: chip.label,
-        submitText: chip.submitText,
-      }));
-
       return [
-        actionChips[0],
         {
-          key: BUDDY_POST_CHIP.key,
-          label: BUDDY_POST_CHIP.label,
-          submitText: BUDDY_POST_CHIP.submitText,
+          key: AI_GUIDE_CHIP.key,
+          label: AI_GUIDE_CHIP.label,
+          submitText: AI_GUIDE_CHIP.submitText,
         },
-        ...tagChips,
-        ...actionChips.slice(1),
       ];
     }
 
@@ -137,7 +90,7 @@ export function ChatComposer({
       label: chip.label,
       submitText: chip.submitText,
     }));
-  }, [activityLegacyId, shortcutTags]);
+  }, [activityLegacyId]);
 
   const isBusy = isStreaming;
   const isComposerDisabled = isStreaming || isLoadingHistory;
@@ -151,19 +104,9 @@ export function ChatComposer({
           return;
         }
       }
-      if (chip.key === BUDDY_POST_CHIP.key) {
-        if (activityLegacyId != null && !Number.isNaN(activityLegacyId)) {
-          onBuddyPostClick?.();
-          return;
-        }
-      }
-      if (chip.isShortcutTag) {
-        recordAiShortcutTagUse(chip.submitText);
-        setShortcutTags(getTopAiShortcutTags());
-      }
       onSubmit(chip.submitText);
     },
-    [activityLegacyId, isBusy, onAiGuideClick, onBuddyPostClick, onSubmit],
+    [activityLegacyId, isBusy, onAiGuideClick, onSubmit],
   );
 
   const canSend = Boolean(input.trim()) && !isComposerDisabled;
@@ -184,12 +127,6 @@ export function ChatComposer({
                 disabled={isBusy}
                 onClick={() => handleQuickChipClick(chip)}
               />
-            ) : chip.key === BUDDY_POST_CHIP.key ? (
-              <AiBuddyPostShortcutChip
-                key={chip.key}
-                disabled={isBusy}
-                onClick={() => handleQuickChipClick(chip)}
-              />
             ) : (
               <Button
                 key={chip.key}
@@ -203,8 +140,6 @@ export function ChatComposer({
           )}
         </View>
       </ScrollView>
-
-      <AiMatchQuotaBanner />
 
       <View className="s-ai-assistant-chat__composer">
         <View className="s-ai-assistant-chat__composer-inner">

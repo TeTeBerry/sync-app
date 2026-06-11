@@ -45,7 +45,7 @@ describe('buildItineraryBannerCopy', () => {
       eventMeta: '风暴电音节 深圳站',
       dayLabels: ['6月13日', '6月14日'],
     });
-    expect(copy.title).toBe('已根据你选择的 2 位 DJ 生成专属行程');
+    expect(copy.title).toBe('已根据你选择的 2 位 DJ 生成电音时间表');
     expect(copy.subtitle).toContain('EXCISION · MARSHMELLO');
     expect(copy.subtitle).toContain('覆盖 6月13日、6月14日');
     expect(copy.subtitle).not.toContain('时间节点');
@@ -62,7 +62,7 @@ describe('buildItineraryBannerCopy', () => {
       eventMeta: '风暴电音节 深圳站',
       dayLabels: ['6月13日', '6月14日'],
     });
-    expect(copy.title).toBe('已根据你选择的 4 位 DJ 生成专属行程');
+    expect(copy.title).toBe('已根据你选择的 4 位 DJ 生成电音时间表');
     expect(copy.subtitle).toContain('EXCISION');
   });
 });

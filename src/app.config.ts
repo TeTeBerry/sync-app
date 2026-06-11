@@ -16,7 +16,6 @@ export default {
         'pages/event-detail/index',
         'pages/exclusive-itinerary/index',
         'pages/my-itinerary/index',
-        'pages/explore/index',
       ],
     },
     {
@@ -35,11 +34,6 @@ export default {
       root: 'packageAi',
       name: 'ai',
       pages: ['pages/ai-assistant/index'],
-    },
-    {
-      root: 'packageMessage',
-      name: 'message',
-      pages: ['pages/messages/index', 'pages/chat/index'],
     },
   ],
   tabBar: {
@@ -80,7 +74,7 @@ export default {
   preloadRule: {
     'pages/index/index': {
       network: 'wifi',
-      packages: ['event', 'message'],
+      packages: ['event'],
     },
     'pages/events/index': {
       network: 'wifi',
@@ -88,7 +82,7 @@ export default {
     },
     'pages/profile/index': {
       network: 'wifi',
-      packages: ['profile', 'message'],
+      packages: ['profile'],
     },
   },
 };

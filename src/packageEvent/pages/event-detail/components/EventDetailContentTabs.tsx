@@ -4,14 +4,14 @@ export type EventDetailTabId = 'posts' | 'live';
 
 type EventDetailContentTabsProps = {
   active: EventDetailTabId;
-  postsCount: number;
+  boardCount: number;
   liveCount: number;
   onChange: (tab: EventDetailTabId) => void;
 };
 
 export function EventDetailContentTabs({
   active,
-  postsCount,
+  boardCount,
   liveCount,
   onChange,
 }: EventDetailContentTabsProps) {
@@ -26,8 +26,8 @@ export function EventDetailContentTabs({
           .join(' ')}
         onClick={() => onChange('posts')}
       >
-        <Text className="s-event-detail-tabs__label">活动帖子</Text>
-        <Text className="s-event-detail-tabs__badge">{postsCount}</Text>
+        <Text className="s-event-detail-tabs__label">留言板</Text>
+        <Text className="s-event-detail-tabs__badge">{boardCount}</Text>
       </View>
       <View
         className={[

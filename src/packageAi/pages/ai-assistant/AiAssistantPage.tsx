@@ -1,6 +1,6 @@
 import './AiAssistantPage.scss';
 import { type FC } from 'react';
-import { BottomNavSlot } from '../../../components/navigation/BottomNav';
+import { PageTabBarChrome } from '../../../components/navigation/BottomNav';
 import { CalendarDays, Sparkles, Zap } from '../../../components/icons';
 import PageNavigation from '../../../components/navigation/PageNavigation';
 import { Text, View } from '@tarojs/components';
@@ -116,7 +116,7 @@ const AiAssistantPage: FC = () => {
         </View>
       </View>
 
-      <BottomNavSlot />
+      <PageTabBarChrome />
 
       {page.profileBenefitsEnabled ? (
         <AiPackageUpgradeSheet

@@ -135,3 +135,11 @@ export function validateChatImageDataUrl(dataUrl: string): void {
     throw new ChatImageTooLargeError();
   }
 }
+
+/** Compress local temp file and read as JPEG data URL (no COS upload). */
+export async function readLocalImageAsJpegDataUrl(filePath: string): Promise<string> {
+  const jpegPath = await compressToJpegPath(filePath);
+  const dataUrl = await readFileAsJpegDataUrl(jpegPath);
+  validateChatImageDataUrl(dataUrl);
+  return dataUrl;
+}

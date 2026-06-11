@@ -1,51 +1,62 @@
 import React from 'react';
 import ThemedPageLoader from '../../../../components/ThemedPageLoader';
-import { EventDetailAiMatchCard } from './EventDetailAiMatchCard';
+import { EventDetailAiTravelGuideCard } from './EventDetailAiTravelGuideCard';
+import { EventDetailMessageBoardComposer } from './EventDetailMessageBoardComposer';
 import {
   EventDetailContentTabs,
   type EventDetailTabId,
 } from './EventDetailContentTabs';
-import { EventDetailExclusiveItineraryButton } from './EventDetailExclusiveItineraryButton';
+import { EventDetailItineraryMenu } from './EventDetailItineraryMenu';
 import type { OnsiteBuddyPostIntentId } from '../../../../constants/onsiteBuddyPostIntents';
 import { View } from '@tarojs/components';
 
 export type EventDetailComposerSectionProps = {
   showHeaderSkeleton: boolean;
   composerReady: boolean;
-  prompt: string;
-  onPromptChange: (value: string) => void;
-  onAiSubmit: () => void;
-  onShortcutTag: (tag: string) => void;
+  messageDraft: string;
+  onMessageDraftChange: (value: string) => void;
+  messageImageRefs: string[];
+  onPickMessageImages: () => void;
+  onRemoveMessageImage: (index: number) => void;
+  onPublishMessage: () => void;
+  messagePublishing?: boolean;
   onAiGuideClick: () => void;
-  onBuddyPostClick: () => void;
-  buddyPostDisabled?: boolean;
+  onOpenTemplateSheet: () => void;
+  templateDisabled?: boolean;
   isOnSite?: boolean;
   onOnsiteIntentClick?: (intentId: OnsiteBuddyPostIntentId) => void;
   onsitePublishDisabled?: boolean;
+  activityTitle?: string;
+  onOpenMyItinerary: () => void;
   onOpenExclusiveItinerary: () => void;
   contentTab: EventDetailTabId;
   onContentTabChange: (tab: EventDetailTabId) => void;
-  postsCount: number;
+  boardCount: number;
   liveCount: number;
 };
 
 export const EventDetailComposerSection: React.FC<EventDetailComposerSectionProps> = ({
   showHeaderSkeleton,
   composerReady,
-  prompt,
-  onPromptChange,
-  onAiSubmit,
-  onShortcutTag,
+  messageDraft,
+  onMessageDraftChange,
+  messageImageRefs,
+  onPickMessageImages,
+  onRemoveMessageImage,
+  onPublishMessage,
+  messagePublishing,
   onAiGuideClick,
-  onBuddyPostClick,
-  buddyPostDisabled,
+  onOpenTemplateSheet,
+  templateDisabled,
   isOnSite,
   onOnsiteIntentClick,
   onsitePublishDisabled,
+  activityTitle,
+  onOpenMyItinerary,
   onOpenExclusiveItinerary,
   contentTab,
   onContentTabChange,
-  postsCount,
+  boardCount,
   liveCount,
 }) => {
   if (showHeaderSkeleton) {
@@ -55,24 +66,33 @@ export const EventDetailComposerSection: React.FC<EventDetailComposerSectionProp
   return (
     <>
       {composerReady ? (
-        <EventDetailAiMatchCard
-          prompt={prompt}
-          onPromptChange={onPromptChange}
-          onSubmit={onAiSubmit}
-          onTagClick={onShortcutTag}
-          onAiGuideClick={onAiGuideClick}
-          onBuddyPostClick={onBuddyPostClick}
-          buddyPostDisabled={buddyPostDisabled}
-          isOnSite={isOnSite}
-          onOnsiteIntentClick={onOnsiteIntentClick}
-          onsitePublishDisabled={onsitePublishDisabled}
-        />
+        <>
+          <EventDetailAiTravelGuideCard onClick={onAiGuideClick} />
+          <EventDetailMessageBoardComposer
+            draft={messageDraft}
+            onDraftChange={onMessageDraftChange}
+            imageRefs={messageImageRefs}
+            onPickImages={onPickMessageImages}
+            onRemoveImage={onRemoveMessageImage}
+            onPublish={onPublishMessage}
+            onOpenTemplateSheet={onOpenTemplateSheet}
+            templateDisabled={templateDisabled}
+            isOnSite={isOnSite}
+            onOnsiteIntentClick={onOnsiteIntentClick}
+            onsitePublishDisabled={onsitePublishDisabled}
+            publishing={messagePublishing}
+          />
+        </>
       ) : null}
       <View className="s-event-detail__feed-section">
-        <EventDetailExclusiveItineraryButton onPress={onOpenExclusiveItinerary} />
+        <EventDetailItineraryMenu
+          activityTitle={activityTitle}
+          onOpenMyItinerary={onOpenMyItinerary}
+          onOpenExclusiveItinerary={onOpenExclusiveItinerary}
+        />
         <EventDetailContentTabs
           active={contentTab}
-          postsCount={postsCount}
+          boardCount={boardCount}
           liveCount={liveCount}
           onChange={onContentTabChange}
         />

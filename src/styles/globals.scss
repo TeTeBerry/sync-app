@@ -94,6 +94,10 @@ page {
 }
 
 /** Fixed viewport-level host for custom BottomNav (WeChat-safe) */
+.s-tabbar-chrome {
+  width: 100%;
+}
+
 .s-tabbar-fixed-host {
   position: fixed;
   bottom: 0;

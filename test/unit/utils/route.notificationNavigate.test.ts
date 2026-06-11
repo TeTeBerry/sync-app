@@ -1,6 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import Taro from '@tarojs/taro';
 
+vi.mock('@/utils/authStorage', () => ({
+  isLoggedIn: () => true,
+}));
+
 vi.mock('@tarojs/taro', () => ({
   default: {
     getCurrentPages: vi.fn(() => []),
@@ -41,7 +45,11 @@ vi.mock('@/stores/navigationStore', () => ({
 
 describe('navigateFromNotification', () => {
   beforeEach(() => {
+    vi.resetModules();
     vi.clearAllMocks();
+    vi.mocked(Taro.getCurrentPages).mockReturnValue([
+      { route: 'pages/index/index' },
+    ] as never);
     vi.mocked(Taro.navigateTo).mockImplementation((options) => {
       options?.success?.({ errMsg: 'navigateTo:ok' } as never);
       options?.complete?.({ errMsg: 'navigateTo:ok' } as never);
@@ -49,7 +57,7 @@ describe('navigateFromNotification', () => {
     });
   });
 
-  it('opens event detail anchored to post for team apply notifications', async () => {
+  it('opens profile posts for team apply notifications', async () => {
     const { navigateFromNotification } = await import('@/utils/route');
     const opened = navigateFromNotification({
       type: 'application',
@@ -63,7 +71,6 @@ describe('navigateFromNotification', () => {
 
     expect(opened).toBe(true);
     const url = String(vi.mocked(Taro.navigateTo).mock.calls[0]?.[0]?.url ?? '');
-    expect(url).toContain('activityLegacyId=4');
-    expect(url).toContain('postId=post-abc');
+    expect(url).toContain('profile-posts');
   });
 });

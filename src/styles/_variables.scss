@@ -133,4 +133,10 @@ page {
   --s-tabbar-inactive: #888888;
   --s-tabbar-blur: 16px;
   --s-tabbar-shadow: 0 -4px 24px rgba(0, 0, 0, 0.45);
+
+  /* Global AI Agent FAB */
+  --s-global-ai-fab-size: 52px;
+  --s-global-ai-fab-offset: 12px;
+  --s-global-ai-fab-right: var(--s-page-gutter);
+  --s-global-ai-fab-z: 10000;
 }

@@ -27,7 +27,7 @@ const ExclusiveItineraryFooter: React.FC<ExclusiveItineraryFooterProps> = ({
     >
       <Sparkles size={18} color="#fff" aria-hidden />
       <Text className="s-exclusive-itinerary__cta-label">
-        {generating ? '生成中…' : '生成专属行程'}
+        {generating ? '生成中…' : '生成时间表'}
       </Text>
     </Button>
   </View>

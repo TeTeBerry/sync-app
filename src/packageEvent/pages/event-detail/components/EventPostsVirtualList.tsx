@@ -11,13 +11,10 @@ type EventPostsVirtualListProps = {
   items: EventPostListItem[];
   highlightPostId: string;
   expandedCommentPostIds: Set<string>;
-  appliedPostIds: Set<string>;
   currentUserAvatar?: string;
   onLike: EventPostCardProps['onLike'];
   onToggleComments: EventPostCardProps['onToggleComments'];
   onDelete: EventPostCardProps['onDelete'];
-  onApply: EventPostCardProps['onApply'];
-  onComplete?: EventPostCardProps['onComplete'];
   onCommentSubmitted: EventPostCardProps['onCommentSubmitted'];
   hasMore?: boolean;
   hasMoreLocal?: boolean;
@@ -30,13 +27,10 @@ export function EventPostsVirtualList({
   items,
   highlightPostId,
   expandedCommentPostIds,
-  appliedPostIds,
   currentUserAvatar,
   onLike,
   onToggleComments,
   onDelete,
-  onApply,
-  onComplete,
   onCommentSubmitted,
   hasMore = false,
   hasMoreLocal = false,
@@ -59,33 +53,30 @@ export function EventPostsVirtualList({
       {items.map((item) => {
         const highlighted = item.post.id === highlightPostId;
         return (
-          <View key={item.post.id} id={`post-${item.post.id}`}>
+          <View
+            key={item.post.id}
+            id={`post-${item.post.id}`}
+            className="s-event-posts-list__item"
+          >
             <EventPostCard
               post={item.post}
               activityLegacyId={activityLegacyId}
               publishTimeLabel={item.publishTimeLabel}
               highlighted={highlighted}
               commentsExpanded={expandedCommentPostIds.has(item.post.id)}
-              applied={appliedPostIds.has(item.post.id)}
               currentUserAvatar={currentUserAvatar}
               onLike={onLike}
               onToggleComments={onToggleComments}
               onDelete={onDelete}
-              onApply={onApply}
-              onComplete={onComplete}
               onCommentSubmitted={onCommentSubmitted}
             />
           </View>
         );
       })}
       {isLoadingMore ? (
-        <Text className="s-event-posts-list__more">加载更多…</Text>
+        <Text className="s-event-posts-list__loading">加载中…</Text>
       ) : null}
-      {!hasMore && !hasMoreLocal && items.length > 0 ? (
-        <Text className="s-event-posts-list__more s-event-posts-list__more--end">
-          没有更多帖子了
-        </Text>
-      ) : null}
+      {!isLoadingMore && !hasMoreLocal && !hasMore && items.length > 0 ? null : null}
     </View>
   );
 }

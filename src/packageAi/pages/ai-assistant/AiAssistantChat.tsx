@@ -93,7 +93,7 @@ export function AiAssistantChat({
 
   const welcomeText = useMemo(() => {
     if (activityTitle?.trim()) {
-      return `👋 已为你锁定「${activityTitle.trim()}」。可先生成出行攻略，生成后点「一键组队」自动预填发帖；也可直接描述需求或点「AI攻略」「组队发帖」。`;
+      return `👋 已为你锁定「${activityTitle.trim()}」。可先生成出行攻略，生成后点「一键组队」自动预填发帖；也可直接描述需求或点「AI出行攻略」「组队发帖」。`;
     }
     return '👋 我是你的 AI 智能助手，帮你发现活动、找组队，说出需求，我来搞定。';
   }, [activityTitle]);
@@ -412,7 +412,6 @@ export function AiAssistantChat({
           onClearChat={handleClearChat}
           clearDisabled={isStreaming}
           onAiGuideClick={travelGuide.openGuideSheet}
-          onBuddyPostClick={buddyPost.openBuddyPostSheet}
         />
       </View>
 

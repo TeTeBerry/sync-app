@@ -6,5 +6,6 @@ export {
 export type { PageNavigationProps } from './PageNavigation';
 export { default as TabPageHeader } from './TabPageHeader';
 export type { TabPageHeaderProps } from './TabPageHeader';
-export { BottomNavSlot } from './BottomNav';
+export { BottomNavSlot, PageTabBarChrome } from './BottomNav';
+export { default as GlobalAiAgentFab } from './GlobalAiAgentFab';
 export { default as NavigationLoadingOverlay } from './NavigationLoadingOverlay';

@@ -1,11 +1,17 @@
 import { useCallback, useState } from 'react';
 import Taro from '@tarojs/taro';
 import { useAccountRisk } from '../../../hooks/useAccountRisk';
-import { invalidatePostQueries } from '../../../hooks/useSyncApi';
-import { publishBuddyPostFromForm } from '../../../utils/publishBuddyPost';
-import { isApiEnabled } from '../../../constants/api';
 import type { EventDetailPost } from '../../../types/post';
-import type { AiBuddyPostFormValues } from '../../../types/buddyPost';
+import type {
+  AiBuddyPostFormValues,
+  AiBuddyPostSubmitPayload,
+} from '../../../types/buddyPost';
+import {
+  buildOptimisticBuddyPost,
+  publishBuddyPostFromForm,
+} from '../../../utils/publishBuddyPost';
+import { isApiEnabled } from '../../../constants/api';
+import { getClientUserId } from '../../../utils/session';
 import {
   ONSITE_INTENT_PREFILL_BANNER_TITLE,
   buildOnsiteBuddyPostForm,
@@ -21,7 +27,7 @@ export type BuddySheetPrefillState = {
   submitLabel: string;
 };
 
-/** Buddy-post plan sheet on event detail — publish in place, refresh post list. */
+/** Structured message-board template sheet on event detail. */
 export function useEventDetailBuddyPost(
   eventId: number,
   options: {
@@ -30,13 +36,11 @@ export function useEventDetailBuddyPost(
     activityLocation?: string;
     authorName: string;
     authorAvatar?: string;
-    /** Refetch activity post list (useEventPostsInfiniteQuery is not on useApiQuery cache). */
-    refreshPosts?: () => Promise<void>;
-    /** Optimistic insert so the feed updates before refetch completes. */
+    refreshPosts?: (options?: { silent?: boolean }) => Promise<void>;
     prependPost?: (post: EventDetailPost) => void;
-    /** Defer users/me until secondaryReady to cut first-screen requests. */
+    replacePost?: (pendingId: string, post: EventDetailPost) => void;
+    removePost?: (postId: string) => void;
     accountRiskEnabled?: boolean;
-    /** When true, chip prefill copy mentions wristband →「我在现场」badge. */
     hintOnSiteBadge?: boolean;
   },
 ) {
@@ -69,7 +73,7 @@ export function useEventDetailBuddyPost(
 
   const handleBuddyPostSheetSubmit = useCallback(
     async (
-      form: AiBuddyPostFormValues,
+      payload: AiBuddyPostSubmitPayload,
       submitOptions?: {
         quiet?: boolean;
         skipListRefresh?: boolean;
@@ -81,19 +85,38 @@ export function useEventDetailBuddyPost(
 
       if (!(await guardPublish())) return false;
 
+      if (!isApiEnabled()) {
+        void Taro.showToast({ title: '请先配置 API 地址', icon: 'none' });
+        return false;
+      }
+
+      const { imageRefs, syncToPostList: _sync, ...form } = payload;
+      const title = options.activityTitle?.trim() || '本场活动';
+      const listedInFeed =
+        submitOptions?.listedInFeed ?? payload.syncToPostList !== false;
+      const pendingId = `pending-${Date.now()}`;
+
       setIsPublishing(true);
       setSheetOpen(false);
       clearSheetPrefill();
 
-      try {
-        if (!isApiEnabled()) {
-          throw new Error('请先配置 API 地址');
-        }
+      if (!submitOptions?.skipListRefresh && listedInFeed) {
+        options.prependPost?.(
+          buildOptimisticBuddyPost({
+            pendingId,
+            form,
+            imageRefs,
+            authorName: options.authorName,
+            authorAvatar: options.authorAvatar,
+            userId: getClientUserId(),
+          }),
+        );
+      }
 
-        const title = options.activityTitle?.trim() || '本场活动';
-        const listedInFeed = submitOptions?.listedInFeed !== false;
+      try {
         const { post } = await publishBuddyPostFromForm({
           form,
+          imageRefs,
           activityLegacyId: eventId,
           activityTitle: title,
           authorName: options.authorName,
@@ -103,30 +126,24 @@ export function useEventDetailBuddyPost(
 
         if (!submitOptions?.quiet) {
           const toastTitle = post.authorOnSiteVerified
-            ? '已发布 · 手环认证'
-            : '组队帖已发布';
+            ? '留言已发布 · 手环认证'
+            : '留言已发布';
           void Taro.showToast({ title: toastTitle, icon: 'success' });
         }
 
-        if (!submitOptions?.skipListRefresh) {
-          if (listedInFeed) {
-            options.prependPost?.(post);
-          }
-          void (async () => {
-            await invalidatePostQueries();
-            try {
-              await options.refreshPosts?.();
-            } catch {
-              // List refresh is best-effort; publish already succeeded.
-            }
-          })();
+        if (!submitOptions?.skipListRefresh && listedInFeed) {
+          options.replacePost?.(pendingId, post);
+          void options.refreshPosts?.({ silent: true });
         }
         return true;
       } catch (error) {
+        if (!submitOptions?.skipListRefresh && listedInFeed) {
+          options.removePost?.(pendingId);
+        }
         if (await handlePublishError(error)) {
           return false;
         }
-        const message = error instanceof Error ? error.message : '发帖失败，请稍后重试';
+        const message = error instanceof Error ? error.message : '发布失败，请稍后重试';
         void Taro.showToast({ title: message, icon: 'none' });
         setSheetOpen(true);
         return false;

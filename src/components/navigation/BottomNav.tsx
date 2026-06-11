@@ -2,30 +2,15 @@ import './BottomNav.scss';
 import React from 'react';
 import { Button } from '../ui';
 import { View, Text } from '@tarojs/components';
-import {
-  CalendarDays,
-  Compass,
-  House,
-  MessageCircle,
-  User,
-} from '../../components/icons';
+import { CalendarDays, House, User } from '../../components/icons';
+import GlobalAiAgentFab from './GlobalAiAgentFab';
 import {
   preloadAiSubpackage,
   preloadEventSubpackage,
-  preloadMessageSubpackage,
   preloadProfileSubpackage,
 } from '../../utils/subpackagePreload';
 import type { RoutePath } from '../../utils/route';
-import {
-  ROUTES,
-  goExplore,
-  goMessages,
-  switchTabTo,
-  useActiveRoutePath,
-} from '../../utils/route';
-
-/** 暂时隐藏探索 tab；恢复时改为 true */
-const EXPLORE_TAB_VISIBLE = false;
+import { ROUTES, switchTabTo, useActiveRoutePath } from '../../utils/route';
 
 function preloadSubpackagesForTab(path: RoutePath) {
   if (path === ROUTES.HOME || path === ROUTES.EVENTS) {
@@ -38,49 +23,20 @@ function preloadSubpackagesForTab(path: RoutePath) {
   }
 }
 
-function isMessagesRouteActive(activePath: string): boolean {
-  return activePath === ROUTES.MESSAGES || activePath.startsWith('/packageMessage/');
-}
-
-function isExploreRouteActive(activePath: string): boolean {
-  return activePath === ROUTES.EXPLORE;
-}
-
 const BottomNav: React.FC = () => {
   const activePath = useActiveRoutePath();
 
   const navItems = [
-    { path: ROUTES.HOME, icon: House, label: '首页', kind: 'tab' as const },
-    { path: ROUTES.EVENTS, icon: CalendarDays, label: '活动', kind: 'tab' as const },
-    {
-      path: ROUTES.MESSAGES,
-      icon: MessageCircle,
-      label: '私信',
-      kind: 'stack' as const,
-    },
-    ...(EXPLORE_TAB_VISIBLE
-      ? [
-          {
-            path: ROUTES.EXPLORE,
-            icon: Compass,
-            label: '探索',
-            kind: 'stack' as const,
-          },
-        ]
-      : []),
-    { path: ROUTES.PROFILE, icon: User, label: '我的', kind: 'tab' as const },
+    { path: ROUTES.HOME, icon: House, label: '首页' },
+    { path: ROUTES.EVENTS, icon: CalendarDays, label: '活动' },
+    { path: ROUTES.PROFILE, icon: User, label: '我的' },
   ];
 
   return (
     <View data-cmp="BottomNav" className="s-bottom-nav">
       <View className="s-bottom-nav__row">
         {navItems.map((item) => {
-          const isActive =
-            item.kind === 'stack'
-              ? item.path === ROUTES.MESSAGES
-                ? isMessagesRouteActive(activePath)
-                : isExploreRouteActive(activePath)
-              : activePath === item.path;
+          const isActive = activePath === item.path;
           const Icon = item.icon;
           return (
             <Button
@@ -88,26 +44,10 @@ const BottomNav: React.FC = () => {
               disabled={isActive}
               onTouchStart={() => {
                 if (!isActive) {
-                  if (item.path === ROUTES.MESSAGES) {
-                    preloadMessageSubpackage();
-                  } else if (item.path === ROUTES.EXPLORE) {
-                    preloadEventSubpackage();
-                  } else {
-                    preloadSubpackagesForTab(item.path);
-                  }
+                  preloadSubpackagesForTab(item.path);
                 }
               }}
-              onClick={() => {
-                if (item.path === ROUTES.MESSAGES) {
-                  goMessages();
-                  return;
-                }
-                if (item.path === ROUTES.EXPLORE) {
-                  goExplore();
-                  return;
-                }
-                switchTabTo(item.path);
-              }}
+              onClick={() => switchTabTo(item.path)}
               className="s-bottom-nav__item"
             >
               <Icon
@@ -129,12 +69,22 @@ const BottomNav: React.FC = () => {
   );
 };
 
-/** Renders BottomNav in a viewport-fixed host (required on WeChat tab pages). */
+/** Fixed bottom tab bar only (used by WeChat custom-tab-bar). */
 export function BottomNavSlot() {
   return (
     <View className="s-tabbar-fixed-host">
       <BottomNav />
     </View>
+  );
+}
+
+/** Tab bar + global AI FAB for stack pages that embed the bar in-page. */
+export function PageTabBarChrome() {
+  return (
+    <>
+      <GlobalAiAgentFab />
+      <BottomNavSlot />
+    </>
   );
 }
 

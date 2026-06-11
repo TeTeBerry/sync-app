@@ -29,32 +29,58 @@ export function useEventPostsInfiniteQuery(
   const [nextCursor, setNextCursor] = useState<string | undefined>();
   const [hasMore, setHasMore] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [isError, setIsError] = useState(false);
   const loadingMoreRef = useRef(false);
   const userId = getClientUserId();
 
-  const resetAndLoad = useCallback(async () => {
-    if (!enabled || activityLegacyId == null) return;
-    setIsLoading(true);
-    setIsError(false);
-    try {
-      const page = await fetchPostsByActivityPage(activityLegacyId, {
-        limit: pageSize,
-        anchorPostId,
-      });
-      setItems(page.items);
-      setNextCursor(page.nextCursor);
-      setHasMore(page.hasMore);
-    } catch {
-      setIsError(true);
-      setItems([]);
-      setNextCursor(undefined);
-      setHasMore(false);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [activityLegacyId, anchorPostId, enabled, pageSize]);
+  const mergeFetchedPosts = useCallback(
+    (fetched: EventDetailPost[], previous: EventDetailPost[]) => {
+      const fetchedIds = new Set(fetched.map((post) => post.id));
+      const localOnly = previous.filter((post) => !fetchedIds.has(post.id));
+      return [...localOnly, ...fetched];
+    },
+    [],
+  );
+
+  const resetAndLoad = useCallback(
+    async (options?: { silent?: boolean }) => {
+      if (!enabled || activityLegacyId == null) return;
+      const silent = options?.silent === true;
+      if (silent) {
+        setIsRefreshing(true);
+      } else {
+        setIsLoading(true);
+      }
+      setIsError(false);
+      try {
+        const page = await fetchPostsByActivityPage(activityLegacyId, {
+          limit: pageSize,
+          anchorPostId,
+        });
+        setItems((previous) =>
+          silent ? mergeFetchedPosts(page.items, previous) : page.items,
+        );
+        setNextCursor(page.nextCursor);
+        setHasMore(page.hasMore);
+      } catch {
+        if (!silent) {
+          setIsError(true);
+          setItems([]);
+          setNextCursor(undefined);
+          setHasMore(false);
+        }
+      } finally {
+        if (silent) {
+          setIsRefreshing(false);
+        } else {
+          setIsLoading(false);
+        }
+      }
+    },
+    [activityLegacyId, anchorPostId, enabled, mergeFetchedPosts, pageSize],
+  );
 
   useEffect(() => {
     if (!enabled) {
@@ -105,9 +131,12 @@ export function useEventPostsInfiniteQuery(
     }
   }, [activityLegacyId, enabled, hasMore, nextCursor, pageSize]);
 
-  const refetch = useCallback(async () => {
-    await resetAndLoad();
-  }, [resetAndLoad]);
+  const refetch = useCallback(
+    async (options?: { silent?: boolean }) => {
+      await resetAndLoad(options);
+    },
+    [resetAndLoad],
+  );
 
   const patchItem = useCallback(
     (
@@ -152,10 +181,21 @@ export function useEventPostsInfiniteQuery(
     });
   }, []);
 
+  const replaceItem = useCallback((pendingId: string, post: EventDetailPost) => {
+    setItems((prev) => {
+      const withoutPending = prev.filter((item) => item.id !== pendingId);
+      if (withoutPending.some((item) => item.id === post.id)) {
+        return withoutPending;
+      }
+      return [post, ...withoutPending];
+    });
+  }, []);
+
   return {
     items,
     hasMore,
     isLoading,
+    isRefreshing,
     isLoadingMore,
     isError,
     loadMore,
@@ -163,5 +203,6 @@ export function useEventPostsInfiniteQuery(
     patchItem,
     removeItem,
     prependItem,
+    replaceItem,
   };
 }

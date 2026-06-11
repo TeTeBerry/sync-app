@@ -1,6 +1,6 @@
 import './event-detail.scss';
 import { useEndRouteTransitionOnShow } from '../../../hooks/useEndRouteTransitionOnShow';
-import { BottomNavSlot } from '../../../components/navigation/BottomNav';
+import { PageTabBarChrome } from '../../../components/navigation/BottomNav';
 import ThemedPageLoader from '../../../components/ThemedPageLoader';
 import { useConfirmDialog } from '../../../hooks/useConfirmDialog';
 import { LoginInterceptHost } from '../../../components/auth/LoginInterceptHost';
@@ -12,7 +12,6 @@ import { EventPostsVirtualList } from './components/EventPostsVirtualList';
 import { EVENT_DETAIL_SCROLL_ID } from './useEventDetailPosts';
 import { useEventDetailPage } from './useEventDetailPage';
 import { AiBuddyPostSheet } from '../../../components/ai-chat/AiBuddyPostSheet';
-import { TeamApplySheet } from '../../../components/post/TeamApplySheet';
 import { AiGuidePlanSheet } from '../../../components/ai-chat/AiGuidePlanSheet';
 import PageNavigation from '../../../components/navigation/PageNavigation';
 import { ScrollView, Text, View } from '@tarojs/components';
@@ -48,8 +47,13 @@ const EventDetailPage = () => {
     activityStatusClass,
     showHeaderSkeleton,
     composerReady,
-    prompt,
-    setPrompt,
+    messageDraft,
+    setMessageDraft,
+    messageImageRefs,
+    pickMessageImages,
+    removeMessageImage,
+    handlePublishMessage,
+    messagePublishing,
     contentTab,
     setContentTab,
     live,
@@ -59,12 +63,9 @@ const EventDetailPage = () => {
     currentUserAvatar,
     postsQuery,
     handleBack,
-    openAi,
-    handleShortcutTag,
     handleOpenAiGuide,
-    handleOpenBuddyPost,
-    buddySheetForApplyFlow,
-    handleOpenExclusiveItinerary,
+    handleOpenTemplateSheet,
+    publishOnsiteIntent,
     buddyPostSheetOpen,
     buddySheetInitialValues,
     buddySheetPrefillLines,
@@ -75,17 +76,17 @@ const EventDetailPage = () => {
     handleBuddyPostSheetSubmit,
     buddyPostActivityDate,
     buddyPostActivityTitle,
-    isBuddyPostPublishing,
+    activityTitle,
+    handleOpenMyItinerary,
+    handleOpenExclusiveItinerary,
+    isOnSite,
     guideSheetOpen,
     closeGuideSheet,
     handleGuideSheetSubmit,
     guideDefaultNights,
     guideEventCity,
     entitlements,
-    teamApply,
-    applyBuddyPublishPending,
-    isOnSite,
-    publishOnsiteIntent,
+    handleOnSiteCertifiedSuccess,
   } = page;
 
   return (
@@ -119,22 +120,29 @@ const EventDetailPage = () => {
             <EventDetailComposerSection
               showHeaderSkeleton={showHeaderSkeleton}
               composerReady={composerReady}
-              prompt={prompt}
-              onPromptChange={setPrompt}
-              onAiSubmit={() => openAi(prompt)}
-              onShortcutTag={handleShortcutTag}
+              messageDraft={messageDraft}
+              onMessageDraftChange={setMessageDraft}
+              messageImageRefs={messageImageRefs}
+              onPickMessageImages={() => {
+                void pickMessageImages();
+              }}
+              onRemoveMessageImage={removeMessageImage}
+              onPublishMessage={handlePublishMessage}
+              messagePublishing={messagePublishing}
               onAiGuideClick={handleOpenAiGuide}
-              onBuddyPostClick={handleOpenBuddyPost}
-              buddyPostDisabled={isBuddyPostPublishing}
+              onOpenTemplateSheet={handleOpenTemplateSheet}
+              templateDisabled={messagePublishing}
               isOnSite={isOnSite}
               onOnsiteIntentClick={(intentId) => {
                 void publishOnsiteIntent(intentId);
               }}
-              onsitePublishDisabled={isBuddyPostPublishing}
+              onsitePublishDisabled={messagePublishing}
+              activityTitle={activityTitle}
+              onOpenMyItinerary={handleOpenMyItinerary}
               onOpenExclusiveItinerary={handleOpenExclusiveItinerary}
               contentTab={contentTab}
               onContentTabChange={setContentTab}
-              postsCount={posts.totalPostCount}
+              boardCount={posts.totalPostCount}
               liveCount={live.liveFeedCount}
             />
 
@@ -144,7 +152,7 @@ const EventDetailPage = () => {
                   <ThemedPageLoader variant="skeleton-event-posts" minHeight={200} />
                 ) : posts.totalPostCount === 0 ? (
                   <Text className="s-event-detail__empty">
-                    暂无组队帖，来发布第一条吧
+                    暂无留言，来发布第一条吧
                   </Text>
                 ) : (
                   <EventPostsVirtualList
@@ -153,7 +161,6 @@ const EventDetailPage = () => {
                     items={posts.postItems}
                     highlightPostId={highlightPostId}
                     expandedCommentPostIds={posts.expandedCommentPostIds}
-                    appliedPostIds={posts.appliedPostIds}
                     currentUserAvatar={currentUserAvatar}
                     hasMore={postsQuery.hasMore}
                     hasMoreLocal={posts.hasMoreVisiblePosts}
@@ -161,8 +168,6 @@ const EventDetailPage = () => {
                     onLike={posts.handleLikePost}
                     onToggleComments={posts.togglePostComments}
                     onDelete={posts.handleDeletePost}
-                    onApply={posts.handleApply}
-                    onComplete={posts.handleCompletePost}
                     onCommentSubmitted={posts.handleCommentSubmitted}
                   />
                 )}
@@ -178,7 +183,7 @@ const EventDetailPage = () => {
               onOpenUpdate={live.handleOpenLiveUpdateSheet}
               onLiveInfoActions={live.handleLiveInfoActions}
               onCloseUpdateSheet={live.handleCloseLiveUpdateSheet}
-              onCertifiedSuccess={page.handleOnSiteCertifiedSuccess}
+              onCertifiedSuccess={handleOnSiteCertifiedSuccess}
             />
 
             {!showHeaderSkeleton && showPostsEnd ? (
@@ -212,19 +217,10 @@ const EventDetailPage = () => {
         prefillBannerTitle={buddySheetPrefillTitle}
         showOnSiteBadgeHint={buddySheetShowOnSiteBadgeHint}
         submitLabel={buddySheetSubmitLabel}
-        showSyncToFeedOption={buddySheetForApplyFlow}
         onClose={closeBuddyPostSheet}
-        onSubmit={handleBuddyPostSheetSubmit}
-      />
-      <TeamApplySheet
-        open={teamApply.applySheetOpen}
-        mode={teamApply.applySheetMode}
-        buddyPreview={teamApply.applyBuddyPreview}
-        defaultDepartureCity={teamApply.defaultDepartureCity}
-        submitting={teamApply.applySubmitting}
-        publishPending={applyBuddyPublishPending}
-        onClose={teamApply.closeApplySheet}
-        onConfirm={teamApply.handleConfirmApply}
+        onSubmit={(payload) => {
+          void handleBuddyPostSheetSubmit(payload);
+        }}
       />
       <AiGuidePlanSheet
         open={guideSheetOpen}
@@ -233,7 +229,7 @@ const EventDetailPage = () => {
         onClose={closeGuideSheet}
         onSubmit={handleGuideSheetSubmit}
       />
-      <BottomNavSlot />
+      <PageTabBarChrome />
     </View>
   );
 };

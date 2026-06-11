@@ -1,9 +1,8 @@
 import Taro from '@tarojs/taro';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   deletePostAndInvalidate,
   likePostAndInvalidate,
-  updatePostAndInvalidate,
 } from '../../../hooks/useSyncApi';
 import type { ConfirmDialogOptions } from '../../../hooks/useConfirmDialog';
 import { useEventPostsInfiniteQuery } from '../../../hooks/useEventPostsInfiniteQuery';
@@ -38,20 +37,9 @@ export function useEventDetailPosts({
   confirm,
   setScrollTop,
 }: UseEventDetailPostsParams) {
-  const [appliedPostIds, setAppliedPostIds] = useState<Set<string>>(() => new Set());
   const [expandedCommentPostIds, setExpandedCommentPostIds] = useState<Set<string>>(
     () => new Set(),
   );
-
-  useEffect(() => {
-    setAppliedPostIds((prev) => {
-      const next = new Set(prev);
-      for (const post of postsQuery.items) {
-        if (post.appliedByMe) next.add(post.id);
-      }
-      return next;
-    });
-  }, [postsQuery.items]);
 
   const allPostItems = useMemo(
     (): EventPostListItem[] => normalizeEventPostList(postsQuery.items),
@@ -153,7 +141,7 @@ export function useEventDetailPosts({
     async (post: EventDetailPost) => {
       const ok = await confirm({
         title: '确认删除',
-        message: '删除后无法恢复，确定要删除这条帖子吗？',
+        message: '删除后无法恢复，确定要删除这条留言吗？',
         confirmText: '删除',
       });
       if (!ok) return;
@@ -177,32 +165,10 @@ export function useEventDetailPosts({
     [postsQuery],
   );
 
-  const handleCompletePost = useCallback(
-    async (postId: string) => {
-      const ok = await confirm({
-        title: '确认标记为已组队',
-        message: '标记后该帖子将结束招募，同类型帖子可重新发布。确定要继续吗？',
-        confirmText: '确认',
-      });
-      if (!ok) return;
-      void updatePostAndInvalidate(postId, { status: 'completed' })
-        .then((updated) => {
-          postsQuery.patchItem({ id: postId, status: updated.status });
-          void Taro.showToast({ title: '已标记为已组队', icon: 'success' });
-        })
-        .catch(() => {
-          void Taro.showToast({ title: '标记失败', icon: 'none' });
-        });
-    },
-    [confirm, postsQuery],
-  );
-
   return {
     postItems,
     totalPostCount: allPostItems.length,
     hasMoreVisiblePosts,
-    appliedPostIds,
-    setAppliedPostIds,
     expandedCommentPostIds,
     handleScrollToLower,
     handleLikePost,
@@ -211,6 +177,5 @@ export function useEventDetailPosts({
     togglePostComments,
     handleDeletePost,
     handleCommentSubmitted,
-    handleCompletePost,
   };
 }

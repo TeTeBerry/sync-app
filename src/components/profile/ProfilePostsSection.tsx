@@ -48,10 +48,6 @@ export type ProfilePostsSectionProps = {
   editDraft?: ProfilePostEditDraft | null;
   onSelect?: (item: ProfilePostItem) => void;
   onComplete?: (item: ProfilePostItem) => void;
-  onChatWithApplication?: (
-    post: ProfilePostItem,
-    application: PostApplicationItem,
-  ) => void;
   onEdit?: (item: ProfilePostItem) => void;
   onDelete?: (item: ProfilePostItem) => void;
   onEditDraftChange?: (draft: ProfilePostEditDraft) => void;
@@ -62,11 +58,9 @@ export type ProfilePostsSectionProps = {
 function PostApplicationsBlock({
   post,
   applications,
-  onChatWithApplication,
 }: {
   post: ProfilePostItem;
   applications: PostApplicationItem[];
-  onChatWithApplication?: ProfilePostsSectionProps['onChatWithApplication'];
 }) {
   const pending = applications.filter((item) => item.status === 'pending');
   const accepted = applications.filter((item) => item.status === 'accepted');
@@ -126,8 +120,6 @@ function PostApplicationsBlock({
         <View className="s-profile-post__applications-list">
           {applications.map((applicant) => {
             const isAccepted = applicant.status === 'accepted';
-            const canChat =
-              applicant.status === 'pending' && Boolean(onChatWithApplication);
 
             return (
               <View key={applicant.id} className="s-profile-post__application">
@@ -158,16 +150,8 @@ function PostApplicationsBlock({
                   </View>
                   {isAccepted ? (
                     <Text className="s-profile-post__application-status">已接受</Text>
-                  ) : canChat ? (
-                    <Button
-                      className="s-profile-post__application-chat"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        onChatWithApplication?.(post, applicant);
-                      }}
-                    >
-                      <Text className="s-btn-label">沟通</Text>
-                    </Button>
+                  ) : applicant.status === 'pending' ? (
+                    <Text className="s-profile-post__application-status">待处理</Text>
                   ) : null}
                 </View>
               </View>
@@ -194,7 +178,6 @@ function renderPostItems(
     editDraft = null,
     onSelect,
     onComplete,
-    onChatWithApplication,
     onEdit,
     onDelete,
     onEditDraftChange,
@@ -252,11 +235,7 @@ function renderPostItems(
         <ContentTypeBadge types={contentTypeKeys} />
 
         {item.applications?.length ? (
-          <PostApplicationsBlock
-            post={item}
-            applications={item.applications}
-            onChatWithApplication={onChatWithApplication}
-          />
+          <PostApplicationsBlock post={item} applications={item.applications} />
         ) : null}
 
         <View className="s-profile-post__footer">
@@ -450,7 +429,6 @@ const ProfilePostsSection: React.FC<ProfilePostsSectionProps> = ({
   editDraft = null,
   onSelect,
   onComplete,
-  onChatWithApplication,
   onEdit,
   onDelete,
   onEditDraftChange,
@@ -462,7 +440,6 @@ const ProfilePostsSection: React.FC<ProfilePostsSectionProps> = ({
     editDraft,
     onSelect,
     onComplete,
-    onChatWithApplication,
     onEdit,
     onDelete,
     onEditDraftChange,

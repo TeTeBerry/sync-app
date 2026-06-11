@@ -1,7 +1,7 @@
 import '../../../components/profile/profile.scss';
 import Taro, { useDidShow } from '@tarojs/taro';
 import React, { useCallback, useEffect, useState } from 'react';
-import { BottomNavSlot } from '../../../components/navigation/BottomNav';
+import { PageTabBarChrome } from '../../../components/navigation/BottomNav';
 import PageNavigation, {
   stackPageNavChromePx,
 } from '../../../components/navigation/PageNavigation';
@@ -16,20 +16,11 @@ import {
   updatePostAndInvalidate,
   useProfilePostsQuery,
 } from '../../../hooks/useSyncApi';
-import type { PostApplicationItem } from '../../../types/backend';
 import { invalidateProfilePosts } from '../../../utils/queryInvalidation';
 import { useNavBarInsets } from '../../../hooks/useNavBarInsets';
 import { useTabPageMainHeight } from '../../../hooks/useTabPageMainHeight';
 import type { ProfilePostItem } from '../../../types/backend';
-import { buildTempChatRouteSessionId } from '../../../utils/tempChatNavigation';
-import {
-  invalidateTeamChatQueries,
-  openTeamChatByOwnerAndInvalidate,
-} from '../../../hooks/sync/teamChats';
-import { isLiveApi } from '../../../constants/api';
-import { useTempChatStore } from '../../../stores/tempChatStore';
-import { resolveApplicantBuddyInfo } from '../../../utils/tempChatApplicantBuddy';
-import { goEventDetail, goTempChat, ROUTES } from '../../../utils/route';
+import { goEventDetail, ROUTES } from '../../../utils/route';
 import { useEndRouteTransitionOnShow } from '../../../hooks/useEndRouteTransitionOnShow';
 import { ScrollView, View } from '@tarojs/components';
 
@@ -131,39 +122,6 @@ const ProfilePostsPage: React.FC = () => {
     [confirm, editDraft, handleCancelPostEdit],
   );
 
-  const handleChatWithApplication = useCallback(
-    async (post: ProfilePostItem, application: PostApplicationItem) => {
-      const sessionId = buildTempChatRouteSessionId(post.id, application.userId);
-      if (isLiveApi()) {
-        try {
-          await openTeamChatByOwnerAndInvalidate(post.id, application.userId);
-        } catch {
-          void Taro.showToast({ title: '发起沟通失败', icon: 'none' });
-          return;
-        }
-      } else {
-        useTempChatStore.getState().openSessionFromApplication({
-          postId: post.id,
-          applicantUserId: application.userId,
-          peerUserId: application.userId,
-          peerName: application.name,
-          peerAvatar: application.avatar,
-          postTitle: post.title,
-          buddyInfo:
-            application.buddyPreview ?? resolveApplicantBuddyInfo(application.userId),
-          applicationMessage: application.message,
-          activityLegacyId: post.activityLegacyId,
-          applicationStatus: application.status,
-          postRecruitmentStatus: post.status === '已组队' ? '已组队' : '招募中',
-          isOwner: true,
-        });
-        invalidateTeamChatQueries();
-      }
-      goTempChat(sessionId);
-    },
-    [],
-  );
-
   const handleDeletePost = useCallback(
     async (item: ProfilePostItem) => {
       const ok = await confirm({
@@ -207,7 +165,6 @@ const ProfilePostsPage: React.FC = () => {
                 editDraft={editDraft}
                 onSelect={handleSelectPost}
                 onComplete={handleCompletePost}
-                onChatWithApplication={handleChatWithApplication}
                 onEdit={handleEditPost}
                 onDelete={handleDeletePost}
                 onEditDraftChange={setEditDraft}
@@ -220,7 +177,7 @@ const ProfilePostsPage: React.FC = () => {
       </View>
 
       {confirmDialog}
-      <BottomNavSlot />
+      <PageTabBarChrome />
     </View>
   );
 };

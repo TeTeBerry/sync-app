@@ -1,16 +1,6 @@
 @use '../../styles/chat' as chat;
 
 .s-ai-buddy-post-sheet {
-  /* 贴底展示：去掉 tabbar 区多余 10px，按钮更靠近底部导航 */
-  &.s-overlay--sheet {
-    padding: 0 0 calc(var(--s-tabbar-row, 56px) + env(safe-area-inset-bottom, 0px));
-  }
-
-  .s-overlay__panel.s-ai-guide-plan-sheet__panel {
-    height: auto;
-    max-height: min(82vh, 640px);
-  }
-
   .s-ai-guide-plan-sheet__title-icon {
     background: rgba(var(--primary-rgb), 0.2);
     border-color: rgba(var(--primary-rgb), 0.45);
@@ -19,13 +9,14 @@
 
   .s-ai-guide-plan-sheet__scroll {
     flex: 1;
-    min-height: 280px;
+    height: 0;
+    min-height: 0;
     width: 100%;
     box-sizing: border-box;
   }
 
   .s-ai-guide-plan-sheet__body {
-    padding-bottom: 8px;
+    padding-bottom: 12px;
   }
 
   &__prefill-banner {
@@ -61,18 +52,6 @@
 
   &__field--note {
     margin-bottom: 4px;
-  }
-
-  .s-ai-guide-plan-sheet__footer {
-    position: relative;
-    z-index: 3;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-top: auto;
-    padding: 10px 16px 8px;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 -10px 28px rgba(0, 0, 0, 0.45);
   }
 
   &__sync-row {
@@ -280,5 +259,68 @@
     font-size: 11px;
     color: rgba(255, 255, 255, 0.32);
     line-height: 1;
+  }
+
+  &__image-row {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  &__image-thumb {
+    position: relative;
+    width: 72px;
+    height: 72px;
+    border-radius: 12px;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: #1e1e20;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  }
+
+  &__image-thumb-img {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  &__image-remove {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    margin: 0;
+    border: none;
+    border-radius: var(--radius-full);
+    background: rgba(0, 0, 0, 0.62);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    &--pressed {
+      opacity: 0.88;
+    }
+  }
+
+  &__image-add {
+    width: 72px;
+    height: 72px;
+    padding: 0;
+    margin: 0;
+    border: 1px dashed rgba(255, 255, 255, 0.18);
+    border-radius: 12px;
+    background: #1e1e20;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    &--pressed {
+      opacity: 0.88;
+      background: rgba(255, 255, 255, 0.06);
+    }
   }
 }

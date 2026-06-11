@@ -5,7 +5,6 @@ import {
   applyToPost,
   deletePost,
   fetchPostComments,
-  fetchAllPosts,
   fetchPostsByActivity,
   fetchPopularPosts,
   likePost,
@@ -22,7 +21,6 @@ import {
   persistPopularPosts,
 } from '../../utils/homeCacheStorage';
 import { sanitizeImageList, sanitizeRemoteImageUrl } from '../../utils/imageUrl';
-import { isSharePost } from '../../utils/postContentTypeDisplay';
 import {
   invalidateAllPosts,
   invalidatePostComments,
@@ -47,7 +45,6 @@ import {
 import { useApiQuery } from '../useApiQuery';
 import type { QueryEnableOptions } from './types';
 import { invalidateNotificationQueries } from './notifications';
-import { invalidateTeamChatQueries } from './teamChats';
 
 export function usePopularPostsQuery(options?: QueryEnableOptions) {
   const tabEnabled = options?.enabled ?? true;
@@ -66,28 +63,6 @@ export function usePopularPostsQuery(options?: QueryEnableOptions) {
     enabled,
     staleTime: STALE_POSTS_FEED_MS,
   });
-}
-
-export function useAllPostsQuery() {
-  const enabled = isLiveApi();
-  const userId = resolveRequestUserId();
-
-  const query = useApiQuery({
-    queryKey: ['posts', 'all', userId],
-    queryFn: async () => {
-      const result = await fetchAllPosts();
-      return result.map(mapHomeFeedPost);
-    },
-    enabled,
-    staleTime: STALE_POSTS_FEED_MS,
-  });
-
-  return {
-    posts: (query.data ?? []).map(mapHomeFeedPost),
-    isLoading: query.isLoading && query.data === undefined,
-    isError: query.isError,
-    refetch: query.refetch,
-  };
 }
 
 /** Home popular feed — canonical source is `posts/popular` cache (seeded from `/home`). */
@@ -124,7 +99,7 @@ export function mapHomeFeedPost(item: HomeFeedPost): HomeFeedPost {
     activityLegacyId: item.activityLegacyId,
     contentTypes: item.contentTypes,
     tags: item.tags,
-    images: isSharePost(item) ? sanitizeImageList(item.images) : undefined,
+    images: item.images?.length ? sanitizeImageList(item.images) : undefined,
   };
 }
 
@@ -262,9 +237,7 @@ export async function applyToPostAndInvalidate(
   postId: string,
   payload?: Parameters<typeof applyToPost>[1],
 ) {
-  const result = await applyToPost(postId, payload);
-  invalidateTeamChatQueries();
-  return result;
+  return applyToPost(postId, payload);
 }
 
 export async function acceptPostApplicationAndInvalidate(
@@ -275,7 +248,6 @@ export async function acceptPostApplicationAndInvalidate(
   patchProfilePostApplicationAccepted(postId, applicantUserId);
   invalidateProfilePosts();
   invalidatePostFeeds();
-  invalidateTeamChatQueries();
   return result;
 }
 

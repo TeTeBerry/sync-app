@@ -19,7 +19,6 @@ import {
 import { requireAuth } from '../../utils/authGate';
 import {
   buildEventDetailQuery,
-  goAiAssistant,
   goEventDetail,
   goNotifications,
   preloadHotRoutes,
@@ -32,6 +31,7 @@ import { DEFER_BELOW_FOLD_MS, DEFER_SECONDARY_API_MS } from '../../utils/timing'
 import { HomeCountdownCard } from './components/HomeCountdownCard';
 import { HomeFeaturedEvents } from './components/HomeFeaturedEvents';
 import TabPageHeader from '../../components/navigation/TabPageHeader';
+import GlobalAiAgentFab from '../../components/navigation/GlobalAiAgentFab';
 import { LoginInterceptHost } from '../../components/auth/LoginInterceptHost';
 import { HomeHeaderActions } from './components/HomeHeaderActions';
 import type { HomeFeedPost } from '../../types/post';
@@ -71,16 +71,6 @@ const Home = () => {
     isError: postsError,
     refetch: refetchPosts,
   } = usePopularPosts({ enabled: belowFoldReady });
-
-  const openAiAssistant = useCallback((message?: string) => {
-    requireAuth(() => {
-      if (message?.trim()) {
-        goAiAssistant({ initialMessage: message.trim() });
-        return;
-      }
-      goAiAssistant();
-    }, 'ai_match');
-  }, []);
 
   const handleNotification = useCallback(() => {
     requireAuth(() => goNotifications(), 'notification');
@@ -169,7 +159,6 @@ const Home = () => {
             trailing={
               <HomeHeaderActions
                 unreadCount={unreadCount}
-                onAgentClick={() => openAiAssistant()}
                 onNotificationClick={handleNotification}
               />
             }
@@ -212,6 +201,7 @@ const Home = () => {
         </View>
       </ScrollView>
 
+      <GlobalAiAgentFab />
       {confirmDialog}
       <LoginInterceptHost />
     </View>

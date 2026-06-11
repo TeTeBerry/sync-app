@@ -4,7 +4,6 @@ import type { AiGuidePlanFormValues } from '../../types/travelGuide';
 import type { AuthorGender } from '../../utils/inferAuthorGender';
 import { throttleRaf } from '../../utils/throttleRaf';
 import { ChatMessageRow } from './ChatMessageRow';
-import { AiMatchQuotaExhaustedMessage } from './AiMatchQuotaExhaustedMessage';
 import { CHAT_SCROLL_BOTTOM_ID } from './chatScrollBottom';
 import { shouldSuppressAutoScrollForMessage } from './chatMessageListScroll';
 import { ScrollView, View } from '@tarojs/components';
@@ -129,7 +128,6 @@ export function ChatMessageList({
             onBuddyPostFromTravelGuide={onBuddyPostFromTravelGuide}
           />
         ))}
-        <AiMatchQuotaExhaustedMessage />
         <View
           id={CHAT_SCROLL_BOTTOM_ID}
           className="s-ai-assistant-chat__scroll-bottom"

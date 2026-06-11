@@ -423,23 +423,23 @@ export function AiGuidePlanSheet({
                 </View>
               </View>
             </View>
-
-            <View className="s-ai-guide-plan-sheet__submit-wrap">
-              <Button
-                className={cn(
-                  's-ai-guide-plan-sheet__submit',
-                  !canSubmit && 's-ai-guide-plan-sheet__submit--disabled',
-                )}
-                disabled={!canSubmit}
-                hoverClass={canSubmit ? 's-ai-guide-plan-sheet__submit--pressed' : ''}
-                onClick={handleSubmit}
-              >
-                <Sparkles size={18} color="#fff" aria-hidden />
-                <Text className="s-ai-guide-plan-sheet__submit-text">生成 AI 攻略</Text>
-              </Button>
-            </View>
           </View>
         </ScrollView>
+
+        <View className="s-ai-guide-plan-sheet__footer">
+          <Button
+            className={cn(
+              's-ai-guide-plan-sheet__submit',
+              !canSubmit && 's-ai-guide-plan-sheet__submit--disabled',
+            )}
+            disabled={!canSubmit}
+            hoverClass={canSubmit ? 's-ai-guide-plan-sheet__submit--pressed' : ''}
+            onClick={handleSubmit}
+          >
+            <Sparkles size={18} color="#fff" aria-hidden />
+            <Text className="s-ai-guide-plan-sheet__submit-text">生成 AI 攻略</Text>
+          </Button>
+        </View>
       </View>
     </View>
   );

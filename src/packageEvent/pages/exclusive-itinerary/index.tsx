@@ -46,7 +46,7 @@ const ExclusiveItineraryPage = () => {
   return (
     <View data-cmp="ExclusiveItineraryPage" className="s-exclusive-itinerary">
       <PageNavigation
-        title="专属电音行程"
+        title="我的电音时间表"
         fallback={navFallback}
         trailing={
           <Button

@@ -415,7 +415,7 @@ function drawPageHeader(
   ctx.textBaseline = 'top';
   ctx.fillStyle = WALLPAPER_THEME.textPrimary;
   ctx.font = `700 ${titleSize}px sans-serif`;
-  ctx.fillText('我的专属行程', cx, y);
+  ctx.fillText('我的电音时间表', cx, y);
   y += compact ? 30 * s : 36 * s;
 
   if (layout.showEventMeta && festivalName) {
@@ -631,7 +631,7 @@ function drawFooter(ctx: CanvasRenderingContext2D, w: number, layout: WallpaperL
   if (showFooterTagline) {
     ctx.fillStyle = WALLPAPER_THEME.textMuted;
     ctx.font = `500 ${Math.round(14 * s)}px sans-serif`;
-    ctx.fillText('专属行程屏保', w / 2, footerBaseY - 26 * s);
+    ctx.fillText('电音时间表屏保', w / 2, footerBaseY - 26 * s);
   }
 }
 

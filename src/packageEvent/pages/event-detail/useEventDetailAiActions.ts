@@ -1,6 +1,10 @@
 import Taro from '@tarojs/taro';
 import { useCallback, useState } from 'react';
-import { goAiAssistant, goExclusiveItinerary } from '../../../utils/route';
+import {
+  goAiAssistant,
+  goExclusiveItinerary,
+  goMyItinerary,
+} from '../../../utils/route';
 import { isAiShortcutTag, recordAiShortcutTagUse } from '../../../utils/aiShortcutTags';
 
 export type UseEventDetailAiActionsOptions = {
@@ -18,13 +22,27 @@ export function useEventDetailAiActions(
     recordAiShortcutTagUse(tag);
   }, []);
 
-  const handleOpenExclusiveItinerary = useCallback(() => {
+  const assertValidEventId = useCallback(() => {
     if (!Number.isFinite(eventId) || eventId <= 0) {
       void Taro.showToast({ title: '活动信息无效', icon: 'none' });
+      return false;
+    }
+    return true;
+  }, [eventId]);
+
+  const handleOpenMyItinerary = useCallback(() => {
+    if (!assertValidEventId()) {
+      return;
+    }
+    goMyItinerary(eventId);
+  }, [assertValidEventId, eventId]);
+
+  const handleOpenExclusiveItinerary = useCallback(() => {
+    if (!assertValidEventId()) {
       return;
     }
     goExclusiveItinerary(eventId);
-  }, [eventId]);
+  }, [assertValidEventId, eventId]);
 
   const openAi = useCallback(
     (message?: string) => {
@@ -43,7 +61,7 @@ export function useEventDetailAiActions(
 
   const handleShortcutTag = useCallback(
     (tag: string) => {
-      if (tag === 'AI攻略') {
+      if (tag === 'AI攻略' || tag === 'AI出行攻略') {
         openGuideSheet();
         return;
       }
@@ -72,6 +90,7 @@ export function useEventDetailAiActions(
     handleShortcutTag,
     handleOpenAiGuide,
     handleOpenBuddyPost,
+    handleOpenMyItinerary,
     handleOpenExclusiveItinerary,
   };
 }

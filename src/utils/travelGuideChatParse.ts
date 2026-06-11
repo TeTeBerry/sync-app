@@ -106,7 +106,7 @@ export function buildTravelGuideCollectPrompt(missing: TravelGuideSlotKey[]): st
   } else {
     lines.push('也可一句话说全，例如：「上海 2 人、舒适、自驾、住 2 晚」。');
   }
-  lines.push('若需表单填写，可点下方「AI攻略」按钮。');
+  lines.push('若需表单填写，可点下方「AI出行攻略」按钮。');
   return lines.join('\n');
 }
 

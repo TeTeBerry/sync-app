@@ -9,7 +9,10 @@ import {
 import Taro from '@tarojs/taro';
 import { createMessageId } from './ai-chat/createMessageId';
 import type { ChatUiMessage } from '../types/aiChat';
-import type { AiBuddyPostFormValues } from '../types/buddyPost';
+import type {
+  AiBuddyPostFormValues,
+  AiBuddyPostSubmitPayload,
+} from '../types/buddyPost';
 import type { AiGuidePlanFormValues } from '../types/travelGuide';
 import { travelGuideFormToBuddyPrefill } from '../utils/travelGuideToBuddyPost';
 import { isApiEnabled } from '../constants/api';
@@ -136,13 +139,14 @@ export function useAiBuddyPost(options: {
 
   const runPublish = useCallback(
     async (
-      form: AiBuddyPostFormValues,
+      payload: AiBuddyPostSubmitPayload,
       options?: { skipUserBubble?: boolean; userBubbleText?: string },
     ) => {
       if (activityLegacyId == null || Number.isNaN(activityLegacyId)) return;
       if (publishingRef.current) return;
       if (!(await guardPublish())) return;
 
+      const { imageRefs, syncToPostList: _sync, ...form } = payload;
       const title = activityTitle?.trim() || '本场活动';
       publishingRef.current = true;
       setIsPublishing(true);
@@ -179,6 +183,7 @@ export function useAiBuddyPost(options: {
 
         const { card } = await publishBuddyPostFromForm({
           form,
+          imageRefs,
           activityLegacyId,
           activityTitle: title,
           authorName,
@@ -311,10 +316,10 @@ export function useAiBuddyPost(options: {
   );
 
   const handleSheetSubmit = useCallback(
-    (form: AiBuddyPostFormValues) => {
+    (payload: AiBuddyPostSubmitPayload) => {
       setSheetOpen(false);
       setSheetPrefillHint(null);
-      void runPublish(form);
+      void runPublish(payload);
     },
     [runPublish],
   );

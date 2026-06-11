@@ -279,7 +279,6 @@ export interface PostApplicationItem {
   status: PostApplicationStatus;
   appliedAt: string;
   /** Set when post owner opened chat from profile posts. */
-  ownerOpenedChatAt?: string;
   buddyPreview?: PostBuddyPreview;
 }
 
@@ -346,14 +345,6 @@ export interface EventPostsPage {
   hasMore: boolean;
 }
 
-export interface SharePostsPage {
-  items: HomeFeedPost[];
-  nextCursor?: string;
-  hasMore: boolean;
-  /** Distinct share authors — present on the first page only. */
-  sharerCount?: number;
-}
-
 export interface EventDetailPost {
   id: string;
   userId?: string;
@@ -404,11 +395,6 @@ export interface UpdatePostPayload {
 export interface PostActionResult {
   ok: true;
   alreadyApplied?: boolean;
-  teamChat?: {
-    sessionId: string;
-    postId: string;
-    applicantUserId: string;
-  };
 }
 
 export interface HomeSummary {
@@ -676,4 +662,81 @@ export interface SavedItineraryResult {
   eventMeta?: string;
   days?: ItineraryDay[];
   updatedAt?: string;
+}
+
+export type TravelPlanCategory = 'flight' | 'transport' | 'hotel' | 'dining' | 'event';
+
+export interface TravelPlanNodePayload {
+  id: string;
+  category: TravelPlanCategory;
+  startDate: string;
+  endDate: string;
+  startTime?: string;
+  endTime?: string;
+  duration?: string;
+  title: string;
+  subtitle: string;
+  detail?: string;
+  price?: number;
+  confirmed: boolean;
+}
+
+export interface SaveTravelPlanPayload {
+  eventMeta?: string;
+  nodes: TravelPlanNodePayload[];
+  activityConfirmations?: Record<string, boolean>;
+  activityPriceOverrides?: Record<string, number>;
+  hiddenActivityNodeIds?: string[];
+}
+
+export interface SaveTravelPlanResult {
+  ok: true;
+  activityLegacyId: number;
+  savedAt: string;
+  nodeCount: number;
+}
+
+export interface SavedTravelPlanNode extends TravelPlanNodePayload {
+  timeLabel?: string;
+  source?: 'activity' | 'user';
+}
+
+export interface SavedTravelPlanResult {
+  saved: boolean;
+  activityLegacyId?: number;
+  eventMeta?: string;
+  activityNodes?: SavedTravelPlanNode[];
+  userNodes?: SavedTravelPlanNode[];
+  nodes?: SavedTravelPlanNode[];
+  activityConfirmations?: Record<string, boolean>;
+  activityPriceOverrides?: Record<string, number>;
+  hiddenActivityNodeIds?: string[];
+  savedAt?: string;
+}
+
+export type TravelPlanReceiptCategory = 'transport' | 'hotel' | 'dining' | 'event';
+
+export interface TravelPlanReceiptRecognizeForm {
+  title: string;
+  description: string;
+  cost: string;
+  remark: string;
+  startDate: string;
+  endDate: string;
+  startTime?: string;
+  endTime?: string;
+}
+
+export interface RecognizeTravelPlanReceiptPayload {
+  category: TravelPlanReceiptCategory;
+  image: string;
+}
+
+export interface RecognizeTravelPlanReceiptResult {
+  ok: true;
+  filled: boolean;
+  category: TravelPlanReceiptCategory;
+  form?: TravelPlanReceiptRecognizeForm;
+  forms?: TravelPlanReceiptRecognizeForm[];
+  message?: string;
 }
