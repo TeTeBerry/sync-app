@@ -197,8 +197,6 @@ X-Activity-Id: 4          # 可选，活动 legacyId（REST + AI WebSocket upgra
 
 `image` / `images`：必须使用 `POST /api/uploads/images` 返回的 URL（上传时走微信 `img_sec_check`）；不支持 data URL 或外链。
 
-AI 匹配配额：服务端在 `post_recommendations` 且 `posts.length > 0` 时扣次；客户端收到后仅需刷新 `GET /profile/entitlements`，勿再调用 `POST /profile/entitlements/consume/ai-match`。
-
 服务端事件（示例）：
 
 ```json

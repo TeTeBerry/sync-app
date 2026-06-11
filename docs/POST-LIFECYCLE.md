@@ -44,7 +44,6 @@ POST /api/posts
 4. 推断 `contentTypes`、写入 `matchCriteria` / `departureCity`
 5. 同活动发帖上限（默认 8 篇）
 6. `repository.create`，状态 `recruiting`
-7. 异步 Chroma 向量入库
 
 ## 三、活动帖列表与状态
 

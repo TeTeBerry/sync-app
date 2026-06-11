@@ -1,6 +1,6 @@
-import type { EventDetailPost } from '../../../../types/post';
-import { formatPostPublishTime } from '../../../../utils/formatPostPublishTime';
-import { sanitizeImageList, sanitizeRemoteImageUrl } from '../../../../utils/imageUrl';
+import type { EventDetailPost } from '../../../types/post';
+import { formatPostPublishTime } from '../../../utils/formatPostPublishTime';
+import { sanitizeImageList, sanitizeRemoteImageUrl } from '../../../utils/imageUrl';
 
 export type EventPostListItem = {
   post: EventDetailPost;

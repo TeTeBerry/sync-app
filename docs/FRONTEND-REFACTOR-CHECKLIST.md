@@ -113,7 +113,8 @@
 - [x] B1：AI WebSocket JWT actor（`buildAiChatWsSendActor` + upgrade Bearer）
 - [x] Checklist「当前身份」与 demo 仅 `userId` 对齐
 - [x] `api/sync/ownerQuery.contract.test.ts` — profile / notifications / activities 有/无 Bearer
-- [x] `useEventDetailRoute` / `useEventDetailActivityHeader` / `useEventDetailEntitlements` / `useEventDetailAiActions`；精简 `useEventDetailPage`
+- [x] `useEventDetailRoute` / `useEventDetailActivityHeader` / `useEventDetailEntitlements`；精简 `useEventDetailPage`
+- [x] `domains/partner-feed/` — 活动详情帖流 / 留言板 / 组队发帖（2026-06）
 
 ### Phase 4 数据层 + 编排 ✅（2026-06）
 

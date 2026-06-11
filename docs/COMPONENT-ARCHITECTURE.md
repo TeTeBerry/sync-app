@@ -8,7 +8,7 @@
 |------|------|------|
 | UI 原语 | `src/components/ui/` | 无业务语义；包装 Taro 原语 + BEM/`cn` |
 | 跨页业务 | `src/components/`（`auth/`、`ai-chat/`、`profile/`、`post/`、`navigation/` 等） | 多 Tab / 多分包复用的轻量 UI |
-| 活动域 | `src/domains/`（`travel-plan/`、`performance-itinerary/`、`live-info/`、`travel-guide/`） | 与后端 ActivityExperience 对齐的重逻辑域 |
+| 活动域 | `src/domains/`（`travel-plan/`、`performance-itinerary/`、`live-info/`、`travel-guide/`、`partner-feed/`） | 与后端 ActivityExperience 对齐的重逻辑域 |
 | 页面壳 | `src/pages/**/`、`src/package*/pages/**/` | 路由入口、薄编排 |
 
 ### 依赖方向（必须遵守）
@@ -31,7 +31,7 @@ pages / package pages  →  domains/*  →  components/*  →  components/ui
 | `src/types/post.ts` | 帖子相关类型的 UI 层统一导出入口 |
 | `src/types/countdown.ts` | 倒计时展示类型（`CountdownPart`） |
 
-`HomeFeedPost`（首页热帖）与 `EventDetailPost`（活动详情帖）字段不同，**不要**强行合并为单一 interface；需要展示层适配时用 mapper（如 `utils/eventPostDisplay.ts`）。
+`HomeFeedPost`（首页热帖）与 `EventDetailPost`（活动详情帖）字段不同，**不要**强行合并为单一 interface；需要展示层适配时用 mapper（如 `domains/partner-feed/utils/eventPostDisplay.ts`）。
 
 ## 领域模块
 
@@ -60,8 +60,9 @@ Barrel 导出分包/活动详情需要的组件与逻辑；仅主 profile 页使
 
 ### 活动详情
 
-- 页面：`packageEvent/pages/event-detail/index.tsx`
-- 编排：`useEventDetailPage.ts`；局部组件：`packageEvent/pages/event-detail/components/`
+- 页面：`packageEvent/pages/event-detail/index.tsx`（薄壳：路由、权益弹窗、live-info lazy 包装）
+- 编排：`useEventDetailPage.ts`
+- 域：`domains/partner-feed/`（帖流、留言板、组队发帖）、`domains/live-info/`、`domains/travel-guide/`
 
 ## 决策表
 
@@ -70,7 +71,8 @@ Barrel 导出分包/活动详情需要的组件与逻辑；仅主 profile 页使
 | 通用按钮/输入，无业务文案 | `components/ui/` |
 | 只在首页用的区块 | `pages/index/components/` |
 | 个人中心 + profile 分包共用 | `components/profile/` |
-| 只在活动详情用的块 | `packageEvent/.../event-detail/components/` |
+| 活动详情帖流 / 留言 / 组队发帖 | `domains/partner-feed/` |
+| 活动详情页级弹窗 / fallback | `packageEvent/.../event-detail/components/` |
 | 跨多 Tab/多活动的帖子 UI | `components/post/`（`FeedPostList`、`PostCardActionBar` 等） |
 | 顶栏 / 底栏 / Tab 页头 | `components/navigation/` |
 | 活动列表卡片 / 状态徽章 | `components/event/` |

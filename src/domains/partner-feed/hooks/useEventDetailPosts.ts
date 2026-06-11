@@ -9,7 +9,7 @@ import { useEventPostsInfiniteQuery } from '../../../hooks/useEventPostsInfinite
 import { requireAuth } from '../../../utils/authGate';
 import { scrollElementToCenter } from '../../../utils/scrollToCenter';
 import type { EventDetailPost } from '../../../types/post';
-import type { EventDetailTabId } from './components/EventDetailContentTabs';
+import type { EventDetailTabId } from '../components/EventDetailContentTabs';
 import {
   EVENT_POSTS_INITIAL_RENDER,
   EVENT_POSTS_RENDER_STEP,
@@ -18,7 +18,7 @@ import { useWindowedList } from '../../../hooks/useWindowedList';
 import {
   normalizeEventPostList,
   type EventPostListItem,
-} from './utils/eventPostNormalize';
+} from '../utils/eventPostNormalize';
 
 export const EVENT_DETAIL_SCROLL_ID = 'event-detail-scroll';
 

@@ -1,5 +1,5 @@
-import { ChevronRight, Map } from '../../../../components/icons';
-import { Button } from '../../../../components/ui';
+import { ChevronRight, Map } from '../../../components/icons';
+import { Button } from '../../../components/ui';
 import { Text, View } from '@tarojs/components';
 
 type EventDetailAiTravelGuideCardProps = {

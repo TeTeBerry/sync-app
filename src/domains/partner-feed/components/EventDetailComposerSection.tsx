@@ -1,13 +1,13 @@
 import React from 'react';
-import ThemedPageLoader from '../../../../components/ThemedPageLoader';
-import { EventDetailAiTravelGuideCard } from './EventDetailAiTravelGuideCard';
+import ThemedPageLoader from '../../../components/ThemedPageLoader';
+import { EventDetailAiTravelGuideCard } from '@/domains/travel-guide/components/EventDetailAiTravelGuideCard';
 import { EventDetailMessageBoardComposer } from './EventDetailMessageBoardComposer';
 import {
   EventDetailContentTabs,
   type EventDetailTabId,
 } from './EventDetailContentTabs';
 import { EventDetailItineraryMenu } from './EventDetailItineraryMenu';
-import type { OnsiteBuddyPostIntentId } from '../../../../constants/onsiteBuddyPostIntents';
+import type { OnsiteBuddyPostIntentId } from '../../../constants/onsiteBuddyPostIntents';
 import { View } from '@tarojs/components';
 
 export type EventDetailComposerSectionProps = {

@@ -6,16 +6,18 @@ import {
   useCurrentUserQuery,
 } from '../../../hooks/useSyncApi';
 import { useEventPostsInfiniteQuery } from '../../../hooks/useEventPostsInfiniteQuery';
-import { useEventDetailPosts } from './useEventDetailPosts';
 import { useEventDetailLive } from '@/domains/live-info';
-import type { EventDetailTabId } from './components/EventDetailContentTabs';
+import {
+  useEventDetailPosts,
+  useEventDetailBuddyPost,
+  useEventDetailMessageBoard,
+  type EventDetailTabId,
+} from '@/domains/partner-feed';
 import { useResolvedProfile } from '../../../hooks/useResolvedProfile';
 import type { ConfirmDialogOptions } from '../../../hooks/useConfirmDialog';
 import { useEventDetailRoute } from './useEventDetailRoute';
 import { useEventDetailActivityHeader } from './useEventDetailActivityHeader';
 import { useEventDetailEntitlements } from './useEventDetailEntitlements';
-import { useEventDetailBuddyPost } from './useEventDetailBuddyPost';
-import { useEventDetailMessageBoard } from './useEventDetailMessageBoard';
 import { useEventDetailScrollPreserve } from './useEventDetailScrollPreserve';
 import { useEventDetailTravelGuide } from '@/domains/travel-guide';
 import { goExclusiveItinerary, goMyItinerary } from '../../../utils/route';

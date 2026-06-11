@@ -2,7 +2,7 @@ import Taro from '@tarojs/taro';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { EventLiveInfoTabActions } from '../components/EventLiveInfoTab';
 import type { PublishLiveInfoPayload } from './useEventLiveInfo';
-import type { EventDetailTabId } from '@/packageEvent/pages/event-detail/components/EventDetailContentTabs';
+import type { EventDetailTabId } from '@/domains/partner-feed';
 
 export type UseEventDetailLiveOptions = {
   contentTab: EventDetailTabId;

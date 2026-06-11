@@ -4,12 +4,14 @@ import { PageTabBarChrome } from '../../../components/navigation/BottomNav';
 import ThemedPageLoader from '../../../components/ThemedPageLoader';
 import { useConfirmDialog } from '../../../hooks/useConfirmDialog';
 import { LoginInterceptHost } from '../../../components/auth/LoginInterceptHost';
-import { EventDetailComposerSection } from './components/EventDetailComposerSection';
 import { EventDetailEntitlementModals } from './components/EventDetailEntitlementModals';
 import EventDetailFallback from './components/EventDetailFallback';
 import EventDetailLiveSection from './components/EventDetailLiveSection';
-import { EventPostsVirtualList } from './components/EventPostsVirtualList';
-import { EVENT_DETAIL_SCROLL_ID } from './useEventDetailPosts';
+import {
+  EventDetailComposerSection,
+  EventPostsVirtualList,
+  EVENT_DETAIL_SCROLL_ID,
+} from '@/domains/partner-feed';
 import { useEventDetailPage } from './useEventDetailPage';
 import { AiBuddyPostSheet } from '../../../components/ai-chat/AiBuddyPostSheet';
 import { AiGuidePlanSheet } from '../../../components/ai-chat/AiGuidePlanSheet';

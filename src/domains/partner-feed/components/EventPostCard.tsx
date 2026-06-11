@@ -1,20 +1,20 @@
 import { memo } from 'react';
-import { MapPin } from '../../../../components/icons';
-import PostCardActionBar from '../../../../components/post/PostCardActionBar';
-import { buildPostSharePayload } from '../../../../components/post/postCardShare';
+import { MapPin } from '../../../components/icons';
+import PostCardActionBar from '../../../components/post/PostCardActionBar';
+import { buildPostSharePayload } from '../../../components/post/postCardShare';
 import {
   PostActionMenu,
   PostCommentSection,
   PostShareButton,
-} from '../../../../components/post';
-import { ImageWithFallback } from '../../../../components/ImageWithFallback';
-import { PostImageGrid } from '../../../../components/post';
-import { EVENT_POST_IMAGE_MAX_DISPLAY } from '../../../../constants/listPerf';
-import { isApiEnabled } from '../../../../constants/api';
-import { isCurrentUserPostAuthor } from '../../../../utils/postOwnership';
-import type { EventDetailPost } from '../../../../types/backend';
+} from '../../../components/post';
+import { ImageWithFallback } from '../../../components/ImageWithFallback';
+import { PostImageGrid } from '../../../components/post';
+import { EVENT_POST_IMAGE_MAX_DISPLAY } from '../../../constants/listPerf';
+import { isApiEnabled } from '../../../constants/api';
+import { isCurrentUserPostAuthor } from '../../../utils/postOwnership';
+import type { EventDetailPost } from '../../../types/backend';
 import { formatEventPostHandle } from '../utils/eventPostDisplay';
-import { OnSiteVerifiedBadge } from '../../../../components/OnSiteVerifiedBadge';
+import { OnSiteVerifiedBadge } from '../../../components/OnSiteVerifiedBadge';
 import { Text, View } from '@tarojs/components';
 
 export type EventPostCardProps = {

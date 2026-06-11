@@ -1,12 +1,12 @@
-import { ImagePlus, MessageSquare, Send, X } from '../../../../components/icons';
-import { AiBuddyPostShortcutChip } from '../../../../components/ai-chat/AiBuddyPostShortcutChip';
-import { Button } from '../../../../components/ui';
+import { ImagePlus, MessageSquare, Send, X } from '../../../components/icons';
+import { AiBuddyPostShortcutChip } from '../../../components/ai-chat/AiBuddyPostShortcutChip';
+import { Button } from '../../../components/ui';
 import { Text, Textarea, View, Image } from '@tarojs/components';
-import { BUDDY_POST_MAX_IMAGES } from '../../../../types/buddyPost';
+import { BUDDY_POST_MAX_IMAGES } from '../../../types/buddyPost';
 import {
   ONSITE_BUDDY_POST_INTENTS,
   type OnsiteBuddyPostIntentId,
-} from '../../../../constants/onsiteBuddyPostIntents';
+} from '../../../constants/onsiteBuddyPostIntents';
 
 type EventDetailMessageBoardComposerProps = {
   draft: string;

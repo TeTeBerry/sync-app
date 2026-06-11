@@ -1,5 +1,5 @@
-import { Calendar, ChevronRight, Music2 } from '../../../../components/icons';
-import { Button } from '../../../../components/ui';
+import { Calendar, ChevronRight, Music2 } from '../../../components/icons';
+import { Button } from '../../../components/ui';
 import { Text, View } from '@tarojs/components';
 
 type EventDetailItineraryMenuProps = {
