@@ -44,7 +44,7 @@ pages / package pages  →  domains/*  →  components/*  →  components/ui
 
 Barrel 导出分包/活动详情需要的组件与逻辑；仅主 profile 页使用的块（如 `ProfileActionCard`）不放入 barrel。
 
-纯函数/常量单测优先直引子模块（如 `profilePackageData.ts`），避免 `import from '@/components/profile'` 拉起 Taro 组件树。
+纯函数/常量单测优先直引子模块（如 `profileSummaryUtils.ts`），避免 `import from '@/components/profile'` 拉起 Taro 组件树。
 
 ### Navigation（跨页导航壳）
 
@@ -60,7 +60,7 @@ Barrel 导出分包/活动详情需要的组件与逻辑；仅主 profile 页使
 
 ### 活动详情
 
-- 页面：`packageEvent/pages/event-detail/index.tsx`（薄壳：路由、权益弹窗、live-info lazy 包装）
+- 页面：`packageEvent/pages/event-detail/index.tsx`（薄壳：路由编排、live-info lazy 包装）
 - 编排：`useEventDetailPage.ts`
 - 域：`domains/partner-feed/`（帖流、留言板、组队发帖）、`domains/live-info/`、`domains/travel-guide/`
 

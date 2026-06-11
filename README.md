@@ -27,7 +27,7 @@ npm run prd:weapp        # 连云服务器 → .env.production（监听编译）
 npm run build:weapp      # 生产构建（同 prd，使用 .env.production）
 npm run build:weapp:size # 构建 + 包体阈值检查
 npm run check            # typecheck + lint + format:check + test
-npm run dev:h5           # H5 开发（未维护）
+npm run dev:h5           # 可选：本地 H5 调试（非发布目标，见 config/h5.config.ts）
 npm run build:h5
 ```
 
@@ -60,30 +60,9 @@ import { defineAppConfig } from "@tarojs/taro";
 
 页面与业务代码仍可正常使用 `import ... from "@tarojs/taro"`（如 `navigateTo`）。
 
-### H5 必须把 `dist` 当网站根目录，且需要 `src/index.html`
+### H5（可选本地调试）
 
-Taro Webpack **仅在存在 `src/index.html`** 时才注入 **html-webpack-plugin**。若缺少该文件，构建只会产出 `js/`、`css/` 等资源，没有 **`dist/index.html`**；用任意静态服务打开目录时就会出现类似「只剩 `~/` + 搜索框」的目录列表页，而不会加载 SPA。
-
-本地预览生产包：
-
-```bash
-npm run build:h5
-# 任选其一：把工作目录设为 dist/
-npx --yes serve dist -p 10087 --single
-# 或直接在仓库根目录用 http-server 等方法，将 `-o`/`--cwd` 指到 ./dist（不要指向项目根目录）
-```
-
-脚本与样式使用 **`h5.publicPath`（默认为 `/`，见 `config/index.ts`）**；站点若挂在子路径，需改成对应前缀并重编。
-
-### H5 路由（根路径即为首页）
-
-本仓库 H5 已配置 **`h5.router.mode: "browser"`**，因此 **`http://主机:端口/`**（pathname 为 `/`）会由 Taro 解析为 **`app.config.ts` 中第一个页面**（`pages/index/index`），不再需要 `#/`。
-
-生产环境静态托管需 **SPA 回退**：所有路径应返回 `index.html`（否则刷新子路径会 404），例如：
-
-```bash
-npx --yes serve dist -p 10087 --single
-```
+H5 配置在 **`config/h5.config.ts`**，仅用于 `dev:h5` / `build:h5` 本地调试，**不作为发布目标**。产物目录为 `dist-h5/`；开发时 `/api` 代理到 `localhost:3000`。
 
 若站点挂在子路径，请同步设置 **`h5.publicPath`、`h5.router.basename`** 并重编。
 

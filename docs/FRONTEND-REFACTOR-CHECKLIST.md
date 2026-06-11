@@ -79,9 +79,9 @@
 - [x] `src/types/post.ts` — 帖子类型统一导出入口；移除 `ActivityPost`（改用 `HomeFeedPost`）
 - [x] Profile 域迁入 `src/components/profile/` + `index.ts` barrel
 - [x] `ProfileSummarySection` / `ProfileSettingsSection` / `ProfileDebugSection`
-- [x] `EventDetailComposerSection` / `EventDetailEntitlementModals`
+- [x] `EventDetailComposerSection`
 - [x] [COMPONENT-ARCHITECTURE.md](./COMPONENT-ARCHITECTURE.md) 三层规则与决策表
-- [x] `ProfileBenefitsBlock` / `ProfileOverlaysHost`（含 debug modals + 购买 Sheet）
+- [x] ~~`ProfileBenefitsBlock` / 套餐权益~~（已移除，2026-06）
 - [x] `useProfilePage` — profile `index.tsx` 编排 &lt;200 行
 - [x] `eventPostNormalize` + `useEventDetailPosts`
 - [x] `CountdownPart` → `types/home.ts`；Vitest Taro compile flags
@@ -113,7 +113,7 @@
 - [x] B1：AI WebSocket JWT actor（`buildAiChatWsSendActor` + upgrade Bearer）
 - [x] Checklist「当前身份」与 demo 仅 `userId` 对齐
 - [x] `api/sync/ownerQuery.contract.test.ts` — profile / notifications / activities 有/无 Bearer
-- [x] `useEventDetailRoute` / `useEventDetailActivityHeader` / `useEventDetailEntitlements`；精简 `useEventDetailPage`
+- [x] `useEventDetailRoute` / `useEventDetailActivityHeader`；精简 `useEventDetailPage`（权益相关 hook 已移除）
 - [x] `domains/partner-feed/` — 活动详情帖流 / 留言板 / 组队发帖（2026-06）
 
 ### Phase 4 数据层 + 编排 ✅（2026-06）
@@ -122,8 +122,8 @@
 - [x] `api/sync/posts.test.ts`；`requestContext.test.ts` 更新
 - [x] [DATA-LAYER.md](./DATA-LAYER.md) REST vs WS 身份表
 - [x] Query `authorName` 弱化（前端 demo 已完成；展示名仍用 `getClientUserName()`）
-- [x] `useProfileBenefitsSection` / `useProfileDebugOverlays`；`useAiAssistantPage`
-- [x] `components/event/`；`profileBenefitsMapper` 子模块拆分
+- [x] `useProfileDebugOverlays`；`useAiAssistantPage`（权益区块已移除）
+- [x] `components/event/`
 
 ### P2-perf 包体与依赖 ✅（2025-06）
 
@@ -141,7 +141,7 @@
 > 按需优化：图片懒加载与首屏张数、个人中心 API 推迟、导航 store 细粒度订阅。
 
 - [x] **帖子图片**：`PostImageGrid` 默认最多 4 张（`lazyLoad` 经 `ImageWithFallback`）；首页 `FEED_POST_IMAGE_MAX_DISPLAY`、活动帖 `EVENT_POST_IMAGE_MAX_DISPLAY`；评论头像 `lazyLoad` + `aspectFill`
-- [x] **个人中心**：`DEFER_PROFILE_ENTITLEMENTS_MS`（400ms）后再请求 entitlements / activities；套餐 Sheet 打开时才拉 `profile/activities`
+- [x] **个人中心**：摘要首屏；活动/帖子列表按需进入子页再拉
 - [x] **Zustand**：`stores/navigationSelectors.ts`；`NavigationLoadingOverlay` 等按字段订阅，避免 `routeTransition` 对象引用导致多余重渲染
 - [x] **H5 说明**：[`README.md`](../README.md) 标明性能投入集中在 weapp
 
@@ -162,7 +162,7 @@
 - [x] `hooks/useWindowedList.ts` + `constants/listPerf.ts` — 通用窗口化（首屏 N 条、`showMore` / `ensureIndexVisible`）
 - [x] 首页 `FeedPostList` — 首屏 5 条 +「展开更多」；评论区仅在 `commentsExpanded` 时挂载 `PostCommentSection`
 - [x] 活动详情 `useEventDetailPosts` — 首屏 6 条、步进 +6；`onScrollToLower` 先扩本地窗口再 `postsQuery.loadMore()`；Tab 计数用 `totalPostCount`
-- [x] 活动详情首屏分步：`composerReady` / `feedReady` / `secondaryReady`（`timing.ts`）；首屏仅活动详情 REST，帖子 +240ms，权益/users/me +400ms；现场 Tab 才拉 live-info（见 `BUNDLE-SIZE.md`）
+- [x] 活动详情首屏分步：`composerReady` / `feedReady` / `secondaryReady`（`timing.ts`）；首屏仅活动详情 REST，帖子 +240ms，`users/me` +400ms；现场 Tab 才拉 live-info（见 `BUNDLE-SIZE.md`）
 - [x] `EventPostsVirtualList` — 「没有更多」需 `!hasMore && !hasMoreLocal`；高亮帖滚动前 `ensureIndexVisible`
 - [x] AI 聊天：`utils/throttleRaf.ts` — 打字机 `onUpdate` 每帧最多一次 `setState`
 - [x] AI 聊天：`utils/chatMessages.ts` — `patchChatMessage` 单条更新，保留其它行引用供 `memo`
@@ -186,7 +186,7 @@
 ### Phase 3 前端架构 ✅（2026-06）
 
 - [x] `useEventDetailPage` + `PostCardActionBar` / `buildPostSharePayload`（首页 Feed + 活动帖共用互动条）
-- [x] `useProfilePackageSheet` 拆分 `useProfilePage`
+- [x] `useProfilePage` 编排个人 Tab（套餐 Sheet 已移除）
 - [x] `AiAssistantChat` 抽出至 `packageAi/pages/ai-assistant/AiAssistantChat.tsx`
 - [x] `apiClient.test.ts`（401 + 无 token 不清 session）；`notificationQueryParams()`
 - [x] `components/navigation/` — 导航壳迁移 + [COMPONENT-ARCHITECTURE.md](./COMPONENT-ARCHITECTURE.md) 文档
@@ -295,14 +295,16 @@ src/
 ├── pages/event-detail/         详情 + 互动 + goAiAssistant
 ├── pages/index/                精选活动 + 热帖互动
 ├── pages/profile/index.tsx     个人 Tab 编排
-├── components/profile/         个人中心域 UI + 权益
+├── components/profile/         个人中心域 UI
 ├── types/post.ts               帖子类型导出入口
 └── packageAi/pages/ai-assistant/AiAssistantPage  activityId + post_created toast
 ```
 
 ---
 
-## H5 开发
+## H5 开发（可选 / archived）
+
+主发布端为 **weapp**；H5 仅本地调试，配置见 `config/h5.config.ts`。
 
 ```bash
 TARO_APP_API_BASE_URL=/api
@@ -310,6 +312,13 @@ TARO_APP_AUTH_DEV=true
 TARO_APP_AI_CHAT_WS_URL=ws://127.0.0.1:3000/api/ai/chat/ws
 npm run dev:h5
 ```
+
+---
+
+## 测试目录布局
+
+- `test/unit/domains/**` 镜像 `src/domains/**`（如 `partner-feed`、`travel-plan`、`performance-itinerary`）
+- `test/unit/packageEvent/**` 仅保留源码仍在分包页、尚未迁入 domains 的用例（如 `exclusive-itinerary`）
 
 ---
 
@@ -341,7 +350,7 @@ npm run dev:h5
 
 ### P3-perf（体验细节）✅
 
-- [x] 帖图首屏张数 + 懒加载；个人中心权益 API 推迟
+- [x] 帖图首屏张数 + 懒加载；个人中心摘要优先
 - [x] `navigationSelectors` 细粒度订阅
 
 ### P2-perf（包体）✅

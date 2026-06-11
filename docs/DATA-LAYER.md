@@ -26,7 +26,7 @@ REST 与自定义 `useApiQuery` 缓存的分层约定；身份为 **JWT + demo Q
 - `hasAuthenticatedRequest()` — `!!getAccessToken()`
 - `demoActorQueryParams()` — demo REST 仅 `userId`
 - `mergeOwnerQueryParams(extra)` — 合并 limit/cursor 等
-- `ownerQueryParamsWithActivity(activityLegacyId?)` — profile / entitlements 作用域
+- `ownerQueryParamsWithActivity(activityLegacyId?)` — 带活动作用域的 owner Query（历史接口，profile 摘要已不再使用）
 - `resolveRequestUserId()` — React Query `queryKey` 中的用户维度
 - `notificationQueryParams()` — 通知 API：有 Bearer 时 `undefined`（不传 `userId`）；无 token 时 `{ userId }`
 - `buildAiChatWsSendActor()` — [`api/requestActor.ts`](../src/api/requestActor.ts)：已登录 WS `send` 仅传 `userPhone`（如有）；demo 传 `userId`/`userName`
@@ -67,7 +67,7 @@ REST 与自定义 `useApiQuery` 缓存的分层约定；身份为 **JWT + demo Q
 | ------------------ | ------------------------------------------- |
 | `activities.ts`    | 活动列表、首页 summary、详情、报名          |
 | `posts.ts`         | 热帖、活动帖、评论分页、帖互动 mutation     |
-| `profile.ts`       | 个人中心、权益、套餐（`profileApiEnabled`） |
+| `profile.ts`       | 个人摘要、活动列表、组队帖列表              |
 | `notifications.ts` | 通知列表与已读                              |
 
 对外仍从 [`hooks/useSyncApi.ts`](../src/hooks/useSyncApi.ts) 导出。

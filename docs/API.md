@@ -1,4 +1,4 @@
-# Sync App — API 契约（H5 先行）
+# Sync App — REST / WS 契约
 
 > **身份**：JWT（Bearer）与 demo Query 双轨并存。  
 > **已登录**：`Authorization: Bearer`；业务 REST **不再**附带 demo Query（`ownerQueryParams()`）。  

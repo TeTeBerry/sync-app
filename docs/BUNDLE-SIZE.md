@@ -73,7 +73,7 @@ PR 若主包上涨 >50 KB，请在 PR 说明原因并更新上表（可选）。
 | 首屏 | 0ms | `GET /activities/:legacyId`（React Query，可命中首页 seed 缓存） |
 | `composerReady` | +48ms | 挂载 AI  composer UI（无额外 REST；`onTouchStart` 仍可 `warmAiAssistant`） |
 | `feedReady` | +240ms | `GET /posts?activityLegacyId=…`（首屏帖子列表） |
-| `secondaryReady` | +400ms | `GET /profile/entitlements`（与联系解锁共用同一 query）、`GET /users/me`（发帖风控 / 头像） |
+| `secondaryReady` | +400ms | `GET /users/me`（发帖风控 / 头像） |
 | `aiWarmReady` | +800ms | 空闲预加载 AI 分包（`warmAiAssistant`，非 REST） |
 | 切到「现场资讯」Tab | 用户操作 | `GET …/live-info`（`EventLiveInfoTab` 懒加载，默认 Tab 不请求） |
 

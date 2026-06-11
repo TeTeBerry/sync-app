@@ -55,12 +55,12 @@ POST /api/posts
 
 ### 前端
 
-1. 校验登录、联系解锁额度（`consumeContactUnlockWithQuota`）
+1. 校验登录（`requireAuth`）
 2. 有招募中帖：打开 `TeamApplySheet`（完整模式），展示 **与帖主帖最匹配** 的自己招募帖（`resolveUserBuddyPreviewForTargetPost`）
 3. 无招募中帖：打开 `TeamApplySheet`（轻量模式）— 出发地（必填）、出行天数、性别偏好 + 可选补充说明
 4. `POST /api/posts/:id/applications` — 可选 `message`；轻量模式另传 `lightApply: { departureCity, tripDays?, genderPref? }`
 5. 轻量申请成功后可选「完善组队帖」；首条私信为合成正文（如「从广州出发，活动 2 天」）
-5. 活动帖 CTA 变为「已申请」禁用（不再显示「查看沟通」）
+6. 活动帖 CTA 变为「已申请」禁用（不再显示「查看沟通」）
 
 ### 后端 `applyToPost`
 
