@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { isLiveApi } from '../../constants/api';
-import { isProfileBenefitsEnabled } from '../../constants/featureFlags';
 import { useProfileActivitiesQuery } from '../../hooks/useSyncApi';
 import { selectConsumeProfileIntent, useNavigationStore } from '../../stores';
 import { invalidateProfilePackageState } from '../../utils/queryInvalidation';
@@ -56,9 +55,6 @@ export function useProfilePackageSheet({
       initialSelectedTierId?: PackageTierId;
       currentPaidTierId?: PackageTierId;
     }) => {
-      if (!isProfileBenefitsEnabled()) {
-        return;
-      }
       const rawActivityId = options?.activityLegacyId;
       const resolvedActivityId =
         rawActivityId != null && !Number.isNaN(rawActivityId)
@@ -115,9 +111,6 @@ export function useProfilePackageSheet({
   );
 
   const applyRouteParams = useCallback(() => {
-    if (!isProfileBenefitsEnabled()) {
-      return;
-    }
     const intent = consumeProfileIntent();
     if (intent?.openPackageSheet) {
       openPackageSheet();

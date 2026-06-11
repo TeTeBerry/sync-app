@@ -19,6 +19,18 @@ export default defineConfig({
         __dirname,
         '../sync-app-backend/src/shared/chat/index.ts',
       ),
+      '@sync/travel-plan-contracts': path.resolve(
+        __dirname,
+        '../sync-app-backend/src/shared/travel-plan/index.ts',
+      ),
+      '@sync/itinerary-contracts': path.resolve(
+        __dirname,
+        '../sync-app-backend/src/shared/itinerary/index.ts',
+      ),
+      '@sync/live-info-contracts': path.resolve(
+        __dirname,
+        '../sync-app-backend/src/shared/live-info/index.ts',
+      ),
     },
   },
   define: Object.fromEntries(

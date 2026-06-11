@@ -1,5 +1,5 @@
 @use '../../../styles/chat' as chat;
-@use './event-detail-live-info';
+@use '@/domains/live-info/live-info';
 
 .s-event-detail {
   background: #000;

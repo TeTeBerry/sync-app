@@ -4,7 +4,7 @@ import {
   extractPerformanceArtistsFromDays,
   MY_ITINERARY_DAYS,
   parseSelectedDjIds,
-} from '@/packageEvent/pages/my-itinerary/myItineraryMock';
+} from '@/domains/performance-itinerary/mocks/myItineraryMock';
 
 describe('parseSelectedDjIds', () => {
   it('returns empty array for blank input', () => {

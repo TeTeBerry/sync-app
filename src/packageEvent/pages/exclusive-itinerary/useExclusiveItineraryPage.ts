@@ -5,7 +5,7 @@ import {
   useItineraryMutations,
   useItineraryScheduleQuery,
 } from '../../../hooks/useItineraryApi';
-import { useItineraryStore } from '../../../stores/itineraryStore';
+import { useItineraryStore } from '@/domains/performance-itinerary/store';
 import { useStackPageMainHeight } from '../../../hooks/useTabPageMainHeight';
 import { fetchItineraryBuddyRecruitHint } from '../../../api/sync/itinerary';
 import {

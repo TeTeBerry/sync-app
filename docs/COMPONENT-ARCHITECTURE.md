@@ -2,20 +2,23 @@
 
 > 改造进度与 Button 待办清单见 [FRONTEND-REFACTOR-CHECKLIST.md](./FRONTEND-REFACTOR-CHECKLIST.md#组件架构)。
 
-## 三层放置
+## 四层放置
 
 | 层级 | 路径 | 用途 |
 |------|------|------|
 | UI 原语 | `src/components/ui/` | 无业务语义；包装 Taro 原语 + BEM/`cn` |
-| 跨页业务 | `src/components/`（`auth/`、`ai-chat/`、`profile/`、`post/`、`navigation/` 等） | 多页面/分包复用的领域 UI |
-| 页面局部 | `src/pages/**/components/`、`src/package*/pages/**/components/` | 仅单页或单功能使用 |
+| 跨页业务 | `src/components/`（`auth/`、`ai-chat/`、`profile/`、`post/`、`navigation/` 等） | 多 Tab / 多分包复用的轻量 UI |
+| 活动域 | `src/domains/`（`travel-plan/`、`performance-itinerary/`、`live-info/`、`travel-guide/`） | 与后端 ActivityExperience 对齐的重逻辑域 |
+| 页面壳 | `src/pages/**/`、`src/package*/pages/**/` | 路由入口、薄编排 |
 
 ### 依赖方向（必须遵守）
 
 ```text
-pages / package pages  →  components/*  →  components/ui
-types/post.ts、types/backend.ts  ← 任意层（类型不反向依赖 pages）
+pages / package pages  →  domains/*  →  components/*  →  components/ui
+@sync/*-contracts、types/*  ← 任意层（类型不反向依赖 pages）
 ```
+
+主包 Tab **不得**直接 import `domains/*` 内重组件（见 `scripts/verify-bundle-boundaries.mjs`）。
 
 - `components/**` **不得** import `pages/**` 或 `package*/pages/**`
 - 帖子类型从 `src/types/post.ts` 导入，不从 `pages/index/homeData` 等页面路径导入

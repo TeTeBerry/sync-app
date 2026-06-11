@@ -17,22 +17,6 @@ export function resolveProfileEntitlement(
   return entitlements[0] ?? null;
 }
 
-/** Effective AI match remaining after free + paid merge (`null` = unlimited). */
-export function getAiMatchRemaining(
-  entitlement: EventPackageEntitlement | null,
-): number | null {
-  if (!entitlement) return null;
-  return entitlement.quotas.aiMatch.remaining;
-}
-
-/** True when the user has no AI matches left (not unlimited). */
-export function isAiMatchQuotaExhausted(
-  entitlement: EventPackageEntitlement | null,
-): boolean {
-  const remaining = getAiMatchRemaining(entitlement);
-  return remaining === 0;
-}
-
 /** Effective contact-unlock remaining after free + paid merge (`null` = unlimited). */
 export function getContactUnlockRemaining(
   entitlement: EventPackageEntitlement | null,

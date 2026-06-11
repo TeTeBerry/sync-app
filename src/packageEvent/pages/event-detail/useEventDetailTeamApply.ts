@@ -5,7 +5,6 @@ import {
   useProfilePostsQuery,
 } from '../../../hooks/useSyncApi';
 import { requireAuth } from '../../../utils/authGate';
-import { isProfileBenefitsEnabled } from '../../../constants/featureFlags';
 import { consumeContactUnlockWithQuota } from '../../../utils/contactUnlockEntitlement';
 import {
   resolveUserBuddyPreviewForTargetPost,
@@ -119,7 +118,7 @@ export function useEventDetailTeamApply({
             : undefined;
 
         const result = await applyToPostAndInvalidate(postId, apiPayload);
-        if (!result.alreadyApplied && isProfileBenefitsEnabled()) {
+        if (!result.alreadyApplied) {
           const consumed = await consumeContactUnlockWithQuota(eventId);
           if (!consumed) {
             openContactUnlockExhaustedModal();
@@ -176,7 +175,7 @@ export function useEventDetailTeamApply({
       if (appliedPostIds.has(postId)) return;
 
       requireAuth(() => {
-        if (isProfileBenefitsEnabled() && contactUnlockQuota.exhausted) {
+        if (contactUnlockQuota.exhausted) {
           openContactUnlockExhaustedModal();
           return;
         }

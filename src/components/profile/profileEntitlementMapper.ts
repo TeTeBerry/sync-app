@@ -7,13 +7,11 @@ import { safeFiniteNumber } from '../../utils/safeString';
 import { PROFILE_SEED_ACTIVITY_LEGACY_ID } from '../../constants/profilePackage';
 import { PACKAGE_TIER_ORDER } from './profilePackageData';
 import type { ProfileBenefits } from './profileBenefitsTypes';
-export const FREE_MONTHLY_AI_LIMIT = 3;
 export const FREE_MONTHLY_CONTACT_LIMIT = 3;
 
 export const MOCK_PROFILE_SEED_ACTIVITY_LEGACY_ID = PROFILE_SEED_ACTIVITY_LEGACY_ID;
 
 const EMPTY_QUOTAS: EventPackageEntitlement['quotas'] = {
-  aiMatch: { limit: 0, used: 0, remaining: 0 },
   contactUnlock: { limit: 0, used: 0, remaining: 0 },
   map: {
     days: 0,
@@ -74,27 +72,19 @@ export function hasValidEntitlementQuotas(
   if (!quotas) {
     return false;
   }
-  return (
-    isValidQuotaSlot(quotas.aiMatch) &&
-    isValidQuotaSlot(quotas.contactUnlock) &&
-    isValidMapQuotaSlot(quotas.map)
-  );
+  return isValidQuotaSlot(quotas.contactUnlock) && isValidMapQuotaSlot(quotas.map);
 }
 
 export function isValidFreeMonthlyQuota(
   freeMonthly: FreeMonthlyQuota | null | undefined,
 ): freeMonthly is FreeMonthlyQuota {
-  return Boolean(
-    freeMonthly?.aiMatch &&
-    freeMonthly?.contactUnlock &&
-    typeof freeMonthly.period === 'string',
-  );
+  return Boolean(freeMonthly?.contactUnlock && typeof freeMonthly.period === 'string');
 }
 
 function normalizeQuotaSlot(
-  slot: EventPackageEntitlement['quotas']['aiMatch'] | undefined,
-  fallback: EventPackageEntitlement['quotas']['aiMatch'],
-): EventPackageEntitlement['quotas']['aiMatch'] {
+  slot: EventPackageEntitlement['quotas']['contactUnlock'] | undefined,
+  fallback: EventPackageEntitlement['quotas']['contactUnlock'],
+): EventPackageEntitlement['quotas']['contactUnlock'] {
   if (!slot) {
     return fallback;
   }
@@ -117,7 +107,6 @@ export function resolveEntitlementQuotas(
   }
   const quotas = entitlement.quotas;
   return {
-    aiMatch: normalizeQuotaSlot(quotas.aiMatch, EMPTY_QUOTAS.aiMatch),
     contactUnlock: normalizeQuotaSlot(quotas.contactUnlock, EMPTY_QUOTAS.contactUnlock),
     map: {
       days: safeFiniteNumber(quotas.map.days, 0),
@@ -189,21 +178,11 @@ function displayQuotaValue(remaining: number | null): { value: number; unit: str
 export function buildMetricsFromQuotas(
   quotas: EventPackageEntitlement['quotas'],
 ): ProfileBenefits['metrics'] {
-  const ai = displayQuotaValue(quotas.aiMatch.remaining);
   const contact = displayQuotaValue(quotas.contactUnlock.remaining);
   const mapDaysLeft = quotas.map.active ? mapDaysRemaining(quotas.map.expiresAt) : 0;
   const mapLimit = quotas.map.days;
 
   return [
-    {
-      id: 'ai-match',
-      kind: 'match',
-      value: ai.value,
-      unit: ai.unit,
-      label: 'AI 匹配剩余',
-      remainingRatio: quotaRatio(quotas.aiMatch.remaining, quotas.aiMatch.limit),
-      lowRemaining: quotaLow(quotas.aiMatch.remaining, quotas.aiMatch.limit),
-    },
     {
       id: 'contact',
       kind: 'contact',

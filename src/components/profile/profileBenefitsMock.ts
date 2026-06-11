@@ -2,7 +2,6 @@ import type { EventPackageEntitlement } from '../../types/backend';
 import type { ProfileBenefits } from './profileBenefitsTypes';
 import { MOCK_PACKAGE_CATALOG } from './profilePackageData';
 import {
-  FREE_MONTHLY_AI_LIMIT,
   FREE_MONTHLY_CONTACT_LIMIT,
   MOCK_PROFILE_SEED_ACTIVITY_LEGACY_ID,
 } from './profileEntitlementMapper';
@@ -12,7 +11,6 @@ export function buildMockProfileBenefits(): ProfileBenefits {
   const proTier =
     MOCK_PACKAGE_CATALOG.tiers.find((tier) => tier.id === 'pro') ??
     MOCK_PACKAGE_CATALOG.tiers[0];
-  const aiRemaining = (proTier.limits.aiMatchCount ?? 0) + FREE_MONTHLY_AI_LIMIT;
   const contactRemaining =
     (proTier.limits.contactUnlockCount ?? 0) + FREE_MONTHLY_CONTACT_LIMIT;
   const mapDays = proTier.limits.mapDays;
@@ -26,15 +24,6 @@ export function buildMockProfileBenefits(): ProfileBenefits {
       suffix: ' · 含每月免费额度',
     },
     metrics: [
-      {
-        id: 'ai-match',
-        kind: 'match',
-        value: aiRemaining,
-        unit: '次',
-        label: 'AI 匹配剩余',
-        remainingRatio: 1,
-        lowRemaining: false,
-      },
       {
         id: 'contact',
         kind: 'contact',
@@ -62,7 +51,6 @@ export function buildMockProPlusEntitlement(): EventPackageEntitlement {
   const proPlusTier =
     MOCK_PACKAGE_CATALOG.tiers.find((tier) => tier.id === 'pro_plus') ??
     MOCK_PACKAGE_CATALOG.tiers[1];
-  const aiLimit = proPlusTier.limits.aiMatchCount ?? 15;
   const contactLimit = proPlusTier.limits.contactUnlockCount ?? 12;
   const mapDays = proPlusTier.limits.mapDays;
   const pinLimit = proPlusTier.limits.postPinCount ?? 1;
@@ -74,7 +62,6 @@ export function buildMockProPlusEntitlement(): EventPackageEntitlement {
     paidTierId: 'pro_plus',
     purchasedAt: new Date().toISOString(),
     quotas: {
-      aiMatch: { limit: aiLimit, used: 3, remaining: aiLimit - 3 },
       contactUnlock: {
         limit: contactLimit,
         used: 2,
@@ -95,7 +82,6 @@ export function buildMockPaidEntitlement(): EventPackageEntitlement {
   const proTier =
     MOCK_PACKAGE_CATALOG.tiers.find((tier) => tier.id === 'pro') ??
     MOCK_PACKAGE_CATALOG.tiers[0];
-  const aiLimit = (proTier.limits.aiMatchCount ?? 0) + FREE_MONTHLY_AI_LIMIT;
   const contactLimit =
     (proTier.limits.contactUnlockCount ?? 0) + FREE_MONTHLY_CONTACT_LIMIT;
   const mapDays = proTier.limits.mapDays;
@@ -107,7 +93,6 @@ export function buildMockPaidEntitlement(): EventPackageEntitlement {
     paidTierId: 'pro',
     purchasedAt: new Date().toISOString(),
     quotas: {
-      aiMatch: { limit: aiLimit, used: 0, remaining: aiLimit },
       contactUnlock: { limit: contactLimit, used: 0, remaining: contactLimit },
       map: {
         days: mapDays,

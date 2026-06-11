@@ -85,13 +85,6 @@ export function parseStreamEventPayload(
         typeof json.activityLegacyId === 'number' ? json.activityLegacyId : undefined,
     };
   }
-  if (json.type === 'post_recommendations' && Array.isArray(json.posts)) {
-    return {
-      type: 'post_recommendations',
-      posts: json.posts as RecommendedPostCard[],
-      degraded: typeof json.degraded === 'boolean' ? json.degraded : undefined,
-    };
-  }
   if (
     json.type === 'activity_recommendation' &&
     json.activity &&

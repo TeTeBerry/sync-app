@@ -105,7 +105,7 @@ describe('post lifecycle (frontend orchestration)', () => {
     );
   });
 
-  it('3: apply sheet picks applicant carpool post when host seeks carpool', async () => {
+  it('3: apply sheet uses the applicant first recruiting post in the feed', async () => {
     const host = hostPost();
     const feed = [
       host,
@@ -123,8 +123,8 @@ describe('post lifecycle (frontend orchestration)', () => {
 
     const preview = resolveUserBuddyPreviewForTargetPost(host, ACTIVITY_ID, feed, []);
 
-    expect(preview?.body).toContain('同路');
-    expect(preview?.tags.some((t) => t.includes('同路'))).toBe(true);
+    expect(preview?.body).toContain('找组队');
+    expect(preview?.tags.some((t) => t.includes('组队'))).toBe(true);
   });
 
   it('4: submit application calls POST applications with optional message', async () => {

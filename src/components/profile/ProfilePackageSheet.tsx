@@ -39,7 +39,6 @@ import { ImageWithFallback } from '../ImageWithFallback';
 import { ScrollView, Text, View } from '@tarojs/components';
 
 const FEATURE_ICONS: Record<PackageFeatureIcon, typeof Sparkles> = {
-  match: Sparkles,
   contact: LockOpen,
   map: Map,
   exposure: Megaphone,

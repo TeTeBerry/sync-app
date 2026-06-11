@@ -41,12 +41,6 @@ describe('buildContactUnlockUpgradeCompare', () => {
       target: '5次/场',
     });
     expect(model?.rows[1]).toEqual({
-      id: 'aiMatch',
-      label: 'AI 智能匹配',
-      current: '3次/月',
-      target: '8次/场',
-    });
-    expect(model?.rows[2]).toEqual({
       id: 'map',
       label: '地图实时定位',
       current: '限量',
@@ -67,10 +61,8 @@ describe('buildContactUnlockUpgradeCompare', () => {
       current: '5次/场',
       target: '12次/场',
     });
-    expect(model?.rows[1].current).toBe('8次/场');
-    expect(model?.rows[1].target).toBe('15次/场');
-    expect(model?.rows[2].current).toBe('7天');
-    expect(model?.rows[2].target).toBe('15天');
+    expect(model?.rows[1].current).toBe('7天');
+    expect(model?.rows[1].target).toBe('15天');
   });
 
   it('uses API free monthly limits when provided', () => {
@@ -80,7 +72,6 @@ describe('buildContactUnlockUpgradeCompare', () => {
       targetTierId: 'pro',
       freeMonthly: {
         period: '2026-05',
-        aiMatch: { limit: 3, used: 3, remaining: 0 },
         contactUnlock: { limit: 3, used: 3, remaining: 0 },
       },
     });

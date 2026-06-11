@@ -6,17 +6,13 @@ import { invalidatePostQueries } from '../../../hooks/useSyncApi';
 import { ChatMessageList } from '../../../components/ai-chat/ChatMessageList';
 import { ChatComposer } from '../../../components/ai-chat/ChatComposer';
 import { AccountRiskBanner } from '../../../components/account-risk/AccountRiskBanner';
-import { DegradedMatchBanner } from '../../../components/ai-chat/DegradedMatchBanner';
 import { useAccountRisk } from '../../../hooks/useAccountRisk';
 import { AiBuddyPostSheet } from '../../../components/ai-chat/AiBuddyPostSheet';
 import { AiGuidePlanSheet } from '../../../components/ai-chat/AiGuidePlanSheet';
 import { useKeyboardInset } from '../../../hooks/useKeyboardInset';
-import { API_BASE_URL } from '../../../constants/api';
-import { isProfileBenefitsEnabled } from '../../../constants/featureFlags';
 import type { inferUserGenderFromName } from '../../../utils/inferAuthorGender';
 import type { AiGuidePlanFormValues } from '../../../types/travelGuide';
 import { Canvas, View } from '@tarojs/components';
-import { invalidateProfileEntitlements } from '../../../utils/queryInvalidation';
 import { invalidateCache } from '../../../hooks/useApiQuery';
 import { useAiBuddyPost } from '../../../hooks/useAiBuddyPost';
 import { useAiTravelGuide } from '../../../hooks/useAiTravelGuide';
@@ -42,7 +38,6 @@ export type AiAssistantChatProps = {
   userAvatar?: string;
   userName: string;
   userGender?: ReturnType<typeof inferUserGenderFromName>;
-  aiMatchQuotaExhausted: boolean;
 };
 
 export function AiAssistantChat({
@@ -58,7 +53,6 @@ export function AiAssistantChat({
   userAvatar,
   userName,
   userGender,
-  aiMatchQuotaExhausted,
 }: AiAssistantChatProps) {
   const [input, setInput] = useState('');
   const keyboardInset = useKeyboardInset();
@@ -98,11 +92,6 @@ export function AiAssistantChat({
     return '👋 我是你的 AI 智能助手，帮你发现活动、找组队，说出需求，我来搞定。';
   }, [activityTitle]);
 
-  const handleMatchResults = useCallback(async () => {
-    if (!API_BASE_URL) return;
-    await invalidateProfileEntitlements();
-  }, []);
-
   const {
     messages,
     setMessages,
@@ -136,7 +125,6 @@ export function AiAssistantChat({
         duration: 2500,
       });
     },
-    onMatchResults: handleMatchResults,
   });
 
   const scheduleScrollToBottom = useCallback(() => {
@@ -212,7 +200,7 @@ export function AiAssistantChat({
     }
 
     const trimmed = initialMessage.trim();
-    if (!trimmed || isStreaming || aiMatchQuotaExhausted) return;
+    if (!trimmed || isStreaming) return;
 
     initialMessageHandledRef.current = true;
     onInitialMessageSent?.();
@@ -229,7 +217,6 @@ export function AiAssistantChat({
     })();
   }, [
     activityLegacyId,
-    aiMatchQuotaExhausted,
     buddyPost,
     initialMessage,
     isStreaming,
@@ -270,14 +257,6 @@ export function AiAssistantChat({
         return;
       }
 
-      if (isProfileBenefitsEnabled() && aiMatchQuotaExhausted) {
-        void Taro.showToast({
-          title: 'AI 匹配次数已用完，请升级套餐',
-          icon: 'none',
-        });
-        return;
-      }
-
       const scoped = activityLegacyId != null && !Number.isNaN(activityLegacyId);
       if (scoped) {
         const buddyHandled = await buddyPost.handleBuddyPostChatMessage(trimmed);
@@ -300,15 +279,7 @@ export function AiAssistantChat({
         submitLockRef.current = false;
       }
     },
-    [
-      activityLegacyId,
-      aiMatchQuotaExhausted,
-      isStreaming,
-      isStreamingRef,
-      send,
-      buddyPost,
-      travelGuide,
-    ],
+    [activityLegacyId, isStreaming, isStreamingRef, send, buddyPost, travelGuide],
   );
 
   const handleClearChat = useCallback(async () => {
@@ -321,13 +292,6 @@ export function AiAssistantChat({
   const handleSelectSuggestedReply = useCallback(
     async (reply: string) => {
       if (submitLockRef.current || isStreaming || isStreamingRef.current) return;
-      if (isProfileBenefitsEnabled() && aiMatchQuotaExhausted) {
-        void Taro.showToast({
-          title: 'AI 匹配次数已用完，请升级套餐',
-          icon: 'none',
-        });
-        return;
-      }
       const trimmed = reply.trim();
       const scoped = activityLegacyId != null && !Number.isNaN(activityLegacyId);
       if (scoped) {
@@ -344,15 +308,7 @@ export function AiAssistantChat({
         submitLockRef.current = false;
       }
     },
-    [
-      activityLegacyId,
-      aiMatchQuotaExhausted,
-      buddyPost,
-      isStreaming,
-      isStreamingRef,
-      send,
-      travelGuide,
-    ],
+    [activityLegacyId, buddyPost, isStreaming, isStreamingRef, send, travelGuide],
   );
 
   const needsPageGuideCanvas =
@@ -376,7 +332,6 @@ export function AiAssistantChat({
         />
       ) : null}
 
-      <DegradedMatchBanner />
       <AccountRiskBanner
         accountRisk={accountRisk}
         className="s-account-risk-banner--chat"

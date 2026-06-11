@@ -7,48 +7,42 @@ async function collectFromGenerator(
   return events;
 }
 
-describe('useWsChatStream match quota callbacks', () => {
-  it('should call onMatchResults only for post_recommendations with posts', async () => {
-    const onMatchResults = vi.fn();
+describe('useWsChatStream stream event handling', () => {
+  it('invokes onDone when done event is received', async () => {
     const onDoneConsume = vi.fn();
 
     const events: AiChatStreamEvent[] = [
+      { type: 'delta', content: 'hi' },
+      { type: 'done', sessionId: 's1' },
+    ];
+
+    for (const event of await collectFromGenerator(events)) {
+      if (event.type === 'done') {
+        onDoneConsume();
+      }
+    }
+
+    expect(onDoneConsume).toHaveBeenCalledTimes(1);
+  });
+
+  it('ignores unknown legacy post_recommendations frames', async () => {
+    const onActivity = vi.fn();
+
+    const events = [
       {
         type: 'post_recommendations',
         posts: [{ postId: 'p1', snippet: 'x', authorName: 'A', eventTitle: 'E' }],
         degraded: false,
       },
       { type: 'done', sessionId: 's1' },
-    ];
-
-    for (const event of await collectFromGenerator(events)) {
-      if (event.type === 'post_recommendations' && event.posts.length > 0) {
-        onMatchResults(9);
-      }
-      if (event.type === 'done') {
-        onDoneConsume();
-      }
-    }
-
-    expect(onMatchResults).toHaveBeenCalledTimes(1);
-    expect(onMatchResults).toHaveBeenCalledWith(9);
-    expect(onDoneConsume).toHaveBeenCalledTimes(1);
-  });
-
-  it('should not call onMatchResults for empty recommendations', async () => {
-    const onMatchResults = vi.fn();
-
-    const events: AiChatStreamEvent[] = [
-      { type: 'post_recommendations', posts: [], degraded: false },
-      { type: 'done', sessionId: 's1' },
-    ];
+    ] as AiChatStreamEvent[];
 
     for (const event of events) {
-      if (event.type === 'post_recommendations' && event.posts.length > 0) {
-        onMatchResults();
+      if (event.type === 'activity_recommendation') {
+        onActivity();
       }
     }
 
-    expect(onMatchResults).not.toHaveBeenCalled();
+    expect(onActivity).not.toHaveBeenCalled();
   });
 });

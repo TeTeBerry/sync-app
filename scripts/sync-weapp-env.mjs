@@ -133,7 +133,6 @@ const passthroughKeys = [
   'TARO_APP_DEV_USER_NAME',
   'TARO_APP_QQ_MAP_KEY',
   'TARO_APP_QQ_MAP_LAYER_STYLE',
-  'TARO_APP_ENABLE_PROFILE_BENEFITS',
   'TARO_APP_COS_BUCKET',
   'TARO_APP_COS_REGION',
   'TARO_APP_COS_PUBLIC_BASE_URL',
@@ -164,7 +163,6 @@ const generalPassthroughLines = [
   'TARO_APP_DEV_USER_NAME',
   'TARO_APP_QQ_MAP_KEY',
   'TARO_APP_QQ_MAP_LAYER_STYLE',
-  'TARO_APP_ENABLE_PROFILE_BENEFITS',
 ]
   .filter((key) => appEnv[key])
   .map((key) => `${key}=${appEnv[key]}`)

@@ -53,17 +53,25 @@ describe('parseStreamEventPayload', () => {
     });
   });
 
-  it('parses post_recommendations and server error', () => {
+  it('parses activity_recommendation and server error', () => {
     expect(
       parseStreamEventPayload({
-        type: 'post_recommendations',
-        posts: [{ postId: 'p1', snippet: 'x', authorName: 'A', eventTitle: 'E' }],
-        degraded: true,
+        type: 'activity_recommendation',
+        activity: {
+          activityLegacyId: 4,
+          title: '风暴电音节',
+          date: '06/13',
+          location: '深圳',
+        },
       }),
     ).toEqual({
-      type: 'post_recommendations',
-      posts: [{ postId: 'p1', snippet: 'x', authorName: 'A', eventTitle: 'E' }],
-      degraded: true,
+      type: 'activity_recommendation',
+      activity: {
+        activityLegacyId: 4,
+        title: '风暴电音节',
+        date: '06/13',
+        location: '深圳',
+      },
     });
     expect(parseStreamEventPayload({ type: 'error', message: 'quota' })).toEqual({
       type: 'error',

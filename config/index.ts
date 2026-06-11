@@ -5,6 +5,18 @@ const chatContractsPath = path.resolve(
   __dirname,
   '../../sync-app-backend/src/shared/chat/index.ts',
 );
+const travelPlanContractsPath = path.resolve(
+  __dirname,
+  '../../sync-app-backend/src/shared/travel-plan/index.ts',
+);
+const itineraryContractsPath = path.resolve(
+  __dirname,
+  '../../sync-app-backend/src/shared/itinerary/index.ts',
+);
+const liveInfoContractsPath = path.resolve(
+  __dirname,
+  '../../sync-app-backend/src/shared/live-info/index.ts',
+);
 
 /**
  * Primary target: WeChat mini program (weapp). Design draft: 375px logical width.
@@ -22,6 +34,9 @@ if (process.env.TARO_ENV === 'weapp') {
 export default defineConfig({
   alias: {
     '@sync/chat-contracts': chatContractsPath,
+    '@sync/travel-plan-contracts': travelPlanContractsPath,
+    '@sync/itinerary-contracts': itineraryContractsPath,
+    '@sync/live-info-contracts': liveInfoContractsPath,
   },
   projectName: 'sync-app',
   date: '2026-5-24',

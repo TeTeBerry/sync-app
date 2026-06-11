@@ -1,7 +1,6 @@
 import React from 'react';
 import { ContactUnlockQuotaExhaustedModal } from '../../../../components/contact-unlock/ContactUnlockQuotaExhaustedModal';
 import { ProfilePackageSheet } from '../../../../components/profile';
-import { isProfileBenefitsEnabled } from '../../../../constants/featureFlags';
 import { invalidateProfilePackageState } from '../../../../utils/queryInvalidation';
 import type { FreeMonthlyQuota, PackageTierId } from '../../../../types/backend';
 
@@ -30,10 +29,6 @@ export const EventDetailEntitlementModals: React.FC<
   packageSheetInitialTierId,
   onClosePackageSheet,
 }) => {
-  if (!isProfileBenefitsEnabled()) {
-    return null;
-  }
-
   return (
     <>
       <ContactUnlockQuotaExhaustedModal

@@ -1,6 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
 import { pickGlobalFreeMonthly } from '../../../components/profile';
-import { isProfileBenefitsEnabled } from '../../../constants/featureFlags';
 import type { QueryEnableOptions } from '../../../hooks/sync/types';
 import { useProfileEntitlementsQuery } from '../../../hooks/useSyncApi';
 import type { PackageTierId } from '../../../types/backend';
@@ -28,9 +27,6 @@ export function useEventDetailEntitlements(
   >(undefined);
 
   const openContactUnlockExhaustedModal = useCallback(() => {
-    if (!isProfileBenefitsEnabled()) {
-      return;
-    }
     setContactUnlockExhaustedOpen(true);
   }, []);
 
@@ -39,9 +35,6 @@ export function useEventDetailEntitlements(
   }, []);
 
   const openPackageUpgradeSheet = useCallback((targetTierId: PackageTierId) => {
-    if (!isProfileBenefitsEnabled()) {
-      return;
-    }
     setContactUnlockExhaustedOpen(false);
     setPackageSheetInitialTierId(targetTierId);
     setPackageSheetOpen(true);

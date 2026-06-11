@@ -14,7 +14,6 @@ import type {
   ProfileFreeBenefitCardModel,
 } from './profileBenefitsTypes';
 import {
-  FREE_MONTHLY_AI_LIMIT,
   FREE_MONTHLY_CONTACT_LIMIT,
   buildMetricsFromQuotas,
   hasValidEntitlementQuotas,
@@ -48,16 +47,11 @@ function slotToFreeQuota(
 function resolveFreeQuotaSlots(
   entitlement: EventPackageEntitlement | null | undefined,
   freeMonthly?: FreeMonthlyQuota | null,
-): Pick<ProfileFreeBenefitCardModel, 'aiMatch' | 'contactUnlock'> {
+): Pick<ProfileFreeBenefitCardModel, 'contactUnlock'> {
   const monthly = entitlement?.freeMonthly ?? freeMonthly ?? null;
 
   if (isValidFreeMonthlyQuota(monthly)) {
     return {
-      aiMatch: slotToFreeQuota(
-        monthly.aiMatch.remaining,
-        monthly.aiMatch.limit,
-        FREE_MONTHLY_AI_LIMIT,
-      ),
       contactUnlock: slotToFreeQuota(
         monthly.contactUnlock.remaining,
         monthly.contactUnlock.limit,
@@ -72,11 +66,6 @@ function resolveFreeQuotaSlots(
     hasValidEntitlementQuotas(entitlement)
   ) {
     return {
-      aiMatch: slotToFreeQuota(
-        entitlement.quotas.aiMatch.remaining,
-        entitlement.quotas.aiMatch.limit,
-        FREE_MONTHLY_AI_LIMIT,
-      ),
       contactUnlock: slotToFreeQuota(
         entitlement.quotas.contactUnlock.remaining,
         entitlement.quotas.contactUnlock.limit,
@@ -86,7 +75,6 @@ function resolveFreeQuotaSlots(
   }
 
   return {
-    aiMatch: slotToFreeQuota(null, null, FREE_MONTHLY_AI_LIMIT),
     contactUnlock: slotToFreeQuota(null, null, FREE_MONTHLY_CONTACT_LIMIT),
   };
 }
@@ -95,9 +83,8 @@ export function buildProPlusUpsellText(): string {
   const proPlus =
     MOCK_PACKAGE_CATALOG.tiers.find((tier) => tier.id === 'pro_plus') ??
     MOCK_PACKAGE_CATALOG.tiers[1];
-  const ai = proPlus.limits.aiMatchCount ?? 15;
   const contact = proPlus.limits.contactUnlockCount ?? 12;
-  return `升级 Pro+ 享受 AI ${ai}次 + 解锁 ${contact}次`;
+  return `升级 Pro+ 享受解锁 ${contact}次`;
 }
 
 export function buildFreeBenefitCardModel(
@@ -117,10 +104,8 @@ export function buildFreeBenefitCardModel(
 export function buildFreeProfileBenefits(
   freeMonthly?: FreeMonthlyQuota | null,
 ): ProfileBenefits {
-  const aiRemaining = freeMonthly?.aiMatch.remaining ?? FREE_MONTHLY_AI_LIMIT;
   const contactRemaining =
     freeMonthly?.contactUnlock.remaining ?? FREE_MONTHLY_CONTACT_LIMIT;
-  const aiLimit = freeMonthly?.aiMatch.limit ?? FREE_MONTHLY_AI_LIMIT;
   const contactLimit = freeMonthly?.contactUnlock.limit ?? FREE_MONTHLY_CONTACT_LIMIT;
 
   return {
@@ -128,19 +113,10 @@ export function buildFreeProfileBenefits(
     upgradeLabel: '升级套餐',
     promo: {
       prefix: '每月免费额度 · ',
-      highlight: 'AI 3 次',
-      suffix: ' · 联系方式解锁 3 次',
+      highlight: '联系方式解锁 3 次',
+      suffix: '',
     },
     metrics: [
-      {
-        id: 'ai-match',
-        kind: 'match',
-        value: aiRemaining,
-        unit: '次',
-        label: 'AI 匹配剩余',
-        remainingRatio: quotaRatio(aiRemaining, aiLimit),
-        lowRemaining: quotaLow(aiRemaining, aiLimit),
-      },
       {
         id: 'contact',
         kind: 'contact',
@@ -278,13 +254,6 @@ export function buildEventBenefitRows(
       ),
       accent: 'purple',
       quotaTone: 'muted',
-    },
-    {
-      id: 'ai-match',
-      label: 'AI 智能匹配',
-      quotaLabel: formatQuotaLabel(quotas.aiMatch.remaining, quotas.aiMatch.limit),
-      remainingRatio: quotaRatio(quotas.aiMatch.remaining, quotas.aiMatch.limit),
-      accent: 'pink',
     },
     buildMapBenefitRow(quotas.map),
   ];

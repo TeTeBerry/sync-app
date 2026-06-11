@@ -9,8 +9,4 @@ export function applyStreamEventToSessionStore(event: AiChatStreamEvent): void {
     store.applyConversationPatch(event.state);
     return;
   }
-
-  if (event.type === 'post_recommendations') {
-    store.setPostRecommendationsMeta(event.degraded);
-  }
 }

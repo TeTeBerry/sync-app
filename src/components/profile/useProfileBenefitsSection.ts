@@ -9,7 +9,6 @@ import {
   type ProfileEventBenefitCardModel,
 } from './profileBenefitsMapper';
 import type { ProfileBenefitsBlockProps } from './ProfileBenefitsBlock';
-import { isProfileBenefitsEnabled } from '../../constants/featureFlags';
 import { go, ROUTES } from '../../utils/route';
 
 export type UseProfileBenefitsSectionOptions = {
@@ -75,7 +74,7 @@ export function useProfileBenefitsSection({
   };
 
   return {
-    visible: isProfileBenefitsEnabled() && showBenefitsBlock,
+    visible: showBenefitsBlock,
     showPaid: showPaidBenefitsSection,
     showFree: showFreeBenefitsSection,
     showFreeLoading: showBenefitsLoading,

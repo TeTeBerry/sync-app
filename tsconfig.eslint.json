@@ -5,7 +5,8 @@
     "config/**/*",
     "types/**/*",
     "test/**/*",
-    "vitest.config.ts"
+    "vitest.config.ts",
+    "vitest.setup.ts"
   ],
   "exclude": ["node_modules", "dist", "dist-weapp", "dist-h5"]
 }

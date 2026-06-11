@@ -6,7 +6,6 @@ export type {
   ConversationFlow,
   ConversationState,
   PublishDraftState,
-  RecommendGateState,
 } from '@sync/chat-contracts';
 
 export { CONVERSATION_STATE_VERSION } from '@sync/chat-contracts';

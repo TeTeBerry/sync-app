@@ -28,7 +28,6 @@ type PackageFeatureIconComponent = React.ComponentType<{
 }>;
 
 const FEATURE_ICONS: Record<PackageFeatureIcon, PackageFeatureIconComponent> = {
-  match: Sparkles,
   contact: LockOpen,
   map: Map,
   exposure: Sparkles,
@@ -198,10 +197,10 @@ const AiPackageUpgradeSheet: React.FC<AiPackageUpgradeSheetProps> = ({
               id="ai-package-upgrade-title"
               className="s-ai-package-upgrade-sheet__hero-title"
             >
-              AI 匹配次数已用完
+              升级套餐解锁更多权益
             </Text>
             <Text className="s-ai-package-upgrade-sheet__hero-sub">
-              本月 AI 智能匹配额度已耗尽{'\n'}升级套餐即可立即恢复匹配能力
+              联系方式解锁、点位地图等场次权益{'\n'}可按活动单独购买
             </Text>
           </View>
 

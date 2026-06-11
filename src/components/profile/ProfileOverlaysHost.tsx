@@ -1,5 +1,4 @@
 import React from 'react';
-import { isProfileBenefitsEnabled } from '../../constants/featureFlags';
 import type { PackageTierId, ProfileActivityItem } from '../../types/backend';
 import ProfilePackageSheet from './ProfilePackageSheet';
 
@@ -21,7 +20,7 @@ const ProfileOverlaysHost: React.FC<ProfileOverlaysHostProps> = ({
   packageSheetOpen,
   packageSheet,
 }) => {
-  if (!isProfileBenefitsEnabled() || !packageSheetOpen) {
+  if (!packageSheetOpen) {
     return null;
   }
 

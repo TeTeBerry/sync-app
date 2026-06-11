@@ -1,19 +1,19 @@
 import { describe, expect, it } from 'vitest';
-import type { ItineraryTimelineItem } from '@/packageEvent/pages/my-itinerary/myItineraryMock';
+import type { ItineraryTimelineItem } from '@/domains/performance-itinerary/mocks/myItineraryMock';
 import {
   buildWallpaperSectionsByDate,
   type ItineraryWallpaperSection,
-} from '@/packageEvent/pages/my-itinerary/itineraryWallpaperParse';
-import { MY_ITINERARY_DAYS } from '@/packageEvent/pages/my-itinerary/myItineraryMock';
+} from '@/domains/performance-itinerary/utils/itineraryWallpaperParse';
+import { MY_ITINERARY_DAYS } from '@/domains/performance-itinerary/mocks/myItineraryMock';
 import {
   lockScreenInsets,
   WALLPAPER_DESIGN,
-} from '@/packageEvent/pages/my-itinerary/itineraryWallpaperDesign';
+} from '@/domains/performance-itinerary/utils/itineraryWallpaperDesign';
 import {
   computeWallpaperLayout,
   drawItineraryWallpaper,
   estimateWallpaperContentBottom,
-} from '@/packageEvent/pages/my-itinerary/itineraryWallpaperDraw';
+} from '@/domains/performance-itinerary/utils/itineraryWallpaperDraw';
 
 function createMockContext(): CanvasRenderingContext2D {
   const calls: { method: string; args: unknown[] }[] = [];

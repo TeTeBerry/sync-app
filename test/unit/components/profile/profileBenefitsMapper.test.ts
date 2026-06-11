@@ -22,7 +22,6 @@ function paidEntitlement(
 ): EventPackageEntitlement {
   const quotasByTier: Record<typeof tier, EventPackageEntitlement['quotas']> = {
     pro: {
-      aiMatch: { limit: 11, used: 2, remaining: 9 },
       contactUnlock: { limit: 8, used: 1, remaining: 7 },
       map: {
         days: 7,
@@ -33,7 +32,6 @@ function paidEntitlement(
       basicExposure: true,
     },
     pro_plus: {
-      aiMatch: { limit: 18, used: 3, remaining: 15 },
       contactUnlock: { limit: 15, used: 0, remaining: 15 },
       map: {
         days: 15,
@@ -44,7 +42,6 @@ function paidEntitlement(
       basicExposure: false,
     },
     ultra: {
-      aiMatch: { limit: null, used: 5, remaining: null },
       contactUnlock: { limit: null, used: 0, remaining: null },
       map: {
         days: 30,
@@ -116,7 +113,6 @@ describe('getNextTierId', () => {
 describe('buildFreeBenefitCardModel', () => {
   const freeMonthly = {
     period: '2026-05',
-    aiMatch: { limit: 3, used: 0, remaining: 3 },
     contactUnlock: { limit: 3, used: 1, remaining: 2 },
   };
 
@@ -124,7 +120,6 @@ describe('buildFreeBenefitCardModel', () => {
     const card = buildFreeBenefitCardModel(freeMonthly);
     expect(card.title).toBe('通场免费额度');
     expect(card.subtitle).toBe('每月重置');
-    expect(card.aiMatch).toEqual({ remaining: 3, limit: 3, remainingRatio: 1 });
     expect(card.contactUnlock.remaining).toBe(2);
     expect(card.contactUnlock.limit).toBe(3);
     expect(card.upsellText).toBe(buildProPlusUpsellText());
@@ -134,13 +129,11 @@ describe('buildFreeBenefitCardModel', () => {
     const card = buildFreeBenefitCardModel(null);
     expect(card.title).toBe('通场免费额度');
     expect(card.subtitle).toBe('每月重置');
-    expect(card.aiMatch.remaining).toBe(3);
     expect(card.contactUnlock.remaining).toBe(3);
   });
 
   it('falls back when freeMonthly slots are missing (API partial payload)', () => {
     const card = buildFreeBenefitCardModel({ period: '2026-05' } as never);
-    expect(card.aiMatch.remaining).toBe(3);
     expect(card.contactUnlock.remaining).toBe(3);
   });
 });
@@ -149,12 +142,10 @@ describe('pickGlobalFreeMonthly', () => {
   it('prefers summary freeMonthly over list rows', () => {
     const summary = {
       period: '2026-05',
-      aiMatch: { limit: 3, used: 2, remaining: 1 },
       contactUnlock: { limit: 3, used: 0, remaining: 3 },
     };
     const fromList = {
       period: '2026-04',
-      aiMatch: { limit: 3, used: 0, remaining: 3 },
       contactUnlock: { limit: 3, used: 0, remaining: 3 },
     };
     expect(
@@ -176,11 +167,11 @@ describe('pickGlobalFreeMonthly', () => {
 });
 
 describe('buildMockProfileBenefits', () => {
-  it('shows Pro tier with free monthly merge (11 / 8 / 7)', () => {
+  it('shows Pro tier with free monthly merge (8 / 7)', () => {
     const benefits = buildMockProfileBenefits();
     expect(benefits.planLabel).toBe('Pro');
     expect(benefits.promo.highlight).toBe('Pro');
-    expect(benefits.metrics.map((metric) => metric.value)).toEqual([11, 8, 7]);
+    expect(benefits.metrics.map((metric) => metric.value)).toEqual([8, 7]);
   });
 });
 
@@ -191,7 +182,6 @@ describe('pickProfileEntitlement', () => {
     tierName: 'Pro',
     paidTierId: 'pro',
     quotas: {
-      aiMatch: { limit: 11, used: 0, remaining: 11 },
       contactUnlock: { limit: 8, used: 0, remaining: 8 },
       map: { days: 7, expiresAt: '2099-01-01T00:00:00.000Z', active: true },
       postPin: { limit: 0, used: 0, remaining: 0 },
@@ -205,7 +195,6 @@ describe('pickProfileEntitlement', () => {
     tierName: '免费版',
     paidTierId: null,
     quotas: {
-      aiMatch: { limit: 3, used: 0, remaining: 3 },
       contactUnlock: { limit: 3, used: 0, remaining: 3 },
       map: { days: 0, expiresAt: '1970-01-01T00:00:00.000Z', active: false },
       postPin: { limit: 0, used: 0, remaining: 0 },
@@ -248,8 +237,7 @@ describe('hasValidEntitlementQuotas', () => {
         tierName: 'Pro',
         paidTierId: 'pro',
         quotas: {
-          aiMatch: {} as never,
-          contactUnlock: { limit: 8, used: 0, remaining: 8 },
+          contactUnlock: {} as never,
           map: {
             days: 7,
             expiresAt: '2099-01-01T00:00:00.000Z',
@@ -270,7 +258,6 @@ describe('listPaidEntitlements', () => {
     tierName: 'Pro',
     paidTierId: 'pro',
     quotas: {
-      aiMatch: { limit: 11, used: 0, remaining: 11 },
       contactUnlock: { limit: 8, used: 0, remaining: 8 },
       map: { days: 7, expiresAt: '2099-01-01T00:00:00.000Z', active: true },
       postPin: { limit: 0, used: 0, remaining: 0 },
@@ -284,7 +271,6 @@ describe('listPaidEntitlements', () => {
     tierName: 'Ultra',
     paidTierId: 'ultra',
     quotas: {
-      aiMatch: { limit: null, used: 0, remaining: null },
       contactUnlock: { limit: null, used: 0, remaining: null },
       map: { days: 30, expiresAt: '2099-06-01T00:00:00.000Z', active: true },
       postPin: { limit: 2, used: 0, remaining: 2 },
@@ -298,7 +284,6 @@ describe('listPaidEntitlements', () => {
     tierName: '免费版',
     paidTierId: null,
     quotas: {
-      aiMatch: { limit: 3, used: 0, remaining: 3 },
       contactUnlock: { limit: 3, used: 0, remaining: 3 },
       map: { days: 0, expiresAt: '1970-01-01T00:00:00.000Z', active: false },
       postPin: { limit: 0, used: 0, remaining: 0 },
@@ -312,24 +297,24 @@ describe('listPaidEntitlements', () => {
     expect(paid.map((item) => item.activityLegacyId)).toEqual([1, 4]);
   });
 
-  it('builds three benefit rows for Pro (no pin)', () => {
+  it('builds two benefit rows for Pro (no pin)', () => {
     const card = buildEventBenefitCardModel(proSeed);
-    expect(card.rows).toHaveLength(3);
-    expect(card.rows.map((row) => row.id)).toEqual(['contact', 'ai-match', 'map']);
+    expect(card.rows).toHaveLength(2);
+    expect(card.rows.map((row) => row.id)).toEqual(['contact', 'map']);
   });
 
   it('builds paid card when postPin slot is missing (partial API quotas)', () => {
     const quotas = { ...proSeed.quotas };
     delete (quotas as { postPin?: unknown }).postPin;
     const card = buildEventBenefitCardModel({ ...proSeed, quotas });
-    expect(card.rows).toHaveLength(3);
+    expect(card.rows).toHaveLength(2);
     expect(card.rows.find((row) => row.id === 'post-pin')).toBeUndefined();
   });
 
-  it('builds four benefit rows when pin quota exists', () => {
+  it('builds three benefit rows when pin quota exists', () => {
     const card = buildEventBenefitCardModel(paidEntitlement('pro_plus'));
-    expect(card.rows).toHaveLength(4);
-    expect(card.rows.map((row) => row.id)).toContain('post-pin');
+    expect(card.rows).toHaveLength(3);
+    expect(card.rows.map((row) => row.id)).toEqual(['contact', 'map', 'post-pin']);
   });
 });
 
@@ -351,7 +336,6 @@ describe('buildEventBenefitCardModel tier display', () => {
     expect(card.tierId).toBe('pro');
     expect(card.tierName).toBe('Pro');
     expect(card.rows.find((row) => row.id === 'post-pin')).toBeUndefined();
-    expect(card.rows.find((row) => row.id === 'ai-match')?.quotaLabel).toBe('剩 11/11');
     expect(card.rows.find((row) => row.id === 'contact')?.quotaLabel).toBe('剩 8/8');
     expect(card.rows.find((row) => row.id === 'map')?.quotaLabel).toMatch(
       /^剩 \d+ 天$/,
@@ -370,7 +354,6 @@ describe('buildEventBenefitCardModel tier display', () => {
     const card = buildEventBenefitCardModel(paidEntitlement('pro_plus'));
     expect(card.tierId).toBe('pro_plus');
     expect(card.tierName).toBe('Pro+');
-    expect(card.rows.find((row) => row.id === 'ai-match')?.quotaLabel).toBe('剩 15/18');
     expect(card.rows.find((row) => row.id === 'contact')?.quotaLabel).toBe('剩 15/15');
     expect(card.rows.find((row) => row.id === 'post-pin')?.quotaLabel).toBe('剩 1/1');
   });
@@ -379,7 +362,6 @@ describe('buildEventBenefitCardModel tier display', () => {
     const card = buildEventBenefitCardModel(paidEntitlement('ultra'));
     expect(card.tierId).toBe('ultra');
     expect(card.tierName).toBe('Ultra');
-    expect(card.rows.find((row) => row.id === 'ai-match')?.quotaLabel).toBe('不限');
     expect(card.rows.find((row) => row.id === 'contact')?.quotaLabel).toBe('不限');
     expect(card.rows.find((row) => row.id === 'post-pin')?.quotaLabel).toBe('剩 1/2');
   });

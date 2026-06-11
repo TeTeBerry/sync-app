@@ -28,14 +28,12 @@ export const MOCK_PACKAGE_CATALOG: PackageCatalog = {
       priceLabel: '6.9',
       audience: '普通爱好者 · 偶尔组队散户',
       limits: {
-        aiMatchCount: 8,
         contactUnlockCount: 5,
         mapDays: 7,
         postPinCount: 0,
         basicExposure: true,
       },
       features: [
-        { icon: 'match', text: 'AI 智能匹配 · 8 次' },
         { icon: 'contact', text: '联系方式解锁 · 5 次' },
         { icon: 'map', text: '点位地图 · 7 天' },
         { icon: 'exposure', text: '组队帖基础曝光' },
@@ -49,14 +47,12 @@ export const MOCK_PACKAGE_CATALOG: PackageCatalog = {
       audience: '组队发起人 · 高频找搭子用户',
       badge: '主推爆款',
       limits: {
-        aiMatchCount: 15,
         contactUnlockCount: 12,
         mapDays: 15,
         postPinCount: 1,
         basicExposure: false,
       },
       features: [
-        { icon: 'match', text: 'AI 智能匹配 · 15 次' },
         { icon: 'contact', text: '联系方式解锁 · 12 次' },
         { icon: 'map', text: '点位地图 · 15 天' },
         { icon: 'pin', text: '帖子 24h 置顶 × 1 次' },
@@ -69,14 +65,12 @@ export const MOCK_PACKAGE_CATALOG: PackageCatalog = {
       priceLabel: '15.9',
       audience: '跨城团长 · 电音 KOL · 重度发烧友',
       limits: {
-        aiMatchCount: null,
         contactUnlockCount: null,
         mapDays: 30,
         postPinCount: 2,
         basicExposure: false,
       },
       features: [
-        { icon: 'match', text: 'AI 智能匹配 · 不限次', unlimited: true },
         { icon: 'contact', text: '联系方式解锁 · 不限次', unlimited: true },
         { icon: 'map', text: '点位地图 · 30 天（上限）' },
         { icon: 'pin', text: '帖子 24h 置顶 × 2 次' },

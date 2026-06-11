@@ -1,20 +1,10 @@
 import './ContactUnlockQuotaExhaustedModal.scss';
 import React, { useCallback, useMemo } from 'react';
 import Taro from '@tarojs/taro';
-import {
-  ArrowRight,
-  Crown,
-  Lock,
-  Map,
-  Sparkles,
-  Star,
-  X,
-} from '../../components/icons';
+import { ArrowRight, Crown, Lock, Map, Star, X } from '../../components/icons';
 import { Text, View } from '@tarojs/components';
 import { useOverlayLock } from '../../hooks/useOverlayLock';
 import { useProfilePackagesQuery } from '../../hooks/useSyncApi';
-import { isLiveApi } from '../../constants/api';
-import { isProfileBenefitsEnabled } from '../../constants/featureFlags';
 import type { FreeMonthlyQuota, PackageTierId } from '../../types/backend';
 import {
   buildContactUnlockUpgradeCompare,
@@ -28,7 +18,6 @@ const ROW_ICONS: Record<
   React.ComponentType<{ size?: number | string; className?: string }>
 > = {
   contactUnlock: Lock,
-  aiMatch: Sparkles,
   map: Map,
 };
 
@@ -63,7 +52,6 @@ export function ContactUnlockQuotaExhaustedModal({
     });
   }, [onClose, onViewAllBenefits]);
 
-  const apiEnabled = isLiveApi();
   const packagesQuery = useProfilePackagesQuery();
   const catalog = packagesQuery.data;
   const tiers = useMemo(() => catalog?.tiers ?? [], [catalog?.tiers]);
@@ -183,14 +171,12 @@ export function ContactUnlockQuotaExhaustedModal({
               {ctaLabel}
             </Text>
           </View>
-          {isProfileBenefitsEnabled() ? (
-            <Text
-              className="s-contact-unlock-exhausted-modal__secondary"
-              onClick={handleViewAllBenefits}
-            >
-              查看我的全部权益 &gt;
-            </Text>
-          ) : null}
+          <Text
+            className="s-contact-unlock-exhausted-modal__secondary"
+            onClick={handleViewAllBenefits}
+          >
+            查看我的全部权益 &gt;
+          </Text>
         </View>
       </View>
     </View>

@@ -8,7 +8,6 @@ const proActivity4: EventPackageEntitlement = {
   tierName: 'Pro',
   paidTierId: 'pro',
   quotas: {
-    aiMatch: { limit: 11, used: 0, remaining: 11 },
     contactUnlock: { limit: 8, used: 0, remaining: 8 },
     map: { days: 7, expiresAt: '2099-01-01T00:00:00.000Z', active: true },
     postPin: { limit: 0, used: 0, remaining: 0 },
@@ -22,7 +21,6 @@ const freeActivity1: EventPackageEntitlement = {
   tierName: '免费版',
   paidTierId: null,
   quotas: {
-    aiMatch: { limit: 3, used: 0, remaining: 3 },
     contactUnlock: { limit: 3, used: 0, remaining: 3 },
     map: { days: 0, expiresAt: '1970-01-01T00:00:00.000Z', active: false },
     postPin: { limit: 0, used: 0, remaining: 0 },
@@ -34,7 +32,7 @@ describe('resolveProfileEntitlement', () => {
   it('returns free quotas for activity 1 when Pro exists only on activity 4', () => {
     const scoped = resolveProfileEntitlement([freeActivity1], 1);
     expect(scoped?.tierId).toBe('free');
-    expect(scoped?.quotas.aiMatch.limit).toBe(3);
+    expect(scoped?.quotas.contactUnlock.limit).toBe(3);
   });
 
   it('does not use activity 4 Pro when resolving activity 1', () => {
@@ -46,6 +44,6 @@ describe('resolveProfileEntitlement', () => {
   it('returns Pro when scoped to activity 4', () => {
     const picked = resolveProfileEntitlement([proActivity4, freeActivity1], 4);
     expect(picked?.paidTierId).toBe('pro');
-    expect(picked?.quotas.aiMatch.remaining).toBe(11);
+    expect(picked?.quotas.contactUnlock.remaining).toBe(8);
   });
 });

@@ -1,7 +1,6 @@
 import Taro, { useDidShow } from '@tarojs/taro';
 import { useCallback, useEffect, useMemo } from 'react';
 import { isLiveApi } from '../../constants/api';
-import { isProfileBenefitsEnabled } from '../../constants/featureFlags';
 import { useAccountRisk } from '../../hooks/useAccountRisk';
 import {
   useBlockedUsersQuery,
@@ -99,7 +98,7 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
     entitlementsData: paidEntitlementsData,
     refetchEntitlements,
   } = useProfilePaidBenefitCards({
-    entitlementsEnabled: isProfileBenefitsEnabled() && entitlementsReady && loggedIn,
+    entitlementsEnabled: entitlementsReady && loggedIn,
   });
 
   const packageSheet = useProfilePackageSheet({ paidEntitlements });

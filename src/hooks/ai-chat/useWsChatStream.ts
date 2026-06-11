@@ -38,7 +38,6 @@ export interface UseWsChatStreamOptions {
   onExistingPost?: (
     event: Extract<AiChatStreamEvent, { type: 'existing_post' }>,
   ) => void;
-  onMatchResults?: (activityLegacyId?: number) => void | Promise<void>;
   persistSessionFromStream: (sessionId: string) => void;
   createTypewriter: (options: {
     charDelayMs?: number;
@@ -58,7 +57,6 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
     getAuthHeaders,
     onPostCreated,
     onExistingPost,
-    onMatchResults,
     persistSessionFromStream,
     createTypewriter,
     typewriterCharDelayMs = 22,
@@ -127,11 +125,9 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
           typewriter,
           streamErrorText,
           setMessages,
-          activityLegacyId: activityId,
           persistSessionFromStream,
           onPostCreated,
           onExistingPost,
-          onMatchResults,
         });
       } catch (error) {
         if ((error as Error).name === 'AbortError') {
@@ -161,7 +157,6 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
       getAuthHeaders,
       mockReply,
       onExistingPost,
-      onMatchResults,
       onPostCreated,
       persistSessionFromStream,
       sessionIdRef,

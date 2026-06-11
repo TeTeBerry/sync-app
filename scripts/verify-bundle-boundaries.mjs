@@ -34,8 +34,8 @@ const MAIN_PACKAGE_GLOBS = [
 const FORBIDDEN_IN_MAIN = [
   /packageEvent\//,
   /packageEvent\/pages\/(my-itinerary|exclusive-itinerary)\//,
-  /itineraryWallpaperDraw/,
-  /generateItineraryWallpaper/,
+  /domains\/performance-itinerary\/utils\/itineraryWallpaper/,
+  /domains\/performance-itinerary\/utils\/generateItineraryWallpaper/,
 ];
 
 function walkTsFiles(dir, files = []) {

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   travelPlanNodeFromPayload,
   travelPlanNodeToPayload,
-} from '@/packageEvent/pages/my-itinerary/travelPlanApiMapper';
+} from '@/domains/travel-plan/utils/travelPlanApiMapper';
 
 describe('travelPlanApiMapper', () => {
   it('round-trips node payloads', () => {

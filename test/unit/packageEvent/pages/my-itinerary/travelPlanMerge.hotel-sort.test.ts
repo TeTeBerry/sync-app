@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { sortTravelPlanNodes } from '@/packageEvent/pages/my-itinerary/travelPlanMerge';
-import type { TravelPlanNode } from '@/packageEvent/pages/my-itinerary/travelPlanTypes';
+import { sortTravelPlanNodes } from '@sync/travel-plan-contracts';
+import type { TravelPlanNode } from '@/domains/travel-plan/types';
 
 const baseNode = (
   partial: Partial<TravelPlanNode> &

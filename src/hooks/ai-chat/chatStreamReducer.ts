@@ -15,13 +15,11 @@ export interface ProcessChatStreamEventsOptions {
   typewriter: TypewriterReveal;
   streamErrorText: string;
   setMessages: Dispatch<SetStateAction<ChatUiMessage[]>>;
-  activityLegacyId?: number;
   persistSessionFromStream: (sessionId: string) => void;
   onPostCreated?: (event: Extract<AiChatStreamEvent, { type: 'post_created' }>) => void;
   onExistingPost?: (
     event: Extract<AiChatStreamEvent, { type: 'existing_post' }>,
   ) => void;
-  onMatchResults?: (activityLegacyId?: number) => void | Promise<void>;
 }
 
 export async function processChatStreamEvents(
@@ -33,11 +31,9 @@ export async function processChatStreamEvents(
     typewriter,
     streamErrorText,
     setMessages,
-    activityLegacyId,
     persistSessionFromStream,
     onPostCreated,
     onExistingPost,
-    onMatchResults,
   } = options;
 
   const finishAiMessage = (updater: (current: ChatUiMessage) => ChatUiMessage) => {
@@ -79,17 +75,6 @@ export async function processChatStreamEvents(
 
     if (event.type === 'existing_post') {
       onExistingPost?.(event);
-      continue;
-    }
-
-    if (event.type === 'post_recommendations') {
-      finishAiMessage((message) => ({
-        ...message,
-        recommendedPosts: event.posts,
-      }));
-      if (event.posts.length > 0) {
-        void onMatchResults?.(activityLegacyId);
-      }
       continue;
     }
 

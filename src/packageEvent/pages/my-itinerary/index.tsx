@@ -6,15 +6,20 @@ import { Canvas, ScrollView, Text, View } from '@tarojs/components';
 import { PageTabBarChrome } from '../../../components/navigation/BottomNav';
 import PageNavigation from '../../../components/navigation/PageNavigation';
 import { useEndRouteTransitionOnShow } from '../../../hooks/useEndRouteTransitionOnShow';
-import { ITINERARY_WALLPAPER_CANVAS_ID } from './generateItineraryWallpaper';
-import MyItineraryTimeline from './components/MyItineraryTimeline';
-import { MyItineraryFooter, MyItinerarySegment } from './components/MyItineraryToolbar';
-import { TravelPlanAddSheet } from './components/TravelPlanAddSheet';
-import { TravelPlanHeaderAction } from './components/TravelPlanHeaderAction';
-import { TravelPlanStatsBar } from './components/TravelPlanStatsBar';
-import { TravelPlanTimeline } from './components/TravelPlanTimeline';
-import { useMyItineraryPage } from './useMyItineraryPage';
-import { useTravelPlanPage } from './useTravelPlanPage';
+import {
+  ITINERARY_WALLPAPER_CANVAS_ID,
+  MyItineraryFooter,
+  MyItinerarySegment,
+  MyItineraryTimeline,
+  useMyItineraryPage,
+} from '@/domains/performance-itinerary';
+import {
+  TravelPlanAddSheet,
+  TravelPlanHeaderAction,
+  TravelPlanStatsBar,
+  TravelPlanTimeline,
+  useTravelPlanPage,
+} from '@/domains/travel-plan';
 
 const MyItineraryPage = () => {
   useEndRouteTransitionOnShow();

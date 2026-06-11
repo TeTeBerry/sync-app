@@ -7,7 +7,7 @@ import {
 } from '../../../hooks/useSyncApi';
 import { useEventPostsInfiniteQuery } from '../../../hooks/useEventPostsInfiniteQuery';
 import { useEventDetailPosts } from './useEventDetailPosts';
-import { useEventDetailLive } from './useEventDetailLive';
+import { useEventDetailLive } from '@/domains/live-info';
 import type { EventDetailTabId } from './components/EventDetailContentTabs';
 import { useResolvedProfile } from '../../../hooks/useResolvedProfile';
 import type { ConfirmDialogOptions } from '../../../hooks/useConfirmDialog';
@@ -17,7 +17,7 @@ import { useEventDetailEntitlements } from './useEventDetailEntitlements';
 import { useEventDetailBuddyPost } from './useEventDetailBuddyPost';
 import { useEventDetailMessageBoard } from './useEventDetailMessageBoard';
 import { useEventDetailScrollPreserve } from './useEventDetailScrollPreserve';
-import { useEventDetailTravelGuide } from './useEventDetailTravelGuide';
+import { useEventDetailTravelGuide } from '@/domains/travel-guide';
 import { goExclusiveItinerary, goMyItinerary } from '../../../utils/route';
 import { useState } from 'react';
 

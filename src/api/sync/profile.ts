@@ -38,14 +38,6 @@ export function purchaseProfilePackage(payload: PurchaseProfilePackagePayload) {
   );
 }
 
-export function consumeProfileAiMatch(payload: ConsumeProfileEntitlementPayload) {
-  return apiPost<ConsumeProfileEntitlementResult>(
-    '/profile/entitlements/consume/ai-match',
-    payload,
-    ownerQueryParams(),
-  );
-}
-
 export function consumeProfileContactUnlock(payload: ConsumeProfileEntitlementPayload) {
   return apiPost<ConsumeProfileEntitlementResult>(
     '/profile/entitlements/consume/contact-unlock',

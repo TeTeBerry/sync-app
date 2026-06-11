@@ -1,8 +1,8 @@
 import React, { lazy, Suspense } from 'react';
 import ThemedPageLoader from '../../../../components/ThemedPageLoader';
-import type { EventLiveInfoTabActions } from '../live/EventLiveInfoTab';
+import type { EventLiveInfoTabActions } from '@/domains/live-info/components/EventLiveInfoTab';
 const EventLiveInfoTab = lazy(() =>
-  import('../live/EventLiveInfoTab').then((mod) => ({
+  import('@/domains/live-info/components/EventLiveInfoTab').then((mod) => ({
     default: mod.EventLiveInfoTab,
   })),
 );

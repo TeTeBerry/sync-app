@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import type { ItineraryDay } from '@/types/backend';
-import { sanitizeItineraryDaysForSave } from '@/packageEvent/pages/my-itinerary/sanitizeItineraryForSave';
+import { normalizeItineraryDaysForSave } from '@/types/itinerary';
 
-describe('sanitizeItineraryDaysForSave', () => {
+describe('normalizeItineraryDaysForSave', () => {
   it('normalizes clock time and coerces dot colors', () => {
-    const days = sanitizeItineraryDaysForSave([
+    const days = normalizeItineraryDaysForSave([
       {
         id: 'jun13',
         label: '6月13日',
@@ -34,7 +34,7 @@ describe('sanitizeItineraryDaysForSave', () => {
 
   it('normalizes pill variant and trims field lengths', () => {
     const long = 'x'.repeat(300);
-    const days = sanitizeItineraryDaysForSave([
+    const days = normalizeItineraryDaysForSave([
       {
         id: '',
         label: '',
@@ -79,7 +79,7 @@ describe('sanitizeItineraryDaysForSave', () => {
       },
     ];
 
-    const days = sanitizeItineraryDaysForSave(input);
+    const days = normalizeItineraryDaysForSave(input);
     expect(days[0].items[0].dotColor).toBe('purple');
     expect(days[0].items[0]).not.toHaveProperty('subtitle');
     expect(days[0].items[0]).not.toHaveProperty('pill');

@@ -45,15 +45,15 @@ describe('resolveUserBuddyPreviewForTargetPost', () => {
     contentTypes: ['team'],
   };
 
-  it('picks the user post that best matches the host post', () => {
+  it('uses the first recruiting post owned by the user in the feed', () => {
     const preview = resolveUserBuddyPreviewForTargetPost(
       host,
       7,
       [host, myTeam, myCarpool],
       [],
     );
-    expect(preview?.body).toContain('同路');
-    expect(preview?.tags).toContain('#同路');
+    expect(preview?.body).toContain('找组队');
+    expect(preview?.tags).toContain('#组队');
   });
 
   it('includes profile recruiting posts not in the feed', () => {
@@ -71,7 +71,7 @@ describe('resolveUserBuddyPreviewForTargetPost', () => {
     const preview = resolveUserBuddyPreviewForTargetPost(
       host,
       7,
-      [host, myTeam],
+      [host],
       [profileOnly],
     );
     expect(preview?.body).toContain('虹桥');

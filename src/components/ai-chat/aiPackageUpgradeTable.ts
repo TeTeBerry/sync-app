@@ -4,7 +4,7 @@ import type {
   PackageTierId,
 } from '../../types/backend';
 
-export type AiPackageCompareRowId = 'aiMatch' | 'contactUnlock' | 'mapDays' | 'postPin';
+export type AiPackageCompareRowId = 'contactUnlock' | 'mapDays' | 'postPin';
 
 export type AiPackageCompareRow = {
   id: AiPackageCompareRowId;
@@ -46,16 +46,6 @@ export function buildAiPackageCompareRows(
 
   return [
     {
-      id: 'aiMatch',
-      label: 'AI 匹配',
-      icon: 'match',
-      values: {
-        pro: formatCount(pro.limits.aiMatchCount),
-        pro_plus: formatCount(proPlus.limits.aiMatchCount),
-        ultra: formatCount(ultra.limits.aiMatchCount),
-      },
-    },
-    {
       id: 'contactUnlock',
       label: '联系解锁',
       icon: 'contact',
@@ -77,7 +67,7 @@ export function buildAiPackageCompareRows(
     },
     {
       id: 'postPin',
-      label: '帖子置顶',
+      label: '主页置顶',
       icon: 'pin',
       values: {
         pro: formatPostPin(pro.limits.postPinCount),

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { useItineraryStore } from '@/stores/itineraryStore';
+import { useItineraryStore } from '@/domains/performance-itinerary/store';
 
 describe('useItineraryStore', () => {
   beforeEach(() => {

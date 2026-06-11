@@ -24,7 +24,6 @@ import {
   preloadProfileSubpackage,
 } from './subpackagePreload';
 import type { BackendActivity } from '../types/backend';
-import { isProfileBenefitsEnabled } from '../constants/featureFlags';
 import { isAuthGated, requireAuth } from './authGate';
 import type { LoginInterceptFeature } from '../stores/loginInterceptStore';
 import { setEventsViewTabIntent } from './eventsTabIntent';
@@ -567,20 +566,12 @@ export function goProfilePosts() {
 
 /** Full benefits list (e.g. from upgrade sheets or profile preview link). */
 export function goProfileBenefits() {
-  if (!isProfileBenefitsEnabled()) {
-    switchTabTo(ROUTES.PROFILE);
-    return;
-  }
   endRouteTransition();
   navigateToSafe(ROUTES.PROFILE_BENEFITS);
 }
 
 /** Profile tab with package upgrade sheet open. */
 export function goProfileUpgrade() {
-  if (!isProfileBenefitsEnabled()) {
-    switchTabTo(ROUTES.PROFILE);
-    return;
-  }
   requireAuth(() => {
     useNavigationStore.getState().setProfileIntent({ openPackageSheet: true });
     switchTabTo(ROUTES.PROFILE);

@@ -39,12 +39,11 @@ export type ProfileFreeBenefitCardModel = {
   title: string;
   /** e.g. 每月重置 for venue-wide monthly quotas. */
   subtitle: string;
-  aiMatch: ProfileFreeBenefitQuota;
   contactUnlock: ProfileFreeBenefitQuota;
   upsellText: string;
 };
 
-export type ProfileBenefitMetricKind = 'match' | 'contact' | 'duration';
+export type ProfileBenefitMetricKind = 'contact' | 'duration';
 
 export type ProfileBenefitMetric = {
   id: string;

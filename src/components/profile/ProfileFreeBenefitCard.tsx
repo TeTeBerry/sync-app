@@ -1,6 +1,6 @@
 import './ProfileFreeBenefitCard.scss';
 import React from 'react';
-import { ChevronRight, Crown, Lock, Sparkles, Ticket } from '../../components/icons';
+import { ChevronRight, Crown, Lock, Ticket } from '../../components/icons';
 import type { ProfileFreeBenefitCardModel } from './profileBenefitsMapper';
 import { Text, View } from '@tarojs/components';
 
@@ -60,32 +60,6 @@ const ProfileFreeBenefitCard: React.FC<ProfileFreeBenefitCardProps> = ({
             aria-hidden
           />
         </View>
-      </View>
-
-      <View className="s-profile-free-benefit__row">
-        <View className="s-profile-free-benefit__row-top">
-          <View className="s-profile-free-benefit__row-label-wrap">
-            <Sparkles
-              size={14}
-              color="var(--primary)"
-              className="s-profile-free-benefit__row-icon"
-              aria-hidden
-            />
-            <Text className="s-profile-free-benefit__row-label">AI 智能匹配</Text>
-          </View>
-          <QuotaFraction
-            remaining={card.aiMatch.remaining}
-            limit={card.aiMatch.limit}
-            accentClass="s-profile-free-benefit__quota-remaining--pink"
-          />
-        </View>
-        <View className="s-profile-free-benefit__bar" aria-hidden>
-          <View
-            className="s-profile-free-benefit__bar-fill s-profile-free-benefit__bar-fill--pink"
-            style={{ width: `${Math.round(card.aiMatch.remainingRatio * 100)}%` }}
-          />
-        </View>
-        <Text className="s-profile-free-benefit__row-hint">{card.subtitle}</Text>
       </View>
 
       <View className="s-profile-free-benefit__row">

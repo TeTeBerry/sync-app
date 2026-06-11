@@ -11,7 +11,6 @@ import {
 } from '../../components/icons';
 import { LoginPromptHero } from '../auth/LoginPromptHero';
 import { requireAuth } from '../../utils/authGate';
-import { isProfileBenefitsEnabled } from '../../constants/featureFlags';
 import { go, ROUTES } from '../../utils/route';
 import { Text, View } from '@tarojs/components';
 
@@ -55,9 +54,7 @@ const ALL_LOCKED_FEATURES: LockedFeature[] = [
   },
 ];
 
-const LOCKED_FEATURES = ALL_LOCKED_FEATURES.filter(
-  (item) => item.feature !== 'benefits' || isProfileBenefitsEnabled(),
-);
+const LOCKED_FEATURES = ALL_LOCKED_FEATURES;
 
 const ProfileGuestSection: React.FC<ProfileGuestSectionProps> = ({
   onLoggedIn,

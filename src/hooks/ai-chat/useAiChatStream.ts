@@ -31,8 +31,6 @@ export interface UseAiChatStreamOptions {
   onExistingPost?: (
     event: Extract<AiChatStreamEvent, { type: 'existing_post' }>,
   ) => void;
-  /** Called when the stream returns post recommendations with at least one post. */
-  onMatchResults?: (activityLegacyId?: number) => void | Promise<void>;
 }
 
 export function useAiChatStream(options: UseAiChatStreamOptions) {
@@ -49,7 +47,6 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
     getAuthHeaders,
     onPostCreated,
     onExistingPost,
-    onMatchResults,
     typewriterCharDelayMs = 22,
   } = options;
 
@@ -92,7 +89,6 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
     getAuthHeaders,
     onPostCreated,
     onExistingPost,
-    onMatchResults,
     persistSessionFromStream,
     createTypewriter,
     typewriterCharDelayMs,

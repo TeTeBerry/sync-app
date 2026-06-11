@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   createTravelPlanNodeFromForm,
   sortTravelPlanAddFormValues,
-} from '@/packageEvent/pages/my-itinerary/travelPlanAddForm';
+} from '@/domains/travel-plan/utils/travelPlanAddForm';
 
 describe('createTravelPlanNodeFromForm', () => {
   it('builds a pending node from form values', () => {
@@ -26,7 +26,7 @@ describe('createTravelPlanNodeFromForm', () => {
     expect(node.duration).toBe('2晚');
     expect(node.title).toBe('入住宝安大酒店');
     expect(node.subtitle).toBe('含双早');
-    expect(node.detail).toBe('含双早 · 预订号 8821');
+    expect(node.detail).toBe('预订号 8821');
     expect(node.price).toBe(760);
     expect(node.confirmed).toBe(false);
   });

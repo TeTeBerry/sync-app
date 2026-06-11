@@ -15,7 +15,16 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@sync/chat-contracts": ["../sync-app-backend/src/shared/chat/index.ts"]
+      "@sync/chat-contracts": ["../sync-app-backend/src/shared/chat/index.ts"],
+      "@sync/travel-plan-contracts": [
+        "../sync-app-backend/src/shared/travel-plan/index.ts"
+      ],
+      "@sync/itinerary-contracts": [
+        "../sync-app-backend/src/shared/itinerary/index.ts"
+      ],
+      "@sync/live-info-contracts": [
+        "../sync-app-backend/src/shared/live-info/index.ts"
+      ]
     },
     "types": ["webpack-env", "node", "react"],
     "typeRoots": ["./node_modules/@types"]

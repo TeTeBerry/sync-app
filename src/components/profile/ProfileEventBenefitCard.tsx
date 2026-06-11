@@ -1,13 +1,6 @@
 import './ProfileEventBenefitCard.scss';
 import React from 'react';
-import {
-  ArrowUp,
-  CloudLightning,
-  Lock,
-  MapPin,
-  Sparkles,
-  Star,
-} from '../../components/icons';
+import { ArrowUp, CloudLightning, Lock, MapPin, Star } from '../../components/icons';
 import {
   getNextTierId,
   type ProfileEventBenefitRow,
@@ -30,11 +23,6 @@ function rowIcon(rowId: ProfileEventBenefitRow['id']) {
   const iconClass = 's-profile-event-benefit__row-icon';
   if (rowId === 'contact') {
     return <Lock size={14} color="#d4a017" className={iconClass} aria-hidden />;
-  }
-  if (rowId === 'ai-match') {
-    return (
-      <Sparkles size={14} color="var(--primary)" className={iconClass} aria-hidden />
-    );
   }
   if (rowId === 'map') {
     return <MapPin size={14} color="#64d2ff" className={iconClass} aria-hidden />;

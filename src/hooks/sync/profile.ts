@@ -1,9 +1,7 @@
 import { isLiveApi } from '../../constants/api';
-import { isProfileBenefitsEnabled } from '../../constants/featureFlags';
 import { isLoggedIn } from '../../utils/authStorage';
 import { fetchCurrentUser } from '../../api/sync/users';
 import {
-  consumeProfileAiMatch,
   consumeProfileContactUnlock,
   fetchProfileActivities,
   fetchProfileEntitlements,
@@ -53,7 +51,7 @@ export function useProfileSummaryQuery(activityLegacyId?: number) {
 }
 
 export function useProfilePackagesQuery() {
-  const enabled = profileApiEnabled() && isProfileBenefitsEnabled();
+  const enabled = profileApiEnabled();
 
   return useApiQuery({
     queryKey: ['profile', 'packages'],
@@ -68,7 +66,7 @@ export function useProfileEntitlementsQuery(
   options?: QueryEnableOptions,
 ) {
   const tabEnabled = options?.enabled ?? true;
-  const enabled = profileApiEnabled() && tabEnabled && isProfileBenefitsEnabled();
+  const enabled = profileApiEnabled() && tabEnabled;
   const scopedId =
     activityLegacyId != null && !Number.isNaN(activityLegacyId)
       ? activityLegacyId
@@ -85,32 +83,14 @@ export function useProfileEntitlementsQuery(
 export async function purchaseProfilePackageAndInvalidate(
   payload: PurchaseProfilePackagePayload,
 ) {
-  if (!isProfileBenefitsEnabled()) {
-    throw new Error('Profile benefits are disabled');
-  }
   const result = await purchaseProfilePackage(payload);
   await invalidateProfilePackageState();
-  return result;
-}
-
-export async function consumeProfileAiMatchAndInvalidate(activityLegacyId: number) {
-  if (!isProfileBenefitsEnabled()) {
-    return;
-  }
-  if (Number.isNaN(activityLegacyId)) {
-    throw new Error('activityLegacyId is required');
-  }
-  const result = await consumeProfileAiMatch({ activityLegacyId });
-  await invalidateProfileEntitlements();
   return result;
 }
 
 export async function consumeProfileContactUnlockAndInvalidate(
   activityLegacyId: number,
 ) {
-  if (!isProfileBenefitsEnabled()) {
-    return;
-  }
   if (Number.isNaN(activityLegacyId)) {
     throw new Error('activityLegacyId is required');
   }

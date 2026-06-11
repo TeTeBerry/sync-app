@@ -34,8 +34,6 @@ declare namespace NodeJS {
     /** 腾讯位置服务 key（地图组件等） */
     TARO_APP_QQ_MAP_KEY?: string;
     TARO_APP_QQ_MAP_LAYER_STYLE?: string;
-    /** 为 true 时展示个人页「我的权益」及相关入口；默认不展示 */
-    TARO_APP_ENABLE_PROFILE_BENEFITS?: string;
     /** Tencent COS — align with backend COS_BUCKET / COS_REGION */
     TARO_APP_COS_BUCKET?: string;
     TARO_APP_COS_REGION?: string;

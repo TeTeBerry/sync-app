@@ -134,10 +134,9 @@ export interface ActivityUnregisterResult {
 
 export type PackageTierId = 'pro' | 'pro_plus' | 'ultra';
 
-export type PackageFeatureIcon = 'match' | 'contact' | 'map' | 'exposure' | 'pin';
+export type PackageFeatureIcon = 'contact' | 'map' | 'exposure' | 'pin';
 
 export interface PackageTierLimits {
-  aiMatchCount: number | null;
   contactUnlockCount: number | null;
   mapDays: number;
   postPinCount: number;
@@ -185,7 +184,6 @@ export interface MapEntitlementSlot {
 }
 
 export interface EventEntitlementQuotas {
-  aiMatch: QuotaSlot;
   contactUnlock: QuotaSlot;
   map: MapEntitlementSlot;
   postPin: QuotaSlot;
@@ -194,7 +192,6 @@ export interface EventEntitlementQuotas {
 
 export interface FreeMonthlyQuota {
   period: string;
-  aiMatch: QuotaSlot;
   contactUnlock: QuotaSlot;
 }
 
@@ -468,275 +465,47 @@ export interface AppNotification {
   createdAt: string;
 }
 
-export type LiveInfoCategoryId =
-  | 'entry_crowd'
-  | 'toilet_queue'
-  | 'water_queue'
-  | 'smoke_drink'
-  | 'sound_level'
-  | 'stage_view';
+export type {
+  GenerateItineraryPayload,
+  GenerateItineraryResult,
+  ItineraryBuddyRecruitHint,
+  ItineraryConflict,
+  ItineraryDay,
+  ItineraryDj,
+  ItineraryScheduleSnapshot,
+  ItineraryStage,
+  ItineraryTimelineDotColor,
+  ItineraryTimelineItem,
+  ItineraryTimelinePill,
+  SaveItineraryPayload,
+  SaveItineraryResult,
+  SavedItineraryResult,
+} from './itinerary';
 
-export interface LiveInfoZone {
-  id: string;
-  label: string;
-}
+export type {
+  LiveInfoCategoryId,
+  LiveInfoCertStatus,
+  LiveInfoFeedFilters,
+  LiveInfoFeedItem,
+  LiveInfoSnapshot,
+  LiveInfoSummaryRow,
+  LiveInfoViewerState,
+  LiveInfoZone,
+  PublishLiveInfoPayload,
+  SubmitLiveInfoWristbandPayload,
+  SubmitLiveInfoWristbandRejectCode,
+  SubmitLiveInfoWristbandResult,
+} from './liveInfo';
 
-export interface LiveInfoSummaryRow {
-  categoryId: LiveInfoCategoryId;
-  score: number;
-}
-
-export interface LiveInfoFeedItem {
-  id: string;
-  userName: string;
-  avatar?: string;
-  authorOnSiteVerified?: boolean;
-  zoneTag: string;
-  zoneLabel: string;
-  timeLabel: string;
-  ratings: { categoryId: LiveInfoCategoryId; score: number }[];
-  remark?: string;
-  likes: number;
-  liked?: boolean;
-}
-
-export type LiveInfoCertStatus = 'none' | 'pending' | 'approved' | 'rejected';
-
-export interface LiveInfoViewerState {
-  isCertified: boolean;
-  certStatus: LiveInfoCertStatus;
-  certExpiryLabel: string;
-  wristbandImageUrl?: string;
-  rejectReason?: string;
-}
-
-export interface LiveInfoSnapshot {
-  activityLegacyId: number;
-  eventDate: string;
-  zones: LiveInfoZone[];
-  viewer: LiveInfoViewerState;
-  summary: LiveInfoSummaryRow[];
-  certCount: number;
-  feed: LiveInfoFeedItem[];
-}
-
-export type LiveInfoFeedFilters = {
-  zoneTag?: string;
-  categoryId?: LiveInfoCategoryId;
-  certifiedOnly?: boolean;
-};
-
-export interface SubmitLiveInfoWristbandPayload {
-  imageUrl: string;
-}
-
-export type SubmitLiveInfoWristbandRejectCode = 'duplicate_image';
-
-export interface SubmitLiveInfoWristbandResult {
-  ok: boolean;
-  viewer: LiveInfoViewerState;
-  message?: string;
-  code?: SubmitLiveInfoWristbandRejectCode;
-}
-
-export interface PublishLiveInfoPayload {
-  zoneTag: string;
-  ratings: { categoryId: LiveInfoCategoryId; score: number }[];
-  remark?: string;
-}
-
-export type ItineraryStage = 'main' | 'bass' | 'late' | 'outdoor';
-
-export interface ItineraryDj {
-  id: string;
-  name: string;
-  genre: string;
-  genreLabel: string;
-  stage: ItineraryStage;
-  popularity: number;
-  avatarSeed: string;
-  genreColor: string;
-}
-
-export interface ItineraryConflict {
-  artistIds: [string, string];
-  artistNames: [string, string];
-  dateKey: string;
-  overlapStart: string;
-  overlapEnd: string;
-  message: string;
-}
-
-export interface ItineraryScheduleSnapshot {
-  activityLegacyId: number;
-  eventMeta: string;
-  sessions: Array<{
-    dateKey: string;
-    label: string;
-    bannerDateLabel: string;
-  }>;
-  djs: ItineraryDj[];
-  performances: Array<{
-    artistId: string;
-    artistName: string;
-    dateKey: string;
-    dateLabel: string;
-    genre: string;
-    genreLabel: string;
-    stage: string;
-    stageLabel: string;
-    startTime: string;
-    endTime: string;
-    startMinutes: number;
-    endMinutes: number;
-    popularity: number;
-    avatarSeed: string;
-    genreColor: string;
-  }>;
-  conflicts: ItineraryConflict[];
-}
-
-export type ItineraryTimelineDotColor = 'pink' | 'cyan' | 'purple';
-
-export interface ItineraryTimelinePill {
-  label: string;
-  variant: 'green' | 'pink';
-}
-
-export interface ItineraryTimelineItem {
-  id: string;
-  time: string;
-  dotColor: ItineraryTimelineDotColor;
-  title: string;
-  subtitle?: string;
-  timeTag?: string;
-  timeTagColor?: ItineraryTimelineDotColor;
-  pill?: ItineraryTimelinePill;
-  highlighted?: boolean;
-}
-
-export interface ItineraryDay {
-  id: string;
-  label: string;
-  bannerDateLabel: string;
-  nodeCount: number;
-  items: ItineraryTimelineItem[];
-}
-
-export interface ItineraryBuddyRecruitHint {
-  recruitingCount: number;
-  highlightGenre: string;
-  genreLabels: string[];
-}
-
-export interface GenerateItineraryPayload {
-  selectedDjIds: string[];
-  dateKey?: string;
-}
-
-export interface GenerateItineraryResult {
-  itinerary: {
-    eventMeta: string;
-    days: ItineraryDay[];
-  };
-  conflicts: ItineraryConflict[];
-  cached: boolean;
-}
-
-export interface SaveItineraryPayload {
-  eventMeta: string;
-  days: ItineraryDay[];
-  selectedDjIds?: string[];
-}
-
-export interface SaveItineraryResult {
-  ok: true;
-  activityLegacyId: number;
-  savedAt: string;
-}
-
-export interface SavedItineraryResult {
-  saved: boolean;
-  activityLegacyId?: number;
-  selectedDjIds?: string[];
-  eventMeta?: string;
-  days?: ItineraryDay[];
-  updatedAt?: string;
-}
-
-export type TravelPlanCategory = 'flight' | 'transport' | 'hotel' | 'dining' | 'event';
-
-export interface TravelPlanNodePayload {
-  id: string;
-  category: TravelPlanCategory;
-  startDate: string;
-  endDate: string;
-  startTime?: string;
-  endTime?: string;
-  duration?: string;
-  title: string;
-  subtitle: string;
-  detail?: string;
-  price?: number;
-  confirmed: boolean;
-}
-
-export interface SaveTravelPlanPayload {
-  eventMeta?: string;
-  nodes: TravelPlanNodePayload[];
-  activityConfirmations?: Record<string, boolean>;
-  activityPriceOverrides?: Record<string, number>;
-  hiddenActivityNodeIds?: string[];
-}
-
-export interface SaveTravelPlanResult {
-  ok: true;
-  activityLegacyId: number;
-  savedAt: string;
-  nodeCount: number;
-}
-
-export interface SavedTravelPlanNode extends TravelPlanNodePayload {
-  timeLabel?: string;
-  source?: 'activity' | 'user';
-}
-
-export interface SavedTravelPlanResult {
-  saved: boolean;
-  activityLegacyId?: number;
-  eventMeta?: string;
-  activityNodes?: SavedTravelPlanNode[];
-  userNodes?: SavedTravelPlanNode[];
-  nodes?: SavedTravelPlanNode[];
-  activityConfirmations?: Record<string, boolean>;
-  activityPriceOverrides?: Record<string, number>;
-  hiddenActivityNodeIds?: string[];
-  savedAt?: string;
-}
-
-export type TravelPlanReceiptCategory = 'transport' | 'hotel' | 'dining' | 'event';
-
-export interface TravelPlanReceiptRecognizeForm {
-  title: string;
-  description: string;
-  cost: string;
-  remark: string;
-  startDate: string;
-  endDate: string;
-  startTime?: string;
-  endTime?: string;
-}
-
-export interface RecognizeTravelPlanReceiptPayload {
-  category: TravelPlanReceiptCategory;
-  image: string;
-}
-
-export interface RecognizeTravelPlanReceiptResult {
-  ok: true;
-  filled: boolean;
-  category: TravelPlanReceiptCategory;
-  form?: TravelPlanReceiptRecognizeForm;
-  forms?: TravelPlanReceiptRecognizeForm[];
-  message?: string;
-}
+export type {
+  RecognizeTravelPlanReceiptPayload,
+  RecognizeTravelPlanReceiptResult,
+  SaveTravelPlanPayload,
+  SaveTravelPlanResult,
+  SavedTravelPlanNode,
+  SavedTravelPlanResult,
+  TravelPlanCategory,
+  TravelPlanNodePayload,
+  TravelPlanReceiptCategory,
+  TravelPlanReceiptRecognizeForm,
+} from './travelPlan';

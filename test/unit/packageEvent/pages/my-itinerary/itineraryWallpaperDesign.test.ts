@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   lockScreenInsets,
   WALLPAPER_DESIGN,
-} from '@/packageEvent/pages/my-itinerary/itineraryWallpaperDesign';
+} from '@/domains/performance-itinerary/utils/itineraryWallpaperDesign';
 
 describe('lockScreenInsets', () => {
   const height = 2340;

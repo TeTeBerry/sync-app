@@ -6,7 +6,7 @@ import {
   resolveLiveInfoCertCount,
   resolveLiveInfoFeed,
   resolveLiveInfoSummary,
-} from '@/packageEvent/pages/event-detail/liveInfoMock';
+} from '@/domains/live-info/mocks/liveInfoMock';
 
 describe('resolveLiveInfoFeed', () => {
   it('returns mock feed when API feed is empty', () => {

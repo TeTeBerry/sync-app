@@ -3,7 +3,7 @@ import {
   computeTravelPlanStats,
   formatTravelPlanCost,
   TRAVEL_PLAN_MOCK_NODES,
-} from '@/packageEvent/pages/my-itinerary/travelPlanMock';
+} from '@/domains/travel-plan/utils/travelPlanMock';
 
 describe('travelPlanMock', () => {
   it('computes stats from mock nodes', () => {

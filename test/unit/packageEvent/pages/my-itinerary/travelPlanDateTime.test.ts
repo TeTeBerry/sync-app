@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatTravelPlanTimeLabel } from '@/packageEvent/pages/my-itinerary/travelPlanDateTime';
+import { formatTravelPlanTimeLabel } from '@/domains/travel-plan/utils/travelPlanDateTime';
 
 describe('formatTravelPlanTimeLabel', () => {
   it('shows hotel check-in and check-out dates on the label', () => {

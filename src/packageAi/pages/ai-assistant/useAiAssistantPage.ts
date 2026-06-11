@@ -19,11 +19,9 @@ import {
   ROUTES,
 } from '../../../utils/route';
 import { resolveAiChatWsUrl } from '../../../constants/api';
-import { isProfileBenefitsEnabled } from '../../../constants/featureFlags';
 import { goProfileBenefits } from '../../../utils/route';
 import { isAiChatWsDevLog } from '../../../utils/aiChatWs';
 import { inferUserGenderFromName } from '../../../utils/inferAuthorGender';
-import { useAiMatchQuota } from '../../../hooks/useAiMatchQuota';
 import { useProfileActivityLegacyId } from '../../../hooks/useProfileActivityLegacyId';
 
 /** Header content row (avatar + titles), excluding status bar. */
@@ -61,19 +59,11 @@ export function useAiAssistantPage() {
   const [pageShowSeq, setPageShowSeq] = useState(0);
   const [upgradeSheetOpen, setUpgradeSheetOpen] = useState(false);
   const profileActivityLegacyId = useProfileActivityLegacyId();
-  const aiMatchQuota = useAiMatchQuota();
-
   const openUpgradeSheet = useCallback(() => {
-    if (!isProfileBenefitsEnabled()) {
-      return;
-    }
     setUpgradeSheetOpen(true);
   }, []);
 
   const handleViewAllBenefits = useCallback(() => {
-    if (!isProfileBenefitsEnabled()) {
-      return;
-    }
     setUpgradeSheetOpen(false);
     Taro.nextTick(() => {
       goProfileBenefits();
@@ -182,7 +172,6 @@ export function useAiAssistantPage() {
   }, [activityLegacyId]);
 
   return {
-    profileBenefitsEnabled: isProfileBenefitsEnabled(),
     navInsets,
     pendingInitialMessage,
     pendingOpenAiGuideSheet,
@@ -193,7 +182,6 @@ export function useAiAssistantPage() {
     upgradeSheetOpen,
     setUpgradeSheetOpen,
     profileActivityLegacyId,
-    aiMatchQuota,
     openUpgradeSheet,
     handleViewAllBenefits,
     profileUserData,

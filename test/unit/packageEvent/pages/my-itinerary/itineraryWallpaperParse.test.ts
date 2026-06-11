@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import type { ItineraryTimelineItem } from '@/packageEvent/pages/my-itinerary/myItineraryMock';
-import { MY_ITINERARY_DAYS } from '@/packageEvent/pages/my-itinerary/myItineraryMock';
+import type { ItineraryTimelineItem } from '@/domains/performance-itinerary/mocks/myItineraryMock';
+import { MY_ITINERARY_DAYS } from '@/domains/performance-itinerary/mocks/myItineraryMock';
 import {
   buildWallpaperRows,
   buildWallpaperSectionsByDate,
   isPerformanceTimelineItem,
   parseTitleArtistStage,
   timelineItemToWallpaperRow,
-} from '@/packageEvent/pages/my-itinerary/itineraryWallpaperParse';
+} from '@/domains/performance-itinerary/utils/itineraryWallpaperParse';
 
 describe('parseTitleArtistStage', () => {
   it('splits artist and stage on middle dot separator', () => {
