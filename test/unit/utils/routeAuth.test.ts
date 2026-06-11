@@ -71,7 +71,7 @@ describe('route auth gate', () => {
   it('goAiAssistant opens login sheet when logged out', async () => {
     const { goAiAssistant } = await import('@/utils/route');
     goAiAssistant();
-    expect(mockShow).toHaveBeenCalledWith('ai_match', expect.any(Function));
+    expect(mockShow).toHaveBeenCalledWith('ai_assistant', expect.any(Function));
     expect(mockNavigateTo).not.toHaveBeenCalled();
   });
 

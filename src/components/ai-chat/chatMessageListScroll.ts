@@ -1,6 +1,6 @@
 import type { ChatUiMessage } from '../../types/aiChat';
 
-/** 快捷集/匹配流展示卡片、攻略图等富内容时保持滚动位置 */
+/** 快捷集、攻略图等富内容时保持滚动位置 */
 export function shouldSuppressAutoScrollForMessage(
   msg: ChatUiMessage | undefined,
 ): boolean {

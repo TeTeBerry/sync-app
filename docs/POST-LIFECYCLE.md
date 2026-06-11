@@ -42,7 +42,7 @@ POST /api/posts
 1. 解析用户资料、活动信息（`activityLegacyId` → `eventTitle` / `location`）
 2. 票务敏感词拦截（`isTicketPublishProhibited`）
 3. 可选风控 `assessPost`（不通过则 `status: hidden`）
-4. 推断 `contentTypes`、写入 `matchCriteria` / `departureCity`
+4. 推断 `contentTypes`、写入 `departureCity`
 5. 同活动发帖上限（默认 8 篇）
 6. `repository.create`，状态 `active`（历史库中的 `recruiting` / `completed` 会在读时归一化为 `active`）
 

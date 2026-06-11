@@ -9,43 +9,35 @@ import {
 } from '../../../../hooks/useSyncApi';
 import { saveEncryptedProfileSnapshot } from '../../../../utils/profileSnapshotStorage';
 import {
-  formatMatchPreferencesSummary,
-  MATCH_BUDGET_OPTIONS,
-  MATCH_DEPARTURE_CITIES,
-  MATCH_GENRE_OPTIONS,
-  normalizeMatchBudgetLevel,
-  type MatchBudgetLevel,
-} from '../../../../constants/matchPreferences';
+  BUDDY_BUDGET_OPTIONS,
+  BUDDY_DEPARTURE_CITIES,
+  BUDDY_GENRE_OPTIONS,
+  formatBuddyPreferencesSummary,
+  normalizeBuddyBudgetLevel,
+  type BuddyBudgetLevel,
+} from '../../../../constants/buddyPreferences';
 import { Input, Text, View } from '@tarojs/components';
 
 const MAX_GENRES = 6;
 
-export function MatchPreferencesSettings() {
+export function BuddyPreferencesSettings() {
   const { data: currentUser } = useCurrentUserQuery();
   const [city, setCity] = useState('');
   const [customCity, setCustomCity] = useState('');
   const [genres, setGenres] = useState<string[]>([]);
-  const [budgetLevel, setBudgetLevel] = useState<MatchBudgetLevel | ''>('');
-  const [likeMate, setLikeMate] = useState<boolean | null>(null);
+  const [budgetLevel, setBudgetLevel] = useState<BuddyBudgetLevel | ''>('');
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
 
   useEffect(() => {
     const nextCity = currentUser?.city?.trim() ?? '';
-    const preset = MATCH_DEPARTURE_CITIES.includes(
-      nextCity as (typeof MATCH_DEPARTURE_CITIES)[number],
+    const preset = BUDDY_DEPARTURE_CITIES.includes(
+      nextCity as (typeof BUDDY_DEPARTURE_CITIES)[number],
     );
     setCity(preset ? nextCity : '');
     setCustomCity(preset ? '' : nextCity);
     setGenres(currentUser?.favorGenres ?? []);
-    setBudgetLevel(normalizeMatchBudgetLevel(currentUser?.budgetLevel) ?? '');
-    setLikeMate(
-      currentUser?.likeMate === true
-        ? true
-        : currentUser?.likeMate === false
-          ? false
-          : null,
-    );
+    setBudgetLevel(normalizeBuddyBudgetLevel(currentUser?.budgetLevel) ?? '');
     setDirty(false);
   }, [currentUser]);
 
@@ -81,14 +73,12 @@ export function MatchPreferencesSettings() {
         city: resolvedCity || undefined,
         favorGenres: genres.length ? genres : undefined,
         budgetLevel: budgetLevel || undefined,
-        likeMate: likeMate === null ? undefined : likeMate,
       };
       await updateCurrentUserAndInvalidate(payload);
       await saveEncryptedProfileSnapshot({
         city: payload.city,
         favorGenres: payload.favorGenres,
         budgetLevel: payload.budgetLevel,
-        likeMate: payload.likeMate,
         notificationsEnabled: currentUser?.notificationsEnabled,
       });
       setDirty(false);
@@ -98,28 +88,20 @@ export function MatchPreferencesSettings() {
     } finally {
       setSaving(false);
     }
-  }, [
-    budgetLevel,
-    currentUser?.notificationsEnabled,
-    genres,
-    likeMate,
-    resolvedCity,
-    saving,
-  ]);
+  }, [budgetLevel, currentUser?.notificationsEnabled, genres, resolvedCity, saving]);
 
-  const preview = formatMatchPreferencesSummary({
+  const preview = formatBuddyPreferencesSummary({
     city: resolvedCity || undefined,
     favorGenres: genres,
     budgetLevel: budgetLevel || undefined,
-    likeMate: likeMate ?? undefined,
   });
 
   return (
     <View className="s-match-prefs">
       <View className="s-match-prefs__banner">
-        <Text className="s-match-prefs__banner-title">用于 AI 匹配与推荐</Text>
+        <Text className="s-match-prefs__banner-title">用于发帖与行程辅助</Text>
         <Text className="s-match-prefs__banner-desc">
-          发布组队帖、生成攻略时也会自动补充画像；此处可手动校正，让匹配更透明。
+          发布帖子、生成攻略时会自动补充画像；此处可手动校正，让 AI 更了解你的出行偏好。
         </Text>
         <Text className="s-match-prefs__banner-preview">当前：{preview}</Text>
       </View>
@@ -127,7 +109,7 @@ export function MatchPreferencesSettings() {
       <View className="s-settings__card s-match-prefs__section">
         <Text className="s-match-prefs__label">常驻出发城市</Text>
         <View className="s-match-prefs__chips">
-          {MATCH_DEPARTURE_CITIES.map((item) => (
+          {BUDDY_DEPARTURE_CITIES.map((item) => (
             <Button
               key={item}
               className={`s-match-prefs__chip${
@@ -161,7 +143,7 @@ export function MatchPreferencesSettings() {
       <View className="s-settings__card s-match-prefs__section">
         <Text className="s-match-prefs__label">偏好曲风（可多选）</Text>
         <View className="s-match-prefs__chips">
-          {MATCH_GENRE_OPTIONS.map((genre) => (
+          {BUDDY_GENRE_OPTIONS.map((genre) => (
             <Button
               key={genre}
               className={`s-match-prefs__chip${
@@ -178,7 +160,7 @@ export function MatchPreferencesSettings() {
 
       <View className="s-settings__card s-match-prefs__section">
         <Text className="s-match-prefs__label">住宿预算档位</Text>
-        {MATCH_BUDGET_OPTIONS.map((opt) => (
+        {BUDDY_BUDGET_OPTIONS.map((opt) => (
           <Button
             key={opt.id}
             className={`s-settings__option${
@@ -198,32 +180,6 @@ export function MatchPreferencesSettings() {
             ) : null}
           </Button>
         ))}
-      </View>
-
-      <View className="s-settings__card s-match-prefs__section">
-        <Text className="s-match-prefs__label">结伴意愿</Text>
-        <View className="s-match-prefs__mate-row">
-          {(
-            [
-              { value: true, label: '想找搭子' },
-              { value: false, label: '不限' },
-            ] as const
-          ).map((opt) => (
-            <Button
-              key={String(opt.value)}
-              className={`s-match-prefs__mate-btn${
-                likeMate === opt.value ? ' s-match-prefs__mate-btn--active' : ''
-              }`}
-              hoverClass="s-match-prefs__mate-btn--pressed"
-              onClick={() => {
-                markDirty();
-                setLikeMate(opt.value);
-              }}
-            >
-              <Text className="s-match-prefs__mate-btn-text">{opt.label}</Text>
-            </Button>
-          ))}
-        </View>
       </View>
 
       <Button

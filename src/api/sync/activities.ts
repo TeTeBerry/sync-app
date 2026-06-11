@@ -11,8 +11,8 @@ export function fetchActivities() {
   return apiGet<BackendActivity[]>('/activities');
 }
 
-export function matchActivity(keyword: string) {
-  return apiGet<BackendActivity | null>('/activities/match', { keyword });
+export function resolveActivityByKeyword(keyword: string) {
+  return apiGet<BackendActivity | null>('/activities/resolve', { keyword });
 }
 
 export function fetchHomeSummary() {

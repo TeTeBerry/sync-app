@@ -52,7 +52,6 @@ export interface CurrentUser {
   city?: string;
   favorGenres?: string[];
   budgetLevel?: string;
-  likeMate?: boolean;
   notificationsEnabled?: boolean;
   privacyLevel?: PrivacyLevel;
   accountRisk?: AccountRiskPublicStatus;
@@ -72,7 +71,6 @@ export interface UpdateCurrentUserPayload {
   city?: string;
   favorGenres?: string[];
   budgetLevel?: string;
-  likeMate?: boolean;
   notificationsEnabled?: boolean;
   privacyLevel?: PrivacyLevel;
 }
@@ -280,14 +278,13 @@ export interface HomeSummary {
   popularPosts?: HomeFeedPost[];
 }
 
-export type NotificationType = 'general' | 'interaction' | 'system' | 'match';
+export type NotificationType = 'general' | 'interaction' | 'system';
 
 /** In-app notification tab grouping (matches backend NotificationCategory). */
 export type NotificationCategory =
   | 'comment'
   | 'like'
   | 'application'
-  | 'buddy_recommend'
   | 'system'
   | 'general';
 
@@ -301,8 +298,7 @@ export type NotificationInteractionType =
   | 'post_rejected'
   | 'post_hidden'
   | 'team_dissolved'
-  | 'team_accepted'
-  | 'match_recommendation';
+  | 'team_accepted';
 
 export interface NotificationMeta {
   activityLegacyId?: number;
@@ -315,7 +311,6 @@ export interface NotificationMeta {
   displayEventName?: string;
   templateKey?: string;
   templateParams?: Record<string, string>;
-  matchPostIds?: string[];
   rejectionReason?: string;
   parentCommentId?: string;
 }

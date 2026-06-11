@@ -15,11 +15,11 @@ import { Text, View } from '@tarojs/components';
 export type ProfileSettingsSectionProps = {
   notificationsEnabled: boolean;
   blockedCount?: number;
-  matchPreferencesSummary?: string;
+  buddyPreferencesSummary?: string;
   showAccountStatusRow?: boolean;
   accountStatusSummary?: string;
   onOpenNotifications: () => void;
-  onOpenMatchPreferences: () => void;
+  onOpenBuddyPreferences: () => void;
   onOpenPrivacy: () => void;
   onOpenBlockedUsers: () => void;
   onOpenAccountAppeal?: () => void;
@@ -31,11 +31,11 @@ export type ProfileSettingsSectionProps = {
 const ProfileSettingsSection: React.FC<ProfileSettingsSectionProps> = ({
   notificationsEnabled,
   blockedCount = 0,
-  matchPreferencesSummary = '未设置',
+  buddyPreferencesSummary = '未设置',
   showAccountStatusRow = false,
   accountStatusSummary = '发帖已限制',
   onOpenNotifications,
-  onOpenMatchPreferences,
+  onOpenBuddyPreferences,
   onOpenPrivacy,
   onOpenBlockedUsers,
   onOpenAccountAppeal,
@@ -64,14 +64,14 @@ const ProfileSettingsSection: React.FC<ProfileSettingsSectionProps> = ({
     <View
       className="s-profile__settings-row"
       hoverClass="s-profile__settings-row--pressed"
-      onClick={onOpenMatchPreferences}
+      onClick={onOpenBuddyPreferences}
     >
       <View className="s-profile__settings-icon s-profile__settings-icon--match">
         <Music2 size={18} />
       </View>
-      <Text className="s-profile__settings-label">组队偏好</Text>
+      <Text className="s-profile__settings-label">用户偏好</Text>
       <Text className="s-profile__settings-value s-profile__settings-value--truncate">
-        {matchPreferencesSummary}
+        {buddyPreferencesSummary}
       </Text>
       <ChevronRight size={18} className="s-profile__settings-chevron" />
     </View>

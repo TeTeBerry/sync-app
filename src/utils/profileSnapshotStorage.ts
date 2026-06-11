@@ -5,7 +5,6 @@ import { getClientUserId } from './session';
 export interface LocalProfileSnapshot {
   city?: string;
   favorGenres?: string[];
-  likeMate?: boolean;
   budgetLevel?: string;
   notificationsEnabled?: boolean;
   updatedAt: string;

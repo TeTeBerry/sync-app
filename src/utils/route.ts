@@ -306,7 +306,7 @@ export function endRouteTransition() {
 }
 
 const AUTH_PROTECTED_ROUTES: Partial<Record<RoutePath, LoginInterceptFeature>> = {
-  [ROUTES.AI_ASSISTANT]: 'ai_match',
+  [ROUTES.AI_ASSISTANT]: 'ai_assistant',
   [ROUTES.NOTIFICATIONS]: 'notification',
   [ROUTES.PROFILE_ACTIVITIES]: 'activity',
   [ROUTES.PROFILE_POSTS]: 'post',
@@ -531,11 +531,6 @@ export function navigateFromNotification(meta?: NotificationMeta): boolean {
   const legacyId = resolveActivityLegacyId(meta);
   if (legacyId == null) {
     return false;
-  }
-
-  if (meta?.type === 'match_recommendation') {
-    goEventDetail(legacyId, meta?.postId ? { postId: meta.postId } : undefined);
-    return true;
   }
 
   if (meta?.type === 'post_rejected') {

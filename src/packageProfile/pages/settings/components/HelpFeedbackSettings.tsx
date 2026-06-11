@@ -13,7 +13,7 @@ const FAQ_QA = [
   },
   {
     q: '如何找到同行伙伴？',
-    a: '浏览热门帖子或在活动详情页使用 AI 精准匹配，找到志同道合的队友。',
+    a: '浏览热门帖子或在活动详情页查看帖流，也可通过 AI 助手发布帖子。',
   },
   {
     q: '如何提升个人影响力？',
@@ -97,7 +97,7 @@ export function HelpFeedbackSettings() {
                 className="s-settings-help__textarea"
                 value={content}
                 maxlength={CONTENT_MAX}
-                placeholder="例如：活动页加载慢、匹配结果不准确、希望增加某功能…"
+                placeholder="例如：活动页加载慢、帖子加载异常、希望增加某功能…"
                 placeholderStyle="color: rgba(255,255,255,0.28)"
                 disabled={submitting}
                 focus

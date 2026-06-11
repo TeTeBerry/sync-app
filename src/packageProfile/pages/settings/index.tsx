@@ -26,7 +26,7 @@ import { ScrollView, Text, View } from '@tarojs/components';
 import { AccountRiskBanner } from '../../../components/account-risk/AccountRiskBanner';
 import { useAccountRisk } from '../../../hooks/useAccountRisk';
 import { BlockedUsersSettings } from './components/BlockedUsersSettings';
-import { MatchPreferencesSettings } from './components/MatchPreferencesSettings';
+import { BuddyPreferencesSettings } from './components/BuddyPreferencesSettings';
 import { AppealSettings } from './components/AppealSettings';
 import { HelpFeedbackSettings } from './components/HelpFeedbackSettings';
 import { LEGAL_DOC_LIST } from '../../../legal';
@@ -37,7 +37,7 @@ type SettingsSection =
   | 'help'
   | 'legal'
   | 'blocked'
-  | 'match'
+  | 'buddy-prefs'
   | 'appeal';
 type PrivacyLevel = ProfilePrivacyLevel;
 
@@ -47,7 +47,7 @@ const SECTION_TITLES: Record<SettingsSection, string> = {
   help: '帮助与反馈',
   legal: '法律与协议',
   blocked: '已屏蔽用户',
-  match: '组队偏好',
+  'buddy-prefs': '用户偏好',
   appeal: '申诉说明',
 };
 
@@ -92,7 +92,7 @@ const SettingsPage: React.FC = () => {
   useEffect(() => {
     if (!isLiveApi()) return; // skip login guard when API is not configured
     if (
-      (section === 'blocked' || section === 'match' || section === 'appeal') &&
+      (section === 'blocked' || section === 'buddy-prefs' || section === 'appeal') &&
       !isLoggedIn()
     ) {
       void Taro.showToast({ title: '请先登录', icon: 'none' });
@@ -128,7 +128,6 @@ const SettingsPage: React.FC = () => {
         notificationsEnabled: next,
         city: currentUser?.city,
         favorGenres: currentUser?.favorGenres,
-        likeMate: currentUser?.likeMate,
         budgetLevel: currentUser?.budgetLevel,
       });
 
@@ -138,7 +137,6 @@ const SettingsPage: React.FC = () => {
     currentUser?.budgetLevel,
     currentUser?.city,
     currentUser?.favorGenres,
-    currentUser?.likeMate,
     setStoreNotificationsEnabled,
   ]);
 
@@ -185,7 +183,7 @@ const SettingsPage: React.FC = () => {
             <BlockedUsersSettings />
           </View>
         </ScrollView>
-      ) : section === 'match' ? (
+      ) : section === 'buddy-prefs' ? (
         <ScrollView
           scrollY
           enhanced
@@ -194,7 +192,7 @@ const SettingsPage: React.FC = () => {
           style={scrollStyle}
         >
           <View className="s-settings__main">
-            <MatchPreferencesSettings />
+            <BuddyPreferencesSettings />
           </View>
         </ScrollView>
       ) : section === 'appeal' ? (

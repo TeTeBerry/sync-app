@@ -37,7 +37,7 @@ function BlockedUserRow({
       />
       <View className="s-settings-blocked__meta">
         <Text className="s-settings-blocked__name">{item.name}</Text>
-        <Text className="s-settings-blocked__hint">已屏蔽其帖子与匹配</Text>
+        <Text className="s-settings-blocked__hint">已屏蔽其帖子</Text>
       </View>
       <Button
         className="s-settings-blocked__unblock"
@@ -123,7 +123,7 @@ export function BlockedUsersSettings() {
     <>
       <View className="s-settings-blocked">
         <Text className="s-settings-blocked__intro">
-          以下用户的帖子不会出现在你的动态与匹配结果中
+          以下用户的帖子不会出现在你的动态与活动帖列表中
         </Text>
         <View className="s-settings__card s-settings-blocked__card">
           {items.map((item) => (

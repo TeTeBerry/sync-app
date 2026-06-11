@@ -4,7 +4,7 @@ export type LoginInterceptFeature =
   | 'general'
   | 'activity'
   | 'post'
-  | 'ai_match'
+  | 'ai_assistant'
   | 'notification'
   | 'social';
 

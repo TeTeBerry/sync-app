@@ -38,7 +38,6 @@ describe('aiChatStore ephemeral buckets', () => {
     store.setActiveScope('activity:1');
     store.setScopeMessages('activity:1', [sampleMessage('x')]);
     store.applyConversationPatch({ flow: 'collect_post_body' } as never);
-    store.setPostRecommendationsMeta(true);
 
     store.resetScope('activity:1');
 
@@ -46,7 +45,6 @@ describe('aiChatStore ephemeral buckets', () => {
     expect(
       useAiChatStore.getState().buckets['activity:1']?.conversationState,
     ).toBeNull();
-    expect(useAiChatStore.getState().buckets['activity:1']?.degraded).toBe(false);
   });
 
   it('clearAllEphemeralChat wipes every scope', () => {

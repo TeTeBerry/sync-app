@@ -58,7 +58,7 @@ export default function GlobalAiAgentFab() {
   const handleOpen = useCallback(() => {
     requireAuth(() => {
       goAiAssistant(activityLegacyId != null ? { activityLegacyId } : undefined);
-    }, 'ai_match');
+    }, 'ai_assistant');
   }, [activityLegacyId]);
 
   if (hidden) {

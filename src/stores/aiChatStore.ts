@@ -6,13 +6,11 @@ import type { AiChatScopeKey } from '../utils/aiChatScope';
 type AiChatScopeBucket = {
   messages: ChatUiMessage[];
   conversationState: ConversationState | null;
-  degraded: boolean;
 };
 
 const emptyBucket = (): AiChatScopeBucket => ({
   messages: [],
   conversationState: null,
-  degraded: false,
 });
 
 function normalizeRestoredMessages(messages: ChatUiMessage[]): ChatUiMessage[] {
@@ -28,7 +26,6 @@ interface AiChatStoreState {
   getScopeMessages: (scopeKey: AiChatScopeKey) => ChatUiMessage[];
   setScopeMessages: (scopeKey: AiChatScopeKey, messages: ChatUiMessage[]) => void;
   applyConversationPatch: (state: ConversationState) => void;
-  setPostRecommendationsMeta: (degraded?: boolean) => void;
   resetScope: (scopeKey: AiChatScopeKey) => void;
   clearAllEphemeralChat: () => void;
 }
@@ -82,9 +79,6 @@ export const useAiChatStore = create<AiChatStoreState>((set, get) => ({
   applyConversationPatch: (conversationState) =>
     set((state) => patchActiveBucket(state, { conversationState })),
 
-  setPostRecommendationsMeta: (degraded) =>
-    set((state) => patchActiveBucket(state, { degraded: degraded === true })),
-
   resetScope: (scopeKey) =>
     set((state) => ({
       buckets: {
@@ -104,10 +98,4 @@ export function selectActiveConversationFlow(state: AiChatStoreState) {
   const scopeKey = state.activeScopeKey;
   if (!scopeKey) return undefined;
   return state.buckets[scopeKey]?.conversationState?.flow;
-}
-
-export function selectActiveDegraded(state: AiChatStoreState) {
-  const scopeKey = state.activeScopeKey;
-  if (!scopeKey) return false;
-  return state.buckets[scopeKey]?.degraded === true;
 }

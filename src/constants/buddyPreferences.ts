@@ -1,7 +1,7 @@
 import type { CurrentUser } from '../types/backend';
 
 /** Common departure cities for chip picker. */
-export const MATCH_DEPARTURE_CITIES = [
+export const BUDDY_DEPARTURE_CITIES = [
   '上海',
   '北京',
   '广州',
@@ -19,7 +19,7 @@ export const MATCH_DEPARTURE_CITIES = [
 ] as const;
 
 /** Curated genres for multi-select (aligned with backend profile normalization). */
-export const MATCH_GENRE_OPTIONS = [
+export const BUDDY_GENRE_OPTIONS = [
   'House',
   'Techno',
   'Trance',
@@ -34,10 +34,10 @@ export const MATCH_GENRE_OPTIONS = [
   'Big Room',
 ] as const;
 
-export type MatchBudgetLevel = 'low' | 'medium' | 'high';
+export type BuddyBudgetLevel = 'low' | 'medium' | 'high';
 
-export const MATCH_BUDGET_OPTIONS: Array<{
-  id: MatchBudgetLevel;
+export const BUDDY_BUDGET_OPTIONS: Array<{
+  id: BuddyBudgetLevel;
   label: string;
   hint: string;
 }> = [
@@ -46,7 +46,7 @@ export const MATCH_BUDGET_OPTIONS: Array<{
   { id: 'high', label: '充裕', hint: '品质优先' },
 ];
 
-export function normalizeMatchBudgetLevel(raw?: string): MatchBudgetLevel | undefined {
+export function normalizeBuddyBudgetLevel(raw?: string): BuddyBudgetLevel | undefined {
   const value = raw?.trim().toLowerCase();
   if (value === 'low' || value === 'medium' || value === 'high') return value;
   if (/低|经济/.test(raw ?? '')) return 'low';
@@ -55,14 +55,14 @@ export function normalizeMatchBudgetLevel(raw?: string): MatchBudgetLevel | unde
   return undefined;
 }
 
-export function matchBudgetLabel(level?: string): string {
-  const normalized = normalizeMatchBudgetLevel(level);
-  const opt = MATCH_BUDGET_OPTIONS.find((o) => o.id === normalized);
+export function buddyBudgetLabel(level?: string): string {
+  const normalized = normalizeBuddyBudgetLevel(level);
+  const opt = BUDDY_BUDGET_OPTIONS.find((o) => o.id === normalized);
   return opt ? opt.label : level?.trim() || '';
 }
 
-export function formatMatchPreferencesSummary(
-  user?: Pick<CurrentUser, 'city' | 'favorGenres' | 'budgetLevel' | 'likeMate'> | null,
+export function formatBuddyPreferencesSummary(
+  user?: Pick<CurrentUser, 'city' | 'favorGenres' | 'budgetLevel'> | null,
 ): string {
   if (!user) return '未设置';
   const parts: string[] = [];
@@ -72,8 +72,7 @@ export function formatMatchPreferencesSummary(
     const more = user.favorGenres.length > 2 ? `等${user.favorGenres.length}种` : '';
     parts.push(`${genres}${more}`);
   }
-  const budget = matchBudgetLabel(user.budgetLevel);
+  const budget = buddyBudgetLabel(user.budgetLevel);
   if (budget) parts.push(budget);
-  if (user.likeMate === true) parts.push('找搭子');
   return parts.length ? parts.join(' · ') : '未设置';
 }

@@ -183,7 +183,7 @@ function ChatMessageRowInner({
                 <AiAssistantActivityCard activity={msg.recommendedActivity} />
               ) : null}
               {msg.createdPost ? (
-                <RecommendPostCards posts={[msg.createdPost]} variant="created" />
+                <RecommendPostCards posts={[msg.createdPost]} />
               ) : null}
               {hasSuggestedReplies ? (
                 <SuggestedReplyChips

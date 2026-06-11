@@ -78,30 +78,6 @@
   font-size: 14px;
 }
 
-.s-match-prefs__mate-row {
-  display: flex;
-  gap: 10px;
-}
-
-.s-match-prefs__mate-btn {
-  flex: 1;
-  padding: 10px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  text-align: center;
-
-  &--active {
-    background: rgba(var(--primary-rgb), 0.18);
-    border-color: rgba(var(--primary-rgb), 0.4);
-  }
-}
-
-.s-match-prefs__mate-btn-text {
-  font-size: 14px;
-  color: #fff;
-}
-
 .s-match-prefs__save {
   margin-top: 4px;
 

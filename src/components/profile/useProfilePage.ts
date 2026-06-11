@@ -35,7 +35,7 @@ import {
   normalizeProfileUserData,
   type ProfileDisplayUser,
 } from './profileSummaryUtils';
-import { formatMatchPreferencesSummary } from '../../constants/matchPreferences';
+import { formatBuddyPreferencesSummary } from '../../constants/buddyPreferences';
 import { deriveInterestTag } from './utils';
 
 export type UseProfilePageOptions = {
@@ -102,7 +102,7 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
         | 'help'
         | 'legal'
         | 'blocked'
-        | 'match'
+        | 'buddy-prefs'
         | 'appeal',
     ) => {
       go(`${ROUTES.SETTINGS}?section=${section}`);
@@ -136,7 +136,7 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
 
   const blockedCount = blockedUsersQuery.data?.blockedUserIds?.length ?? 0;
 
-  const matchPreferencesSummary = formatMatchPreferencesSummary(
+  const buddyPreferencesSummary = formatBuddyPreferencesSummary(
     currentUserQuery.data ?? null,
   );
 
@@ -146,14 +146,14 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
   const settings: ProfileSettingsSectionProps = {
     notificationsEnabled,
     blockedCount,
-    matchPreferencesSummary,
+    buddyPreferencesSummary,
     showAccountStatusRow: publishRestricted,
     accountStatusSummary: untilLabel
       ? `${accountRiskStatusTitle(accountRisk)} · ${untilLabel}`
       : accountRiskStatusTitle(accountRisk),
     onOpenNotifications: () => openSettings('notifications'),
-    onOpenMatchPreferences: () => {
-      requireAuth(() => openSettings('match'), 'general');
+    onOpenBuddyPreferences: () => {
+      requireAuth(() => openSettings('buddy-prefs'), 'general');
     },
     onOpenPrivacy: () => openSettings('privacy'),
     onOpenBlockedUsers: () => {

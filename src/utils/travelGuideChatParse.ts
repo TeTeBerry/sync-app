@@ -257,7 +257,7 @@ export function shouldHandleAsTravelGuideChat(input: {
 export function isTravelGuideChatInterrupt(text: string): boolean {
   const trimmed = text.trim();
   if (!trimmed) return false;
-  if (/组队|搭子|拼卡|同路|住宿同行|查组队|有没有.*帖|匹配/.test(trimmed)) {
+  if (/组队|搭子|拼卡|同路|住宿同行|查组队|有没有.*帖/.test(trimmed)) {
     return true;
   }
   return false;

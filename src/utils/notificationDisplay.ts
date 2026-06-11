@@ -1,15 +1,13 @@
 import type { AppNotification, NotificationInteractionType } from '../types/backend';
 import { formatTimeAgo } from './dayTime';
 
-/** UI tab categories — aligned with backend NotificationCategory (except buddy_recommend). */
+/** UI tab categories — aligned with backend NotificationCategory. */
 export type NotificationCategory =
   | 'comment'
   | 'like'
   | 'application'
   | 'system'
   | 'general';
-
-export type NotificationMetaCategory = NotificationCategory | 'buddy_recommend';
 
 const UI_CATEGORIES = new Set<NotificationCategory>([
   'comment',
@@ -38,15 +36,13 @@ export function categoryFromInteractionType(
     case 'post_hidden':
     case 'activity':
       return 'system';
-    case 'match_recommendation':
-      return 'general';
     default:
       return 'general';
   }
 }
 
 function normalizeStoredCategory(
-  category?: NotificationMetaCategory,
+  category?: NotificationCategory | 'buddy_recommend',
 ): NotificationCategory | undefined {
   if (!category) return undefined;
   if (category === 'buddy_recommend') return 'general';
@@ -63,7 +59,7 @@ export function getNotificationCategory(
 ): NotificationCategory {
   const fromType = categoryFromInteractionType(meta?.type);
   const fromCategory = normalizeStoredCategory(
-    meta?.category as NotificationMetaCategory | undefined,
+    meta?.category as NotificationCategory | 'buddy_recommend' | undefined,
   );
 
   if (meta?.type) {
