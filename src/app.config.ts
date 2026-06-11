@@ -23,7 +23,6 @@ export default {
       name: 'profile',
       pages: [
         'pages/profile-activities/index',
-        'pages/profile-benefits/index',
         'pages/profile-posts/index',
         'pages/settings/index',
         'pages/legal-document/index',

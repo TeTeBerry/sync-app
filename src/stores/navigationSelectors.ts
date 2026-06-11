@@ -9,9 +9,6 @@ export const selectRouteTransitionTabTarget = (state: NavigationState) =>
 export const selectActiveActivityLegacyId = (state: NavigationState) =>
   state.activeActivityLegacyId;
 
-export const selectConsumeProfileIntent = (state: NavigationState) =>
-  state.consumeProfileIntent;
-
 export const selectConsumeAiAssistantIntent = (state: NavigationState) =>
   state.consumeAiAssistantIntent;
 

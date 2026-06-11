@@ -74,19 +74,15 @@ describe('api/sync owner query contract', () => {
       expectNoDemoActorQuery(lastRequestUrl());
     });
 
-    it('fetchProfileSummary includes userId and activityLegacyId when scoped and no token', async () => {
-      await fetchProfileSummary(42);
-      const url = lastRequestUrl();
-      expectDemoActorQuery(url);
-      expect(url).toContain('activityLegacyId=42');
+    it('fetchProfileSummary includes userId only when no token', async () => {
+      await fetchProfileSummary();
+      expectDemoActorQuery(lastRequestUrl());
     });
 
     it('fetchProfileSummary omits demo query when bearer present', async () => {
       mockGetAccessToken.mockReturnValue('jwt-token');
-      await fetchProfileSummary(42);
-      const url = lastRequestUrl();
-      expectNoDemoActorQuery(url);
-      expect(url).toContain('activityLegacyId=42');
+      await fetchProfileSummary();
+      expectNoDemoActorQuery(lastRequestUrl());
     });
   });
 

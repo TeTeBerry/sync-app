@@ -35,17 +35,6 @@ export function invalidateProfileSummary() {
   invalidateCache(['profile', 'summary']);
 }
 
-/** 失效单场套餐权益查询 */
-export function invalidateProfileEntitlements() {
-  invalidateCache(['profile', 'entitlements']);
-}
-
-/** 失效套餐权益与个人摘要（购买后刷新） */
-export function invalidateProfilePackageState() {
-  invalidateProfileEntitlements();
-  invalidateProfileSummary();
-}
-
 /** 失效个人活动列表 */
 export function invalidateProfileActivities() {
   invalidateCache(['profile', 'activities']);

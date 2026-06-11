@@ -1,14 +1,6 @@
 import './ProfileGuestSection.scss';
 import React, { useCallback } from 'react';
-import {
-  Bell,
-  ChevronRight,
-  FileText,
-  Info,
-  Lock,
-  Ticket,
-  Zap,
-} from '../../components/icons';
+import { Bell, ChevronRight, FileText, Info, Lock, Zap } from '../../components/icons';
 import { LoginPromptHero } from '../auth/LoginPromptHero';
 import { requireAuth } from '../../utils/authGate';
 import { go, ROUTES } from '../../utils/route';
@@ -24,10 +16,10 @@ type LockedFeature = {
   icon: React.ReactNode;
   title: string;
   desc: string;
-  feature: 'activity' | 'post' | 'benefits' | 'notification';
+  feature: 'activity' | 'post' | 'notification';
 };
 
-const ALL_LOCKED_FEATURES: LockedFeature[] = [
+const LOCKED_FEATURES: LockedFeature[] = [
   {
     icon: <Zap size={18} color="#ff0066" />,
     title: '我的活动',
@@ -41,20 +33,12 @@ const ALL_LOCKED_FEATURES: LockedFeature[] = [
     feature: 'post',
   },
   {
-    icon: <Ticket size={18} color="#d4a017" />,
-    title: '权益与套餐',
-    desc: 'AI 匹配与联系方式解锁',
-    feature: 'benefits',
-  },
-  {
     icon: <Bell size={18} color="#8e8e93" />,
     title: '消息通知',
     desc: '评论、点赞与活动提醒',
     feature: 'notification',
   },
 ];
-
-const LOCKED_FEATURES = ALL_LOCKED_FEATURES;
 
 const ProfileGuestSection: React.FC<ProfileGuestSectionProps> = ({
   onLoggedIn,
@@ -65,7 +49,6 @@ const ProfileGuestSection: React.FC<ProfileGuestSectionProps> = ({
     const routes = {
       activity: ROUTES.PROFILE_ACTIVITIES,
       post: ROUTES.PROFILE_POSTS,
-      benefits: ROUTES.PROFILE_BENEFITS,
       notification: ROUTES.NOTIFICATIONS,
     } as const;
     requireAuth(() => go(routes[feature]), feature);

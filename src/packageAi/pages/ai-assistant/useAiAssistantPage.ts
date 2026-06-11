@@ -19,10 +19,8 @@ import {
   ROUTES,
 } from '../../../utils/route';
 import { resolveAiChatWsUrl } from '../../../constants/api';
-import { goProfileBenefits } from '../../../utils/route';
 import { isAiChatWsDevLog } from '../../../utils/aiChatWs';
 import { inferUserGenderFromName } from '../../../utils/inferAuthorGender';
-import { useProfileActivityLegacyId } from '../../../hooks/useProfileActivityLegacyId';
 
 /** Header content row (avatar + titles), excluding status bar. */
 export const AI_HEADER_CONTENT_PX = 56;
@@ -57,18 +55,6 @@ export function useAiAssistantPage() {
   );
   const [messageCount, setMessageCount] = useState(0);
   const [pageShowSeq, setPageShowSeq] = useState(0);
-  const [upgradeSheetOpen, setUpgradeSheetOpen] = useState(false);
-  const profileActivityLegacyId = useProfileActivityLegacyId();
-  const openUpgradeSheet = useCallback(() => {
-    setUpgradeSheetOpen(true);
-  }, []);
-
-  const handleViewAllBenefits = useCallback(() => {
-    setUpgradeSheetOpen(false);
-    Taro.nextTick(() => {
-      goProfileBenefits();
-    });
-  }, []);
 
   const consumeAiAssistantIntent = useNavigationStore(selectConsumeAiAssistantIntent);
   const activityLegacyId =
@@ -179,11 +165,6 @@ export function useAiAssistantPage() {
     pageShowSeq,
     messageCount,
     setMessageCount,
-    upgradeSheetOpen,
-    setUpgradeSheetOpen,
-    profileActivityLegacyId,
-    openUpgradeSheet,
-    handleViewAllBenefits,
     profileUserData,
     userGender,
     activityQuery,

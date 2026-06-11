@@ -4,8 +4,6 @@ import { PageTabBarChrome } from '../../../components/navigation/BottomNav';
 import { CalendarDays, Sparkles, Zap } from '../../../components/icons';
 import PageNavigation from '../../../components/navigation/PageNavigation';
 import { Text, View } from '@tarojs/components';
-import { AiUpgradeSheetProvider } from '../../../components/ai-chat/AiUpgradeSheetContext';
-import AiPackageUpgradeSheet from '../../../components/ai-chat/AiPackageUpgradeSheet';
 import { ProfileTabErrorBoundary } from '../../../components/profile/ProfileTabErrorBoundary';
 import { AiAssistantChat } from './AiAssistantChat';
 import { useAiAssistantPage } from './useAiAssistantPage';
@@ -92,35 +90,26 @@ const AiAssistantPage: FC = () => {
         <View className="s-ai-assistant__body">
           <View className="s-ai-assistant__panel">
             <ProfileTabErrorBoundary logTag="AiAssistant">
-              <AiUpgradeSheetProvider openUpgradeSheet={page.openUpgradeSheet}>
-                <AiAssistantChat
-                  initialMessage={page.pendingInitialMessage}
-                  initialOpenAiGuideSheet={page.pendingOpenAiGuideSheet}
-                  initialAutoRunTravelGuideForm={page.pendingAutoGuideForm}
-                  pageShowSeq={page.pageShowSeq}
-                  activityLegacyId={page.activityLegacyId}
-                  activityTitle={page.activityTitle}
-                  onInitialMessageSent={page.handleInitialMessageSent}
-                  onMessageCountChange={page.setMessageCount}
-                  chatScrollHeight={page.chatScrollHeight}
-                  userAvatar={page.profileUserData.avatar}
-                  userName={page.profileUserData.name}
-                  userGender={page.userGender}
-                />
-              </AiUpgradeSheetProvider>
+              <AiAssistantChat
+                initialMessage={page.pendingInitialMessage}
+                initialOpenAiGuideSheet={page.pendingOpenAiGuideSheet}
+                initialAutoRunTravelGuideForm={page.pendingAutoGuideForm}
+                pageShowSeq={page.pageShowSeq}
+                activityLegacyId={page.activityLegacyId}
+                activityTitle={page.activityTitle}
+                onInitialMessageSent={page.handleInitialMessageSent}
+                onMessageCountChange={page.setMessageCount}
+                chatScrollHeight={page.chatScrollHeight}
+                userAvatar={page.profileUserData.avatar}
+                userName={page.profileUserData.name}
+                userGender={page.userGender}
+              />
             </ProfileTabErrorBoundary>
           </View>
         </View>
       </View>
 
       <PageTabBarChrome />
-
-      <AiPackageUpgradeSheet
-        open={page.upgradeSheetOpen}
-        onClose={() => page.setUpgradeSheetOpen(false)}
-        activityLegacyId={page.profileActivityLegacyId ?? page.activityLegacyId}
-        onViewAllBenefits={page.handleViewAllBenefits}
-      />
     </View>
   );
 };

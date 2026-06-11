@@ -8,8 +8,3 @@ export type AiAssistantNavIntent = {
   /** Run travel-guide generation after chat mounts (from event-detail sheet submit). */
   autoRunTravelGuideForm?: AiGuidePlanFormValues;
 };
-
-export type ProfileNavIntent = {
-  /** Open the profile package upgrade sheet after switching to the profile tab. */
-  openPackageSheet?: boolean;
-};

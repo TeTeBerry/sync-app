@@ -7,7 +7,6 @@ import {
   useCurrentUserQuery,
   useProfileSummaryQuery,
 } from '../../hooks/useSyncApi';
-import { useDeferredMount } from '../../hooks/useDeferredMount';
 import type { ConfirmDialogOptions } from '../../hooks/useConfirmDialog';
 import { useAuthSession } from '../../hooks/useAuthSession';
 import { useEndRouteTransitionOnShow } from '../../hooks/useEndRouteTransitionOnShow';
@@ -16,7 +15,6 @@ import { ensureAuth, logout } from '../../utils/auth';
 import { requireAuth } from '../../utils/authGate';
 import { shouldSkipAutoLogin } from '../../utils/authStorage';
 import {
-  invalidateProfilePackageState,
   invalidateProfileSummary,
   invalidateUser,
 } from '../../utils/queryInvalidation';
@@ -25,10 +23,8 @@ import {
   readProfilePrivacyLevel,
 } from '../../utils/profileStorage';
 import { go, preloadHotRoutes, ROUTES } from '../../utils/route';
-import { DEFER_PROFILE_ENTITLEMENTS_MS } from '../../utils/timing';
 import { persistUserName } from '../../utils/session';
-import type { ProfileActivityItem, ProfileSummary } from '../../types/backend';
-import type { PackageTierId } from './profilePackageData';
+import type { ProfileSummary } from '../../types/backend';
 import type { ProfileSettingsSectionProps } from './ProfileSettingsSection';
 import {
   accountRiskStatusTitle,
@@ -41,26 +37,9 @@ import {
 } from './profileSummaryUtils';
 import { formatMatchPreferencesSummary } from '../../constants/matchPreferences';
 import { deriveInterestTag } from './utils';
-import { useProfilePaidBenefitCards } from './useProfilePaidBenefitCards';
-import { useProfilePackageSheet } from './useProfilePackageSheet';
-import { useProfileBenefitsSection } from './useProfileBenefitsSection';
 
 export type UseProfilePageOptions = {
   confirm: (options: ConfirmDialogOptions) => Promise<boolean>;
-};
-
-export type ProfileOverlaysViewModel = {
-  packageSheetOpen: boolean;
-  packageSheet: {
-    activityLegacyId?: number;
-    initialSelectedTierId?: PackageTierId;
-    currentPaidTierId?: PackageTierId;
-    activities: ProfileActivityItem[];
-    activitiesLoading: boolean;
-    paidTierByActivityLegacyId: Map<number, PackageTierId>;
-    onClose: () => void;
-    onPurchaseSuccess: () => void;
-  };
 };
 
 export function useProfilePage({ confirm }: UseProfilePageOptions) {
@@ -76,7 +55,6 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
   const currentUserQuery = useCurrentUserQuery();
   const { accountRisk } = useAccountRisk();
   const blockedUsersQuery = useBlockedUsersQuery();
-  const entitlementsReady = useDeferredMount(DEFER_PROFILE_ENTITLEMENTS_MS);
   const apiEnabled = isLiveApi();
   const { loggedIn, refresh: refreshAuthSession } = useAuthSession();
   const showGuestProfile = apiEnabled && !loggedIn;
@@ -90,30 +68,6 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
   const profileLoading =
     apiEnabled && loggedIn && summaryQuery.isLoading && !summaryQuery.data;
 
-  const {
-    benefitsLoading,
-    paidEntitlements,
-    recentPaidBenefitCards,
-    totalPaidCardCount,
-    entitlementsData: paidEntitlementsData,
-    refetchEntitlements,
-  } = useProfilePaidBenefitCards({
-    entitlementsEnabled: entitlementsReady && loggedIn,
-  });
-
-  const packageSheet = useProfilePackageSheet({ paidEntitlements });
-
-  const benefits = useProfileBenefitsSection({
-    benefitsLoading,
-    paidEntitlements,
-    recentPaidBenefitCards,
-    totalPaidCardCount,
-    summaryData: summaryQuery.data,
-    entitlementsData: paidEntitlementsData,
-    onOpenPackageSheet: () => packageSheet.openPackageSheet(),
-    onUpgrade: packageSheet.handleBenefitUpgrade,
-  });
-
   const ongoingCount = profileUserData.stats.events;
   const postsCount = profileUserData.stats.posts;
   const interestTag = deriveInterestTag(profileUserData.bio);
@@ -124,9 +78,7 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
     preloadHotRoutes(ROUTES.PROFILE);
     setNotificationsEnabled(readProfileNotificationsEnabled());
     setPrivacyLevel(readProfilePrivacyLevel());
-    packageSheet.applyRouteParams();
     if (apiEnabled && loggedIn) {
-      void invalidateProfilePackageState();
       invalidateProfileSummary();
       invalidateUser();
       return;
@@ -160,16 +112,15 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
 
   const handleAuthLoggedIn = useCallback(() => {
     refreshAuthSession();
-    void invalidateProfilePackageState();
+    invalidateProfileSummary();
   }, [refreshAuthSession]);
 
   const handleProfileRetry = useCallback(() => {
     if (apiEnabled && loggedIn) {
-      void invalidateProfilePackageState();
+      invalidateProfileSummary();
       void summaryQuery.refetch();
-      void refetchEntitlements();
     }
-  }, [apiEnabled, loggedIn, refetchEntitlements, summaryQuery]);
+  }, [apiEnabled, loggedIn, summaryQuery]);
 
   const handleLogout = useCallback(async () => {
     const ok = await confirm({
@@ -216,22 +167,15 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
     onLogout: handleLogout,
   };
 
-  const overlays: ProfileOverlaysViewModel = {
-    packageSheetOpen: packageSheet.packageSheetOpen,
-    packageSheet: packageSheet.packageSheet,
-  };
-
   return {
     showGuestProfile,
     profileLoading,
     profileUserData,
     interestTag,
-    benefits,
     ongoingCount,
     postsCount,
     accountRisk,
     settings,
-    overlays,
     handleAuthLoggedIn,
     handleProfileRetry,
     openSettings,

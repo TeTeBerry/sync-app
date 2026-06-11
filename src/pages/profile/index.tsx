@@ -11,8 +11,6 @@ import {
 } from '../../hooks/useTabPageMainHeight';
 import { go, ROUTES } from '../../utils/route';
 import ProfileGuestSection from '../../components/profile/ProfileGuestSection';
-import ProfileBenefitsBlock from '../../components/profile/ProfileBenefitsBlock';
-import ProfileOverlaysHost from '../../components/profile/ProfileOverlaysHost';
 import { ProfileTabErrorBoundary } from '../../components/profile/ProfileTabErrorBoundary';
 import ProfileActionCard from '../../components/profile/ProfileActionCard';
 import ProfileSettingsSection from '../../components/profile/ProfileSettingsSection';
@@ -34,12 +32,10 @@ const Profile: React.FC = () => {
     profileLoading,
     profileUserData,
     interestTag,
-    benefits,
     ongoingCount,
     postsCount,
     accountRisk,
     settings,
-    overlays,
     handleAuthLoggedIn,
     handleProfileRetry,
   } = useProfilePage({ confirm });
@@ -86,7 +82,6 @@ const Profile: React.FC = () => {
                       user={profileUserData}
                       interestTag={interestTag}
                     />
-                    <ProfileBenefitsBlock {...benefits} />
                     <ProfileActionCard
                       accent="activities"
                       icon={<Zap size={20} />}
@@ -116,10 +111,6 @@ const Profile: React.FC = () => {
       {confirmDialog}
       <LoginInterceptHost />
       <GlobalAiAgentFab />
-      <ProfileOverlaysHost
-        packageSheetOpen={overlays.packageSheetOpen}
-        packageSheet={overlays.packageSheet}
-      />
     </View>
   );
 };

@@ -10,7 +10,7 @@ export const DEFER_EVENT_COMPOSER_MS = 48;
 /** Event detail posts feed — after activity detail request starts. */
 export const DEFER_EVENT_POSTS_MS = 240;
 
-/** Event detail entitlements / users/me — after posts on weak networks. */
+/** Event detail users/me (account risk) — after posts on weak networks. */
 export const DEFER_EVENT_SECONDARY_MS = 400;
 
 /** Event detail AI subpackage warm — touch-first; optional idle preload. */
@@ -24,6 +24,3 @@ export const DEFER_AI_CHAT_MS = 0;
 
 /** Hot-route preload after tab settle (see route.ts). */
 export const PRELOAD_HOT_ROUTES_MS = 500;
-
-/** Profile tab: defer entitlements / activities APIs until after summary paints. */
-export const DEFER_PROFILE_ENTITLEMENTS_MS = 400;

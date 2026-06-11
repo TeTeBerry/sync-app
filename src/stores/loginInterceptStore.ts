@@ -5,7 +5,6 @@ export type LoginInterceptFeature =
   | 'activity'
   | 'post'
   | 'ai_match'
-  | 'benefits'
   | 'notification'
   | 'social';
 

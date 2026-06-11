@@ -1,49 +1,13 @@
-import { apiGet, apiPost } from '../../utils/apiClient';
+import { apiGet } from '../../utils/apiClient';
 import type {
-  ConsumeProfileEntitlementPayload,
-  ConsumeProfileEntitlementResult,
-  EventPackageEntitlement,
-  PackageCatalog,
   ProfileActivityItem,
   ProfilePostItem,
   ProfileSummary,
-  PurchaseProfilePackagePayload,
-  PurchaseProfilePackageResult,
 } from '../../types/backend';
-import { ownerQueryParams, ownerQueryParamsWithActivity } from '../requestContext';
+import { ownerQueryParams } from '../requestContext';
 
-export function fetchProfileSummary(activityLegacyId?: number) {
-  return apiGet<ProfileSummary>(
-    '/profile',
-    ownerQueryParamsWithActivity(activityLegacyId),
-  );
-}
-
-export function fetchProfilePackages() {
-  return apiGet<PackageCatalog>('/profile/packages', ownerQueryParams());
-}
-
-export function fetchProfileEntitlements(activityLegacyId?: number) {
-  return apiGet<EventPackageEntitlement[]>(
-    '/profile/entitlements',
-    ownerQueryParamsWithActivity(activityLegacyId),
-  );
-}
-
-export function purchaseProfilePackage(payload: PurchaseProfilePackagePayload) {
-  return apiPost<PurchaseProfilePackageResult>(
-    '/profile/packages/purchase',
-    payload,
-    ownerQueryParams(),
-  );
-}
-
-export function consumeProfileContactUnlock(payload: ConsumeProfileEntitlementPayload) {
-  return apiPost<ConsumeProfileEntitlementResult>(
-    '/profile/entitlements/consume/contact-unlock',
-    payload,
-    ownerQueryParams(),
-  );
+export function fetchProfileSummary() {
+  return apiGet<ProfileSummary>('/profile', ownerQueryParams());
 }
 
 export function fetchProfileActivities() {

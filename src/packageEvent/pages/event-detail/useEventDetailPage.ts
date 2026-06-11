@@ -17,7 +17,6 @@ import { useResolvedProfile } from '../../../hooks/useResolvedProfile';
 import type { ConfirmDialogOptions } from '../../../hooks/useConfirmDialog';
 import { useEventDetailRoute } from './useEventDetailRoute';
 import { useEventDetailActivityHeader } from './useEventDetailActivityHeader';
-import { useEventDetailEntitlements } from './useEventDetailEntitlements';
 import { useEventDetailScrollPreserve } from './useEventDetailScrollPreserve';
 import { useEventDetailTravelGuide } from '@/domains/travel-guide';
 import { goExclusiveItinerary, goMyItinerary } from '../../../utils/route';
@@ -49,9 +48,6 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     activityQuery,
   });
 
-  const { entitlements } = useEventDetailEntitlements(eventId, {
-    enabled: secondaryReady,
-  });
   const travelGuide = useEventDetailTravelGuide({
     eventId,
     activityDate,
@@ -202,7 +198,6 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     guideDefaultNights: travelGuide.guideDefaultNights,
     guideEventCity: travelGuide.guideEventCity,
     invalidEventId: route.invalidEventId,
-    entitlements,
     isOnSite: header.isOnSite,
     handleOnSiteCertifiedSuccess,
   };

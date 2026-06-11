@@ -17,6 +17,9 @@ const liveInfoContractsPath = path.resolve(
   __dirname,
   '../../sync-app-backend/src/shared/live-info/index.ts',
 );
+const srcPath = path.resolve(__dirname, '../src');
+/** @sync/*-contracts aliases point here; must be babel-included for weapp/h5. */
+const backendSharedPath = path.resolve(__dirname, '../../sync-app-backend/src/shared');
 
 /**
  * Primary target: WeChat mini program (weapp). Design draft: 375px logical width.
@@ -37,6 +40,8 @@ export default defineConfig({
     '@sync/travel-plan-contracts': travelPlanContractsPath,
     '@sync/itinerary-contracts': itineraryContractsPath,
     '@sync/live-info-contracts': liveInfoContractsPath,
+    /** After @sync/* — bare `@` must not shadow `@sync/…` contract aliases. */
+    '@': srcPath,
   },
   projectName: 'sync-app',
   date: '2026-5-24',
@@ -62,6 +67,9 @@ export default defineConfig({
   },
   framework: 'react',
   mini: {
+    compile: {
+      include: [backendSharedPath],
+    },
     // @ts-expect-error outputRoot is valid in Taro weapp build
     outputRoot: 'dist-weapp',
     /** 多页面共用组件时 SCSS 导入顺序不一致，忽略 css 合并顺序警告 */
@@ -100,6 +108,9 @@ export default defineConfig({
   },
   /** Unmaintained; kept for `npm run build:h5` only. */
   h5: {
+    compile: {
+      include: [backendSharedPath],
+    },
     // @ts-expect-error outputRoot is valid in Taro h5 build
     outputRoot: 'dist-h5',
     publicPath: '/',

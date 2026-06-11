@@ -4,7 +4,6 @@ import { PageTabBarChrome } from '../../../components/navigation/BottomNav';
 import ThemedPageLoader from '../../../components/ThemedPageLoader';
 import { useConfirmDialog } from '../../../hooks/useConfirmDialog';
 import { LoginInterceptHost } from '../../../components/auth/LoginInterceptHost';
-import { EventDetailEntitlementModals } from './components/EventDetailEntitlementModals';
 import EventDetailFallback from './components/EventDetailFallback';
 import EventDetailLiveSection from './components/EventDetailLiveSection';
 import {
@@ -87,7 +86,6 @@ const EventDetailPage = () => {
     handleGuideSheetSubmit,
     guideDefaultNights,
     guideEventCity,
-    entitlements,
     handleOnSiteCertifiedSuccess,
   } = page;
 
@@ -199,17 +197,6 @@ const EventDetailPage = () => {
       </View>
       {confirmDialog}
       <LoginInterceptHost />
-      <EventDetailEntitlementModals
-        eventId={entitlements.eventId}
-        contactUnlockExhaustedOpen={entitlements.contactUnlockExhaustedOpen}
-        onCloseContactUnlockExhausted={entitlements.closeContactUnlockExhaustedModal}
-        onUpgradeFromContactUnlock={entitlements.openPackageUpgradeSheet}
-        currentPaidTierId={entitlements.currentPaidTierId}
-        freeMonthly={entitlements.freeMonthly}
-        packageSheetOpen={entitlements.packageSheetOpen}
-        packageSheetInitialTierId={entitlements.packageSheetInitialTierId}
-        onClosePackageSheet={entitlements.closePackageUpgradeSheet}
-      />
       <AiBuddyPostSheet
         open={buddyPostSheetOpen}
         activityDate={buddyPostActivityDate}

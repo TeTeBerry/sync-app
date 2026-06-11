@@ -132,108 +132,6 @@ export interface ActivityUnregisterResult {
   wasRegistered?: boolean;
 }
 
-export type PackageTierId = 'pro' | 'pro_plus' | 'ultra';
-
-export type PackageFeatureIcon = 'contact' | 'map' | 'exposure' | 'pin';
-
-export interface PackageTierLimits {
-  contactUnlockCount: number | null;
-  mapDays: number;
-  postPinCount: number;
-  basicExposure: boolean;
-}
-
-export interface PackageFeatureDefinition {
-  icon: PackageFeatureIcon;
-  text: string;
-  unlimited?: boolean;
-}
-
-export interface PackageTierDefinition {
-  id: PackageTierId;
-  name: string;
-  priceYuan: number;
-  priceLabel: string;
-  audience: string;
-  badge?: string;
-  limits: PackageTierLimits;
-  features: PackageFeatureDefinition[];
-}
-
-export interface PackageCatalogSheet {
-  title: string;
-  subtitle: string;
-  defaultTierId: PackageTierId;
-}
-
-export interface PackageCatalog {
-  sheet: PackageCatalogSheet;
-  tiers: PackageTierDefinition[];
-}
-
-export interface QuotaSlot {
-  limit: number | null;
-  used: number;
-  remaining: number | null;
-}
-
-export interface MapEntitlementSlot {
-  days: number;
-  expiresAt: string;
-  active: boolean;
-}
-
-export interface EventEntitlementQuotas {
-  contactUnlock: QuotaSlot;
-  map: MapEntitlementSlot;
-  postPin: QuotaSlot;
-  basicExposure: boolean;
-}
-
-export interface FreeMonthlyQuota {
-  period: string;
-  contactUnlock: QuotaSlot;
-}
-
-export type ProfileEntitlementTierId = PackageTierId | 'free';
-
-export interface EventPackageEntitlement {
-  activityLegacyId: number;
-  tierId: ProfileEntitlementTierId;
-  tierName: string;
-  purchasedAt?: string;
-  /** ISO start of 30-day package window (usually equals purchasedAt). */
-  validFrom?: string;
-  /** ISO end of 30-day package window (purchasedAt + 30 days UTC). */
-  validUntil?: string;
-  quotas: EventEntitlementQuotas;
-  freeMonthly?: FreeMonthlyQuota;
-  paidTierId?: PackageTierId | null;
-}
-
-export interface PurchaseProfilePackagePayload {
-  tierId: PackageTierId;
-  activityLegacyId: number;
-}
-
-export interface PurchaseProfilePackageResult {
-  ok: true;
-  stubPayment: true;
-  entitlement: EventPackageEntitlement;
-}
-
-export type EntitlementConsumeBucket = 'free' | 'paid';
-
-export interface ConsumeProfileEntitlementPayload {
-  activityLegacyId: number;
-}
-
-export interface ConsumeProfileEntitlementResult {
-  ok: true;
-  bucket: EntitlementConsumeBucket;
-  entitlement: EventPackageEntitlement;
-}
-
 export interface ProfileSummary {
   name: string;
   handle: string;
@@ -246,8 +144,6 @@ export interface ProfileSummary {
     likes: number;
     posts: number;
   };
-  packageEntitlement?: EventPackageEntitlement | null;
-  packageEntitlements?: EventPackageEntitlement[];
 }
 
 export interface ProfileActivityItem {

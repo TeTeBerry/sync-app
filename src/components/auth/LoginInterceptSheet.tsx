@@ -5,7 +5,7 @@ import { Button } from '../ui';
 import { View } from '@tarojs/components';
 import { useOverlayLock } from '../../hooks/useOverlayLock';
 import { useLoginInterceptStore } from '../../stores/loginInterceptStore';
-import { invalidateProfilePackageState } from '../../utils/queryInvalidation';
+import { invalidateProfileSummary } from '../../utils/queryInvalidation';
 import { cn } from '../ui';
 import { LoginPromptHero } from './LoginPromptHero';
 
@@ -19,7 +19,7 @@ export function LoginInterceptSheet() {
   useOverlayLock(open);
 
   const handleLoggedIn = useCallback(() => {
-    void invalidateProfilePackageState();
+    void invalidateProfileSummary();
     completeAfterLogin();
   }, [completeAfterLogin]);
 

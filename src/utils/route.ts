@@ -35,7 +35,6 @@ export const ROUTES = {
   EVENTS: '/pages/events/index',
   PROFILE: '/pages/profile/index',
   PROFILE_ACTIVITIES: '/packageProfile/pages/profile-activities/index',
-  PROFILE_BENEFITS: '/packageProfile/pages/profile-benefits/index',
   PROFILE_POSTS: '/packageProfile/pages/profile-posts/index',
   SETTINGS: '/packageProfile/pages/settings/index',
   LEGAL_DOCUMENT: '/packageProfile/pages/legal-document/index',
@@ -311,7 +310,6 @@ const AUTH_PROTECTED_ROUTES: Partial<Record<RoutePath, LoginInterceptFeature>> =
   [ROUTES.NOTIFICATIONS]: 'notification',
   [ROUTES.PROFILE_ACTIVITIES]: 'activity',
   [ROUTES.PROFILE_POSTS]: 'post',
-  [ROUTES.PROFILE_BENEFITS]: 'benefits',
   [ROUTES.EXCLUSIVE_ITINERARY]: 'activity',
   [ROUTES.MY_ITINERARY]: 'activity',
 };
@@ -323,7 +321,7 @@ function loginFeatureForUrl(url: string): LoginInterceptFeature | null {
   if (path === ROUTES.SETTINGS) {
     const section = parseQueryString(rawQuery).section;
     if (section === 'notifications') return 'notification';
-    if (section === 'privacy') return 'benefits';
+    if (section === 'privacy') return 'general';
     return null;
   }
 
@@ -562,20 +560,6 @@ export function goProfilePosts() {
   preloadProfileSubpackage();
   preloadPageSafe(ROUTES.PROFILE_POSTS);
   navigateToSafe(ROUTES.PROFILE_POSTS);
-}
-
-/** Full benefits list (e.g. from upgrade sheets or profile preview link). */
-export function goProfileBenefits() {
-  endRouteTransition();
-  navigateToSafe(ROUTES.PROFILE_BENEFITS);
-}
-
-/** Profile tab with package upgrade sheet open. */
-export function goProfileUpgrade() {
-  requireAuth(() => {
-    useNavigationStore.getState().setProfileIntent({ openPackageSheet: true });
-    switchTabTo(ROUTES.PROFILE);
-  }, 'benefits');
 }
 
 export type GoAiAssistantOptions = Pick<
