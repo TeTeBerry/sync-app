@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import {
-  acceptPostApplication,
   addPostComment,
-  applyToPost,
   deletePost,
   fetchPostComments,
   fetchPostsByActivity,
@@ -26,11 +24,8 @@ import {
   invalidatePostComments,
   invalidateBlockedUsers,
   invalidatePostFeeds,
-  invalidateProfilePosts,
   invalidateProfileSummary,
   patchPostEngagementInCaches,
-  patchPostStatusInCaches,
-  patchProfilePostApplicationAccepted,
   patchUpdatedProfilePostInCaches,
   popularPostsQueryKey,
   readPostEngagementFromCache,
@@ -95,7 +90,6 @@ export function mapHomeFeedPost(item: HomeFeedPost): HomeFeedPost {
     liked: item.liked,
     comments: item.comments ?? 0,
     avatar: sanitizeRemoteImageUrl(item.avatar) ?? item.avatar,
-    status: item.status ?? '招募中',
     activityLegacyId: item.activityLegacyId,
     contentTypes: item.contentTypes,
     tags: item.tags,
@@ -233,24 +227,6 @@ export async function commentPostAndInvalidate(
   return updated;
 }
 
-export async function applyToPostAndInvalidate(
-  postId: string,
-  payload?: Parameters<typeof applyToPost>[1],
-) {
-  return applyToPost(postId, payload);
-}
-
-export async function acceptPostApplicationAndInvalidate(
-  postId: string,
-  applicantUserId: string,
-) {
-  const result = await acceptPostApplication(postId, applicantUserId);
-  patchProfilePostApplicationAccepted(postId, applicantUserId);
-  invalidateProfilePosts();
-  invalidatePostFeeds();
-  return result;
-}
-
 export async function updatePostAndInvalidate(
   postId: string,
   payload: Parameters<typeof updatePost>[1],
@@ -258,8 +234,6 @@ export async function updatePostAndInvalidate(
   const updated = await updatePost(postId, payload);
   if (payload.body !== undefined) {
     patchUpdatedProfilePostInCaches(updated);
-  } else {
-    patchPostStatusInCaches(postId, updated.status);
   }
   await invalidatePostQueries();
   return updated;

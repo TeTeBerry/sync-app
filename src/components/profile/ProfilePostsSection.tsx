@@ -1,22 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import {
   Check,
-  ChevronDown,
-  CircleCheck,
   Clock,
-  Flame,
   Heart,
   MessageCircle,
   MessageSquare,
   Pencil,
-  Sparkles,
   Trash2,
-  Users,
   X,
 } from '../../components/icons';
-import type { PostApplicationItem } from '../../types/backend';
-import { formatTimeAgo } from '../../utils/dayTime';
-import { ContentTypeBadge, PostImageGrid, PostStatusBadge } from '../post';
+import { ContentTypeBadge, PostImageGrid } from '../post';
 import { FEED_POST_IMAGE_MAX_DISPLAY } from '../../constants/listPerf';
 import {
   mergePostContentTypes,
@@ -31,13 +24,11 @@ import { Text, Textarea, View } from '@tarojs/components';
 const POST_BODY_MAX = 200;
 const PROFILE_POST_STAT_ICON_SIZE = 14;
 const PROFILE_POST_ACTION_ICON_SIZE = 16;
-const PROFILE_POST_ACTION_COMPLETE_COLOR = '#22c55e';
 const PROFILE_POST_ACTION_EDIT_COLOR = '#4cc9f0';
 const PROFILE_POST_ACTION_DELETE_COLOR = '#ff6467';
 
 export type ProfilePostEditDraft = {
   body: string;
-  status: '招募中' | '已组队';
 };
 
 export type ProfilePostsSectionProps = {
@@ -47,7 +38,6 @@ export type ProfilePostsSectionProps = {
   editingPostId?: string | null;
   editDraft?: ProfilePostEditDraft | null;
   onSelect?: (item: ProfilePostItem) => void;
-  onComplete?: (item: ProfilePostItem) => void;
   onEdit?: (item: ProfilePostItem) => void;
   onDelete?: (item: ProfilePostItem) => void;
   onEditDraftChange?: (draft: ProfilePostEditDraft) => void;
@@ -55,118 +45,8 @@ export type ProfilePostsSectionProps = {
   onCancelEdit?: () => void;
 };
 
-function PostApplicationsBlock({
-  post,
-  applications,
-}: {
-  post: ProfilePostItem;
-  applications: PostApplicationItem[];
-}) {
-  const pending = applications.filter((item) => item.status === 'pending');
-  const accepted = applications.filter((item) => item.status === 'accepted');
-  const isRecruiting = post.status === '招募中';
-  const [expanded, setExpanded] = useState(isRecruiting);
-
-  useEffect(() => {
-    if (!isRecruiting) {
-      setExpanded(false);
-    }
-  }, [isRecruiting, post.id]);
-
-  if (!applications.length) return null;
-
-  const headSummary =
-    !isRecruiting && accepted.length > 0
-      ? `已接受 ${accepted[0]?.name ?? ''}${accepted.length > 1 ? ` 等 ${accepted.length} 人` : ''}`
-      : pending.length > 0
-        ? `${pending.length} 人待处理`
-        : null;
-
-  return (
-    <View
-      className={`s-profile-post__applications${
-        expanded ? '' : ' s-profile-post__applications--collapsed'
-      }`}
-      onClick={(event) => event.stopPropagation()}
-    >
-      <Button
-        className="s-profile-post__applications-head"
-        aria-expanded={expanded}
-        onClick={() => setExpanded((value) => !value)}
-      >
-        <View className="s-profile-post__applications-head-main">
-          <Users size={14} color="#ff0066" aria-hidden />
-          <View className="s-profile-post__applications-head-text">
-            <Text className="s-profile-post__applications-title">
-              {applications.length} 人申请组队
-            </Text>
-            {headSummary ? (
-              <Text className="s-profile-post__applications-subtitle">
-                {headSummary}
-              </Text>
-            ) : null}
-          </View>
-        </View>
-        <ChevronDown
-          size={16}
-          color="rgba(255, 255, 255, 0.5)"
-          className={`s-profile-post__applications-chevron${
-            expanded ? ' s-profile-post__applications-chevron--expanded' : ''
-          }`}
-          aria-hidden
-        />
-      </Button>
-      {expanded ? (
-        <View className="s-profile-post__applications-list">
-          {applications.map((applicant) => {
-            const isAccepted = applicant.status === 'accepted';
-
-            return (
-              <View key={applicant.id} className="s-profile-post__application">
-                <View
-                  className="s-profile-post__application-avatar"
-                  style={
-                    applicant.avatar
-                      ? { backgroundImage: `url(${applicant.avatar})` }
-                      : undefined
-                  }
-                  aria-hidden
-                />
-                <View className="s-profile-post__application-main">
-                  <View className="s-profile-post__application-body">
-                    <View className="s-profile-post__application-meta">
-                      <Text className="s-profile-post__application-name">
-                        {applicant.name}
-                      </Text>
-                      <Text className="s-profile-post__application-time">
-                        {formatTimeAgo(applicant.appliedAt)}
-                      </Text>
-                    </View>
-                    {applicant.message ? (
-                      <Text className="s-profile-post__application-message">
-                        {applicant.message}
-                      </Text>
-                    ) : null}
-                  </View>
-                  {isAccepted ? (
-                    <Text className="s-profile-post__application-status">已接受</Text>
-                  ) : applicant.status === 'pending' ? (
-                    <Text className="s-profile-post__application-status">待处理</Text>
-                  ) : null}
-                </View>
-              </View>
-            );
-          })}
-        </View>
-      ) : null}
-    </View>
-  );
-}
-
 function isPostEditDirty(item: ProfilePostItem, draft: ProfilePostEditDraft): boolean {
-  const statusMatches =
-    draft.status === '已组队' ? item.status === '已组队' : item.status === '招募中';
-  return draft.body !== item.content || !statusMatches;
+  return draft.body !== item.content;
 }
 
 function renderPostItems(
@@ -177,7 +57,6 @@ function renderPostItems(
     editingPostId = null,
     editDraft = null,
     onSelect,
-    onComplete,
     onEdit,
     onDelete,
     onEditDraftChange,
@@ -213,7 +92,6 @@ function renderPostItems(
             <Text className="s-profile-post__title-dot" />
             {item.title}
           </Text>
-          <PostStatusBadge post={item} variant="home" isOwn />
         </View>
 
         {contentText ? (
@@ -233,10 +111,6 @@ function renderPostItems(
         ) : null}
 
         <ContentTypeBadge types={contentTypeKeys} />
-
-        {item.applications?.length ? (
-          <PostApplicationsBlock post={item} applications={item.applications} />
-        ) : null}
 
         <View className="s-profile-post__footer">
           <View className="s-profile-post__stats">
@@ -270,23 +144,6 @@ function renderPostItems(
           </View>
 
           <View className="s-profile-post__actions">
-            {item.status === '招募中' ? (
-              <Button
-                className="s-profile-post__action s-profile-post__action--complete"
-                aria-label="标记已组队"
-                onClick={(event) => {
-                  event.stopPropagation();
-                  onComplete?.(item);
-                }}
-              >
-                <View className="s-profile-post__action-icon">
-                  <CircleCheck
-                    size={PROFILE_POST_ACTION_ICON_SIZE}
-                    color={PROFILE_POST_ACTION_COMPLETE_COLOR}
-                  />
-                </View>
-              </Button>
-            ) : null}
             <Button
               className="s-profile-post__action s-profile-post__action--edit"
               aria-label="编辑"
@@ -343,7 +200,6 @@ function renderPostItems(
                   maxlength={POST_BODY_MAX}
                   onInput={(event) => {
                     onEditDraftChange?.({
-                      ...draft,
                       body: event.detail.value.slice(0, POST_BODY_MAX),
                     });
                   }}
@@ -358,38 +214,6 @@ function renderPostItems(
                   style={{ width: `${charProgress * 100}%` }}
                 />
               </View>
-            </View>
-
-            <Text className="s-profile-post-edit__status-label">帖子状态</Text>
-            <View className="s-profile-post-edit__status-row">
-              <Button
-                className={`s-profile-post-edit__status-btn${
-                  draft.status === '招募中'
-                    ? ' s-profile-post-edit__status-btn--active-recruiting'
-                    : ''
-                }`}
-                onClick={() => onEditDraftChange?.({ ...draft, status: '招募中' })}
-              >
-                <Flame size={16} />
-                <Text>招募中</Text>
-                {draft.status === '招募中' ? (
-                  <Text className="s-profile-post-edit__status-dot" />
-                ) : null}
-              </Button>
-              <Button
-                className={`s-profile-post-edit__status-btn${
-                  draft.status === '已组队'
-                    ? ' s-profile-post-edit__status-btn--active-grouped'
-                    : ''
-                }`}
-                onClick={() => onEditDraftChange?.({ ...draft, status: '已组队' })}
-              >
-                <CircleCheck size={16} />
-                <Text>已组队</Text>
-                {draft.status === '已组队' ? (
-                  <Sparkles size={14} className="s-profile-post-edit__status-sparkle" />
-                ) : null}
-              </Button>
             </View>
 
             {isDirty ? (
@@ -428,7 +252,6 @@ const ProfilePostsSection: React.FC<ProfilePostsSectionProps> = ({
   editingPostId = null,
   editDraft = null,
   onSelect,
-  onComplete,
   onEdit,
   onDelete,
   onEditDraftChange,
@@ -439,7 +262,6 @@ const ProfilePostsSection: React.FC<ProfilePostsSectionProps> = ({
     editingPostId,
     editDraft,
     onSelect,
-    onComplete,
     onEdit,
     onDelete,
     onEditDraftChange,
@@ -455,9 +277,9 @@ const ProfilePostsSection: React.FC<ProfilePostsSectionProps> = ({
             <View className="s-profile-section__empty-icon s-profile-section__empty-icon--posts">
               <MessageSquare size={22} />
             </View>
-            <Text className="s-profile-section__empty-title">还没有组队帖</Text>
+            <Text className="s-profile-section__empty-title">还没有帖子</Text>
             <Text className="s-profile-section__empty-hint">
-              在活动详情通过 AI 助手发布组队帖
+              在活动详情发布模板帖或留言
             </Text>
           </View>
         ) : (
@@ -471,16 +293,16 @@ const ProfilePostsSection: React.FC<ProfilePostsSectionProps> = ({
     <ProfileCollapsibleSection
       variant="posts"
       icon={<MessageSquare size={14} />}
-      title="我的组队帖"
+      title="我的帖子"
       items={items}
       renderEmpty={() => (
         <View className="s-profile-section__empty">
           <View className="s-profile-section__empty-icon s-profile-section__empty-icon--posts">
             <MessageSquare size={22} />
           </View>
-          <Text className="s-profile-section__empty-title">还没有组队帖</Text>
+          <Text className="s-profile-section__empty-title">还没有帖子</Text>
           <Text className="s-profile-section__empty-hint">
-            在活动详情通过 AI 助手发布组队帖
+            在活动详情发布模板帖或留言
           </Text>
         </View>
       )}

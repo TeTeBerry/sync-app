@@ -28,8 +28,8 @@ const LOCKED_FEATURES: LockedFeature[] = [
   },
   {
     icon: <FileText size={18} color="#bf5af2" />,
-    title: '我的组队帖',
-    desc: '组队帖与申请管理',
+    title: '我的帖子',
+    desc: '模板帖与留言管理',
     feature: 'post',
   },
   {

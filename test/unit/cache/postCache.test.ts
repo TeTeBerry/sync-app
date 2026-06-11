@@ -22,7 +22,6 @@ const samplePost: HomeFeedPost = {
   liked: false,
   comments: 0,
   avatar: '',
-  status: '招募中',
 };
 
 describe('postCache', () => {

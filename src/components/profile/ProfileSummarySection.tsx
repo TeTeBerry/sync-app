@@ -60,17 +60,13 @@ const ProfileSummarySection: React.FC<ProfileSummarySectionProps> = ({
           <Text className="s-profile__stat-value">{user.stats.events}</Text>
           <Text className="s-profile__stat-label">参加活动</Text>
         </View>
-        <View className="s-profile__stat s-profile__stat--accent">
-          <Text className="s-profile__stat-value">{user.stats.matchSuccess}</Text>
-          <Text className="s-profile__stat-label">组队成功</Text>
-        </View>
         <View className="s-profile__stat">
           <Text className="s-profile__stat-value">{user.stats.likes}</Text>
           <Text className="s-profile__stat-label">获赞数</Text>
         </View>
         <View className="s-profile__stat">
           <Text className="s-profile__stat-value">{user.stats.posts}</Text>
-          <Text className="s-profile__stat-label">组队帖</Text>
+          <Text className="s-profile__stat-label">帖子</Text>
         </View>
       </View>
     </View>

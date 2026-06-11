@@ -8,7 +8,6 @@ function post(
   return {
     title: '活动',
     content: '正文',
-    status: '招募中',
     likes: 0,
     comments: 0,
     date: '06/13',

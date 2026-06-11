@@ -1,6 +1,6 @@
 import type { PostContentType, ProfilePostItem } from '../types/backend';
 
-/** Share posts — excluded from「我的组队帖」. */
+/** Share posts — excluded from「我的帖子」. */
 export function isProfileSharePost(contentTypes?: PostContentType[] | null): boolean {
   return (contentTypes ?? []).includes('share');
 }

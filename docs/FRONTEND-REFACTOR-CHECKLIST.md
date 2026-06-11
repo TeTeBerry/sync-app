@@ -25,7 +25,7 @@
 | P3-dev | 开发体验（check / husky / CI） | ✅ 完成（2025-06） |
 | AE | 活动域架构（domains/ + @sync/*-contracts） | ✅ 完成（2026-06） |
 
-**产品约定**：组队帖 **仅 AI 对话闭环创建**，不新增发帖表单 UI。
+**产品约定**：活动页提供 **模板发帖**（`AiBuddyPostSheet`）与 **留言板**；AI 助手亦可闭环发帖。
 
 **工程**：`npm run check`；pre-commit lint-staged；CI 见 `.github/workflows/ci.yml`；工作区 [`../../CONTRIBUTING.md`](../../CONTRIBUTING.md)。
 
@@ -52,11 +52,11 @@
 
 ### P2 ✅（无发帖 UI）
 
-- [x] `syncApi`：`updatePost`、`likePost`、`commentPost`、`applyToPost`（`createPost` 仅 API 层，**无页面调用**）
+- [x] `syncApi`：`updatePost`、`likePost`、`commentPost`（`createPost` 由活动页 / AI 调用）
 - [x] `syncApi`：`registerForActivity`、`cancelActivityRegistration`、`fetchCurrentUser`、`updateCurrentUser`
 - [x] 首页「加入」→ `POST /activities/:legacyId/register`
-- [x] 首页 / 活动详情：点赞、评论（H5 `promptText`）、申请加入
-- [x] 个人页：编辑正文、标记完成 → `PATCH /posts/:id`
+- [x] 首页 / 活动详情：点赞、评论（H5 `promptText`）
+- [x] 个人页：编辑正文 → `PATCH /posts/:id`
 - [x] `invalidatePostQueries` 统一刷新
 
 ### P3 ✅
@@ -114,7 +114,7 @@
 - [x] Checklist「当前身份」与 demo 仅 `userId` 对齐
 - [x] `api/sync/ownerQuery.contract.test.ts` — profile / notifications / activities 有/无 Bearer
 - [x] `useEventDetailRoute` / `useEventDetailActivityHeader`；精简 `useEventDetailPage`（权益相关 hook 已移除）
-- [x] `domains/partner-feed/` — 活动详情帖流 / 留言板 / 组队发帖（2026-06）
+- [x] `domains/partner-feed/` — 活动详情帖流 / 留言板 / 模板发帖（2026-06）
 
 ### Phase 4 数据层 + 编排 ✅（2026-06）
 
@@ -262,7 +262,7 @@
 | GET | `/posts/popular`、按活动/owner | ✅ |
 | POST | `/posts` | 🟡 API 有，UI 不调（AI 发帖） |
 | PATCH/DELETE | `/posts/:id` | ✅ |
-| POST | `/posts/:id/like|comments|applications` | ✅ |
+| POST | `/posts/:id/like|comments` | ✅ |
 | GET | `/profile`… | ✅ |
 | WS | `/ai/chat/ws` | ✅ |
 | GET | `/chat/sessions/:id` | ✅ |

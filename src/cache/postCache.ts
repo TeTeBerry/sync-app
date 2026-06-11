@@ -14,8 +14,6 @@ import type {
   ProfileSummary,
 } from '../types/backend';
 import { sumProfilePostLikes } from '../utils/profileLikes';
-import { patchProfilePostAfterAcceptApplication } from '../utils/profilePostApplications';
-import type { BackendPostStatusLabel } from '../utils/postStatus';
 
 export type PostEngagementPatch = Pick<
   EventDetailPost,
@@ -121,45 +119,6 @@ export function patchPostEngagementInCaches(updated: PostEngagementPatch): void 
   broadcastCacheData(['posts']);
 }
 
-export function patchPostStatusInCaches(
-  postId: string,
-  status: BackendPostStatusLabel,
-): void {
-  const patchList = <T extends { id: string; status?: BackendPostStatusLabel }>(
-    posts: T[] | undefined,
-  ) => posts?.map((post) => (post.id === postId ? { ...post, status } : post));
-
-  forEachCacheEntry((key, entryData) => {
-    if (!key.startsWith('posts|') && key !== 'profile|posts') return;
-    if (!Array.isArray(entryData)) return;
-    const patched = patchList(
-      entryData as { id: string; status?: BackendPostStatusLabel }[],
-    );
-    if (patched) setCacheDataByKey(key, patched);
-  });
-
-  broadcastCacheData(['posts']);
-  broadcastCacheData(['profile', 'posts']);
-}
-
-export function patchProfilePostApplicationAccepted(
-  postId: string,
-  applicantUserId: string,
-): void {
-  forEachCacheEntry((key, entryData) => {
-    if (key !== 'profile|posts' || !Array.isArray(entryData)) return;
-    const patched = patchProfilePostAfterAcceptApplication(
-      entryData as ProfilePostItem[],
-      postId,
-      applicantUserId,
-    );
-    setCacheDataByKey(key, patched);
-  });
-
-  patchPostStatusInCaches(postId, '已组队');
-  broadcastCacheData(['profile', 'posts']);
-}
-
 export function patchUpdatedProfilePostInCaches(updated: ProfilePostItem): void {
   const patchList = (posts: ProfilePostItem[] | undefined) =>
     posts?.map((post) =>
@@ -167,7 +126,6 @@ export function patchUpdatedProfilePostInCaches(updated: ProfilePostItem): void 
         ? {
             ...post,
             content: updated.content,
-            status: updated.status,
             title: updated.title,
           }
         : post,
@@ -179,7 +137,6 @@ export function patchUpdatedProfilePostInCaches(updated: ProfilePostItem): void 
     if (patched) setCacheDataByKey(key, patched);
   });
 
-  patchPostStatusInCaches(updated.id, updated.status);
   broadcastCacheData(['profile', 'posts']);
 }
 

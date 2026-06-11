@@ -62,7 +62,7 @@ Barrel 导出分包/活动详情需要的组件与逻辑；仅主 profile 页使
 
 - 页面：`packageEvent/pages/event-detail/index.tsx`（薄壳：路由编排、live-info lazy 包装）
 - 编排：`useEventDetailPage.ts`
-- 域：`domains/partner-feed/`（帖流、留言板、组队发帖）、`domains/live-info/`、`domains/travel-guide/`
+- 域：`domains/partner-feed/`（帖流、留言板、模板发帖）、`domains/live-info/`、`domains/travel-guide/`
 
 ## 决策表
 
@@ -71,7 +71,7 @@ Barrel 导出分包/活动详情需要的组件与逻辑；仅主 profile 页使
 | 通用按钮/输入，无业务文案 | `components/ui/` |
 | 只在首页用的区块 | `pages/index/components/` |
 | 个人中心 + profile 分包共用 | `components/profile/` |
-| 活动详情帖流 / 留言 / 组队发帖 | `domains/partner-feed/` |
+| 活动详情帖流 / 留言 / 模板发帖 | `domains/partner-feed/` |
 | 活动详情页级弹窗 / fallback | `packageEvent/.../event-detail/components/` |
 | 跨多 Tab/多活动的帖子 UI | `components/post/`（`FeedPostList`、`PostCardActionBar` 等） |
 | 顶栏 / 底栏 / Tab 页头 | `components/navigation/` |

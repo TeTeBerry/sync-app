@@ -13,7 +13,6 @@ function basePost(overrides: Partial<EventDetailPost> = {}): EventDetailPost {
     likes: 1,
     comments: 0,
     avatar: 'https://example.com/a.jpg',
-    status: '招募中',
     ...overrides,
   };
 }

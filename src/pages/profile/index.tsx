@@ -93,9 +93,9 @@ const Profile: React.FC = () => {
                     <ProfileActionCard
                       accent="posts"
                       icon={<FileText size={20} />}
-                      title="我的组队帖"
+                      title="我的帖子"
                       badge={postsCount}
-                      subtitle={`${postsCount} 条组队帖`}
+                      subtitle={`${postsCount} 条帖子`}
                       onClick={() => go(ROUTES.PROFILE_POSTS)}
                     />
                     <ProfileSettingsSection {...settings} />

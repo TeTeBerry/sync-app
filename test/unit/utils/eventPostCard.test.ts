@@ -14,7 +14,6 @@ describe('eventDetailPostToCard', () => {
         likes: 0,
         comments: 0,
         avatar: 'a.png',
-        status: '招募中',
       },
       {
         activityLegacyId: 9,

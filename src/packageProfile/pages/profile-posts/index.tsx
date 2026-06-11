@@ -55,21 +55,6 @@ const ProfilePostsPage: React.FC = () => {
     goEventDetail(activityLegacyId, { postId: item.id });
   }, []);
 
-  const handleCompletePost = useCallback(
-    async (item: ProfilePostItem) => {
-      const ok = await confirm({
-        title: '标记已组队',
-        message: '确认将该帖子标记为已组队？',
-        confirmText: '标记已组队',
-      });
-      if (!ok) return;
-      void updatePostAndInvalidate(item.id, { status: 'completed' })
-        .then(() => void Taro.showToast({ title: '已更新', icon: 'success' }))
-        .catch(() => void Taro.showToast({ title: '更新失败', icon: 'none' }));
-    },
-    [confirm],
-  );
-
   const handleEditPost = useCallback(
     (item: ProfilePostItem) => {
       if (editingPostId === item.id) {
@@ -78,10 +63,7 @@ const ProfilePostsPage: React.FC = () => {
         return;
       }
       setEditingPostId(item.id);
-      setEditDraft({
-        body: item.content,
-        status: item.status === '已组队' ? '已组队' : '招募中',
-      });
+      setEditDraft({ body: item.content });
     },
     [editingPostId],
   );
@@ -99,27 +81,15 @@ const ProfilePostsPage: React.FC = () => {
         void Taro.showToast({ title: '帖子内容不能为空', icon: 'none' });
         return;
       }
-      const status =
-        editDraft.status === '已组队' ? 'completed' : ('recruiting' as const);
 
-      if (item.status === '已组队' && status === 'recruiting') {
-        const ok = await confirm({
-          title: '改回招募中',
-          message:
-            '若你们已互相组队，双方帖子将恢复招募，组队关系解散，对方会收到通知。确定继续吗？',
-          confirmText: '确定',
-        });
-        if (!ok) return;
-      }
-
-      void updatePostAndInvalidate(item.id, { body, status })
+      void updatePostAndInvalidate(item.id, { body })
         .then(() => {
           handleCancelPostEdit();
           void Taro.showToast({ title: '已保存', icon: 'success' });
         })
         .catch(() => void Taro.showToast({ title: '保存失败', icon: 'none' }));
     },
-    [confirm, editDraft, handleCancelPostEdit],
+    [editDraft, handleCancelPostEdit],
   );
 
   const handleDeletePost = useCallback(
@@ -143,7 +113,7 @@ const ProfilePostsPage: React.FC = () => {
   return (
     <View data-cmp="ProfilePostsPage" className="s-profile-stack s-page-with-tabbar">
       <View className="s-page-with-tabbar__main">
-        <PageNavigation title="我的组队帖" fallback={ROUTES.PROFILE} tone="surface" />
+        <PageNavigation title="我的帖子" fallback={ROUTES.PROFILE} tone="surface" />
 
         <ScrollView
           scrollY
@@ -164,7 +134,6 @@ const ProfilePostsPage: React.FC = () => {
                 editingPostId={editingPostId}
                 editDraft={editDraft}
                 onSelect={handleSelectPost}
-                onComplete={handleCompletePost}
                 onEdit={handleEditPost}
                 onDelete={handleDeletePost}
                 onEditDraftChange={setEditDraft}

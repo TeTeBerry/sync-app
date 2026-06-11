@@ -4,9 +4,6 @@ import type {
   EventDetailPost,
   EventPostsPage,
   HomeFeedPost,
-  PostActionResult,
-  PostApplicationItem,
-  PostCommentItem,
   PostCommentsPage,
   ProfilePostItem,
   UpdatePostPayload,
@@ -66,54 +63,6 @@ export function likePost(postId: string) {
     {},
     ownerQueryParams(),
   ).then(unwrapPostMutation);
-}
-
-export type LightApplyPayload = {
-  departureCity: string;
-  tripDays?: number;
-  genderPref?: '女生优先' | '男生优先' | '不限';
-};
-
-export type ApplyToPostPayload = {
-  message?: string;
-  lightApply?: LightApplyPayload;
-};
-
-export function applyToPost(postId: string, payload?: ApplyToPostPayload) {
-  const body: ApplyToPostPayload = {};
-  const message = payload?.message?.trim();
-  if (message) body.message = message;
-  if (payload?.lightApply?.departureCity?.trim()) {
-    body.lightApply = {
-      departureCity: payload.lightApply.departureCity.trim(),
-      ...(payload.lightApply.tripDays != null
-        ? { tripDays: payload.lightApply.tripDays }
-        : {}),
-      ...(payload.lightApply.genderPref
-        ? { genderPref: payload.lightApply.genderPref }
-        : {}),
-    };
-  }
-  return apiPost<PostActionResult>(
-    `/posts/${postId}/applications`,
-    Object.keys(body).length ? body : {},
-    ownerQueryParams(),
-  );
-}
-
-export function fetchPostApplications(postId: string) {
-  return apiGet<PostApplicationItem[]>(
-    `/posts/${postId}/applications`,
-    ownerQueryParams(),
-  );
-}
-
-export function acceptPostApplication(postId: string, applicantUserId: string) {
-  return apiPost<{ ok: true }>(
-    `/posts/${postId}/applications/${encodeURIComponent(applicantUserId)}/accept`,
-    {},
-    ownerQueryParams(),
-  );
 }
 
 export type FetchPostCommentsOptions = {

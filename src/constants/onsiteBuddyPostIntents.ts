@@ -86,7 +86,7 @@ export function buildOnsiteIntentPrefillSummaryLines(
   form: AiBuddyPostFormValues,
 ): string[] {
   const intentLabel =
-    ONSITE_BUDDY_POST_INTENTS.find((item) => item.id === intentId)?.label ?? '现场招募';
+    ONSITE_BUDDY_POST_INTENTS.find((item) => item.id === intentId)?.label ?? '现场发帖';
   const tagLabels = formatOnsiteIntentTagLabels(form);
   const lines = [intentLabel, form.location.trim() || '现场', tagLabels];
   if (form.note?.trim()) {

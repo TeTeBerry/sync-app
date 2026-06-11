@@ -140,7 +140,6 @@ export interface ProfileSummary {
   avatar: string;
   stats: {
     events: number;
-    matchSuccess: number;
     likes: number;
     posts: number;
   };
@@ -155,40 +154,16 @@ export interface ProfileActivityItem {
   status: 'registered' | 'attended';
 }
 
-export type PostApplicationStatus = 'pending' | 'accepted' | 'rejected';
-
-export type PostBuddyPreview = {
-  body: string;
-  location?: string;
-  tags: string[];
-};
-
-export interface PostApplicationItem {
-  id: string;
-  userId: string;
-  name: string;
-  avatar?: string;
-  message?: string;
-  status: PostApplicationStatus;
-  appliedAt: string;
-  /** Set when post owner opened chat from profile posts. */
-  buddyPreview?: PostBuddyPreview;
-}
-
 export interface ProfilePostItem {
   id: string;
   title: string;
   content: string;
-  status: '招募中' | '已组队' | '已隐藏';
   likes: number;
   comments: number;
   date: string;
   activityLegacyId?: number;
   contentTypes?: PostContentType[];
   images?: string[];
-  /** Applicants on posts owned by the current user (newest first). */
-  applications?: PostApplicationItem[];
-  pendingApplicationCount?: number;
 }
 
 export type HomeFeedPostAuthorGender = 'female' | 'male';
@@ -207,7 +182,6 @@ export interface HomeFeedPost {
   liked?: boolean;
   comments: number;
   avatar: string;
-  status: '招募中' | '已组队' | '已隐藏';
   activityLegacyId?: number;
   contentTypes?: PostContentType[];
   tags?: string[];
@@ -249,11 +223,8 @@ export interface EventDetailPost {
   contentTypes?: PostContentType[];
   likes: number;
   liked?: boolean;
-  /** Current user has submitted a team application for this post. */
-  appliedByMe?: boolean;
   comments: number;
   avatar: string;
-  status: '招募中' | '已组队' | '已隐藏';
   images?: string[];
   /** Author passed wristband on-site verification for this activity today. */
   authorOnSiteVerified?: boolean;
@@ -282,7 +253,6 @@ export interface CreatePostPayload {
 export interface UpdatePostPayload {
   body?: string;
   eventTitle?: string;
-  status?: 'recruiting' | 'completed';
 }
 
 export interface PostActionResult {
@@ -364,7 +334,6 @@ export interface AppNotification {
 export type {
   GenerateItineraryPayload,
   GenerateItineraryResult,
-  ItineraryBuddyRecruitHint,
   ItineraryConflict,
   ItineraryDay,
   ItineraryDj,

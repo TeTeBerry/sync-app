@@ -11,7 +11,6 @@ export const profileUser = {
   verified: true,
   stats: {
     events: 4,
-    matchSuccess: 1,
     likes: 73,
     posts: 7,
   },
@@ -44,7 +43,6 @@ export const profilePosts: ProfilePostItem[] = [
     activityLegacyId: 4,
     likes: 12,
     comments: 3,
-    status: '招募中',
     date: '05/20',
   },
 ];

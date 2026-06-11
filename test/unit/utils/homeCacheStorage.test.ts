@@ -53,7 +53,6 @@ const mockPosts: HomeFeedPost[] = Array.from({ length: 10 }, (_, index) => ({
   likes: 0,
   comments: 0,
   avatar: '',
-  status: '招募中' as const,
 }));
 
 describe('homeCacheStorage', () => {

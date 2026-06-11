@@ -6,6 +6,22 @@ import { getClientUserId } from '../utils/session';
 
 const DEFAULT_PAGE_SIZE = 10;
 
+function parsePostCreatedAtMs(createdAt?: string): number {
+  if (!createdAt) return 0;
+  const ms = Date.parse(createdAt);
+  return Number.isFinite(ms) ? ms : 0;
+}
+
+/** Newest first — matches backend activity feed ordering. */
+function sortPostsNewestFirst(posts: EventDetailPost[]): EventDetailPost[] {
+  return [...posts].sort((a, b) => {
+    const timeDiff =
+      parsePostCreatedAtMs(b.createdAt) - parsePostCreatedAtMs(a.createdAt);
+    if (timeDiff !== 0) return timeDiff;
+    return b.id.localeCompare(a.id);
+  });
+}
+
 export function useEventPostsInfiniteQuery(
   activityLegacyId?: number,
   options?: {
@@ -37,9 +53,14 @@ export function useEventPostsInfiniteQuery(
 
   const mergeFetchedPosts = useCallback(
     (fetched: EventDetailPost[], previous: EventDetailPost[]) => {
-      const fetchedIds = new Set(fetched.map((post) => post.id));
-      const localOnly = previous.filter((post) => !fetchedIds.has(post.id));
-      return [...localOnly, ...fetched];
+      const byId = new Map<string, EventDetailPost>();
+      for (const post of previous) {
+        byId.set(post.id, post);
+      }
+      for (const post of fetched) {
+        byId.set(post.id, post);
+      }
+      return sortPostsNewestFirst([...byId.values()]);
     },
     [],
   );
@@ -141,12 +162,7 @@ export function useEventPostsInfiniteQuery(
   const patchItem = useCallback(
     (
       updated: Pick<EventDetailPost, 'id'> &
-        Partial<
-          Pick<
-            EventDetailPost,
-            'likes' | 'liked' | 'comments' | 'status' | 'appliedByMe'
-          >
-        >,
+        Partial<Pick<EventDetailPost, 'likes' | 'liked' | 'comments' | 'status'>>,
     ) => {
       setItems((prev) =>
         prev.map((post) =>
@@ -159,9 +175,6 @@ export function useEventPostsInfiniteQuery(
                   ? { comments: updated.comments }
                   : {}),
                 ...(updated.status !== undefined ? { status: updated.status } : {}),
-                ...(updated.appliedByMe !== undefined
-                  ? { appliedByMe: updated.appliedByMe }
-                  : {}),
               }
             : post,
         ),
@@ -183,11 +196,8 @@ export function useEventPostsInfiniteQuery(
 
   const replaceItem = useCallback((pendingId: string, post: EventDetailPost) => {
     setItems((prev) => {
-      const withoutPending = prev.filter((item) => item.id !== pendingId);
-      if (withoutPending.some((item) => item.id === post.id)) {
-        return withoutPending;
-      }
-      return [post, ...withoutPending];
+      const rest = prev.filter((item) => item.id !== pendingId && item.id !== post.id);
+      return [post, ...rest];
     });
   }, []);
 

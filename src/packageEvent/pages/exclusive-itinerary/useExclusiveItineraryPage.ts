@@ -7,14 +7,11 @@ import {
 } from '../../../hooks/useItineraryApi';
 import { useItineraryStore } from '@/domains/performance-itinerary/store';
 import { useStackPageMainHeight } from '../../../hooks/useTabPageMainHeight';
-import { fetchItineraryBuddyRecruitHint } from '../../../api/sync/itinerary';
 import {
-  goEventDetail,
   goMyItinerary,
   resolveEventDetailIdFromQuery,
   ROUTES,
 } from '../../../utils/route';
-import { formatItineraryBuddyRecruitHintMessage } from '../../../utils/itineraryBuddyRecruitHint';
 import { selectActiveActivityLegacyId, useNavigationStore } from '../../../stores';
 import {
   buildGenreFilterOptions,
@@ -219,40 +216,7 @@ export function useExclusiveItineraryPage() {
     try {
       const result = await generate({ selectedDjIds: selectedIds });
       setFromGenerateResult(activityLegacyId, selectedIds, result);
-
-      const continueToItinerary = () => {
-        goMyItinerary(activityLegacyId, selectedIds);
-      };
-
-      if (apiEnabled) {
-        try {
-          const hint = await fetchItineraryBuddyRecruitHint(
-            activityLegacyId,
-            selectedIds,
-          );
-          const buddyMessage = formatItineraryBuddyRecruitHintMessage(hint);
-          if (buddyMessage) {
-            setHintModal({
-              title: '也许能结伴同行',
-              message: buddyMessage,
-              confirmText: '继续看行程',
-              showIcon: false,
-              secondaryCta: {
-                label: '去看招募',
-                onClick: () => {
-                  setHintModal(null);
-                  goEventDetail(activityLegacyId);
-                },
-              },
-            });
-            return;
-          }
-        } catch {
-          // Best-effort buddy hint; still navigate to itinerary.
-        }
-      }
-
-      continueToItinerary();
+      goMyItinerary(activityLegacyId, selectedIds);
     } catch (error) {
       const message =
         error instanceof Error ? error.message : '行程生成失败，请稍后重试';
@@ -260,7 +224,7 @@ export function useExclusiveItineraryPage() {
     } finally {
       setGenerating(false);
     }
-  }, [activityLegacyId, apiEnabled, generate, selectedIds, setFromGenerateResult]);
+  }, [activityLegacyId, generate, selectedIds, setFromGenerateResult]);
 
   const sortSheetItems = useMemo(
     () =>

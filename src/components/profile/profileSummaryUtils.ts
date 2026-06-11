@@ -27,7 +27,6 @@ export function normalizeProfileUserData(
         : profileUser.verified,
     stats: {
       events: Number(stats.events) || 0,
-      matchSuccess: Number(stats.matchSuccess) || 0,
       likes: Number(stats.likes) || 0,
       posts: Number(stats.posts) || 0,
     },

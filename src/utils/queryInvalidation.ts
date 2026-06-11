@@ -2,8 +2,6 @@ import { invalidateCache } from '../hooks/useApiQuery';
 
 export {
   patchPostEngagementInCaches,
-  patchPostStatusInCaches,
-  patchProfilePostApplicationAccepted,
   patchUpdatedProfilePostInCaches,
   syncProfileSummaryLikesFromPostsCache,
   popularPostsQueryKey,

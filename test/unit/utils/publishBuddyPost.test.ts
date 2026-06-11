@@ -21,7 +21,6 @@ describe('publishBuddyPostFromForm', () => {
       likes: 0,
       comments: 0,
       avatar: '',
-      status: '招募中',
     });
   });
 

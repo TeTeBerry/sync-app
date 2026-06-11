@@ -46,7 +46,6 @@ const sampleEventDetailPost: EventDetailPost = {
   liked: true,
   comments: 0,
   avatar: '',
-  status: '招募中',
 };
 
 function postMutationMock(post: EventDetailPost): { post: EventDetailPost } {
@@ -130,7 +129,6 @@ describe('api/sync/posts createPost (组队发帖 REST)', () => {
       likes: 0,
       comments: 0,
       avatar: '',
-      status: '招募中',
     });
   });
 

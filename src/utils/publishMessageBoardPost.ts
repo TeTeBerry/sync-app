@@ -23,7 +23,6 @@ export function buildOptimisticMessageBoardPost(params: {
     likes: 0,
     liked: false,
     comments: 0,
-    status: '招募中',
     ...(params.imageRefs?.length ? { images: params.imageRefs } : {}),
   };
 }

@@ -9,7 +9,6 @@ import PostCardActionBar from './PostCardActionBar';
 import { buildPostSharePayload } from './postCardShare';
 import { PostCommentSection } from './PostCommentSection';
 import { PostActionMenu, PostShareButton } from './PostActionMenu';
-import { PostStatusBadge } from './PostStatusBadge';
 import {
   filterContentTypeTags,
   mergePostContentTypes,
@@ -102,21 +101,15 @@ function FeedPostRowInner({
             <Text className="s-home-post__meta-text">{post.time}</Text>
           </View>
         </View>
-        <View className="s-home-post__head-badge">
-          {sharePost && headerTypeKey ? (
+        {sharePost && headerTypeKey ? (
+          <View className="s-home-post__head-badge">
             <View className="s-home-post__type-badge">
               <Text className="s-home-post__type-badge-text">
                 {formatContentTypeHashtag(headerTypeKey)}
               </Text>
             </View>
-          ) : !sharePost ? (
-            <PostStatusBadge
-              post={{ status: post.status ?? '招募中' }}
-              variant="home"
-              isOwn={isOwn}
-            />
-          ) : null}
-        </View>
+          </View>
+        ) : null}
       </View>
 
       <View
