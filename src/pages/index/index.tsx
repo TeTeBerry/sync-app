@@ -25,6 +25,7 @@ import {
   ROUTES,
 } from '../../utils/route';
 import { joinActivityWithAuth } from '../../utils/joinActivity';
+import { isLoggedIn } from '../../utils/authStorage';
 import { deletePostWithFeedback } from '../../utils/deletePostFeedback';
 import { useAuthSession } from '../../hooks/useAuthSession';
 import { DEFER_BELOW_FOLD_MS, DEFER_SECONDARY_API_MS } from '../../utils/timing';
@@ -51,6 +52,9 @@ const Home = () => {
 
   useDidShow(() => {
     preloadHotRoutes(ROUTES.HOME);
+    if (isLoggedIn()) {
+      void refetchHomeSummary({ background: true });
+    }
   });
 
   const belowFoldReady = useDeferredMount(DEFER_BELOW_FOLD_MS);
@@ -58,7 +62,7 @@ const Home = () => {
   const { confirm, confirmDialog } = useConfirmDialog({
     cancelText: '取消',
   });
-  const { data: summary } = useHomeSummary();
+  const { data: summary, refetch: refetchHomeSummary } = useHomeSummary();
   const heat = summary?.heat;
   const { loggedIn } = useAuthSession();
   const { items: featuredEvents } = useFeaturedEvents();
@@ -107,6 +111,7 @@ const Home = () => {
         return;
       }
       joinActivityWithAuth(legacyId, {
+        alreadyJoined: event.going,
         onSuccess: () => openEventDetail(event),
       });
     },

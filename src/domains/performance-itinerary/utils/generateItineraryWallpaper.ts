@@ -84,13 +84,18 @@ export async function generateAndSaveItineraryWallpaper(
 export type RunSaveItineraryWallpaperOptions = {
   /** Server itinerary already persisted — show partial success if wallpaper skipped. */
   serverSaved?: boolean;
+  /** When false, caller owns showLoading/hideLoading (e.g. save + wallpaper in one tap). */
+  manageLoading?: boolean;
 };
 
 export async function runSaveItineraryWallpaperFlow(
   input: GenerateItineraryWallpaperInput,
   options?: RunSaveItineraryWallpaperOptions,
 ): Promise<void> {
-  void Taro.showLoading({ title: '生成屏保中…', mask: true });
+  const manageLoading = options?.manageLoading !== false;
+  if (manageLoading) {
+    void Taro.showLoading({ title: '生成屏保中…', mask: true });
+  }
   try {
     await generateAndSaveItineraryWallpaper(input);
     void Taro.showToast({
@@ -123,7 +128,9 @@ export async function runSaveItineraryWallpaperFlow(
       icon: 'none',
     });
   } finally {
-    void Taro.hideLoading();
+    if (manageLoading) {
+      void Taro.hideLoading();
+    }
   }
 }
 

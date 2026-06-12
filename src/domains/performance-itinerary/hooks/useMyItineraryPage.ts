@@ -181,43 +181,49 @@ export function useMyItineraryPage() {
   }, []);
 
   const handleSave = useCallback(async () => {
+    void Taro.showLoading({ title: '生成屏保中…', mask: true });
+
     const daysForSave = normalizeItineraryDaysForSave(
       itineraryDays as ApiItineraryDay[],
     );
 
     let serverSaved = false;
-    if (apiEnabled && Number.isFinite(activityLegacyId) && activityLegacyId > 0) {
-      try {
-        await save({
-          eventMeta: eventMeta.trim().slice(0, 200),
-          days: daysForSave,
-          selectedDjIds,
-        });
-        void savedQuery.refetch();
-        serverSaved = true;
-      } catch (error) {
-        const message =
-          error instanceof ApiError
-            ? error.message
-            : error instanceof Error
+    try {
+      if (apiEnabled && Number.isFinite(activityLegacyId) && activityLegacyId > 0) {
+        try {
+          await save({
+            eventMeta: eventMeta.trim().slice(0, 200),
+            days: daysForSave,
+            selectedDjIds,
+          });
+          void savedQuery.refetch();
+          serverSaved = true;
+        } catch (error) {
+          const message =
+            error instanceof ApiError
               ? error.message
-              : '保存失败，请重试';
-        void Taro.showToast({ title: message, icon: 'none' });
-        return;
+              : error instanceof Error
+                ? error.message
+                : '保存失败，请重试';
+          void Taro.showToast({ title: message, icon: 'none' });
+          return;
+        }
       }
-    }
 
-    void runSaveItineraryWallpaperFlow(
-      {
-        eventMeta,
-        days: daysForSave.map((day) => ({
-          dateKey: day.id,
-          dateLabel: day.bannerDateLabel,
-          items: day.items,
-        })),
-      },
-      { serverSaved },
-    );
+      await runSaveItineraryWallpaperFlow(
+        {
+          eventMeta,
+          days: daysForSave.map((day) => ({
+            dateKey: day.id,
+            dateLabel: day.bannerDateLabel,
+            items: day.items,
+          })),
+        },
+        { serverSaved, manageLoading: false },
+      );
+    } finally {
+      void Taro.hideLoading();
+    }
   }, [
     activityLegacyId,
     apiEnabled,

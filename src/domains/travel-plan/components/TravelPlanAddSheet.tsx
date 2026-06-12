@@ -127,6 +127,7 @@ export function TravelPlanAddSheet({
 
       setOcrStatus('loading');
       setOcrMessage('');
+      void Taro.showLoading({ title: '识别中…', mask: true });
 
       try {
         if (!isLiveApi()) {
@@ -172,6 +173,8 @@ export function TravelPlanAddSheet({
                 ? error.message
                 : '识别失败，请稍后重试';
         void Taro.showToast({ title: message, icon: 'none' });
+      } finally {
+        void Taro.hideLoading();
       }
     })();
   }, [activityLegacyId, category, ocrStatus, resetOcrState]);

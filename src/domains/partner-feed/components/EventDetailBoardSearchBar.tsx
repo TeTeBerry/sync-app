@@ -17,6 +17,9 @@ export function EventDetailBoardSearchBar({
   resultCount,
   totalCount,
 }: EventDetailBoardSearchBarProps) {
+  const [inputFocused, setInputFocused] = useState(false);
+  useOverlayLock(inputFocused);
+
   const trimmed = value.trim();
   const showSummary =
     trimmed.length > 0 &&

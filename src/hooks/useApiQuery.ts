@@ -82,8 +82,12 @@ export function forEachCacheEntry(fn: (cacheKey: string, data: unknown) => void)
   }
 }
 
-export function setCacheDataByKey<T>(cacheKey: string, data: T): void {
-  globalCache.set(cacheKey, { data, timestamp: Date.now() });
+export function setCacheDataByKey<T>(
+  cacheKey: string,
+  data: T,
+  timestamp?: number,
+): void {
+  globalCache.set(cacheKey, { data, timestamp: timestamp ?? Date.now() });
 }
 
 interface UseApiQueryOptions<T> {

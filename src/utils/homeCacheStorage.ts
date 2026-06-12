@@ -25,7 +25,7 @@ type CacheEnvelope<T> = {
   data: T;
 };
 
-function readEnvelope<T>(storageKey: string): T | undefined {
+function readEnvelope<T>(storageKey: string): CacheEnvelope<T> | undefined {
   try {
     const raw = Taro.getStorageSync(storageKey);
     if (!raw) return undefined;
@@ -39,10 +39,14 @@ function readEnvelope<T>(storageKey: string): T | undefined {
     if (Date.now() - parsed.savedAt > HOME_CACHE_MAX_AGE_MS) {
       return undefined;
     }
-    return parsed.data;
+    return parsed;
   } catch {
     return undefined;
   }
+}
+
+function readEnvelopeData<T>(storageKey: string): T | undefined {
+  return readEnvelope<T>(storageKey)?.data;
 }
 
 function writeEnvelope<T>(storageKey: string, data: T): void {
@@ -62,10 +66,14 @@ export function hydrateHomeCachesFromStorage(): void {
     return;
   }
 
-  const summary = readEnvelope<HomeSummary>(SUMMARY_STORAGE_KEY);
-  if (summary) {
-    setCacheDataByKey(getCacheKey(['home', 'summary']), summary);
-    seedPopularPostsCache(summary.popularPosts);
+  const summaryEnvelope = readEnvelope<HomeSummary>(SUMMARY_STORAGE_KEY);
+  if (summaryEnvelope) {
+    setCacheDataByKey(
+      getCacheKey(['home', 'summary']),
+      summaryEnvelope.data,
+      summaryEnvelope.savedAt,
+    );
+    seedPopularPostsCache(summaryEnvelope.data.popularPosts);
   }
 
   const userId = getClientUserId();
@@ -73,7 +81,7 @@ export function hydrateHomeCachesFromStorage(): void {
     return;
   }
 
-  const popular = readEnvelope<HomeFeedPost[]>(popularStorageKey(userId));
+  const popular = readEnvelopeData<HomeFeedPost[]>(popularStorageKey(userId));
   if (popular?.length) {
     setCacheDataByKey(getCacheKey(['posts', 'popular', userId]), popular);
   }

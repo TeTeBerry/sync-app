@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import {
   cancelActivityRegistration,
   fetchActivities,
@@ -7,6 +7,8 @@ import {
   registerForActivity,
 } from '../../api/sync/activities';
 import { isLiveApi } from '../../constants/api';
+import { isLoggedIn } from '../../utils/authStorage';
+import { subscribeAuthSessionChange } from '../../utils/authSession';
 import type { BackendActivity } from '../../types/backend';
 import {
   seedActivityDetailsFromHomeSummary,
@@ -100,7 +102,7 @@ export function useEventList(options?: QueryEnableOptions) {
 }
 
 export function useHomeSummary() {
-  return useApiQuery({
+  const query = useApiQuery({
     queryKey: ['home', 'summary'],
     queryFn: async () => {
       const result = withCatalogHomeSummary(await fetchHomeSummary());
@@ -112,6 +114,19 @@ export function useHomeSummary() {
     enabled: isLiveApi(),
     staleTime: STALE_HOME_SUMMARY_MS,
   });
+
+  const { refetch } = query;
+
+  useEffect(() => {
+    if (!isLiveApi()) return;
+    return subscribeAuthSessionChange(() => {
+      if (isLoggedIn()) {
+        void refetch({ background: true });
+      }
+    });
+  }, [refetch]);
+
+  return query;
 }
 
 export function useFeaturedEvents() {

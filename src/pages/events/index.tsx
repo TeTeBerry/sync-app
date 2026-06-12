@@ -13,6 +13,7 @@ import { useEventList, useHomeSummary } from '../../hooks/useSyncApi';
 import { parseActivityLegacyId } from '../../utils/activityLegacyId';
 import { resolveEventCardLegacyId } from '../../utils/apiMappers';
 import { goEventDetail, preloadHotRoutes } from '../../utils/route';
+import { isLoggedIn } from '../../utils/authStorage';
 import { activityOccursOnDay, todayCalendarParts } from '../../utils/activityCalendar';
 import {
   compareActivitiesNearestFirst,
@@ -45,7 +46,7 @@ const Events: React.FC = () => {
   );
 
   const { events, isLoading, isError, refetch } = useEventList();
-  const { data: homeSummary } = useHomeSummary();
+  const { data: homeSummary, refetch: refetchHomeSummary } = useHomeSummary();
   const [viewTab, setViewTab] = useState<EventsViewTab>('calendar');
   const [selectedDay, setSelectedDay] = useState(todayCalendarParts);
 
@@ -54,6 +55,9 @@ const Events: React.FC = () => {
     const intent = consumeEventsViewTabIntent();
     if (intent) {
       setViewTab(intent);
+    }
+    if (isLoggedIn()) {
+      void refetchHomeSummary({ background: true });
     }
   });
 
