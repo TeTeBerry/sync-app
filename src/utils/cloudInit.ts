@@ -1,11 +1,11 @@
 import Taro from '@tarojs/taro';
-import { CLOUDBASE_ENV_ID, isCloudStorageUploadEnabled } from '../constants/cloud';
+import { CLOUDBASE_ENV_ID, isCloudBaseEnabled } from '../constants/cloud';
 
 let cloudInitialized = false;
 
 /** Initialize wx.cloud once per mini program session. */
 export function initCloudBase(): void {
-  if (!isCloudStorageUploadEnabled() || cloudInitialized) {
+  if (!isCloudBaseEnabled() || cloudInitialized) {
     return;
   }
 

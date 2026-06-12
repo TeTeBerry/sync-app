@@ -17,7 +17,6 @@ import type {
   BuddyPostTagId,
 } from '../../types/buddyPost';
 import { BUDDY_POST_MAX_IMAGES, BUDDY_POST_TAG_OPTIONS } from '../../types/buddyPost';
-import { ONSITE_INTENT_ONSITE_BADGE_HINT } from '../../constants/onsiteBuddyPostIntents';
 import { defaultBuddyPostForm } from '../../utils/buddyPostForm';
 import { pickAndCompressChatImages } from '../../utils/chatImage';
 import {
@@ -38,11 +37,9 @@ export type AiBuddyPostSheetProps = {
   activityDate?: string;
   activityTitle?: string;
   initialValues?: AiBuddyPostFormValues | null;
-  /** Shown when opened via travel-guide「一键组队」or onsite chips. */
+  /** Shown when opened via travel-guide「一键组队」等预填流程。 */
   prefillSummaryLines?: string[] | null;
   prefillBannerTitle?: string | null;
-  /** Extra line under prefill banner (e.g. wristband →「手环认证」). */
-  showOnSiteBadgeHint?: boolean;
   submitLabel?: string | null;
   /** Apply-team flow: let user choose whether the post appears on the activity feed. */
   showSyncToFeedOption?: boolean;
@@ -87,7 +84,6 @@ export function AiBuddyPostSheet({
   initialValues,
   prefillSummaryLines = null,
   prefillBannerTitle = null,
-  showOnSiteBadgeHint = false,
   submitLabel = null,
   showSyncToFeedOption = false,
   onClose,
@@ -242,11 +238,6 @@ export function AiBuddyPostSheet({
                 <Text className="s-ai-buddy-post-sheet__prefill-desc">
                   {prefillSummaryLines.join(' · ')}。请确认日期、标签与备注后发布。
                 </Text>
-                {showOnSiteBadgeHint ? (
-                  <Text className="s-ai-buddy-post-sheet__prefill-onsite">
-                    {ONSITE_INTENT_ONSITE_BADGE_HINT}
-                  </Text>
-                ) : null}
               </View>
             ) : null}
             <View className="s-ai-guide-plan-sheet__field">

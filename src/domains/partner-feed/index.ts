@@ -5,7 +5,6 @@ export {
 export type { UseEventDetailPostsParams } from './hooks/useEventDetailPosts';
 export { useEventDetailMessageBoard } from './hooks/useEventDetailMessageBoard';
 export { useEventDetailBuddyPost } from './hooks/useEventDetailBuddyPost';
-export type { BuddySheetPrefillState } from './hooks/useEventDetailBuddyPost';
 export { EventPostCard } from './components/EventPostCard';
 export type { EventPostCardProps } from './components/EventPostCard';
 export { EventPostsVirtualList } from './components/EventPostsVirtualList';

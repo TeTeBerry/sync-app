@@ -214,55 +214,6 @@
   }
 }
 
-.s-event-detail__ai-onsite {
-  margin: 0 0 12px;
-  padding-top: 10px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.s-event-detail__ai-onsite-title {
-  display: block;
-  font-size: 12px;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.72);
-  margin-bottom: 4px;
-}
-
-.s-event-detail__ai-onsite-hint {
-  display: block;
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.45);
-  line-height: 1.4;
-  margin-bottom: 8px;
-}
-
-.s-event-detail__ai-onsite-tags {
-  display: flex;
-  flex-wrap: nowrap;
-  gap: 8px;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  padding-bottom: 2px;
-}
-
-.s-event-detail__ai-onsite-chip {
-  @include chat.chat-pill-chip;
-  flex-shrink: 0;
-  padding: 6px 12px;
-  font-size: 12px;
-  font-weight: var(--s-fw-semibold);
-  color: var(--primary);
-  background: rgba(var(--primary-rgb), 0.08);
-  border: 1px solid rgba(var(--primary-rgb), 0.45);
-  box-shadow: 0 0 10px rgba(var(--primary-rgb), 0.12);
-
-  &--pressed,
-  &:active {
-    background: rgba(var(--primary-rgb), 0.18);
-    border-color: rgba(var(--primary-rgb), 0.6);
-  }
-}
-
 .s-event-detail__ai-compose {
   position: relative;
   min-height: 88px;
@@ -389,50 +340,6 @@
 .s-event-detail__board-template-chip {
   flex-shrink: 0;
   margin-top: 2px;
-}
-
-.s-event-detail__board-onsite {
-  margin: 0 0 12px;
-  padding: 12px 0 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.s-event-detail__board-onsite-title {
-  display: block;
-  font-size: 12px;
-  font-weight: var(--s-fw-bold);
-  color: rgba(255, 255, 255, 0.78);
-  margin-bottom: 4px;
-}
-
-.s-event-detail__board-onsite-hint {
-  display: block;
-  font-size: 11px;
-  color: #636366;
-  line-height: 1.4;
-  margin-bottom: 8px;
-}
-
-.s-event-detail__board-onsite-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.s-event-detail__board-onsite-chip {
-  @include chat.chat-pill-chip;
-  padding: 6px 12px;
-  font-size: 12px;
-  font-weight: var(--s-fw-semibold);
-  border-color: rgba(255, 255, 255, 0.12);
-  color: rgba(255, 255, 255, 0.88);
-  background: rgba(255, 255, 255, 0.04);
-
-  &--pressed,
-  &:active {
-    background: rgba(var(--primary-rgb), 0.12);
-    border-color: rgba(var(--primary-rgb), 0.28);
-  }
 }
 
 .s-event-detail__board-compose {

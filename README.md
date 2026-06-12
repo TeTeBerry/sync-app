@@ -46,6 +46,18 @@ npm run build:h5
 
 3. 若仍报错，确认 `dist-weapp/app.json` 存在后再点「编译」；没有则重新运行 `npm run dev:weapp`。
 
+### 云托管 API（体验版 / 真机）
+
+小程序 **不** 用 `Taro.request` 访问 `*.sh.run.tcloudbase.com`（公众平台无法将该默认域名加入合法域名）。配置 `TARO_APP_CLOUDBASE_ENV_ID` + `TARO_APP_CLOUD_RUN_SERVICE` 后，REST 走 **`wx.cloud.callContainer`**，AI WebSocket 走 **`wx.cloud.connectContainer`**（实现见 `src/utils/cloudRunTransport.ts`）。基础库 ≥ 2.23.0。
+
+`.env.development` / `.env.production` 示例：
+
+```env
+TARO_APP_CLOUDBASE_ENV_ID=sync-prd-xxxx
+TARO_APP_CLOUD_RUN_SERVICE=sync-backend-prd-xxxx
+TARO_APP_API_BASE_URL=https://sync-backend-prd-xxxx.sh.run.tcloudbase.com/api
+```
+
 ## 重要说明
 
 ### 配置文件不要 `import @tarojs/taro`

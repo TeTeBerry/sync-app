@@ -56,29 +56,6 @@ describe('thumbnailImageUrl uploads', () => {
   });
 });
 
-describe('needsWeappDownloadBeforeDisplay', () => {
-  afterEach(() => {
-    vi.unstubAllEnvs();
-  });
-
-  it('downloads LAN backend uploads on weapp', async () => {
-    vi.stubEnv('TARO_ENV', 'weapp');
-    vi.stubEnv('TARO_APP_API_BASE_URL', 'http://192.168.1.7:3000/api');
-    const { needsWeappDownloadBeforeDisplay } = await import('@/utils/imageUrl');
-    expect(
-      needsWeappDownloadBeforeDisplay('http://192.168.1.7:3000/uploads/a.jpg'),
-    ).toBe(true);
-  });
-
-  it('skips cloud fileIDs', async () => {
-    vi.stubEnv('TARO_ENV', 'weapp');
-    const { needsWeappDownloadBeforeDisplay } = await import('@/utils/imageUrl');
-    expect(needsWeappDownloadBeforeDisplay('cloud://env.x/ugc/posts/u1/a.jpg')).toBe(
-      false,
-    );
-  });
-});
-
 describe('sanitizeImageList', () => {
   afterEach(() => {
     vi.unstubAllEnvs();
@@ -94,28 +71,6 @@ describe('sanitizeImageList', () => {
         'http://192.168.1.7:3000/uploads/a.jpg',
       ]),
     ).toEqual(['http://192.168.1.7:3000/uploads/a.jpg']);
-  });
-});
-
-describe('isWeappDownloadFileSuccess', () => {
-  it('accepts statusCode 200 with tempFilePath', async () => {
-    const { isWeappDownloadFileSuccess } = await import('@/utils/imageUrl');
-    expect(
-      isWeappDownloadFileSuccess({
-        statusCode: 200,
-        tempFilePath: 'wxfile://tmp_abc.jpg',
-      }),
-    ).toBe(true);
-  });
-
-  it('accepts downloadFile:ok when statusCode is missing', async () => {
-    const { isWeappDownloadFileSuccess } = await import('@/utils/imageUrl');
-    expect(
-      isWeappDownloadFileSuccess({
-        errMsg: 'downloadFile:ok',
-        tempFilePath: 'wxfile://tmp_abc.jpg',
-      }),
-    ).toBe(true);
   });
 });
 
@@ -145,33 +100,15 @@ describe('resolvePostGridImageSrc', () => {
 });
 
 describe('resolveImageWithFallbackDisplaySrc', () => {
-  afterEach(() => {
-    vi.unstubAllEnvs();
-  });
-
   it('blocks unresolved cloud fileIDs', async () => {
     const { resolveImageWithFallbackDisplaySrc } = await import('@/utils/imageUrl');
     const cloud = 'cloud://env.x/ugc/posts/u1/a.jpg';
-    expect(
-      resolveImageWithFallbackDisplaySrc(cloud, 'wxfile://tmp_abc.jpg'),
-    ).toBeUndefined();
+    expect(resolveImageWithFallbackDisplaySrc(cloud)).toBeUndefined();
   });
 
-  it('uses downloaded temp path for LAN uploads on weapp', async () => {
-    vi.stubEnv('TARO_ENV', 'weapp');
-    vi.stubEnv('TARO_APP_API_BASE_URL', 'http://192.168.1.7:3000/api');
+  it('returns HTTPS src for resolved URLs', async () => {
     const { resolveImageWithFallbackDisplaySrc } = await import('@/utils/imageUrl');
-    const upload = 'http://192.168.1.7:3000/uploads/a.jpg';
-    expect(resolveImageWithFallbackDisplaySrc(upload, 'wxfile://tmp_abc.jpg')).toBe(
-      'wxfile://tmp_abc.jpg',
-    );
-    expect(resolveImageWithFallbackDisplaySrc(upload, undefined)).toBeUndefined();
-  });
-
-  it('uses HTTPS src directly on h5', async () => {
-    vi.stubEnv('TARO_ENV', 'h5');
-    const { resolveImageWithFallbackDisplaySrc } = await import('@/utils/imageUrl');
-    const url = 'https://cdn.example.com/uploads/posts/u/a.jpg';
-    expect(resolveImageWithFallbackDisplaySrc(url, undefined)).toBe(url);
+    const url = 'https://cdn.example.com/posts/u/a.jpg';
+    expect(resolveImageWithFallbackDisplaySrc(url)).toBe(url);
   });
 });

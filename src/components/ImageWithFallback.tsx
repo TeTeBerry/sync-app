@@ -1,8 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import Taro from '@tarojs/taro';
 import {
-  isWeappDownloadFileSuccess,
-  needsWeappDownloadBeforeDisplay,
   resolveImageWithFallbackDisplaySrc,
   sanitizeRemoteImageUrl,
 } from '../utils/imageUrl';
@@ -38,57 +35,16 @@ export const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
   mode = 'aspectFill',
 }) => {
   const [broken, setBroken] = useState(false);
-  const [downloadedSrc, setDownloadedSrc] = useState<string | undefined>(undefined);
   const resolvedSrc = useMemo(() => sanitizeRemoteImageUrl(src), [src]);
-  const needsDownload = useMemo(
-    () => needsWeappDownloadBeforeDisplay(resolvedSrc),
-    [resolvedSrc],
-  );
   const displaySrc = useMemo(
-    () => resolveImageWithFallbackDisplaySrc(resolvedSrc, downloadedSrc),
-    [resolvedSrc, downloadedSrc],
+    () => resolveImageWithFallbackDisplaySrc(resolvedSrc),
+    [resolvedSrc],
   );
   const displaySrcRef = useRef(displaySrc);
   displaySrcRef.current = displaySrc;
 
   useEffect(() => {
     setBroken(false);
-
-    if (!resolvedSrc?.trim() || !needsDownload) {
-      setDownloadedSrc(undefined);
-      return;
-    }
-
-    let cancelled = false;
-    const downloadUrl = resolvedSrc.trim();
-    void Taro.downloadFile({ url: downloadUrl })
-      .then((res) => {
-        if (cancelled) return;
-        const tempPath = res.tempFilePath?.trim();
-        if (isWeappDownloadFileSuccess(res) && tempPath) {
-          setDownloadedSrc(tempPath);
-          setBroken(false);
-          return;
-        }
-        setDownloadedSrc(undefined);
-        setBroken(true);
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setDownloadedSrc(undefined);
-          setBroken(true);
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [resolvedSrc, needsDownload]);
-
-  useEffect(() => {
-    if (displaySrc?.trim()) {
-      setBroken(false);
-    }
   }, [displaySrc]);
 
   const showImage = Boolean(displaySrc?.trim()) && !broken;

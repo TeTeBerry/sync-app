@@ -7,7 +7,6 @@ import {
   type EventDetailTabId,
 } from './EventDetailContentTabs';
 import { EventDetailItineraryMenu } from './EventDetailItineraryMenu';
-import type { OnsiteBuddyPostIntentId } from '../../../constants/onsiteBuddyPostIntents';
 import { View } from '@tarojs/components';
 
 export type EventDetailComposerSectionProps = {
@@ -23,9 +22,6 @@ export type EventDetailComposerSectionProps = {
   onAiGuideClick: () => void;
   onOpenTemplateSheet: () => void;
   templateDisabled?: boolean;
-  isOnSite?: boolean;
-  onOnsiteIntentClick?: (intentId: OnsiteBuddyPostIntentId) => void;
-  onsitePublishDisabled?: boolean;
   activityTitle?: string;
   onOpenMyItinerary: () => void;
   onOpenExclusiveItinerary: () => void;
@@ -48,9 +44,6 @@ export const EventDetailComposerSection: React.FC<EventDetailComposerSectionProp
   onAiGuideClick,
   onOpenTemplateSheet,
   templateDisabled,
-  isOnSite,
-  onOnsiteIntentClick,
-  onsitePublishDisabled,
   activityTitle,
   onOpenMyItinerary,
   onOpenExclusiveItinerary,
@@ -77,9 +70,6 @@ export const EventDetailComposerSection: React.FC<EventDetailComposerSectionProp
             onPublish={onPublishMessage}
             onOpenTemplateSheet={onOpenTemplateSheet}
             templateDisabled={templateDisabled}
-            isOnSite={isOnSite}
-            onOnsiteIntentClick={onOnsiteIntentClick}
-            onsitePublishDisabled={onsitePublishDisabled}
             publishing={messagePublishing}
           />
         </>

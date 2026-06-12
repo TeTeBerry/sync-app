@@ -78,7 +78,6 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
   const templatePost = useEventDetailBuddyPost(eventId, {
     activityTitle,
     activityDate,
-    activityLocation,
     authorName: displayUserName,
     authorAvatar: currentUserQuery.data?.avatar,
     refreshPosts: postsQuery.refetch,
@@ -86,7 +85,6 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     replacePost: postsQuery.replaceItem,
     removePost: postsQuery.removeItem,
     accountRiskEnabled: secondaryReady,
-    hintOnSiteBadge: header.isOnSite,
   });
 
   const handleOnSiteCertifiedSuccess = useCallback(async () => {
@@ -170,13 +168,7 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     handlePublishMessage,
     messagePublishing: isPublishing,
     handleOpenTemplateSheet: templatePost.openBuddyPostSheet,
-    publishOnsiteIntent: templatePost.publishOnsiteIntent,
     buddyPostSheetOpen: templatePost.buddyPostSheetOpen,
-    buddySheetInitialValues: templatePost.buddySheetInitialValues,
-    buddySheetPrefillLines: templatePost.buddySheetPrefillLines,
-    buddySheetPrefillTitle: templatePost.buddySheetPrefillTitle,
-    buddySheetShowOnSiteBadgeHint: templatePost.buddySheetShowOnSiteBadgeHint,
-    buddySheetSubmitLabel: templatePost.buddySheetSubmitLabel,
     closeBuddyPostSheet: templatePost.closeBuddyPostSheet,
     handleBuddyPostSheetSubmit: templatePost.handleBuddyPostSheetSubmit,
     buddyPostActivityDate: templatePost.buddyPostActivityDate,
@@ -200,7 +192,6 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     guideDefaultNights: travelGuide.guideDefaultNights,
     guideEventCity: travelGuide.guideEventCity,
     invalidEventId: route.invalidEventId,
-    isOnSite: header.isOnSite,
     handleOnSiteCertifiedSuccess,
   };
 }

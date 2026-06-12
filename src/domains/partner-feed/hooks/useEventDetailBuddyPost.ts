@@ -2,30 +2,13 @@ import { useCallback, useState } from 'react';
 import Taro from '@tarojs/taro';
 import { useAccountRisk } from '../../../hooks/useAccountRisk';
 import type { EventDetailPost } from '../../../types/post';
-import type {
-  AiBuddyPostFormValues,
-  AiBuddyPostSubmitPayload,
-} from '../../../types/buddyPost';
+import type { AiBuddyPostSubmitPayload } from '../../../types/buddyPost';
 import {
   buildOptimisticBuddyPost,
   publishBuddyPostFromForm,
 } from '../../../utils/publishBuddyPost';
 import { isApiEnabled } from '../../../constants/api';
 import { getClientUserId } from '../../../utils/session';
-import {
-  ONSITE_INTENT_PREFILL_BANNER_TITLE,
-  buildOnsiteBuddyPostForm,
-  buildOnsiteIntentPrefillSummaryLines,
-  type OnsiteBuddyPostIntentId,
-} from '../../../constants/onsiteBuddyPostIntents';
-
-export type BuddySheetPrefillState = {
-  initialValues: AiBuddyPostFormValues;
-  summaryLines: string[];
-  bannerTitle: string;
-  showOnSiteBadgeHint: boolean;
-  submitLabel: string;
-};
 
 /** Structured message-board template sheet on event detail. */
 export function useEventDetailBuddyPost(
@@ -33,7 +16,6 @@ export function useEventDetailBuddyPost(
   options: {
     activityTitle?: string;
     activityDate?: string;
-    activityLocation?: string;
     authorName: string;
     authorAvatar?: string;
     refreshPosts?: (options?: { silent?: boolean }) => Promise<void>;
@@ -41,35 +23,27 @@ export function useEventDetailBuddyPost(
     replacePost?: (pendingId: string, post: EventDetailPost) => void;
     removePost?: (postId: string) => void;
     accountRiskEnabled?: boolean;
-    hintOnSiteBadge?: boolean;
   },
 ) {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
-  const [sheetPrefill, setSheetPrefill] = useState<BuddySheetPrefillState | null>(null);
   const { guardPublish, handlePublishError } = useAccountRisk({
     enabled: options.accountRiskEnabled ?? true,
   });
-
-  const clearSheetPrefill = useCallback(() => {
-    setSheetPrefill(null);
-  }, []);
 
   const openBuddyPostSheet = useCallback(() => {
     if (!Number.isFinite(eventId) || eventId <= 0) {
       void Taro.showToast({ title: '活动信息无效', icon: 'none' });
       return;
     }
-    clearSheetPrefill();
     void guardPublish().then((allowed) => {
       if (allowed) setSheetOpen(true);
     });
-  }, [clearSheetPrefill, eventId, guardPublish]);
+  }, [eventId, guardPublish]);
 
   const closeBuddyPostSheet = useCallback(() => {
     setSheetOpen(false);
-    clearSheetPrefill();
-  }, [clearSheetPrefill]);
+  }, []);
 
   const handleBuddyPostSheetSubmit = useCallback(
     async (
@@ -98,7 +72,6 @@ export function useEventDetailBuddyPost(
 
       setIsPublishing(true);
       setSheetOpen(false);
-      clearSheetPrefill();
 
       if (!submitOptions?.skipListRefresh && listedInFeed) {
         options.prependPost?.(
@@ -148,66 +121,15 @@ export function useEventDetailBuddyPost(
         setIsPublishing(false);
       }
     },
-    [
-      clearSheetPrefill,
-      eventId,
-      guardPublish,
-      handlePublishError,
-      isPublishing,
-      options,
-    ],
-  );
-
-  const publishOnsiteIntent = useCallback(
-    async (intentId: OnsiteBuddyPostIntentId) => {
-      if (!Number.isFinite(eventId) || eventId <= 0) {
-        void Taro.showToast({ title: '活动信息无效', icon: 'none' });
-        return;
-      }
-      if (isPublishing) return;
-      if (!(await guardPublish())) return;
-
-      const form = buildOnsiteBuddyPostForm(
-        intentId,
-        options.activityDate,
-        options.activityLocation,
-      );
-      if (!form) {
-        void Taro.showToast({ title: '无法解析活动日期', icon: 'none' });
-        return;
-      }
-
-      setSheetPrefill({
-        initialValues: form,
-        summaryLines: buildOnsiteIntentPrefillSummaryLines(intentId, form),
-        bannerTitle: ONSITE_INTENT_PREFILL_BANNER_TITLE,
-        showOnSiteBadgeHint: options.hintOnSiteBadge !== false,
-        submitLabel: '确认发布',
-      });
-      setSheetOpen(true);
-    },
-    [
-      eventId,
-      guardPublish,
-      isPublishing,
-      options.activityDate,
-      options.activityLocation,
-      options.hintOnSiteBadge,
-    ],
+    [eventId, guardPublish, handlePublishError, isPublishing, options],
   );
 
   return {
     buddyPostSheetOpen: sheetOpen,
-    buddySheetInitialValues: sheetPrefill?.initialValues ?? null,
-    buddySheetPrefillLines: sheetPrefill?.summaryLines ?? null,
-    buddySheetPrefillTitle: sheetPrefill?.bannerTitle ?? null,
-    buddySheetShowOnSiteBadgeHint: sheetPrefill?.showOnSiteBadgeHint ?? false,
-    buddySheetSubmitLabel: sheetPrefill?.submitLabel ?? null,
     isBuddyPostPublishing: isPublishing,
     openBuddyPostSheet,
     closeBuddyPostSheet,
     handleBuddyPostSheetSubmit,
-    publishOnsiteIntent,
     buddyPostActivityDate: options.activityDate,
     buddyPostActivityTitle: options.activityTitle,
   };

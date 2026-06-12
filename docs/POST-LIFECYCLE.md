@@ -7,7 +7,6 @@
 | 入口 | 组件 / Hook | 说明 |
 |------|-------------|------|
 | 活动详情 · 模板发帖 | `useEventDetailBuddyPost` | 打开 `AiBuddyPostSheet`，提交后 `publishBuddyPostFromForm` |
-| 活动详情 · 节中 | `publishOnsiteIntent` + 现场快捷芯片 | 预填打开 `AiBuddyPostSheet`，确认后 `publishBuddyPostFromForm` → `POST /posts` |
 | AI 助手 | `useAiBuddyPost` | 对话收集槽位或表单，`runPublish` → 同一 `publishBuddyPostFromForm` |
 | AI WebSocket | 后端 `create-post-from-chat` | 与 REST 共用 `PostWriteService.createPost` |
 | 活动详情 · 留言板 | `publishMessageBoardPost` | `contentTypes: ['other']`，活动页留言区独立 composer |

@@ -29,44 +29,14 @@ function unsplashDimensions(url: URL): { width: number; height: number } {
   return { width: w, height: isSquareCrop ? w : Math.round(w * 0.75) };
 }
 
-export function isUserUploadImageUrl(src: string | undefined): boolean {
-  const trimmed = src?.trim();
-  if (!trimmed) return false;
-  if (isCloudStorageFileId(trimmed)) return true;
-  if (trimmed.startsWith('/uploads/') || trimmed.startsWith('uploads/')) return true;
-  if (!/^https?:\/\//i.test(trimmed)) return false;
-  try {
-    const url = new URL(trimmed);
-    return url.pathname.includes('/uploads/');
-  } catch {
-    return false;
-  }
-}
-
-/** True when Taro `downloadFile` completed successfully enough to use `tempFilePath`. */
-export function isWeappDownloadFileSuccess(res: {
-  statusCode?: number;
-  tempFilePath?: string;
-  errMsg?: string;
-}): boolean {
-  const tempPath = res.tempFilePath?.trim();
-  if (!tempPath) return false;
-  if (res.statusCode === 200) return true;
-  return res.errMsg === 'downloadFile:ok';
-}
-
-/** ImageWithFallback display `src`: block unresolved cloud fileIDs; on weapp use downloaded temp path. */
+/** ImageWithFallback display `src`: block unresolved `cloud://` fileIDs. */
 export function resolveImageWithFallbackDisplaySrc(
   resolvedSrc: string | undefined,
-  downloadedSrc: string | undefined,
 ): string | undefined {
   const trimmed = resolvedSrc?.trim();
   if (!trimmed) return undefined;
   if (isCloudStorageFileId(trimmed)) {
     return undefined;
-  }
-  if (needsWeappDownloadBeforeDisplay(trimmed)) {
-    return downloadedSrc?.trim() || undefined;
   }
   return trimmed;
 }
@@ -82,15 +52,6 @@ export function resolvePostGridImageSrc(
   if (!trimmed) return '';
   if (isCloudStorageFileId(trimmed)) return '';
   return trimmed;
-}
-
-/** WeChat `downloadFile` for LAN backend `/uploads/` URLs (Image src alone often fails). */
-export function needsWeappDownloadBeforeDisplay(src: string | undefined): boolean {
-  const resolved = sanitizeRemoteImageUrl(src);
-  if (!resolved?.trim()) return false;
-  if (process.env.TARO_ENV !== 'weapp') return false;
-  if (isCloudStorageFileId(resolved)) return false;
-  return isUserUploadImageUrl(resolved);
 }
 
 /** Resolve `/uploads/...` against API host (local Nest dev only). */

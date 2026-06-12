@@ -1,5 +1,10 @@
 import Taro from '@tarojs/taro';
+import { isWeappCloudRunTransportEnabled } from '../../constants/cloud';
 import { parseStreamEventPayload } from '../aiChatStreamEvents';
+import {
+  AI_CHAT_WS_CONTAINER_PATH,
+  connectContainerSocket,
+} from '../cloudRunTransport';
 import { decodeWsMessageData } from './decode';
 import {
   describeRawWsData,
@@ -161,6 +166,13 @@ function headersKey(headers?: Record<string, string>): string {
   );
 }
 
+function poolEndpointKey(wsUrl: string, headers?: Record<string, string>): string {
+  if (isWeappCloudRunTransportEnabled()) {
+    return `container:${AI_CHAT_WS_CONTAINER_PATH}:${headersKey(headers)}`;
+  }
+  return `url:${wsUrl}:${headersKey(headers)}`;
+}
+
 export function closeAiChatWsConnection(reason = 'client close'): void {
   if (!wsPool) return;
   try {
@@ -200,8 +212,8 @@ export async function ensureWsPool(
   wsUrl: string,
   headers?: Record<string, string>,
 ): Promise<PooledConnection> {
-  const key = headersKey(headers);
-  if (wsPool && wsPool.wsUrl === wsUrl && wsPool.headersKey === key) {
+  const key = poolEndpointKey(wsUrl, headers);
+  if (wsPool && wsPool.wsUrl === key && wsPool.headersKey === headersKey(headers)) {
     return wsPool;
   }
 
@@ -217,17 +229,28 @@ export async function ensureWsPool(
   let lastError: Error | undefined;
   for (let attempt = 0; attempt <= WS_CONNECT_RETRY_MAX; attempt += 1) {
     try {
-      devLogWarn('connecting', { url: wsUrl, attempt });
-      const task = await connectSocket(wsUrl, headers);
+      const useContainer = isWeappCloudRunTransportEnabled();
+      devLogWarn('connecting', {
+        transport: useContainer ? 'connectContainer' : 'connectSocket',
+        url: useContainer ? AI_CHAT_WS_CONTAINER_PATH : wsUrl,
+        attempt,
+      });
+      const task = useContainer
+        ? await connectContainerSocket(
+            AI_CHAT_WS_CONTAINER_PATH,
+            headers,
+            WS_CONNECT_TIMEOUT_MS,
+          )
+        : await connectSocket(wsUrl, headers);
       const connection: PooledConnection = {
-        wsUrl,
-        headersKey: key,
+        wsUrl: key,
+        headersKey: headersKey(headers),
         task,
         activeTurn: null,
       };
       attachPoolListeners(connection);
       wsPool = connection;
-      devLogWarn('onOpen', { url: wsUrl });
+      devLogWarn('onOpen', { endpoint: key });
       return connection;
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error));

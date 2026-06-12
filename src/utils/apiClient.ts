@@ -1,9 +1,15 @@
 import Taro from '@tarojs/taro';
 import { API_BASE_URL } from '../constants/api';
+import { isWeappCloudRunTransportEnabled } from '../constants/cloud';
 import type { ApiResponse } from '../types/backend';
 import { handleApiUnauthorized } from '../api/handleApiUnauthorized';
 import { getAccessToken, getAuthHeaders } from './authStorage';
 import { taroRequestData } from './apiRequestBody';
+import {
+  buildContainerApiPath,
+  callContainerRequest,
+  type ContainerHttpResponse,
+} from './cloudRunTransport';
 
 export class ApiError extends Error {
   constructor(
@@ -67,11 +73,7 @@ function buildUrl(path: string, params?: Record<string, string | undefined>): st
   return url;
 }
 
-interface CompatibleResponse {
-  ok: boolean;
-  status: number;
-  json(): Promise<unknown>;
-}
+type CompatibleResponse = ContainerHttpResponse;
 
 async function requestWithTimeout(
   url: string,
@@ -99,12 +101,25 @@ async function requestWithTimeout(
   });
 }
 
+async function dispatchRequest(
+  path: string,
+  params: Record<string, string | undefined> | undefined,
+  init: RequestInit,
+  timeoutMs: number,
+): Promise<CompatibleResponse> {
+  if (isWeappCloudRunTransportEnabled()) {
+    return callContainerRequest(buildContainerApiPath(path, params), init, timeoutMs);
+  }
+  return requestWithTimeout(buildUrl(path, params), init, timeoutMs);
+}
+
 async function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function retryFetch(
-  url: string,
+  path: string,
+  params: Record<string, string | undefined> | undefined,
   init?: ApiFetchInit,
 ): Promise<CompatibleResponse> {
   const { requestInit, timeoutMs, maxRetries } = splitFetchInit(init);
@@ -112,7 +127,7 @@ async function retryFetch(
 
   for (let attempt = 0; attempt <= maxRetries; attempt += 1) {
     try {
-      const response = await requestWithTimeout(url, requestInit, timeoutMs);
+      const response = await dispatchRequest(path, params, requestInit, timeoutMs);
       return response;
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error));
@@ -171,7 +186,7 @@ export async function apiGet<T>(
   init?: ApiFetchInit,
 ): Promise<T> {
   const { headers: extraHeaders, ...restInit } = init ?? {};
-  const response = await retryFetch(buildUrl(path, params), {
+  const response = await retryFetch(path, params, {
     method: 'GET',
     headers: mergeHeaders({
       Accept: 'application/json',
@@ -190,7 +205,7 @@ export async function apiPost<T>(
   init?: ApiFetchInit,
 ): Promise<T> {
   const { headers: extraHeaders, ...restInit } = init ?? {};
-  const response = await retryFetch(buildUrl(path, params), {
+  const response = await retryFetch(path, params, {
     method: 'POST',
     headers: mergeHeaders({
       Accept: 'application/json',
@@ -211,7 +226,7 @@ export async function apiPatch<T>(
   init?: ApiFetchInit,
 ): Promise<T> {
   const { headers: extraHeaders, ...restInit } = init ?? {};
-  const response = await retryFetch(buildUrl(path, params), {
+  const response = await retryFetch(path, params, {
     method: 'PATCH',
     headers: mergeHeaders({
       Accept: 'application/json',
@@ -231,7 +246,7 @@ export async function apiDelete<T>(
   init?: ApiFetchInit,
 ): Promise<T> {
   const { headers: extraHeaders, ...restInit } = init ?? {};
-  const response = await retryFetch(buildUrl(path, params), {
+  const response = await retryFetch(path, params, {
     method: 'DELETE',
     headers: mergeHeaders({
       Accept: 'application/json',

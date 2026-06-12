@@ -1,9 +1,5 @@
 import Taro from '@tarojs/taro';
-import {
-  isCloudStorageFileId,
-  needsWeappDownloadBeforeDisplay,
-  sanitizeRemoteImageUrl,
-} from './imageUrl';
+import { isCloudStorageFileId, sanitizeRemoteImageUrl } from './imageUrl';
 import { resolveDisplayImageUrls } from './resolveDisplayImageUrls';
 
 function isDataUrl(url: string): boolean {
@@ -27,20 +23,6 @@ function dataUrlToTempPath(dataUrl: string): Promise<string> {
   });
 }
 
-async function weappDownloadImageUrl(url: string): Promise<string> {
-  if (!needsWeappDownloadBeforeDisplay(url)) return url;
-
-  try {
-    const res = await Taro.downloadFile({ url });
-    if (res.statusCode === 200 && res.tempFilePath) {
-      return res.tempFilePath;
-    }
-  } catch {
-    // fall through to original URL
-  }
-  return url;
-}
-
 async function resolvePreviewUrl(url: string): Promise<string | null> {
   const trimmed = url.trim();
   if (!trimmed) return null;
@@ -53,15 +35,12 @@ async function resolvePreviewUrl(url: string): Promise<string | null> {
   }
 
   const sanitized = sanitizeRemoteImageUrl(trimmed) ?? trimmed;
-  let displayUrl = sanitized;
-
   if (isCloudStorageFileId(sanitized)) {
     const [resolved] = await resolveDisplayImageUrls([sanitized]);
-    if (!resolved?.trim()) return null;
-    displayUrl = resolved;
+    return resolved?.trim() || null;
   }
 
-  return weappDownloadImageUrl(displayUrl);
+  return sanitized;
 }
 
 const PREVIEW_COOLDOWN_MS = 400;

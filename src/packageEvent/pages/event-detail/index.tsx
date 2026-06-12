@@ -67,13 +67,7 @@ const EventDetailPage = () => {
     handleBack,
     handleOpenAiGuide,
     handleOpenTemplateSheet,
-    publishOnsiteIntent,
     buddyPostSheetOpen,
-    buddySheetInitialValues,
-    buddySheetPrefillLines,
-    buddySheetPrefillTitle,
-    buddySheetShowOnSiteBadgeHint,
-    buddySheetSubmitLabel,
     closeBuddyPostSheet,
     handleBuddyPostSheetSubmit,
     buddyPostActivityDate,
@@ -81,7 +75,6 @@ const EventDetailPage = () => {
     activityTitle,
     handleOpenMyItinerary,
     handleOpenExclusiveItinerary,
-    isOnSite,
     guideSheetOpen,
     closeGuideSheet,
     handleGuideSheetSubmit,
@@ -133,11 +126,6 @@ const EventDetailPage = () => {
               onAiGuideClick={handleOpenAiGuide}
               onOpenTemplateSheet={handleOpenTemplateSheet}
               templateDisabled={messagePublishing}
-              isOnSite={isOnSite}
-              onOnsiteIntentClick={(intentId) => {
-                void publishOnsiteIntent(intentId);
-              }}
-              onsitePublishDisabled={messagePublishing}
               activityTitle={activityTitle}
               onOpenMyItinerary={handleOpenMyItinerary}
               onOpenExclusiveItinerary={handleOpenExclusiveItinerary}
@@ -214,11 +202,6 @@ const EventDetailPage = () => {
         open={buddyPostSheetOpen}
         activityDate={buddyPostActivityDate}
         activityTitle={buddyPostActivityTitle}
-        initialValues={buddySheetInitialValues}
-        prefillSummaryLines={buddySheetPrefillLines}
-        prefillBannerTitle={buddySheetPrefillTitle}
-        showOnSiteBadgeHint={buddySheetShowOnSiteBadgeHint}
-        submitLabel={buddySheetSubmitLabel}
         onClose={closeBuddyPostSheet}
         onSubmit={(payload) => {
           void handleBuddyPostSheetSubmit(payload);

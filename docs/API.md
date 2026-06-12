@@ -51,17 +51,22 @@ H5 devServer 将 `/api`（含 WebSocket）代理到 `http://localhost:3000`。
 ### 环境变量（`npm run dev:weapp` / 上传构建）
 
 ```env
-# 必填：CloudBase 云托管 API（微信公众平台 request 合法域名）
+# 文档/回退用公网 API 根（H5 或调试）；小程序 weapp 走 callContainer，无需 request 合法域名
 TARO_APP_API_BASE_URL=https://sync-backend-prd-xxxx.sh.run.tcloudbase.com/api
 
-# 可选：AI WebSocket（socket 合法域名 wss://…）
+# 文档/回退用；小程序 AI WS 走 connectContainer，无需 socket 合法域名
 TARO_APP_AI_CHAT_WS_URL=wss://sync-backend-prd-xxxx.sh.run.tcloudbase.com/api/ai/chat/ws
 
-# 必填（UGC 图片）：CloudBase 环境 ID，小程序 wx.cloud 直传
+# 必填：CloudBase 环境 ID（wx.cloud.init / uploadFile / callContainer）
 TARO_APP_CLOUDBASE_ENV_ID=sync-prd-xxxx
+
+# 必填：云托管服务名（控制台「服务管理」；也可从 *.sh.run 域名自动推导）
+TARO_APP_CLOUD_RUN_SERVICE=sync-backend-prd-xxxx
 ```
 
-本地联调：开发者工具勾选 **「不校验合法域名、web-view（业务域名）、TLS 版本以及 HTTPS 证书」**，可将 `TARO_APP_API_BASE_URL` 指向局域网 HTTP（如 `http://192.168.x.x:3000`）。
+**小程序生产路径**：`apiClient` 使用 `wx.cloud.callContainer`，AI WebSocket 使用 `wx.cloud.connectContainer`（见 [`utils/cloudRunTransport.ts`](../src/utils/cloudRunTransport.ts)）。**无需**在公众平台配置 `sh.run.tcloudbase.com` 为 request/socket 合法域名。
+
+本地联调 Nest：开发者工具勾选 **「不校验合法域名」**，可将 `TARO_APP_API_BASE_URL` 指向局域网 HTTP，并**清空** `TARO_APP_CLOUD_RUN_SERVICE`（或删除 `TARO_APP_CLOUDBASE_ENV_ID`）以回退 `Taro.request` / `connectSocket`。
 
 ### 登录
 
@@ -75,7 +80,9 @@ TARO_APP_CLOUDBASE_ENV_ID=sync-prd-xxxx
 
 ### WebSocket
 
-在公众平台配置 `socket` 合法域名为 `wss://你的域名`；本地开发可配合「不校验合法域名」使用 `ws://局域网IP:3000/api/ai/chat/ws`。
+云托管体验版/正式版：`connectContainer` 连 `/api/ai/chat/ws`，upgrade 可带 `Authorization: Bearer`（[`aiChatWs/pool.ts`](../src/utils/aiChatWs/pool.ts)）。
+
+H5 / 局域网调试：`Taro.connectSocket` 到 `TARO_APP_AI_CHAT_WS_URL`；本地可配合「不校验合法域名」使用 `ws://局域网IP:3000/api/ai/chat/ws`。
 
 ### 图片上传（UGC）
 

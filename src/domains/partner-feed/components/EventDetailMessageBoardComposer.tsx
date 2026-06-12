@@ -3,10 +3,6 @@ import { AiBuddyPostShortcutChip } from '../../../components/ai-chat/AiBuddyPost
 import { Button } from '../../../components/ui';
 import { Text, Textarea, View, Image } from '@tarojs/components';
 import { BUDDY_POST_MAX_IMAGES } from '../../../types/buddyPost';
-import {
-  ONSITE_BUDDY_POST_INTENTS,
-  type OnsiteBuddyPostIntentId,
-} from '../../../constants/onsiteBuddyPostIntents';
 
 type EventDetailMessageBoardComposerProps = {
   draft: string;
@@ -18,9 +14,6 @@ type EventDetailMessageBoardComposerProps = {
   onOpenTemplateSheet: () => void;
   templateDisabled?: boolean;
   publishing?: boolean;
-  isOnSite?: boolean;
-  onOnsiteIntentClick?: (intentId: OnsiteBuddyPostIntentId) => void;
-  onsitePublishDisabled?: boolean;
 };
 
 export function EventDetailMessageBoardComposer({
@@ -33,9 +26,6 @@ export function EventDetailMessageBoardComposer({
   onOpenTemplateSheet,
   templateDisabled = false,
   publishing = false,
-  isOnSite = false,
-  onOnsiteIntentClick,
-  onsitePublishDisabled = false,
 }: EventDetailMessageBoardComposerProps) {
   const hasContent = Boolean(draft.trim()) || imageRefs.length > 0;
 
@@ -57,28 +47,6 @@ export function EventDetailMessageBoardComposer({
           onClick={onOpenTemplateSheet}
         />
       </View>
-
-      {isOnSite && onOnsiteIntentClick ? (
-        <View className="s-event-detail__board-onsite">
-          <Text className="s-event-detail__board-onsite-title">现场快捷模板</Text>
-          <Text className="s-event-detail__board-onsite-hint">
-            手环认证仅管当天标识；不认证也能发留言
-          </Text>
-          <View className="s-event-detail__board-onsite-tags">
-            {ONSITE_BUDDY_POST_INTENTS.map((intent) => (
-              <Button
-                key={intent.id}
-                className="s-event-detail__board-onsite-chip"
-                hoverClass="s-event-detail__board-onsite-chip--pressed"
-                disabled={onsitePublishDisabled}
-                onClick={() => onOnsiteIntentClick(intent.id)}
-              >
-                <Text className="s-btn-label">{intent.label}</Text>
-              </Button>
-            ))}
-          </View>
-        </View>
-      ) : null}
 
       <View className="s-event-detail__board-compose">
         <Textarea
