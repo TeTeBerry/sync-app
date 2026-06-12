@@ -780,7 +780,8 @@
     margin: 0;
     border: none;
     border-radius: var(--radius-full);
-    background: rgba(var(--primary-rgb), 0.14);
+    background: var(--primary);
+    box-shadow: 0 4px 14px rgba(var(--primary-rgb), 0.35);
     box-sizing: border-box;
 
     &::after {
@@ -789,14 +790,14 @@
     }
 
     &--pressed {
-      opacity: 0.85;
+      opacity: 0.9;
     }
   }
 
   &__node-delete-label {
     font-size: 12px;
-    font-weight: var(--s-fw-semibold);
-    color: var(--primary);
+    font-weight: var(--s-fw-bold);
+    color: #fff;
     line-height: 1.2;
   }
 

@@ -61,6 +61,10 @@
   box-sizing: border-box;
 }
 
+.s-post-action-sheet__header--no-back .s-post-action-sheet__header-copy {
+  padding-left: 0;
+}
+
 .s-post-action-sheet__header-copy {
   flex: 1;
   min-width: 0;
@@ -105,11 +109,6 @@
     display: none;
     border: 0;
   }
-}
-
-.s-post-action-sheet__back--placeholder {
-  visibility: hidden;
-  pointer-events: none;
 }
 
 .s-post-action-sheet__icon-btn--pressed {

@@ -119,6 +119,8 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
   const showPostsEnd =
     contentTab === 'posts' &&
     posts.totalPostCount > 0 &&
+    posts.filteredPostCount > 0 &&
+    !posts.isBoardSearchActive &&
     !postsLoading &&
     !posts.hasMoreVisiblePosts &&
     !postsQuery.hasMore &&

@@ -7,6 +7,7 @@ import { LoginInterceptHost } from '../../../components/auth/LoginInterceptHost'
 import EventDetailFallback from './components/EventDetailFallback';
 import EventDetailLiveSection from './components/EventDetailLiveSection';
 import {
+  EventDetailBoardSearchBar,
   EventDetailComposerSection,
   EventPostsVirtualList,
   EVENT_DETAIL_SCROLL_ID,
@@ -148,11 +149,23 @@ const EventDetailPage = () => {
 
             {!showHeaderSkeleton && contentTab === 'posts' ? (
               <View className="s-event-detail__posts">
+                {posts.totalPostCount > 0 ? (
+                  <EventDetailBoardSearchBar
+                    value={posts.boardSearchQuery}
+                    onChange={posts.setBoardSearchQuery}
+                    resultCount={posts.filteredPostCount}
+                    totalCount={posts.totalPostCount}
+                  />
+                ) : null}
                 {postsLoading ? (
                   <ThemedPageLoader variant="skeleton-event-posts" minHeight={200} />
                 ) : posts.totalPostCount === 0 ? (
                   <Text className="s-event-detail__empty">
                     暂无留言，来发布第一条吧
+                  </Text>
+                ) : posts.isBoardSearchActive && posts.filteredPostCount === 0 ? (
+                  <Text className="s-event-detail__empty">
+                    未找到匹配的留言，试试其他关键词
                   </Text>
                 ) : (
                   <EventPostsVirtualList

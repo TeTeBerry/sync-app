@@ -38,6 +38,15 @@ export function defaultBuddyPostForm(
   };
 }
 
+export function defaultBuddyPostFormWithTag(
+  tagId: BuddyPostTagId,
+  activityDate?: string,
+): AiBuddyPostFormValues | null {
+  const base = defaultBuddyPostForm(activityDate);
+  if (!base) return null;
+  return { ...base, tags: [tagId] };
+}
+
 /** 帖子正文：组队，6.13-6.14，上海，2人（多类型则「组队、拼房，…」） */
 export function buildBuddyPostBody(form: AiBuddyPostFormValues): string {
   const parts = [

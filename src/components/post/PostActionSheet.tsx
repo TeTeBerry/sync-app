@@ -224,7 +224,12 @@ export const PostActionSheet: React.FC<PostActionSheetProps> = ({
       <View className="s-post-action-sheet__stack">
         <View className="s-overlay__panel s-post-action-sheet__card" role="menu">
           <View className="s-post-action-sheet__handle" aria-hidden />
-          <View className="s-post-action-sheet__header">
+          <View
+            className={cn(
+              's-post-action-sheet__header',
+              step !== 'report' && 's-post-action-sheet__header--no-back',
+            )}
+          >
             {step === 'report' && onBack ? (
               <Button
                 className="s-post-action-sheet__back"
@@ -234,9 +239,7 @@ export const PostActionSheet: React.FC<PostActionSheetProps> = ({
               >
                 <ChevronLeft size={20} color="#fff" aria-hidden />
               </Button>
-            ) : (
-              <View className="s-post-action-sheet__back s-post-action-sheet__back--placeholder" />
-            )}
+            ) : null}
             <View className="s-post-action-sheet__header-copy">
               <Text className="s-post-action-sheet__title">{header.title}</Text>
               <Text className="s-post-action-sheet__subtitle">{header.subtitle}</Text>

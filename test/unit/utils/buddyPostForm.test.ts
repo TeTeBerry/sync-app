@@ -6,6 +6,7 @@ import {
   buddyPostContentTypes,
   buddyPostHashTags,
   defaultBuddyPostForm,
+  defaultBuddyPostFormWithTag,
 } from '@/utils/buddyPostForm';
 
 const sampleForm: AiBuddyPostFormValues = {
@@ -23,6 +24,12 @@ describe('buddyPostForm', () => {
     expect(form?.dateStart).toBe('2026-06-13');
     expect(form?.dateEnd).toBe('2026-06-14');
     expect(form?.tags).toEqual(['team']);
+  });
+
+  it('defaultBuddyPostFormWithTag preselects buddy tag', () => {
+    const form = defaultBuddyPostFormWithTag('accommodation', '06/13-14/2026');
+    expect(form?.tags).toEqual(['accommodation']);
+    expect(form?.dateStart).toBe('2026-06-13');
   });
 
   it('buildBuddyPostBody uses intent, short date, location, headcount, note', () => {

@@ -38,7 +38,7 @@ export function AiGuideResultCard({
         >
           <Users size={18} color="#fff" />
           <View className="s-ai-guide-result__buddy-cta-text">
-            <Text className="s-ai-guide-result__buddy-cta-title">一键组队</Text>
+            <Text className="s-ai-guide-result__buddy-cta-title">一键发帖</Text>
             <Text className="s-ai-guide-result__buddy-cta-sub">
               用攻略里的出发地、人数预填发帖
             </Text>

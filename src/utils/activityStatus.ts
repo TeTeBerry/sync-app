@@ -250,8 +250,9 @@ export function findNearestUpcomingActivity<T extends ActivityDateFields>(
     if (getActivityStatusFromActivity(item.date, title, now) === 'ended') continue;
 
     const startAt = resolveActivityCountdownStartAt(item.date, title);
-    const startMs = startAt?.getTime() ?? 0;
-    if (startMs <= 0 || startMs <= nowMs) continue;
+    if (!startAt) continue;
+    const startMs = startAt.getTime();
+    if (startMs <= nowMs) continue;
 
     if (!nearest || startMs < nearest.startMs) {
       nearest = { item, startAt, startMs };

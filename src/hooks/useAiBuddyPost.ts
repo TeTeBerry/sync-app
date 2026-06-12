@@ -12,11 +12,15 @@ import type { ChatUiMessage } from '../types/aiChat';
 import type {
   AiBuddyPostFormValues,
   AiBuddyPostSubmitPayload,
+  BuddyPostTagId,
 } from '../types/buddyPost';
 import type { AiGuidePlanFormValues } from '../types/travelGuide';
 import { travelGuideFormToBuddyPrefill } from '../utils/travelGuideToBuddyPost';
 import { isApiEnabled } from '../constants/api';
-import { buildBuddyPostUserSummary } from '../utils/buddyPostForm';
+import {
+  buildBuddyPostUserSummary,
+  defaultBuddyPostFormWithTag,
+} from '../utils/buddyPostForm';
 import { useAccountRisk } from './useAccountRisk';
 import { publishBuddyPostFromForm } from '../utils/publishBuddyPost';
 
@@ -37,6 +41,7 @@ export function useAiBuddyPost(options: {
   const {
     activityLegacyId,
     activityTitle,
+    activityDate,
     authorName,
     authorAvatar,
     setMessages,
@@ -55,21 +60,37 @@ export function useAiBuddyPost(options: {
   const publishingRef = useRef(false);
   const { guardPublish, handlePublishError } = useAccountRisk();
 
-  const openBuddyPostSheet = useCallback(() => {
-    if (isStreaming || publishingRef.current) {
-      void Taro.showToast({ title: '请等待当前操作完成', icon: 'none' });
-      return;
-    }
-    if (activityLegacyId == null || Number.isNaN(activityLegacyId)) {
-      void Taro.showToast({ title: '请先进入活动后再发帖', icon: 'none' });
-      return;
-    }
-    setSheetPrefillHint(null);
-    setSheetInitialValues(lastFormRef.current);
-    void guardPublish().then((allowed) => {
-      if (allowed) setSheetOpen(true);
-    });
-  }, [activityLegacyId, guardPublish, isStreaming]);
+  const openBuddyPostSheetWithTag = useCallback(
+    (tagId: BuddyPostTagId) => {
+      if (isStreaming || publishingRef.current) {
+        void Taro.showToast({ title: '请等待当前操作完成', icon: 'none' });
+        return;
+      }
+      if (activityLegacyId == null || Number.isNaN(activityLegacyId)) {
+        void Taro.showToast({ title: '请先进入活动后再发帖', icon: 'none' });
+        return;
+      }
+
+      const prefill =
+        defaultBuddyPostFormWithTag(tagId, activityDate) ??
+        lastFormRef.current ??
+        ({
+          dateStart: '',
+          dateEnd: '',
+          location: '',
+          headcount: '',
+          tags: [tagId],
+          note: '',
+        } satisfies AiBuddyPostFormValues);
+
+      setSheetPrefillHint(null);
+      setSheetInitialValues({ ...prefill, tags: [tagId] });
+      void guardPublish().then((allowed) => {
+        if (allowed) setSheetOpen(true);
+      });
+    },
+    [activityDate, activityLegacyId, guardPublish, isStreaming],
+  );
 
   const openBuddyPostSheetFromTravelGuide = useCallback(
     (guideForm: AiGuidePlanFormValues) => {
@@ -212,7 +233,7 @@ export function useAiBuddyPost(options: {
     sheetOpen,
     closeBuddyPostSheet,
     isPublishing,
-    openBuddyPostSheet,
+    openBuddyPostSheetWithTag,
     openBuddyPostSheetFromTravelGuide,
     handleSheetSubmit,
     sheetInitialValues,

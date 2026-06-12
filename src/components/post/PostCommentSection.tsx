@@ -9,7 +9,7 @@ import { PLACEHOLDER_AVATAR } from '../../constants/remoteImages';
 import { sanitizeRemoteImageUrl } from '../../utils/imageUrl';
 import { isCurrentUserPostAuthor } from '../../utils/postOwnership';
 import type { EventDetailPost, PostCommentItem } from '../../types/backend';
-import { Button, Input } from '../ui';
+import { Button, cn, Input } from '../ui';
 import { Image, Text, View } from '@tarojs/components';
 
 const DEFAULT_AVATAR = PLACEHOLDER_AVATAR;
@@ -68,14 +68,17 @@ function CommentRow({
             <Text className="s-post-comments__author">{comment.authorName}</Text>
             <Text className="s-post-comments__time">{comment.time}</Text>
           </View>
-          <Text className="s-post-comments__bubble">{comment.body}</Text>
+          <Text className="s-post-comments__body">{comment.body}</Text>
           <View className="s-post-comments__actions">
             <Button
-              className={`s-post-comments__like${liked ? ' s-post-comments__like--active' : ''}`}
+              className={cn(
+                's-post-comments__like',
+                liked && 's-post-comments__like--active',
+              )}
               onClick={() => onToggleLike(comment.id)}
             >
-              <Heart size={12} filled={liked} color={liked ? '#ff0066' : '#8e8e93'} />
-              <Text className="s-btn-label">赞</Text>
+              <Heart size={13} filled={liked} color={liked ? '#ff0066' : '#8e8e93'} />
+              <Text className="s-btn-label">{liked ? '已赞' : '赞'}</Text>
             </Button>
             {canReply ? (
               <Button
@@ -189,6 +192,7 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
   const userAvatar =
     sanitizeRemoteImageUrl(currentUserAvatar?.trim()) || DEFAULT_AVATAR;
   const comments = commentsQuery.data ?? [];
+  const canSend = Boolean(draft.trim()) && !submitting;
 
   if (!expanded) return null;
 
@@ -229,6 +233,20 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
         )}
       </View>
 
+      {replyTarget ? (
+        <View className="s-post-comments__reply-bar">
+          <Text className="s-post-comments__reply-bar-text">
+            回复 @{replyTarget.authorName}
+          </Text>
+          <Button
+            className="s-post-comments__reply-bar-cancel"
+            onClick={() => setReplyTarget(null)}
+          >
+            <Text className="s-btn-label">取消</Text>
+          </Button>
+        </View>
+      ) : null}
+
       <View className="s-post-comments__composer">
         <Image
           className="s-post-comments__avatar"
@@ -236,25 +254,34 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
           mode="aspectFill"
           lazyLoad
         />
-        <View className="s-post-comments__input-wrap">
+        <View
+          className={cn(
+            's-post-comments__input-wrap',
+            canSend && 's-post-comments__input-wrap--active',
+          )}
+        >
           <Input
             className="s-post-comments__input"
             value={draft}
             placeholder={placeholder}
+            confirmType="send"
             onInput={(e) => setDraft(e.detail.value)}
             onConfirm={() => {
-              if (draft.trim()) handleSubmit();
+              if (canSend) handleSubmit();
             }}
           />
           <Button
-            className="s-post-comments__send"
+            className={cn(
+              's-post-comments__send',
+              canSend && 's-post-comments__send--active',
+            )}
             aria-label="发送评论"
-            disabled={!draft.trim() || submitting}
+            disabled={!canSend}
             onClick={handleSubmit}
           >
             <Send
-              size={20}
-              color="#fff"
+              size={18}
+              color={canSend ? '#fff' : '#8e8e93'}
               className="s-post-comments__send-icon"
               aria-hidden
             />

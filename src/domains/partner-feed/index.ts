@@ -13,6 +13,7 @@ export type { EventPostListItem } from './components/EventPostsVirtualList';
 export { EventDetailComposerSection } from './components/EventDetailComposerSection';
 export type { EventDetailComposerSectionProps } from './components/EventDetailComposerSection';
 export { EventDetailMessageBoardComposer } from './components/EventDetailMessageBoardComposer';
+export { EventDetailBoardSearchBar } from './components/EventDetailBoardSearchBar';
 export {
   EventDetailContentTabs,
   type EventDetailTabId,

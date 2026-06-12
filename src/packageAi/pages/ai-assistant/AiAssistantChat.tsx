@@ -154,7 +154,6 @@ export function AiAssistantChat({
     activityLegacyId,
     activityTitle,
     activityDate: activityQuery.data?.date,
-    activityLocation: activityQuery.data?.location,
     authorName: userName,
     authorAvatar: userAvatar,
     setMessages,
@@ -215,7 +214,6 @@ export function AiAssistantChat({
     })();
   }, [
     activityLegacyId,
-    buddyPost,
     initialMessage,
     isStreaming,
     onInitialMessageSent,
@@ -272,14 +270,14 @@ export function AiAssistantChat({
         submitLockRef.current = false;
       }
     },
-    [activityLegacyId, isStreaming, isStreamingRef, send, buddyPost, travelGuide],
+    [activityLegacyId, isStreaming, isStreamingRef, send, travelGuide],
   );
 
   const handleClearChat = useCallback(async () => {
     if (isStreaming || isStreamingRef.current) return;
     travelGuide.clearGuideCollect();
     await clearChat();
-  }, [buddyPost, clearChat, isStreaming, isStreamingRef, travelGuide]);
+  }, [clearChat, isStreaming, isStreamingRef, travelGuide]);
 
   const handleSelectSuggestedReply = useCallback(
     async (reply: string) => {
@@ -298,7 +296,7 @@ export function AiAssistantChat({
         submitLockRef.current = false;
       }
     },
-    [activityLegacyId, buddyPost, isStreaming, isStreamingRef, send, travelGuide],
+    [activityLegacyId, isStreaming, isStreamingRef, send, travelGuide],
   );
 
   const needsPageGuideCanvas =
@@ -357,6 +355,7 @@ export function AiAssistantChat({
           onClearChat={handleClearChat}
           clearDisabled={isStreaming}
           onAiGuideClick={travelGuide.openGuideSheet}
+          onBuddyPostTagClick={buddyPost.openBuddyPostSheetWithTag}
         />
       </View>
 

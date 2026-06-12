@@ -451,7 +451,6 @@ export function useTravelPlanPage({
           ? '确定从行程计划中移除这场活动吗？'
           : '确定要删除这条行程吗？',
         confirmText: '删除',
-        danger: true,
       });
       if (!accepted) {
         return;

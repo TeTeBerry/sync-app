@@ -1,4 +1,4 @@
-import React, { forwardRef, isValidElement, cloneElement } from 'react';
+import React, { forwardRef, isValidElement, cloneElement, useCallback } from 'react';
 import { cn } from './cn';
 import {
   Input as TaroInput,
@@ -60,6 +60,17 @@ function toTaroInputValue(
   return String(value);
 }
 
+function isEnterKeyEvent(
+  event: Parameters<NonNullable<TaroNativeInputProps['onKeyDown']>>[0],
+): boolean {
+  const keyboardEvent = event as KeyboardEvent & {
+    detail?: { key?: string; keyCode?: number };
+  };
+  const key = keyboardEvent.key ?? keyboardEvent.detail?.key;
+  const keyCode = keyboardEvent.keyCode ?? keyboardEvent.detail?.keyCode;
+  return key === 'Enter' || keyCode === 13;
+}
+
 export const Input = forwardRef<HTMLInputElement, InputProps>(
   (
     {
@@ -72,9 +83,11 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       defaultValue,
       onInput,
       onConfirm,
+      onKeyDown,
       adjustPosition,
       cursorSpacing,
       holdKeyboard,
+      confirmType,
       ...props
     },
     ref,
@@ -83,12 +96,25 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     const weappChatVariant =
       isWeapp && (variant === 'ai-assistant-chat' || variant === 'chat');
 
+    const handleKeyDown = useCallback<NonNullable<TaroNativeInputProps['onKeyDown']>>(
+      (event) => {
+        onKeyDown?.(event);
+        if (!onConfirm || process.env.TARO_ENV !== 'h5') return;
+        if (isEnterKeyEvent(event)) {
+          onConfirm(event);
+        }
+      },
+      [onConfirm, onKeyDown],
+    );
+
     const taroProps = {
       ...props,
       value: toTaroInputValue(value),
       defaultValue: toTaroInputValue(defaultValue),
       onInput,
       onConfirm,
+      onKeyDown: onConfirm || onKeyDown ? handleKeyDown : onKeyDown,
+      confirmType: confirmType ?? (onConfirm ? 'send' : undefined),
       ...(weappChatVariant
         ? {
             adjustPosition: adjustPosition ?? true,

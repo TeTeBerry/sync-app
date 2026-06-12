@@ -19,6 +19,7 @@ import {
   normalizeEventPostList,
   type EventPostListItem,
 } from '../utils/eventPostNormalize';
+import { messageBoardPostMatchesQuery } from '../utils/messageBoardPostSearch';
 
 export const EVENT_DETAIL_SCROLL_ID = 'event-detail-scroll';
 
@@ -40,11 +41,22 @@ export function useEventDetailPosts({
   const [expandedCommentPostIds, setExpandedCommentPostIds] = useState<Set<string>>(
     () => new Set(),
   );
+  const [boardSearchQuery, setBoardSearchQuery] = useState('');
 
-  const allPostItems = useMemo(
+  const loadedPostItems = useMemo(
     (): EventPostListItem[] => normalizeEventPostList(postsQuery.items),
     [postsQuery.items],
   );
+
+  const trimmedBoardSearch = boardSearchQuery.trim();
+  const isBoardSearchActive = trimmedBoardSearch.length > 0;
+
+  const allPostItems = useMemo((): EventPostListItem[] => {
+    if (!isBoardSearchActive) return loadedPostItems;
+    return loadedPostItems.filter((item) =>
+      messageBoardPostMatchesQuery(item.post, trimmedBoardSearch),
+    );
+  }, [isBoardSearchActive, loadedPostItems, trimmedBoardSearch]);
 
   const {
     visibleItems: postItems,
@@ -167,7 +179,11 @@ export function useEventDetailPosts({
 
   return {
     postItems,
-    totalPostCount: allPostItems.length,
+    totalPostCount: loadedPostItems.length,
+    filteredPostCount: allPostItems.length,
+    boardSearchQuery,
+    setBoardSearchQuery,
+    isBoardSearchActive,
     hasMoreVisiblePosts,
     expandedCommentPostIds,
     handleScrollToLower,

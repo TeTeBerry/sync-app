@@ -3,6 +3,8 @@ import { Send, Trash2 } from '../../components/icons';
 import { Button, Input, cn } from '../ui';
 import { HOME_FESTIVAL_SHORTCUT_CHIPS } from '../../constants/homeFestivalShortcuts';
 import { useAiChatStore } from '../../stores/aiChatStore';
+import { BUDDY_POST_TAG_OPTIONS } from '../../types/buddyPost';
+import type { BuddyPostTagId } from '../../types/buddyPost';
 import { AiGuideShortcutChip } from './AiGuideShortcutChip';
 import {
   ScrollView,
@@ -27,7 +29,7 @@ type QuickChip = {
   key: string;
   label: string;
   submitText: string;
-  isShortcutTag?: boolean;
+  buddyPostTagId?: BuddyPostTagId;
 };
 
 export function ChatComposer({
@@ -41,6 +43,7 @@ export function ChatComposer({
   clearDisabled = false,
   isLoadingHistory = false,
   onAiGuideClick,
+  onBuddyPostTagClick,
 }: {
   input: string;
   isStreaming: boolean;
@@ -52,6 +55,7 @@ export function ChatComposer({
   clearDisabled?: boolean;
   isLoadingHistory?: boolean;
   onAiGuideClick?: () => void;
+  onBuddyPostTagClick?: (tagId: BuddyPostTagId) => void;
 }) {
   const conversationFlow = useAiChatStore((state) =>
     state.activeScopeKey
@@ -82,6 +86,12 @@ export function ChatComposer({
           label: AI_GUIDE_CHIP.label,
           submitText: AI_GUIDE_CHIP.submitText,
         },
+        ...BUDDY_POST_TAG_OPTIONS.map((opt) => ({
+          key: `buddy-${opt.id}`,
+          label: opt.label,
+          submitText: opt.label,
+          buddyPostTagId: opt.id,
+        })),
       ];
     }
 
@@ -104,9 +114,13 @@ export function ChatComposer({
           return;
         }
       }
+      if (chip.buddyPostTagId) {
+        onBuddyPostTagClick?.(chip.buddyPostTagId);
+        return;
+      }
       onSubmit(chip.submitText);
     },
-    [activityLegacyId, isBusy, onAiGuideClick, onSubmit],
+    [activityLegacyId, isBusy, onAiGuideClick, onBuddyPostTagClick, onSubmit],
   );
 
   const canSend = Boolean(input.trim()) && !isComposerDisabled;
@@ -151,8 +165,11 @@ export function ChatComposer({
             placeholder={inputPlaceholder}
             adjustPosition={false}
             cursorSpacing={12}
+            confirmType="send"
             onInput={(e) => onInputChange(readComposerInputValue(e))}
-            onConfirm={() => onSubmit(input)}
+            onConfirm={() => {
+              if (canSend) onSubmit(input);
+            }}
           />
           <Button
             className="s-ai-assistant-chat__clear-btn"
