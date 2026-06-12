@@ -1,6 +1,7 @@
 import Taro from '@tarojs/taro';
 import {
   CLOUDBASE_ENV_ID,
+  CLOUD_RUN_MAX_TIMEOUT_MS,
   CLOUD_RUN_SERVICE,
   isWeappCloudRunTransportEnabled,
 } from '../constants/cloud';
@@ -69,6 +70,7 @@ export async function callContainerRequest(
   const method = (
     init.method || 'GET'
   ).toUpperCase() as Taro.cloud.CallContainerParam['method'];
+  const effectiveTimeout = Math.min(timeoutMs, CLOUD_RUN_MAX_TIMEOUT_MS);
 
   try {
     const result = await Taro.cloud.callContainer({
@@ -80,7 +82,7 @@ export async function callContainerRequest(
         'X-WX-SERVICE': CLOUD_RUN_SERVICE,
       },
       data: taroRequestData(init),
-      timeout: timeoutMs,
+      timeout: effectiveTimeout,
     });
 
     return {
@@ -90,6 +92,12 @@ export async function callContainerRequest(
     };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
+    if (message.includes('102002')) {
+      throw new Error('云托管请求超时，请稍后重试');
+    }
+    if (message.includes('-606001') || message.includes('606001')) {
+      throw new Error('请求数据过大，请换一张更小的截图后重试');
+    }
     throw new Error(message || '请求失败');
   }
 }

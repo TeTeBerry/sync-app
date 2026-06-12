@@ -35,6 +35,9 @@ export function isCloudBaseEnabled(): boolean {
   return process.env.TARO_ENV === 'weapp' && CLOUDBASE_ENV_ID.length > 0;
 }
 
+/** WeChat `callContainer` / `connectContainer` timeout ceiling (ms). */
+export const CLOUD_RUN_MAX_TIMEOUT_MS = 15_000;
+
 /** Cloud upload when weapp + env id configured. */
 export function isCloudStorageUploadEnabled(): boolean {
   return isCloudBaseEnabled();

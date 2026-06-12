@@ -3,6 +3,10 @@ import {
   apiGet,
   apiPost,
 } from '../../utils/apiClient';
+import {
+  CLOUD_RUN_MAX_TIMEOUT_MS,
+  isWeappCloudRunTransportEnabled,
+} from '../../constants/cloud';
 import type {
   AiGuidePlanFormValues,
   GenerateTravelGuideResult,
@@ -14,6 +18,22 @@ export type TravelGuidePlaceSuggestion = {
   address: string;
   city?: string;
 };
+
+export type TravelGuideGenerationJobStatus = 'pending' | 'completed' | 'failed';
+
+export type TravelGuideGenerationJobResult = {
+  jobId: string;
+  status: TravelGuideGenerationJobStatus;
+  plan?: GenerateTravelGuideResult['plan'];
+  errorMessage?: string;
+};
+
+const TRAVEL_GUIDE_POLL_INTERVAL_MS = 2_000;
+const TRAVEL_GUIDE_POLL_MAX_ATTEMPTS = 60;
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 export function fetchTravelGuidePlaceSuggestions(keyword: string, region?: string) {
   const params: Record<string, string> = {};
@@ -36,10 +56,47 @@ export function generateTravelGuide(
   activityLegacyId: number,
   payload: AiGuidePlanFormValues,
 ) {
+  if (isWeappCloudRunTransportEnabled()) {
+    return generateTravelGuideViaJob(activityLegacyId, payload);
+  }
+
   return apiPost<GenerateTravelGuideResult>(
     `/activities/${activityLegacyId}/travel-guide/generate`,
     payload,
     ownerQueryParams(),
     { timeoutMs: LONG_RUNNING_REQUEST_TIMEOUT_MS, maxRetries: 0 },
   );
+}
+
+async function generateTravelGuideViaJob(
+  activityLegacyId: number,
+  payload: AiGuidePlanFormValues,
+): Promise<GenerateTravelGuideResult> {
+  const { jobId } = await apiPost<{ jobId: string }>(
+    `/activities/${activityLegacyId}/travel-guide/generate-async`,
+    payload,
+    ownerQueryParams(),
+    { timeoutMs: CLOUD_RUN_MAX_TIMEOUT_MS, maxRetries: 0 },
+  );
+
+  for (let attempt = 0; attempt < TRAVEL_GUIDE_POLL_MAX_ATTEMPTS; attempt += 1) {
+    if (attempt > 0) {
+      await sleep(TRAVEL_GUIDE_POLL_INTERVAL_MS);
+    }
+
+    const job = await apiGet<TravelGuideGenerationJobResult>(
+      `/travel-guide/generation-jobs/${jobId}`,
+      ownerQueryParams(),
+      { timeoutMs: CLOUD_RUN_MAX_TIMEOUT_MS, maxRetries: 0 },
+    );
+
+    if (job.status === 'completed' && job.plan) {
+      return { plan: job.plan };
+    }
+    if (job.status === 'failed') {
+      throw new Error(job.errorMessage || '攻略生成失败，请稍后重试');
+    }
+  }
+
+  throw new Error('攻略生成超时，请稍后重试');
 }

@@ -203,6 +203,7 @@ const EventDetailPage = () => {
         open={buddyPostSheetOpen}
         activityDate={buddyPostActivityDate}
         activityTitle={buddyPostActivityTitle}
+        eventCity={guideEventCity}
         onClose={closeBuddyPostSheet}
         onSubmit={(payload) => {
           void handleBuddyPostSheetSubmit(payload);

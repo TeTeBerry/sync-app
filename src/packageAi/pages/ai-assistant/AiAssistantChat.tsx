@@ -356,6 +356,7 @@ export function AiAssistantChat({
         open={buddyPost.sheetOpen}
         activityDate={activityQuery.data?.date}
         activityTitle={activityTitle}
+        eventCity={guideEventCity}
         initialValues={buddyPost.sheetInitialValues}
         prefillSummaryLines={buddyPost.sheetPrefillHint}
         onClose={buddyPost.closeBuddyPostSheet}

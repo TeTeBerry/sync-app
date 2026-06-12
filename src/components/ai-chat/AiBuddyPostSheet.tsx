@@ -1,14 +1,8 @@
 import './AiGuidePlanSheet.scss';
 import './AiBuddyPostSheet.scss';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  CalendarDays,
-  ImagePlus,
-  MapPin,
-  Send,
-  Users,
-  X,
-} from '../../components/icons';
+import { CalendarDays, ImagePlus, Send, Users, X } from '../../components/icons';
+import { PlaceAutocompleteField } from './PlaceAutocompleteField';
 import { Button, cn } from '../ui';
 import { useOverlayLock } from '../../hooks/useOverlayLock';
 import type {
@@ -36,6 +30,8 @@ export type AiBuddyPostSheetProps = {
   open: boolean;
   activityDate?: string;
   activityTitle?: string;
+  /** Activity host city — biases location POI suggestions. */
+  eventCity?: string;
   initialValues?: AiBuddyPostFormValues | null;
   /** Shown when opened via travel-guide「一键组队」等预填流程。 */
   prefillSummaryLines?: string[] | null;
@@ -81,6 +77,7 @@ export function AiBuddyPostSheet({
   open,
   activityDate,
   activityTitle: _activityTitle,
+  eventCity,
   initialValues,
   prefillSummaryLines = null,
   prefillBannerTitle = null,
@@ -299,24 +296,16 @@ export function AiBuddyPostSheet({
               </View>
             </View>
 
-            <View className="s-ai-guide-plan-sheet__field">
-              <Text className="s-ai-buddy-post-sheet__label">地点</Text>
-              <View className="s-ai-guide-plan-sheet__input-wrap">
-                <MapPin
-                  size={18}
-                  className="s-ai-guide-plan-sheet__input-icon"
-                  aria-hidden
-                />
-                <Input
-                  className="s-ai-guide-plan-sheet__input"
-                  type="text"
-                  value={location}
-                  placeholder="出发地、区域或集合点"
-                  placeholderClass="s-ai-guide-plan-sheet__input-placeholder"
-                  onInput={(e) => setLocation(e.detail.value ?? '')}
-                />
-              </View>
-            </View>
+            <PlaceAutocompleteField
+              label="地点"
+              labelClassName="s-ai-buddy-post-sheet__label"
+              hint="可搜城市、场馆、车站等；同城填具体集合点"
+              value={location}
+              onChange={setLocation}
+              placeholder="出发地、区域或集合点"
+              eventCity={eventCity}
+              active={open}
+            />
 
             <View className="s-ai-guide-plan-sheet__field">
               <Text className="s-ai-buddy-post-sheet__label">人数</Text>

@@ -16,11 +16,8 @@ import { Button, cn } from '@/components/ui';
 import { isLiveApi } from '@/constants/api';
 import { useOverlayLock } from '@/hooks/useOverlayLock';
 import { ApiError } from '@/utils/apiClient';
-import {
-  ChatImageTooLargeError,
-  pickAndCompressChatImage,
-  readLocalImageAsJpegDataUrl,
-} from '@/utils/chatImage';
+import { ChatImageTooLargeError, pickAndCompressChatImage } from '@/utils/chatImage';
+import { buildTravelPlanReceiptImageRef } from '../utils/buildTravelPlanReceiptImageRef';
 import {
   createEmptyTravelPlanAddForm,
   sortTravelPlanAddFormValues,
@@ -138,10 +135,10 @@ export function TravelPlanAddSheet({
           return;
         }
 
-        const imageDataUrl = await readLocalImageAsJpegDataUrl(filePath);
+        const imageRef = await buildTravelPlanReceiptImageRef(filePath);
         const result = await recognizeTravelPlanReceipt(activityLegacyId, {
           category,
-          image: imageDataUrl,
+          image: imageRef,
         });
 
         const recognizedForms = resolveRecognizedTravelPlanForms(result);

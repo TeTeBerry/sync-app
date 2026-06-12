@@ -23,6 +23,7 @@ export class ApiError extends Error {
 
 const DEFAULT_TIMEOUT_MS = 10_000;
 /** WeChat `request` ceiling; used for LLM-heavy itinerary generation. */
+/** WeChat `request` ceiling; used for LLM-heavy itinerary generation. */
 export const LONG_RUNNING_REQUEST_TIMEOUT_MS = 60_000;
 const MAX_RETRIES = 2;
 const RETRY_DELAY_MS = 300;
