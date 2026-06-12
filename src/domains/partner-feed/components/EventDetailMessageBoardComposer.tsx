@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { ImagePlus, MessageSquare, Send, X } from '../../../components/icons';
+import { useOverlayLock } from '../../../hooks/useOverlayLock';
 import { AiBuddyPostShortcutChip } from '../../../components/ai-chat/AiBuddyPostShortcutChip';
 import { Button } from '../../../components/ui';
 import { Text, Textarea, View, Image } from '@tarojs/components';
@@ -27,6 +29,9 @@ export function EventDetailMessageBoardComposer({
   templateDisabled = false,
   publishing = false,
 }: EventDetailMessageBoardComposerProps) {
+  const [inputFocused, setInputFocused] = useState(false);
+  useOverlayLock(inputFocused);
+
   const hasContent = Boolean(draft.trim()) || imageRefs.length > 0;
 
   return (
@@ -58,6 +63,8 @@ export function EventDetailMessageBoardComposer({
           autoHeight
           showConfirmBar={false}
           onInput={(event) => onDraftChange(event.detail.value)}
+          onFocus={() => setInputFocused(true)}
+          onBlur={() => setInputFocused(false)}
         />
 
         {imageRefs.length > 0 ? (

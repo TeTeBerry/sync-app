@@ -9,6 +9,4 @@ export {
 
 export { ProfileCollapsibleSection } from './ProfileCollapsibleSection';
 
-export { profileActivities, profilePosts, profileUser } from './mockData';
-export { mockNotifications } from './mockNotifications';
 export { countOngoingActivities, deriveInterestTag } from './utils';

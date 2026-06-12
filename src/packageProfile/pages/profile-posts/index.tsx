@@ -11,6 +11,7 @@ import {
   type ProfilePostEditDraft,
 } from '../../../components/profile';
 import { useConfirmDialog } from '../../../hooks/useConfirmDialog';
+import { useOverlayLock } from '../../../hooks/useOverlayLock';
 import {
   deletePostAndInvalidate,
   updatePostAndInvalidate,
@@ -37,6 +38,8 @@ const ProfilePostsPage: React.FC = () => {
 
   const [editingPostId, setEditingPostId] = useState<string | null>(null);
   const [editDraft, setEditDraft] = useState<ProfilePostEditDraft | null>(null);
+
+  useOverlayLock(editingPostId != null);
 
   useDidShow(() => {
     invalidateProfilePosts();

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import type { ItineraryTimelineItem } from '@/domains/performance-itinerary/mocks/myItineraryMock';
-import { MY_ITINERARY_DAYS } from '@/domains/performance-itinerary/mocks/myItineraryMock';
+import type { ItineraryTimelineItem } from '@/domains/performance-itinerary/types/myItineraryUi';
+import { FIXTURE_ITINERARY_DAYS } from '../../../../fixtures/itineraryUi.fixture';
 import {
   buildWallpaperRows,
   buildWallpaperSectionsByDate,
@@ -168,7 +168,7 @@ describe('buildWallpaperRows', () => {
 describe('buildWallpaperSectionsByDate', () => {
   it('groups performances by date and omits days without performances', () => {
     const sections = buildWallpaperSectionsByDate(
-      MY_ITINERARY_DAYS.map((day) => ({
+      FIXTURE_ITINERARY_DAYS.map((day) => ({
         dateKey: day.id,
         dateLabel: day.bannerDateLabel,
         items: day.items,

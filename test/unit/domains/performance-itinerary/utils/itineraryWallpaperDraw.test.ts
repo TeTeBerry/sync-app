@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import type { ItineraryTimelineItem } from '@/domains/performance-itinerary/mocks/myItineraryMock';
+import type { ItineraryTimelineItem } from '@/domains/performance-itinerary/types/myItineraryUi';
 import {
   buildWallpaperSectionsByDate,
   type ItineraryWallpaperSection,
 } from '@/domains/performance-itinerary/utils/itineraryWallpaperParse';
-import { MY_ITINERARY_DAYS } from '@/domains/performance-itinerary/mocks/myItineraryMock';
+import { FIXTURE_ITINERARY_DAYS } from '../../../../fixtures/itineraryUi.fixture';
 import {
   lockScreenInsets,
   WALLPAPER_DESIGN,
@@ -78,7 +78,7 @@ function manyPerformanceItems(count: number): ItineraryTimelineItem[] {
 
 describe('drawItineraryWallpaper', () => {
   const sections: ItineraryWallpaperSection[] = buildWallpaperSectionsByDate(
-    MY_ITINERARY_DAYS.map((day) => ({
+    FIXTURE_ITINERARY_DAYS.map((day) => ({
       dateKey: day.id,
       dateLabel: day.bannerDateLabel,
       items: day.items,

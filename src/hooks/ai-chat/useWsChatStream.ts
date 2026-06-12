@@ -18,7 +18,6 @@ import {
 import { buildSingleTurnUserMessage } from '../../utils/aiChatHistory';
 import { buildAiChatWsSendActor } from '../../api/requestActor';
 import { streamAiChatWs } from '../../utils/aiChatWs';
-import { mockAiChatStream } from '../../utils/aiChatStream';
 import type { TypewriterReveal } from '../../utils/typewriterReveal';
 import { patchChatMessage } from '../../utils/chatMessages';
 import { throttleRaf } from '../../utils/throttleRaf';
@@ -26,7 +25,6 @@ import { processChatStreamEvents } from './chatStreamReducer';
 
 export interface UseWsChatStreamOptions {
   welcomeText: string;
-  mockReply: (query: string) => string;
   streamErrorText: string;
   wsUrl?: string;
   activityLegacyIdRef: MutableRefObject<number | undefined>;
@@ -48,7 +46,6 @@ export interface UseWsChatStreamOptions {
 
 export function useWsChatStream(options: UseWsChatStreamOptions) {
   const {
-    mockReply,
     streamErrorText,
     wsUrl = AI_CHAT_WS_URL,
     activityLegacyIdRef,
@@ -102,22 +99,30 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
 
       try {
         const wsLiveApi = Boolean(wsUrl?.trim()) && isLiveApi();
-        const stream = wsLiveApi
-          ? streamAiChatWs({
-              url: wsUrl,
-              messages: history,
-              sessionId: sessionIdRef.current,
-              ...buildAiChatWsSendActor(),
-              activityLegacyId: activityId,
-              image: pendingImage,
-              images,
-              signal: abortSignal,
-              headers: {
-                ...activityHeaders,
-                ...getAuthHeaders?.(),
-              },
-            })
-          : mockAiChatStream(mockReply(trimmed));
+        if (!wsLiveApi) {
+          void Taro.showToast({ title: '请配置 API 地址', icon: 'none' });
+          finishAiMessage((message) => ({
+            ...message,
+            text: '当前环境未配置 AI 服务，请稍后再试。',
+            streaming: false,
+          }));
+          return;
+        }
+
+        const stream = streamAiChatWs({
+          url: wsUrl,
+          messages: history,
+          sessionId: sessionIdRef.current,
+          ...buildAiChatWsSendActor(),
+          activityLegacyId: activityId,
+          image: pendingImage,
+          images,
+          signal: abortSignal,
+          headers: {
+            ...activityHeaders,
+            ...getAuthHeaders?.(),
+          },
+        });
 
         await processChatStreamEvents({
           stream,
@@ -155,7 +160,6 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
       wsUrl,
       createTypewriter,
       getAuthHeaders,
-      mockReply,
       onExistingPost,
       onPostCreated,
       persistSessionFromStream,

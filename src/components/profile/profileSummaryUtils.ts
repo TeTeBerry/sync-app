@@ -1,7 +1,7 @@
 import type { ProfileSummary } from '../../types/backend';
-import { profileUser } from './mockData';
+import { EMPTY_PROFILE_DISPLAY_USER, type ProfileDisplayUser } from './profileTypes';
 
-export type ProfileDisplayUser = typeof profileUser;
+export type { ProfileDisplayUser };
 
 function trimProfileField(value: unknown): string | undefined {
   if (typeof value !== 'string') {
@@ -14,17 +14,17 @@ function trimProfileField(value: unknown): string | undefined {
 export function normalizeProfileUserData(
   data: ProfileSummary | ProfileDisplayUser,
 ): ProfileDisplayUser {
-  const stats = data.stats ?? profileUser.stats;
+  const stats = data.stats ?? EMPTY_PROFILE_DISPLAY_USER.stats;
   return {
-    name: trimProfileField(data.name) ?? profileUser.name,
-    handle: trimProfileField(data.handle) ?? profileUser.handle,
-    location: trimProfileField(data.location) ?? profileUser.location,
-    bio: trimProfileField(data.bio) ?? profileUser.bio,
-    avatar: trimProfileField(data.avatar) ?? profileUser.avatar,
+    name: trimProfileField(data.name) ?? EMPTY_PROFILE_DISPLAY_USER.name,
+    handle: trimProfileField(data.handle) ?? EMPTY_PROFILE_DISPLAY_USER.handle,
+    location: trimProfileField(data.location) ?? EMPTY_PROFILE_DISPLAY_USER.location,
+    bio: trimProfileField(data.bio) ?? EMPTY_PROFILE_DISPLAY_USER.bio,
+    avatar: trimProfileField(data.avatar) ?? EMPTY_PROFILE_DISPLAY_USER.avatar,
     verified:
       'verified' in data && typeof data.verified === 'boolean'
         ? data.verified
-        : profileUser.verified,
+        : EMPTY_PROFILE_DISPLAY_USER.verified,
     stats: {
       events: Number(stats.events) || 0,
       likes: Number(stats.likes) || 0,

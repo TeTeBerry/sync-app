@@ -3,6 +3,7 @@ import { Info } from '../../../components/icons';
 import { Button } from '../../../components/ui';
 import { ScrollView, View } from '@tarojs/components';
 import ActionSheet from '../../../components/ActionSheet';
+import ThemedPageLoader from '../../../components/ThemedPageLoader';
 import PageNavigation from '../../../components/navigation/PageNavigation';
 import { ExclusiveItineraryInfoModal } from './ExclusiveItineraryInfoModal';
 import { useEndRouteTransitionOnShow } from '../../../hooks/useEndRouteTransitionOnShow';
@@ -41,6 +42,9 @@ const ExclusiveItineraryPage = () => {
     infoOpen,
     hintModal,
     generating,
+    djListLoading,
+    djListError,
+    refetchDjList,
   } = useExclusiveItineraryPage();
 
   return (
@@ -77,22 +81,35 @@ const ExclusiveItineraryPage = () => {
             />
           ) : null}
 
-          <ExclusiveItineraryDjGrid
-            selectedCount={selectedIds.length}
-            stageFilter={stageFilter}
-            genreFilter={genreFilter}
-            styleSearchQuery={styleSearchQuery}
-            stageOptions={stageOptions}
-            genreOptions={genreOptions}
-            sortMode={sortMode}
-            filteredDjs={filteredDjs}
-            selectedIds={selectedIds}
-            onStageFilterChange={setStageFilter}
-            onGenreFilterChange={setGenreFilter}
-            onStyleSearchQueryChange={setStyleSearchQuery}
-            onOpenSortSheet={openSortSheet}
-            onToggleDj={toggleDj}
-          />
+          {djListLoading ? (
+            <ThemedPageLoader variant="skeleton-feed" minHeight={280} />
+          ) : djListError ? (
+            <View
+              className="s-exclusive-itinerary__load-error"
+              onClick={() => void refetchDjList()}
+              role="button"
+              aria-label="阵容加载失败，点击重试"
+            >
+              阵容加载失败，点击重试
+            </View>
+          ) : (
+            <ExclusiveItineraryDjGrid
+              selectedCount={selectedIds.length}
+              stageFilter={stageFilter}
+              genreFilter={genreFilter}
+              styleSearchQuery={styleSearchQuery}
+              stageOptions={stageOptions}
+              genreOptions={genreOptions}
+              sortMode={sortMode}
+              filteredDjs={filteredDjs}
+              selectedIds={selectedIds}
+              onStageFilterChange={setStageFilter}
+              onGenreFilterChange={setGenreFilter}
+              onStyleSearchQueryChange={setStyleSearchQuery}
+              onOpenSortSheet={openSortSheet}
+              onToggleDj={toggleDj}
+            />
+          )}
         </View>
       </ScrollView>
 

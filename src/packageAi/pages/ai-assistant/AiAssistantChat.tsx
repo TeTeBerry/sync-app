@@ -79,12 +79,6 @@ export function AiAssistantChat({
     [activityQuery.data?.location],
   );
 
-  const mockReply = useCallback(
-    (query: string) =>
-      `正在为你搜索「${query}」相关内容 🔍 已找到 ${Math.floor(Math.random() * 5 + 3)} 条相关信息。`,
-    [],
-  );
-
   const welcomeText = useMemo(() => {
     if (activityTitle?.trim()) {
       return `👋 已为你锁定「${activityTitle.trim()}」。可点「AI出行攻略」规划行程，或点「模板发帖」发布组队帖。`;
@@ -103,7 +97,6 @@ export function AiAssistantChat({
     sessionIdRef,
   } = useAiChatStream({
     welcomeText,
-    mockReply,
     streamErrorText: '抱歉，回复出错了，请稍后再试。',
     activityLegacyId,
     getAuthHeaders,

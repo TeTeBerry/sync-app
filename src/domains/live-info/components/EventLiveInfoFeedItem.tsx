@@ -4,7 +4,7 @@ import { postActionIconColor } from '@/utils/postActionColors';
 import { Text, View } from '@tarojs/components';
 import { ImageWithFallback } from '@/components/ImageWithFallback';
 import { getLiveInfoCategory } from '@/domains/live-info/config/liveInfoConfig';
-import type { LiveInfoFeedItem } from '../mocks/liveInfoMock';
+import type { LiveInfoFeedItem } from '../types/liveInfoUi';
 import { OnSiteVerifiedBadge } from '@/components/OnSiteVerifiedBadge';
 import { EventLiveInfoStarRow } from './EventLiveInfoStarRow';
 

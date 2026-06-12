@@ -27,7 +27,6 @@ import {
   type TravelPlanAddFormCategory,
   type TravelPlanAddFormValues,
 } from '../utils/travelPlanAddForm';
-import { mockRecognizeTravelPlanReceipt } from '../utils/travelPlanReceiptMock';
 import {
   recognizedTravelPlanFormsToAddFormValues,
   resolveRecognizedTravelPlanForms,
@@ -58,12 +57,6 @@ export type TravelPlanAddSheetProps = {
   onClose: () => void;
   onSubmit: (values: TravelPlanAddFormValues[]) => void;
 };
-
-function sleep(ms: number) {
-  return new Promise<void>((resolve) => {
-    setTimeout(resolve, ms);
-  });
-}
 
 export function TravelPlanAddSheet({
   open,
@@ -139,17 +132,17 @@ export function TravelPlanAddSheet({
       setOcrMessage('');
 
       try {
-        let result;
-        if (isLiveApi()) {
-          const imageDataUrl = await readLocalImageAsJpegDataUrl(filePath);
-          result = await recognizeTravelPlanReceipt(activityLegacyId, {
-            category,
-            image: imageDataUrl,
-          });
-        } else {
-          await sleep(1200);
-          result = mockRecognizeTravelPlanReceipt(category);
+        if (!isLiveApi()) {
+          resetOcrState();
+          void Taro.showToast({ title: '请配置 API 地址', icon: 'none' });
+          return;
         }
+
+        const imageDataUrl = await readLocalImageAsJpegDataUrl(filePath);
+        const result = await recognizeTravelPlanReceipt(activityLegacyId, {
+          category,
+          image: imageDataUrl,
+        });
 
         const recognizedForms = resolveRecognizedTravelPlanForms(result);
         if (result.filled && recognizedForms.length > 0) {

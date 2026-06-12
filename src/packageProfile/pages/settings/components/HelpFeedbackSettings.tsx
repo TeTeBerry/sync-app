@@ -5,6 +5,7 @@ import { submitUserFeedback } from '../../../../api/sync/feedback';
 import { isLiveApi } from '../../../../constants/api';
 import { isLoggedIn } from '../../../../utils/authStorage';
 import { Button } from '../../../../components/ui';
+import { useOverlayLock } from '../../../../hooks/useOverlayLock';
 
 const FAQ_QA = [
   {
@@ -28,6 +29,8 @@ export function HelpFeedbackSettings() {
   const [formOpen, setFormOpen] = useState(false);
   const [content, setContent] = useState('');
   const [submitting, setSubmitting] = useState(false);
+
+  useOverlayLock(formOpen);
 
   const openForm = useCallback(() => {
     if (!isLiveApi() || isLoggedIn()) {

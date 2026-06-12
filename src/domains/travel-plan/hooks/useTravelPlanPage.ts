@@ -23,12 +23,7 @@ import {
   normalizeHiddenActivityNodeIds,
   sortTravelPlanNodes,
 } from '@/types/travelPlan';
-import {
-  computeTravelPlanStats,
-  TRAVEL_PLAN_DATE_RANGE,
-  TRAVEL_PLAN_EVENT_META,
-  TRAVEL_PLAN_MOCK_USER_NODES,
-} from '../utils/travelPlanMock';
+import { computeTravelPlanStats } from '../utils/travelPlanStats';
 import type { TravelPlanNode } from '../types';
 import {
   alignTravelPlanNodesYear,
@@ -88,7 +83,7 @@ export function useTravelPlanPage({
     eventMeta?.trim() ||
     activityQuery.data?.name?.trim() ||
     scheduleQuery.data?.eventMeta?.trim() ||
-    TRAVEL_PLAN_EVENT_META;
+    '';
 
   const activityYearHint = useMemo(
     () =>
@@ -100,9 +95,7 @@ export function useTravelPlanPage({
   );
 
   const [apiActivityNodes, setApiActivityNodes] = useState<TravelPlanNode[]>([]);
-  const [userNodes, setUserNodes] = useState<TravelPlanNode[]>(() =>
-    apiEnabled ? [] : TRAVEL_PLAN_MOCK_USER_NODES,
-  );
+  const [userNodes, setUserNodes] = useState<TravelPlanNode[]>([]);
   const [activityConfirmations, setActivityConfirmations] = useState<
     Record<string, boolean>
   >({});
@@ -119,15 +112,20 @@ export function useTravelPlanPage({
     Number.isFinite(activityLegacyId) &&
     activityLegacyId > 0
       ? activityLegacyId
-      : 4;
+      : null;
 
   const fallbackActivityNodes = useMemo(() => {
+    if (effectiveActivityLegacyId == null) {
+      return [];
+    }
     return buildFallbackActivityNodes({
       activityLegacyId: effectiveActivityLegacyId,
       eventMeta: resolvedEventMeta,
       activityDate: activityQuery.data?.date,
       location: activityQuery.data?.location,
-      sessions: scheduleQuery.data?.sessions,
+      sessions: scheduleQuery.data?.sessions?.length
+        ? scheduleQuery.data.sessions
+        : undefined,
       activityConfirmations,
       activityPriceOverrides,
     });
@@ -138,7 +136,7 @@ export function useTravelPlanPage({
     activityQuery.data?.location,
     effectiveActivityLegacyId,
     resolvedEventMeta,
-    scheduleQuery.data?.sessions,
+    scheduleQuery.data?.sessions?.length,
   ]);
 
   const activityNodes = useMemo(() => {
@@ -160,7 +158,7 @@ export function useTravelPlanPage({
   useEffect(() => {
     hydratedFromApiRef.current = false;
     setApiActivityNodes([]);
-    setUserNodes(apiEnabled ? [] : TRAVEL_PLAN_MOCK_USER_NODES);
+    setUserNodes([]);
     setActivityConfirmations({});
     setActivityPriceOverrides({});
     setHiddenActivityNodeIds([]);
@@ -219,7 +217,7 @@ export function useTravelPlanPage({
     if (fromNodes) {
       return fromNodes;
     }
-    return apiEnabled ? activityQuery.data?.date?.trim() || '' : TRAVEL_PLAN_DATE_RANGE;
+    return activityQuery.data?.date?.trim() || '';
   }, [activityQuery.data?.date, apiEnabled, nodes]);
 
   const pageMeta = useMemo(() => {

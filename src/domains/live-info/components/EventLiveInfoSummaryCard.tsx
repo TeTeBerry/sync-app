@@ -1,6 +1,6 @@
 import { Text, View } from '@tarojs/components';
 import { getLiveInfoCategory } from '@/domains/live-info/config/liveInfoConfig';
-import type { LiveInfoSummaryRow } from '../mocks/liveInfoMock';
+import type { LiveInfoSummaryRow } from '../types/liveInfoUi';
 import { EventLiveInfoStarRow } from './EventLiveInfoStarRow';
 
 type EventLiveInfoSummaryCardProps = {

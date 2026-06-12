@@ -8,7 +8,7 @@ import {
   filterGenreOptionsBySearch,
   fuzzyStyleTextMatches,
 } from '@/packageEvent/pages/exclusive-itinerary/exclusiveItineraryFilters';
-import { EXCLUSIVE_ITINERARY_DJS } from '@/packageEvent/pages/exclusive-itinerary/exclusiveItineraryMock';
+import { FIXTURE_EXCLUSIVE_DJS } from '../../../../fixtures/itineraryUi.fixture';
 
 describe('extractDjStyleTokens', () => {
   it('splits Discogs style labels', () => {
@@ -21,7 +21,7 @@ describe('extractDjStyleTokens', () => {
 
 describe('buildGenreFilterOptions', () => {
   it('derives style chips from lineup genreLabel tokens', () => {
-    const options = buildGenreFilterOptions(EXCLUSIVE_ITINERARY_DJS);
+    const options = buildGenreFilterOptions(FIXTURE_EXCLUSIVE_DJS);
     expect(options[0]).toEqual({ id: 'all', label: '全部风格' });
     expect(options.map((item) => item.id)).toContain('Future Bass');
     expect(options.map((item) => item.id)).toContain('Bass House');
@@ -99,7 +99,7 @@ describe('djMatchesStyleFilter', () => {
 
 describe('buildStageFilterOptions', () => {
   it('includes only stages present in the roster', () => {
-    const options = buildStageFilterOptions(EXCLUSIVE_ITINERARY_DJS);
+    const options = buildStageFilterOptions(FIXTURE_EXCLUSIVE_DJS);
     expect(options).toEqual([
       { id: 'all', label: '全部舞台' },
       { id: 'main', label: '主舞台' },

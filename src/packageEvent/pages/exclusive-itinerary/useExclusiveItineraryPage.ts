@@ -21,13 +21,10 @@ import {
   filterGenreOptionsBySearch,
   isValidFilterId,
 } from './exclusiveItineraryFilters';
-import {
-  EXCLUSIVE_ITINERARY_DJS,
-  EXCLUSIVE_ITINERARY_MOCK_CONFLICT_SLOTS,
-  type ExclusiveItineraryDj,
-} from './exclusiveItineraryMock';
+import { mapItineraryDjFromApi } from '@/domains/performance-itinerary/utils/mapItineraryDj';
+import type { ExclusiveItineraryDj } from './types';
 import { detectItineraryConflicts } from './itineraryConflict.util';
-import type { ItineraryConflict, ItineraryDj } from '../../../types/backend';
+import type { ItineraryConflict } from '../../../types/backend';
 
 const CTA_FOOTER_BASE_PX = 74;
 const SORT_OPTIONS = ['按人气排序', '按名字排序'] as const;
@@ -38,23 +35,6 @@ function djMatchesStage(dj: ExclusiveItineraryDj, stageId: string): boolean {
     return true;
   }
   return dj.stage === stageId;
-}
-
-function mapApiDj(dj: ItineraryDj): ExclusiveItineraryDj {
-  const stage = dj.stage as ExclusiveItineraryDj['stage'];
-  return {
-    id: dj.id,
-    name: dj.name,
-    genre: dj.genre,
-    genreLabel: dj.genreLabel,
-    stage:
-      stage === 'main' || stage === 'bass' || stage === 'late' || stage === 'outdoor'
-        ? stage
-        : 'main',
-    popularity: dj.popularity,
-    avatarSeed: dj.avatarSeed,
-    genreColor: dj.genreColor,
-  };
 }
 
 export function useExclusiveItineraryPage() {
@@ -88,12 +68,15 @@ export function useExclusiveItineraryPage() {
   const { generate } = useItineraryMutations(activityLegacyId ?? 0);
   const setFromGenerateResult = useItineraryStore((s) => s.setFromGenerateResult);
 
-  const djCatalog = useMemo(() => {
-    if (apiEnabled && scheduleQuery.data?.djs?.length) {
-      return scheduleQuery.data.djs.map(mapApiDj);
-    }
-    return EXCLUSIVE_ITINERARY_DJS;
-  }, [apiEnabled, scheduleQuery.data?.djs]);
+  const djCatalog = useMemo(
+    (): ExclusiveItineraryDj[] =>
+      (scheduleQuery.data?.djs ?? []).map(mapItineraryDjFromApi),
+    [scheduleQuery.data?.djs],
+  );
+
+  const djListLoading = scheduleQuery.isLoading && djCatalog.length === 0;
+  const djListError =
+    scheduleQuery.isError && !scheduleQuery.isLoading && djCatalog.length === 0;
 
   const stageOptions = useMemo(() => buildStageFilterOptions(djCatalog), [djCatalog]);
 
@@ -131,12 +114,11 @@ export function useExclusiveItineraryPage() {
   }, [genreFilter, genreOptions]);
 
   const conflicts: ItineraryConflict[] = useMemo(() => {
-    const slots =
-      apiEnabled && scheduleQuery.data?.performances?.length
-        ? scheduleQuery.data.performances
-        : EXCLUSIVE_ITINERARY_MOCK_CONFLICT_SLOTS;
-    return detectItineraryConflicts(slots, selectedIds);
-  }, [apiEnabled, scheduleQuery.data?.performances, selectedIds]);
+    return detectItineraryConflicts(
+      scheduleQuery.data?.performances ?? [],
+      selectedIds,
+    );
+  }, [scheduleQuery.data?.performances, selectedIds]);
 
   const footerChromePx = useMemo(() => {
     try {
@@ -275,5 +257,8 @@ export function useExclusiveItineraryPage() {
     infoOpen,
     hintModal,
     generating,
+    djListLoading,
+    djListError,
+    refetchDjList: scheduleQuery.refetch,
   };
 }

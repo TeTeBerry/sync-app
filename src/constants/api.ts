@@ -73,8 +73,3 @@ export function isApiEnabled(): boolean {
 export function isLiveApi(): boolean {
   return isApiEnabled();
 }
-
-/** Dev-only: force quota-exhausted UI when API is unavailable (local UI testing). */
-export function isDevMockQuotaExhausted(): boolean {
-  return process.env.TARO_APP_MOCK_QUOTA_EXHAUSTED === 'true';
-}

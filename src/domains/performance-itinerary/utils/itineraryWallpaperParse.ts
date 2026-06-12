@@ -1,7 +1,7 @@
 import type {
   ItineraryTimelineDotColor,
   ItineraryTimelineItem,
-} from '../mocks/myItineraryMock';
+} from '../types/myItineraryUi';
 
 /** Title separators: middle dot (API/LLM), hyphen, pipe. */
 const TITLE_STAGE_SEP_PATTERNS = [

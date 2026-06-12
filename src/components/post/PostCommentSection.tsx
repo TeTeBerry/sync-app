@@ -9,6 +9,7 @@ import { PLACEHOLDER_AVATAR } from '../../constants/remoteImages';
 import { sanitizeRemoteImageUrl } from '../../utils/imageUrl';
 import { isCurrentUserPostAuthor } from '../../utils/postOwnership';
 import type { EventDetailPost, PostCommentItem } from '../../types/backend';
+import { useOverlayLock } from '../../hooks/useOverlayLock';
 import { Button, cn, Input } from '../ui';
 import { Image, Text, View } from '@tarojs/components';
 
@@ -128,6 +129,9 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
   const [submitting, setSubmitting] = useState(false);
   const [replyTarget, setReplyTarget] = useState<ReplyTarget | null>(null);
   const [likedCommentIds, setLikedCommentIds] = useState<Set<string>>(() => new Set());
+  const [inputFocused, setInputFocused] = useState(false);
+
+  useOverlayLock(inputFocused);
 
   const placeholder = replyTarget ? `回复 @${replyTarget.authorName}` : '说点什么...';
 
@@ -266,6 +270,8 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
             placeholder={placeholder}
             confirmType="send"
             onInput={(e) => setDraft(e.detail.value)}
+            onFocus={() => setInputFocused(true)}
+            onBlur={() => setInputFocused(false)}
             onConfirm={() => {
               if (canSend) handleSubmit();
             }}

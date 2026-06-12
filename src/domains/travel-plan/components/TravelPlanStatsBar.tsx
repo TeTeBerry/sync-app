@@ -1,5 +1,5 @@
 import { Text, View } from '@tarojs/components';
-import { formatTravelPlanCost } from '../utils/travelPlanMock';
+import { formatTravelPlanCost } from '../utils/travelPlanStats';
 import type { TravelPlanStats } from '../types';
 
 type TravelPlanStatsBarProps = {

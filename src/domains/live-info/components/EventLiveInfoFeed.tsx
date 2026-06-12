@@ -1,5 +1,5 @@
 import { Text, View } from '@tarojs/components';
-import type { LiveInfoFeedItem } from '../mocks/liveInfoMock';
+import type { LiveInfoFeedItem } from '../types/liveInfoUi';
 import { EventLiveInfoFeedItem } from './EventLiveInfoFeedItem';
 
 type EventLiveInfoFeedProps = {

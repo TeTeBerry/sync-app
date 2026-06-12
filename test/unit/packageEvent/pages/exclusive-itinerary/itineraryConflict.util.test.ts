@@ -1,14 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { EXCLUSIVE_ITINERARY_MOCK_CONFLICT_SLOTS } from '@/packageEvent/pages/exclusive-itinerary/exclusiveItineraryMock';
+import { FIXTURE_CONFLICT_SLOTS } from '../../../../fixtures/itineraryUi.fixture';
 import { detectItineraryConflicts } from '@/packageEvent/pages/exclusive-itinerary/itineraryConflict.util';
 
 describe('detectItineraryConflicts (mock slots)', () => {
   it('returns no conflicts for default headliners on separate days', () => {
     expect(
-      detectItineraryConflicts(EXCLUSIVE_ITINERARY_MOCK_CONFLICT_SLOTS, [
-        'marshmello',
-        'illenium',
-      ]),
+      detectItineraryConflicts(FIXTURE_CONFLICT_SLOTS, ['marshmello', 'illenium']),
     ).toHaveLength(0);
   });
 
@@ -45,10 +42,7 @@ describe('detectItineraryConflicts (mock slots)', () => {
 
   it('official jun14 headliner slots do not overlap', () => {
     expect(
-      detectItineraryConflicts(EXCLUSIVE_ITINERARY_MOCK_CONFLICT_SLOTS, [
-        'eric-prydz',
-        'illenium',
-      ]),
+      detectItineraryConflicts(FIXTURE_CONFLICT_SLOTS, ['eric-prydz', 'illenium']),
     ).toHaveLength(0);
   });
 });

@@ -317,4 +317,14 @@
     font-size: inherit;
     font-weight: inherit;
   }
+
+  &__load-error {
+    margin: 24px 0;
+    padding: 20px 16px;
+    border-radius: 12px;
+    text-align: center;
+    font-size: 14px;
+    color: #8e8e93;
+    background: rgba(255, 255, 255, 0.06);
+  }
 }

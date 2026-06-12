@@ -4,7 +4,7 @@ import { Text, View } from '@tarojs/components';
 import ThemedPageLoader from '@/components/ThemedPageLoader';
 import type { LiveInfoCertStatus, LiveInfoFeedFilters } from '@/types/backend';
 import type { LiveInfoZone } from '@/types/backend';
-import type { LiveInfoFeedItem, LiveInfoSummaryRow } from '../mocks/liveInfoMock';
+import type { LiveInfoFeedItem, LiveInfoSummaryRow } from '../types/liveInfoUi';
 import { EventLiveInfoCertCard } from './EventLiveInfoCertCard';
 import { OnSiteVerificationInfoCard } from '@/packageEvent/pages/event-detail/components/OnSiteVerificationInfoCard';
 import { EventLiveInfoFeed } from './EventLiveInfoFeed';

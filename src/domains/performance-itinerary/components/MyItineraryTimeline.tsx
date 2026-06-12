@@ -6,7 +6,7 @@ import type {
   ItineraryDay,
   ItineraryTimelineDotColor,
   ItineraryTimelineItem,
-} from '../mocks/myItineraryMock';
+} from '../types/myItineraryUi';
 
 function TimelineCard({ item }: { item: ItineraryTimelineItem }) {
   return (

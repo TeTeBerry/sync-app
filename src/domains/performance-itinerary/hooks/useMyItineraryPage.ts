@@ -11,20 +11,17 @@ import { useItineraryStore } from '@/domains/performance-itinerary/store';
 import { stackPageNavChromePx } from '@/components/navigation/PageNavigation';
 import { useNavBarInsets } from '@/hooks/useNavBarInsets';
 import { useTabPageMainHeight } from '@/hooks/useTabPageMainHeight';
-import { EXCLUSIVE_ITINERARY_DJS } from '@/packageEvent/pages/exclusive-itinerary/exclusiveItineraryMock';
 import { resolveEventDetailIdFromQuery, ROUTES } from '@/utils/route';
 import { selectActiveActivityLegacyId, useNavigationStore } from '@/stores';
 import type { ItineraryDay as ApiItineraryDay, ItineraryDj } from '@/types/backend';
+import type { ItineraryDay } from '../types/myItineraryUi';
 import {
   buildItineraryBannerCopy,
   extractPerformanceArtistsFromDays,
-  MY_ITINERARY_DAYS,
-  MY_ITINERARY_EVENT_META,
   parseSelectedDjIds,
   resolveDjDisplayNames,
   type DjNameEntry,
-  type ItineraryDay,
-} from '../mocks/myItineraryMock';
+} from '../utils/itineraryBanner';
 import { runSaveItineraryWallpaperFlow } from '../utils/generateItineraryWallpaper';
 import { normalizeItineraryDaysForSave } from '@/types/itinerary';
 import { ApiError } from '@/utils/apiClient';
@@ -73,10 +70,8 @@ export function useMyItineraryPage() {
     initialPerformanceIntent ? 'performance' : 'travel',
   );
 
-  const [itineraryDays, setItineraryDays] = useState<ItineraryDay[]>(
-    () => MY_ITINERARY_DAYS,
-  );
-  const [eventMeta, setEventMeta] = useState(MY_ITINERARY_EVENT_META);
+  const [itineraryDays, setItineraryDays] = useState<ItineraryDay[]>([]);
+  const [eventMeta, setEventMeta] = useState('');
   const [viewMode, setViewMode] = useState<MyItineraryViewMode>('timeline');
   const [activeDayId, setActiveDayId] = useState(() => itineraryDays[0]?.id ?? '');
 
@@ -95,7 +90,14 @@ export function useMyItineraryPage() {
     if (pending) {
       hydratedFromPendingRef.current = true;
       setPageKind('performance');
-      setItineraryDays(pending.days as ItineraryDay[]);
+      if (pending.days.length > 0) {
+        setItineraryDays(pending.days as ItineraryDay[]);
+      } else {
+        void Taro.showToast({
+          title: '暂无演出排期，请稍后重试',
+          icon: 'none',
+        });
+      }
       setEventMeta(pending.eventMeta);
       if (pending.selectedDjIds.length > 0) {
         setSelectedDjIds(pending.selectedDjIds);
@@ -127,12 +129,10 @@ export function useMyItineraryPage() {
     }
   }, [activityQuery.data?.name]);
 
-  const djCatalog = useMemo((): DjNameEntry[] => {
-    if (apiEnabled && scheduleQuery.data?.djs?.length) {
-      return scheduleQuery.data.djs.map(mapApiDjToNameEntry);
-    }
-    return EXCLUSIVE_ITINERARY_DJS.map((dj) => ({ id: dj.id, name: dj.name }));
-  }, [apiEnabled, scheduleQuery.data?.djs]);
+  const djCatalog = useMemo(
+    (): DjNameEntry[] => (scheduleQuery.data?.djs ?? []).map(mapApiDjToNameEntry),
+    [scheduleQuery.data?.djs],
+  );
 
   const itineraryArtistNames = useMemo(
     () => extractPerformanceArtistsFromDays(itineraryDays),

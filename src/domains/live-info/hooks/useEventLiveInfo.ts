@@ -19,15 +19,14 @@ import { pickWristbandImagePath, uploadImageFile } from '@/utils/uploadImage';
 import {
   buildLiveInfoFilterSubtitle,
   isLiveInfoFilterActive,
-} from '../mocks/liveInfoFilterLabels';
+} from '../utils/liveInfoFilterLabels';
 import {
   resolveLiveInfoCertCount,
   resolveLiveInfoFeed,
   resolveLiveInfoSummary,
   resolveLiveInfoZones,
-  type LiveInfoFeedItem,
-  type LiveInfoSummaryRow,
-} from '../mocks/liveInfoMock';
+} from '../utils/liveInfoResolvers';
+import type { LiveInfoFeedItem, LiveInfoSummaryRow } from '../types/liveInfoUi';
 
 export type { PublishLiveInfoPayload };
 
@@ -73,12 +72,11 @@ export function useEventLiveInfo(
   const applySnapshot = useCallback(
     (snap: Awaited<ReturnType<typeof fetchLiveInfoSnapshot>>) => {
       applyViewer(snap?.viewer);
-      const apiMode = isApiEnabled();
-      const nextZones = resolveLiveInfoZones(snap?.zones, apiMode);
+      const nextZones = resolveLiveInfoZones(snap?.zones);
       setZones(nextZones);
-      const nextFeed = resolveLiveInfoFeed(snap?.feed, { apiMode });
-      setSummary(resolveLiveInfoSummary(snap?.summary, { apiMode }));
-      setCertCount(resolveLiveInfoCertCount(snap?.certCount, snap?.feed, { apiMode }));
+      const nextFeed = resolveLiveInfoFeed(snap?.feed);
+      setSummary(resolveLiveInfoSummary(snap?.summary));
+      setCertCount(resolveLiveInfoCertCount(snap?.certCount));
       setFeed(nextFeed);
     },
     [applyViewer],

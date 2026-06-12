@@ -17,8 +17,6 @@ export interface UseAiChatStreamOptions {
   welcomeText: string;
   /** 打字机每字间隔（毫秒） */
   typewriterCharDelayMs?: number;
-  /** Used when WebSocket URL is unset */
-  mockReply: (query: string) => string;
   streamErrorText: string;
   wsUrl?: string;
   sessionId?: string;
@@ -36,7 +34,6 @@ export interface UseAiChatStreamOptions {
 export function useAiChatStream(options: UseAiChatStreamOptions) {
   const {
     welcomeText,
-    mockReply,
     streamErrorText,
     wsUrl: wsUrlOption,
     sessionId: sessionIdOption,
@@ -79,7 +76,6 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
   const { createTypewriter } = useTypewriterReply();
   const { runStream } = useWsChatStream({
     welcomeText,
-    mockReply,
     streamErrorText,
     wsUrl,
     activityLegacyIdRef,

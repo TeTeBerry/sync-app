@@ -1,4 +1,5 @@
 import type { ItineraryScheduleSnapshot } from '@/types/backend';
+import { boundsToIsoDate, parseActivityDateBounds } from '@/utils/activityDateBounds';
 import { formatTravelPlanTimeLabel } from './travelPlanDateTime';
 import type { TravelPlanNode } from '../types';
 
@@ -17,15 +18,9 @@ const MONTH_MAP: Record<string, number> = {
   dec: 12,
 };
 
-const MOCK_ACTIVITY_SESSIONS: Record<
-  number,
-  Array<{ dateKey: string; label: string; sortOrder: number }>
-> = {
-  4: [
-    { dateKey: 'jun13', label: '6月13日', sortOrder: 0 },
-    { dateKey: 'jun14', label: '6月14日', sortOrder: 1 },
-  ],
-};
+const MONTH_ABBR = Object.entries(MONTH_MAP).map(
+  ([key, value]) => [value, key] as const,
+);
 
 function extractYearFromText(text?: string) {
   if (!text?.trim()) {
@@ -54,6 +49,12 @@ function isoDateFromFestivalDateKey(dateKey: string, yearHint: string) {
   return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 }
 
+function isoToFestivalDateKey(isoDate: string) {
+  const [, month, day] = isoDate.split('-').map(Number);
+  const monthKey = MONTH_ABBR.find(([value]) => value === month)?.[1];
+  return monthKey && Number.isFinite(day) ? `${monthKey}${day}` : isoDate;
+}
+
 function resolveActivitySubtitle(
   location: string | undefined,
   dayIndex: number,
@@ -72,6 +73,65 @@ function resolveActivitySubtitle(
   return `${venue} · 活动现场`;
 }
 
+function buildActivityNode(
+  input: {
+    eventName: string;
+    location?: string;
+    activityConfirmations?: Record<string, boolean>;
+  },
+  isoDate: string,
+  index: number,
+  dayCount: number,
+): TravelPlanNode {
+  const nodeId = `activity-event-${isoToFestivalDateKey(isoDate)}`;
+  const timeRange = { startDate: isoDate, endDate: isoDate };
+  const dayNumber = index + 1;
+
+  return {
+    id: nodeId,
+    category: 'event' as const,
+    source: 'activity' as const,
+    startDate: isoDate,
+    endDate: isoDate,
+    timeLabel: formatTravelPlanTimeLabel(timeRange),
+    title: `${input.eventName} · Day ${dayNumber}`,
+    subtitle: resolveActivitySubtitle(input.location, index, dayCount),
+    detail:
+      dayNumber === 1
+        ? '建议提前 1 小时入场，预留安检时间'
+        : '压轴阵容日 · 建议全程在场',
+    price: index === 0 ? 880 : undefined,
+    confirmed: input.activityConfirmations?.[nodeId] ?? true,
+  };
+}
+
+function buildNodesFromActivityDate(input: {
+  eventName: string;
+  activityDate?: string;
+  location?: string;
+  activityConfirmations?: Record<string, boolean>;
+}): TravelPlanNode[] {
+  const bounds = parseActivityDateBounds(input.activityDate);
+  if (!bounds) {
+    return [];
+  }
+
+  const nodes: TravelPlanNode[] = [];
+  for (let day = bounds.dayStart; day <= bounds.dayEnd; day += 1) {
+    const isoDate = boundsToIsoDate(bounds, day);
+    nodes.push(
+      buildActivityNode(
+        input,
+        isoDate,
+        day - bounds.dayStart,
+        bounds.dayEnd - bounds.dayStart + 1,
+      ),
+    );
+  }
+
+  return nodes;
+}
+
 export function buildDefaultActivityTravelPlanNodes(input: {
   activityLegacyId: number;
   eventName: string;
@@ -85,36 +145,18 @@ export function buildDefaultActivityTravelPlanNodes(input: {
     extractYearFromText(input.activityDate) ??
     String(new Date().getFullYear());
 
-  const sessions =
-    input.sessions ?? MOCK_ACTIVITY_SESSIONS[input.activityLegacyId] ?? [];
+  const sessions = input.sessions?.length ? input.sessions : [];
 
   if (sessions.length > 0) {
     return sessions.map((session, index) => {
       const isoDate =
         isoDateFromFestivalDateKey(session.dateKey, yearHint) ?? `${yearHint}-06-13`;
-      const nodeId = `activity-event-${session.dateKey}`;
-      const timeRange = { startDate: isoDate, endDate: isoDate };
 
-      return {
-        id: nodeId,
-        category: 'event' as const,
-        source: 'activity' as const,
-        startDate: isoDate,
-        endDate: isoDate,
-        timeLabel: formatTravelPlanTimeLabel(timeRange),
-        title: `${input.eventName} · Day ${index + 1}`,
-        subtitle: resolveActivitySubtitle(input.location, index, sessions.length),
-        detail:
-          index === 0
-            ? '建议提前 1 小时入场，预留安检时间'
-            : '压轴阵容日 · 建议全程在场',
-        price: index === 0 ? 880 : undefined,
-        confirmed: input.activityConfirmations?.[nodeId] ?? true,
-      };
+      return buildActivityNode(input, isoDate, index, sessions.length);
     });
   }
 
-  return [];
+  return buildNodesFromActivityDate(input);
 }
 
 export function buildActivityTravelPlanNodesFromSchedule(

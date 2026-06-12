@@ -3,6 +3,10 @@ import Taro from '@tarojs/taro';
 import { useCallback, useMemo } from 'react';
 import { Sparkles } from '../icons';
 import { Button } from '../ui';
+import {
+  selectOverlayLockActive,
+  useOverlayLockStore,
+} from '../../stores/overlayLockStore';
 import { requireAuth } from '../../utils/authGate';
 import { parseActivityLegacyId } from '../../utils/activityLegacyId';
 import {
@@ -44,8 +48,9 @@ function resolveActivityLegacyIdFromCurrentPage(): number | undefined {
 /** Global floating AI entry — bottom-right, above tab bar when present. */
 export default function GlobalAiAgentFab() {
   const routePath = useActiveRoutePath();
+  const overlayLocked = useOverlayLockStore(selectOverlayLockActive);
 
-  const hidden = routePath === ROUTES.AI_ASSISTANT;
+  const hidden = routePath === ROUTES.AI_ASSISTANT || overlayLocked;
   const withTabBar = ROUTES_WITH_TAB_BAR.has(routePath);
 
   const activityLegacyId = useMemo(() => {

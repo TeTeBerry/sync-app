@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Input, Text, View } from '@tarojs/components';
 import { parseTravelPlanCostInput } from '../utils/travelPlanAddForm';
-import { formatTravelPlanCost } from '../utils/travelPlanMock';
+import { formatTravelPlanCost } from '../utils/travelPlanStats';
 
 type TravelPlanNodePriceFieldProps = {
   value?: number;

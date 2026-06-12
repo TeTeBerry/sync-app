@@ -3,7 +3,7 @@ import { Check, ChevronDown, Search, X } from '../../../../components/icons';
 import { Button, Input } from '../../../../components/ui';
 import { ScrollView, Text, View } from '@tarojs/components';
 import type { ExclusiveItineraryFilterChip } from '../exclusiveItineraryFilters';
-import type { ExclusiveItineraryDj } from '../exclusiveItineraryMock';
+import type { ExclusiveItineraryDj } from '../types';
 
 export type ExclusiveItineraryDjGridProps = {
   selectedCount: number;

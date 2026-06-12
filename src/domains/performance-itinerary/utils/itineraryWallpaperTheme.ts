@@ -1,4 +1,4 @@
-import type { ItineraryTimelineDotColor } from '../mocks/myItineraryMock';
+import type { ItineraryTimelineDotColor } from '../types/myItineraryUi';
 
 /** SYNC app theme tokens for lock-screen wallpaper (canvas cannot read CSS vars). */
 export const WALLPAPER_THEME = {

@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { Search, X } from '../../../components/icons';
+import { useOverlayLock } from '../../../hooks/useOverlayLock';
 import { Button, Input } from '../../../components/ui';
 import { Text, View } from '@tarojs/components';
 
@@ -36,6 +38,8 @@ export function EventDetailBoardSearchBar({
           confirmType="search"
           onInput={(event) => onChange(event.detail.value)}
           onConfirm={() => undefined}
+          onFocus={() => setInputFocused(true)}
+          onBlur={() => setInputFocused(false)}
         />
         {trimmed ? (
           <Button
