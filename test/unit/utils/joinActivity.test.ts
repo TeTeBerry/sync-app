@@ -27,6 +27,7 @@ describe('registerForActivityWithFeedback', () => {
       ok: true,
       activityLegacyId: 4,
       status: 'registered',
+      attendees: 6,
     });
 
     const ok = await registerForActivityWithFeedback(4);
@@ -44,6 +45,7 @@ describe('registerForActivityWithFeedback', () => {
       activityLegacyId: 4,
       status: 'registered',
       alreadyRegistered: true,
+      attendees: 5,
     });
 
     const ok = await registerForActivityWithFeedback(4);

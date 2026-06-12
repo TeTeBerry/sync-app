@@ -35,8 +35,9 @@ import {
   seedPopularPostsCache,
 } from '../../utils/homeCacheStorage';
 import type { HomeSummary } from '../../types/backend';
+import { patchActivityRegistrationInCaches } from '../../cache/activityCache';
 import {
-  invalidateRegistration,
+  invalidateRegistrationProfile,
   invalidateUser,
   invalidateProfile,
 } from '../../utils/queryInvalidation';
@@ -194,11 +195,16 @@ export function useActivityDetailQuery(legacyId?: number) {
 }
 
 export async function invalidateRegistrationQueries() {
-  await invalidateRegistration();
+  await invalidateRegistrationProfile();
 }
 
 export async function registerForActivityAndInvalidate(legacyId: number) {
   const result = await registerForActivity(legacyId);
+  patchActivityRegistrationInCaches({
+    legacyId,
+    attendees: result.attendees,
+    going: true,
+  });
   try {
     await invalidateRegistrationQueries();
   } catch {
@@ -209,6 +215,11 @@ export async function registerForActivityAndInvalidate(legacyId: number) {
 
 export async function cancelActivityRegistrationAndInvalidate(legacyId: number) {
   const result = await cancelActivityRegistration(legacyId);
+  patchActivityRegistrationInCaches({
+    legacyId,
+    attendees: result.attendees,
+    going: false,
+  });
   await invalidateRegistrationQueries();
   return result;
 }

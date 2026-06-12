@@ -1,5 +1,7 @@
 import { invalidateCache } from '../hooks/useApiQuery';
 
+export { patchActivityRegistrationInCaches } from '../cache/activityCache';
+
 export {
   patchPostEngagementInCaches,
   patchUpdatedProfilePostInCaches,
@@ -71,11 +73,17 @@ export function invalidateAllPosts() {
   invalidateCache(['profile', 'summary']);
 }
 
-/** 失效注册/活动相关查询 */
-export function invalidateRegistration() {
+/** 失效注册相关的个人资料查询（不刷新首页/活动列表，避免覆盖乐观更新） */
+export function invalidateRegistrationProfile() {
   invalidateProfile();
   invalidateUser();
+}
+
+/** 失效注册/活动相关查询 */
+export function invalidateRegistration() {
+  invalidateRegistrationProfile();
   invalidateHome();
+  invalidateCache(['activities']);
 }
 
 /** 失效指定帖子的评论查询 */
