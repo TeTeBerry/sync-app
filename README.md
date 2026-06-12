@@ -22,8 +22,8 @@
 
 ```bash
 npm install
-npm run dev:weapp        # --mode development → sync-app/.env.development
-npm run prd:weapp        # --mode production → sync-app/.env.production
+npm run dev:weapp        # --mode development → 本地 Nest（.env）
+npm run prd:weapp        # --mode production → 云托管 prd（.env.production）
 npm run build:weapp      # 生产构建（--mode production）
 npm run build:weapp:size # 构建 + 包体阈值检查
 npm run check            # typecheck + lint + format:check + test
@@ -46,13 +46,19 @@ npm run build:h5
 
 3. 若仍报错，确认 `dist-weapp/app.json` 存在后再点「编译」；没有则重新运行 `npm run dev:weapp`。
 
-### 云托管 API（体验版 / 真机）
+### 环境（仅两套）
 
-小程序 **不** 用 `Taro.request` 访问 `*.sh.run.tcloudbase.com`（公众平台无法将该默认域名加入合法域名）。配置 `TARO_APP_CLOUDBASE_ENV_ID` + `TARO_APP_CLOUD_RUN_SERVICE` 后，REST 走 **`wx.cloud.callContainer`**，AI WebSocket 走 **`wx.cloud.connectContainer`**（实现见 `src/utils/cloudRunTransport.ts`）。基础库 ≥ 2.23.0。
+| 命令 | 配置 | 后端 |
+|------|------|------|
+| `npm run dev:weapp` | `.env` | 本地 `http://127.0.0.1:3000/api`（`sync-app-backend` `npm run dev`） |
+| `npm run build:weapp` / `prd:weapp` | `.env.production` | 云托管 **sync-backend-prd**（`callContainer` / `connectContainer`） |
 
-`.env.development` / `.env.production` 示例：
+**本地开发**（`.env`）：不配置 `TARO_APP_CLOUD_RUN_SERVICE`，REST/WS 直连本机 Nest；开发者工具勾选「不校验合法域名」。真机请将 `127.0.0.1` 改为局域网 IP。
+
+**生产 / 体验版**（`.env.production`）：配置 `TARO_APP_CLOUDBASE_ENV_ID` + `TARO_APP_CLOUD_RUN_SERVICE=sync-backend-prd`，REST 走 **`wx.cloud.callContainer`**，AI WebSocket 走 **`wx.cloud.connectContainer`**（见 `src/utils/cloudRunTransport.ts`）。基础库 ≥ 2.23.0。
 
 ```env
+# .env.production 示例
 TARO_APP_CLOUDBASE_ENV_ID=sync-prd-xxxx
 TARO_APP_CLOUD_RUN_SERVICE=sync-backend-prd-xxxx
 TARO_APP_API_BASE_URL=https://sync-backend-prd-xxxx.sh.run.tcloudbase.com/api

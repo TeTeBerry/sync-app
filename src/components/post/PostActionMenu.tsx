@@ -222,11 +222,11 @@ export const PostActionMenu: FC<PostActionMenuProps> = ({
     setReportCreatedAt(undefined);
   }, [postId]);
 
-  if (disabled) return null;
-
   const sheetOpen = menuOpen || reportOpen;
   const sheetStep = reportOpen ? 'report' : 'actions';
   const sheetMode = onDelete ? 'owner' : 'viewer';
+
+  if (disabled) return null;
 
   return (
     <View className="s-post-action-menu__trigger-wrap">
@@ -235,7 +235,10 @@ export const PostActionMenu: FC<PostActionMenuProps> = ({
         plain
         hoverClass="none"
         aria-label="更多"
-        onClick={openMenu}
+        onClick={(event) => {
+          event.stopPropagation();
+          openMenu();
+        }}
       >
         <EllipsisVertical size={18} color={POST_ACTION_ICON_COLOR} />
       </Button>

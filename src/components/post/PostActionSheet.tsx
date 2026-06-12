@@ -12,8 +12,7 @@ import React, { useMemo } from 'react';
 import { useOverlayLock } from '../../hooks/useOverlayLock';
 import type { ReportCategory, ReportReviewStatus } from '../../types/backend';
 import { POST_ACTION_DESTRUCTIVE_COLOR } from '../../utils/postActionColors';
-import { cn } from '../ui';
-import { Button } from '../ui';
+import { cn, Button } from '../ui';
 import { Text, View } from '@tarojs/components';
 
 export type PostActionSheetStep = 'actions' | 'report';
@@ -219,8 +218,9 @@ export const PostActionSheet: React.FC<PostActionSheetProps> = ({
       )}
       catchMove
       role="presentation"
+      aria-hidden={!open}
     >
-      <View className="s-overlay__backdrop" onClick={onCancel} />
+      <View className="s-overlay__backdrop" catchMove onClick={onCancel} />
       <View className="s-post-action-sheet__stack">
         <View className="s-overlay__panel s-post-action-sheet__card" role="menu">
           <View className="s-post-action-sheet__handle" aria-hidden />

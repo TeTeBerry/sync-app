@@ -1,5 +1,8 @@
 import { useEffect, useRef } from 'react';
-import { useOverlayLockStore } from '../stores/overlayLockStore';
+import {
+  selectOverlayLockActive,
+  useOverlayLockStore,
+} from '../stores/overlayLockStore';
 
 /** When true, hides the global AI FAB and signals an overlay/form is active. */
 export function useOverlayLock(open: boolean) {
@@ -7,20 +10,25 @@ export function useOverlayLock(open: boolean) {
   const release = useOverlayLockStore((state) => state.release);
   const heldRef = useRef(false);
 
-  useEffect(() => {
-    if (open && !heldRef.current) {
-      acquire();
-      heldRef.current = true;
-    } else if (!open && heldRef.current) {
-      release();
-      heldRef.current = false;
-    }
+  if (open && !heldRef.current) {
+    acquire();
+    heldRef.current = true;
+  } else if (!open && heldRef.current) {
+    release();
+    heldRef.current = false;
+  }
 
+  useEffect(() => {
     return () => {
       if (heldRef.current) {
         release();
         heldRef.current = false;
       }
     };
-  }, [open, acquire, release]);
+  }, [release]);
+}
+
+/** True while any overlay/sheet/dialog holds the global overlay lock. */
+export function useIsOverlayLocked(): boolean {
+  return useOverlayLockStore(selectOverlayLockActive);
 }

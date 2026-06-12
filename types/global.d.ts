@@ -36,6 +36,8 @@ declare namespace NodeJS {
     TARO_APP_QQ_MAP_LAYER_STYLE?: string;
     /** CloudBase env id for wx.cloud storage upload */
     TARO_APP_CLOUDBASE_ENV_ID?: string;
+    /** CloudBase 云托管服务名；本地留空，生产见 `.env.production` */
+    TARO_APP_CLOUD_RUN_SERVICE?: string;
     TARO_ENV?:
       | 'weapp'
       | 'swan'

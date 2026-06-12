@@ -18,8 +18,8 @@ dist-h5
 
 # Local env (per Taro mode; do not commit secrets)
 .env.*.local
+.env
 .env.production
-.env.development
 
 # Editor directories and files
 .vscode/*

@@ -1,23 +1,20 @@
+import { API_BASE_URL } from './api';
+
 /**
  * WeChat mini program CloudBase storage (wx.cloud).
- * Taro injects `TARO_APP_CLOUDBASE_ENV_ID` at compile time.
+ * Taro injects `TARO_APP_*` at compile time — declare in `.env` even when empty.
  */
 const rawCloudEnvId = process.env.TARO_APP_CLOUDBASE_ENV_ID || '';
+const rawCloudRunService = process.env.TARO_APP_CLOUD_RUN_SERVICE || '';
 
 export const CLOUDBASE_ENV_ID = rawCloudEnvId.trim();
 
-function readApiBaseUrl(): string {
-  const raw =
-    process.env.TARO_APP_API_BASE_URL || (process.env.TARO_ENV === 'h5' ? '/api' : '');
-  return raw.replace(/\/$/, '');
-}
-
 /** CloudBase 云托管服务名（callContainer / connectContainer 的 `service`）。 */
 export function resolveCloudRunService(): string {
-  const explicit = (process.env.TARO_APP_CLOUD_RUN_SERVICE || '').trim();
+  const explicit = rawCloudRunService.trim();
   if (explicit) return explicit;
 
-  const apiBase = readApiBaseUrl();
+  const apiBase = API_BASE_URL;
   if (!apiBase.startsWith('http')) return '';
   try {
     const host = new URL(apiBase).hostname;

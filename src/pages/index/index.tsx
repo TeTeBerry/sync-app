@@ -42,7 +42,8 @@ import {
 import { useNavBarInsets } from '../../hooks/useNavBarInsets';
 import { useEndRouteTransitionOnShow } from '../../hooks/useEndRouteTransitionOnShow';
 import { usePostPageShare } from '../../hooks/usePostPageShare';
-import { ScrollView, Text, View } from '@tarojs/components';
+import { OverlayAwareScrollView } from '../../components/layout/OverlayAwareScrollView';
+import { Text, View } from '@tarojs/components';
 
 const Home = () => {
   usePostPageShare();
@@ -145,7 +146,7 @@ const Home = () => {
 
   return (
     <View data-cmp="Home" className="s-page-with-tabbar">
-      <ScrollView
+      <OverlayAwareScrollView
         scrollY
         enhanced
         showScrollbar={false}
@@ -199,7 +200,7 @@ const Home = () => {
             {activeTeamCount} 人正在发现活动
           </View>
         </View>
-      </ScrollView>
+      </OverlayAwareScrollView>
 
       <GlobalAiAgentFab />
       {confirmDialog}

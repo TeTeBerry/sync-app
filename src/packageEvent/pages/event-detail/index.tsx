@@ -16,7 +16,8 @@ import { useEventDetailPage } from './useEventDetailPage';
 import { AiBuddyPostSheet } from '../../../components/ai-chat/AiBuddyPostSheet';
 import { AiGuidePlanSheet } from '../../../components/ai-chat/AiGuidePlanSheet';
 import PageNavigation from '../../../components/navigation/PageNavigation';
-import { ScrollView, Text, View } from '@tarojs/components';
+import { OverlayAwareScrollView } from '../../../components/layout/OverlayAwareScrollView';
+import { Text, View } from '@tarojs/components';
 
 const EventDetailPage = () => {
   useEndRouteTransitionOnShow();
@@ -97,7 +98,7 @@ const EventDetailPage = () => {
           onBack={handleBack}
         />
 
-        <ScrollView
+        <OverlayAwareScrollView
           id={EVENT_DETAIL_SCROLL_ID}
           scrollY
           enhanced
@@ -194,7 +195,7 @@ const EventDetailPage = () => {
               <Text className="s-event-detail__end">已经到底啦 ~</Text>
             ) : null}
           </View>
-        </ScrollView>
+        </OverlayAwareScrollView>
       </View>
       {confirmDialog}
       <LoginInterceptHost />
