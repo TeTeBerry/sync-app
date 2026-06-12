@@ -156,7 +156,7 @@ export const PostActionSheet: React.FC<PostActionSheetProps> = ({
         {
           id: 'delete',
           label: '删除帖子',
-          hint: '从活动页移除这条组队信息',
+          hint: '从活动页移除这条帖子',
           tone: 'destructive',
           icon: <Trash2 size={18} color={POST_ACTION_DESTRUCTIVE_COLOR} aria-hidden />,
           onPress: onDelete,

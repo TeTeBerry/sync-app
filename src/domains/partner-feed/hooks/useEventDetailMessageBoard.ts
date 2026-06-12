@@ -7,6 +7,7 @@ import {
   buildOptimisticMessageBoardPost,
   publishMessageBoardPost,
 } from '../../../utils/publishMessageBoardPost';
+import { resolveCurrentPostLocation } from '../../../utils/resolveCurrentPostLocation';
 import { pickAndCompressChatImages } from '../../../utils/chatImage';
 import { getClientUserId } from '../../../utils/session';
 
@@ -65,6 +66,7 @@ export function useEventDetailMessageBoard(
     const bodyToPublish = body || '分享图片 📸';
     const pendingId = `pending-${Date.now()}`;
     const refsToPublish = [...imageRefs];
+    const currentLocation = await resolveCurrentPostLocation();
     setIsPublishing(true);
     options.prependPost?.(
       buildOptimisticMessageBoardPost({
@@ -74,11 +76,11 @@ export function useEventDetailMessageBoard(
         authorAvatar: options.authorAvatar,
         userId: getClientUserId(),
         imageRefs: refsToPublish,
+        location: currentLocation,
       }),
     );
     setDraft('');
     setImageRefs([]);
-    void Taro.showToast({ title: '留言已发布', icon: 'success' });
 
     try {
       const post = await publishMessageBoardPost({
@@ -89,6 +91,7 @@ export function useEventDetailMessageBoard(
       });
       options.replacePost?.(pendingId, post);
       void options.refreshPosts?.({ silent: true });
+      void Taro.showToast({ title: '留言已发布', icon: 'success' });
       return true;
     } catch (error) {
       options.removePost?.(pendingId);

@@ -1,0 +1,18 @@
+.s-image-with-fallback--loading {
+  position: relative;
+}
+
+.s-image-with-fallback__placeholder {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.s-image-with-fallback__img--pending {
+  opacity: 0;
+}
+
+.s-image-with-fallback__img--loaded {
+  opacity: 1;
+  transition: opacity 0.2s ease;
+}

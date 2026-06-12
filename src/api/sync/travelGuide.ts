@@ -25,6 +25,13 @@ export function fetchTravelGuidePlaceSuggestions(keyword: string, region?: strin
   );
 }
 
+export function fetchReverseGeocodeLabel(lat: number, lng: number) {
+  return apiGet<{ label: string | null }>('/travel-guide/reverse-geocode', {
+    lat: String(lat),
+    lng: String(lng),
+  });
+}
+
 export function generateTravelGuide(
   activityLegacyId: number,
   payload: AiGuidePlanFormValues,

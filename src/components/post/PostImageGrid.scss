@@ -53,6 +53,30 @@
   background: #1c1c1e;
 }
 
+.s-post-image-grid__skeleton {
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.04) 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0.04) 100%
+  );
+  background-size: 200% 100%;
+  animation: s-post-image-grid-shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes s-post-image-grid-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
+}
+
 .s-post-image-grid__img--placeholder {
   background: #1c1c1e;
 }

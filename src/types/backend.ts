@@ -226,6 +226,9 @@ export interface EventDetailPost {
   comments: number;
   avatar: string;
   images?: string[];
+  /** Present on create when moderation hides the post from public feeds. */
+  status?: 'active' | 'hidden';
+  moderationReason?: string;
   /** Author passed wristband on-site verification for this activity today. */
   authorOnSiteVerified?: boolean;
 }

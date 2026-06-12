@@ -20,6 +20,10 @@ export interface PostImageGridProps {
 const THUMB_ROW_WIDTH = 200;
 const FEATURED_WIDTH = 480;
 
+function PostImageSkeleton() {
+  return <View className="s-post-image-grid__skeleton" aria-hidden />;
+}
+
 export function PostImageGrid({ images, maxDisplay = 4 }: PostImageGridProps) {
   const sanitizedImages = useMemo(
     () =>
@@ -62,17 +66,19 @@ export function PostImageGrid({ images, maxDisplay = 4 }: PostImageGridProps) {
 
   const count = sanitizedImages.length;
 
-  const renderImage = (
-    src: string,
-    className: string,
-    priority = false,
-    mode: 'aspectFill' | 'widthFix' = 'aspectFill',
-    widthFix = false,
-  ) => {
-    const wrapClass = widthFix
-      ? 's-post-image-grid__img-wrap s-post-image-grid__img-wrap--width-fix'
-      : 's-post-image-grid__img-wrap';
+  const renderImage = (index: number, className: string, priority = false) => {
+    const src = displayImages[index];
+    const wrapClass = 's-post-image-grid__img-wrap';
     const placeholderWrapClass = `${wrapClass} s-post-image-grid__img-wrap--placeholder`;
+    const isResolvingUrl = Boolean(sanitizedImages[index]?.trim()) && !src?.trim();
+
+    if (isResolvingUrl) {
+      return (
+        <View className={placeholderWrapClass}>
+          <PostImageSkeleton />
+        </View>
+      );
+    }
 
     return (
       <ImageWithFallback
@@ -80,9 +86,10 @@ export function PostImageGrid({ images, maxDisplay = 4 }: PostImageGridProps) {
         wrapperClassName={wrapClass}
         fallbackWrapperClassName={placeholderWrapClass}
         imageClassName={`${className} s-post-image-grid__img-inner`}
-        fallback=""
+        fallback={<PostImageSkeleton />}
+        placeholderUntilLoaded
         priority={priority}
-        mode={mode}
+        mode="aspectFill"
       />
     );
   };
@@ -100,7 +107,7 @@ export function PostImageGrid({ images, maxDisplay = 4 }: PostImageGridProps) {
       aria-label={ariaLabel}
       role="button"
     >
-      {renderImage(displayImages[index], 's-post-image-grid__img', priority)}
+      {renderImage(index, 's-post-image-grid__img', priority)}
     </View>
   );
 
@@ -114,7 +121,7 @@ export function PostImageGrid({ images, maxDisplay = 4 }: PostImageGridProps) {
           aria-label="查看图片 1"
           role="button"
         >
-          {renderImage(displayImages[0], 's-post-image-grid__img', true)}
+          {renderImage(0, 's-post-image-grid__img', true)}
         </View>
       </View>
     );
@@ -149,7 +156,7 @@ export function PostImageGrid({ images, maxDisplay = 4 }: PostImageGridProps) {
         aria-label="查看图片 1"
         role="button"
       >
-        {renderImage(displayImages[0], 's-post-image-grid__img', true)}
+        {renderImage(0, 's-post-image-grid__img', true)}
         <View className="s-post-image-grid__count-badge">
           <ImageIcon size={14} />
           {images.length}
@@ -167,7 +174,7 @@ export function PostImageGrid({ images, maxDisplay = 4 }: PostImageGridProps) {
               aria-label={`查看图片 ${index + 1}`}
               role="button"
             >
-              {renderImage(displayImages[index], 's-post-image-grid__img')}
+              {renderImage(index, 's-post-image-grid__img')}
               {thumbIndex === thumbnails.length - 1 && images.length > maxDisplay ? (
                 <View className="s-post-image-grid__more">
                   +{images.length - maxDisplay}
