@@ -136,9 +136,7 @@ TARO_APP_CLOUDBASE_ENV_ID=sync-prd-xxxx
 { "code": "<wx.login code>", "nickName": "可选", "avatarUrl": "可选" }
 ```
 
-登录成功前服务端会调用微信 [`getuserriskrank`](https://developers.weixin.qq.com/miniprogram/dev/server/API/sec-center/safety-control-capability/api_getuserriskrank.html)（`scene=2` UGC，`client_ip` 取自请求 IP）。`risk_rank` 大于配置上限（默认 `WECHAT_USER_RISK_MAX_RANK=2`，即仅允许 0–2）时返回 **403**，文案：「当前账号安全风险较高，暂无法使用本小程序」。已登录用户访问受保护 REST / AI WebSocket 时按 `WECHAT_USER_RISK_RECHECK_HOURS`（默认 24h）复检。
-
-需配置：`WECHAT_USER_RISK_ENABLED=true`、`WECHAT_MINI_APP_ID` / `SECRET`（与内容安全共用）。
+需配置：`WECHAT_MINI_APP_ID` / `WECHAT_MINI_APP_SECRET`（与内容安全共用 access_token）。
 
 响应格式与 `/auth/dev` 相同。
 
