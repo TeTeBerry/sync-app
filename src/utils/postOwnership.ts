@@ -1,3 +1,4 @@
+import { getAuthUserId, getResolvedAuthUserId } from './authStorage';
 import { getClientUserId, getClientUserName } from './session';
 
 function authorNameMatches(stored: string, client?: string): boolean {
@@ -23,7 +24,10 @@ export function isCurrentUserPostAuthor(
   authorName?: string | null,
   authorUserId?: string,
 ): boolean {
-  const clientUserId = getClientUserId().trim();
+  const clientUserId =
+    getResolvedAuthUserId()?.trim() ||
+    getAuthUserId()?.trim() ||
+    getClientUserId().trim();
   const clientUserName = getClientUserName().trim();
   const postUserId = authorUserId?.trim();
   const normalizedAuthorName = authorName?.trim() ?? '';

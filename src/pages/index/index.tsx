@@ -8,7 +8,6 @@ import { preloadEventSubpackage } from '../../utils/subpackagePreload';
 import { useConfirmDialog } from '../../hooks/useConfirmDialog';
 import { useDeferredMount } from '../../hooks/useDeferredMount';
 import {
-  deletePostAndInvalidate,
   likePostAndInvalidate,
   useFeaturedEvents,
   useHomeSummary,
@@ -26,6 +25,7 @@ import {
   ROUTES,
 } from '../../utils/route';
 import { joinActivityWithAuth } from '../../utils/joinActivity';
+import { deletePostWithFeedback } from '../../utils/deletePostFeedback';
 import { useAuthSession } from '../../hooks/useAuthSession';
 import { DEFER_BELOW_FOLD_MS, DEFER_SECONDARY_API_MS } from '../../utils/timing';
 import { HomeCountdownCard } from './components/HomeCountdownCard';
@@ -121,14 +121,11 @@ const Home = () => {
         confirmText: '删除',
       });
       if (!ok) return;
-      void deletePostAndInvalidate(post.id)
-        .then(() => {
-          void Taro.showToast({ title: '已删除', icon: 'success' });
-        })
-        .catch(() => {
-          void refetchPosts();
-          void Taro.showToast({ title: '删除失败', icon: 'none' });
+      requireAuth(() => {
+        void deletePostWithFeedback(post.id, {
+          refetchOnFailure: () => refetchPosts(),
         });
+      }, 'social');
     },
     [confirm, refetchPosts],
   );

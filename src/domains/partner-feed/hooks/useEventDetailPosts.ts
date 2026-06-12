@@ -1,12 +1,10 @@
 import Taro from '@tarojs/taro';
 import { useCallback, useMemo, useState } from 'react';
-import {
-  deletePostAndInvalidate,
-  likePostAndInvalidate,
-} from '../../../hooks/useSyncApi';
+import { likePostAndInvalidate } from '../../../hooks/useSyncApi';
 import type { ConfirmDialogOptions } from '../../../hooks/useConfirmDialog';
 import { useEventPostsInfiniteQuery } from '../../../hooks/useEventPostsInfiniteQuery';
 import { requireAuth } from '../../../utils/authGate';
+import { deletePostWithFeedback } from '../../../utils/deletePostFeedback';
 import { scrollElementToCenter } from '../../../utils/scrollToCenter';
 import type { EventDetailPost } from '../../../types/post';
 import type { EventDetailTabId } from '../components/EventDetailContentTabs';
@@ -157,15 +155,13 @@ export function useEventDetailPosts({
         confirmText: '删除',
       });
       if (!ok) return;
-      void deletePostAndInvalidate(post.id)
-        .then(() => {
-          postsQuery.removeItem(post.id);
-          void Taro.showToast({ title: '已删除', icon: 'success' });
-        })
-        .catch(() => {
-          void postsQuery.refetch();
-          void Taro.showToast({ title: '删除失败', icon: 'none' });
+
+      requireAuth(() => {
+        void deletePostWithFeedback(post.id, {
+          onRemoved: () => postsQuery.removeItem(post.id),
+          refetchOnFailure: () => postsQuery.refetch({ silent: true }),
         });
+      }, 'social');
     },
     [confirm, postsQuery],
   );

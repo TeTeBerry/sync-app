@@ -13,10 +13,10 @@ import {
 import { useConfirmDialog } from '../../../hooks/useConfirmDialog';
 import { useOverlayLock } from '../../../hooks/useOverlayLock';
 import {
-  deletePostAndInvalidate,
   updatePostAndInvalidate,
   useProfilePostsQuery,
 } from '../../../hooks/useSyncApi';
+import { deletePostWithFeedback } from '../../../utils/deletePostFeedback';
 import { invalidateProfilePosts } from '../../../utils/queryInvalidation';
 import { useNavBarInsets } from '../../../hooks/useNavBarInsets';
 import { useTabPageMainHeight } from '../../../hooks/useTabPageMainHeight';
@@ -103,12 +103,9 @@ const ProfilePostsPage: React.FC = () => {
         confirmText: '删除',
       });
       if (!ok) return;
-      void deletePostAndInvalidate(item.id)
-        .then(() => void Taro.showToast({ title: '已删除', icon: 'success' }))
-        .catch(() => {
-          void postsQuery.refetch();
-          void Taro.showToast({ title: '删除失败', icon: 'none' });
-        });
+      void deletePostWithFeedback(item.id, {
+        refetchOnFailure: () => postsQuery.refetch(),
+      });
     },
     [confirm, postsQuery],
   );
