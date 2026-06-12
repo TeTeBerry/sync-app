@@ -28,7 +28,6 @@ export type ChatUiMessage = {
   imagePreview?: string;
   ocrText?: string;
   streaming?: boolean;
-  recommendedPosts?: RecommendedPostCard[];
   recommendedActivity?: RecommendedActivityCard;
   createdPost?: RecommendedPostCard;
   suggestedReplies?: string[];

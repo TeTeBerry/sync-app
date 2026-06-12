@@ -19,17 +19,6 @@ import { isApiEnabled } from '../constants/api';
 import { buildBuddyPostUserSummary } from '../utils/buddyPostForm';
 import { useAccountRisk } from './useAccountRisk';
 import { publishBuddyPostFromForm } from '../utils/publishBuddyPost';
-import {
-  buildBuddyPostCollectPrompt,
-  buildBuddyPostSuggestedReplies,
-  buddyPostDraftToForm,
-  isBuddyPostChatInterrupt,
-  listMissingBuddyPostSlots,
-  mergeBuddyPostDraft,
-  parseBuddyPostChatMessage,
-  shouldHandleAsBuddyPostChat,
-  type BuddyPostChatDraft,
-} from '../utils/buddyPostChatParse';
 
 const PUBLISHING_TEXT = '正在为你发布组队帖…';
 
@@ -37,7 +26,6 @@ export function useAiBuddyPost(options: {
   activityLegacyId?: number;
   activityTitle?: string;
   activityDate?: string;
-  activityLocation?: string;
   authorName: string;
   authorAvatar?: string;
   setMessages: Dispatch<SetStateAction<ChatUiMessage[]>>;
@@ -49,8 +37,6 @@ export function useAiBuddyPost(options: {
   const {
     activityLegacyId,
     activityTitle,
-    activityDate,
-    activityLocation,
     authorName,
     authorAvatar,
     setMessages,
@@ -67,31 +53,7 @@ export function useAiBuddyPost(options: {
   const [sheetPrefillHint, setSheetPrefillHint] = useState<string[] | null>(null);
   const lastFormRef = useRef<AiBuddyPostFormValues | null>(null);
   const publishingRef = useRef(false);
-  const collectActiveRef = useRef(false);
-  const draftRef = useRef<BuddyPostChatDraft>({});
   const { guardPublish, handlePublishError } = useAccountRisk();
-
-  const suggestContext = useCallback(
-    () => ({
-      activityDate,
-      activityLocation,
-    }),
-    [activityDate, activityLocation],
-  );
-
-  const clearCollect = useCallback(() => {
-    collectActiveRef.current = false;
-    draftRef.current = {};
-  }, []);
-
-  const appendMessages = useCallback(
-    (items: ChatUiMessage[]) => {
-      const next = [...messagesRef.current, ...items];
-      messagesRef.current = next;
-      setMessages(next);
-    },
-    [messagesRef, setMessages],
-  );
 
   const openBuddyPostSheet = useCallback(() => {
     if (isStreaming || publishingRef.current) {
@@ -102,13 +64,12 @@ export function useAiBuddyPost(options: {
       void Taro.showToast({ title: '请先进入活动后再发帖', icon: 'none' });
       return;
     }
-    clearCollect();
     setSheetPrefillHint(null);
     setSheetInitialValues(lastFormRef.current);
     void guardPublish().then((allowed) => {
       if (allowed) setSheetOpen(true);
     });
-  }, [activityLegacyId, clearCollect, guardPublish, isStreaming]);
+  }, [activityLegacyId, guardPublish, isStreaming]);
 
   const openBuddyPostSheetFromTravelGuide = useCallback(
     (guideForm: AiGuidePlanFormValues) => {
@@ -120,8 +81,7 @@ export function useAiBuddyPost(options: {
         void Taro.showToast({ title: '请先进入活动后再发帖', icon: 'none' });
         return;
       }
-      clearCollect();
-      const prefill = travelGuideFormToBuddyPrefill(guideForm, activityDate);
+      const prefill = travelGuideFormToBuddyPrefill(guideForm, options.activityDate);
       setSheetInitialValues(prefill.form);
       setSheetPrefillHint(prefill.summaryLines);
       void guardPublish().then((allowed) => {
@@ -134,14 +94,11 @@ export function useAiBuddyPost(options: {
         });
       });
     },
-    [activityDate, activityLegacyId, clearCollect, guardPublish, isStreaming],
+    [activityLegacyId, guardPublish, isStreaming, options.activityDate],
   );
 
   const runPublish = useCallback(
-    async (
-      payload: AiBuddyPostSubmitPayload,
-      options?: { skipUserBubble?: boolean; userBubbleText?: string },
-    ) => {
+    async (payload: AiBuddyPostSubmitPayload) => {
       if (activityLegacyId == null || Number.isNaN(activityLegacyId)) return;
       if (publishingRef.current) return;
       if (!(await guardPublish())) return;
@@ -151,16 +108,12 @@ export function useAiBuddyPost(options: {
       publishingRef.current = true;
       setIsPublishing(true);
       lastFormRef.current = form;
-      clearCollect();
 
-      const userMsg: ChatUiMessage | null = options?.skipUserBubble
-        ? null
-        : {
-            id: createMessageId(),
-            from: 'user',
-            text:
-              options?.userBubbleText?.trim() || buildBuddyPostUserSummary(form, title),
-          };
+      const userMsg: ChatUiMessage = {
+        id: createMessageId(),
+        from: 'user',
+        text: buildBuddyPostUserSummary(form, title),
+      };
       const aiMsgId = createMessageId();
       const planningMsg: ChatUiMessage = {
         id: aiMsgId,
@@ -169,9 +122,7 @@ export function useAiBuddyPost(options: {
         streaming: true,
       };
 
-      const base = options?.skipUserBubble
-        ? [...messagesRef.current, planningMsg]
-        : [...messagesRef.current, userMsg!, planningMsg];
+      const base = [...messagesRef.current, userMsg, planningMsg];
       messagesRef.current = base;
       setMessages(base);
       Taro.nextTick(() => onPlanningMessagesShown?.());
@@ -196,7 +147,7 @@ export function useAiBuddyPost(options: {
           text: [
             `已为你发布「${title}」组队帖 ✅`,
             '',
-            '点击下方卡片可在活动详情页查看，等待伙伴申请加入。',
+            '点击下方卡片可在活动详情页查看。',
           ].join('\n'),
           streaming: false,
           createdPost: card,
@@ -234,84 +185,12 @@ export function useAiBuddyPost(options: {
       activityTitle,
       authorAvatar,
       authorName,
-      clearCollect,
       guardPublish,
       handlePublishError,
       messagesRef,
       onPlanningMessagesShown,
       onPublished,
       setMessages,
-    ],
-  );
-
-  const handleBuddyPostChatMessage = useCallback(
-    async (userText: string): Promise<boolean> => {
-      const trimmed = userText.trim();
-      if (!trimmed) return false;
-      if (activityLegacyId == null || Number.isNaN(activityLegacyId)) {
-        return false;
-      }
-      if (isStreaming || publishingRef.current) {
-        void Taro.showToast({ title: '请等待当前操作完成', icon: 'none' });
-        return true;
-      }
-
-      if (isBuddyPostChatInterrupt(trimmed)) {
-        clearCollect();
-        return false;
-      }
-
-      const collecting = collectActiveRef.current;
-      if (
-        !shouldHandleAsBuddyPostChat({
-          text: trimmed,
-          collecting,
-          activityDate,
-        })
-      ) {
-        return false;
-      }
-
-      const parsed = parseBuddyPostChatMessage(trimmed, activityDate);
-      const merged = mergeBuddyPostDraft(draftRef.current, parsed);
-      draftRef.current = merged;
-      collectActiveRef.current = true;
-
-      appendMessages([
-        {
-          id: createMessageId(),
-          from: 'user',
-          text: trimmed,
-        },
-      ]);
-
-      const form = buddyPostDraftToForm(merged);
-      if (form) {
-        await runPublish(form, { skipUserBubble: true });
-        return true;
-      }
-
-      const missing = listMissingBuddyPostSlots(merged);
-      appendMessages([
-        {
-          id: createMessageId(),
-          from: 'ai',
-          text: buildBuddyPostCollectPrompt(missing, suggestContext()),
-          suggestedReplies: buildBuddyPostSuggestedReplies(missing, suggestContext()),
-        },
-      ]);
-      Taro.nextTick(() => onPlanningMessagesShown?.());
-      return true;
-    },
-    [
-      activityDate,
-      activityLegacyId,
-      appendMessages,
-      clearCollect,
-      isStreaming,
-      onPlanningMessagesShown,
-      runPublish,
-      suggestContext,
     ],
   );
 
@@ -331,13 +210,10 @@ export function useAiBuddyPost(options: {
 
   return {
     sheetOpen,
-    setSheetOpen,
     closeBuddyPostSheet,
     isPublishing,
     openBuddyPostSheet,
     openBuddyPostSheetFromTravelGuide,
-    handleBuddyPostChatMessage,
-    clearCollect,
     handleSheetSubmit,
     sheetInitialValues,
     sheetPrefillHint,

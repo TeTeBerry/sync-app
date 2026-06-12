@@ -8,7 +8,12 @@ import {
   PostShareButton,
 } from '../../../components/post';
 import { ImageWithFallback } from '../../../components/ImageWithFallback';
-import { PostImageGrid } from '../../../components/post';
+import {
+  ContentTypeBadge,
+  PostImageGrid,
+  mergePostContentTypes,
+  stripContentTypeHashtags,
+} from '../../../components/post';
 import { EVENT_POST_IMAGE_MAX_DISPLAY } from '../../../constants/listPerf';
 import { isApiEnabled } from '../../../constants/api';
 import { isCurrentUserPostAuthor } from '../../../utils/postOwnership';
@@ -46,7 +51,11 @@ function EventPostCardInner({
 }: EventPostCardProps) {
   const postName = post.name?.trim() || '用户';
   const isOwn = isCurrentUserPostAuthor(postName, post.userId);
-  const bodyText = post.body?.trim() ?? '';
+  const contentTypeKeys = mergePostContentTypes(post.contentTypes, {
+    body: post.body,
+    tags: post.tags,
+  });
+  const bodyText = stripContentTypeHashtags(post.body);
   const submetaLocation = post.location?.trim() ?? '';
 
   return (
@@ -112,6 +121,13 @@ function EventPostCardInner({
 
       {post.images?.length ? (
         <PostImageGrid images={post.images} maxDisplay={EVENT_POST_IMAGE_MAX_DISPLAY} />
+      ) : null}
+
+      {contentTypeKeys.length ? (
+        <ContentTypeBadge
+          types={contentTypeKeys}
+          className="s-event-post__content-badges s-content-badges--flush"
+        />
       ) : null}
 
       <View className="s-event-post__footer">

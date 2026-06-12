@@ -30,7 +30,8 @@ import { normalizeItineraryDaysForSave } from '@/types/itinerary';
 import { ApiError } from '@/utils/apiClient';
 import type { MyItineraryViewMode } from '../components/MyItineraryToolbar';
 
-const FOOTER_BASE_PX = 74;
+/** 8px pad + 48px btn + 8px pad — matches .s-my-itinerary__footer */
+const FOOTER_BASE_PX = 64;
 const SEGMENT_TOGGLE_PX = 56;
 
 function mapApiDjToNameEntry(dj: ItineraryDj): DjNameEntry {
@@ -161,17 +162,7 @@ export function useMyItineraryPage() {
     }
   }, [activeDayId, itineraryDays]);
 
-  const footerChromePx = useMemo(() => {
-    try {
-      const win = Taro.getWindowInfo();
-      const screenHeight = win.screenHeight ?? win.windowHeight ?? 667;
-      const safeBottom =
-        win.safeArea != null ? Math.max(0, screenHeight - win.safeArea.bottom) : 0;
-      return FOOTER_BASE_PX + safeBottom;
-    } catch {
-      return FOOTER_BASE_PX;
-    }
-  }, []);
+  const footerChromePx = FOOTER_BASE_PX;
 
   const headerChromePx = stackPageNavChromePx(navInsets, { meta: true });
   const travelScrollHeight = useTabPageMainHeight(headerChromePx);

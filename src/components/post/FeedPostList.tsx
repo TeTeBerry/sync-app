@@ -10,6 +10,7 @@ import { buildPostSharePayload } from './postCardShare';
 import { PostCommentSection } from './PostCommentSection';
 import { PostActionMenu, PostShareButton } from './PostActionMenu';
 import {
+  ContentTypeBadge,
   filterContentTypeTags,
   mergePostContentTypes,
   stripContentTypeHashtags,
@@ -141,6 +142,15 @@ function FeedPostRowInner({
           <PostImageGrid images={postImages} maxDisplay={FEED_POST_IMAGE_MAX_DISPLAY} />
         ) : null}
 
+        {contentTypeKeys.length > 0 && !sharePost ? (
+          <View className="s-home-post__content-types">
+            <ContentTypeBadge
+              types={contentTypeKeys}
+              className="s-content-badges--flush"
+            />
+          </View>
+        ) : null}
+
         {displayTags.length ? (
           <View className="s-home-post__tags">
             {displayTags.map((tag) => (
@@ -151,36 +161,39 @@ function FeedPostRowInner({
       </View>
 
       <View className="s-home-post__footer">
-        <PostCardActionBar
-          variant="home"
-          liked={Boolean(post.liked)}
-          likes={post.likes}
-          comments={post.comments}
-          commentsExpanded={commentsExpanded}
-          onLike={() => onLike?.(post)}
-          onToggleComments={() => onToggleComments(post.id)}
-        />
-        <View className="s-home-post__footer-end">
-          {isOwn && onDelete ? (
-            <PostActionMenu
-              postId={post.id}
-              authorUserId={post.userId}
-              onDelete={() => onDelete(post)}
-            />
-          ) : !isOwn ? (
-            <PostActionMenu postId={post.id} authorUserId={post.userId} />
-          ) : null}
-          <PostShareButton
-            share={buildPostSharePayload({
-              postId: post.id,
-              activityLegacyId: post.activityLegacyId,
-              body: post.body,
-              eventTitle: post.event,
-              authorName: postName,
-              images: postImages,
-              avatar: post.avatar,
-            })}
+        <View className="s-home-post__footer-divider" aria-hidden />
+        <View className="s-home-post__footer-row">
+          <PostCardActionBar
+            variant="home"
+            liked={Boolean(post.liked)}
+            likes={post.likes}
+            comments={post.comments}
+            commentsExpanded={commentsExpanded}
+            onLike={() => onLike?.(post)}
+            onToggleComments={() => onToggleComments(post.id)}
           />
+          <View className="s-home-post__footer-end">
+            {isOwn && onDelete ? (
+              <PostActionMenu
+                postId={post.id}
+                authorUserId={post.userId}
+                onDelete={() => onDelete(post)}
+              />
+            ) : !isOwn ? (
+              <PostActionMenu postId={post.id} authorUserId={post.userId} />
+            ) : null}
+            <PostShareButton
+              share={buildPostSharePayload({
+                postId: post.id,
+                activityLegacyId: post.activityLegacyId,
+                body: post.body,
+                eventTitle: post.event,
+                authorName: postName,
+                images: postImages,
+                avatar: post.avatar,
+              })}
+            />
+          </View>
         </View>
       </View>
 

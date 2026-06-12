@@ -28,7 +28,7 @@ export const BUDDY_POST_MAX_IMAGES = 3;
 export const BUDDY_POST_TAG_OPTIONS: Array<{
   id: BuddyPostTagId;
   label: string;
-  /** 正文首段，如「找组队」 */
+  /** 正文首段，如「组队」 */
   intentPhrase: string;
   hashTag: string;
   contentType: PostContentType;
@@ -36,28 +36,28 @@ export const BUDDY_POST_TAG_OPTIONS: Array<{
   {
     id: 'team',
     label: '组队',
-    intentPhrase: '找组队',
+    intentPhrase: '组队',
     hashTag: '#组队',
     contentType: 'team',
   },
   {
     id: 'accommodation',
     label: '拼房',
-    intentPhrase: '找拼房',
+    intentPhrase: '拼房',
     hashTag: '#拼房',
     contentType: 'accommodation',
   },
   {
     id: 'carpool',
     label: '同路',
-    intentPhrase: '找同路伙伴',
+    intentPhrase: '同路',
     hashTag: '#同路',
     contentType: 'carpool',
   },
   {
     id: 'vip',
     label: '拼卡',
-    intentPhrase: '找卡座',
+    intentPhrase: '拼卡',
     hashTag: '#拼卡',
     contentType: 'carpool',
   },

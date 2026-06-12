@@ -8,8 +8,8 @@ describe('buddyPostIntent', () => {
     expect(isBuddyPostIntent('帮我发个组队帖')).toBe(true);
   });
 
-  it('does not match generic buddy search', () => {
-    expect(isBuddyPostIntent('组队队友')).toBe(false);
+  it('does not match post browsing phrases', () => {
     expect(isBuddyPostIntent('看看有没有组队帖')).toBe(false);
+    expect(isBuddyPostIntent('有没有类似的帖子')).toBe(false);
   });
 });

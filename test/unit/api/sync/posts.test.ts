@@ -40,7 +40,7 @@ const sampleEventDetailPost: EventDetailPost = {
   name: '风暴电音节',
   location: '上海',
   createdAt: '2026-06-01T10:00:00.000Z',
-  body: '找同行',
+  body: '组队同行',
   tags: ['#组队'],
   likes: 1,
   liked: true,
@@ -144,7 +144,7 @@ describe('api/sync/posts createPost (组队发帖 REST)', () => {
 
   it('POST /posts with JSON body and auth headers', async () => {
     await createPost({
-      body: '找同行\n\n#组队',
+      body: '组队同行\n\n#组队',
       activityLegacyId: 9,
       eventTitle: '风暴电音节',
       location: '上海',

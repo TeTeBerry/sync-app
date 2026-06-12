@@ -1,3 +1,4 @@
+import './ContentTypeBadge.scss';
 import React from 'react';
 import { Text, View } from '@tarojs/components';
 import { formatPostTagLabel, postTagBadgeClass } from '../../utils/postTagDisplay';

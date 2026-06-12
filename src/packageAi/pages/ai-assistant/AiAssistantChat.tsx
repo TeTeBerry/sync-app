@@ -87,9 +87,9 @@ export function AiAssistantChat({
 
   const welcomeText = useMemo(() => {
     if (activityTitle?.trim()) {
-      return `👋 已为你锁定「${activityTitle.trim()}」。可先生成出行攻略，生成后点「一键组队」自动预填发帖；也可直接描述需求或点「AI出行攻略」「组队发帖」。`;
+      return `👋 已为你锁定「${activityTitle.trim()}」。可点「AI出行攻略」规划行程，或点「模板发帖」发布组队帖。`;
     }
-    return '👋 我是你的 AI 智能助手，帮你发现活动、找组队，说出需求，我来搞定。';
+    return '👋 我是你的 AI 智能助手，帮你发现活动、规划出行，有问题随时问我。';
   }, [activityTitle]);
 
   const {
@@ -208,8 +208,6 @@ export function AiAssistantChat({
     const scoped = activityLegacyId != null && !Number.isNaN(activityLegacyId);
     void (async () => {
       if (scoped) {
-        const buddyHandled = await buddyPost.handleBuddyPostChatMessage(trimmed);
-        if (buddyHandled) return;
         const guideHandled = await travelGuide.handleTravelGuideChatMessage(trimmed);
         if (guideHandled) return;
       }
@@ -259,11 +257,6 @@ export function AiAssistantChat({
 
       const scoped = activityLegacyId != null && !Number.isNaN(activityLegacyId);
       if (scoped) {
-        const buddyHandled = await buddyPost.handleBuddyPostChatMessage(trimmed);
-        if (buddyHandled) {
-          setInput('');
-          return;
-        }
         const guideHandled = await travelGuide.handleTravelGuideChatMessage(trimmed);
         if (guideHandled) {
           setInput('');
@@ -284,7 +277,6 @@ export function AiAssistantChat({
 
   const handleClearChat = useCallback(async () => {
     if (isStreaming || isStreamingRef.current) return;
-    buddyPost.clearCollect();
     travelGuide.clearGuideCollect();
     await clearChat();
   }, [buddyPost, clearChat, isStreaming, isStreamingRef, travelGuide]);
@@ -295,8 +287,6 @@ export function AiAssistantChat({
       const trimmed = reply.trim();
       const scoped = activityLegacyId != null && !Number.isNaN(activityLegacyId);
       if (scoped) {
-        const buddyHandled = await buddyPost.handleBuddyPostChatMessage(trimmed);
-        if (buddyHandled) return;
         const guideHandled = await travelGuide.handleTravelGuideChatMessage(trimmed);
         if (guideHandled) return;
       }

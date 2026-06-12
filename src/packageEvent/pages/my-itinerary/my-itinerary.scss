@@ -354,7 +354,8 @@
     flex-shrink: 0;
     display: flex;
     gap: 10px;
-    padding: 10px var(--s-page-gutter) calc(12px + env(safe-area-inset-bottom, 0px));
+    /* Main column already ends above fixed tab bar; do not add safe-area again */
+    padding: 8px var(--s-page-gutter) 8px;
     background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, #000 28%);
     box-sizing: border-box;
   }

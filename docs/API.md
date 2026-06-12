@@ -379,7 +379,7 @@ Query：`targetType=post`（V1 仅帖子）、`targetId`（帖子 id）
 
 **画像自动写入**（`city` / `favorGenres` / `budgetLevel`，有变化才 `PATCH`）：
 
-- AI 找搭子对话（`UserProfileAgent`）
+- AI 对话画像提取（`UserProfileAgent`，仅城市/风格/预算等字段）
 - 组队发帖 / 组队表单 `POST /api/posts`（地点→`city`，正文英文风格词→`favorGenres`）
 - 专属行程 `POST /api/activities/:legacyId/travel-guide/generate`（出发地→`city`，住宿档位→`budgetLevel`）
 

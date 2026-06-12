@@ -3,32 +3,19 @@ import { shouldSuppressAutoScrollForMessage } from '@/components/ai-chat/chatMes
 import type { ChatUiMessage } from '@/types/aiChat';
 
 describe('shouldSuppressAutoScrollForMessage', () => {
-  it('suppresses when match post cards are present', () => {
+  it('suppresses when created post card is present', () => {
     const msg: ChatUiMessage = {
       id: '1',
       from: 'ai',
-      text: '为你找到以下队友',
-      recommendedPosts: [
-        {
-          postId: 'p1',
-          snippet: '求组队',
-          authorName: 'A',
-          eventTitle: '活动',
-        },
-      ],
+      text: '已发布组队帖',
+      createdPost: {
+        postId: 'p1',
+        snippet: '求组队',
+        authorName: 'A',
+        eventTitle: '活动',
+      },
     };
     expect(shouldSuppressAutoScrollForMessage(msg)).toBe(true);
-  });
-
-  it('does not suppress when match list is empty', () => {
-    expect(
-      shouldSuppressAutoScrollForMessage({
-        id: '1',
-        from: 'ai',
-        text: '暂未找到合适队友',
-        recommendedPosts: [],
-      }),
-    ).toBe(false);
   });
 
   it('suppresses for activity recommendation and travel guide', () => {

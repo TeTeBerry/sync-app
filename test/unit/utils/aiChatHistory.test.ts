@@ -3,8 +3,8 @@ import { buildSingleTurnUserMessage } from '@/utils/aiChatHistory';
 
 describe('buildSingleTurnUserMessage', () => {
   it('returns only the current user line', () => {
-    expect(buildSingleTurnUserMessage('找组队')).toEqual([
-      { role: 'user', content: '找组队' },
+    expect(buildSingleTurnUserMessage('组队')).toEqual([
+      { role: 'user', content: '组队' },
     ]);
   });
 

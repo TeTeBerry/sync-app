@@ -21,8 +21,8 @@ export type LiveInfoFeedItem = {
 };
 
 export const MOCK_LIVE_INFO_ZONES: LiveInfoZone[] = [
-  { id: 'stage_a', label: 'A 舞台' },
-  { id: 'stage_b', label: 'B 舞台' },
+  { id: 'stage_a', label: 'A区' },
+  { id: 'stage_b', label: 'B区' },
   { id: 'vip_booth', label: '卡座' },
   { id: 'venue', label: '全场' },
 ];
@@ -88,7 +88,7 @@ export const MOCK_LIVE_INFO_FEED: LiveInfoFeedItem[] = [
     avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80',
     authorOnSiteVerified: true,
     zoneTag: 'stage_a',
-    zoneLabel: 'A 舞台',
+    zoneLabel: 'A区',
     timeLabel: '2分钟前',
     ratings: [
       { categoryId: 'entry_crowd', score: 4 },
@@ -104,7 +104,7 @@ export const MOCK_LIVE_INFO_FEED: LiveInfoFeedItem[] = [
     avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&q=80',
     authorOnSiteVerified: true,
     zoneTag: 'stage_b',
-    zoneLabel: 'B 舞台',
+    zoneLabel: 'B区',
     timeLabel: '8分钟前',
     ratings: [
       { categoryId: 'toilet_queue', score: 5 },
@@ -167,7 +167,7 @@ export const MOCK_LIVE_INFO_FEED: LiveInfoFeedItem[] = [
     avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&q=80',
     authorOnSiteVerified: true,
     zoneTag: 'stage_a',
-    zoneLabel: 'A 舞台',
+    zoneLabel: 'A区',
     timeLabel: '38分钟前',
     ratings: [{ categoryId: 'toilet_queue', score: 4 }],
     remark: 'VIP 通道畅通，普通口要排二十分钟左右',
@@ -179,7 +179,7 @@ export const MOCK_LIVE_INFO_FEED: LiveInfoFeedItem[] = [
     avatar: 'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=200&q=80',
     authorOnSiteVerified: true,
     zoneTag: 'stage_b',
-    zoneLabel: 'B 舞台',
+    zoneLabel: 'B区',
     timeLabel: '48分钟前',
     ratings: [
       { categoryId: 'water_queue', score: 5 },
@@ -208,7 +208,7 @@ export const MOCK_LIVE_INFO_FEED: LiveInfoFeedItem[] = [
     avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80',
     authorOnSiteVerified: true,
     zoneTag: 'stage_a',
-    zoneLabel: 'A 舞台',
+    zoneLabel: 'A区',
     timeLabel: '1小时前',
     ratings: [
       { categoryId: 'entry_crowd', score: 3.5 },

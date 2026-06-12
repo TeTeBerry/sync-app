@@ -13,7 +13,7 @@ describe('isTravelGuideIntent', () => {
   });
 
   it('does not match buddy shortcuts', () => {
-    expect(isTravelGuideIntent('组队队友')).toBe(false);
+    expect(isTravelGuideIntent('组队发帖')).toBe(false);
     expect(isTravelGuideIntent('看看有没有组队帖')).toBe(false);
   });
 });

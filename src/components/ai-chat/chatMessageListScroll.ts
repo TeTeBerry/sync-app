@@ -5,7 +5,6 @@ export function shouldSuppressAutoScrollForMessage(
   msg: ChatUiMessage | undefined,
 ): boolean {
   if (!msg) return false;
-  if (msg.recommendedPosts?.length) return true;
   if (msg.recommendedActivity) return true;
   if (msg.createdPost) return true;
   if (msg.travelGuide?.imagePath?.trim()) return true;
