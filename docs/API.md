@@ -52,10 +52,10 @@ H5 devServer 将 `/api`（含 WebSocket）代理到 `http://localhost:3000`。
 
 ```env
 # 必填：CloudBase 云托管 API（微信公众平台 request 合法域名）
-TARO_APP_API_BASE_URL=https://sync-prd-xxxx.tcloudbaseapp.com/api
+TARO_APP_API_BASE_URL=https://sync-backend-prd-xxxx.sh.run.tcloudbase.com/api
 
 # 可选：AI WebSocket（socket 合法域名 wss://…）
-TARO_APP_AI_CHAT_WS_URL=wss://sync-prd-xxxx.tcloudbaseapp.com/api/ai/chat/ws
+TARO_APP_AI_CHAT_WS_URL=wss://sync-backend-prd-xxxx.sh.run.tcloudbase.com/api/ai/chat/ws
 
 # 必填（UGC 图片）：CloudBase 环境 ID，小程序 wx.cloud 直传
 TARO_APP_CLOUDBASE_ENV_ID=sync-prd-xxxx

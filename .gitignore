@@ -16,11 +16,8 @@ dist-weapp
 dist-h5
 *.local
 
-# Local env secrets (do not commit)
-.env
-.env.local
+# Local env (per Taro mode; do not commit secrets)
 .env.*.local
-.env.example
 .env.production
 .env.development
 

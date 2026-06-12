@@ -22,9 +22,9 @@
 
 ```bash
 npm install
-npm run dev:weapp        # 本地开发 → .env.development / 局域网 IP
-npm run prd:weapp        # 连云服务器 → .env.production（监听编译）
-npm run build:weapp      # 生产构建（同 prd，使用 .env.production）
+npm run dev:weapp        # --mode development → sync-app/.env.development
+npm run prd:weapp        # --mode production → sync-app/.env.production
+npm run build:weapp      # 生产构建（--mode production）
 npm run build:weapp:size # 构建 + 包体阈值检查
 npm run check            # typecheck + lint + format:check + test
 npm run dev:h5           # 可选：本地 H5 调试（非发布目标，见 config/h5.config.ts）
