@@ -181,18 +181,20 @@ function HomeFeaturedEventCard({
 
       <View className="s-home-showcase-card__footer">
         <View className="s-home-showcase-card__people">
-          <View className="s-home-showcase-card__avatars" aria-hidden>
-            {(event.guests ?? []).slice(0, 3).map((guest, guestIndex) => (
-              <Image
-                key={guest}
-                src={thumbnailImageUrl(guest, 48) ?? guest}
-                className="s-home-showcase-card__avatar"
-                mode="aspectFill"
-                lazyLoad
-                style={{ zIndex: 3 - guestIndex }}
-              />
-            ))}
-          </View>
+          {(event.guests ?? []).length > 0 ? (
+            <View className="s-home-showcase-card__avatars" aria-hidden>
+              {(event.guests ?? []).slice(0, 3).map((guest, guestIndex) => (
+                <Image
+                  key={guest}
+                  src={thumbnailImageUrl(guest, 48) ?? guest}
+                  className="s-home-showcase-card__avatar"
+                  mode="aspectFill"
+                  lazyLoad
+                  style={{ zIndex: 3 - guestIndex }}
+                />
+              ))}
+            </View>
+          ) : null}
           <Text className="s-home-showcase-card__count">{event.attendeeCount} 人</Text>
         </View>
 

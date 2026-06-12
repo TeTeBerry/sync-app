@@ -43,12 +43,7 @@ function lastRequestUrl(): string {
   return (call[0] as { url: string }).url;
 }
 
-function expectDemoActorQuery(url: string) {
-  expect(url).toContain('userId=demo-client-id');
-  expect(url).not.toContain('authorName=');
-}
-
-function expectNoDemoActorQuery(url: string) {
+function expectNoActorQuery(url: string) {
   expect(url).not.toContain('userId=');
   expect(url).not.toContain('authorName=');
 }
@@ -63,65 +58,65 @@ describe('api/sync owner query contract', () => {
   });
 
   describe('profile', () => {
-    it('fetchProfilePosts includes userId only when no token', async () => {
+    it('fetchProfilePosts omits actor query when no token', async () => {
       await fetchProfilePosts();
-      expectDemoActorQuery(lastRequestUrl());
+      expectNoActorQuery(lastRequestUrl());
     });
 
-    it('fetchProfilePosts omits demo query when bearer present', async () => {
+    it('fetchProfilePosts omits actor query when bearer present', async () => {
       mockGetAccessToken.mockReturnValue('jwt-token');
       await fetchProfilePosts();
-      expectNoDemoActorQuery(lastRequestUrl());
+      expectNoActorQuery(lastRequestUrl());
     });
 
-    it('fetchProfileSummary includes userId only when no token', async () => {
+    it('fetchProfileSummary omits actor query when no token', async () => {
       await fetchProfileSummary();
-      expectDemoActorQuery(lastRequestUrl());
+      expectNoActorQuery(lastRequestUrl());
     });
 
-    it('fetchProfileSummary omits demo query when bearer present', async () => {
+    it('fetchProfileSummary omits actor query when bearer present', async () => {
       mockGetAccessToken.mockReturnValue('jwt-token');
       await fetchProfileSummary();
-      expectNoDemoActorQuery(lastRequestUrl());
+      expectNoActorQuery(lastRequestUrl());
     });
   });
 
   describe('notifications', () => {
-    it('fetchNotifications includes userId only when no token', async () => {
+    it('fetchNotifications omits actor query when no token', async () => {
       await fetchNotifications();
-      expectDemoActorQuery(lastRequestUrl());
+      expectNoActorQuery(lastRequestUrl());
     });
 
-    it('fetchNotifications omits userId when bearer present', async () => {
+    it('fetchNotifications omits actor query when bearer present', async () => {
       mockGetAccessToken.mockReturnValue('jwt-token');
       await fetchNotifications();
-      expectNoDemoActorQuery(lastRequestUrl());
+      expectNoActorQuery(lastRequestUrl());
     });
   });
 
   describe('activities', () => {
-    it('fetchHomeSummary includes userId only when no token', async () => {
+    it('fetchHomeSummary omits actor query when no token', async () => {
       await fetchHomeSummary();
-      expectDemoActorQuery(lastRequestUrl());
+      expectNoActorQuery(lastRequestUrl());
     });
 
-    it('fetchHomeSummary omits demo query when bearer present', async () => {
+    it('fetchHomeSummary omits actor query when bearer present', async () => {
       mockGetAccessToken.mockReturnValue('jwt-token');
       await fetchHomeSummary();
-      expectNoDemoActorQuery(lastRequestUrl());
+      expectNoActorQuery(lastRequestUrl());
     });
 
-    it('registerForActivity includes userId only when no token', async () => {
+    it('registerForActivity omits actor query when no token', async () => {
       await registerForActivity(7);
       const url = lastRequestUrl();
       expect(url).toContain('/activities/7/register');
-      expectDemoActorQuery(url);
+      expectNoActorQuery(url);
     });
 
-    it('registerForActivity omits demo query when bearer present', async () => {
+    it('registerForActivity omits actor query when bearer present', async () => {
       mockGetAccessToken.mockReturnValue('jwt-token');
       await registerForActivity(7);
-      expectNoDemoActorQuery(lastRequestUrl());
+      expectNoActorQuery(lastRequestUrl());
     });
   });
 });

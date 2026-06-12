@@ -7,7 +7,7 @@ import { Text, View } from '@tarojs/components';
 import { isLiveApi } from '../../constants/api';
 import { SyncBrandMark } from '../SyncBrandMark';
 import { LegalConsentRow } from '../legal/LegalConsentRow';
-import { loginWithDev, loginWithWechat } from '../../utils/auth';
+import { loginWithWechat } from '../../utils/auth';
 import { hasLegalConsent, writeLegalConsent } from '../../utils/legalConsentStorage';
 import { switchTabTo, ROUTES } from '../../utils/route';
 
@@ -44,8 +44,6 @@ export function LoginPromptHero({
     try {
       if (process.env.TARO_ENV === 'weapp') {
         await loginWithWechat({ requireProfile: true });
-      } else if (process.env.TARO_APP_AUTH_DEV === 'true') {
-        await loginWithDev(process.env.TARO_APP_DEV_USER_NAME || '开发用户');
       } else {
         void Taro.showToast({
           title: '请在微信小程序中登录',

@@ -116,17 +116,6 @@ export async function loginWithWechat(
   return result;
 }
 
-export async function loginWithDev(displayName?: string): Promise<AuthLoginResult> {
-  const result = await apiPost<AuthLoginResult>(
-    '/auth/dev',
-    displayName?.trim() ? { displayName: displayName.trim() } : {},
-    undefined,
-    { maxRetries: 0 },
-  );
-  saveAuthResult(result);
-  return result;
-}
-
 /** Silent login on app launch when API is enabled (skipped after explicit logout). */
 export async function ensureAuth(): Promise<AuthLoginResult | null> {
   if (!isApiEnabled()) return null;
@@ -150,9 +139,6 @@ export async function ensureAuth(): Promise<AuthLoginResult | null> {
       try {
         if (process.env.TARO_ENV === 'weapp') {
           return await loginWithWechat({ requireProfile: false });
-        }
-        if (process.env.TARO_APP_AUTH_DEV === 'true') {
-          return await loginWithDev(process.env.TARO_APP_DEV_USER_NAME || '开发用户');
         }
         return null;
       } finally {

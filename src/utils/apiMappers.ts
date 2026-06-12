@@ -1,6 +1,5 @@
 import type { ActivityMapRegion } from '../constants/activityMapRegion';
 import type { HomeSummary } from '../types/backend';
-import { ACTIVITY_GUEST_AVATARS } from '../constants/activityGuestAvatars';
 import { resolveCatalogActivityImage } from '../constants/activityCatalogImages';
 import { resolveActivityThumb } from '../constants/activityImages';
 import { getActivityTypeLabel } from '../constants/activityType';
@@ -110,7 +109,7 @@ export function mapSignupEventToFeaturedEvent(item: SignupEvent): FeaturedEvent 
     distance: item.location ?? '',
     attendeeCount: `${item.attendees}+`,
     remaining: '',
-    guests: ACTIVITY_GUEST_AVATARS,
+    guests: [],
     image: resolveActivityThumb(remote, 200),
     going: item.going,
   };

@@ -5,8 +5,8 @@ const SESSION_KEY = 'sync_ai_session';
 const ACTIVITY_SESSION_KEY_PREFIX = 'sync_ai_session_activity_';
 const USER_NAME_KEY = 'sync_user_name';
 const USER_PHONE_KEY = 'sync_user_phone';
-const DEFAULT_USER_NAME = 'Zara';
-const DEFAULT_USER_PHONE = '17610941208';
+const DEFAULT_USER_NAME = '用户';
+const DEFAULT_USER_PHONE = '';
 
 let cachedUserId: string | undefined;
 let cachedUserName: string | undefined;

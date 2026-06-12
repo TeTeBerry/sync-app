@@ -12,7 +12,6 @@ vi.mock('@/utils/authStorage', () => ({
 }));
 
 import {
-  demoActorQueryParams,
   hasAuthenticatedRequest,
   mergeOwnerQueryParams,
   notificationQueryParams,
@@ -33,25 +32,14 @@ describe('hasAuthenticatedRequest', () => {
   });
 });
 
-describe('demoActorQueryParams', () => {
-  beforeEach(() => {
-    mockGetClientUserId.mockReturnValue('demo-u1');
-  });
-
-  it('returns userId only', () => {
-    expect(demoActorQueryParams()).toEqual({ userId: 'demo-u1' });
-    expect(demoActorQueryParams()).not.toHaveProperty('authorName');
-  });
-});
-
 describe('ownerQueryParams', () => {
   beforeEach(() => {
     mockGetAccessToken.mockReturnValue(null);
     mockGetClientUserId.mockReturnValue('client-id');
   });
 
-  it('returns userId only from session when no token', () => {
-    expect(ownerQueryParams()).toEqual({ userId: 'client-id' });
+  it('returns empty object without token', () => {
+    expect(ownerQueryParams()).toEqual({});
   });
 
   it('returns empty object when access token is present', () => {
@@ -76,9 +64,8 @@ describe('mergeOwnerQueryParams', () => {
     mockGetClientUserId.mockReturnValue('u1');
   });
 
-  it('merges owner params with extra string fields', () => {
+  it('merges extra string fields without demo query', () => {
     expect(mergeOwnerQueryParams({ limit: '20', cursor: 'abc' })).toEqual({
-      userId: 'u1',
       limit: '20',
       cursor: 'abc',
     });
@@ -89,12 +76,6 @@ describe('mergeOwnerQueryParams', () => {
     expect(mergeOwnerQueryParams({ limit: '20' })).toEqual({ limit: '20' });
   });
 
-  it('extra overrides owner fields', () => {
-    expect(mergeOwnerQueryParams({ userId: 'override' })).toEqual({
-      userId: 'override',
-    });
-  });
-
   it('drops undefined and empty string values', () => {
     expect(
       mergeOwnerQueryParams({
@@ -103,13 +84,12 @@ describe('mergeOwnerQueryParams', () => {
         activityLegacyId: '7',
       }),
     ).toEqual({
-      userId: 'u1',
       activityLegacyId: '7',
     });
   });
 
-  it('returns only owner params when extra is omitted', () => {
-    expect(mergeOwnerQueryParams()).toEqual({ userId: 'u1' });
+  it('returns empty object when extra is omitted', () => {
+    expect(mergeOwnerQueryParams()).toEqual({});
   });
 });
 
@@ -119,8 +99,8 @@ describe('notificationQueryParams', () => {
     mockGetClientUserId.mockReturnValue('notify-user');
   });
 
-  it('returns userId when no bearer token', () => {
-    expect(notificationQueryParams()).toEqual({ userId: 'notify-user' });
+  it('returns undefined without bearer token', () => {
+    expect(notificationQueryParams()).toBeUndefined();
   });
 
   it('returns undefined when bearer token is present', () => {
@@ -137,7 +117,6 @@ describe('ownerQueryParamsWithActivity', () => {
 
   it('adds activityLegacyId when finite', () => {
     expect(ownerQueryParamsWithActivity(42)).toEqual({
-      userId: 'u1',
       activityLegacyId: '42',
     });
   });
@@ -149,11 +128,11 @@ describe('ownerQueryParamsWithActivity', () => {
     });
   });
 
-  it('omits activityLegacyId when undefined', () => {
-    expect(ownerQueryParamsWithActivity(undefined)).toEqual({ userId: 'u1' });
+  it('returns empty object when activityLegacyId is undefined', () => {
+    expect(ownerQueryParamsWithActivity(undefined)).toEqual({});
   });
 
-  it('omits activityLegacyId when NaN', () => {
-    expect(ownerQueryParamsWithActivity(Number.NaN)).toEqual({ userId: 'u1' });
+  it('returns empty object when activityLegacyId is NaN', () => {
+    expect(ownerQueryParamsWithActivity(Number.NaN)).toEqual({});
   });
 });

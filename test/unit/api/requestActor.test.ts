@@ -1,21 +1,19 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mockHasAuthenticatedRequest = vi.fn(() => false);
-const mockGetClientUserId = vi.fn(() => 'demo-id');
-const mockGetClientUserName = vi.fn(() => 'Demo User');
+const mockGetClientUserId = vi.fn(() => 'session-id');
+const mockGetClientUserName = vi.fn(() => 'Guest User');
 const mockGetClientUserPhone = vi.fn(() => '');
 
 vi.mock('@/api/requestContext', () => ({
   hasAuthenticatedRequest: () => mockHasAuthenticatedRequest(),
-  demoActorQueryParams: () => ({ userId: 'demo-id' }),
-  ownerQueryParams: () => (mockHasAuthenticatedRequest() ? {} : { userId: 'demo-id' }),
+  ownerQueryParams: () => ({}),
   mergeOwnerQueryParams: (extra?: Record<string, string>) => ({
-    ...(mockHasAuthenticatedRequest() ? {} : { userId: 'demo-id' }),
     ...extra,
   }),
   ownerQueryParamsWithActivity: () => ({}),
   notificationQueryParams: () => undefined,
-  resolveRequestUserId: () => 'demo-id',
+  resolveRequestUserId: () => 'session-id',
 }));
 
 vi.mock('@/utils/session', () => ({
@@ -29,24 +27,24 @@ import { buildAiChatWsSendActor, getClientSessionIdentity } from '@/api/requestA
 describe('requestActor', () => {
   beforeEach(() => {
     mockHasAuthenticatedRequest.mockReturnValue(false);
-    mockGetClientUserId.mockReturnValue('demo-id');
-    mockGetClientUserName.mockReturnValue('Demo User');
+    mockGetClientUserId.mockReturnValue('session-id');
+    mockGetClientUserName.mockReturnValue('Guest User');
     mockGetClientUserPhone.mockReturnValue('');
   });
 
-  it('getClientSessionIdentity returns demo fields when not authenticated', () => {
+  it('getClientSessionIdentity returns session fields when not authenticated', () => {
     expect(getClientSessionIdentity()).toEqual({
       isAuthenticated: false,
-      userId: 'demo-id',
-      displayName: 'Demo User',
+      userId: 'session-id',
+      displayName: 'Guest User',
       userPhone: '',
     });
   });
 
   it('buildAiChatWsSendActor includes userId and userName when not authenticated', () => {
     expect(buildAiChatWsSendActor()).toEqual({
-      userId: 'demo-id',
-      userName: 'Demo User',
+      userId: 'session-id',
+      userName: 'Guest User',
     });
   });
 

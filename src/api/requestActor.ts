@@ -7,7 +7,6 @@ import {
 } from '../utils/session';
 import { subscribeAuthSessionChange } from '../utils/authSession';
 import {
-  demoActorQueryParams,
   hasAuthenticatedRequest,
   mergeOwnerQueryParams,
   notificationQueryParams,
@@ -18,7 +17,7 @@ import {
 } from './requestContext';
 
 /**
- * Client-side session identity (JWT or demo). Not the backend `RequestActor`
+ * Client-side session identity (JWT or anonymous). Not the backend `RequestActor`
  * (`source` / `clientUserId` / `resolvedUserId`).
  */
 export type ClientSessionIdentity = {
@@ -29,7 +28,6 @@ export type ClientSessionIdentity = {
 };
 
 export {
-  demoActorQueryParams,
   hasAuthenticatedRequest,
   mergeOwnerQueryParams,
   notificationQueryParams,
@@ -48,7 +46,7 @@ export function getClientSessionIdentity(): ClientSessionIdentity {
   };
 }
 
-/** WebSocket `send` body identity — JWT on upgrade; demo uses body fields. */
+/** WebSocket `send` body identity — JWT on upgrade; anonymous uses body fields. */
 export function buildAiChatWsSendActor(): {
   userId?: string;
   userName?: string;

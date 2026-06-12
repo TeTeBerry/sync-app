@@ -1,7 +1,6 @@
 import './EventCard.scss';
 import React, { memo, useMemo } from 'react';
 import AvatarGroup from '../AvatarGroup';
-import { ACTIVITY_GUEST_AVATARS } from '../../constants/activityGuestAvatars';
 import { ImageWithFallback } from '../ImageWithFallback';
 import { Button } from '../ui';
 import {
@@ -179,7 +178,7 @@ const EventCardInner: React.FC<EventCardProps> = ({
           </View>
         ) : (
           <View className="s-event-card__social">
-            <AvatarGroup avatars={ACTIVITY_GUEST_AVATARS} total={attendees} />
+            <AvatarGroup total={attendees} />
             <View className="s-event-card__team-posts">
               <Users size={13} aria-hidden />
               <Text>{`${stats.teamPostCount} 条组队帖`}</Text>
