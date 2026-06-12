@@ -51,11 +51,11 @@ H5 devServer 将 `/api`（含 WebSocket）代理到 `http://localhost:3000`。
 ### 环境变量（`npm run dev:weapp` / 上传构建）
 
 ```env
-# 必填：HTTPS 业务 API（须在微信公众平台配置 request 合法域名）
-TARO_APP_API_BASE_URL=https://your-api.example.com
+# 必填：CloudBase 云托管 API（微信公众平台 request 合法域名）
+TARO_APP_API_BASE_URL=https://sync-prd-xxxx.tcloudbaseapp.com/api
 
-# 可选：AI WebSocket（须配置 socket 合法域名 wss://…）
-TARO_APP_AI_CHAT_WS_URL=wss://your-api.example.com/api/ai/chat/ws
+# 可选：AI WebSocket（socket 合法域名 wss://…）
+TARO_APP_AI_CHAT_WS_URL=wss://sync-prd-xxxx.tcloudbaseapp.com/api/ai/chat/ws
 
 # 必填（UGC 图片）：CloudBase 环境 ID，小程序 wx.cloud 直传
 TARO_APP_CLOUDBASE_ENV_ID=sync-prd-xxxx
@@ -212,7 +212,8 @@ X-Activity-Id: 4          # 可选，活动 legacyId（REST + AI WebSocket upgra
 
 `image` / `images`：须为小程序 `wx.cloud.uploadFile` 返回的 **`cloud://` fileID**（路径前缀 `ugc/posts/…`）；后端仅存 fileID，展示由客户端 `wx.cloud.getTempFileURL` 解析。不支持 data URL 或外链 HTTPS。
 
-本地开发（非云存储）可沿用后端静态 **`http://…/uploads/…`** URL（手环等）；生产 UGC 统一走 CloudBase。
+**生产（CloudBase 云托管）**：仅 `cloud://` fileID。  
+**本地 Nest 联调**：可设 `ENABLE_LOCAL_UPLOADS=true`，临时使用 `http://局域网IP:3000/uploads/…`。
 
 服务端事件（示例）：
 
@@ -263,7 +264,7 @@ X-Activity-Id: 4          # 可选，活动 legacyId（REST + AI WebSocket upgra
 | GET | `/api/activities/:legacyId` | 活动详情 |
 | GET | `/api/posts/popular?limit=` | 首页热门帖子 |
 | GET | `/api/posts?activityLegacyId=&limit=&cursor=&anchorPostId=` | 活动下帖子（分页：`{ items, nextCursor?, hasMore }`）；`EventDetailPost` 可选 `authorOnSiteVerified`（作者当日已通过该活动手环认证） |
-**UGC 文本**（发帖/评论/私信/现场资讯备注/AI 用户消息/资料编辑/举报说明等）在落库前会调用微信 `msg_sec_check`（需 `WECHAT_CONTENT_SECURITY_ENABLED=true` 且配置小程序 AppId/Secret）。
+**UGC 文本**（发帖/评论/现场资讯备注/AI 用户消息/资料编辑/举报说明等）在落库前会调用微信 `msg_sec_check`（需 `WECHAT_CONTENT_SECURITY_ENABLED=true` 且配置小程序 AppId/Secret）。
 | GET | `/api/posts?userId=&authorName=` | 我的帖子（owner 过滤） |
 | POST | `/api/posts` | 创建帖子（Query 身份；模板帖可由活动页 `AiBuddyPostSheet` 或 AI 闭环创建；留言板 `contentTypes: ['other']`） |
 | PATCH | `/api/posts/:id` | 编辑自己的帖子（正文、图片等；不含 status 流转） |
@@ -286,6 +287,10 @@ X-Activity-Id: 4          # 可选，活动 legacyId（REST + AI WebSocket upgra
 | PATCH | `/api/notifications/:id/read` | 单条已读 |
 | PATCH | `/api/notifications/read-all` | 全部已读 |
 | POST | `/api/auth/logout` | 退出登录（Bearer）；吊销其它设备 JWT |
+| POST | `/api/activities/:legacyId/travel-guide/generate` | AI 出行攻略（出发地、人数、预算档、是否自驾等；POI/路线来自高德） |
+| GET | `/api/travel-guide/place-suggestions` | 出发地输入提示（高德 inputtips + 本地城市库） |
+
+后端地图链路见 `sync-app-backend/docs/TRAVEL_GUIDE_MAP.md`；需配置 `AMAP_KEY`。
 
 ### GET `/api/posts/:id/comments`（分页）
 

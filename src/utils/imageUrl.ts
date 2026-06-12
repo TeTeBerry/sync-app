@@ -93,7 +93,7 @@ export function needsWeappDownloadBeforeDisplay(src: string | undefined): boolea
   return isUserUploadImageUrl(resolved);
 }
 
-/** Resolve `/uploads/...` and fix `/api/uploads/...` misconfiguration from UPLOAD_PUBLIC_BASE_URL. */
+/** Resolve `/uploads/...` against API host (local Nest dev only). */
 export function resolveAbsoluteUploadImageUrl(src: string): string {
   const trimmed = src.trim();
   if (!trimmed) return trimmed;

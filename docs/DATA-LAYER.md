@@ -55,7 +55,7 @@ REST 与自定义 `useApiQuery` 缓存的分层约定；身份为 **JWT + demo Q
 | `liveInfo.ts`      | `.../live-info`        |
 | `itinerary.ts`     | `.../itinerary`        |
 | `travelPlan.ts`    | `.../travel-plan`      |
-| `travelGuide.ts`   | `.../travel-guide`     |
+| `travelGuide.ts`   | `.../travel-guide`（生成攻略、出发地 inputtips；POI/路线由后端 **高德** API 提供） |
 
 对外仍可从 [`api/syncApi.ts`](../src/api/syncApi.ts) barrel 导入（`import { fetchX } from '../api/syncApi'`）。
 

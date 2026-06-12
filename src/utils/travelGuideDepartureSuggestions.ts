@@ -46,7 +46,7 @@ export function departureValueForSubmit(item: DepartureSuggestionItem): string {
   return departureDisplayValue(item);
 }
 
-/** 补全行里的城市（腾讯 `city` 字段），供地理编码与后续搜索 region */
+/** 补全行里的城市（高德 inputtips 的 district/city），供地理编码 region */
 export function departureCityFromSuggestion(
   item: DepartureSuggestionItem,
 ): string | undefined {

@@ -22,7 +22,7 @@ function longPlan(): TravelGuidePlan {
       hotels: Array.from({ length: 4 }, (_, i) => ({
         name: `酒店${i + 1}`,
         note: '约 ¥300-450/晚 · 距会场 800m · 评分 4.0 · 2 晚 · 双床',
-        bookingHint: '腾讯地图 / 携程',
+        bookingHint: '高德地图 / 携程',
       })),
     },
     nightlife: {

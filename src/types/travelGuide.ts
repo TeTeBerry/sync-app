@@ -3,7 +3,7 @@ export type TravelGuideBudgetTier = 'economy' | 'standard' | 'comfort';
 
 export type AiGuidePlanFormValues = {
   departure: string;
-  /** 选 POI 时腾讯返回的城市，用于地理编码 region（非活动举办城市） */
+  /** 选 POI 时高德返回的城市/区县，用于地理编码 region（非活动举办城市） */
   departureCity?: string;
   headcount: number;
   budgetTier: TravelGuideBudgetTier;
