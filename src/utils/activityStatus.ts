@@ -201,6 +201,42 @@ function activityTitleFromFields(item: ActivityDateFields): string | undefined {
   return item.title ?? item.name;
 }
 
+/** Per-activity gate/show start for home countdown (local time on first festival day). */
+const ACTIVITY_SHOW_START_BY_TITLE: ReadonlyArray<{
+  pattern: RegExp;
+  hour: number;
+  minute: number;
+}> = [{ pattern: /风暴|storm/i, hour: 14, minute: 0 }];
+
+export function resolveActivityShowStartTime(
+  title?: string,
+): { hour: number; minute: number } | null {
+  const trimmed = title?.trim();
+  if (!trimmed) return null;
+  for (const { pattern, hour, minute } of ACTIVITY_SHOW_START_BY_TITLE) {
+    if (pattern.test(trimmed)) return { hour, minute };
+  }
+  return null;
+}
+
+/** Countdown target: first calendar day + optional show start (e.g. Storm 14:00). */
+export function resolveActivityCountdownStartAt(
+  date?: string,
+  title?: string,
+): Date | null {
+  if (!date?.trim()) return null;
+  const yearHint = extractYearFromText(title) ?? extractYearFromText(date);
+  const parsed = parseActivityDateRange(date, yearHint);
+  if (!parsed) return null;
+
+  const showStart = resolveActivityShowStartTime(title);
+  const startAt = new Date(parsed.start);
+  if (showStart) {
+    startAt.setHours(showStart.hour, showStart.minute, 0, 0);
+  }
+  return startAt;
+}
+
 /** Nearest activity that has not ended and whose start is still in the future. */
 export function findNearestUpcomingActivity<T extends ActivityDateFields>(
   activities: T[],
@@ -213,11 +249,12 @@ export function findNearestUpcomingActivity<T extends ActivityDateFields>(
     const title = activityTitleFromFields(item);
     if (getActivityStatusFromActivity(item.date, title, now) === 'ended') continue;
 
-    const startMs = getActivitySortTimestamp(item.date, title);
+    const startAt = resolveActivityCountdownStartAt(item.date, title);
+    const startMs = startAt?.getTime() ?? 0;
     if (startMs <= 0 || startMs <= nowMs) continue;
 
     if (!nearest || startMs < nearest.startMs) {
-      nearest = { item, startAt: new Date(startMs), startMs };
+      nearest = { item, startAt, startMs };
     }
   }
 

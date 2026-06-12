@@ -1,7 +1,7 @@
 import { PLACEHOLDER_EVENT_HERO } from './remoteImages';
 import { thumbnailImageUrl } from '../utils/imageUrl';
 
-/** Activity covers: remote HTTPS from API/seed only (no COS catalog). */
+/** Activity covers: remote HTTPS from API/seed only. */
 export function resolveActivityThumb(remoteUrl?: string, width = 200): string {
   const trimmed = remoteUrl?.trim();
   if (trimmed) {

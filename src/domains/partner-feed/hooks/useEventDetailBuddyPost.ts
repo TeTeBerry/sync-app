@@ -113,6 +113,10 @@ export function useEventDetailBuddyPost(
         );
       }
 
+      if (!submitOptions?.quiet) {
+        void Taro.showToast({ title: '留言已发布', icon: 'success' });
+      }
+
       try {
         const { post } = await publishBuddyPostFromForm({
           form,
@@ -123,13 +127,6 @@ export function useEventDetailBuddyPost(
           authorAvatar: options.authorAvatar,
           listedInFeed,
         });
-
-        if (!submitOptions?.quiet) {
-          const toastTitle = post.authorOnSiteVerified
-            ? '留言已发布 · 手环认证'
-            : '留言已发布';
-          void Taro.showToast({ title: toastTitle, icon: 'success' });
-        }
 
         if (!submitOptions?.skipListRefresh && listedInFeed) {
           options.replacePost?.(pendingId, post);

@@ -2,24 +2,33 @@ import type { AppNotification, NotificationInteractionType } from '../types/back
 import { formatTimeAgo } from './dayTime';
 
 /** UI tab categories — aligned with backend NotificationCategory. */
-export type NotificationCategory =
-  | 'comment'
-  | 'like'
-  | 'application'
-  | 'system'
-  | 'general';
+export type NotificationCategory = 'comment' | 'like' | 'system' | 'general';
 
 const UI_CATEGORIES = new Set<NotificationCategory>([
   'comment',
   'like',
-  'application',
   'system',
   'general',
 ]);
 
+const DEPRECATED_APPLICATION_TYPES = new Set<string>([
+  'application',
+  'team_dissolved',
+  'team_accepted',
+]);
+
+/** Legacy team-apply notifications — hidden from the inbox. */
+export function isDeprecatedApplicationNotification(
+  meta?: AppNotification['meta'],
+): boolean {
+  if (!meta) return false;
+  if ((meta.category as string | undefined) === 'application') return true;
+  return meta.type != null && DEPRECATED_APPLICATION_TYPES.has(meta.type);
+}
+
 /** Same rules as backend `categoryForInteractionType`. */
 export function categoryFromInteractionType(
-  type?: NotificationInteractionType,
+  type?: NotificationInteractionType | string,
 ): NotificationCategory {
   switch (type) {
     case 'like':
@@ -30,7 +39,7 @@ export function categoryFromInteractionType(
     case 'application':
     case 'team_dissolved':
     case 'team_accepted':
-      return 'application';
+      return 'general';
     case 'activity_update':
     case 'post_rejected':
     case 'post_hidden':
@@ -63,13 +72,6 @@ export function getNotificationCategory(
   );
 
   if (meta?.type) {
-    if (
-      fromCategory &&
-      fromCategory !== fromType &&
-      (fromType === 'application' || fromCategory === 'comment')
-    ) {
-      return fromType;
-    }
     return fromType;
   }
 

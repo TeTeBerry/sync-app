@@ -34,11 +34,8 @@ declare namespace NodeJS {
     /** 腾讯位置服务 key（地图组件等） */
     TARO_APP_QQ_MAP_KEY?: string;
     TARO_APP_QQ_MAP_LAYER_STYLE?: string;
-    /** Tencent COS — align with backend COS_BUCKET / COS_REGION */
-    TARO_APP_COS_BUCKET?: string;
-    TARO_APP_COS_REGION?: string;
-    /** Optional CDN origin; align with backend COS_PUBLIC_BASE_URL */
-    TARO_APP_COS_PUBLIC_BASE_URL?: string;
+    /** CloudBase env id for wx.cloud storage upload */
+    TARO_APP_CLOUDBASE_ENV_ID?: string;
     TARO_ENV?:
       | 'weapp'
       | 'swan'

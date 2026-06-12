@@ -30,7 +30,24 @@ vi.mock('@/utils/subpackagePreload', () => ({
 }));
 
 vi.mock('@/hooks/useApiQuery', () => ({
-  getCacheData: vi.fn(),
+  getCacheData: vi.fn(() => undefined),
+}));
+
+vi.mock('@/utils/notificationNavigation', () => ({
+  isPostInteractionNotification: (meta?: { type?: string; category?: string }) =>
+    meta?.type === 'like' ||
+    meta?.type === 'comment' ||
+    meta?.category === 'like' ||
+    meta?.category === 'comment',
+  resolveNotificationPostTarget: vi.fn(
+    async (meta: { postId?: string; activityLegacyId?: number }) => {
+      if (!meta.postId?.trim()) return null;
+      if (meta.activityLegacyId != null) {
+        return { postId: meta.postId, activityLegacyId: meta.activityLegacyId };
+      }
+      return null;
+    },
+  ),
 }));
 
 vi.mock('@/stores/navigationStore', () => ({
@@ -57,10 +74,10 @@ describe('navigateFromNotification', () => {
     });
   });
 
-  it('opens profile posts for team apply notifications', async () => {
+  it('opens event detail for like notifications with postId', async () => {
     const { navigateFromNotification } = await import('@/utils/route');
-    const opened = navigateFromNotification({
-      type: 'application',
+    const opened = await navigateFromNotification({
+      type: 'like',
       activityLegacyId: 4,
       postId: 'post-abc',
     });
@@ -71,6 +88,21 @@ describe('navigateFromNotification', () => {
 
     expect(opened).toBe(true);
     const url = String(vi.mocked(Taro.navigateTo).mock.calls[0]?.[0]?.url ?? '');
-    expect(url).toContain('profile-posts');
+    expect(url).toContain('event-detail');
+    expect(url).toContain('postId=post-abc');
+  });
+
+  it('opens event detail for comment notifications with postId', async () => {
+    const { navigateFromNotification } = await import('@/utils/route');
+    const opened = await navigateFromNotification({
+      type: 'comment',
+      activityLegacyId: 7,
+      postId: 'post-comment',
+    });
+
+    expect(opened).toBe(true);
+    const url = String(vi.mocked(Taro.navigateTo).mock.calls[0]?.[0]?.url ?? '');
+    expect(url).toContain('event-detail');
+    expect(url).toContain('postId=post-comment');
   });
 });

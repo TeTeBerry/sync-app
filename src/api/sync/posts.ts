@@ -49,6 +49,13 @@ export function deletePost(postId: string) {
   return apiDelete<{ ok: true }>(`/posts/${postId}`, ownerQueryParams());
 }
 
+export function fetchPostNavigationTarget(postId: string) {
+  return apiGet<{ postId: string; activityLegacyId: number }>(
+    `/posts/${postId}/navigation-target`,
+    ownerQueryParams(),
+  );
+}
+
 export function createPost(payload: CreatePostPayload) {
   return apiPost<EventDetailPost>('/posts', payload, ownerQueryParams());
 }

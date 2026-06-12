@@ -56,6 +56,9 @@ TARO_APP_API_BASE_URL=https://your-api.example.com
 
 # 可选：AI WebSocket（须配置 socket 合法域名 wss://…）
 TARO_APP_AI_CHAT_WS_URL=wss://your-api.example.com/api/ai/chat/ws
+
+# 必填（UGC 图片）：CloudBase 环境 ID，小程序 wx.cloud 直传
+TARO_APP_CLOUDBASE_ENV_ID=sync-prd-xxxx
 ```
 
 本地联调：开发者工具勾选 **「不校验合法域名、web-view（业务域名）、TLS 版本以及 HTTPS 证书」**，可将 `TARO_APP_API_BASE_URL` 指向局域网 HTTP（如 `http://192.168.x.x:3000`）。
@@ -73,6 +76,18 @@ TARO_APP_AI_CHAT_WS_URL=wss://your-api.example.com/api/ai/chat/ws
 ### WebSocket
 
 在公众平台配置 `socket` 合法域名为 `wss://你的域名`；本地开发可配合「不校验合法域名」使用 `ws://局域网IP:3000/api/ai/chat/ws`。
+
+### 图片上传（UGC）
+
+| 环节 | 说明 |
+|------|------|
+| 选图 | 小程序 `Taro.chooseImage` / 聊天选图 |
+| 上传 | `wx.cloud.uploadFile` → 对象路径 `ugc/posts/{userId}/…` |
+| 提交 API | 请求体字段存 **`cloud://` fileID**（帖子 `images`、AI `image`、手环 `imageUrl`、聊天图片等） |
+| 展示 | 客户端 `wx.cloud.getTempFileURL`；`useDisplayImageUrls` |
+| 后端 | 校验 fileID 格式与 `CLOUDBASE_ENV_ID`（若配置）；**不**持有 COS 密钥、**不**代传文件 |
+
+环境变量：`TARO_APP_CLOUDBASE_ENV_ID`（前端）、`CLOUDBASE_ENV_ID`（后端，可选校验）。
 
 ---
 
@@ -177,7 +192,7 @@ X-Activity-Id: 4          # 可选，活动 legacyId（REST + AI WebSocket upgra
   "messages": [{ "role": "user", "content": "帮我组队风暴" }],
   "sessionId": "optional",
   "activityLegacyId": 4,
-  "image": "http://127.0.0.1:3000/uploads/abc.jpg"
+  "image": "cloud://sync-prd-xxxx.7373-sync-prd/ugc/posts/wx_user/1710000000000_abc.jpg"
 }
 ```
 
@@ -195,7 +210,9 @@ X-Activity-Id: 4          # 可选，活动 legacyId（REST + AI WebSocket upgra
 
 若已登录且 body `userId` 与 JWT `sub` 不一致，服务端返回 `{ "type": "error", "message": "用户身份与登录态不一致" }`。
 
-`image` / `images`：必须使用 `POST /api/uploads/images` 返回的 URL（上传时走微信 `img_sec_check`）；不支持 data URL 或外链。
+`image` / `images`：须为小程序 `wx.cloud.uploadFile` 返回的 **`cloud://` fileID**（路径前缀 `ugc/posts/…`）；后端仅存 fileID，展示由客户端 `wx.cloud.getTempFileURL` 解析。不支持 data URL 或外链 HTTPS。
+
+本地开发（非云存储）可沿用后端静态 **`http://…/uploads/…`** URL（手环等）；生产 UGC 统一走 CloudBase。
 
 服务端事件（示例）：
 
@@ -246,8 +263,6 @@ X-Activity-Id: 4          # 可选，活动 legacyId（REST + AI WebSocket upgra
 | GET | `/api/activities/:legacyId` | 活动详情 |
 | GET | `/api/posts/popular?limit=` | 首页热门帖子 |
 | GET | `/api/posts?activityLegacyId=&limit=&cursor=&anchorPostId=` | 活动下帖子（分页：`{ items, nextCursor?, hasMore }`）；`EventDetailPost` 可选 `authorOnSiteVerified`（作者当日已通过该活动手环认证） |
-| POST | `/api/uploads/images` | multipart 字段 `file`，返回 `{ url }`；已配置 `WECHAT_MINI_APP_*` 时先调用微信 `img_sec_check`（≤1MB）。**所有 UGC 图片**（AI 聊天、手环、帖子 `images`）须先走此接口 |
-
 **UGC 文本**（发帖/评论/私信/现场资讯备注/AI 用户消息/资料编辑/举报说明等）在落库前会调用微信 `msg_sec_check`（需 `WECHAT_CONTENT_SECURITY_ENABLED=true` 且配置小程序 AppId/Secret）。
 | GET | `/api/posts?userId=&authorName=` | 我的帖子（owner 过滤） |
 | POST | `/api/posts` | 创建帖子（Query 身份；模板帖可由活动页 `AiBuddyPostSheet` 或 AI 闭环创建；留言板 `contentTypes: ['other']`） |
@@ -262,7 +277,7 @@ X-Activity-Id: 4          # 可选，活动 legacyId（REST + AI WebSocket upgra
 | GET/PATCH | `/api/users/me` | 当前用户资料（Query 身份） |
 | POST/DELETE | `/api/activities/:legacyId/register` | 活动报名 / 取消 |
 | GET | `/api/activities/:legacyId/live-info` | 现场资讯快照：`zones`、`viewer`、`summary`、`certCount`、`feed`；Query 可选 `zoneTag`、`categoryId`、`certifiedOnly=true` |
-| POST | `/api/activities/:legacyId/live-info/wristband` | 提交手环图 `{ imageUrl }`（当日认证） |
+| POST | `/api/activities/:legacyId/live-info/wristband` | 提交手环图 `{ imageUrl }`（`cloud://` fileID 或本地 dev `/uploads/` URL；当日认证） |
 | DELETE | `/api/activities/:legacyId/live-info/wristband` | 清除当日认证 |
 | POST | `/api/activities/:legacyId/live-info/updates` | 发布 `{ zoneTag, ratings: [{ categoryId, score }], remark? }`（须当日认证；5 分钟冷却、每小时上限、同内容 24h 内不可重复） |
 | POST | `/api/activities/:legacyId/live-info/updates/:updateId/like` | 点赞切换 |

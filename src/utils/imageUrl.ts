@@ -1,5 +1,7 @@
 import { API_BASE_URL } from '../constants/api';
-import { COS_PUBLIC_BASE_URL } from '../constants/cos';
+import { isCloudStorageFileId } from './cloudImage';
+
+export { isCloudStorageFileId } from './cloudImage';
 
 /** Unsplash IDs that 404 or fail in WeChat mini-program. */
 const BROKEN_UNSPLASH_PHOTO_IDS = new Set([
@@ -27,65 +29,18 @@ function unsplashDimensions(url: URL): { width: number; height: number } {
   return { width: w, height: isSquareCrop ? w : Math.round(w * 0.75) };
 }
 
-function isCosPostUploadImagePathname(pathname: string): boolean {
-  const normalized = pathname.replace(/\/+$/, '') || '/';
-  return normalized.startsWith('/uploads/');
-}
-
 export function isUserUploadImageUrl(src: string | undefined): boolean {
   const trimmed = src?.trim();
   if (!trimmed) return false;
+  if (isCloudStorageFileId(trimmed)) return true;
   if (trimmed.startsWith('/uploads/') || trimmed.startsWith('uploads/')) return true;
   if (!/^https?:\/\//i.test(trimmed)) return false;
   try {
     const url = new URL(trimmed);
-    if (isCosPostUploadImagePathname(url.pathname)) {
-      try {
-        const cosHost = new URL(COS_PUBLIC_BASE_URL).hostname;
-        if (url.hostname === cosHost) return true;
-      } catch {
-        // ignore
-      }
-    }
     return url.pathname.includes('/uploads/');
   } catch {
     return false;
   }
-}
-
-/** Stable COS object key for post images (`uploads/posts/{userId}/...`). */
-export function extractCosPostObjectKey(src: string | undefined): string | undefined {
-  const resolved = sanitizeRemoteImageUrl(src);
-  if (!resolved?.trim()) return undefined;
-  const trimmed = resolved.trim();
-  try {
-    const pathname = new URL(trimmed).pathname;
-    const match = pathname.match(/\/uploads\/posts\/[^/]+\/[^/]+/);
-    if (!match) return undefined;
-    return decodeURIComponent(match[0].replace(/^\/+/, ''));
-  } catch {
-    const match = trimmed.match(/uploads\/posts\/[^/?#]+/);
-    return match?.[0];
-  }
-}
-
-/** COS post images (`uploads/posts/{userId}/...`) need signed URLs when bucket is private. */
-export function isCosPostImageUrl(src: string | undefined): boolean {
-  return Boolean(extractCosPostObjectKey(src));
-}
-
-/** Tencent COS pre-signed query (works even when hostname differs from TARO_APP_COS_PUBLIC_BASE_URL). */
-export function isTencentCosPreSignedUrl(src: string | undefined): boolean {
-  const resolved = sanitizeRemoteImageUrl(src);
-  if (!resolved?.trim()) return false;
-  const trimmed = resolved.trim();
-  if (!/^https:\/\//i.test(trimmed)) return false;
-  return trimmed.includes('q-sign-algorithm=');
-}
-
-/** WeChat Image is unreliable with long COS pre-signed URLs; download to temp path first. */
-export function isCosSignedImageUrl(src: string | undefined): boolean {
-  return isTencentCosPreSignedUrl(src) && isCosPostImageUrl(src);
 }
 
 /** True when Taro `downloadFile` completed successfully enough to use `tempFilePath`. */
@@ -100,14 +55,14 @@ export function isWeappDownloadFileSuccess(res: {
   return res.errMsg === 'downloadFile:ok';
 }
 
-/** ImageWithFallback display `src`: block unsigned COS posts; on weapp use downloaded temp path. */
+/** ImageWithFallback display `src`: block unresolved cloud fileIDs; on weapp use downloaded temp path. */
 export function resolveImageWithFallbackDisplaySrc(
   resolvedSrc: string | undefined,
   downloadedSrc: string | undefined,
 ): string | undefined {
   const trimmed = resolvedSrc?.trim();
   if (!trimmed) return undefined;
-  if (isCosPostImageUrl(trimmed) && !isCosSignedImageUrl(trimmed)) {
+  if (isCloudStorageFileId(trimmed)) {
     return undefined;
   }
   if (needsWeappDownloadBeforeDisplay(trimmed)) {
@@ -116,35 +71,25 @@ export function resolveImageWithFallbackDisplaySrc(
   return trimmed;
 }
 
-/** Post grid tile src: prefer signed COS URL; never pass unsigned private post URLs. */
+/** Post grid tile src: use resolved URL; hide unresolved cloud fileIDs. */
 export function resolvePostGridImageSrc(
   originalSrc: string,
-  signedSrc: string | undefined,
+  resolvedSrc: string | undefined,
 ): string {
-  const signed = signedSrc?.trim();
-  if (signed) return signed;
+  const resolved = resolvedSrc?.trim();
+  if (resolved) return resolved;
   const trimmed = originalSrc?.trim();
   if (!trimmed) return '';
-  if (isCosPostImageUrl(trimmed)) return '';
+  if (isCloudStorageFileId(trimmed)) return '';
   return trimmed;
 }
 
-/** WeChat `downloadFile` for LAN uploads and COS signed URLs (Image src alone often fails). */
+/** WeChat `downloadFile` for LAN backend `/uploads/` URLs (Image src alone often fails). */
 export function needsWeappDownloadBeforeDisplay(src: string | undefined): boolean {
   const resolved = sanitizeRemoteImageUrl(src);
   if (!resolved?.trim()) return false;
   if (process.env.TARO_ENV !== 'weapp') return false;
-  if (isTencentCosPreSignedUrl(resolved)) return true;
-  if (isCosPostImageUrl(resolved)) return false;
-  try {
-    const url = new URL(resolved.trim());
-    const host = url.hostname.toLowerCase();
-    if (host.endsWith('.myqcloud.com') && host.includes('.cos.')) {
-      return false;
-    }
-  } catch {
-    return false;
-  }
+  if (isCloudStorageFileId(resolved)) return false;
   return isUserUploadImageUrl(resolved);
 }
 
@@ -196,6 +141,8 @@ export function rewriteLocalDevUploadHost(src: string): string {
 /** Map legacy Unsplash URLs to stable picsum.photos (WeChat-safe). */
 export function sanitizeRemoteImageUrl(src: string | undefined): string | undefined {
   if (!src?.trim()) return undefined;
+  const raw = src.trim();
+  if (isCloudStorageFileId(raw)) return raw;
   let trimmed = resolveAbsoluteUploadImageUrl(src);
   if (!/^https?:\/\//i.test(trimmed)) return trimmed;
 

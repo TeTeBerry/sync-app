@@ -281,24 +281,16 @@ export interface HomeSummary {
 export type NotificationType = 'general' | 'interaction' | 'system';
 
 /** In-app notification tab grouping (matches backend NotificationCategory). */
-export type NotificationCategory =
-  | 'comment'
-  | 'like'
-  | 'application'
-  | 'system'
-  | 'general';
+export type NotificationCategory = 'comment' | 'like' | 'system' | 'general';
 
 export type NotificationInteractionType =
   | 'like'
   | 'comment'
   | 'comment_reply'
-  | 'application'
   | 'activity'
   | 'activity_update'
   | 'post_rejected'
-  | 'post_hidden'
-  | 'team_dissolved'
-  | 'team_accepted';
+  | 'post_hidden';
 
 export interface NotificationMeta {
   activityLegacyId?: number;

@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from 'react';
-import { useSignedCosImageUrls } from '../../hooks/useSignedCosImageUrls';
+import { useDisplayImageUrls } from '../../hooks/useDisplayImageUrls';
 import { ImageIcon } from '../../components/icons';
 import './PostImageGrid.scss';
 import {
@@ -29,26 +29,26 @@ export function PostImageGrid({ images, maxDisplay = 4 }: PostImageGridProps) {
         .slice(0, maxDisplay),
     [images, maxDisplay],
   );
-  const signedImages = useSignedCosImageUrls(sanitizedImages);
+  const displayResolvedImages = useDisplayImageUrls(sanitizedImages);
   const previewImages = useMemo(
     () =>
       sanitizedImages.map((src, index) => {
-        const signed = signedImages[index]?.trim();
+        const signed = displayResolvedImages[index]?.trim();
         return signed || src;
       }),
-    [sanitizedImages, signedImages],
+    [sanitizedImages, displayResolvedImages],
   );
   const displayImages = useMemo(
     () =>
       sanitizedImages.map((src, index) => {
-        const resolved = resolvePostGridImageSrc(src, signedImages[index]);
+        const resolved = resolvePostGridImageSrc(src, displayResolvedImages[index]);
         if (!resolved) return '';
         if (index === 0 && sanitizedImages.length >= 4) {
           return featuredPostImageUrl(resolved, FEATURED_WIDTH) ?? resolved;
         }
         return thumbnailImageUrl(resolved, THUMB_ROW_WIDTH) ?? resolved;
       }),
-    [sanitizedImages, signedImages],
+    [sanitizedImages, displayResolvedImages],
   );
 
   const handleOpen = useCallback(

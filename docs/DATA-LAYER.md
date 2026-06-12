@@ -76,7 +76,7 @@ REST 与自定义 `useApiQuery` 缓存的分层约定；身份为 **JWT + demo Q
 
 - [x] `ownerQueryParams()` — 有 Bearer 时不发 demo Query
 - [x] Demo Query 仅 `userId`（不再传 Query `authorName`；后端 demo 判定只看 `userId`）
-- [x] `apiClient` / `uploadImage` — 401 清 session + 后端 `message` toast
+- [x] `apiClient` / `uploadImage`（`wx.cloud.uploadFile` → `cloud://` fileID）— 401 清 session + 后端 `message` toast
 - [x] `logout()` — `POST /auth/logout` + 清本地 session
 - [x] AI WebSocket JWT actor（upgrade Bearer；`buildAiChatWsSendActor`）
 - [x] 无效 Bearer → REST 401 + WS error；`api/requestActor.ts` + `useClientSessionIdentity`

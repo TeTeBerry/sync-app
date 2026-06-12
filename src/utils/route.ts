@@ -3,7 +3,17 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigationStore } from '../stores/navigationStore';
 import type { NavigationState } from '../stores/navigationStore';
 import type { AiAssistantNavIntent } from '../stores/types';
-import type { NotificationMeta } from '../types/backend';
+import type { BackendActivity, HomeSummary, NotificationMeta } from '../types/backend';
+import {
+  isPostInteractionNotification,
+  resolveNotificationPostTarget,
+} from './notificationNavigation';
+import { PRELOAD_HOT_ROUTES_MS } from './timing';
+import {
+  preloadAiSubpackage,
+  preloadEventSubpackage,
+  preloadProfileSubpackage,
+} from './subpackagePreload';
 import { parseActivityLegacyId } from './activityLegacyId';
 import {
   buildQueryString,
@@ -16,14 +26,6 @@ import {
   seedActivityDetailCache,
   seedActivityDetailFromHomeSignupEvent,
 } from './activityDetailCache';
-import type { HomeSummary } from '../types/backend';
-import { PRELOAD_HOT_ROUTES_MS } from './timing';
-import {
-  preloadAiSubpackage,
-  preloadEventSubpackage,
-  preloadProfileSubpackage,
-} from './subpackagePreload';
-import type { BackendActivity } from '../types/backend';
 import { isAuthGated, requireAuth } from './authGate';
 import type { LoginInterceptFeature } from '../stores/loginInterceptStore';
 import { setEventsViewTabIntent } from './eventsTabIntent';
@@ -515,35 +517,44 @@ export function goMyItinerary(activityLegacyId?: number, selectedDjIds?: string[
 }
 
 function resolveActivityLegacyId(meta?: NotificationMeta): number | null {
-  if (meta?.activityLegacyId != null && !Number.isNaN(meta.activityLegacyId)) {
-    return meta.activityLegacyId;
-  }
-  return null;
+  return parseActivityLegacyId(meta?.activityLegacyId);
 }
 
 /** Navigate from notification meta; returns true when a route was opened. */
-export function navigateFromNotification(meta?: NotificationMeta): boolean {
-  if (meta?.type === 'post_hidden') {
+export async function navigateFromNotification(
+  meta?: NotificationMeta,
+): Promise<boolean> {
+  if (!meta) return false;
+
+  if (meta.type === 'post_hidden') {
     goProfile();
     return true;
   }
 
-  const legacyId = resolveActivityLegacyId(meta);
-  if (legacyId == null) {
-    return false;
-  }
+  const postId = meta.postId?.trim();
+  const isPostInteraction = isPostInteractionNotification(meta);
 
-  if (meta?.type === 'post_rejected') {
+  if (meta.type === 'post_rejected') {
+    const legacyId = resolveActivityLegacyId(meta);
+    if (legacyId == null) return false;
     goAiAssistant({ activityLegacyId: legacyId });
     return true;
   }
 
-  if (meta?.type === 'application' && meta.postId?.trim()) {
-    goProfilePosts();
+  if (isPostInteraction && postId) {
+    const target = await resolveNotificationPostTarget(meta);
+    if (target == null) {
+      void Taro.showToast({ title: '无法定位帖子', icon: 'none' });
+      return false;
+    }
+    goEventDetail(target.activityLegacyId, { postId: target.postId });
     return true;
   }
 
-  goEventDetail(legacyId, meta?.postId ? { postId: meta.postId } : undefined);
+  const legacyId = resolveActivityLegacyId(meta);
+  if (legacyId == null) return false;
+
+  goEventDetail(legacyId, postId ? { postId } : undefined);
   return true;
 }
 

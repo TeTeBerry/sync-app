@@ -78,6 +78,7 @@ export function useEventDetailMessageBoard(
     );
     setDraft('');
     setImageRefs([]);
+    void Taro.showToast({ title: '留言已发布', icon: 'success' });
 
     try {
       const post = await publishMessageBoardPost({
@@ -87,12 +88,18 @@ export function useEventDetailMessageBoard(
         activityTitle: options.activityTitle ?? '本场活动',
       });
       options.replacePost?.(pendingId, post);
-      void Taro.showToast({ title: '留言已发布', icon: 'success' });
       void options.refreshPosts?.({ silent: true });
       return true;
     } catch (error) {
       options.removePost?.(pendingId);
-      handlePublishError(error);
+      if (await handlePublishError(error)) {
+        return false;
+      }
+      const message =
+        error instanceof Error && error.message.trim()
+          ? error.message.trim()
+          : '发布失败，请稍后重试';
+      void Taro.showToast({ title: message, icon: 'none' });
       return false;
     } finally {
       setIsPublishing(false);

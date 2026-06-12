@@ -1,13 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
-  blankCosPostUrlsForDisplay,
-  resolveSignedCosImageUrls,
-} from '../utils/resolveSignedCosImageUrls';
+  blankUnresolvedImageUrls,
+  resolveDisplayImageUrls,
+} from '../utils/resolveDisplayImageUrls';
 
-export function useSignedCosImageUrls(urls: string[]): string[] {
+/** Resolve cloud:// fileIDs to temp HTTPS URLs for Image components. */
+export function useDisplayImageUrls(urls: string[]): string[] {
   const inputKey = useMemo(() => urls.join('\n'), [urls]);
   const [resolved, setResolved] = useState<string[]>(() =>
-    blankCosPostUrlsForDisplay(urls),
+    blankUnresolvedImageUrls(urls),
   );
 
   useEffect(() => {
@@ -17,16 +18,16 @@ export function useSignedCosImageUrls(urls: string[]): string[] {
       return;
     }
 
-    setResolved(blankCosPostUrlsForDisplay(candidates));
+    setResolved(blankUnresolvedImageUrls(candidates));
 
     let cancelled = false;
-    void resolveSignedCosImageUrls(candidates)
+    void resolveDisplayImageUrls(candidates)
       .then((next) => {
         if (!cancelled) setResolved(next);
       })
       .catch(() => {
         if (!cancelled) {
-          setResolved(blankCosPostUrlsForDisplay(candidates));
+          setResolved(blankUnresolvedImageUrls(candidates));
         }
       });
 

@@ -20,10 +20,17 @@
   "libVersion": "3.5.5",
   "packOptions": {
     "ignore": [
-      { "type": "suffix", "value": ".map" },
-      { "type": "file", "value": ".DS_Store" }
+      {
+        "type": "suffix",
+        "value": ".map"
+      },
+      {
+        "type": "file",
+        "value": ".DS_Store"
+      }
     ],
     "include": []
   },
-  "condition": {}
+  "condition": {},
+  "cloudfunctionRoot": "cloudfunctions/"
 }

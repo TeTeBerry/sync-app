@@ -1,7 +1,6 @@
 import Taro from '@tarojs/taro';
-import { verifyCosUpload } from '../api/sync/uploads';
-import { ApiError } from './apiClient';
-import { uploadImagesToCos } from './cosUpload';
+import { isCloudStorageUploadEnabled } from '../constants/cloud';
+import { uploadImagesToCloud } from './cloudUpload';
 
 /** 选择手环图，返回临时文件路径（已尽量压缩）。 */
 export async function pickWristbandImagePath(): Promise<string | null> {
@@ -21,8 +20,7 @@ export async function pickWristbandImagePath(): Promise<string | null> {
 }
 
 /**
- * STS direct upload to COS, then POST /api/uploads/verify (WeChat img_sec_check).
- * Returns canonical COS URL for post payload.
+ * `wx.cloud.uploadFile` → `cloud://` fileID（Nest 仅存 fileID；展示时 getTempFileURL）。
  */
 export async function uploadImageFile(filePath: string): Promise<string> {
   const trimmed = filePath.trim();
@@ -30,18 +28,10 @@ export async function uploadImageFile(filePath: string): Promise<string> {
     throw new Error('图片路径为空');
   }
 
-  const [cosUrl] = await uploadImagesToCos([trimmed]);
-
-  try {
-    const verified = await verifyCosUpload(cosUrl);
-    if (verified.status !== 'approved') {
-      throw new Error('图片未通过安全检测，请更换后重试');
-    }
-    return verified.url;
-  } catch (error) {
-    if (error instanceof ApiError) {
-      throw new Error(error.message);
-    }
-    throw error;
+  if (!isCloudStorageUploadEnabled()) {
+    throw new Error('请配置 TARO_APP_CLOUDBASE_ENV_ID 并启用小程序云开发');
   }
+
+  const [fileId] = await uploadImagesToCloud([trimmed]);
+  return fileId;
 }

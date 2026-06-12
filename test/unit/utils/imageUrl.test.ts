@@ -56,55 +56,9 @@ describe('thumbnailImageUrl uploads', () => {
   });
 });
 
-describe('isTencentCosPreSignedUrl', () => {
-  it('matches any HTTPS COS pre-signed URL', async () => {
-    const { isTencentCosPreSignedUrl } = await import('@/utils/imageUrl');
-    expect(
-      isTencentCosPreSignedUrl(
-        'https://cdn.example.com/uploads/posts/u/a.jpg?q-sign-algorithm=sha1',
-      ),
-    ).toBe(true);
-    expect(
-      isTencentCosPreSignedUrl(
-        'http://192.168.1.7:3000/uploads/a.jpg?q-sign-algorithm=sha1',
-      ),
-    ).toBe(false);
-  });
-});
-
 describe('needsWeappDownloadBeforeDisplay', () => {
   afterEach(() => {
     vi.unstubAllEnvs();
-  });
-
-  it('downloads signed COS post images on weapp', async () => {
-    vi.stubEnv('TARO_ENV', 'weapp');
-    vi.stubEnv('TARO_APP_COS_BUCKET', 'syncapp-1304288643');
-    vi.stubEnv('TARO_APP_COS_REGION', 'ap-shanghai');
-    const { needsWeappDownloadBeforeDisplay } = await import('@/utils/imageUrl');
-    const cosUrl =
-      'https://syncapp-1304288643.cos.ap-shanghai.myqcloud.com/uploads/posts/wx_user/a.jpg?q-sign-algorithm=sha1';
-    expect(needsWeappDownloadBeforeDisplay(cosUrl)).toBe(true);
-  });
-
-  it('downloads pre-signed URLs on alternate COS hostnames', async () => {
-    vi.stubEnv('TARO_ENV', 'weapp');
-    const { needsWeappDownloadBeforeDisplay } = await import('@/utils/imageUrl');
-    expect(
-      needsWeappDownloadBeforeDisplay(
-        'https://other-bucket.cos.ap-guangzhou.myqcloud.com/uploads/posts/u/a.jpg?q-sign-algorithm=sha1',
-      ),
-    ).toBe(true);
-  });
-
-  it('skips download for unsigned COS post images', async () => {
-    vi.stubEnv('TARO_ENV', 'weapp');
-    vi.stubEnv('TARO_APP_COS_BUCKET', 'syncapp-1304288643');
-    vi.stubEnv('TARO_APP_COS_REGION', 'ap-shanghai');
-    const { needsWeappDownloadBeforeDisplay } = await import('@/utils/imageUrl');
-    const cosUrl =
-      'https://syncapp-1304288643.cos.ap-shanghai.myqcloud.com/uploads/posts/wx_user/a.jpg';
-    expect(needsWeappDownloadBeforeDisplay(cosUrl)).toBe(false);
   });
 
   it('downloads LAN backend uploads on weapp', async () => {
@@ -115,33 +69,13 @@ describe('needsWeappDownloadBeforeDisplay', () => {
       needsWeappDownloadBeforeDisplay('http://192.168.1.7:3000/uploads/a.jpg'),
     ).toBe(true);
   });
-});
 
-describe('isCosPostImageUrl', () => {
-  afterEach(() => {
-    vi.unstubAllEnvs();
-  });
-
-  it('matches COS post upload URLs', async () => {
-    vi.stubEnv('TARO_APP_COS_BUCKET', 'syncapp-1304288643');
-    vi.stubEnv('TARO_APP_COS_REGION', 'ap-shanghai');
-    const { isCosPostImageUrl, isCosSignedImageUrl } = await import('@/utils/imageUrl');
-    const cosUrl =
-      'https://syncapp-1304288643.cos.ap-shanghai.myqcloud.com/uploads/posts/wx_user/a.jpg';
-    expect(isCosPostImageUrl(cosUrl)).toBe(true);
-    expect(isCosSignedImageUrl(`${cosUrl}?q-sign-algorithm=sha1`)).toBe(true);
-    expect(isCosSignedImageUrl(cosUrl)).toBe(false);
-  });
-
-  it('does not match non-post upload paths', async () => {
-    vi.stubEnv('TARO_APP_COS_BUCKET', 'syncapp-1304288643');
-    vi.stubEnv('TARO_APP_COS_REGION', 'ap-shanghai');
-    const { isCosPostImageUrl } = await import('@/utils/imageUrl');
-    expect(
-      isCosPostImageUrl(
-        'https://syncapp-1304288643.cos.ap-shanghai.myqcloud.com/uploads/avatars/wx_user/a.jpg',
-      ),
-    ).toBe(false);
+  it('skips cloud fileIDs', async () => {
+    vi.stubEnv('TARO_ENV', 'weapp');
+    const { needsWeappDownloadBeforeDisplay } = await import('@/utils/imageUrl');
+    expect(needsWeappDownloadBeforeDisplay('cloud://env.x/ugc/posts/u1/a.jpg')).toBe(
+      false,
+    );
   });
 });
 
@@ -190,26 +124,20 @@ describe('resolvePostGridImageSrc', () => {
     vi.unstubAllEnvs();
   });
 
-  it('prefers signed COS URL over unsigned original', async () => {
-    vi.stubEnv('TARO_APP_COS_BUCKET', 'syncapp-1304288643');
-    vi.stubEnv('TARO_APP_COS_REGION', 'ap-shanghai');
+  it('prefers resolved URL over original', async () => {
     const { resolvePostGridImageSrc } = await import('@/utils/imageUrl');
-    const unsigned =
-      'https://syncapp-1304288643.cos.ap-shanghai.myqcloud.com/uploads/posts/u/a.jpg';
-    const signed = `${unsigned}?q-sign-algorithm=sha1`;
-    expect(resolvePostGridImageSrc(unsigned, signed)).toBe(signed);
+    const original = 'cloud://env.x/ugc/posts/u1/a.jpg';
+    const resolved = 'https://tmp.example/a.jpg';
+    expect(resolvePostGridImageSrc(original, resolved)).toBe(resolved);
   });
 
-  it('returns empty string for unsigned COS post images without a signed URL', async () => {
-    vi.stubEnv('TARO_APP_COS_BUCKET', 'syncapp-1304288643');
-    vi.stubEnv('TARO_APP_COS_REGION', 'ap-shanghai');
+  it('returns empty string for unresolved cloud fileIDs', async () => {
     const { resolvePostGridImageSrc } = await import('@/utils/imageUrl');
-    const unsigned =
-      'https://syncapp-1304288643.cos.ap-shanghai.myqcloud.com/uploads/posts/u/a.jpg';
-    expect(resolvePostGridImageSrc(unsigned, '')).toBe('');
+    const cloud = 'cloud://env.x/ugc/posts/u1/a.jpg';
+    expect(resolvePostGridImageSrc(cloud, '')).toBe('');
   });
 
-  it('keeps non-COS URLs when signing is unavailable', async () => {
+  it('keeps non-cloud URLs when resolution is unavailable', async () => {
     const { resolvePostGridImageSrc } = await import('@/utils/imageUrl');
     const url = 'https://picsum.photos/seed/x/200/200';
     expect(resolvePostGridImageSrc(url, '')).toBe(url);
@@ -221,36 +149,29 @@ describe('resolveImageWithFallbackDisplaySrc', () => {
     vi.unstubAllEnvs();
   });
 
-  it('uses downloaded temp path for signed COS URLs on weapp', async () => {
-    vi.stubEnv('TARO_ENV', 'weapp');
-    vi.stubEnv('TARO_APP_COS_BUCKET', 'syncapp-1304288643');
-    vi.stubEnv('TARO_APP_COS_REGION', 'ap-shanghai');
+  it('blocks unresolved cloud fileIDs', async () => {
     const { resolveImageWithFallbackDisplaySrc } = await import('@/utils/imageUrl');
-    const signed =
-      'https://syncapp-1304288643.cos.ap-shanghai.myqcloud.com/uploads/posts/u/a.jpg?q-sign-algorithm=sha1';
-    expect(resolveImageWithFallbackDisplaySrc(signed, 'wxfile://tmp_abc.jpg')).toBe(
-      'wxfile://tmp_abc.jpg',
-    );
-    expect(resolveImageWithFallbackDisplaySrc(signed, undefined)).toBeUndefined();
+    const cloud = 'cloud://env.x/ugc/posts/u1/a.jpg';
+    expect(
+      resolveImageWithFallbackDisplaySrc(cloud, 'wxfile://tmp_abc.jpg'),
+    ).toBeUndefined();
   });
 
-  it('blocks unsigned COS post URLs until signing completes', async () => {
+  it('uses downloaded temp path for LAN uploads on weapp', async () => {
     vi.stubEnv('TARO_ENV', 'weapp');
-    vi.stubEnv('TARO_APP_COS_BUCKET', 'syncapp-1304288643');
-    vi.stubEnv('TARO_APP_COS_REGION', 'ap-shanghai');
+    vi.stubEnv('TARO_APP_API_BASE_URL', 'http://192.168.1.7:3000/api');
     const { resolveImageWithFallbackDisplaySrc } = await import('@/utils/imageUrl');
-    const unsigned =
-      'https://syncapp-1304288643.cos.ap-shanghai.myqcloud.com/uploads/posts/u/a.jpg';
-    expect(
-      resolveImageWithFallbackDisplaySrc(unsigned, 'wxfile://tmp_abc.jpg'),
-    ).toBeUndefined();
+    const upload = 'http://192.168.1.7:3000/uploads/a.jpg';
+    expect(resolveImageWithFallbackDisplaySrc(upload, 'wxfile://tmp_abc.jpg')).toBe(
+      'wxfile://tmp_abc.jpg',
+    );
+    expect(resolveImageWithFallbackDisplaySrc(upload, undefined)).toBeUndefined();
   });
 
   it('uses HTTPS src directly on h5', async () => {
     vi.stubEnv('TARO_ENV', 'h5');
     const { resolveImageWithFallbackDisplaySrc } = await import('@/utils/imageUrl');
-    const signed =
-      'https://cdn.example.com/uploads/posts/u/a.jpg?q-sign-algorithm=sha1';
-    expect(resolveImageWithFallbackDisplaySrc(signed, undefined)).toBe(signed);
+    const url = 'https://cdn.example.com/uploads/posts/u/a.jpg';
+    expect(resolveImageWithFallbackDisplaySrc(url, undefined)).toBe(url);
   });
 });

@@ -1,11 +1,10 @@
 import Taro from '@tarojs/taro';
 import {
-  isCosPostImageUrl,
-  isCosSignedImageUrl,
+  isCloudStorageFileId,
   needsWeappDownloadBeforeDisplay,
   sanitizeRemoteImageUrl,
 } from './imageUrl';
-import { resolveSignedCosImageUrls } from './resolveSignedCosImageUrls';
+import { resolveDisplayImageUrls } from './resolveDisplayImageUrls';
 
 function isDataUrl(url: string): boolean {
   return /^data:image\//i.test(url);
@@ -56,10 +55,10 @@ async function resolvePreviewUrl(url: string): Promise<string | null> {
   const sanitized = sanitizeRemoteImageUrl(trimmed) ?? trimmed;
   let displayUrl = sanitized;
 
-  if (isCosPostImageUrl(sanitized) && !isCosSignedImageUrl(sanitized)) {
-    const [signed] = await resolveSignedCosImageUrls([sanitized]);
-    if (!signed?.trim()) return null;
-    displayUrl = signed;
+  if (isCloudStorageFileId(sanitized)) {
+    const [resolved] = await resolveDisplayImageUrls([sanitized]);
+    if (!resolved?.trim()) return null;
+    displayUrl = resolved;
   }
 
   return weappDownloadImageUrl(displayUrl);

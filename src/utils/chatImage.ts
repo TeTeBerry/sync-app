@@ -1,4 +1,5 @@
 import Taro from '@tarojs/taro';
+import { isCloudStorageFileId } from './cloudImage';
 import { uploadImageFile } from './uploadImage';
 import { isTrustedUploadImageUrl } from './userUploadImageUrl';
 
@@ -110,6 +111,12 @@ export function isLocalImageFileRef(ref: string): boolean {
 
 async function uploadOneImageRef(ref: string): Promise<string> {
   const trimmed = ref.trim();
+  if (isCloudStorageFileId(trimmed)) {
+    if (!isTrustedUploadImageUrl(trimmed)) {
+      throw new Error('图片须先通过上传接口提交');
+    }
+    return trimmed;
+  }
   if (isLocalImageFileRef(trimmed)) {
     return uploadImageFile(trimmed);
   }
@@ -125,7 +132,7 @@ async function uploadOneImageRef(ref: string): Promise<string> {
   return uploadImageFile(trimmed);
 }
 
-/** Upload local temp paths to COS and verify; only trust prior COS upload URLs. */
+/** Upload local temp paths to cloud storage; trust prior cloud fileIDs. */
 export async function uploadChatImageRefs(refs: string[]): Promise<string[]> {
   return Promise.all(refs.map((ref) => uploadOneImageRef(ref)));
 }
@@ -136,7 +143,7 @@ export function validateChatImageDataUrl(dataUrl: string): void {
   }
 }
 
-/** Compress local temp file and read as JPEG data URL (no COS upload). */
+/** Compress local temp file and read as JPEG data URL (no cloud upload). */
 export async function readLocalImageAsJpegDataUrl(filePath: string): Promise<string> {
   const jpegPath = await compressToJpegPath(filePath);
   const dataUrl = await readFileAsJpegDataUrl(jpegPath);

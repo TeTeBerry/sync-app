@@ -1,4 +1,5 @@
 import './notifications.scss';
+import Taro from '@tarojs/taro';
 import React, { useCallback, useMemo, useState } from 'react';
 import ThemedPageLoader from '../../../components/ThemedPageLoader';
 import { useDeferredMount } from '../../../hooks/useDeferredMount';
@@ -10,7 +11,6 @@ import {
   MessageCircle,
   Megaphone,
   Trash2,
-  Users,
 } from '../../../components/icons';
 import PageNavigation from '../../../components/navigation/PageNavigation';
 import {
@@ -25,6 +25,7 @@ import type { AppNotification } from '../../../types/backend';
 import {
   formatNotificationTimeAgo,
   getNotificationCategory,
+  isDeprecatedApplicationNotification,
   resolveNotificationText,
   type NotificationCategory,
 } from '../../../utils/notificationDisplay';
@@ -35,13 +36,7 @@ import { Text, View } from '@tarojs/components';
 
 type CategoryFilter = 'all' | NotificationCategory;
 
-const CATEGORY_TABS: CategoryFilter[] = [
-  'all',
-  'application',
-  'comment',
-  'like',
-  'system',
-];
+const CATEGORY_TABS: CategoryFilter[] = ['all', 'comment', 'like', 'system'];
 
 function NotificationIcon({ category }: { category: NotificationCategory }) {
   const iconProps = { size: 20 as const };
@@ -51,8 +46,6 @@ function NotificationIcon({ category }: { category: NotificationCategory }) {
       return <Heart {...iconProps} />;
     case 'comment':
       return <MessageCircle {...iconProps} />;
-    case 'application':
-      return <Users {...iconProps} />;
     case 'system':
       return <Megaphone {...iconProps} />;
     default:
@@ -64,7 +57,13 @@ const NotificationsPage: React.FC = () => {
   useEndRouteTransitionOnShow();
   const listReady = useDeferredMount(DEFER_NOTIFICATIONS_MS);
   const notificationsQuery = useNotificationsQuery();
-  const notifications = notificationsQuery.data ?? [];
+  const notifications = useMemo(
+    () =>
+      (notificationsQuery.data ?? []).filter(
+        (item) => !isDeprecatedApplicationNotification(item.meta),
+      ),
+    [notificationsQuery.data],
+  );
   const isLoading = notificationsQuery.isLoading;
   const refetch = notificationsQuery.refetch;
   const contentReady = listReady && !isLoading;
@@ -89,7 +88,6 @@ const NotificationsPage: React.FC = () => {
   const unreadTabCounts = useMemo(() => {
     const counts: Record<CategoryFilter, number> = {
       all: 0,
-      application: 0,
       comment: 0,
       like: 0,
       system: 0,
@@ -140,10 +138,13 @@ const NotificationsPage: React.FC = () => {
   );
 
   const handleItemClick = useCallback(async (item: AppNotification) => {
-    if (!item.read) {
-      await markNotificationAsRead(item.id);
+    const navigated = await navigateFromNotification(item.meta);
+    if (!navigated && item.meta?.postId?.trim()) {
+      void Taro.showToast({ title: '无法打开帖子', icon: 'none' });
     }
-    navigateFromNotification(item.meta);
+    if (!item.read) {
+      void markNotificationAsRead(item.id);
+    }
   }, []);
 
   return (
@@ -166,13 +167,11 @@ const NotificationsPage: React.FC = () => {
                 <Text className="s-btn-label">
                   {category === 'all'
                     ? '全部'
-                    : category === 'application'
-                      ? '组队'
-                      : category === 'comment'
-                        ? '评论'
-                        : category === 'like'
-                          ? '点赞'
-                          : '系统'}
+                    : category === 'comment'
+                      ? '评论'
+                      : category === 'like'
+                        ? '点赞'
+                        : '系统'}
                 </Text>
                 {count > 0 && (
                   <Text className="s-notifications__tab-count">{count}</Text>

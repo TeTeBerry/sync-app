@@ -2,11 +2,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { isLocalImageFileRef, uploadChatImageRefs } from '@/utils/chatImage';
 import { uploadImageFile } from '@/utils/uploadImage';
 
-const cosUrl =
-  'https://syncapp-1304288643.cos.ap-shanghai.myqcloud.com/uploads/posts/demo-user/1.jpg';
+const cloudFileId = 'cloud://env.x/ugc/posts/demo-user/1.jpg';
 
 vi.mock('@/utils/uploadImage', () => ({
-  uploadImageFile: vi.fn(async () => cosUrl),
+  uploadImageFile: vi.fn(async () => cloudFileId),
 }));
 
 describe('isLocalImageFileRef', () => {
@@ -31,12 +30,12 @@ describe('uploadChatImageRefs', () => {
     vi.mocked(uploadImageFile).mockClear();
   });
 
-  it('uploads WeChat devtools http://tmp paths via COS + verify', async () => {
+  it('uploads WeChat devtools http://tmp paths via cloud storage', async () => {
     const localPath = 'http://tmp/wxfoo.png';
     const urls = await uploadChatImageRefs([localPath]);
 
     expect(uploadImageFile).toHaveBeenCalledWith(localPath);
-    expect(urls).toEqual([cosUrl]);
+    expect(urls).toEqual([cloudFileId]);
   });
 
   it('uploads wxfile paths on device', async () => {
@@ -45,10 +44,9 @@ describe('uploadChatImageRefs', () => {
     expect(uploadImageFile).toHaveBeenCalledWith(localPath);
   });
 
-  it('passes through trusted COS upload URLs', async () => {
-    const trusted = cosUrl;
-    const urls = await uploadChatImageRefs([trusted]);
-    expect(urls).toEqual([trusted]);
+  it('passes through trusted cloud fileIDs', async () => {
+    const urls = await uploadChatImageRefs([cloudFileId]);
+    expect(urls).toEqual([cloudFileId]);
     expect(uploadImageFile).not.toHaveBeenCalled();
   });
 

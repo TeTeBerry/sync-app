@@ -50,7 +50,7 @@ function decodeJwtSub(token: string): string | null {
   }
 }
 
-/** JWT `sub` when profile cache is missing — keeps COS path aligned with verify. */
+/** JWT `sub` when profile cache is missing — keeps cloud upload path aligned with verify. */
 export function getResolvedAuthUserId(): string | null {
   return getAuthUserId() ?? decodeJwtSub(getAccessToken() ?? '') ?? null;
 }

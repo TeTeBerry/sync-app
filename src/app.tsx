@@ -13,9 +13,11 @@ import { LucideTaroProvider } from './components/icons';
 import type { PropsWithChildren } from 'react';
 import NavigationLoadingOverlay from './components/navigation/NavigationLoadingOverlay';
 import { preloadEventSubpackage } from './utils/subpackagePreload';
+import { initCloudBase } from './utils/cloudInit';
 
 export default function App({ children }: PropsWithChildren) {
   useLaunch(() => {
+    initCloudBase();
     if (isLiveApi()) {
       void ensureAuth().catch((error) => {
         const message = error instanceof Error ? error.message : '登录失败，请稍后重试';

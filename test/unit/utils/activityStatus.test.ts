@@ -61,6 +61,25 @@ describe('findNearestUpcomingActivity', () => {
     expect(nearest?.startAt.getTime()).toBeGreaterThan(NOW.getTime());
   });
 
+  it('uses 14:00 show start for Storm countdown', () => {
+    const nearest = findNearestUpcomingActivity(
+      [{ title: '风暴电音节 深圳站', date: '06/13-14' }],
+      NOW,
+    );
+    expect(nearest?.title).toBe('风暴电音节 深圳站');
+    expect(nearest?.startAt).toEqual(new Date(2026, 5, 13, 14, 0, 0, 0));
+  });
+
+  it('keeps Storm countdown on show day before 14:00', () => {
+    const morningOfShowDay = new Date(2026, 5, 13, 10, 0, 0, 0);
+    const nearest = findNearestUpcomingActivity(
+      [{ title: '风暴电音节 深圳站', date: '06/13-14' }],
+      morningOfShowDay,
+    );
+    expect(nearest?.title).toBe('风暴电音节 深圳站');
+    expect(nearest?.startAt).toEqual(new Date(2026, 5, 13, 14, 0, 0, 0));
+  });
+
   it('ignores ended and already-started activities', () => {
     const nearest = findNearestUpcomingActivity(
       [
