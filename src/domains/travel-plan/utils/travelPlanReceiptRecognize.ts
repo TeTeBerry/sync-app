@@ -9,7 +9,7 @@ import {
 } from './travelPlanAddForm';
 import { parseTransportTimesFromText } from './travelPlanTransportTime';
 
-export function travelPlanReceiptFormToAddFormValues(
+function travelPlanReceiptFormToAddFormValues(
   category: TravelPlanAddFormCategory,
   receipt: TravelPlanReceiptRecognizeForm,
 ): TravelPlanAddFormValues {
@@ -33,20 +33,6 @@ export function travelPlanReceiptFormToAddFormValues(
       ...(includeTimes && startTime ? { startTime } : {}),
       ...(includeTimes && endTime ? { endTime } : {}),
     },
-  };
-}
-
-export function applyTravelPlanReceiptToForm(
-  current: TravelPlanAddFormValues,
-  receipt: TravelPlanReceiptRecognizeForm,
-): TravelPlanAddFormValues {
-  return {
-    ...current,
-    ...travelPlanReceiptFormToAddFormValues(current.category, receipt),
-    title: receipt.title || current.title,
-    description: receipt.description || current.description,
-    cost: receipt.cost || current.cost,
-    remark: receipt.remark || current.remark,
   };
 }
 

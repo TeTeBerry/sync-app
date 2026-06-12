@@ -1,4 +1,3 @@
-import type { ItineraryScheduleSnapshot } from '@/types/backend';
 import { boundsToIsoDate, parseActivityDateBounds } from '@/utils/activityDateBounds';
 import { formatTravelPlanTimeLabel } from './travelPlanDateTime';
 import type { TravelPlanNode } from '../types';
@@ -157,16 +156,4 @@ export function buildDefaultActivityTravelPlanNodes(input: {
   }
 
   return buildNodesFromActivityDate(input);
-}
-
-export function buildActivityTravelPlanNodesFromSchedule(
-  schedule: ItineraryScheduleSnapshot,
-  activityConfirmations?: Record<string, boolean>,
-): TravelPlanNode[] {
-  return buildDefaultActivityTravelPlanNodes({
-    activityLegacyId: schedule.activityLegacyId,
-    eventName: schedule.eventMeta,
-    sessions: schedule.sessions,
-    activityConfirmations,
-  });
 }

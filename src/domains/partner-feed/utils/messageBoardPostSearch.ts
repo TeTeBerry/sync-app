@@ -45,7 +45,7 @@ function contentTypeSearchLabels(types: string[] | undefined): string[] {
   return [...labels];
 }
 
-export function buildMessageBoardPostSearchText(post: EventDetailPost): string {
+function buildMessageBoardPostSearchText(post: EventDetailPost): string {
   return [
     post.body,
     post.name,

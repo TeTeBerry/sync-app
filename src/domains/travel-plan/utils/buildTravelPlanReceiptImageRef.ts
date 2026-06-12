@@ -27,7 +27,7 @@ export async function buildTravelPlanReceiptImageRef(
   return readLocalImageAsJpegDataUrl(filePath);
 }
 
-/** Block oversized / legacy payloads before callContainer. */
+/** Block legacy data URLs before callContainer. */
 export function assertReceiptImageRefForTransport(imageRef: string): void {
   if (!isWeappCloudRunTransportEnabled()) {
     return;
@@ -37,10 +37,7 @@ export function assertReceiptImageRefForTransport(imageRef: string): void {
   if (trimmed.startsWith('data:')) {
     throw new Error('截图须先上传云存储，请更新小程序后重试');
   }
-  if (isCloudStorageFileId(trimmed)) {
-    return;
-  }
-  if (trimmed.length > 4_000) {
-    throw new Error('截图数据过大，请换一张更小的图片');
+  if (!isCloudStorageFileId(trimmed)) {
+    throw new Error('截图上传失败，请重试');
   }
 }

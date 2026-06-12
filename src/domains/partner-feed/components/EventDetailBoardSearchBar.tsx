@@ -40,7 +40,6 @@ export function EventDetailBoardSearchBar({
           placeholder="搜索留言、昵称、标签…"
           confirmType="search"
           onInput={(event) => onChange(event.detail.value)}
-          onConfirm={() => undefined}
           onFocus={() => setInputFocused(true)}
           onBlur={() => setInputFocused(false)}
         />
