@@ -16,6 +16,8 @@ export type {
   TravelPlanNodeSource,
   TravelPlanReceiptCategory,
   TravelPlanReceiptRecognizeForm,
+  TravelPlanReceiptRecognizeJobResult,
+  TravelPlanReceiptRecognizeJobStatus,
 } from '@sync/travel-plan-contracts';
 
 export {

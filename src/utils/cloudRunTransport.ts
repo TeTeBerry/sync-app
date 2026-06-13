@@ -42,6 +42,36 @@ export function buildContainerApiPath(
   return containerPath;
 }
 
+/** callContainer 请求包上限约 100KB（含 body）。 */
+export const CALL_CONTAINER_MAX_BODY_BYTES = 95_000;
+
+function readCloudContainerErrorMessage(error: unknown): string {
+  if (error instanceof Error && error.message.trim()) {
+    return error.message.trim();
+  }
+  if (typeof error === 'object' && error !== null) {
+    const errMsg = (error as { errMsg?: string }).errMsg;
+    if (typeof errMsg === 'string' && errMsg.trim()) {
+      return errMsg.trim();
+    }
+    const errCode = (error as { errCode?: number }).errCode;
+    if (typeof errCode === 'number') {
+      return String(errCode);
+    }
+  }
+  return String(error ?? '请求失败');
+}
+
+function assertCallContainerPayloadSize(data: unknown): void {
+  if (data == null) return;
+  const bytes = JSON.stringify(data).length;
+  if (bytes > CALL_CONTAINER_MAX_BODY_BYTES) {
+    throw new Error(
+      `请求数据过大（${Math.round(bytes / 1024)}KB），请先将截图上传到云存储`,
+    );
+  }
+}
+
 export interface ContainerHttpResponse {
   ok: boolean;
   status: number;
@@ -71,6 +101,8 @@ export async function callContainerRequest(
     init.method || 'GET'
   ).toUpperCase() as Taro.cloud.CallContainerParam['method'];
   const effectiveTimeout = Math.min(timeoutMs, CLOUD_RUN_MAX_TIMEOUT_MS);
+  const requestData = taroRequestData(init);
+  assertCallContainerPayloadSize(requestData);
 
   try {
     const result = await Taro.cloud.callContainer({
@@ -81,7 +113,7 @@ export async function callContainerRequest(
         ...headers,
         'X-WX-SERVICE': CLOUD_RUN_SERVICE,
       },
-      data: taroRequestData(init),
+      data: requestData,
       timeout: effectiveTimeout,
     });
 
@@ -91,12 +123,12 @@ export async function callContainerRequest(
       json: async () => result.data,
     };
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
+    const message = readCloudContainerErrorMessage(error);
     if (message.includes('102002')) {
       throw new Error('云托管请求超时，请稍后重试');
     }
     if (message.includes('-606001') || message.includes('606001')) {
-      throw new Error('请求数据过大，请换一张更小的截图后重试');
+      throw new Error('请求数据过大，请先将截图上传到云存储后重试');
     }
     throw new Error(message || '请求失败');
   }

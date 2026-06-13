@@ -2,6 +2,7 @@ import Taro from '@tarojs/taro';
 import { isCloudStorageUploadEnabled } from '../constants/cloud';
 
 const CLOUD_FILE_ID_RE = /^cloud:\/\/[^/]+\/.+/;
+const CLOUD_UGC_PATH_PREFIX = 'ugc/';
 const TEMP_URL_MAX_AGE_SEC = 3600;
 
 const tempUrlCache = new Map<string, { url: string; expiresAt: number }>();
@@ -9,7 +10,16 @@ const tempUrlCache = new Map<string, { url: string; expiresAt: number }>();
 /** `cloud://` fileID stored in Mongo / returned by API. */
 export function isCloudStorageFileId(src: string | undefined): boolean {
   const trimmed = src?.trim();
-  return Boolean(trimmed && CLOUD_FILE_ID_RE.test(trimmed));
+  if (!trimmed || !CLOUD_FILE_ID_RE.test(trimmed)) {
+    return false;
+  }
+  const withoutScheme = trimmed.slice('cloud://'.length);
+  const slash = withoutScheme.indexOf('/');
+  if (slash <= 0) return false;
+  const objectPath = withoutScheme.slice(slash + 1);
+  if (!objectPath.startsWith(CLOUD_UGC_PATH_PREFIX)) return false;
+  if (objectPath.includes('..')) return false;
+  return true;
 }
 
 function readCachedTempUrl(fileId: string): string | undefined {

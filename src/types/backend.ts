@@ -365,4 +365,6 @@ export type {
   TravelPlanNodePayload,
   TravelPlanReceiptCategory,
   TravelPlanReceiptRecognizeForm,
+  TravelPlanReceiptRecognizeJobResult,
+  TravelPlanReceiptRecognizeJobStatus,
 } from './travelPlan';
