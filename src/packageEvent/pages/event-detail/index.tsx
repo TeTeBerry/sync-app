@@ -8,6 +8,7 @@ import EventDetailFallback from './components/EventDetailFallback';
 import {
   EventDetailBoardSearchBar,
   EventDetailComposerSection,
+  EventDetailTemplatePostFab,
   EventPostsVirtualList,
   EVENT_DETAIL_SCROLL_ID,
 } from '@/domains/partner-feed';
@@ -75,7 +76,12 @@ const EventDetailPage = () => {
   return (
     <View
       data-cmp="EventDetail"
-      className={['s-event-detail', 's-page-with-tabbar', activityStatusClass]
+      className={[
+        's-event-detail',
+        's-page-with-tabbar',
+        activityStatusClass,
+        !showHeaderSkeleton && 's-event-detail--with-legal-footer',
+      ]
         .filter(Boolean)
         .join(' ')}
     >
@@ -103,9 +109,7 @@ const EventDetailPage = () => {
             <EventDetailComposerSection
               showHeaderSkeleton={showHeaderSkeleton}
               composerReady={composerReady}
-              templatePublishing={templatePublishing}
               onAiGuideClick={handleOpenAiGuide}
-              onOpenTemplateSheet={handleOpenTemplateSheet}
               activityTitle={activityTitle}
               onOpenMyItinerary={handleOpenMyItinerary}
               onOpenExclusiveItinerary={handleOpenExclusiveItinerary}
@@ -150,7 +154,21 @@ const EventDetailPage = () => {
             ) : null}
           </View>
         </OverlayAwareScrollView>
+
+        {!showHeaderSkeleton ? (
+          <View className="s-event-detail__legal-footer" aria-label="平台声明">
+            <Text className="s-event-detail__legal-footer-text">
+              本平台仅作电音节信息参考展示，不组团，不收款，不从事娱乐经营业务
+            </Text>
+          </View>
+        ) : null}
       </View>
+      {!showHeaderSkeleton && composerReady ? (
+        <EventDetailTemplatePostFab
+          disabled={templatePublishing}
+          onClick={handleOpenTemplateSheet}
+        />
+      ) : null}
       {confirmDialog}
       <LoginInterceptHost />
       <AiBuddyPostSheet

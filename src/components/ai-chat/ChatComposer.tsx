@@ -1,7 +1,10 @@
 import React, { useCallback, useMemo } from 'react';
 import { Send, Trash2 } from '../../components/icons';
 import { Button, Input, cn } from '../ui';
-import { HOME_FESTIVAL_SHORTCUT_CHIPS } from '../../constants/homeFestivalShortcuts';
+import {
+  HOME_FESTIVAL_SHORTCUT_CHIPS,
+  resolveActiveActivityChipKey,
+} from '../../constants/homeFestivalShortcuts';
 import { useAiChatStore } from '../../stores/aiChatStore';
 import {
   ScrollView,
@@ -28,6 +31,7 @@ export function ChatComposer({
   isStreaming,
   activityLegacyId,
   activityTitle,
+  activityCode,
   onInputChange,
   onSubmit,
   onClearChat,
@@ -39,6 +43,7 @@ export function ChatComposer({
   isStreaming: boolean;
   activityLegacyId?: number;
   activityTitle?: string;
+  activityCode?: string;
   onInputChange: (value: string) => void;
   onSubmit: (text: string) => void;
   onClearChat?: () => void | Promise<void>;
@@ -68,23 +73,19 @@ export function ChatComposer({
   })();
 
   const activityChips = useMemo((): ActivityChip[] => {
-    if (scopedToActivity && trimmedActivityTitle) {
-      return [
-        {
-          key: `bound-${activityLegacyId}`,
-          label: trimmedActivityTitle,
-          keyword: trimmedActivityTitle,
-          active: true,
-        },
-      ];
-    }
+    const activeKey = resolveActiveActivityChipKey({
+      activityLegacyId,
+      activityCode,
+      activityTitle: trimmedActivityTitle,
+    });
 
     return HOME_FESTIVAL_SHORTCUT_CHIPS.map((chip) => ({
       key: chip.key,
       label: chip.label,
       keyword: chip.submitText,
+      active: chip.key === activeKey,
     }));
-  }, [activityLegacyId, scopedToActivity, trimmedActivityTitle]);
+  }, [activityCode, activityLegacyId, trimmedActivityTitle]);
 
   const isBusy = isStreaming;
   const isComposerDisabled = isStreaming || isLoadingHistory;

@@ -19,8 +19,6 @@ describe('assertPostPublishedVisible', () => {
         location: '',
         body: 'x',
         tags: [],
-        likes: 0,
-        comments: 0,
         avatar: '',
       }),
     ).toThrow('内容未通过审核');
@@ -36,8 +34,6 @@ describe('assertPostPublishedVisible', () => {
         location: '',
         body: 'x',
         tags: [],
-        likes: 0,
-        comments: 0,
         avatar: '',
       }),
     ).not.toThrow();

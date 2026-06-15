@@ -4,10 +4,6 @@ import { useNavigationStore } from '../stores/navigationStore';
 import type { NavigationState } from '../stores/navigationStore';
 import type { AiAssistantNavIntent } from '../stores/types';
 import type { BackendActivity, HomeSummary, NotificationMeta } from '../types/backend';
-import {
-  isPostInteractionNotification,
-  resolveNotificationPostTarget,
-} from './notificationNavigation';
 import { PRELOAD_HOT_ROUTES_MS } from './timing';
 import {
   preloadAiSubpackage,
@@ -547,22 +543,11 @@ export async function navigateFromNotification(
   }
 
   const postId = meta.postId?.trim();
-  const isPostInteraction = isPostInteractionNotification(meta);
 
   if (meta.type === 'post_rejected') {
     const legacyId = resolveActivityLegacyId(meta);
     if (legacyId == null) return false;
     goAiAssistant({ activityLegacyId: legacyId });
-    return true;
-  }
-
-  if (isPostInteraction && postId) {
-    const target = await resolveNotificationPostTarget(meta);
-    if (target == null) {
-      void Taro.showToast({ title: '无法定位帖子', icon: 'none' });
-      return false;
-    }
-    goEventDetail(target.activityLegacyId, { postId: target.postId });
     return true;
   }
 

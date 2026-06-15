@@ -1,18 +1,19 @@
 import './FeedPostList.scss';
-import { memo, type FC } from 'react';
+import { memo, useMemo, type FC } from 'react';
 import {
   FEED_POST_IMAGE_MAX_DISPLAY,
   HOME_FEED_INITIAL_RENDER,
 } from '../../constants/listPerf';
+import { useContactExpandedToggle } from '../../hooks/useContactExpandedToggle';
 import { useWindowedList } from '../../hooks/useWindowedList';
-import { stripContentTypeHashtags } from './ContentTypeBadge';
+import { PostBodyWithContact } from './PostBodyWithContact';
 import { PostImageGrid } from './PostImageGrid';
 import { PostOwnerDeleteButton } from './PostOwnerDeleteButton';
 import { MapPin, Ticket } from '../icons';
 import type { HomeFeedPost } from '../../types/post';
 import { isCurrentUserPostAuthor } from '../../utils/postOwnership';
+import { splitPostBodyContact } from '../../utils/postBodyContact';
 import { thumbnailImageUrl } from '../../utils/imageUrl';
-import { WechatEmojiText } from '../wechat-emoji/WechatEmojiText';
 import { Image, Text, View } from '@tarojs/components';
 
 export type FeedPostListProps = {
@@ -30,13 +31,23 @@ function FeedPostRowInner({ post, onDelete }: FeedPostRowProps) {
   const postHandle = post.handle?.trim() || `@${postName}`;
   const isOwn = isCurrentUserPostAuthor(postName, post.userId);
   const avatarSrc = thumbnailImageUrl(post.avatar, 80) ?? post.avatar;
-  const bodyText = stripContentTypeHashtags(post.body);
+  const { publicBody, contact } = useMemo(
+    () => splitPostBodyContact(post.body),
+    [post.body],
+  );
+  const { expanded: contactExpanded, toggle: toggleContact } = useContactExpandedToggle(
+    Boolean(contact),
+  );
   const eventLocation = post.location?.trim();
   const eventTitle = post.event?.trim();
   const postImages = post.images?.length ? post.images : undefined;
 
+  const stopClickPropagation = (event: { stopPropagation?: () => void }) => {
+    event.stopPropagation?.();
+  };
+
   return (
-    <View className="s-home-post">
+    <View className="s-home-post" onClick={contact ? toggleContact : undefined}>
       <View className="s-home-post__header">
         <Image
           className="s-home-post__avatar"
@@ -61,7 +72,7 @@ function FeedPostRowInner({ post, onDelete }: FeedPostRowProps) {
           </View>
         </View>
         {isOwn && onDelete ? (
-          <View className="s-home-post__head-actions">
+          <View className="s-home-post__head-actions" onClick={stopClickPropagation}>
             <PostOwnerDeleteButton onDelete={() => onDelete(post)} />
           </View>
         ) : null}
@@ -75,9 +86,16 @@ function FeedPostRowInner({ post, onDelete }: FeedPostRowProps) {
           .filter(Boolean)
           .join(' ')}
       >
-        {bodyText ? (
+        {publicBody || contact ? (
           <View className="s-home-post__body">
-            <WechatEmojiText text={bodyText} className="s-home-post__text" />
+            <PostBodyWithContact
+              publicBody={publicBody}
+              contact={contact}
+              expanded={contactExpanded}
+              onContactToggle={toggleContact}
+              textClassName="s-home-post__text"
+              useWechatEmoji
+            />
           </View>
         ) : null}
 
@@ -93,7 +111,12 @@ function FeedPostRowInner({ post, onDelete }: FeedPostRowProps) {
         ) : null}
 
         {postImages?.length ? (
-          <PostImageGrid images={postImages} maxDisplay={FEED_POST_IMAGE_MAX_DISPLAY} />
+          <View onClick={stopClickPropagation}>
+            <PostImageGrid
+              images={postImages}
+              maxDisplay={FEED_POST_IMAGE_MAX_DISPLAY}
+            />
+          </View>
         ) : null}
       </View>
     </View>

@@ -10,7 +10,7 @@ export { EventPostsVirtualList } from './components/EventPostsVirtualList';
 export type { EventPostListItem } from './components/EventPostsVirtualList';
 export { EventDetailComposerSection } from './components/EventDetailComposerSection';
 export type { EventDetailComposerSectionProps } from './components/EventDetailComposerSection';
-export { EventDetailTemplatePostButton } from './components/EventDetailTemplatePostButton';
+export { EventDetailTemplatePostFab } from './components/EventDetailTemplatePostFab';
 export { EventDetailBoardSearchBar } from './components/EventDetailBoardSearchBar';
 export { EventDetailItineraryMenu } from './components/EventDetailItineraryMenu';
 export {

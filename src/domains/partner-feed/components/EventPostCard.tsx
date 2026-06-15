@@ -1,14 +1,16 @@
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import { MapPin } from '../../../components/icons';
 import { ImageWithFallback } from '../../../components/ImageWithFallback';
 import {
+  PostBodyWithContact,
   PostImageGrid,
   PostOwnerDeleteButton,
-  stripContentTypeHashtags,
 } from '../../../components/post';
 import { EVENT_POST_IMAGE_MAX_DISPLAY } from '../../../constants/listPerf';
+import { useContactExpandedToggle } from '../../../hooks/useContactExpandedToggle';
 import { isCurrentUserPostAuthor } from '../../../utils/postOwnership';
 import type { EventDetailPost } from '../../../types/backend';
+import { splitPostBodyContact } from '../../../utils/postBodyContact';
 import { formatEventPostHandle } from '../utils/eventPostDisplay';
 import { Text, View } from '@tarojs/components';
 
@@ -25,16 +27,28 @@ function EventPostCardInner({
   highlighted,
   onDelete,
 }: EventPostCardProps) {
+  const { publicBody, contact } = useMemo(
+    () => splitPostBodyContact(post.body),
+    [post.body],
+  );
+  const { expanded: contactExpanded, toggle: toggleContact } = useContactExpandedToggle(
+    Boolean(contact),
+  );
+  const submetaLocation = post.location?.trim() ?? '';
+
   const postName = post.name?.trim() || '用户';
   const isOwn = isCurrentUserPostAuthor(postName, post.userId);
-  const bodyText = stripContentTypeHashtags(post.body);
-  const submetaLocation = post.location?.trim() ?? '';
+
+  const stopClickPropagation = (event: { stopPropagation?: () => void }) => {
+    event.stopPropagation?.();
+  };
 
   return (
     <View
       className={['s-event-post', highlighted && 's-event-post--highlight']
         .filter(Boolean)
         .join(' ')}
+      onClick={contact ? toggleContact : undefined}
     >
       <View className="s-event-post__header">
         <View className="s-event-post__avatar-wrap">
@@ -64,7 +78,10 @@ function EventPostCardInner({
               </View>
             </View>
             {isOwn && onDelete ? (
-              <View className="s-event-post__head-actions">
+              <View
+                className="s-event-post__head-actions"
+                onClick={stopClickPropagation}
+              >
                 <PostOwnerDeleteButton onDelete={() => onDelete(post)} />
               </View>
             ) : null}
@@ -72,10 +89,23 @@ function EventPostCardInner({
         </View>
       </View>
 
-      {bodyText ? <Text className="s-event-post__text">{bodyText}</Text> : null}
+      {publicBody || contact ? (
+        <PostBodyWithContact
+          publicBody={publicBody}
+          contact={contact}
+          expanded={contactExpanded}
+          onContactToggle={toggleContact}
+          textClassName="s-event-post__text"
+        />
+      ) : null}
 
       {post.images?.length ? (
-        <PostImageGrid images={post.images} maxDisplay={EVENT_POST_IMAGE_MAX_DISPLAY} />
+        <View onClick={stopClickPropagation}>
+          <PostImageGrid
+            images={post.images}
+            maxDisplay={EVENT_POST_IMAGE_MAX_DISPLAY}
+          />
+        </View>
       ) : null}
     </View>
   );

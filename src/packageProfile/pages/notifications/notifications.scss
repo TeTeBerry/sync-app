@@ -139,26 +139,6 @@
   justify-content: center;
   flex-shrink: 0;
 
-  &--pindan {
-    background: rgba(255, 0, 102, 0.15);
-    color: var(--primary);
-  }
-
-  &--like {
-    background: rgba(255, 105, 180, 0.15);
-    color: #ff69b4;
-  }
-
-  &--comment {
-    background: rgba(76, 201, 240, 0.15);
-    color: var(--secondary);
-  }
-
-  &--application {
-    background: rgba(var(--primary-rgb), 0.15);
-    color: var(--primary);
-  }
-
   &--system {
     background: rgba(255, 193, 7, 0.15);
     color: #ffc107;
@@ -167,11 +147,6 @@
   &--general {
     background: rgba(255, 255, 255, 0.08);
     color: rgba(255, 255, 255, 0.72);
-  }
-
-  &--ticket {
-    background: rgba(76, 201, 240, 0.15);
-    color: var(--secondary);
   }
 }
 

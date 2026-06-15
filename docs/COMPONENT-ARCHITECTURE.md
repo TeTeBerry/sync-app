@@ -73,7 +73,7 @@ Barrel 导出分包/活动详情需要的组件与逻辑；仅主 profile 页使
 | 个人中心 + profile 分包共用 | `components/profile/` |
 | 活动详情帖流 / 留言 / 模板发帖 | `domains/partner-feed/` |
 | 活动详情页级弹窗 / fallback | `packageEvent/.../event-detail/components/` |
-| 跨多 Tab/多活动的帖子 UI | `components/post/`（`FeedPostList`、`PostCardActionBar` 等） |
+| 跨多 Tab/多活动的帖子 UI | `components/post/`（`FeedPostList`、`PostOwnerDeleteButton` 等） |
 | 顶栏 / 底栏 / Tab 页头 | `components/navigation/` |
 | 活动列表卡片 / 状态徽章 | `components/event/` |
 | 新帖子 TypeScript 类型 | `types/post.ts` |

@@ -25,7 +25,7 @@
 | P3-dev | 开发体验（check / husky / CI） | ✅ 完成（2025-06） |
 | AE | 活动域架构（domains/ + @sync/*-contracts） | ✅ 完成（2026-06） |
 
-**产品约定**：活动页提供 **模板发帖**（`AiBuddyPostSheet`）与 **留言板**；AI 助手亦可闭环发帖。
+**产品约定**：活动页 **模板发帖**（右下角 `+` FAB → `AiBuddyPostSheet`）；AI 助手亦可闭环发帖。帖子 **无点赞/评论/编辑**；联系方式默认隐藏、点击展开。详见 [POST-LIFECYCLE.md](./POST-LIFECYCLE.md)。
 
 **工程**：`npm run check`；pre-commit lint-staged；CI 见 `.github/workflows/ci.yml`；工作区 [`../../CONTRIBUTING.md`](../../CONTRIBUTING.md)。
 
@@ -50,14 +50,14 @@
 - [x] 热帖 / 活动帖 / 我的帖子 — 已有 hooks
 - [x] `apiMappers.ts` 映射后端 DTO
 
-### P2 ✅（无发帖 UI）
+### P2 ✅（发帖与删帖；互动已移除 2026-06）
 
-- [x] `syncApi`：`updatePost`、`likePost`、`commentPost`（`createPost` 由活动页 / AI 调用）
+- [x] `syncApi`：`createPost`（活动页 / AI）、`deletePost`
 - [x] `syncApi`：`registerForActivity`、`cancelActivityRegistration`、`fetchCurrentUser`、`updateCurrentUser`
 - [x] 首页「加入」→ `POST /activities/:legacyId/register`
-- [x] 首页 / 活动详情：点赞、评论（H5 `promptText`）
-- [x] 个人页：编辑正文 → `PATCH /posts/:id`
+- [x] 个人页 / 活动详情 / 首页：删自己的帖 → `DELETE /posts/:id`
 - [x] `invalidatePostQueries` 统一刷新
+- [x] ~~点赞 / 评论 / `PATCH /posts/:id`~~ — 已移除（前后端）
 
 ### P3 ✅
 
@@ -69,7 +69,7 @@
 ### P4 ✅
 
 - [x] 探索 Tab 已移除（`pages/explore`、底栏入口、`packageEvent/pages/posts` 全量帖页）
-- [x] `docs/API.md` 与 `syncApi.ts` 一致
+- [x] `docs/API.md` 与 `syncApi.ts` 一致（2026-06 同步移除帖互动 API）
 - [x] Mock 模式：`!isApiEnabled()` 仍可本地演示
 
 ---
@@ -160,8 +160,8 @@
 > 包体与分包策略见 [BUNDLE-SIZE.md](./BUNDLE-SIZE.md)。
 
 - [x] `hooks/useWindowedList.ts` + `constants/listPerf.ts` — 通用窗口化（首屏 N 条、`showMore` / `ensureIndexVisible`）
-- [x] 首页 `FeedPostList` — 首屏 5 条 +「展开更多」；评论区仅在 `commentsExpanded` 时挂载 `PostCommentSection`
-- [x] 活动详情 `useEventDetailPosts` — 首屏 6 条、步进 +6；`onScrollToLower` 先扩本地窗口再 `postsQuery.loadMore()`；Tab 计数用 `totalPostCount`
+- [x] 首页 `FeedPostList` — 首屏 5 条 +「展开更多」；联系方式 `PostBodyWithContact` 点击展开
+- [x] 活动详情 `useEventDetailPosts` — 首屏 6 条、步进 +6；留言模糊搜索 `messageBoardPostSearch`；底部合规提示条
 - [x] 活动详情首屏分步：`composerReady` / `feedReady` / `secondaryReady`（`timing.ts`）；首屏仅活动详情 REST，帖子 +240ms，`users/me` +400ms；现场 Tab 才拉 live-info（见 `BUNDLE-SIZE.md`）
 - [x] `EventPostsVirtualList` — 「没有更多」需 `!hasMore && !hasMoreLocal`；高亮帖滚动前 `ensureIndexVisible`
 - [x] AI 聊天：`utils/throttleRaf.ts` — 打字机 `onUpdate` 每帧最多一次 `setState`
@@ -185,7 +185,7 @@
 
 ### Phase 3 前端架构 ✅（2026-06）
 
-- [x] `useEventDetailPage` + `PostCardActionBar` / `buildPostSharePayload`（首页 Feed + 活动帖共用互动条）
+- [x] `useEventDetailPage` + `EventPostCard` / `FeedPostList`（删帖；联系方式折叠展示）
 - [x] `useProfilePage` 编排个人 Tab（套餐 Sheet 已移除）
 - [x] `AiAssistantChat` 抽出至 `packageAi/pages/ai-assistant/AiAssistantChat.tsx`
 - [x] `apiClient.test.ts`（401 + 无 token 不清 session）；`notificationQueryParams()`
@@ -260,9 +260,9 @@
 | GET | `/activities`… | ✅ |
 | POST/DELETE | `/activities/:id/register` | ✅ 首页「加入」 |
 | GET | `/posts/popular`、按活动/owner | ✅ |
-| POST | `/posts` | 🟡 API 有，UI 不调（AI 发帖） |
-| PATCH/DELETE | `/posts/:id` | ✅ |
-| POST | `/posts/:id/like|comments` | ✅ |
+| POST | `/posts` | ✅ 活动详情 FAB + AI 助手 |
+| DELETE | `/posts/:id` | ✅ |
+| ~~PATCH / like / comments~~ | — | 已移除 |
 | GET | `/profile`… | ✅ |
 | WS | `/ai/chat/ws` | ✅ |
 | GET | `/chat/sessions/:id` | ✅ |

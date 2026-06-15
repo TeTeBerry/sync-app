@@ -247,7 +247,7 @@ export interface HomeSummary {
 export type NotificationType = 'general' | 'interaction' | 'system';
 
 /** In-app notification tab grouping (matches backend NotificationCategory). */
-export type NotificationCategory = 'comment' | 'like' | 'system' | 'general';
+export type NotificationCategory = 'system' | 'general';
 
 export type NotificationInteractionType =
   | 'like'

@@ -12,9 +12,6 @@ const samplePost: EventDetailPost = {
   location: '上海',
   tags: ['#组队'],
   contentTypes: ['team'],
-  likes: 0,
-  comments: 1,
-  liked: false,
 };
 
 describe('messageBoardPostSearch', () => {

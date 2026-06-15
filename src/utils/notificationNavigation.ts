@@ -9,22 +9,6 @@ import type {
 } from '../types/backend';
 import { parseActivityLegacyId } from './activityLegacyId';
 
-export function isPostInteractionNotification(meta?: NotificationMeta): boolean {
-  if (!meta) return false;
-  if (
-    meta.type === 'like' ||
-    meta.type === 'comment' ||
-    meta.type === 'comment_reply'
-  ) {
-    return true;
-  }
-  if (meta.category === 'like' || meta.category === 'comment') {
-    return true;
-  }
-  const templateKey = meta.templateKey ?? '';
-  return /notifications\.types\.(like|comment)/.test(templateKey);
-}
-
 function findActivityLegacyIdInCaches(postId: string): number | null {
   const fromPopular = getPopularPostsFromCache()?.find((post) => post.id === postId);
   const popularLegacyId = parseActivityLegacyId(fromPopular?.activityLegacyId);

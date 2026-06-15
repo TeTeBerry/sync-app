@@ -5,6 +5,7 @@
 ## 相关文档
 
 - API 契约：`docs/API.md`
+- 帖子全链路：`docs/POST-LIFECYCLE.md`
 - 贡献 / 分支流程：`docs/CONTRIBUTING.md`
 - 包体基线：`docs/BUNDLE-SIZE.md`
 - 发版冒烟：`docs/RELEASE-SMOKE.md`

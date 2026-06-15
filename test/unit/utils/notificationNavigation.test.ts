@@ -17,29 +17,18 @@ vi.mock('@/hooks/useApiQuery', () => ({
 import { fetchPostNavigationTarget } from '@/api/sync/posts';
 import { getPopularPostsFromCache } from '@/cache/postCache';
 import { getCacheData } from '@/hooks/useApiQuery';
-import {
-  isPostInteractionNotification,
-  resolveNotificationPostTarget,
-} from '@/utils/notificationNavigation';
+import { resolveNotificationPostTarget } from '@/utils/notificationNavigation';
 
 describe('notificationNavigation', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('detects like notifications from category when type is missing', () => {
-    expect(
-      isPostInteractionNotification({
-        category: 'like',
-      }),
-    ).toBe(true);
-  });
-
   it('resolves target from meta activityLegacyId', async () => {
     const target = await resolveNotificationPostTarget({
       postId: 'post-1',
       activityLegacyId: 4,
-      category: 'like',
+      type: 'post_hidden',
     });
     expect(target).toEqual({ postId: 'post-1', activityLegacyId: 4 });
     expect(fetchPostNavigationTarget).not.toHaveBeenCalled();
@@ -53,7 +42,7 @@ describe('notificationNavigation', () => {
 
     const target = await resolveNotificationPostTarget({
       postId: 'post-abc',
-      category: 'like',
+      type: 'post_hidden',
     } satisfies NotificationMeta);
 
     expect(target).toEqual({ postId: 'post-abc', activityLegacyId: 7 });
@@ -70,7 +59,7 @@ describe('notificationNavigation', () => {
 
     const target = await resolveNotificationPostTarget({
       postId: 'post-2',
-      category: 'like',
+      type: 'activity_update',
     });
 
     expect(target).toEqual({ postId: 'post-2', activityLegacyId: 4 });
@@ -87,7 +76,7 @@ describe('notificationNavigation', () => {
 
     const target = await resolveNotificationPostTarget({
       postId: 'post-3',
-      category: 'comment',
+      type: 'activity_update',
     });
 
     expect(target).toEqual({ postId: 'post-3', activityLegacyId: 5 });

@@ -5,6 +5,7 @@
 > **未登录（开发）**：Query 仅 `userId`（需后端 `AUTH_ALLOW_DEMO=true`；不传 Query `authorName`）。  
 > 登录：`POST /auth/dev`（H5 开发）/ `POST /auth/wechat`（小程序）/ `POST /auth/logout`（吊销 JWT）。  
 > 清单：`docs/FRONTEND-REFACTOR-CHECKLIST.md` / 后端 `docs/BACKEND-REFACTOR-CHECKLIST.md`  
+> 帖子全链路：`docs/POST-LIFECYCLE.md`  
 > 架构：`../sync-app-backend/docs/ARCHITECTURE.md`
 
 ---
@@ -268,15 +269,11 @@ X-Activity-Id: 4          # 可选，活动 legacyId（REST + AI WebSocket upgra
 | GET | `/api/activities/resolve?keyword=` | 活动关键词解析（按 code / 名称 / 别名查找） |
 | GET | `/api/activities/:legacyId` | 活动详情 |
 | GET | `/api/posts/popular?limit=` | 首页热门帖子 |
-| GET | `/api/posts?activityLegacyId=&limit=&cursor=&anchorPostId=` | 活动下帖子（分页：`{ items, nextCursor?, hasMore }`）；`EventDetailPost` 可选 `authorOnSiteVerified`（作者当日已通过该活动手环认证） |
-**UGC 文本**（发帖/评论/现场资讯备注/AI 用户消息/资料编辑/举报说明等）在落库前会调用微信 `msg_sec_check`（需 `WECHAT_CONTENT_SECURITY_ENABLED=true` 且配置小程序 AppId/Secret）。
+| GET | `/api/posts?activityLegacyId=&limit=&cursor=&anchorPostId=` | 活动下帖子（分页：`{ items, nextCursor?, hasMore }`）；项为 `EventDetailPost` |
 | GET | `/api/posts?userId=&authorName=` | 我的帖子（owner 过滤） |
-| POST | `/api/posts` | 创建帖子（Query 身份；模板帖可由活动页 `AiBuddyPostSheet` 或 AI 闭环创建；留言板 `contentTypes: ['other']`） |
-| PATCH | `/api/posts/:id` | 编辑自己的帖子（正文、图片等；不含 status 流转） |
+| POST | `/api/posts` | 创建帖子（模板帖：`contentTypes` + `tags` + `联系方式：` 正文；活动页 `AiBuddyPostSheet` 或 AI 闭环） |
 | DELETE | `/api/posts/:id` | 删除自己的帖子 |
-| POST | `/api/posts/:id/like` | 点赞/取消；响应 `{ post: EventDetailPost }` |
-| GET | `/api/posts/:id/comments` | 评论分页：`{ items, nextCursor?, hasMore }`；Query `limit`（默认 20，最大 50）、`cursor` |
-| POST | `/api/posts/:id/comments` | 发表评论 `{ "body": "..." }`；响应 `{ post: EventDetailPost }` |
+| GET | `/api/posts/:id/navigation-target` | 通知深链解析（活动 id、是否可跳转） |
 | GET | `/api/profile` | 个人资料摘要 |
 | GET | `/api/profile/activities` | 我的报名活动 |
 | GET | `/api/profile/posts` | 我的帖子 |
@@ -297,47 +294,67 @@ X-Activity-Id: 4          # 可选，活动 legacyId（REST + AI WebSocket upgra
 
 后端地图链路见 `sync-app-backend/docs/TRAVEL_GUIDE_MAP.md`；需配置 `AMAP_KEY`。
 
-### GET `/api/posts/:id/comments`（分页）
+**UGC 文本**（发帖 / 现场资讯备注 / AI 用户消息 / 资料编辑 / 举报说明等）在落库前可调用微信 `msg_sec_check`（需 `WECHAT_CONTENT_SECURITY_ENABLED=true` 且配置小程序 AppId/Secret）。
 
-Query：`limit`（默认 20，最大 50）、`cursor`（上一页 `nextCursor`）。
+### POST `/api/posts`（模板帖 body 示例）
 
 ```json
 {
-  "code": 200,
-  "data": {
-    "items": [
-      {
-        "id": "…",
-        "userId": "…",
-        "authorName": "…",
-        "avatar": "…",
-        "body": "…",
-        "time": "刚刚",
-        "replies": []
-      }
-    ],
-    "nextCursor": "eyJj…",
-    "hasMore": true
-  }
+  "body": "组队、拼房，6.13-6.14，上海，2人，联系方式：wx_sync_team，女生优先\n\n#组队 #拼房",
+  "activityLegacyId": 4,
+  "eventTitle": "风暴电音节",
+  "location": "上海",
+  "tags": ["#组队", "#拼房"],
+  "contentTypes": ["team", "accommodation"],
+  "listedInFeed": true
 }
 ```
 
-仅分页**顶层评论**（`createdAt` 升序）；每条顶层评论的 `replies` 仍随页返回。
+- 模板帖走风控 `rulesOnly`：**完整保留** `联系方式：` 段（前端默认隐藏，点击展开）
+- `listedInFeed: false` 不入活动公开列表（前端发帖 UI 暂未暴露）
 
-通知 `meta`（深链，可选）：
+### 活动帖搜索（前端）
+
+无服务端搜索 API。活动详情 `EventDetailBoardSearchBar` 对已加载列表做模糊匹配（`body` / `location` / `tags`）；搜索时自动 `loadMore` 直至无更多页。
+
+### GET `/api/activities/:legacyId/itinerary/schedule`
+
+响应含 `schedulePublished: boolean` — 无官方演出时间表时为 `false`，前端禁止「生成时间表」并提示等待官宣。
+
+### 帖子互动（已移除）
+
+以下接口已从后端删除，前端不再调用：
+
+- `PATCH /api/posts/:id`
+- `POST /api/posts/:id/like`
+- `GET|POST /api/posts/:id/comments`
+
+### 消息通知
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | `/api/notifications` | 通知列表（过滤历史点赞/评论/组队申请） |
+| GET | `/api/notifications/unread-count` | 未读数（同上过滤） |
+| PATCH | `/api/notifications/:id/read` | 单条已读 |
+| PATCH | `/api/notifications/read-all` | 全部已读 |
+| DELETE | `/api/notifications/:id` | 删除单条（若实现） |
+
+前端通知页 Tab：**全部** / **系统**。不再推送或展示点赞/评论类通知。
+
+### 通知 `meta`（深链，可选）
 
 ```json
 {
   "activityLegacyId": 4,
   "postId": "665a…",
-  "type": "like",
-  "actorUserId": "demo-zara",
-  "actorUserName": "Zara Chen"
+  "type": "activity_update",
+  "changeSummary": "地点已更新"
 }
 ```
 
-- `type`：`like` | `comment` | `activity`（历史通知可能含已废弃的 `application`；客户端跳转活动详情；有 `postId` 时高亮对应帖子）
+- `type`：`activity_update` | `post_rejected` | `post_hidden` | `activity` — 按类型跳转活动详情 / AI 助手 / 个人页
 - `activityLegacyId`：优先于已废弃的字符串 `activityId`
+- **已废弃（列表不返回）**：`like` | `comment` | `comment_reply` | `application`
 
 ---
 
@@ -355,7 +372,7 @@ GET 响应 `data`：`{ id, name, handle, location, bio, avatar, city?, favorGenr
 - `reasonCode`：`scalper` | `content` | `reports`（用户可读原因分类，不含内部违规明细）
 - `appealHint`：引导至「设置 → 申诉说明」的固定文案
 
-发帖/评论 403 时前端应 `invalidate users/me` 并展示提示。
+发帖 403 时前端应 `invalidate users/me` 并展示提示。
 
 PATCH body（均可选）：`name`, `handle`, `location`, `bio`, `avatar`, `city`, `favorGenres`, `budgetLevel`
 
@@ -377,7 +394,7 @@ Query：`targetType=post`（V1 仅帖子）、`targetId`（帖子 id）
 **账号风控**（`GET /users/me` 在受限时返回 `accountRisk`：`status`、`postBlockedUntil`、`message`、`reasonCode`、`appealHint`）：
 
 - 累计 **黄牛类违规**（规则/票务策略/LLM `scalper`）或 **被举报黄牛** 达阈值 → `restricted`（默认 7 天）或 `banned`（30 天）
-- 受限期间 `POST /posts`、评论、AI 发帖均返回 **403**
+- 受限期间 `POST /posts`、AI 发帖均返回 **403**
 - 违规事件写入 `AccountRiskEvent`；`duplicate` 不计入升级
 
 **画像写入**：小程序「我的 → 组队偏好」可手动 `PATCH`；亦会在下列操作有变化时自动合并写入：

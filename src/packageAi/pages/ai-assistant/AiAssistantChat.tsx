@@ -17,7 +17,6 @@ import { invalidateCache } from '../../../hooks/useApiQuery';
 import { useAiBuddyPost } from '../../../hooks/useAiBuddyPost';
 import { useAiTravelGuide } from '../../../hooks/useAiTravelGuide';
 import { resolveActivityByKeyword } from '../../../api/syncApi';
-import { goEventDetail } from '../../../utils/route';
 import { selectSetActiveActivityLegacyId, useNavigationStore } from '../../../stores';
 import { parseActivityDayCount } from '../../../utils/parseActivityDayCount';
 import { useActivityDetailQuery } from '../../../hooks/useSyncApi';
@@ -86,9 +85,9 @@ export function AiAssistantChat({
 
   const welcomeText = useMemo(() => {
     if (activityTitle?.trim()) {
-      return `👋 已为你锁定「${activityTitle.trim()}」。有问题随时问我，或点下方活动名进入活动详情。`;
+      return `👋 已为你锁定「${activityTitle.trim()}」。有问题随时问我，或点下方活动名切换场次。`;
     }
-    return '👋 我是你的 AI 智能助手，帮你发现活动、规划出行。点下方活动名可绑定场次。';
+    return '👋 我是你的 AI 智能助手，帮你发现活动、规划出行。点下方活动名绑定场次。';
   }, [activityTitle]);
 
   const {
@@ -181,16 +180,6 @@ export function AiAssistantChat({
       const trimmedKeyword = keyword.trim();
       if (!trimmedKeyword) return;
 
-      if (
-        activityLegacyId != null &&
-        !Number.isNaN(activityLegacyId) &&
-        trimmedActivityTitle &&
-        trimmedKeyword === trimmedActivityTitle
-      ) {
-        goEventDetail(activityLegacyId);
-        return;
-      }
-
       try {
         const activity = await resolveActivityByKeyword(trimmedKeyword);
         if (activity?.legacyId != null && !Number.isNaN(activity.legacyId)) {
@@ -220,7 +209,6 @@ export function AiAssistantChat({
       send,
       setActiveActivityLegacyId,
       travelGuide,
-      trimmedActivityTitle,
     ],
   );
 
@@ -400,6 +388,7 @@ export function AiAssistantChat({
           }
           activityLegacyId={activityLegacyId}
           activityTitle={activityTitle}
+          activityCode={activityQuery.data?.code}
           onInputChange={setInput}
           onSubmit={submit}
           onClearChat={handleClearChat}

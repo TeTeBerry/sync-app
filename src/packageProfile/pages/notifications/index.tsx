@@ -5,13 +5,7 @@ import ThemedPageLoader from '../../../components/ThemedPageLoader';
 import { useDeferredMount } from '../../../hooks/useDeferredMount';
 import { usePageRouteReady } from '../../../hooks/usePageRouteReady';
 import { useEndRouteTransitionOnShow } from '../../../hooks/useEndRouteTransitionOnShow';
-import {
-  Bell,
-  Heart,
-  MessageCircle,
-  Megaphone,
-  Trash2,
-} from '../../../components/icons';
+import { Bell, Megaphone, Trash2 } from '../../../components/icons';
 import PageNavigation from '../../../components/navigation/PageNavigation';
 import {
   clearAllNotificationsAndInvalidate,
@@ -25,7 +19,7 @@ import type { AppNotification } from '../../../types/backend';
 import {
   formatNotificationTimeAgo,
   getNotificationCategory,
-  isDeprecatedApplicationNotification,
+  isHiddenNotification,
   resolveNotificationText,
   type NotificationCategory,
 } from '../../../utils/notificationDisplay';
@@ -34,23 +28,15 @@ import { DEFER_NOTIFICATIONS_MS } from '../../../utils/timing';
 import { Button } from '../../../components/ui';
 import { Text, View } from '@tarojs/components';
 
-type CategoryFilter = 'all' | NotificationCategory;
+type CategoryFilter = 'all' | 'system';
 
-const CATEGORY_TABS: CategoryFilter[] = ['all', 'comment', 'like', 'system'];
+const CATEGORY_TABS: CategoryFilter[] = ['all', 'system'];
 
 function NotificationIcon({ category }: { category: NotificationCategory }) {
-  const iconProps = { size: 20 as const };
-
-  switch (category) {
-    case 'like':
-      return <Heart {...iconProps} />;
-    case 'comment':
-      return <MessageCircle {...iconProps} />;
-    case 'system':
-      return <Megaphone {...iconProps} />;
-    default:
-      return <Bell {...iconProps} />;
+  if (category === 'system') {
+    return <Megaphone size={20} />;
   }
+  return <Bell size={20} />;
 }
 
 const NotificationsPage: React.FC = () => {
@@ -60,7 +46,7 @@ const NotificationsPage: React.FC = () => {
   const notifications = useMemo(
     () =>
       (notificationsQuery.data ?? []).filter(
-        (item) => !isDeprecatedApplicationNotification(item.meta),
+        (item) => !isHiddenNotification(item.meta),
       ),
     [notificationsQuery.data],
   );
@@ -88,17 +74,13 @@ const NotificationsPage: React.FC = () => {
   const unreadTabCounts = useMemo(() => {
     const counts: Record<CategoryFilter, number> = {
       all: 0,
-      comment: 0,
-      like: 0,
       system: 0,
-      general: 0,
     };
     for (const item of notifications) {
       if (item.read) continue;
       counts.all += 1;
-      const category = getNotificationCategory(item.meta);
-      if (category !== 'general') {
-        counts[category] += 1;
+      if (getNotificationCategory(item.meta) === 'system') {
+        counts.system += 1;
       }
     }
     return counts;
@@ -165,13 +147,7 @@ const NotificationsPage: React.FC = () => {
                 onClick={() => setActiveCategory(category)}
               >
                 <Text className="s-btn-label">
-                  {category === 'all'
-                    ? '全部'
-                    : category === 'comment'
-                      ? '评论'
-                      : category === 'like'
-                        ? '点赞'
-                        : '系统'}
+                  {category === 'all' ? '全部' : '系统'}
                 </Text>
                 {count > 0 && (
                   <Text className="s-notifications__tab-count">{count}</Text>
@@ -207,7 +183,7 @@ const NotificationsPage: React.FC = () => {
             <Bell size={40} className="s-notifications__empty-icon" />
             <View className="s-notifications__empty-title">暂无消息</View>
             <View className="s-notifications__empty-desc">
-              评论、点赞和活动变更会在这里显示。
+              活动变更、审核结果等系统通知会在这里显示。
             </View>
           </View>
         ) : (

@@ -18,9 +18,13 @@ vi.mock('@tarojs/taro', () => ({
   useDidShow: vi.fn(),
 }));
 
-vi.mock('@/constants/api', () => ({
-  isLiveApi: () => false,
-}));
+vi.mock('@/constants/api', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/constants/api')>();
+  return {
+    ...actual,
+    isLiveApi: () => false,
+  };
+});
 
 vi.mock('@/utils/subpackagePreload', () => ({
   preloadAiSubpackage: vi.fn(),
@@ -31,23 +35,6 @@ vi.mock('@/utils/subpackagePreload', () => ({
 
 vi.mock('@/hooks/useApiQuery', () => ({
   getCacheData: vi.fn(() => undefined),
-}));
-
-vi.mock('@/utils/notificationNavigation', () => ({
-  isPostInteractionNotification: (meta?: { type?: string; category?: string }) =>
-    meta?.type === 'like' ||
-    meta?.type === 'comment' ||
-    meta?.category === 'like' ||
-    meta?.category === 'comment',
-  resolveNotificationPostTarget: vi.fn(
-    async (meta: { postId?: string; activityLegacyId?: number }) => {
-      if (!meta.postId?.trim()) return null;
-      if (meta.activityLegacyId != null) {
-        return { postId: meta.postId, activityLegacyId: meta.activityLegacyId };
-      }
-      return null;
-    },
-  ),
 }));
 
 vi.mock('@/stores/navigationStore', () => ({
@@ -74,35 +61,26 @@ describe('navigateFromNotification', () => {
     });
   });
 
-  it('opens event detail for like notifications with postId', async () => {
+  it('opens event detail for activity update notifications', async () => {
     const { navigateFromNotification } = await import('@/utils/route');
     const opened = await navigateFromNotification({
-      type: 'like',
+      type: 'activity_update',
       activityLegacyId: 4,
-      postId: 'post-abc',
-    });
-
-    await vi.waitFor(() => {
-      expect(Taro.navigateTo).toHaveBeenCalled();
     });
 
     expect(opened).toBe(true);
     const url = String(vi.mocked(Taro.navigateTo).mock.calls[0]?.[0]?.url ?? '');
     expect(url).toContain('event-detail');
-    expect(url).toContain('postId=post-abc');
   });
 
-  it('opens event detail for comment notifications with postId', async () => {
+  it('opens profile for post hidden notifications', async () => {
     const { navigateFromNotification } = await import('@/utils/route');
+
     const opened = await navigateFromNotification({
-      type: 'comment',
-      activityLegacyId: 7,
-      postId: 'post-comment',
+      type: 'post_hidden',
+      postId: 'post-hidden',
     });
 
     expect(opened).toBe(true);
-    const url = String(vi.mocked(Taro.navigateTo).mock.calls[0]?.[0]?.url ?? '');
-    expect(url).toContain('event-detail');
-    expect(url).toContain('postId=post-comment');
   });
 });
