@@ -728,6 +728,51 @@
     line-height: 1.4;
   }
 
+  &__dining-bills {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  &__dining-bill {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  &__dining-bill-main {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__dining-bill-title {
+    display: block;
+    font-size: 13px;
+    font-weight: var(--s-fw-semibold);
+    color: #fff;
+    line-height: 1.35;
+  }
+
+  &__dining-bill-meta {
+    display: block;
+    margin-top: 2px;
+    font-size: 11px;
+    color: #8e8e93;
+    line-height: 1.35;
+  }
+
+  &__dining-bill-cost {
+    flex-shrink: 0;
+    font-size: 13px;
+    font-weight: var(--s-fw-semibold);
+    color: #ff9f0a;
+    line-height: 1.35;
+  }
+
   &__node-foot {
     display: flex;
     align-items: center;

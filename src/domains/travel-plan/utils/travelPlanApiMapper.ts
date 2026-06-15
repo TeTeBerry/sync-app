@@ -19,6 +19,8 @@ export function travelPlanNodeToPayload(node: TravelPlanNode): TravelPlanNodePay
     ...(node.detail ? { detail: node.detail } : {}),
     ...(node.price != null ? { price: node.price } : {}),
     confirmed: node.confirmed,
+    ...(node.diningBills?.length ? { diningBills: node.diningBills } : {}),
+    ...(node.transportBills?.length ? { transportBills: node.transportBills } : {}),
   };
 }
 
@@ -49,6 +51,10 @@ export function travelPlanNodeFromPayload(
     ...(payload.detail ? { detail: payload.detail } : {}),
     ...(payload.price != null ? { price: payload.price } : {}),
     confirmed: payload.confirmed,
+    ...(payload.diningBills?.length ? { diningBills: payload.diningBills } : {}),
+    ...(payload.transportBills?.length
+      ? { transportBills: payload.transportBills }
+      : {}),
   };
 }
 
@@ -88,5 +94,9 @@ export function travelPlanNodeFromSavedPayload(
     subtitle: payload.subtitle,
     startDate: timeRange.startDate,
     endDate: timeRange.endDate,
+    ...(payload.diningBills?.length ? { diningBills: payload.diningBills } : {}),
+    ...(payload.transportBills?.length
+      ? { transportBills: payload.transportBills }
+      : {}),
   };
 }

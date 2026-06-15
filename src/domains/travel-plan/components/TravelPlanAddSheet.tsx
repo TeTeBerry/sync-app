@@ -28,6 +28,7 @@ import {
   recognizedTravelPlanFormsToAddFormValues,
   resolveRecognizedTravelPlanForms,
 } from '../utils/travelPlanReceiptRecognize';
+import { shouldMergeTransportForms } from '../utils/travelPlanTransportBills';
 import Taro from '@tarojs/taro';
 import { TravelPlanAddSheetSegment } from './TravelPlanAddSheetSegment';
 import { ScrollView, Text, View } from '@tarojs/components';
@@ -100,6 +101,32 @@ export function TravelPlanAddSheet({
     [category],
   );
 
+  const removeFormSegment = useCallback(
+    (index: number) => {
+      setFormSegments((prev) => {
+        if (prev.length <= 1) {
+          return [createEmptyTravelPlanAddForm(category)];
+        }
+        const next = prev.filter((_, segmentIndex) => segmentIndex !== index);
+        return next.length > 0 ? next : [createEmptyTravelPlanAddForm(category)];
+      });
+    },
+    [category],
+  );
+
+  const mergeAsBillList = useMemo(() => {
+    if (formSegments.length <= 1) {
+      return false;
+    }
+    if (category === 'dining') {
+      return true;
+    }
+    if (category === 'transport') {
+      return shouldMergeTransportForms(formSegments);
+    }
+    return false;
+  }, [category, formSegments]);
+
   const handleCategoryChange = useCallback(
     (nextCategory: TravelPlanAddFormCategory) => {
       setCategory(nextCategory);
@@ -150,9 +177,20 @@ export function TravelPlanAddSheet({
           setOcrStatus('success');
           setOcrMessage(
             result.message ??
-              (recognizedForms.length > 1
-                ? `AI 识别完成，已拆分为 ${recognizedForms.length} 段单程`
-                : 'AI 识别完成，已自动填入'),
+              (category === 'dining' && recognizedForms.length > 1
+                ? `AI 识别完成，已识别 ${recognizedForms.length} 笔账单`
+                : category === 'transport' &&
+                    recognizedForms.length > 1 &&
+                    shouldMergeTransportForms(
+                      recognizedTravelPlanFormsToAddFormValues(
+                        category,
+                        recognizedForms,
+                      ),
+                    )
+                  ? `AI 识别完成，已识别 ${recognizedForms.length} 笔打车记录`
+                  : recognizedForms.length > 1
+                    ? `AI 识别完成，已拆分为 ${recognizedForms.length} 段单程`
+                    : 'AI 识别完成，已自动填入'),
           );
           return;
         }
@@ -309,7 +347,11 @@ export function TravelPlanAddSheet({
                   </Text>
                   {formSegments.length > 1 ? (
                     <Text className="s-travel-plan-add-sheet__ocr-hint-sub">
-                      已填入 {formSegments.length} 段，可向下滚动查看并编辑
+                      {category === 'dining'
+                        ? `已填入 ${formSegments.length} 笔账单，可向下滚动查看、编辑或删除`
+                        : mergeAsBillList
+                          ? `已填入 ${formSegments.length} 笔打车记录，可向下滚动查看、编辑或删除`
+                          : `已填入 ${formSegments.length} 段，可向下滚动查看并编辑`}
                     </Text>
                   ) : null}
                 </View>
@@ -358,6 +400,10 @@ export function TravelPlanAddSheet({
                   form={segment}
                   sheetOpen={open}
                   onPatch={(patch) => patchFormSegment(index, patch)}
+                  onRemove={
+                    mergeAsBillList ? () => removeFormSegment(index) : undefined
+                  }
+                  mergeAsBillList={mergeAsBillList}
                 />
               ))}
             </View>
@@ -373,9 +419,13 @@ export function TravelPlanAddSheet({
                 onClick={handleSubmit}
               >
                 <Text className="s-travel-plan-add-sheet__submit-label">
-                  {formSegments.length > 1
-                    ? `保存 ${formSegments.length} 段行程`
-                    : '保存行程'}
+                  {mergeAsBillList
+                    ? category === 'dining'
+                      ? `保存 ${formSegments.length} 笔餐饮账单`
+                      : `保存 ${formSegments.length} 笔打车记录`
+                    : formSegments.length > 1
+                      ? `保存 ${formSegments.length} 段行程`
+                      : '保存行程'}
                 </Text>
               </Button>
             </View>

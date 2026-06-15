@@ -320,6 +320,36 @@
     margin-bottom: 14px;
   }
 
+  &__segment-head-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  &__segment-remove {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    margin: 0;
+    border: none;
+    border-radius: var(--radius-full);
+    background: rgba(255, 69, 58, 0.12);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+
+    &::after {
+      display: none;
+      border: 0;
+    }
+
+    &--pressed {
+      opacity: 0.82;
+    }
+  }
+
   &__segment-title {
     font-size: 14px;
     font-weight: var(--s-fw-bold);

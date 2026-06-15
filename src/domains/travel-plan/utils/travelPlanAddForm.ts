@@ -8,6 +8,8 @@ import {
 import { resolveTravelPlanExpandedDetail } from './travelPlanNodeDisplay';
 import { parseTransportTimesFromText } from './travelPlanTransportTime';
 import type { TravelPlanCategory, TravelPlanNode } from '../types';
+import type { TravelPlanBillLineItem } from '@/types/travelPlan';
+import { shouldMergeTransportForms } from './travelPlanTransportBills';
 
 export type TravelPlanAddFormCategory = 'transport' | 'hotel' | 'dining' | 'event';
 
@@ -107,4 +109,126 @@ export function createTravelPlanNodeFromForm(
     price: parseTravelPlanCostInput(form.cost),
     confirmed: false,
   };
+}
+
+function formatAggregatedBillNodeTitle(
+  bills: TravelPlanBillLineItem[],
+  fallback: string,
+): string {
+  const titles = bills.map((bill) => bill.title.trim()).filter(Boolean);
+  if (titles.length === 0) {
+    return fallback;
+  }
+  if (titles.length === 1) {
+    return titles[0];
+  }
+  if (titles.length <= 3) {
+    return titles.join('、');
+  }
+  return `${titles[0]} 等 ${titles.length} 笔`;
+}
+
+function createAggregatedBillNodeFromForms(
+  forms: TravelPlanAddFormValues[],
+  options: {
+    category: 'dining' | 'transport';
+    billIdPrefix: string;
+    billsField: 'diningBills' | 'transportBills';
+    fallbackTitle: string;
+    subtitleSuffix: string;
+  },
+): TravelPlanNode {
+  const sortedForms = sortTravelPlanAddFormValues(forms);
+
+  const bills: TravelPlanBillLineItem[] = sortedForms.map((form, index) => ({
+    id: `${options.billIdPrefix}-${Date.now()}-${index}`,
+    title: form.title.trim(),
+    description: form.description.trim() || undefined,
+    cost: parseTravelPlanCostInput(form.cost),
+    startDate: form.timeRange.startDate,
+    ...(form.timeRange.startTime ? { startTime: form.timeRange.startTime } : {}),
+  }));
+
+  const startForm = sortedForms[0];
+  const endForm = sortedForms[sortedForms.length - 1];
+  const normalizedRange = {
+    startDate: startForm.timeRange.startDate,
+    endDate: endForm.timeRange.endDate || endForm.timeRange.startDate,
+    ...(startForm.timeRange.startTime
+      ? { startTime: startForm.timeRange.startTime }
+      : {}),
+    ...(endForm.timeRange.endTime ? { endTime: endForm.timeRange.endTime } : {}),
+  };
+
+  const totalCost = bills.reduce((sum, bill) => sum + (bill.cost ?? 0), 0);
+  const price = totalCost > 0 ? Math.round(totalCost * 100) / 100 : undefined;
+  const title = formatAggregatedBillNodeTitle(bills, options.fallbackTitle);
+  const subtitle = `共 ${bills.length} ${options.subtitleSuffix}`;
+  const timeLabel = formatTravelPlanTimeLabel(normalizedRange) || '待填写日期';
+  const duration = formatTravelPlanDuration(normalizedRange);
+
+  return {
+    id: `plan-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    source: 'user',
+    category: options.category,
+    startDate: normalizedRange.startDate,
+    endDate: normalizedRange.endDate,
+    ...(normalizedRange.startTime ? { startTime: normalizedRange.startTime } : {}),
+    ...(normalizedRange.endTime ? { endTime: normalizedRange.endTime } : {}),
+    timeLabel,
+    ...(duration ? { duration } : {}),
+    title,
+    subtitle,
+    detail: `${bills.length} 笔账单明细`,
+    price,
+    confirmed: false,
+    [options.billsField]: bills,
+  } as TravelPlanNode;
+}
+
+export function createTravelPlanDiningNodeFromForms(
+  forms: TravelPlanAddFormValues[],
+): TravelPlanNode {
+  return createAggregatedBillNodeFromForms(
+    forms.map((form) => ({ ...form, category: 'dining' as const })),
+    {
+      category: 'dining',
+      billIdPrefix: 'dining-bill',
+      billsField: 'diningBills',
+      fallbackTitle: '餐饮消费',
+      subtitleSuffix: '笔消费',
+    },
+  );
+}
+
+export function createTravelPlanTransportNodeFromForms(
+  forms: TravelPlanAddFormValues[],
+): TravelPlanNode {
+  return createAggregatedBillNodeFromForms(
+    forms.map((form) => ({ ...form, category: 'transport' as const })),
+    {
+      category: 'transport',
+      billIdPrefix: 'transport-bill',
+      billsField: 'transportBills',
+      fallbackTitle: '打车出行',
+      subtitleSuffix: '笔打车',
+    },
+  );
+}
+
+export function createTravelPlanNodesFromFormValues(
+  values: TravelPlanAddFormValues[],
+): TravelPlanNode[] {
+  const sortedValues = sortTravelPlanAddFormValues(values);
+  if (sortedValues.length > 1 && sortedValues[0]?.category === 'dining') {
+    return [createTravelPlanDiningNodeFromForms(sortedValues)];
+  }
+  if (
+    sortedValues.length > 1 &&
+    sortedValues[0]?.category === 'transport' &&
+    shouldMergeTransportForms(sortedValues)
+  ) {
+    return [createTravelPlanTransportNodeFromForms(sortedValues)];
+  }
+  return sortedValues.map(createTravelPlanNodeFromForm);
 }

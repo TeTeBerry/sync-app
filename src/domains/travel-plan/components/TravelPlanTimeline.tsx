@@ -14,6 +14,10 @@ import {
 import { Button } from '@/components/ui';
 import { Text, View } from '@tarojs/components';
 import { resolveTravelPlanExpandedDetail } from '../utils/travelPlanNodeDisplay';
+import {
+  formatDiningBillCost,
+  formatDiningBillMeta,
+} from '../utils/travelPlanDiningBills';
 import type { TravelPlanCategory, TravelPlanNode } from '../types';
 import { TravelPlanNodePriceField } from './TravelPlanNodePriceField';
 
@@ -76,6 +80,12 @@ function TravelPlanNodeCard({
 }) {
   const accent = CATEGORY_COLORS[node.category];
   const expandedDetail = expanded ? resolveTravelPlanExpandedDetail(node) : undefined;
+  const billLines =
+    node.diningBills && node.diningBills.length > 0
+      ? node.diningBills
+      : node.transportBills && node.transportBills.length > 0
+        ? node.transportBills
+        : null;
 
   return (
     <View
@@ -144,7 +154,28 @@ function TravelPlanNodeCard({
 
         <Text className="s-travel-plan__node-sub">{node.subtitle}</Text>
 
-        {expandedDetail ? (
+        {expanded && billLines ? (
+          <View className="s-travel-plan__dining-bills">
+            {billLines.map((bill) => {
+              const costLabel = formatDiningBillCost(bill.cost);
+              return (
+                <View key={bill.id} className="s-travel-plan__dining-bill">
+                  <View className="s-travel-plan__dining-bill-main">
+                    <Text className="s-travel-plan__dining-bill-title">
+                      {bill.title}
+                    </Text>
+                    <Text className="s-travel-plan__dining-bill-meta">
+                      {formatDiningBillMeta(bill)}
+                    </Text>
+                  </View>
+                  {costLabel ? (
+                    <Text className="s-travel-plan__dining-bill-cost">{costLabel}</Text>
+                  ) : null}
+                </View>
+              );
+            })}
+          </View>
+        ) : expandedDetail ? (
           <Text className="s-travel-plan__node-detail">{expandedDetail}</Text>
         ) : null}
 

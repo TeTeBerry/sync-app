@@ -12,7 +12,7 @@ import {
 } from '../utils/travelPlanApiMapper';
 import { buildDefaultActivityTravelPlanNodes } from '../utils/travelPlanActivityNodes';
 import {
-  createTravelPlanNodeFromForm,
+  createTravelPlanNodesFromFormValues,
   sortTravelPlanAddFormValues,
   type TravelPlanAddFormValues,
 } from '../utils/travelPlanAddForm';
@@ -285,7 +285,7 @@ export function useTravelPlanPage({
     async (values: TravelPlanAddFormValues[]) => {
       const sortedValues = sortTravelPlanAddFormValues(values);
       const nodes = alignTravelPlanNodesYear(
-        sortedValues.map(createTravelPlanNodeFromForm),
+        createTravelPlanNodesFromFormValues(sortedValues),
         activityYearHint,
       );
       const nextUserNodes = sortTravelPlanNodes([...userNodes, ...nodes]);
@@ -301,7 +301,14 @@ export function useTravelPlanPage({
       );
       if (ok) {
         void Taro.showToast({
-          title: nodes.length > 1 ? `已保存 ${nodes.length} 段行程` : '已保存行程',
+          title:
+            nodes.length > 1
+              ? `已保存 ${nodes.length} 段行程`
+              : nodes[0]?.diningBills && nodes[0].diningBills.length > 1
+                ? `已保存 ${nodes[0].diningBills.length} 笔餐饮账单`
+                : nodes[0]?.transportBills && nodes[0].transportBills.length > 1
+                  ? `已保存 ${nodes[0].transportBills.length} 笔打车记录`
+                  : '已保存行程',
           icon: 'success',
         });
       } else {
