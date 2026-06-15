@@ -50,8 +50,6 @@ const mockPosts: HomeFeedPost[] = Array.from({ length: 10 }, (_, index) => ({
   location: 'SZ',
   body: `body ${index}`,
   time: '1h',
-  likes: 0,
-  comments: 0,
   avatar: '',
 }));
 

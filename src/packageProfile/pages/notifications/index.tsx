@@ -19,7 +19,6 @@ import type { AppNotification } from '../../../types/backend';
 import {
   formatNotificationTimeAgo,
   getNotificationCategory,
-  isHiddenNotification,
   resolveNotificationText,
   type NotificationCategory,
 } from '../../../utils/notificationDisplay';
@@ -43,13 +42,7 @@ const NotificationsPage: React.FC = () => {
   useEndRouteTransitionOnShow();
   const listReady = useDeferredMount(DEFER_NOTIFICATIONS_MS);
   const notificationsQuery = useNotificationsQuery();
-  const notifications = useMemo(
-    () =>
-      (notificationsQuery.data ?? []).filter(
-        (item) => !isHiddenNotification(item.meta),
-      ),
-    [notificationsQuery.data],
-  );
+  const notifications = notificationsQuery.data ?? [];
   const isLoading = notificationsQuery.isLoading;
   const refetch = notificationsQuery.refetch;
   const contentReady = listReady && !isLoading;

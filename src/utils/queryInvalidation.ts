@@ -57,11 +57,6 @@ export function invalidatePostFeeds() {
   invalidateCache(['posts', 'activity']);
 }
 
-/** 失效已屏蔽用户列表 */
-export function invalidateBlockedUsers() {
-  invalidateCache(['users', 'blocks']);
-}
-
 /** 失效所有帖子及关联查询 */
 export function invalidateAllPosts() {
   invalidateCache(['posts']);

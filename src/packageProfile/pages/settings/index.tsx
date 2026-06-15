@@ -25,7 +25,6 @@ import { Button } from '../../../components/ui';
 import { ScrollView, Text, View } from '@tarojs/components';
 import { AccountRiskBanner } from '../../../components/account-risk/AccountRiskBanner';
 import { useAccountRisk } from '../../../hooks/useAccountRisk';
-import { BlockedUsersSettings } from './components/BlockedUsersSettings';
 import { BuddyPreferencesSettings } from './components/BuddyPreferencesSettings';
 import { AppealSettings } from './components/AppealSettings';
 import { HelpFeedbackSettings } from './components/HelpFeedbackSettings';
@@ -36,7 +35,6 @@ type SettingsSection =
   | 'privacy'
   | 'help'
   | 'legal'
-  | 'blocked'
   | 'buddy-prefs'
   | 'appeal';
 type PrivacyLevel = ProfilePrivacyLevel;
@@ -46,7 +44,6 @@ const SECTION_TITLES: Record<SettingsSection, string> = {
   privacy: '隐私设置',
   help: '帮助与反馈',
   legal: '法律与协议',
-  blocked: '已屏蔽用户',
   'buddy-prefs': '用户偏好',
   appeal: '申诉说明',
 };
@@ -91,10 +88,7 @@ const SettingsPage: React.FC = () => {
 
   useEffect(() => {
     if (!isLiveApi()) return; // skip login guard when API is not configured
-    if (
-      (section === 'blocked' || section === 'buddy-prefs' || section === 'appeal') &&
-      !isLoggedIn()
-    ) {
+    if ((section === 'buddy-prefs' || section === 'appeal') && !isLoggedIn()) {
       void Taro.showToast({ title: '请先登录', icon: 'none' });
       void Taro.navigateBack();
     }
@@ -171,19 +165,7 @@ const SettingsPage: React.FC = () => {
 
       <AccountRiskBanner accountRisk={accountRisk} />
 
-      {section === 'blocked' ? (
-        <ScrollView
-          scrollY
-          enhanced
-          showScrollbar={false}
-          className="s-settings__scroll s-scrollbar-none"
-          style={scrollStyle}
-        >
-          <View className="s-settings__main">
-            <BlockedUsersSettings />
-          </View>
-        </ScrollView>
-      ) : section === 'buddy-prefs' ? (
+      {section === 'buddy-prefs' ? (
         <ScrollView
           scrollY
           enhanced

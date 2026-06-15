@@ -75,17 +75,6 @@ export interface UpdateCurrentUserPayload {
   privacyLevel?: PrivacyLevel;
 }
 
-export interface BlockedUserItem {
-  userId: string;
-  name: string;
-  avatar?: string;
-}
-
-export interface BlockListResult {
-  blockedUserIds: string[];
-  items: BlockedUserItem[];
-}
-
 export interface ReportPayload {
   targetType: ReportTargetType;
   targetId: string;

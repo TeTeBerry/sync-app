@@ -26,13 +26,7 @@ vi.mock('@/constants/api', () => ({
   API_BASE_URL: 'https://api.test',
 }));
 
-import {
-  blockUser,
-  fetchBlockedUserIds,
-  fetchReportStatus,
-  submitReport,
-  unblockUser,
-} from '@/api/sync/users';
+import { fetchReportStatus, submitReport } from '@/api/sync/users';
 
 function mockSuccessResponse(data: unknown, statusCode = 200) {
   mockRequest.mockImplementation(
@@ -83,7 +77,6 @@ describe('api/sync/users moderation', () => {
     const { url, method } = lastRequest();
     expect(method).toBe('POST');
     expect(url).toContain('/reports');
-    expect(url).toContain('userId=');
     expect(lastRequestBody()).toEqual({
       targetType: 'post',
       targetId: 'post-abc',
@@ -103,40 +96,14 @@ describe('api/sync/users moderation', () => {
     expect(result.reported).toBe(true);
   });
 
-  it('blockUser POSTs /users/blocks with blockedUserId', async () => {
-    await blockUser('user-blocked');
-    const { url, method } = lastRequest();
-    expect(method).toBe('POST');
-    expect(url).toContain('/users/blocks');
-    expect(lastRequestBody()).toEqual({ blockedUserId: 'user-blocked' });
-  });
-
-  it('fetchBlockedUserIds GETs /users/blocks', async () => {
-    mockSuccessResponse({
-      blockedUserIds: ['a', 'b'],
-      items: [
-        { userId: 'a', name: '用户 A' },
-        { userId: 'b', name: '用户 B' },
-      ],
-    });
-    const result = await fetchBlockedUserIds();
-    expect(result.blockedUserIds).toEqual(['a', 'b']);
-    expect(result.items).toHaveLength(2);
-    expect(lastRequest().method).toBe('GET');
-    expect(lastRequest().url).toContain('/users/blocks');
-  });
-
-  it('unblockUser DELETEs /users/blocks/:id', async () => {
-    await unblockUser('user-blocked');
-    const { url, method } = lastRequest();
-    expect(method).toBe('DELETE');
-    expect(url).toContain('/users/blocks/user-blocked');
-  });
-
   it('omits userId query when bearer token is present', async () => {
     mockGetAccessToken.mockReturnValue('token');
     mockGetAuthHeaders.mockReturnValue({ Authorization: 'Bearer token' });
-    await blockUser('user-x');
+    await submitReport({
+      targetType: 'post',
+      targetId: 'post-abc',
+      category: 'ads',
+    });
     expect(lastRequest().url).not.toContain('userId=');
   });
 });

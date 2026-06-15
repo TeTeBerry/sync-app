@@ -144,7 +144,7 @@ POST /api/posts
 | 前端留言搜索 | `test/unit/domains/partner-feed/utils/messageBoardPostSearch.test.ts` |
 | 后端写帖 | `test/unit/modules/partner/application/buddy-post-write-flow.spec.ts` |
 | 后端联系方式保留 | `test/unit/ai/agents/risk.agent.spec.ts`（`rulesOnly`） |
-| 通知过滤 | `test/unit/utils/notificationDisplay.test.ts`、`notification-visibility.util.spec.ts` |
+| 通知展示 | `test/unit/utils/notificationDisplay.test.ts` |
 
 本地执行：
 

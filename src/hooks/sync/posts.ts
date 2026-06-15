@@ -13,7 +13,6 @@ import {
 import { sanitizeImageList, sanitizeRemoteImageUrl } from '../../utils/imageUrl';
 import {
   invalidateAllPosts,
-  invalidateBlockedUsers,
   invalidatePostFeeds,
   popularPostsQueryKey,
   setPopularPostsCache,
@@ -21,7 +20,6 @@ import {
 import { STALE_POSTS_FEED_MS } from '../../constants/queryCache';
 import { useApiQuery } from '../useApiQuery';
 import type { QueryEnableOptions } from './types';
-import { blockUser } from '../../api/sync/users';
 
 export function usePopularPostsQuery(options?: QueryEnableOptions) {
   const tabEnabled = options?.enabled ?? true;
@@ -103,13 +101,6 @@ export async function invalidatePostQueries() {
 export async function deletePostAndInvalidate(postId: string) {
   await deletePost(postId);
   await invalidatePostQueries();
-}
-
-export async function blockUserAndInvalidate(blockedUserId: string) {
-  const result = await blockUser(blockedUserId);
-  invalidatePostFeeds();
-  invalidateBlockedUsers();
-  return result;
 }
 
 export { fetchReportStatus, submitReport } from '../../api/sync/users';

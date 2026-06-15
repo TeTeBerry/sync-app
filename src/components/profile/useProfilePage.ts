@@ -2,11 +2,7 @@ import Taro, { useDidShow } from '@tarojs/taro';
 import { useCallback, useEffect, useMemo } from 'react';
 import { isLiveApi } from '../../constants/api';
 import { useAccountRisk } from '../../hooks/useAccountRisk';
-import {
-  useBlockedUsersQuery,
-  useCurrentUserQuery,
-  useProfileSummaryQuery,
-} from '../../hooks/useSyncApi';
+import { useCurrentUserQuery, useProfileSummaryQuery } from '../../hooks/useSyncApi';
 import type { ConfirmDialogOptions } from '../../hooks/useConfirmDialog';
 import { useAuthSession } from '../../hooks/useAuthSession';
 import { useEndRouteTransitionOnShow } from '../../hooks/useEndRouteTransitionOnShow';
@@ -54,7 +50,6 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
   const summaryQuery = useProfileSummaryQuery();
   const currentUserQuery = useCurrentUserQuery();
   const { accountRisk } = useAccountRisk();
-  const blockedUsersQuery = useBlockedUsersQuery();
   const apiEnabled = isLiveApi();
   const { loggedIn, refresh: refreshAuthSession } = useAuthSession();
   const showGuestProfile = apiEnabled && !loggedIn;
@@ -101,7 +96,6 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
         | 'privacy'
         | 'help'
         | 'legal'
-        | 'blocked'
         | 'buddy-prefs'
         | 'appeal',
     ) => {
@@ -134,8 +128,6 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
     void Taro.showToast({ title: '已退出登录', icon: 'success' });
   }, [confirm, refreshAuthSession]);
 
-  const blockedCount = blockedUsersQuery.data?.blockedUserIds?.length ?? 0;
-
   const buddyPreferencesSummary = formatBuddyPreferencesSummary(
     currentUserQuery.data ?? null,
   );
@@ -145,7 +137,6 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
 
   const settings: ProfileSettingsSectionProps = {
     notificationsEnabled,
-    blockedCount,
     buddyPreferencesSummary,
     showAccountStatusRow: publishRestricted,
     accountStatusSummary: untilLabel
@@ -156,9 +147,6 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
       requireAuth(() => openSettings('buddy-prefs'), 'general');
     },
     onOpenPrivacy: () => openSettings('privacy'),
-    onOpenBlockedUsers: () => {
-      requireAuth(() => openSettings('blocked'), 'general');
-    },
     onOpenAccountAppeal: () => {
       requireAuth(() => openSettings('appeal'), 'general');
     },

@@ -2,8 +2,6 @@ import { describe, expect, it } from 'vitest';
 import {
   categoryFromInteractionType,
   getNotificationCategory,
-  isDeprecatedApplicationNotification,
-  isHiddenNotification,
 } from '@/utils/notificationDisplay';
 
 describe('notificationDisplay', () => {
@@ -27,24 +25,7 @@ describe('notificationDisplay', () => {
     expect(getNotificationCategory({ category: 'system' })).toBe('system');
   });
 
-  it('flags legacy team application notifications', () => {
-    expect(
-      isDeprecatedApplicationNotification({
-        type: 'application',
-        category: 'application',
-      }),
-    ).toBe(true);
-    expect(isDeprecatedApplicationNotification({ type: 'like' })).toBe(false);
-  });
-
-  it('hides like and comment notifications', () => {
-    expect(isHiddenNotification({ type: 'like' })).toBe(true);
-    expect(isHiddenNotification({ type: 'comment' })).toBe(true);
-    expect(
-      isHiddenNotification({
-        type: 'activity_update',
-        category: 'system',
-      }),
-    ).toBe(false);
+  it('falls back unknown stored categories to general', () => {
+    expect(getNotificationCategory({ category: 'like' as never })).toBe('general');
   });
 });

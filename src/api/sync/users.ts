@@ -1,6 +1,5 @@
-import { apiDelete, apiGet, apiPatch, apiPost } from '../../utils/apiClient';
+import { apiGet, apiPatch, apiPost } from '../../utils/apiClient';
 import type {
-  BlockListResult,
   CurrentUser,
   ReportPayload,
   ReportResult,
@@ -15,21 +14,6 @@ export function fetchCurrentUser() {
 
 export function updateCurrentUser(payload: UpdateCurrentUserPayload) {
   return apiPatch<CurrentUser>('/users/me', payload, ownerQueryParams());
-}
-
-export function fetchBlockedUserIds() {
-  return apiGet<BlockListResult>('/users/blocks', ownerQueryParams());
-}
-
-export function blockUser(blockedUserId: string) {
-  return apiPost<{ ok: true }>('/users/blocks', { blockedUserId }, ownerQueryParams());
-}
-
-export function unblockUser(blockedUserId: string) {
-  return apiDelete<{ ok: true }>(
-    `/users/blocks/${encodeURIComponent(blockedUserId)}`,
-    ownerQueryParams(),
-  );
 }
 
 export function submitReport(payload: ReportPayload) {

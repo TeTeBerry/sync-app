@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  Ban,
   Bell,
   ChevronRight,
   FileText,
@@ -14,14 +13,12 @@ import { Text, View } from '@tarojs/components';
 
 export type ProfileSettingsSectionProps = {
   notificationsEnabled: boolean;
-  blockedCount?: number;
   buddyPreferencesSummary?: string;
   showAccountStatusRow?: boolean;
   accountStatusSummary?: string;
   onOpenNotifications: () => void;
   onOpenBuddyPreferences: () => void;
   onOpenPrivacy: () => void;
-  onOpenBlockedUsers: () => void;
   onOpenAccountAppeal?: () => void;
   onOpenHelp: () => void;
   onOpenLegal: () => void;
@@ -30,14 +27,12 @@ export type ProfileSettingsSectionProps = {
 
 const ProfileSettingsSection: React.FC<ProfileSettingsSectionProps> = ({
   notificationsEnabled,
-  blockedCount = 0,
   buddyPreferencesSummary = '未设置',
   showAccountStatusRow = false,
   accountStatusSummary = '发帖已限制',
   onOpenNotifications,
   onOpenBuddyPreferences,
   onOpenPrivacy,
-  onOpenBlockedUsers,
   onOpenAccountAppeal,
   onOpenHelp,
   onOpenLegal,
@@ -100,21 +95,6 @@ const ProfileSettingsSection: React.FC<ProfileSettingsSectionProps> = ({
         <Shield size={18} />
       </View>
       <Text className="s-profile__settings-label">隐私与安全</Text>
-      <ChevronRight size={18} className="s-profile__settings-chevron" />
-    </View>
-
-    <View
-      className="s-profile__settings-row"
-      hoverClass="s-profile__settings-row--pressed"
-      onClick={onOpenBlockedUsers}
-    >
-      <View className="s-profile__settings-icon s-profile__settings-icon--ban">
-        <Ban size={18} />
-      </View>
-      <Text className="s-profile__settings-label">已屏蔽用户</Text>
-      {blockedCount > 0 ? (
-        <Text className="s-profile__settings-value">{blockedCount} 人</Text>
-      ) : null}
       <ChevronRight size={18} className="s-profile__settings-chevron" />
     </View>
 

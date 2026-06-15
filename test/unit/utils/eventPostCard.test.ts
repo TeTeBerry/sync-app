@@ -11,8 +11,6 @@ describe('eventDetailPostToCard', () => {
         createdAt: '2026-06-01T10:00:00.000Z',
         body: '2人 拼房',
         tags: ['#拼房'],
-        likes: 0,
-        comments: 0,
         avatar: 'a.png',
       },
       {

@@ -18,8 +18,6 @@ describe('publishBuddyPostFromForm', () => {
       location: '上海',
       body: 'mock',
       tags: ['#组队'],
-      likes: 0,
-      comments: 0,
       avatar: '',
     });
   });
