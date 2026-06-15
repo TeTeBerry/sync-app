@@ -7,7 +7,7 @@ import {
   fetchProfileSummary,
 } from '../../api/sync/profile';
 import { filterProfileTeamPosts } from '../../utils/profileTeamPosts';
-import { invalidateProfileSummary } from '../../utils/queryInvalidation';
+import { persistProfileSummary } from '../../utils/homeCacheStorage';
 import { useApiQuery } from '../useApiQuery';
 import type { QueryEnableOptions } from './types';
 
@@ -32,7 +32,11 @@ export function useProfileSummaryQuery() {
 
   return useApiQuery({
     queryKey: ['profile', 'summary'],
-    queryFn: fetchProfileSummary,
+    queryFn: async () => {
+      const summary = await fetchProfileSummary();
+      persistProfileSummary(summary);
+      return summary;
+    },
     enabled,
     staleTime: 60_000,
   });
@@ -59,8 +63,4 @@ export function useProfilePostsQuery() {
     enabled,
     staleTime: 30_000,
   });
-}
-
-export async function refreshProfileSummary() {
-  await invalidateProfileSummary();
 }

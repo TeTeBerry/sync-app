@@ -49,7 +49,6 @@ const EventDetailPage = () => {
     handleScroll,
     activityStatusClass,
     showHeaderSkeleton,
-    composerReady,
     templatePublishing,
     posts,
     postsLoading,
@@ -108,7 +107,6 @@ const EventDetailPage = () => {
           <View className="s-event-detail__scroll-inner">
             <EventDetailComposerSection
               showHeaderSkeleton={showHeaderSkeleton}
-              composerReady={composerReady}
               onAiGuideClick={handleOpenAiGuide}
               activityTitle={activityTitle}
               onOpenMyItinerary={handleOpenMyItinerary}
@@ -163,7 +161,7 @@ const EventDetailPage = () => {
           </View>
         ) : null}
       </View>
-      {!showHeaderSkeleton && composerReady ? (
+      {!showHeaderSkeleton ? (
         <EventDetailTemplatePostFab
           disabled={templatePublishing}
           onClick={handleOpenTemplateSheet}

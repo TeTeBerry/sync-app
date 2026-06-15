@@ -2,7 +2,6 @@ import './notifications.scss';
 import Taro from '@tarojs/taro';
 import React, { useCallback, useMemo, useState } from 'react';
 import ThemedPageLoader from '../../../components/ThemedPageLoader';
-import { useDeferredMount } from '../../../hooks/useDeferredMount';
 import { usePageRouteReady } from '../../../hooks/usePageRouteReady';
 import { useEndRouteTransitionOnShow } from '../../../hooks/useEndRouteTransitionOnShow';
 import { Bell, Megaphone, Trash2 } from '../../../components/icons';
@@ -23,7 +22,6 @@ import {
   type NotificationCategory,
 } from '../../../utils/notificationDisplay';
 import { navigateFromNotification, ROUTES } from '../../../utils/route';
-import { DEFER_NOTIFICATIONS_MS } from '../../../utils/timing';
 import { Button } from '../../../components/ui';
 import { Text, View } from '@tarojs/components';
 
@@ -40,12 +38,11 @@ function NotificationIcon({ category }: { category: NotificationCategory }) {
 
 const NotificationsPage: React.FC = () => {
   useEndRouteTransitionOnShow();
-  const listReady = useDeferredMount(DEFER_NOTIFICATIONS_MS);
   const notificationsQuery = useNotificationsQuery();
   const notifications = notificationsQuery.data ?? [];
   const isLoading = notificationsQuery.isLoading;
   const refetch = notificationsQuery.refetch;
-  const contentReady = listReady && !isLoading;
+  const contentReady = !isLoading;
   usePageRouteReady(contentReady);
   const [activeCategory, setActiveCategory] = useState<CategoryFilter>('all');
   const { confirm, confirmDialog } = useConfirmDialog({
@@ -169,7 +166,7 @@ const NotificationsPage: React.FC = () => {
           </View>
         )}
 
-        {(isLoading && notifications.length === 0) || !listReady ? (
+        {isLoading && notifications.length === 0 ? (
           <ThemedPageLoader variant="skeleton-feed" minHeight={280} />
         ) : filteredNotifications.length === 0 ? (
           <View className="s-notifications__empty">

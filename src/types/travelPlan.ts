@@ -11,8 +11,6 @@ export type {
   SavedTravelPlanResult,
   TravelPlanBillLineItem,
   TravelPlanCategory,
-  TravelPlanDiningBillItem,
-  TravelPlanTransportBillItem,
   TravelPlanNode,
   TravelPlanNodePayload,
   TravelPlanNodeRecord,

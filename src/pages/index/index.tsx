@@ -5,7 +5,6 @@ import ThemedPageLoader from '../../components/ThemedPageLoader';
 import { HomeActivityFeed } from './components/HomeActivityFeed';
 import { seedActivityDetailFromFeaturedEvent } from '../../utils/activityDetailCache';
 import { preloadEventSubpackage } from '../../utils/subpackagePreload';
-import { useDeferredMount } from '../../hooks/useDeferredMount';
 import { useConfirmDialog } from '../../hooks/useConfirmDialog';
 import {
   useFeaturedEvents,
@@ -27,7 +26,6 @@ import { joinActivityWithAuth } from '../../utils/joinActivity';
 import { isLoggedIn } from '../../utils/authStorage';
 import { deletePostWithFeedback } from '../../utils/deletePostFeedback';
 import { useAuthSession } from '../../hooks/useAuthSession';
-import { DEFER_BELOW_FOLD_MS, DEFER_SECONDARY_API_MS } from '../../utils/timing';
 import { HomeCountdownCard } from './components/HomeCountdownCard';
 import { HomeFeaturedEvents } from './components/HomeFeaturedEvents';
 import TabPageHeader from '../../components/navigation/TabPageHeader';
@@ -56,22 +54,18 @@ const Home = () => {
     }
   });
 
-  const belowFoldReady = useDeferredMount(DEFER_BELOW_FOLD_MS);
-  const secondaryApiReady = useDeferredMount(DEFER_SECONDARY_API_MS);
   const { data: summary, refetch: refetchHomeSummary } = useHomeSummary();
   const heat = summary?.heat;
   const { loggedIn } = useAuthSession();
   const { items: featuredEvents } = useFeaturedEvents();
   const nearestUpcoming = useNearestUpcomingForCountdown();
-  const { data: unreadCount = 0 } = useNotificationUnreadCount({
-    enabled: secondaryApiReady,
-  });
+  const { data: unreadCount = 0 } = useNotificationUnreadCount();
   const {
     posts,
     isLoading: postsLoading,
     isError: postsError,
     refetch: refetchPosts,
-  } = usePopularPosts({ enabled: belowFoldReady });
+  } = usePopularPosts();
 
   const handleNotification = useCallback(() => {
     requireAuth(() => goNotifications(), 'notification');
@@ -167,7 +161,7 @@ const Home = () => {
             onEventPreload={handleEventPreload}
           />
 
-          {!belowFoldReady || postsLoading ? (
+          {!postsLoading ? (
             <ThemedPageLoader variant="skeleton-feed" minHeight={240} />
           ) : postsError ? (
             <View

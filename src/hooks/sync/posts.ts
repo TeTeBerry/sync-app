@@ -6,44 +6,34 @@ import {
 import { resolveRequestUserId } from '../../api/requestContext';
 import type { HomeFeedPost } from '../../types/backend';
 import { isLiveApi } from '../../constants/api';
+import { popularPostsQueryKey, setPopularPostsCache } from '../../cache/postCache';
 import {
   HOME_POPULAR_POSTS_PERSIST_LIMIT,
   persistPopularPosts,
 } from '../../utils/homeCacheStorage';
 import { sanitizeImageList, sanitizeRemoteImageUrl } from '../../utils/imageUrl';
-import {
-  invalidateAllPosts,
-  invalidatePostFeeds,
-  popularPostsQueryKey,
-  setPopularPostsCache,
-} from '../../utils/queryInvalidation';
+import { invalidateAllPosts } from '../../utils/queryInvalidation';
 import { STALE_POSTS_FEED_MS } from '../../constants/queryCache';
 import { useApiQuery } from '../useApiQuery';
 import type { QueryEnableOptions } from './types';
 
-export function usePopularPostsQuery(options?: QueryEnableOptions) {
+/** Home popular feed — canonical source is `posts/popular` cache (seeded from `/home`). */
+export function usePopularPosts(options?: QueryEnableOptions) {
   const tabEnabled = options?.enabled ?? true;
   const enabled = isLiveApi() && tabEnabled;
-  const userId = resolveRequestUserId();
 
-  return useApiQuery({
-    queryKey: [...popularPostsQueryKey(userId)],
+  const query = useApiQuery({
+    queryKey: [...popularPostsQueryKey()],
     queryFn: async () => {
       const result = await fetchPopularPosts(HOME_POPULAR_POSTS_PERSIST_LIMIT);
       const mapped = result.map(mapHomeFeedPost);
       persistPopularPosts(mapped);
-      setPopularPostsCache(mapped, userId);
+      setPopularPostsCache(mapped);
       return mapped;
     },
     enabled,
     staleTime: STALE_POSTS_FEED_MS,
   });
-}
-
-/** Home popular feed — canonical source is `posts/popular` cache (seeded from `/home`). */
-export function usePopularPosts(options?: QueryEnableOptions) {
-  const tabEnabled = options?.enabled ?? true;
-  const query = usePopularPostsQuery({ enabled: tabEnabled });
 
   return {
     posts: (query.data ?? []).map(mapHomeFeedPost),

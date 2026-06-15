@@ -1,7 +1,7 @@
 import './utils/abortControllerPolyfill';
-import { hydrateHomeCachesFromStorage } from './utils/homeCacheStorage';
+import { hydrateAppCachesFromStorage } from './utils/homeCacheStorage';
 
-hydrateHomeCachesFromStorage();
+hydrateAppCachesFromStorage();
 
 import './app.scss';
 import { useDidHide, useLaunch } from '@tarojs/taro';
@@ -14,15 +14,25 @@ import type { PropsWithChildren } from 'react';
 import NavigationLoadingOverlay from './components/navigation/NavigationLoadingOverlay';
 import { preloadEventSubpackage } from './utils/subpackagePreload';
 import { initCloudBase } from './utils/cloudInit';
+import {
+  prefetchCoreQueriesOnLaunch,
+  prefetchProfileIfMissing,
+} from './utils/appLaunchPrefetch';
 
 export default function App({ children }: PropsWithChildren) {
   useLaunch(() => {
     initCloudBase();
     if (isLiveApi()) {
-      void ensureAuth().catch((error) => {
-        const message = error instanceof Error ? error.message : '登录失败，请稍后重试';
-        console.warn('[auth] ensureAuth failed:', message);
-      });
+      prefetchCoreQueriesOnLaunch();
+      void ensureAuth()
+        .then(() => {
+          prefetchProfileIfMissing();
+        })
+        .catch((error) => {
+          const message =
+            error instanceof Error ? error.message : '登录失败，请稍后重试';
+          console.warn('[auth] ensureAuth failed:', message);
+        });
     }
     preloadEventSubpackage();
   });

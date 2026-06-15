@@ -162,7 +162,7 @@
 - [x] `hooks/useWindowedList.ts` + `constants/listPerf.ts` — 通用窗口化（首屏 N 条、`showMore` / `ensureIndexVisible`）
 - [x] 首页 `FeedPostList` — 首屏 5 条 +「展开更多」；联系方式 `PostBodyWithContact` 点击展开
 - [x] 活动详情 `useEventDetailPosts` — 首屏 6 条、步进 +6；留言模糊搜索 `messageBoardPostSearch`；底部合规提示条
-- [x] 活动详情首屏分步：`composerReady` / `feedReady` / `secondaryReady`（`timing.ts`）；首屏仅活动详情 REST，帖子 +240ms，`users/me` +400ms；现场 Tab 才拉 live-info（见 `BUNDLE-SIZE.md`）
+- [x] 活动详情首屏：`secondaryReady`（`users/me` +120ms）与 `aiWarmReady`（AI 分包 +400ms）；活动详情与帖子列表立即请求；现场 Tab 才拉 live-info（见 `BUNDLE-SIZE.md`）
 - [x] `EventPostsVirtualList` — 「没有更多」需 `!hasMore && !hasMoreLocal`；高亮帖滚动前 `ensureIndexVisible`
 - [x] AI 聊天：`utils/throttleRaf.ts` — 打字机 `onUpdate` 每帧最多一次 `setState`
 - [x] AI 聊天：`utils/chatMessages.ts` — `patchChatMessage` 单条更新，保留其它行引用供 `memo`
@@ -194,7 +194,7 @@
 
 ### 后续 Phase（未排期）
 
-- [x] `AiAssistantPage` 迁入 `packageAi/pages/ai-assistant/` 同目录
+- [x] AI 助手主入口为 Tab `pages/ai`（`AiTabPage`）；`packageAi/pages/ai-assistant/index` 仅旧深链重定向
 - [x] `my-itinerary` / `exclusive-itinerary` 拆 `components/` + page hooks
 - [x] `components/post/` — 帖子 UI 归档；`ui/Input` 扩展 Taro `onInput` + `events-search` variant
 
@@ -297,7 +297,7 @@ src/
 ├── pages/profile/index.tsx     个人 Tab 编排
 ├── components/profile/         个人中心域 UI
 ├── types/post.ts               帖子类型导出入口
-└── packageAi/pages/ai-assistant/AiAssistantPage  activityId + post_created toast
+└── packageAi/pages/ai-assistant/  AiAssistantChat + legacy redirect → AI Tab
 ```
 
 ---

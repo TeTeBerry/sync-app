@@ -1,13 +1,17 @@
 import { useEffect, useState } from 'react';
-import { DEFER_BELOW_FOLD_MS } from '../utils/timing';
 
 /**
  * Defers below-the-fold work until after first paint.
  */
-export function useDeferredMount(timeoutMs = DEFER_BELOW_FOLD_MS): boolean {
-  const [ready, setReady] = useState(false);
+export function useDeferredMount(timeoutMs = 0): boolean {
+  const [ready, setReady] = useState(timeoutMs <= 0);
 
   useEffect(() => {
+    if (timeoutMs <= 0) {
+      setReady(true);
+      return;
+    }
+
     let cancelled = false;
     let timer: ReturnType<typeof setTimeout> | undefined;
     const raf =

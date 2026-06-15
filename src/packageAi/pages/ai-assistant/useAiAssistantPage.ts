@@ -12,26 +12,17 @@ import {
   selectSetActiveActivityLegacyId,
   useNavigationStore,
 } from '../../../stores';
-import {
-  endRouteTransition,
-  goBack,
-  goEventDetail,
-  ROUTES,
-} from '../../../utils/route';
 import { resolveAiChatWsUrl } from '../../../constants/api';
 import { isAiChatWsDevLog } from '../../../utils/aiChatWs';
 import { TAB_PAGE_NAV_PX } from '../../../hooks/useTabPageMainHeight';
 import { inferUserGenderFromName } from '../../../utils/inferAuthorGender';
 
-/** Header content row (avatar + titles), excluding status bar. */
-export const AI_HEADER_CONTENT_PX = 56;
 /** Event context strip below header when scoped to an activity. */
 export const AI_EVENT_CONTEXT_PX = 44;
 /** Quick chips + composer row inside chat footer (px @ 375). */
 export const AI_CHAT_COMPOSER_CHROME_PX = 136;
 
-export function useAiAssistantPage(options?: { tabRoot?: boolean }) {
-  const tabRoot = options?.tabRoot ?? false;
+export function useAiAssistantPage() {
   const navInsets = useNavBarInsets();
   const [navBoot] = useState(() => {
     const intent = useNavigationStore.getState().consumeAiAssistantIntent();
@@ -83,11 +74,8 @@ export function useAiAssistantPage(options?: { tabRoot?: boolean }) {
 
   const headerSubtractPx = useMemo(() => {
     const eventBar = showEventContext ? AI_EVENT_CONTEXT_PX : 0;
-    if (tabRoot) {
-      return navInsets.paddingTop + TAB_PAGE_NAV_PX + eventBar;
-    }
-    return navInsets.paddingTop + 12 + AI_HEADER_CONTENT_PX + eventBar;
-  }, [navInsets.paddingTop, showEventContext, tabRoot]);
+    return navInsets.paddingTop + TAB_PAGE_NAV_PX + eventBar;
+  }, [navInsets.paddingTop, showEventContext]);
 
   const chatScrollHeight = useTabPageMainHeight({
     subtractPx: headerSubtractPx + AI_CHAT_COMPOSER_CHROME_PX,
@@ -139,32 +127,7 @@ export function useAiAssistantPage(options?: { tabRoot?: boolean }) {
     setPageShowSeq((n) => n + 1);
   });
 
-  const handleBack = useCallback(() => {
-    if (tabRoot) return;
-    endRouteTransition();
-    const pages = Taro.getCurrentPages();
-    if (pages.length <= 1) {
-      if (activityLegacyId != null && !Number.isNaN(activityLegacyId)) {
-        goEventDetail(activityLegacyId);
-        return;
-      }
-      goBack(ROUTES.HOME);
-      return;
-    }
-    void Taro.navigateBack({
-      delta: 1,
-      fail: () => {
-        if (activityLegacyId != null && !Number.isNaN(activityLegacyId)) {
-          goEventDetail(activityLegacyId);
-          return;
-        }
-        goBack(ROUTES.HOME);
-      },
-    });
-  }, [activityLegacyId, tabRoot]);
-
   return {
-    tabRoot,
     navInsets,
     pendingInitialMessage,
     pendingOpenAiGuideSheet,
@@ -177,11 +140,9 @@ export function useAiAssistantPage(options?: { tabRoot?: boolean }) {
     activityQuery,
     activityTitle,
     activityMeta,
-    hasEventScope,
     showEventContext,
     chatScrollHeight,
     activityLegacyId,
     handleInitialMessageSent,
-    handleBack,
   };
 }

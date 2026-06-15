@@ -64,20 +64,19 @@ npm run verify:bundle
 
 PR 若主包上涨 >50 KB，请在 PR 说明原因并更新上表（可选）。
 
-## 活动详情首屏与弱网请求（`feedReady` 分步）
+## 活动详情首屏与弱网请求
 
 常量见 [`src/utils/timing.ts`](../src/utils/timing.ts)，路由编排见 [`useEventDetailRoute.ts`](../src/packageEvent/pages/event-detail/useEventDetailRoute.ts)。
 
 | 阶段 | 延迟（约） | 网络请求 / 行为 |
 |------|-----------|-----------------|
-| 首屏 | 0ms | `GET /activities/:legacyId`（React Query，可命中首页 seed 缓存） |
-| `composerReady` | +48ms | 挂载 AI  composer UI（无额外 REST；`onTouchStart` 仍可 `warmAiAssistant`） |
-| `feedReady` | +240ms | `GET /posts?activityLegacyId=…`（首屏帖子列表） |
-| `secondaryReady` | +400ms | `GET /users/me`（发帖风控 / 头像） |
-| `aiWarmReady` | +800ms | 空闲预加载 AI 分包（`warmAiAssistant`，非 REST） |
+| 首屏 | 0ms | `GET /activities/:legacyId`（可命中首页/活动列表 seed 缓存） |
+| 帖子列表 | 0ms | `GET /posts?activityLegacyId=…`（与活动详情并行） |
+| `secondaryReady` | +120ms | `GET /users/me`（发帖风控 / 头像） |
+| `aiWarmReady` | +400ms | 空闲预加载 AI 分包（`warmAiAssistant`，非 REST） |
 | 切到「现场资讯」Tab | 用户操作 | `GET …/live-info`（`EventLiveInfoTab` 懒加载，默认 Tab 不请求） |
 
 约定：
 
 - 勿在 `useEventDetailBuddyPost` / `useEventDetailTravelGuide` 内重复 `useActivityDetailQuery`；活动元数据由 `useEventDetailPage` 注入。
-- 弱网 SWR / 出站队列见计划「现场弱网草稿与缓存」；落地后缓存键需含 `feedReady` 筛选维度（live-info filters）。
+- 弱网 SWR / 出站队列见计划「现场弱网草稿与缓存」。

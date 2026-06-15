@@ -10,10 +10,7 @@ import { useProfilePageStore } from '../../stores';
 import { ensureAuth, logout } from '../../utils/auth';
 import { requireAuth } from '../../utils/authGate';
 import { shouldSkipAutoLogin } from '../../utils/authStorage';
-import {
-  invalidateProfileSummary,
-  invalidateUser,
-} from '../../utils/queryInvalidation';
+import { invalidateProfileSummary } from '../../utils/queryInvalidation';
 import {
   readProfileNotificationsEnabled,
   readProfilePrivacyLevel,
@@ -74,8 +71,8 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
     setNotificationsEnabled(readProfileNotificationsEnabled());
     setPrivacyLevel(readProfilePrivacyLevel());
     if (apiEnabled && loggedIn) {
-      invalidateProfileSummary();
-      invalidateUser();
+      void summaryQuery.refetch({ background: true });
+      void currentUserQuery.refetch({ background: true });
       return;
     }
     if (apiEnabled && !loggedIn && !shouldSkipAutoLogin()) {

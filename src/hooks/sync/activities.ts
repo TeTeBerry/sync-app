@@ -31,9 +31,13 @@ import {
   type EventCardUi,
   type FeaturedEvent,
 } from '../../utils/apiMappers';
-import { resolveCatalogActivityImage } from '../../constants/activityCatalogImages';
+import {
+  withCatalogActivityImage,
+  withCatalogHomeSummary,
+} from '../../utils/activityCatalog';
 import {
   persistHomeSummary,
+  persistActivities,
   seedPopularPostsCache,
 } from '../../utils/homeCacheStorage';
 import type { HomeSummary } from '../../types/backend';
@@ -48,26 +52,6 @@ import type { QueryEnableOptions } from './types';
 import type { UpdateCurrentUserPayload } from '../../types/backend';
 import { updateCurrentUser } from '../../api/sync/users';
 
-function withCatalogActivityImage(activity: BackendActivity): BackendActivity {
-  return {
-    ...activity,
-    image: resolveCatalogActivityImage(activity.legacyId, activity.image),
-  };
-}
-
-function withCatalogHomeSummary(summary: HomeSummary): HomeSummary {
-  if (!summary.signupEvents?.length) {
-    return summary;
-  }
-  return {
-    ...summary,
-    signupEvents: summary.signupEvents.map((event) => ({
-      ...event,
-      image: resolveCatalogActivityImage(event.id, event.image),
-    })),
-  };
-}
-
 export function useActivitiesQuery(options?: QueryEnableOptions) {
   const tabEnabled = options?.enabled ?? true;
   const enabled = isLiveApi() && tabEnabled;
@@ -77,6 +61,7 @@ export function useActivitiesQuery(options?: QueryEnableOptions) {
     queryFn: async () => {
       const activities = (await fetchActivities()).map(withCatalogActivityImage);
       seedActivityDetailsFromList(activities);
+      persistActivities(activities);
       return activities;
     },
     enabled,
@@ -95,7 +80,7 @@ export function useEventList(options?: QueryEnableOptions) {
 
   return {
     events,
-    isLoading: tabEnabled && query.isLoading,
+    isLoading: tabEnabled && query.isLoading && query.data === undefined,
     isError: tabEnabled && query.isError,
     refetch: query.refetch,
   };

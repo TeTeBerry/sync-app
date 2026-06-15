@@ -51,12 +51,6 @@ export function invalidateHome() {
   invalidateCache(['home']);
 }
 
-/** 失效帖子 Feed 查询 */
-export function invalidatePostFeeds() {
-  invalidateCache(['posts', 'popular']);
-  invalidateCache(['posts', 'activity']);
-}
-
 /** 失效所有帖子及关联查询 */
 export function invalidateAllPosts() {
   invalidateCache(['posts']);

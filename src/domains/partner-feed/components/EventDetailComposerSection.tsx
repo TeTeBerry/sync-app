@@ -6,7 +6,6 @@ import { View } from '@tarojs/components';
 
 export type EventDetailComposerSectionProps = {
   showHeaderSkeleton: boolean;
-  composerReady: boolean;
   onAiGuideClick: () => void;
   activityTitle?: string;
   onOpenMyItinerary: () => void;
@@ -15,7 +14,6 @@ export type EventDetailComposerSectionProps = {
 
 export const EventDetailComposerSection: React.FC<EventDetailComposerSectionProps> = ({
   showHeaderSkeleton,
-  composerReady,
   onAiGuideClick,
   activityTitle,
   onOpenMyItinerary,
@@ -27,7 +25,7 @@ export const EventDetailComposerSection: React.FC<EventDetailComposerSectionProp
 
   return (
     <View className="s-event-detail__action-list">
-      {composerReady ? <EventDetailAiTravelGuideCard onClick={onAiGuideClick} /> : null}
+      <EventDetailAiTravelGuideCard onClick={onAiGuideClick} />
       <EventDetailItineraryMenu
         activityTitle={activityTitle}
         onOpenMyItinerary={onOpenMyItinerary}

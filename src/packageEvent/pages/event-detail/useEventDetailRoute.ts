@@ -4,8 +4,6 @@ import { resolveEventDetailIdFromQuery, warmAiAssistant } from '../../../utils/r
 import { useDeferredMount } from '../../../hooks/useDeferredMount';
 import {
   DEFER_EVENT_AI_WARM_MS,
-  DEFER_EVENT_COMPOSER_MS,
-  DEFER_EVENT_POSTS_MS,
   DEFER_EVENT_SECONDARY_MS,
 } from '../../../utils/timing';
 import { selectActiveActivityLegacyId, useNavigationStore } from '../../../stores';
@@ -14,8 +12,6 @@ export function useEventDetailRoute() {
   const router = useRouter();
   const activeActivityLegacyId = useNavigationStore(selectActiveActivityLegacyId);
   const [scrollTop, setScrollTop] = useState<number | undefined>();
-  const composerReady = useDeferredMount(DEFER_EVENT_COMPOSER_MS);
-  const feedReady = useDeferredMount(DEFER_EVENT_POSTS_MS);
   const secondaryReady = useDeferredMount(DEFER_EVENT_SECONDARY_MS);
   const aiWarmReady = useDeferredMount(DEFER_EVENT_AI_WARM_MS);
 
@@ -44,8 +40,6 @@ export function useEventDetailRoute() {
     highlightPostId,
     scrollTop,
     setScrollTop,
-    composerReady,
-    feedReady,
     secondaryReady,
     invalidEventId,
     hasValidEventId,

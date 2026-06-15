@@ -90,6 +90,39 @@ export function setCacheDataByKey<T>(
   globalCache.set(cacheKey, { data, timestamp: timestamp ?? Date.now() });
 }
 
+/** Shared in-flight dedupe for app-launch prefetch and mounted hooks. */
+export async function prefetchToCache<T>(
+  queryKey: (string | number | undefined)[],
+  queryFn: () => Promise<T>,
+): Promise<T | undefined> {
+  const cacheKey = getCacheKey(queryKey);
+  const cached = globalCache.get(cacheKey) as CacheEntry<T> | undefined;
+  if (cached) {
+    return cached.data;
+  }
+
+  let request = inflightByKey.get(cacheKey) as Promise<T> | undefined;
+  if (!request) {
+    request = queryFn()
+      .then((result) => {
+        globalCache.set(cacheKey, { data: result, timestamp: Date.now() });
+        return result;
+      })
+      .finally(() => {
+        if (inflightByKey.get(cacheKey) === request) {
+          inflightByKey.delete(cacheKey);
+        }
+      });
+    inflightByKey.set(cacheKey, request);
+  }
+
+  try {
+    return await request;
+  } catch {
+    return undefined;
+  }
+}
+
 interface UseApiQueryOptions<T> {
   queryKey: (string | number | undefined)[];
   queryFn: () => Promise<T>;

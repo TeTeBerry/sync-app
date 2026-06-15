@@ -37,7 +37,7 @@ export const ROUTES = {
   PROFILE_POSTS: '/packageProfile/pages/profile-posts/index',
   SETTINGS: '/packageProfile/pages/settings/index',
   LEGAL_DOCUMENT: '/packageProfile/pages/legal-document/index',
-  /** @deprecated Use ROUTES.AI — kept for legacy deep links */
+  /** Legacy subpackage deep link — `packageAi/pages/ai-assistant` redirects to `ROUTES.AI`. */
   AI_ASSISTANT: '/packageAi/pages/ai-assistant/index',
   EVENT_DETAIL: '/packageEvent/pages/event-detail/index',
   EXCLUSIVE_ITINERARY: '/packageEvent/pages/exclusive-itinerary/index',

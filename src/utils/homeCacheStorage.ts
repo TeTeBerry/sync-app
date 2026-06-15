@@ -7,18 +7,22 @@ import {
   setCacheDataByKey,
 } from '../hooks/useApiQuery';
 import { isLiveApi } from '../constants/api';
-import { getClientUserId } from './session';
+import { seedActivityDetailsFromList } from './activityDetailCache';
 import { invalidateHome } from './queryInvalidation';
-import type { HomeFeedPost, HomeSummary } from '../types/backend';
+import type {
+  BackendActivity,
+  HomeFeedPost,
+  HomeSummary,
+  ProfileSummary,
+} from '../types/backend';
 
 export const HOME_POPULAR_POSTS_PERSIST_LIMIT = 8;
 export const HOME_CACHE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 
 const SUMMARY_STORAGE_KEY = 'sync:home:summary:v2';
-
-function popularStorageKey(userId: string): string {
-  return `sync:home:popular:v1:${userId}`;
-}
+const POPULAR_STORAGE_KEY = 'sync:home:popular:v2';
+const ACTIVITIES_STORAGE_KEY = 'sync:activities:list:v1';
+const PROFILE_SUMMARY_STORAGE_KEY = 'sync:profile:summary:v1';
 
 type CacheEnvelope<T> = {
   savedAt: number;
@@ -61,7 +65,7 @@ function writeEnvelope<T>(storageKey: string, data: T): void {
   }
 }
 
-export function hydrateHomeCachesFromStorage(): void {
+export function hydrateAppCachesFromStorage(): void {
   if (!isLiveApi()) {
     return;
   }
@@ -76,14 +80,28 @@ export function hydrateHomeCachesFromStorage(): void {
     seedPopularPostsCache(summaryEnvelope.data.popularPosts);
   }
 
-  const userId = getClientUserId();
-  if (!userId) {
-    return;
+  const popular = readEnvelopeData<HomeFeedPost[]>(POPULAR_STORAGE_KEY);
+  if (popular?.length) {
+    setPopularPostsCache(popular);
   }
 
-  const popular = readEnvelopeData<HomeFeedPost[]>(popularStorageKey(userId));
-  if (popular?.length) {
-    setCacheDataByKey(getCacheKey(['posts', 'popular', userId]), popular);
+  const activitiesEnvelope = readEnvelope<BackendActivity[]>(ACTIVITIES_STORAGE_KEY);
+  if (activitiesEnvelope?.data?.length) {
+    setCacheDataByKey(
+      getCacheKey(['activities']),
+      activitiesEnvelope.data,
+      activitiesEnvelope.savedAt,
+    );
+    seedActivityDetailsFromList(activitiesEnvelope.data);
+  }
+
+  const profileEnvelope = readEnvelope<ProfileSummary>(PROFILE_SUMMARY_STORAGE_KEY);
+  if (profileEnvelope) {
+    setCacheDataByKey(
+      getCacheKey(['profile', 'summary']),
+      profileEnvelope.data,
+      profileEnvelope.savedAt,
+    );
   }
 }
 
@@ -94,10 +112,32 @@ export function persistHomeSummary(data: HomeSummary): void {
   writeEnvelope(SUMMARY_STORAGE_KEY, data);
 }
 
+export function persistActivities(data: BackendActivity[]): void {
+  if (!isLiveApi() || !data.length) {
+    return;
+  }
+  writeEnvelope(ACTIVITIES_STORAGE_KEY, data);
+}
+
+export function persistProfileSummary(data: ProfileSummary): void {
+  if (!isLiveApi()) {
+    return;
+  }
+  writeEnvelope(PROFILE_SUMMARY_STORAGE_KEY, data);
+}
+
 /** Clear persisted home summary (e.g. on logout so `going` is not shown to guests). */
 export function clearPersistedHomeSummary(): void {
   try {
     Taro.removeStorageSync(SUMMARY_STORAGE_KEY);
+  } catch {
+    // storage unavailable
+  }
+}
+
+export function clearPersistedProfileSummary(): void {
+  try {
+    Taro.removeStorageSync(PROFILE_SUMMARY_STORAGE_KEY);
   } catch {
     // storage unavailable
   }
@@ -122,6 +162,7 @@ export function resetHomeSummaryGoingFlagsInCache(): void {
 /** Clear persisted + in-memory home caches on logout (keeps `auth.ts` free of hook imports). */
 export function clearHomeCachesOnLogout(): void {
   clearPersistedHomeSummary();
+  clearPersistedProfileSummary();
   resetHomeSummaryGoingFlagsInCache();
   invalidateHome();
 }
@@ -130,12 +171,8 @@ export function persistPopularPosts(data: HomeFeedPost[]): void {
   if (!isLiveApi()) {
     return;
   }
-  const userId = getClientUserId();
-  if (!userId) {
-    return;
-  }
   const trimmed = data.slice(0, HOME_POPULAR_POSTS_PERSIST_LIMIT);
-  writeEnvelope(popularStorageKey(userId), trimmed);
+  writeEnvelope(POPULAR_STORAGE_KEY, trimmed);
 }
 
 /** Seed React Query cache when `/home` embeds `popularPosts`. */
@@ -143,11 +180,7 @@ export function seedPopularPostsCache(posts: HomeFeedPost[] | undefined): void {
   if (!isLiveApi() || !posts?.length) {
     return;
   }
-  const userId = getClientUserId();
-  if (!userId) {
-    return;
-  }
   const trimmed = posts.slice(0, HOME_POPULAR_POSTS_PERSIST_LIMIT);
   persistPopularPosts(trimmed);
-  setPopularPostsCache(trimmed, userId);
+  setPopularPostsCache(trimmed);
 }

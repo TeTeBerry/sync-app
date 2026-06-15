@@ -14,7 +14,7 @@ import { useEndRouteTransitionOnShow } from '../../hooks/useEndRouteTransitionOn
 const AiTabPage: FC = () => {
   useEndRouteTransitionOnShow();
   const navInsets = useNavBarInsets();
-  const page = useAiAssistantPage({ tabRoot: true });
+  const page = useAiAssistantPage();
 
   return (
     <View data-cmp="AiTab" className="s-page-with-tabbar">

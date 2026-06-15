@@ -22,8 +22,6 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     highlightPostId,
     scrollTop: routeScrollTop,
     setScrollTop,
-    feedReady,
-    composerReady,
     secondaryReady,
   } = route;
 
@@ -42,12 +40,11 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     activityDate,
     activityLocation,
   });
-  const currentUserQuery = useCurrentUserQuery({ enabled: feedReady });
+  const currentUserQuery = useCurrentUserQuery();
   const profileUser = useResolvedProfile();
   const displayUserName = currentUserQuery.data?.name ?? profileUser.name ?? '用户';
 
   const postsQuery = useEventPostsInfiniteQuery(eventId, {
-    enabled: feedReady,
     anchorPostId: highlightPostId || undefined,
   });
 
@@ -73,8 +70,7 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
 
   const scrollTop = scrollFrozen && frozenTop != null ? frozenTop : routeScrollTop;
 
-  const postsLoading =
-    !feedReady || (postsQuery.isLoading && postsQuery.items.length === 0);
+  const postsLoading = postsQuery.isLoading && postsQuery.items.length === 0;
   const showPostsEnd =
     posts.totalPostCount > 0 &&
     posts.filteredPostCount > 0 &&
@@ -115,7 +111,6 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     scrollTop,
     scrollFrozen,
     handleScroll,
-    composerReady,
     templatePublishing: isPublishing,
     handleOpenTemplateSheet: templatePost.openBuddyPostSheet,
     buddyPostSheetOpen: templatePost.buddyPostSheetOpen,
