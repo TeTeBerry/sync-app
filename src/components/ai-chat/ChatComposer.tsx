@@ -2,9 +2,10 @@ import React, { useCallback, useMemo } from 'react';
 import { Send, Trash2 } from '../../components/icons';
 import { Button, Input, cn } from '../ui';
 import {
-  HOME_FESTIVAL_SHORTCUT_CHIPS,
+  filterActiveHomeFestivalShortcutChips,
   resolveActiveActivityChipKey,
 } from '../../constants/homeFestivalShortcuts';
+import { useActivitiesQuery } from '../../hooks/sync/activities';
 import { useAiChatStore } from '../../stores/aiChatStore';
 import {
   ScrollView,
@@ -56,6 +57,7 @@ export function ChatComposer({
       ? state.buckets[state.activeScopeKey]?.conversationState?.flow
       : undefined,
   );
+  const { data: activities } = useActivitiesQuery();
 
   const scopedToActivity = activityLegacyId != null && !Number.isNaN(activityLegacyId);
   const trimmedActivityTitle = activityTitle?.trim();
@@ -79,13 +81,13 @@ export function ChatComposer({
       activityTitle: trimmedActivityTitle,
     });
 
-    return HOME_FESTIVAL_SHORTCUT_CHIPS.map((chip) => ({
+    return filterActiveHomeFestivalShortcutChips(activities).map((chip) => ({
       key: chip.key,
       label: chip.label,
       keyword: chip.submitText,
       active: chip.key === activeKey,
     }));
-  }, [activityCode, activityLegacyId, trimmedActivityTitle]);
+  }, [activities, activityCode, activityLegacyId, trimmedActivityTitle]);
 
   const isBusy = isStreaming;
   const isComposerDisabled = isStreaming || isLoadingHistory;
