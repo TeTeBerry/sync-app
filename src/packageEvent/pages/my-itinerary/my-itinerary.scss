@@ -509,15 +509,6 @@
     font-weight: var(--s-fw-bold);
     color: #fff;
     line-height: 1.2;
-
-    &--confirmed {
-      color: #34c759;
-    }
-
-    &--muted {
-      color: #8e8e93;
-      font-weight: var(--s-fw-semibold);
-    }
   }
 
   &__stats-label {
@@ -776,44 +767,11 @@
   &__node-foot {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-end;
     gap: 10px;
     margin-top: 12px;
     padding-top: 10px;
     border-top: 1px solid rgba(255, 255, 255, 0.06);
-  }
-
-  &__node-status {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    min-height: 28px;
-    padding: 0 12px;
-    border-radius: var(--radius-full);
-    box-sizing: border-box;
-
-    &-text {
-      font-size: 12px;
-      font-weight: var(--s-fw-semibold);
-      line-height: 1.2;
-    }
-
-    &--confirmed {
-      background: rgba(52, 199, 89, 0.14);
-
-      .s-travel-plan__node-status-text {
-        color: #34c759;
-      }
-    }
-
-    &--pending {
-      background: rgba(255, 159, 10, 0.14);
-      border: 1px solid rgba(255, 159, 10, 0.22);
-
-      .s-travel-plan__node-status-text {
-        color: #ff9f0a;
-      }
-    }
   }
 
   &__node-delete {
@@ -844,37 +802,6 @@
     font-weight: var(--s-fw-bold);
     color: #fff;
     line-height: 1.2;
-  }
-
-  &__node-check {
-    flex-shrink: 0;
-    width: 28px;
-    height: 28px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0;
-    padding: 0;
-    border: none;
-    border-radius: var(--radius-full);
-    box-sizing: border-box;
-
-    &::after {
-      display: none;
-      border: 0;
-    }
-
-    &--confirmed {
-      background: rgba(52, 199, 89, 0.12);
-    }
-
-    &--pending {
-      background: rgba(99, 99, 102, 0.2);
-    }
-
-    &--pressed {
-      opacity: 0.8;
-    }
   }
 
   &__add-icon {

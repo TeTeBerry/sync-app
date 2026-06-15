@@ -121,27 +121,8 @@ export function isActivityOnSite(
   return at >= parsed.start && at <= parsed.end;
 }
 
-export function shouldShowActivityStatusBadge(status: ActivityStatus): boolean {
-  return status !== 'in_progress';
-}
-
-export function activityStatusBadgeClass(status: ActivityStatus): string {
-  return `s-activity-status s-activity-status--${status.replace('_', '-')}`;
-}
-
 export function activityStatusCardClass(status: ActivityStatus): string {
   return status === 'ended' ? 's-activity-card--ended' : '';
-}
-
-export function activityStatusText(status: ActivityStatus): string {
-  switch (status) {
-    case 'in_progress':
-      return '进行中';
-    case 'ended':
-      return '已结束';
-    default:
-      return '未开始';
-  }
 }
 
 export function getActivitySortTimestamp(date?: string, title?: string): number {

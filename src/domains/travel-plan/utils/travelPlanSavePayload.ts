@@ -81,7 +81,7 @@ export function estimateTravelPlanSavePayloadBytes(
   return JSON.stringify(payload).length;
 }
 
-export function resolveTravelPlanSavePayloadByteLimit(): number | undefined {
+function resolveTravelPlanSavePayloadByteLimit(): number | undefined {
   return isWeappCloudRunTransportEnabled() ? CALL_CONTAINER_MAX_BODY_BYTES : undefined;
 }
 

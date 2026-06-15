@@ -6,4 +6,4 @@ export { default as ProfilePostsSection } from './ProfilePostsSection';
 
 export { ProfileCollapsibleSection } from './ProfileCollapsibleSection';
 
-export { countOngoingActivities, deriveInterestTag } from './utils';
+export { deriveInterestTag } from './utils';
