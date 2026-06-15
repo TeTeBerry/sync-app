@@ -147,10 +147,7 @@ export function seedPopularPostsCache(posts: HomeFeedPost[] | undefined): void {
   if (!userId) {
     return;
   }
-  const trimmed = posts.slice(0, HOME_POPULAR_POSTS_PERSIST_LIMIT).map((item) => ({
-    ...item,
-    comments: item.comments ?? 0,
-  }));
+  const trimmed = posts.slice(0, HOME_POPULAR_POSTS_PERSIST_LIMIT);
   persistPopularPosts(trimmed);
   setPopularPostsCache(trimmed, userId);
 }

@@ -1,14 +1,13 @@
 import './home.scss';
-import Taro, { useDidShow } from '@tarojs/taro';
+import { useDidShow } from '@tarojs/taro';
 import { useCallback } from 'react';
 import ThemedPageLoader from '../../components/ThemedPageLoader';
 import { HomeActivityFeed } from './components/HomeActivityFeed';
 import { seedActivityDetailFromFeaturedEvent } from '../../utils/activityDetailCache';
 import { preloadEventSubpackage } from '../../utils/subpackagePreload';
-import { useConfirmDialog } from '../../hooks/useConfirmDialog';
 import { useDeferredMount } from '../../hooks/useDeferredMount';
+import { useConfirmDialog } from '../../hooks/useConfirmDialog';
 import {
-  likePostAndInvalidate,
   useFeaturedEvents,
   useHomeSummary,
   useNearestUpcomingForCountdown,
@@ -42,13 +41,14 @@ import {
 } from '../../utils/apiMappers';
 import { useNavBarInsets } from '../../hooks/useNavBarInsets';
 import { useEndRouteTransitionOnShow } from '../../hooks/useEndRouteTransitionOnShow';
-import { usePostPageShare } from '../../hooks/usePostPageShare';
 import { OverlayAwareScrollView } from '../../components/layout/OverlayAwareScrollView';
 import { Text, View } from '@tarojs/components';
 
 const Home = () => {
-  usePostPageShare();
   useEndRouteTransitionOnShow();
+  const { confirm, confirmDialog } = useConfirmDialog({
+    cancelText: '取消',
+  });
 
   useDidShow(() => {
     preloadHotRoutes(ROUTES.HOME);
@@ -59,9 +59,6 @@ const Home = () => {
 
   const belowFoldReady = useDeferredMount(DEFER_BELOW_FOLD_MS);
   const secondaryApiReady = useDeferredMount(DEFER_SECONDARY_API_MS);
-  const { confirm, confirmDialog } = useConfirmDialog({
-    cancelText: '取消',
-  });
   const { data: summary, refetch: refetchHomeSummary } = useHomeSummary();
   const heat = summary?.heat;
   const { loggedIn } = useAuthSession();
@@ -135,14 +132,6 @@ const Home = () => {
     [confirm, refetchPosts],
   );
 
-  const handleLikePost = useCallback((post: HomeFeedPost) => {
-    requireAuth(() => {
-      void likePostAndInvalidate(post.id).catch(
-        () => void Taro.showToast({ title: '请求失败，请稍后重试', icon: 'none' }),
-      );
-    }, 'social');
-  }, []);
-
   const activeTeamCount = heat?.people ?? 0;
   const navInsets = useNavBarInsets();
 
@@ -191,11 +180,7 @@ const Home = () => {
               <Text className="s-home-feed__error-text">帖子加载失败，点击重试</Text>
             </View>
           ) : (
-            <HomeActivityFeed
-              items={posts}
-              onDelete={handleDeletePost}
-              onLike={handleLikePost}
-            />
+            <HomeActivityFeed items={posts} onDelete={handleDeletePost} />
           )}
 
           <View className="s-home__heat s-tabbar-offset" aria-label="Today heat">

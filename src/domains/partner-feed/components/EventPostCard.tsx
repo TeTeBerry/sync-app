@@ -1,60 +1,32 @@
 import { memo } from 'react';
 import { MapPin } from '../../../components/icons';
-import PostCardActionBar from '../../../components/post/PostCardActionBar';
-import { buildPostSharePayload } from '../../../components/post/postCardShare';
-import {
-  PostActionMenu,
-  PostCommentSection,
-  PostShareButton,
-} from '../../../components/post';
 import { ImageWithFallback } from '../../../components/ImageWithFallback';
 import {
-  ContentTypeBadge,
   PostImageGrid,
-  mergePostContentTypes,
+  PostOwnerDeleteButton,
   stripContentTypeHashtags,
 } from '../../../components/post';
 import { EVENT_POST_IMAGE_MAX_DISPLAY } from '../../../constants/listPerf';
-import { isApiEnabled } from '../../../constants/api';
 import { isCurrentUserPostAuthor } from '../../../utils/postOwnership';
 import type { EventDetailPost } from '../../../types/backend';
 import { formatEventPostHandle } from '../utils/eventPostDisplay';
-import { OnSiteVerifiedBadge } from '../../../components/OnSiteVerifiedBadge';
 import { Text, View } from '@tarojs/components';
 
 export type EventPostCardProps = {
   post: EventDetailPost;
-  activityLegacyId: number;
   publishTimeLabel: string;
   highlighted: boolean;
-  commentsExpanded: boolean;
-  currentUserAvatar?: string;
-  onLike: (postId: string) => void;
-  onToggleComments: (postId: string) => void;
-  onDelete: (post: EventDetailPost) => void;
-  onCommentSubmitted: (
-    updated: Pick<EventDetailPost, 'id' | 'comments' | 'likes' | 'liked'>,
-  ) => void;
+  onDelete?: (post: EventDetailPost) => void;
 };
 
 function EventPostCardInner({
   post,
-  activityLegacyId,
   publishTimeLabel,
   highlighted,
-  commentsExpanded,
-  currentUserAvatar,
-  onLike,
-  onToggleComments,
   onDelete,
-  onCommentSubmitted,
 }: EventPostCardProps) {
   const postName = post.name?.trim() || '用户';
   const isOwn = isCurrentUserPostAuthor(postName, post.userId);
-  const contentTypeKeys = mergePostContentTypes(post.contentTypes, {
-    body: post.body,
-    tags: post.tags,
-  });
   const bodyText = stripContentTypeHashtags(post.body);
   const submetaLocation = post.location?.trim() ?? '';
 
@@ -79,7 +51,6 @@ function EventPostCardInner({
             <View className="s-event-post__identity">
               <View className="s-event-post__name-row">
                 <Text className="s-event-post__user-name">{postName}</Text>
-                {post.authorOnSiteVerified ? <OnSiteVerifiedBadge /> : null}
                 <Text className="s-event-post__user-handle">
                   {formatEventPostHandle(postName)}
                 </Text>
@@ -92,27 +63,11 @@ function EventPostCardInner({
                 </Text>
               </View>
             </View>
-            <View className="s-event-post__head-actions">
-              <PostShareButton
-                share={buildPostSharePayload({
-                  postId: post.id,
-                  activityLegacyId,
-                  body: post.body,
-                  authorName: post.name,
-                  images: post.images,
-                  avatar: post.avatar,
-                })}
-              />
-              {isOwn ? (
-                <PostActionMenu
-                  postId={post.id}
-                  authorUserId={post.userId}
-                  onDelete={() => onDelete(post)}
-                />
-              ) : (
-                <PostActionMenu postId={post.id} authorUserId={post.userId} />
-              )}
-            </View>
+            {isOwn && onDelete ? (
+              <View className="s-event-post__head-actions">
+                <PostOwnerDeleteButton onDelete={() => onDelete(post)} />
+              </View>
+            ) : null}
           </View>
         </View>
       </View>
@@ -121,43 +76,6 @@ function EventPostCardInner({
 
       {post.images?.length ? (
         <PostImageGrid images={post.images} maxDisplay={EVENT_POST_IMAGE_MAX_DISPLAY} />
-      ) : null}
-
-      {contentTypeKeys.length ? (
-        <ContentTypeBadge
-          types={contentTypeKeys}
-          className="s-event-post__content-badges s-content-badges--flush"
-        />
-      ) : null}
-
-      <View className="s-event-post__footer">
-        <View className="s-event-post__footer-divider" aria-hidden />
-        <View className="s-event-post__footer-row">
-          <View className="s-event-post__footer-left">
-            <PostCardActionBar
-              variant="event"
-              liked={Boolean(post.liked)}
-              likes={post.likes}
-              comments={post.comments}
-              commentsExpanded={commentsExpanded}
-              onLike={() => onLike(post.id)}
-              onToggleComments={() => onToggleComments(post.id)}
-              likeDisabled={!isApiEnabled()}
-            />
-          </View>
-        </View>
-      </View>
-
-      {commentsExpanded ? (
-        <PostCommentSection
-          postId={post.id}
-          postAuthorName={post.name}
-          postAuthorUserId={post.userId}
-          expanded
-          onToggleExpanded={() => onToggleComments(post.id)}
-          currentUserAvatar={currentUserAvatar}
-          onCommentSubmitted={onCommentSubmitted}
-        />
       ) : null}
     </View>
   );

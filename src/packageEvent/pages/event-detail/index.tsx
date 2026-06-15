@@ -5,7 +5,6 @@ import ThemedPageLoader from '../../../components/ThemedPageLoader';
 import { useConfirmDialog } from '../../../hooks/useConfirmDialog';
 import { LoginInterceptHost } from '../../../components/auth/LoginInterceptHost';
 import EventDetailFallback from './components/EventDetailFallback';
-import EventDetailLiveSection from './components/EventDetailLiveSection';
 import {
   EventDetailBoardSearchBar,
   EventDetailComposerSection,
@@ -57,13 +56,9 @@ const EventDetailPage = () => {
     removeMessageImage,
     handlePublishMessage,
     messagePublishing,
-    contentTab,
-    setContentTab,
-    live,
     posts,
     postsLoading,
     showPostsEnd,
-    currentUserAvatar,
     postsQuery,
     handleBack,
     handleOpenAiGuide,
@@ -81,7 +76,6 @@ const EventDetailPage = () => {
     handleGuideSheetSubmit,
     guideDefaultNights,
     guideEventCity,
-    handleOnSiteCertifiedSuccess,
   } = page;
 
   return (
@@ -130,13 +124,10 @@ const EventDetailPage = () => {
               activityTitle={activityTitle}
               onOpenMyItinerary={handleOpenMyItinerary}
               onOpenExclusiveItinerary={handleOpenExclusiveItinerary}
-              contentTab={contentTab}
-              onContentTabChange={setContentTab}
               boardCount={posts.totalPostCount}
-              liveCount={live.liveFeedCount}
             />
 
-            {!showHeaderSkeleton && contentTab === 'posts' ? (
+            {!showHeaderSkeleton ? (
               <View className="s-event-detail__posts">
                 {posts.totalPostCount > 0 ? (
                   <EventDetailBoardSearchBar
@@ -158,40 +149,19 @@ const EventDetailPage = () => {
                   </Text>
                 ) : (
                   <EventPostsVirtualList
-                    activityLegacyId={eventId}
                     onScrollToPostId={posts.scrollToElement}
                     items={posts.postItems}
                     highlightPostId={highlightPostId}
-                    expandedCommentPostIds={posts.expandedCommentPostIds}
-                    currentUserAvatar={currentUserAvatar}
+                    onDelete={posts.handleDeletePost}
                     hasMore={postsQuery.hasMore}
                     hasMoreLocal={posts.hasMoreVisiblePosts}
                     isLoadingMore={postsQuery.isLoadingMore}
-                    onLike={posts.handleLikePost}
-                    onToggleComments={posts.togglePostComments}
-                    onDelete={posts.handleDeletePost}
-                    onCommentSubmitted={posts.handleCommentSubmitted}
                   />
                 )}
               </View>
             ) : null}
 
-            <EventDetailLiveSection
-              visible={!showHeaderSkeleton && contentTab === 'live'}
-              eventId={eventId}
-              userName={page.displayUserName}
-              updateSheetOpen={live.liveUpdateSheetOpen}
-              onFeedCountChange={live.handleLiveFeedCountChange}
-              onOpenUpdate={live.handleOpenLiveUpdateSheet}
-              onLiveInfoActions={live.handleLiveInfoActions}
-              onCloseUpdateSheet={live.handleCloseLiveUpdateSheet}
-              onCertifiedSuccess={handleOnSiteCertifiedSuccess}
-            />
-
             {!showHeaderSkeleton && showPostsEnd ? (
-              <Text className="s-event-detail__end">已经到底啦 ~</Text>
-            ) : null}
-            {!showHeaderSkeleton && live.showLiveEnd ? (
               <Text className="s-event-detail__end">已经到底啦 ~</Text>
             ) : null}
           </View>

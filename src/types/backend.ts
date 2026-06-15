@@ -140,7 +140,6 @@ export interface ProfileSummary {
   avatar: string;
   stats: {
     events: number;
-    likes: number;
     posts: number;
   };
 }
@@ -158,8 +157,6 @@ export interface ProfilePostItem {
   id: string;
   title: string;
   content: string;
-  likes: number;
-  comments: number;
   date: string;
   activityLegacyId?: number;
   contentTypes?: PostContentType[];
@@ -178,32 +175,11 @@ export interface HomeFeedPost {
   location: string;
   body: string;
   time: string;
-  likes: number;
-  liked?: boolean;
-  comments: number;
   avatar: string;
   activityLegacyId?: number;
   contentTypes?: PostContentType[];
   tags?: string[];
   images?: string[];
-  /** Author passed wristband on-site verification for this activity today. */
-  authorOnSiteVerified?: boolean;
-}
-
-export interface PostCommentItem {
-  id: string;
-  userId: string;
-  authorName: string;
-  avatar: string;
-  body: string;
-  time: string;
-  replies?: PostCommentItem[];
-}
-
-export interface PostCommentsPage {
-  items: PostCommentItem[];
-  nextCursor?: string;
-  hasMore: boolean;
 }
 
 export interface EventPostsPage {
@@ -221,16 +197,11 @@ export interface EventDetailPost {
   body: string;
   tags: string[];
   contentTypes?: PostContentType[];
-  likes: number;
-  liked?: boolean;
-  comments: number;
   avatar: string;
   images?: string[];
   /** Present on create when moderation hides the post from public feeds. */
   status?: 'active' | 'hidden';
   moderationReason?: string;
-  /** Author passed wristband on-site verification for this activity today. */
-  authorOnSiteVerified?: boolean;
 }
 
 export type PostContentType =
@@ -251,16 +222,6 @@ export interface CreatePostPayload {
   images?: string[];
   /** Default true. False = stored but hidden from activity/popular feeds. */
   listedInFeed?: boolean;
-}
-
-export interface UpdatePostPayload {
-  body?: string;
-  eventTitle?: string;
-}
-
-export interface PostActionResult {
-  ok: true;
-  alreadyApplied?: boolean;
 }
 
 export interface HomeSummary {
@@ -338,21 +299,6 @@ export type {
   SaveItineraryResult,
   SavedItineraryResult,
 } from './itinerary';
-
-export type {
-  LiveInfoCategoryId,
-  LiveInfoCertStatus,
-  LiveInfoFeedFilters,
-  LiveInfoFeedItem,
-  LiveInfoSnapshot,
-  LiveInfoSummaryRow,
-  LiveInfoViewerState,
-  LiveInfoZone,
-  PublishLiveInfoPayload,
-  SubmitLiveInfoWristbandPayload,
-  SubmitLiveInfoWristbandRejectCode,
-  SubmitLiveInfoWristbandResult,
-} from './liveInfo';
 
 export type {
   RecognizeTravelPlanReceiptPayload,

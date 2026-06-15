@@ -7,7 +7,6 @@ import {
   buildOptimisticMessageBoardPost,
   publishMessageBoardPost,
 } from '../../../utils/publishMessageBoardPost';
-import { resolveCurrentPostLocation } from '../../../utils/resolveCurrentPostLocation';
 import { pickAndCompressChatImages } from '../../../utils/chatImage';
 import { getClientUserId } from '../../../utils/session';
 
@@ -66,7 +65,6 @@ export function useEventDetailMessageBoard(
     const bodyToPublish = body || '分享图片 📸';
     const pendingId = `pending-${Date.now()}`;
     const refsToPublish = [...imageRefs];
-    const currentLocation = await resolveCurrentPostLocation();
     setIsPublishing(true);
     options.prependPost?.(
       buildOptimisticMessageBoardPost({
@@ -76,7 +74,6 @@ export function useEventDetailMessageBoard(
         authorAvatar: options.authorAvatar,
         userId: getClientUserId(),
         imageRefs: refsToPublish,
-        location: currentLocation,
       }),
     );
     setDraft('');

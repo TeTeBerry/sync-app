@@ -1,13 +1,10 @@
-import Taro from '@tarojs/taro';
 import { useCallback, useMemo, useState } from 'react';
-import { likePostAndInvalidate } from '../../../hooks/useSyncApi';
 import type { ConfirmDialogOptions } from '../../../hooks/useConfirmDialog';
 import { useEventPostsInfiniteQuery } from '../../../hooks/useEventPostsInfiniteQuery';
 import { requireAuth } from '../../../utils/authGate';
 import { deletePostWithFeedback } from '../../../utils/deletePostFeedback';
 import { scrollElementToCenter } from '../../../utils/scrollToCenter';
 import type { EventDetailPost } from '../../../types/post';
-import type { EventDetailTabId } from '../components/EventDetailContentTabs';
 import {
   EVENT_POSTS_INITIAL_RENDER,
   EVENT_POSTS_RENDER_STEP,
@@ -24,21 +21,16 @@ export const EVENT_DETAIL_SCROLL_ID = 'event-detail-scroll';
 type EventPostsQuery = ReturnType<typeof useEventPostsInfiniteQuery>;
 
 export type UseEventDetailPostsParams = {
-  contentTab: EventDetailTabId;
   postsQuery: EventPostsQuery;
   confirm: (options: ConfirmDialogOptions) => Promise<boolean>;
   setScrollTop: (value: number | undefined) => void;
 };
 
 export function useEventDetailPosts({
-  contentTab,
   postsQuery,
   confirm,
   setScrollTop,
 }: UseEventDetailPostsParams) {
-  const [expandedCommentPostIds, setExpandedCommentPostIds] = useState<Set<string>>(
-    () => new Set(),
-  );
   const [boardSearchQuery, setBoardSearchQuery] = useState('');
 
   const loadedPostItems = useMemo(
@@ -67,38 +59,12 @@ export function useEventDetailPosts({
   });
 
   const handleScrollToLower = useCallback(() => {
-    if (contentTab !== 'posts') return;
     if (hasMoreVisiblePosts) {
       showMoreVisiblePosts();
       return;
     }
     void postsQuery.loadMore();
-  }, [contentTab, hasMoreVisiblePosts, showMoreVisiblePosts, postsQuery]);
-
-  const handleLikePost = useCallback(
-    (postId: string) => {
-      requireAuth(() => {
-        void likePostAndInvalidate(postId)
-          .then((updated) => {
-            postsQuery.patchItem(updated);
-          })
-          .catch(
-            () => void Taro.showToast({ title: '请求失败，请稍后重试', icon: 'none' }),
-          );
-      }, 'social');
-    },
-    [postsQuery],
-  );
-
-  const ensurePostVisible = useCallback(
-    (postId: string) => {
-      const index = allPostItems.findIndex((item) => item.post.id === postId);
-      if (index >= 0) {
-        ensureIndexVisible(index);
-      }
-    },
-    [allPostItems, ensureIndexVisible],
-  );
+  }, [hasMoreVisiblePosts, showMoreVisiblePosts, postsQuery]);
 
   const scrollToElement = useCallback(
     (elementId: string) => {
@@ -129,24 +95,6 @@ export function useEventDetailPosts({
     [allPostItems, ensureIndexVisible, setScrollTop],
   );
 
-  const togglePostComments = useCallback(
-    (postId: string) => {
-      const index = allPostItems.findIndex((item) => item.post.id === postId);
-      if (index >= 0) ensureIndexVisible(index);
-
-      setExpandedCommentPostIds((prev) => {
-        const next = new Set(prev);
-        if (next.has(postId)) {
-          next.delete(postId);
-        } else {
-          next.add(postId);
-        }
-        return next;
-      });
-    },
-    [allPostItems, ensureIndexVisible],
-  );
-
   const handleDeletePost = useCallback(
     async (post: EventDetailPost) => {
       const ok = await confirm({
@@ -166,13 +114,6 @@ export function useEventDetailPosts({
     [confirm, postsQuery],
   );
 
-  const handleCommentSubmitted = useCallback(
-    (updated: Pick<EventDetailPost, 'id' | 'comments' | 'likes' | 'liked'>) => {
-      postsQuery.patchItem(updated);
-    },
-    [postsQuery],
-  );
-
   return {
     postItems,
     totalPostCount: loadedPostItems.length,
@@ -181,13 +122,8 @@ export function useEventDetailPosts({
     setBoardSearchQuery,
     isBoardSearchActive,
     hasMoreVisiblePosts,
-    expandedCommentPostIds,
     handleScrollToLower,
-    handleLikePost,
-    ensurePostVisible,
     scrollToElement,
-    togglePostComments,
     handleDeletePost,
-    handleCommentSubmitted,
   };
 }

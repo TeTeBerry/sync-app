@@ -2,7 +2,6 @@ import { createPost } from '../api/sync/posts';
 import type { EventDetailPost } from '../types/backend';
 import { uploadChatImageRefs } from './chatImage';
 import { assertPostPublishedVisible } from './postPublishFeedback';
-import { resolveCurrentPostLocation } from './resolveCurrentPostLocation';
 
 export function buildOptimisticMessageBoardPost(params: {
   pendingId: string;
@@ -23,9 +22,6 @@ export function buildOptimisticMessageBoardPost(params: {
     body: params.body.trim(),
     tags: [],
     contentTypes: ['other'],
-    likes: 0,
-    liked: false,
-    comments: 0,
     ...(params.imageRefs?.length ? { images: params.imageRefs } : {}),
   };
 }
@@ -42,7 +38,6 @@ export async function publishMessageBoardPost(params: {
     ? await uploadChatImageRefs(params.imageRefs)
     : undefined;
   const body = trimmedBody || (images?.length ? '分享图片 📸' : '');
-  const location = await resolveCurrentPostLocation();
 
   const post = await createPost({
     body,
@@ -50,7 +45,6 @@ export async function publishMessageBoardPost(params: {
     eventTitle: title,
     contentTypes: ['other'],
     listedInFeed: true,
-    ...(location ? { location } : {}),
     ...(images?.length ? { images } : {}),
   });
   assertPostPublishedVisible(post);

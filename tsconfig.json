@@ -21,9 +21,6 @@
       ],
       "@sync/itinerary-contracts": [
         "../sync-app-backend/src/shared/itinerary/index.ts"
-      ],
-      "@sync/live-info-contracts": [
-        "../sync-app-backend/src/shared/live-info/index.ts"
       ]
     },
     "types": ["webpack-env", "node", "react"],

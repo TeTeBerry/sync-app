@@ -10,7 +10,6 @@ import {
 import { eventDetailPostToCard } from './eventPostCard';
 import { uploadChatImageRefs } from './chatImage';
 import { assertPostPublishedVisible } from './postPublishFeedback';
-import { resolveCurrentPostLocation } from './resolveCurrentPostLocation';
 
 export function buildOptimisticBuddyPost(params: {
   pendingId: string;
@@ -35,9 +34,6 @@ export function buildOptimisticBuddyPost(params: {
     body: fullBody,
     tags: hashTags,
     contentTypes: buddyPostContentTypes(params.form.tags),
-    likes: 0,
-    liked: false,
-    comments: 0,
     ...(params.imageRefs?.length ? { images: params.imageRefs } : {}),
   };
 }
@@ -59,7 +55,7 @@ export async function publishBuddyPostFromForm(params: {
   const images = params.imageRefs?.length
     ? await uploadChatImageRefs(params.imageRefs)
     : undefined;
-  const location = await resolveCurrentPostLocation();
+  const location = form.location.trim();
 
   const post = await createPost({
     body: hashTags.length ? `${body}\n\n${hashTags.join(' ')}` : body,

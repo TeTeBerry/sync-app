@@ -3,7 +3,6 @@ import Taro from '@tarojs/taro';
 import { useAccountRisk } from '../../../hooks/useAccountRisk';
 import type { EventDetailPost } from '../../../types/post';
 import type { AiBuddyPostSubmitPayload } from '../../../types/buddyPost';
-import { resolveCurrentPostLocation } from '../../../utils/resolveCurrentPostLocation';
 import {
   buildOptimisticBuddyPost,
   publishBuddyPostFromForm,
@@ -70,7 +69,6 @@ export function useEventDetailBuddyPost(
       const listedInFeed =
         submitOptions?.listedInFeed ?? payload.syncToPostList !== false;
       const pendingId = `pending-${Date.now()}`;
-      const currentLocation = await resolveCurrentPostLocation();
 
       setIsPublishing(true);
       setSheetOpen(false);
@@ -84,7 +82,6 @@ export function useEventDetailBuddyPost(
             authorName: options.authorName,
             authorAvatar: options.authorAvatar,
             userId: getClientUserId(),
-            location: currentLocation,
           }),
         );
       }

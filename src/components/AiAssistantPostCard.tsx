@@ -1,5 +1,4 @@
 import './AiAssistantPostCard.scss';
-import { PostTagBadge } from './post';
 import { MapPin } from '../components/icons';
 import type { FC } from 'react';
 import type { RecommendedPostCard } from '../types/aiChat';
@@ -69,14 +68,6 @@ export const AiAssistantPostCard: FC<AiAssistantPostCardProps> = ({
           <Text className="s-ai-assistant-post-card__location-text">
             {post.location}
           </Text>
-        </View>
-      ) : null}
-
-      {post.tags?.length ? (
-        <View className="s-ai-assistant-post-card__tags">
-          {post.tags.slice(0, 5).map((tag) => (
-            <PostTagBadge key={tag} tag={tag} />
-          ))}
         </View>
       ) : null}
 

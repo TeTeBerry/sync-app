@@ -13,10 +13,6 @@ export { EventDetailComposerSection } from './components/EventDetailComposerSect
 export type { EventDetailComposerSectionProps } from './components/EventDetailComposerSection';
 export { EventDetailMessageBoardComposer } from './components/EventDetailMessageBoardComposer';
 export { EventDetailBoardSearchBar } from './components/EventDetailBoardSearchBar';
-export {
-  EventDetailContentTabs,
-  type EventDetailTabId,
-} from './components/EventDetailContentTabs';
 export { EventDetailItineraryMenu } from './components/EventDetailItineraryMenu';
 export {
   normalizeEventPostList,

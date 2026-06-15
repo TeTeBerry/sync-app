@@ -4,7 +4,6 @@ export * from './posts';
 export * from './profile';
 export * from './notifications';
 export * from './chat';
-export * from './liveInfo';
 export * from './itinerary';
 export * from './travelGuide';
 export * from './travelPlan';

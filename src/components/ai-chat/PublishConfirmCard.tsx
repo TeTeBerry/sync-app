@@ -1,26 +1,9 @@
-import {
-  ContentTypeBadge,
-  filterContentTypeTags,
-  mergePostContentTypes,
-  PostTagBadge,
-  stripContentTypeHashtags,
-} from '../post';
-import { inferIntentTagsFromText } from '../../utils/inferIntentTags';
+import { stripContentTypeHashtags } from '../post';
 import {
   PUBLISH_CONFIRM_MARKER,
   type PublishConfirmPayload,
 } from '../../utils/parsePublishConfirmMessage';
 import { Image, Text, View } from '@tarojs/components';
-
-const HASHTAG_TAG_RE = /#([^\s#]+)/g;
-
-function extractDisplayTags(body: string, contentTypeKeys: string[]): string[] {
-  const tags: string[] = [];
-  for (const match of body.matchAll(HASHTAG_TAG_RE)) {
-    tags.push(`#${match[1]}`);
-  }
-  return filterContentTypeTags(tags, contentTypeKeys);
-}
 
 export function PublishConfirmCard({
   payload,
@@ -31,21 +14,7 @@ export function PublishConfirmCard({
   userAvatar?: string;
   userName: string;
 }) {
-  const contentTypeKeys = mergePostContentTypes(undefined, {
-    body: payload.draftBody,
-    tags: payload.draftTags,
-  });
   const bodyText = stripContentTypeHashtags(payload.draftBody);
-  const inferredTags =
-    payload.draftTags.length > 0
-      ? payload.draftTags
-      : inferIntentTagsFromText(payload.draftBody);
-  const displayTags = filterContentTypeTags(
-    inferredTags.length
-      ? inferredTags
-      : extractDisplayTags(payload.draftBody, contentTypeKeys),
-    contentTypeKeys,
-  );
 
   return (
     <View className="s-publish-confirm">
@@ -74,18 +43,6 @@ export function PublishConfirmCard({
         <Text className="s-publish-confirm__event-title">{payload.activityLabel}</Text>
 
         {bodyText ? <Text className="s-publish-confirm__body">{bodyText}</Text> : null}
-
-        {contentTypeKeys.length || displayTags.length ? (
-          <View className="s-publish-confirm__tags">
-            <ContentTypeBadge
-              types={contentTypeKeys}
-              className="s-publish-confirm__content-badges"
-            />
-            {displayTags.map((tag) => (
-              <PostTagBadge key={tag} tag={tag} />
-            ))}
-          </View>
-        ) : null}
       </View>
 
       <Text className="s-publish-confirm__hint">{payload.footerHint}</Text>

@@ -16,13 +16,9 @@ export function normalizeEventPostListItem(item: EventDetailPost): EventPostList
     body: item.body ?? '',
     tags: item.tags ?? [],
     name: item.name?.trim() || '用户',
-    likes: item.likes,
-    liked: item.liked,
-    comments: item.comments,
     avatar: sanitizeRemoteImageUrl(item.avatar) ?? item.avatar,
     contentTypes: item.contentTypes,
     images: sanitizeImageList(item.images),
-    authorOnSiteVerified: item.authorOnSiteVerified,
   };
   const publishTimeLabel = post.createdAt ? formatPostPublishTime(post.createdAt) : '';
   return { post, publishTimeLabel };

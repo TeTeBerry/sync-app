@@ -1,76 +1,38 @@
 import './FeedPostList.scss';
-import { memo, useCallback, useState, type FC } from 'react';
+import { memo, type FC } from 'react';
 import {
   FEED_POST_IMAGE_MAX_DISPLAY,
   HOME_FEED_INITIAL_RENDER,
 } from '../../constants/listPerf';
 import { useWindowedList } from '../../hooks/useWindowedList';
-import PostCardActionBar from './PostCardActionBar';
-import { buildPostSharePayload } from './postCardShare';
-import { PostCommentSection } from './PostCommentSection';
-import { PostActionMenu, PostShareButton } from './PostActionMenu';
-import {
-  ContentTypeBadge,
-  filterContentTypeTags,
-  mergePostContentTypes,
-  stripContentTypeHashtags,
-} from './ContentTypeBadge';
-import { formatContentTypeHashtag } from '../../utils/postContentTypeDisplay';
-import { PostTagBadge } from './PostTagBadge';
+import { stripContentTypeHashtags } from './ContentTypeBadge';
 import { PostImageGrid } from './PostImageGrid';
+import { PostOwnerDeleteButton } from './PostOwnerDeleteButton';
 import { MapPin, Ticket } from '../icons';
-import { useCurrentUserQuery } from '../../hooks/useSyncApi';
-import { isCurrentUserPostAuthor } from '../../utils/postOwnership';
-import type { EventDetailPost } from '../../types/backend';
 import type { HomeFeedPost } from '../../types/post';
+import { isCurrentUserPostAuthor } from '../../utils/postOwnership';
 import { thumbnailImageUrl } from '../../utils/imageUrl';
-import { isSharePost } from '../../utils/postContentTypeDisplay';
-import { POST_ACTION_ICON_COLOR } from '../../utils/postActionColors';
 import { WechatEmojiText } from '../wechat-emoji/WechatEmojiText';
 import { Image, Text, View } from '@tarojs/components';
 
 export type FeedPostListProps = {
   items: HomeFeedPost[];
   onDelete?: (post: HomeFeedPost) => void;
-  onLike?: (post: HomeFeedPost) => void;
-  onCommentSubmitted?: (
-    updated: Pick<EventDetailPost, 'id' | 'comments' | 'likes' | 'liked'>,
-  ) => void;
 };
 
 type FeedPostRowProps = {
   post: HomeFeedPost;
-  commentsExpanded: boolean;
-  currentUserAvatar?: string;
   onDelete?: (post: HomeFeedPost) => void;
-  onLike?: (post: HomeFeedPost) => void;
-  onCommentSubmitted?: FeedPostListProps['onCommentSubmitted'];
-  onToggleComments: (postId: string) => void;
 };
 
-function FeedPostRowInner({
-  post,
-  commentsExpanded,
-  currentUserAvatar,
-  onDelete,
-  onLike,
-  onCommentSubmitted,
-  onToggleComments,
-}: FeedPostRowProps) {
+function FeedPostRowInner({ post, onDelete }: FeedPostRowProps) {
   const postName = post.name?.trim() || '用户';
   const postHandle = post.handle?.trim() || `@${postName}`;
   const isOwn = isCurrentUserPostAuthor(postName, post.userId);
   const avatarSrc = thumbnailImageUrl(post.avatar, 80) ?? post.avatar;
-  const contentTypeKeys = mergePostContentTypes(post.contentTypes, {
-    body: post.body,
-    tags: post.tags,
-  });
   const bodyText = stripContentTypeHashtags(post.body);
-  const displayTags = filterContentTypeTags(post.tags, contentTypeKeys);
   const eventLocation = post.location?.trim();
   const eventTitle = post.event?.trim();
-  const sharePost = isSharePost(post);
-  const headerTypeKey = contentTypeKeys[0];
   const postImages = post.images?.length ? post.images : undefined;
 
   return (
@@ -90,11 +52,7 @@ function FeedPostRowInner({
           <View className="s-home-post__meta">
             {eventLocation ? (
               <>
-                <MapPin
-                  size={10}
-                  color={POST_ACTION_ICON_COLOR}
-                  className="s-home-post__meta-icon"
-                />
+                <MapPin size={10} color="#8e8e93" className="s-home-post__meta-icon" />
                 <Text className="s-home-post__meta-text">{eventLocation}</Text>
                 <Text className="s-home-post__meta-sep"> · </Text>
               </>
@@ -102,13 +60,9 @@ function FeedPostRowInner({
             <Text className="s-home-post__meta-text">{post.time}</Text>
           </View>
         </View>
-        {sharePost && headerTypeKey ? (
-          <View className="s-home-post__head-badge">
-            <View className="s-home-post__type-badge">
-              <Text className="s-home-post__type-badge-text">
-                {formatContentTypeHashtag(headerTypeKey)}
-              </Text>
-            </View>
+        {isOwn && onDelete ? (
+          <View className="s-home-post__head-actions">
+            <PostOwnerDeleteButton onDelete={() => onDelete(post)} />
           </View>
         ) : null}
       </View>
@@ -141,140 +95,34 @@ function FeedPostRowInner({
         {postImages?.length ? (
           <PostImageGrid images={postImages} maxDisplay={FEED_POST_IMAGE_MAX_DISPLAY} />
         ) : null}
-
-        {contentTypeKeys.length > 0 && !sharePost ? (
-          <View className="s-home-post__content-types">
-            <ContentTypeBadge
-              types={contentTypeKeys}
-              className="s-content-badges--flush"
-            />
-          </View>
-        ) : null}
-
-        {displayTags.length ? (
-          <View className="s-home-post__tags">
-            {displayTags.map((tag) => (
-              <PostTagBadge key={tag} tag={tag} />
-            ))}
-          </View>
-        ) : null}
       </View>
-
-      <View className="s-home-post__footer">
-        <View className="s-home-post__footer-divider" aria-hidden />
-        <View className="s-home-post__footer-row">
-          <PostCardActionBar
-            variant="home"
-            liked={Boolean(post.liked)}
-            likes={post.likes}
-            comments={post.comments}
-            commentsExpanded={commentsExpanded}
-            onLike={() => onLike?.(post)}
-            onToggleComments={() => onToggleComments(post.id)}
-          />
-          <View className="s-home-post__footer-end">
-            {isOwn && onDelete ? (
-              <PostActionMenu
-                postId={post.id}
-                authorUserId={post.userId}
-                onDelete={() => onDelete(post)}
-              />
-            ) : !isOwn ? (
-              <PostActionMenu postId={post.id} authorUserId={post.userId} />
-            ) : null}
-            <PostShareButton
-              share={buildPostSharePayload({
-                postId: post.id,
-                activityLegacyId: post.activityLegacyId,
-                body: post.body,
-                eventTitle: post.event,
-                authorName: postName,
-                images: postImages,
-                avatar: post.avatar,
-              })}
-            />
-          </View>
-        </View>
-      </View>
-
-      {commentsExpanded ? (
-        <PostCommentSection
-          postId={post.id}
-          postAuthorName={postName}
-          postAuthorUserId={post.userId}
-          expanded
-          onToggleExpanded={() => onToggleComments(post.id)}
-          currentUserAvatar={currentUserAvatar}
-          onCommentSubmitted={onCommentSubmitted}
-        />
-      ) : null}
     </View>
   );
 }
 
 const FeedPostRow = memo(FeedPostRowInner);
 
-function FeedPostListInner({
-  items,
-  onDelete,
-  onLike,
-  onCommentSubmitted,
-}: FeedPostListProps) {
-  const { data: currentUser } = useCurrentUserQuery();
-  const [expandedCommentPostIds, setExpandedCommentPostIds] = useState<Set<string>>(
-    () => new Set(),
-  );
-
+function FeedPostListInner({ items, onDelete }: FeedPostListProps) {
   const windowed = useWindowedList(items, {
     initialSize: HOME_FEED_INITIAL_RENDER,
     step: HOME_FEED_INITIAL_RENDER,
   });
-  const visibleItems = windowed.visibleItems;
-  const hasMoreToShow = windowed.hasMoreToShow;
-  const hiddenCount = windowed.hiddenCount;
-  const showMore = windowed.showMore;
-  const ensureIndexVisible = windowed.ensureIndexVisible;
-
-  const togglePostComments = useCallback(
-    (postId: string) => {
-      const index = items.findIndex((post) => post.id === postId);
-      if (index >= 0) ensureIndexVisible(index);
-
-      setExpandedCommentPostIds((prev) => {
-        const next = new Set(prev);
-        if (next.has(postId)) {
-          next.delete(postId);
-        } else {
-          next.add(postId);
-        }
-        return next;
-      });
-    },
-    [items, ensureIndexVisible],
-  );
 
   return (
     <View className="s-feed-post-list">
-      {visibleItems.map((post) => (
-        <FeedPostRow
-          key={post.id}
-          post={post}
-          commentsExpanded={expandedCommentPostIds.has(post.id)}
-          currentUserAvatar={currentUser?.avatar}
-          onDelete={onDelete}
-          onLike={onLike}
-          onCommentSubmitted={onCommentSubmitted}
-          onToggleComments={togglePostComments}
-        />
+      {windowed.visibleItems.map((post) => (
+        <FeedPostRow key={post.id} post={post} onDelete={onDelete} />
       ))}
-      {hasMoreToShow ? (
+      {windowed.hasMoreToShow ? (
         <View
           className="s-feed-post-list__more"
-          onClick={showMore}
+          onClick={windowed.showMore}
           role="button"
-          aria-label={`展开更多帖子，还有 ${hiddenCount} 条`}
+          aria-label={`展开更多帖子，还有 ${windowed.hiddenCount} 条`}
         >
-          <Text className="s-feed-post-list__more-text">展开更多（{hiddenCount}）</Text>
+          <Text className="s-feed-post-list__more-text">
+            展开更多（{windowed.hiddenCount}）
+          </Text>
         </View>
       ) : null}
     </View>

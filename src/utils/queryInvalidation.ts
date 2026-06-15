@@ -3,13 +3,9 @@ import { invalidateCache } from '../hooks/useApiQuery';
 export { patchActivityRegistrationInCaches } from '../cache/activityCache';
 
 export {
-  patchPostEngagementInCaches,
-  patchUpdatedProfilePostInCaches,
-  syncProfileSummaryLikesFromPostsCache,
   popularPostsQueryKey,
   getPopularPostsFromCache,
   setPopularPostsCache,
-  readPostEngagementFromCache,
 } from '../cache/postCache';
 
 export {
@@ -84,9 +80,4 @@ export function invalidateRegistration() {
   invalidateRegistrationProfile();
   invalidateHome();
   invalidateCache(['activities']);
-}
-
-/** 失效指定帖子的评论查询 */
-export function invalidatePostComments(postId: string) {
-  invalidateCache(['posts', postId, 'comments']);
 }

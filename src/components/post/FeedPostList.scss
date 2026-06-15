@@ -220,6 +220,16 @@
   margin-top: 8px;
 }
 
+.s-home-post__head-badge {
+  flex-shrink: 0;
+}
+
+.s-home-post__head-actions {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
 .s-home-post__footer {
   display: flex;
   flex-direction: column;

@@ -1,21 +1,14 @@
 import '../../../components/profile/profile.scss';
 import Taro, { useDidShow } from '@tarojs/taro';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback } from 'react';
 import { PageTabBarChrome } from '../../../components/navigation/BottomNav';
 import PageNavigation, {
   stackPageNavChromePx,
 } from '../../../components/navigation/PageNavigation';
 import ThemedPageLoader from '../../../components/ThemedPageLoader';
-import {
-  ProfilePostsSection,
-  type ProfilePostEditDraft,
-} from '../../../components/profile';
+import { ProfilePostsSection } from '../../../components/profile';
 import { useConfirmDialog } from '../../../hooks/useConfirmDialog';
-import { useOverlayLock } from '../../../hooks/useOverlayLock';
-import {
-  updatePostAndInvalidate,
-  useProfilePostsQuery,
-} from '../../../hooks/useSyncApi';
+import { useProfilePostsQuery } from '../../../hooks/useSyncApi';
 import { deletePostWithFeedback } from '../../../utils/deletePostFeedback';
 import { invalidateProfilePosts } from '../../../utils/queryInvalidation';
 import { useNavBarInsets } from '../../../hooks/useNavBarInsets';
@@ -31,23 +24,13 @@ const ProfilePostsPage: React.FC = () => {
   const headerChromePx = stackPageNavChromePx(navInsets);
   const mainScrollHeight = useTabPageMainHeight(headerChromePx);
   const postsQuery = useProfilePostsQuery();
-  const [postsOverride, setPostsOverride] = useState<ProfilePostItem[] | null>(null);
-  const posts = postsOverride ?? postsQuery.data ?? [];
+  const posts = postsQuery.data ?? [];
   const loading = postsQuery.isLoading && !postsQuery.data;
   const { confirm, confirmDialog } = useConfirmDialog({ cancelText: '取消' });
-
-  const [editingPostId, setEditingPostId] = useState<string | null>(null);
-  const [editDraft, setEditDraft] = useState<ProfilePostEditDraft | null>(null);
-
-  useOverlayLock(editingPostId != null);
 
   useDidShow(() => {
     invalidateProfilePosts();
   });
-
-  useEffect(() => {
-    setPostsOverride(null);
-  }, [postsQuery.data]);
 
   const handleSelectPost = useCallback((item: ProfilePostItem) => {
     const activityLegacyId = item.activityLegacyId;
@@ -57,43 +40,6 @@ const ProfilePostsPage: React.FC = () => {
     }
     goEventDetail(activityLegacyId, { postId: item.id });
   }, []);
-
-  const handleEditPost = useCallback(
-    (item: ProfilePostItem) => {
-      if (editingPostId === item.id) {
-        setEditingPostId(null);
-        setEditDraft(null);
-        return;
-      }
-      setEditingPostId(item.id);
-      setEditDraft({ body: item.content });
-    },
-    [editingPostId],
-  );
-
-  const handleCancelPostEdit = useCallback(() => {
-    setEditingPostId(null);
-    setEditDraft(null);
-  }, []);
-
-  const handleSavePostEdit = useCallback(
-    async (item: ProfilePostItem) => {
-      if (!editDraft) return;
-      const body = editDraft.body.trim();
-      if (!body) {
-        void Taro.showToast({ title: '帖子内容不能为空', icon: 'none' });
-        return;
-      }
-
-      void updatePostAndInvalidate(item.id, { body })
-        .then(() => {
-          handleCancelPostEdit();
-          void Taro.showToast({ title: '已保存', icon: 'success' });
-        })
-        .catch(() => void Taro.showToast({ title: '保存失败', icon: 'none' }));
-    },
-    [editDraft, handleCancelPostEdit],
-  );
 
   const handleDeletePost = useCallback(
     async (item: ProfilePostItem) => {
@@ -129,22 +75,15 @@ const ProfilePostsPage: React.FC = () => {
               <ThemedPageLoader variant="inline" label="加载帖子…" minHeight={120} />
             ) : (
               <ProfilePostsSection
-                mode="list"
                 items={posts}
-                editingPostId={editingPostId}
-                editDraft={editDraft}
+                mode="list"
                 onSelect={handleSelectPost}
-                onEdit={handleEditPost}
                 onDelete={handleDeletePost}
-                onEditDraftChange={setEditDraft}
-                onSaveEdit={handleSavePostEdit}
-                onCancelEdit={handleCancelPostEdit}
               />
             )}
           </View>
         </ScrollView>
       </View>
-
       {confirmDialog}
       <PageTabBarChrome />
     </View>

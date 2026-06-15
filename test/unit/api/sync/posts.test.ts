@@ -26,31 +26,7 @@ vi.mock('@/constants/api', () => ({
   API_BASE_URL: 'https://api.test',
 }));
 
-import type { EventDetailPost } from '@/types/backend';
-import {
-  addPostComment,
-  createPost,
-  fetchPopularPosts,
-  fetchPostComments,
-  likePost,
-} from '@/api/sync/posts';
-
-const sampleEventDetailPost: EventDetailPost = {
-  id: 'post-1',
-  name: '风暴电音节',
-  location: '上海',
-  createdAt: '2026-06-01T10:00:00.000Z',
-  body: '组队同行',
-  tags: ['#组队'],
-  likes: 1,
-  liked: true,
-  comments: 0,
-  avatar: '',
-};
-
-function postMutationMock(post: EventDetailPost): { post: EventDetailPost } {
-  return { post };
-}
+import { createPost, fetchPopularPosts } from '@/api/sync/posts';
 
 function mockSuccessResponse(data: unknown, statusCode = 200) {
   mockRequest.mockImplementation(
@@ -74,16 +50,6 @@ describe('api/sync/posts query params', () => {
     mockSuccessResponse([]);
   });
 
-  it('likePost includes userId and not authorName when no token', async () => {
-    mockSuccessResponse(postMutationMock(sampleEventDetailPost));
-    const result = await likePost('post-1');
-    const url = lastRequestUrl();
-    expect(url).toContain('userId=');
-    expect(url).not.toContain('authorName=');
-    expect(result).toEqual(sampleEventDetailPost);
-    expect(result.liked).toBe(true);
-  });
-
   it('fetchPopularPosts omits userId and authorName when bearer token present', async () => {
     mockGetAccessToken.mockReturnValue('jwt-token');
     await fetchPopularPosts(10);
@@ -94,27 +60,7 @@ describe('api/sync/posts query params', () => {
   });
 });
 
-describe('api/sync/posts post mutations ({ post })', () => {
-  beforeEach(() => {
-    mockRequest.mockReset();
-    mockGetAccessToken.mockReturnValue(null);
-    mockGetAuthHeaders.mockReturnValue({});
-    mockGetClientUserId.mockReturnValue('demo-client-id');
-  });
-
-  it('addPostComment unwraps { post } mutation response', async () => {
-    const postAfterComment: EventDetailPost = {
-      ...sampleEventDetailPost,
-      comments: 2,
-    };
-    mockSuccessResponse(postMutationMock(postAfterComment));
-    const result = await addPostComment('post-1', 'nice');
-    expect(result).toEqual(postAfterComment);
-    expect(result.comments).toBe(2);
-  });
-});
-
-describe('api/sync/posts createPost (组队发帖 REST)', () => {
+describe('api/sync/posts createPost', () => {
   beforeEach(() => {
     mockRequest.mockReset();
     mockGetAccessToken.mockReturnValue('jwt-token');
@@ -126,20 +72,8 @@ describe('api/sync/posts createPost (组队发帖 REST)', () => {
       createdAt: '2026-06-01T10:00:00.000Z',
       body: 'test',
       tags: ['#组队'],
-      likes: 0,
-      comments: 0,
       avatar: '',
     });
-  });
-
-  it('GET /posts/:id/comments passes limit and cursor query', async () => {
-    mockSuccessResponse({ items: [], hasMore: false });
-    await fetchPostComments('post-9', { limit: 20, cursor: 'abc' });
-
-    const call = mockRequest.mock.calls[0][0] as { url: string };
-    expect(call.url).toContain('/posts/post-9/comments');
-    expect(call.url).toContain('limit=20');
-    expect(call.url).toContain('cursor=abc');
   });
 
   it('POST /posts with JSON body and auth headers', async () => {

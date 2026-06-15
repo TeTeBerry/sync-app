@@ -10,8 +10,6 @@ function basePost(overrides: Partial<EventDetailPost> = {}): EventDetailPost {
     createdAt: '2026-06-01T10:00:00.000Z',
     body: 'hello',
     tags: [],
-    likes: 1,
-    comments: 0,
     avatar: 'https://example.com/a.jpg',
     ...overrides,
   };

@@ -6,32 +6,20 @@ import { Text, View } from '@tarojs/components';
 export type { EventPostListItem };
 
 type EventPostsVirtualListProps = {
-  activityLegacyId: number;
   onScrollToPostId?: (elementId: string) => void;
   items: EventPostListItem[];
   highlightPostId: string;
-  expandedCommentPostIds: Set<string>;
-  currentUserAvatar?: string;
-  onLike: EventPostCardProps['onLike'];
-  onToggleComments: EventPostCardProps['onToggleComments'];
-  onDelete: EventPostCardProps['onDelete'];
-  onCommentSubmitted: EventPostCardProps['onCommentSubmitted'];
+  onDelete?: EventPostCardProps['onDelete'];
   hasMore?: boolean;
   hasMoreLocal?: boolean;
   isLoadingMore?: boolean;
 };
 
 export function EventPostsVirtualList({
-  activityLegacyId,
   onScrollToPostId,
   items,
   highlightPostId,
-  expandedCommentPostIds,
-  currentUserAvatar,
-  onLike,
-  onToggleComments,
   onDelete,
-  onCommentSubmitted,
   hasMore = false,
   hasMoreLocal = false,
   isLoadingMore = false,
@@ -60,15 +48,9 @@ export function EventPostsVirtualList({
           >
             <EventPostCard
               post={item.post}
-              activityLegacyId={activityLegacyId}
               publishTimeLabel={item.publishTimeLabel}
               highlighted={highlighted}
-              commentsExpanded={expandedCommentPostIds.has(item.post.id)}
-              currentUserAvatar={currentUserAvatar}
-              onLike={onLike}
-              onToggleComments={onToggleComments}
               onDelete={onDelete}
-              onCommentSubmitted={onCommentSubmitted}
             />
           </View>
         );

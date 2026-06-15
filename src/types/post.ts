@@ -11,8 +11,6 @@ export type {
   EventPostsPage,
   HomeFeedPost,
   HomeFeedPostAuthorGender,
-  PostCommentItem,
   PostContentType,
   ProfilePostItem,
-  UpdatePostPayload,
 } from './backend';

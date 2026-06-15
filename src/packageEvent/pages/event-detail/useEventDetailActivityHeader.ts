@@ -9,8 +9,6 @@ import {
 import { stackPageNavChromePx } from '../../../components/navigation/PageNavigation';
 import { useNavBarInsets } from '../../../hooks/useNavBarInsets';
 import { useTabPageMainHeight } from '../../../hooks/useTabPageMainHeight';
-import { usePostPageShare } from '../../../hooks/usePostPageShare';
-import type { PostSharePayload } from '../../../utils/postShare';
 import type { useActivityDetailQuery } from '../../../hooks/useSyncApi';
 
 export type UseEventDetailActivityHeaderOptions = {
@@ -27,24 +25,9 @@ export function useEventDetailActivityHeader({
   const navInsets = useNavBarInsets();
 
   const title = activityQuery.data?.name;
-  const activityImage = activityQuery.data?.image;
   const activityDate = activityQuery.data?.date;
   const activityLocation = activityQuery.data?.location;
   const isOnSite = isActivityOnSite(activityDate, title);
-
-  const getDefaultShare = useCallback((): PostSharePayload | null => {
-    if (!Number.isFinite(eventId) || eventId <= 0) {
-      return null;
-    }
-    return {
-      postId: '',
-      activityLegacyId: eventId,
-      eventTitle: title,
-      imageUrl: activityImage,
-    };
-  }, [activityImage, eventId, title]);
-
-  usePostPageShare({ getDefaultShare });
 
   const activityStatus = getActivityStatusFromActivity(activityDate, title);
   const showHeaderSkeleton =

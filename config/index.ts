@@ -14,10 +14,6 @@ const itineraryContractsPath = path.resolve(
   __dirname,
   '../../sync-app-backend/src/shared/itinerary/index.ts',
 );
-const liveInfoContractsPath = path.resolve(
-  __dirname,
-  '../../sync-app-backend/src/shared/live-info/index.ts',
-);
 const srcPath = path.resolve(__dirname, '../src');
 /** @sync/*-contracts aliases point here; must be babel-included for weapp/h5. */
 const backendSharedPath = path.resolve(__dirname, '../../sync-app-backend/src/shared');
@@ -40,7 +36,6 @@ export default defineConfig({
     '@sync/chat-contracts': chatContractsPath,
     '@sync/travel-plan-contracts': travelPlanContractsPath,
     '@sync/itinerary-contracts': itineraryContractsPath,
-    '@sync/live-info-contracts': liveInfoContractsPath,
     /** After @sync/* — bare `@` must not shadow `@sync/…` contract aliases. */
     '@': srcPath,
   },

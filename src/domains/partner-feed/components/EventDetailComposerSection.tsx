@@ -2,10 +2,6 @@ import React from 'react';
 import ThemedPageLoader from '../../../components/ThemedPageLoader';
 import { EventDetailAiTravelGuideCard } from '@/domains/travel-guide/components/EventDetailAiTravelGuideCard';
 import { EventDetailMessageBoardComposer } from './EventDetailMessageBoardComposer';
-import {
-  EventDetailContentTabs,
-  type EventDetailTabId,
-} from './EventDetailContentTabs';
 import { EventDetailItineraryMenu } from './EventDetailItineraryMenu';
 import { View } from '@tarojs/components';
 
@@ -25,10 +21,7 @@ export type EventDetailComposerSectionProps = {
   activityTitle?: string;
   onOpenMyItinerary: () => void;
   onOpenExclusiveItinerary: () => void;
-  contentTab: EventDetailTabId;
-  onContentTabChange: (tab: EventDetailTabId) => void;
   boardCount: number;
-  liveCount: number;
 };
 
 export const EventDetailComposerSection: React.FC<EventDetailComposerSectionProps> = ({
@@ -47,10 +40,6 @@ export const EventDetailComposerSection: React.FC<EventDetailComposerSectionProp
   activityTitle,
   onOpenMyItinerary,
   onOpenExclusiveItinerary,
-  contentTab,
-  onContentTabChange,
-  boardCount,
-  liveCount,
 }) => {
   if (showHeaderSkeleton) {
     return <ThemedPageLoader variant="skeleton-event" minHeight={360} />;
@@ -79,12 +68,6 @@ export const EventDetailComposerSection: React.FC<EventDetailComposerSectionProp
           activityTitle={activityTitle}
           onOpenMyItinerary={onOpenMyItinerary}
           onOpenExclusiveItinerary={onOpenExclusiveItinerary}
-        />
-        <EventDetailContentTabs
-          active={contentTab}
-          boardCount={boardCount}
-          liveCount={liveCount}
-          onChange={onContentTabChange}
         />
       </View>
     </>

@@ -1,17 +1,11 @@
 import { useCallback } from 'react';
 import Taro from '@tarojs/taro';
-import {
-  invalidatePostQueries,
-  useActivityDetailQuery,
-  useCurrentUserQuery,
-} from '../../../hooks/useSyncApi';
+import { useActivityDetailQuery, useCurrentUserQuery } from '../../../hooks/useSyncApi';
 import { useEventPostsInfiniteQuery } from '../../../hooks/useEventPostsInfiniteQuery';
-import { useEventDetailLive } from '@/domains/live-info';
 import {
   useEventDetailPosts,
   useEventDetailBuddyPost,
   useEventDetailMessageBoard,
-  type EventDetailTabId,
 } from '@/domains/partner-feed';
 import { useResolvedProfile } from '../../../hooks/useResolvedProfile';
 import type { ConfirmDialogOptions } from '../../../hooks/useConfirmDialog';
@@ -20,7 +14,6 @@ import { useEventDetailActivityHeader } from './useEventDetailActivityHeader';
 import { useEventDetailScrollPreserve } from './useEventDetailScrollPreserve';
 import { useEventDetailTravelGuide } from '@/domains/travel-guide';
 import { goExclusiveItinerary, goMyItinerary } from '../../../utils/route';
-import { useState } from 'react';
 
 export type UseEventDetailPageOptions = {
   confirm: (options: ConfirmDialogOptions) => Promise<boolean>;
@@ -57,8 +50,6 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
   const profileUser = useResolvedProfile();
   const displayUserName = currentUserQuery.data?.name ?? profileUser.name ?? '用户';
 
-  const [contentTab, setContentTab] = useState<EventDetailTabId>('posts');
-
   const postsQuery = useEventPostsInfiniteQuery(eventId, {
     enabled: feedReady,
     anchorPostId: highlightPostId || undefined,
@@ -87,24 +78,9 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     accountRiskEnabled: secondaryReady,
   });
 
-  const handleOnSiteCertifiedSuccess = useCallback(async () => {
-    await invalidatePostQueries();
-    try {
-      await postsQuery.refetch({ silent: true });
-    } catch {
-      // Best-effort refresh so messages pick up on-site badge.
-    }
-  }, [postsQuery]);
-
-  const live = useEventDetailLive({
-    contentTab,
-    showHeaderSkeleton: header.showHeaderSkeleton,
-  });
-
   const { handleScroll, frozenTop, scrollFrozen } = useEventDetailScrollPreserve();
 
   const posts = useEventDetailPosts({
-    contentTab,
     postsQuery,
     confirm,
     setScrollTop,
@@ -115,7 +91,6 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
   const postsLoading =
     !feedReady || (postsQuery.isLoading && postsQuery.items.length === 0);
   const showPostsEnd =
-    contentTab === 'posts' &&
     posts.totalPostCount > 0 &&
     posts.filteredPostCount > 0 &&
     !posts.isBoardSearchActive &&
@@ -173,13 +148,9 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     handleBuddyPostSheetSubmit: templatePost.handleBuddyPostSheetSubmit,
     buddyPostActivityDate: templatePost.buddyPostActivityDate,
     buddyPostActivityTitle: templatePost.buddyPostActivityTitle,
-    contentTab,
-    setContentTab,
-    live,
     posts,
     postsLoading,
     showPostsEnd,
-    currentUserAvatar: currentUserQuery.data?.avatar,
     postsQuery,
     displayUserName,
     handleOpenAiGuide: travelGuide.openGuideSheet,
@@ -192,6 +163,5 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     guideDefaultNights: travelGuide.guideDefaultNights,
     guideEventCity: travelGuide.guideEventCity,
     invalidEventId: route.invalidEventId,
-    handleOnSiteCertifiedSuccess,
   };
 }
