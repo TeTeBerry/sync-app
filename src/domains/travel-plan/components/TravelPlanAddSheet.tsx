@@ -44,7 +44,7 @@ const TYPE_OPTIONS: Array<{
   { id: 'transport', label: '交通', Icon: Car },
   { id: 'hotel', label: '住宿', Icon: BedDouble },
   { id: 'dining', label: '餐饮', Icon: Utensils },
-  { id: 'event', label: '活动', Icon: Ticket },
+  { id: 'event', label: '其他', Icon: Ticket },
 ];
 
 type OcrStatus = 'idle' | 'loading' | 'success';

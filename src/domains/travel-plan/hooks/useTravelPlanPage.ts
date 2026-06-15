@@ -10,6 +10,7 @@ import {
   travelPlanNodeFromSavedPayload,
   travelPlanNodeToPayload,
 } from '../utils/travelPlanApiMapper';
+import { fitTravelPlanSavePayload } from '../utils/travelPlanSavePayload';
 import { buildDefaultActivityTravelPlanNodes } from '../utils/travelPlanActivityNodes';
 import {
   createTravelPlanNodesFromFormValues,
@@ -219,15 +220,17 @@ export function useTravelPlanPage({
 
       setIsSaving(true);
       try {
-        await save({
-          eventMeta: resolvedEventMeta.slice(0, 200),
-          nodes: nextUserNodes.map(travelPlanNodeToPayload),
-          activityConfirmations: {},
-          activityPriceOverrides: nextActivityPriceOverrides,
-          hiddenActivityNodeIds: normalizeHiddenActivityNodeIds(
-            nextHiddenActivityNodeIds,
-          ),
-        });
+        await save(
+          fitTravelPlanSavePayload({
+            eventMeta: resolvedEventMeta.slice(0, 200),
+            nodes: nextUserNodes.map(travelPlanNodeToPayload),
+            activityConfirmations: {},
+            activityPriceOverrides: nextActivityPriceOverrides,
+            hiddenActivityNodeIds: normalizeHiddenActivityNodeIds(
+              nextHiddenActivityNodeIds,
+            ),
+          }),
+        );
         return true;
       } catch (error) {
         const message =

@@ -14,14 +14,14 @@ const SEGMENT_TYPE_OPTIONS: Array<{
   { id: 'transport', label: '交通' },
   { id: 'hotel', label: '住宿' },
   { id: 'dining', label: '餐饮' },
-  { id: 'event', label: '活动' },
+  { id: 'event', label: '其他' },
 ];
 
 const SEGMENT_CATEGORY_LABEL: Record<TravelPlanAddFormCategory, string> = {
   transport: '交通',
   hotel: '住宿',
   dining: '餐饮',
-  event: '活动',
+  event: '其他',
 };
 
 type TravelPlanAddSheetSegmentProps = {

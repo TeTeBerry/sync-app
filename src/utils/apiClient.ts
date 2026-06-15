@@ -8,6 +8,7 @@ import { taroRequestData } from './apiRequestBody';
 import {
   buildContainerApiPath,
   callContainerRequest,
+  CALL_CONTAINER_MAX_BODY_BYTES,
   type ContainerHttpResponse,
 } from './cloudRunTransport';
 
@@ -108,6 +109,11 @@ async function dispatchRequest(
   timeoutMs: number,
 ): Promise<CompatibleResponse> {
   if (isWeappCloudRunTransportEnabled()) {
+    const requestData = taroRequestData(init);
+    const bytes = requestData == null ? 0 : JSON.stringify(requestData).length;
+    if (bytes > CALL_CONTAINER_MAX_BODY_BYTES && API_BASE_URL.startsWith('http')) {
+      return requestWithTimeout(buildUrl(path, params), init, timeoutMs);
+    }
     return callContainerRequest(buildContainerApiPath(path, params), init, timeoutMs);
   }
   return requestWithTimeout(buildUrl(path, params), init, timeoutMs);
