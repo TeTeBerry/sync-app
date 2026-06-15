@@ -58,14 +58,6 @@ export function partsFromIsoDate(iso: string): CalendarDay | null {
   };
 }
 
-export function calendarDayToDate(parts: CalendarDay): Date {
-  return dayFromParts(parts).toDate();
-}
-
-export function compareCalendarDays(a: CalendarDay, b: CalendarDay): number {
-  return dayFromParts(a).diff(dayFromParts(b), 'day');
-}
-
 export function isDayInRange(
   day: CalendarDay,
   start: CalendarDay,

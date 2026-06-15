@@ -107,5 +107,3 @@ export async function deletePostAndInvalidate(postId: string) {
   await deletePost(postId);
   await invalidatePostQueries();
 }
-
-export { fetchReportStatus, submitReport } from '../../api/sync/users';

@@ -22,10 +22,7 @@ export type {
 } from '@sync/travel-plan-contracts';
 
 export {
-  TRAVEL_PLAN_RECEIPT_CATEGORIES,
   applyActivityNodeOverrides,
-  filterUserTravelPlanNodes,
-  isActivityTravelPlanNodeId,
   mergeTravelPlanNodes,
   normalizeHiddenActivityNodeIds,
   sortTravelPlanNodes,

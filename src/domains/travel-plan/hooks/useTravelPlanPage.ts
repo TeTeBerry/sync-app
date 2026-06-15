@@ -299,19 +299,7 @@ export function useTravelPlanPage({
         activityPriceOverrides,
         hiddenActivityNodeIds,
       );
-      if (ok) {
-        void Taro.showToast({
-          title:
-            nodes.length > 1
-              ? `已保存 ${nodes.length} 段行程`
-              : nodes[0]?.diningBills && nodes[0].diningBills.length > 1
-                ? `已保存 ${nodes[0].diningBills.length} 笔餐饮账单`
-                : nodes[0]?.transportBills && nodes[0].transportBills.length > 1
-                  ? `已保存 ${nodes[0].transportBills.length} 笔打车记录`
-                  : '已保存行程',
-          icon: 'success',
-        });
-      } else {
+      if (!ok) {
         setUserNodes(previousUserNodes);
         setExpandedId(null);
       }

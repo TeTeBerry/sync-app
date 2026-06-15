@@ -1,20 +1,5 @@
 import { invalidateCache } from '../hooks/useApiQuery';
 
-export { patchActivityRegistrationInCaches } from '../cache/activityCache';
-
-export {
-  popularPostsQueryKey,
-  getPopularPostsFromCache,
-  setPopularPostsCache,
-} from '../cache/postCache';
-
-export {
-  markNotificationReadInCache,
-  markAllNotificationsReadInCache,
-  removeNotificationFromCache,
-  clearNotificationsInCache,
-} from '../cache/notificationCache';
-
 /** 失效通知相关查询 */
 export function invalidateNotifications() {
   invalidateCache(['notifications']);
@@ -62,11 +47,4 @@ export function invalidateAllPosts() {
 export function invalidateRegistrationProfile() {
   invalidateProfile();
   invalidateUser();
-}
-
-/** 失效注册/活动相关查询 */
-export function invalidateRegistration() {
-  invalidateRegistrationProfile();
-  invalidateHome();
-  invalidateCache(['activities']);
 }

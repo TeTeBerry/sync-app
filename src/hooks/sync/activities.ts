@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import {
   cancelActivityRegistration,
   fetchActivities,
@@ -51,6 +51,8 @@ import { getCacheData, useApiQuery } from '../useApiQuery';
 import type { QueryEnableOptions } from './types';
 import type { UpdateCurrentUserPayload } from '../../types/backend';
 import { updateCurrentUser } from '../../api/sync/users';
+import { useProfileActivitiesQuery } from './profile';
+import { buildRegisteredActivityLegacyIds } from '../../utils/activityRegistration';
 
 export function useActivitiesQuery(options?: QueryEnableOptions) {
   const tabEnabled = options?.enabled ?? true;
@@ -101,6 +103,15 @@ export function useHomeSummary() {
   });
 
   const { refetch } = query;
+  const refreshedGoingFlagsRef = useRef(false);
+
+  useEffect(() => {
+    if (!isLiveApi() || !isLoggedIn() || refreshedGoingFlagsRef.current) {
+      return;
+    }
+    refreshedGoingFlagsRef.current = true;
+    void refetch({ background: true });
+  }, [refetch]);
 
   useEffect(() => {
     if (!isLiveApi()) return;
@@ -112,6 +123,20 @@ export function useHomeSummary() {
   }, [refetch]);
 
   return query;
+}
+
+export function useRegisteredActivityLegacyIds() {
+  const { data: summary } = useHomeSummary();
+  const profileActivitiesQuery = useProfileActivitiesQuery();
+
+  return useMemo(
+    () =>
+      buildRegisteredActivityLegacyIds(
+        summary?.signupEvents,
+        profileActivitiesQuery.data,
+      ),
+    [summary?.signupEvents, profileActivitiesQuery.data],
+  );
 }
 
 export function useFeaturedEvents() {

@@ -22,7 +22,7 @@ export type TravelPlanAddFormValues = {
   remark: string;
 };
 
-export const EMPTY_TRAVEL_PLAN_ADD_FORM: TravelPlanAddFormValues = {
+const EMPTY_TRAVEL_PLAN_ADD_FORM: TravelPlanAddFormValues = {
   category: 'hotel',
   timeRange: DEFAULT_TRAVEL_PLAN_TIME_RANGE,
   title: '',
@@ -49,7 +49,13 @@ export function sortTravelPlanAddFormValues(
     if (startDiff !== 0) {
       return startDiff;
     }
-    return a.timeRange.endDate.localeCompare(b.timeRange.endDate);
+    const endDiff = a.timeRange.endDate.localeCompare(b.timeRange.endDate);
+    if (endDiff !== 0) {
+      return endDiff;
+    }
+    const timeA = a.timeRange.startTime ?? '';
+    const timeB = b.timeRange.startTime ?? '';
+    return timeA.localeCompare(timeB);
   });
 }
 
@@ -62,9 +68,7 @@ export function parseTravelPlanCostInput(raw: string): number | undefined {
   return Number.isFinite(value) && value >= 0 ? value : undefined;
 }
 
-export function createTravelPlanNodeFromForm(
-  form: TravelPlanAddFormValues,
-): TravelPlanNode {
+function createTravelPlanNodeFromForm(form: TravelPlanAddFormValues): TravelPlanNode {
   const title = form.title.trim();
   const description = form.description.trim();
   const remark = form.remark.trim();
@@ -136,6 +140,7 @@ function createAggregatedBillNodeFromForms(
     billsField: 'diningBills' | 'transportBills';
     fallbackTitle: string;
     subtitleSuffix: string;
+    includeDuration?: boolean;
   },
 ): TravelPlanNode {
   const sortedForms = sortTravelPlanAddFormValues(forms);
@@ -151,13 +156,16 @@ function createAggregatedBillNodeFromForms(
 
   const startForm = sortedForms[0];
   const endForm = sortedForms[sortedForms.length - 1];
+  const endTime =
+    endForm.timeRange.endTime ??
+    (sortedForms.length > 1 ? endForm.timeRange.startTime : undefined);
   const normalizedRange = {
     startDate: startForm.timeRange.startDate,
     endDate: endForm.timeRange.endDate || endForm.timeRange.startDate,
     ...(startForm.timeRange.startTime
       ? { startTime: startForm.timeRange.startTime }
       : {}),
-    ...(endForm.timeRange.endTime ? { endTime: endForm.timeRange.endTime } : {}),
+    ...(endTime ? { endTime } : {}),
   };
 
   const totalCost = bills.reduce((sum, bill) => sum + (bill.cost ?? 0), 0);
@@ -165,7 +173,10 @@ function createAggregatedBillNodeFromForms(
   const title = formatAggregatedBillNodeTitle(bills, options.fallbackTitle);
   const subtitle = `共 ${bills.length} ${options.subtitleSuffix}`;
   const timeLabel = formatTravelPlanTimeLabel(normalizedRange) || '待填写日期';
-  const duration = formatTravelPlanDuration(normalizedRange);
+  const includeDuration = options.includeDuration ?? options.category !== 'dining';
+  const duration = includeDuration
+    ? formatTravelPlanDuration(normalizedRange)
+    : undefined;
 
   return {
     id: `plan-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
@@ -186,7 +197,7 @@ function createAggregatedBillNodeFromForms(
   } as TravelPlanNode;
 }
 
-export function createTravelPlanDiningNodeFromForms(
+function createTravelPlanDiningNodeFromForms(
   forms: TravelPlanAddFormValues[],
 ): TravelPlanNode {
   return createAggregatedBillNodeFromForms(
@@ -197,11 +208,48 @@ export function createTravelPlanDiningNodeFromForms(
       billsField: 'diningBills',
       fallbackTitle: '餐饮消费',
       subtitleSuffix: '笔消费',
+      includeDuration: false,
     },
   );
 }
 
-export function createTravelPlanTransportNodeFromForms(
+function groupTravelPlanFormsByStartDate(
+  forms: TravelPlanAddFormValues[],
+): TravelPlanAddFormValues[][] {
+  const sortedForms = sortTravelPlanAddFormValues(forms);
+  const groups: TravelPlanAddFormValues[][] = [];
+  let currentDate = '';
+  let currentGroup: TravelPlanAddFormValues[] = [];
+
+  for (const form of sortedForms) {
+    const date = form.timeRange.startDate;
+    if (date !== currentDate) {
+      if (currentGroup.length > 0) {
+        groups.push(currentGroup);
+      }
+      currentDate = date;
+      currentGroup = [form];
+      continue;
+    }
+    currentGroup.push(form);
+  }
+
+  if (currentGroup.length > 0) {
+    groups.push(currentGroup);
+  }
+
+  return groups;
+}
+
+function createTravelPlanDiningNodesFromForms(
+  forms: TravelPlanAddFormValues[],
+): TravelPlanNode[] {
+  return groupTravelPlanFormsByStartDate(
+    forms.map((form) => ({ ...form, category: 'dining' as const })),
+  ).map((group) => createTravelPlanDiningNodeFromForms(group));
+}
+
+function createTravelPlanTransportNodeFromForms(
   forms: TravelPlanAddFormValues[],
 ): TravelPlanNode {
   return createAggregatedBillNodeFromForms(
@@ -220,15 +268,32 @@ export function createTravelPlanNodesFromFormValues(
   values: TravelPlanAddFormValues[],
 ): TravelPlanNode[] {
   const sortedValues = sortTravelPlanAddFormValues(values);
-  if (sortedValues.length > 1 && sortedValues[0]?.category === 'dining') {
-    return [createTravelPlanDiningNodeFromForms(sortedValues)];
+  if (sortedValues.length === 0) {
+    return [];
   }
-  if (
-    sortedValues.length > 1 &&
-    sortedValues[0]?.category === 'transport' &&
-    shouldMergeTransportForms(sortedValues)
-  ) {
-    return [createTravelPlanTransportNodeFromForms(sortedValues)];
+
+  const nodes: TravelPlanNode[] = [];
+
+  const diningForms = sortedValues.filter((form) => form.category === 'dining');
+  if (diningForms.length > 0) {
+    nodes.push(...createTravelPlanDiningNodesFromForms(diningForms));
   }
-  return sortedValues.map(createTravelPlanNodeFromForm);
+
+  const transportForms = sortedValues.filter((form) => form.category === 'transport');
+  if (transportForms.length > 1 && shouldMergeTransportForms(transportForms)) {
+    nodes.push(createTravelPlanTransportNodeFromForms(transportForms));
+  } else {
+    for (const form of transportForms) {
+      nodes.push(createTravelPlanNodeFromForm(form));
+    }
+  }
+
+  const otherForms = sortedValues.filter(
+    (form) => form.category !== 'dining' && form.category !== 'transport',
+  );
+  for (const form of otherForms) {
+    nodes.push(createTravelPlanNodeFromForm(form));
+  }
+
+  return nodes;
 }

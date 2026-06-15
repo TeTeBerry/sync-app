@@ -12,8 +12,10 @@ import {
   useNearestUpcomingForCountdown,
   useNotificationUnreadCount,
   usePopularPosts,
+  useRegisteredActivityLegacyIds,
   mapHomeFeedPost,
 } from '../../hooks/useSyncApi';
+import { isActivityRegistered } from '../../utils/activityRegistration';
 import { requireAuth } from '../../utils/authGate';
 import {
   buildEventDetailQuery,
@@ -26,7 +28,6 @@ import {
 import { joinActivityWithAuth } from '../../utils/joinActivity';
 import { isLoggedIn } from '../../utils/authStorage';
 import { deletePostWithFeedback } from '../../utils/deletePostFeedback';
-import { useAuthSession } from '../../hooks/useAuthSession';
 import { HomeCountdownCard } from './components/HomeCountdownCard';
 import { HomeFeaturedEvents } from './components/HomeFeaturedEvents';
 import TabPageHeader from '../../components/navigation/TabPageHeader';
@@ -57,12 +58,13 @@ const Home = () => {
 
   const {
     data: summary,
-    isLoading: summaryLoading,
+    isLoading: summaryQueryLoading,
     refetch: refetchHomeSummary,
   } = useHomeSummary();
+  const summaryLoading = summaryQueryLoading && !summary;
   const heat = summary?.heat;
-  const { loggedIn } = useAuthSession();
   const { items: featuredEvents } = useFeaturedEvents();
+  const registeredLegacyIds = useRegisteredActivityLegacyIds();
   const nearestUpcoming = useNearestUpcomingForCountdown();
   const { data: unreadCount = 0 } = useNotificationUnreadCount();
 
@@ -70,17 +72,15 @@ const Home = () => {
     () => (summary?.popularPosts ?? []).map(mapHomeFeedPost),
     [summary?.popularPosts],
   );
-  const needsPopularFallback = !summaryLoading && summaryPosts.length === 0;
   const {
-    posts: fallbackPosts,
+    posts: feedPosts,
     isLoading: popularLoading,
     isError: postsError,
     refetch: refetchPosts,
-  } = usePopularPosts({ enabled: needsPopularFallback });
+  } = usePopularPosts();
 
-  const posts = summaryPosts.length > 0 ? summaryPosts : fallbackPosts;
-  const postsLoading =
-    posts.length === 0 && (summaryLoading || (needsPopularFallback && popularLoading));
+  const posts = summaryPosts.length > 0 ? summaryPosts : feedPosts;
+  const postsLoading = posts.length === 0 && (summaryLoading || popularLoading);
 
   const handleNotification = useCallback(() => {
     requireAuth(() => goNotifications(), 'notification');
@@ -111,16 +111,16 @@ const Home = () => {
       if (legacyId == null) {
         return;
       }
-      if (loggedIn && event.going) {
+      if (isActivityRegistered(legacyId, registeredLegacyIds)) {
         openEventDetail(event);
         return;
       }
       joinActivityWithAuth(legacyId, {
-        alreadyJoined: event.going,
+        alreadyJoined: isActivityRegistered(legacyId, registeredLegacyIds),
         onSuccess: () => openEventDetail(event),
       });
     },
-    [loggedIn, openEventDetail],
+    [openEventDetail, registeredLegacyIds],
   );
 
   const handleDeletePost = useCallback(
@@ -171,6 +171,7 @@ const Home = () => {
 
           <HomeFeaturedEvents
             items={featuredEvents}
+            registeredLegacyIds={registeredLegacyIds}
             onEventClick={openEventDetail}
             onJoinClick={handleJoinEvent}
             onEventPreload={handleEventPreload}

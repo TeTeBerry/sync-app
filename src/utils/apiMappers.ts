@@ -43,12 +43,6 @@ export type FeaturedEvent = {
   going: boolean;
 };
 
-export function buildActivityNameMap(
-  activities: import('../types/backend').BackendActivity[],
-): Map<string, string> {
-  return new Map(activities.map((item) => [item.code, item.name]));
-}
-
 export function findBackendActivityByLegacyId(
   activities: import('../types/backend').BackendActivity[],
   legacyId: number,

@@ -1,6 +1,5 @@
 import '../../packageAi/pages/ai-assistant/AiAssistantPage.scss';
 import { type FC } from 'react';
-import { BottomNavSlot } from '../../components/navigation/BottomNav';
 import { CalendarDays, Zap } from '../../components/icons';
 import TabPageHeader from '../../components/navigation/TabPageHeader';
 import { Text, View } from '@tarojs/components';
@@ -94,7 +93,6 @@ const AiTabPage: FC = () => {
         </View>
       </View>
 
-      <BottomNavSlot />
       <LoginInterceptHost />
     </View>
   );

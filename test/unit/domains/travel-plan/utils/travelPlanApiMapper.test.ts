@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-  travelPlanNodeFromPayload,
+  travelPlanNodeFromSavedPayload,
   travelPlanNodeToPayload,
 } from '@/domains/travel-plan/utils/travelPlanApiMapper';
 
@@ -19,7 +19,7 @@ describe('travelPlanApiMapper', () => {
       confirmed: true,
     };
 
-    const node = travelPlanNodeFromPayload(payload);
+    const node = travelPlanNodeFromSavedPayload(payload, 'user');
     expect(node.source).toBe('user');
     expect(node.timeLabel).toBe('06/13–06/15');
     expect(travelPlanNodeToPayload(node)).toEqual(payload);

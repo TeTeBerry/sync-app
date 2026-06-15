@@ -1,5 +1,5 @@
-import { Input, Text, View } from '@tarojs/components';
-import { Trash2 } from '@/components/icons';
+import { Input, Picker, Text, View } from '@tarojs/components';
+import { ChevronDown, Trash2 } from '@/components/icons';
 import { Button } from '@/components/ui';
 import type {
   TravelPlanAddFormCategory,
@@ -7,49 +7,77 @@ import type {
 } from '../utils/travelPlanAddForm';
 import { TravelPlanDateTimeRangeField } from './TravelPlanDateTimeRangeField';
 
+const SEGMENT_TYPE_OPTIONS: Array<{
+  id: TravelPlanAddFormCategory;
+  label: string;
+}> = [
+  { id: 'transport', label: '交通' },
+  { id: 'hotel', label: '住宿' },
+  { id: 'dining', label: '餐饮' },
+  { id: 'event', label: '活动' },
+];
+
+const SEGMENT_CATEGORY_LABEL: Record<TravelPlanAddFormCategory, string> = {
+  transport: '交通',
+  hotel: '住宿',
+  dining: '餐饮',
+  event: '活动',
+};
+
 type TravelPlanAddSheetSegmentProps = {
   index: number;
   total: number;
-  category: TravelPlanAddFormCategory;
   form: TravelPlanAddFormValues;
   sheetOpen: boolean;
   onPatch: (patch: Partial<TravelPlanAddFormValues>) => void;
   onRemove?: () => void;
-  mergeAsBillList?: boolean;
+  batchMode?: boolean;
 };
 
 function resolveSegmentLabel(
   index: number,
   total: number,
   category: TravelPlanAddFormCategory,
-  mergeAsBillList: boolean,
+  batchMode: boolean,
 ) {
   if (total <= 1) {
     return null;
   }
-  if (category === 'transport' && total === 2 && !mergeAsBillList) {
+  if (batchMode) {
+    return `${SEGMENT_CATEGORY_LABEL[category]} ${index + 1}`;
+  }
+  if (category === 'transport' && total === 2) {
     return index === 0 ? '去程' : '返程';
   }
-  if (category === 'dining') {
-    return `账单 ${index + 1}`;
-  }
-  if (category === 'transport' && mergeAsBillList) {
-    return `打车 ${index + 1}`;
-  }
   return `第 ${index + 1} 段`;
+}
+
+function isBillStyleSegment(
+  category: TravelPlanAddFormCategory,
+  batchMode: boolean,
+): boolean {
+  if (!batchMode) {
+    return false;
+  }
+  return category === 'dining' || category === 'transport';
 }
 
 export function TravelPlanAddSheetSegment({
   index,
   total,
-  category,
   form,
   sheetOpen,
   onPatch,
   onRemove,
-  mergeAsBillList = false,
+  batchMode = false,
 }: TravelPlanAddSheetSegmentProps) {
-  const segmentLabel = resolveSegmentLabel(index, total, category, mergeAsBillList);
+  const category = form.category;
+  const billStyle = isBillStyleSegment(category, batchMode);
+  const segmentLabel = resolveSegmentLabel(index, total, category, batchMode);
+  const categoryIndex = Math.max(
+    0,
+    SEGMENT_TYPE_OPTIONS.findIndex((option) => option.id === category),
+  );
 
   return (
     <View className="s-travel-plan-add-sheet__segment">
@@ -74,6 +102,29 @@ export function TravelPlanAddSheetSegment({
         </View>
       ) : null}
 
+      {batchMode ? (
+        <View className="s-travel-plan-add-sheet__field">
+          <Text className="s-travel-plan-add-sheet__field-label">类型</Text>
+          <Picker
+            mode="selector"
+            range={SEGMENT_TYPE_OPTIONS.map((option) => option.label)}
+            value={categoryIndex}
+            onChange={(event) => {
+              const next =
+                SEGMENT_TYPE_OPTIONS[Number(event.detail.value)]?.id ?? category;
+              onPatch({ category: next });
+            }}
+          >
+            <View className="s-travel-plan-add-sheet__segment-select">
+              <Text className="s-travel-plan-add-sheet__segment-select-value">
+                {SEGMENT_CATEGORY_LABEL[category]}
+              </Text>
+              <ChevronDown size={16} color="#8e8e93" aria-hidden />
+            </View>
+          </Picker>
+        </View>
+      ) : null}
+
       <View className="s-travel-plan-add-sheet__field s-travel-plan-add-sheet__field--time">
         <Text className="s-travel-plan-add-sheet__field-label">时间</Text>
         <TravelPlanDateTimeRangeField
@@ -85,9 +136,9 @@ export function TravelPlanAddSheetSegment({
 
       <View className="s-travel-plan-add-sheet__field">
         <Text className="s-travel-plan-add-sheet__field-label">
-          {category === 'dining'
+          {billStyle && category === 'dining'
             ? '商家'
-            : category === 'transport' && mergeAsBillList
+            : billStyle && category === 'transport'
               ? '行程摘要'
               : '标题'}
         </Text>
@@ -96,9 +147,9 @@ export function TravelPlanAddSheetSegment({
           type="text"
           value={form.title}
           placeholder={
-            category === 'dining'
+            billStyle && category === 'dining'
               ? '如：星巴克'
-              : category === 'transport' && mergeAsBillList
+              : billStyle && category === 'transport'
                 ? '如：滴滴出行'
                 : '如：乘高铁去深圳'
           }
@@ -111,19 +162,13 @@ export function TravelPlanAddSheetSegment({
       <View className="s-travel-plan-add-sheet__grid s-travel-plan-add-sheet__grid--desc-cost">
         <View className="s-travel-plan-add-sheet__field">
           <Text className="s-travel-plan-add-sheet__field-label">
-            {category === 'dining' || (category === 'transport' && mergeAsBillList)
-              ? '消费时间（选填）'
-              : '描述（选填）'}
+            {billStyle ? '消费时间（选填）' : '描述（选填）'}
           </Text>
           <Input
             className="s-travel-plan-add-sheet__input"
             type="text"
             value={form.description}
-            placeholder={
-              category === 'dining' || (category === 'transport' && mergeAsBillList)
-                ? '如：6/15 13:53'
-                : '如：G1222次 · 二等座'
-            }
+            placeholder={billStyle ? '如：6/15 13:53' : '如：G1222次 · 二等座'}
             placeholderClass="s-travel-plan-add-sheet__input-placeholder"
             confirmType="done"
             onInput={(event) => onPatch({ description: event.detail.value ?? '' })}

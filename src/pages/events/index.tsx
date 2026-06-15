@@ -9,8 +9,11 @@ import ThemedPageLoader from '../../components/ThemedPageLoader';
 import { seedActivityDetailFromEventCard } from '../../utils/activityDetailCache';
 import { preloadEventSubpackage } from '../../utils/subpackagePreload';
 import { buildEventDetailQuery, preloadPageSafe, ROUTES } from '../../utils/route';
-import { useEventList, useHomeSummary } from '../../hooks/useSyncApi';
-import { parseActivityLegacyId } from '../../utils/activityLegacyId';
+import {
+  useEventList,
+  useHomeSummary,
+  useRegisteredActivityLegacyIds,
+} from '../../hooks/useSyncApi';
 import { resolveEventCardLegacyId } from '../../utils/apiMappers';
 import { goEventDetail, preloadHotRoutes } from '../../utils/route';
 import { isLoggedIn } from '../../utils/authStorage';
@@ -45,7 +48,8 @@ const Events: React.FC = () => {
   );
 
   const { events, isLoading, isError, refetch } = useEventList();
-  const { data: homeSummary, refetch: refetchHomeSummary } = useHomeSummary();
+  const { refetch: refetchHomeSummary } = useHomeSummary();
+  const registeredLegacyIds = useRegisteredActivityLegacyIds();
   const [viewTab, setViewTab] = useState<EventsViewTab>('calendar');
   const [selectedDay, setSelectedDay] = useState(todayCalendarParts);
 
@@ -57,21 +61,9 @@ const Events: React.FC = () => {
     }
     if (isLoggedIn()) {
       void refetchHomeSummary({ background: true });
+      void refetch();
     }
   });
-
-  const registeredLegacyIds = useMemo(() => {
-    const ids = new Set<number>();
-    for (const item of homeSummary?.signupEvents ?? []) {
-      if (item.going) {
-        const legacyId = parseActivityLegacyId(item.id);
-        if (legacyId != null) {
-          ids.add(legacyId);
-        }
-      }
-    }
-    return ids;
-  }, [homeSummary?.signupEvents]);
 
   const upcomingEvents = useMemo(
     () =>

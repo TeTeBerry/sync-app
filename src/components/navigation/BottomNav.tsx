@@ -10,7 +10,6 @@ import {
 } from '../../utils/subpackagePreload';
 import type { RoutePath } from '../../utils/route';
 import { ROUTES, switchTabTo, useActiveRoutePath } from '../../utils/route';
-import { requireAuth } from '../../utils/authGate';
 
 function preloadSubpackagesForTab(path: RoutePath) {
   if (path === ROUTES.HOME || path === ROUTES.EVENTS || path === ROUTES.AI) {
@@ -27,10 +26,6 @@ function preloadSubpackagesForTab(path: RoutePath) {
 function handleTabPress(path: RoutePath, isActive: boolean) {
   if (isActive) return;
   preloadSubpackagesForTab(path);
-  if (path === ROUTES.AI) {
-    requireAuth(() => switchTabTo(path), 'ai_assistant');
-    return;
-  }
   switchTabTo(path);
 }
 

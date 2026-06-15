@@ -12,14 +12,15 @@ import {
   resolveFeaturedEventLegacyId,
   type FeaturedEvent,
 } from '../../../utils/apiMappers';
+import { isActivityRegistered } from '../../../utils/activityRegistration';
 import { featuredPostImageUrl, thumbnailImageUrl } from '../../../utils/imageUrl';
 import { useRouteTransitionActive } from '../../../utils/route';
 import { goEventsListTab } from '../../../utils/route';
-import { useAuthSession } from '../../../hooks/useAuthSession';
 import { Image, Swiper, SwiperItem, Text, View } from '@tarojs/components';
 
 type HomeFeaturedEventsProps = {
   items: FeaturedEvent[];
+  registeredLegacyIds: Set<number>;
   onEventClick: (item: FeaturedEvent) => void;
   onJoinClick: (item: FeaturedEvent) => void;
   onEventPreload?: (item: FeaturedEvent) => void;
@@ -27,12 +28,11 @@ type HomeFeaturedEventsProps = {
 
 export const HomeFeaturedEvents: FC<HomeFeaturedEventsProps> = ({
   items,
+  registeredLegacyIds,
   onEventClick,
   onJoinClick,
   onEventPreload,
 }) => {
-  const { loggedIn } = useAuthSession();
-
   if (items.length === 0) {
     return (
       <View className="s-home-showcase" aria-label="热门活动">
@@ -73,7 +73,7 @@ export const HomeFeaturedEvents: FC<HomeFeaturedEventsProps> = ({
             <HomeFeaturedEventCard
               event={event}
               index={index}
-              loggedIn={loggedIn}
+              registeredLegacyIds={registeredLegacyIds}
               onEventClick={onEventClick}
               onJoinClick={onJoinClick}
               onEventPreload={onEventPreload}
@@ -88,14 +88,14 @@ export const HomeFeaturedEvents: FC<HomeFeaturedEventsProps> = ({
 function HomeFeaturedEventCard({
   event,
   index,
-  loggedIn,
+  registeredLegacyIds,
   onEventClick,
   onJoinClick,
   onEventPreload,
 }: {
   event: FeaturedEvent;
   index: number;
-  loggedIn: boolean;
+  registeredLegacyIds: Set<number>;
   onEventClick: (item: FeaturedEvent) => void;
   onJoinClick: (item: FeaturedEvent) => void;
   onEventPreload?: (item: FeaturedEvent) => void;
@@ -108,7 +108,7 @@ function HomeFeaturedEventCard({
     featuredPostImageUrl(event.image, 720) ??
     thumbnailImageUrl(event.image, 480) ??
     event.image;
-  const showJoined = loggedIn && event.going;
+  const showJoined = isActivityRegistered(legacyId, registeredLegacyIds);
   const categoryLabel = formatActivityCategoryLabel(event.category);
 
   const handlePreload = () => {
@@ -119,9 +119,10 @@ function HomeFeaturedEventCard({
   const joinLabel = (() => {
     if (isJoinNavigating) return '加入中…';
     if (status === 'ended') return '已结束';
-    if (showJoined) return '已加入';
     return '立即参与';
   })();
+
+  const showJoinButton = !showJoined;
 
   const openDetail = () => {
     if (legacyId == null) return;
@@ -198,23 +199,24 @@ function HomeFeaturedEventCard({
           <Text className="s-home-showcase-card__count">{event.attendeeCount} 人</Text>
         </View>
 
-        <Button
-          className={[
-            's-home-showcase-card__cta',
-            showJoined && 's-home-showcase-card__cta--joined',
-            isJoinNavigating && 's-home-showcase-card__cta--loading',
-          ]
-            .filter(Boolean)
-            .join(' ')}
-          disabled={status === 'ended' || isJoinNavigating || legacyId == null}
-          onTouchStart={handlePreload}
-          onClick={(clickEvent) => {
-            clickEvent.stopPropagation();
-            onJoinClick(event);
-          }}
-        >
-          <Text className="s-home-showcase-card__cta-text">{joinLabel}</Text>
-        </Button>
+        {showJoinButton ? (
+          <Button
+            className={[
+              's-home-showcase-card__cta',
+              isJoinNavigating && 's-home-showcase-card__cta--loading',
+            ]
+              .filter(Boolean)
+              .join(' ')}
+            disabled={status === 'ended' || isJoinNavigating || legacyId == null}
+            onTouchStart={handlePreload}
+            onClick={(clickEvent) => {
+              clickEvent.stopPropagation();
+              onJoinClick(event);
+            }}
+          >
+            <Text className="s-home-showcase-card__cta-text">{joinLabel}</Text>
+          </Button>
+        ) : null}
       </View>
     </View>
   );

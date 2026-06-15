@@ -24,9 +24,8 @@ import {
 } from './activityDetailCache';
 import { isAuthGated, requireAuth } from './authGate';
 import type { LoginInterceptFeature } from '../stores/loginInterceptStore';
+import { useLoginInterceptStore } from '../stores/loginInterceptStore';
 import { setEventsViewTabIntent } from './eventsTabIntent';
-
-export { parseActivityLegacyId } from './activityLegacyId';
 
 export const ROUTES = {
   HOME: '/pages/index/index',
@@ -92,11 +91,20 @@ function resolvePreloadTab(path?: string): PreloadTabPath {
 }
 
 const tabRouteListeners = new Set<() => void>();
+/** Tab highlight before `getCurrentPages()` reflects `switchTab` (custom tab bar). */
+let optimisticTabPath: RoutePath | null = null;
 
 function notifyTabRouteChange() {
   for (const listener of tabRouteListeners) {
     listener();
   }
+}
+
+function resolveActiveRoutePath(): string {
+  if (optimisticTabPath) {
+    return optimisticTabPath;
+  }
+  return currentRoutePath();
 }
 
 export function subscribeTabRouteChange(listener: () => void): () => void {
@@ -188,29 +196,6 @@ function buildPageUrl(path: RoutePath, query?: Record<string, string>): string {
   }
   const qs = buildQueryString(query);
   return qs ? `${path}?${qs}` : path;
-}
-
-/** Decode query params that WeChat may leave percent-encoded (e.g. Chinese titles). */
-export function decodeRouteQueryParam(value?: string): string {
-  if (!value?.trim()) {
-    return '';
-  }
-  let decoded = value.trim();
-  for (let pass = 0; pass < 2; pass += 1) {
-    if (!/%[0-9A-Fa-f]{2}/.test(decoded)) {
-      break;
-    }
-    try {
-      const next = decodeURIComponent(decoded.replace(/\+/g, ' '));
-      if (next === decoded) {
-        break;
-      }
-      decoded = next;
-    } catch {
-      break;
-    }
-  }
-  return decoded;
 }
 
 function shouldSkipNavigation(url: string): boolean {
@@ -392,11 +377,15 @@ export function switchTabTo(url: RoutePath) {
   beginTabRouteTransition(url);
 
   if (process.env.TARO_ENV !== 'weapp') {
+    optimisticTabPath = url;
+    notifyTabRouteChange();
     reLaunchTo(url);
     return;
   }
 
   markNavigationStart(url);
+  optimisticTabPath = url;
+  notifyTabRouteChange();
 
   runSerializedNavigation(
     () =>
@@ -408,6 +397,8 @@ export function switchTabTo(url: RoutePath) {
             resolve();
           },
           fail: () => {
+            optimisticTabPath = null;
+            notifyTabRouteChange();
             endRouteTransition();
             Taro.reLaunch({
               url,
@@ -562,12 +553,6 @@ export function goProfile() {
   switchTabTo(ROUTES.PROFILE);
 }
 
-export function goProfilePosts() {
-  preloadProfileSubpackage();
-  preloadPageSafe(ROUTES.PROFILE_POSTS);
-  navigateToSafe(ROUTES.PROFILE_POSTS);
-}
-
 export type GoAiAssistantOptions = Pick<
   AiAssistantNavIntent,
   'initialMessage' | 'activityLegacyId' | 'openAiGuideSheet' | 'autoRunTravelGuideForm'
@@ -605,9 +590,10 @@ export function goAiAssistant(options?: GoAiAssistantOptions) {
   }
 
   warmAiAssistant();
-  requireAuth(() => {
-    switchTabTo(ROUTES.AI);
-  }, 'ai_assistant');
+  switchTabTo(ROUTES.AI);
+  if (isAuthGated()) {
+    useLoginInterceptStore.getState().show('ai_assistant', () => {});
+  }
 }
 
 export function goNotifications() {
@@ -654,9 +640,18 @@ export function goBack(fallback: RoutePath = ROUTES.HOME) {
 }
 
 export function useActiveRoutePath(): string {
-  const [path, setPath] = useState(() => currentRoutePath());
-  const bump = useCallback(() => setPath(currentRoutePath()), []);
-  useDidShow(() => bump());
+  const [path, setPath] = useState(() => resolveActiveRoutePath());
+  const bump = useCallback(() => {
+    const next = resolveActiveRoutePath();
+    if (next === currentRoutePath()) {
+      optimisticTabPath = null;
+    }
+    setPath(next);
+  }, []);
+  useDidShow(() => {
+    optimisticTabPath = null;
+    bump();
+  });
 
   useEffect(() => {
     return subscribeTabRouteChange(bump);

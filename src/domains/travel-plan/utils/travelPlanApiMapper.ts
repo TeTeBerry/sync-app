@@ -24,9 +24,7 @@ export function travelPlanNodeToPayload(node: TravelPlanNode): TravelPlanNodePay
   };
 }
 
-export function travelPlanNodeFromPayload(
-  payload: TravelPlanNodePayload,
-): TravelPlanNode {
+function travelPlanNodeFromPayload(payload: TravelPlanNodePayload): TravelPlanNode {
   const timeRange = {
     startDate: payload.startDate,
     endDate: payload.endDate,

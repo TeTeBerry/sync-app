@@ -357,6 +357,28 @@
     line-height: 1.2;
   }
 
+  &__segment-select {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    width: 100%;
+    min-height: 44px;
+    padding: 0 12px;
+    border-radius: 12px;
+    background: #1c1c1e;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-sizing: border-box;
+  }
+
+  &__segment-select-value {
+    flex: 1;
+    min-width: 0;
+    font-size: 14px;
+    color: #fff;
+    line-height: 1.2;
+  }
+
   &__segment-index {
     flex-shrink: 0;
     font-size: 11px;

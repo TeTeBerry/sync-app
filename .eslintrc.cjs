@@ -54,13 +54,6 @@ module.exports = {
             message: 'Import from ../api/requestActor instead.',
           },
         ],
-        patterns: [
-          {
-            group: ['**/queryInvalidation'],
-            importNames: ['patchLikedPostInCaches'],
-            message: 'Use patchPostEngagementInCaches from @/cache/postCache.',
-          },
-        ],
       },
     ],
   },

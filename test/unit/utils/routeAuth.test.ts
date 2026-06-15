@@ -76,12 +76,11 @@ describe('route auth gate', () => {
     mockIsLoggedIn.mockReturnValue(false);
   });
 
-  it('goAiAssistant opens login sheet when logged out', async () => {
+  it('goAiAssistant switches to AI tab and opens login when logged out', async () => {
     const { goAiAssistant } = await import('@/utils/route');
     goAiAssistant();
+    expect(mockSwitchTab).toHaveBeenCalled();
     expect(mockShow).toHaveBeenCalledWith('ai_assistant', expect.any(Function));
-    expect(mockNavigateTo).not.toHaveBeenCalled();
-    expect(mockSwitchTab).not.toHaveBeenCalled();
   });
 
   it('goAiAssistant switches to AI tab when logged in', async () => {

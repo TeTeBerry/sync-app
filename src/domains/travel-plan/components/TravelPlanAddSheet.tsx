@@ -94,11 +94,11 @@ export function TravelPlanAddSheet({
     (index: number, patch: Partial<TravelPlanAddFormValues>) => {
       setFormSegments((prev) =>
         prev.map((segment, segmentIndex) =>
-          segmentIndex === index ? { ...segment, ...patch, category } : segment,
+          segmentIndex === index ? { ...segment, ...patch } : segment,
         ),
       );
     },
-    [category],
+    [],
   );
 
   const removeFormSegment = useCallback(
@@ -114,23 +114,17 @@ export function TravelPlanAddSheet({
     [category],
   );
 
-  const mergeAsBillList = useMemo(() => {
-    if (formSegments.length <= 1) {
-      return false;
-    }
-    if (category === 'dining') {
-      return true;
-    }
-    if (category === 'transport') {
-      return shouldMergeTransportForms(formSegments);
-    }
-    return false;
-  }, [category, formSegments]);
+  const batchMode = formSegments.length > 1;
 
   const handleCategoryChange = useCallback(
     (nextCategory: TravelPlanAddFormCategory) => {
       setCategory(nextCategory);
-      setFormSegments([createEmptyTravelPlanAddForm(nextCategory)]);
+      setFormSegments((prev) => {
+        if (prev.length > 1) {
+          return prev;
+        }
+        return [createEmptyTravelPlanAddForm(nextCategory)];
+      });
       resetOcrState();
     },
     [resetOcrState],
@@ -225,13 +219,9 @@ export function TravelPlanAddSheet({
       });
       return;
     }
-    onSubmit(
-      sortTravelPlanAddFormValues(
-        formSegments.map((segment) => ({ ...segment, category })),
-      ),
-    );
+    onSubmit(sortTravelPlanAddFormValues(formSegments));
     onClose();
-  }, [canSubmit, category, formSegments, onClose, onSubmit]);
+  }, [canSubmit, formSegments, onClose, onSubmit]);
 
   if (!open) {
     return null;
@@ -345,20 +335,18 @@ export function TravelPlanAddSheet({
                   <Text className="s-travel-plan-add-sheet__ocr-hint-label">
                     {ocrMessage}
                   </Text>
-                  {formSegments.length > 1 ? (
+                  {batchMode ? (
                     <Text className="s-travel-plan-add-sheet__ocr-hint-sub">
-                      {category === 'dining'
-                        ? `已填入 ${formSegments.length} 笔账单，可向下滚动查看、编辑或删除`
-                        : mergeAsBillList
-                          ? `已填入 ${formSegments.length} 笔打车记录，可向下滚动查看、编辑或删除`
-                          : `已填入 ${formSegments.length} 段，可向下滚动查看并编辑`}
+                      已填入 {formSegments.length} 笔，可修改每条类型并向下滚动编辑
                     </Text>
                   ) : null}
                 </View>
               </View>
             ) : null}
 
-            <Text className="s-travel-plan-add-sheet__label">类型</Text>
+            <Text className="s-travel-plan-add-sheet__label">
+              {batchMode ? '默认识别类型' : '类型'}
+            </Text>
             <View className="s-travel-plan-add-sheet__types">
               {TYPE_OPTIONS.map(({ id, label, Icon }) => {
                 const active = category === id;
@@ -396,14 +384,11 @@ export function TravelPlanAddSheet({
                   key={`segment-${index}`}
                   index={index}
                   total={formSegments.length}
-                  category={category}
                   form={segment}
                   sheetOpen={open}
                   onPatch={(patch) => patchFormSegment(index, patch)}
-                  onRemove={
-                    mergeAsBillList ? () => removeFormSegment(index) : undefined
-                  }
-                  mergeAsBillList={mergeAsBillList}
+                  onRemove={batchMode ? () => removeFormSegment(index) : undefined}
+                  batchMode={batchMode}
                 />
               ))}
             </View>
@@ -419,13 +404,7 @@ export function TravelPlanAddSheet({
                 onClick={handleSubmit}
               >
                 <Text className="s-travel-plan-add-sheet__submit-label">
-                  {mergeAsBillList
-                    ? category === 'dining'
-                      ? `保存 ${formSegments.length} 笔餐饮账单`
-                      : `保存 ${formSegments.length} 笔打车记录`
-                    : formSegments.length > 1
-                      ? `保存 ${formSegments.length} 段行程`
-                      : '保存行程'}
+                  {batchMode ? `保存 ${formSegments.length} 笔账单` : '保存行程'}
                 </Text>
               </Button>
             </View>
