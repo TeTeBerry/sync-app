@@ -15,7 +15,26 @@ function normalizeSearchText(text: string): string {
     .trim();
 }
 
-/** Substring + token prefix fuzzy match for message-board search. */
+function isCharacterSubsequence(haystack: string, needle: string): boolean {
+  if (!needle) return true;
+  let start = 0;
+  for (const char of needle) {
+    const index = haystack.indexOf(char, start);
+    if (index < 0) return false;
+    start = index + 1;
+  }
+  return true;
+}
+
+function tokenMatchesHaystack(haystack: string, token: string): boolean {
+  if (!token) return true;
+  if (haystack.includes(token)) return true;
+  if (haystack.split(' ').some((word) => word.startsWith(token))) return true;
+  if (token.length >= 2 && isCharacterSubsequence(haystack, token)) return true;
+  return false;
+}
+
+/** Substring, token prefix, and ordered-character fuzzy match for post search. */
 export function fuzzyTextMatches(text: string, query: string): boolean {
   const normalizedQuery = normalizeSearchText(query);
   if (!normalizedQuery) return true;
@@ -26,11 +45,7 @@ export function fuzzyTextMatches(text: string, query: string): boolean {
   if (haystack.includes(normalizedQuery)) return true;
 
   const tokens = normalizedQuery.split(' ').filter(Boolean);
-  return tokens.every(
-    (token) =>
-      haystack.includes(token) ||
-      haystack.split(' ').some((word) => word.startsWith(token)),
-  );
+  return tokens.every((token) => tokenMatchesHaystack(haystack, token));
 }
 
 function contentTypeSearchLabels(types: string[] | undefined): string[] {
@@ -48,7 +63,6 @@ function contentTypeSearchLabels(types: string[] | undefined): string[] {
 function buildMessageBoardPostSearchText(post: EventDetailPost): string {
   return [
     post.body,
-    post.name,
     post.location,
     ...(post.tags ?? []),
     ...contentTypeSearchLabels(post.contentTypes),

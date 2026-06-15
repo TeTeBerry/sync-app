@@ -2,7 +2,6 @@ import '../../components/profile/profile.scss';
 import React from 'react';
 import { FileText, Zap } from '../../components/icons';
 import TabPageHeader from '../../components/navigation/TabPageHeader';
-import GlobalAiAgentFab from '../../components/navigation/GlobalAiAgentFab';
 import ThemedPageLoader from '../../components/ThemedPageLoader';
 import { useNavBarInsets } from '../../hooks/useNavBarInsets';
 import {
@@ -110,7 +109,6 @@ const Profile: React.FC = () => {
 
       {confirmDialog}
       <LoginInterceptHost />
-      <GlobalAiAgentFab />
     </View>
   );
 };

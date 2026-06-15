@@ -1,6 +1,11 @@
-import AiAssistantPage from './AiAssistantPage';
+import { useEffect } from 'react';
+import { ROUTES, switchTabTo } from '../../../utils/route';
 
-/** 同步加载，避免从活动页「生成攻略」进入时长时间停在 Suspense 骨架屏 */
-export default function AiAssistantRoute() {
-  return <AiAssistantPage />;
+/** Legacy subpackage route — forwards to the AI tab. */
+export default function AiAssistantRedirect() {
+  useEffect(() => {
+    switchTabTo(ROUTES.AI);
+  }, []);
+
+  return null;
 }

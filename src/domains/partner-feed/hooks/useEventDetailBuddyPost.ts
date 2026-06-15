@@ -64,7 +64,7 @@ export function useEventDetailBuddyPost(
         return false;
       }
 
-      const { imageRefs, syncToPostList: _sync, ...form } = payload;
+      const { syncToPostList: _sync, ...form } = payload;
       const title = options.activityTitle?.trim() || '本场活动';
       const listedInFeed =
         submitOptions?.listedInFeed ?? payload.syncToPostList !== false;
@@ -78,7 +78,6 @@ export function useEventDetailBuddyPost(
           buildOptimisticBuddyPost({
             pendingId,
             form,
-            imageRefs,
             authorName: options.authorName,
             authorAvatar: options.authorAvatar,
             userId: getClientUserId(),
@@ -87,13 +86,12 @@ export function useEventDetailBuddyPost(
       }
 
       if (!submitOptions?.quiet) {
-        void Taro.showToast({ title: '留言已发布', icon: 'success' });
+        void Taro.showToast({ title: '帖子已发布', icon: 'success' });
       }
 
       try {
         const { post } = await publishBuddyPostFromForm({
           form,
-          imageRefs,
           activityLegacyId: eventId,
           activityTitle: title,
           authorName: options.authorName,

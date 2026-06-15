@@ -3,7 +3,6 @@ export {
   EVENT_DETAIL_SCROLL_ID,
 } from './hooks/useEventDetailPosts';
 export type { UseEventDetailPostsParams } from './hooks/useEventDetailPosts';
-export { useEventDetailMessageBoard } from './hooks/useEventDetailMessageBoard';
 export { useEventDetailBuddyPost } from './hooks/useEventDetailBuddyPost';
 export { EventPostCard } from './components/EventPostCard';
 export type { EventPostCardProps } from './components/EventPostCard';
@@ -11,7 +10,7 @@ export { EventPostsVirtualList } from './components/EventPostsVirtualList';
 export type { EventPostListItem } from './components/EventPostsVirtualList';
 export { EventDetailComposerSection } from './components/EventDetailComposerSection';
 export type { EventDetailComposerSectionProps } from './components/EventDetailComposerSection';
-export { EventDetailMessageBoardComposer } from './components/EventDetailMessageBoardComposer';
+export { EventDetailTemplatePostButton } from './components/EventDetailTemplatePostButton';
 export { EventDetailBoardSearchBar } from './components/EventDetailBoardSearchBar';
 export { EventDetailItineraryMenu } from './components/EventDetailItineraryMenu';
 export {

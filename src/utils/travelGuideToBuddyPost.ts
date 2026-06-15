@@ -62,6 +62,7 @@ export function travelGuideFormToBuddyPrefill(
     dateEnd: dateSeed.dateEnd,
     location,
     headcount,
+    contact: '',
     tags: suggestBuddyTags(guide),
     note: buildPrefillNote(guide),
   };

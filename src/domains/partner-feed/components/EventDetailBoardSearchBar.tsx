@@ -37,7 +37,7 @@ export function EventDetailBoardSearchBar({
         <Input
           className="s-event-detail-board-search__input"
           value={value}
-          placeholder="搜索留言、昵称、标签…"
+          placeholder="搜索留言…"
           confirmType="search"
           onInput={(event) => onChange(event.detail.value)}
           onFocus={() => setInputFocused(true)}

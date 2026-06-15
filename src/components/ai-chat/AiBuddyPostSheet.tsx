@@ -1,7 +1,7 @@
 import './AiGuidePlanSheet.scss';
 import './AiBuddyPostSheet.scss';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { CalendarDays, ImagePlus, Send, Users, X } from '../../components/icons';
+import { CalendarDays, MessageCircle, Send, Users, X } from '../../components/icons';
 import { PlaceAutocompleteField } from './PlaceAutocompleteField';
 import { Button, cn } from '../ui';
 import { useOverlayLock } from '../../hooks/useOverlayLock';
@@ -10,18 +10,9 @@ import type {
   AiBuddyPostSubmitPayload,
   BuddyPostTagId,
 } from '../../types/buddyPost';
-import { BUDDY_POST_MAX_IMAGES, BUDDY_POST_TAG_OPTIONS } from '../../types/buddyPost';
+import { BUDDY_POST_TAG_OPTIONS } from '../../types/buddyPost';
 import { defaultBuddyPostForm } from '../../utils/buddyPostForm';
-import { pickAndCompressChatImages } from '../../utils/chatImage';
-import {
-  Input,
-  Picker,
-  ScrollView,
-  Text,
-  Textarea,
-  View,
-  Image,
-} from '@tarojs/components';
+import { Input, Picker, ScrollView, Text, Textarea, View } from '@tarojs/components';
 
 const NOTE_MAX_LENGTH = 120;
 const BUDDY_PICKER_ICON_COLOR = '#64d2ff';
@@ -95,22 +86,22 @@ export function AiBuddyPostSheet({
   const [dateEnd, setDateEnd] = useState('');
   const [location, setLocation] = useState('');
   const [headcount, setHeadcount] = useState('');
+  const [contact, setContact] = useState('');
   const [tags, setTags] = useState<BuddyPostTagId[]>(['team']);
   const [note, setNote] = useState('');
-  const [imageRefs, setImageRefs] = useState<string[]>([]);
   const [syncToPostList, setSyncToPostList] = useState(true);
 
   useEffect(() => {
     if (!open) return;
     setScrollTop(0);
     setSyncToPostList(true);
-    setImageRefs([]);
     const seed = initialValues ?? defaults;
     if (seed) {
       setDateStart(seed.dateStart);
       setDateEnd(seed.dateEnd);
       setLocation(seed.location);
       setHeadcount(seed.headcount);
+      setContact(seed.contact);
       setTags(seed.tags.length ? seed.tags : ['team']);
       setNote(seed.note ?? '');
       return;
@@ -121,22 +112,10 @@ export function AiBuddyPostSheet({
     setDateEnd(iso);
     setLocation('');
     setHeadcount('');
+    setContact('');
     setTags(['team']);
     setNote('');
-    setImageRefs([]);
   }, [defaults, initialValues, open]);
-
-  const handlePickImages = useCallback(async () => {
-    const remaining = BUDDY_POST_MAX_IMAGES - imageRefs.length;
-    if (remaining <= 0) return;
-    const picked = await pickAndCompressChatImages(remaining);
-    if (!picked.length) return;
-    setImageRefs((prev) => [...prev, ...picked].slice(0, BUDDY_POST_MAX_IMAGES));
-  }, [imageRefs.length]);
-
-  const handleRemoveImage = useCallback((index: number) => {
-    setImageRefs((prev) => prev.filter((_, i) => i !== index));
-  }, []);
 
   const toggleTag = useCallback((id: BuddyPostTagId) => {
     setTags((prev) => {
@@ -149,8 +128,9 @@ export function AiBuddyPostSheet({
   }, []);
 
   const canSubmit =
-    Boolean(dateStart && dateEnd && location.trim() && headcount.trim()) &&
-    dateEnd >= dateStart;
+    Boolean(
+      dateStart && dateEnd && location.trim() && headcount.trim() && contact.trim(),
+    ) && dateEnd >= dateStart;
 
   const handleSubmit = useCallback(() => {
     if (!canSubmit) return;
@@ -160,18 +140,18 @@ export function AiBuddyPostSheet({
         dateEnd,
         location: location.trim(),
         headcount: headcount.trim(),
+        contact: contact.trim(),
         tags: tags.length ? tags : ['team'],
         note: note.trim() || undefined,
-        imageRefs: imageRefs.length ? imageRefs : undefined,
         ...(showSyncToFeedOption ? { syncToPostList } : {}),
       }),
     );
   }, [
     canSubmit,
+    contact,
     dateEnd,
     dateStart,
     headcount,
-    imageRefs,
     location,
     note,
     onSubmit,
@@ -327,6 +307,27 @@ export function AiBuddyPostSheet({
             </View>
 
             <View className="s-ai-guide-plan-sheet__field">
+              <Text className="s-ai-buddy-post-sheet__label">
+                联系方式（微信/手机）
+              </Text>
+              <View className="s-ai-guide-plan-sheet__input-wrap">
+                <MessageCircle
+                  size={18}
+                  className="s-ai-guide-plan-sheet__input-icon"
+                  aria-hidden
+                />
+                <Input
+                  className="s-ai-guide-plan-sheet__input"
+                  type="text"
+                  value={contact}
+                  placeholder="微信号或手机号"
+                  placeholderClass="s-ai-guide-plan-sheet__input-placeholder"
+                  onInput={(e) => setContact(e.detail.value ?? '')}
+                />
+              </View>
+            </View>
+
+            <View className="s-ai-guide-plan-sheet__field">
               <Text className="s-ai-buddy-post-sheet__label">留言类型（可选）</Text>
               <View className="s-ai-buddy-post-sheet__tag-row">
                 {BUDDY_POST_TAG_OPTIONS.map((opt) => {
@@ -369,49 +370,6 @@ export function AiBuddyPostSheet({
                 <Text className="s-ai-buddy-post-sheet__note-count" aria-hidden>
                   {note.length}/{NOTE_MAX_LENGTH}
                 </Text>
-              </View>
-            </View>
-
-            <View className="s-ai-guide-plan-sheet__field">
-              <View className="s-ai-buddy-post-sheet__field-head">
-                <Text className="s-ai-buddy-post-sheet__label">图片（可选）</Text>
-                <Text className="s-ai-buddy-post-sheet__field-hint-inline">
-                  最多 {BUDDY_POST_MAX_IMAGES} 张
-                </Text>
-              </View>
-              <View className="s-ai-buddy-post-sheet__image-row">
-                {imageRefs.map((ref, index) => (
-                  <View
-                    key={`${ref}-${index}`}
-                    className="s-ai-buddy-post-sheet__image-thumb"
-                  >
-                    <Image
-                      src={ref}
-                      mode="aspectFill"
-                      className="s-ai-buddy-post-sheet__image-thumb-img"
-                    />
-                    <Button
-                      className="s-ai-buddy-post-sheet__image-remove"
-                      hoverClass="s-ai-buddy-post-sheet__image-remove--pressed"
-                      aria-label="移除图片"
-                      onClick={() => handleRemoveImage(index)}
-                    >
-                      <X size={12} color="#fff" aria-hidden />
-                    </Button>
-                  </View>
-                ))}
-                {imageRefs.length < BUDDY_POST_MAX_IMAGES ? (
-                  <Button
-                    className="s-ai-buddy-post-sheet__image-add"
-                    hoverClass="s-ai-buddy-post-sheet__image-add--pressed"
-                    aria-label="添加图片"
-                    onClick={() => {
-                      void handlePickImages();
-                    }}
-                  >
-                    <ImagePlus size={20} color="#8e8e93" aria-hidden />
-                  </Button>
-                ) : null}
               </View>
             </View>
           </View>

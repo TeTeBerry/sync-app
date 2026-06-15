@@ -8,7 +8,6 @@ import {
   buddyPostHashTags,
 } from './buddyPostForm';
 import { eventDetailPostToCard } from './eventPostCard';
-import { uploadChatImageRefs } from './chatImage';
 import { assertPostPublishedVisible } from './postPublishFeedback';
 
 export function buildOptimisticBuddyPost(params: {
@@ -17,7 +16,6 @@ export function buildOptimisticBuddyPost(params: {
   authorName: string;
   authorAvatar?: string;
   userId?: string;
-  imageRefs?: string[];
   location?: string;
 }): EventDetailPost {
   const body = buildBuddyPostBody(params.form);
@@ -34,13 +32,11 @@ export function buildOptimisticBuddyPost(params: {
     body: fullBody,
     tags: hashTags,
     contentTypes: buddyPostContentTypes(params.form.tags),
-    ...(params.imageRefs?.length ? { images: params.imageRefs } : {}),
   };
 }
 
 export async function publishBuddyPostFromForm(params: {
   form: AiBuddyPostFormValues;
-  imageRefs?: string[];
   activityLegacyId: number;
   activityTitle: string;
   authorName: string;
@@ -52,9 +48,6 @@ export async function publishBuddyPostFromForm(params: {
   const title = activityTitle.trim() || '本场活动';
   const body = buildBuddyPostBody(form);
   const hashTags = buddyPostHashTags(form.tags);
-  const images = params.imageRefs?.length
-    ? await uploadChatImageRefs(params.imageRefs)
-    : undefined;
   const location = form.location.trim();
 
   const post = await createPost({
@@ -65,7 +58,6 @@ export async function publishBuddyPostFromForm(params: {
     tags: hashTags,
     contentTypes: buddyPostContentTypes(form.tags),
     listedInFeed: params.listedInFeed !== false,
-    ...(images?.length ? { images } : {}),
   });
   assertPostPublishedVisible(post);
 

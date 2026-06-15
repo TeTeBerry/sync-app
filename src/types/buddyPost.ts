@@ -11,19 +11,17 @@ export type AiBuddyPostFormValues = {
   location: string;
   /** 文本输入，如「2人」「2-3人」 */
   headcount: string;
+  /** 微信或手机号 */
+  contact: string;
   tags: BuddyPostTagId[];
   note?: string;
 };
 
 /** Submit payload from buddy sheet (apply-flow may include feed sync). */
 export type AiBuddyPostSubmitPayload = AiBuddyPostFormValues & {
-  /** Local temp paths; uploaded on publish. */
-  imageRefs?: string[];
   /** When false, post is created but activity feed is not refreshed until later. */
   syncToPostList?: boolean;
 };
-
-export const BUDDY_POST_MAX_IMAGES = 3;
 
 export const BUDDY_POST_TAG_OPTIONS: Array<{
   id: BuddyPostTagId;

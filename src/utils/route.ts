@@ -34,12 +34,14 @@ export { parseActivityLegacyId } from './activityLegacyId';
 
 export const ROUTES = {
   HOME: '/pages/index/index',
+  AI: '/pages/ai/index',
   EVENTS: '/pages/events/index',
   PROFILE: '/pages/profile/index',
   PROFILE_ACTIVITIES: '/packageProfile/pages/profile-activities/index',
   PROFILE_POSTS: '/packageProfile/pages/profile-posts/index',
   SETTINGS: '/packageProfile/pages/settings/index',
   LEGAL_DOCUMENT: '/packageProfile/pages/legal-document/index',
+  /** @deprecated Use ROUTES.AI — kept for legacy deep links */
   AI_ASSISTANT: '/packageAi/pages/ai-assistant/index',
   EVENT_DETAIL: '/packageEvent/pages/event-detail/index',
   EXCLUSIVE_ITINERARY: '/packageEvent/pages/exclusive-itinerary/index',
@@ -51,27 +53,39 @@ export type RoutePath = (typeof ROUTES)[keyof typeof ROUTES];
 
 const TAB_ROUTE_PATHS = new Set<RoutePath>([
   ROUTES.HOME,
+  ROUTES.AI,
   ROUTES.EVENTS,
   ROUTES.PROFILE,
 ]);
 
-type PreloadTabPath = typeof ROUTES.HOME | typeof ROUTES.EVENTS | typeof ROUTES.PROFILE;
+type PreloadTabPath =
+  | typeof ROUTES.HOME
+  | typeof ROUTES.AI
+  | typeof ROUTES.EVENTS
+  | typeof ROUTES.PROFILE;
 
-/** Stack pages per tab; AI 分包/页面在 `goAiAssistant` 时按需加载 */
+/** Stack pages per tab; event/profile subpackages preload on tab switch */
 const PRELOAD_PAGE_ROUTES_BY_TAB: Record<PreloadTabPath, RoutePath[]> = {
   [ROUTES.HOME]: [ROUTES.EVENT_DETAIL, ROUTES.NOTIFICATIONS],
+  [ROUTES.AI]: [ROUTES.EVENT_DETAIL],
   [ROUTES.EVENTS]: [ROUTES.EVENT_DETAIL],
   [ROUTES.PROFILE]: [ROUTES.NOTIFICATIONS],
 };
 
 function preloadSubpackagesForTab(tab: PreloadTabPath): void {
   preloadEventSubpackage();
+  if (tab === ROUTES.AI) {
+    preloadAiSubpackage();
+  }
   if (tab === ROUTES.PROFILE) {
     preloadProfileSubpackage();
   }
 }
 
 function resolvePreloadTab(path?: string): PreloadTabPath {
+  if (path === ROUTES.AI) {
+    return ROUTES.AI;
+  }
   if (path === ROUTES.EVENTS) {
     return ROUTES.EVENTS;
   }
@@ -308,6 +322,7 @@ export function endRouteTransition() {
 }
 
 const AUTH_PROTECTED_ROUTES: Partial<Record<RoutePath, LoginInterceptFeature>> = {
+  [ROUTES.AI]: 'ai_assistant',
   [ROUTES.AI_ASSISTANT]: 'ai_assistant',
   [ROUTES.NOTIFICATIONS]: 'notification',
   [ROUTES.PROFILE_ACTIVITIES]: 'activity',
@@ -573,10 +588,9 @@ export type GoAiAssistantOptions = Pick<
   'initialMessage' | 'activityLegacyId' | 'openAiGuideSheet' | 'autoRunTravelGuideForm'
 >;
 
-/** Pre-download AI subpackage and warm ai-assistant page (touch / mount). */
+/** Pre-download AI subpackage (touch / mount). */
 export function warmAiAssistant(): void {
   preloadAiSubpackage();
-  preloadPageSafe(ROUTES.AI_ASSISTANT);
 }
 
 export function goAiAssistant(options?: GoAiAssistantOptions) {
@@ -606,7 +620,9 @@ export function goAiAssistant(options?: GoAiAssistantOptions) {
   }
 
   warmAiAssistant();
-  navigateToSafe(ROUTES.AI_ASSISTANT);
+  requireAuth(() => {
+    switchTabTo(ROUTES.AI);
+  }, 'ai_assistant');
 }
 
 export function goNotifications() {

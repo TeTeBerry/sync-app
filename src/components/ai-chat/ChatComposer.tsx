@@ -3,9 +3,6 @@ import { Send, Trash2 } from '../../components/icons';
 import { Button, Input, cn } from '../ui';
 import { HOME_FESTIVAL_SHORTCUT_CHIPS } from '../../constants/homeFestivalShortcuts';
 import { useAiChatStore } from '../../stores/aiChatStore';
-import { BUDDY_POST_TAG_OPTIONS } from '../../types/buddyPost';
-import type { BuddyPostTagId } from '../../types/buddyPost';
-import { AiGuideShortcutChip } from './AiGuideShortcutChip';
 import {
   ScrollView,
   Text,
@@ -13,23 +10,17 @@ import {
   type InputProps as TaroInputProps,
 } from '@tarojs/components';
 
-const AI_GUIDE_CHIP = {
-  key: 'aiGuide',
-  label: 'AI出行攻略',
-  submitText: 'AI出行攻略',
-} as const;
-
 function readComposerInputValue(
   event: Parameters<NonNullable<TaroInputProps['onInput']>>[0],
 ): string {
   return event.detail?.value ?? '';
 }
 
-type QuickChip = {
+type ActivityChip = {
   key: string;
   label: string;
-  submitText: string;
-  buddyPostTagId?: BuddyPostTagId;
+  keyword: string;
+  active?: boolean;
 };
 
 export function ChatComposer({
@@ -42,8 +33,7 @@ export function ChatComposer({
   onClearChat,
   clearDisabled = false,
   isLoadingHistory = false,
-  onAiGuideClick,
-  onBuddyPostTagClick,
+  onActivityChipClick,
 }: {
   input: string;
   isStreaming: boolean;
@@ -54,8 +44,7 @@ export function ChatComposer({
   onClearChat?: () => void | Promise<void>;
   clearDisabled?: boolean;
   isLoadingHistory?: boolean;
-  onAiGuideClick?: () => void;
-  onBuddyPostTagClick?: (tagId: BuddyPostTagId) => void;
+  onActivityChipClick?: (keyword: string) => void;
 }) {
   const conversationFlow = useAiChatStore((state) =>
     state.activeScopeKey
@@ -78,82 +67,68 @@ export function ChatComposer({
     return '说说你想去哪、有什么想了解的…';
   })();
 
-  const quickChips = useMemo((): QuickChip[] => {
-    if (activityLegacyId != null && !Number.isNaN(activityLegacyId)) {
+  const activityChips = useMemo((): ActivityChip[] => {
+    if (scopedToActivity && trimmedActivityTitle) {
       return [
         {
-          key: AI_GUIDE_CHIP.key,
-          label: AI_GUIDE_CHIP.label,
-          submitText: AI_GUIDE_CHIP.submitText,
+          key: `bound-${activityLegacyId}`,
+          label: trimmedActivityTitle,
+          keyword: trimmedActivityTitle,
+          active: true,
         },
-        ...BUDDY_POST_TAG_OPTIONS.map((opt) => ({
-          key: `buddy-${opt.id}`,
-          label: opt.label,
-          submitText: opt.label,
-          buddyPostTagId: opt.id,
-        })),
       ];
     }
 
     return HOME_FESTIVAL_SHORTCUT_CHIPS.map((chip) => ({
       key: chip.key,
       label: chip.label,
-      submitText: chip.submitText,
+      keyword: chip.submitText,
     }));
-  }, [activityLegacyId]);
+  }, [activityLegacyId, scopedToActivity, trimmedActivityTitle]);
 
   const isBusy = isStreaming;
   const isComposerDisabled = isStreaming || isLoadingHistory;
 
-  const handleQuickChipClick = useCallback(
-    (chip: QuickChip) => {
+  const handleActivityChipClick = useCallback(
+    (chip: ActivityChip) => {
       if (isBusy) return;
-      if (chip.key === AI_GUIDE_CHIP.key) {
-        if (activityLegacyId != null && !Number.isNaN(activityLegacyId)) {
-          onAiGuideClick?.();
-          return;
-        }
-      }
-      if (chip.buddyPostTagId) {
-        onBuddyPostTagClick?.(chip.buddyPostTagId);
+      if (onActivityChipClick) {
+        onActivityChipClick(chip.keyword);
         return;
       }
-      onSubmit(chip.submitText);
+      onSubmit(chip.keyword);
     },
-    [activityLegacyId, isBusy, onAiGuideClick, onBuddyPostTagClick, onSubmit],
+    [isBusy, onActivityChipClick, onSubmit],
   );
 
   const canSend = Boolean(input.trim()) && !isComposerDisabled;
 
   return (
     <>
-      <ScrollView
-        scrollX
-        enhanced
-        showScrollbar={false}
-        className="s-ai-assistant-chat__quick-scroll s-scrollbar-none"
-      >
-        <View className="s-ai-assistant-chat__quick-row">
-          {quickChips.map((chip) =>
-            chip.key === AI_GUIDE_CHIP.key ? (
-              <AiGuideShortcutChip
-                key={chip.key}
-                disabled={isBusy}
-                onClick={() => handleQuickChipClick(chip)}
-              />
-            ) : (
+      {activityChips.length > 0 ? (
+        <ScrollView
+          scrollX
+          enhanced
+          showScrollbar={false}
+          className="s-ai-assistant-chat__quick-scroll s-scrollbar-none"
+        >
+          <View className="s-ai-assistant-chat__quick-row">
+            {activityChips.map((chip) => (
               <Button
                 key={chip.key}
-                className="s-ai-assistant-chat__quick-chip"
+                className={cn(
+                  's-ai-assistant-chat__quick-chip',
+                  chip.active && 's-ai-assistant-chat__quick-chip--active',
+                )}
                 disabled={isBusy}
-                onClick={() => handleQuickChipClick(chip)}
+                onClick={() => handleActivityChipClick(chip)}
               >
                 <Text className="s-btn-label">{chip.label}</Text>
               </Button>
-            ),
-          )}
-        </View>
-      </ScrollView>
+            ))}
+          </View>
+        </ScrollView>
+      ) : null}
 
       <View className="s-ai-assistant-chat__composer">
         <View className="s-ai-assistant-chat__composer-inner">

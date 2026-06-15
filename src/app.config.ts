@@ -7,7 +7,12 @@ export default {
   /** 微信「代码质量」要求开启按需注入，见开发者工具 → 代码质量 → 组件 */
   lazyCodeLoading: 'requiredComponents',
   /** 主包：仅 3 个 Tab，缩小首包体积 */
-  pages: ['pages/index/index', 'pages/events/index', 'pages/profile/index'],
+  pages: [
+    'pages/index/index',
+    'pages/ai/index',
+    'pages/events/index',
+    'pages/profile/index',
+  ],
   subPackages: [
     {
       root: 'packageEvent',
@@ -43,6 +48,7 @@ export default {
     borderStyle: '@tabBorderStyle',
     list: [
       { pagePath: 'pages/index/index', text: '首页' },
+      { pagePath: 'pages/ai/index', text: 'AI问答' },
       { pagePath: 'pages/events/index', text: '活动' },
       { pagePath: 'pages/profile/index', text: '我的' },
     ],
@@ -71,6 +77,10 @@ export default {
   /** Wi‑Fi only: avoid competing with home API on cellular; AI 分包在首次进入助手时再加载 */
   preloadRule: {
     'pages/index/index': {
+      network: 'wifi',
+      packages: ['event'],
+    },
+    'pages/ai/index': {
       network: 'wifi',
       packages: ['event'],
     },

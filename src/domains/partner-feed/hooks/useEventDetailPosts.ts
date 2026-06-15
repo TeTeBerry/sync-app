@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ConfirmDialogOptions } from '../../../hooks/useConfirmDialog';
 import { useEventPostsInfiniteQuery } from '../../../hooks/useEventPostsInfiniteQuery';
 import { requireAuth } from '../../../utils/authGate';
@@ -40,6 +40,18 @@ export function useEventDetailPosts({
 
   const trimmedBoardSearch = boardSearchQuery.trim();
   const isBoardSearchActive = trimmedBoardSearch.length > 0;
+
+  useEffect(() => {
+    if (!isBoardSearchActive) return;
+    if (!postsQuery.hasMore || postsQuery.isLoadingMore) return;
+    void postsQuery.loadMore();
+  }, [
+    isBoardSearchActive,
+    postsQuery.hasMore,
+    postsQuery.isLoadingMore,
+    postsQuery.items.length,
+    postsQuery.loadMore,
+  ]);
 
   const allPostItems = useMemo((): EventPostListItem[] => {
     if (!isBoardSearchActive) return loadedPostItems;

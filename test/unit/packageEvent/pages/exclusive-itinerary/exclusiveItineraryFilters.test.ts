@@ -20,26 +20,31 @@ describe('extractDjStyleTokens', () => {
 });
 
 describe('buildGenreFilterOptions', () => {
-  it('derives style chips from lineup genreLabel tokens', () => {
+  it('derives category chips from lineup genre field', () => {
     const options = buildGenreFilterOptions(FIXTURE_EXCLUSIVE_DJS);
     expect(options[0]).toEqual({ id: 'all', label: '全部风格' });
-    expect(options.map((item) => item.id)).toContain('Future Bass');
-    expect(options.map((item) => item.id)).toContain('Bass House');
-    expect(options.map((item) => item.id)).not.toContain('House');
-    expect(options.map((item) => item.id)).toContain('Dubstep');
+    expect(options.map((item) => item.id)).toEqual([
+      'all',
+      'Dubstep',
+      'Future Bass',
+      'House',
+    ]);
+    expect(options.map((item) => item.id)).not.toContain('Tech House');
+    expect(options.map((item) => item.id)).not.toContain('Brostep');
   });
 
-  it('sorts styles by artist count descending', () => {
+  it('sorts categories by artist count descending', () => {
     const edcDjs = [
-      { genreLabel: 'Tech House · Bass House' },
-      { genreLabel: 'Tech House' },
-      { genreLabel: 'Melodic Techno' },
-      { genreLabel: 'Tech House · Deep House' },
+      { genre: 'House' },
+      { genre: 'House' },
+      { genre: 'House' },
+      { genre: 'Techno' },
+      { genre: 'Techno' },
+      { genre: 'Trance' },
     ];
     const ids = buildGenreFilterOptions(edcDjs).map((item) => item.id);
-    expect(ids[1]).toBe('Tech House');
-    expect(ids).toContain('Bass House');
-    expect(ids).toContain('Melodic Techno');
+    expect(ids[1]).toBe('House');
+    expect(ids).toEqual(['all', 'House', 'Techno', 'Trance']);
   });
 });
 
@@ -70,29 +75,26 @@ describe('djMatchesStyleSearch', () => {
 });
 
 describe('filterGenreOptionsBySearch', () => {
-  it('narrows chips to search hits plus all', () => {
+  it('narrows category chips to search hits plus all', () => {
     const options = buildGenreFilterOptions([
-      { genreLabel: 'Tech House · Bass House' },
-      { genreLabel: 'Melodic Techno' },
-      { genreLabel: 'Big Room' },
+      { genre: 'House' },
+      { genre: 'Techno' },
+      { genre: 'Big Room' },
     ]);
     const filtered = filterGenreOptionsBySearch(options, 'tech');
-    expect(filtered.map((item) => item.id)).toEqual([
-      'all',
-      expect.any(String),
-      expect.any(String),
-    ]);
-    expect(filtered.map((item) => item.id)).toContain('Tech House');
-    expect(filtered.map((item) => item.id)).toContain('Melodic Techno');
+    expect(filtered.map((item) => item.id)).toEqual(['all', 'Techno']);
   });
 });
 
 describe('djMatchesStyleFilter', () => {
-  it('matches a selected style token exactly', () => {
-    const dj = { genreLabel: 'Big Room · Progressive House' };
-    expect(djMatchesStyleFilter(dj, 'Big Room')).toBe(true);
-    expect(djMatchesStyleFilter(dj, 'Progressive House')).toBe(true);
-    expect(djMatchesStyleFilter(dj, 'House')).toBe(false);
+  it('matches a selected genre category', () => {
+    const dj = {
+      genre: 'House',
+      genreLabel: 'Big Room · Progressive House',
+    };
+    expect(djMatchesStyleFilter(dj, 'House')).toBe(true);
+    expect(djMatchesStyleFilter(dj, 'Big Room')).toBe(false);
+    expect(djMatchesStyleFilter(dj, 'Progressive House')).toBe(false);
     expect(djMatchesStyleFilter(dj, 'all')).toBe(true);
   });
 });

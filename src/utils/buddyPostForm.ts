@@ -33,6 +33,7 @@ export function defaultBuddyPostForm(
     dateEnd,
     location: '',
     headcount: '',
+    contact: '',
     tags: ['team'],
     note: '',
   };
@@ -55,6 +56,11 @@ export function buildBuddyPostBody(form: AiBuddyPostFormValues): string {
     form.location.trim(),
     formatBuddyPostHeadcount(form.headcount),
   ].filter(Boolean);
+
+  const contact = form.contact.trim();
+  if (contact) {
+    parts.push(`联系方式：${contact}`);
+  }
 
   const note = form.note?.trim();
   if (note) {

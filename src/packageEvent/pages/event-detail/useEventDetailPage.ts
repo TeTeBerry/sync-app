@@ -2,11 +2,7 @@ import { useCallback } from 'react';
 import Taro from '@tarojs/taro';
 import { useActivityDetailQuery, useCurrentUserQuery } from '../../../hooks/useSyncApi';
 import { useEventPostsInfiniteQuery } from '../../../hooks/useEventPostsInfiniteQuery';
-import {
-  useEventDetailPosts,
-  useEventDetailBuddyPost,
-  useEventDetailMessageBoard,
-} from '@/domains/partner-feed';
+import { useEventDetailPosts, useEventDetailBuddyPost } from '@/domains/partner-feed';
 import { useResolvedProfile } from '../../../hooks/useResolvedProfile';
 import type { ConfirmDialogOptions } from '../../../hooks/useConfirmDialog';
 import { useEventDetailRoute } from './useEventDetailRoute';
@@ -53,17 +49,6 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
   const postsQuery = useEventPostsInfiniteQuery(eventId, {
     enabled: feedReady,
     anchorPostId: highlightPostId || undefined,
-  });
-
-  const messageBoard = useEventDetailMessageBoard(eventId, {
-    activityTitle,
-    authorName: displayUserName,
-    authorAvatar: currentUserQuery.data?.avatar,
-    refreshPosts: postsQuery.refetch,
-    prependPost: postsQuery.prependItem,
-    replacePost: postsQuery.replaceItem,
-    removePost: postsQuery.removeItem,
-    accountRiskEnabled: secondaryReady,
   });
 
   const templatePost = useEventDetailBuddyPost(eventId, {
@@ -121,11 +106,7 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     goExclusiveItinerary(eventId);
   }, [assertValidEventId, eventId]);
 
-  const handlePublishMessage = useCallback(() => {
-    void messageBoard.publishMessage();
-  }, [messageBoard]);
-
-  const isPublishing = messageBoard.isPublishing || templatePost.isBuddyPostPublishing;
+  const isPublishing = templatePost.isBuddyPostPublishing;
 
   return {
     ...header,
@@ -135,13 +116,7 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     scrollFrozen,
     handleScroll,
     composerReady,
-    messageDraft: messageBoard.draft,
-    setMessageDraft: messageBoard.setDraft,
-    messageImageRefs: messageBoard.imageRefs,
-    pickMessageImages: messageBoard.pickImages,
-    removeMessageImage: messageBoard.removeImage,
-    handlePublishMessage,
-    messagePublishing: isPublishing,
+    templatePublishing: isPublishing,
     handleOpenTemplateSheet: templatePost.openBuddyPostSheet,
     buddyPostSheetOpen: templatePost.buddyPostSheetOpen,
     closeBuddyPostSheet: templatePost.closeBuddyPostSheet,

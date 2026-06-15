@@ -2,8 +2,7 @@ import './BottomNav.scss';
 import React from 'react';
 import { Button } from '../ui';
 import { View, Text } from '@tarojs/components';
-import { CalendarDays, House, User } from '../../components/icons';
-import GlobalAiAgentFab from './GlobalAiAgentFab';
+import { Bot, CalendarDays, House, User } from '../../components/icons';
 import {
   preloadAiSubpackage,
   preloadEventSubpackage,
@@ -11,16 +10,28 @@ import {
 } from '../../utils/subpackagePreload';
 import type { RoutePath } from '../../utils/route';
 import { ROUTES, switchTabTo, useActiveRoutePath } from '../../utils/route';
+import { requireAuth } from '../../utils/authGate';
 
 function preloadSubpackagesForTab(path: RoutePath) {
-  if (path === ROUTES.HOME || path === ROUTES.EVENTS) {
+  if (path === ROUTES.HOME || path === ROUTES.EVENTS || path === ROUTES.AI) {
     preloadEventSubpackage();
-    return;
+  }
+  if (path === ROUTES.AI) {
+    preloadAiSubpackage();
   }
   if (path === ROUTES.PROFILE) {
     preloadProfileSubpackage();
-    preloadAiSubpackage();
   }
+}
+
+function handleTabPress(path: RoutePath, isActive: boolean) {
+  if (isActive) return;
+  preloadSubpackagesForTab(path);
+  if (path === ROUTES.AI) {
+    requireAuth(() => switchTabTo(path), 'ai_assistant');
+    return;
+  }
+  switchTabTo(path);
 }
 
 const BottomNav: React.FC = () => {
@@ -28,6 +39,7 @@ const BottomNav: React.FC = () => {
 
   const navItems = [
     { path: ROUTES.HOME, icon: House, label: '首页' },
+    { path: ROUTES.AI, icon: Bot, label: 'AI问答' },
     { path: ROUTES.EVENTS, icon: CalendarDays, label: '活动' },
     { path: ROUTES.PROFILE, icon: User, label: '我的' },
   ];
@@ -47,7 +59,7 @@ const BottomNav: React.FC = () => {
                   preloadSubpackagesForTab(item.path);
                 }
               }}
-              onClick={() => switchTabTo(item.path)}
+              onClick={() => handleTabPress(item.path, isActive)}
               className="s-bottom-nav__item"
             >
               <Icon
@@ -78,14 +90,9 @@ export function BottomNavSlot() {
   );
 }
 
-/** Tab bar + global AI FAB for stack pages that embed the bar in-page. */
+/** Tab bar for stack pages that embed the bar in-page. */
 export function PageTabBarChrome() {
-  return (
-    <>
-      <GlobalAiAgentFab />
-      <BottomNavSlot />
-    </>
-  );
+  return <BottomNavSlot />;
 }
 
 export default BottomNav;

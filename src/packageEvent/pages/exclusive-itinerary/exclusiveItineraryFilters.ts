@@ -22,24 +22,21 @@ export function extractDjStyleTokens(genreLabel?: string): string[] {
 }
 
 export function buildGenreFilterOptions(
-  djs: Array<{ genreLabel: string }>,
+  djs: Array<{ genre: string }>,
 ): ExclusiveItineraryFilterChip[] {
   const counts = new Map<string, number>();
   const labels = new Map<string, string>();
 
   for (const dj of djs) {
-    const seen = new Set<string>();
-    for (const token of extractDjStyleTokens(dj.genreLabel)) {
-      const key = token.toLowerCase();
-      if (seen.has(key)) {
-        continue;
-      }
-      seen.add(key);
-      if (!labels.has(key)) {
-        labels.set(key, token);
-      }
-      counts.set(key, (counts.get(key) ?? 0) + 1);
+    const genre = dj.genre?.trim() ?? '';
+    if (!genre || genre === '风格待补充') {
+      continue;
     }
+    const key = genre.toLowerCase();
+    if (!labels.has(key)) {
+      labels.set(key, genre);
+    }
+    counts.set(key, (counts.get(key) ?? 0) + 1);
   }
 
   const styles = [...counts.keys()].sort((a, b) => {
@@ -112,18 +109,14 @@ export function fuzzyStyleTextMatches(text: string, query: string): boolean {
   });
 }
 
-export function djMatchesStyleFilter(
-  dj: { genreLabel: string },
-  styleId: string,
-): boolean {
+export function djMatchesStyleFilter(dj: { genre: string }, styleId: string): boolean {
   if (styleId === 'all') {
     return true;
   }
 
   const normalized = styleId.trim().toLowerCase();
-  return extractDjStyleTokens(dj.genreLabel).some(
-    (token) => token.toLowerCase() === normalized,
-  );
+  const genre = dj.genre?.trim().toLowerCase() ?? '';
+  return genre === normalized;
 }
 
 export function djMatchesStyleSearch(

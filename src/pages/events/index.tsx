@@ -22,7 +22,6 @@ import {
   parseActivityDateRange,
 } from '../../utils/activityStatus';
 import { EventsPageHeader } from './components/EventsPageHeader';
-import GlobalAiAgentFab from '../../components/navigation/GlobalAiAgentFab';
 import { EventsViewTabs, type EventsViewTab } from './components/EventsViewTabs';
 import { EventsActivityCalendar } from './components/EventsActivityCalendar';
 import { EventsActivityMapTab } from './components/EventsActivityMapTab';
@@ -236,7 +235,6 @@ const Events: React.FC = () => {
           </ScrollView>
         )}
       </View>
-      <GlobalAiAgentFab />
     </View>
   );
 };

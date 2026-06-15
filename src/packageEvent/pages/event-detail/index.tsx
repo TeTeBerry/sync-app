@@ -49,13 +49,7 @@ const EventDetailPage = () => {
     activityStatusClass,
     showHeaderSkeleton,
     composerReady,
-    messageDraft,
-    setMessageDraft,
-    messageImageRefs,
-    pickMessageImages,
-    removeMessageImage,
-    handlePublishMessage,
-    messagePublishing,
+    templatePublishing,
     posts,
     postsLoading,
     showPostsEnd,
@@ -109,22 +103,12 @@ const EventDetailPage = () => {
             <EventDetailComposerSection
               showHeaderSkeleton={showHeaderSkeleton}
               composerReady={composerReady}
-              messageDraft={messageDraft}
-              onMessageDraftChange={setMessageDraft}
-              messageImageRefs={messageImageRefs}
-              onPickMessageImages={() => {
-                void pickMessageImages();
-              }}
-              onRemoveMessageImage={removeMessageImage}
-              onPublishMessage={handlePublishMessage}
-              messagePublishing={messagePublishing}
+              templatePublishing={templatePublishing}
               onAiGuideClick={handleOpenAiGuide}
               onOpenTemplateSheet={handleOpenTemplateSheet}
-              templateDisabled={messagePublishing}
               activityTitle={activityTitle}
               onOpenMyItinerary={handleOpenMyItinerary}
               onOpenExclusiveItinerary={handleOpenExclusiveItinerary}
-              boardCount={posts.totalPostCount}
             />
 
             {!showHeaderSkeleton ? (
@@ -141,11 +125,11 @@ const EventDetailPage = () => {
                   <ThemedPageLoader variant="skeleton-event-posts" minHeight={200} />
                 ) : posts.totalPostCount === 0 ? (
                   <Text className="s-event-detail__empty">
-                    暂无留言，来发布第一条吧
+                    暂无组队帖，来发布第一条吧
                   </Text>
                 ) : posts.isBoardSearchActive && posts.filteredPostCount === 0 ? (
                   <Text className="s-event-detail__empty">
-                    未找到匹配的留言，试试其他关键词
+                    未找到匹配的组队帖，试试其他关键词
                   </Text>
                 ) : (
                   <EventPostsVirtualList

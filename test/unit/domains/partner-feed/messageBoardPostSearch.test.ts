@@ -22,8 +22,13 @@ describe('messageBoardPostSearch', () => {
     expect(messageBoardPostMatchesQuery(samplePost, '一起')).toBe(true);
   });
 
-  it('matches author name', () => {
-    expect(messageBoardPostMatchesQuery(samplePost, '微信')).toBe(true);
+  it('fuzzy-matches non-consecutive characters in body', () => {
+    expect(messageBoardPostMatchesQuery(samplePost, '上组')).toBe(true);
+    expect(messageBoardPostMatchesQuery(samplePost, '还吗')).toBe(true);
+  });
+
+  it('does not match author name', () => {
+    expect(messageBoardPostMatchesQuery(samplePost, '微信')).toBe(false);
   });
 
   it('matches content type label', () => {

@@ -189,6 +189,13 @@ export function useExclusiveItineraryPage() {
       });
       return;
     }
+    if (scheduleQuery.data?.schedulePublished === false) {
+      setHintModal({
+        title: '时间表尚未发布',
+        message: '官方演出时间表尚未公布，请耐心等待。当前可先浏览阵容并预选 DJ。',
+      });
+      return;
+    }
     if (!Number.isFinite(activityLegacyId) || activityLegacyId <= 0) {
       goMyItinerary(activityLegacyId, selectedIds);
       return;
@@ -206,7 +213,13 @@ export function useExclusiveItineraryPage() {
     } finally {
       setGenerating(false);
     }
-  }, [activityLegacyId, generate, selectedIds, setFromGenerateResult]);
+  }, [
+    activityLegacyId,
+    generate,
+    scheduleQuery.data?.schedulePublished,
+    selectedIds,
+    setFromGenerateResult,
+  ]);
 
   const sortSheetItems = useMemo(
     () =>

@@ -79,6 +79,7 @@ export function useAiBuddyPost(options: {
           dateEnd: '',
           location: '',
           headcount: '',
+          contact: '',
           tags: [tagId],
           note: '',
         } satisfies AiBuddyPostFormValues);
@@ -124,7 +125,7 @@ export function useAiBuddyPost(options: {
       if (publishingRef.current) return;
       if (!(await guardPublish())) return;
 
-      const { imageRefs, syncToPostList: _sync, ...form } = payload;
+      const { syncToPostList: _sync, ...form } = payload;
       const title = activityTitle?.trim() || '本场活动';
       publishingRef.current = true;
       setIsPublishing(true);
@@ -155,7 +156,6 @@ export function useAiBuddyPost(options: {
 
         const { card } = await publishBuddyPostFromForm({
           form,
-          imageRefs,
           activityLegacyId,
           activityTitle: title,
           authorName,

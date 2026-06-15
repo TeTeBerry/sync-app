@@ -20,6 +20,7 @@ import {
 } from '../../../utils/route';
 import { resolveAiChatWsUrl } from '../../../constants/api';
 import { isAiChatWsDevLog } from '../../../utils/aiChatWs';
+import { TAB_PAGE_NAV_PX } from '../../../hooks/useTabPageMainHeight';
 import { inferUserGenderFromName } from '../../../utils/inferAuthorGender';
 
 /** Header content row (avatar + titles), excluding status bar. */
@@ -29,7 +30,8 @@ export const AI_EVENT_CONTEXT_PX = 44;
 /** Quick chips + composer row inside chat footer (px @ 375). */
 export const AI_CHAT_COMPOSER_CHROME_PX = 136;
 
-export function useAiAssistantPage() {
+export function useAiAssistantPage(options?: { tabRoot?: boolean }) {
+  const tabRoot = options?.tabRoot ?? false;
   const navInsets = useNavBarInsets();
   const [navBoot] = useState(() => {
     const intent = useNavigationStore.getState().consumeAiAssistantIntent();
@@ -81,8 +83,11 @@ export function useAiAssistantPage() {
 
   const headerSubtractPx = useMemo(() => {
     const eventBar = showEventContext ? AI_EVENT_CONTEXT_PX : 0;
+    if (tabRoot) {
+      return navInsets.paddingTop + TAB_PAGE_NAV_PX + eventBar;
+    }
     return navInsets.paddingTop + 12 + AI_HEADER_CONTENT_PX + eventBar;
-  }, [navInsets.paddingTop, showEventContext]);
+  }, [navInsets.paddingTop, showEventContext, tabRoot]);
 
   const chatScrollHeight = useTabPageMainHeight({
     subtractPx: headerSubtractPx + AI_CHAT_COMPOSER_CHROME_PX,
@@ -135,6 +140,7 @@ export function useAiAssistantPage() {
   });
 
   const handleBack = useCallback(() => {
+    if (tabRoot) return;
     endRouteTransition();
     const pages = Taro.getCurrentPages();
     if (pages.length <= 1) {
@@ -155,9 +161,10 @@ export function useAiAssistantPage() {
         goBack(ROUTES.HOME);
       },
     });
-  }, [activityLegacyId]);
+  }, [activityLegacyId, tabRoot]);
 
   return {
+    tabRoot,
     navInsets,
     pendingInitialMessage,
     pendingOpenAiGuideSheet,

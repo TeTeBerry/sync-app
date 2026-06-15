@@ -16,6 +16,9 @@ import { Canvas, View } from '@tarojs/components';
 import { invalidateCache } from '../../../hooks/useApiQuery';
 import { useAiBuddyPost } from '../../../hooks/useAiBuddyPost';
 import { useAiTravelGuide } from '../../../hooks/useAiTravelGuide';
+import { resolveActivityByKeyword } from '../../../api/syncApi';
+import { goEventDetail } from '../../../utils/route';
+import { selectSetActiveActivityLegacyId, useNavigationStore } from '../../../stores';
 import { parseActivityDayCount } from '../../../utils/parseActivityDayCount';
 import { useActivityDetailQuery } from '../../../hooks/useSyncApi';
 import { TRAVEL_GUIDE_CANVAS_ID } from '../../../components/ai-chat/travelGuideWallpaper/renderTravelGuideImage';
@@ -79,11 +82,13 @@ export function AiAssistantChat({
     [activityQuery.data?.location],
   );
 
+  const trimmedActivityTitle = activityTitle?.trim();
+
   const welcomeText = useMemo(() => {
     if (activityTitle?.trim()) {
-      return `👋 已为你锁定「${activityTitle.trim()}」。可点「AI出行攻略」规划行程，或点「模板发帖」发布组队帖。`;
+      return `👋 已为你锁定「${activityTitle.trim()}」。有问题随时问我，或点下方活动名进入活动详情。`;
     }
-    return '👋 我是你的 AI 智能助手，帮你发现活动、规划出行，有问题随时问我。';
+    return '👋 我是你的 AI 智能助手，帮你发现活动、规划出行。点下方活动名可绑定场次。';
   }, [activityTitle]);
 
   const {
@@ -166,6 +171,58 @@ export function AiAssistantChat({
     sessionIdRef,
     onPlanningMessagesShown: scheduleScrollToBottom,
   });
+
+  const setActiveActivityLegacyId = useNavigationStore(selectSetActiveActivityLegacyId);
+
+  const handleActivityChipClick = useCallback(
+    async (keyword: string) => {
+      if (isStreaming || isStreamingRef.current) return;
+
+      const trimmedKeyword = keyword.trim();
+      if (!trimmedKeyword) return;
+
+      if (
+        activityLegacyId != null &&
+        !Number.isNaN(activityLegacyId) &&
+        trimmedActivityTitle &&
+        trimmedKeyword === trimmedActivityTitle
+      ) {
+        goEventDetail(activityLegacyId);
+        return;
+      }
+
+      try {
+        const activity = await resolveActivityByKeyword(trimmedKeyword);
+        if (activity?.legacyId != null && !Number.isNaN(activity.legacyId)) {
+          setActiveActivityLegacyId(activity.legacyId);
+          void Taro.showToast({
+            title: `已绑定「${activity.name?.trim() || trimmedKeyword}」`,
+            icon: 'none',
+          });
+          return;
+        }
+      } catch {
+        // fall through to unbound chat flow
+      }
+
+      const scoped = activityLegacyId != null && !Number.isNaN(activityLegacyId);
+      if (scoped) {
+        const guideHandled =
+          await travelGuide.handleTravelGuideChatMessage(trimmedKeyword);
+        if (guideHandled) return;
+      }
+      await send({ text: trimmedKeyword });
+    },
+    [
+      activityLegacyId,
+      isStreaming,
+      isStreamingRef,
+      send,
+      setActiveActivityLegacyId,
+      travelGuide,
+      trimmedActivityTitle,
+    ],
+  );
 
   useEffect(() => {
     onMessageCountChange?.(messages.length);
@@ -347,8 +404,7 @@ export function AiAssistantChat({
           onSubmit={submit}
           onClearChat={handleClearChat}
           clearDisabled={isStreaming}
-          onAiGuideClick={travelGuide.openGuideSheet}
-          onBuddyPostTagClick={buddyPost.openBuddyPostSheetWithTag}
+          onActivityChipClick={handleActivityChipClick}
         />
       </View>
 
