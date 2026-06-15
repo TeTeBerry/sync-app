@@ -4,9 +4,13 @@ import {
   deletePost,
 } from '../../api/sync/posts';
 import { resolveRequestUserId } from '../../api/requestContext';
-import type { HomeFeedPost } from '../../types/backend';
+import type { HomeFeedPost, HomeSummary } from '../../types/backend';
 import { isLiveApi } from '../../constants/api';
-import { popularPostsQueryKey, setPopularPostsCache } from '../../cache/postCache';
+import {
+  getPopularPostsFromCache,
+  popularPostsQueryKey,
+  setPopularPostsCache,
+} from '../../cache/postCache';
 import {
   HOME_POPULAR_POSTS_PERSIST_LIMIT,
   persistPopularPosts,
@@ -14,7 +18,7 @@ import {
 import { sanitizeImageList, sanitizeRemoteImageUrl } from '../../utils/imageUrl';
 import { invalidateAllPosts } from '../../utils/queryInvalidation';
 import { STALE_POSTS_FEED_MS } from '../../constants/queryCache';
-import { useApiQuery } from '../useApiQuery';
+import { getCacheData, useApiQuery } from '../useApiQuery';
 import type { QueryEnableOptions } from './types';
 
 /** Home popular feed — canonical source is `posts/popular` cache (seeded from `/home`). */
@@ -25,6 +29,17 @@ export function usePopularPosts(options?: QueryEnableOptions) {
   const query = useApiQuery({
     queryKey: [...popularPostsQueryKey()],
     queryFn: async () => {
+      const cached = getPopularPostsFromCache();
+      if (cached?.length) {
+        return cached.map(mapHomeFeedPost);
+      }
+      const fromHome = getCacheData<HomeSummary>(['home', 'summary'])?.popularPosts;
+      if (fromHome?.length) {
+        const mapped = fromHome.map(mapHomeFeedPost);
+        persistPopularPosts(mapped);
+        setPopularPostsCache(mapped);
+        return mapped;
+      }
       const result = await fetchPopularPosts(HOME_POPULAR_POSTS_PERSIST_LIMIT);
       const mapped = result.map(mapHomeFeedPost);
       persistPopularPosts(mapped);

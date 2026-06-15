@@ -1,6 +1,6 @@
 import './home.scss';
 import { useDidShow } from '@tarojs/taro';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import ThemedPageLoader from '../../components/ThemedPageLoader';
 import { HomeActivityFeed } from './components/HomeActivityFeed';
 import { seedActivityDetailFromFeaturedEvent } from '../../utils/activityDetailCache';
@@ -12,6 +12,7 @@ import {
   useNearestUpcomingForCountdown,
   useNotificationUnreadCount,
   usePopularPosts,
+  mapHomeFeedPost,
 } from '../../hooks/useSyncApi';
 import { requireAuth } from '../../utils/authGate';
 import {
@@ -54,18 +55,32 @@ const Home = () => {
     }
   });
 
-  const { data: summary, refetch: refetchHomeSummary } = useHomeSummary();
+  const {
+    data: summary,
+    isLoading: summaryLoading,
+    refetch: refetchHomeSummary,
+  } = useHomeSummary();
   const heat = summary?.heat;
   const { loggedIn } = useAuthSession();
   const { items: featuredEvents } = useFeaturedEvents();
   const nearestUpcoming = useNearestUpcomingForCountdown();
   const { data: unreadCount = 0 } = useNotificationUnreadCount();
+
+  const summaryPosts = useMemo(
+    () => (summary?.popularPosts ?? []).map(mapHomeFeedPost),
+    [summary?.popularPosts],
+  );
+  const needsPopularFallback = !summaryLoading && summaryPosts.length === 0;
   const {
-    posts,
-    isLoading: postsLoading,
+    posts: fallbackPosts,
+    isLoading: popularLoading,
     isError: postsError,
     refetch: refetchPosts,
-  } = usePopularPosts();
+  } = usePopularPosts({ enabled: needsPopularFallback });
+
+  const posts = summaryPosts.length > 0 ? summaryPosts : fallbackPosts;
+  const postsLoading =
+    posts.length === 0 && (summaryLoading || (needsPopularFallback && popularLoading));
 
   const handleNotification = useCallback(() => {
     requireAuth(() => goNotifications(), 'notification');
@@ -161,7 +176,7 @@ const Home = () => {
             onEventPreload={handleEventPreload}
           />
 
-          {!postsLoading ? (
+          {postsLoading ? (
             <ThemedPageLoader variant="skeleton-feed" minHeight={240} />
           ) : postsError ? (
             <View
