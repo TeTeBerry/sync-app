@@ -52,7 +52,11 @@ import type { QueryEnableOptions } from './types';
 import type { UpdateCurrentUserPayload } from '../../types/backend';
 import { updateCurrentUser } from '../../api/sync/users';
 import { useProfileActivitiesQuery } from './profile';
-import { buildRegisteredActivityLegacyIds } from '../../utils/activityRegistration';
+import {
+  buildRegisteredActivityLegacyIds,
+  mergeCountdownActivityCandidates,
+  pickCountdownActivityCandidates,
+} from '../../utils/activityRegistration';
 
 export function useActivitiesQuery(options?: QueryEnableOptions) {
   const tabEnabled = options?.enabled ?? true;
@@ -128,14 +132,15 @@ export function useHomeSummary() {
 export function useRegisteredActivityLegacyIds() {
   const { data: summary } = useHomeSummary();
   const profileActivitiesQuery = useProfileActivitiesQuery();
+  const loggedIn = isLoggedIn();
 
   return useMemo(
     () =>
       buildRegisteredActivityLegacyIds(
-        summary?.signupEvents,
-        profileActivitiesQuery.data,
+        loggedIn ? summary?.signupEvents : undefined,
+        loggedIn ? profileActivitiesQuery.data : undefined,
       ),
-    [summary?.signupEvents, profileActivitiesQuery.data],
+    [loggedIn, summary?.signupEvents, profileActivitiesQuery.data],
   );
 }
 
@@ -156,36 +161,14 @@ export function useFeaturedEvents() {
   };
 }
 
-function mergeHomeCountdownCandidates(
-  signupEvents: HomeSummary['signupEvents'],
-  activities: BackendActivity[] | undefined,
-): ActivityDateFields[] {
-  const seen = new Set<string>();
-  const candidates: ActivityDateFields[] = [];
-
-  const add = (title: string, date?: string) => {
-    const key = `${title}|${date ?? ''}`;
-    if (seen.has(key)) return;
-    seen.add(key);
-    candidates.push({ title, date });
-  };
-
-  for (const event of signupEvents) {
-    add(event.title, event.date);
-  }
-  for (const activity of activities ?? []) {
-    add(activity.name, activity.date);
-  }
-
-  return candidates;
-}
-
 export function useNearestUpcomingForCountdown() {
   const { data: summary } = useHomeSummary();
+  const { data: activities } = useActivitiesQuery();
+  const registeredLegacyIds = useRegisteredActivityLegacyIds();
 
   return useMemo(() => {
-    const signupEvents = summary?.signupEvents ?? [];
-    const candidates = mergeHomeCountdownCandidates(signupEvents, undefined);
+    const merged = mergeCountdownActivityCandidates(summary?.signupEvents, activities);
+    const candidates = pickCountdownActivityCandidates(merged, registeredLegacyIds);
     const nearest = findNearestUpcomingActivity(candidates);
     if (!nearest) return null;
 
@@ -193,7 +176,7 @@ export function useNearestUpcomingForCountdown() {
     if (!title) return null;
 
     return { title, startAt: nearest.startAt };
-  }, [summary]);
+  }, [summary?.signupEvents, activities, registeredLegacyIds]);
 }
 
 export function useActivityDetailQuery(legacyId?: number) {
