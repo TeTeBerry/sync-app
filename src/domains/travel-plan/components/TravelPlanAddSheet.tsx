@@ -173,18 +173,20 @@ export function TravelPlanAddSheet({
             result.message ??
               (category === 'dining' && recognizedForms.length > 1
                 ? `AI 识别完成，已识别 ${recognizedForms.length} 笔账单`
-                : category === 'transport' &&
-                    recognizedForms.length > 1 &&
-                    shouldMergeTransportForms(
-                      recognizedTravelPlanFormsToAddFormValues(
-                        category,
-                        recognizedForms,
-                      ),
-                    )
-                  ? `AI 识别完成，已识别 ${recognizedForms.length} 笔打车记录`
-                  : recognizedForms.length > 1
-                    ? `AI 识别完成，已拆分为 ${recognizedForms.length} 段单程`
-                    : 'AI 识别完成，已自动填入'),
+                : category === 'event' && recognizedForms.length > 1
+                  ? `AI 识别完成，已识别 ${recognizedForms.length} 笔记录`
+                  : category === 'transport' &&
+                      recognizedForms.length > 1 &&
+                      shouldMergeTransportForms(
+                        recognizedTravelPlanFormsToAddFormValues(
+                          category,
+                          recognizedForms,
+                        ),
+                      )
+                    ? `AI 识别完成，已识别 ${recognizedForms.length} 笔打车记录`
+                    : recognizedForms.length > 1
+                      ? `AI 识别完成，已拆分为 ${recognizedForms.length} 段单程`
+                      : 'AI 识别完成，已自动填入'),
           );
           return;
         }
@@ -337,7 +339,7 @@ export function TravelPlanAddSheet({
                   </Text>
                   {batchMode ? (
                     <Text className="s-travel-plan-add-sheet__ocr-hint-sub">
-                      已填入 {formSegments.length} 笔，可修改每条类型并向下滚动编辑
+                      已填入 {formSegments.length} 项，可修改每条类型并向下滚动编辑
                     </Text>
                   ) : null}
                 </View>
@@ -404,7 +406,7 @@ export function TravelPlanAddSheet({
                 onClick={handleSubmit}
               >
                 <Text className="s-travel-plan-add-sheet__submit-label">
-                  {batchMode ? `保存 ${formSegments.length} 笔账单` : '保存行程'}
+                  {batchMode ? `保存 ${formSegments.length} 项` : '保存行程'}
                 </Text>
               </Button>
             </View>

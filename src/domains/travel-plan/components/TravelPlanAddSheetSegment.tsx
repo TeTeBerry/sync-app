@@ -59,7 +59,7 @@ function isBillStyleSegment(
   if (!batchMode) {
     return false;
   }
-  return category === 'dining' || category === 'transport';
+  return category === 'dining' || category === 'transport' || category === 'event';
 }
 
 export function TravelPlanAddSheetSegment({
@@ -140,7 +140,9 @@ export function TravelPlanAddSheetSegment({
             ? '商家'
             : billStyle && category === 'transport'
               ? '行程摘要'
-              : '标题'}
+              : billStyle && category === 'event'
+                ? '名称'
+                : '标题'}
         </Text>
         <Input
           className="s-travel-plan-add-sheet__input"
@@ -151,7 +153,9 @@ export function TravelPlanAddSheetSegment({
               ? '如：星巴克'
               : billStyle && category === 'transport'
                 ? '如：滴滴出行'
-                : '如：乘高铁去深圳'
+                : billStyle && category === 'event'
+                  ? '如：演出门票、纪念周边'
+                  : '如：乘高铁去深圳'
           }
           placeholderClass="s-travel-plan-add-sheet__input-placeholder"
           confirmType="done"
@@ -162,13 +166,23 @@ export function TravelPlanAddSheetSegment({
       <View className="s-travel-plan-add-sheet__grid s-travel-plan-add-sheet__grid--desc-cost">
         <View className="s-travel-plan-add-sheet__field">
           <Text className="s-travel-plan-add-sheet__field-label">
-            {billStyle ? '消费时间（选填）' : '描述（选填）'}
+            {billStyle
+              ? category === 'event'
+                ? '时间/场次（选填）'
+                : '消费时间（选填）'
+              : '描述（选填）'}
           </Text>
           <Input
             className="s-travel-plan-add-sheet__input"
             type="text"
             value={form.description}
-            placeholder={billStyle ? '如：6/15 13:53' : '如：G1222次 · 二等座'}
+            placeholder={
+              billStyle && category === 'event'
+                ? '如：6/15 19:30 · VIP'
+                : billStyle
+                  ? '如：6/15 13:53'
+                  : '如：G1222次 · 二等座'
+            }
             placeholderClass="s-travel-plan-add-sheet__input-placeholder"
             confirmType="done"
             onInput={(event) => onPatch({ description: event.detail.value ?? '' })}
