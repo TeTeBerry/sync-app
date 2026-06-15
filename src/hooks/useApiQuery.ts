@@ -136,7 +136,9 @@ export function useApiQuery<T>(options: UseApiQueryOptions<T>) {
   const cached = globalCache.get(cacheKey) as CacheEntry<T> | undefined;
 
   const [data, setData] = useState<T | undefined>(cached?.data);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(
+    () => enabled && cached?.data === undefined,
+  );
   const [isError, setIsError] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const lastFetchRef = useRef<number>(cached?.timestamp ?? 0);
@@ -208,6 +210,9 @@ export function useApiQuery<T>(options: UseApiQueryOptions<T>) {
     if (!enabled) {
       setIsLoading(false);
       return;
+    }
+    if (entry?.data === undefined) {
+      setIsLoading(true);
     }
     void fetch({ background: entry?.data !== undefined });
   }, [cacheKey, enabled, fetch]);

@@ -1,5 +1,5 @@
 import Taro from '@tarojs/taro';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { isLiveApi } from '@/constants/api';
 import { useItineraryScheduleQuery } from '@/hooks/useItineraryApi';
 import { useActivityDetailQuery } from '@/hooks/useSyncApi';
@@ -77,7 +77,6 @@ export function useTravelPlanPage({
   const scheduleQuery = useItineraryScheduleQuery(apiEnabled ? activityLegacyId : null);
   const savedQuery = useSavedTravelPlanQuery(apiEnabled ? activityLegacyId : null);
   const { save } = useTravelPlanMutations(activityLegacyId ?? 0);
-  const hydratedFromApiRef = useRef(false);
 
   const resolvedEventMeta =
     eventMeta?.trim() ||
@@ -156,7 +155,6 @@ export function useTravelPlanPage({
   ]);
 
   useEffect(() => {
-    hydratedFromApiRef.current = false;
     setApiActivityNodes([]);
     setUserNodes([]);
     setActivityConfirmations({});
@@ -166,14 +164,15 @@ export function useTravelPlanPage({
   }, [activityLegacyId, apiEnabled]);
 
   useEffect(() => {
-    if (!apiEnabled || hydratedFromApiRef.current) {
+    if (!apiEnabled) {
       return;
     }
     if (savedQuery.isLoading) {
       return;
     }
-
-    hydratedFromApiRef.current = true;
+    if (savedQuery.data === undefined) {
+      return;
+    }
 
     const saved = savedQuery.data;
     const nextApiActivityNodes = (saved?.activityNodes ?? []).map((node) =>
@@ -505,7 +504,10 @@ export function useTravelPlanPage({
     nodes,
     stats,
     expandedId,
-    isLoading: apiEnabled && savedQuery.isLoading && !hydratedFromApiRef.current,
+    isLoading:
+      apiEnabled &&
+      (savedQuery.isLoading || savedQuery.data === undefined) &&
+      !savedQuery.isError,
     isSaving,
     toggleExpanded,
     addSheetOpen,
