@@ -4,7 +4,6 @@ export function computeTravelPlanStats(nodes: TravelPlanNode[]): TravelPlanStats
   return {
     nodeCount: nodes.length,
     estimatedCost: nodes.reduce((sum, node) => sum + (node.price ?? 0), 0),
-    confirmedCount: nodes.filter((node) => node.confirmed).length,
   };
 }
 

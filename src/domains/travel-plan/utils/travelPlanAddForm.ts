@@ -111,7 +111,7 @@ function createTravelPlanNodeFromForm(form: TravelPlanAddFormValues): TravelPlan
     subtitle,
     detail,
     price: parseTravelPlanCostInput(form.cost),
-    confirmed: false,
+    confirmed: true,
   };
 }
 
@@ -192,7 +192,7 @@ function createAggregatedBillNodeFromForms(
     subtitle,
     detail: `${bills.length} 笔账单明细`,
     price,
-    confirmed: false,
+    confirmed: true,
     [options.billsField]: bills,
   } as TravelPlanNode;
 }

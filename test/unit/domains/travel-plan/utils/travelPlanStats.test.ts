@@ -35,7 +35,6 @@ describe('travelPlanStats', () => {
     const stats = computeTravelPlanStats(SAMPLE_NODES);
     expect(stats.nodeCount).toBe(2);
     expect(stats.estimatedCost).toBe(1440);
-    expect(stats.confirmedCount).toBe(1);
   });
 
   it('formats cost in zh-CN locale', () => {

@@ -62,7 +62,6 @@ const MyItineraryPage = () => {
                 onToggleExpanded={travelPlan.toggleExpanded}
                 onAddNode={travelPlan.handleAddNode}
                 onDeleteNode={travelPlan.handleDeleteNode}
-                onToggleConfirmed={travelPlan.toggleNodeConfirmed}
                 onUpdatePrice={travelPlan.handleUpdateNodePrice}
               />
             </View>

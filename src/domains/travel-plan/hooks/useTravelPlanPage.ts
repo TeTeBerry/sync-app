@@ -41,7 +41,6 @@ function buildFallbackActivityNodes(input: {
   activityDate?: string;
   location?: string;
   sessions?: Array<{ dateKey: string; label: string }>;
-  activityConfirmations?: Record<string, boolean>;
   activityPriceOverrides?: Record<string, number>;
 }) {
   const nodes = buildDefaultActivityTravelPlanNodes({
@@ -50,14 +49,9 @@ function buildFallbackActivityNodes(input: {
     activityDate: input.activityDate,
     location: input.location,
     sessions: input.sessions,
-    activityConfirmations: input.activityConfirmations,
   });
 
-  return applyActivityNodeOverrides(
-    nodes,
-    input.activityConfirmations ?? {},
-    input.activityPriceOverrides ?? {},
-  );
+  return applyActivityNodeOverrides(nodes, {}, input.activityPriceOverrides ?? {});
 }
 
 export function useTravelPlanPage({
@@ -95,9 +89,6 @@ export function useTravelPlanPage({
 
   const [apiActivityNodes, setApiActivityNodes] = useState<TravelPlanNode[]>([]);
   const [userNodes, setUserNodes] = useState<TravelPlanNode[]>([]);
-  const [activityConfirmations, setActivityConfirmations] = useState<
-    Record<string, boolean>
-  >({});
   const [activityPriceOverrides, setActivityPriceOverrides] = useState<
     Record<string, number>
   >({});
@@ -125,11 +116,9 @@ export function useTravelPlanPage({
       sessions: scheduleQuery.data?.sessions?.length
         ? scheduleQuery.data.sessions
         : undefined,
-      activityConfirmations,
       activityPriceOverrides,
     });
   }, [
-    activityConfirmations,
     activityPriceOverrides,
     activityQuery.data?.date,
     activityQuery.data?.location,
@@ -140,24 +129,14 @@ export function useTravelPlanPage({
 
   const activityNodes = useMemo(() => {
     if (apiActivityNodes.length > 0) {
-      return applyActivityNodeOverrides(
-        apiActivityNodes,
-        activityConfirmations,
-        activityPriceOverrides,
-      );
+      return applyActivityNodeOverrides(apiActivityNodes, {}, activityPriceOverrides);
     }
     return fallbackActivityNodes;
-  }, [
-    activityConfirmations,
-    activityPriceOverrides,
-    apiActivityNodes,
-    fallbackActivityNodes,
-  ]);
+  }, [activityPriceOverrides, apiActivityNodes, fallbackActivityNodes]);
 
   useEffect(() => {
     setApiActivityNodes([]);
     setUserNodes([]);
-    setActivityConfirmations({});
     setActivityPriceOverrides({});
     setHiddenActivityNodeIds([]);
     setExpandedId(null);
@@ -190,7 +169,6 @@ export function useTravelPlanPage({
 
     setApiActivityNodes(nextApiActivityNodes);
     setUserNodes(sortTravelPlanNodes(nextUserNodes));
-    setActivityConfirmations(saved?.activityConfirmations ?? {});
     setActivityPriceOverrides(saved?.activityPriceOverrides ?? {});
     setHiddenActivityNodeIds(saved?.hiddenActivityNodeIds ?? []);
   }, [
@@ -232,7 +210,6 @@ export function useTravelPlanPage({
   const persistPlan = useCallback(
     async (
       nextUserNodes: TravelPlanNode[],
-      nextActivityConfirmations: Record<string, boolean>,
       nextActivityPriceOverrides: Record<string, number>,
       nextHiddenActivityNodeIds: string[],
     ) => {
@@ -245,7 +222,7 @@ export function useTravelPlanPage({
         await save({
           eventMeta: resolvedEventMeta.slice(0, 200),
           nodes: nextUserNodes.map(travelPlanNodeToPayload),
-          activityConfirmations: nextActivityConfirmations,
+          activityConfirmations: {},
           activityPriceOverrides: nextActivityPriceOverrides,
           hiddenActivityNodeIds: normalizeHiddenActivityNodeIds(
             nextHiddenActivityNodeIds,
@@ -294,7 +271,6 @@ export function useTravelPlanPage({
 
       const ok = await persistPlan(
         nextUserNodes,
-        activityConfirmations,
         activityPriceOverrides,
         hiddenActivityNodeIds,
       );
@@ -304,62 +280,8 @@ export function useTravelPlanPage({
       }
     },
     [
-      activityConfirmations,
       activityPriceOverrides,
       activityYearHint,
-      hiddenActivityNodeIds,
-      persistPlan,
-      userNodes,
-    ],
-  );
-
-  const toggleNodeConfirmed = useCallback(
-    async (id: string) => {
-      const isActivityNode =
-        activityNodes.some((node) => node.id === id) ||
-        id.startsWith('activity-event-');
-
-      if (isActivityNode) {
-        const current = activityNodes.find((node) => node.id === id);
-        const nextConfirmations = {
-          ...activityConfirmations,
-          [id]: !(activityConfirmations[id] ?? current?.confirmed ?? true),
-        };
-        const previousConfirmations = activityConfirmations;
-        setActivityConfirmations(nextConfirmations);
-
-        const ok = await persistPlan(
-          userNodes,
-          nextConfirmations,
-          activityPriceOverrides,
-          hiddenActivityNodeIds,
-        );
-        if (!ok) {
-          setActivityConfirmations(previousConfirmations);
-        }
-        return;
-      }
-
-      const nextUserNodes = userNodes.map((node) =>
-        node.id === id ? { ...node, confirmed: !node.confirmed } : node,
-      );
-      const previousUserNodes = userNodes;
-      setUserNodes(nextUserNodes);
-
-      const ok = await persistPlan(
-        nextUserNodes,
-        activityConfirmations,
-        activityPriceOverrides,
-        hiddenActivityNodeIds,
-      );
-      if (!ok) {
-        setUserNodes(previousUserNodes);
-      }
-    },
-    [
-      activityConfirmations,
-      activityNodes,
-      activityPriceOverrides,
       hiddenActivityNodeIds,
       persistPlan,
       userNodes,
@@ -382,12 +304,7 @@ export function useTravelPlanPage({
         const previousOverrides = activityPriceOverrides;
         setActivityPriceOverrides(nextOverrides);
 
-        const ok = await persistPlan(
-          userNodes,
-          activityConfirmations,
-          nextOverrides,
-          hiddenActivityNodeIds,
-        );
+        const ok = await persistPlan(userNodes, nextOverrides, hiddenActivityNodeIds);
         if (!ok) {
           setActivityPriceOverrides(previousOverrides);
         }
@@ -411,7 +328,6 @@ export function useTravelPlanPage({
 
       const ok = await persistPlan(
         nextUserNodes,
-        activityConfirmations,
         activityPriceOverrides,
         hiddenActivityNodeIds,
       );
@@ -420,7 +336,6 @@ export function useTravelPlanPage({
       }
     },
     [
-      activityConfirmations,
       activityNodes,
       activityPriceOverrides,
       hiddenActivityNodeIds,
@@ -458,12 +373,7 @@ export function useTravelPlanPage({
         const previousHidden = hiddenActivityNodeIds;
         setHiddenActivityNodeIds(nextHidden);
 
-        const ok = await persistPlan(
-          userNodes,
-          activityConfirmations,
-          activityPriceOverrides,
-          nextHidden,
-        );
+        const ok = await persistPlan(userNodes, activityPriceOverrides, nextHidden);
         if (!ok) {
           setHiddenActivityNodeIds(previousHidden);
         } else {
@@ -478,7 +388,6 @@ export function useTravelPlanPage({
 
       const ok = await persistPlan(
         nextUserNodes,
-        activityConfirmations,
         activityPriceOverrides,
         hiddenActivityNodeIds,
       );
@@ -489,7 +398,6 @@ export function useTravelPlanPage({
       }
     },
     [
-      activityConfirmations,
       activityPriceOverrides,
       confirm,
       hiddenActivityNodeIds,
@@ -515,7 +423,6 @@ export function useTravelPlanPage({
     closeAddSheet,
     handleSaveNode,
     handleDeleteNode,
-    toggleNodeConfirmed,
     handleUpdateNodePrice,
     confirmDialog,
   };

@@ -3,9 +3,7 @@ import {
   Car,
   ChevronDown,
   ChevronRight,
-  CircleCheck,
   Clock,
-  Hourglass,
   Plane,
   Plus,
   Utensils,
@@ -59,7 +57,6 @@ type TravelPlanTimelineProps = {
   onToggleExpanded: (id: string) => void;
   onAddNode: () => void;
   onDeleteNode: (id: string) => void;
-  onToggleConfirmed: (id: string) => void;
   onUpdatePrice: (id: string, price: number | undefined) => void;
 };
 
@@ -68,14 +65,12 @@ function TravelPlanNodeCard({
   expanded,
   onToggle,
   onDelete,
-  onToggleConfirmed,
   onUpdatePrice,
 }: {
   node: TravelPlanNode;
   expanded: boolean;
   onToggle: () => void;
   onDelete: () => void;
-  onToggleConfirmed: () => void;
   onUpdatePrice: (price: number | undefined) => void;
 }) {
   const accent = CATEGORY_COLORS[node.category];
@@ -123,26 +118,6 @@ function TravelPlanNodeCard({
 
         <View className="s-travel-plan__node-title-row">
           <Text className="s-travel-plan__node-title">{node.title}</Text>
-          <Button
-            className={[
-              's-travel-plan__node-check',
-              node.confirmed
-                ? 's-travel-plan__node-check--confirmed'
-                : 's-travel-plan__node-check--pending',
-            ].join(' ')}
-            hoverClass="s-travel-plan__node-check--pressed"
-            aria-label={node.confirmed ? '标记为待确认' : '标记为已确认'}
-            onTap={(event) => {
-              event.stopPropagation();
-              onToggleConfirmed();
-            }}
-          >
-            <CircleCheck
-              size={16}
-              color={node.confirmed ? '#34c759' : '#636366'}
-              aria-hidden
-            />
-          </Button>
           <View className="s-travel-plan__node-chevron" aria-hidden>
             {expanded ? (
               <ChevronDown size={16} color="#8e8e93" />
@@ -181,17 +156,6 @@ function TravelPlanNodeCard({
 
         {expanded ? (
           <View className="s-travel-plan__node-foot">
-            {node.confirmed ? (
-              <View className="s-travel-plan__node-status s-travel-plan__node-status--confirmed">
-                <CircleCheck size={12} color="#34c759" aria-hidden />
-                <Text className="s-travel-plan__node-status-text">已确认</Text>
-              </View>
-            ) : (
-              <View className="s-travel-plan__node-status s-travel-plan__node-status--pending">
-                <Hourglass size={12} color="#ff9f0a" aria-hidden />
-                <Text className="s-travel-plan__node-status-text">待确认</Text>
-              </View>
-            )}
             <Button
               className="s-travel-plan__node-delete"
               hoverClass="s-travel-plan__node-delete--pressed"
@@ -215,7 +179,6 @@ export function TravelPlanTimeline({
   onToggleExpanded,
   onAddNode,
   onDeleteNode,
-  onToggleConfirmed,
   onUpdatePrice,
 }: TravelPlanTimelineProps) {
   return (
@@ -239,7 +202,6 @@ export function TravelPlanTimeline({
                 expanded={expanded}
                 onToggle={() => onToggleExpanded(node.id)}
                 onDelete={() => onDeleteNode(node.id)}
-                onToggleConfirmed={() => onToggleConfirmed(node.id)}
                 onUpdatePrice={(price) => onUpdatePrice(node.id, price)}
               />
             </View>

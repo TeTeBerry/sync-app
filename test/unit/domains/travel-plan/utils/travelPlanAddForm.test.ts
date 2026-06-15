@@ -31,7 +31,7 @@ describe('createTravelPlanNodesFromFormValues', () => {
     expect(node?.subtitle).toBe('含双早');
     expect(node?.detail).toBe('预订号 8821');
     expect(node?.price).toBe(760);
-    expect(node?.confirmed).toBe(false);
+    expect(node?.confirmed).toBe(true);
   });
 
   it('sorts multi-leg form values by start date', () => {

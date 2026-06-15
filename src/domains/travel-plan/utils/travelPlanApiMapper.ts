@@ -18,7 +18,7 @@ export function travelPlanNodeToPayload(node: TravelPlanNode): TravelPlanNodePay
     subtitle: node.subtitle,
     ...(node.detail ? { detail: node.detail } : {}),
     ...(node.price != null ? { price: node.price } : {}),
-    confirmed: node.confirmed,
+    confirmed: true,
     ...(node.diningBills?.length ? { diningBills: node.diningBills } : {}),
     ...(node.transportBills?.length ? { transportBills: node.transportBills } : {}),
   };
