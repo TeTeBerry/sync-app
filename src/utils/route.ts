@@ -33,6 +33,7 @@ export const ROUTES = {
   EVENTS: '/pages/events/index',
   PROFILE: '/pages/profile/index',
   PROFILE_ACTIVITIES: '/packageProfile/pages/profile-activities/index',
+  PROFILE_POSTS: '/packageProfile/pages/profile-posts/index',
   SETTINGS: '/packageProfile/pages/settings/index',
   LEGAL_DOCUMENT: '/packageProfile/pages/legal-document/index',
   /** Legacy subpackage deep link — `packageAi/pages/ai-assistant` redirects to `ROUTES.AI`. */
@@ -306,6 +307,7 @@ const AUTH_PROTECTED_ROUTES: Partial<Record<RoutePath, LoginInterceptFeature>> =
   [ROUTES.AI_ASSISTANT]: 'ai_assistant',
   [ROUTES.NOTIFICATIONS]: 'notification',
   [ROUTES.PROFILE_ACTIVITIES]: 'activity',
+  [ROUTES.PROFILE_POSTS]: 'post',
   [ROUTES.EXCLUSIVE_ITINERARY]: 'activity',
   [ROUTES.MY_ITINERARY]: 'activity',
 };
@@ -443,14 +445,22 @@ export function go(url: RoutePath | string) {
 }
 
 /** Query params for event-detail; keep `id` + `activityLegacyId` in sync for preload/navigate. */
-export function buildEventDetailQuery(legacyId: number): Record<string, string> {
-  return {
+export function buildEventDetailQuery(
+  legacyId: number,
+  options?: { postId?: string },
+): Record<string, string> {
+  const query: Record<string, string> = {
     id: String(legacyId),
     activityLegacyId: String(legacyId),
   };
+  const postId = options?.postId?.trim();
+  if (postId) {
+    query.postId = postId;
+  }
+  return query;
 }
 
-export function goEventDetail(eventId: number | string) {
+export function goEventDetail(eventId: number | string, options?: { postId?: string }) {
   const legacyId = parseActivityLegacyId(eventId);
   if (legacyId == null) {
     void Taro.showToast({ title: '活动信息无效', icon: 'none' });
@@ -470,7 +480,7 @@ export function goEventDetail(eventId: number | string) {
     }
   }
   useNavigationStore.getState().setActiveActivityLegacyId(legacyId);
-  const query = buildEventDetailQuery(legacyId);
+  const query = buildEventDetailQuery(legacyId, options);
   preloadEventSubpackage();
   navigateToSafe(buildPageUrl(ROUTES.EVENT_DETAIL, query), {
     eventId: legacyId,
@@ -518,15 +528,24 @@ export async function navigateFromNotification(
 ): Promise<boolean> {
   if (!meta) return false;
 
-  if (meta.type === 'post_hidden' || meta.type === 'post_rejected') {
+  if (meta.type === 'post_hidden') {
     goProfile();
+    return true;
+  }
+
+  const postId = meta.postId?.trim();
+
+  if (meta.type === 'post_rejected') {
+    const legacyId = resolveActivityLegacyId(meta);
+    if (legacyId == null) return false;
+    goAiAssistant({ activityLegacyId: legacyId });
     return true;
   }
 
   const legacyId = resolveActivityLegacyId(meta);
   if (legacyId == null) return false;
 
-  goEventDetail(legacyId);
+  goEventDetail(legacyId, postId ? { postId } : undefined);
   return true;
 }
 

@@ -21,6 +21,11 @@ export function invalidateProfileActivities() {
   invalidateCache(['profile', 'activities']);
 }
 
+/** 失效个人帖子列表 */
+export function invalidateProfilePosts() {
+  invalidateCache(['profile', 'posts']);
+}
+
 /** 失效当前用户查询 */
 export function invalidateUser() {
   invalidateCache(['users', 'me']);
@@ -29,6 +34,13 @@ export function invalidateUser() {
 /** 失效首页查询 */
 export function invalidateHome() {
   invalidateCache(['home']);
+}
+
+/** 失效所有帖子及关联查询 */
+export function invalidateAllPosts() {
+  invalidateCache(['posts']);
+  invalidateCache(['profile', 'posts']);
+  invalidateCache(['profile', 'summary']);
 }
 
 /** 失效注册相关的个人资料查询（不刷新首页/活动列表，避免覆盖乐观更新） */

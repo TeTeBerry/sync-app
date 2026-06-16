@@ -1,6 +1,6 @@
 import './ProfileGuestSection.scss';
 import React, { useCallback } from 'react';
-import { Bell, ChevronRight, Info, Lock, Zap } from '../../components/icons';
+import { Bell, ChevronRight, FileText, Info, Lock, Zap } from '../../components/icons';
 import { LoginPromptHero } from '../auth/LoginPromptHero';
 import { requireAuth } from '../../utils/authGate';
 import { go, ROUTES } from '../../utils/route';
@@ -16,7 +16,7 @@ type LockedFeature = {
   icon: React.ReactNode;
   title: string;
   desc: string;
-  feature: 'activity' | 'notification';
+  feature: 'activity' | 'post' | 'notification';
 };
 
 const LOCKED_FEATURES: LockedFeature[] = [
@@ -27,9 +27,15 @@ const LOCKED_FEATURES: LockedFeature[] = [
     feature: 'activity',
   },
   {
+    icon: <FileText size={18} color="#bf5af2" />,
+    title: '我的帖子',
+    desc: '模板帖与留言管理',
+    feature: 'post',
+  },
+  {
     icon: <Bell size={18} color="#8e8e93" />,
     title: '消息通知',
-    desc: '活动提醒与系统消息',
+    desc: '评论、点赞与活动提醒',
     feature: 'notification',
   },
 ];
@@ -42,6 +48,7 @@ const ProfileGuestSection: React.FC<ProfileGuestSectionProps> = ({
   const openLockedRoute = useCallback((feature: LockedFeature['feature']) => {
     const routes = {
       activity: ROUTES.PROFILE_ACTIVITIES,
+      post: ROUTES.PROFILE_POSTS,
       notification: ROUTES.NOTIFICATIONS,
     } as const;
     requireAuth(() => go(routes[feature]), feature);
@@ -57,25 +64,33 @@ const ProfileGuestSection: React.FC<ProfileGuestSectionProps> = ({
         <Text className="s-profile-guest__locked-head">登录后可用</Text>
         {LOCKED_FEATURES.map((item) => (
           <View
-            key={item.feature}
+            key={item.title}
             className="s-profile-guest__locked-row"
             hoverClass="s-profile-guest__locked-row--pressed"
             onClick={() => openLockedRoute(item.feature)}
           >
-            <View className="s-profile-guest__locked-icon">
-              <Lock size={16} color="#8e8e93" />
-              {item.icon}
-            </View>
+            <View className="s-profile-guest__locked-icon">{item.icon}</View>
             <View className="s-profile-guest__locked-copy">
               <Text className="s-profile-guest__locked-title">{item.title}</Text>
               <Text className="s-profile-guest__locked-desc">{item.desc}</Text>
             </View>
-            <ChevronRight size={18} color="#8e8e93" />
+            <Lock size={16} color="#636366" aria-hidden />
           </View>
         ))}
       </View>
 
       <View className="s-profile-guest__settings-card">
+        <View
+          className="s-profile-guest__settings-row"
+          hoverClass="s-profile-guest__settings-row--pressed"
+          onClick={onOpenLegal}
+        >
+          <View className="s-profile-guest__settings-icon">
+            <FileText size={18} />
+          </View>
+          <Text className="s-profile-guest__settings-label">法律与协议</Text>
+          <ChevronRight size={18} color="#636366" />
+        </View>
         <View
           className="s-profile-guest__settings-row"
           hoverClass="s-profile-guest__settings-row--pressed"
@@ -85,18 +100,7 @@ const ProfileGuestSection: React.FC<ProfileGuestSectionProps> = ({
             <Info size={18} />
           </View>
           <Text className="s-profile-guest__settings-label">帮助与反馈</Text>
-          <ChevronRight size={18} color="#8e8e93" />
-        </View>
-        <View
-          className="s-profile-guest__settings-row"
-          hoverClass="s-profile-guest__settings-row--pressed"
-          onClick={onOpenLegal}
-        >
-          <View className="s-profile-guest__settings-icon">
-            <Info size={18} />
-          </View>
-          <Text className="s-profile-guest__settings-label">用户协议与隐私</Text>
-          <ChevronRight size={18} color="#8e8e93" />
+          <ChevronRight size={18} color="#636366" />
         </View>
       </View>
     </View>

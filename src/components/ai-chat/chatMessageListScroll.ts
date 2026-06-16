@@ -6,6 +6,7 @@ export function shouldSuppressAutoScrollForMessage(
 ): boolean {
   if (!msg) return false;
   if (msg.recommendedActivity) return true;
+  if (msg.createdPost) return true;
   if (msg.travelGuide?.imagePath?.trim()) return true;
   return false;
 }

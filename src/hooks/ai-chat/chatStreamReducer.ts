@@ -16,6 +16,10 @@ export interface ProcessChatStreamEventsOptions {
   streamErrorText: string;
   setMessages: Dispatch<SetStateAction<ChatUiMessage[]>>;
   persistSessionFromStream: (sessionId: string) => void;
+  onPostCreated?: (event: Extract<AiChatStreamEvent, { type: 'post_created' }>) => void;
+  onExistingPost?: (
+    event: Extract<AiChatStreamEvent, { type: 'existing_post' }>,
+  ) => void;
 }
 
 export async function processChatStreamEvents(
@@ -28,6 +32,8 @@ export async function processChatStreamEvents(
     streamErrorText,
     setMessages,
     persistSessionFromStream,
+    onPostCreated,
+    onExistingPost,
   } = options;
 
   const finishAiMessage = (updater: (current: ChatUiMessage) => ChatUiMessage) => {
@@ -53,6 +59,22 @@ export async function processChatStreamEvents(
       } else {
         typewriter.ensureTarget(event.content);
       }
+      continue;
+    }
+
+    if (event.type === 'post_created') {
+      onPostCreated?.(event);
+      if (event.post) {
+        finishAiMessage((message) => ({
+          ...message,
+          createdPost: event.post,
+        }));
+      }
+      continue;
+    }
+
+    if (event.type === 'existing_post') {
+      onExistingPost?.(event);
       continue;
     }
 

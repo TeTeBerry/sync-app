@@ -6,8 +6,11 @@ import type { AiGuidePlanFormValues } from '../../types/travelGuide';
 import type { AuthorGender } from '../../utils/inferAuthorGender';
 import { ChatUserAvatar } from './ChatUserAvatar';
 import { AiAssistantActivityCard } from './AiAssistantActivityCard';
+import { RecommendPostCards } from './RecommendPostCards';
+import { PublishConfirmCard } from './PublishConfirmCard';
 import { SuggestedReplyChips } from './SuggestedReplyChips';
 import { AiGuideResultCard } from './AiGuideResultCard';
+import { parsePublishConfirmMessage } from '../../utils/parsePublishConfirmMessage';
 import { openSingleImagePreview } from '../../utils/openImagePreview';
 import { Button } from '../ui';
 import { Image, Text, View } from '@tarojs/components';
@@ -52,6 +55,7 @@ export type ChatMessageRowProps = {
   onSelectSuggestedReply: (reply: string) => void;
   onRegenerateTravelGuide?: (form: AiGuidePlanFormValues) => void;
   onShareTravelGuide?: (imagePath: string) => void;
+  onBuddyPostFromTravelGuide?: (form: AiGuidePlanFormValues) => void;
 };
 
 function ChatMessageRowInner({
@@ -65,19 +69,30 @@ function ChatMessageRowInner({
   onSelectSuggestedReply,
   onRegenerateTravelGuide,
   onShareTravelGuide,
+  onBuddyPostFromTravelGuide,
 }: ChatMessageRowProps) {
   const isUser = msg.from === 'user';
   const timestamp = formatMessageTime(msg.id);
   const showTimestamp = shouldShowTimestamp(messages, index);
 
+  const publishConfirm =
+    !isUser && !msg.streaming ? parsePublishConfirmMessage(msg.text) : null;
+  const hasPostCards = Boolean(msg.createdPost);
   const hasActivityCard = Boolean(msg.recommendedActivity);
   const hasSuggestedReplies = Boolean(msg.suggestedReplies?.length);
   const travelGuideImagePath = msg.travelGuide?.imagePath?.trim();
   const hasTravelGuide = Boolean(travelGuideImagePath);
   const showEmbedBelow =
-    !isUser && (hasActivityCard || hasSuggestedReplies || hasTravelGuide);
+    !isUser &&
+    (hasPostCards || hasActivityCard || hasSuggestedReplies || hasTravelGuide);
+  const showPublishConfirm = Boolean(publishConfirm);
   const showTypingIndicator =
-    msg.streaming && !msg.text && !hasActivityCard && !hasTravelGuide;
+    msg.streaming &&
+    !msg.text &&
+    !hasPostCards &&
+    !hasActivityCard &&
+    !hasTravelGuide &&
+    !showPublishConfirm;
 
   return (
     <>
@@ -100,7 +115,8 @@ function ChatMessageRowInner({
           className={cn(
             's-ai-assistant-chat__content',
             isUser && 's-ai-assistant-chat__content--from-user',
-            hasActivityCard && 's-ai-assistant-chat__content--has-cards',
+            (hasPostCards || hasActivityCard || showPublishConfirm) &&
+              's-ai-assistant-chat__content--has-cards',
           )}
         >
           <View
@@ -118,6 +134,7 @@ function ChatMessageRowInner({
               msg.streaming && 's-ai-assistant-chat__bubble--streaming',
               msg.streaming && !msg.text && 's-ai-assistant-chat__bubble--waiting',
               showEmbedBelow && 's-ai-assistant-chat__bubble--with-embed-below',
+              showPublishConfirm && 's-ai-assistant-chat__bubble--publish-confirm',
             )}
           >
             {showTypingIndicator ? (
@@ -141,7 +158,13 @@ function ChatMessageRowInner({
                     />
                   </Button>
                 ) : null}
-                {msg.text ? (
+                {publishConfirm ? (
+                  <PublishConfirmCard
+                    payload={publishConfirm}
+                    userAvatar={userAvatar}
+                    userName={userName}
+                  />
+                ) : msg.text ? (
                   <Text className="s-ai-assistant-chat__bubble-text">{msg.text}</Text>
                 ) : null}
                 {isUser && hasSuggestedReplies ? (
@@ -159,6 +182,9 @@ function ChatMessageRowInner({
               {msg.recommendedActivity ? (
                 <AiAssistantActivityCard activity={msg.recommendedActivity} />
               ) : null}
+              {msg.createdPost ? (
+                <RecommendPostCards posts={[msg.createdPost]} />
+              ) : null}
               {hasSuggestedReplies ? (
                 <SuggestedReplyChips
                   replies={msg.suggestedReplies}
@@ -172,6 +198,11 @@ function ChatMessageRowInner({
                   disabled={isStreaming}
                   onRegenerate={() => onRegenerateTravelGuide?.(msg.travelGuide!.form)}
                   onShare={() => onShareTravelGuide?.(travelGuideImagePath)}
+                  onBuddyPostFromGuide={
+                    onBuddyPostFromTravelGuide
+                      ? () => onBuddyPostFromTravelGuide(msg.travelGuide!.form)
+                      : undefined
+                  }
                 />
               ) : null}
             </View>

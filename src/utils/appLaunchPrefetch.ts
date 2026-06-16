@@ -14,6 +14,7 @@ import {
   persistActivities,
   persistHomeSummary,
   persistProfileSummary,
+  seedPopularPostsCache,
 } from './homeCacheStorage';
 
 /** Wake Cloud Run container before user-facing requests (experience build cold start). */
@@ -52,6 +53,7 @@ export function prefetchCoreQueriesOnLaunch(): void {
       const result = withCatalogHomeSummary(await fetchHomeSummary());
       persistHomeSummary(result);
       seedActivityDetailsFromHomeSummary(result);
+      seedPopularPostsCache(result.popularPosts);
       return result;
     });
   }

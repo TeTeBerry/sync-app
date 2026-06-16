@@ -1,4 +1,5 @@
 import Taro from '@tarojs/taro';
+import { setPopularPostsCache } from '../cache/postCache';
 import {
   broadcastCacheData,
   getCacheKey,
@@ -8,11 +9,18 @@ import {
 import { isLiveApi } from '../constants/api';
 import { seedActivityDetailsFromList } from './activityDetailCache';
 import { invalidateHome } from './queryInvalidation';
-import type { BackendActivity, HomeSummary, ProfileSummary } from '../types/backend';
+import type {
+  BackendActivity,
+  HomeFeedPost,
+  HomeSummary,
+  ProfileSummary,
+} from '../types/backend';
 
+export const HOME_POPULAR_POSTS_PERSIST_LIMIT = 8;
 export const HOME_CACHE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 
 const SUMMARY_STORAGE_KEY = 'sync:home:summary:v2';
+const POPULAR_STORAGE_KEY = 'sync:home:popular:v2';
 const ACTIVITIES_STORAGE_KEY = 'sync:activities:list:v1';
 const PROFILE_SUMMARY_STORAGE_KEY = 'sync:profile:summary:v1';
 
@@ -41,6 +49,10 @@ function readEnvelope<T>(storageKey: string): CacheEnvelope<T> | undefined {
   }
 }
 
+function readEnvelopeData<T>(storageKey: string): T | undefined {
+  return readEnvelope<T>(storageKey)?.data;
+}
+
 function writeEnvelope<T>(storageKey: string, data: T): void {
   try {
     const payload: CacheEnvelope<T> = {
@@ -65,6 +77,12 @@ export function hydrateAppCachesFromStorage(): void {
       summaryEnvelope.data,
       summaryEnvelope.savedAt,
     );
+    seedPopularPostsCache(summaryEnvelope.data.popularPosts);
+  }
+
+  const popular = readEnvelopeData<HomeFeedPost[]>(POPULAR_STORAGE_KEY);
+  if (popular?.length) {
+    setPopularPostsCache(popular);
   }
 
   const activitiesEnvelope = readEnvelope<BackendActivity[]>(ACTIVITIES_STORAGE_KEY);
@@ -108,6 +126,7 @@ export function persistProfileSummary(data: ProfileSummary): void {
   writeEnvelope(PROFILE_SUMMARY_STORAGE_KEY, data);
 }
 
+/** Clear persisted home summary (e.g. on logout so `going` is not shown to guests). */
 export function clearPersistedHomeSummary(): void {
   try {
     Taro.removeStorageSync(SUMMARY_STORAGE_KEY);
@@ -124,6 +143,7 @@ export function clearPersistedProfileSummary(): void {
   }
 }
 
+/** Reset cached `going` flags on home summary after logout. */
 export function resetHomeSummaryGoingFlagsInCache(): void {
   setCacheData<HomeSummary>(['home', 'summary'], (prev) => {
     if (!prev?.signupEvents?.length) {
@@ -139,9 +159,28 @@ export function resetHomeSummaryGoingFlagsInCache(): void {
   broadcastCacheData(['home', 'summary']);
 }
 
+/** Clear persisted + in-memory home caches on logout (keeps `auth.ts` free of hook imports). */
 export function clearHomeCachesOnLogout(): void {
   clearPersistedHomeSummary();
   clearPersistedProfileSummary();
   resetHomeSummaryGoingFlagsInCache();
   invalidateHome();
+}
+
+export function persistPopularPosts(data: HomeFeedPost[]): void {
+  if (!isLiveApi()) {
+    return;
+  }
+  const trimmed = data.slice(0, HOME_POPULAR_POSTS_PERSIST_LIMIT);
+  writeEnvelope(POPULAR_STORAGE_KEY, trimmed);
+}
+
+/** Seed React Query cache when `/home` embeds `popularPosts`. */
+export function seedPopularPostsCache(posts: HomeFeedPost[] | undefined): void {
+  if (!isLiveApi() || !posts?.length) {
+    return;
+  }
+  const trimmed = posts.slice(0, HOME_POPULAR_POSTS_PERSIST_LIMIT);
+  persistPopularPosts(trimmed);
+  setPopularPostsCache(trimmed);
 }

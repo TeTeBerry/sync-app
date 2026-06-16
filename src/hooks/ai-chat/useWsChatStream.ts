@@ -6,7 +6,11 @@ import {
 } from 'react';
 import Taro from '@tarojs/taro';
 import { AI_CHAT_WS_URL, isLiveApi } from '../../constants/api';
-import type { ChatUiMessage, SendChatOptions } from '../../types/aiChat';
+import type {
+  AiChatStreamEvent,
+  ChatUiMessage,
+  SendChatOptions,
+} from '../../types/aiChat';
 import {
   formatAiChatStreamError,
   formatAiChatToastError,
@@ -28,6 +32,10 @@ export interface UseWsChatStreamOptions {
   messagesRef: MutableRefObject<ChatUiMessage[]>;
   setMessages: Dispatch<SetStateAction<ChatUiMessage[]>>;
   getAuthHeaders?: () => Record<string, string>;
+  onPostCreated?: (event: Extract<AiChatStreamEvent, { type: 'post_created' }>) => void;
+  onExistingPost?: (
+    event: Extract<AiChatStreamEvent, { type: 'existing_post' }>,
+  ) => void;
   persistSessionFromStream: (sessionId: string) => void;
   createTypewriter: (options: {
     charDelayMs?: number;
@@ -44,6 +52,8 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
     sessionIdRef,
     setMessages,
     getAuthHeaders,
+    onPostCreated,
+    onExistingPost,
     persistSessionFromStream,
     createTypewriter,
     typewriterCharDelayMs = 22,
@@ -121,6 +131,8 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
           streamErrorText,
           setMessages,
           persistSessionFromStream,
+          onPostCreated,
+          onExistingPost,
         });
       } catch (error) {
         if ((error as Error).name === 'AbortError') {
@@ -148,6 +160,8 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
       wsUrl,
       createTypewriter,
       getAuthHeaders,
+      onExistingPost,
+      onPostCreated,
       persistSessionFromStream,
       sessionIdRef,
       setMessages,
