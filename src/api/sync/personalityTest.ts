@@ -28,6 +28,17 @@ export function fetchPersonalityTestQuestions() {
   );
 }
 
+export function fetchPersonalityTestMediaUrls(keys: string[]) {
+  const uniqueKeys = [...new Set(keys.map((key) => key.trim()).filter(Boolean))];
+  if (!uniqueKeys.length) {
+    return Promise.resolve({ urls: {} as Record<string, string> });
+  }
+  return apiGet<{ urls: Record<string, string> }>('/personality-test/media-urls', {
+    ...ownerQueryParams(),
+    keys: uniqueKeys.join(','),
+  });
+}
+
 export function submitPersonalityTest(
   answers: PersonalityTestAnswers,
   questionIds: string[],
