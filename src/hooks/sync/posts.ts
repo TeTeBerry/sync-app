@@ -14,6 +14,7 @@ import { isLiveApi } from '../../constants/api';
 import {
   getPopularPostsFromCache,
   popularPostsQueryKey,
+  removePostFromCaches,
   setPopularPostsCache,
 } from '../../cache/postCache';
 import {
@@ -113,6 +114,7 @@ export async function invalidatePostQueries() {
 
 export async function deletePostAndInvalidate(postId: string) {
   await deletePost(postId);
+  removePostFromCaches(postId);
   await invalidatePostQueries();
 }
 
