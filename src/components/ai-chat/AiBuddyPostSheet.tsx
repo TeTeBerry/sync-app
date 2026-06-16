@@ -191,7 +191,7 @@ export function AiBuddyPostSheet({
                   {prefillBannerTitle?.trim() || '已从攻略预填'}
                 </Text>
                 <Text className="s-ai-buddy-post-sheet__prefill-desc">
-                  {prefillSummaryLines.join(' · ')}。请确认日期、标签与备注后发布。
+                  {prefillSummaryLines.join(' · ')}。请确认日期、集合点与备注后发布。
                 </Text>
               </View>
             ) : null}
@@ -255,14 +255,15 @@ export function AiBuddyPostSheet({
             </View>
 
             <PlaceAutocompleteField
-              label="地点"
+              label="集合点"
               labelClassName="s-ai-buddy-post-sheet__label"
-              hint="可搜城市、场馆、车站等；同城填具体集合点"
+              hint="请填写具体集合点（场馆门口、地铁口、酒店大堂等），不要只写城市名"
               value={location}
               onChange={setLocation}
-              placeholder="出发地、区域或集合点"
+              placeholder="如 A 馆北门、XX 地铁站 1 号口"
               eventCity={eventCity}
               active={open}
+              placesOnly
             />
 
             <View className="s-ai-guide-plan-sheet__field">

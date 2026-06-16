@@ -9,12 +9,6 @@ export type TravelGuideBuddyPrefill = {
   summaryLines: string[];
 };
 
-function resolveBuddyLocation(guide: AiGuidePlanFormValues): string {
-  const departure = guide.departure.trim();
-  if (departure) return departure;
-  return guide.departureCity?.trim() ?? '';
-}
-
 function suggestBuddyTags(): BuddyPostTagId[] {
   return ['team'];
 }
@@ -40,27 +34,26 @@ function fallbackDateRange(): Pick<AiBuddyPostFormValues, 'dateStart' | 'dateEnd
 
 /**
  * Map a completed travel-guide plan form into buddy-post sheet defaults.
- * Activity dates fill the calendar range; guide supplies location, headcount, tags, note.
+ * Activity dates fill the calendar range; meeting point is left for the user.
  */
 export function travelGuideFormToBuddyPrefill(
   guide: AiGuidePlanFormValues,
   activityDate?: string,
 ): TravelGuideBuddyPrefill {
   const dateSeed = defaultBuddyPostForm(activityDate) ?? fallbackDateRange();
-  const location = resolveBuddyLocation(guide);
   const headcount = guide.headcount > 0 ? String(guide.headcount) : '';
 
   const form: AiBuddyPostFormValues = {
     dateStart: dateSeed.dateStart,
     dateEnd: dateSeed.dateEnd,
-    location,
+    location: '',
     headcount,
     tags: suggestBuddyTags(),
     note: buildPrefillNote(guide),
   };
 
   const summaryLines = [
-    location ? `${location}出发` : '出发地待补充',
+    '集合点待填写',
     headcount ? `${headcount}人` : '人数待补充',
     guide.accommodationNights > 0
       ? `住${guide.accommodationNights}晚 · ${travelGuideBudgetLabel(guide.budgetTier)}`

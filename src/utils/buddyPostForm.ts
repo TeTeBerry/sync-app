@@ -47,7 +47,7 @@ export function defaultBuddyPostFormWithTag(
   return { ...base, tags: ['team'] };
 }
 
-/** 帖子正文：组队，6.13-6.14，上海，2人 */
+/** 帖子正文：组队，6.13-6.14，集合点，2人 */
 export function buildBuddyPostBody(form: AiBuddyPostFormValues): string {
   const parts = [
     buddyPostIntentPhrases(form.tags),

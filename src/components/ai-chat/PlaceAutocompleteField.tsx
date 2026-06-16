@@ -24,6 +24,8 @@ export type PlaceAutocompleteFieldProps = {
   label?: string;
   labelClassName?: string;
   hint?: string;
+  /** When true, only POI suggestions are shown (no city rows). */
+  placesOnly?: boolean;
 };
 
 export function PlaceAutocompleteField({
@@ -35,6 +37,7 @@ export function PlaceAutocompleteField({
   label,
   labelClassName = 's-ai-guide-plan-sheet__label',
   hint,
+  placesOnly = false,
 }: PlaceAutocompleteFieldProps) {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [regionCity, setRegionCity] = useState<string | undefined>();
@@ -74,11 +77,10 @@ export function PlaceAutocompleteField({
     return () => clearTimeout(timer);
   }, [active, eventCity, regionCity, showSuggestions, value]);
 
-  const suggestions = useMemo(
-    (): DepartureSuggestionItem[] =>
-      mapPlaceSuggestionsToDepartureItems(placeSuggestions),
-    [placeSuggestions],
-  );
+  const suggestions = useMemo((): DepartureSuggestionItem[] => {
+    const items = mapPlaceSuggestionsToDepartureItems(placeSuggestions);
+    return placesOnly ? items.filter((item) => item.kind === 'place') : items;
+  }, [placeSuggestions, placesOnly]);
 
   const pickSuggestion = useCallback(
     (item: DepartureSuggestionItem) => {
