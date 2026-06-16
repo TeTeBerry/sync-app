@@ -1,16 +1,14 @@
 import './AiGuidePlanSheet.scss';
 import './AiBuddyPostSheet.scss';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { CalendarDays, MessageCircle, Send, Users, X } from '../../components/icons';
+import { CalendarDays, Send, Users, X } from '../../components/icons';
 import { PlaceAutocompleteField } from './PlaceAutocompleteField';
 import { Button, cn } from '../ui';
 import { useOverlayLock } from '../../hooks/useOverlayLock';
 import type {
   AiBuddyPostFormValues,
   AiBuddyPostSubmitPayload,
-  BuddyPostTagId,
 } from '../../types/buddyPost';
-import { BUDDY_POST_TAG_OPTIONS } from '../../types/buddyPost';
 import { defaultBuddyPostForm } from '../../utils/buddyPostForm';
 import { Input, Picker, ScrollView, Text, Textarea, View } from '@tarojs/components';
 
@@ -86,8 +84,6 @@ export function AiBuddyPostSheet({
   const [dateEnd, setDateEnd] = useState('');
   const [location, setLocation] = useState('');
   const [headcount, setHeadcount] = useState('');
-  const [contact, setContact] = useState('');
-  const [tags, setTags] = useState<BuddyPostTagId[]>(['team']);
   const [note, setNote] = useState('');
   const [syncToPostList, setSyncToPostList] = useState(true);
 
@@ -101,8 +97,6 @@ export function AiBuddyPostSheet({
       setDateEnd(seed.dateEnd);
       setLocation(seed.location);
       setHeadcount(seed.headcount);
-      setContact(seed.contact);
-      setTags(seed.tags.length ? seed.tags : ['team']);
       setNote(seed.note ?? '');
       return;
     }
@@ -112,25 +106,12 @@ export function AiBuddyPostSheet({
     setDateEnd(iso);
     setLocation('');
     setHeadcount('');
-    setContact('');
-    setTags(['team']);
     setNote('');
   }, [defaults, initialValues, open]);
 
-  const toggleTag = useCallback((id: BuddyPostTagId) => {
-    setTags((prev) => {
-      if (prev.includes(id)) {
-        const next = prev.filter((t) => t !== id);
-        return next.length ? next : prev;
-      }
-      return [...prev, id];
-    });
-  }, []);
-
   const canSubmit =
-    Boolean(
-      dateStart && dateEnd && location.trim() && headcount.trim() && contact.trim(),
-    ) && dateEnd >= dateStart;
+    Boolean(dateStart && dateEnd && location.trim() && headcount.trim()) &&
+    dateEnd >= dateStart;
 
   const handleSubmit = useCallback(() => {
     if (!canSubmit) return;
@@ -140,15 +121,13 @@ export function AiBuddyPostSheet({
         dateEnd,
         location: location.trim(),
         headcount: headcount.trim(),
-        contact: contact.trim(),
-        tags: tags.length ? tags : ['team'],
+        tags: ['team'],
         note: note.trim() || undefined,
         ...(showSyncToFeedOption ? { syncToPostList } : {}),
       }),
     );
   }, [
     canSubmit,
-    contact,
     dateEnd,
     dateStart,
     headcount,
@@ -157,7 +136,6 @@ export function AiBuddyPostSheet({
     onSubmit,
     showSyncToFeedOption,
     syncToPostList,
-    tags,
   ]);
 
   if (!open) return null;
@@ -303,56 +281,6 @@ export function AiBuddyPostSheet({
                   placeholderClass="s-ai-guide-plan-sheet__input-placeholder"
                   onInput={(e) => setHeadcount(e.detail.value ?? '')}
                 />
-              </View>
-            </View>
-
-            <View className="s-ai-guide-plan-sheet__field">
-              <Text className="s-ai-buddy-post-sheet__label">
-                联系方式（微信/手机）
-              </Text>
-              <View className="s-ai-guide-plan-sheet__input-wrap">
-                <MessageCircle
-                  size={18}
-                  className="s-ai-guide-plan-sheet__input-icon"
-                  aria-hidden
-                />
-                <Input
-                  className="s-ai-guide-plan-sheet__input"
-                  type="text"
-                  value={contact}
-                  placeholder="微信号或手机号"
-                  placeholderClass="s-ai-guide-plan-sheet__input-placeholder"
-                  onInput={(e) => setContact(e.detail.value ?? '')}
-                />
-              </View>
-            </View>
-
-            <View className="s-ai-guide-plan-sheet__field">
-              <Text className="s-ai-buddy-post-sheet__label">留言类型（可选）</Text>
-              <View className="s-ai-buddy-post-sheet__tag-row">
-                {BUDDY_POST_TAG_OPTIONS.map((opt) => {
-                  const active = tags.includes(opt.id);
-                  return (
-                    <Button
-                      key={opt.id}
-                      className={cn(
-                        's-ai-buddy-post-sheet__tag',
-                        active && `s-ai-buddy-post-sheet__tag--${opt.id}`,
-                      )}
-                      hoverClass="s-ai-buddy-post-sheet__tag--pressed"
-                      onClick={() => toggleTag(opt.id)}
-                    >
-                      <Text
-                        className={cn(
-                          's-ai-buddy-post-sheet__tag-text',
-                          active && `s-ai-buddy-post-sheet__tag-text--${opt.id}`,
-                        )}
-                      >
-                        {opt.label}
-                      </Text>
-                    </Button>
-                  );
-                })}
               </View>
             </View>
 

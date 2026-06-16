@@ -33,22 +33,21 @@ export function defaultBuddyPostForm(
     dateEnd,
     location: '',
     headcount: '',
-    contact: '',
     tags: ['team'],
     note: '',
   };
 }
 
 export function defaultBuddyPostFormWithTag(
-  tagId: BuddyPostTagId,
+  _tagId: BuddyPostTagId = 'team',
   activityDate?: string,
 ): AiBuddyPostFormValues | null {
   const base = defaultBuddyPostForm(activityDate);
   if (!base) return null;
-  return { ...base, tags: [tagId] };
+  return { ...base, tags: ['team'] };
 }
 
-/** 帖子正文：组队，6.13-6.14，上海，2人（多类型则「组队、拼房，…」） */
+/** 帖子正文：组队，6.13-6.14，上海，2人 */
 export function buildBuddyPostBody(form: AiBuddyPostFormValues): string {
   const parts = [
     buddyPostIntentPhrases(form.tags),
@@ -56,11 +55,6 @@ export function buildBuddyPostBody(form: AiBuddyPostFormValues): string {
     form.location.trim(),
     formatBuddyPostHeadcount(form.headcount),
   ].filter(Boolean);
-
-  const contact = form.contact.trim();
-  if (contact) {
-    parts.push(`联系方式：${contact}`);
-  }
 
   const note = form.note?.trim();
   if (note) {

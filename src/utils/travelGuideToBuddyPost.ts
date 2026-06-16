@@ -15,15 +15,8 @@ function resolveBuddyLocation(guide: AiGuidePlanFormValues): string {
   return guide.departureCity?.trim() ?? '';
 }
 
-function suggestBuddyTags(guide: AiGuidePlanFormValues): BuddyPostTagId[] {
-  const tags = new Set<BuddyPostTagId>(['team']);
-  if (guide.accommodationNights > 0) {
-    tags.add('accommodation');
-  }
-  if (guide.selfDrive) {
-    tags.add('carpool');
-  }
-  return [...tags];
+function suggestBuddyTags(): BuddyPostTagId[] {
+  return ['team'];
 }
 
 function buildPrefillNote(guide: AiGuidePlanFormValues): string | undefined {
@@ -62,8 +55,7 @@ export function travelGuideFormToBuddyPrefill(
     dateEnd: dateSeed.dateEnd,
     location,
     headcount,
-    contact: '',
-    tags: suggestBuddyTags(guide),
+    tags: suggestBuddyTags(),
     note: buildPrefillNote(guide),
   };
 

@@ -17,6 +17,7 @@ import { AiBuddyPostSheet } from '../../../components/ai-chat/AiBuddyPostSheet';
 import { AiGuidePlanSheet } from '../../../components/ai-chat/AiGuidePlanSheet';
 import PageNavigation from '../../../components/navigation/PageNavigation';
 import { OverlayAwareScrollView } from '../../../components/layout/OverlayAwareScrollView';
+import { PlatformDisclaimer } from '../../../components/legal/PlatformDisclaimer';
 import { Text, View } from '@tarojs/components';
 
 const EventDetailPage = () => {
@@ -153,13 +154,7 @@ const EventDetailPage = () => {
           </View>
         </OverlayAwareScrollView>
 
-        {!showHeaderSkeleton ? (
-          <View className="s-event-detail__legal-footer" aria-label="平台声明">
-            <Text className="s-event-detail__legal-footer-text">
-              本平台仅作电音节信息参考展示，不组团，不收款，不从事娱乐经营业务
-            </Text>
-          </View>
-        ) : null}
+        {!showHeaderSkeleton ? <PlatformDisclaimer variant="fixed" /> : null}
       </View>
       {!showHeaderSkeleton ? (
         <EventDetailTemplatePostFab

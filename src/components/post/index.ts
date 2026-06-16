@@ -1,7 +1,3 @@
-export {
-  PostBodyWithContact,
-  type PostBodyWithContactProps,
-} from './PostBodyWithContact';
 export { FeedPostList, type FeedPostListProps } from './FeedPostList';
 export { PostImageGrid, type PostImageGridProps } from './PostImageGrid';
 export {

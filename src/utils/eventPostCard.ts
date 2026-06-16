@@ -1,6 +1,6 @@
 import type { EventDetailPost } from '../types/backend';
 import type { RecommendedPostCard } from '../types/aiChat';
-import { splitPostBodyContact } from './postBodyContact';
+import { stripPostBodyContact } from './postBodyContact';
 
 export function eventDetailPostToCard(
   post: EventDetailPost,
@@ -11,11 +11,9 @@ export function eventDetailPostToCard(
     authorGender?: RecommendedPostCard['authorGender'];
   },
 ): RecommendedPostCard {
-  const { publicBody } = splitPostBodyContact(post.body);
-
   return {
     postId: post.id,
-    snippet: publicBody,
+    snippet: stripPostBodyContact(post.body),
     authorName: options.authorName,
     authorAvatar: options.authorAvatar || post.avatar,
     authorGender: options.authorGender,

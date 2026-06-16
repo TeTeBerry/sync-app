@@ -1,9 +1,8 @@
 import React, { useMemo } from 'react';
 import { Clock, MessageSquare } from '../../components/icons';
-import { PostBodyWithContact, PostImageGrid, PostOwnerDeleteButton } from '../post';
+import { PostImageGrid, PostOwnerDeleteButton } from '../post';
 import { FEED_POST_IMAGE_MAX_DISPLAY } from '../../constants/listPerf';
-import { useContactExpandedToggle } from '../../hooks/useContactExpandedToggle';
-import { splitPostBodyContact } from '../../utils/postBodyContact';
+import { stripPostBodyContact } from '../../utils/postBodyContact';
 import { ProfileCollapsibleSection } from './ProfileCollapsibleSection';
 import type { ProfilePostItem } from '../../types/backend';
 import { Text, View } from '@tarojs/components';
@@ -27,21 +26,7 @@ function ProfilePostItem({
   onSelect?: (item: ProfilePostItem) => void;
   onDelete?: (item: ProfilePostItem) => void;
 }) {
-  const { publicBody, contact } = useMemo(
-    () => splitPostBodyContact(item.content),
-    [item.content],
-  );
-  const { expanded: contactExpanded, toggle: toggleContact } = useContactExpandedToggle(
-    Boolean(contact),
-  );
-
-  const handlePostClick = () => {
-    if (contact) {
-      toggleContact();
-      return;
-    }
-    onSelect?.(item);
-  };
+  const displayBody = useMemo(() => stripPostBodyContact(item.content), [item.content]);
 
   const stopClickPropagation = (event: { stopPropagation?: () => void }) => {
     event.stopPropagation?.();
@@ -52,35 +37,22 @@ function ProfilePostItem({
       key={item.id}
       className="s-profile-post s-profile-post--clickable"
       role="button"
-      onClick={handlePostClick}
+      onClick={() => onSelect?.(item)}
       onKeyDown={(event) => {
         if (event.key !== 'Enter' && event.key !== ' ') return;
         event.preventDefault();
-        handlePostClick();
+        onSelect?.(item);
       }}
     >
-      <View
-        className="s-profile-post__head"
-        onClick={(event) => {
-          if (!contact) return;
-          stopClickPropagation(event);
-          onSelect?.(item);
-        }}
-      >
+      <View className="s-profile-post__head">
         <Text className="s-profile-post__title">
           <Text className="s-profile-post__title-dot" />
           {item.title}
         </Text>
       </View>
 
-      {publicBody || contact ? (
-        <PostBodyWithContact
-          publicBody={publicBody}
-          contact={contact}
-          expanded={contactExpanded}
-          onContactToggle={toggleContact}
-          textClassName="s-profile-post__content"
-        />
+      {displayBody ? (
+        <Text className="s-profile-post__content">{displayBody}</Text>
       ) : null}
 
       {item.images?.length ? (

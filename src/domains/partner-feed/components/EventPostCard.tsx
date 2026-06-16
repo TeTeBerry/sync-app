@@ -1,16 +1,11 @@
 import { memo, useMemo } from 'react';
 import { MapPin } from '../../../components/icons';
 import { ImageWithFallback } from '../../../components/ImageWithFallback';
-import {
-  PostBodyWithContact,
-  PostImageGrid,
-  PostOwnerDeleteButton,
-} from '../../../components/post';
+import { PostImageGrid, PostOwnerDeleteButton } from '../../../components/post';
 import { EVENT_POST_IMAGE_MAX_DISPLAY } from '../../../constants/listPerf';
-import { useContactExpandedToggle } from '../../../hooks/useContactExpandedToggle';
 import { isCurrentUserPostAuthor } from '../../../utils/postOwnership';
 import type { EventDetailPost } from '../../../types/backend';
-import { splitPostBodyContact } from '../../../utils/postBodyContact';
+import { stripPostBodyContact } from '../../../utils/postBodyContact';
 import { formatEventPostHandle } from '../utils/eventPostDisplay';
 import { Text, View } from '@tarojs/components';
 
@@ -27,13 +22,7 @@ function EventPostCardInner({
   highlighted,
   onDelete,
 }: EventPostCardProps) {
-  const { publicBody, contact } = useMemo(
-    () => splitPostBodyContact(post.body),
-    [post.body],
-  );
-  const { expanded: contactExpanded, toggle: toggleContact } = useContactExpandedToggle(
-    Boolean(contact),
-  );
+  const displayBody = useMemo(() => stripPostBodyContact(post.body), [post.body]);
   const submetaLocation = post.location?.trim() ?? '';
 
   const postName = post.name?.trim() || '用户';
@@ -48,7 +37,6 @@ function EventPostCardInner({
       className={['s-event-post', highlighted && 's-event-post--highlight']
         .filter(Boolean)
         .join(' ')}
-      onClick={contact ? toggleContact : undefined}
     >
       <View className="s-event-post__header">
         <View className="s-event-post__avatar-wrap">
@@ -89,15 +77,7 @@ function EventPostCardInner({
         </View>
       </View>
 
-      {publicBody || contact ? (
-        <PostBodyWithContact
-          publicBody={publicBody}
-          contact={contact}
-          expanded={contactExpanded}
-          onContactToggle={toggleContact}
-          textClassName="s-event-post__text"
-        />
-      ) : null}
+      {displayBody ? <Text className="s-event-post__text">{displayBody}</Text> : null}
 
       {post.images?.length ? (
         <View onClick={stopClickPropagation}>

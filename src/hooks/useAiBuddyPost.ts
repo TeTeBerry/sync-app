@@ -61,7 +61,7 @@ export function useAiBuddyPost(options: {
   const { guardPublish, handlePublishError } = useAccountRisk();
 
   const openBuddyPostSheetWithTag = useCallback(
-    (tagId: BuddyPostTagId) => {
+    (_tagId: BuddyPostTagId = 'team') => {
       if (isStreaming || publishingRef.current) {
         void Taro.showToast({ title: '请等待当前操作完成', icon: 'none' });
         return;
@@ -72,20 +72,19 @@ export function useAiBuddyPost(options: {
       }
 
       const prefill =
-        defaultBuddyPostFormWithTag(tagId, activityDate) ??
+        defaultBuddyPostFormWithTag('team', activityDate) ??
         lastFormRef.current ??
         ({
           dateStart: '',
           dateEnd: '',
           location: '',
           headcount: '',
-          contact: '',
-          tags: [tagId],
+          tags: ['team'],
           note: '',
         } satisfies AiBuddyPostFormValues);
 
       setSheetPrefillHint(null);
-      setSheetInitialValues({ ...prefill, tags: [tagId] });
+      setSheetInitialValues({ ...prefill, tags: ['team'] });
       void guardPublish().then((allowed) => {
         if (allowed) setSheetOpen(true);
       });

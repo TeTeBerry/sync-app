@@ -41,6 +41,7 @@ import {
 import { useNavBarInsets } from '../../hooks/useNavBarInsets';
 import { useEndRouteTransitionOnShow } from '../../hooks/useEndRouteTransitionOnShow';
 import { OverlayAwareScrollView } from '../../components/layout/OverlayAwareScrollView';
+import { PlatformDisclaimer } from '../../components/legal/PlatformDisclaimer';
 import { Text, View } from '@tarojs/components';
 
 const Home = () => {
@@ -209,6 +210,8 @@ const Home = () => {
           <View className="s-home__heat s-tabbar-offset" aria-label="Today heat">
             {activeTeamCount} 人正在发现活动
           </View>
+
+          <PlatformDisclaimer variant="inline" />
         </View>
       </OverlayAwareScrollView>
 

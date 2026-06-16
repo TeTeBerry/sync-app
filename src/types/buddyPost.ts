@@ -1,7 +1,7 @@
 import type { PostContentType } from './backend';
 
-/** 表单可选标签（对应发帖 contentTypes / 正文 # 标签） */
-export type BuddyPostTagId = 'team' | 'accommodation' | 'carpool' | 'vip';
+/** 留言类型固定为组队 */
+export type BuddyPostTagId = 'team';
 
 export type AiBuddyPostFormValues = {
   /** YYYY-MM-DD */
@@ -11,8 +11,6 @@ export type AiBuddyPostFormValues = {
   location: string;
   /** 文本输入，如「2人」「2-3人」 */
   headcount: string;
-  /** 微信或手机号 */
-  contact: string;
   tags: BuddyPostTagId[];
   note?: string;
 };
@@ -37,26 +35,5 @@ export const BUDDY_POST_TAG_OPTIONS: Array<{
     intentPhrase: '组队',
     hashTag: '#组队',
     contentType: 'team',
-  },
-  {
-    id: 'accommodation',
-    label: '拼房',
-    intentPhrase: '拼房',
-    hashTag: '#拼房',
-    contentType: 'accommodation',
-  },
-  {
-    id: 'carpool',
-    label: '同路',
-    intentPhrase: '同路',
-    hashTag: '#同路',
-    contentType: 'carpool',
-  },
-  {
-    id: 'vip',
-    label: '拼卡',
-    intentPhrase: '拼卡',
-    hashTag: '#拼卡',
-    contentType: 'carpool',
   },
 ];

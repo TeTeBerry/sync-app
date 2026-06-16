@@ -28,8 +28,7 @@ describe('publishBuddyPostFromForm', () => {
       dateEnd: '2026-06-14',
       location: '上海',
       headcount: '2人',
-      contact: 'wx_berry',
-      tags: ['team', 'accommodation'],
+      tags: ['team'],
       note: '',
     };
 
@@ -46,11 +45,9 @@ describe('publishBuddyPostFromForm', () => {
         activityLegacyId: 9,
         eventTitle: '风暴电音节',
         location: '上海',
-        tags: ['#组队', '#拼房'],
-        contentTypes: ['team', 'accommodation'],
-        body: expect.stringMatching(
-          /组队、拼房，6\.13-6\.14，上海，2人，联系方式：wx_berry/,
-        ),
+        tags: ['#组队'],
+        contentTypes: ['team'],
+        body: expect.stringMatching(/组队，6\.13-6\.14，上海，2人/),
       }),
     );
     expect(card.postId).toBe('post-1');

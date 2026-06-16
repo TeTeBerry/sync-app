@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { travelGuideFormToBuddyPrefill } from '@/utils/travelGuideToBuddyPost';
 
 describe('travelGuideFormToBuddyPrefill', () => {
-  it('maps departure, headcount, activity dates, tags and note', () => {
+  it('maps departure, headcount, activity dates, team tag and note', () => {
     const { form, summaryLines } = travelGuideFormToBuddyPrefill(
       {
         departure: '上海',
@@ -18,7 +18,7 @@ describe('travelGuideFormToBuddyPrefill', () => {
     expect(form.dateEnd).toBe('2026-06-14');
     expect(form.location).toBe('上海');
     expect(form.headcount).toBe('2');
-    expect(form.tags).toEqual(['team', 'accommodation', 'carpool']);
+    expect(form.tags).toEqual(['team']);
     expect(form.note).toContain('住2晚');
     expect(form.note).toContain('自驾');
     expect(summaryLines[0]).toBe('上海出发');
@@ -36,7 +36,7 @@ describe('travelGuideFormToBuddyPrefill', () => {
     expect(form.location).toBe('杭州');
   });
 
-  it('omits accommodation tag when nights are zero', () => {
+  it('keeps team tag when accommodation nights are zero', () => {
     const { form } = travelGuideFormToBuddyPrefill({
       departure: '北京',
       headcount: 3,

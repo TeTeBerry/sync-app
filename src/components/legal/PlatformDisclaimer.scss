@@ -1,0 +1,24 @@
+.s-platform-disclaimer {
+  flex-shrink: 0;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 16px;
+}
+
+.s-platform-disclaimer--fixed {
+  background: rgba(0, 0, 0, 0.94);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.s-platform-disclaimer--inline {
+  padding: 16px var(--s-page-gutter) 20px;
+  margin: 0 calc(-1 * var(--s-page-gutter));
+}
+
+.s-platform-disclaimer__text {
+  display: block;
+  text-align: center;
+  font-size: 11px;
+  line-height: 1.55;
+  color: #8e8e93;
+}

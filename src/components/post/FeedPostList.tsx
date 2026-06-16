@@ -4,15 +4,14 @@ import {
   FEED_POST_IMAGE_MAX_DISPLAY,
   HOME_FEED_INITIAL_RENDER,
 } from '../../constants/listPerf';
-import { useContactExpandedToggle } from '../../hooks/useContactExpandedToggle';
 import { useWindowedList } from '../../hooks/useWindowedList';
-import { PostBodyWithContact } from './PostBodyWithContact';
 import { PostImageGrid } from './PostImageGrid';
 import { PostOwnerDeleteButton } from './PostOwnerDeleteButton';
 import { MapPin, Ticket } from '../icons';
+import { WechatEmojiText } from '../wechat-emoji/WechatEmojiText';
 import type { HomeFeedPost } from '../../types/post';
 import { isCurrentUserPostAuthor } from '../../utils/postOwnership';
-import { splitPostBodyContact } from '../../utils/postBodyContact';
+import { stripPostBodyContact } from '../../utils/postBodyContact';
 import { thumbnailImageUrl } from '../../utils/imageUrl';
 import { Image, Text, View } from '@tarojs/components';
 
@@ -31,13 +30,7 @@ function FeedPostRowInner({ post, onDelete }: FeedPostRowProps) {
   const postHandle = post.handle?.trim() || `@${postName}`;
   const isOwn = isCurrentUserPostAuthor(postName, post.userId);
   const avatarSrc = thumbnailImageUrl(post.avatar, 80) ?? post.avatar;
-  const { publicBody, contact } = useMemo(
-    () => splitPostBodyContact(post.body),
-    [post.body],
-  );
-  const { expanded: contactExpanded, toggle: toggleContact } = useContactExpandedToggle(
-    Boolean(contact),
-  );
+  const displayBody = useMemo(() => stripPostBodyContact(post.body), [post.body]);
   const eventLocation = post.location?.trim();
   const eventTitle = post.event?.trim();
   const postImages = post.images?.length ? post.images : undefined;
@@ -47,7 +40,7 @@ function FeedPostRowInner({ post, onDelete }: FeedPostRowProps) {
   };
 
   return (
-    <View className="s-home-post" onClick={contact ? toggleContact : undefined}>
+    <View className="s-home-post">
       <View className="s-home-post__header">
         <Image
           className="s-home-post__avatar"
@@ -86,16 +79,9 @@ function FeedPostRowInner({ post, onDelete }: FeedPostRowProps) {
           .filter(Boolean)
           .join(' ')}
       >
-        {publicBody || contact ? (
+        {displayBody ? (
           <View className="s-home-post__body">
-            <PostBodyWithContact
-              publicBody={publicBody}
-              contact={contact}
-              expanded={contactExpanded}
-              onContactToggle={toggleContact}
-              textClassName="s-home-post__text"
-              useWechatEmoji
-            />
+            <WechatEmojiText text={displayBody} className="s-home-post__text" />
           </View>
         ) : null}
 

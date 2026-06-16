@@ -2,37 +2,32 @@ import { stripContentTypeHashtags } from './postContentTypeDisplay';
 
 const CONTACT_PREFIX = '联系方式：';
 
-export type SplitPostBodyContactResult = {
-  publicBody: string;
-  contact?: string;
-};
-
-/** Hide contact in feed; keep note segments that follow the contact line. */
-export function splitPostBodyContact(
-  body: string | undefined,
-): SplitPostBodyContactResult {
+/** Remove structured contact segment from post body for display and publish. */
+export function stripPostBodyContact(body: string | undefined): string {
   const normalized = stripContentTypeHashtags(body ?? '').trim();
   if (!normalized) {
-    return { publicBody: '' };
+    return '';
   }
 
   const contactIndex = normalized.lastIndexOf(CONTACT_PREFIX);
   if (contactIndex < 0) {
-    return { publicBody: normalized };
+    return normalized;
   }
 
   const before = normalized.slice(0, contactIndex).replace(/，$/, '').trim();
-  const afterPrefix = normalized.slice(contactIndex + CONTACT_PREFIX.length).trim();
-  const commaIndex = afterPrefix.indexOf('，');
-  const contact = (
-    commaIndex >= 0 ? afterPrefix.slice(0, commaIndex) : afterPrefix
-  ).trim();
-  const trailingNote = commaIndex >= 0 ? afterPrefix.slice(commaIndex + 1).trim() : '';
+  const afterPrefix = normalized.slice(contactIndex + CONTACT_PREFIX.length);
+  const contactValueMatch = afterPrefix.match(/^[^\n，]+/);
+  const skipLen = contactValueMatch?.[0].length ?? 0;
+  let rest = afterPrefix.slice(skipLen);
+  if (rest.startsWith('，')) {
+    rest = rest.slice(1).trim();
+  } else {
+    rest = rest.trim();
+  }
 
-  const publicBody = [before, trailingNote].filter(Boolean).join('，');
+  if (!rest) {
+    return before;
+  }
 
-  return {
-    publicBody,
-    contact: contact || undefined,
-  };
+  return before ? `${before}，${rest}` : rest;
 }
