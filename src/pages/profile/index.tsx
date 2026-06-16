@@ -1,6 +1,6 @@
 import '../../components/profile/profile.scss';
 import React from 'react';
-import { FileText, Zap } from '../../components/icons';
+import { Zap } from '../../components/icons';
 import TabPageHeader from '../../components/navigation/TabPageHeader';
 import ThemedPageLoader from '../../components/ThemedPageLoader';
 import { useNavBarInsets } from '../../hooks/useNavBarInsets';
@@ -32,7 +32,6 @@ const Profile: React.FC = () => {
     profileUserData,
     interestTag,
     ongoingCount,
-    postsCount,
     accountRisk,
     settings,
     handleAuthLoggedIn,
@@ -88,14 +87,6 @@ const Profile: React.FC = () => {
                       badge={ongoingCount}
                       subtitle={`${ongoingCount} 个进行中的活动`}
                       onClick={() => go(ROUTES.PROFILE_ACTIVITIES)}
-                    />
-                    <ProfileActionCard
-                      accent="posts"
-                      icon={<FileText size={20} />}
-                      title="我的帖子"
-                      badge={postsCount}
-                      subtitle={`${postsCount} 条帖子`}
-                      onClick={() => go(ROUTES.PROFILE_POSTS)}
                     />
                     <ProfileSettingsSection {...settings} />
                     <View className="s-profile__scroll-spacer" />

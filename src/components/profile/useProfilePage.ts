@@ -61,7 +61,6 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
     apiEnabled && loggedIn && summaryQuery.isLoading && !summaryQuery.data;
 
   const ongoingCount = profileUserData.stats.events;
-  const postsCount = profileUserData.stats.posts;
   const interestTag = deriveInterestTag(profileUserData.bio);
 
   useEndRouteTransitionOnShow();
@@ -158,7 +157,6 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
     profileUserData,
     interestTag,
     ongoingCount,
-    postsCount,
     accountRisk,
     settings,
     handleAuthLoggedIn,

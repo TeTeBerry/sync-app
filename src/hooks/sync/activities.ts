@@ -11,6 +11,7 @@ import { isLoggedIn } from '../../utils/authStorage';
 import { subscribeAuthSessionChange } from '../../utils/authSession';
 import type { BackendActivity } from '../../types/backend';
 import {
+  seedActivityDetailCache,
   seedActivityDetailsFromHomeSummary,
   seedActivityDetailsFromList,
 } from '../../utils/activityDetailCache';
@@ -34,11 +35,7 @@ import {
   withCatalogActivityImage,
   withCatalogHomeSummary,
 } from '../../utils/activityCatalog';
-import {
-  persistHomeSummary,
-  persistActivities,
-  seedPopularPostsCache,
-} from '../../utils/homeCacheStorage';
+import { persistHomeSummary, persistActivities } from '../../utils/homeCacheStorage';
 import type { HomeSummary } from '../../types/backend';
 import { patchActivityRegistrationInCaches } from '../../cache/activityCache';
 import {
@@ -52,6 +49,7 @@ import type { UpdateCurrentUserPayload } from '../../types/backend';
 import { updateCurrentUser } from '../../api/sync/users';
 import { useProfileActivitiesQuery } from './profile';
 import { buildRegisteredActivityLegacyIds } from '../../utils/activityRegistration';
+import { parseActivityLegacyId } from '../../utils/activityLegacyId';
 
 export function useActivitiesQuery(options?: QueryEnableOptions) {
   const tabEnabled = options?.enabled ?? true;
@@ -94,7 +92,6 @@ export function useHomeSummary() {
       const result = withCatalogHomeSummary(await fetchHomeSummary());
       persistHomeSummary(result);
       seedActivityDetailsFromHomeSummary(result);
-      seedPopularPostsCache(result.popularPosts);
       return result;
     },
     enabled: isLiveApi(),
@@ -124,78 +121,89 @@ export function useHomeSummary() {
   return query;
 }
 
+export function useFeaturedEvents() {
+  const summaryQuery = useHomeSummary();
+  const profileActivitiesQuery = useProfileActivitiesQuery({
+    enabled: isLoggedIn(),
+  });
+
+  const registeredLegacyIds = useMemo(
+    () =>
+      buildRegisteredActivityLegacyIds(
+        summaryQuery.data?.signupEvents,
+        profileActivitiesQuery.data,
+      ),
+    [profileActivitiesQuery.data, summaryQuery.data?.signupEvents],
+  );
+
+  const items = useMemo((): FeaturedEvent[] => {
+    const signupEvents = summaryQuery.data?.signupEvents;
+    if (!signupEvents?.length) {
+      return [];
+    }
+    return pickHomeFeaturedEvents(signupEvents, registeredLegacyIds);
+  }, [registeredLegacyIds, summaryQuery.data?.signupEvents]);
+
+  return {
+    items,
+    isLoading:
+      summaryQuery.isLoading &&
+      !summaryQuery.data &&
+      (isLoggedIn() ? profileActivitiesQuery.isLoading : false),
+    refetch: summaryQuery.refetch,
+  };
+}
+
 export function useRegisteredActivityLegacyIds() {
-  const { data: summary } = useHomeSummary();
-  const profileActivitiesQuery = useProfileActivitiesQuery();
-  const loggedIn = isLoggedIn();
+  const summaryQuery = useHomeSummary();
+  const profileActivitiesQuery = useProfileActivitiesQuery({
+    enabled: isLoggedIn(),
+  });
 
   return useMemo(
     () =>
       buildRegisteredActivityLegacyIds(
-        loggedIn ? summary?.signupEvents : undefined,
-        loggedIn ? profileActivitiesQuery.data : undefined,
+        summaryQuery.data?.signupEvents,
+        profileActivitiesQuery.data,
       ),
-    [loggedIn, summary?.signupEvents, profileActivitiesQuery.data],
+    [profileActivitiesQuery.data, summaryQuery.data?.signupEvents],
   );
 }
 
-export function useFeaturedEvents() {
-  const { data: summary, isLoading } = useHomeSummary();
-  const registeredLegacyIds = useRegisteredActivityLegacyIds();
-
-  const items = useMemo((): FeaturedEvent[] => {
-    const signupEvents = summary?.signupEvents ?? [];
-    const active = signupEvents.filter(
-      (item) => getActivityStatusFromActivity(item.date, item.title) !== 'ended',
-    );
-    return pickHomeFeaturedEvents(active, registeredLegacyIds);
-  }, [summary, registeredLegacyIds]);
-
-  return {
-    items,
-    isLoading,
-  };
-}
-
-export function useActivityDetailQuery(legacyId?: number) {
-  const enabled =
-    isLiveApi() && legacyId != null && !Number.isNaN(legacyId) && legacyId > 0;
+export function useActivityDetailQuery(
+  legacyId: number | null | undefined,
+  options?: QueryEnableOptions,
+) {
+  const parsedId = parseActivityLegacyId(legacyId);
+  const tabEnabled = options?.enabled ?? true;
+  const enabled = isLiveApi() && tabEnabled && parsedId != null;
 
   return useApiQuery({
-    queryKey: ['activities', 'detail', legacyId],
+    queryKey: ['activities', 'detail', parsedId ?? 'invalid'],
     queryFn: async () => {
-      const result = await fetchActivityByLegacyId(legacyId as number);
-      if (result != null) {
-        return withCatalogActivityImage(result);
+      const activity = await fetchActivityByLegacyId(parsedId!);
+      if (activity) {
+        seedActivityDetailCache(withCatalogActivityImage(activity));
       }
-      const seeded = getCacheData<BackendActivity | null>([
-        'activities',
-        'detail',
-        legacyId,
-      ]);
-      return seeded ?? null;
+      return activity;
     },
     enabled,
     staleTime: STALE_ACTIVITY_DETAIL_MS,
+    initialData: () => {
+      if (parsedId == null) return undefined;
+      return getCacheData<BackendActivity | null>(['activities', 'detail', parsedId]);
+    },
   });
-}
-
-export async function invalidateRegistrationQueries() {
-  await invalidateRegistrationProfile();
 }
 
 export async function registerForActivityAndInvalidate(legacyId: number) {
   const result = await registerForActivity(legacyId);
   patchActivityRegistrationInCaches({
     legacyId,
-    attendees: result.attendees,
     going: true,
+    attendees: result.attendees,
   });
-  try {
-    await invalidateRegistrationQueries();
-  } catch {
-    // Registration succeeded; cache refresh is best-effort.
-  }
+  invalidateRegistrationProfile();
   return result;
 }
 
@@ -203,10 +211,10 @@ export async function cancelActivityRegistrationAndInvalidate(legacyId: number) 
   const result = await cancelActivityRegistration(legacyId);
   patchActivityRegistrationInCaches({
     legacyId,
-    attendees: result.attendees,
     going: false,
+    attendees: result.attendees,
   });
-  await invalidateRegistrationQueries();
+  invalidateRegistrationProfile();
   return result;
 }
 
@@ -214,6 +222,16 @@ export async function updateCurrentUserAndInvalidate(
   payload: UpdateCurrentUserPayload,
 ) {
   const user = await updateCurrentUser(payload);
-  await Promise.all([invalidateUser(), invalidateProfile()]);
+  invalidateUser();
+  invalidateProfile();
   return user;
+}
+
+export function useActivityStatus(activity?: ActivityDateFields | null) {
+  return useMemo(() => getActivityStatusFromActivity(activity), [activity]);
+}
+
+export function useHomeSummarySignupEvents(): HomeSummary['signupEvents'] {
+  const { data } = useHomeSummary();
+  return data?.signupEvents ?? [];
 }

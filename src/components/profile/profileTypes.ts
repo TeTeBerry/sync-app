@@ -7,7 +7,6 @@ export type ProfileDisplayUser = {
   verified: boolean;
   stats: {
     events: number;
-    posts: number;
   };
 };
 
@@ -18,5 +17,5 @@ export const EMPTY_PROFILE_DISPLAY_USER: ProfileDisplayUser = {
   bio: '',
   avatar: '',
   verified: false,
-  stats: { events: 0, posts: 0 },
+  stats: { events: 0 },
 };

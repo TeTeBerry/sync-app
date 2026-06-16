@@ -26,7 +26,7 @@ function longPlan(): TravelGuidePlan {
       })),
     },
     nightlife: {
-      title: '散场 AP · 夜宵',
+      title: '散场 夜宵',
       spots: Array.from({ length: 4 }, (_, i) => ({
         name: `夜宵店${i + 1}`,
         note: '距会场约 500m · 评分 4.0 · 适合散场后前往 · 详细地址说明'.repeat(2),

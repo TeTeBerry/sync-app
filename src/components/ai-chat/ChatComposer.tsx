@@ -6,7 +6,6 @@ import {
   resolveActiveActivityChipKey,
 } from '../../constants/homeFestivalShortcuts';
 import { useActivitiesQuery } from '../../hooks/sync/activities';
-import { useAiChatStore } from '../../stores/aiChatStore';
 import {
   ScrollView,
   Text,
@@ -52,27 +51,15 @@ export function ChatComposer({
   isLoadingHistory?: boolean;
   onActivityChipClick?: (keyword: string) => void;
 }) {
-  const conversationFlow = useAiChatStore((state) =>
-    state.activeScopeKey
-      ? state.buckets[state.activeScopeKey]?.conversationState?.flow
-      : undefined,
-  );
   const { data: activities } = useActivitiesQuery();
 
   const scopedToActivity = activityLegacyId != null && !Number.isNaN(activityLegacyId);
   const trimmedActivityTitle = activityTitle?.trim();
 
-  const inputPlaceholder = (() => {
-    if (conversationFlow === 'collect_post_body') {
-      return scopedToActivity && trimmedActivityTitle
-        ? `描述你在「${trimmedActivityTitle}」的组队需求…`
-        : '描述你的组队需求，如出发地、人数、日期…';
-    }
-    if (scopedToActivity && trimmedActivityTitle) {
-      return `聊聊「${trimmedActivityTitle}」相关问题…`;
-    }
-    return '说说你想去哪、有什么想了解的…';
-  })();
+  const inputPlaceholder =
+    scopedToActivity && trimmedActivityTitle
+      ? `聊聊「${trimmedActivityTitle}」相关问题…`
+      : '说说你想去哪、有什么想了解的…';
 
   const activityChips = useMemo((): ActivityChip[] => {
     const activeKey = resolveActiveActivityChipKey({

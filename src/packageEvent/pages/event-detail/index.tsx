@@ -1,19 +1,13 @@
 import './event-detail.scss';
 import { useEndRouteTransitionOnShow } from '../../../hooks/useEndRouteTransitionOnShow';
 import { PageTabBarChrome } from '../../../components/navigation/BottomNav';
-import ThemedPageLoader from '../../../components/ThemedPageLoader';
-import { useConfirmDialog } from '../../../hooks/useConfirmDialog';
 import { LoginInterceptHost } from '../../../components/auth/LoginInterceptHost';
 import EventDetailFallback from './components/EventDetailFallback';
 import {
-  EventDetailBoardSearchBar,
   EventDetailComposerSection,
-  EventDetailTemplatePostFab,
-  EventPostsVirtualList,
   EVENT_DETAIL_SCROLL_ID,
 } from '@/domains/partner-feed';
 import { useEventDetailPage } from './useEventDetailPage';
-import { AiBuddyPostSheet } from '../../../components/ai-chat/AiBuddyPostSheet';
 import { AiGuidePlanSheet } from '../../../components/ai-chat/AiGuidePlanSheet';
 import PageNavigation from '../../../components/navigation/PageNavigation';
 import { OverlayAwareScrollView } from '../../../components/layout/OverlayAwareScrollView';
@@ -21,10 +15,7 @@ import { Text, View } from '@tarojs/components';
 
 const EventDetailPage = () => {
   useEndRouteTransitionOnShow();
-  const { confirm, confirmDialog } = useConfirmDialog({
-    cancelText: '取消',
-  });
-  const page = useEventDetailPage({ confirm });
+  const page = useEventDetailPage({ confirm: async () => false });
 
   if (page.invalidEventId) {
     return <EventDetailFallback variant="invalidId" />;
@@ -39,8 +30,6 @@ const EventDetailPage = () => {
   }
 
   const {
-    eventId,
-    highlightPostId,
     title,
     metaLine,
     scrollHeight,
@@ -49,19 +38,8 @@ const EventDetailPage = () => {
     handleScroll,
     activityStatusClass,
     showHeaderSkeleton,
-    templatePublishing,
-    posts,
-    postsLoading,
-    showPostsEnd,
-    postsQuery,
     handleBack,
     handleOpenAiGuide,
-    handleOpenTemplateSheet,
-    buddyPostSheetOpen,
-    closeBuddyPostSheet,
-    handleBuddyPostSheetSubmit,
-    buddyPostActivityDate,
-    buddyPostActivityTitle,
     activityTitle,
     handleOpenMyItinerary,
     handleOpenExclusiveItinerary,
@@ -98,9 +76,7 @@ const EventDetailPage = () => {
           showScrollbar={false}
           scrollTop={scrollTop}
           scrollWithAnimation={!scrollFrozen}
-          lowerThreshold={80}
           onScroll={(event) => handleScroll(event.detail.scrollTop)}
-          onScrollToLower={posts.handleScrollToLower}
           className="s-event-detail__main s-scrollbar-none"
           style={scrollHeight != null ? { height: `${scrollHeight}px` } : undefined}
         >
@@ -112,44 +88,6 @@ const EventDetailPage = () => {
               onOpenMyItinerary={handleOpenMyItinerary}
               onOpenExclusiveItinerary={handleOpenExclusiveItinerary}
             />
-
-            {!showHeaderSkeleton ? (
-              <View className="s-event-detail__posts">
-                {posts.totalPostCount > 0 ? (
-                  <EventDetailBoardSearchBar
-                    value={posts.boardSearchQuery}
-                    onChange={posts.setBoardSearchQuery}
-                    resultCount={posts.filteredPostCount}
-                    totalCount={posts.totalPostCount}
-                  />
-                ) : null}
-                {postsLoading ? (
-                  <ThemedPageLoader variant="skeleton-event-posts" minHeight={200} />
-                ) : posts.totalPostCount === 0 ? (
-                  <Text className="s-event-detail__empty">
-                    暂无组队帖，来发布第一条吧
-                  </Text>
-                ) : posts.isBoardSearchActive && posts.filteredPostCount === 0 ? (
-                  <Text className="s-event-detail__empty">
-                    未找到匹配的组队帖，试试其他关键词
-                  </Text>
-                ) : (
-                  <EventPostsVirtualList
-                    onScrollToPostId={posts.scrollToElement}
-                    items={posts.postItems}
-                    highlightPostId={highlightPostId}
-                    onDelete={posts.handleDeletePost}
-                    hasMore={postsQuery.hasMore}
-                    hasMoreLocal={posts.hasMoreVisiblePosts}
-                    isLoadingMore={postsQuery.isLoadingMore}
-                  />
-                )}
-              </View>
-            ) : null}
-
-            {!showHeaderSkeleton && showPostsEnd ? (
-              <Text className="s-event-detail__end">已经到底啦 ~</Text>
-            ) : null}
           </View>
         </OverlayAwareScrollView>
 
@@ -161,24 +99,8 @@ const EventDetailPage = () => {
           </View>
         ) : null}
       </View>
-      {!showHeaderSkeleton ? (
-        <EventDetailTemplatePostFab
-          disabled={templatePublishing}
-          onClick={handleOpenTemplateSheet}
-        />
-      ) : null}
-      {confirmDialog}
+
       <LoginInterceptHost />
-      <AiBuddyPostSheet
-        open={buddyPostSheetOpen}
-        activityDate={buddyPostActivityDate}
-        activityTitle={buddyPostActivityTitle}
-        eventCity={guideEventCity}
-        onClose={closeBuddyPostSheet}
-        onSubmit={(payload) => {
-          void handleBuddyPostSheetSubmit(payload);
-        }}
-      />
       <AiGuidePlanSheet
         open={guideSheetOpen}
         defaultNights={guideDefaultNights}

@@ -28,7 +28,7 @@ export type PrivacyLevel = 'public' | 'friends' | 'private';
 
 export type ReportCategory = 'ads' | 'scalper' | 'vulgar';
 
-export type ReportTargetType = 'post' | 'user' | 'comment';
+export type ReportTargetType = 'user' | 'comment';
 
 export type AccountRiskStatus = 'normal' | 'restricted' | 'banned';
 
@@ -129,7 +129,6 @@ export interface ProfileSummary {
   avatar: string;
   stats: {
     events: number;
-    posts: number;
   };
 }
 
@@ -140,77 +139,6 @@ export interface ProfileActivityItem {
   location: string;
   image: string;
   status: 'registered' | 'attended';
-}
-
-export interface ProfilePostItem {
-  id: string;
-  title: string;
-  content: string;
-  date: string;
-  activityLegacyId?: number;
-  contentTypes?: PostContentType[];
-  images?: string[];
-}
-
-export type HomeFeedPostAuthorGender = 'female' | 'male';
-
-export interface HomeFeedPost {
-  id: string;
-  userId?: string;
-  authorGender?: HomeFeedPostAuthorGender;
-  name: string;
-  handle: string;
-  event: string;
-  location: string;
-  body: string;
-  time: string;
-  avatar: string;
-  activityLegacyId?: number;
-  contentTypes?: PostContentType[];
-  tags?: string[];
-  images?: string[];
-}
-
-export interface EventPostsPage {
-  items: EventDetailPost[];
-  nextCursor?: string;
-  hasMore: boolean;
-}
-
-export interface EventDetailPost {
-  id: string;
-  userId?: string;
-  name: string;
-  location: string;
-  createdAt?: string;
-  body: string;
-  tags: string[];
-  contentTypes?: PostContentType[];
-  avatar: string;
-  images?: string[];
-  /** Present on create when moderation hides the post from public feeds. */
-  status?: 'active' | 'hidden';
-  moderationReason?: string;
-}
-
-export type PostContentType =
-  | 'team'
-  | 'accommodation'
-  | 'carpool'
-  | 'ticket'
-  | 'share'
-  | 'other';
-
-export interface CreatePostPayload {
-  body: string;
-  activityLegacyId?: number;
-  eventTitle?: string;
-  location?: string;
-  tags?: string[];
-  contentTypes?: PostContentType[];
-  images?: string[];
-  /** Default true. False = stored but hidden from activity/popular feeds. */
-  listedInFeed?: boolean;
 }
 
 export interface HomeSummary {
@@ -229,8 +157,6 @@ export interface HomeSummary {
     attendees: number;
     going: boolean;
   }>;
-  /** Present when loaded via `GET /home` (merged to avoid extra `/posts/popular` RTT). */
-  popularPosts?: HomeFeedPost[];
 }
 
 export type NotificationType = 'general' | 'interaction' | 'system';

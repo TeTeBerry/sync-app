@@ -27,7 +27,6 @@ export function normalizeProfileUserData(
         : EMPTY_PROFILE_DISPLAY_USER.verified,
     stats: {
       events: Number(stats.events) || 0,
-      posts: Number(stats.posts) || 0,
     },
   };
 }

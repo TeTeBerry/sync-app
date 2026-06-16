@@ -1,8 +1,4 @@
-import type {
-  AiChatStreamEvent,
-  RecommendedActivityCard,
-  RecommendedPostCard,
-} from '../types/aiChat';
+import type { AiChatStreamEvent, RecommendedActivityCard } from '../types/aiChat';
 import type { ConversationState } from '../types/conversationState';
 
 function isRestApiEnvelope(json: Record<string, unknown>): boolean {
@@ -59,30 +55,6 @@ export function parseStreamEventPayload(
       type: 'done',
       messageId: json.messageId as string | undefined,
       sessionId: json.sessionId as string | undefined,
-    };
-  }
-  if (json.type === 'post_created' && typeof json.postId === 'string') {
-    const post =
-      json.post && typeof json.post === 'object'
-        ? (json.post as RecommendedPostCard)
-        : undefined;
-    return {
-      type: 'post_created',
-      postId: json.postId,
-      activityLegacyId:
-        typeof json.activityLegacyId === 'number' ? json.activityLegacyId : undefined,
-      post:
-        post && typeof post.postId === 'string' && typeof post.snippet === 'string'
-          ? post
-          : undefined,
-    };
-  }
-  if (json.type === 'existing_post' && typeof json.postId === 'string') {
-    return {
-      type: 'existing_post',
-      postId: json.postId,
-      activityLegacyId:
-        typeof json.activityLegacyId === 'number' ? json.activityLegacyId : undefined,
     };
   }
   if (

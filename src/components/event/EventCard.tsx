@@ -17,7 +17,6 @@ import {
 } from '../../utils/activityStatus';
 import { Text, View } from '@tarojs/components';
 import {
-  deriveEventCardStats,
   formatEventDateBadge,
   formatEventFullDate,
   formatEventHeroMetaLine,
@@ -72,7 +71,6 @@ const EventCardInner: React.FC<EventCardProps> = ({
         : formatEventHeroSubtitle(title, location),
     [ctaVariant, date, location, title],
   );
-  const stats = useMemo(() => deriveEventCardStats(attendees), [attendees]);
 
   if (variant !== 'list') {
     return (
@@ -179,10 +177,6 @@ const EventCardInner: React.FC<EventCardProps> = ({
         ) : (
           <View className="s-event-card__social">
             <AvatarGroup total={attendees} />
-            <View className="s-event-card__team-posts">
-              <Users size={13} aria-hidden />
-              <Text>{`${stats.teamPostCount} 条组队帖`}</Text>
-            </View>
           </View>
         )}
 

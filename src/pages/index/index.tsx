@@ -1,18 +1,13 @@
 import './home.scss';
 import { useDidShow } from '@tarojs/taro';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import ThemedPageLoader from '../../components/ThemedPageLoader';
-import { HomeActivityFeed } from './components/HomeActivityFeed';
 import { seedActivityDetailFromFeaturedEvent } from '../../utils/activityDetailCache';
 import { preloadEventSubpackage } from '../../utils/subpackagePreload';
-import { useConfirmDialog } from '../../hooks/useConfirmDialog';
 import {
   useFeaturedEvents,
   useHomeSummary,
   useNotificationUnreadCount,
-  usePopularPosts,
   useRegisteredActivityLegacyIds,
-  mapHomeFeedPost,
 } from '../../hooks/useSyncApi';
 import { isActivityRegistered } from '../../utils/activityRegistration';
 import { resolveFeaturedEventCountdown } from '../../utils/activityStatus';
@@ -27,13 +22,11 @@ import {
 } from '../../utils/route';
 import { joinActivityWithAuth } from '../../utils/joinActivity';
 import { isLoggedIn } from '../../utils/authStorage';
-import { deletePostWithFeedback } from '../../utils/deletePostFeedback';
 import { HomeCountdownCard } from './components/HomeCountdownCard';
 import { HomeFeaturedEvents } from './components/HomeFeaturedEvents';
 import TabPageHeader from '../../components/navigation/TabPageHeader';
 import { LoginInterceptHost } from '../../components/auth/LoginInterceptHost';
 import { HomeHeaderActions } from './components/HomeHeaderActions';
-import type { HomeFeedPost } from '../../types/post';
 import {
   resolveFeaturedEventLegacyId,
   type FeaturedEvent,
@@ -45,9 +38,7 @@ import { Text, View } from '@tarojs/components';
 
 const Home = () => {
   useEndRouteTransitionOnShow();
-  const { confirm, confirmDialog } = useConfirmDialog({
-    cancelText: '取消',
-  });
+  const navInsets = useNavBarInsets();
 
   useDidShow(() => {
     preloadHotRoutes(ROUTES.HOME);
@@ -79,20 +70,6 @@ const Home = () => {
     }
     return resolveFeaturedEventCountdown(event);
   }, [featuredEvents, featuredIndex]);
-
-  const summaryPosts = useMemo(
-    () => (summary?.popularPosts ?? []).map(mapHomeFeedPost),
-    [summary?.popularPosts],
-  );
-  const {
-    posts: feedPosts,
-    isLoading: popularLoading,
-    isError: postsError,
-    refetch: refetchPosts,
-  } = usePopularPosts();
-
-  const posts = summaryPosts.length > 0 ? summaryPosts : feedPosts;
-  const postsLoading = posts.length === 0 && (summaryLoading || popularLoading);
 
   const handleNotification = useCallback(() => {
     requireAuth(() => goNotifications(), 'notification');
@@ -135,25 +112,7 @@ const Home = () => {
     [openEventDetail, registeredLegacyIds],
   );
 
-  const handleDeletePost = useCallback(
-    async (post: HomeFeedPost) => {
-      const ok = await confirm({
-        title: '确认删除',
-        message: '删除后无法恢复，确定要删除这条帖子吗？',
-        confirmText: '删除',
-      });
-      if (!ok) return;
-      requireAuth(() => {
-        void deletePostWithFeedback(post.id, {
-          refetchOnFailure: () => refetchPosts(),
-        });
-      }, 'social');
-    },
-    [confirm, refetchPosts],
-  );
-
   const activeTeamCount = heat?.people ?? 0;
-  const navInsets = useNavBarInsets();
 
   return (
     <View data-cmp="Home" className="s-page-with-tabbar">
@@ -191,28 +150,12 @@ const Home = () => {
             onEventPreload={handleEventPreload}
           />
 
-          {postsLoading ? (
-            <ThemedPageLoader variant="skeleton-feed" minHeight={240} />
-          ) : postsError ? (
-            <View
-              className="s-home-feed s-home-feed--error"
-              onClick={() => void refetchPosts()}
-              role="button"
-              aria-label="加载失败，点击重试"
-            >
-              <Text className="s-home-feed__error-text">帖子加载失败，点击重试</Text>
-            </View>
-          ) : (
-            <HomeActivityFeed items={posts} onDelete={handleDeletePost} />
-          )}
-
           <View className="s-home__heat s-tabbar-offset" aria-label="Today heat">
-            {activeTeamCount} 人正在发现活动
+            {summaryLoading ? '…' : `${activeTeamCount} 人正在发现活动`}
           </View>
         </View>
       </OverlayAwareScrollView>
 
-      {confirmDialog}
       <LoginInterceptHost />
     </View>
   );

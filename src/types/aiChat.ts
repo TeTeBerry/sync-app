@@ -4,7 +4,6 @@
 import type {
   ChatMessage as AiChatMessage,
   RecommendedActivityCard,
-  RecommendedPostCard,
 } from '@sync/chat-contracts';
 import type { ConversationState } from './conversationState';
 import type { TravelGuideChatPayload } from './travelGuide';
@@ -15,8 +14,6 @@ export type {
   ChatMessageImageContext as AiChatImageContext,
   ChatMessageRole as AiChatRole,
   RecommendedActivityCard,
-  RecommendedPostAuthorGender,
-  RecommendedPostCard,
 } from '@sync/chat-contracts';
 
 export type { ConversationState };
@@ -29,7 +26,6 @@ export type ChatUiMessage = {
   ocrText?: string;
   streaming?: boolean;
   recommendedActivity?: RecommendedActivityCard;
-  createdPost?: RecommendedPostCard;
   suggestedReplies?: string[];
   travelGuide?: TravelGuideChatPayload;
 };

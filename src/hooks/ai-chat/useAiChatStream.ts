@@ -25,10 +25,6 @@ export interface UseAiChatStreamOptions {
   userPhone?: string;
   activityLegacyId?: number;
   getAuthHeaders?: () => Record<string, string>;
-  onPostCreated?: (event: Extract<AiChatStreamEvent, { type: 'post_created' }>) => void;
-  onExistingPost?: (
-    event: Extract<AiChatStreamEvent, { type: 'existing_post' }>,
-  ) => void;
 }
 
 export function useAiChatStream(options: UseAiChatStreamOptions) {
@@ -42,8 +38,6 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
     userPhone: userPhoneOption,
     activityLegacyId,
     getAuthHeaders,
-    onPostCreated,
-    onExistingPost,
     typewriterCharDelayMs = 22,
   } = options;
 
@@ -83,8 +77,6 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
     messagesRef,
     setMessages,
     getAuthHeaders,
-    onPostCreated,
-    onExistingPost,
     persistSessionFromStream,
     createTypewriter,
     typewriterCharDelayMs,

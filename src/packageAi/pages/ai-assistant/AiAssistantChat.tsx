@@ -2,19 +2,15 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Taro from '@tarojs/taro';
 import { useAiChatStream } from '../../../hooks/useAiChatStream';
 import { getAuthHeaders } from '../../../utils/authStorage';
-import { invalidatePostQueries } from '../../../hooks/useSyncApi';
 import { ChatMessageList } from '../../../components/ai-chat/ChatMessageList';
 import { ChatComposer } from '../../../components/ai-chat/ChatComposer';
 import { AccountRiskBanner } from '../../../components/account-risk/AccountRiskBanner';
 import { useAccountRisk } from '../../../hooks/useAccountRisk';
-import { AiBuddyPostSheet } from '../../../components/ai-chat/AiBuddyPostSheet';
 import { AiGuidePlanSheet } from '../../../components/ai-chat/AiGuidePlanSheet';
 import { useKeyboardInset } from '../../../hooks/useKeyboardInset';
 import type { inferUserGenderFromName } from '../../../utils/inferAuthorGender';
 import type { AiGuidePlanFormValues } from '../../../types/travelGuide';
 import { Canvas, View } from '@tarojs/components';
-import { invalidateCache } from '../../../hooks/useApiQuery';
-import { useAiBuddyPost } from '../../../hooks/useAiBuddyPost';
 import { useAiTravelGuide } from '../../../hooks/useAiTravelGuide';
 import { resolveActivityByKeyword } from '../../../api/syncApi';
 import { selectSetActiveActivityLegacyId, useNavigationStore } from '../../../stores';
@@ -61,6 +57,9 @@ export function AiAssistantChat({
   const initialMessageHandledRef = useRef(false);
   const initialGuideSheetHandledRef = useRef(false);
   const initialAutoGuideHandledRef = useRef(false);
+  const prevInitialMessageRef = useRef<string | null>(null);
+  const prevOpenGuideSheetRef = useRef(false);
+  const prevAutoGuideFormRef = useRef<AiGuidePlanFormValues | null>(null);
   const submitLockRef = useRef(false);
   const pendingPageShowScrollRef = useRef(false);
   const [forceScrollToBottomKey, setForceScrollToBottomKey] = useState(0);
@@ -104,24 +103,6 @@ export function AiAssistantChat({
     streamErrorText: '抱歉，回复出错了，请稍后再试。',
     activityLegacyId,
     getAuthHeaders,
-    onPostCreated: async (event) => {
-      await invalidatePostQueries();
-      const scopedId = event.activityLegacyId ?? activityLegacyId;
-      if (scopedId != null) {
-        invalidateCache(['posts', 'activity', scopedId]);
-      }
-      void Taro.showToast({
-        title: '组队帖已发布',
-        icon: 'success',
-      });
-    },
-    onExistingPost: () => {
-      void Taro.showToast({
-        title: '你已有组队帖，请去「我的」编辑或在活动详情查看',
-        icon: 'none',
-        duration: 2500,
-      });
-    },
   });
 
   const scheduleScrollToBottom = useCallback(() => {
@@ -139,26 +120,6 @@ export function AiAssistantChat({
       bumpScrollToBottom();
     }, 300);
   }, [bumpScrollToBottom, messagesRef]);
-
-  const handleBuddyPostPublished = useCallback(async () => {
-    await invalidatePostQueries();
-    if (activityLegacyId != null) {
-      invalidateCache(['posts', 'activity', activityLegacyId]);
-    }
-  }, [activityLegacyId]);
-
-  const buddyPost = useAiBuddyPost({
-    activityLegacyId,
-    activityTitle,
-    activityDate: activityQuery.data?.date,
-    authorName: userName,
-    authorAvatar: userAvatar,
-    setMessages,
-    messagesRef,
-    isStreaming,
-    onPublished: handleBuddyPostPublished,
-    onPlanningMessagesShown: scheduleScrollToBottom,
-  });
 
   const travelGuide = useAiTravelGuide({
     activityLegacyId,
@@ -227,6 +188,29 @@ export function AiAssistantChat({
     pendingPageShowScrollRef.current = false;
     scheduleScrollToBottom();
   }, [messages.length, pageShowSeq, scheduleScrollToBottom]);
+
+  useEffect(() => {
+    const trimmed = initialMessage?.trim() || null;
+    if (trimmed && prevInitialMessageRef.current == null) {
+      initialMessageHandledRef.current = false;
+    }
+    prevInitialMessageRef.current = trimmed;
+  }, [initialMessage]);
+
+  useEffect(() => {
+    if (initialOpenAiGuideSheet && !prevOpenGuideSheetRef.current) {
+      initialGuideSheetHandledRef.current = false;
+    }
+    prevOpenGuideSheetRef.current = initialOpenAiGuideSheet;
+  }, [initialOpenAiGuideSheet]);
+
+  useEffect(() => {
+    const form = initialAutoRunTravelGuideForm;
+    if (form != null && prevAutoGuideFormRef.current == null) {
+      initialAutoGuideHandledRef.current = false;
+    }
+    prevAutoGuideFormRef.current = form ?? null;
+  }, [initialAutoRunTravelGuideForm]);
 
   useEffect(() => {
     if (!initialMessage) {
@@ -365,7 +349,7 @@ export function AiAssistantChat({
       <ChatMessageList
         messages={messages}
         isStreaming={isStreaming}
-        isTravelGuideGenerating={travelGuide.isGenerating || buddyPost.isPublishing}
+        isTravelGuideGenerating={travelGuide.isGenerating}
         scrollAreaHeight={chatScrollHeight}
         keyboardInset={keyboardInset}
         forceScrollToBottomKey={forceScrollToBottomKey}
@@ -375,7 +359,6 @@ export function AiAssistantChat({
         onSelectSuggestedReply={handleSelectSuggestedReply}
         onRegenerateTravelGuide={travelGuide.handleRegenerate}
         onShareTravelGuide={(path) => void travelGuide.handleShareGuide(path)}
-        onBuddyPostFromTravelGuide={buddyPost.openBuddyPostSheetFromTravelGuide}
       />
       <View
         className="s-ai-assistant-chat__footer"
@@ -383,9 +366,7 @@ export function AiAssistantChat({
       >
         <ChatComposer
           input={input}
-          isStreaming={
-            isStreaming || travelGuide.isGenerating || buddyPost.isPublishing
-          }
+          isStreaming={isStreaming || travelGuide.isGenerating}
           activityLegacyId={activityLegacyId}
           activityTitle={activityTitle}
           activityCode={activityQuery.data?.code}
@@ -396,17 +377,6 @@ export function AiAssistantChat({
           onActivityChipClick={handleActivityChipClick}
         />
       </View>
-
-      <AiBuddyPostSheet
-        open={buddyPost.sheetOpen}
-        activityDate={activityQuery.data?.date}
-        activityTitle={activityTitle}
-        eventCity={guideEventCity}
-        initialValues={buddyPost.sheetInitialValues}
-        prefillSummaryLines={buddyPost.sheetPrefillHint}
-        onClose={buddyPost.closeBuddyPostSheet}
-        onSubmit={buddyPost.handleSheetSubmit}
-      />
 
       <AiGuidePlanSheet
         open={travelGuide.sheetOpen}

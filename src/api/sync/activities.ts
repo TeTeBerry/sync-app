@@ -1,15 +1,12 @@
-import { ApiError, apiDelete, apiGet, apiPost } from '../../utils/apiClient';
+import { ApiError, apiGet, apiPost, apiDelete } from '../../utils/apiClient';
 import { getActivityTypeLabel } from '../../constants/activityType';
-import { HOME_POPULAR_POSTS_PERSIST_LIMIT } from '../../utils/homeCacheStorage';
 import type {
   ActivityRegistrationResult,
   ActivityUnregisterResult,
   BackendActivity,
-  HomeFeedPost,
   HomeSummary,
 } from '../../types/backend';
 import { ownerQueryParams } from '../requestContext';
-import { fetchPopularPosts } from './posts';
 
 export function fetchActivities() {
   return apiGet<BackendActivity[]>('/activities');
@@ -19,10 +16,7 @@ export function resolveActivityByKeyword(keyword: string) {
   return apiGet<BackendActivity | null>('/activities/resolve', { keyword });
 }
 
-function buildHomeSummaryFromCatalog(
-  activities: BackendActivity[],
-  popularPosts: HomeFeedPost[],
-): HomeSummary {
+function buildHomeSummaryFromCatalog(activities: BackendActivity[]): HomeSummary {
   const signupEvents = activities.map((item) => ({
     id: item.legacyId,
     title: item.name,
@@ -40,19 +34,13 @@ function buildHomeSummaryFromCatalog(
   return {
     signupEvents,
     heat: { people, growthPercent: 0 },
-    popularPosts,
   };
 }
 
 /** Compose home feed from public catalog APIs when `/home` is auth-gated. */
 async function fetchHomeSummaryFromPublicCatalog(): Promise<HomeSummary> {
-  const [activities, popularPosts] = await Promise.all([
-    fetchActivities(),
-    fetchPopularPosts(HOME_POPULAR_POSTS_PERSIST_LIMIT).catch(
-      () => [] as HomeFeedPost[],
-    ),
-  ]);
-  return buildHomeSummaryFromCatalog(activities, popularPosts);
+  const activities = await fetchActivities();
+  return buildHomeSummaryFromCatalog(activities);
 }
 
 export async function fetchHomeSummary(): Promise<HomeSummary> {

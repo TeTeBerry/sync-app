@@ -1,12 +1,7 @@
 import { isLiveApi } from '../../constants/api';
 import { isLoggedIn } from '../../utils/authStorage';
 import { fetchCurrentUser } from '../../api/sync/users';
-import {
-  fetchProfileActivities,
-  fetchProfilePosts,
-  fetchProfileSummary,
-} from '../../api/sync/profile';
-import { filterProfileTeamPosts } from '../../utils/profileTeamPosts';
+import { fetchProfileActivities, fetchProfileSummary } from '../../api/sync/profile';
 import { persistProfileSummary } from '../../utils/homeCacheStorage';
 import { useApiQuery } from '../useApiQuery';
 import type { QueryEnableOptions } from './types';
@@ -51,16 +46,5 @@ export function useProfileActivitiesQuery(options?: QueryEnableOptions) {
     queryFn: fetchProfileActivities,
     enabled,
     staleTime: 60_000,
-  });
-}
-
-export function useProfilePostsQuery() {
-  const enabled = profileApiEnabled();
-
-  return useApiQuery({
-    queryKey: ['profile', 'posts'],
-    queryFn: async () => filterProfileTeamPosts(await fetchProfilePosts()),
-    enabled,
-    staleTime: 30_000,
   });
 }
