@@ -188,9 +188,26 @@ export interface EventDetailPost {
   contentTypes?: PostContentType[];
   avatar: string;
   images?: string[];
+  comments?: number;
   /** Present on create when moderation hides the post from public feeds. */
   status?: 'active' | 'hidden';
   moderationReason?: string;
+}
+
+export interface PostCommentItem {
+  id: string;
+  userId: string;
+  authorName: string;
+  avatar: string;
+  body: string;
+  time: string;
+  replies?: PostCommentItem[];
+}
+
+export interface PostCommentsPage {
+  items: PostCommentItem[];
+  hasMore: boolean;
+  nextCursor?: string;
 }
 
 export type PostContentType =

@@ -292,7 +292,7 @@ export function AiBuddyPostSheet({
                   className="s-ai-buddy-post-sheet__textarea"
                   value={note}
                   maxlength={NOTE_MAX_LENGTH}
-                  placeholder="性别偏好、预算、其他说明…"
+                  placeholder="性别偏好、喜欢音乐风格、其他说明…"
                   placeholderClass="s-ai-guide-plan-sheet__input-placeholder"
                   onInput={(e) => setNote(e.detail.value ?? '')}
                 />

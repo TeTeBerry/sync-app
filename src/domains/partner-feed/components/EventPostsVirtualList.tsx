@@ -9,6 +9,10 @@ type EventPostsVirtualListProps = {
   onScrollToPostId?: (elementId: string) => void;
   items: EventPostListItem[];
   highlightPostId: string;
+  expandedCommentPostIds: Set<string>;
+  currentUserAvatar?: string;
+  onToggleComments: (postId: string) => void;
+  onCommentSubmitted?: EventPostCardProps['onCommentSubmitted'];
   onDelete?: EventPostCardProps['onDelete'];
   hasMore?: boolean;
   hasMoreLocal?: boolean;
@@ -19,6 +23,10 @@ export function EventPostsVirtualList({
   onScrollToPostId,
   items,
   highlightPostId,
+  expandedCommentPostIds,
+  currentUserAvatar,
+  onToggleComments,
+  onCommentSubmitted,
   onDelete,
   hasMore = false,
   hasMoreLocal = false,
@@ -50,6 +58,10 @@ export function EventPostsVirtualList({
               post={item.post}
               publishTimeLabel={item.publishTimeLabel}
               highlighted={highlighted}
+              commentsExpanded={expandedCommentPostIds.has(item.post.id)}
+              currentUserAvatar={currentUserAvatar}
+              onToggleComments={onToggleComments}
+              onCommentSubmitted={onCommentSubmitted}
               onDelete={onDelete}
             />
           </View>

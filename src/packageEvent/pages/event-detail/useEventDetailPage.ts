@@ -123,6 +123,7 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     showPostsEnd,
     postsQuery,
     displayUserName,
+    currentUserAvatar: currentUserQuery.data?.avatar,
     handleOpenAiGuide: travelGuide.openGuideSheet,
     activityTitle,
     handleOpenMyItinerary,

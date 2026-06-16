@@ -4,6 +4,7 @@ import type {
   EventDetailPost,
   EventPostsPage,
   HomeFeedPost,
+  PostCommentsPage,
 } from '../../types/backend';
 import { mergeOwnerQueryParams, ownerQueryParams } from '../requestContext';
 
@@ -51,4 +52,31 @@ export function createPost(payload: CreatePostPayload) {
 
 export function deletePost(postId: string) {
   return apiDelete<{ ok: true }>(`/posts/${postId}`, ownerQueryParams());
+}
+
+export type FetchPostCommentsOptions = {
+  limit?: number;
+  cursor?: string;
+};
+
+export function fetchPostComments(postId: string, options?: FetchPostCommentsOptions) {
+  const params: Record<string, string> = {};
+  if (options?.limit != null) {
+    params.limit = String(options.limit);
+  }
+  if (options?.cursor) {
+    params.cursor = options.cursor;
+  }
+  return apiGet<PostCommentsPage>(
+    `/posts/${postId}/comments`,
+    Object.keys(params).length ? params : undefined,
+  );
+}
+
+export function addPostComment(postId: string, body: string, parentCommentId?: string) {
+  return apiPost<{ id: string; comments: number }>(
+    `/posts/${postId}/comments`,
+    { body, ...(parentCommentId ? { parentCommentId } : {}) },
+    ownerQueryParams(),
+  );
 }

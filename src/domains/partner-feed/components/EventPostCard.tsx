@@ -1,7 +1,12 @@
 import { memo, useMemo } from 'react';
 import { MapPin } from '../../../components/icons';
+import {
+  PostCardActionBar,
+  PostCommentSection,
+  PostImageGrid,
+  PostOwnerDeleteButton,
+} from '../../../components/post';
 import { ImageWithFallback } from '../../../components/ImageWithFallback';
-import { PostImageGrid, PostOwnerDeleteButton } from '../../../components/post';
 import { EVENT_POST_IMAGE_MAX_DISPLAY } from '../../../constants/listPerf';
 import { isCurrentUserPostAuthor } from '../../../utils/postOwnership';
 import type { EventDetailPost } from '../../../types/backend';
@@ -13,14 +18,22 @@ export type EventPostCardProps = {
   post: EventDetailPost;
   publishTimeLabel: string;
   highlighted: boolean;
+  commentsExpanded: boolean;
+  currentUserAvatar?: string;
+  onToggleComments: (postId: string) => void;
   onDelete?: (post: EventDetailPost) => void;
+  onCommentSubmitted?: (updated: Pick<EventDetailPost, 'id' | 'comments'>) => void;
 };
 
 function EventPostCardInner({
   post,
   publishTimeLabel,
   highlighted,
+  commentsExpanded,
+  currentUserAvatar,
+  onToggleComments,
   onDelete,
+  onCommentSubmitted,
 }: EventPostCardProps) {
   const displayBody = useMemo(() => stripPostBodyContact(post.body), [post.body]);
   const submetaLocation = post.location?.trim() ?? '';
@@ -86,6 +99,31 @@ function EventPostCardInner({
             maxDisplay={EVENT_POST_IMAGE_MAX_DISPLAY}
           />
         </View>
+      ) : null}
+
+      <View className="s-event-post__footer">
+        <View className="s-event-post__footer-divider" aria-hidden />
+        <View className="s-event-post__footer-row">
+          <View className="s-event-post__footer-left">
+            <PostCardActionBar
+              comments={post.comments ?? 0}
+              commentsExpanded={commentsExpanded}
+              onToggleComments={() => onToggleComments(post.id)}
+            />
+          </View>
+        </View>
+      </View>
+
+      {commentsExpanded ? (
+        <PostCommentSection
+          postId={post.id}
+          postAuthorName={post.name}
+          postAuthorUserId={post.userId}
+          expanded
+          onToggleExpanded={() => onToggleComments(post.id)}
+          currentUserAvatar={currentUserAvatar}
+          onCommentSubmitted={onCommentSubmitted}
+        />
       ) : null}
     </View>
   );

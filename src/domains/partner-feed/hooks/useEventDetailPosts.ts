@@ -31,6 +31,9 @@ export function useEventDetailPosts({
   confirm,
   setScrollTop,
 }: UseEventDetailPostsParams) {
+  const [expandedCommentPostIds, setExpandedCommentPostIds] = useState<Set<string>>(
+    () => new Set(),
+  );
   const [boardSearchQuery, setBoardSearchQuery] = useState('');
 
   const loadedPostItems = useMemo(
@@ -126,6 +129,31 @@ export function useEventDetailPosts({
     [confirm, postsQuery],
   );
 
+  const togglePostComments = useCallback(
+    (postId: string) => {
+      const index = allPostItems.findIndex((item) => item.post.id === postId);
+      if (index >= 0) ensureIndexVisible(index);
+
+      setExpandedCommentPostIds((prev) => {
+        const next = new Set(prev);
+        if (next.has(postId)) {
+          next.delete(postId);
+        } else {
+          next.add(postId);
+        }
+        return next;
+      });
+    },
+    [allPostItems, ensureIndexVisible],
+  );
+
+  const handleCommentSubmitted = useCallback(
+    (updated: Pick<EventDetailPost, 'id' | 'comments'>) => {
+      postsQuery.patchItem(updated);
+    },
+    [postsQuery],
+  );
+
   return {
     postItems,
     totalPostCount: loadedPostItems.length,
@@ -134,8 +162,11 @@ export function useEventDetailPosts({
     setBoardSearchQuery,
     isBoardSearchActive,
     hasMoreVisiblePosts,
+    expandedCommentPostIds,
     handleScrollToLower,
     scrollToElement,
     handleDeletePost,
+    togglePostComments,
+    handleCommentSubmitted,
   };
 }

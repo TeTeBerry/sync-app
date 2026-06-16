@@ -71,6 +71,7 @@ const EventDetailPage = () => {
     handleGuideSheetSubmit,
     guideDefaultNights,
     guideEventCity,
+    currentUserAvatar,
   } = page;
 
   return (
@@ -139,6 +140,10 @@ const EventDetailPage = () => {
                     onScrollToPostId={posts.scrollToElement}
                     items={posts.postItems}
                     highlightPostId={highlightPostId}
+                    expandedCommentPostIds={posts.expandedCommentPostIds}
+                    currentUserAvatar={currentUserAvatar}
+                    onToggleComments={posts.togglePostComments}
+                    onCommentSubmitted={posts.handleCommentSubmitted}
                     onDelete={posts.handleDeletePost}
                     hasMore={postsQuery.hasMore}
                     hasMoreLocal={posts.hasMoreVisiblePosts}

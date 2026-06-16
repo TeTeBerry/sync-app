@@ -9,3 +9,4 @@ export const STALE_ACTIVITY_DETAIL_MS = 120_000;
 
 /** Post feeds (home popular fallback, activity posts query). */
 export const STALE_POSTS_FEED_MS = 90_000;
+export const STALE_POST_COMMENTS_MS = 60_000;
