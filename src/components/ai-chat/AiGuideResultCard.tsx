@@ -1,6 +1,17 @@
 import type { AiGuidePlanFormValues, TravelGuidePlan } from '@/types/travelGuide';
 import { goAiTravelGuide } from '@/utils/route';
-import { ChevronRight, Map, RefreshCw, Sparkles, Users } from '../../components/icons';
+import {
+  findTravelGuideTotalBudgetItem,
+  formatTravelGuideBudgetShareLabel,
+} from '@/domains/travel-guide/utils/travelGuideBudgetDisplay.util';
+import {
+  ChevronRight,
+  Map,
+  RefreshCw,
+  Sparkles,
+  TrendingUp,
+  Users,
+} from '../../components/icons';
 import { Button } from '../ui';
 import { Text, View } from '@tarojs/components';
 import './AiGuideResultCard.scss';
@@ -21,17 +32,12 @@ function previewHighlights(plan: TravelGuidePlan): string[] {
 
   const schemes = plan.accommodation.schemes;
   if (schemes?.length) {
-    highlights.push(`住宿：${schemes.map((s) => s.label).join(' / ')}`);
+    highlights.push(`住宿 ${schemes.map((s) => s.label).join(' / ')}`);
   } else if (plan.accommodation.hotels[0]?.name) {
-    highlights.push(`住宿：${plan.accommodation.hotels[0].name}`);
+    highlights.push(`住宿 ${plan.accommodation.hotels[0].name}`);
   }
 
-  const total = plan.budget?.items.find((item) => item.label.includes('合计'));
-  if (total) {
-    highlights.push(`预算 ${total.range}`);
-  }
-
-  return highlights.slice(0, 3);
+  return highlights.slice(0, 2);
 }
 
 export function AiGuideResultCard({
@@ -42,6 +48,7 @@ export function AiGuideResultCard({
   onBuddyPostFromGuide,
 }: AiGuideResultCardProps) {
   const highlights = previewHighlights(plan);
+  const total = findTravelGuideTotalBudgetItem(plan);
 
   const openDetail = () => {
     if (disabled) return;
@@ -84,6 +91,22 @@ export function AiGuideResultCard({
             {plan.selfDrive ? '自驾' : '公共交通'}
           </Text>
         </View>
+
+        {total ? (
+          <View className="s-ai-guide-result__budget-strip">
+            <View className="s-ai-guide-result__budget-strip-icon" aria-hidden>
+              <TrendingUp size={14} color="#ffd60a" />
+            </View>
+            <View className="s-ai-guide-result__budget-strip-text">
+              <Text className="s-ai-guide-result__budget-strip-label">
+                全程预算（合计）
+              </Text>
+              <Text className="s-ai-guide-result__budget-strip-value">
+                {formatTravelGuideBudgetShareLabel(total.range, plan.headcount)}
+              </Text>
+            </View>
+          </View>
+        ) : null}
 
         {highlights.length ? (
           <View className="s-ai-guide-result__preview">

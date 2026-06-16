@@ -7,13 +7,17 @@ import { resolveCatalogActivityImage } from '@/constants/activityCatalogImages';
 import { ROUTES } from '@/utils/route';
 import { buildQueryString } from '@/utils/queryString';
 import type { TravelGuideDetailPayload } from './travelGuideDetailStorage';
+import {
+  findTravelGuideTotalBudgetItem,
+  formatTravelGuideBudgetShareLabel,
+} from './travelGuideBudgetDisplay.util';
 
 const BUDGET_TIERS: TravelGuideBudgetTier[] = ['economy', 'standard', 'comfort'];
 
 export function buildTravelGuideShareTitle(plan: TravelGuidePlan): string {
-  const total = plan.budget?.items.find((item) => item.label.includes('合计'));
+  const total = findTravelGuideTotalBudgetItem(plan);
   if (total) {
-    return `${plan.activityName} · AI 出行攻略（${total.range}）`;
+    return `${plan.activityName} · AI 出行攻略（${formatTravelGuideBudgetShareLabel(total.range, plan.headcount)}）`;
   }
   return `${plan.activityName} · AI 出行攻略`;
 }

@@ -21,7 +21,19 @@ import {
   parseTravelGuideFormFromShareQuery,
 } from '../utils/travelGuideWechatShare.util';
 
-const FOOTER_PX = 78;
+const FOOTER_BASE_PX = 72;
+
+function resolveFooterChromePx(): number {
+  try {
+    const win = Taro.getWindowInfo();
+    const screenHeight = win.screenHeight ?? win.windowHeight ?? 667;
+    const safeBottom =
+      win.safeArea != null ? Math.max(0, screenHeight - win.safeArea.bottom) : 0;
+    return FOOTER_BASE_PX + safeBottom;
+  } catch {
+    return FOOTER_BASE_PX;
+  }
+}
 
 export function useAiTravelGuidePage() {
   const router = useRouter();
@@ -45,7 +57,8 @@ export function useAiTravelGuidePage() {
   const activityLegacyId = payload?.activityLegacyId ?? shareSeed?.activityLegacyId;
   const activityQuery = useActivityDetailQuery(activityLegacyId);
 
-  const mainScrollHeight = useStackPageMainHeight(FOOTER_PX);
+  const footerChromePx = useMemo(() => resolveFooterChromePx(), []);
+  const mainScrollHeight = useStackPageMainHeight(footerChromePx);
   const isWeapp = Taro.getEnv() === Taro.ENV_TYPE.WEAPP;
 
   useEffect(() => {

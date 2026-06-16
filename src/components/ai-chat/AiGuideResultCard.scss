@@ -106,6 +106,52 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+.s-ai-guide-result__budget-strip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 214, 10, 0.12) 0%,
+    rgba(255, 214, 10, 0.04) 100%
+  );
+  border: 1px solid rgba(255, 214, 10, 0.18);
+}
+
+.s-ai-guide-result__budget-strip-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 214, 10, 0.12);
+}
+
+.s-ai-guide-result__budget-strip-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.s-ai-guide-result__budget-strip-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.56);
+}
+
+.s-ai-guide-result__budget-strip-value {
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.35;
+}
+
 .s-ai-guide-result__preview {
   display: flex;
   flex-direction: column;

@@ -1,19 +1,17 @@
 import '../../packageAi/pages/ai-assistant/AiAssistantPage.scss';
 import { type FC } from 'react';
 import { CalendarDays, Zap } from '../../components/icons';
-import TabPageHeader from '../../components/navigation/TabPageHeader';
+import PageNavigation from '../../components/navigation/PageNavigation';
 import { Text, View } from '@tarojs/components';
 import { ProfileTabErrorBoundary } from '../../components/profile/ProfileTabErrorBoundary';
 import { AiAssistantChat } from '../../packageAi/pages/ai-assistant/AiAssistantChat';
 import { useAiAssistantPage } from '../../packageAi/pages/ai-assistant/useAiAssistantPage';
 import { LoginInterceptHost } from '../../components/auth/LoginInterceptHost';
-import { useNavBarInsets } from '../../hooks/useNavBarInsets';
 import { useEndRouteTransitionOnShow } from '../../hooks/useEndRouteTransitionOnShow';
 import { ROUTES } from '../../utils/route';
 
 const AiTabPage: FC = () => {
   useEndRouteTransitionOnShow(ROUTES.AI);
-  const navInsets = useNavBarInsets();
   const page = useAiAssistantPage();
 
   return (
@@ -28,10 +26,10 @@ const AiTabPage: FC = () => {
           .filter(Boolean)
           .join(' ')}
       >
-        <TabPageHeader
-          className="s-tab-page-header--ai"
+        <PageNavigation
           title="AI问答"
-          navInsets={navInsets}
+          fallback={ROUTES.HOME}
+          onBack={page.handleBack}
           trailing={
             page.messageCount > 0 ? (
               <Text className="s-ai-assistant__message-count" aria-hidden>

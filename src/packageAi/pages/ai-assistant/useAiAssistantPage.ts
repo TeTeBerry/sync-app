@@ -13,7 +13,8 @@ import {
 } from '../../../stores';
 import { resolveAiChatWsUrl } from '../../../constants/api';
 import { isAiChatWsDevLog } from '../../../utils/aiChatWs';
-import { TAB_PAGE_NAV_PX } from '../../../hooks/useTabPageMainHeight';
+import { stackPageNavChromePx } from '../../../components/navigation/PageNavigation';
+import { goEventDetail, ROUTES, switchTabTo } from '../../../utils/route';
 import { inferUserGenderFromName } from '../../../utils/inferAuthorGender';
 
 /** Event context strip below header when scoped to an activity. */
@@ -77,12 +78,20 @@ export function useAiAssistantPage() {
 
   const headerSubtractPx = useMemo(() => {
     const eventBar = showEventContext ? AI_EVENT_CONTEXT_PX : 0;
-    return navInsets.paddingTop + TAB_PAGE_NAV_PX + eventBar;
-  }, [navInsets.paddingTop, showEventContext]);
+    return stackPageNavChromePx(navInsets) + eventBar;
+  }, [navInsets, showEventContext]);
 
   const chatScrollHeight = useTabPageMainHeight({
     subtractPx: headerSubtractPx + AI_CHAT_COMPOSER_CHROME_PX,
   });
+
+  const handleBack = useCallback(() => {
+    if (activityLegacyId != null && !Number.isNaN(activityLegacyId)) {
+      goEventDetail(activityLegacyId);
+      return;
+    }
+    switchTabTo(ROUTES.HOME);
+  }, [activityLegacyId]);
 
   usePageRouteReady(true);
 
@@ -151,5 +160,6 @@ export function useAiAssistantPage() {
     chatScrollHeight,
     activityLegacyId,
     handleInitialMessageSent,
+    handleBack,
   };
 }

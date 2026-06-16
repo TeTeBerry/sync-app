@@ -22,17 +22,13 @@ const AiTravelGuidePage = () => {
       {page.loading ? (
         <ThemedPageLoader variant="spinner" label="正在加载攻略…" minHeight={280} />
       ) : page.payload ? (
-        <>
+        <View className="s-ai-travel-guide-page__body">
           <ScrollView
             scrollY
             enhanced
             showScrollbar={false}
             className="s-ai-travel-guide-page__scroll s-scrollbar-none"
-            style={
-              page.mainScrollHeight != null
-                ? { height: `${page.mainScrollHeight}px` }
-                : undefined
-            }
+            style={{ height: `${page.mainScrollHeight ?? 480}px` }}
           >
             <View className="s-ai-travel-guide-page__inner">
               <TravelGuideDetailView plan={page.payload.plan} />
@@ -73,7 +69,7 @@ const AiTravelGuidePage = () => {
               <Text className="s-ai-travel-guide-page__footer-btn-label">复制文案</Text>
             </Button>
           </View>
-        </>
+        </View>
       ) : (
         <View className="s-ai-travel-guide-page__empty">
           <Text className="s-ai-travel-guide-page__empty-title">
