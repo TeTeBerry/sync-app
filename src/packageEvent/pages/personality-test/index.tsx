@@ -40,8 +40,8 @@ const PersonalityTestPage = () => {
               </Text>
               <Text className="s-personality-test__intro-title">电音人格测试</Text>
               <Text className="s-personality-test__intro-desc">
-                8 道题测出你的 Raver 人格（每次题目随机），含听感与 VJ
-                视觉题，再匹配本命 DJ 与适合你的电音节活动。
+                8 道题测出你的 Raver 人格（每次题目随机），含听感题，再匹配本命 DJ
+                与适合你的电音节活动。
               </Text>
             </View>
           ) : null}

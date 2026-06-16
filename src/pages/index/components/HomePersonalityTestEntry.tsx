@@ -49,7 +49,7 @@ export const HomePersonalityTestEntry: FC = () => {
             <Text className="s-home-personality__card-desc">
               {cachedSoulDj
                 ? '点击查看完整人格解读、阵容推荐与分享海报'
-                : '8 道场景题（每次随机抽题），含听感与 VJ 视觉题，再匹配本命 DJ 与适合你的电音节活动。'}
+                : '8 道场景题（每次随机抽题），含听感题，再匹配本命 DJ 与适合你的电音节活动。'}
             </Text>
           </View>
         </View>
