@@ -113,16 +113,6 @@ page {
   --s-fw-extrabold: 700;
   --s-fw-black: 800;
 
-  /* Post card action row (like, comment, share) */
-  --s-post-action-icon: #8e8e93;
-  --s-post-action-active: #64d2ff;
-  --s-post-action-liked: #ff0066;
-
-  /* Post action bottom sheet */
-  --s-post-sheet-panel: #1c1c1e;
-  --s-post-sheet-row: #2c2c2e;
-  --s-post-sheet-row-pressed: #353537;
-
   /* Bottom tab bar: 56px row + 10px top pad + safe area (matches BottomNav.scss) */
   --s-tabbar-row: 56px;
   --s-tabbar-height: var(--s-tabbar-row);

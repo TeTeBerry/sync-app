@@ -30,6 +30,7 @@ vi.mock('@/constants/cloud', () => ({
   isWeappCloudRunTransportEnabled: () => true,
   CLOUDBASE_ENV_ID: 'sync-prd-d7gquj4qk86da9bb2',
   CLOUD_RUN_SERVICE: 'sync-backend-prd-269371-9',
+  CLOUD_RUN_MAX_TIMEOUT_MS: 15_000,
 }));
 
 import { apiGet } from '@/utils/apiClient';

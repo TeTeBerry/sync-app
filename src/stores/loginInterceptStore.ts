@@ -3,7 +3,6 @@ import { create } from 'zustand';
 export type LoginInterceptFeature =
   | 'general'
   | 'activity'
-  | 'post'
   | 'ai_assistant'
   | 'notification'
   | 'social';

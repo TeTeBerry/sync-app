@@ -26,7 +26,7 @@ git push -u origin feat/简短描述
 
 ## 组件与类型
 
-新 UI / 组件放置规则见 [COMPONENT-ARCHITECTURE.md](./COMPONENT-ARCHITECTURE.md)。帖子相关类型从 `src/types/post.ts` 导入。
+新 UI / 组件放置规则见 [COMPONENT-ARCHITECTURE.md](./COMPONENT-ARCHITECTURE.md)。
 
 ## 微信小程序联调
 

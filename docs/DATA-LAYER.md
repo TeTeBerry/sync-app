@@ -67,7 +67,7 @@ REST 与自定义 `useApiQuery` 缓存的分层约定；身份为 **JWT + demo Q
 | ------------------ | ------------------------------------------- |
 | `activities.ts`    | 活动列表、首页 summary、详情、报名          |
 | `posts.ts`         | 热帖、活动帖、评论分页、帖互动 mutation     |
-| `profile.ts`       | 个人摘要、活动列表、帖子列表              |
+| `profile.ts`       | 个人摘要、活动列表              |
 | `notifications.ts` | 通知列表与已读                              |
 
 对外仍从 [`hooks/useSyncApi.ts`](../src/hooks/useSyncApi.ts) 导出。

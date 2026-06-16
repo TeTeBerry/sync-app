@@ -28,7 +28,7 @@ vi.mock('@/constants/api', () => ({
 
 import { fetchHomeSummary, registerForActivity } from '@/api/sync/activities';
 import { fetchNotifications } from '@/api/sync/notifications';
-import { fetchProfilePosts, fetchProfileSummary } from '@/api/sync/profile';
+import { fetchProfileSummary } from '@/api/sync/profile';
 
 function mockSuccessResponse(data: unknown, statusCode = 200) {
   mockRequest.mockImplementation(
@@ -58,17 +58,6 @@ describe('api/sync owner query contract', () => {
   });
 
   describe('profile', () => {
-    it('fetchProfilePosts omits actor query when no token', async () => {
-      await fetchProfilePosts();
-      expectNoActorQuery(lastRequestUrl());
-    });
-
-    it('fetchProfilePosts omits actor query when bearer present', async () => {
-      mockGetAccessToken.mockReturnValue('jwt-token');
-      await fetchProfilePosts();
-      expectNoActorQuery(lastRequestUrl());
-    });
-
     it('fetchProfileSummary omits actor query when no token', async () => {
       await fetchProfileSummary();
       expectNoActorQuery(lastRequestUrl());

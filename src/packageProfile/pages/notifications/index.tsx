@@ -1,5 +1,4 @@
 import './notifications.scss';
-import Taro from '@tarojs/taro';
 import React, { useCallback, useMemo, useState } from 'react';
 import ThemedPageLoader from '../../../components/ThemedPageLoader';
 import { usePageRouteReady } from '../../../hooks/usePageRouteReady';
@@ -110,10 +109,7 @@ const NotificationsPage: React.FC = () => {
   );
 
   const handleItemClick = useCallback(async (item: AppNotification) => {
-    const navigated = await navigateFromNotification(item.meta);
-    if (!navigated && item.meta?.postId?.trim()) {
-      void Taro.showToast({ title: '无法打开帖子', icon: 'none' });
-    }
+    await navigateFromNotification(item.meta);
     if (!item.read) {
       void markNotificationAsRead(item.id);
     }

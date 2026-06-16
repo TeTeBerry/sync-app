@@ -2,14 +2,12 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import Taro from '@tarojs/taro';
 import {
   HOME_CACHE_MAX_AGE_MS,
-  HOME_POPULAR_POSTS_PERSIST_LIMIT,
   hydrateAppCachesFromStorage,
   persistActivities,
   persistHomeSummary,
-  persistPopularPosts,
 } from '@/utils/homeCacheStorage';
 import { getCacheData, invalidateCache } from '@/hooks/useApiQuery';
-import type { BackendActivity, HomeFeedPost, HomeSummary } from '@/types/backend';
+import type { BackendActivity, HomeSummary } from '@/types/backend';
 
 vi.mock('@tarojs/taro', () => ({
   default: {
@@ -19,6 +17,7 @@ vi.mock('@tarojs/taro', () => ({
 }));
 
 vi.mock('@/constants/api', () => ({
+  API_BASE_URL: 'https://api.test',
   isLiveApi: () => true,
 }));
 
@@ -39,23 +38,11 @@ const mockSummary: HomeSummary = {
   ],
 };
 
-const mockPosts: HomeFeedPost[] = Array.from({ length: 10 }, (_, index) => ({
-  id: `post-${index}`,
-  name: 'User',
-  handle: '@user',
-  event: 'Test Fest',
-  location: 'SZ',
-  body: `body ${index}`,
-  time: '1h',
-  avatar: '',
-}));
-
 describe('homeCacheStorage', () => {
   beforeEach(() => {
     vi.mocked(Taro.getStorageSync).mockReturnValue('');
     vi.mocked(Taro.setStorageSync).mockClear();
     invalidateCache(['home']);
-    invalidateCache(['posts']);
   });
 
   it('persists and hydrates home summary', () => {
@@ -90,13 +77,6 @@ describe('homeCacheStorage', () => {
 
     hydrateAppCachesFromStorage();
     expect(getCacheData<BackendActivity[]>(['activities'])).toEqual(activities);
-  });
-
-  it('persists at most HOME_POPULAR_POSTS_PERSIST_LIMIT posts', () => {
-    persistPopularPosts(mockPosts);
-    const stored = vi.mocked(Taro.setStorageSync).mock.calls[0]?.[1] as string;
-    const envelope = JSON.parse(stored) as { data: HomeFeedPost[] };
-    expect(envelope.data).toHaveLength(HOME_POPULAR_POSTS_PERSIST_LIMIT);
   });
 
   it('skips expired envelope on hydrate', () => {

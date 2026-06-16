@@ -29,6 +29,7 @@ vi.mock('@tarojs/taro', () => ({
 }));
 
 vi.mock('@/constants/api', () => ({
+  API_BASE_URL: 'https://api.test',
   isLiveApi: () => false,
 }));
 

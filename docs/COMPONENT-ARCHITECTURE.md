@@ -7,7 +7,7 @@
 | 层级 | 路径 | 用途 |
 |------|------|------|
 | UI 原语 | `src/components/ui/` | 无业务语义；包装 Taro 原语 + BEM/`cn` |
-| 跨页业务 | `src/components/`（`auth/`、`ai-chat/`、`profile/`、`post/`、`navigation/` 等） | 多 Tab / 多分包复用的轻量 UI |
+| 跨页业务 | `src/components/`（`auth/`、`ai-chat/`、`profile/`、`navigation/` 等） | 多 Tab / 多分包复用的轻量 UI |
 | 活动域 | `src/domains/`（`travel-plan/`、`performance-itinerary/`、`live-info/`、`travel-guide/`、`partner-feed/`） | 与后端 ActivityExperience 对齐的重逻辑域 |
 | 页面壳 | `src/pages/**/`、`src/package*/pages/**/` | 路由入口、薄编排 |
 
@@ -21,17 +21,13 @@ pages / package pages  →  domains/*  →  components/*  →  components/ui
 主包 Tab **不得**直接 import `domains/*` 内重组件（见 `scripts/verify-bundle-boundaries.mjs`）。
 
 - `components/**` **不得** import `pages/**` 或 `package*/pages/**`
-- 帖子类型从 `src/types/post.ts` 导入，不从 `pages/index/homeData` 等页面路径导入
 
 ## 类型
 
 | 文件 | 内容 |
 |------|------|
 | `src/types/backend.ts` | API 契约与 DTO（与后端对齐） |
-| `src/types/post.ts` | 帖子相关类型的 UI 层统一导出入口 |
 | `src/types/countdown.ts` | 倒计时展示类型（`CountdownPart`） |
-
-`HomeFeedPost`（首页热帖）与 `EventDetailPost`（活动详情帖）字段不同，**不要**强行合并为单一 interface；需要展示层适配时用 mapper（如 `domains/partner-feed/utils/eventPostDisplay.ts`）。
 
 ## 领域模块
 
@@ -62,7 +58,7 @@ Barrel 导出分包/活动详情需要的组件与逻辑；仅主 profile 页使
 
 - 页面：`packageEvent/pages/event-detail/index.tsx`（薄壳：路由编排、live-info lazy 包装）
 - 编排：`useEventDetailPage.ts`
-- 域：`domains/partner-feed/`（帖流、留言板、模板发帖）、`domains/live-info/`、`domains/travel-guide/`
+- 域：`domains/partner-feed/`（活动详情 AI 咨询入口、行程菜单）、`domains/live-info/`、`domains/travel-guide/`
 
 ## 决策表
 
@@ -71,14 +67,12 @@ Barrel 导出分包/活动详情需要的组件与逻辑；仅主 profile 页使
 | 通用按钮/输入，无业务文案 | `components/ui/` |
 | 只在首页用的区块 | `pages/index/components/` |
 | 个人中心 + profile 分包共用 | `components/profile/` |
-| 活动详情帖流 / 留言 / 模板发帖 | `domains/partner-feed/` |
+| 活动详情 AI 咨询 / 行程入口 | `domains/partner-feed/` |
 | 活动详情页级弹窗 / fallback | `packageEvent/.../event-detail/components/` |
-| 跨多 Tab/多活动的帖子 UI | `components/post/`（`FeedPostList`、`PostOwnerDeleteButton` 等） |
 | 顶栏 / 底栏 / Tab 页头 | `components/navigation/` |
 | 活动列表卡片 / 状态徽章 | `components/event/` |
-| 新帖子 TypeScript 类型 | `types/post.ts` |
 
-**何时从页面局部升格？** 当**第二个消费者**（含分包页）需要 import 时，再迁入对应域（`profile/`、`post/`、`navigation/`、`event/` 等）并改走 barrel。
+**何时从页面局部升格？** 当**第二个消费者**（含分包页）需要 import 时，再迁入对应域（`profile/`、`navigation/`、`event/` 等）并改走 barrel。
 
 ## Input 约定
 

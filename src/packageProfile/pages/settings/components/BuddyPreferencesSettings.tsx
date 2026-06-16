@@ -99,9 +99,9 @@ export function BuddyPreferencesSettings() {
   return (
     <View className="s-match-prefs">
       <View className="s-match-prefs__banner">
-        <Text className="s-match-prefs__banner-title">用于发帖与行程辅助</Text>
+        <Text className="s-match-prefs__banner-title">用于行程辅助与 AI 推荐</Text>
         <Text className="s-match-prefs__banner-desc">
-          发布帖子、生成攻略时会自动补充画像；此处可手动校正，让 AI 更了解你的出行偏好。
+          生成攻略时会自动补充画像；此处可手动校正，让 AI 更了解你的出行偏好。
         </Text>
         <Text className="s-match-prefs__banner-preview">当前：{preview}</Text>
       </View>

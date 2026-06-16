@@ -18,7 +18,7 @@ describe('parseStreamEventPayload', () => {
     expect(parseStreamEventPayload({ code: 200, message: 'ok', data: {} })).toBeNull();
   });
 
-  it('parses message_complete, conversation_patch, and post_created', () => {
+  it('parses message_complete and conversation_patch', () => {
     expect(
       parseStreamEventPayload({
         type: 'message_complete',
@@ -38,18 +38,6 @@ describe('parseStreamEventPayload', () => {
     ).toEqual({
       type: 'conversation_patch',
       state: { version: 1, flow: 'idle' },
-    });
-    expect(
-      parseStreamEventPayload({
-        type: 'post_created',
-        postId: 'p1',
-        activityLegacyId: 4,
-      }),
-    ).toEqual({
-      type: 'post_created',
-      postId: 'p1',
-      activityLegacyId: 4,
-      post: undefined,
     });
   });
 

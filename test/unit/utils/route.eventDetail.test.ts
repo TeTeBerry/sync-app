@@ -14,6 +14,7 @@ vi.mock('@tarojs/taro', () => ({
 }));
 
 vi.mock('@/constants/api', () => ({
+  API_BASE_URL: 'https://api.test',
   isLiveApi: () => false,
 }));
 
@@ -48,11 +49,6 @@ describe('event detail routing', () => {
     expect(buildEventDetailQuery(42)).toEqual({
       id: '42',
       activityLegacyId: '42',
-    });
-    expect(buildEventDetailQuery(7, { postId: 'p1' })).toEqual({
-      id: '7',
-      activityLegacyId: '7',
-      postId: 'p1',
     });
   });
 

@@ -44,29 +44,6 @@ button[type='default'][class*='s-']::after {
   display: none !important;
 }
 
-/* 微信 open-type 按钮（分享等）默认白底会撑满一行 */
-button.s-post-share-btn__hit,
-button[class*='s-post-share-btn'],
-button[class*='s-post-action-menu__trigger'],
-button[class*='s-home-post__action'],
-button[class*='s-event-post__action'] {
-  width: auto !important;
-  max-width: none;
-  min-height: 0 !important;
-  line-height: 1 !important;
-  border: none !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  background: transparent !important;
-  background-color: transparent !important;
-}
-
-button[class*='s-home-post__action']::after,
-button[class*='s-event-post__action']::after {
-  display: none !important;
-  border: none !important;
-}
-
 button[class*='s-'] .s-btn-label,
 button[class*='s-'] [class$='-text'],
 button[class*='s-'] [class*='__text'] {

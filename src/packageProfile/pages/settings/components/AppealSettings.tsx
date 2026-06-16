@@ -10,16 +10,16 @@ import { Text, View } from '@tarojs/components';
 
 const FAQ = [
   {
-    q: '为什么会突然被限制发帖？',
+    q: '为什么会突然被限制互动？',
     a: '常见原因包括：发布转票/加价出票、站外引流、重复灌水，或被多名用户举报为黄牛。AI 审核也可能误判，可通过下方流程申诉。',
   },
   {
     q: '限制多久会解除？',
-    a: '限制到期后会自动恢复发帖与评论。具体解禁时间可在个人页或 AI 助手顶部的提示条中查看。',
+    a: '限制到期后会自动恢复。具体解禁时间可在个人页或 AI 助手顶部的提示条中查看。',
   },
   {
     q: '如何申诉误伤？',
-    a: '先检查「我的组队帖」正文是否含票务交易、微信号等违规表述；然后在帮助与反馈中说明情况，我们会人工复核。',
+    a: '在帮助与反馈中说明情况并附上相关截图，我们会人工复核。',
   },
 ] as const;
 
@@ -49,7 +49,7 @@ export function AppealSettings() {
       <View className="s-settings__card s-appeal-settings__steps">
         <Text className="s-appeal-settings__section-title">申诉步骤</Text>
         <Text className="s-appeal-settings__step">
-          1. 打开「我的 → 我的组队帖」，检查并修改违规表述
+          1. 回顾近期在 AI 对话、现场资讯等场景的发言是否含违规表述
         </Text>
         <Text className="s-appeal-settings__step">2. {SUPPORT_FEEDBACK_HINT}</Text>
         <Text className="s-appeal-settings__step">

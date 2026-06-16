@@ -74,31 +74,6 @@ describe('sanitizeImageList', () => {
   });
 });
 
-describe('resolvePostGridImageSrc', () => {
-  afterEach(() => {
-    vi.unstubAllEnvs();
-  });
-
-  it('prefers resolved URL over original', async () => {
-    const { resolvePostGridImageSrc } = await import('@/utils/imageUrl');
-    const original = 'cloud://env.x/ugc/posts/u1/a.jpg';
-    const resolved = 'https://tmp.example/a.jpg';
-    expect(resolvePostGridImageSrc(original, resolved)).toBe(resolved);
-  });
-
-  it('returns empty string for unresolved cloud fileIDs', async () => {
-    const { resolvePostGridImageSrc } = await import('@/utils/imageUrl');
-    const cloud = 'cloud://env.x/ugc/posts/u1/a.jpg';
-    expect(resolvePostGridImageSrc(cloud, '')).toBe('');
-  });
-
-  it('keeps non-cloud URLs when resolution is unavailable', async () => {
-    const { resolvePostGridImageSrc } = await import('@/utils/imageUrl');
-    const url = 'https://picsum.photos/seed/x/200/200';
-    expect(resolvePostGridImageSrc(url, '')).toBe(url);
-  });
-});
-
 describe('resolveImageWithFallbackDisplaySrc', () => {
   it('blocks unresolved cloud fileIDs', async () => {
     const { resolveImageWithFallbackDisplaySrc } = await import('@/utils/imageUrl');

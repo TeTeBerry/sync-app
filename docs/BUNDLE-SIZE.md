@@ -71,8 +71,7 @@ PR 若主包上涨 >50 KB，请在 PR 说明原因并更新上表（可选）。
 | 阶段 | 延迟（约） | 网络请求 / 行为 |
 |------|-----------|-----------------|
 | 首屏 | 0ms | `GET /activities/:legacyId`（可命中首页/活动列表 seed 缓存） |
-| 帖子列表 | 0ms | `GET /posts?activityLegacyId=…`（与活动详情并行） |
-| `secondaryReady` | +120ms | `GET /users/me`（发帖风控 / 头像） |
+| `secondaryReady` | +120ms | `GET /users/me`（账号风控状态 / 头像） |
 | `aiWarmReady` | +400ms | 空闲预加载 AI 分包（`warmAiAssistant`，非 REST） |
 | 切到「现场资讯」Tab | 用户操作 | `GET …/live-info`（`EventLiveInfoTab` 懒加载，默认 Tab 不请求） |
 

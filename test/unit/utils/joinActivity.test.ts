@@ -8,6 +8,7 @@ vi.mock('@/hooks/sync/activities', () => ({
 }));
 
 vi.mock('@/constants/api', () => ({
+  API_BASE_URL: 'https://api.test',
   isApiEnabled: vi.fn(() => true),
 }));
 

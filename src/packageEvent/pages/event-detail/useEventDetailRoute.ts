@@ -19,8 +19,6 @@ export function useEventDetailRoute() {
     () => resolveEventDetailIdFromQuery(router.params, activeActivityLegacyId),
     [activeActivityLegacyId, router.params],
   );
-  const highlightPostId = router.params.postId?.trim() || '';
-
   useEffect(() => {
     if (Number.isFinite(eventId) && eventId > 0) {
       useNavigationStore.getState().setActiveActivityLegacyId(eventId);
@@ -37,7 +35,6 @@ export function useEventDetailRoute() {
 
   return {
     eventId,
-    highlightPostId,
     scrollTop,
     setScrollTop,
     secondaryReady,

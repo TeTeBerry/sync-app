@@ -9,16 +9,16 @@ import { useOverlayLock } from '../../../../hooks/useOverlayLock';
 
 const FAQ_QA = [
   {
-    q: '如何发布组队帖？',
-    a: '进入活动详情页，通过 AI 助手描述你的需求，或在「我的组队帖」中管理已发布内容。',
+    q: '如何使用 AI 出行攻略？',
+    a: '进入活动详情或 AI 助手，点「AI出行攻略」或描述出发地、人数、预算，即可生成交通/住宿/散场建议。',
   },
   {
-    q: '如何找到同行伙伴？',
-    a: '浏览热门帖子或在活动详情页查看帖流，也可通过 AI 助手发布帖子。',
+    q: '如何查看活动信息？',
+    a: '在首页或活动 Tab 浏览电音节，进入活动详情可查看阵容、报名与行程入口。',
   },
   {
     q: '如何提升个人影响力？',
-    a: '参与活动、成功组队、发布优质帖子均可获得互动与认可。',
+    a: '参与活动、完善个人资料、使用 AI 攻略与现场资讯等功能，可获得更好的活动体验。',
   },
 ] as const;
 
@@ -100,7 +100,7 @@ export function HelpFeedbackSettings() {
                 className="s-settings-help__textarea"
                 value={content}
                 maxlength={CONTENT_MAX}
-                placeholder="例如：活动页加载慢、帖子加载异常、希望增加某功能…"
+                placeholder="例如：活动页加载慢、攻略生成异常、希望增加某功能…"
                 placeholderStyle="color: rgba(255,255,255,0.28)"
                 disabled={submitting}
                 focus
