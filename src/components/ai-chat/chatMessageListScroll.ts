@@ -8,6 +8,6 @@ export function shouldSuppressAutoScrollForMessage(
   if (msg.recommendedActivity) return true;
   if (msg.createdPost) return true;
   if (msg.matchedPosts?.length) return true;
-  if (msg.travelGuide?.imagePath?.trim()) return true;
+  if (msg.travelGuide?.plan) return true;
   return false;
 }

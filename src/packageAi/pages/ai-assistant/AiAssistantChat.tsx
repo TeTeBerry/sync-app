@@ -12,7 +12,7 @@ import { AiGuidePlanSheet } from '../../../components/ai-chat/AiGuidePlanSheet';
 import { useKeyboardInset } from '../../../hooks/useKeyboardInset';
 import type { inferUserGenderFromName } from '../../../utils/inferAuthorGender';
 import type { AiGuidePlanFormValues } from '../../../types/travelGuide';
-import { Canvas, View } from '@tarojs/components';
+import { View } from '@tarojs/components';
 import { invalidateCache } from '../../../hooks/useApiQuery';
 import { useAiBuddyPost } from '../../../hooks/useAiBuddyPost';
 import { useAiBuddySearchChat } from '../../../hooks/useAiBuddySearchChat';
@@ -21,11 +21,8 @@ import { resolveActivityByKeyword } from '../../../api/syncApi';
 import { selectSetActiveActivityLegacyId, useNavigationStore } from '../../../stores';
 import { parseActivityDayCount } from '../../../utils/parseActivityDayCount';
 import { useActivityDetailQuery } from '../../../hooks/useSyncApi';
-import { TRAVEL_GUIDE_CANVAS_ID } from '../../../components/ai-chat/travelGuideWallpaper/renderTravelGuideImage';
-import { TRAVEL_GUIDE_MAX_CANVAS_HEIGHT } from '../../../components/ai-chat/travelGuideWallpaper/renderTravelGuideImage';
 import { eventCityFromLocation } from '../../../utils/travelGuideDepartureSuggestions';
 import { shouldSuppressAutoScrollForMessage } from '../../../components/ai-chat/chatMessageListScroll';
-import { isOffscreenCanvasSupported } from '../../../utils/offscreenCanvas';
 export type AiAssistantChatProps = {
   initialMessage?: string | null;
   initialOpenAiGuideSheet?: boolean;
@@ -397,27 +394,8 @@ export function AiAssistantChat({
     buddyPost.isPublishing ||
     buddySearch.isSearching;
 
-  const needsPageGuideCanvas =
-    !isOffscreenCanvasSupported() && travelGuide.isGenerating;
-
   return (
     <View className="s-ai-assistant-chat">
-      {needsPageGuideCanvas ? (
-        <Canvas
-          type="2d"
-          id={TRAVEL_GUIDE_CANVAS_ID}
-          canvasId={TRAVEL_GUIDE_CANVAS_ID}
-          style={{
-            position: 'fixed',
-            left: '-9999px',
-            top: 0,
-            width: '750px',
-            height: `${TRAVEL_GUIDE_MAX_CANVAS_HEIGHT}px`,
-            pointerEvents: 'none',
-          }}
-        />
-      ) : null}
-
       <AccountRiskBanner
         accountRisk={accountRisk}
         className="s-account-risk-banner--chat"
@@ -434,7 +412,6 @@ export function AiAssistantChat({
         userGender={userGender}
         onSelectSuggestedReply={handleSelectSuggestedReply}
         onRegenerateTravelGuide={travelGuide.handleRegenerate}
-        onShareTravelGuide={(path) => void travelGuide.handleShareGuide(path)}
         onBuddyPostFromTravelGuide={buddyPost.openBuddyPostSheetFromTravelGuide}
       />
       <View

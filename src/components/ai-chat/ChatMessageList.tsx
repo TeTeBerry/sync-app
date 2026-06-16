@@ -23,7 +23,6 @@ export function ChatMessageList({
   userGender,
   onSelectSuggestedReply,
   onRegenerateTravelGuide,
-  onShareTravelGuide,
   onBuddyPostFromTravelGuide,
 }: {
   messages: ChatUiMessage[];
@@ -37,7 +36,6 @@ export function ChatMessageList({
   userGender?: AuthorGender;
   onSelectSuggestedReply: (reply: string) => void;
   onRegenerateTravelGuide?: (form: AiGuidePlanFormValues) => void;
-  onShareTravelGuide?: (imagePath: string) => void;
   onBuddyPostFromTravelGuide?: (form: AiGuidePlanFormValues) => void;
 }) {
   const [scrollIntoView, setScrollIntoView] = useState<string | undefined>();
@@ -124,7 +122,6 @@ export function ChatMessageList({
             userGender={userGender}
             onSelectSuggestedReply={onSelectSuggestedReply}
             onRegenerateTravelGuide={onRegenerateTravelGuide}
-            onShareTravelGuide={onShareTravelGuide}
             onBuddyPostFromTravelGuide={onBuddyPostFromTravelGuide}
           />
         ))}

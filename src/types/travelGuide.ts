@@ -18,9 +18,33 @@ export interface TravelGuideHotelItem {
   bookingHint?: string;
 }
 
+export interface TravelGuideAccommodationScheme {
+  label: string;
+  name: string;
+  note: string;
+  reason: string;
+  bookingHint?: string;
+}
+
 export interface TravelGuideSpotItem {
   name: string;
   note: string;
+}
+
+export interface TravelGuideTicketChannel {
+  name: string;
+  note: string;
+}
+
+export interface TravelGuideVenueTransportOption {
+  label: string;
+  lines: string[];
+}
+
+export interface TravelGuideBudgetItem {
+  label: string;
+  range: string;
+  note?: string;
 }
 
 export interface TravelGuidePlan {
@@ -33,10 +57,24 @@ export interface TravelGuidePlan {
   accommodationNights: number;
   selfDrive: boolean;
   transport: { title: string; lines: string[] };
-  accommodation: { title: string; hotels: TravelGuideHotelItem[] };
+  accommodation: {
+    title: string;
+    hotels: TravelGuideHotelItem[];
+    schemes?: TravelGuideAccommodationScheme[];
+  };
   parking?: { title: string; lines: string[] };
   nightlife: { title: string; spots: TravelGuideSpotItem[] };
   tips: { title: string; items: string[] };
+  documents?: { title: string; items: string[] };
+  tickets?: { title: string; channels: TravelGuideTicketChannel[] };
+  essentials?: {
+    title: string;
+    network: string[];
+    payment: string[];
+    apps: string[];
+  };
+  venueTransport?: { title: string; options: TravelGuideVenueTransportOption[] };
+  budget?: { title: string; items: TravelGuideBudgetItem[] };
 }
 
 export interface GenerateTravelGuideResult {
@@ -44,7 +82,7 @@ export interface GenerateTravelGuideResult {
 }
 
 export type TravelGuideChatPayload = {
-  imagePath: string;
+  guideId: string;
   plan: TravelGuidePlan;
   form: AiGuidePlanFormValues;
 };

@@ -100,7 +100,7 @@ export function buildTravelGuideCollectPrompt(missing: TravelGuideSlotKey[]): st
     parts.push('预算（可直接回复「经济」「舒适」或「豪华」）');
   }
   const need = parts.join('、');
-  const lines = ['好的，我来帮你生成出行攻略长图。', '', `请补充：${need}。`];
+  const lines = ['好的，我来帮你生成出行攻略。', '', `请补充：${need}。`];
   if (missing.length === 1 && missing[0] === 'budgetTier') {
     lines.push('直接发送预算档位即可，例如：舒适');
   } else {

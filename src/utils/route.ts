@@ -43,6 +43,7 @@ export const ROUTES = {
   EXCLUSIVE_ITINERARY: '/packageEvent/pages/exclusive-itinerary/index',
   MY_ITINERARY: '/packageEvent/pages/my-itinerary/index',
   PERSONALITY_TEST: '/packageEvent/pages/personality-test/index',
+  AI_TRAVEL_GUIDE: '/packageEvent/pages/ai-travel-guide/index',
   NOTIFICATIONS: '/packageProfile/pages/notifications/index',
 } as const;
 
@@ -63,8 +64,13 @@ type PreloadTabPath =
 
 /** Stack pages per tab; event/profile subpackages preload on tab switch */
 const PRELOAD_PAGE_ROUTES_BY_TAB: Record<PreloadTabPath, RoutePath[]> = {
-  [ROUTES.HOME]: [ROUTES.EVENT_DETAIL, ROUTES.NOTIFICATIONS, ROUTES.PERSONALITY_TEST],
-  [ROUTES.AI]: [ROUTES.EVENT_DETAIL],
+  [ROUTES.HOME]: [
+    ROUTES.EVENT_DETAIL,
+    ROUTES.NOTIFICATIONS,
+    ROUTES.PERSONALITY_TEST,
+    ROUTES.AI_TRAVEL_GUIDE,
+  ],
+  [ROUTES.AI]: [ROUTES.EVENT_DETAIL, ROUTES.AI_TRAVEL_GUIDE],
   [ROUTES.EVENTS]: [ROUTES.EVENT_DETAIL],
   [ROUTES.PROFILE]: [ROUTES.NOTIFICATIONS],
 };
@@ -544,6 +550,16 @@ export function goPersonalityTest(options?: { viewResult?: boolean }) {
   }
   const url = buildPageUrl(ROUTES.PERSONALITY_TEST, query);
   void ensureEventSubpackageLoaded().then(() => navigateToSafe(url));
+}
+
+export function goAiTravelGuide(guideId: string) {
+  const id = guideId.trim();
+  if (!id) {
+    void Taro.showToast({ title: '攻略信息无效', icon: 'none' });
+    return;
+  }
+  preloadEventSubpackage();
+  navigateToSafe(buildPageUrl(ROUTES.AI_TRAVEL_GUIDE, { guideId: id }));
 }
 
 function resolveActivityLegacyId(meta?: NotificationMeta): number | null {

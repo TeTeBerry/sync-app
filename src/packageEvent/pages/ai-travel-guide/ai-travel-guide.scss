@@ -1,0 +1,92 @@
+.s-ai-travel-guide-page {
+  min-height: 100vh;
+  background: var(--background);
+  display: flex;
+  flex-direction: column;
+}
+
+.s-ai-travel-guide-page__scroll {
+  flex: 1;
+}
+
+.s-ai-travel-guide-page__inner {
+  padding: 12px 16px 24px;
+}
+
+.s-ai-travel-guide-page__disclaimer {
+  display: block;
+  margin-top: 16px;
+  font-size: 11px;
+  line-height: 1.5;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.42);
+}
+
+.s-ai-travel-guide-page__footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  gap: 10px;
+  padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+  background: rgba(8, 10, 16, 0.94);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+}
+
+.s-ai-travel-guide-page__footer-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 12px 10px;
+  border-radius: 14px;
+  background: rgb(38, 38, 40);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+
+  &--primary {
+    flex: 1.2;
+    background: linear-gradient(135deg, #ff0066 0%, #cc0052 100%);
+    border: none;
+    box-shadow: 0 6px 18px rgba(255, 0, 102, 0.32);
+  }
+
+  &--ghost {
+    flex: 0.9;
+  }
+
+  &--pressed {
+    opacity: 0.92;
+  }
+}
+
+.s-ai-travel-guide-page__footer-btn-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.s-ai-travel-guide-page__empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 32px 24px;
+}
+
+.s-ai-travel-guide-page__empty-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.s-ai-travel-guide-page__empty-sub {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.56);
+  text-align: center;
+}

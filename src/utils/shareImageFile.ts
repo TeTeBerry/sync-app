@@ -30,7 +30,7 @@ async function promptOpenAlbumSettings(): Promise<void> {
   }
 }
 
-export async function saveTravelGuideImageToAlbum(filePath: string): Promise<void> {
+async function saveImageFileToAlbum(filePath: string): Promise<void> {
   const allowed = await ensureWritePhotosAlbumPermission();
   if (!allowed) {
     await promptOpenAlbumSettings();
@@ -55,7 +55,7 @@ async function offerShareFallback(filePath: string): Promise<void> {
   });
 
   if (tapIndex === 0) {
-    await saveTravelGuideImageToAlbum(filePath);
+    await saveImageFileToAlbum(filePath);
     void Taro.showToast({
       title: '已保存到相册，可从相册发送给好友',
       icon: 'none',
@@ -69,13 +69,11 @@ async function offerShareFallback(filePath: string): Promise<void> {
   }
 }
 
-/**
- * 分享攻略长图：小程序调起微信「发送给朋友」图片菜单；失败时提供保存/预览兜底。
- */
-export async function shareTravelGuideImage(path: string): Promise<void> {
+/** 小程序调起微信「发送给朋友」图片菜单；失败时提供保存/预览兜底。 */
+export async function shareImageFile(path: string): Promise<void> {
   const filePath = path?.trim();
   if (!filePath) {
-    throw new Error('攻略图片不存在，请重新生成');
+    throw new Error('图片不存在，请重新生成');
   }
 
   if (process.env.TARO_ENV === 'weapp') {

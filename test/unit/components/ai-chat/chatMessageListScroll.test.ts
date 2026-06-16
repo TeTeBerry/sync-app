@@ -24,7 +24,7 @@ describe('shouldSuppressAutoScrollForMessage', () => {
         from: 'ai',
         text: '攻略已生成',
         travelGuide: {
-          imagePath: '/tmp/guide.png',
+          guideId: '2',
           form: {
             departure: '上海',
             headcount: 2,

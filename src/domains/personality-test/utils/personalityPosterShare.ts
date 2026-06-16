@@ -1,5 +1,5 @@
 import Taro from '@tarojs/taro';
-import { shareTravelGuideImage } from '@/utils/travelGuideShare';
+import { shareImageFile } from '@/utils/shareImageFile';
 import {
   ensureWritePhotosAlbumPermission,
   promptOpenAlbumSettings,
@@ -23,7 +23,7 @@ export async function sharePersonalityPoster(
   void Taro.showLoading({ title: '生成海报中…', mask: true });
   try {
     const path = await generatePersonalityPoster(result, true);
-    await shareTravelGuideImage(path);
+    await shareImageFile(path);
   } finally {
     void Taro.hideLoading();
   }

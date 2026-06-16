@@ -12,12 +12,8 @@ import { createMessageId } from './ai-chat/createMessageId';
 import type { ChatUiMessage } from '../types/aiChat';
 import type { AiGuidePlanFormValues } from '../types/travelGuide';
 import { travelGuideBudgetLabel } from '../types/travelGuide';
-import {
-  renderTravelGuideImage,
-  shareTravelGuideImage,
-} from '../components/ai-chat/travelGuideWallpaper/renderTravelGuideImage';
+import { saveTravelGuideDetail } from '../domains/travel-guide/utils/travelGuideDetailStorage';
 import { isApiEnabled } from '../constants/api';
-import { persistTravelGuideImage } from '../utils/travelGuideImageStorage';
 import {
   buildTravelGuideCollectPrompt,
   buildTravelGuideSuggestedReplies,
@@ -138,19 +134,19 @@ export function useAiTravelGuide(options: {
         }
 
         const { plan } = await generateTravelGuide(activityLegacyId, form);
-        const tempImagePath = await renderTravelGuideImage(plan);
-        const imagePath = await persistTravelGuideImage(
-          tempImagePath,
-          sessionIdRef.current,
-          aiMsgId,
-        );
+        const guideId = aiMsgId;
+        saveTravelGuideDetail(guideId, {
+          plan,
+          form,
+          activityLegacyId,
+        });
 
         const doneMsg: ChatUiMessage = {
           id: aiMsgId,
           from: 'ai',
-          text: '已为你生成出行攻略，可保存或分享给同行伙伴～',
+          text: '已为你生成出行攻略，点击查看完整方案～',
           streaming: false,
-          travelGuide: { imagePath, plan, form },
+          travelGuide: { guideId, plan, form },
         };
 
         messagesRef.current = messagesRef.current.map((m) =>
@@ -177,13 +173,12 @@ export function useAiTravelGuide(options: {
       clearGuideCollect,
       messagesRef,
       onPlanningMessagesShown,
-      sessionIdRef,
       setMessages,
     ],
   );
 
   /**
-   * 对话生成攻略：解析出发地/人数/预算等，齐全则直接生成长图；否则多轮追问。
+   * 对话生成攻略：解析出发地/人数/预算等，齐全则直接生成攻略卡片；否则多轮追问。
    * @returns true 表示已消费该条消息，勿再走组队聊天流。
    */
   const handleTravelGuideChatMessage = useCallback(
@@ -263,18 +258,6 @@ export function useAiTravelGuide(options: {
     setSheetOpen(true);
   }, []);
 
-  const handleShareGuide = useCallback(async (imagePath: string) => {
-    try {
-      await shareTravelGuideImage(imagePath);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : '分享失败，请稍后重试';
-      if (/取消|cancel/i.test(message)) {
-        return;
-      }
-      void Taro.showToast({ title: message, icon: 'none' });
-    }
-  }, []);
-
   return {
     sheetOpen,
     setSheetOpen,
@@ -284,7 +267,6 @@ export function useAiTravelGuide(options: {
     clearGuideCollect,
     handleSheetSubmit,
     handleRegenerate,
-    handleShareGuide,
     sheetInitialValues,
     defaultNights,
   };

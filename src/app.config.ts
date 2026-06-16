@@ -22,6 +22,7 @@ export default {
         'pages/exclusive-itinerary/index',
         'pages/my-itinerary/index',
         'pages/personality-test/index',
+        'pages/ai-travel-guide/index',
       ],
     },
     {

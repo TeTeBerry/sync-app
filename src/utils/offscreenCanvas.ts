@@ -55,18 +55,3 @@ export function createOffscreenCanvas(
 
   return null;
 }
-
-export function isOffscreenCanvasSupported(): boolean {
-  if (typeof getWx()?.createOffscreenCanvas === 'function') {
-    return true;
-  }
-  if (typeof document === 'undefined') {
-    return false;
-  }
-  try {
-    const probe = document.createElement('canvas');
-    return typeof probe.getContext === 'function';
-  } catch {
-    return false;
-  }
-}

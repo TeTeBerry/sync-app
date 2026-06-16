@@ -54,7 +54,6 @@ export type ChatMessageRowProps = {
   userGender?: AuthorGender;
   onSelectSuggestedReply: (reply: string) => void;
   onRegenerateTravelGuide?: (form: AiGuidePlanFormValues) => void;
-  onShareTravelGuide?: (imagePath: string) => void;
   onBuddyPostFromTravelGuide?: (form: AiGuidePlanFormValues) => void;
 };
 
@@ -68,7 +67,6 @@ function ChatMessageRowInner({
   userGender,
   onSelectSuggestedReply,
   onRegenerateTravelGuide,
-  onShareTravelGuide,
   onBuddyPostFromTravelGuide,
 }: ChatMessageRowProps) {
   const isUser = msg.from === 'user';
@@ -81,8 +79,8 @@ function ChatMessageRowInner({
   const hasMatchedPosts = Boolean(msg.matchedPosts?.length);
   const hasActivityCard = Boolean(msg.recommendedActivity);
   const hasSuggestedReplies = Boolean(msg.suggestedReplies?.length);
-  const travelGuideImagePath = msg.travelGuide?.imagePath?.trim();
-  const hasTravelGuide = Boolean(travelGuideImagePath);
+  const travelGuidePayload = msg.travelGuide;
+  const hasTravelGuide = Boolean(travelGuidePayload?.plan && travelGuidePayload?.form);
   const showEmbedBelow =
     !isUser &&
     (hasPostCards ||
@@ -201,15 +199,18 @@ function ChatMessageRowInner({
                   onSelect={onSelectSuggestedReply}
                 />
               ) : null}
-              {travelGuideImagePath && msg.travelGuide?.form ? (
+              {hasTravelGuide && travelGuidePayload ? (
                 <AiGuideResultCard
-                  imagePath={travelGuideImagePath}
+                  guideId={travelGuidePayload.guideId || msg.id}
+                  plan={travelGuidePayload.plan}
+                  form={travelGuidePayload.form}
                   disabled={isStreaming}
-                  onRegenerate={() => onRegenerateTravelGuide?.(msg.travelGuide!.form)}
-                  onShare={() => onShareTravelGuide?.(travelGuideImagePath)}
+                  onRegenerate={() =>
+                    onRegenerateTravelGuide?.(travelGuidePayload.form)
+                  }
                   onBuddyPostFromGuide={
                     onBuddyPostFromTravelGuide
-                      ? () => onBuddyPostFromTravelGuide(msg.travelGuide!.form)
+                      ? () => onBuddyPostFromTravelGuide(travelGuidePayload.form)
                       : undefined
                   }
                 />
