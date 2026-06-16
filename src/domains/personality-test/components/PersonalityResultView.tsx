@@ -1,0 +1,364 @@
+import type { FC } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import Taro from '@tarojs/taro';
+import { Bookmark, MapPin, RefreshCw, Share2 } from '@/components/icons';
+import { Button } from '@/components/ui';
+import {
+  getCachedPersonalityTestCatalog,
+  getDjSoulProfile,
+  getPersonalityMeta,
+  loadPersonalityTestCatalog,
+  savePersonalityPoster,
+  sharePersonalityPoster,
+} from '@/domains/personality-test';
+import { getPreferredDjIdsForItinerary } from '@/domains/personality-test/utils/itineraryDjPrefs';
+import type { PersonalityEventRecommendation, PersonalityTestResult } from '../types';
+import { getActivityStatusFromActivity } from '@/utils/activityStatus';
+import { goEventDetail, goExclusiveItinerary } from '@/utils/route';
+import { Text, View } from '@tarojs/components';
+
+type PersonalityResultViewProps = {
+  result: PersonalityTestResult;
+  onRestart: () => void;
+};
+
+function tierLabel(tier: string): string {
+  if (tier === 'must_see') return '必看';
+  if (tier === 'recommended') return '推荐';
+  return '挑战';
+}
+
+function eventIncludesDj(
+  event: PersonalityEventRecommendation,
+  djName: string,
+): boolean {
+  const target = djName.trim().toLowerCase();
+  return event.matchedDjs.some((name) => name.trim().toLowerCase() === target);
+}
+
+function isUpcomingEvent(event: PersonalityEventRecommendation): boolean {
+  return getActivityStatusFromActivity(event.dateLabel, event.name) !== 'ended';
+}
+
+export const PersonalityResultView: FC<PersonalityResultViewProps> = ({
+  result,
+  onRestart,
+}) => {
+  const [catalog, setCatalog] = useState(() => getCachedPersonalityTestCatalog());
+  const soul = result.recommendations.soulMatch;
+  const [similarityDisplay, setSimilarityDisplay] = useState(0);
+
+  useEffect(() => {
+    void loadPersonalityTestCatalog()
+      .then(setCatalog)
+      .catch(() => undefined);
+  }, []);
+
+  useEffect(() => {
+    const target = soul.soulSimilarity;
+    if (target <= 0) {
+      setSimilarityDisplay(0);
+      return;
+    }
+    let frame = 0;
+    const steps = 20;
+    const timer = setInterval(() => {
+      frame += 1;
+      setSimilarityDisplay(Math.round((target * frame) / steps));
+      if (frame >= steps) {
+        clearInterval(timer);
+        setSimilarityDisplay(target);
+      }
+    }, 35);
+    return () => clearInterval(timer);
+  }, [soul.soulSimilarity]);
+
+  const lineupEvents = result.recommendedEvents.filter(
+    (event) => event.matchedDjs.length > 0 && isUpcomingEvent(event),
+  );
+  const confirmedSoulEvent = lineupEvents.find((event) =>
+    eventIncludesDj(event, soul.djName),
+  );
+
+  const liveInfoLabel = useMemo(() => {
+    if (!confirmedSoulEvent) {
+      return '';
+    }
+    return [
+      confirmedSoulEvent.name,
+      confirmedSoulEvent.dateLabel,
+      confirmedSoulEvent.location,
+    ]
+      .filter(Boolean)
+      .join(' · ');
+  }, [confirmedSoulEvent]);
+
+  if (!catalog) {
+    return (
+      <View className="s-personality-result">
+        <Text className="s-personality-result__celebrate">加载结果中…</Text>
+      </View>
+    );
+  }
+
+  const primary = getPersonalityMeta(catalog, result.score.primaryType);
+  const secondary = result.score.secondaryType
+    ? getPersonalityMeta(catalog, result.score.secondaryType)
+    : null;
+  const soulProfile = getDjSoulProfile(catalog, soul.djId);
+
+  const blendLabel =
+    result.score.blendRatio && secondary
+      ? `${result.score.blendRatio.primary}% ${primary.label} + ${result.score.blendRatio.secondary}% ${secondary.label}`
+      : null;
+
+  const djSections = [
+    { title: '必看 Set', items: result.recommendations.mustSee },
+    { title: '推荐 Set', items: result.recommendations.recommended },
+    { title: '挑战曲风', items: result.recommendations.challenge },
+  ].filter((section) => section.items.length > 0);
+
+  const handleGenerateItinerary = () => {
+    if (!confirmedSoulEvent) {
+      void Taro.showToast({
+        title: '该活动阵容尚未官宣，暂无法生成行程',
+        icon: 'none',
+      });
+      return;
+    }
+    const djIds = getPreferredDjIdsForItinerary(result.recommendations);
+    goExclusiveItinerary(confirmedSoulEvent.activityLegacyId, djIds);
+  };
+
+  const handleSetReminder = () => {
+    if (!confirmedSoulEvent) {
+      void Taro.showToast({
+        title: '阵容公布后可设置演出提醒',
+        icon: 'none',
+      });
+      return;
+    }
+    void Taro.showModal({
+      title: '开场提醒',
+      content: `将在 ${soul.djName} 于「${confirmedSoulEvent.name}」的演出时段公布后通知你。`,
+      confirmText: '好的',
+      showCancel: false,
+    });
+  };
+
+  const handleSavePoster = async () => {
+    try {
+      await savePersonalityPoster(result);
+    } catch {
+      void Taro.showToast({ title: '保存失败，请稍后重试', icon: 'none' });
+    }
+  };
+
+  const handleSharePoster = async () => {
+    try {
+      await sharePersonalityPoster(result);
+    } catch {
+      void Taro.showToast({ title: '分享失败，请稍后重试', icon: 'none' });
+    }
+  };
+
+  return (
+    <View className="s-personality-result">
+      <Text className="s-personality-result__celebrate">🎉 你的本命 DJ 是…</Text>
+
+      <View
+        className="s-personality-result__hero"
+        style={{ borderColor: `${primary.primaryColor}44` }}
+      >
+        <View className="s-personality-result__hero-glow" aria-hidden />
+        <Text className="s-personality-result__hero-emoji" aria-hidden>
+          {primary.emoji}
+        </Text>
+        <Text className="s-personality-result__hero-dj">
+          {primary.emoji} {soul.djName} {primary.emoji}
+        </Text>
+        <Text className="s-personality-result__hero-genre">{soul.genreLabel}</Text>
+
+        <View className="s-personality-result__similarity">
+          <View className="s-personality-result__similarity-ring" aria-hidden>
+            <View
+              className="s-personality-result__similarity-arc"
+              style={{
+                background: `conic-gradient(${primary.primaryColor} ${similarityDisplay * 3.6}deg, rgba(255,255,255,0.08) 0deg)`,
+              }}
+            />
+          </View>
+          <View className="s-personality-result__similarity-copy">
+            <Text className="s-personality-result__similarity-label">灵魂相似度</Text>
+            <Text
+              className="s-personality-result__similarity-value"
+              style={{ color: primary.primaryColor }}
+            >
+              {similarityDisplay}%
+            </Text>
+          </View>
+        </View>
+
+        <Text className="s-personality-result__hero-tagline">
+          「{result.narrative.tagline}」
+        </Text>
+      </View>
+
+      <View
+        className="s-personality-result__chip"
+        style={{ borderColor: `${primary.primaryColor}44` }}
+      >
+        <Text className="s-personality-result__chip-text">
+          {primary.emoji} {primary.label} · {primary.labelEn}
+        </Text>
+        {blendLabel ? (
+          <Text className="s-personality-result__chip-sub">{blendLabel}</Text>
+        ) : null}
+      </View>
+
+      <View className="s-personality-result__card">
+        <Text className="s-personality-result__section-title">💬 AI 分析</Text>
+        <Text className="s-personality-result__analysis">
+          {result.narrative.aiAnalysis}
+        </Text>
+      </View>
+
+      {result.narrative.spiritConnections.length > 0 ? (
+        <View className="s-personality-result__card">
+          <Text className="s-personality-result__section-title">🎵 你们的精神连接</Text>
+          <View
+            className="s-personality-result__spirit-card"
+            style={{ borderLeftColor: primary.primaryColor }}
+          >
+            {result.narrative.spiritConnections.map((line) => (
+              <Text key={line} className="s-personality-result__spirit-line">
+                {line.includes('=') ? line : `本命艺人 · ${line}`}
+              </Text>
+            ))}
+          </View>
+        </View>
+      ) : null}
+
+      {confirmedSoulEvent ? (
+        <View className="s-personality-result__card">
+          <Text className="s-personality-result__section-title">
+            📍 阵容已官宣 · 你的本命 DJ 在列
+          </Text>
+          <View
+            className="s-personality-result__live-card"
+            onClick={() => goEventDetail(confirmedSoulEvent.activityLegacyId)}
+            role="button"
+            aria-label={liveInfoLabel}
+          >
+            <MapPin size={16} color="#ff4d94" />
+            <Text className="s-personality-result__live-text">{liveInfoLabel}</Text>
+          </View>
+        </View>
+      ) : null}
+
+      {djSections.length > 0 ? (
+        <View className="s-personality-result__card">
+          <Text className="s-personality-result__section-title">阵容推荐</Text>
+          <Text className="s-personality-result__section-meta">
+            基于 E/M/S/C 四维匹配 · 灵魂曲目 {soulProfile.signatureTrack}
+          </Text>
+
+          {djSections.map((section) => (
+            <View key={section.title} className="s-personality-result__dj-section">
+              <Text className="s-personality-result__dj-heading">{section.title}</Text>
+              {section.items.map((item) => (
+                <View
+                  key={`${section.title}-${item.djId}`}
+                  className="s-personality-result__dj-row"
+                >
+                  <View className="s-personality-result__dj-main">
+                    <Text className="s-personality-result__dj-name">{item.djName}</Text>
+                    <Text className="s-personality-result__dj-genre">
+                      {item.genreLabel}
+                    </Text>
+                    {item.highlight ? (
+                      <Text className="s-personality-result__dj-highlight">
+                        {item.highlight}
+                      </Text>
+                    ) : null}
+                  </View>
+                  <View className="s-personality-result__dj-score-col">
+                    <Text className="s-personality-result__dj-score">
+                      {item.matchScore}%
+                    </Text>
+                    <Text className="s-personality-result__dj-tier">
+                      {tierLabel(item.tier)}
+                    </Text>
+                  </View>
+                </View>
+              ))}
+            </View>
+          ))}
+        </View>
+      ) : null}
+
+      {lineupEvents.length > 0 ? (
+        <View className="s-personality-result__card">
+          <Text className="s-personality-result__section-title">活动推荐</Text>
+          <Text className="s-personality-result__section-meta">
+            仅展示已官宣阵容且含推荐 DJ 的活动
+          </Text>
+          {lineupEvents.map((event) => (
+            <View
+              key={event.activityLegacyId}
+              className="s-personality-result__event-row"
+              onClick={() => goEventDetail(event.activityLegacyId)}
+              role="button"
+            >
+              <View className="s-personality-result__event-main">
+                <Text className="s-personality-result__event-name">{event.name}</Text>
+                <Text className="s-personality-result__event-meta">
+                  {[event.dateLabel, event.location].filter(Boolean).join(' · ')}
+                </Text>
+                <Text className="s-personality-result__event-reason">
+                  {event.reason}
+                </Text>
+              </View>
+              <Text className="s-personality-result__event-score">
+                {event.matchScore}
+              </Text>
+            </View>
+          ))}
+        </View>
+      ) : null}
+
+      <View className="s-personality-result__primary-actions">
+        <Button
+          className="s-personality-result__cta s-personality-result__cta--primary"
+          onClick={handleGenerateItinerary}
+        >
+          生成专属朝圣行程
+        </Button>
+        <Button className="s-personality-result__cta" onClick={handleSetReminder}>
+          设置开场提醒
+        </Button>
+      </View>
+
+      <View className="s-personality-result__secondary-actions">
+        <Button
+          className="s-personality-result__secondary"
+          onClick={() => void handleSavePoster()}
+        >
+          <Bookmark size={15} color="#fff" />
+          <Text className="s-personality-result__secondary-label">保存本命</Text>
+        </Button>
+        <Button className="s-personality-result__secondary" onClick={onRestart}>
+          <RefreshCw size={15} color="#fff" />
+          <Text className="s-personality-result__secondary-label">再测一次</Text>
+        </Button>
+        <Button
+          className="s-personality-result__secondary"
+          onClick={() => void handleSharePoster()}
+        >
+          <Share2 size={15} color="#fff" />
+          <Text className="s-personality-result__secondary-label">分享海报</Text>
+        </Button>
+      </View>
+    </View>
+  );
+};

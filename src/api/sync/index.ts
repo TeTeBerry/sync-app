@@ -7,3 +7,4 @@ export * from './chat';
 export * from './itinerary';
 export * from './travelGuide';
 export * from './travelPlan';
+export * from './personalityTest';

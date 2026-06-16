@@ -21,6 +21,7 @@ export default {
         'pages/event-detail/index',
         'pages/exclusive-itinerary/index',
         'pages/my-itinerary/index',
+        'pages/personality-test/index',
       ],
     },
     {

@@ -30,6 +30,7 @@ import { isLoggedIn } from '../../utils/authStorage';
 import { deletePostWithFeedback } from '../../utils/deletePostFeedback';
 import { HomeCountdownCard } from './components/HomeCountdownCard';
 import { HomeFeaturedEvents } from './components/HomeFeaturedEvents';
+import { HomePersonalityTestEntry } from './components/HomePersonalityTestEntry';
 import TabPageHeader from '../../components/navigation/TabPageHeader';
 import { LoginInterceptHost } from '../../components/auth/LoginInterceptHost';
 import { HomeHeaderActions } from './components/HomeHeaderActions';
@@ -192,6 +193,8 @@ const Home = () => {
               onJoinClick={handleJoinEvent}
               onEventPreload={handleEventPreload}
             />
+
+            <HomePersonalityTestEntry />
 
             {postsLoading ? (
               <ThemedPageLoader variant="skeleton-feed" minHeight={240} />

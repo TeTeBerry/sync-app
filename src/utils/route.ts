@@ -6,6 +6,7 @@ import type { AiAssistantNavIntent } from '../stores/types';
 import type { BackendActivity, HomeSummary, NotificationMeta } from '../types/backend';
 import { PRELOAD_HOT_ROUTES_MS } from './timing';
 import {
+  ensureEventSubpackageLoaded,
   preloadAiSubpackage,
   preloadEventSubpackage,
   preloadProfileSubpackage,
@@ -41,6 +42,7 @@ export const ROUTES = {
   EVENT_DETAIL: '/packageEvent/pages/event-detail/index',
   EXCLUSIVE_ITINERARY: '/packageEvent/pages/exclusive-itinerary/index',
   MY_ITINERARY: '/packageEvent/pages/my-itinerary/index',
+  PERSONALITY_TEST: '/packageEvent/pages/personality-test/index',
   NOTIFICATIONS: '/packageProfile/pages/notifications/index',
 } as const;
 
@@ -61,7 +63,7 @@ type PreloadTabPath =
 
 /** Stack pages per tab; event/profile subpackages preload on tab switch */
 const PRELOAD_PAGE_ROUTES_BY_TAB: Record<PreloadTabPath, RoutePath[]> = {
-  [ROUTES.HOME]: [ROUTES.EVENT_DETAIL, ROUTES.NOTIFICATIONS],
+  [ROUTES.HOME]: [ROUTES.EVENT_DETAIL, ROUTES.NOTIFICATIONS, ROUTES.PERSONALITY_TEST],
   [ROUTES.AI]: [ROUTES.EVENT_DETAIL],
   [ROUTES.EVENTS]: [ROUTES.EVENT_DETAIL],
   [ROUTES.PROFILE]: [ROUTES.NOTIFICATIONS],
@@ -310,6 +312,7 @@ const AUTH_PROTECTED_ROUTES: Partial<Record<RoutePath, LoginInterceptFeature>> =
   [ROUTES.PROFILE_POSTS]: 'post',
   [ROUTES.EXCLUSIVE_ITINERARY]: 'activity',
   [ROUTES.MY_ITINERARY]: 'activity',
+  [ROUTES.PERSONALITY_TEST]: 'activity',
 };
 
 function loginFeatureForUrl(url: string): LoginInterceptFeature | null {
@@ -496,7 +499,10 @@ export function goBuddyAiSearch(eventId: number | string) {
   goAiAssistant({ activityLegacyId: legacyId, openBuddySearch: true });
 }
 
-export function goExclusiveItinerary(activityLegacyId: number) {
+export function goExclusiveItinerary(
+  activityLegacyId: number,
+  selectedDjIds?: string[],
+) {
   const legacyId = parseActivityLegacyId(activityLegacyId);
   if (legacyId == null) {
     void Taro.showToast({ title: '活动信息无效', icon: 'none' });
@@ -506,6 +512,10 @@ export function goExclusiveItinerary(activityLegacyId: number) {
     id: String(legacyId),
     activityLegacyId: String(legacyId),
   };
+  const ids = selectedDjIds?.map((id) => id.trim()).filter(Boolean) ?? [];
+  if (ids.length > 0) {
+    query.selectedDjIds = ids.join(',');
+  }
   useNavigationStore.getState().setActiveActivityLegacyId(legacyId);
   preloadEventSubpackage();
   navigateToSafe(buildPageUrl(ROUTES.EXCLUSIVE_ITINERARY, query));
@@ -525,6 +535,15 @@ export function goMyItinerary(activityLegacyId?: number, selectedDjIds?: string[
   }
   preloadEventSubpackage();
   navigateToSafe(buildPageUrl(ROUTES.MY_ITINERARY, query));
+}
+
+export function goPersonalityTest(options?: { viewResult?: boolean }) {
+  const query: Record<string, string> = {};
+  if (options?.viewResult) {
+    query.view = 'result';
+  }
+  const url = buildPageUrl(ROUTES.PERSONALITY_TEST, query);
+  void ensureEventSubpackageLoaded().then(() => navigateToSafe(url));
 }
 
 function resolveActivityLegacyId(meta?: NotificationMeta): number | null {

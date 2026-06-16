@@ -22,6 +22,7 @@ import {
   isValidFilterId,
 } from './exclusiveItineraryFilters';
 import { mapItineraryDjFromApi } from '@/domains/performance-itinerary/utils/mapItineraryDj';
+import { parseSelectedDjIds } from '@/domains/performance-itinerary/utils/itineraryBanner';
 import type { ExclusiveItineraryDj } from './types';
 import { detectItineraryConflicts } from './itineraryConflict.util';
 import type { ItineraryConflict } from '../../../types/backend';
@@ -50,7 +51,9 @@ export function useExclusiveItineraryPage() {
   const [genreFilter, setGenreFilter] = useState('all');
   const [styleSearchQuery, setStyleSearchQuery] = useState('');
   const [sortMode, setSortMode] = useState<ExclusiveSortMode>('按人气排序');
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [selectedIds, setSelectedIds] = useState<string[]>(() =>
+    parseSelectedDjIds(router.params.selectedDjIds),
+  );
   const [infoOpen, setInfoOpen] = useState(false);
   const [sortSheetOpen, setSortSheetOpen] = useState(false);
   const [hintModal, setHintModal] = useState<{
@@ -86,12 +89,12 @@ export function useExclusiveItineraryPage() {
   }, [djCatalog, styleSearchQuery]);
 
   useEffect(() => {
-    setSelectedIds([]);
     setConflictDismissed(false);
     setStyleSearchQuery('');
     setGenreFilter('all');
     setStageFilter('all');
-  }, [activityLegacyId]);
+    setSelectedIds(parseSelectedDjIds(router.params.selectedDjIds));
+  }, [activityLegacyId, router.params.selectedDjIds]);
 
   useEffect(() => {
     const catalogIds = new Set(djCatalog.map((dj) => dj.id));

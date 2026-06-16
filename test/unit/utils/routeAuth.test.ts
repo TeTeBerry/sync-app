@@ -52,6 +52,7 @@ vi.mock('@/utils/subpackagePreload', () => ({
   preloadAiSubpackage: vi.fn(),
   preloadProfileSubpackage: vi.fn(),
   preloadEventSubpackage: vi.fn(),
+  ensureEventSubpackageLoaded: vi.fn(() => Promise.resolve()),
   preloadStackSubpackages: vi.fn(),
 }));
 
