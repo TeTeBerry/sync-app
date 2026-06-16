@@ -18,6 +18,7 @@ import {
 } from './authStorage';
 import { notifyAuthSessionChange } from './authSession';
 import { clearHomeCachesOnLogout } from './homeCacheStorage';
+import { clearPersonalityTestResult } from '@/domains/personality-test/utils/personalityTestStorage';
 import { hasLegalConsent } from './legalConsentStorage';
 
 export {
@@ -161,5 +162,6 @@ export async function logout(): Promise<void> {
     }
   }
   clearHomeCachesOnLogout();
+  clearPersonalityTestResult();
   clearAuth();
 }

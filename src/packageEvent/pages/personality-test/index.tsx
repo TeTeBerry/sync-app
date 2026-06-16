@@ -63,10 +63,10 @@ const PersonalityTestPage = () => {
               </Text>
               <Text
                 className="s-personality-test__error-retry"
-                onClick={page.retrySubmit}
+                onClick={page.retryError}
                 role="button"
               >
-                点击重试
+                {page.errorMessage.includes('登录') ? '去登录' : '点击重试'}
               </Text>
             </View>
           ) : null}

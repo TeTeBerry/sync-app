@@ -1,4 +1,5 @@
 import Taro from '@tarojs/taro';
+import { clearPersonalityTestResult } from '@/domains/personality-test/utils/personalityTestStorage';
 import { clearAuthStorage, markSkipAutoLogin } from '../utils/authStorage';
 import { notifyAuthSessionChange } from '../utils/authSession';
 import { clearClientUserCache } from '../utils/session';
@@ -14,6 +15,7 @@ export function handleApiUnauthorized(message?: string): void {
   try {
     clearAuthStorage();
     markSkipAutoLogin();
+    clearPersonalityTestResult();
     clearClientUserCache();
     notifyAuthSessionChange();
     void Taro.showToast({

@@ -18,6 +18,8 @@ import type {
 } from '@/domains/personality-test/types';
 import { ROUTES } from '@/utils/route';
 import { ApiError } from '@/utils/apiClient';
+import { requireAuth } from '@/utils/authGate';
+import { isLoggedIn } from '@/utils/authStorage';
 import { useStackPageMainHeight } from '@/hooks/useTabPageMainHeight';
 
 export type PersonalityTestPhase =
@@ -63,6 +65,12 @@ export function usePersonalityTestPage() {
   }, []);
 
   const loadQuestions = useCallback(async () => {
+    if (!isLoggedIn()) {
+      setErrorMessage('请先登录后参与测试');
+      setPhase('error');
+      return;
+    }
+
     setPhase('loading');
     setErrorMessage('');
     try {
@@ -81,6 +89,12 @@ export function usePersonalityTestPage() {
   }, [applyQuestionSet]);
 
   useEffect(() => {
+    if (!isLoggedIn()) {
+      setErrorMessage('请先登录后参与测试');
+      setPhase('error');
+      return;
+    }
+
     if (router.params.view === 'result') {
       const cached = loadPersonalityTestResult();
       if (cached) {
@@ -162,6 +176,18 @@ export function usePersonalityTestPage() {
     void submitAnswers(answers);
   }, [answers, submitAnswers]);
 
+  const retryError = useCallback(() => {
+    if (!isLoggedIn()) {
+      requireAuth(() => void loadQuestions(), 'activity');
+      return;
+    }
+    if (answers && Object.keys(answers).length > 0 && questions.length > 0) {
+      void submitAnswers(answers);
+      return;
+    }
+    void loadQuestions();
+  }, [answers, loadQuestions, questions.length, submitAnswers]);
+
   const restart = useCallback(() => {
     setResult(null);
     setErrorMessage('');
@@ -185,6 +211,7 @@ export function usePersonalityTestPage() {
     goBackQuestion,
     goNextQuestion,
     retrySubmit,
+    retryError,
     restart,
     reload: loadQuestions,
   };

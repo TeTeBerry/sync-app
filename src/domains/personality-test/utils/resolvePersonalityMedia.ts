@@ -1,79 +1,79 @@
-import Taro from '@tarojs/taro';
 import { fetchPersonalityTestMediaUrls } from '@/api/sync/personalityTest';
 import { isLiveApi } from '@/constants/api';
-import { CLOUDBASE_ENV_ID, isCloudBaseEnabled } from '@/constants/cloud';
-import { initCloudBase } from '@/utils/cloudInit';
 
 const mediaUrlCache = new Map<string, { url: string; expiresAt: number }>();
-const TEMP_URL_MAX_AGE_SEC = 3600;
+const TEMP_URL_TTL_MS = (3600 - 60) * 1000;
 
-function readCachedUrl(assetKey: string): string | undefined {
-  const cached = mediaUrlCache.get(assetKey);
+function readCachedUrl(cacheKey: string): string | undefined {
+  const cached = mediaUrlCache.get(cacheKey);
   if (!cached) return undefined;
   if (cached.expiresAt <= Date.now()) {
-    mediaUrlCache.delete(assetKey);
+    mediaUrlCache.delete(cacheKey);
     return undefined;
   }
   return cached.url;
 }
 
-function cacheUrl(assetKey: string, url: string): void {
-  mediaUrlCache.set(assetKey, {
+function cacheUrl(cacheKey: string, url: string): void {
+  mediaUrlCache.set(cacheKey, {
     url,
-    expiresAt: Date.now() + (TEMP_URL_MAX_AGE_SEC - 60) * 1000,
+    expiresAt: Date.now() + TEMP_URL_TTL_MS,
   });
 }
 
-export function buildPersonalityCloudFileId(assetKey: string): string {
-  const key = assetKey.trim();
-  const envId = CLOUDBASE_ENV_ID.trim();
-  if (!key || !envId) return '';
-  return `cloud://${envId}/${key}`;
+function normalizeAssetKey(source: string): string {
+  const trimmed = source.trim();
+  if (trimmed.startsWith('cloud://')) {
+    return trimmed.replace(/^cloud:\/\/[^/]+\//, '');
+  }
+  return trimmed;
 }
 
-async function resolveViaBackend(assetKey: string): Promise<string> {
-  if (!isLiveApi()) {
-    return '';
+let pendingBackendFetch: Promise<Record<string, string>> | null = null;
+let pendingBackendKeys: string[] = [];
+
+async function fetchBackendUrls(assetKeys: string[]): Promise<Record<string, string>> {
+  if (!isLiveApi() || !assetKeys.length) {
+    return {};
   }
-  try {
-    const response = await fetchPersonalityTestMediaUrls([assetKey]);
-    return response.urls[assetKey]?.trim() ?? '';
-  } catch (error) {
-    console.warn('[personality-media] backend media-urls failed:', error);
-    return '';
+
+  const uncached = assetKeys.filter((key) => !readCachedUrl(key));
+  if (!uncached.length) {
+    return Object.fromEntries(
+      assetKeys.map((key) => [key, readCachedUrl(key) ?? '']).filter(([, url]) => url),
+    );
   }
+
+  pendingBackendKeys = [...new Set([...pendingBackendKeys, ...uncached])];
+
+  if (!pendingBackendFetch) {
+    const keysToFetch = [...pendingBackendKeys];
+    pendingBackendKeys = [];
+    pendingBackendFetch = fetchPersonalityTestMediaUrls(keysToFetch)
+      .then((response) => {
+        for (const [key, url] of Object.entries(response.urls ?? {})) {
+          if (url?.trim()) {
+            cacheUrl(key, url.trim());
+          }
+        }
+        return response.urls ?? {};
+      })
+      .catch((error) => {
+        console.warn('[personality-media] backend media-urls failed:', error);
+        return {};
+      })
+      .finally(() => {
+        pendingBackendFetch = null;
+      });
+  }
+
+  await pendingBackendFetch;
+  return Object.fromEntries(
+    assetKeys.map((key) => [key, readCachedUrl(key) ?? '']).filter(([, url]) => url),
+  );
 }
 
-async function resolveViaWxCloud(fileId: string): Promise<string> {
-  if (!isCloudBaseEnabled() || !Taro.cloud) {
-    return '';
-  }
-
-  initCloudBase();
-
-  try {
-    const request = {
-      fileList: [{ fileID: fileId, maxAge: TEMP_URL_MAX_AGE_SEC }],
-    };
-    const response = (await Taro.cloud.getTempFileURL(
-      request as unknown as Parameters<
-        NonNullable<typeof Taro.cloud>['getTempFileURL']
-      >[0],
-    )) as {
-      fileList?: Array<{ tempFileURL?: string; status?: number }>;
-    };
-
-    const tempUrl = response.fileList?.[0]?.tempFileURL?.trim() ?? '';
-    if (tempUrl && response.fileList?.[0]?.status === 0) {
-      return tempUrl;
-    }
-  } catch (error) {
-    console.warn('[personality-media] wx.cloud.getTempFileURL failed:', error);
-  }
-  return '';
-}
-
-/** Resolve personality-test static media from cloud object key or HTTPS URL. */
+/** Resolve personality-test media URLs from cloud storage via backend API. */
 export async function resolvePersonalityMediaUrl(source?: string): Promise<string> {
   const trimmed = source?.trim();
   if (!trimmed) return '';
@@ -82,38 +82,40 @@ export async function resolvePersonalityMediaUrl(source?: string): Promise<strin
     return trimmed;
   }
 
-  const assetKey = trimmed.startsWith('cloud://')
-    ? trimmed.replace(/^cloud:\/\/[^/]+\//, '')
-    : trimmed;
+  const assetKey = normalizeAssetKey(trimmed);
   if (!assetKey) return '';
 
   const cacheKey = trimmed.startsWith('cloud://') ? trimmed : assetKey;
   const cached = readCachedUrl(cacheKey);
   if (cached) return cached;
 
-  const backendUrl = await resolveViaBackend(assetKey);
+  const backendUrls = await fetchBackendUrls([assetKey]);
+  const backendUrl = backendUrls[assetKey]?.trim() ?? '';
   if (backendUrl) {
     cacheUrl(cacheKey, backendUrl);
     return backendUrl;
   }
 
-  const fileId = trimmed.startsWith('cloud://')
-    ? trimmed
-    : buildPersonalityCloudFileId(assetKey);
-  const wxUrl = fileId ? await resolveViaWxCloud(fileId) : '';
-  if (wxUrl) {
-    cacheUrl(cacheKey, wxUrl);
-  }
-  return wxUrl;
+  return '';
 }
 
 export async function resolvePersonalityMediaUrls(
   sources: Array<string | undefined>,
 ): Promise<string[]> {
+  const assetKeys = sources
+    .map((source) => (source ? normalizeAssetKey(source) : ''))
+    .filter(Boolean);
+
+  if (assetKeys.length) {
+    await fetchBackendUrls([...new Set(assetKeys)]);
+  }
+
   return Promise.all(sources.map((source) => resolvePersonalityMediaUrl(source)));
 }
 
 /** Test helper */
 export function clearPersonalityMediaUrlCacheForTests(): void {
   mediaUrlCache.clear();
+  pendingBackendFetch = null;
+  pendingBackendKeys = [];
 }

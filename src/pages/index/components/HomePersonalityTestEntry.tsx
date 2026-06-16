@@ -2,17 +2,25 @@ import './HomePersonalityTestEntry.scss';
 import type { FC } from 'react';
 import { AudioWaveform, ChevronRight } from '../../../components/icons';
 import { loadPersonalityTestResult } from '@/domains/personality-test';
+import { useAuthSession } from '@/hooks/useAuthSession';
+import { requireAuth } from '@/utils/authGate';
 import { goPersonalityTest } from '../../../utils/route';
 import { Text, View } from '@tarojs/components';
 
 const GENRE_TAGS = ['Techno', 'House', 'Trance', 'Bass'] as const;
 
 export const HomePersonalityTestEntry: FC = () => {
-  const cachedSoulDj =
-    loadPersonalityTestResult()?.recommendations.soulMatch.djName ?? null;
+  const { loggedIn } = useAuthSession();
+  const cachedSoulDj = loggedIn
+    ? (loadPersonalityTestResult()?.recommendations.soulMatch.djName ?? null)
+    : null;
 
   const handleStart = () => {
-    goPersonalityTest({ viewResult: Boolean(cachedSoulDj) });
+    requireAuth(() => {
+      const soulDj =
+        loadPersonalityTestResult()?.recommendations.soulMatch.djName ?? null;
+      goPersonalityTest({ viewResult: Boolean(soulDj) });
+    }, 'activity');
   };
 
   return (
@@ -56,11 +64,11 @@ export const HomePersonalityTestEntry: FC = () => {
 
         <View className="s-home-personality__footer">
           <Text className="s-home-personality__meta">
-            {cachedSoulDj ? '结果已保存 · 可再测' : '无标准答案 · 结果可分享'}
+            {cachedSoulDj ? '结果已保存 · 可再测' : '登录后开始 · 结果可分享'}
           </Text>
           <View className="s-home-personality__cta">
             <Text className="s-home-personality__cta-text">
-              {cachedSoulDj ? '查看结果' : '开始测试'}
+              {cachedSoulDj ? '查看结果' : loggedIn ? '开始测试' : '登录测试'}
             </Text>
             <ChevronRight size={14} color="#ff0066" />
           </View>
