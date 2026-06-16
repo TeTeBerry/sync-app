@@ -3,9 +3,14 @@ import {
   formatTravelGuideBudgetShareLabel,
   travelGuideBudgetBannerTitle,
   travelGuideBudgetPerPersonRange,
+  shortTravelGuideBudgetLabel,
 } from '@/domains/travel-guide/utils/travelGuideBudgetDisplay.util';
 
 describe('travelGuideBudgetDisplay', () => {
+  it('derives short budget tier label for hero chips', () => {
+    expect(shortTravelGuideBudgetLabel('舒适(¥300-600/晚)')).toBe('舒适');
+  });
+
   it('labels banner as total for multi-person trips', () => {
     expect(travelGuideBudgetBannerTitle(2)).toBe('全程预算参考（合计）');
     expect(travelGuideBudgetBannerTitle(1)).toBe('全程预算参考（单人合计）');

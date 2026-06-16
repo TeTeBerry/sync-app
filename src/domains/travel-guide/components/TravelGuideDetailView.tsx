@@ -2,15 +2,13 @@ import type { ReactNode } from 'react';
 import type { TravelGuidePlan } from '@/types/travelGuide';
 import {
   findTravelGuideTotalBudgetItem,
-  travelGuideBudgetBannerTitle,
+  shortTravelGuideBudgetLabel,
   travelGuideBudgetPerPersonRange,
 } from '@/domains/travel-guide/utils/travelGuideBudgetDisplay.util';
 import {
   BedDouble,
-  Calendar,
   Car,
   FileText,
-  MapPin,
   Plane,
   Sparkles,
   Ticket,
@@ -37,8 +35,22 @@ type SectionAccent =
   | 'nightlife'
   | 'tips';
 
+const SECTION_ICON_COLORS: Record<SectionAccent, string> = {
+  default: '#ff69b4',
+  docs: '#f2f2f7',
+  ticket: '#f2f2f7',
+  transport: '#64d2ff',
+  venue: '#64d2ff',
+  hotel: '#ff69b4',
+  budget: '#ffd60a',
+  essentials: '#f2f2f7',
+  nightlife: '#f2f2f7',
+  tips: '#ff69b4',
+};
+
 function SectionIcon({ accent }: { accent: SectionAccent }) {
-  const props = { size: 14, color: 'currentColor' as const };
+  const color = SECTION_ICON_COLORS[accent];
+  const props = { size: 14, color };
   switch (accent) {
     case 'docs':
       return <FileText {...props} />;
@@ -122,73 +134,34 @@ export function TravelGuideDetailView({ plan }: TravelGuideDetailViewProps) {
 
         <Text className="s-travel-guide-detail__hero-title">{plan.activityName}</Text>
 
-        <View className="s-travel-guide-detail__hero-meta">
-          <View className="s-travel-guide-detail__hero-meta-row">
-            <Calendar size={13} color="#ff69b4" aria-hidden />
-            <Text className="s-travel-guide-detail__hero-meta-line">
-              {plan.eventDates}
-            </Text>
-          </View>
-          <View className="s-travel-guide-detail__hero-meta-row">
-            <MapPin size={13} color="#64d2ff" aria-hidden />
-            <Text className="s-travel-guide-detail__hero-meta-line">{plan.venue}</Text>
-          </View>
-        </View>
-
-        <View className="s-travel-guide-detail__stats">
-          <View className="s-travel-guide-detail__stat">
-            <Text className="s-travel-guide-detail__stat-value">{plan.departure}</Text>
-            <Text className="s-travel-guide-detail__stat-label">出发</Text>
-          </View>
-          <View className="s-travel-guide-detail__stat-divider" aria-hidden />
-          <View className="s-travel-guide-detail__stat">
-            <Text className="s-travel-guide-detail__stat-value">
-              {plan.headcount}人
-            </Text>
-            <Text className="s-travel-guide-detail__stat-label">同行</Text>
-          </View>
-          <View className="s-travel-guide-detail__stat-divider" aria-hidden />
-          <View className="s-travel-guide-detail__stat">
-            <Text className="s-travel-guide-detail__stat-value">
-              {plan.accommodationNights}晚
-            </Text>
-            <Text className="s-travel-guide-detail__stat-label">住宿</Text>
-          </View>
-          <View className="s-travel-guide-detail__stat-divider" aria-hidden />
-          <View className="s-travel-guide-detail__stat">
-            <Text className="s-travel-guide-detail__stat-value">
-              {plan.budgetLabel}
-            </Text>
-            <Text className="s-travel-guide-detail__stat-label">档位</Text>
-          </View>
-        </View>
+        <Text className="s-travel-guide-detail__hero-meta">
+          {plan.eventDates} · {plan.venue}
+        </Text>
 
         <View className="s-travel-guide-detail__chips">
+          <Text className="s-travel-guide-detail__chip">{plan.departure}</Text>
+          <Text className="s-travel-guide-detail__chip">{plan.headcount}人</Text>
           <Text className="s-travel-guide-detail__chip">
-            {plan.selfDrive ? '自驾出行' : '公共交通'}
+            住{plan.accommodationNights}晚
+          </Text>
+          <Text className="s-travel-guide-detail__chip">
+            {shortTravelGuideBudgetLabel(plan.budgetLabel)}
+          </Text>
+          <Text className="s-travel-guide-detail__chip">
+            {plan.selfDrive ? '自驾' : '公共交通'}
           </Text>
         </View>
 
         {totalBudget ? (
           <View className="s-travel-guide-detail__budget-banner">
-            <View className="s-travel-guide-detail__budget-banner-head">
-              <Text className="s-travel-guide-detail__budget-label">
-                {travelGuideBudgetBannerTitle(plan.headcount)}
-              </Text>
-              <Text className="s-travel-guide-detail__budget-tag">合计</Text>
-            </View>
+            <Text className="s-travel-guide-detail__budget-label">全程预算 · 合计</Text>
             <Text className="s-travel-guide-detail__budget-value">
               {totalBudget.range}
             </Text>
             {perPersonBudget ? (
-              <View className="s-travel-guide-detail__budget-sub-row">
-                <Text className="s-travel-guide-detail__budget-sub-label">
-                  人均参考
-                </Text>
-                <Text className="s-travel-guide-detail__budget-sub">
-                  {perPersonBudget}
-                </Text>
-              </View>
+              <Text className="s-travel-guide-detail__budget-sub">
+                人均 {perPersonBudget}
+              </Text>
             ) : null}
           </View>
         ) : null}

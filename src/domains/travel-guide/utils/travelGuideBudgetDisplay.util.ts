@@ -42,3 +42,9 @@ export function formatTravelGuideBudgetShareLabel(
   if (perPerson) return `${totalRange}（合计，${perPerson}）`;
   return `${totalRange}（合计）`;
 }
+
+/** Hero / 卡片用短档位名，避免「舒适(¥300-600/晚)」撑破布局。 */
+export function shortTravelGuideBudgetLabel(budgetLabel: string): string {
+  const short = budgetLabel.split('(')[0]?.trim();
+  return short || budgetLabel;
+}

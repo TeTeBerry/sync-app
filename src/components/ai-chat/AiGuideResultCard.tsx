@@ -2,16 +2,10 @@ import type { AiGuidePlanFormValues, TravelGuidePlan } from '@/types/travelGuide
 import { goAiTravelGuide } from '@/utils/route';
 import {
   findTravelGuideTotalBudgetItem,
-  formatTravelGuideBudgetShareLabel,
+  shortTravelGuideBudgetLabel,
+  travelGuideBudgetPerPersonRange,
 } from '@/domains/travel-guide/utils/travelGuideBudgetDisplay.util';
-import {
-  ChevronRight,
-  Map,
-  RefreshCw,
-  Sparkles,
-  TrendingUp,
-  Users,
-} from '../../components/icons';
+import { ChevronRight, Map, RefreshCw, Sparkles, Users } from '../../components/icons';
 import { Button } from '../ui';
 import { Text, View } from '@tarojs/components';
 import './AiGuideResultCard.scss';
@@ -86,25 +80,23 @@ export function AiGuideResultCard({
         <View className="s-ai-guide-result__chips">
           <Text className="s-ai-guide-result__chip">{plan.departure}</Text>
           <Text className="s-ai-guide-result__chip">{plan.headcount}人</Text>
-          <Text className="s-ai-guide-result__chip">{plan.budgetLabel}</Text>
           <Text className="s-ai-guide-result__chip">
-            {plan.selfDrive ? '自驾' : '公共交通'}
+            {shortTravelGuideBudgetLabel(plan.budgetLabel)}
+          </Text>
+          <Text className="s-ai-guide-result__chip">
+            {plan.selfDrive ? '自驾' : '公交'}
           </Text>
         </View>
 
         {total ? (
           <View className="s-ai-guide-result__budget-strip">
-            <View className="s-ai-guide-result__budget-strip-icon" aria-hidden>
-              <TrendingUp size={14} color="#ffd60a" />
-            </View>
-            <View className="s-ai-guide-result__budget-strip-text">
-              <Text className="s-ai-guide-result__budget-strip-label">
-                全程预算（合计）
+            <Text className="s-ai-guide-result__budget-strip-label">合计</Text>
+            <Text className="s-ai-guide-result__budget-strip-value">{total.range}</Text>
+            {plan.headcount > 1 ? (
+              <Text className="s-ai-guide-result__budget-strip-sub">
+                人均 {travelGuideBudgetPerPersonRange(total.range, plan.headcount)}
               </Text>
-              <Text className="s-ai-guide-result__budget-strip-value">
-                {formatTravelGuideBudgetShareLabel(total.range, plan.headcount)}
-              </Text>
-            </View>
+            ) : null}
           </View>
         ) : null}
 
