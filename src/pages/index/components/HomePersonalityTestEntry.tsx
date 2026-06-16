@@ -1,7 +1,11 @@
 import './HomePersonalityTestEntry.scss';
 import type { FC } from 'react';
+import { useEffect, useState } from 'react';
 import { AudioWaveform, ChevronRight } from '../../../components/icons';
-import { loadPersonalityTestResult } from '@/domains/personality-test';
+import {
+  loadPersonalityTestResult,
+  restorePersonalityTestResultFromServer,
+} from '@/domains/personality-test';
 import { useAuthSession } from '@/hooks/useAuthSession';
 import { requireAuth } from '@/utils/authGate';
 import { goPersonalityTest } from '../../../utils/route';
@@ -11,14 +15,34 @@ const GENRE_TAGS = ['Techno', 'House', 'Trance', 'Bass'] as const;
 
 export const HomePersonalityTestEntry: FC = () => {
   const { loggedIn } = useAuthSession();
-  const cachedSoulDj = loggedIn
-    ? (loadPersonalityTestResult()?.recommendations.soulMatch.djName ?? null)
-    : null;
+  const [cachedSoulDj, setCachedSoulDj] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!loggedIn) {
+      setCachedSoulDj(null);
+      return;
+    }
+
+    let cancelled = false;
+    void (async () => {
+      let result = loadPersonalityTestResult();
+      if (!result) {
+        result = await restorePersonalityTestResultFromServer();
+      }
+      if (!cancelled) {
+        setCachedSoulDj(result?.recommendations.soulMatch.djName ?? null);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [loggedIn]);
 
   const handleStart = () => {
     requireAuth(() => {
       const soulDj =
-        loadPersonalityTestResult()?.recommendations.soulMatch.djName ?? null;
+        loadPersonalityTestResult()?.recommendations.soulMatch.djName ?? cachedSoulDj;
       goPersonalityTest({ viewResult: Boolean(soulDj) });
     }, 'activity');
   };

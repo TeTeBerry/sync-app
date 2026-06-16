@@ -1,4 +1,5 @@
 import Taro from '@tarojs/taro';
+import { fetchPersonalityTestResult } from '@/api/sync/personalityTest';
 import { getResolvedAuthUserId, isLoggedIn } from '@/utils/authStorage';
 import type { PersonalityTestResult } from '../types';
 
@@ -73,6 +74,25 @@ export function clearPersonalityTestResult(): void {
   } catch {
     // ignore
   }
+}
+
+/** Pull the latest saved result from the server into local storage (e.g. after login). */
+export async function restorePersonalityTestResultFromServer(): Promise<PersonalityTestResult | null> {
+  if (!isLoggedIn()) {
+    return null;
+  }
+
+  try {
+    const remote = await fetchPersonalityTestResult();
+    if (remote?.version === 1) {
+      savePersonalityTestResult(remote);
+      return remote;
+    }
+  } catch {
+    // offline or no saved result yet
+  }
+
+  return loadPersonalityTestResult();
 }
 
 export const PERSONALITY_TEST_STORAGE_KEY = STORAGE_KEY;

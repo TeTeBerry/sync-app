@@ -39,6 +39,13 @@ export function fetchPersonalityTestMediaUrls(keys: string[]) {
   });
 }
 
+export function fetchPersonalityTestResult() {
+  return apiGet<PersonalityTestResult | null>(
+    '/personality-test/result',
+    ownerQueryParams(),
+  );
+}
+
 export function submitPersonalityTest(
   answers: PersonalityTestAnswers,
   questionIds: string[],

@@ -30,6 +30,7 @@ export {
 export {
   clearPersonalityTestResult,
   loadPersonalityTestResult,
+  restorePersonalityTestResultFromServer,
   savePersonalityTestResult,
   PERSONALITY_TEST_STORAGE_KEY,
 } from './utils/personalityTestStorage';

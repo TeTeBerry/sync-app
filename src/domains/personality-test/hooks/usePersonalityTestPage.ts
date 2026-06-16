@@ -9,6 +9,7 @@ import {
 import { loadPersonalityTestCatalog } from '@/domains/personality-test/personalityTestCatalog';
 import {
   loadPersonalityTestResult,
+  restorePersonalityTestResultFromServer,
   savePersonalityTestResult,
 } from '@/domains/personality-test/utils/personalityTestStorage';
 import type {
@@ -89,22 +90,44 @@ export function usePersonalityTestPage() {
   }, [applyQuestionSet]);
 
   useEffect(() => {
-    if (!isLoggedIn()) {
-      setErrorMessage('请先登录后参与测试');
-      setPhase('error');
-      return;
-    }
+    let cancelled = false;
 
-    if (router.params.view === 'result') {
-      const cached = loadPersonalityTestResult();
-      if (cached) {
-        setResult(cached);
-        setPhase('result');
-        void loadPersonalityTestCatalog().catch(() => undefined);
+    const init = async () => {
+      if (!isLoggedIn()) {
+        setErrorMessage('请先登录后参与测试');
+        setPhase('error');
         return;
       }
-    }
-    void loadQuestions();
+
+      let cached = loadPersonalityTestResult();
+      if (!cached) {
+        cached = await restorePersonalityTestResultFromServer();
+      }
+
+      if (cancelled) {
+        return;
+      }
+
+      if (router.params.view === 'result') {
+        if (cached) {
+          setResult(cached);
+          setPhase('result');
+          void loadPersonalityTestCatalog().catch(() => undefined);
+          return;
+        }
+        setErrorMessage('暂无测试结果，请先完成测试');
+        setPhase('error');
+        return;
+      }
+
+      void loadQuestions();
+    };
+
+    void init();
+
+    return () => {
+      cancelled = true;
+    };
   }, [loadQuestions, router.params.view]);
 
   const currentQuestion = questions[currentIndex];

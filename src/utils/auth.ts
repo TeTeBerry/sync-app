@@ -18,7 +18,10 @@ import {
 } from './authStorage';
 import { notifyAuthSessionChange } from './authSession';
 import { clearHomeCachesOnLogout } from './homeCacheStorage';
-import { clearPersonalityTestResult } from '@/domains/personality-test/utils/personalityTestStorage';
+import {
+  clearPersonalityTestResult,
+  restorePersonalityTestResultFromServer,
+} from '@/domains/personality-test/utils/personalityTestStorage';
 import { hasLegalConsent } from './legalConsentStorage';
 
 export {
@@ -32,11 +35,12 @@ export {
 
 let loginPromise: Promise<AuthLoginResult | null> | null = null;
 
-function saveAuthResult(result: AuthLoginResult): void {
+async function saveAuthResult(result: AuthLoginResult): Promise<void> {
   clearSkipAutoLogin();
   saveAuthStorage(result.accessToken, result.user);
   persistUserName(result.user.name);
   clearClientUserCache();
+  await restorePersonalityTestResultFromServer();
   notifyAuthSessionChange();
 }
 
@@ -113,7 +117,7 @@ export async function loginWithWechat(
   const result = await apiPost<AuthLoginResult>('/auth/wechat', body, undefined, {
     maxRetries: 0,
   });
-  saveAuthResult(result);
+  await saveAuthResult(result);
   return result;
 }
 
@@ -124,6 +128,7 @@ export async function ensureAuth(): Promise<AuthLoginResult | null> {
   const token = getAccessToken();
   const user = getAuthUser();
   if (token && user) {
+    await restorePersonalityTestResultFromServer();
     return { accessToken: token, user };
   }
 
