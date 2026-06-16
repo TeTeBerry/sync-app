@@ -8,6 +8,7 @@ import {
 } from 'react';
 import Taro from '@tarojs/taro';
 import { searchBuddyPostsWithAi } from '../api/sync/posts';
+import { ApiError } from '../utils/apiClient';
 import { createMessageId } from './ai-chat/createMessageId';
 import type { ChatUiMessage, RecommendedPostCard } from '../types/aiChat';
 import type { EventDetailPost } from '../types/backend';
@@ -144,13 +145,24 @@ export function useAiBuddySearchChat(options: {
               : message,
           ),
         );
-      } catch {
+      } catch (error) {
+        const fallback = '检索失败，请稍后重试。';
+        let text = fallback;
+        if (error instanceof ApiError) {
+          if (error.status === 404) {
+            text = '检索服务暂未上线，请稍后重试或联系管理员更新后端。';
+          } else if (error.message.includes('超时')) {
+            text = '检索超时，请稍后重试。';
+          } else if (error.message.trim()) {
+            text = error.message.trim();
+          }
+        }
         setMessages((prev) =>
           prev.map((message) =>
             message.id === aiMsgId
               ? {
                   ...message,
-                  text: '检索失败，请稍后重试。',
+                  text,
                   streaming: false,
                 }
               : message,

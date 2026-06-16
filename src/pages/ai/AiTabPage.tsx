@@ -9,9 +9,10 @@ import { useAiAssistantPage } from '../../packageAi/pages/ai-assistant/useAiAssi
 import { LoginInterceptHost } from '../../components/auth/LoginInterceptHost';
 import { useNavBarInsets } from '../../hooks/useNavBarInsets';
 import { useEndRouteTransitionOnShow } from '../../hooks/useEndRouteTransitionOnShow';
+import { ROUTES } from '../../utils/route';
 
 const AiTabPage: FC = () => {
-  useEndRouteTransitionOnShow();
+  useEndRouteTransitionOnShow(ROUTES.AI);
   const navInsets = useNavBarInsets();
   const page = useAiAssistantPage();
 

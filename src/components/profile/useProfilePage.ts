@@ -64,7 +64,7 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
   const postsCount = profileUserData.stats.posts;
   const interestTag = deriveInterestTag(profileUserData.bio);
 
-  useEndRouteTransitionOnShow();
+  useEndRouteTransitionOnShow(ROUTES.PROFILE);
 
   useDidShow(() => {
     preloadHotRoutes(ROUTES.PROFILE);

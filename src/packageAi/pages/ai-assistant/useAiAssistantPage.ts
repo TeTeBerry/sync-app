@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import Taro, { useDidShow } from '@tarojs/taro';
 import { useNavBarInsets } from '../../../hooks/useNavBarInsets';
 import { usePageRouteReady } from '../../../hooks/usePageRouteReady';
-import { useEndRouteTransitionOnShow } from '../../../hooks/useEndRouteTransitionOnShow';
 import { useTabPageMainHeight } from '../../../hooks/useTabPageMainHeight';
 import { useResolvedProfile } from '../../../hooks/useResolvedProfile';
 import { useActivityDetailQuery } from '../../../hooks/useSyncApi';
@@ -86,7 +85,6 @@ export function useAiAssistantPage() {
   });
 
   usePageRouteReady(true);
-  useEndRouteTransitionOnShow();
 
   useEffect(() => {
     if (!isAiChatWsDevLog()) return;

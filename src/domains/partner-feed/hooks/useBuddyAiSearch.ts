@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
 import Taro from '@tarojs/taro';
 import { searchBuddyPostsWithAi } from '../../../api/sync/posts';
+import { ApiError } from '../../../utils/apiClient';
 import {
   normalizeEventPostList,
   type EventPostListItem,
@@ -41,8 +42,14 @@ export function useBuddyAiSearch(activityLegacyId?: number) {
       setTotalMatched(result.totalMatched);
       setTotalScanned(result.totalScanned);
       setHasSearched(true);
-    } catch {
-      void Taro.showToast({ title: '检索失败，请稍后重试', icon: 'none' });
+    } catch (error) {
+      const title =
+        error instanceof ApiError && error.status === 404
+          ? '检索服务暂未上线'
+          : error instanceof ApiError && error.message.includes('超时')
+            ? '检索超时，请稍后重试'
+            : '检索失败，请稍后重试';
+      void Taro.showToast({ title, icon: 'none' });
     } finally {
       setIsSearching(false);
     }

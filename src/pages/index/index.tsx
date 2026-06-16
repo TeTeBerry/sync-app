@@ -45,7 +45,7 @@ import { PlatformDisclaimer } from '../../components/legal/PlatformDisclaimer';
 import { Text, View } from '@tarojs/components';
 
 const Home = () => {
-  useEndRouteTransitionOnShow();
+  useEndRouteTransitionOnShow(ROUTES.HOME);
   const { confirm, confirmDialog } = useConfirmDialog({
     cancelText: '取消',
   });

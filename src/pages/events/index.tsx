@@ -40,7 +40,7 @@ import { consumeEventsViewTabIntent } from '../../utils/eventsTabIntent';
 const EVENTS_CHROME_PX = 118;
 
 const Events: React.FC = () => {
-  useEndRouteTransitionOnShow();
+  useEndRouteTransitionOnShow(ROUTES.EVENTS);
 
   const navInsets = useNavBarInsets();
   const listScrollHeight = useTabPageMainHeight(

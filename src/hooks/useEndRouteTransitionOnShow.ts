@@ -1,9 +1,36 @@
 import { useDidShow } from '@tarojs/taro';
-import { endRouteTransition } from '../utils/route';
+import { endRouteTransition, type RoutePath } from '../utils/route';
+import { useNavigationStore } from '../stores/navigationStore';
 
-/** Clears global route-transition overlay when a stack page becomes visible. */
-export function useEndRouteTransitionOnShow() {
+/** Whether this page show should dismiss the global route-transition overlay. */
+export function shouldEndRouteTransitionOnShow(
+  transition: { active: boolean; tabTarget?: string },
+  ownTabPath?: RoutePath,
+): boolean {
+  if (!transition.active) {
+    return false;
+  }
+  if (
+    transition.tabTarget != null &&
+    ownTabPath != null &&
+    transition.tabTarget !== ownTabPath
+  ) {
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Clears global route-transition overlay when a page becomes visible.
+ * Tab pages should pass their route so intermediate tabs during switchTab
+ * (e.g. home under event-detail) do not dismiss the overlay early.
+ */
+export function useEndRouteTransitionOnShow(ownTabPath?: RoutePath) {
   useDidShow(() => {
+    const transition = useNavigationStore.getState().routeTransition;
+    if (!shouldEndRouteTransitionOnShow(transition, ownTabPath)) {
+      return;
+    }
     endRouteTransition();
   });
 }
