@@ -40,6 +40,17 @@ function isUpcomingEvent(event: PersonalityEventRecommendation): boolean {
   return getActivityStatusFromActivity(event.dateLabel, event.name) !== 'ended';
 }
 
+function formatSpiritConnectionLine(
+  entry: { role: 'soul' | 'aligned'; djName: string } | string,
+): string {
+  if (typeof entry === 'string') {
+    return entry.includes('·') ? entry : `本命艺人 · ${entry}`;
+  }
+  return entry.role === 'soul'
+    ? `灵魂共鸣 · ${entry.djName}`
+    : `同频艺人 · ${entry.djName}`;
+}
+
 export const PersonalityResultView: FC<PersonalityResultViewProps> = ({
   result,
   onRestart,
@@ -230,11 +241,14 @@ export const PersonalityResultView: FC<PersonalityResultViewProps> = ({
             className="s-personality-result__spirit-card"
             style={{ borderLeftColor: primary.primaryColor }}
           >
-            {result.narrative.spiritConnections.map((line) => (
-              <Text key={line} className="s-personality-result__spirit-line">
-                {line.includes('=') ? line : `本命艺人 · ${line}`}
-              </Text>
-            ))}
+            {result.narrative.spiritConnections.map((entry) => {
+              const line = formatSpiritConnectionLine(entry);
+              return (
+                <Text key={line} className="s-personality-result__spirit-line">
+                  {line}
+                </Text>
+              );
+            })}
           </View>
         </View>
       ) : null}
