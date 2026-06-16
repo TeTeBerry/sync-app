@@ -48,7 +48,9 @@ export function useKeyboardInset(options?: UseKeyboardInsetOptions): number {
 
     Taro.onKeyboardHeightChange(onChange);
     return () => {
-      Taro.offKeyboardHeightChange(onChange);
+      if (typeof Taro.offKeyboardHeightChange === 'function') {
+        Taro.offKeyboardHeightChange(onChange);
+      }
     };
   }, [subtractTabBar]);
 

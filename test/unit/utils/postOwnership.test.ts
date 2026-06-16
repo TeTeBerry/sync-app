@@ -8,7 +8,7 @@ vi.mock('@/utils/session', () => ({
   getClientUserName: () => mockGetClientUserName(),
 }));
 
-import { isCurrentUserPostAuthor } from '@/utils/postOwnership';
+import { isCommentByPostAuthor, isCurrentUserPostAuthor } from '@/utils/postOwnership';
 
 describe('isCurrentUserPostAuthor', () => {
   beforeEach(() => {
@@ -45,5 +45,21 @@ describe('isCurrentUserPostAuthor', () => {
     mockGetClientUserId.mockReturnValue('user-x');
     mockGetClientUserName.mockReturnValue('Alice');
     expect(isCurrentUserPostAuthor('Bob Smith', 'user-y')).toBe(false);
+  });
+});
+
+describe('isCommentByPostAuthor', () => {
+  it('matches by userId even when display names are the same', () => {
+    expect(isCommentByPostAuthor('微信用户', 'user-b', '微信用户', 'user-a')).toBe(
+      false,
+    );
+    expect(isCommentByPostAuthor('微信用户', 'user-a', '微信用户', 'user-a')).toBe(
+      true,
+    );
+  });
+
+  it('falls back to name only when both sides lack userId', () => {
+    expect(isCommentByPostAuthor('Mia', undefined, 'Mia', undefined)).toBe(true);
+    expect(isCommentByPostAuthor('Bob', undefined, 'Mia', undefined)).toBe(false);
   });
 });

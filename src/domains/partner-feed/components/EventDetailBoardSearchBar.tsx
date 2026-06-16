@@ -1,6 +1,4 @@
-import { useState } from 'react';
 import { Search, X } from '../../../components/icons';
-import { useOverlayLock } from '../../../hooks/useOverlayLock';
 import { Button, Input } from '../../../components/ui';
 import { Text, View } from '@tarojs/components';
 
@@ -17,9 +15,6 @@ export function EventDetailBoardSearchBar({
   resultCount,
   totalCount,
 }: EventDetailBoardSearchBarProps) {
-  const [inputFocused, setInputFocused] = useState(false);
-  useOverlayLock(inputFocused);
-
   const trimmed = value.trim();
   const showSummary =
     trimmed.length > 0 &&
@@ -39,9 +34,8 @@ export function EventDetailBoardSearchBar({
           value={value}
           placeholder="搜索留言…"
           confirmType="search"
+          adjustPosition={false}
           onInput={(event) => onChange(event.detail.value)}
-          onFocus={() => setInputFocused(true)}
-          onBlur={() => setInputFocused(false)}
         />
         {trimmed ? (
           <Button

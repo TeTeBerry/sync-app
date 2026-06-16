@@ -28,4 +28,9 @@ describe('normalizeEventPostListItem', () => {
     );
     expect(publishTimeLabel.length).toBeGreaterThan(0);
   });
+
+  it('preserves comments count', () => {
+    const { post } = normalizeEventPostListItem(basePost({ comments: 3 }));
+    expect(post.comments).toBe(3);
+  });
 });

@@ -15,11 +15,6 @@ function authorNameMatches(stored: string, client?: string): boolean {
   );
 }
 
-/**
- * Whether a feed/event post was authored by the current client user.
- * When `authorUserId` is present, only compares ids (ignores display name).
- * `authorName` fallback is for legacy rows without stored userId.
- */
 export function isCurrentUserPostAuthor(
   authorName?: string | null,
   authorUserId?: string,
@@ -42,6 +37,31 @@ export function isCurrentUserPostAuthor(
     authorNameMatches(normalizedAuthorName, clientUserName)
   ) {
     return true;
+  }
+
+  return false;
+}
+
+/**
+ * Whether a comment was left by the post author (for reply eligibility).
+ * Prefer userId match; name fallback only when both sides lack userId.
+ */
+export function isCommentByPostAuthor(
+  commentAuthorName?: string | null,
+  commentUserId?: string,
+  postAuthorName?: string | null,
+  postAuthorUserId?: string,
+): boolean {
+  const postUid = postAuthorUserId?.trim();
+  const commentUid = commentUserId?.trim();
+  if (postUid && commentUid) {
+    return postUid === commentUid;
+  }
+
+  const postName = postAuthorName?.trim() ?? '';
+  const commentName = commentAuthorName?.trim() ?? '';
+  if (!postUid && !commentUid && postName && commentName) {
+    return authorNameMatches(postName, commentName);
   }
 
   return false;

@@ -7,9 +7,11 @@ import { commentPostAndInvalidate, usePostCommentsQuery } from '../../hooks/sync
 import { requireAuth } from '../../utils/authGate';
 import { PLACEHOLDER_AVATAR } from '../../constants/remoteImages';
 import { sanitizeRemoteImageUrl } from '../../utils/imageUrl';
-import { isCurrentUserPostAuthor } from '../../utils/postOwnership';
+import {
+  isCommentByPostAuthor,
+  isCurrentUserPostAuthor,
+} from '../../utils/postOwnership';
 import type { EventDetailPost, PostCommentItem } from '../../types/backend';
-import { useOverlayLock } from '../../hooks/useOverlayLock';
 import { Button, cn, Input } from '../ui';
 import { Image, Text, View } from '@tarojs/components';
 
@@ -34,6 +36,8 @@ type CommentRowProps = {
   comment: PostCommentItem;
   nested?: boolean;
   isPostAuthor: boolean;
+  postAuthorName: string;
+  postAuthorUserId?: string;
   replyTargetId?: string;
   onStartReply: (target: ReplyTarget) => void;
 };
@@ -42,11 +46,19 @@ function CommentRow({
   comment,
   nested = false,
   isPostAuthor,
+  postAuthorName,
+  postAuthorUserId,
   replyTargetId,
   onStartReply,
 }: CommentRowProps) {
-  const isOwnComment = isCurrentUserPostAuthor(comment.authorName, comment.userId);
-  const canReply = isPostAuthor && !isOwnComment && !nested && !comment.replies?.length;
+  const isPostAuthorComment = isCommentByPostAuthor(
+    comment.authorName,
+    comment.userId,
+    postAuthorName,
+    postAuthorUserId,
+  );
+  const canReply =
+    isPostAuthor && !isPostAuthorComment && !nested && !comment.replies?.length;
 
   return (
     <>
@@ -86,6 +98,8 @@ function CommentRow({
           comment={reply}
           nested
           isPostAuthor={isPostAuthor}
+          postAuthorName={postAuthorName}
+          postAuthorUserId={postAuthorUserId}
           onStartReply={onStartReply}
         />
       ))}
@@ -109,9 +123,6 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
   const [draft, setDraft] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [replyTarget, setReplyTarget] = useState<ReplyTarget | null>(null);
-  const [inputFocused, setInputFocused] = useState(false);
-
-  useOverlayLock(inputFocused);
 
   const placeholder = replyTarget ? `回复 @${replyTarget.authorName}` : '说点什么...';
 
@@ -184,6 +195,8 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
                 key={comment.id}
                 comment={comment}
                 isPostAuthor={isPostAuthor}
+                postAuthorName={postAuthorName}
+                postAuthorUserId={postAuthorUserId}
                 replyTargetId={replyTarget?.commentId}
                 onStartReply={startReply}
               />
@@ -235,9 +248,8 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
             value={draft}
             placeholder={placeholder}
             confirmType="send"
+            adjustPosition={false}
             onInput={(e) => setDraft(e.detail.value)}
-            onFocus={() => setInputFocused(true)}
-            onBlur={() => setInputFocused(false)}
             onConfirm={() => {
               if (canSend) handleSubmit();
             }}

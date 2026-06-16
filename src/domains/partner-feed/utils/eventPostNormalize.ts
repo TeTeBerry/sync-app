@@ -19,6 +19,7 @@ export function normalizeEventPostListItem(item: EventDetailPost): EventPostList
     avatar: sanitizeRemoteImageUrl(item.avatar) ?? item.avatar,
     contentTypes: item.contentTypes,
     images: sanitizeImageList(item.images),
+    comments: item.comments,
   };
   const publishTimeLabel = post.createdAt ? formatPostPublishTime(post.createdAt) : '';
   return { post, publishTimeLabel };
