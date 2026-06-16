@@ -231,6 +231,31 @@
   color: rgba(255, 255, 255, 0.68);
 }
 
+.s-travel-guide-detail__named-item-reason {
+  font-size: 12px;
+  line-height: 1.5;
+  color: rgba(100, 210, 255, 0.9);
+}
+
+.s-travel-guide-detail__named-item-hint {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.52);
+}
+
+.s-travel-guide-detail__more-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.s-travel-guide-detail__subsection-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.55);
+  letter-spacing: 0.04em;
+}
+
 .s-travel-guide-detail__option-block {
   display: flex;
   flex-direction: column;

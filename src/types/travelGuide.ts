@@ -15,6 +15,7 @@ export type AiGuidePlanFormValues = {
 export interface TravelGuideHotelItem {
   name: string;
   note: string;
+  reason?: string;
   bookingHint?: string;
 }
 
@@ -29,6 +30,7 @@ export interface TravelGuideAccommodationScheme {
 export interface TravelGuideSpotItem {
   name: string;
   note: string;
+  reason?: string;
 }
 
 export interface TravelGuideTicketChannel {

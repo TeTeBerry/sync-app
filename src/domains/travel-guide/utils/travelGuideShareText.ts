@@ -38,13 +38,30 @@ export function buildTravelGuideShareText(plan: TravelGuidePlan): string {
       lines.push(`  · ${scheme.label}：${scheme.name}`);
       lines.push(`    ${scheme.reason}`);
     }
+    const featured = new Set(schemes.map((s) => s.name));
+    for (const hotel of plan.accommodation.hotels.filter(
+      (h) => !featured.has(h.name),
+    )) {
+      lines.push(`  · 备选：${hotel.name}`);
+      if (hotel.reason) lines.push(`    ${hotel.reason}`);
+    }
   } else {
     lines.push(`▸ ${plan.accommodation.title}`);
-    for (const hotel of plan.accommodation.hotels.slice(0, 2)) {
+    for (const hotel of plan.accommodation.hotels.slice(0, 6)) {
       lines.push(`  · ${hotel.name}：${hotel.note}`);
+      if (hotel.reason) lines.push(`    ${hotel.reason}`);
     }
   }
   lines.push('');
+
+  if (plan.nightlife.spots.length) {
+    lines.push(`▸ ${plan.nightlife.title}`);
+    for (const spot of plan.nightlife.spots.slice(0, 6)) {
+      lines.push(`  · ${spot.name}：${spot.note}`);
+      if (spot.reason) lines.push(`    ${spot.reason}`);
+    }
+    lines.push('');
+  }
 
   if (plan.budget?.items.length) {
     lines.push(`▸ ${plan.budget.title}`);

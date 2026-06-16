@@ -121,6 +121,11 @@ export function TravelGuideDetailView({ plan }: TravelGuideDetailViewProps) {
     totalBudget != null
       ? travelGuideBudgetPerPersonRange(totalBudget.range, plan.headcount)
       : null;
+  const accommodationSchemes = plan.accommodation.schemes ?? [];
+  const featuredHotelNames = new Set(accommodationSchemes.map((s) => s.name));
+  const moreHotels = plan.accommodation.hotels.filter(
+    (hotel) => !featuredHotelNames.has(hotel.name),
+  );
 
   return (
     <View className="s-travel-guide-detail">
@@ -207,7 +212,7 @@ export function TravelGuideDetailView({ plan }: TravelGuideDetailViewProps) {
 
       <SectionCard title={plan.accommodation.title} accent="hotel">
         <View className="s-travel-guide-detail__scheme-grid">
-          {(plan.accommodation.schemes ?? []).map((scheme) => (
+          {accommodationSchemes.map((scheme) => (
             <View key={scheme.label} className="s-travel-guide-detail__scheme">
               <Text className="s-travel-guide-detail__scheme-label">
                 {scheme.label}
@@ -225,7 +230,32 @@ export function TravelGuideDetailView({ plan }: TravelGuideDetailViewProps) {
             </View>
           ))}
         </View>
-        {!plan.accommodation.schemes?.length
+        {moreHotels.length ? (
+          <View className="s-travel-guide-detail__more-list">
+            <Text className="s-travel-guide-detail__subsection-title">更多备选</Text>
+            {moreHotels.map((hotel) => (
+              <View key={hotel.name} className="s-travel-guide-detail__named-item">
+                <Text className="s-travel-guide-detail__named-item-title">
+                  {hotel.name}
+                </Text>
+                <Text className="s-travel-guide-detail__named-item-note">
+                  {hotel.note}
+                </Text>
+                {hotel.reason ? (
+                  <Text className="s-travel-guide-detail__named-item-reason">
+                    {hotel.reason}
+                  </Text>
+                ) : null}
+                {hotel.bookingHint ? (
+                  <Text className="s-travel-guide-detail__named-item-hint">
+                    预订 {hotel.bookingHint}
+                  </Text>
+                ) : null}
+              </View>
+            ))}
+          </View>
+        ) : null}
+        {!accommodationSchemes.length
           ? plan.accommodation.hotels.map((hotel) => (
               <View key={hotel.name} className="s-travel-guide-detail__named-item">
                 <Text className="s-travel-guide-detail__named-item-title">
@@ -234,6 +264,11 @@ export function TravelGuideDetailView({ plan }: TravelGuideDetailViewProps) {
                 <Text className="s-travel-guide-detail__named-item-note">
                   {hotel.note}
                 </Text>
+                {hotel.reason ? (
+                  <Text className="s-travel-guide-detail__named-item-reason">
+                    {hotel.reason}
+                  </Text>
+                ) : null}
               </View>
             ))
           : null}
@@ -295,6 +330,11 @@ export function TravelGuideDetailView({ plan }: TravelGuideDetailViewProps) {
           <View key={spot.name} className="s-travel-guide-detail__named-item">
             <Text className="s-travel-guide-detail__named-item-title">{spot.name}</Text>
             <Text className="s-travel-guide-detail__named-item-note">{spot.note}</Text>
+            {spot.reason ? (
+              <Text className="s-travel-guide-detail__named-item-reason">
+                {spot.reason}
+              </Text>
+            ) : null}
           </View>
         ))}
       </SectionCard>
