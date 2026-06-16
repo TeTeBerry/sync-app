@@ -4,6 +4,8 @@ import type { HomeSummary } from '@/types/backend';
 
 type SignupEvent = HomeSummary['signupEvents'][number];
 
+const NOW = new Date(2026, 4, 30, 12, 0, 0, 0);
+
 function signupEvent(
   partial: Partial<SignupEvent> & Pick<SignupEvent, 'id' | 'title'>,
 ): SignupEvent {
@@ -20,38 +22,35 @@ function signupEvent(
 }
 
 describe('pickHomeFeaturedEvents', () => {
-  it('orders hot items before non-hot', () => {
+  it('orders all active events by nearest start when user has no registrations', () => {
     const events = [
-      signupEvent({ id: 1, title: 'Regular A', hot: false }),
-      signupEvent({ id: 2, title: 'Hot B', hot: true }),
-      signupEvent({ id: 3, title: 'Regular C', hot: false }),
-      signupEvent({ id: 5, title: 'Hot E', hot: true }),
+      signupEvent({ id: 8, title: 'EDC Korea', date: '10/03-04' }),
+      signupEvent({ id: 4, title: '风暴电音节', date: '06/13-14' }),
+      signupEvent({ id: 5, title: 'EDC Thailand', date: '12/18-20' }),
     ];
 
-    const picked = pickHomeFeaturedEvents(events);
+    const picked = pickHomeFeaturedEvents(events, new Set(), NOW);
     expect(picked.map((item) => item.title)).toEqual([
-      'Hot B',
-      'Hot E',
-      'Regular A',
-      'Regular C',
+      '风暴电音节',
+      'EDC Korea',
+      'EDC Thailand',
     ]);
   });
 
-  it('pins storm fest (legacyId 4) to the first card', () => {
+  it('puts registered events first, each group sorted by nearest start', () => {
     const events = [
-      signupEvent({ id: 1, title: 'Regular A', hot: false }),
-      signupEvent({ id: 2, title: 'Hot B', hot: true }),
-      signupEvent({ id: 4, title: '风暴电音节 深圳站', hot: true }),
-      signupEvent({ id: 3, title: 'Regular C', hot: false }),
+      signupEvent({ id: 4, title: '风暴电音节', date: '06/13-14' }),
+      signupEvent({ id: 8, title: 'EDC Korea', date: '10/03-04' }),
+      signupEvent({ id: 5, title: 'EDC Thailand', date: '12/18-20' }),
+      signupEvent({ id: 1, title: 'Tomorrowland', date: '12/11-13' }),
     ];
 
-    const picked = pickHomeFeaturedEvents(events);
-    expect(picked[0]?.title).toBe('风暴电音节 深圳站');
+    const picked = pickHomeFeaturedEvents(events, new Set([8, 1]), NOW);
     expect(picked.map((item) => item.title)).toEqual([
-      '风暴电音节 深圳站',
-      'Hot B',
-      'Regular A',
-      'Regular C',
+      'EDC Korea',
+      'Tomorrowland',
+      '风暴电音节',
+      'EDC Thailand',
     ]);
   });
 

@@ -1,5 +1,5 @@
 import './HomeFeaturedEvents.scss';
-import { type FC } from 'react';
+import { type FC, useEffect, useState } from 'react';
 import { ChevronRight } from '../../../components/icons';
 import { ImageWithFallback } from '../../../components/ImageWithFallback';
 import { Button } from '../../../components/ui';
@@ -21,6 +21,8 @@ import { Image, Swiper, SwiperItem, Text, View } from '@tarojs/components';
 type HomeFeaturedEventsProps = {
   items: FeaturedEvent[];
   registeredLegacyIds: Set<number>;
+  activeIndex?: number;
+  onActiveIndexChange?: (index: number) => void;
   onEventClick: (item: FeaturedEvent) => void;
   onJoinClick: (item: FeaturedEvent) => void;
   onEventPreload?: (item: FeaturedEvent) => void;
@@ -29,10 +31,27 @@ type HomeFeaturedEventsProps = {
 export const HomeFeaturedEvents: FC<HomeFeaturedEventsProps> = ({
   items,
   registeredLegacyIds,
+  activeIndex,
+  onActiveIndexChange,
   onEventClick,
   onJoinClick,
   onEventPreload,
 }) => {
+  const [internalIndex, setInternalIndex] = useState(0);
+  const currentIndex = activeIndex ?? internalIndex;
+
+  useEffect(() => {
+    if (activeIndex === undefined) {
+      setInternalIndex(0);
+    }
+  }, [items, activeIndex]);
+
+  const handleSwiperChange = (index: number) => {
+    onActiveIndexChange?.(index);
+    if (activeIndex === undefined) {
+      setInternalIndex(index);
+    }
+  };
   if (items.length === 0) {
     return (
       <View className="s-home-showcase" aria-label="热门活动">
@@ -61,6 +80,8 @@ export const HomeFeaturedEvents: FC<HomeFeaturedEventsProps> = ({
 
       <Swiper
         className="s-home-showcase__swiper"
+        current={currentIndex}
+        onChange={(event) => handleSwiperChange(event.detail.current)}
         indicatorDots={items.length > 1}
         indicatorColor="rgba(255, 255, 255, 0.25)"
         indicatorActiveColor="var(--primary)"

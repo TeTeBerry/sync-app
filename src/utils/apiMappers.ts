@@ -3,8 +3,8 @@ import type { HomeSummary } from '../types/backend';
 import { resolveCatalogActivityImage } from '../constants/activityCatalogImages';
 import { resolveActivityThumb } from '../constants/activityImages';
 import { getActivityTypeLabel } from '../constants/activityType';
-import { HOME_FEATURED_PIN_LEGACY_ID } from '../constants/homeFeatured';
 import { parseActivityLegacyId } from './activityLegacyId';
+import { compareActivitiesNearestFirst } from './activityStatus';
 import { sanitizeRemoteImageUrl } from './imageUrl';
 
 type SignupEvent = HomeSummary['signupEvents'][number];
@@ -109,38 +109,39 @@ export function mapSignupEventToFeaturedEvent(item: SignupEvent): FeaturedEvent 
   };
 }
 
-export function mapBackendActivityToFeaturedEvent(
-  activity: import('../types/backend').BackendActivity,
-): FeaturedEvent {
-  return mapSignupEventToFeaturedEvent({
-    id: activity.legacyId,
-    title: activity.name,
-    date: activity.date ?? '',
-    location: activity.location ?? '',
-    image:
-      sanitizeRemoteImageUrl(
-        resolveCatalogActivityImage(activity.legacyId, activity.image),
-      ) ??
-      resolveCatalogActivityImage(activity.legacyId, activity.image) ??
-      '',
-    category: getActivityTypeLabel(activity.activityType),
-    hot: Boolean(activity.hot),
-    attendees: activity.attendees ?? 0,
-    going: false,
-  });
-}
+/** 首页热门活动：未报名时按开始时间就近；已报名时已报名活动靠前并按开始时间就近，其余活动随后同样按时间排序。 */
+export function pickHomeFeaturedEvents(
+  signupEvents: SignupEvent[],
+  registeredLegacyIds?: Set<number>,
+  now?: Date,
+): FeaturedEvent[] {
+  const hasRegistrations = (registeredLegacyIds?.size ?? 0) > 0;
 
-/** 首页热门活动：风暴电音节置顶，其余热门优先，支持横向滑动展示多场 */
-export function pickHomeFeaturedEvents(signupEvents: SignupEvent[]): FeaturedEvent[] {
-  const hot = signupEvents.filter((item) => item.hot);
-  const rest = signupEvents.filter((item) => !item.hot);
-  const ordered = [...hot, ...rest];
-  const pinIndex = ordered.findIndex(
-    (item) => parseActivityLegacyId(item.id) === HOME_FEATURED_PIN_LEGACY_ID,
-  );
-  if (pinIndex > 0) {
-    const [pinned] = ordered.splice(pinIndex, 1);
-    ordered.unshift(pinned);
+  const sortNearest = (items: SignupEvent[]) =>
+    [...items].sort((a, b) =>
+      compareActivitiesNearestFirst(
+        { date: a.date, title: a.title },
+        { date: b.date, title: b.title },
+        now,
+      ),
+    );
+
+  let ordered: SignupEvent[];
+  if (!hasRegistrations) {
+    ordered = sortNearest(signupEvents);
+  } else {
+    const registered: SignupEvent[] = [];
+    const unregistered: SignupEvent[] = [];
+    for (const event of signupEvents) {
+      const legacyId = parseActivityLegacyId(event.id);
+      if (legacyId != null && registeredLegacyIds!.has(legacyId)) {
+        registered.push(event);
+      } else {
+        unregistered.push(event);
+      }
+    }
+    ordered = [...sortNearest(registered), ...sortNearest(unregistered)];
   }
+
   return ordered.map((item) => mapSignupEventToFeaturedEvent(item));
 }

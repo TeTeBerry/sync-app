@@ -11,7 +11,6 @@ vi.mock('@/api/requestContext', () => ({
   mergeOwnerQueryParams: (extra?: Record<string, string>) => ({
     ...extra,
   }),
-  ownerQueryParamsWithActivity: () => ({}),
   notificationQueryParams: () => undefined,
   resolveRequestUserId: () => 'session-id',
 }));

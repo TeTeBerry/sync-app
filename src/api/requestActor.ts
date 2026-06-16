@@ -11,7 +11,6 @@ import {
   mergeOwnerQueryParams,
   notificationQueryParams,
   ownerQueryParams,
-  ownerQueryParamsWithActivity,
   resolveRequestUserId,
   type OwnerQueryParams,
 } from './requestContext';
@@ -32,7 +31,6 @@ export {
   mergeOwnerQueryParams,
   notificationQueryParams,
   ownerQueryParams,
-  ownerQueryParamsWithActivity,
   resolveRequestUserId,
   type OwnerQueryParams,
 };

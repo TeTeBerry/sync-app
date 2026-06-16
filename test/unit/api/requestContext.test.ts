@@ -16,7 +16,6 @@ import {
   mergeOwnerQueryParams,
   notificationQueryParams,
   ownerQueryParams,
-  ownerQueryParamsWithActivity,
   resolveRequestUserId,
 } from '@/api/requestContext';
 
@@ -106,33 +105,5 @@ describe('notificationQueryParams', () => {
   it('returns undefined when bearer token is present', () => {
     mockGetAccessToken.mockReturnValue('jwt-token');
     expect(notificationQueryParams()).toBeUndefined();
-  });
-});
-
-describe('ownerQueryParamsWithActivity', () => {
-  beforeEach(() => {
-    mockGetAccessToken.mockReturnValue(null);
-    mockGetClientUserId.mockReturnValue('u1');
-  });
-
-  it('adds activityLegacyId when finite', () => {
-    expect(ownerQueryParamsWithActivity(42)).toEqual({
-      activityLegacyId: '42',
-    });
-  });
-
-  it('adds only activityLegacyId when bearer token is present', () => {
-    mockGetAccessToken.mockReturnValue('jwt-token');
-    expect(ownerQueryParamsWithActivity(42)).toEqual({
-      activityLegacyId: '42',
-    });
-  });
-
-  it('returns empty object when activityLegacyId is undefined', () => {
-    expect(ownerQueryParamsWithActivity(undefined)).toEqual({});
-  });
-
-  it('returns empty object when activityLegacyId is NaN', () => {
-    expect(ownerQueryParamsWithActivity(Number.NaN)).toEqual({});
   });
 });

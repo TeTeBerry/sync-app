@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   compareActivitiesNearestFirst,
   findNearestUpcomingActivity,
+  resolveFeaturedEventCountdown,
 } from '@/utils/activityStatus';
 
 const NOW = new Date(2026, 4, 30, 12, 0, 0, 0);
@@ -95,6 +96,26 @@ describe('findNearestUpcomingActivity', () => {
   it('returns null when no upcoming activities remain', () => {
     expect(
       findNearestUpcomingActivity([{ title: 'Past fest', date: '2024-07-12' }], NOW),
+    ).toBeNull();
+  });
+});
+
+describe('resolveFeaturedEventCountdown', () => {
+  it('returns countdown target for a featured event card', () => {
+    const target = resolveFeaturedEventCountdown({
+      title: 'EDC Korea 2026',
+      date: '10/03-04',
+    });
+    expect(target?.title).toBe('EDC Korea 2026');
+    expect(target?.startAt).toEqual(new Date(2026, 9, 3, 0, 0, 0, 0));
+  });
+
+  it('returns null for ended events', () => {
+    expect(
+      resolveFeaturedEventCountdown({
+        title: 'Past fest',
+        date: '2024-07-12',
+      }),
     ).toBeNull();
   });
 });

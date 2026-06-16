@@ -7,7 +7,6 @@ export type { FetchPostsByActivityPageOptions } from './sync/posts';
 export {
   ownerQueryParams,
   mergeOwnerQueryParams,
-  ownerQueryParamsWithActivity,
   resolveRequestUserId,
   type OwnerQueryParams,
 } from './requestContext';

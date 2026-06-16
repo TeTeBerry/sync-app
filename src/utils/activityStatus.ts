@@ -242,3 +242,19 @@ export function findNearestUpcomingActivity<T extends ActivityDateFields>(
 
   return nearest ? { ...nearest.item, startAt: nearest.startAt } : null;
 }
+
+/** Countdown target for a single featured/home activity card. */
+export function resolveFeaturedEventCountdown(event: {
+  title?: string;
+  date?: string;
+}): { title: string; startAt: Date } | null {
+  const title = event.title?.trim();
+  if (!title || getActivityStatusFromActivity(event.date, title) === 'ended') {
+    return null;
+  }
+  const startAt = resolveActivityCountdownStartAt(event.date, title);
+  if (!startAt) {
+    return null;
+  }
+  return { title, startAt };
+}

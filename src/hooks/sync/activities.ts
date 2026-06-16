@@ -21,7 +21,6 @@ import {
 } from '../../constants/queryCache';
 import {
   compareActivitiesNearestFirst,
-  findNearestUpcomingActivity,
   getActivityStatusFromActivity,
   type ActivityDateFields,
 } from '../../utils/activityStatus';
@@ -52,11 +51,7 @@ import type { QueryEnableOptions } from './types';
 import type { UpdateCurrentUserPayload } from '../../types/backend';
 import { updateCurrentUser } from '../../api/sync/users';
 import { useProfileActivitiesQuery } from './profile';
-import {
-  buildRegisteredActivityLegacyIds,
-  mergeCountdownActivityCandidates,
-  pickCountdownActivityCandidates,
-} from '../../utils/activityRegistration';
+import { buildRegisteredActivityLegacyIds } from '../../utils/activityRegistration';
 
 export function useActivitiesQuery(options?: QueryEnableOptions) {
   const tabEnabled = options?.enabled ?? true;
@@ -146,37 +141,20 @@ export function useRegisteredActivityLegacyIds() {
 
 export function useFeaturedEvents() {
   const { data: summary, isLoading } = useHomeSummary();
+  const registeredLegacyIds = useRegisteredActivityLegacyIds();
 
   const items = useMemo((): FeaturedEvent[] => {
     const signupEvents = summary?.signupEvents ?? [];
     const active = signupEvents.filter(
       (item) => getActivityStatusFromActivity(item.date, item.title) !== 'ended',
     );
-    return pickHomeFeaturedEvents(active);
-  }, [summary]);
+    return pickHomeFeaturedEvents(active, registeredLegacyIds);
+  }, [summary, registeredLegacyIds]);
 
   return {
     items,
     isLoading,
   };
-}
-
-export function useNearestUpcomingForCountdown() {
-  const { data: summary } = useHomeSummary();
-  const { data: activities } = useActivitiesQuery();
-  const registeredLegacyIds = useRegisteredActivityLegacyIds();
-
-  return useMemo(() => {
-    const merged = mergeCountdownActivityCandidates(summary?.signupEvents, activities);
-    const candidates = pickCountdownActivityCandidates(merged, registeredLegacyIds);
-    const nearest = findNearestUpcomingActivity(candidates);
-    if (!nearest) return null;
-
-    const title = nearest.title ?? nearest.name;
-    if (!title) return null;
-
-    return { title, startAt: nearest.startAt };
-  }, [summary?.signupEvents, activities, registeredLegacyIds]);
 }
 
 export function useActivityDetailQuery(legacyId?: number) {

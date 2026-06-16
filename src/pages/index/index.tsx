@@ -1,6 +1,6 @@
 import './home.scss';
 import { useDidShow } from '@tarojs/taro';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import ThemedPageLoader from '../../components/ThemedPageLoader';
 import { HomeActivityFeed } from './components/HomeActivityFeed';
 import { seedActivityDetailFromFeaturedEvent } from '../../utils/activityDetailCache';
@@ -9,13 +9,13 @@ import { useConfirmDialog } from '../../hooks/useConfirmDialog';
 import {
   useFeaturedEvents,
   useHomeSummary,
-  useNearestUpcomingForCountdown,
   useNotificationUnreadCount,
   usePopularPosts,
   useRegisteredActivityLegacyIds,
   mapHomeFeedPost,
 } from '../../hooks/useSyncApi';
 import { isActivityRegistered } from '../../utils/activityRegistration';
+import { resolveFeaturedEventCountdown } from '../../utils/activityStatus';
 import { requireAuth } from '../../utils/authGate';
 import {
   buildEventDetailQuery,
@@ -65,8 +65,20 @@ const Home = () => {
   const heat = summary?.heat;
   const { items: featuredEvents } = useFeaturedEvents();
   const registeredLegacyIds = useRegisteredActivityLegacyIds();
-  const nearestUpcoming = useNearestUpcomingForCountdown();
+  const [featuredIndex, setFeaturedIndex] = useState(0);
   const { data: unreadCount = 0 } = useNotificationUnreadCount();
+
+  useEffect(() => {
+    setFeaturedIndex(0);
+  }, [featuredEvents]);
+
+  const featuredCountdown = useMemo(() => {
+    const event = featuredEvents[featuredIndex];
+    if (!event) {
+      return null;
+    }
+    return resolveFeaturedEventCountdown(event);
+  }, [featuredEvents, featuredIndex]);
 
   const summaryPosts = useMemo(
     () => (summary?.popularPosts ?? []).map(mapHomeFeedPost),
@@ -165,13 +177,15 @@ const Home = () => {
           />
 
           <HomeCountdownCard
-            eventName={nearestUpcoming?.title}
-            targetAt={nearestUpcoming?.startAt ?? null}
+            eventName={featuredCountdown?.title}
+            targetAt={featuredCountdown?.startAt ?? null}
           />
 
           <HomeFeaturedEvents
             items={featuredEvents}
             registeredLegacyIds={registeredLegacyIds}
+            activeIndex={featuredIndex}
+            onActiveIndexChange={setFeaturedIndex}
             onEventClick={openEventDetail}
             onJoinClick={handleJoinEvent}
             onEventPreload={handleEventPreload}

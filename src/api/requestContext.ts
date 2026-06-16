@@ -42,13 +42,3 @@ export function mergeOwnerQueryParams(
   }
   return out;
 }
-
-export function ownerQueryParamsWithActivity(
-  activityLegacyId?: number,
-): Record<string, string> {
-  const params = mergeOwnerQueryParams();
-  if (activityLegacyId != null && !Number.isNaN(activityLegacyId)) {
-    params.activityLegacyId = String(activityLegacyId);
-  }
-  return params;
-}

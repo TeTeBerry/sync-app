@@ -1,4 +1,5 @@
 import { boundsToIsoDate, parseActivityDateBounds } from '@/utils/activityDateBounds';
+import { extractYearFromText } from '@/utils/activityStatus';
 import { formatTravelPlanTimeLabel } from './travelPlanDateTime';
 import type { TravelPlanNode } from '../types';
 
@@ -20,14 +21,6 @@ const MONTH_MAP: Record<string, number> = {
 const MONTH_ABBR = Object.entries(MONTH_MAP).map(
   ([key, value]) => [value, key] as const,
 );
-
-function extractYearFromText(text?: string) {
-  if (!text?.trim()) {
-    return undefined;
-  }
-  const match = text.match(/\b(20\d{2})\b/);
-  return match?.[1];
-}
 
 function isoDateFromFestivalDateKey(dateKey: string, yearHint: string) {
   const match = dateKey
