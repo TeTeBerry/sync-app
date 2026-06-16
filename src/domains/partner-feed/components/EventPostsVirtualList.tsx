@@ -11,7 +11,8 @@ type EventPostsVirtualListProps = {
   highlightPostId: string;
   expandedCommentPostIds: Set<string>;
   currentUserAvatar?: string;
-  onToggleComments: (postId: string) => void;
+  onOpenComments: (postId: string) => void;
+  onCloseComments: (postId: string) => void;
   onCommentSubmitted?: EventPostCardProps['onCommentSubmitted'];
   onDelete?: EventPostCardProps['onDelete'];
   hasMore?: boolean;
@@ -25,7 +26,8 @@ export function EventPostsVirtualList({
   highlightPostId,
   expandedCommentPostIds,
   currentUserAvatar,
-  onToggleComments,
+  onOpenComments,
+  onCloseComments,
   onCommentSubmitted,
   onDelete,
   hasMore = false,
@@ -60,7 +62,8 @@ export function EventPostsVirtualList({
               highlighted={highlighted}
               commentsExpanded={expandedCommentPostIds.has(item.post.id)}
               currentUserAvatar={currentUserAvatar}
-              onToggleComments={onToggleComments}
+              onOpenComments={onOpenComments}
+              onCloseComments={onCloseComments}
               onCommentSubmitted={onCommentSubmitted}
               onDelete={onDelete}
             />

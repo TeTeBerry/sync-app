@@ -76,7 +76,9 @@ describe('homeCacheStorage', () => {
     });
 
     hydrateAppCachesFromStorage();
-    expect(getCacheData<BackendActivity[]>(['activities'])).toEqual(activities);
+    expect(getCacheData<BackendActivity[]>(['activities'])).toEqual([
+      { ...activities[0], image: '' },
+    ]);
   });
 
   it('skips expired envelope on hydrate', () => {

@@ -315,6 +315,40 @@
   padding: 0 var(--s-page-gutter) 8px;
 }
 
+.s-event-detail-buddy-ai-search-entry {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+
+  &__btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    min-height: 44px;
+    padding: 0 16px;
+    border: 1px solid rgba(100, 210, 255, 0.35);
+    border-radius: 9999px;
+    background: rgba(100, 210, 255, 0.1);
+    color: #fff;
+    font-size: var(--s-type-body);
+    font-weight: 600;
+  }
+
+  &__label {
+    color: #fff;
+  }
+
+  &__hint {
+    padding: 0 4px;
+    font-size: var(--s-type-caption);
+    color: #8e8e93;
+    line-height: 1.4;
+  }
+}
+
 .s-event-detail-board-search {
   display: flex;
   flex-direction: column;

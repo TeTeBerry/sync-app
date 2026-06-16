@@ -35,6 +35,7 @@ export function useAiAssistantPage() {
       initialMessage: intent?.initialMessage?.trim() ?? null,
       openAiGuideSheet: Boolean(intent?.openAiGuideSheet),
       autoRunTravelGuideForm: intent?.autoRunTravelGuideForm ?? null,
+      openBuddySearch: Boolean(intent?.openBuddySearch),
     };
   });
   const [pendingInitialMessage, setPendingInitialMessage] = useState(
@@ -45,6 +46,9 @@ export function useAiAssistantPage() {
   );
   const [pendingAutoGuideForm, setPendingAutoGuideForm] = useState(
     navBoot.autoRunTravelGuideForm,
+  );
+  const [pendingOpenBuddySearch, setPendingOpenBuddySearch] = useState(
+    navBoot.openBuddySearch,
   );
   const [messageCount, setMessageCount] = useState(0);
   const [pageShowSeq, setPageShowSeq] = useState(0);
@@ -97,6 +101,7 @@ export function useAiAssistantPage() {
     setPendingInitialMessage(null);
     setPendingOpenAiGuideSheet(false);
     setPendingAutoGuideForm(null);
+    setPendingOpenBuddySearch(false);
   }, []);
 
   const applyAiAssistantIntent = useCallback(() => {
@@ -110,6 +115,9 @@ export function useAiAssistantPage() {
     }
     if (intent.autoRunTravelGuideForm) {
       setPendingAutoGuideForm(intent.autoRunTravelGuideForm);
+    }
+    if (intent.openBuddySearch) {
+      setPendingOpenBuddySearch(true);
     }
     if (intent.activityLegacyId != null && !Number.isNaN(intent.activityLegacyId)) {
       setActiveActivityLegacyId(intent.activityLegacyId);
@@ -132,6 +140,7 @@ export function useAiAssistantPage() {
     pendingInitialMessage,
     pendingOpenAiGuideSheet,
     pendingAutoGuideForm,
+    pendingOpenBuddySearch,
     pageShowSeq,
     messageCount,
     setMessageCount,

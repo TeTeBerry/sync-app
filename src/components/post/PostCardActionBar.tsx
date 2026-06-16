@@ -6,13 +6,13 @@ import { Text, View } from '@tarojs/components';
 export type PostCardActionBarProps = {
   comments: number;
   commentsExpanded: boolean;
-  onToggleComments: () => void;
+  onOpenComments: () => void;
 };
 
 const PostCardActionBar: React.FC<PostCardActionBarProps> = ({
   comments,
   commentsExpanded,
-  onToggleComments,
+  onOpenComments,
 }) => {
   const commentClassName = [
     's-event-post__action',
@@ -27,7 +27,10 @@ const PostCardActionBar: React.FC<PostCardActionBarProps> = ({
         plain
         hoverClass="none"
         className={commentClassName}
-        onClick={onToggleComments}
+        onClick={(event) => {
+          event.stopPropagation?.();
+          if (!commentsExpanded) onOpenComments();
+        }}
       >
         <MessageCircle size={16} color={commentsExpanded ? '#ff0066' : '#8e8e93'} />
         <Text className="s-event-post__action-label">{comments}</Text>

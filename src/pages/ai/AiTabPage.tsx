@@ -78,6 +78,7 @@ const AiTabPage: FC = () => {
                 initialMessage={page.pendingInitialMessage}
                 initialOpenAiGuideSheet={page.pendingOpenAiGuideSheet}
                 initialAutoRunTravelGuideForm={page.pendingAutoGuideForm}
+                initialOpenBuddySearch={page.pendingOpenBuddySearch}
                 pageShowSeq={page.pageShowSeq}
                 activityLegacyId={page.activityLegacyId}
                 activityTitle={page.activityTitle}

@@ -15,6 +15,7 @@ import type { AiGuidePlanFormValues } from '../../../types/travelGuide';
 import { Canvas, View } from '@tarojs/components';
 import { invalidateCache } from '../../../hooks/useApiQuery';
 import { useAiBuddyPost } from '../../../hooks/useAiBuddyPost';
+import { useAiBuddySearchChat } from '../../../hooks/useAiBuddySearchChat';
 import { useAiTravelGuide } from '../../../hooks/useAiTravelGuide';
 import { resolveActivityByKeyword } from '../../../api/syncApi';
 import { selectSetActiveActivityLegacyId, useNavigationStore } from '../../../stores';
@@ -29,6 +30,7 @@ export type AiAssistantChatProps = {
   initialMessage?: string | null;
   initialOpenAiGuideSheet?: boolean;
   initialAutoRunTravelGuideForm?: AiGuidePlanFormValues | null;
+  initialOpenBuddySearch?: boolean;
   activityLegacyId?: number;
   activityTitle?: string;
   onInitialMessageSent?: () => void;
@@ -46,6 +48,7 @@ export function AiAssistantChat({
   initialMessage,
   initialOpenAiGuideSheet = false,
   initialAutoRunTravelGuideForm = null,
+  initialOpenBuddySearch = false,
   activityLegacyId,
   activityTitle,
   onInitialMessageSent,
@@ -61,6 +64,7 @@ export function AiAssistantChat({
   const initialMessageHandledRef = useRef(false);
   const initialGuideSheetHandledRef = useRef(false);
   const initialAutoGuideHandledRef = useRef(false);
+  const initialBuddySearchHandledRef = useRef(false);
   const submitLockRef = useRef(false);
   const pendingPageShowScrollRef = useRef(false);
   const [forceScrollToBottomKey, setForceScrollToBottomKey] = useState(0);
@@ -158,6 +162,13 @@ export function AiAssistantChat({
     isStreaming,
     onPublished: handleBuddyPostPublished,
     onPlanningMessagesShown: scheduleScrollToBottom,
+  });
+
+  const buddySearch = useAiBuddySearchChat({
+    activityLegacyId,
+    activityTitle,
+    setMessages,
+    onMessagesUpdated: scheduleScrollToBottom,
   });
 
   const travelGuide = useAiTravelGuide({
@@ -283,11 +294,34 @@ export function AiAssistantChat({
     travelGuide,
   ]);
 
+  useEffect(() => {
+    if (!initialOpenBuddySearch || initialBuddySearchHandledRef.current) return;
+    initialBuddySearchHandledRef.current = true;
+    onInitialMessageSent?.();
+    buddySearch.enterBuddySearchMode();
+  }, [buddySearch.enterBuddySearchMode, initialOpenBuddySearch, onInitialMessageSent]);
+
   const submit = useCallback(
     async (text: string) => {
       if (submitLockRef.current) return;
       const trimmed = text.trim();
-      if (!trimmed || isStreaming || isStreamingRef.current) {
+      if (
+        !trimmed ||
+        isStreaming ||
+        isStreamingRef.current ||
+        buddySearch.isSearching
+      ) {
+        return;
+      }
+
+      if (buddySearch.buddySearchActive) {
+        submitLockRef.current = true;
+        try {
+          setInput('');
+          await buddySearch.handleSearchSubmit(trimmed);
+        } finally {
+          submitLockRef.current = false;
+        }
         return;
       }
 
@@ -308,19 +342,39 @@ export function AiAssistantChat({
         submitLockRef.current = false;
       }
     },
-    [activityLegacyId, isStreaming, isStreamingRef, send, travelGuide],
+    [activityLegacyId, buddySearch, isStreaming, isStreamingRef, send, travelGuide],
   );
 
   const handleClearChat = useCallback(async () => {
-    if (isStreaming || isStreamingRef.current) return;
+    if (isStreaming || isStreamingRef.current || buddySearch.isSearching) return;
+    buddySearch.exitBuddySearchMode();
     travelGuide.clearGuideCollect();
     await clearChat();
-  }, [clearChat, isStreaming, isStreamingRef, travelGuide]);
+  }, [buddySearch, clearChat, isStreaming, isStreamingRef, travelGuide]);
 
   const handleSelectSuggestedReply = useCallback(
     async (reply: string) => {
-      if (submitLockRef.current || isStreaming || isStreamingRef.current) return;
+      if (
+        submitLockRef.current ||
+        isStreaming ||
+        isStreamingRef.current ||
+        buddySearch.isSearching
+      ) {
+        return;
+      }
       const trimmed = reply.trim();
+      if (!trimmed) return;
+
+      if (buddySearch.buddySearchActive) {
+        submitLockRef.current = true;
+        try {
+          await buddySearch.handleSearchSubmit(trimmed);
+        } finally {
+          submitLockRef.current = false;
+        }
+        return;
+      }
+
       const scoped = activityLegacyId != null && !Number.isNaN(activityLegacyId);
       if (scoped) {
         const guideHandled = await travelGuide.handleTravelGuideChatMessage(trimmed);
@@ -334,8 +388,14 @@ export function AiAssistantChat({
         submitLockRef.current = false;
       }
     },
-    [activityLegacyId, isStreaming, isStreamingRef, send, travelGuide],
+    [activityLegacyId, buddySearch, isStreaming, isStreamingRef, send, travelGuide],
   );
+
+  const composerBusy =
+    isStreaming ||
+    travelGuide.isGenerating ||
+    buddyPost.isPublishing ||
+    buddySearch.isSearching;
 
   const needsPageGuideCanvas =
     !isOffscreenCanvasSupported() && travelGuide.isGenerating;
@@ -364,7 +424,7 @@ export function AiAssistantChat({
       />
       <ChatMessageList
         messages={messages}
-        isStreaming={isStreaming}
+        isStreaming={isStreaming || buddySearch.isSearching}
         isTravelGuideGenerating={travelGuide.isGenerating || buddyPost.isPublishing}
         scrollAreaHeight={chatScrollHeight}
         keyboardInset={keyboardInset}
@@ -383,16 +443,15 @@ export function AiAssistantChat({
       >
         <ChatComposer
           input={input}
-          isStreaming={
-            isStreaming || travelGuide.isGenerating || buddyPost.isPublishing
-          }
+          isStreaming={composerBusy}
           activityLegacyId={activityLegacyId}
           activityTitle={activityTitle}
           activityCode={activityQuery.data?.code}
+          buddySearchMode={buddySearch.buddySearchActive}
           onInputChange={setInput}
           onSubmit={submit}
           onClearChat={handleClearChat}
-          clearDisabled={isStreaming}
+          clearDisabled={composerBusy}
           onActivityChipClick={handleActivityChipClick}
         />
       </View>

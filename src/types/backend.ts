@@ -177,6 +177,22 @@ export interface EventPostsPage {
   hasMore: boolean;
 }
 
+export interface BuddyPostSearchParsed {
+  eventName?: string;
+  date?: string;
+  genre?: string;
+  peopleCount?: string;
+  extraKeywords?: string[];
+  searchTerms: string[];
+}
+
+export interface BuddyPostAiSearchResult {
+  parsed: BuddyPostSearchParsed;
+  items: EventDetailPost[];
+  totalMatched: number;
+  totalScanned: number;
+}
+
 export interface EventDetailPost {
   id: string;
   userId?: string;

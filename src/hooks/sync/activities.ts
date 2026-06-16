@@ -173,7 +173,7 @@ export function useActivityDetailQuery(legacyId?: number) {
         'detail',
         legacyId,
       ]);
-      return seeded ?? null;
+      return seeded ? withCatalogActivityImage(seeded) : null;
     },
     enabled,
     staleTime: STALE_ACTIVITY_DETAIL_MS,

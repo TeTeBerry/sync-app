@@ -30,6 +30,7 @@ export type ChatUiMessage = {
   streaming?: boolean;
   recommendedActivity?: RecommendedActivityCard;
   createdPost?: RecommendedPostCard;
+  matchedPosts?: RecommendedPostCard[];
   suggestedReplies?: string[];
   travelGuide?: TravelGuideChatPayload;
 };

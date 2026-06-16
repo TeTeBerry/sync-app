@@ -11,7 +11,7 @@ export type { EventPostListItem } from './components/EventPostsVirtualList';
 export { EventDetailComposerSection } from './components/EventDetailComposerSection';
 export type { EventDetailComposerSectionProps } from './components/EventDetailComposerSection';
 export { EventDetailTemplatePostFab } from './components/EventDetailTemplatePostFab';
-export { EventDetailBoardSearchBar } from './components/EventDetailBoardSearchBar';
+export { EventDetailBuddyAiSearchEntry } from './components/EventDetailBuddyAiSearchEntry';
 export {
   normalizeEventPostList,
   normalizeEventPostListItem,

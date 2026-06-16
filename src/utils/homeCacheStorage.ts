@@ -7,7 +7,11 @@ import {
   setCacheDataByKey,
 } from '../hooks/useApiQuery';
 import { isLiveApi } from '../constants/api';
-import { seedActivityDetailsFromList } from './activityDetailCache';
+import {
+  seedActivityDetailsFromList,
+  seedActivityDetailsFromHomeSummary,
+} from './activityDetailCache';
+import { withCatalogActivities, withCatalogHomeSummary } from './activityCatalog';
 import { invalidateHome } from './queryInvalidation';
 import type {
   BackendActivity,
@@ -72,12 +76,14 @@ export function hydrateAppCachesFromStorage(): void {
 
   const summaryEnvelope = readEnvelope<HomeSummary>(SUMMARY_STORAGE_KEY);
   if (summaryEnvelope) {
+    const summary = withCatalogHomeSummary(summaryEnvelope.data);
     setCacheDataByKey(
       getCacheKey(['home', 'summary']),
-      summaryEnvelope.data,
+      summary,
       summaryEnvelope.savedAt,
     );
-    seedPopularPostsCache(summaryEnvelope.data.popularPosts);
+    seedPopularPostsCache(summary.popularPosts);
+    seedActivityDetailsFromHomeSummary(summary);
   }
 
   const popular = readEnvelopeData<HomeFeedPost[]>(POPULAR_STORAGE_KEY);
@@ -87,12 +93,13 @@ export function hydrateAppCachesFromStorage(): void {
 
   const activitiesEnvelope = readEnvelope<BackendActivity[]>(ACTIVITIES_STORAGE_KEY);
   if (activitiesEnvelope?.data?.length) {
+    const activities = withCatalogActivities(activitiesEnvelope.data);
     setCacheDataByKey(
       getCacheKey(['activities']),
-      activitiesEnvelope.data,
+      activities,
       activitiesEnvelope.savedAt,
     );
-    seedActivityDetailsFromList(activitiesEnvelope.data);
+    seedActivityDetailsFromList(activities);
   }
 
   const profileEnvelope = readEnvelope<ProfileSummary>(PROFILE_SUMMARY_STORAGE_KEY);

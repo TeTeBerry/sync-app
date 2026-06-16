@@ -20,7 +20,8 @@ export type EventPostCardProps = {
   highlighted: boolean;
   commentsExpanded: boolean;
   currentUserAvatar?: string;
-  onToggleComments: (postId: string) => void;
+  onOpenComments: (postId: string) => void;
+  onCloseComments: (postId: string) => void;
   onDelete?: (post: EventDetailPost) => void;
   onCommentSubmitted?: (updated: Pick<EventDetailPost, 'id' | 'comments'>) => void;
 };
@@ -31,7 +32,8 @@ function EventPostCardInner({
   highlighted,
   commentsExpanded,
   currentUserAvatar,
-  onToggleComments,
+  onOpenComments,
+  onCloseComments,
   onDelete,
   onCommentSubmitted,
 }: EventPostCardProps) {
@@ -108,7 +110,7 @@ function EventPostCardInner({
             <PostCardActionBar
               comments={post.comments ?? 0}
               commentsExpanded={commentsExpanded}
-              onToggleComments={() => onToggleComments(post.id)}
+              onOpenComments={() => onOpenComments(post.id)}
             />
           </View>
         </View>
@@ -120,7 +122,7 @@ function EventPostCardInner({
           postAuthorName={post.name}
           postAuthorUserId={post.userId}
           expanded
-          onToggleExpanded={() => onToggleComments(post.id)}
+          onToggleExpanded={() => onCloseComments(post.id)}
           currentUserAvatar={currentUserAvatar}
           onCommentSubmitted={onCommentSubmitted}
         />

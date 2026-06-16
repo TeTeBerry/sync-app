@@ -39,6 +39,7 @@ export function ChatComposer({
   clearDisabled = false,
   isLoadingHistory = false,
   onActivityChipClick,
+  buddySearchMode = false,
 }: {
   input: string;
   isStreaming: boolean;
@@ -51,6 +52,7 @@ export function ChatComposer({
   clearDisabled?: boolean;
   isLoadingHistory?: boolean;
   onActivityChipClick?: (keyword: string) => void;
+  buddySearchMode?: boolean;
 }) {
   const conversationFlow = useAiChatStore((state) =>
     state.activeScopeKey
@@ -63,6 +65,11 @@ export function ChatComposer({
   const trimmedActivityTitle = activityTitle?.trim();
 
   const inputPlaceholder = (() => {
+    if (buddySearchMode) {
+      return scopedToActivity && trimmedActivityTitle
+        ? `描述你在「${trimmedActivityTitle}」的结伴检索需求…`
+        : '描述结伴需求，如日期、曲风、人数…';
+    }
     if (conversationFlow === 'collect_post_body') {
       return scopedToActivity && trimmedActivityTitle
         ? `描述你在「${trimmedActivityTitle}」的组队需求…`

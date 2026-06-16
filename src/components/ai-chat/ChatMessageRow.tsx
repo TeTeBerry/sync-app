@@ -78,18 +78,24 @@ function ChatMessageRowInner({
   const publishConfirm =
     !isUser && !msg.streaming ? parsePublishConfirmMessage(msg.text) : null;
   const hasPostCards = Boolean(msg.createdPost);
+  const hasMatchedPosts = Boolean(msg.matchedPosts?.length);
   const hasActivityCard = Boolean(msg.recommendedActivity);
   const hasSuggestedReplies = Boolean(msg.suggestedReplies?.length);
   const travelGuideImagePath = msg.travelGuide?.imagePath?.trim();
   const hasTravelGuide = Boolean(travelGuideImagePath);
   const showEmbedBelow =
     !isUser &&
-    (hasPostCards || hasActivityCard || hasSuggestedReplies || hasTravelGuide);
+    (hasPostCards ||
+      hasMatchedPosts ||
+      hasActivityCard ||
+      hasSuggestedReplies ||
+      hasTravelGuide);
   const showPublishConfirm = Boolean(publishConfirm);
   const showTypingIndicator =
     msg.streaming &&
     !msg.text &&
     !hasPostCards &&
+    !hasMatchedPosts &&
     !hasActivityCard &&
     !hasTravelGuide &&
     !showPublishConfirm;
@@ -184,6 +190,9 @@ function ChatMessageRowInner({
               ) : null}
               {msg.createdPost ? (
                 <RecommendPostCards posts={[msg.createdPost]} />
+              ) : null}
+              {msg.matchedPosts?.length ? (
+                <RecommendPostCards posts={msg.matchedPosts} />
               ) : null}
               {hasSuggestedReplies ? (
                 <SuggestedReplyChips

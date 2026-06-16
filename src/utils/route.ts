@@ -487,6 +487,15 @@ export function goEventDetail(eventId: number | string, options?: { postId?: str
   });
 }
 
+export function goBuddyAiSearch(eventId: number | string) {
+  const legacyId = parseActivityLegacyId(eventId);
+  if (legacyId == null) {
+    void Taro.showToast({ title: '活动信息无效', icon: 'none' });
+    return;
+  }
+  goAiAssistant({ activityLegacyId: legacyId, openBuddySearch: true });
+}
+
 export function goExclusiveItinerary(activityLegacyId: number) {
   const legacyId = parseActivityLegacyId(activityLegacyId);
   if (legacyId == null) {
@@ -555,7 +564,11 @@ export function goProfile() {
 
 export type GoAiAssistantOptions = Pick<
   AiAssistantNavIntent,
-  'initialMessage' | 'activityLegacyId' | 'openAiGuideSheet' | 'autoRunTravelGuideForm'
+  | 'initialMessage'
+  | 'activityLegacyId'
+  | 'openAiGuideSheet'
+  | 'autoRunTravelGuideForm'
+  | 'openBuddySearch'
 >;
 
 /** Pre-download AI subpackage (touch / mount). */
@@ -580,11 +593,15 @@ export function goAiAssistant(options?: GoAiAssistantOptions) {
   if (options?.autoRunTravelGuideForm) {
     intent.autoRunTravelGuideForm = options.autoRunTravelGuideForm;
   }
+  if (options?.openBuddySearch) {
+    intent.openBuddySearch = true;
+  }
   if (
     intent.initialMessage ||
     intent.activityLegacyId != null ||
     intent.openAiGuideSheet ||
-    intent.autoRunTravelGuideForm
+    intent.autoRunTravelGuideForm ||
+    intent.openBuddySearch
   ) {
     useNavigationStore.getState().setAiAssistantIntent(intent);
   }

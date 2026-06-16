@@ -73,8 +73,6 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
   const postsLoading = postsQuery.isLoading && postsQuery.items.length === 0;
   const showPostsEnd =
     posts.totalPostCount > 0 &&
-    posts.filteredPostCount > 0 &&
-    !posts.isBoardSearchActive &&
     !postsLoading &&
     !posts.hasMoreVisiblePosts &&
     !postsQuery.hasMore &&

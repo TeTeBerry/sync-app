@@ -157,63 +157,65 @@ const Home = () => {
   const navInsets = useNavBarInsets();
 
   return (
-    <View data-cmp="Home" className="s-page-with-tabbar">
-      <OverlayAwareScrollView
-        scrollY
-        enhanced
-        showScrollbar={false}
-        className="s-page-with-tabbar__scroll s-home__main s-scrollbar-none"
-      >
-        <View className="s-home__scroll-inner">
-          <TabPageHeader
-            className="s-tab-page-header--home"
-            navInsets={navInsets}
-            paddingRightGutterPx={16}
-            trailing={
-              <HomeHeaderActions
-                unreadCount={unreadCount}
-                onNotificationClick={handleNotification}
-              />
-            }
-          />
+    <View data-cmp="Home" className="s-page-with-tabbar s-home--with-legal-footer">
+      <View className="s-page-with-tabbar__main s-home__shell">
+        <OverlayAwareScrollView
+          scrollY
+          enhanced
+          showScrollbar={false}
+          className="s-home__main s-scrollbar-none"
+        >
+          <View className="s-home__scroll-inner">
+            <TabPageHeader
+              className="s-tab-page-header--home"
+              navInsets={navInsets}
+              paddingRightGutterPx={16}
+              trailing={
+                <HomeHeaderActions
+                  unreadCount={unreadCount}
+                  onNotificationClick={handleNotification}
+                />
+              }
+            />
 
-          <HomeCountdownCard
-            eventName={featuredCountdown?.title}
-            targetAt={featuredCountdown?.startAt ?? null}
-          />
+            <HomeCountdownCard
+              eventName={featuredCountdown?.title}
+              targetAt={featuredCountdown?.startAt ?? null}
+            />
 
-          <HomeFeaturedEvents
-            items={featuredEvents}
-            registeredLegacyIds={registeredLegacyIds}
-            activeIndex={featuredIndex}
-            onActiveIndexChange={setFeaturedIndex}
-            onEventClick={openEventDetail}
-            onJoinClick={handleJoinEvent}
-            onEventPreload={handleEventPreload}
-          />
+            <HomeFeaturedEvents
+              items={featuredEvents}
+              registeredLegacyIds={registeredLegacyIds}
+              activeIndex={featuredIndex}
+              onActiveIndexChange={setFeaturedIndex}
+              onEventClick={openEventDetail}
+              onJoinClick={handleJoinEvent}
+              onEventPreload={handleEventPreload}
+            />
 
-          {postsLoading ? (
-            <ThemedPageLoader variant="skeleton-feed" minHeight={240} />
-          ) : postsError ? (
-            <View
-              className="s-home-feed s-home-feed--error"
-              onClick={() => void refetchPosts()}
-              role="button"
-              aria-label="加载失败，点击重试"
-            >
-              <Text className="s-home-feed__error-text">帖子加载失败，点击重试</Text>
+            {postsLoading ? (
+              <ThemedPageLoader variant="skeleton-feed" minHeight={240} />
+            ) : postsError ? (
+              <View
+                className="s-home-feed s-home-feed--error"
+                onClick={() => void refetchPosts()}
+                role="button"
+                aria-label="加载失败，点击重试"
+              >
+                <Text className="s-home-feed__error-text">帖子加载失败，点击重试</Text>
+              </View>
+            ) : (
+              <HomeActivityFeed items={posts} onDelete={handleDeletePost} />
+            )}
+
+            <View className="s-home__heat" aria-label="Today heat">
+              {activeTeamCount} 人正在发现活动
             </View>
-          ) : (
-            <HomeActivityFeed items={posts} onDelete={handleDeletePost} />
-          )}
-
-          <View className="s-home__heat s-tabbar-offset" aria-label="Today heat">
-            {activeTeamCount} 人正在发现活动
           </View>
+        </OverlayAwareScrollView>
 
-          <PlatformDisclaimer variant="inline" />
-        </View>
-      </OverlayAwareScrollView>
+        <PlatformDisclaimer variant="fixed" />
+      </View>
 
       {confirmDialog}
       <LoginInterceptHost />

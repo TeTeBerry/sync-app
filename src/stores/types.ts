@@ -7,4 +7,6 @@ export type AiAssistantNavIntent = {
   openAiGuideSheet?: boolean;
   /** Run travel-guide generation after chat mounts (from event-detail sheet submit). */
   autoRunTravelGuideForm?: AiGuidePlanFormValues;
+  /** Enter buddy-post keyword search mode (activity detail entry). */
+  openBuddySearch?: boolean;
 };

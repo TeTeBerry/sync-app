@@ -6,7 +6,7 @@ import { useConfirmDialog } from '../../../hooks/useConfirmDialog';
 import { LoginInterceptHost } from '../../../components/auth/LoginInterceptHost';
 import EventDetailFallback from './components/EventDetailFallback';
 import {
-  EventDetailBoardSearchBar,
+  EventDetailBuddyAiSearchEntry,
   EventDetailComposerSection,
   EventDetailTemplatePostFab,
   EventPostsVirtualList,
@@ -18,6 +18,7 @@ import { AiGuidePlanSheet } from '../../../components/ai-chat/AiGuidePlanSheet';
 import PageNavigation from '../../../components/navigation/PageNavigation';
 import { OverlayAwareScrollView } from '../../../components/layout/OverlayAwareScrollView';
 import { PlatformDisclaimer } from '../../../components/legal/PlatformDisclaimer';
+import { goBuddyAiSearch } from '../../../utils/route';
 import { Text, View } from '@tarojs/components';
 
 const EventDetailPage = () => {
@@ -117,23 +118,16 @@ const EventDetailPage = () => {
 
             {!showHeaderSkeleton ? (
               <View className="s-event-detail__posts">
-                {posts.totalPostCount > 0 ? (
-                  <EventDetailBoardSearchBar
-                    value={posts.boardSearchQuery}
-                    onChange={posts.setBoardSearchQuery}
-                    resultCount={posts.filteredPostCount}
-                    totalCount={posts.totalPostCount}
-                  />
-                ) : null}
+                <EventDetailBuddyAiSearchEntry
+                  onClick={() => {
+                    goBuddyAiSearch(eventId);
+                  }}
+                />
                 {postsLoading ? (
                   <ThemedPageLoader variant="skeleton-event-posts" minHeight={200} />
                 ) : posts.totalPostCount === 0 ? (
                   <Text className="s-event-detail__empty">
                     暂无组队帖，来发布第一条吧
-                  </Text>
-                ) : posts.isBoardSearchActive && posts.filteredPostCount === 0 ? (
-                  <Text className="s-event-detail__empty">
-                    未找到匹配的组队帖，试试其他关键词
                   </Text>
                 ) : (
                   <EventPostsVirtualList
@@ -142,7 +136,8 @@ const EventDetailPage = () => {
                     highlightPostId={highlightPostId}
                     expandedCommentPostIds={posts.expandedCommentPostIds}
                     currentUserAvatar={currentUserAvatar}
-                    onToggleComments={posts.togglePostComments}
+                    onOpenComments={posts.openPostComments}
+                    onCloseComments={posts.closePostComments}
                     onCommentSubmitted={posts.handleCommentSubmitted}
                     onDelete={posts.handleDeletePost}
                     hasMore={postsQuery.hasMore}

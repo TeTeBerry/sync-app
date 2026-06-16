@@ -1,6 +1,7 @@
 import { apiDelete, apiGet, apiPost } from '../../utils/apiClient';
 import type {
   CreatePostPayload,
+  BuddyPostAiSearchResult,
   EventDetailPost,
   EventPostsPage,
   HomeFeedPost,
@@ -77,6 +78,14 @@ export function addPostComment(postId: string, body: string, parentCommentId?: s
   return apiPost<{ id: string; comments: number }>(
     `/posts/${postId}/comments`,
     { body, ...(parentCommentId ? { parentCommentId } : {}) },
+    ownerQueryParams(),
+  );
+}
+
+export function searchBuddyPostsWithAi(query: string, activityLegacyId: number) {
+  return apiPost<BuddyPostAiSearchResult>(
+    '/posts/ai-search',
+    { query, activityLegacyId },
     ownerQueryParams(),
   );
 }

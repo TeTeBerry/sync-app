@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import type { ConfirmDialogOptions } from '../../../hooks/useConfirmDialog';
 import { useEventPostsInfiniteQuery } from '../../../hooks/useEventPostsInfiniteQuery';
 import { requireAuth } from '../../../utils/authGate';
@@ -14,7 +14,6 @@ import {
   normalizeEventPostList,
   type EventPostListItem,
 } from '../utils/eventPostNormalize';
-import { messageBoardPostMatchesQuery } from '../utils/messageBoardPostSearch';
 
 export const EVENT_DETAIL_SCROLL_ID = 'event-detail-scroll';
 
@@ -34,41 +33,18 @@ export function useEventDetailPosts({
   const [expandedCommentPostIds, setExpandedCommentPostIds] = useState<Set<string>>(
     () => new Set(),
   );
-  const [boardSearchQuery, setBoardSearchQuery] = useState('');
 
   const loadedPostItems = useMemo(
     (): EventPostListItem[] => normalizeEventPostList(postsQuery.items),
     [postsQuery.items],
   );
 
-  const trimmedBoardSearch = boardSearchQuery.trim();
-  const isBoardSearchActive = trimmedBoardSearch.length > 0;
-
-  useEffect(() => {
-    if (!isBoardSearchActive) return;
-    if (!postsQuery.hasMore || postsQuery.isLoadingMore) return;
-    void postsQuery.loadMore();
-  }, [
-    isBoardSearchActive,
-    postsQuery.hasMore,
-    postsQuery.isLoadingMore,
-    postsQuery.items.length,
-    postsQuery.loadMore,
-  ]);
-
-  const allPostItems = useMemo((): EventPostListItem[] => {
-    if (!isBoardSearchActive) return loadedPostItems;
-    return loadedPostItems.filter((item) =>
-      messageBoardPostMatchesQuery(item.post, trimmedBoardSearch),
-    );
-  }, [isBoardSearchActive, loadedPostItems, trimmedBoardSearch]);
-
   const {
     visibleItems: postItems,
     hasMoreToShow: hasMoreVisiblePosts,
     showMore: showMoreVisiblePosts,
     ensureIndexVisible,
-  } = useWindowedList(allPostItems, {
+  } = useWindowedList(loadedPostItems, {
     initialSize: EVENT_POSTS_INITIAL_RENDER,
     step: EVENT_POSTS_RENDER_STEP,
   });
@@ -86,7 +62,7 @@ export function useEventDetailPosts({
       const postId = elementId.startsWith('post-')
         ? elementId.slice('post-'.length)
         : elementId;
-      const index = allPostItems.findIndex((item) => item.post.id === postId);
+      const index = loadedPostItems.findIndex((item) => item.post.id === postId);
       if (index >= 0) ensureIndexVisible(index);
 
       const targetSelector = `#${elementId}`;
@@ -107,7 +83,7 @@ export function useEventDetailPosts({
         }
       });
     },
-    [allPostItems, ensureIndexVisible, setScrollTop],
+    [loadedPostItems, ensureIndexVisible, setScrollTop],
   );
 
   const handleDeletePost = useCallback(
@@ -129,23 +105,29 @@ export function useEventDetailPosts({
     [confirm, postsQuery],
   );
 
-  const togglePostComments = useCallback(
+  const openPostComments = useCallback(
     (postId: string) => {
-      const index = allPostItems.findIndex((item) => item.post.id === postId);
+      const index = loadedPostItems.findIndex((item) => item.post.id === postId);
       if (index >= 0) ensureIndexVisible(index);
 
       setExpandedCommentPostIds((prev) => {
+        if (prev.has(postId)) return prev;
         const next = new Set(prev);
-        if (next.has(postId)) {
-          next.delete(postId);
-        } else {
-          next.add(postId);
-        }
+        next.add(postId);
         return next;
       });
     },
-    [allPostItems, ensureIndexVisible],
+    [loadedPostItems, ensureIndexVisible],
   );
+
+  const closePostComments = useCallback((postId: string) => {
+    setExpandedCommentPostIds((prev) => {
+      if (!prev.has(postId)) return prev;
+      const next = new Set(prev);
+      next.delete(postId);
+      return next;
+    });
+  }, []);
 
   const handleCommentSubmitted = useCallback(
     (updated: Pick<EventDetailPost, 'id' | 'comments'>) => {
@@ -157,16 +139,13 @@ export function useEventDetailPosts({
   return {
     postItems,
     totalPostCount: loadedPostItems.length,
-    filteredPostCount: allPostItems.length,
-    boardSearchQuery,
-    setBoardSearchQuery,
-    isBoardSearchActive,
     hasMoreVisiblePosts,
     expandedCommentPostIds,
     handleScrollToLower,
     scrollToElement,
     handleDeletePost,
-    togglePostComments,
+    openPostComments,
+    closePostComments,
     handleCommentSubmitted,
   };
 }
