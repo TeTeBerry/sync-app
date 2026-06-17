@@ -117,6 +117,115 @@ export function parseStreamEventPayload(
       state: json.state as ConversationState,
     };
   }
+  if (json.type === 'client_action' && json.action && typeof json.action === 'object') {
+    const action = json.action as { kind?: string; sheet?: string; mode?: string };
+    if (
+      action.kind === 'open_sheet' &&
+      (action.sheet === 'buddy_post' ||
+        action.sheet === 'travel_guide' ||
+        action.sheet === 'itinerary' ||
+        action.sheet === 'personality_test')
+    ) {
+      return {
+        type: 'client_action',
+        action: {
+          kind: 'open_sheet',
+          sheet: action.sheet,
+          mode: action.mode === 'open' ? 'open' : 'prompt',
+        },
+      };
+    }
+  }
+  if (
+    json.type === 'travel_guide_ready' &&
+    typeof json.guideId === 'string' &&
+    json.plan &&
+    typeof json.plan === 'object' &&
+    json.form &&
+    typeof json.form === 'object'
+  ) {
+    return {
+      type: 'travel_guide_ready',
+      guideId: json.guideId,
+      plan: json.plan as Extract<
+        AiChatStreamEvent,
+        { type: 'travel_guide_ready' }
+      >['plan'],
+      form: json.form as Extract<
+        AiChatStreamEvent,
+        { type: 'travel_guide_ready' }
+      >['form'],
+    };
+  }
+  if (
+    json.type === 'itinerary_ready' &&
+    typeof json.itineraryId === 'string' &&
+    typeof json.activityLegacyId === 'number' &&
+    Array.isArray(json.selectedDjIds) &&
+    Array.isArray(json.days)
+  ) {
+    return {
+      type: 'itinerary_ready',
+      itineraryId: json.itineraryId,
+      activityLegacyId: json.activityLegacyId,
+      selectedDjIds: json.selectedDjIds.filter(
+        (id): id is string => typeof id === 'string',
+      ),
+      eventMeta: typeof json.eventMeta === 'string' ? json.eventMeta : '',
+      days: json.days as Extract<
+        AiChatStreamEvent,
+        { type: 'itinerary_ready' }
+      >['days'],
+      conflicts: Array.isArray(json.conflicts)
+        ? (json.conflicts as Extract<
+            AiChatStreamEvent,
+            { type: 'itinerary_ready' }
+          >['conflicts'])
+        : [],
+      cached: typeof json.cached === 'boolean' ? json.cached : undefined,
+    };
+  }
+  if (
+    json.type === 'personality_result_ready' &&
+    typeof json.resultId === 'string' &&
+    json.result &&
+    typeof json.result === 'object'
+  ) {
+    return {
+      type: 'personality_result_ready',
+      resultId: json.resultId,
+      tagline: typeof json.tagline === 'string' ? json.tagline : '',
+      primaryType: typeof json.primaryType === 'string' ? json.primaryType : '',
+      soulMatchDjName:
+        typeof json.soulMatchDjName === 'string' ? json.soulMatchDjName : '',
+      result: json.result as Extract<
+        AiChatStreamEvent,
+        { type: 'personality_result_ready' }
+      >['result'],
+    };
+  }
+  if (
+    json.type === 'activity_registered' &&
+    typeof json.activityLegacyId === 'number'
+  ) {
+    return {
+      type: 'activity_registered',
+      activityLegacyId: json.activityLegacyId,
+      title: typeof json.title === 'string' ? json.title : undefined,
+      attendees: typeof json.attendees === 'number' ? json.attendees : 0,
+      alreadyRegistered:
+        typeof json.alreadyRegistered === 'boolean'
+          ? json.alreadyRegistered
+          : undefined,
+    };
+  }
+  if (json.type === 'comment_added' && typeof json.postId === 'string') {
+    return {
+      type: 'comment_added',
+      postId: json.postId,
+      body: typeof json.body === 'string' ? json.body : '',
+    };
+  }
   if (typeof json.content === 'string') {
     return { type: 'delta', content: json.content };
   }

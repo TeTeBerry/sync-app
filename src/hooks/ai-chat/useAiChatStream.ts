@@ -29,6 +29,12 @@ export interface UseAiChatStreamOptions {
   onExistingPost?: (
     event: Extract<AiChatStreamEvent, { type: 'existing_post' }>,
   ) => void;
+  onTravelGuideReady?: (
+    event: Extract<AiChatStreamEvent, { type: 'travel_guide_ready' }>,
+  ) => void;
+  onItineraryReady?: (
+    event: Extract<AiChatStreamEvent, { type: 'itinerary_ready' }>,
+  ) => void;
 }
 
 export function useAiChatStream(options: UseAiChatStreamOptions) {
@@ -44,6 +50,8 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
     getAuthHeaders,
     onPostCreated,
     onExistingPost,
+    onTravelGuideReady,
+    onItineraryReady,
     typewriterCharDelayMs = 22,
   } = options;
 
@@ -87,6 +95,8 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
     getAuthHeaders,
     onPostCreated,
     onExistingPost,
+    onTravelGuideReady,
+    onItineraryReady,
     persistSessionFromStream,
     createTypewriter,
     typewriterCharDelayMs,

@@ -36,6 +36,12 @@ export interface UseWsChatStreamOptions {
   onExistingPost?: (
     event: Extract<AiChatStreamEvent, { type: 'existing_post' }>,
   ) => void;
+  onTravelGuideReady?: (
+    event: Extract<AiChatStreamEvent, { type: 'travel_guide_ready' }>,
+  ) => void;
+  onItineraryReady?: (
+    event: Extract<AiChatStreamEvent, { type: 'itinerary_ready' }>,
+  ) => void;
   persistSessionFromStream: (sessionId: string) => void;
   createTypewriter: (options: {
     charDelayMs?: number;
@@ -54,6 +60,8 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
     getAuthHeaders,
     onPostCreated,
     onExistingPost,
+    onTravelGuideReady,
+    onItineraryReady,
     persistSessionFromStream,
     createTypewriter,
     typewriterCharDelayMs = 22,
@@ -133,6 +141,8 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
           persistSessionFromStream,
           onPostCreated,
           onExistingPost,
+          onTravelGuideReady,
+          onItineraryReady,
         });
       } catch (error) {
         if ((error as Error).name === 'AbortError') {
@@ -162,6 +172,8 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
       getAuthHeaders,
       onExistingPost,
       onPostCreated,
+      onTravelGuideReady,
+      onItineraryReady,
       persistSessionFromStream,
       sessionIdRef,
       setMessages,

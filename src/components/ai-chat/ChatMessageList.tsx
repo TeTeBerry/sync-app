@@ -26,6 +26,8 @@ export function ChatMessageList({
   onBuddyPostFromTravelGuide,
   onOpenBuddyPostSheet,
   onOpenTravelGuideSheet,
+  onOpenItinerarySheet,
+  onOpenPersonalityTest,
 }: {
   messages: ChatUiMessage[];
   isStreaming: boolean;
@@ -41,6 +43,8 @@ export function ChatMessageList({
   onBuddyPostFromTravelGuide?: (form: AiGuidePlanFormValues) => void;
   onOpenBuddyPostSheet?: () => void;
   onOpenTravelGuideSheet?: () => void;
+  onOpenItinerarySheet?: () => void;
+  onOpenPersonalityTest?: () => void;
 }) {
   const [scrollIntoView, setScrollIntoView] = useState<string | undefined>();
   const [scrollTop, setScrollTop] = useState(0);
@@ -129,6 +133,8 @@ export function ChatMessageList({
             onBuddyPostFromTravelGuide={onBuddyPostFromTravelGuide}
             onOpenBuddyPostSheet={onOpenBuddyPostSheet}
             onOpenTravelGuideSheet={onOpenTravelGuideSheet}
+            onOpenItinerarySheet={onOpenItinerarySheet}
+            onOpenPersonalityTest={onOpenPersonalityTest}
           />
         ))}
         <View

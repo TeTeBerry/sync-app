@@ -11,13 +11,19 @@ import { PublishConfirmCard } from './PublishConfirmCard';
 import { SuggestedReplyChips } from './SuggestedReplyChips';
 import { BuddyPostTemplateCta } from './BuddyPostTemplateCta';
 import { TravelGuideSheetCta } from './TravelGuideSheetCta';
+import { ItinerarySheetCta } from './ItinerarySheetCta';
+import { PersonalityTestSheetCta } from './PersonalityTestSheetCta';
 import { AiGuideResultCard } from './AiGuideResultCard';
+import { AiItineraryResultCard } from './AiItineraryResultCard';
+import { AiPersonalityResultCard } from './AiPersonalityResultCard';
 import { parsePublishConfirmMessage } from '../../utils/parsePublishConfirmMessage';
 import {
   filterBuddyPostSheetShortcutReplies,
   isBuddyPostTemplatePrompt,
 } from '../../utils/buddyPostPromptMessage';
 import { isTravelGuideSheetPrompt } from '../../utils/travelGuidePromptMessage';
+import { isItinerarySheetPrompt } from '../../utils/itineraryPromptMessage';
+import { isPersonalityTestSheetPrompt } from '../../utils/personalityTestPromptMessage';
 import { openSingleImagePreview } from '../../utils/openImagePreview';
 import { Button } from '../ui';
 import { Image, Text, View } from '@tarojs/components';
@@ -64,6 +70,8 @@ export type ChatMessageRowProps = {
   onBuddyPostFromTravelGuide?: (form: AiGuidePlanFormValues) => void;
   onOpenBuddyPostSheet?: () => void;
   onOpenTravelGuideSheet?: () => void;
+  onOpenItinerarySheet?: () => void;
+  onOpenPersonalityTest?: () => void;
 };
 
 function ChatMessageRowInner({
@@ -79,6 +87,8 @@ function ChatMessageRowInner({
   onBuddyPostFromTravelGuide,
   onOpenBuddyPostSheet,
   onOpenTravelGuideSheet,
+  onOpenItinerarySheet,
+  onOpenPersonalityTest,
 }: ChatMessageRowProps) {
   const isUser = msg.from === 'user';
   const timestamp = formatMessageTime(msg.id);
@@ -95,15 +105,29 @@ function ChatMessageRowInner({
   const showBuddyPostTemplateCta =
     !isUser &&
     !msg.streaming &&
-    isBuddyPostTemplatePrompt(msg.text) &&
-    Boolean(onOpenBuddyPostSheet);
+    Boolean(onOpenBuddyPostSheet) &&
+    (msg.showBuddyPostSheetCta || isBuddyPostTemplatePrompt(msg.text));
   const showTravelGuideSheetCta =
     !isUser &&
     !msg.streaming &&
     Boolean(onOpenTravelGuideSheet) &&
     (msg.showTravelGuideSheetCta || isTravelGuideSheetPrompt(msg.text));
+  const showItinerarySheetCta =
+    !isUser &&
+    !msg.streaming &&
+    Boolean(onOpenItinerarySheet) &&
+    (msg.showItinerarySheetCta || isItinerarySheetPrompt(msg.text));
+  const showPersonalityTestSheetCta =
+    !isUser &&
+    !msg.streaming &&
+    Boolean(onOpenPersonalityTest) &&
+    (msg.showPersonalityTestSheetCta || isPersonalityTestSheetPrompt(msg.text));
   const travelGuidePayload = msg.travelGuide;
   const hasTravelGuide = Boolean(travelGuidePayload?.plan && travelGuidePayload?.form);
+  const itineraryPayload = msg.itinerary;
+  const hasItinerary = Boolean(itineraryPayload?.result?.itinerary?.days?.length);
+  const personalityPayload = msg.personalityResult;
+  const hasPersonalityResult = Boolean(personalityPayload?.result);
   const showEmbedBelow =
     !isUser &&
     (hasPostCards ||
@@ -112,7 +136,11 @@ function ChatMessageRowInner({
       hasSuggestedReplyChips ||
       showBuddyPostTemplateCta ||
       showTravelGuideSheetCta ||
-      hasTravelGuide);
+      showItinerarySheetCta ||
+      showPersonalityTestSheetCta ||
+      hasTravelGuide ||
+      hasItinerary ||
+      hasPersonalityResult);
   const showPublishConfirm = Boolean(publishConfirm);
   const showTypingIndicator =
     msg.streaming &&
@@ -236,6 +264,18 @@ function ChatMessageRowInner({
                   onOpenSheet={onOpenTravelGuideSheet!}
                 />
               ) : null}
+              {showItinerarySheetCta ? (
+                <ItinerarySheetCta
+                  disabled={isStreaming}
+                  onOpenSheet={onOpenItinerarySheet!}
+                />
+              ) : null}
+              {showPersonalityTestSheetCta ? (
+                <PersonalityTestSheetCta
+                  disabled={isStreaming}
+                  onOpenSheet={onOpenPersonalityTest!}
+                />
+              ) : null}
               {hasTravelGuide && travelGuidePayload ? (
                 <AiGuideResultCard
                   guideId={travelGuidePayload.guideId || msg.id}
@@ -250,6 +290,20 @@ function ChatMessageRowInner({
                       ? () => onBuddyPostFromTravelGuide(travelGuidePayload.form)
                       : undefined
                   }
+                />
+              ) : null}
+              {hasItinerary && itineraryPayload ? (
+                <AiItineraryResultCard
+                  activityLegacyId={itineraryPayload.activityLegacyId}
+                  selectedDjIds={itineraryPayload.selectedDjIds}
+                  result={itineraryPayload.result}
+                  disabled={isStreaming}
+                />
+              ) : null}
+              {hasPersonalityResult && personalityPayload ? (
+                <AiPersonalityResultCard
+                  result={personalityPayload.result}
+                  disabled={isStreaming}
                 />
               ) : null}
             </View>

@@ -16,6 +16,7 @@ import { View } from '@tarojs/components';
 import { invalidateCache } from '../../../hooks/useApiQuery';
 import { useAiBuddyPost } from '../../../hooks/useAiBuddyPost';
 import { useAiTravelGuide } from '../../../hooks/useAiTravelGuide';
+import { saveTravelGuideDetail } from '../../../domains/travel-guide/utils/travelGuideDetailStorage';
 import { resolveActivityByKeyword } from '../../../api/syncApi';
 import {
   HOME_FESTIVAL_SHORTCUT_CHIPS,
@@ -29,6 +30,9 @@ import { useActivityDetailQuery } from '../../../hooks/useSyncApi';
 import { eventCityFromLocation } from '../../../utils/travelGuideDepartureSuggestions';
 import { shouldSuppressAutoScrollForMessage } from '../../../components/ai-chat/chatMessageListScroll';
 import { BUDDY_POST_SHEET_ACTION_LABEL } from '../../../utils/buddyPostPromptMessage';
+import { TRAVEL_GUIDE_SHEET_ACTION_LABEL } from '../../../utils/travelGuidePromptMessage';
+import { goExclusiveItinerary, goPersonalityTest } from '../../../utils/route';
+import { useItineraryStore } from '../../../domains/performance-itinerary/store';
 export type AiAssistantChatProps = {
   initialMessage?: string | null;
   initialOpenAiGuideSheet?: boolean;
@@ -124,7 +128,39 @@ export function AiAssistantChat({
         duration: 2500,
       });
     },
+    onTravelGuideReady: (event) => {
+      if (activityLegacyId == null) return;
+      saveTravelGuideDetail(event.guideId, {
+        plan: event.plan,
+        form: event.form,
+        activityLegacyId,
+      });
+    },
+    onItineraryReady: (event) => {
+      useItineraryStore
+        .getState()
+        .setFromGenerateResult(event.activityLegacyId, event.selectedDjIds, {
+          itinerary: {
+            eventMeta: event.eventMeta,
+            days: event.days,
+          },
+          conflicts: event.conflicts,
+          cached: event.cached ?? false,
+        });
+    },
   });
+
+  const handleOpenItinerarySheet = useCallback(() => {
+    if (activityLegacyId == null) {
+      void Taro.showToast({ title: '请先进入活动后再生成行程', icon: 'none' });
+      return;
+    }
+    goExclusiveItinerary(activityLegacyId);
+  }, [activityLegacyId]);
+
+  const handleOpenPersonalityTest = useCallback(() => {
+    goPersonalityTest();
+  }, []);
 
   const scheduleScrollToBottom = useCallback(() => {
     const last = messagesRef.current[messagesRef.current.length - 1];
@@ -239,21 +275,13 @@ export function AiAssistantChat({
 
       setPinnedChipKey(undefined);
 
-      const scoped = activityLegacyId != null && !Number.isNaN(activityLegacyId);
-      if (scoped) {
-        const guideHandled =
-          await travelGuide.handleTravelGuideChatMessage(trimmedKeyword);
-        if (guideHandled) return;
-      }
       await send({ text: trimmedKeyword });
     },
     [
-      activityLegacyId,
       isStreaming,
       isStreamingRef,
       send,
       setActiveActivityLegacyId,
-      travelGuide,
       applyActivityBinding,
     ],
   );
@@ -288,22 +316,8 @@ export function AiAssistantChat({
     initialMessageHandledRef.current = true;
     onInitialMessageSent?.();
 
-    const scoped = activityLegacyId != null && !Number.isNaN(activityLegacyId);
-    void (async () => {
-      if (scoped) {
-        const guideHandled = await travelGuide.handleTravelGuideChatMessage(trimmed);
-        if (guideHandled) return;
-      }
-      await send({ text: trimmed });
-    })();
-  }, [
-    activityLegacyId,
-    initialMessage,
-    isStreaming,
-    onInitialMessageSent,
-    send,
-    travelGuide,
-  ]);
+    void send({ text: trimmed });
+  }, [initialMessage, isStreaming, onInitialMessageSent, send]);
 
   useEffect(() => {
     if (!initialOpenAiGuideSheet || initialGuideSheetHandledRef.current) return;
@@ -337,15 +351,6 @@ export function AiAssistantChat({
         return;
       }
 
-      const scoped = activityLegacyId != null && !Number.isNaN(activityLegacyId);
-      if (scoped) {
-        const guideHandled = await travelGuide.handleTravelGuideChatMessage(trimmed);
-        if (guideHandled) {
-          setInput('');
-          return;
-        }
-      }
-
       submitLockRef.current = true;
       try {
         setInput('');
@@ -354,14 +359,13 @@ export function AiAssistantChat({
         submitLockRef.current = false;
       }
     },
-    [activityLegacyId, isStreaming, isStreamingRef, send, travelGuide],
+    [isStreaming, isStreamingRef, send],
   );
 
   const handleClearChat = useCallback(async () => {
     if (isStreaming || isStreamingRef.current) return;
-    travelGuide.clearGuideCollect();
     await clearChat();
-  }, [clearChat, isStreaming, isStreamingRef, travelGuide]);
+  }, [clearChat, isStreaming, isStreamingRef]);
 
   const handleSelectSuggestedReply = useCallback(
     async (reply: string) => {
@@ -376,10 +380,9 @@ export function AiAssistantChat({
         return;
       }
 
-      const scoped = activityLegacyId != null && !Number.isNaN(activityLegacyId);
-      if (scoped) {
-        const guideHandled = await travelGuide.handleTravelGuideChatMessage(trimmed);
-        if (guideHandled) return;
+      if (trimmed === TRAVEL_GUIDE_SHEET_ACTION_LABEL) {
+        travelGuide.openGuideSheet();
+        return;
       }
 
       submitLockRef.current = true;
@@ -389,7 +392,7 @@ export function AiAssistantChat({
         submitLockRef.current = false;
       }
     },
-    [activityLegacyId, buddyPost, isStreaming, isStreamingRef, send, travelGuide],
+    [buddyPost, isStreaming, isStreamingRef, send, travelGuide],
   );
 
   const composerBusy =
@@ -416,6 +419,8 @@ export function AiAssistantChat({
         onBuddyPostFromTravelGuide={buddyPost.openBuddyPostSheetFromTravelGuide}
         onOpenBuddyPostSheet={buddyPost.openBuddyPostSheetWithTag}
         onOpenTravelGuideSheet={travelGuide.openGuideSheet}
+        onOpenItinerarySheet={handleOpenItinerarySheet}
+        onOpenPersonalityTest={handleOpenPersonalityTest}
       />
       <View
         className="s-ai-assistant-chat__footer"

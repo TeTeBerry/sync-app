@@ -14,22 +14,7 @@ import type { AiGuidePlanFormValues } from '../types/travelGuide';
 import { travelGuideBudgetLabel } from '../types/travelGuide';
 import { saveTravelGuideDetail } from '../domains/travel-guide/utils/travelGuideDetailStorage';
 import { isApiEnabled } from '../constants/api';
-import {
-  isPostingConversationFlow,
-  selectActiveConversationFlow,
-  useAiChatStore,
-} from '../stores/aiChatStore';
 import { isAuthGated, requireAuth } from '../utils/authGate';
-import {
-  buildTravelGuideCollectPrompt,
-  isTravelGuideChatInterrupt,
-  listMissingTravelGuideSlots,
-  mergeTravelGuideDraft,
-  parseTravelGuideChatMessage,
-  shouldHandleAsTravelGuideChat,
-  travelGuideDraftToForm,
-  type TravelGuideChatDraft,
-} from '../utils/travelGuideChatParse';
 
 const PLANNING_TEXT = 'AI 正在为你规划...';
 const PLANNING_STAGE_TEXTS = [
@@ -58,11 +43,9 @@ export function useAiTravelGuide(options: {
   const {
     activityLegacyId,
     activityTitle,
-    defaultNights,
     setMessages,
     messagesRef,
     isStreaming,
-    sessionIdRef,
     onPlanningMessagesShown,
   } = options;
 
@@ -72,22 +55,6 @@ export function useAiTravelGuide(options: {
     useState<AiGuidePlanFormValues | null>(null);
   const lastFormRef = useRef<AiGuidePlanFormValues | null>(null);
   const generatingRef = useRef(false);
-  const guideCollectActiveRef = useRef(false);
-  const guideDraftRef = useRef<TravelGuideChatDraft>({});
-
-  const clearGuideCollect = useCallback(() => {
-    guideCollectActiveRef.current = false;
-    guideDraftRef.current = {};
-  }, []);
-
-  const appendMessages = useCallback(
-    (items: ChatUiMessage[]) => {
-      const next = [...messagesRef.current, ...items];
-      messagesRef.current = next;
-      setMessages(next);
-    },
-    [messagesRef, setMessages],
-  );
 
   const openGuideSheet = useCallback(() => {
     requireAuth(() => {
@@ -99,11 +66,10 @@ export function useAiTravelGuide(options: {
         void Taro.showToast({ title: '请先进入活动后再生成攻略', icon: 'none' });
         return;
       }
-      clearGuideCollect();
       setSheetInitialValues(lastFormRef.current);
       setSheetOpen(true);
     }, 'ai_assistant');
-  }, [activityLegacyId, clearGuideCollect, isStreaming]);
+  }, [activityLegacyId, isStreaming]);
 
   const runGeneration = useCallback(
     async (
@@ -118,7 +84,6 @@ export function useAiTravelGuide(options: {
         generatingRef.current = true;
         setIsGenerating(true);
         lastFormRef.current = form;
-        clearGuideCollect();
 
         const userMsg: ChatUiMessage | null = options?.skipUserBubble
           ? null
@@ -205,99 +170,9 @@ export function useAiTravelGuide(options: {
     [
       activityLegacyId,
       activityTitle,
-      clearGuideCollect,
       messagesRef,
       onPlanningMessagesShown,
       setMessages,
-    ],
-  );
-
-  /**
-   * 对话生成攻略：解析出发地/人数/预算等，齐全则直接生成攻略卡片；否则多轮追问。
-   * @returns true 表示已消费该条消息，勿再走组队聊天流。
-   */
-  const handleTravelGuideChatMessage = useCallback(
-    async (userText: string): Promise<boolean> => {
-      const trimmed = userText.trim();
-      if (!trimmed) return false;
-      if (activityLegacyId == null || Number.isNaN(activityLegacyId)) {
-        return false;
-      }
-      if (isStreaming || generatingRef.current) {
-        void Taro.showToast({ title: '请等待当前操作完成', icon: 'none' });
-        return true;
-      }
-
-      if (isTravelGuideChatInterrupt(trimmed)) {
-        clearGuideCollect();
-        return false;
-      }
-
-      const postingFlowActive = isPostingConversationFlow(
-        selectActiveConversationFlow(useAiChatStore.getState()),
-      );
-      if (postingFlowActive) {
-        clearGuideCollect();
-        return false;
-      }
-
-      const collecting = guideCollectActiveRef.current;
-      if (
-        !shouldHandleAsTravelGuideChat({
-          text: trimmed,
-          collecting,
-          postingFlowActive,
-        })
-      ) {
-        return false;
-      }
-
-      if (isAuthGated()) {
-        requireAuth(() => {
-          void handleTravelGuideChatMessage(userText);
-        }, 'ai_assistant');
-        return true;
-      }
-
-      const parsed = parseTravelGuideChatMessage(trimmed);
-      const merged = mergeTravelGuideDraft(guideDraftRef.current, parsed);
-      guideDraftRef.current = merged;
-      guideCollectActiveRef.current = true;
-
-      appendMessages([
-        {
-          id: createMessageId(),
-          from: 'user',
-          text: trimmed,
-        },
-      ]);
-
-      const form = travelGuideDraftToForm(merged, defaultNights);
-      if (form) {
-        await runGeneration(form, { skipUserBubble: true });
-        return true;
-      }
-
-      const missing = listMissingTravelGuideSlots(merged);
-      appendMessages([
-        {
-          id: createMessageId(),
-          from: 'ai',
-          text: buildTravelGuideCollectPrompt(missing),
-          showTravelGuideSheetCta: true,
-        },
-      ]);
-      Taro.nextTick(() => onPlanningMessagesShown?.());
-      return true;
-    },
-    [
-      activityLegacyId,
-      appendMessages,
-      clearGuideCollect,
-      defaultNights,
-      isStreaming,
-      onPlanningMessagesShown,
-      runGeneration,
     ],
   );
 
@@ -321,11 +196,9 @@ export function useAiTravelGuide(options: {
     setSheetOpen,
     isGenerating,
     openGuideSheet,
-    handleTravelGuideChatMessage,
-    clearGuideCollect,
     handleSheetSubmit,
     handleRegenerate,
     sheetInitialValues,
-    defaultNights,
+    defaultNights: options.defaultNights,
   };
 }
