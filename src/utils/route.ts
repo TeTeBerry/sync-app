@@ -1,4 +1,4 @@
-import Taro, { useDidShow } from '@tarojs/taro';
+import Taro from '@tarojs/taro';
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigationStore } from '../stores/navigationStore';
 import type { NavigationState } from '../stores/navigationStore';
@@ -62,6 +62,8 @@ type PreloadTabPath =
   | typeof ROUTES.EVENTS
   | typeof ROUTES.PROFILE;
 
+export type TabRoutePath = PreloadTabPath;
+
 /** Stack pages per tab; event/profile subpackages preload on tab switch */
 const PRELOAD_PAGE_ROUTES_BY_TAB: Record<PreloadTabPath, RoutePath[]> = {
   [ROUTES.HOME]: [
@@ -86,21 +88,31 @@ function preloadSubpackagesForTab(tab: PreloadTabPath): void {
 }
 
 function resolvePreloadTab(path?: string): PreloadTabPath {
-  if (path === ROUTES.AI) {
-    return ROUTES.AI;
-  }
-  if (path === ROUTES.EVENTS) {
-    return ROUTES.EVENTS;
-  }
-  if (path === ROUTES.PROFILE) {
-    return ROUTES.PROFILE;
+  const tab = resolveTabRouteFromPath(path ?? '');
+  if (tab) {
+    return tab;
   }
   return ROUTES.HOME;
 }
 
+/** Map a page route (tab root or subpackage stack) to its bottom-nav tab. */
+export function resolveTabRouteFromPath(path: string): PreloadTabPath | null {
+  const base = normalizePath(path.split('?')[0] ?? path);
+  if (TAB_ROUTE_PATHS.has(base as RoutePath)) {
+    return base as PreloadTabPath;
+  }
+  if (base.startsWith('/packageProfile/')) {
+    return ROUTES.PROFILE;
+  }
+  if (base.startsWith('/packageAi/')) {
+    return ROUTES.AI;
+  }
+  return null;
+}
+
 const tabRouteListeners = new Set<() => void>();
 /** Tab highlight before `getCurrentPages()` reflects `switchTab` (custom tab bar). */
-let optimisticTabPath: RoutePath | null = null;
+let optimisticTabPath: PreloadTabPath | null = null;
 
 function notifyTabRouteChange() {
   for (const listener of tabRouteListeners) {
@@ -108,11 +120,35 @@ function notifyTabRouteChange() {
   }
 }
 
-function resolveActiveRoutePath(): string {
+/** Tab pages call on useDidShow so the custom tab bar stays in sync. */
+export function syncTabBarRoute(tabPath: PreloadTabPath): void {
+  optimisticTabPath = tabPath;
+  notifyTabRouteChange();
+}
+
+/** Stack pages with an embedded tab bar sync highlight from the visible route. */
+export function syncTabBarFromCurrentPage(): void {
+  const tab = resolveTabRouteFromPath(currentRoutePath());
+  if (tab) {
+    syncTabBarRoute(tab);
+    return;
+  }
+  notifyTabRouteChange();
+}
+
+function resolveActiveRoutePath(): PreloadTabPath {
+  const current = currentRoutePath();
+  const tabFromCurrent = resolveTabRouteFromPath(current);
+  if (tabFromCurrent) {
+    if (optimisticTabPath === tabFromCurrent) {
+      optimisticTabPath = null;
+    }
+    return tabFromCurrent;
+  }
   if (optimisticTabPath) {
     return optimisticTabPath;
   }
-  return currentRoutePath();
+  return resolvePreloadTab(current);
 }
 
 export function subscribeTabRouteChange(listener: () => void): () => void {
@@ -122,7 +158,7 @@ export function subscribeTabRouteChange(listener: () => void): () => void {
   };
 }
 
-export function isTabRoute(url: string): url is RoutePath {
+export function isTabRoute(url: string): url is TabRoutePath {
   return TAB_ROUTE_PATHS.has(normalizePath(url) as RoutePath);
 }
 
@@ -496,15 +532,6 @@ export function goEventDetail(eventId: number | string, options?: { postId?: str
   });
 }
 
-export function goBuddyAiSearch(eventId: number | string) {
-  const legacyId = parseActivityLegacyId(eventId);
-  if (legacyId == null) {
-    void Taro.showToast({ title: '活动信息无效', icon: 'none' });
-    return;
-  }
-  goAiAssistant({ activityLegacyId: legacyId, openBuddySearch: true });
-}
-
 export function goExclusiveItinerary(
   activityLegacyId: number,
   selectedDjIds?: string[],
@@ -601,11 +628,7 @@ export function goProfile() {
 
 export type GoAiAssistantOptions = Pick<
   AiAssistantNavIntent,
-  | 'initialMessage'
-  | 'activityLegacyId'
-  | 'openAiGuideSheet'
-  | 'autoRunTravelGuideForm'
-  | 'openBuddySearch'
+  'initialMessage' | 'activityLegacyId' | 'openAiGuideSheet' | 'autoRunTravelGuideForm'
 >;
 
 /** Pre-download AI subpackage (touch / mount). */
@@ -630,15 +653,11 @@ export function goAiAssistant(options?: GoAiAssistantOptions) {
   if (options?.autoRunTravelGuideForm) {
     intent.autoRunTravelGuideForm = options.autoRunTravelGuideForm;
   }
-  if (options?.openBuddySearch) {
-    intent.openBuddySearch = true;
-  }
   if (
     intent.initialMessage ||
     intent.activityLegacyId != null ||
     intent.openAiGuideSheet ||
-    intent.autoRunTravelGuideForm ||
-    intent.openBuddySearch
+    intent.autoRunTravelGuideForm
   ) {
     useNavigationStore.getState().setAiAssistantIntent(intent);
   }
@@ -693,19 +712,11 @@ export function goBack(fallback: RoutePath = ROUTES.HOME) {
   );
 }
 
-export function useActiveRoutePath(): string {
+export function useActiveRoutePath(): TabRoutePath {
   const [path, setPath] = useState(() => resolveActiveRoutePath());
   const bump = useCallback(() => {
-    const next = resolveActiveRoutePath();
-    if (next === currentRoutePath()) {
-      optimisticTabPath = null;
-    }
-    setPath(next);
+    setPath(resolveActiveRoutePath());
   }, []);
-  useDidShow(() => {
-    optimisticTabPath = null;
-    bump();
-  });
 
   useEffect(() => {
     return subscribeTabRouteChange(bump);

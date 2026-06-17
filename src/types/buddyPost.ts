@@ -1,5 +1,3 @@
-import type { PostContentType } from './backend';
-
 /** 留言类型固定为组队 */
 export type BuddyPostTagId = 'team';
 
@@ -27,13 +25,11 @@ export const BUDDY_POST_TAG_OPTIONS: Array<{
   /** 正文首段，如「组队」 */
   intentPhrase: string;
   hashTag: string;
-  contentType: PostContentType;
 }> = [
   {
     id: 'team',
     label: '组队',
     intentPhrase: '组队',
     hashTag: '#组队',
-    contentType: 'team',
   },
 ];

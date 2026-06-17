@@ -1,4 +1,4 @@
-import { stripContentTypeHashtags } from '../post';
+import { stripTeamHashtags } from '../../utils/postBodyContact';
 import {
   PUBLISH_CONFIRM_MARKER,
   type PublishConfirmPayload,
@@ -14,7 +14,7 @@ export function PublishConfirmCard({
   userAvatar?: string;
   userName: string;
 }) {
-  const bodyText = stripContentTypeHashtags(payload.draftBody);
+  const bodyText = stripTeamHashtags(payload.draftBody);
 
   return (
     <View className="s-publish-confirm">

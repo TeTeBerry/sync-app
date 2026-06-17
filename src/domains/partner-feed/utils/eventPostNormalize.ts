@@ -1,6 +1,6 @@
 import type { EventDetailPost } from '../../../types/post';
 import { formatPostPublishTime } from '../../../utils/formatPostPublishTime';
-import { sanitizeImageList, sanitizeRemoteImageUrl } from '../../../utils/imageUrl';
+import { sanitizeRemoteImageUrl } from '../../../utils/imageUrl';
 
 export type EventPostListItem = {
   post: EventDetailPost;
@@ -17,8 +17,6 @@ export function normalizeEventPostListItem(item: EventDetailPost): EventPostList
     tags: item.tags ?? [],
     name: item.name?.trim() || '用户',
     avatar: sanitizeRemoteImageUrl(item.avatar) ?? item.avatar,
-    contentTypes: item.contentTypes,
-    images: sanitizeImageList(item.images),
     comments: item.comments,
   };
   const publishTimeLabel = post.createdAt ? formatPostPublishTime(post.createdAt) : '';

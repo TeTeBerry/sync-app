@@ -27,7 +27,7 @@ const AiTabPage: FC = () => {
           .join(' ')}
       >
         <PageNavigation
-          title="AI问答"
+          title="AI助手"
           fallback={ROUTES.HOME}
           onBack={page.handleBack}
           trailing={
@@ -77,7 +77,6 @@ const AiTabPage: FC = () => {
                 initialMessage={page.pendingInitialMessage}
                 initialOpenAiGuideSheet={page.pendingOpenAiGuideSheet}
                 initialAutoRunTravelGuideForm={page.pendingAutoGuideForm}
-                initialOpenBuddySearch={page.pendingOpenBuddySearch}
                 pageShowSeq={page.pageShowSeq}
                 activityLegacyId={page.activityLegacyId}
                 activityTitle={page.activityTitle}

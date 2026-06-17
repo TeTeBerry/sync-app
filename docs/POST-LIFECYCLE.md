@@ -20,7 +20,7 @@
 
 ```
 AiBuddyPostFormValues
-  → buildBuddyPostBody / buddyPostHashTags / buddyPostContentTypes
+  → buildBuddyPostBody / buddyPostHashTags
   → POST /api/posts  (api/sync/posts.createPost)
   → prependItem（乐观帖）→ replaceItem（服务端帖）→ refetch({ silent: true })
 ```
@@ -34,11 +34,11 @@ AiBuddyPostFormValues
 ```
 
 - 段内字段以中文逗号 `，` 连接
-- 标签以 `\n\n` 与正文分隔，并同步写入 `tags`、`contentTypes`
+- 标签以 `\n\n` 与正文分隔，并同步写入 `tags`
 
 关键文件：
 
-- `src/utils/publishBuddyPost.ts` — 组装 body、tags、contentTypes、`listedInFeed`、乐观帖
+- `src/utils/publishBuddyPost.ts` — 组装 body、tags、`listedInFeed`、乐观帖
 - `src/utils/buddyPostForm.ts` — 表单 → 正文与标签
 - `src/domains/partner-feed/hooks/useEventDetailBuddyPost.ts` — 活动页发帖编排
 - `src/components/ai-chat/AiBuddyPostSheet.tsx` — 发帖表单 UI
@@ -60,10 +60,10 @@ POST /api/posts
 2. 微信 UGC 文本安全（`msg_sec_check`，若启用）
 3. 票务敏感词拦截（`isTicketPublishProhibited`）
 4. 风控 `assessPost`：
-   - **模板帖**（同时带 `contentTypes` + `tags`）→ `{ rulesOnly: true }`
+   - **模板帖**（带 `tags`）→ `{ rulesOnly: true }`
    - 不通过 → `status: hidden`
 5. `assertPostHasNoContactInfo` 拒绝含联系方式的正文（手机号、微信号、QQ、邮箱、链接等）
-6. 推断 `contentTypes`、写入 `departureCity`（可由正文/地点推断）
+6. 写入 `departureCity`（可由正文/地点推断）
 7. 同活动相近帖 / 发帖上限（默认 8 篇）校验
 8. 对最终正文及关联字段走微信 `msg_sec_check` 文本审核
 9. `repository.create`，状态 `active`
@@ -75,12 +75,12 @@ POST /api/posts
 ## 三、活动帖列表
 
 - `GET /api/posts?activityLegacyId=&limit=&cursor=&anchorPostId=` — 分页 `{ items, nextCursor?, hasMore }`
-- 过滤：`status: active`、`listedInFeed !== false`、排除 `share` 类型现场帖
+- 过滤：`status: active`、`listedInFeed !== false`
 - 前端：`useEventPostsInfiniteQuery` + `useEventDetailPosts`（窗口化首屏 6 条、步进 +6）
 - **评论**：活动帖卡片底部评论 icon 展开/收起；`PostCommentSection` + `GET|POST /api/posts/:id/comments`
 - 删帖：`DELETE /api/posts/:id`（仅自己的帖）
 
-`EventDetailPost` 核心字段：`id`, `userId`, `name`, `avatar`, `location`, `createdAt`, `body`, `tags`, `contentTypes`, `comments?`, `images?`
+`EventDetailPost` 核心字段：`id`, `userId`, `name`, `avatar`, `location`, `createdAt`, `body`, `tags`, `comments?`
 
 ---
 

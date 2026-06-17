@@ -21,7 +21,7 @@ import {
   HOME_POPULAR_POSTS_PERSIST_LIMIT,
   persistPopularPosts,
 } from '../../utils/homeCacheStorage';
-import { sanitizeImageList, sanitizeRemoteImageUrl } from '../../utils/imageUrl';
+import { sanitizeRemoteImageUrl } from '../../utils/imageUrl';
 import { invalidateAllPosts } from '../../utils/queryInvalidation';
 import {
   STALE_POST_COMMENTS_MS,
@@ -82,9 +82,7 @@ export function mapHomeFeedPost(item: HomeFeedPost): HomeFeedPost {
     time: item.time,
     avatar: sanitizeRemoteImageUrl(item.avatar) ?? item.avatar,
     activityLegacyId: item.activityLegacyId,
-    contentTypes: item.contentTypes,
     tags: item.tags,
-    images: item.images?.length ? sanitizeImageList(item.images) : undefined,
   };
 }
 

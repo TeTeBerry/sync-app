@@ -1,10 +1,18 @@
-import { stripContentTypeHashtags } from './postContentTypeDisplay';
-
 const CONTACT_PREFIX = '联系方式：';
+
+/** Remove the fixed team hashtag from visible post text. */
+export function stripTeamHashtags(text?: string): string {
+  if (!text?.trim()) return '';
+  return text
+    .replace(/#组队/g, '')
+    .replace(/[ \t]+$/gm, '')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
 
 /** Remove structured contact segment from post body for display and publish. */
 export function stripPostBodyContact(body: string | undefined): string {
-  const normalized = stripContentTypeHashtags(body ?? '').trim();
+  const normalized = stripTeamHashtags(body ?? '').trim();
   if (!normalized) {
     return '';
   }

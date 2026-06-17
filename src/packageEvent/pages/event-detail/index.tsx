@@ -6,8 +6,8 @@ import { useConfirmDialog } from '../../../hooks/useConfirmDialog';
 import { LoginInterceptHost } from '../../../components/auth/LoginInterceptHost';
 import EventDetailFallback from './components/EventDetailFallback';
 import {
-  EventDetailBuddyAiSearchEntry,
   EventDetailComposerSection,
+  EventDetailPostSearchBar,
   EventDetailTemplatePostFab,
   EventPostsVirtualList,
   EVENT_DETAIL_SCROLL_ID,
@@ -18,7 +18,6 @@ import { AiGuidePlanSheet } from '../../../components/ai-chat/AiGuidePlanSheet';
 import PageNavigation from '../../../components/navigation/PageNavigation';
 import { OverlayAwareScrollView } from '../../../components/layout/OverlayAwareScrollView';
 import { PlatformDisclaimer } from '../../../components/legal/PlatformDisclaimer';
-import { goBuddyAiSearch } from '../../../utils/route';
 import { Text, View } from '@tarojs/components';
 
 const EventDetailPage = () => {
@@ -118,13 +117,19 @@ const EventDetailPage = () => {
 
             {!showHeaderSkeleton ? (
               <View className="s-event-detail__posts">
-                <EventDetailBuddyAiSearchEntry
-                  onClick={() => {
-                    goBuddyAiSearch(eventId);
-                  }}
+                <EventDetailPostSearchBar
+                  value={posts.searchQuery}
+                  onChange={posts.setSearchQuery}
+                  onClear={posts.clearSearchQuery}
+                  isSearching={posts.searchLoading}
+                  matchedCount={posts.searchMatchedCount}
                 />
                 {postsLoading ? (
                   <ThemedPageLoader variant="skeleton-event-posts" minHeight={200} />
+                ) : posts.searchActive && posts.totalPostCount === 0 ? (
+                  <Text className="s-event-detail__empty">
+                    未找到匹配的帖子，试试其他关键词
+                  </Text>
                 ) : posts.totalPostCount === 0 ? (
                   <Text className="s-event-detail__empty">
                     暂无组队帖，来发布第一条吧

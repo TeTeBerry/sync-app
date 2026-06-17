@@ -148,8 +148,6 @@ export interface ProfilePostItem {
   content: string;
   date: string;
   activityLegacyId?: number;
-  contentTypes?: PostContentType[];
-  images?: string[];
 }
 
 export type HomeFeedPostAuthorGender = 'female' | 'male';
@@ -166,9 +164,7 @@ export interface HomeFeedPost {
   time: string;
   avatar: string;
   activityLegacyId?: number;
-  contentTypes?: PostContentType[];
   tags?: string[];
-  images?: string[];
 }
 
 export interface EventPostsPage {
@@ -201,9 +197,7 @@ export interface EventDetailPost {
   createdAt?: string;
   body: string;
   tags: string[];
-  contentTypes?: PostContentType[];
   avatar: string;
-  images?: string[];
   comments?: number;
   /** Present on create when moderation hides the post from public feeds. */
   status?: 'active' | 'hidden';
@@ -226,22 +220,12 @@ export interface PostCommentsPage {
   nextCursor?: string;
 }
 
-export type PostContentType =
-  | 'team'
-  | 'accommodation'
-  | 'carpool'
-  | 'ticket'
-  | 'share'
-  | 'other';
-
 export interface CreatePostPayload {
   body: string;
   activityLegacyId?: number;
   eventTitle?: string;
   location?: string;
   tags?: string[];
-  contentTypes?: PostContentType[];
-  images?: string[];
   /** Default true. False = stored but hidden from activity/popular feeds. */
   listedInFeed?: boolean;
 }

@@ -1,4 +1,3 @@
-import type { PostContentType } from '../types/backend';
 import type { AiBuddyPostFormValues, BuddyPostTagId } from '../types/buddyPost';
 import { BUDDY_POST_TAG_OPTIONS } from '../types/buddyPost';
 import {
@@ -71,16 +70,6 @@ export function buddyPostHashTags(tags: BuddyPostTagId[]): string[] {
     if (opt) out.add(opt.hashTag);
   }
   return [...out];
-}
-
-export function buddyPostContentTypes(tags: BuddyPostTagId[]): PostContentType[] {
-  const types = new Set<PostContentType>();
-  for (const id of tags) {
-    const opt = BUDDY_POST_TAG_OPTIONS.find((o) => o.id === id);
-    if (opt) types.add(opt.contentType);
-  }
-  if (!types.size) types.add('team');
-  return [...types];
 }
 
 export function buildBuddyPostUserSummary(

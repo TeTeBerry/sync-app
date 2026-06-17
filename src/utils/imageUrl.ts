@@ -41,19 +41,6 @@ export function resolveImageWithFallbackDisplaySrc(
   return trimmed;
 }
 
-/** Post grid tile src: use resolved URL; hide unresolved cloud fileIDs. */
-export function resolvePostGridImageSrc(
-  originalSrc: string,
-  resolvedSrc: string | undefined,
-): string {
-  const resolved = resolvedSrc?.trim();
-  if (resolved) return resolved;
-  const trimmed = originalSrc?.trim();
-  if (!trimmed) return '';
-  if (isCloudStorageFileId(trimmed)) return '';
-  return trimmed;
-}
-
 /** Resolve `/uploads/...` against API host (local Nest dev only). */
 export function resolveAbsoluteUploadImageUrl(src: string): string {
   const trimmed = src.trim();
@@ -126,31 +113,6 @@ export function sanitizeRemoteImageUrl(src: string | undefined): string | undefi
   } catch {
     return trimmed;
   }
-}
-
-function isDisplayableFeedImageUrl(url: string): boolean {
-  const trimmed = url.trim();
-  if (!trimmed) return false;
-  if (/^wxfile:\/\//i.test(trimmed) || /^blob:/i.test(trimmed)) return false;
-  if (/^data:/i.test(trimmed)) return false;
-  try {
-    if (/^https?:\/\//i.test(trimmed)) {
-      const host = new URL(trimmed).hostname.toLowerCase();
-      if (host === 'tmp' || host === 'usr' || host === 'store') return false;
-    }
-  } catch {
-    return false;
-  }
-  return true;
-}
-
-export function sanitizeImageList(images: string[] | undefined): string[] | undefined {
-  if (!images?.length) return images;
-  const next = images
-    .filter((url) => isDisplayableFeedImageUrl(url))
-    .map((url) => sanitizeRemoteImageUrl(url) ?? url)
-    .filter((url) => Boolean(url));
-  return next.length ? next : undefined;
 }
 
 /** Resize remote list thumbnails when the CDN supports path or query params. */

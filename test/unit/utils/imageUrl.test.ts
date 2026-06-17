@@ -56,24 +56,6 @@ describe('thumbnailImageUrl uploads', () => {
   });
 });
 
-describe('sanitizeImageList', () => {
-  afterEach(() => {
-    vi.unstubAllEnvs();
-  });
-
-  it('drops WeChat sandbox temp paths', async () => {
-    vi.stubEnv('TARO_APP_API_BASE_URL', 'http://192.168.1.7:3000/api');
-    const { sanitizeImageList } = await import('@/utils/imageUrl');
-    expect(
-      sanitizeImageList([
-        'wxfile://tmp_a.jpg',
-        'http://tmp/wxfoo.png',
-        'http://192.168.1.7:3000/uploads/a.jpg',
-      ]),
-    ).toEqual(['http://192.168.1.7:3000/uploads/a.jpg']);
-  });
-});
-
 describe('resolveImageWithFallbackDisplaySrc', () => {
   it('blocks unresolved cloud fileIDs', async () => {
     const { resolveImageWithFallbackDisplaySrc } = await import('@/utils/imageUrl');

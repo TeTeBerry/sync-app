@@ -1,5 +1,10 @@
 import { useDidShow } from '@tarojs/taro';
-import { endRouteTransition, type RoutePath } from '../utils/route';
+import {
+  endRouteTransition,
+  isTabRoute,
+  syncTabBarRoute,
+  type RoutePath,
+} from '../utils/route';
 import { useNavigationStore } from '../stores/navigationStore';
 
 /** Whether this page show should dismiss the global route-transition overlay. */
@@ -27,6 +32,10 @@ export function shouldEndRouteTransitionOnShow(
  */
 export function useEndRouteTransitionOnShow(ownTabPath?: RoutePath) {
   useDidShow(() => {
+    if (ownTabPath && isTabRoute(ownTabPath)) {
+      syncTabBarRoute(ownTabPath);
+    }
+
     const transition = useNavigationStore.getState().routeTransition;
     if (!shouldEndRouteTransitionOnShow(transition, ownTabPath)) {
       return;

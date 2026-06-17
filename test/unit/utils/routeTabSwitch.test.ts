@@ -9,8 +9,11 @@ import { useNavigationStore } from '@/stores/navigationStore';
 import {
   beginTabRouteTransition,
   endRouteTransition,
+  resolveTabRouteFromPath,
   ROUTES,
+  subscribeTabRouteChange,
   switchTabTo,
+  syncTabBarRoute,
 } from '@/utils/route';
 
 vi.mock('@tarojs/taro', () => ({
@@ -92,5 +95,20 @@ describe('tab switch loading', () => {
     switchTabTo(ROUTES.HOME);
     expect(useNavigationStore.getState().routeTransition.active).toBe(false);
     expect(Taro.switchTab).not.toHaveBeenCalled();
+  });
+
+  it('resolveTabRouteFromPath maps tab roots and profile subpackage routes', () => {
+    expect(resolveTabRouteFromPath(ROUTES.PROFILE)).toBe(ROUTES.PROFILE);
+    expect(resolveTabRouteFromPath(ROUTES.SETTINGS)).toBe(ROUTES.PROFILE);
+    expect(resolveTabRouteFromPath(ROUTES.AI_ASSISTANT)).toBe(ROUTES.AI);
+    expect(resolveTabRouteFromPath(ROUTES.EVENT_DETAIL)).toBeNull();
+  });
+
+  it('syncTabBarRoute notifies listeners with the destination tab', () => {
+    const listener = vi.fn();
+    const unsubscribe = subscribeTabRouteChange(listener);
+    syncTabBarRoute(ROUTES.PROFILE);
+    expect(listener).toHaveBeenCalled();
+    unsubscribe();
   });
 });

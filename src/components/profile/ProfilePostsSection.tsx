@@ -1,7 +1,6 @@
 import React, { useMemo } from 'react';
 import { Clock, MessageSquare } from '../../components/icons';
-import { PostImageGrid, PostOwnerDeleteButton } from '../post';
-import { FEED_POST_IMAGE_MAX_DISPLAY } from '../../constants/listPerf';
+import { PostOwnerDeleteButton } from '../post';
 import { stripPostBodyContact } from '../../utils/postBodyContact';
 import { ProfileCollapsibleSection } from './ProfileCollapsibleSection';
 import type { ProfilePostItem } from '../../types/backend';
@@ -53,15 +52,6 @@ function ProfilePostItem({
 
       {displayBody ? (
         <Text className="s-profile-post__content">{displayBody}</Text>
-      ) : null}
-
-      {item.images?.length ? (
-        <View className="s-profile-post__images" onClick={stopClickPropagation}>
-          <PostImageGrid
-            images={item.images}
-            maxDisplay={FEED_POST_IMAGE_MAX_DISPLAY}
-          />
-        </View>
       ) : null}
 
       <View className="s-profile-post__footer">

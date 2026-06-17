@@ -6,11 +6,5 @@ export const EVENT_POSTS_INITIAL_RENDER = 6;
 
 export const EVENT_POSTS_RENDER_STEP = 6;
 
-/** Feed / list cards: cap rendered tiles (full set still in preview). */
-export const FEED_POST_IMAGE_MAX_DISPLAY = 6;
-
-/** Activity detail post cards may show one more thumb in the featured row. */
-export const EVENT_POST_IMAGE_MAX_DISPLAY = 6;
-
 /** Comments loaded per page on post detail. */
 export const POST_COMMENTS_PAGE_SIZE = 20;

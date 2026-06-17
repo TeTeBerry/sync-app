@@ -14,18 +14,21 @@ import {
   normalizeEventPostList,
   type EventPostListItem,
 } from '../utils/eventPostNormalize';
+import { useEventDetailPostSearch } from './useEventDetailPostSearch';
 
 export const EVENT_DETAIL_SCROLL_ID = 'event-detail-scroll';
 
 type EventPostsQuery = ReturnType<typeof useEventPostsInfiniteQuery>;
 
 export type UseEventDetailPostsParams = {
+  activityLegacyId?: number;
   postsQuery: EventPostsQuery;
   confirm: (options: ConfirmDialogOptions) => Promise<boolean>;
   setScrollTop: (value: number | undefined) => void;
 };
 
 export function useEventDetailPosts({
+  activityLegacyId,
   postsQuery,
   confirm,
   setScrollTop,
@@ -34,10 +37,15 @@ export function useEventDetailPosts({
     () => new Set(),
   );
 
-  const loadedPostItems = useMemo(
-    (): EventPostListItem[] => normalizeEventPostList(postsQuery.items),
-    [postsQuery.items],
-  );
+  const search = useEventDetailPostSearch({
+    activityLegacyId,
+    loadedPosts: postsQuery.items,
+  });
+
+  const loadedPostItems = useMemo((): EventPostListItem[] => {
+    const source = search.isActive ? (search.matchedPosts ?? []) : postsQuery.items;
+    return normalizeEventPostList(source);
+  }, [postsQuery.items, search.isActive, search.matchedPosts]);
 
   const {
     visibleItems: postItems,
@@ -50,12 +58,15 @@ export function useEventDetailPosts({
   });
 
   const handleScrollToLower = useCallback(() => {
+    if (search.isActive) {
+      return;
+    }
     if (hasMoreVisiblePosts) {
       showMoreVisiblePosts();
       return;
     }
     void postsQuery.loadMore();
-  }, [hasMoreVisiblePosts, showMoreVisiblePosts, postsQuery]);
+  }, [hasMoreVisiblePosts, search.isActive, showMoreVisiblePosts, postsQuery]);
 
   const scrollToElement = useCallback(
     (elementId: string) => {
@@ -139,7 +150,7 @@ export function useEventDetailPosts({
   return {
     postItems,
     totalPostCount: loadedPostItems.length,
-    hasMoreVisiblePosts,
+    hasMoreVisiblePosts: search.isActive ? false : hasMoreVisiblePosts,
     expandedCommentPostIds,
     handleScrollToLower,
     scrollToElement,
@@ -147,5 +158,11 @@ export function useEventDetailPosts({
     openPostComments,
     closePostComments,
     handleCommentSubmitted,
+    searchQuery: search.query,
+    setSearchQuery: search.setQuery,
+    clearSearchQuery: search.clearSearch,
+    searchActive: search.isActive,
+    searchLoading: search.isSearching,
+    searchMatchedCount: search.matchedCount,
   };
 }

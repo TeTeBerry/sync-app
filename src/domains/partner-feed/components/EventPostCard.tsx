@@ -3,11 +3,9 @@ import { MapPin } from '../../../components/icons';
 import {
   PostCardActionBar,
   PostCommentSection,
-  PostImageGrid,
   PostOwnerDeleteButton,
 } from '../../../components/post';
 import { ImageWithFallback } from '../../../components/ImageWithFallback';
-import { EVENT_POST_IMAGE_MAX_DISPLAY } from '../../../constants/listPerf';
 import { isCurrentUserPostAuthor } from '../../../utils/postOwnership';
 import type { EventDetailPost } from '../../../types/backend';
 import { stripPostBodyContact } from '../../../utils/postBodyContact';
@@ -93,15 +91,6 @@ function EventPostCardInner({
       </View>
 
       {displayBody ? <Text className="s-event-post__text">{displayBody}</Text> : null}
-
-      {post.images?.length ? (
-        <View onClick={stopClickPropagation}>
-          <PostImageGrid
-            images={post.images}
-            maxDisplay={EVENT_POST_IMAGE_MAX_DISPLAY}
-          />
-        </View>
-      ) : null}
 
       <View className="s-event-post__footer">
         <View className="s-event-post__footer-divider" aria-hidden />

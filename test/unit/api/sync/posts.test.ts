@@ -83,7 +83,6 @@ describe('api/sync/posts createPost', () => {
       eventTitle: '风暴电音节',
       location: '上海',
       tags: ['#组队'],
-      contentTypes: ['team'],
     });
 
     const call = mockRequest.mock.calls[0][0] as {
@@ -99,7 +98,6 @@ describe('api/sync/posts createPost', () => {
       expect.objectContaining({
         activityLegacyId: 9,
         location: '上海',
-        contentTypes: ['team'],
       }),
     );
   });

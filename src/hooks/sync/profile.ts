@@ -6,7 +6,6 @@ import {
   fetchProfilePosts,
   fetchProfileSummary,
 } from '../../api/sync/profile';
-import { filterProfileTeamPosts } from '../../utils/profileTeamPosts';
 import { persistProfileSummary } from '../../utils/homeCacheStorage';
 import { useApiQuery } from '../useApiQuery';
 import type { QueryEnableOptions } from './types';
@@ -59,7 +58,7 @@ export function useProfilePostsQuery() {
 
   return useApiQuery({
     queryKey: ['profile', 'posts'],
-    queryFn: async () => filterProfileTeamPosts(await fetchProfilePosts()),
+    queryFn: async () => fetchProfilePosts(),
     enabled,
     staleTime: 30_000,
   });

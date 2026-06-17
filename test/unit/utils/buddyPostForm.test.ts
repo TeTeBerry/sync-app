@@ -3,7 +3,6 @@ import type { AiBuddyPostFormValues } from '@/types/buddyPost';
 import {
   buildBuddyPostBody,
   buildBuddyPostUserSummary,
-  buddyPostContentTypes,
   buddyPostHashTags,
   defaultBuddyPostForm,
   defaultBuddyPostFormWithTag,
@@ -46,10 +45,9 @@ describe('buddyPostForm', () => {
     expect(body).toBe('组队，6.13-6.14，上海，1人');
   });
 
-  it('maps tags to hashTags and contentTypes', () => {
+  it('maps tags to hashTags', () => {
     expect(buddyPostHashTags(['team'])).toEqual(['#组队']);
-    expect(buddyPostContentTypes(['team'])).toEqual(['team']);
-    expect(buddyPostContentTypes([])).toEqual(['team']);
+    expect(buddyPostHashTags([])).toEqual([]);
   });
 
   it('buildBuddyPostUserSummary for chat bubble', () => {

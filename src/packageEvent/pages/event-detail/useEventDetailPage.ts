@@ -63,6 +63,7 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
   const { handleScroll, frozenTop, scrollFrozen } = useEventDetailScrollPreserve();
 
   const posts = useEventDetailPosts({
+    activityLegacyId: eventId,
     postsQuery,
     confirm,
     setScrollTop,
@@ -72,6 +73,7 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
 
   const postsLoading = postsQuery.isLoading && postsQuery.items.length === 0;
   const showPostsEnd =
+    !posts.searchActive &&
     posts.totalPostCount > 0 &&
     !postsLoading &&
     !posts.hasMoreVisiblePosts &&

@@ -1,5 +1,6 @@
 import './BottomNav.scss';
 import React from 'react';
+import { useDidShow } from '@tarojs/taro';
 import { Button } from '../ui';
 import { View, Text } from '@tarojs/components';
 import { Bot, CalendarDays, House, User } from '../../components/icons';
@@ -9,7 +10,12 @@ import {
   preloadProfileSubpackage,
 } from '../../utils/subpackagePreload';
 import type { RoutePath } from '../../utils/route';
-import { ROUTES, switchTabTo, useActiveRoutePath } from '../../utils/route';
+import {
+  ROUTES,
+  switchTabTo,
+  syncTabBarFromCurrentPage,
+  useActiveRoutePath,
+} from '../../utils/route';
 
 function preloadSubpackagesForTab(path: RoutePath) {
   if (path === ROUTES.HOME || path === ROUTES.EVENTS || path === ROUTES.AI) {
@@ -34,7 +40,7 @@ const BottomNav: React.FC = () => {
 
   const navItems = [
     { path: ROUTES.HOME, icon: House, label: '首页' },
-    { path: ROUTES.AI, icon: Bot, label: 'AI问答' },
+    { path: ROUTES.AI, icon: Bot, label: 'AI助手' },
     { path: ROUTES.EVENTS, icon: CalendarDays, label: '活动' },
     { path: ROUTES.PROFILE, icon: User, label: '我的' },
   ];
@@ -87,6 +93,9 @@ export function BottomNavSlot() {
 
 /** Tab bar for stack pages that embed the bar in-page. */
 export function PageTabBarChrome() {
+  useDidShow(() => {
+    syncTabBarFromCurrentPage();
+  });
   return <BottomNavSlot />;
 }
 

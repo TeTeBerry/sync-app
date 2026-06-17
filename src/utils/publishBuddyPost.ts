@@ -2,11 +2,7 @@ import { createPost } from '../api/sync/posts';
 import type { EventDetailPost } from '../types/backend';
 import type { RecommendedPostCard } from '../types/aiChat';
 import type { AiBuddyPostFormValues } from '../types/buddyPost';
-import {
-  buildBuddyPostBody,
-  buddyPostContentTypes,
-  buddyPostHashTags,
-} from './buddyPostForm';
+import { buildBuddyPostBody, buddyPostHashTags } from './buddyPostForm';
 import { eventDetailPostToCard } from './eventPostCard';
 import { assertPostPublishedVisible } from './postPublishFeedback';
 
@@ -31,7 +27,6 @@ export function buildOptimisticBuddyPost(params: {
     createdAt: new Date().toISOString(),
     body: fullBody,
     tags: hashTags,
-    contentTypes: buddyPostContentTypes(params.form.tags),
   };
 }
 
@@ -56,7 +51,6 @@ export async function publishBuddyPostFromForm(params: {
     eventTitle: title,
     ...(location ? { location } : {}),
     tags: hashTags,
-    contentTypes: buddyPostContentTypes(form.tags),
     listedInFeed: params.listedInFeed !== false,
   });
   assertPostPublishedVisible(post);

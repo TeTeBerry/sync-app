@@ -1,11 +1,7 @@
 import './FeedPostList.scss';
 import { memo, useMemo, type FC } from 'react';
-import {
-  FEED_POST_IMAGE_MAX_DISPLAY,
-  HOME_FEED_INITIAL_RENDER,
-} from '../../constants/listPerf';
+import { HOME_FEED_INITIAL_RENDER } from '../../constants/listPerf';
 import { useWindowedList } from '../../hooks/useWindowedList';
-import { PostImageGrid } from './PostImageGrid';
 import { PostOwnerDeleteButton } from './PostOwnerDeleteButton';
 import { MapPin, Ticket } from '../icons';
 import { WechatEmojiText } from '../wechat-emoji/WechatEmojiText';
@@ -33,7 +29,6 @@ function FeedPostRowInner({ post, onDelete }: FeedPostRowProps) {
   const displayBody = useMemo(() => stripPostBodyContact(post.body), [post.body]);
   const eventLocation = post.location?.trim();
   const eventTitle = post.event?.trim();
-  const postImages = post.images?.length ? post.images : undefined;
 
   const stopClickPropagation = (event: { stopPropagation?: () => void }) => {
     event.stopPropagation?.();
@@ -71,14 +66,7 @@ function FeedPostRowInner({ post, onDelete }: FeedPostRowProps) {
         ) : null}
       </View>
 
-      <View
-        className={[
-          's-home-post__content',
-          postImages?.length && 's-home-post__content--with-media',
-        ]
-          .filter(Boolean)
-          .join(' ')}
-      >
+      <View className="s-home-post__content">
         {displayBody ? (
           <View className="s-home-post__body">
             <WechatEmojiText text={displayBody} className="s-home-post__text" />
@@ -93,15 +81,6 @@ function FeedPostRowInner({ post, onDelete }: FeedPostRowProps) {
               className="s-home-post__event-pill-icon"
             />
             <Text className="s-home-post__event-pill-text">{eventTitle}</Text>
-          </View>
-        ) : null}
-
-        {postImages?.length ? (
-          <View onClick={stopClickPropagation}>
-            <PostImageGrid
-              images={postImages}
-              maxDisplay={FEED_POST_IMAGE_MAX_DISPLAY}
-            />
           </View>
         ) : null}
       </View>

@@ -210,8 +210,6 @@ X-Activity-Id: 4          # 可选，活动 legacyId（REST + AI WebSocket upgra
 
 若已登录且 body `userId` 与 JWT `sub` 不一致，服务端返回 `{ "type": "error", "message": "用户身份与登录态不一致" }`。
 
-`image` / `images`：须为小程序 `wx.cloud.uploadFile` 返回的 **`cloud://` fileID**（路径前缀 `ugc/posts/…`）；后端仅存 fileID，展示由客户端 `wx.cloud.getTempFileURL` 解析。不支持 data URL 或外链 HTTPS。
-
 **生产（CloudBase 云托管）**：仅 `cloud://` fileID。  
 **本地 Nest 联调**：可设 `ENABLE_LOCAL_UPLOADS=true`，临时使用 `http://局域网IP:3000/uploads/…`。
 
