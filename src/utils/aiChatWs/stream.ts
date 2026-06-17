@@ -115,8 +115,6 @@ async function* runSingleWsTurn(
       userName: options.userName,
       userPhone: options.userPhone,
       activityLegacyId: options.activityLegacyId,
-      image: options.image,
-      images: options.images,
     });
 
     const turnTimedOut = new Promise<never>((_, reject) => {

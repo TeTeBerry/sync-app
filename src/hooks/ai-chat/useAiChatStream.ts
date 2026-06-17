@@ -8,6 +8,11 @@ import type {
   SendChatOptions,
 } from '../../types/aiChat';
 import { getClientSessionIdentity } from '../../api/requestActor';
+import {
+  startAiChatStagedProgress,
+  withAiChatProgress,
+} from '../../utils/aiChatStagedProgress';
+import { resolveAiChatProgressKind } from '../../utils/resolveAiChatProgressKind';
 import { createMessageId } from './createMessageId';
 import { useChatSession } from './useChatSession';
 import { useWsChatStream } from './useWsChatStream';
@@ -119,10 +124,9 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
 
   const executeSend = useCallback(
     async (sendOptions: SendChatOptions) => {
-      const { text, image, images, imagePreview, imagePreviews } = sendOptions;
+      const { text } = sendOptions;
       const trimmed = text.trim();
-      const hasImages = Boolean(image) || (images && images.length > 0);
-      if (!trimmed && !hasImages) return;
+      if (!trimmed) return;
 
       cancelHistoryLoad();
       abortRef.current?.abort();
@@ -131,32 +135,39 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
         id: createMessageId(),
         from: 'user',
         text: trimmed,
-        imagePreview: imagePreview ?? imagePreviews?.[0] ?? image ?? images?.[0],
-        ocrText: hasImages ? trimmed : undefined,
       };
       const aiMsgId = createMessageId();
+      const progressKind = resolveAiChatProgressKind({ text: trimmed });
       const baseMessages = messagesRef.current;
       const nextMessages: ChatUiMessage[] = [
         ...baseMessages,
         userMsg,
-        { id: aiMsgId, from: 'ai', text: '', streaming: true },
+        withAiChatProgress({ id: aiMsgId, from: 'ai', text: '' }, progressKind),
       ];
       messagesRef.current = nextMessages;
       setMessages(nextMessages);
       setIsStreaming(true);
       setIsStreamingRef(true);
 
+      const stopStagedProgress = startAiChatStagedProgress({
+        aiMsgId,
+        kind: progressKind,
+        messagesRef,
+        setMessages,
+      });
+
       const controller = new AbortController();
       abortRef.current = controller;
 
       try {
-        await runStream(sendOptions, aiMsgId, controller.signal);
+        await runStream(sendOptions, aiMsgId, controller.signal, stopStagedProgress);
       } catch (error) {
         if ((error as Error).name === 'AbortError') {
           return;
         }
         // Transport layer (`useWsChatStream`) already surfaces user-facing toasts.
       } finally {
+        stopStagedProgress();
         setIsStreaming(false);
         setIsStreamingRef(false);
         abortRef.current = null;
@@ -168,10 +179,8 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
   const send = useCallback(
     async (payload: string | SendChatOptions) => {
       const sendOptions = typeof payload === 'string' ? { text: payload } : payload;
-      const { text, image, images } = sendOptions;
-      const trimmed = text.trim();
-      const hasImages = Boolean(image) || (images && images.length > 0);
-      if (!trimmed && !hasImages) return;
+      const trimmed = sendOptions.text.trim();
+      if (!trimmed) return;
 
       if (isStreamingRef.current) {
         void Taro.showToast({ title: '请等待上一条回复', icon: 'none' });

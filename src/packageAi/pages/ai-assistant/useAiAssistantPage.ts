@@ -19,13 +19,13 @@ import { isAiChatWsDevLog } from '../../../utils/aiChatWs';
 import { inferUserGenderFromName } from '../../../utils/inferAuthorGender';
 import { useFestivalPlanSummary } from '../../../domains/festival-plan/useFestivalPlanSummary';
 import { useFestivalPlanNavigation } from '../../../domains/festival-plan/useFestivalPlanNavigation';
+import type { FestivalPlanTaskActions } from '../../../domains/festival-plan/festivalPlanTaskActions';
+import { FESTIVAL_PLAN_SUMMARY_PX } from '../../../domains/festival-plan/FestivalPlanSummaryBar';
 
 /** Event context strip below header when scoped to an activity. */
 export const AI_EVENT_CONTEXT_PX = 44;
-/** Festival plan summary below event context. */
-export const FESTIVAL_PLAN_SUMMARY_PX = 52;
 /** Quick chips + composer row inside chat footer (px @ 375). */
-export const AI_CHAT_COMPOSER_CHROME_PX = 136;
+export const AI_CHAT_COMPOSER_CHROME_PX = 88;
 
 export function useAiAssistantPage() {
   const navInsets = useNavBarInsets();
@@ -51,8 +51,10 @@ export function useAiAssistantPage() {
   const [pendingAutoGuideForm, setPendingAutoGuideForm] = useState(
     navBoot.autoRunTravelGuideForm,
   );
-  const [messageCount, setMessageCount] = useState(0);
+  const [chatRevision, setChatRevision] = useState(0);
   const [pageShowSeq, setPageShowSeq] = useState(0);
+  const [festivalPlanActions, setFestivalPlanActions] =
+    useState<FestivalPlanTaskActions | null>(null);
 
   const consumeAiAssistantIntent = useNavigationStore(selectConsumeAiAssistantIntent);
   const activityLegacyId =
@@ -78,11 +80,12 @@ export function useAiAssistantPage() {
     hasEventScope && Boolean(activityTitle || activityQuery.isLoading);
   const festivalPlan = useFestivalPlanSummary(
     activityLegacyId,
-    pageShowSeq + messageCount,
+    pageShowSeq + chatRevision,
   );
-  const handleFestivalPlanChipPress = useFestivalPlanNavigation(
+  const handleFestivalPlanTaskPress = useFestivalPlanNavigation(
     activityLegacyId,
     festivalPlan,
+    festivalPlanActions,
   );
 
   const headerSubtractPx = useMemo(() => {
@@ -146,8 +149,7 @@ export function useAiAssistantPage() {
     pendingOpenAiGuideSheet,
     pendingAutoGuideForm,
     pageShowSeq,
-    messageCount,
-    setMessageCount,
+    onChatMessagesChange: setChatRevision,
     profileUserData,
     userGender,
     activityQuery,
@@ -155,7 +157,8 @@ export function useAiAssistantPage() {
     activityMeta,
     showEventContext,
     festivalPlan,
-    handleFestivalPlanChipPress,
+    handleFestivalPlanTaskPress,
+    setFestivalPlanActions,
     chatScrollHeight,
     activityLegacyId,
     handleInitialMessageSent,

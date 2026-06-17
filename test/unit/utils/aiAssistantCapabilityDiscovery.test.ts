@@ -12,13 +12,8 @@ import {
 } from '@/constants/aiCtaLabels';
 
 describe('aiAssistantCapabilityDiscovery', () => {
-  it('shows bound activity capability chips', () => {
-    expect(buildWelcomeCapabilityChipLabels(true)).toEqual([
-      '查阵容',
-      GENERATE_TRAVEL_GUIDE_CTA,
-      GENERATE_ITINERARY_CTA,
-      BUDDY_POST_CTA,
-    ]);
+  it('shows bound lineup chip only — plan tasks live in festival checklist', () => {
+    expect(buildWelcomeCapabilityChipLabels(true)).toEqual(['查阵容']);
   });
 
   it('shows unbound discovery chips', () => {
@@ -33,12 +28,7 @@ describe('aiAssistantCapabilityDiscovery', () => {
     const message = createWelcomeChatMessage('EDC Thailand 2026', 8);
     expect(message.isWelcome).toBe(true);
     expect(message.text).toContain('EDC Thailand 2026');
-    expect(message.suggestedReplies).toEqual([
-      '查阵容',
-      GENERATE_TRAVEL_GUIDE_CTA,
-      GENERATE_ITINERARY_CTA,
-      BUDDY_POST_CTA,
-    ]);
+    expect(message.suggestedReplies).toEqual(['查阵容']);
   });
 
   it('maps bound chip labels to actions', () => {
@@ -70,7 +60,7 @@ describe('aiAssistantCapabilityDiscovery', () => {
       type: 'personality_test',
     });
     expect(resolveWelcomeCapabilityChipAction('选一场音乐节', false)).toEqual({
-      type: 'pick_festival_hint',
+      type: 'pick_festival_sheet',
     });
   });
 });

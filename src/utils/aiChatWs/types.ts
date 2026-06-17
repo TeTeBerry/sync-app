@@ -7,8 +7,6 @@ export interface AiChatWsSendPayload {
   userName?: string;
   userPhone?: string;
   activityLegacyId?: number;
-  image?: string;
-  images?: string[];
 }
 
 export interface StreamAiChatWsOptions extends AiChatWsSendPayload {

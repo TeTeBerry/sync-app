@@ -7,6 +7,7 @@ import type {
   RecommendedPostCard,
 } from '@sync/chat-contracts';
 import type { ConversationState } from './conversationState';
+import type { AiChatProgressKind } from '../constants/aiChatProgress';
 import type { TravelGuideChatPayload } from './travelGuide';
 import type { GenerateItineraryResult } from './itinerary';
 import type { PersonalityTestResult } from '../domains/personality-test/types';
@@ -39,9 +40,9 @@ export type ChatUiMessage = {
   id: string;
   from: 'ai' | 'user';
   text: string;
-  imagePreview?: string;
-  ocrText?: string;
   streaming?: boolean;
+  /** Unified in-progress label for async capabilities (lineup, guide, etc.). */
+  progressKind?: AiChatProgressKind;
   recommendedActivity?: RecommendedActivityCard;
   createdPost?: RecommendedPostCard;
   matchedPosts?: RecommendedPostCard[];
@@ -69,11 +70,6 @@ export type ChatUiMessage = {
 
 export interface SendChatOptions {
   text: string;
-  image?: string;
-  images?: string[];
-  /** Local temp path(s) for bubble preview; WS payload uses `image` / `images` fileIDs. */
-  imagePreview?: string;
-  imagePreviews?: string[];
 }
 
 export interface ChatSessionRecord {

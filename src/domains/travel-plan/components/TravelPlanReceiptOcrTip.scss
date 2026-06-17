@@ -1,0 +1,48 @@
+.s-travel-plan-receipt-ocr-tip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(191, 90, 242, 0.1);
+  border: 1px solid rgba(191, 90, 242, 0.28);
+  text-align: left;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+
+  &--pressed {
+    opacity: 0.92;
+  }
+}
+
+.s-travel-plan-receipt-ocr-tip__icon {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(191, 90, 242, 0.14);
+}
+
+.s-travel-plan-receipt-ocr-tip__copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.s-travel-plan-receipt-ocr-tip__title {
+  font-size: var(--s-type-body-sm);
+  font-weight: var(--s-fw-semibold);
+  color: rgba(255, 255, 255, 0.92);
+  line-height: 1.35;
+}
+
+.s-travel-plan-receipt-ocr-tip__cta {
+  font-size: var(--s-type-small);
+  color: rgba(191, 90, 242, 0.95);
+  line-height: 1.35;
+}

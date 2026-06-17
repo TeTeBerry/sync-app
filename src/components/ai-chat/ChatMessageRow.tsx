@@ -24,9 +24,13 @@ import {
 import { isTravelGuideSheetPrompt } from '../../utils/travelGuidePromptMessage';
 import { isItinerarySheetPrompt } from '../../utils/itineraryPromptMessage';
 import { isPersonalityTestSheetPrompt } from '../../utils/personalityTestPromptMessage';
-import { openSingleImagePreview } from '../../utils/openImagePreview';
-import { Button } from '../ui';
-import { Image, Text, View } from '@tarojs/components';
+import {
+  filterChecklistDuplicateSuggestedReplies,
+  shouldSuppressPlanSheetCtAs,
+} from '../../utils/aiAssistantEntryPolicy';
+import { useAiChatStore } from '../../stores/aiChatStore';
+import { AiChatProgressIndicator } from './AiChatProgressIndicator';
+import { Text, View } from '@tarojs/components';
 
 const TIMESTAMP_GAP_MS = 5 * 60 * 1000;
 
@@ -62,6 +66,7 @@ export type ChatMessageRowProps = {
   index: number;
   messages: ChatUiMessage[];
   isStreaming: boolean;
+  activityLegacyId?: number;
   userAvatar?: string;
   userName: string;
   userGender?: AuthorGender;
@@ -79,6 +84,7 @@ function ChatMessageRowInner({
   index,
   messages,
   isStreaming,
+  activityLegacyId,
   userAvatar,
   userName,
   userGender,
@@ -90,6 +96,15 @@ function ChatMessageRowInner({
   onOpenItinerarySheet,
   onOpenPersonalityTest,
 }: ChatMessageRowProps) {
+  const conversationFlow = useAiChatStore((state) =>
+    state.activeScopeKey
+      ? state.buckets[state.activeScopeKey]?.conversationState?.flow
+      : undefined,
+  );
+  const suppressPlanSheetCtAs = shouldSuppressPlanSheetCtAs(
+    activityLegacyId,
+    conversationFlow,
+  );
   const isUser = msg.from === 'user';
   const timestamp = formatMessageTime(msg.id);
   const showTimestamp = shouldShowTimestamp(messages, index);
@@ -99,22 +114,27 @@ function ChatMessageRowInner({
   const hasPostCards = Boolean(msg.createdPost);
   const hasMatchedPosts = Boolean(msg.matchedPosts?.length);
   const hasActivityCard = Boolean(msg.recommendedActivity);
-  const hasSuggestedReplies = Boolean(msg.suggestedReplies?.length);
   const suggestedReplyChips = msg.isWelcome
     ? (msg.suggestedReplies ?? [])
-    : filterBuddyPostSheetShortcutReplies(msg.suggestedReplies);
+    : (filterChecklistDuplicateSuggestedReplies(
+        filterBuddyPostSheetShortcutReplies(msg.suggestedReplies),
+        activityLegacyId,
+      ) ?? []);
   const hasSuggestedReplyChips = suggestedReplyChips.length > 0;
   const showBuddyPostTemplateCta =
+    !suppressPlanSheetCtAs &&
     !isUser &&
     !msg.streaming &&
     Boolean(onOpenBuddyPostSheet) &&
     (msg.showBuddyPostSheetCta || isBuddyPostTemplatePrompt(msg.text));
   const showTravelGuideSheetCta =
+    !suppressPlanSheetCtAs &&
     !isUser &&
     !msg.streaming &&
     Boolean(onOpenTravelGuideSheet) &&
     (msg.showTravelGuideSheetCta || isTravelGuideSheetPrompt(msg.text));
   const showItinerarySheetCta =
+    !suppressPlanSheetCtAs &&
     !isUser &&
     !msg.streaming &&
     Boolean(onOpenItinerarySheet) &&
@@ -144,9 +164,20 @@ function ChatMessageRowInner({
       hasItinerary ||
       hasPersonalityResult);
   const showPublishConfirm = Boolean(publishConfirm);
+  const showProgressIndicator =
+    !isUser &&
+    msg.streaming &&
+    Boolean(msg.progressKind) &&
+    !hasPostCards &&
+    !hasMatchedPosts &&
+    !hasActivityCard &&
+    !hasTravelGuide &&
+    !hasItinerary &&
+    !showPublishConfirm;
   const showTypingIndicator =
     msg.streaming &&
     !msg.text &&
+    !msg.progressKind &&
     !hasPostCards &&
     !hasMatchedPosts &&
     !hasActivityCard &&
@@ -191,12 +222,16 @@ function ChatMessageRowInner({
                   )
                 : 's-ai-assistant-chat__bubble--from-ai',
               msg.streaming && 's-ai-assistant-chat__bubble--streaming',
-              msg.streaming && !msg.text && 's-ai-assistant-chat__bubble--waiting',
+              msg.streaming &&
+                (showProgressIndicator || showTypingIndicator) &&
+                's-ai-assistant-chat__bubble--waiting',
               showEmbedBelow && 's-ai-assistant-chat__bubble--with-embed-below',
               showPublishConfirm && 's-ai-assistant-chat__bubble--publish-confirm',
             )}
           >
-            {showTypingIndicator ? (
+            {showProgressIndicator && msg.progressKind ? (
+              <AiChatProgressIndicator kind={msg.progressKind} label={msg.text} />
+            ) : showTypingIndicator ? (
               <View className="s-ai-assistant-chat__typing" aria-label="AI 正在思考">
                 <View className="s-ai-assistant-chat__typing-dot" />
                 <View className="s-ai-assistant-chat__typing-dot" />
@@ -204,19 +239,6 @@ function ChatMessageRowInner({
               </View>
             ) : (
               <>
-                {msg.imagePreview ? (
-                  <Button
-                    className="s-ai-assistant-chat__bubble-image-btn"
-                    aria-label="查看大图"
-                    onClick={() => openSingleImagePreview(msg.imagePreview!)}
-                  >
-                    <Image
-                      className="s-ai-assistant-chat__bubble-image"
-                      src={msg.imagePreview}
-                      alt="已上传的图片"
-                    />
-                  </Button>
-                ) : null}
                 {publishConfirm ? (
                   <PublishConfirmCard
                     payload={publishConfirm}
@@ -283,6 +305,7 @@ function ChatMessageRowInner({
                   guideId={travelGuidePayload.guideId || msg.id}
                   plan={travelGuidePayload.plan}
                   form={travelGuidePayload.form}
+                  activityLegacyId={activityLegacyId}
                   disabled={isStreaming}
                   onRegenerate={() =>
                     onRegenerateTravelGuide?.(travelGuidePayload.form)

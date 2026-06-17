@@ -1,37 +1,76 @@
-import { Button } from '@/components/ui';
-import type { FestivalPlanChip } from './useFestivalPlanSummary';
+import { Button, cn } from '@/components/ui';
+import type {
+  FestivalPlanChecklist,
+  FestivalPlanTask,
+} from './buildFestivalPlanChecklist';
 import { Text, View } from '@tarojs/components';
 import './FestivalPlanSummaryBar.scss';
 
-export const FESTIVAL_PLAN_SUMMARY_PX = 52;
+/** Checklist card below event context (px @ 375). */
+export const FESTIVAL_PLAN_SUMMARY_PX = 148;
 
 export function FestivalPlanSummaryBar({
-  chips,
-  emptyHint = '暂无本场计划，试试对话里的快捷入口',
-  onChipPress,
+  checklist,
+  onTaskPress,
 }: {
-  chips: FestivalPlanChip[];
-  emptyHint?: string;
-  onChipPress: (chip: FestivalPlanChip) => void;
+  checklist: FestivalPlanChecklist;
+  onTaskPress: (task: FestivalPlanTask) => void;
 }) {
+  const { tasks, completedCount, totalCount, nextTaskKey } = checklist;
+
   return (
     <View className="s-festival-plan-summary">
-      <Text className="s-festival-plan-summary__title">本场计划</Text>
-      {chips.length > 0 ? (
-        <View className="s-festival-plan-summary__chips">
-          {chips.map((chip) => (
-            <Button
-              key={chip.key}
-              className="s-festival-plan-summary__chip"
-              hoverClass="s-festival-plan-summary__chip--pressed"
-              onClick={() => onChipPress(chip)}
+      <View className="s-festival-plan-summary__header">
+        <Text className="s-festival-plan-summary__title">本场计划</Text>
+        <Text className="s-festival-plan-summary__progress">
+          {completedCount}/{totalCount}
+        </Text>
+      </View>
+
+      <View className="s-festival-plan-summary__tasks">
+        {tasks.map((task) => (
+          <Button
+            key={task.key}
+            className={cn(
+              's-festival-plan-summary__task',
+              task.done && 's-festival-plan-summary__task--done',
+              task.isNext && 's-festival-plan-summary__task--next',
+            )}
+            hoverClass="s-festival-plan-summary__task--pressed"
+            onClick={() => onTaskPress(task)}
+          >
+            <Text
+              className={cn(
+                's-festival-plan-summary__marker',
+                task.done && 's-festival-plan-summary__marker--done',
+              )}
+              aria-hidden
             >
-              <Text className="s-festival-plan-summary__chip-label">{chip.label}</Text>
-            </Button>
-          ))}
-        </View>
+              {task.done ? '✓' : '○'}
+            </Text>
+            <Text className="s-festival-plan-summary__task-label">{task.label}</Text>
+            <Text
+              className={cn(
+                's-festival-plan-summary__task-action',
+                task.isNext &&
+                  !task.done &&
+                  's-festival-plan-summary__task-action--next',
+              )}
+            >
+              {task.trailingLabel}
+            </Text>
+          </Button>
+        ))}
+      </View>
+
+      {nextTaskKey ? (
+        <Text className="s-festival-plan-summary__hint">
+          下一步：{tasks.find((task) => task.key === nextTaskKey)?.trailingLabel}
+        </Text>
       ) : (
-        <Text className="s-festival-plan-summary__empty">{emptyHint}</Text>
+        <Text className="s-festival-plan-summary__hint s-festival-plan-summary__hint--complete">
+          本场准备已完成，祝你玩得开心
+        </Text>
       )}
     </View>
   );

@@ -31,13 +31,6 @@ const AiTabPage: FC = () => {
           title="AI助手"
           navInsets={page.navInsets}
           className="s-tab-page-header--ai"
-          trailing={
-            page.messageCount > 0 ? (
-              <Text className="s-ai-assistant__message-count" aria-hidden>
-                {page.messageCount}
-              </Text>
-            ) : undefined
-          }
         />
 
         {page.showEventContext ? (
@@ -67,10 +60,10 @@ const AiTabPage: FC = () => {
           </View>
         ) : null}
 
-        {page.showEventContext ? (
+        {page.showEventContext && page.festivalPlan ? (
           <FestivalPlanSummaryBar
-            chips={page.festivalPlan?.chips ?? []}
-            onChipPress={page.handleFestivalPlanChipPress}
+            checklist={page.festivalPlan}
+            onTaskPress={page.handleFestivalPlanTaskPress}
           />
         ) : null}
 
@@ -89,11 +82,12 @@ const AiTabPage: FC = () => {
                 activityLegacyId={page.activityLegacyId}
                 activityTitle={page.activityTitle}
                 onInitialMessageSent={page.handleInitialMessageSent}
-                onMessageCountChange={page.setMessageCount}
+                onMessageCountChange={page.onChatMessagesChange}
                 chatScrollHeight={page.chatScrollHeight}
                 userAvatar={page.profileUserData.avatar}
                 userName={page.profileUserData.name}
                 userGender={page.userGender}
+                onFestivalPlanActionsChange={page.setFestivalPlanActions}
               />
             </ProfileTabErrorBoundary>
           </View>

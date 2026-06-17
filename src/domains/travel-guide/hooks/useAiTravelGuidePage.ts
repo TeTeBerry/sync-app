@@ -178,6 +178,7 @@ export function useAiTravelGuidePage() {
   return {
     guideId,
     payload,
+    activityLegacyId,
     loading,
     loadError,
     mainScrollHeight,

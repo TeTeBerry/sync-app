@@ -18,6 +18,7 @@ export function ChatMessageList({
   keyboardInset = 0,
   /** Bump when re-entering the page or after history sync — scrolls to latest messages. */
   forceScrollToBottomKey = 0,
+  activityLegacyId,
   userAvatar,
   userName,
   userGender,
@@ -35,6 +36,7 @@ export function ChatMessageList({
   scrollAreaHeight?: number;
   keyboardInset?: number;
   forceScrollToBottomKey?: number;
+  activityLegacyId?: number;
   userAvatar?: string;
   userName: string;
   userGender?: AuthorGender;
@@ -125,6 +127,7 @@ export function ChatMessageList({
             index={index}
             messages={messages}
             isStreaming={isStreaming}
+            activityLegacyId={activityLegacyId}
             userAvatar={userAvatar}
             userName={userName}
             userGender={userGender}

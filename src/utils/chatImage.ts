@@ -1,7 +1,4 @@
 import Taro from '@tarojs/taro';
-import { isCloudStorageFileId } from './cloudImage';
-import { uploadImageFile } from './uploadImage';
-import { isTrustedUploadImageUrl } from './userUploadImageUrl';
 
 /** 与后端一致：Base64 解码后不超过 10MB */
 export const MAX_IMAGE_BASE64_BYTES = 10 * 1024 * 1024;
@@ -60,37 +57,22 @@ async function compressToJpegPath(filePath: string): Promise<string> {
   return path;
 }
 
-/** 选择并压缩聊天图片，返回本地临时路径（用于预览与上传） */
+/** 选择并压缩图片，返回本地临时路径（行程记账票据等场景）。 */
 export async function pickAndCompressChatImage(): Promise<string | null> {
-  const images = await pickAndCompressChatImages(1);
-  return images[0] ?? null;
-}
-
-/** 选择并压缩多张聊天图片，返回本地临时路径数组 */
-export async function pickAndCompressChatImages(maxCount = 6): Promise<string[]> {
   const result = await Taro.chooseImage({
-    count: maxCount,
+    count: 1,
     sizeType: ['compressed'],
     sourceType: ['album', 'camera'],
   }).catch(() => null);
 
-  const paths = result?.tempFilePaths ?? [];
-  if (!paths.length) return [];
+  const path = result?.tempFilePaths?.[0];
+  if (!path) return null;
 
-  const compressed: string[] = [];
-  for (const path of paths) {
-    try {
-      const jpegPath = await compressToJpegPath(path);
-      compressed.push(jpegPath);
-    } catch {
-      // skip failed images
-    }
+  try {
+    return await compressToJpegPath(path);
+  } catch {
+    return null;
   }
-  return compressed;
-}
-
-function isRemoteImageRef(ref: string): boolean {
-  return /^https?:\/\//i.test(ref.trim());
 }
 
 /** WeChat sandbox paths: wxfile:// on device, http(s)://tmp|usr|store in devtools. */
@@ -107,34 +89,6 @@ export function isLocalImageFileRef(ref: string): boolean {
   } catch {
     return false;
   }
-}
-
-async function uploadOneImageRef(ref: string): Promise<string> {
-  const trimmed = ref.trim();
-  if (isCloudStorageFileId(trimmed)) {
-    if (!isTrustedUploadImageUrl(trimmed)) {
-      throw new Error('图片须先通过上传接口提交');
-    }
-    return trimmed;
-  }
-  if (isLocalImageFileRef(trimmed)) {
-    return uploadImageFile(trimmed);
-  }
-  if (isRemoteImageRef(trimmed)) {
-    if (!isTrustedUploadImageUrl(trimmed)) {
-      throw new Error('图片须先通过上传接口提交');
-    }
-    return trimmed;
-  }
-  if (/^data:/i.test(trimmed)) {
-    throw new Error('图片须先通过上传接口提交');
-  }
-  return uploadImageFile(trimmed);
-}
-
-/** Upload local temp paths to cloud storage; trust prior cloud fileIDs. */
-export async function uploadChatImageRefs(refs: string[]): Promise<string[]> {
-  return Promise.all(refs.map((ref) => uploadOneImageRef(ref)));
 }
 
 export function validateChatImageDataUrl(dataUrl: string): void {

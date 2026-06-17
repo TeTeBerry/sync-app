@@ -8,6 +8,7 @@ import { ChatComposer } from '../../../components/ai-chat/ChatComposer';
 import { AccountRiskBanner } from '../../../components/account-risk/AccountRiskBanner';
 import { useAccountRisk } from '../../../hooks/useAccountRisk';
 import { AiBuddyPostSheet } from '../../../components/ai-chat/AiBuddyPostSheet';
+import { AiActivityPickerSheet } from '../../../components/ai-chat/AiActivityPickerSheet';
 import { AiGuidePlanSheet } from '../../../components/ai-chat/AiGuidePlanSheet';
 import { useKeyboardInset } from '../../../hooks/useKeyboardInset';
 import type { inferUserGenderFromName } from '../../../utils/inferAuthorGender';
@@ -15,23 +16,14 @@ import type {
   AiGuidePlanFormValues,
   TravelGuidePlan,
 } from '../../../types/travelGuide';
+import type { BackendActivity } from '../../../types/backend';
 import { View } from '@tarojs/components';
 import { invalidateCache } from '../../../hooks/useApiQuery';
 import { useAiBuddyPost } from '../../../hooks/useAiBuddyPost';
 import { useAiTravelGuide } from '../../../hooks/useAiTravelGuide';
 import { saveTravelGuideDetail } from '../../../domains/travel-guide/utils/travelGuideDetailStorage';
-import { resolveActivityByKeyword } from '../../../api/syncApi';
-import {
-  HOME_FESTIVAL_SHORTCUT_CHIPS,
-  resolveActiveActivityChipKey,
-} from '../../../constants/homeFestivalShortcuts';
 import { selectSetActiveActivityLegacyId, useNavigationStore } from '../../../stores';
 import { seedActivityDetailCache } from '../../../utils/activityDetailCache';
-import {
-  formatChatImagePickError,
-  pickChatComposerImages,
-  uploadChatComposerImages,
-} from '../../../utils/chatComposerImages';
 import {
   resolveWelcomeCapabilityChipAction,
   isActivityBoundForCapabilities,
@@ -44,6 +36,7 @@ import { BUDDY_POST_SHEET_ACTION_LABEL } from '../../../utils/buddyPostPromptMes
 import { TRAVEL_GUIDE_SHEET_ACTION_LABEL } from '../../../utils/travelGuidePromptMessage';
 import { goExclusiveItinerary, goPersonalityTest } from '../../../utils/route';
 import { useItineraryStore } from '../../../domains/performance-itinerary/store';
+import type { FestivalPlanTaskActions } from '../../../domains/festival-plan/festivalPlanTaskActions';
 export type AiAssistantChatProps = {
   initialMessage?: string | null;
   initialOpenAiGuideSheet?: boolean;
@@ -59,6 +52,7 @@ export type AiAssistantChatProps = {
   userAvatar?: string;
   userName: string;
   userGender?: ReturnType<typeof inferUserGenderFromName>;
+  onFestivalPlanActionsChange?: (actions: FestivalPlanTaskActions | null) => void;
 };
 
 export function AiAssistantChat({
@@ -74,9 +68,10 @@ export function AiAssistantChat({
   userAvatar,
   userName,
   userGender,
+  onFestivalPlanActionsChange,
 }: AiAssistantChatProps) {
   const [input, setInput] = useState('');
-  const [pendingImages, setPendingImages] = useState<string[]>([]);
+  const [activityPickerOpen, setActivityPickerOpen] = useState(false);
   const keyboardInset = useKeyboardInset();
   const initialMessageHandledRef = useRef(false);
   const initialGuideSheetHandledRef = useRef(false);
@@ -84,7 +79,6 @@ export function AiAssistantChat({
   const submitLockRef = useRef(false);
   const pendingPageShowScrollRef = useRef(false);
   const [forceScrollToBottomKey, setForceScrollToBottomKey] = useState(0);
-  const [pinnedChipKey, setPinnedChipKey] = useState<string | undefined>();
 
   const bumpScrollToBottom = useCallback(() => {
     setForceScrollToBottomKey((k) => k + 1);
@@ -216,81 +210,48 @@ export function AiAssistantChat({
     onPlanningMessagesShown: scheduleScrollToBottom,
   });
 
+  useEffect(() => {
+    if (!onFestivalPlanActionsChange) return;
+    onFestivalPlanActionsChange({
+      openTravelGuideSheet: travelGuide.openGuideSheet,
+      openItinerarySheet: handleOpenItinerarySheet,
+      openBuddyPostSheet: buddyPost.openBuddyPostSheetWithTag,
+    });
+    return () => onFestivalPlanActionsChange(null);
+  }, [
+    buddyPost.openBuddyPostSheetWithTag,
+    handleOpenItinerarySheet,
+    onFestivalPlanActionsChange,
+    travelGuide.openGuideSheet,
+  ]);
+
   const setActiveActivityLegacyId = useNavigationStore(selectSetActiveActivityLegacyId);
 
-  const activeChipKey = useMemo(() => {
-    if (pinnedChipKey) {
-      return pinnedChipKey;
-    }
-    return resolveActiveActivityChipKey({
-      activityLegacyId,
-      activityCode: activityQuery.data?.code,
-      activityTitle: activityTitle?.trim(),
-    });
-  }, [activityLegacyId, activityQuery.data?.code, activityTitle, pinnedChipKey]);
-
-  useEffect(() => {
-    if (!pinnedChipKey) return;
-    const resolved = resolveActiveActivityChipKey({
-      activityLegacyId,
-      activityCode: activityQuery.data?.code,
-      activityTitle: activityTitle?.trim(),
-    });
-    if (resolved === pinnedChipKey) {
-      setPinnedChipKey(undefined);
-    }
-  }, [activityLegacyId, activityQuery.data?.code, activityTitle, pinnedChipKey]);
-
-  const handleActivityChipClick = useCallback(
-    async (keyword: string) => {
-      if (isStreaming || isStreamingRef.current) return;
-
-      const trimmedKeyword = keyword.trim();
-      if (!trimmedKeyword) return;
-
-      const chip = HOME_FESTIVAL_SHORTCUT_CHIPS.find(
-        (item) => item.submitText.toLowerCase() === trimmedKeyword.toLowerCase(),
-      );
-      if (chip) {
-        setPinnedChipKey(chip.key);
+  const bindSelectedActivity = useCallback(
+    (activity: BackendActivity) => {
+      if (activity.legacyId == null || Number.isNaN(activity.legacyId)) {
+        return;
       }
 
-      try {
-        const activity = await resolveActivityByKeyword(trimmedKeyword);
-        if (activity?.legacyId != null && !Number.isNaN(activity.legacyId)) {
-          const activityName = activity.name?.trim() || trimmedKeyword;
-          seedActivityDetailCache(activity);
-          setActiveActivityLegacyId(activity.legacyId);
-          applyActivityBinding({ legacyId: activity.legacyId, name: activityName });
-          setPinnedChipKey(
-            resolveActiveActivityChipKey({
-              activityLegacyId: activity.legacyId,
-              activityCode: activity.code,
-              activityTitle: activityName,
-            }),
-          );
-          void Taro.showToast({
-            title: `已绑定「${activityName}」`,
-            icon: 'none',
-          });
-          return;
-        }
-      } catch {
-        setPinnedChipKey(undefined);
-        // fall through to unbound chat flow
-      }
-
-      setPinnedChipKey(undefined);
-
-      await send({ text: trimmedKeyword });
+      const activityName = activity.name?.trim() || '本场活动';
+      seedActivityDetailCache(activity);
+      setActiveActivityLegacyId(activity.legacyId);
+      applyActivityBinding({ legacyId: activity.legacyId, name: activityName });
+      void Taro.showToast({
+        title: `已绑定「${activityName}」`,
+        icon: 'none',
+      });
+      scheduleScrollToBottom();
     },
-    [
-      isStreaming,
-      isStreamingRef,
-      send,
-      setActiveActivityLegacyId,
-      applyActivityBinding,
-    ],
+    [applyActivityBinding, scheduleScrollToBottom, setActiveActivityLegacyId],
+  );
+
+  const handleActivityPicked = useCallback(
+    (activity: BackendActivity) => {
+      setActivityPickerOpen(false);
+      bindSelectedActivity(activity);
+    },
+    [bindSelectedActivity],
   );
 
   useEffect(() => {
@@ -354,66 +315,23 @@ export function AiAssistantChat({
     async (text: string) => {
       if (submitLockRef.current) return;
       const trimmed = text.trim();
-      const locals = pendingImages;
-      const hasImages = locals.length > 0;
-      if ((!trimmed && !hasImages) || isStreaming || isStreamingRef.current) {
+      if (!trimmed || isStreaming || isStreamingRef.current) {
         return;
       }
 
       submitLockRef.current = true;
-      const previews = [...locals];
       try {
         setInput('');
-        setPendingImages([]);
-
-        let cloudRefs: string[] = [];
-        if (previews.length > 0) {
-          try {
-            cloudRefs = await uploadChatComposerImages(previews);
-          } catch (error) {
-            setPendingImages(previews);
-            void Taro.showToast({
-              title: formatChatImagePickError(error),
-              icon: 'none',
-            });
-            return;
-          }
-        }
-
-        await send({
-          text: trimmed,
-          ...(cloudRefs.length === 1
-            ? { image: cloudRefs[0], imagePreview: previews[0] }
-            : cloudRefs.length > 1
-              ? {
-                  images: cloudRefs,
-                  imagePreviews: previews,
-                  imagePreview: previews[0],
-                }
-              : {}),
-        });
+        await send({ text: trimmed });
       } finally {
         submitLockRef.current = false;
       }
     },
-    [isStreaming, isStreamingRef, pendingImages, send],
+    [isStreaming, isStreamingRef, send],
   );
-
-  const handlePickImages = useCallback(async () => {
-    if (isStreaming || isStreamingRef.current) return;
-    const picked = await pickChatComposerImages(pendingImages.length);
-    if (!picked.length) return;
-    setPendingImages((prev) => [...prev, ...picked]);
-    bumpScrollToBottom();
-  }, [bumpScrollToBottom, isStreaming, isStreamingRef, pendingImages.length]);
-
-  const handleRemoveImage = useCallback((index: number) => {
-    setPendingImages((prev) => prev.filter((_, i) => i !== index));
-  }, []);
 
   const handleClearChat = useCallback(async () => {
     if (isStreaming || isStreamingRef.current) return;
-    setPendingImages([]);
     await clearChat();
   }, [clearChat, isStreaming, isStreamingRef]);
 
@@ -461,11 +379,8 @@ export function AiAssistantChat({
           case 'personality_test':
             handleOpenPersonalityTest();
             return;
-          case 'pick_festival_hint':
-            void Taro.showToast({
-              title: '在下方选择活动名绑定场次',
-              icon: 'none',
-            });
+          case 'pick_festival_sheet':
+            setActivityPickerOpen(true);
             return;
         }
       }
@@ -505,6 +420,7 @@ export function AiAssistantChat({
         scrollAreaHeight={chatScrollHeight}
         keyboardInset={keyboardInset}
         forceScrollToBottomKey={forceScrollToBottomKey}
+        activityLegacyId={activityLegacyId}
         userAvatar={userAvatar}
         userName={userName}
         userGender={userGender}
@@ -522,19 +438,13 @@ export function AiAssistantChat({
       >
         <ChatComposer
           input={input}
-          pendingImages={pendingImages}
           isStreaming={composerBusy}
           activityLegacyId={activityLegacyId}
           activityTitle={activityTitle}
-          activityCode={activityQuery.data?.code}
-          activeChipKey={activeChipKey}
           onInputChange={setInput}
           onSubmit={submit}
-          onPickImages={handlePickImages}
-          onRemoveImage={handleRemoveImage}
           onClearChat={handleClearChat}
           clearDisabled={composerBusy}
-          onActivityChipClick={handleActivityChipClick}
         />
       </View>
 
@@ -556,6 +466,12 @@ export function AiAssistantChat({
         initialValues={travelGuide.sheetInitialValues}
         onClose={() => travelGuide.setSheetOpen(false)}
         onSubmit={travelGuide.handleSheetSubmit}
+      />
+
+      <AiActivityPickerSheet
+        open={activityPickerOpen}
+        onClose={() => setActivityPickerOpen(false)}
+        onSelect={handleActivityPicked}
       />
     </View>
   );

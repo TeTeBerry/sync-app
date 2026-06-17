@@ -21,10 +21,12 @@ import {
   buildBuddyPostUserSummary,
   defaultBuddyPostFormWithTag,
 } from '../utils/buddyPostForm';
+import {
+  startAiChatStagedProgress,
+  withAiChatProgress,
+} from '../utils/aiChatStagedProgress';
 import { useAccountRisk } from './useAccountRisk';
 import { publishBuddyPostFromForm } from '../utils/publishBuddyPost';
-
-const PUBLISHING_TEXT = '正在为你发布组队帖…';
 
 export function useAiBuddyPost(options: {
   activityLegacyId?: number;
@@ -136,17 +138,22 @@ export function useAiBuddyPost(options: {
         text: buildBuddyPostUserSummary(form, title),
       };
       const aiMsgId = createMessageId();
-      const planningMsg: ChatUiMessage = {
-        id: aiMsgId,
-        from: 'ai',
-        text: PUBLISHING_TEXT,
-        streaming: true,
-      };
+      const planningMsg = withAiChatProgress(
+        { id: aiMsgId, from: 'ai', text: '' },
+        'buddy_post',
+      );
 
       const base = [...messagesRef.current, userMsg, planningMsg];
       messagesRef.current = base;
       setMessages(base);
       Taro.nextTick(() => onPlanningMessagesShown?.());
+
+      const stopStagedProgress = startAiChatStagedProgress({
+        aiMsgId,
+        kind: 'buddy_post',
+        messagesRef,
+        setMessages,
+      });
 
       try {
         if (!isApiEnabled()) {
@@ -169,7 +176,6 @@ export function useAiBuddyPost(options: {
             '',
             '点击下方卡片可在活动详情页查看。',
           ].join('\n'),
-          streaming: false,
           createdPost: card,
         };
 
@@ -196,6 +202,7 @@ export function useAiBuddyPost(options: {
           void Taro.showToast({ title: message, icon: 'none' });
         }
       } finally {
+        stopStagedProgress();
         publishingRef.current = false;
         setIsPublishing(false);
       }

@@ -3,3 +3,4 @@ export { TravelPlanAddSheet } from './components/TravelPlanAddSheet';
 export { TravelPlanHeaderAction } from './components/TravelPlanHeaderAction';
 export { TravelPlanStatsBar } from './components/TravelPlanStatsBar';
 export { TravelPlanTimeline } from './components/TravelPlanTimeline';
+export { TravelPlanReceiptOcrTip } from './components/TravelPlanReceiptOcrTip';

@@ -20,6 +20,7 @@ import { buildAiChatWsSendActor } from '../../api/requestActor';
 import { streamAiChatWs } from '../../utils/aiChatWs';
 import type { TypewriterReveal } from '../../utils/typewriterReveal';
 import { patchChatMessage } from '../../utils/chatMessages';
+import { clearAiChatProgress } from '../../utils/aiChatStagedProgress';
 import { throttleRaf } from '../../utils/throttleRaf';
 import { processChatStreamEvents } from './chatStreamReducer';
 
@@ -67,15 +68,20 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
   } = options;
 
   const runStream = useCallback(
-    async (payload: SendChatOptions, aiMsgId: string, abortSignal: AbortSignal) => {
-      const { text, image, images } = payload;
+    async (
+      payload: SendChatOptions,
+      aiMsgId: string,
+      abortSignal: AbortSignal,
+      stopStagedProgress?: () => void,
+    ) => {
+      const { text } = payload;
       const trimmed = text.trim();
+      if (!trimmed) return;
+
       const activityId = activityLegacyIdRef.current;
       const activityHeaders =
         activityId != null ? { 'X-Activity-Id': String(activityId) } : undefined;
-
-      const pendingImage = image ?? images?.[0];
-      const history = buildSingleTurnUserMessage(trimmed, pendingImage);
+      const history = buildSingleTurnUserMessage(trimmed);
 
       const finishAiMessage = (updater: (current: ChatUiMessage) => ChatUiMessage) => {
         setMessages((prev) => {
@@ -89,11 +95,21 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
         });
       };
 
+      let stopProgress = stopStagedProgress;
+      const endProgress = () => {
+        stopProgress?.();
+        stopProgress = undefined;
+      };
+
       const pushTypewriterText = throttleRaf((visible: string) => {
+        endProgress();
         setMessages((prev) =>
-          patchChatMessage(prev, aiMsgId, (message) =>
-            message.text === visible ? message : { ...message, text: visible },
-          ),
+          patchChatMessage(prev, aiMsgId, (message) => {
+            if (message.text === visible && !message.progressKind) {
+              return message;
+            }
+            return clearAiChatProgress({ ...message, text: visible });
+          }),
         );
       });
 
@@ -108,8 +124,9 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
         const wsLiveApi = Boolean(wsUrl?.trim()) && isLiveApi();
         if (!wsLiveApi) {
           void Taro.showToast({ title: '请配置 API 地址', icon: 'none' });
+          endProgress();
           finishAiMessage((message) => ({
-            ...message,
+            ...clearAiChatProgress(message),
             text: '当前环境未配置 AI 服务，请稍后再试。',
             streaming: false,
           }));
@@ -122,8 +139,6 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
           sessionId: sessionIdRef.current,
           ...buildAiChatWsSendActor(),
           activityLegacyId: activityId,
-          image: pendingImage,
-          images,
           signal: abortSignal,
           headers: {
             ...activityHeaders,
@@ -142,17 +157,20 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
           onExistingPost,
           onTravelGuideReady,
           onItineraryReady,
+          onProgressEnd: endProgress,
         });
       } catch (error) {
         if ((error as Error).name === 'AbortError') {
           typewriter.stop();
+          endProgress();
           throw error;
         }
 
         const displayError = formatAiChatStreamError(error, streamErrorText);
         typewriter.flush();
+        endProgress();
         finishAiMessage((message) => ({
-          ...message,
+          ...clearAiChatProgress(message),
           text: message.text || displayError,
           streaming: false,
         }));
@@ -161,7 +179,11 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
           icon: 'none',
         });
       } finally {
-        finishAiMessage((message) => ({ ...message, streaming: false }));
+        endProgress();
+        finishAiMessage((message) => ({
+          ...clearAiChatProgress(message),
+          streaming: false,
+        }));
       }
     },
     [

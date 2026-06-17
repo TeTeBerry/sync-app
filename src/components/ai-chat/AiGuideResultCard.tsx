@@ -11,6 +11,7 @@ import {
   travelGuideBudgetPerPersonRange,
 } from '@/domains/travel-guide/utils/travelGuideBudgetDisplay.util';
 import { ChevronRight, Map, RefreshCw, Sparkles, Users } from '../../components/icons';
+import { TravelPlanReceiptOcrTip } from '@/domains/travel-plan';
 import { Button } from '../ui';
 import { Text, View } from '@tarojs/components';
 import './AiGuideResultCard.scss';
@@ -19,6 +20,7 @@ export type AiGuideResultCardProps = {
   guideId: string;
   plan: TravelGuidePlan;
   form: AiGuidePlanFormValues;
+  activityLegacyId?: number;
   disabled?: boolean;
   onRegenerate: () => void;
   onBuddyPostFromGuide?: () => void;
@@ -43,6 +45,7 @@ export function AiGuideResultCard({
   guideId,
   plan,
   disabled = false,
+  activityLegacyId,
   onRegenerate,
   onBuddyPostFromGuide,
 }: AiGuideResultCardProps) {
@@ -137,6 +140,11 @@ export function AiGuideResultCard({
           </View>
         </Button>
       ) : null}
+
+      <TravelPlanReceiptOcrTip
+        activityLegacyId={activityLegacyId}
+        disabled={disabled}
+      />
 
       <View className="s-ai-guide-result__actions">
         <Button

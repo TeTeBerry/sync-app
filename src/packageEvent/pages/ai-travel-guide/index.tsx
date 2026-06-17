@@ -3,6 +3,7 @@ import PageNavigation from '../../../components/navigation/PageNavigation';
 import ThemedPageLoader from '../../../components/ThemedPageLoader';
 import { Button } from '../../../components/ui';
 import { TravelGuideDetailView } from '@/domains/travel-guide/components/TravelGuideDetailView';
+import { TravelPlanReceiptOcrTip } from '@/domains/travel-plan';
 import { useAiTravelGuidePage } from '@/domains/travel-guide/hooks/useAiTravelGuidePage';
 import { useEndRouteTransitionOnShow } from '../../../hooks/useEndRouteTransitionOnShow';
 import { usePageRouteReady } from '../../../hooks/usePageRouteReady';
@@ -34,6 +35,10 @@ const AiTravelGuidePage = () => {
           >
             <View className="s-ai-travel-guide-page__inner">
               <TravelGuideDetailView plan={page.payload.plan} />
+              <TravelPlanReceiptOcrTip
+                className="s-ai-travel-guide-page__ocr-tip"
+                activityLegacyId={page.activityLegacyId}
+              />
               <Text className="s-ai-travel-guide-page__disclaimer">
                 {AI_TRAVEL_GUIDE_DISCLAIMER}
               </Text>

@@ -25,7 +25,7 @@ export type WelcomeCapabilityChipAction =
   | { type: 'itinerary_sheet' }
   | { type: 'buddy_post_sheet' }
   | { type: 'personality_test' }
-  | { type: 'pick_festival_hint' };
+  | { type: 'pick_festival_sheet' };
 
 export function isActivityBoundForCapabilities(
   activityLegacyId?: number | null,
@@ -35,12 +35,7 @@ export function isActivityBoundForCapabilities(
 
 export function buildWelcomeCapabilityChipLabels(activityBound: boolean): string[] {
   if (activityBound) {
-    return [
-      LINEUP_CAPABILITY_LABEL,
-      TRAVEL_GUIDE_CAPABILITY_LABEL,
-      ITINERARY_CAPABILITY_LABEL,
-      BUDDY_POST_CAPABILITY_LABEL,
-    ];
+    return [LINEUP_CAPABILITY_LABEL];
   }
   return [
     PICK_FESTIVAL_CAPABILITY_LABEL,
@@ -73,7 +68,7 @@ export function resolveWelcomeCapabilityChipAction(
 
   switch (trimmed) {
     case PICK_FESTIVAL_CAPABILITY_LABEL:
-      return { type: 'pick_festival_hint' };
+      return { type: 'pick_festival_sheet' };
     case NEAR_EVENTS_CAPABILITY_LABEL:
       return { type: 'send', text: NEAR_EVENTS_SUBMIT_TEXT };
     case PERSONALITY_CAPABILITY_LABEL:

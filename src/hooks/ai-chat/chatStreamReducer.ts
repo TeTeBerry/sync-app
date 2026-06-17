@@ -9,6 +9,7 @@ import { closeAiChatWsConnection } from '../../utils/aiChatWs';
 import { shouldClearSessionOnWsError } from '../../utils/wsAuthError';
 import type { TypewriterReveal } from '../../utils/typewriterReveal';
 import { patchChatMessage } from '../../utils/chatMessages';
+import { clearAiChatProgress } from '../../utils/aiChatStagedProgress';
 import { applyClientActionToMessage } from '../../utils/aiChatClientAction';
 import { applyStreamEventToSessionStore } from './useChatStreamStoreSync';
 
@@ -29,6 +30,7 @@ export interface ProcessChatStreamEventsOptions {
   onItineraryReady?: (
     event: Extract<AiChatStreamEvent, { type: 'itinerary_ready' }>,
   ) => void;
+  onProgressEnd?: () => void;
 }
 
 export async function processChatStreamEvents(
@@ -45,6 +47,7 @@ export async function processChatStreamEvents(
     onExistingPost,
     onTravelGuideReady,
     onItineraryReady,
+    onProgressEnd,
   } = options;
 
   const finishAiMessage = (updater: (current: ChatUiMessage) => ChatUiMessage) => {
@@ -56,15 +59,24 @@ export async function processChatStreamEvents(
     );
   };
 
+  const finishAiMessageWithoutProgress = (
+    updater: (current: ChatUiMessage) => ChatUiMessage,
+  ) => {
+    onProgressEnd?.();
+    finishAiMessage((message) => clearAiChatProgress(updater(message)));
+  };
+
   for await (const event of stream) {
     applyStreamEventToSessionStore(event);
 
     if (event.type === 'delta') {
+      onProgressEnd?.();
       typewriter.append(event.content);
       continue;
     }
 
     if (event.type === 'message_complete') {
+      onProgressEnd?.();
       if (!typewriter.getTarget()) {
         typewriter.append(event.content);
       } else {
@@ -110,7 +122,7 @@ export async function processChatStreamEvents(
     }
 
     if (event.type === 'client_action') {
-      finishAiMessage((message) => ({
+      finishAiMessageWithoutProgress((message) => ({
         ...message,
         ...applyClientActionToMessage(message, event.action),
       }));
@@ -119,7 +131,7 @@ export async function processChatStreamEvents(
 
     if (event.type === 'travel_guide_ready') {
       onTravelGuideReady?.(event);
-      finishAiMessage((message) => ({
+      finishAiMessageWithoutProgress((message) => ({
         ...message,
         text: message.text || '已为你生成出行攻略，点击查看完整方案～',
         streaming: false,
@@ -134,7 +146,7 @@ export async function processChatStreamEvents(
 
     if (event.type === 'itinerary_ready') {
       onItineraryReady?.(event);
-      finishAiMessage((message) => ({
+      finishAiMessageWithoutProgress((message) => ({
         ...message,
         text: message.text || '已为你生成专属行程，点击查看～',
         streaming: false,
@@ -156,7 +168,7 @@ export async function processChatStreamEvents(
     }
 
     if (event.type === 'personality_result_ready') {
-      finishAiMessage((message) => ({
+      finishAiMessageWithoutProgress((message) => ({
         ...message,
         text: message.text || `你的 Raver 人格：${event.tagline}`,
         streaming: false,
@@ -190,7 +202,7 @@ export async function processChatStreamEvents(
         handleApiUnauthorized(event.message);
       }
       typewriter.flush();
-      finishAiMessage((message) => ({
+      finishAiMessageWithoutProgress((message) => ({
         ...message,
         text: event.message || message.text || streamErrorText,
         streaming: false,
@@ -203,13 +215,14 @@ export async function processChatStreamEvents(
     }
 
     if (event.type === 'done') {
+      onProgressEnd?.();
       finishAiMessage((message) => ({
-        ...message,
+        ...clearAiChatProgress(message),
         streaming: false,
       }));
       await typewriter.waitUntilComplete();
       finishAiMessage((message) => ({
-        ...message,
+        ...clearAiChatProgress(message),
         text: typewriter.getTarget() || message.text,
         streaming: false,
       }));

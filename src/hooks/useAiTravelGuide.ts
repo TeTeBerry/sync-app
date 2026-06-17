@@ -13,14 +13,13 @@ import type { ChatUiMessage } from '../types/aiChat';
 import type { AiGuidePlanFormValues } from '../types/travelGuide';
 import { travelGuideBudgetLabel } from '../types/travelGuide';
 import { saveTravelGuideDetail } from '../domains/travel-guide/utils/travelGuideDetailStorage';
+import { TRAVEL_GUIDE_TITLE } from '../constants/aiCtaLabels';
 import {
-  TRAVEL_GUIDE_GENERATING_STAGES,
-  TRAVEL_GUIDE_GENERATING_TEXT,
-  TRAVEL_GUIDE_TITLE,
-} from '../constants/aiCtaLabels';
+  startAiChatStagedProgress,
+  withAiChatProgress,
+} from '../utils/aiChatStagedProgress';
 import { isApiEnabled } from '../constants/api';
 import { isAuthGated, requireAuth } from '../utils/authGate';
-const PLANNING_STAGE_INTERVAL_MS = 3_500;
 
 function buildUserSummary(form: AiGuidePlanFormValues, activityTitle: string): string {
   const budget = travelGuideBudgetLabel(form.budgetTier);
@@ -91,12 +90,10 @@ export function useAiTravelGuide(options: {
               text: options?.userBubbleText?.trim() || buildUserSummary(form, title),
             };
         const aiMsgId = createMessageId();
-        const planningMsg: ChatUiMessage = {
-          id: aiMsgId,
-          from: 'ai',
-          text: TRAVEL_GUIDE_GENERATING_TEXT,
-          streaming: true,
-        };
+        const planningMsg = withAiChatProgress(
+          { id: aiMsgId, from: 'ai', text: '' },
+          'travel_guide',
+        );
 
         const base = options?.skipUserBubble
           ? [...messagesRef.current, planningMsg]
@@ -105,18 +102,12 @@ export function useAiTravelGuide(options: {
         setMessages(base);
         Taro.nextTick(() => onPlanningMessagesShown?.());
 
-        let planningStageIndex = 0;
-        const planningStageTimer = setInterval(() => {
-          planningStageIndex = Math.min(
-            planningStageIndex + 1,
-            TRAVEL_GUIDE_GENERATING_STAGES.length - 1,
-          );
-          const stageText = TRAVEL_GUIDE_GENERATING_STAGES[planningStageIndex];
-          messagesRef.current = messagesRef.current.map((m) =>
-            m.id === aiMsgId && m.streaming ? { ...m, text: stageText } : m,
-          );
-          setMessages([...messagesRef.current]);
-        }, PLANNING_STAGE_INTERVAL_MS);
+        const stopStagedProgress = startAiChatStagedProgress({
+          aiMsgId,
+          kind: 'travel_guide',
+          messagesRef,
+          setMessages,
+        });
 
         try {
           if (!isApiEnabled()) {
@@ -135,7 +126,6 @@ export function useAiTravelGuide(options: {
             id: aiMsgId,
             from: 'ai',
             text: '已为你生成出行攻略，点击查看完整方案～',
-            streaming: false,
             travelGuide: { guideId, plan, form },
           };
 
@@ -153,7 +143,7 @@ export function useAiTravelGuide(options: {
           setMessages(messagesRef.current);
           void Taro.showToast({ title: message, icon: 'none' });
         } finally {
-          clearInterval(planningStageTimer);
+          stopStagedProgress();
           generatingRef.current = false;
           setIsGenerating(false);
         }

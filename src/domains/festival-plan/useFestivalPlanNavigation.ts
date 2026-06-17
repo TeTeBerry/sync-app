@@ -1,57 +1,66 @@
 import { useCallback } from 'react';
 import Taro from '@tarojs/taro';
-import {
-  goAiTravelGuide,
-  goEventDetail,
-  goMyItinerary,
-  goPersonalityTest,
-  ROUTES,
-} from '@/utils/route';
-import type { FestivalPlanChip } from './useFestivalPlanSummary';
+import { goAiTravelGuide, goEventDetail, goMyItinerary, ROUTES } from '@/utils/route';
+import type {
+  FestivalPlanChecklist,
+  FestivalPlanTask,
+} from './buildFestivalPlanChecklist';
+import type { FestivalPlanTaskActions } from './festivalPlanTaskActions';
 
 export function useFestivalPlanNavigation(
   activityLegacyId?: number,
-  summary?: {
-    travelGuideId?: string;
-    itinerarySelectedDjIds?: string[];
-    buddyPostId?: string;
-  } | null,
+  checklist?: FestivalPlanChecklist | null,
+  actions?: FestivalPlanTaskActions | null,
 ) {
   return useCallback(
-    (chip: FestivalPlanChip) => {
+    (task: FestivalPlanTask) => {
       if (activityLegacyId == null || Number.isNaN(activityLegacyId)) return;
 
-      switch (chip.key) {
+      if (task.done) {
+        switch (task.key) {
+          case 'travel_guide':
+            if (checklist?.travelGuideId) {
+              goAiTravelGuide(checklist.travelGuideId);
+            }
+            return;
+          case 'itinerary':
+            goMyItinerary(activityLegacyId, checklist?.itinerarySelectedDjIds);
+            return;
+          case 'buddy_post':
+            if (checklist?.buddyPostId) {
+              goEventDetail(activityLegacyId, { postId: checklist.buddyPostId });
+            } else {
+              void Taro.navigateTo({ url: ROUTES.PROFILE_POSTS });
+            }
+            return;
+          case 'registration':
+            goEventDetail(activityLegacyId);
+            return;
+        }
+        return;
+      }
+
+      switch (task.key) {
         case 'travel_guide':
-          if (summary?.travelGuideId) {
-            goAiTravelGuide(summary.travelGuideId);
-          } else {
-            void Taro.showToast({ title: '请先生成出行攻略', icon: 'none' });
-          }
+          actions?.openTravelGuideSheet();
           return;
         case 'itinerary':
-          goMyItinerary(activityLegacyId, summary?.itinerarySelectedDjIds);
+          actions?.openItinerarySheet();
           return;
         case 'buddy_post':
-          if (summary?.buddyPostId) {
-            goEventDetail(activityLegacyId, { postId: summary.buddyPostId });
-          } else {
-            void Taro.navigateTo({ url: ROUTES.PROFILE_POSTS });
-          }
+          actions?.openBuddyPostSheet();
           return;
         case 'registration':
           goEventDetail(activityLegacyId);
           return;
-        case 'personality':
-          goPersonalityTest({ viewResult: true });
-          return;
       }
     },
     [
+      actions,
       activityLegacyId,
-      summary?.buddyPostId,
-      summary?.itinerarySelectedDjIds,
-      summary?.travelGuideId,
+      checklist?.buddyPostId,
+      checklist?.itinerarySelectedDjIds,
+      checklist?.travelGuideId,
     ],
   );
 }

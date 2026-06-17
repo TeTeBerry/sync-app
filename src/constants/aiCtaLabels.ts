@@ -18,3 +18,7 @@ export const TRAVEL_GUIDE_GENERATING_STAGES = [
   '正在整理交通与预算…',
   '正在润色攻略文案…',
 ] as const;
+
+/** Travel plan receipt OCR — surfaced after travel guide generation. */
+export const TRAVEL_PLAN_RECEIPT_OCR_TIP = '有票务/酒店订单？去行程页拍票根自动记账';
+export const TRAVEL_PLAN_RECEIPT_OCR_CTA = '去行程页记账';

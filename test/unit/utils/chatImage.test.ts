@@ -1,12 +1,5 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { isLocalImageFileRef, uploadChatImageRefs } from '@/utils/chatImage';
-import { uploadImageFile } from '@/utils/uploadImage';
-
-const cloudFileId = 'cloud://env.x/ugc/posts/demo-user/1.jpg';
-
-vi.mock('@/utils/uploadImage', () => ({
-  uploadImageFile: vi.fn(async () => cloudFileId),
-}));
+import { describe, expect, it } from 'vitest';
+import { isLocalImageFileRef } from '@/utils/chatImage';
 
 describe('isLocalImageFileRef', () => {
   it('recognizes WeChat device and devtools temp paths', () => {
@@ -22,43 +15,5 @@ describe('isLocalImageFileRef', () => {
   it('does not treat real remote URLs as local', () => {
     expect(isLocalImageFileRef('http://127.0.0.1:3000/uploads/a.jpg')).toBe(false);
     expect(isLocalImageFileRef('https://evil.example.com/uploads/x.jpg')).toBe(false);
-  });
-});
-
-describe('uploadChatImageRefs', () => {
-  beforeEach(() => {
-    vi.mocked(uploadImageFile).mockClear();
-  });
-
-  it('uploads WeChat devtools http://tmp paths via cloud storage', async () => {
-    const localPath = 'http://tmp/wxfoo.png';
-    const urls = await uploadChatImageRefs([localPath]);
-
-    expect(uploadImageFile).toHaveBeenCalledWith(localPath);
-    expect(urls).toEqual([cloudFileId]);
-  });
-
-  it('uploads wxfile paths on device', async () => {
-    const localPath = 'wxfile://tmp_abc.jpg';
-    await uploadChatImageRefs([localPath]);
-    expect(uploadImageFile).toHaveBeenCalledWith(localPath);
-  });
-
-  it('passes through trusted cloud fileIDs', async () => {
-    const urls = await uploadChatImageRefs([cloudFileId]);
-    expect(urls).toEqual([cloudFileId]);
-    expect(uploadImageFile).not.toHaveBeenCalled();
-  });
-
-  it('rejects data URLs', async () => {
-    await expect(uploadChatImageRefs(['data:image/jpeg;base64,abc'])).rejects.toThrow(
-      '图片须先通过上传接口提交',
-    );
-  });
-
-  it('rejects untrusted remote URLs', async () => {
-    await expect(
-      uploadChatImageRefs(['https://evil.example.com/uploads/x.jpg']),
-    ).rejects.toThrow('图片须先通过上传接口提交');
   });
 });
