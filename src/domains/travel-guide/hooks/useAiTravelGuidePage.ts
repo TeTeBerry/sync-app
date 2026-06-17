@@ -168,8 +168,7 @@ export function useAiTravelGuidePage() {
       () =>
         goAiAssistant({
           activityLegacyId: payload.activityLegacyId,
-          openAiGuideSheet: true,
-          autoRunTravelGuideForm: payload.form,
+          prefillTravelGuideForm: payload.form,
         }),
       'ai_assistant',
     );

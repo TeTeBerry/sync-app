@@ -5,11 +5,13 @@ import type { AiCapability } from '@/domains/ai-capability';
 
 type TravelGuideApi = {
   handleSheetSubmit: (form: AiGuidePlanFormValues) => void;
+  handleRegenerate: (form: AiGuidePlanFormValues) => void;
 };
 
 export function useAiAssistantInitialIntents(options: {
   initialMessage?: string | null;
   initialOpenAiGuideSheet?: boolean;
+  initialPrefillTravelGuideForm?: AiGuidePlanFormValues | null;
   initialAutoRunTravelGuideForm?: AiGuidePlanFormValues | null;
   activityLegacyId?: number;
   isStreaming: boolean;
@@ -21,6 +23,7 @@ export function useAiAssistantInitialIntents(options: {
   const {
     initialMessage,
     initialOpenAiGuideSheet = false,
+    initialPrefillTravelGuideForm = null,
     initialAutoRunTravelGuideForm = null,
     activityLegacyId,
     isStreaming,
@@ -32,6 +35,7 @@ export function useAiAssistantInitialIntents(options: {
 
   const initialMessageHandledRef = useRef(false);
   const initialGuideSheetHandledRef = useRef(false);
+  const initialPrefillGuideHandledRef = useRef(false);
   const initialAutoGuideHandledRef = useRef(false);
 
   useEffect(() => {
@@ -47,16 +51,52 @@ export function useAiAssistantInitialIntents(options: {
   }, [initialMessage, isStreaming, onInitialMessageSent, send]);
 
   useEffect(() => {
-    if (!initialOpenAiGuideSheet || initialGuideSheetHandledRef.current) return;
+    if (!initialOpenAiGuideSheet) {
+      initialGuideSheetHandledRef.current = false;
+      return;
+    }
+    if (initialPrefillTravelGuideForm) return;
+    if (initialGuideSheetHandledRef.current) return;
     if (activityLegacyId == null || Number.isNaN(activityLegacyId)) return;
     initialGuideSheetHandledRef.current = true;
     onInitialMessageSent?.();
     runCapability('travel_guide', { source: 'deep_link' });
-  }, [activityLegacyId, initialOpenAiGuideSheet, onInitialMessageSent, runCapability]);
+  }, [
+    activityLegacyId,
+    initialOpenAiGuideSheet,
+    initialPrefillTravelGuideForm,
+    onInitialMessageSent,
+    runCapability,
+  ]);
+
+  useEffect(() => {
+    const form = initialPrefillTravelGuideForm;
+    if (!form) {
+      initialPrefillGuideHandledRef.current = false;
+      return;
+    }
+    if (initialPrefillGuideHandledRef.current) return;
+    if (activityLegacyId == null || Number.isNaN(activityLegacyId)) return;
+    initialPrefillGuideHandledRef.current = true;
+    initialGuideSheetHandledRef.current = true;
+    onInitialMessageSent?.();
+    Taro.nextTick(() => {
+      travelGuide.handleRegenerate(form);
+    });
+  }, [
+    activityLegacyId,
+    initialPrefillTravelGuideForm,
+    onInitialMessageSent,
+    travelGuide,
+  ]);
 
   useEffect(() => {
     const form = initialAutoRunTravelGuideForm;
-    if (!form || initialAutoGuideHandledRef.current) return;
+    if (!form) {
+      initialAutoGuideHandledRef.current = false;
+      return;
+    }
+    if (initialAutoGuideHandledRef.current) return;
     if (activityLegacyId == null || Number.isNaN(activityLegacyId)) return;
     initialAutoGuideHandledRef.current = true;
     onInitialMessageSent?.();

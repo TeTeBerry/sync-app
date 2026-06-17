@@ -7,6 +7,7 @@ import { eventCityFromLocation } from '../../../../utils/travelGuideDepartureSug
 import type { inferUserGenderFromName } from '../../../../utils/inferAuthorGender';
 import type { AiGuidePlanFormValues } from '../../../../types/travelGuide';
 import type { FestivalPlanTaskActions } from '../../../../domains/festival-plan/festivalPlanTaskActions';
+import type { ActivityBindingActions } from '../activityBindingActions';
 import { useAiAssistantChatStream } from './useAiAssistantChatStream';
 import { useAiAssistantScroll } from './useAiAssistantScroll';
 import { useAiActivityBinding } from './useAiActivityBinding';
@@ -17,6 +18,7 @@ import { useAiAssistantInitialIntents } from './useAiAssistantInitialIntents';
 export type UseAiAssistantOrchestratorOptions = {
   initialMessage?: string | null;
   initialOpenAiGuideSheet?: boolean;
+  initialPrefillTravelGuideForm?: AiGuidePlanFormValues | null;
   initialAutoRunTravelGuideForm?: AiGuidePlanFormValues | null;
   activityLegacyId?: number;
   activityTitle?: string;
@@ -27,12 +29,14 @@ export type UseAiAssistantOrchestratorOptions = {
   userName: string;
   userGender?: ReturnType<typeof inferUserGenderFromName>;
   onFestivalPlanActionsChange?: (actions: FestivalPlanTaskActions | null) => void;
+  onActivityBindingActionsChange?: (actions: ActivityBindingActions | null) => void;
 };
 
 export function useAiAssistantOrchestrator(options: UseAiAssistantOrchestratorOptions) {
   const {
     initialMessage,
     initialOpenAiGuideSheet = false,
+    initialPrefillTravelGuideForm = null,
     initialAutoRunTravelGuideForm = null,
     activityLegacyId,
     activityTitle,
@@ -43,6 +47,8 @@ export function useAiAssistantOrchestrator(options: UseAiAssistantOrchestratorOp
     userName,
     onFestivalPlanActionsChange,
   } = options;
+
+  const onActivityBindingActionsChange = options.onActivityBindingActionsChange;
 
   const keyboardInset = useKeyboardInset();
   const activityQuery = useActivityDetailQuery(activityLegacyId);
@@ -67,6 +73,7 @@ export function useAiAssistantOrchestrator(options: UseAiAssistantOrchestratorOp
   const activityBinding = useAiActivityBinding({
     applyActivityBinding: chat.applyActivityBinding,
     scheduleScrollToBottom,
+    onActivityBindingActionsChange,
   });
 
   const capabilities = useAiAssistantCapabilitySheets({
@@ -98,6 +105,7 @@ export function useAiAssistantOrchestrator(options: UseAiAssistantOrchestratorOp
   useAiAssistantInitialIntents({
     initialMessage,
     initialOpenAiGuideSheet,
+    initialPrefillTravelGuideForm,
     initialAutoRunTravelGuideForm,
     activityLegacyId,
     isStreaming: chat.isStreaming,

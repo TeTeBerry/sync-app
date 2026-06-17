@@ -1,6 +1,7 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Taro from '@tarojs/taro';
 import type { BackendActivity } from '../../../../types/backend';
+import type { ActivityBindingActions } from '../activityBindingActions';
 
 export function useAiActivityBinding(options: {
   applyActivityBinding: (activity: {
@@ -9,8 +10,13 @@ export function useAiActivityBinding(options: {
     activity?: BackendActivity;
   }) => void;
   scheduleScrollToBottom: () => void;
+  onActivityBindingActionsChange?: (actions: ActivityBindingActions | null) => void;
 }) {
-  const { applyActivityBinding, scheduleScrollToBottom } = options;
+  const {
+    applyActivityBinding,
+    scheduleScrollToBottom,
+    onActivityBindingActionsChange,
+  } = options;
   const [activityPickerOpen, setActivityPickerOpen] = useState(false);
 
   const openActivityPicker = useCallback(() => {
@@ -49,6 +55,12 @@ export function useAiActivityBinding(options: {
     },
     [bindSelectedActivity],
   );
+
+  useEffect(() => {
+    if (!onActivityBindingActionsChange) return;
+    onActivityBindingActionsChange({ openActivityPicker });
+    return () => onActivityBindingActionsChange(null);
+  }, [onActivityBindingActionsChange, openActivityPicker]);
 
   return {
     activityPickerOpen,

@@ -698,7 +698,11 @@ export function goProfile() {
 
 export type GoAiAssistantOptions = Pick<
   AiAssistantNavIntent,
-  'initialMessage' | 'activityLegacyId' | 'openAiGuideSheet' | 'autoRunTravelGuideForm'
+  | 'initialMessage'
+  | 'activityLegacyId'
+  | 'openAiGuideSheet'
+  | 'prefillTravelGuideForm'
+  | 'autoRunTravelGuideForm'
 >;
 
 /** Pre-download AI subpackage (touch / mount). */
@@ -720,6 +724,9 @@ export function goAiAssistant(options?: GoAiAssistantOptions) {
   if (options?.openAiGuideSheet) {
     intent.openAiGuideSheet = true;
   }
+  if (options?.prefillTravelGuideForm) {
+    intent.prefillTravelGuideForm = options.prefillTravelGuideForm;
+  }
   if (options?.autoRunTravelGuideForm) {
     intent.autoRunTravelGuideForm = options.autoRunTravelGuideForm;
   }
@@ -727,6 +734,7 @@ export function goAiAssistant(options?: GoAiAssistantOptions) {
     intent.initialMessage ||
     intent.activityLegacyId != null ||
     intent.openAiGuideSheet ||
+    intent.prefillTravelGuideForm ||
     intent.autoRunTravelGuideForm
   ) {
     useNavigationStore.getState().setAiAssistantIntent(intent);

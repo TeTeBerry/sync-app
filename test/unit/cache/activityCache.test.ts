@@ -14,7 +14,7 @@ const homeSummary: HomeSummary = {
       date: '2026-07-01',
       location: '上海',
       image: '',
-      category: '音乐节',
+      category: '电音节',
       hot: true,
       attendees: 5,
       going: false,

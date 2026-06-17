@@ -18,7 +18,7 @@ describe('aiAssistantCapabilityDiscovery', () => {
 
   it('shows unbound discovery chips', () => {
     expect(buildWelcomeCapabilityChipLabels(false)).toEqual([
-      '选一场音乐节',
+      '选一场电音节',
       '最近有什么活动',
       START_PERSONALITY_TEST_CTA,
     ]);
@@ -59,7 +59,7 @@ describe('aiAssistantCapabilityDiscovery', () => {
     ).toEqual({
       type: 'personality_test',
     });
-    expect(resolveWelcomeCapabilityChipAction('选一场音乐节', false)).toEqual({
+    expect(resolveWelcomeCapabilityChipAction('选一场电音节', false)).toEqual({
       type: 'pick_festival_sheet',
     });
   });

@@ -16,6 +16,7 @@ import { inferUserGenderFromName } from '../../../utils/inferAuthorGender';
 import { useFestivalPlanSummary } from '../../../domains/festival-plan/useFestivalPlanSummary';
 import { useFestivalPlanNavigation } from '../../../domains/festival-plan/useFestivalPlanNavigation';
 import type { FestivalPlanTaskActions } from '../../../domains/festival-plan/festivalPlanTaskActions';
+import type { ActivityBindingActions } from './activityBindingActions';
 
 export function useAiAssistantPage() {
   const navInsets = useNavBarInsets();
@@ -29,6 +30,7 @@ export function useAiAssistantPage() {
     return {
       initialMessage: intent?.initialMessage?.trim() ?? null,
       openAiGuideSheet: Boolean(intent?.openAiGuideSheet),
+      prefillTravelGuideForm: intent?.prefillTravelGuideForm ?? null,
       autoRunTravelGuideForm: intent?.autoRunTravelGuideForm ?? null,
     };
   });
@@ -38,6 +40,9 @@ export function useAiAssistantPage() {
   const [pendingOpenAiGuideSheet, setPendingOpenAiGuideSheet] = useState(
     navBoot.openAiGuideSheet,
   );
+  const [pendingPrefillGuideForm, setPendingPrefillGuideForm] = useState(
+    navBoot.prefillTravelGuideForm,
+  );
   const [pendingAutoGuideForm, setPendingAutoGuideForm] = useState(
     navBoot.autoRunTravelGuideForm,
   );
@@ -46,6 +51,8 @@ export function useAiAssistantPage() {
   const [chromeLayoutSeq, setChromeLayoutSeq] = useState(0);
   const [festivalPlanActions, setFestivalPlanActions] =
     useState<FestivalPlanTaskActions | null>(null);
+  const [activityBindingActions, setActivityBindingActions] =
+    useState<ActivityBindingActions | null>(null);
 
   const consumeAiAssistantIntent = useNavigationStore(selectConsumeAiAssistantIntent);
   const activityLegacyId =
@@ -101,6 +108,7 @@ export function useAiAssistantPage() {
   const handleInitialMessageSent = useCallback(() => {
     setPendingInitialMessage(null);
     setPendingOpenAiGuideSheet(false);
+    setPendingPrefillGuideForm(null);
     setPendingAutoGuideForm(null);
   }, []);
 
@@ -112,6 +120,9 @@ export function useAiAssistantPage() {
     }
     if (intent.openAiGuideSheet) {
       setPendingOpenAiGuideSheet(true);
+    }
+    if (intent.prefillTravelGuideForm) {
+      setPendingPrefillGuideForm(intent.prefillTravelGuideForm);
     }
     if (intent.autoRunTravelGuideForm) {
       setPendingAutoGuideForm(intent.autoRunTravelGuideForm);
@@ -136,6 +147,7 @@ export function useAiAssistantPage() {
     navInsets,
     pendingInitialMessage,
     pendingOpenAiGuideSheet,
+    pendingPrefillGuideForm,
     pendingAutoGuideForm,
     pageShowSeq,
     onChatMessagesChange: setChatRevision,
@@ -148,6 +160,8 @@ export function useAiAssistantPage() {
     festivalPlan,
     handleFestivalPlanTaskPress,
     setFestivalPlanActions,
+    activityBindingActions,
+    setActivityBindingActions,
     layoutRemeasureKey,
     handleChromeLayoutChange,
     activityLegacyId,

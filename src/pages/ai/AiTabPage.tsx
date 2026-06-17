@@ -2,6 +2,7 @@ import '../../packageAi/pages/ai-assistant/AiAssistantPage.scss';
 import { type FC } from 'react';
 import { CalendarDays } from '../../components/icons';
 import TabPageHeader from '../../components/navigation/TabPageHeader';
+import { Button } from '../../components/ui';
 import { Text, View } from '@tarojs/components';
 import { ProfileTabErrorBoundary } from '../../components/profile/ProfileTabErrorBoundary';
 import { AiAssistantChat } from '../../packageAi/pages/ai-assistant/AiAssistantChat';
@@ -57,6 +58,13 @@ const AiTabPage: FC = () => {
                 </>
               )}
             </View>
+            <Button
+              className="s-ai-assistant__event-context-switch"
+              hoverClass="s-ai-assistant__event-context-switch--pressed"
+              onClick={() => page.activityBindingActions?.openActivityPicker()}
+            >
+              切换
+            </Button>
           </View>
         ) : null}
 
@@ -74,6 +82,7 @@ const AiTabPage: FC = () => {
               <AiAssistantChat
                 initialMessage={page.pendingInitialMessage}
                 initialOpenAiGuideSheet={page.pendingOpenAiGuideSheet}
+                initialPrefillTravelGuideForm={page.pendingPrefillGuideForm}
                 initialAutoRunTravelGuideForm={page.pendingAutoGuideForm}
                 pageShowSeq={page.pageShowSeq}
                 activityLegacyId={page.activityLegacyId}
@@ -85,6 +94,7 @@ const AiTabPage: FC = () => {
                 userName={page.profileUserData.name}
                 userGender={page.userGender}
                 onFestivalPlanActionsChange={page.setFestivalPlanActions}
+                onActivityBindingActionsChange={page.setActivityBindingActions}
               />
             </ProfileTabErrorBoundary>
           </View>

@@ -63,7 +63,7 @@ export function AiActivityPickerSheet({
               id="ai-activity-picker-title"
               className="s-ai-guide-plan-sheet__title"
             >
-              选择音乐节
+              选择电音节
             </Text>
           </View>
           <Button
