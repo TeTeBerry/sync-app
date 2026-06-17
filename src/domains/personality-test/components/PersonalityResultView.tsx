@@ -1,7 +1,14 @@
 import type { FC } from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import Taro from '@tarojs/taro';
-import { Bookmark, MapPin, RefreshCw, Share2 } from '@/components/icons';
+import {
+  Bookmark,
+  Calendar,
+  ChevronRight,
+  MapPin,
+  RefreshCw,
+  Share2,
+} from '@/components/icons';
 import { Button } from '@/components/ui';
 import {
   getCachedPersonalityTestCatalog,
@@ -321,28 +328,140 @@ export const PersonalityResultView: FC<PersonalityResultViewProps> = ({
 
       {lineupEvents.length > 0 ? (
         <View className="s-personality-result__card">
-          <Text className="s-personality-result__section-title">活动推荐</Text>
+          <Text className="s-personality-result__section-title">🎪 活动推荐</Text>
           <Text className="s-personality-result__section-meta">
-            仅展示已官宣阵容且含推荐 DJ 的活动
+            已官宣阵容中含你的推荐 DJ
           </Text>
-          {lineupEvents.map((event) => (
-            <View
-              key={event.activityLegacyId}
-              className="s-personality-result__event-row"
-              onClick={() => goEventDetail(event.activityLegacyId)}
-              role="button"
-            >
-              <View className="s-personality-result__event-main">
-                <Text className="s-personality-result__event-name">{event.name}</Text>
-                <Text className="s-personality-result__event-meta">
-                  {[event.dateLabel, event.location].filter(Boolean).join(' · ')}
-                </Text>
-                <Text className="s-personality-result__event-reason">
-                  {event.reason}
-                </Text>
-              </View>
-            </View>
-          ))}
+          <View className="s-personality-result__event-list">
+            {lineupEvents.map((event) => {
+              const includesSoul = eventIncludesDj(event, soul.djName);
+              return (
+                <View
+                  key={event.activityLegacyId}
+                  className="s-personality-result__event-card"
+                  hoverClass="s-personality-result__event-card--pressed"
+                  hoverStayTime={80}
+                  onClick={() => goEventDetail(event.activityLegacyId)}
+                  role="button"
+                  aria-label={`${event.name}，${event.matchedDjs.join('、')}`}
+                >
+                  <View
+                    className="s-personality-result__event-card-glow"
+                    style={{ background: `${primary.primaryColor}22` }}
+                    aria-hidden
+                  />
+                  <View className="s-personality-result__event-card-inner">
+                    <View className="s-personality-result__event-card-head">
+                      <Text className="s-personality-result__event-name">
+                        {event.name}
+                      </Text>
+                      <View
+                        className={[
+                          's-personality-result__event-badge',
+                          includesSoul ? 's-personality-result__event-badge--soul' : '',
+                        ]
+                          .filter(Boolean)
+                          .join(' ')}
+                        style={
+                          includesSoul
+                            ? {
+                                borderColor: `${primary.primaryColor}66`,
+                                background: `${primary.primaryColor}18`,
+                              }
+                            : undefined
+                        }
+                      >
+                        <Text
+                          className="s-personality-result__event-badge-text"
+                          style={
+                            includesSoul ? { color: primary.primaryColor } : undefined
+                          }
+                        >
+                          {includesSoul ? '本命在列' : '阵容官宣'}
+                        </Text>
+                      </View>
+                    </View>
+
+                    <View className="s-personality-result__event-details">
+                      {event.dateLabel ? (
+                        <View className="s-personality-result__event-detail">
+                          <Calendar size={13} color="#8e8e93" aria-hidden />
+                          <Text className="s-personality-result__event-detail-text">
+                            {event.dateLabel}
+                          </Text>
+                        </View>
+                      ) : null}
+                      {event.location ? (
+                        <View className="s-personality-result__event-detail">
+                          <MapPin size={13} color="#8e8e93" aria-hidden />
+                          <Text className="s-personality-result__event-detail-text">
+                            {event.location}
+                          </Text>
+                        </View>
+                      ) : null}
+                    </View>
+
+                    {event.matchedDjs.length > 0 ? (
+                      <View className="s-personality-result__event-dj-block">
+                        <Text className="s-personality-result__event-dj-label">
+                          阵容匹配
+                        </Text>
+                        <View className="s-personality-result__event-dj-chips">
+                          {event.matchedDjs.slice(0, 5).map((djName) => {
+                            const isSoul =
+                              djName.trim().toLowerCase() ===
+                              soul.djName.trim().toLowerCase();
+                            return (
+                              <View
+                                key={djName}
+                                className={[
+                                  's-personality-result__event-dj-chip',
+                                  isSoul
+                                    ? 's-personality-result__event-dj-chip--soul'
+                                    : '',
+                                ]
+                                  .filter(Boolean)
+                                  .join(' ')}
+                                style={
+                                  isSoul
+                                    ? {
+                                        borderColor: `${primary.primaryColor}55`,
+                                        background: `${primary.primaryColor}14`,
+                                      }
+                                    : undefined
+                                }
+                              >
+                                <Text
+                                  className="s-personality-result__event-dj-chip-text"
+                                  style={
+                                    isSoul ? { color: primary.primaryColor } : undefined
+                                  }
+                                >
+                                  {djName}
+                                </Text>
+                              </View>
+                            );
+                          })}
+                          {event.matchedDjs.length > 5 ? (
+                            <Text className="s-personality-result__event-dj-more">
+                              +{event.matchedDjs.length - 5}
+                            </Text>
+                          ) : null}
+                        </View>
+                      </View>
+                    ) : null}
+
+                    <View className="s-personality-result__event-card-foot">
+                      <Text className="s-personality-result__event-card-cta">
+                        查看活动详情
+                      </Text>
+                      <ChevronRight size={14} color="#8e8e93" aria-hidden />
+                    </View>
+                  </View>
+                </View>
+              );
+            })}
+          </View>
         </View>
       ) : null}
 
