@@ -4,8 +4,10 @@ import { isLiveApi } from '../../../constants/api';
 import {
   useItineraryMutations,
   useItineraryScheduleQuery,
+  useSavedItineraryQuery,
 } from '../../../hooks/useItineraryApi';
 import { useItineraryStore } from '@/domains/performance-itinerary/store';
+import { normalizeItineraryDaysForSave } from '@/types/itinerary';
 import { useStackPageMainHeight } from '../../../hooks/useTabPageMainHeight';
 import {
   goMyItinerary,
@@ -22,11 +24,11 @@ import {
   isValidFilterId,
 } from './exclusiveItineraryFilters';
 import { mapItineraryDjFromApi } from '@/domains/performance-itinerary/utils/mapItineraryDj';
-import { parseSelectedDjIds } from '@/domains/performance-itinerary/utils/itineraryBanner';
 import {
   itineraryDjCardDomId,
   resolveItineraryDjSelection,
 } from '@/domains/performance-itinerary/utils/resolveItineraryDjSelection';
+import { readExclusiveItineraryRouteSelection } from './readExclusiveItineraryRouteSelection';
 import type { ExclusiveItineraryDj } from './types';
 import { detectItineraryConflicts } from './itineraryConflict.util';
 import type { ItineraryConflict } from '../../../types/backend';
@@ -51,18 +53,16 @@ export function useExclusiveItineraryPage() {
     [activeActivityLegacyId, router.params],
   );
 
-  const focusDjName = router.params.focusDjName?.trim() ?? '';
-  const selectedDjNames = useMemo(
-    () => parseSelectedDjIds(router.params.selectedDjNames),
-    [router.params.selectedDjNames],
-  );
+  const routeSelection = useState(() =>
+    readExclusiveItineraryRouteSelection(router.params, activeActivityLegacyId),
+  )[0];
 
   const [stageFilter, setStageFilter] = useState('all');
   const [genreFilter, setGenreFilter] = useState('all');
   const [styleSearchQuery, setStyleSearchQuery] = useState('');
   const [sortMode, setSortMode] = useState<ExclusiveSortMode>('按人气排序');
-  const [selectedIds, setSelectedIds] = useState<string[]>(() =>
-    parseSelectedDjIds(router.params.selectedDjIds),
+  const [selectedIds, setSelectedIds] = useState<string[]>(
+    () => routeSelection.selectedDjIds,
   );
   const [focusDjId, setFocusDjId] = useState<string | undefined>();
   const [scrollIntoViewId, setScrollIntoViewId] = useState('');
@@ -79,9 +79,39 @@ export function useExclusiveItineraryPage() {
   const [generating, setGenerating] = useState(false);
 
   const apiEnabled = isLiveApi();
+  const forceReselect = router.params.reselect === '1';
+  const hasPreselection =
+    routeSelection.selectedDjIds.length > 0 ||
+    routeSelection.selectedDjNames.length > 0 ||
+    routeSelection.focusDjName.length > 0;
   const scheduleQuery = useItineraryScheduleQuery(apiEnabled ? activityLegacyId : null);
-  const { generate } = useItineraryMutations(activityLegacyId ?? 0);
+  const savedQuery = useSavedItineraryQuery(apiEnabled ? activityLegacyId : null);
+  const { generate, save } = useItineraryMutations(activityLegacyId ?? 0);
   const setFromGenerateResult = useItineraryStore((s) => s.setFromGenerateResult);
+
+  const shouldCheckSavedRedirect =
+    apiEnabled &&
+    !forceReselect &&
+    !hasPreselection &&
+    Number.isFinite(activityLegacyId) &&
+    activityLegacyId > 0;
+
+  const skipDjSelectionPending = shouldCheckSavedRedirect && savedQuery.isLoading;
+
+  useEffect(() => {
+    if (!shouldCheckSavedRedirect) return;
+    if (savedQuery.isLoading) return;
+
+    const saved = savedQuery.data;
+    if (!saved?.saved || !saved.days?.length) return;
+
+    goMyItinerary(activityLegacyId, saved.selectedDjIds, { replace: true });
+  }, [
+    activityLegacyId,
+    savedQuery.data,
+    savedQuery.isLoading,
+    shouldCheckSavedRedirect,
+  ]);
 
   const djCatalog = useMemo(
     (): ExclusiveItineraryDj[] =>
@@ -105,22 +135,22 @@ export function useExclusiveItineraryPage() {
     setStyleSearchQuery('');
     setGenreFilter('all');
     setStageFilter('all');
-    setSelectedIds(parseSelectedDjIds(router.params.selectedDjIds));
+    setSelectedIds([]);
     setFocusDjId(undefined);
     setScrollIntoViewId('');
-  }, [activityLegacyId, router.params.selectedDjIds, focusDjName, selectedDjNames]);
+  }, [activityLegacyId, routeSelection]);
 
   useEffect(() => {
     if (!djCatalog.length) return;
 
     const resolved = resolveItineraryDjSelection({
-      requestedIds: parseSelectedDjIds(router.params.selectedDjIds),
-      selectedDjNames,
-      focusDjName: focusDjName || undefined,
+      requestedIds: routeSelection.selectedDjIds,
+      selectedDjNames: routeSelection.selectedDjNames,
+      focusDjName: routeSelection.focusDjName || undefined,
       catalog: djCatalog,
     });
 
-    if (focusDjName || selectedDjNames.length > 0) {
+    if (routeSelection.focusDjName || routeSelection.selectedDjNames.length > 0) {
       setStageFilter('all');
       setGenreFilter('all');
       setStyleSearchQuery('');
@@ -128,7 +158,7 @@ export function useExclusiveItineraryPage() {
 
     setSelectedIds(resolved.selectedIds);
     setFocusDjId(resolved.focusDjId);
-  }, [djCatalog, router.params.selectedDjIds, focusDjName, selectedDjNames]);
+  }, [djCatalog, routeSelection]);
 
   useEffect(() => {
     if (!isValidFilterId(stageOptions, stageFilter)) {
@@ -252,6 +282,11 @@ export function useExclusiveItineraryPage() {
     try {
       const result = await generate({ selectedDjIds: selectedIds });
       setFromGenerateResult(activityLegacyId, selectedIds, result);
+      void save({
+        eventMeta: result.itinerary.eventMeta.trim().slice(0, 200),
+        days: normalizeItineraryDaysForSave(result.itinerary.days),
+        selectedDjIds: selectedIds,
+      }).catch(() => undefined);
       goMyItinerary(activityLegacyId, selectedIds);
     } catch (error) {
       const message =
@@ -263,6 +298,7 @@ export function useExclusiveItineraryPage() {
   }, [
     activityLegacyId,
     generate,
+    save,
     scheduleQuery.data?.schedulePublished,
     selectedIds,
     setFromGenerateResult,
@@ -319,6 +355,7 @@ export function useExclusiveItineraryPage() {
     generating,
     djListLoading,
     djListError,
+    skipDjSelectionPending,
     refetchDjList: scheduleQuery.refetch,
     scrollIntoViewId,
   };

@@ -17,7 +17,13 @@ import { invalidateCache } from '../../../hooks/useApiQuery';
 import { useAiBuddyPost } from '../../../hooks/useAiBuddyPost';
 import { useAiTravelGuide } from '../../../hooks/useAiTravelGuide';
 import { resolveActivityByKeyword } from '../../../api/syncApi';
+import {
+  HOME_FESTIVAL_SHORTCUT_CHIPS,
+  resolveActiveActivityChipKey,
+} from '../../../constants/homeFestivalShortcuts';
 import { selectSetActiveActivityLegacyId, useNavigationStore } from '../../../stores';
+import { seedActivityDetailCache } from '../../../utils/activityDetailCache';
+import { buildAiAssistantWelcomeText } from '../../../utils/aiAssistantWelcome';
 import { parseActivityDayCount } from '../../../utils/parseActivityDayCount';
 import { useActivityDetailQuery } from '../../../hooks/useSyncApi';
 import { eventCityFromLocation } from '../../../utils/travelGuideDepartureSuggestions';
@@ -61,6 +67,7 @@ export function AiAssistantChat({
   const submitLockRef = useRef(false);
   const pendingPageShowScrollRef = useRef(false);
   const [forceScrollToBottomKey, setForceScrollToBottomKey] = useState(0);
+  const [pinnedChipKey, setPinnedChipKey] = useState<string | undefined>();
 
   const bumpScrollToBottom = useCallback(() => {
     setForceScrollToBottomKey((k) => k + 1);
@@ -78,12 +85,10 @@ export function AiAssistantChat({
     [activityQuery.data?.location],
   );
 
-  const welcomeText = useMemo(() => {
-    if (activityTitle?.trim()) {
-      return `👋 已为你锁定「${activityTitle.trim()}」。有问题随时问我，或点下方活动名切换场次。`;
-    }
-    return '👋 我是你的 AI 智能助手，帮你发现活动、规划出行。点下方活动名绑定场次。';
-  }, [activityTitle]);
+  const welcomeText = useMemo(
+    () => buildAiAssistantWelcomeText(activityTitle),
+    [activityTitle],
+  );
 
   const {
     messages,
@@ -93,6 +98,7 @@ export function AiAssistantChat({
     isStreamingRef,
     send,
     clearChat,
+    applyActivityBinding,
     sessionIdRef,
   } = useAiChatStream({
     welcomeText,
@@ -168,6 +174,29 @@ export function AiAssistantChat({
 
   const setActiveActivityLegacyId = useNavigationStore(selectSetActiveActivityLegacyId);
 
+  const activeChipKey = useMemo(() => {
+    if (pinnedChipKey) {
+      return pinnedChipKey;
+    }
+    return resolveActiveActivityChipKey({
+      activityLegacyId,
+      activityCode: activityQuery.data?.code,
+      activityTitle: activityTitle?.trim(),
+    });
+  }, [activityLegacyId, activityQuery.data?.code, activityTitle, pinnedChipKey]);
+
+  useEffect(() => {
+    if (!pinnedChipKey) return;
+    const resolved = resolveActiveActivityChipKey({
+      activityLegacyId,
+      activityCode: activityQuery.data?.code,
+      activityTitle: activityTitle?.trim(),
+    });
+    if (resolved === pinnedChipKey) {
+      setPinnedChipKey(undefined);
+    }
+  }, [activityLegacyId, activityQuery.data?.code, activityTitle, pinnedChipKey]);
+
   const handleActivityChipClick = useCallback(
     async (keyword: string) => {
       if (isStreaming || isStreamingRef.current) return;
@@ -175,19 +204,39 @@ export function AiAssistantChat({
       const trimmedKeyword = keyword.trim();
       if (!trimmedKeyword) return;
 
+      const chip = HOME_FESTIVAL_SHORTCUT_CHIPS.find(
+        (item) => item.submitText.toLowerCase() === trimmedKeyword.toLowerCase(),
+      );
+      if (chip) {
+        setPinnedChipKey(chip.key);
+      }
+
       try {
         const activity = await resolveActivityByKeyword(trimmedKeyword);
         if (activity?.legacyId != null && !Number.isNaN(activity.legacyId)) {
+          const activityName = activity.name?.trim() || trimmedKeyword;
+          seedActivityDetailCache(activity);
           setActiveActivityLegacyId(activity.legacyId);
+          applyActivityBinding({ legacyId: activity.legacyId, name: activityName });
+          setPinnedChipKey(
+            resolveActiveActivityChipKey({
+              activityLegacyId: activity.legacyId,
+              activityCode: activity.code,
+              activityTitle: activityName,
+            }),
+          );
           void Taro.showToast({
-            title: `已绑定「${activity.name?.trim() || trimmedKeyword}」`,
+            title: `已绑定「${activityName}」`,
             icon: 'none',
           });
           return;
         }
       } catch {
+        setPinnedChipKey(undefined);
         // fall through to unbound chat flow
       }
+
+      setPinnedChipKey(undefined);
 
       const scoped = activityLegacyId != null && !Number.isNaN(activityLegacyId);
       if (scoped) {
@@ -204,6 +253,7 @@ export function AiAssistantChat({
       send,
       setActiveActivityLegacyId,
       travelGuide,
+      applyActivityBinding,
     ],
   );
 
@@ -369,6 +419,7 @@ export function AiAssistantChat({
           activityLegacyId={activityLegacyId}
           activityTitle={activityTitle}
           activityCode={activityQuery.data?.code}
+          activeChipKey={activeChipKey}
           onInputChange={setInput}
           onSubmit={submit}
           onClearChat={handleClearChat}

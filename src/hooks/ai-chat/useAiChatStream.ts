@@ -62,6 +62,8 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
     setIsStreamingRef,
     isStreamingRef,
     cancelHistoryLoad,
+    showWelcome,
+    applyActivityBinding,
   } = useChatSession({
     welcomeText,
     sessionId: sessionIdOption,
@@ -195,6 +197,8 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
     send,
     abort,
     clearChat,
+    showWelcome,
+    applyActivityBinding,
     sessionIdRef,
     sessionId: sessionIdRef.current,
   };

@@ -40,7 +40,7 @@ const baseResult = {
 } as PersonalityTestResult;
 
 describe('buildPersonalityItinerarySelection', () => {
-  it('selects spirit-connection djs that appear in the target event lineup', () => {
+  it('selects every dj shown in the event lineup match section', () => {
     const result = {
       ...baseResult,
       recommendations: {
@@ -56,13 +56,13 @@ describe('buildPersonalityItinerarySelection', () => {
       activityLegacyId: 5,
       name: 'EDC Thailand 2026',
       dateLabel: '12/18-20',
-      matchedDjs: ['CARTA', 'DENNETT', 'FIFI'],
+      matchedDjs: ['CARTA', 'DENNETT', 'FIFI', 'ODD MOB'],
       matchScore: 70,
       reason: '阵容含 CARTA、DENNETT、FIFI 等',
     });
 
-    expect(selection.selectedDjIds).toEqual(['carta', 'dennett']);
-    expect(selection.selectedDjNames).toEqual(['CARTA', 'DENNETT']);
+    expect(selection.selectedDjNames).toEqual(['CARTA', 'DENNETT', 'FIFI', 'ODD MOB']);
+    expect(selection.selectedDjIds).toEqual(['carta', 'dennett', 'fifi', 'odd-mob']);
     expect(selection.focusDjName).toBe('CARTA');
   });
 
@@ -87,6 +87,7 @@ describe('buildPersonalityItinerarySelection', () => {
       reason: '阵容含 MARSHMELLO、CARTA',
     });
 
+    expect(selection.selectedDjNames).toEqual(['MARSHMELLO', 'CARTA']);
     expect(selection.selectedDjIds).toEqual(['marshmello', 'carta']);
     expect(selection.focusDjName).toBe('MARSHMELLO');
   });

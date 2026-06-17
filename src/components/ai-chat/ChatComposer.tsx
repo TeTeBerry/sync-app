@@ -33,6 +33,7 @@ export function ChatComposer({
   activityLegacyId,
   activityTitle,
   activityCode,
+  activeChipKey,
   onInputChange,
   onSubmit,
   onClearChat,
@@ -45,6 +46,7 @@ export function ChatComposer({
   activityLegacyId?: number;
   activityTitle?: string;
   activityCode?: string;
+  activeChipKey?: string;
   onInputChange: (value: string) => void;
   onSubmit: (text: string) => void;
   onClearChat?: () => void | Promise<void>;
@@ -75,19 +77,21 @@ export function ChatComposer({
   })();
 
   const activityChips = useMemo((): ActivityChip[] => {
-    const activeKey = resolveActiveActivityChipKey({
-      activityLegacyId,
-      activityCode,
-      activityTitle: trimmedActivityTitle,
-    });
+    const resolvedActiveKey =
+      activeChipKey ??
+      resolveActiveActivityChipKey({
+        activityLegacyId,
+        activityCode,
+        activityTitle: trimmedActivityTitle,
+      });
 
     return filterActiveHomeFestivalShortcutChips(activities).map((chip) => ({
       key: chip.key,
       label: chip.label,
       keyword: chip.submitText,
-      active: chip.key === activeKey,
+      active: chip.key === resolvedActiveKey,
     }));
-  }, [activities, activityCode, activityLegacyId, trimmedActivityTitle]);
+  }, [activeChipKey, activities, activityCode, activityLegacyId, trimmedActivityTitle]);
 
   const isBusy = isStreaming;
   const isComposerDisabled = isStreaming || isLoadingHistory;

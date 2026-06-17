@@ -19,6 +19,15 @@ describe('itineraryBanner utils', () => {
     ]);
   });
 
+  it('parses pipe-delimited selected DJ lists for route params', () => {
+    expect(parseSelectedDjIds('carta|dennett|fifi|odd-mob')).toEqual([
+      'carta',
+      'dennett',
+      'fifi',
+      'odd-mob',
+    ]);
+  });
+
   it('extracts performance artists from generated days', () => {
     const artists = extractPerformanceArtistsFromDays(FIXTURE_ITINERARY_DAYS);
     expect(artists).toEqual(['EXCISION', 'MARSHMELLO', 'ERIC PRYDZ', 'ILLENIUM']);

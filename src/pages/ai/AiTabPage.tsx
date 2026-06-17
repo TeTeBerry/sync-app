@@ -1,7 +1,7 @@
 import '../../packageAi/pages/ai-assistant/AiAssistantPage.scss';
 import { type FC } from 'react';
 import { CalendarDays, Zap } from '../../components/icons';
-import PageNavigation from '../../components/navigation/PageNavigation';
+import TabPageHeader from '../../components/navigation/TabPageHeader';
 import { Text, View } from '@tarojs/components';
 import { ProfileTabErrorBoundary } from '../../components/profile/ProfileTabErrorBoundary';
 import { AiAssistantChat } from '../../packageAi/pages/ai-assistant/AiAssistantChat';
@@ -26,10 +26,10 @@ const AiTabPage: FC = () => {
           .filter(Boolean)
           .join(' ')}
       >
-        <PageNavigation
+        <TabPageHeader
           title="AI助手"
-          fallback={ROUTES.HOME}
-          onBack={page.handleBack}
+          navInsets={page.navInsets}
+          className="s-tab-page-header--ai"
           trailing={
             page.messageCount > 0 ? (
               <Text className="s-ai-assistant__message-count" aria-hidden>

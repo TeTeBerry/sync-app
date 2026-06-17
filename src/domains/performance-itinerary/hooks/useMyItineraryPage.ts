@@ -11,7 +11,11 @@ import { useItineraryStore } from '@/domains/performance-itinerary/store';
 import { stackPageNavChromePx } from '@/components/navigation/PageNavigation';
 import { useNavBarInsets } from '@/hooks/useNavBarInsets';
 import { useTabPageMainHeight } from '@/hooks/useTabPageMainHeight';
-import { resolveEventDetailIdFromQuery, ROUTES } from '@/utils/route';
+import {
+  resolveEventDetailIdFromQuery,
+  ROUTES,
+  goExclusiveItinerary,
+} from '@/utils/route';
 import { selectActiveActivityLegacyId, useNavigationStore } from '@/stores';
 import type { ItineraryDay as ApiItineraryDay, ItineraryDj } from '@/types/backend';
 import type { ItineraryDay } from '../types/myItineraryUi';
@@ -69,6 +73,9 @@ export function useMyItineraryPage() {
   const [pageKind, setPageKind] = useState<'travel' | 'performance'>(() =>
     initialPerformanceIntent ? 'performance' : 'travel',
   );
+  const [pageKindResolved, setPageKindResolved] = useState(
+    () => initialPerformanceIntent || !apiEnabled,
+  );
 
   const [itineraryDays, setItineraryDays] = useState<ItineraryDay[]>([]);
   const [eventMeta, setEventMeta] = useState('');
@@ -84,12 +91,16 @@ export function useMyItineraryPage() {
 
   useEffect(() => {
     hydratedFromPendingRef.current = false;
+    if (!initialPerformanceIntent && apiEnabled) {
+      setPageKindResolved(false);
+    }
     if (!Number.isFinite(activityLegacyId) || activityLegacyId <= 0) return;
 
     const pending = consumePending(activityLegacyId);
     if (pending) {
       hydratedFromPendingRef.current = true;
       setPageKind('performance');
+      setPageKindResolved(true);
       if (pending.days.length > 0) {
         setItineraryDays(pending.days as ItineraryDay[]);
       } else {
@@ -104,16 +115,22 @@ export function useMyItineraryPage() {
       }
       return;
     }
-  }, [activityLegacyId, consumePending]);
+  }, [activityLegacyId, apiEnabled, consumePending, initialPerformanceIntent]);
 
   useEffect(() => {
     if (!apiEnabled || hydratedFromPendingRef.current) return;
-    if (!Number.isFinite(activityLegacyId) || activityLegacyId <= 0) return;
+    if (!Number.isFinite(activityLegacyId) || activityLegacyId <= 0) {
+      setPageKindResolved(true);
+      return;
+    }
     if (savedQuery.isLoading) return;
+
+    setPageKindResolved(true);
 
     const saved = savedQuery.data;
     if (!saved?.saved || !saved.days?.length) return;
 
+    setPageKind('performance');
     setItineraryDays(saved.days as ItineraryDay[]);
     if (saved.eventMeta?.trim()) {
       setEventMeta(saved.eventMeta.trim());
@@ -177,8 +194,12 @@ export function useMyItineraryPage() {
   }, []);
 
   const handleReselect = useCallback(() => {
+    if (Number.isFinite(activityLegacyId) && activityLegacyId > 0) {
+      goExclusiveItinerary(activityLegacyId, undefined, { reselect: true });
+      return;
+    }
     void Taro.navigateBack();
-  }, []);
+  }, [activityLegacyId]);
 
   const handleSave = useCallback(async () => {
     void Taro.showLoading({ title: '生成屏保中…', mask: true });
@@ -243,6 +264,7 @@ export function useMyItineraryPage() {
 
   return {
     pageKind,
+    pageKindResolved,
     activityLegacyId,
     eventMeta,
     bannerCopy,

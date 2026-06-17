@@ -16,7 +16,7 @@ type LockedFeature = {
   icon: React.ReactNode;
   title: string;
   desc: string;
-  feature: 'activity' | 'post' | 'notification';
+  feature: 'activity' | 'social' | 'notification';
 };
 
 const LOCKED_FEATURES: LockedFeature[] = [
@@ -30,7 +30,7 @@ const LOCKED_FEATURES: LockedFeature[] = [
     icon: <FileText size={18} color="#bf5af2" />,
     title: '我的帖子',
     desc: '模板帖与留言管理',
-    feature: 'post',
+    feature: 'social',
   },
   {
     icon: <Bell size={18} color="#8e8e93" />,
@@ -48,7 +48,7 @@ const ProfileGuestSection: React.FC<ProfileGuestSectionProps> = ({
   const openLockedRoute = useCallback((feature: LockedFeature['feature']) => {
     const routes = {
       activity: ROUTES.PROFILE_ACTIVITIES,
-      post: ROUTES.PROFILE_POSTS,
+      social: ROUTES.PROFILE_POSTS,
       notification: ROUTES.NOTIFICATIONS,
     } as const;
     requireAuth(() => go(routes[feature]), feature);

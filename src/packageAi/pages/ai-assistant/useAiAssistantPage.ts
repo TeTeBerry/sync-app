@@ -2,7 +2,10 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import Taro, { useDidShow } from '@tarojs/taro';
 import { useNavBarInsets } from '../../../hooks/useNavBarInsets';
 import { usePageRouteReady } from '../../../hooks/usePageRouteReady';
-import { useTabPageMainHeight } from '../../../hooks/useTabPageMainHeight';
+import {
+  TAB_PAGE_NAV_PX,
+  useTabPageMainHeight,
+} from '../../../hooks/useTabPageMainHeight';
 import { useResolvedProfile } from '../../../hooks/useResolvedProfile';
 import { useActivityDetailQuery } from '../../../hooks/useSyncApi';
 import {
@@ -13,8 +16,6 @@ import {
 } from '../../../stores';
 import { resolveAiChatWsUrl } from '../../../constants/api';
 import { isAiChatWsDevLog } from '../../../utils/aiChatWs';
-import { stackPageNavChromePx } from '../../../components/navigation/PageNavigation';
-import { goEventDetail, ROUTES, switchTabTo } from '../../../utils/route';
 import { inferUserGenderFromName } from '../../../utils/inferAuthorGender';
 
 /** Event context strip below header when scoped to an activity. */
@@ -74,20 +75,12 @@ export function useAiAssistantPage() {
 
   const headerSubtractPx = useMemo(() => {
     const eventBar = showEventContext ? AI_EVENT_CONTEXT_PX : 0;
-    return stackPageNavChromePx(navInsets) + eventBar;
-  }, [navInsets, showEventContext]);
+    return navInsets.paddingTop + TAB_PAGE_NAV_PX + eventBar;
+  }, [navInsets.paddingTop, showEventContext]);
 
   const chatScrollHeight = useTabPageMainHeight({
     subtractPx: headerSubtractPx + AI_CHAT_COMPOSER_CHROME_PX,
   });
-
-  const handleBack = useCallback(() => {
-    if (activityLegacyId != null && !Number.isNaN(activityLegacyId)) {
-      goEventDetail(activityLegacyId);
-      return;
-    }
-    switchTabTo(ROUTES.HOME);
-  }, [activityLegacyId]);
 
   usePageRouteReady(true);
 
@@ -151,6 +144,5 @@ export function useAiAssistantPage() {
     chatScrollHeight,
     activityLegacyId,
     handleInitialMessageSent,
-    handleBack,
   };
 }

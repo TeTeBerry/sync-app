@@ -8,3 +8,10 @@ export type AiAssistantNavIntent = {
   /** Run travel-guide generation after chat mounts (from event-detail sheet submit). */
   autoRunTravelGuideForm?: AiGuidePlanFormValues;
 };
+
+export type ExclusiveItineraryNavIntent = {
+  activityLegacyId: number;
+  selectedDjIds: string[];
+  selectedDjNames: string[];
+  focusDjName?: string;
+};

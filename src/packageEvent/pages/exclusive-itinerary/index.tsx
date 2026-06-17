@@ -46,7 +46,16 @@ const ExclusiveItineraryPage = () => {
     djListError,
     refetchDjList,
     scrollIntoViewId,
+    skipDjSelectionPending,
   } = useExclusiveItineraryPage();
+
+  if (skipDjSelectionPending) {
+    return (
+      <View data-cmp="ExclusiveItineraryPage" className="s-exclusive-itinerary">
+        <ThemedPageLoader variant="skeleton-feed" minHeight={320} />
+      </View>
+    );
+  }
 
   return (
     <View data-cmp="ExclusiveItineraryPage" className="s-exclusive-itinerary">

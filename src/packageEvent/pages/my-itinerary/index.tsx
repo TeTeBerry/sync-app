@@ -3,6 +3,7 @@ import { Share2, Sparkles } from '../../../components/icons';
 import MapFeatureDeveloping from '../../../components/MapFeatureDeveloping';
 import { Button } from '../../../components/ui';
 import { Canvas, ScrollView, Text, View } from '@tarojs/components';
+import ThemedPageLoader from '../../../components/ThemedPageLoader';
 import { PageTabBarChrome } from '../../../components/navigation/BottomNav';
 import PageNavigation from '../../../components/navigation/PageNavigation';
 import { useEndRouteTransitionOnShow } from '../../../hooks/useEndRouteTransitionOnShow';
@@ -28,6 +29,15 @@ const MyItineraryPage = () => {
     activityLegacyId: page.activityLegacyId,
     eventMeta: page.eventMeta,
   });
+
+  if (!page.pageKindResolved) {
+    return (
+      <View data-cmp="MyItineraryPage" className="s-my-itinerary s-page-with-tabbar">
+        <ThemedPageLoader variant="skeleton-feed" minHeight={320} />
+        <PageTabBarChrome />
+      </View>
+    );
+  }
 
   if (page.pageKind === 'travel') {
     return (

@@ -1,13 +1,26 @@
 import type { ItineraryDay } from '../types/myItineraryUi';
 
 export function parseSelectedDjIds(raw?: string): string[] {
+  return parseSelectedDjList(raw);
+}
+
+/** Pipe-delimited lists avoid comma-splitting issues in mini-program route params. */
+export function parseSelectedDjList(raw?: string): string[] {
   if (!raw?.trim()) {
     return [];
   }
+  const delimiter = raw.includes('|') ? '|' : ',';
   return raw
-    .split(',')
-    .map((id) => id.trim())
+    .split(delimiter)
+    .map((part) => part.trim())
     .filter(Boolean);
+}
+
+export function encodeSelectedDjList(values: string[]): string {
+  return values
+    .map((value) => value.trim())
+    .filter(Boolean)
+    .join('|');
 }
 
 export type DjNameEntry = { id: string; name: string };

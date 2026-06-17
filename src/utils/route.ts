@@ -1,6 +1,8 @@
 import Taro from '@tarojs/taro';
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigationStore } from '../stores/navigationStore';
+import type { ExclusiveItineraryNavIntent } from '../stores/types';
+import { encodeSelectedDjList } from '../domains/performance-itinerary/utils/itineraryBanner';
 import type { NavigationState } from '../stores/navigationStore';
 import type { AiAssistantNavIntent } from '../stores/types';
 import type { BackendActivity, HomeSummary, NotificationMeta } from '../types/backend';
@@ -351,7 +353,7 @@ const AUTH_PROTECTED_ROUTES: Partial<Record<RoutePath, LoginInterceptFeature>> =
   [ROUTES.AI_ASSISTANT]: 'ai_assistant',
   [ROUTES.NOTIFICATIONS]: 'notification',
   [ROUTES.PROFILE_ACTIVITIES]: 'activity',
-  [ROUTES.PROFILE_POSTS]: 'post',
+  [ROUTES.PROFILE_POSTS]: 'social',
   [ROUTES.EXCLUSIVE_ITINERARY]: 'activity',
   [ROUTES.MY_ITINERARY]: 'activity',
   [ROUTES.PERSONALITY_TEST]: 'activity',
@@ -388,6 +390,38 @@ function navigateToSafe(url: string, _options?: { eventId?: number }) {
     () =>
       new Promise<void>((resolve) => {
         Taro.navigateTo({
+          url,
+          success: () => resolve(),
+          fail: () => {
+            endRouteTransition();
+            void Taro.showToast({ title: '页面打开失败', icon: 'none' });
+            resolve();
+          },
+          complete: () => {
+            markNavigationEnd();
+          },
+        });
+      }),
+  );
+}
+
+function redirectToSafe(url: string) {
+  if (shouldSkipNavigation(url)) {
+    return;
+  }
+
+  const loginFeature = loginFeatureForUrl(url);
+  if (loginFeature && isAuthGated()) {
+    requireAuth(() => redirectToSafe(url), loginFeature);
+    return;
+  }
+
+  markNavigationStart(url);
+
+  runSerializedNavigation(
+    () =>
+      new Promise<void>((resolve) => {
+        Taro.redirectTo({
           url,
           success: () => resolve(),
           fail: () => {
@@ -535,7 +569,12 @@ export function goEventDetail(eventId: number | string, options?: { postId?: str
 export function goExclusiveItinerary(
   activityLegacyId: number,
   selectedDjIds?: string[],
-  options?: { focusDjName?: string; selectedDjNames?: string[] },
+  options?: {
+    focusDjName?: string;
+    selectedDjNames?: string[];
+    /** Skip auto-redirect to saved timetable (e.g. 重新选择). */
+    reselect?: boolean;
+  },
 ) {
   const legacyId = parseActivityLegacyId(activityLegacyId);
   if (legacyId == null) {
@@ -547,24 +586,42 @@ export function goExclusiveItinerary(
     activityLegacyId: String(legacyId),
   };
   const ids = selectedDjIds?.map((id) => id.trim()).filter(Boolean) ?? [];
-  if (ids.length > 0) {
-    query.selectedDjIds = ids.join(',');
-  }
+  const names =
+    options?.selectedDjNames?.map((name) => name.trim()).filter(Boolean) ?? [];
   const focusDjName = options?.focusDjName?.trim();
+
+  if (ids.length > 0 || names.length > 0 || focusDjName) {
+    const intent: ExclusiveItineraryNavIntent = {
+      activityLegacyId: legacyId,
+      selectedDjIds: ids,
+      selectedDjNames: names.length > 0 ? names : ids,
+      focusDjName,
+    };
+    useNavigationStore.getState().setExclusiveItineraryIntent(intent);
+  }
+
+  if (ids.length > 0) {
+    query.selectedDjIds = encodeSelectedDjList(ids);
+  }
   if (focusDjName) {
     query.focusDjName = focusDjName;
   }
-  const names =
-    options?.selectedDjNames?.map((name) => name.trim()).filter(Boolean) ?? [];
   if (names.length > 0) {
-    query.selectedDjNames = names.join(',');
+    query.selectedDjNames = encodeSelectedDjList(names);
+  }
+  if (options?.reselect) {
+    query.reselect = '1';
   }
   useNavigationStore.getState().setActiveActivityLegacyId(legacyId);
   preloadEventSubpackage();
   navigateToSafe(buildPageUrl(ROUTES.EXCLUSIVE_ITINERARY, query));
 }
 
-export function goMyItinerary(activityLegacyId?: number, selectedDjIds?: string[]) {
+export function goMyItinerary(
+  activityLegacyId?: number,
+  selectedDjIds?: string[],
+  options?: { replace?: boolean },
+) {
   const query: Record<string, string> = {};
   const legacyId = parseActivityLegacyId(activityLegacyId);
   if (legacyId != null) {
@@ -574,10 +631,15 @@ export function goMyItinerary(activityLegacyId?: number, selectedDjIds?: string[
   }
   const ids = selectedDjIds?.map((id) => id.trim()).filter(Boolean) ?? [];
   if (ids.length > 0) {
-    query.selectedDjIds = ids.join(',');
+    query.selectedDjIds = encodeSelectedDjList(ids);
   }
   preloadEventSubpackage();
-  navigateToSafe(buildPageUrl(ROUTES.MY_ITINERARY, query));
+  const url = buildPageUrl(ROUTES.MY_ITINERARY, query);
+  if (options?.replace) {
+    redirectToSafe(url);
+    return;
+  }
+  navigateToSafe(url);
 }
 
 export function goPersonalityTest(options?: { viewResult?: boolean }) {
