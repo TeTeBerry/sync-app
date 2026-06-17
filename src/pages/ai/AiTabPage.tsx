@@ -1,6 +1,6 @@
 import '../../packageAi/pages/ai-assistant/AiAssistantPage.scss';
 import { type FC } from 'react';
-import { CalendarDays, Zap } from '../../components/icons';
+import { CalendarDays } from '../../components/icons';
 import TabPageHeader from '../../components/navigation/TabPageHeader';
 import { Text, View } from '@tarojs/components';
 import { ProfileTabErrorBoundary } from '../../components/profile/ProfileTabErrorBoundary';
@@ -69,10 +69,6 @@ const AiTabPage: FC = () => {
 
         <View className="s-ai-assistant__body">
           <View className="s-ai-assistant__panel">
-            <View className="s-ai-assistant__tab-status" aria-hidden>
-              <Zap size={10} color="#64d2ff" />
-              <Text className="s-ai-assistant__tab-status-text">在线 · 实时响应</Text>
-            </View>
             <ProfileTabErrorBoundary logTag="AiTab">
               <AiAssistantChat
                 initialMessage={page.pendingInitialMessage}

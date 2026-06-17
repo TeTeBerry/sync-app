@@ -20,7 +20,7 @@ import { inferUserGenderFromName } from '../../../utils/inferAuthorGender';
 import { useFestivalPlanSummary } from '../../../domains/festival-plan/useFestivalPlanSummary';
 import { useFestivalPlanNavigation } from '../../../domains/festival-plan/useFestivalPlanNavigation';
 import type { FestivalPlanTaskActions } from '../../../domains/festival-plan/festivalPlanTaskActions';
-import { FESTIVAL_PLAN_SUMMARY_PX } from '../../../domains/festival-plan/FestivalPlanSummaryBar';
+import { FESTIVAL_PLAN_SUMMARY_COLLAPSED_PX } from '../../../domains/festival-plan/FestivalPlanSummaryBar';
 
 /** Event context strip below header when scoped to an activity. */
 export const AI_EVENT_CONTEXT_PX = 44;
@@ -90,7 +90,7 @@ export function useAiAssistantPage() {
 
   const headerSubtractPx = useMemo(() => {
     const eventBar = showEventContext ? AI_EVENT_CONTEXT_PX : 0;
-    const planBar = showEventContext ? FESTIVAL_PLAN_SUMMARY_PX : 0;
+    const planBar = showEventContext ? FESTIVAL_PLAN_SUMMARY_COLLAPSED_PX : 0;
     return navInsets.paddingTop + TAB_PAGE_NAV_PX + eventBar + planBar;
   }, [navInsets.paddingTop, showEventContext]);
 

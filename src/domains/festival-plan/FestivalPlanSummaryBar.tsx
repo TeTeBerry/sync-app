@@ -1,13 +1,18 @@
+import { useEffect, useState } from 'react';
 import { Button, cn } from '@/components/ui';
+import { ChevronDown, ChevronUp } from '@/components/icons';
 import type {
   FestivalPlanChecklist,
   FestivalPlanTask,
 } from './buildFestivalPlanChecklist';
+import { resolveFestivalPlanVisibleTasks } from './resolveFestivalPlanVisibleTasks';
 import { Text, View } from '@tarojs/components';
 import './FestivalPlanSummaryBar.scss';
 
-/** Checklist card below event context (px @ 375). */
+/** Checklist card below event context — expanded (px @ 375). */
 export const FESTIVAL_PLAN_SUMMARY_PX = 148;
+/** Default collapsed: header + one next task (px @ 375). */
+export const FESTIVAL_PLAN_SUMMARY_COLLAPSED_PX = 92;
 
 export function FestivalPlanSummaryBar({
   checklist,
@@ -17,61 +22,93 @@ export function FestivalPlanSummaryBar({
   onTaskPress: (task: FestivalPlanTask) => void;
 }) {
   const { tasks, completedCount, totalCount, nextTaskKey } = checklist;
+  const [expanded, setExpanded] = useState(false);
+
+  useEffect(() => {
+    setExpanded(false);
+  }, [nextTaskKey]);
+
+  const visibleTasks = resolveFestivalPlanVisibleTasks(tasks, {
+    expanded,
+    nextTaskKey,
+  });
+  const allComplete = !nextTaskKey;
 
   return (
-    <View className="s-festival-plan-summary">
-      <View className="s-festival-plan-summary__header">
+    <View
+      className={cn(
+        's-festival-plan-summary',
+        expanded && 's-festival-plan-summary--expanded',
+      )}
+    >
+      <Button
+        className="s-festival-plan-summary__header"
+        hoverClass="s-festival-plan-summary__header--pressed"
+        aria-expanded={expanded}
+        onClick={() => setExpanded((value) => !value)}
+      >
         <Text className="s-festival-plan-summary__title">本场计划</Text>
-        <Text className="s-festival-plan-summary__progress">
-          {completedCount}/{totalCount}
-        </Text>
-      </View>
+        <View className="s-festival-plan-summary__header-trail">
+          <Text className="s-festival-plan-summary__progress">
+            {completedCount}/{totalCount}
+          </Text>
+          {expanded ? (
+            <ChevronUp size={14} color="var(--muted-foreground)" aria-hidden />
+          ) : (
+            <ChevronDown size={14} color="var(--muted-foreground)" aria-hidden />
+          )}
+        </View>
+      </Button>
 
-      <View className="s-festival-plan-summary__tasks">
-        {tasks.map((task) => (
-          <Button
-            key={task.key}
-            className={cn(
-              's-festival-plan-summary__task',
-              task.done && 's-festival-plan-summary__task--done',
-              task.isNext && 's-festival-plan-summary__task--next',
-            )}
-            hoverClass="s-festival-plan-summary__task--pressed"
-            onClick={() => onTaskPress(task)}
-          >
-            <Text
+      {visibleTasks.length > 0 ? (
+        <View className="s-festival-plan-summary__tasks">
+          {visibleTasks.map((task) => (
+            <Button
+              key={task.key}
               className={cn(
-                's-festival-plan-summary__marker',
-                task.done && 's-festival-plan-summary__marker--done',
+                's-festival-plan-summary__task',
+                task.done && 's-festival-plan-summary__task--done',
+                task.isNext && 's-festival-plan-summary__task--next',
               )}
-              aria-hidden
+              hoverClass="s-festival-plan-summary__task--pressed"
+              onClick={() => onTaskPress(task)}
             >
-              {task.done ? '✓' : '○'}
-            </Text>
-            <Text className="s-festival-plan-summary__task-label">{task.label}</Text>
-            <Text
-              className={cn(
-                's-festival-plan-summary__task-action',
-                task.isNext &&
-                  !task.done &&
-                  's-festival-plan-summary__task-action--next',
-              )}
-            >
-              {task.trailingLabel}
-            </Text>
-          </Button>
-        ))}
-      </View>
+              <Text
+                className={cn(
+                  's-festival-plan-summary__marker',
+                  task.done && 's-festival-plan-summary__marker--done',
+                )}
+                aria-hidden
+              >
+                {task.done ? '✓' : '○'}
+              </Text>
+              <Text className="s-festival-plan-summary__task-label">{task.label}</Text>
+              <Text
+                className={cn(
+                  's-festival-plan-summary__task-action',
+                  task.isNext &&
+                    !task.done &&
+                    's-festival-plan-summary__task-action--next',
+                )}
+              >
+                {task.trailingLabel}
+              </Text>
+            </Button>
+          ))}
+        </View>
+      ) : null}
 
-      {nextTaskKey ? (
+      {expanded && nextTaskKey ? (
         <Text className="s-festival-plan-summary__hint">
           下一步：{tasks.find((task) => task.key === nextTaskKey)?.trailingLabel}
         </Text>
-      ) : (
+      ) : null}
+
+      {allComplete ? (
         <Text className="s-festival-plan-summary__hint s-festival-plan-summary__hint--complete">
           本场准备已完成，祝你玩得开心
         </Text>
-      )}
+      ) : null}
     </View>
   );
 }

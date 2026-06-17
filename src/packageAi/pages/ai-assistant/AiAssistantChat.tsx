@@ -11,6 +11,7 @@ import { AiBuddyPostSheet } from '../../../components/ai-chat/AiBuddyPostSheet';
 import { AiActivityPickerSheet } from '../../../components/ai-chat/AiActivityPickerSheet';
 import { AiGuidePlanSheet } from '../../../components/ai-chat/AiGuidePlanSheet';
 import { useKeyboardInset } from '../../../hooks/useKeyboardInset';
+import { useConfirmDialog } from '../../../hooks/useConfirmDialog';
 import type { inferUserGenderFromName } from '../../../utils/inferAuthorGender';
 import type {
   AiGuidePlanFormValues,
@@ -86,6 +87,10 @@ export function AiAssistantChat({
 
   const activityQuery = useActivityDetailQuery(activityLegacyId);
   const { accountRisk } = useAccountRisk();
+  const { confirm, confirmDialog } = useConfirmDialog({
+    confirmText: '清空',
+    cancelText: '取消',
+  });
   const defaultGuideNights = useMemo(
     () => parseActivityDayCount(activityQuery.data?.date),
     [activityQuery.data?.date],
@@ -332,8 +337,16 @@ export function AiAssistantChat({
 
   const handleClearChat = useCallback(async () => {
     if (isStreaming || isStreamingRef.current) return;
+
+    const ok = await confirm({
+      title: '清空对话',
+      message:
+        '确定清空当前聊天记录？将重新开始本场对话，上方「本场计划」进度不受影响。',
+    });
+    if (!ok) return;
+
     await clearChat();
-  }, [clearChat, isStreaming, isStreamingRef]);
+  }, [clearChat, confirm, isStreaming, isStreamingRef]);
 
   const handleSelectSuggestedReply = useCallback(
     async (reply: string) => {
@@ -473,6 +486,8 @@ export function AiAssistantChat({
         onClose={() => setActivityPickerOpen(false)}
         onSelect={handleActivityPicked}
       />
+
+      {confirmDialog}
     </View>
   );
 }
