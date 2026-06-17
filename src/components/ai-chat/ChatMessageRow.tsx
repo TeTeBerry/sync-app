@@ -9,8 +9,15 @@ import { AiAssistantActivityCard } from './AiAssistantActivityCard';
 import { RecommendPostCards } from './RecommendPostCards';
 import { PublishConfirmCard } from './PublishConfirmCard';
 import { SuggestedReplyChips } from './SuggestedReplyChips';
+import { BuddyPostTemplateCta } from './BuddyPostTemplateCta';
+import { TravelGuideSheetCta } from './TravelGuideSheetCta';
 import { AiGuideResultCard } from './AiGuideResultCard';
 import { parsePublishConfirmMessage } from '../../utils/parsePublishConfirmMessage';
+import {
+  filterBuddyPostSheetShortcutReplies,
+  isBuddyPostTemplatePrompt,
+} from '../../utils/buddyPostPromptMessage';
+import { isTravelGuideSheetPrompt } from '../../utils/travelGuidePromptMessage';
 import { openSingleImagePreview } from '../../utils/openImagePreview';
 import { Button } from '../ui';
 import { Image, Text, View } from '@tarojs/components';
@@ -55,6 +62,8 @@ export type ChatMessageRowProps = {
   onSelectSuggestedReply: (reply: string) => void;
   onRegenerateTravelGuide?: (form: AiGuidePlanFormValues) => void;
   onBuddyPostFromTravelGuide?: (form: AiGuidePlanFormValues) => void;
+  onOpenBuddyPostSheet?: () => void;
+  onOpenTravelGuideSheet?: () => void;
 };
 
 function ChatMessageRowInner({
@@ -68,6 +77,8 @@ function ChatMessageRowInner({
   onSelectSuggestedReply,
   onRegenerateTravelGuide,
   onBuddyPostFromTravelGuide,
+  onOpenBuddyPostSheet,
+  onOpenTravelGuideSheet,
 }: ChatMessageRowProps) {
   const isUser = msg.from === 'user';
   const timestamp = formatMessageTime(msg.id);
@@ -79,6 +90,18 @@ function ChatMessageRowInner({
   const hasMatchedPosts = Boolean(msg.matchedPosts?.length);
   const hasActivityCard = Boolean(msg.recommendedActivity);
   const hasSuggestedReplies = Boolean(msg.suggestedReplies?.length);
+  const suggestedReplyChips = filterBuddyPostSheetShortcutReplies(msg.suggestedReplies);
+  const hasSuggestedReplyChips = suggestedReplyChips.length > 0;
+  const showBuddyPostTemplateCta =
+    !isUser &&
+    !msg.streaming &&
+    isBuddyPostTemplatePrompt(msg.text) &&
+    Boolean(onOpenBuddyPostSheet);
+  const showTravelGuideSheetCta =
+    !isUser &&
+    !msg.streaming &&
+    Boolean(onOpenTravelGuideSheet) &&
+    (msg.showTravelGuideSheetCta || isTravelGuideSheetPrompt(msg.text));
   const travelGuidePayload = msg.travelGuide;
   const hasTravelGuide = Boolean(travelGuidePayload?.plan && travelGuidePayload?.form);
   const showEmbedBelow =
@@ -86,7 +109,9 @@ function ChatMessageRowInner({
     (hasPostCards ||
       hasMatchedPosts ||
       hasActivityCard ||
-      hasSuggestedReplies ||
+      hasSuggestedReplyChips ||
+      showBuddyPostTemplateCta ||
+      showTravelGuideSheetCta ||
       hasTravelGuide);
   const showPublishConfirm = Boolean(publishConfirm);
   const showTypingIndicator =
@@ -171,9 +196,9 @@ function ChatMessageRowInner({
                 ) : msg.text ? (
                   <Text className="s-ai-assistant-chat__bubble-text">{msg.text}</Text>
                 ) : null}
-                {isUser && hasSuggestedReplies ? (
+                {isUser && hasSuggestedReplyChips ? (
                   <SuggestedReplyChips
-                    replies={msg.suggestedReplies}
+                    replies={suggestedReplyChips}
                     disabled={isStreaming}
                     onSelect={onSelectSuggestedReply}
                   />
@@ -192,11 +217,23 @@ function ChatMessageRowInner({
               {msg.matchedPosts?.length ? (
                 <RecommendPostCards posts={msg.matchedPosts} />
               ) : null}
-              {hasSuggestedReplies ? (
+              {hasSuggestedReplyChips ? (
                 <SuggestedReplyChips
-                  replies={msg.suggestedReplies}
+                  replies={suggestedReplyChips}
                   disabled={isStreaming}
                   onSelect={onSelectSuggestedReply}
+                />
+              ) : null}
+              {showBuddyPostTemplateCta ? (
+                <BuddyPostTemplateCta
+                  disabled={isStreaming}
+                  onOpenSheet={onOpenBuddyPostSheet!}
+                />
+              ) : null}
+              {showTravelGuideSheetCta ? (
+                <TravelGuideSheetCta
+                  disabled={isStreaming}
+                  onOpenSheet={onOpenTravelGuideSheet!}
                 />
               ) : null}
               {hasTravelGuide && travelGuidePayload ? (

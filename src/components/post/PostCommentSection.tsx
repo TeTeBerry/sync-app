@@ -176,12 +176,19 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
     sanitizeRemoteImageUrl(currentUserAvatar?.trim()) || DEFAULT_AVATAR;
   const comments = commentsQuery.data ?? [];
   const canSend = Boolean(draft.trim()) && !submitting;
+  const isEmptyList =
+    !commentsQuery.isLoading && !commentsQuery.isError && comments.length === 0;
 
   if (!expanded) return null;
 
   return (
     <View className="s-post-comments" aria-label="帖子评论">
-      <View className="s-post-comments__list">
+      <View
+        className={cn(
+          's-post-comments__list',
+          isEmptyList && 's-post-comments__list--empty',
+        )}
+      >
         {commentsQuery.isLoading ? (
           <Text className="s-post-comments__status">加载中…</Text>
         ) : commentsQuery.isError ? (

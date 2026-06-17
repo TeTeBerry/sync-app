@@ -1,28 +1,31 @@
 @use '../../styles/chat' as chat;
 
 .s-post-comments {
-  margin-top: 10px;
-  padding-top: 12px;
+  margin-top: 6px;
+  padding-top: 8px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .s-post-comments__list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 2px 0;
+  gap: 10px;
+
+  &--empty {
+    gap: 4px;
+  }
 }
 
 .s-post-comments__status {
   margin: 0;
-  padding: 12px 8px;
+  padding: 4px 4px 2px;
   text-align: center;
   color: #8e8e93;
   font-size: var(--s-type-meta);
-  line-height: 1.45;
+  line-height: 1.35;
 }
 
 .s-post-comments__load-more {
@@ -181,13 +184,13 @@
 
 .s-post-comments__composer {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   gap: 8px;
-  padding-top: 2px;
 }
 
 .s-post-comments__composer .s-post-comments__avatar {
-  margin-bottom: 4px;
+  width: 28px;
+  height: 28px;
 }
 
 .s-post-comments__input-wrap {
@@ -196,8 +199,8 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  min-height: 40px;
-  padding: 4px 4px 4px 12px;
+  min-height: 36px;
+  padding: 3px 3px 3px 10px;
   border-radius: var(--radius-full);
   background: rgb(38, 38, 40);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -214,7 +217,7 @@
 .s-post-comments__input {
   flex: 1;
   min-width: 0;
-  min-height: 32px;
+  min-height: 28px;
   border: none;
   background: none;
   color: #fff;
@@ -228,10 +231,10 @@
 }
 
 .s-post-comments__send {
-  width: 34px;
-  height: 34px;
-  min-width: 34px;
-  min-height: 34px;
+  width: 30px;
+  height: 30px;
+  min-width: 30px;
+  min-height: 30px;
   padding: 0;
   border-radius: var(--radius-full);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -274,10 +277,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 3px;
   width: 100%;
   margin: 0;
-  padding: 6px 0 0;
+  padding: 4px 0 0;
   border: none;
   border-top: 1px solid rgba(255, 255, 255, 0.05);
   background: transparent;

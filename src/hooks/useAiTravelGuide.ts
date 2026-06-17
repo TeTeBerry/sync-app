@@ -14,10 +14,14 @@ import type { AiGuidePlanFormValues } from '../types/travelGuide';
 import { travelGuideBudgetLabel } from '../types/travelGuide';
 import { saveTravelGuideDetail } from '../domains/travel-guide/utils/travelGuideDetailStorage';
 import { isApiEnabled } from '../constants/api';
+import {
+  isPostingConversationFlow,
+  selectActiveConversationFlow,
+  useAiChatStore,
+} from '../stores/aiChatStore';
 import { isAuthGated, requireAuth } from '../utils/authGate';
 import {
   buildTravelGuideCollectPrompt,
-  buildTravelGuideSuggestedReplies,
   isTravelGuideChatInterrupt,
   listMissingTravelGuideSlots,
   mergeTravelGuideDraft,
@@ -229,8 +233,22 @@ export function useAiTravelGuide(options: {
         return false;
       }
 
+      const postingFlowActive = isPostingConversationFlow(
+        selectActiveConversationFlow(useAiChatStore.getState()),
+      );
+      if (postingFlowActive) {
+        clearGuideCollect();
+        return false;
+      }
+
       const collecting = guideCollectActiveRef.current;
-      if (!shouldHandleAsTravelGuideChat({ text: trimmed, collecting })) {
+      if (
+        !shouldHandleAsTravelGuideChat({
+          text: trimmed,
+          collecting,
+          postingFlowActive,
+        })
+      ) {
         return false;
       }
 
@@ -266,7 +284,7 @@ export function useAiTravelGuide(options: {
           id: createMessageId(),
           from: 'ai',
           text: buildTravelGuideCollectPrompt(missing),
-          suggestedReplies: buildTravelGuideSuggestedReplies(missing),
+          showTravelGuideSheetCta: true,
         },
       ]);
       Taro.nextTick(() => onPlanningMessagesShown?.());

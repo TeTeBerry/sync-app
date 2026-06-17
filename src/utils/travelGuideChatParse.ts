@@ -100,29 +100,7 @@ export function buildTravelGuideCollectPrompt(missing: TravelGuideSlotKey[]): st
     parts.push('预算（可直接回复「经济」「舒适」或「豪华」）');
   }
   const need = parts.join('、');
-  const lines = ['好的，我来帮你生成出行攻略。', '', `请补充：${need}。`];
-  if (missing.length === 1 && missing[0] === 'budgetTier') {
-    lines.push('直接发送预算档位即可，例如：舒适');
-  } else {
-    lines.push('也可一句话说全，例如：「上海 2 人、舒适、自驾、住 2 晚」。');
-  }
-  lines.push('若需表单填写，可点下方「AI出行攻略」按钮。');
-  return lines.join('\n');
-}
-
-export function buildTravelGuideSuggestedReplies(
-  missing: TravelGuideSlotKey[],
-): string[] {
-  if (missing.length === 1 && missing[0] === 'budgetTier') {
-    return ['经济', '舒适', '豪华'];
-  }
-  if (missing.length === 1 && missing[0] === 'headcount') {
-    return ['2人', '3人', '4人'];
-  }
-  if (missing.length === 1 && missing[0] === 'departure') {
-    return ['上海', '广州', '北京'];
-  }
-  return ['上海2人舒适自驾住2晚', '广州3人经济 不自驾', '北京2人豪华自驾'];
+  return ['好的，我来帮你生成出行攻略。', '', `请补充：${need}。`].join('\n');
 }
 
 /** 从自然语言抽取攻略参数（可与多轮草稿 merge） */
@@ -237,9 +215,12 @@ function labelToDeparture(label: string): { label: string; city?: string } {
 export function shouldHandleAsTravelGuideChat(input: {
   text: string;
   collecting: boolean;
+  /** 发帖收集/确认中：同形槽位（如「2人 上海」）应走组队发帖而非攻略 */
+  postingFlowActive?: boolean;
 }): boolean {
   const trimmed = input.text.trim();
   if (!trimmed) return false;
+  if (input.postingFlowActive) return false;
   if (input.collecting) return true;
   if (isTravelGuideIntent(trimmed)) return true;
   if (isTravelGuideBudgetPrompt(trimmed)) return true;
@@ -257,7 +238,7 @@ export function shouldHandleAsTravelGuideChat(input: {
 export function isTravelGuideChatInterrupt(text: string): boolean {
   const trimmed = text.trim();
   if (!trimmed) return false;
-  if (/组队|拼卡|同路|住宿同行|有没有.*帖/.test(trimmed)) {
+  if (/组队|拼卡|同路|住宿同行|有没有.*帖|发帖|发组队/.test(trimmed)) {
     return true;
   }
   return false;

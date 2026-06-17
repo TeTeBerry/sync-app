@@ -99,3 +99,9 @@ export function selectActiveConversationFlow(state: AiChatStoreState) {
   if (!scopeKey) return undefined;
   return state.buckets[scopeKey]?.conversationState?.flow;
 }
+
+export function isPostingConversationFlow(
+  flow?: ConversationState['flow'] | null,
+): boolean {
+  return flow === 'collect_post_body' || flow === 'publish_confirm';
+}

@@ -4,6 +4,7 @@ import {
   listMissingTravelGuideSlots,
   mergeTravelGuideDraft,
   parseTravelGuideChatMessage,
+  shouldHandleAsTravelGuideChat,
   travelGuideDraftToForm,
 } from '@/utils/travelGuideChatParse';
 
@@ -50,5 +51,21 @@ describe('travelGuideChatParse', () => {
     let draft = mergeTravelGuideDraft(parseTravelGuideChatMessage('上海2人'), {});
     draft = mergeTravelGuideDraft(draft, parseTravelGuideChatMessage('舒适'));
     expect(travelGuideDraftToForm(draft, 2)?.budgetTier).toBe('standard');
+  });
+
+  it('does not treat post-body slots as travel guide while posting', () => {
+    expect(
+      shouldHandleAsTravelGuideChat({
+        text: '2人 上海',
+        collecting: false,
+        postingFlowActive: true,
+      }),
+    ).toBe(false);
+    expect(
+      shouldHandleAsTravelGuideChat({
+        text: '2人 上海',
+        collecting: false,
+      }),
+    ).toBe(true);
   });
 });

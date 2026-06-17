@@ -24,6 +24,8 @@ export function ChatMessageList({
   onSelectSuggestedReply,
   onRegenerateTravelGuide,
   onBuddyPostFromTravelGuide,
+  onOpenBuddyPostSheet,
+  onOpenTravelGuideSheet,
 }: {
   messages: ChatUiMessage[];
   isStreaming: boolean;
@@ -37,6 +39,8 @@ export function ChatMessageList({
   onSelectSuggestedReply: (reply: string) => void;
   onRegenerateTravelGuide?: (form: AiGuidePlanFormValues) => void;
   onBuddyPostFromTravelGuide?: (form: AiGuidePlanFormValues) => void;
+  onOpenBuddyPostSheet?: () => void;
+  onOpenTravelGuideSheet?: () => void;
 }) {
   const [scrollIntoView, setScrollIntoView] = useState<string | undefined>();
   const [scrollTop, setScrollTop] = useState(0);
@@ -123,6 +127,8 @@ export function ChatMessageList({
             onSelectSuggestedReply={onSelectSuggestedReply}
             onRegenerateTravelGuide={onRegenerateTravelGuide}
             onBuddyPostFromTravelGuide={onBuddyPostFromTravelGuide}
+            onOpenBuddyPostSheet={onOpenBuddyPostSheet}
+            onOpenTravelGuideSheet={onOpenTravelGuideSheet}
           />
         ))}
         <View

@@ -28,6 +28,7 @@ import { parseActivityDayCount } from '../../../utils/parseActivityDayCount';
 import { useActivityDetailQuery } from '../../../hooks/useSyncApi';
 import { eventCityFromLocation } from '../../../utils/travelGuideDepartureSuggestions';
 import { shouldSuppressAutoScrollForMessage } from '../../../components/ai-chat/chatMessageListScroll';
+import { BUDDY_POST_SHEET_ACTION_LABEL } from '../../../utils/buddyPostPromptMessage';
 export type AiAssistantChatProps = {
   initialMessage?: string | null;
   initialOpenAiGuideSheet?: boolean;
@@ -370,6 +371,11 @@ export function AiAssistantChat({
       const trimmed = reply.trim();
       if (!trimmed) return;
 
+      if (trimmed === BUDDY_POST_SHEET_ACTION_LABEL) {
+        buddyPost.openBuddyPostSheetWithTag();
+        return;
+      }
+
       const scoped = activityLegacyId != null && !Number.isNaN(activityLegacyId);
       if (scoped) {
         const guideHandled = await travelGuide.handleTravelGuideChatMessage(trimmed);
@@ -383,7 +389,7 @@ export function AiAssistantChat({
         submitLockRef.current = false;
       }
     },
-    [activityLegacyId, isStreaming, isStreamingRef, send, travelGuide],
+    [activityLegacyId, buddyPost, isStreaming, isStreamingRef, send, travelGuide],
   );
 
   const composerBusy =
@@ -408,6 +414,8 @@ export function AiAssistantChat({
         onSelectSuggestedReply={handleSelectSuggestedReply}
         onRegenerateTravelGuide={travelGuide.handleRegenerate}
         onBuddyPostFromTravelGuide={buddyPost.openBuddyPostSheetFromTravelGuide}
+        onOpenBuddyPostSheet={buddyPost.openBuddyPostSheetWithTag}
+        onOpenTravelGuideSheet={travelGuide.openGuideSheet}
       />
       <View
         className="s-ai-assistant-chat__footer"

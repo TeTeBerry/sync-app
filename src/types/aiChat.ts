@@ -33,6 +33,8 @@ export type ChatUiMessage = {
   matchedPosts?: RecommendedPostCard[];
   suggestedReplies?: string[];
   travelGuide?: TravelGuideChatPayload;
+  /** 展示「AI出行攻略」表单入口（替代示例快捷回复） */
+  showTravelGuideSheetCta?: boolean;
 };
 
 export interface SendChatOptions {
