@@ -55,20 +55,25 @@ export type ChatUiMessage = {
     attendees: number;
     alreadyRegistered?: boolean;
   };
-  /** 展示「AI出行攻略」表单入口（替代示例快捷回复） */
+  /** 展示「生成出行攻略」表单入口（替代示例快捷回复） */
   showTravelGuideSheetCta?: boolean;
   /** 展示「组队发帖」表单入口（由 client_action 驱动） */
   showBuddyPostSheetCta?: boolean;
-  /** 展示「专属行程」入口 */
+  /** 展示「生成专属行程」入口 */
   showItinerarySheetCta?: boolean;
-  /** 展示「Raver 人格测试」入口 */
+  /** 展示「开始人格测试」入口 */
   showPersonalityTestSheetCta?: boolean;
+  /** 首屏欢迎消息，展示能力发现 chips 时不过滤组队发帖等标签 */
+  isWelcome?: boolean;
 };
 
 export interface SendChatOptions {
   text: string;
   image?: string;
   images?: string[];
+  /** Local temp path(s) for bubble preview; WS payload uses `image` / `images` fileIDs. */
+  imagePreview?: string;
+  imagePreviews?: string[];
 }
 
 export interface ChatSessionRecord {

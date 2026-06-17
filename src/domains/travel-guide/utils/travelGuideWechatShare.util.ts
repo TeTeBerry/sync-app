@@ -1,3 +1,4 @@
+import { TRAVEL_GUIDE_TITLE } from '@/constants/aiCtaLabels';
 import type {
   AiGuidePlanFormValues,
   TravelGuideBudgetTier,
@@ -17,9 +18,9 @@ const BUDGET_TIERS: TravelGuideBudgetTier[] = ['economy', 'standard', 'comfort']
 export function buildTravelGuideShareTitle(plan: TravelGuidePlan): string {
   const total = findTravelGuideTotalBudgetItem(plan);
   if (total) {
-    return `${plan.activityName} · AI 出行攻略（${formatTravelGuideBudgetShareLabel(total.range, plan.headcount)}）`;
+    return `${plan.activityName} · ${TRAVEL_GUIDE_TITLE}（${formatTravelGuideBudgetShareLabel(total.range, plan.headcount)}）`;
   }
-  return `${plan.activityName} · AI 出行攻略`;
+  return `${plan.activityName} · ${TRAVEL_GUIDE_TITLE}`;
 }
 
 export function buildTravelGuideSharePath(

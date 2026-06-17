@@ -17,9 +17,13 @@ import {
 import { resolveAiChatWsUrl } from '../../../constants/api';
 import { isAiChatWsDevLog } from '../../../utils/aiChatWs';
 import { inferUserGenderFromName } from '../../../utils/inferAuthorGender';
+import { useFestivalPlanSummary } from '../../../domains/festival-plan/useFestivalPlanSummary';
+import { useFestivalPlanNavigation } from '../../../domains/festival-plan/useFestivalPlanNavigation';
 
 /** Event context strip below header when scoped to an activity. */
 export const AI_EVENT_CONTEXT_PX = 44;
+/** Festival plan summary below event context. */
+export const FESTIVAL_PLAN_SUMMARY_PX = 52;
 /** Quick chips + composer row inside chat footer (px @ 375). */
 export const AI_CHAT_COMPOSER_CHROME_PX = 136;
 
@@ -72,10 +76,19 @@ export function useAiAssistantPage() {
   const hasEventScope = activityLegacyId != null && !Number.isNaN(activityLegacyId);
   const showEventContext =
     hasEventScope && Boolean(activityTitle || activityQuery.isLoading);
+  const festivalPlan = useFestivalPlanSummary(
+    activityLegacyId,
+    pageShowSeq + messageCount,
+  );
+  const handleFestivalPlanChipPress = useFestivalPlanNavigation(
+    activityLegacyId,
+    festivalPlan,
+  );
 
   const headerSubtractPx = useMemo(() => {
     const eventBar = showEventContext ? AI_EVENT_CONTEXT_PX : 0;
-    return navInsets.paddingTop + TAB_PAGE_NAV_PX + eventBar;
+    const planBar = showEventContext ? FESTIVAL_PLAN_SUMMARY_PX : 0;
+    return navInsets.paddingTop + TAB_PAGE_NAV_PX + eventBar + planBar;
   }, [navInsets.paddingTop, showEventContext]);
 
   const chatScrollHeight = useTabPageMainHeight({
@@ -141,6 +154,8 @@ export function useAiAssistantPage() {
     activityTitle,
     activityMeta,
     showEventContext,
+    festivalPlan,
+    handleFestivalPlanChipPress,
     chatScrollHeight,
     activityLegacyId,
     handleInitialMessageSent,

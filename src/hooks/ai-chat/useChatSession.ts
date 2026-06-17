@@ -11,13 +11,12 @@ import {
   persistSessionId,
 } from '../../utils/session';
 import { buildAiChatScopeKey } from '../../utils/aiChatScope';
-import { buildAiAssistantWelcomeText } from '../../utils/aiAssistantWelcome';
+import { createWelcomeChatMessage } from '../../utils/aiAssistantCapabilityDiscovery';
 import type { ChatUiMessage } from '../../types/aiChat';
 import { closeAiChatWsConnection } from '../../utils/aiChatWs';
-import { createMessageId } from './createMessageId';
 
 export interface UseChatSessionOptions {
-  welcomeText: string;
+  activityTitle?: string;
   sessionId?: string;
   activityLegacyId?: number;
   userId?: string;
@@ -43,12 +42,15 @@ function createFreshSessionIdForScope(activityLegacyId: number | undefined): str
   return createFreshSessionId();
 }
 
-function createWelcomeMessage(welcomeText: string): ChatUiMessage {
-  return { id: createMessageId(), from: 'ai', text: welcomeText };
+function createWelcomeMessage(
+  activityTitle?: string,
+  activityLegacyId?: number,
+): ChatUiMessage {
+  return createWelcomeChatMessage(activityTitle, activityLegacyId);
 }
 
 export function useChatSession(options: UseChatSessionOptions) {
-  const { welcomeText, activityLegacyId } = options;
+  const { activityTitle, activityLegacyId } = options;
   const activityLegacyIdRef = useRef(activityLegacyId);
   const scopeKey = buildAiChatScopeKey(activityLegacyId);
 
@@ -60,7 +62,7 @@ export function useChatSession(options: UseChatSessionOptions) {
   const [messages, setMessagesState] = useState<ChatUiMessage[]>(() => {
     const stored = useAiChatStore.getState().getScopeMessages(scopeKey);
     if (stored.length > 0) return stored;
-    return [createWelcomeMessage(welcomeText)];
+    return [createWelcomeMessage(activityTitle, activityLegacyId)];
   });
   const messagesRef = useRef<ChatUiMessage[]>(messages);
   const isStreamingRef = useRef(false);
@@ -94,10 +96,10 @@ export function useChatSession(options: UseChatSessionOptions) {
   }, []);
 
   const showWelcome = useCallback(() => {
-    const welcome = [createWelcomeMessage(welcomeText)];
+    const welcome = [createWelcomeMessage(activityTitle, activityLegacyIdRef.current)];
     messagesRef.current = welcome;
     setMessages(welcome);
-  }, [setMessages, welcomeText]);
+  }, [activityTitle, setMessages]);
 
   const applyActivityBinding = useCallback(
     (activity: { legacyId: number; name?: string }) => {
@@ -107,9 +109,7 @@ export function useChatSession(options: UseChatSessionOptions) {
       }
 
       const nextScopeKey = buildAiChatScopeKey(legacyId);
-      const welcome = [
-        createWelcomeMessage(buildAiAssistantWelcomeText(activity.name)),
-      ];
+      const welcome = [createWelcomeChatMessage(activity.name, legacyId)];
       const nextSessionId = getOrCreateActivitySessionId(legacyId);
 
       sessionIdRef.current = nextSessionId;

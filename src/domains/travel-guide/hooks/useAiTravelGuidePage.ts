@@ -15,6 +15,7 @@ import {
   saveTravelGuideDetail,
   type TravelGuideDetailPayload,
 } from '../utils/travelGuideDetailStorage';
+import { TRAVEL_GUIDE_TITLE } from '@/constants/aiCtaLabels';
 import { buildTravelGuideShareText } from '../utils/travelGuideShareText';
 import {
   buildTravelGuideShareAppMessage,
@@ -126,7 +127,7 @@ export function useAiTravelGuidePage() {
   useShareAppMessage(() => {
     const current = shareRef.current;
     if (!current) {
-      return { title: 'AI 出行攻略', path: ROUTES.AI_TRAVEL_GUIDE };
+      return { title: TRAVEL_GUIDE_TITLE, path: ROUTES.AI_TRAVEL_GUIDE };
     }
     return buildTravelGuideShareAppMessage(
       current.guideId,
@@ -138,7 +139,7 @@ export function useAiTravelGuidePage() {
   useShareTimeline(() => {
     const current = shareRef.current;
     if (!current) {
-      return { title: 'AI 出行攻略' };
+      return { title: TRAVEL_GUIDE_TITLE };
     }
     return buildTravelGuideShareTimeline(
       current.guideId,

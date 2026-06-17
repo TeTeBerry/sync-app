@@ -1,4 +1,5 @@
 import { ChevronRight, Map } from '../../../components/icons';
+import { GENERATE_TRAVEL_GUIDE_CTA } from '../../../constants/aiCtaLabels';
 import { Button } from '../../../components/ui';
 import { Text, View } from '@tarojs/components';
 
@@ -14,7 +15,7 @@ export function EventDetailAiTravelGuideCard({
       <Button
         className="s-event-detail__itinerary-card s-event-detail__itinerary-card--guide"
         hoverClass="s-event-detail__itinerary-card--pressed"
-        aria-label="AI出行攻略"
+        aria-label={GENERATE_TRAVEL_GUIDE_CTA}
         onClick={onClick}
       >
         <View
@@ -24,9 +25,11 @@ export function EventDetailAiTravelGuideCard({
           <Map size={20} color="#ff0066" />
         </View>
         <View className="s-event-detail__itinerary-card__body">
-          <Text className="s-event-detail__itinerary-card__title">AI出行攻略</Text>
+          <Text className="s-event-detail__itinerary-card__title">
+            {GENERATE_TRAVEL_GUIDE_CTA}
+          </Text>
           <Text className="s-event-detail__itinerary-card__sub">
-            智能规划出行 · 住宿 · 交通
+            交通 · 住宿 · 散场建议
           </Text>
         </View>
         <ChevronRight

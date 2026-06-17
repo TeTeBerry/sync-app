@@ -626,10 +626,22 @@
     height: 72px;
     flex-shrink: 0;
 
-    .s-ai-assistant-chat__attach-preview-btn img {
+    .s-ai-assistant-chat__attach-preview-btn img,
+    .s-ai-assistant-chat__attach-preview-image {
       width: 72px;
       height: 72px;
+      border-radius: 12px;
+      object-fit: cover;
+      display: block;
+      border: 1px solid rgba(255, 255, 255, 0.12);
     }
+  }
+
+  &__attach-preview-image {
+    width: 72px;
+    height: 72px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
   }
 
   &__composer-inner {

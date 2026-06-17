@@ -11,6 +11,7 @@ import {
   Ticket,
   Users,
 } from '../../components/icons';
+import { GENERATE_TRAVEL_GUIDE_CTA } from '../../constants/aiCtaLabels';
 import {
   activityStatusCardClass,
   getActivityStatusFromActivity,
@@ -172,7 +173,7 @@ const EventCardInner: React.FC<EventCardProps> = ({
             <View className="s-event-card__detail-tags">
               <Text className="s-event-card__detail-tag">{category}</Text>
               <Text className="s-event-card__detail-tag s-event-card__detail-tag--ai">
-                ✨ AI出行攻略
+                ✨ {GENERATE_TRAVEL_GUIDE_CTA}
               </Text>
             </View>
           </View>

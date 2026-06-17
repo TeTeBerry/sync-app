@@ -24,7 +24,6 @@ import { throttleRaf } from '../../utils/throttleRaf';
 import { processChatStreamEvents } from './chatStreamReducer';
 
 export interface UseWsChatStreamOptions {
-  welcomeText: string;
   streamErrorText: string;
   wsUrl?: string;
   activityLegacyIdRef: MutableRefObject<number | undefined>;

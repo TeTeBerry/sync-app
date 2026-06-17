@@ -1,0 +1,51 @@
+.s-festival-plan-summary {
+  flex-shrink: 0;
+  margin: 0 12px 8px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.s-festival-plan-summary__title {
+  display: block;
+  margin-bottom: 8px;
+  font-size: var(--s-type-caption);
+  font-weight: var(--s-fw-bold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+.s-festival-plan-summary__chips {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.s-festival-plan-summary__chip {
+  min-height: 0;
+  height: auto;
+  padding: 6px 10px;
+  border-radius: 9999px;
+  background: rgba(var(--primary-rgb), 0.14);
+  border: 1px solid rgba(var(--primary-rgb), 0.28);
+}
+
+.s-festival-plan-summary__chip--pressed {
+  opacity: 0.85;
+}
+
+.s-festival-plan-summary__chip-label {
+  font-size: var(--s-type-caption);
+  font-weight: var(--s-fw-medium);
+  color: var(--foreground);
+  line-height: 1.2;
+}
+
+.s-festival-plan-summary__empty {
+  font-size: var(--s-type-caption);
+  line-height: 1.4;
+  color: var(--muted-foreground);
+}

@@ -6,6 +6,7 @@ import { Text, View } from '@tarojs/components';
 import { ProfileTabErrorBoundary } from '../../components/profile/ProfileTabErrorBoundary';
 import { AiAssistantChat } from '../../packageAi/pages/ai-assistant/AiAssistantChat';
 import { useAiAssistantPage } from '../../packageAi/pages/ai-assistant/useAiAssistantPage';
+import { FestivalPlanSummaryBar } from '../../domains/festival-plan/FestivalPlanSummaryBar';
 import { LoginInterceptHost } from '../../components/auth/LoginInterceptHost';
 import { useEndRouteTransitionOnShow } from '../../hooks/useEndRouteTransitionOnShow';
 import { ROUTES } from '../../utils/route';
@@ -64,6 +65,13 @@ const AiTabPage: FC = () => {
               )}
             </View>
           </View>
+        ) : null}
+
+        {page.showEventContext ? (
+          <FestivalPlanSummaryBar
+            chips={page.festivalPlan?.chips ?? []}
+            onChipPress={page.handleFestivalPlanChipPress}
+          />
         ) : null}
 
         <View className="s-ai-assistant__body">

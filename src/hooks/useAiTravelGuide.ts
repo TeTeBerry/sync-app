@@ -13,21 +13,19 @@ import type { ChatUiMessage } from '../types/aiChat';
 import type { AiGuidePlanFormValues } from '../types/travelGuide';
 import { travelGuideBudgetLabel } from '../types/travelGuide';
 import { saveTravelGuideDetail } from '../domains/travel-guide/utils/travelGuideDetailStorage';
+import {
+  TRAVEL_GUIDE_GENERATING_STAGES,
+  TRAVEL_GUIDE_GENERATING_TEXT,
+  TRAVEL_GUIDE_TITLE,
+} from '../constants/aiCtaLabels';
 import { isApiEnabled } from '../constants/api';
 import { isAuthGated, requireAuth } from '../utils/authGate';
-
-const PLANNING_TEXT = 'AI 正在为你规划...';
-const PLANNING_STAGE_TEXTS = [
-  '正在检索场馆周边酒店与夜宵...',
-  '正在规划交通与预算...',
-  'AI 正在润色攻略文案...',
-];
 const PLANNING_STAGE_INTERVAL_MS = 3_500;
 
 function buildUserSummary(form: AiGuidePlanFormValues, activityTitle: string): string {
   const budget = travelGuideBudgetLabel(form.budgetTier);
   const drive = form.selfDrive ? '自驾' : '非自驾';
-  return `生成「${activityTitle}」AI 攻略：${form.departure}出发，${form.headcount}人，住${form.accommodationNights}晚，${budget}，${drive}`;
+  return `生成「${activityTitle}」${TRAVEL_GUIDE_TITLE}：${form.departure}出发，${form.headcount}人，住${form.accommodationNights}晚，${budget}，${drive}`;
 }
 
 export function useAiTravelGuide(options: {
@@ -96,7 +94,7 @@ export function useAiTravelGuide(options: {
         const planningMsg: ChatUiMessage = {
           id: aiMsgId,
           from: 'ai',
-          text: PLANNING_TEXT,
+          text: TRAVEL_GUIDE_GENERATING_TEXT,
           streaming: true,
         };
 
@@ -111,9 +109,9 @@ export function useAiTravelGuide(options: {
         const planningStageTimer = setInterval(() => {
           planningStageIndex = Math.min(
             planningStageIndex + 1,
-            PLANNING_STAGE_TEXTS.length - 1,
+            TRAVEL_GUIDE_GENERATING_STAGES.length - 1,
           );
-          const stageText = PLANNING_STAGE_TEXTS[planningStageIndex];
+          const stageText = TRAVEL_GUIDE_GENERATING_STAGES[planningStageIndex];
           messagesRef.current = messagesRef.current.map((m) =>
             m.id === aiMsgId && m.streaming ? { ...m, text: stageText } : m,
           );

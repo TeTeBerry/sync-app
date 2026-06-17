@@ -1,3 +1,4 @@
+import { ITINERARY_TITLE, VIEW_ITINERARY_CTA } from '@/constants/aiCtaLabels';
 import type { GenerateItineraryResult } from '@/types/itinerary';
 import { goMyItinerary } from '@/utils/route';
 import { useItineraryStore } from '@/domains/performance-itinerary/store';
@@ -36,14 +37,14 @@ export function AiItineraryResultCard({
         className="s-ai-itinerary-result__card"
         disabled={disabled}
         hoverClass="s-ai-itinerary-result__card--pressed"
-        aria-label="查看专属演出行程"
+        aria-label={VIEW_ITINERARY_CTA}
         onClick={openDetail}
       >
         <View className="s-ai-itinerary-result__card-head">
           <View className="s-ai-itinerary-result__card-icon" aria-hidden>
             <Music2 size={16} color="#a855f7" />
           </View>
-          <Text className="s-ai-itinerary-result__card-kicker">专属演出行程</Text>
+          <Text className="s-ai-itinerary-result__card-kicker">{ITINERARY_TITLE}</Text>
         </View>
 
         <Text className="s-ai-itinerary-result__card-title">
@@ -63,7 +64,9 @@ export function AiItineraryResultCard({
         </View>
 
         <View className="s-ai-itinerary-result__foot">
-          <Text className="s-ai-itinerary-result__foot-label">查看完整行程</Text>
+          <Text className="s-ai-itinerary-result__foot-label">
+            {VIEW_ITINERARY_CTA}
+          </Text>
           <ChevronRight size={14} color="#a855f7" />
         </View>
       </Button>

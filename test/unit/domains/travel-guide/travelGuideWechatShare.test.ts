@@ -31,7 +31,7 @@ function mockPlan(overrides: Partial<TravelGuidePlan> = {}): TravelGuidePlan {
 describe('travelGuideWechatShare', () => {
   it('builds share title with budget total', () => {
     expect(buildTravelGuideShareTitle(mockPlan())).toBe(
-      'EDC Thailand 2026 · AI 出行攻略（约 ¥8000–12000（合计，约 ¥4000–6000/人））',
+      'EDC Thailand 2026 · 出行攻略（约 ¥8000–12000（合计，约 ¥4000–6000/人））',
     );
   });
 

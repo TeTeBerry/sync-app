@@ -7,6 +7,7 @@ import { useAiTravelGuidePage } from '@/domains/travel-guide/hooks/useAiTravelGu
 import { useEndRouteTransitionOnShow } from '../../../hooks/useEndRouteTransitionOnShow';
 import { usePageRouteReady } from '../../../hooks/usePageRouteReady';
 import { FileText, RefreshCw, Share2 } from '../../../components/icons';
+import { REGENERATE_CTA, TRAVEL_GUIDE_TITLE } from '../../../constants/aiCtaLabels';
 import { AI_TRAVEL_GUIDE_DISCLAIMER } from '../../../constants/aiDisclosure';
 import { LoginInterceptHost } from '../../../components/auth/LoginInterceptHost';
 import { ScrollView, Text, View } from '@tarojs/components';
@@ -18,7 +19,7 @@ const AiTravelGuidePage = () => {
 
   return (
     <View data-cmp="AiTravelGuidePage" className="s-ai-travel-guide-page">
-      <PageNavigation title="AI 出行攻略" fallback={page.navFallback} />
+      <PageNavigation title={TRAVEL_GUIDE_TITLE} fallback={page.navFallback} />
 
       {page.loading ? (
         <ThemedPageLoader variant="spinner" label="正在加载攻略…" minHeight={280} />
@@ -46,7 +47,9 @@ const AiTravelGuidePage = () => {
               onClick={page.handleRegenerate}
             >
               <RefreshCw size={16} color="#fff" />
-              <Text className="s-ai-travel-guide-page__footer-btn-label">重新规划</Text>
+              <Text className="s-ai-travel-guide-page__footer-btn-label">
+                {REGENERATE_CTA}
+              </Text>
             </Button>
             {page.isWeapp ? (
               <Button

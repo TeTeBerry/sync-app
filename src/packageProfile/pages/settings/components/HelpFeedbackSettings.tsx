@@ -1,6 +1,10 @@
 import Taro from '@tarojs/taro';
 import { useCallback, useState } from 'react';
 import { Text, Textarea, View } from '@tarojs/components';
+import {
+  GENERATE_TRAVEL_GUIDE_CTA,
+  TRAVEL_GUIDE_TITLE,
+} from '../../../../constants/aiCtaLabels';
 import { submitUserFeedback } from '../../../../api/sync/feedback';
 import { isLiveApi } from '../../../../constants/api';
 import { isLoggedIn } from '../../../../utils/authStorage';
@@ -9,8 +13,8 @@ import { useOverlayLock } from '../../../../hooks/useOverlayLock';
 
 const FAQ_QA = [
   {
-    q: '如何使用 AI 出行攻略？',
-    a: '进入活动详情或 AI 助手，点「AI出行攻略」或描述出发地、人数、预算，即可生成交通/住宿/散场建议。',
+    q: `如何使用${TRAVEL_GUIDE_TITLE}？`,
+    a: `进入活动详情或 AI 助手，点「${GENERATE_TRAVEL_GUIDE_CTA}」或描述出发地、人数、预算，即可生成交通/住宿/散场建议。`,
   },
   {
     q: '如何查看活动信息？',

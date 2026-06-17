@@ -24,7 +24,7 @@ export function ItinerarySheetCta({
         <Text className="s-itinerary-sheet-cta__title">
           {ITINERARY_SHEET_ACTION_LABEL}
         </Text>
-        <Text className="s-itinerary-sheet-cta__sub">选择想看的 DJ，生成演出行程</Text>
+        <Text className="s-itinerary-sheet-cta__sub">选择想看的 DJ，生成专属行程</Text>
       </View>
     </Button>
   );

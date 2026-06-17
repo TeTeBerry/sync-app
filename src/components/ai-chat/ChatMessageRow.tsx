@@ -100,7 +100,9 @@ function ChatMessageRowInner({
   const hasMatchedPosts = Boolean(msg.matchedPosts?.length);
   const hasActivityCard = Boolean(msg.recommendedActivity);
   const hasSuggestedReplies = Boolean(msg.suggestedReplies?.length);
-  const suggestedReplyChips = filterBuddyPostSheetShortcutReplies(msg.suggestedReplies);
+  const suggestedReplyChips = msg.isWelcome
+    ? (msg.suggestedReplies ?? [])
+    : filterBuddyPostSheetShortcutReplies(msg.suggestedReplies);
   const hasSuggestedReplyChips = suggestedReplyChips.length > 0;
   const showBuddyPostTemplateCta =
     !isUser &&

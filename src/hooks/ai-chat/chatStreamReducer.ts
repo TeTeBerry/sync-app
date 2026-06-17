@@ -136,7 +136,7 @@ export async function processChatStreamEvents(
       onItineraryReady?.(event);
       finishAiMessage((message) => ({
         ...message,
-        text: message.text || '已为你生成专属演出行程，点击查看～',
+        text: message.text || '已为你生成专属行程，点击查看～',
         streaming: false,
         itinerary: {
           itineraryId: event.itineraryId,

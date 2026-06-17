@@ -27,7 +27,15 @@ import {
 } from '../../../constants/homeFestivalShortcuts';
 import { selectSetActiveActivityLegacyId, useNavigationStore } from '../../../stores';
 import { seedActivityDetailCache } from '../../../utils/activityDetailCache';
-import { buildAiAssistantWelcomeText } from '../../../utils/aiAssistantWelcome';
+import {
+  formatChatImagePickError,
+  pickChatComposerImages,
+  uploadChatComposerImages,
+} from '../../../utils/chatComposerImages';
+import {
+  resolveWelcomeCapabilityChipAction,
+  isActivityBoundForCapabilities,
+} from '../../../utils/aiAssistantCapabilityDiscovery';
 import { parseActivityDayCount } from '../../../utils/parseActivityDayCount';
 import { useActivityDetailQuery } from '../../../hooks/useSyncApi';
 import { eventCityFromLocation } from '../../../utils/travelGuideDepartureSuggestions';
@@ -68,6 +76,7 @@ export function AiAssistantChat({
   userGender,
 }: AiAssistantChatProps) {
   const [input, setInput] = useState('');
+  const [pendingImages, setPendingImages] = useState<string[]>([]);
   const keyboardInset = useKeyboardInset();
   const initialMessageHandledRef = useRef(false);
   const initialGuideSheetHandledRef = useRef(false);
@@ -93,11 +102,6 @@ export function AiAssistantChat({
     [activityQuery.data?.location],
   );
 
-  const welcomeText = useMemo(
-    () => buildAiAssistantWelcomeText(activityTitle),
-    [activityTitle],
-  );
-
   const {
     messages,
     setMessages,
@@ -109,7 +113,7 @@ export function AiAssistantChat({
     applyActivityBinding,
     sessionIdRef,
   } = useAiChatStream({
-    welcomeText,
+    activityTitle,
     streamErrorText: '抱歉，回复出错了，请稍后再试。',
     activityLegacyId,
     getAuthHeaders,
@@ -350,23 +354,66 @@ export function AiAssistantChat({
     async (text: string) => {
       if (submitLockRef.current) return;
       const trimmed = text.trim();
-      if (!trimmed || isStreaming || isStreamingRef.current) {
+      const locals = pendingImages;
+      const hasImages = locals.length > 0;
+      if ((!trimmed && !hasImages) || isStreaming || isStreamingRef.current) {
         return;
       }
 
       submitLockRef.current = true;
+      const previews = [...locals];
       try {
         setInput('');
-        await send({ text: trimmed });
+        setPendingImages([]);
+
+        let cloudRefs: string[] = [];
+        if (previews.length > 0) {
+          try {
+            cloudRefs = await uploadChatComposerImages(previews);
+          } catch (error) {
+            setPendingImages(previews);
+            void Taro.showToast({
+              title: formatChatImagePickError(error),
+              icon: 'none',
+            });
+            return;
+          }
+        }
+
+        await send({
+          text: trimmed,
+          ...(cloudRefs.length === 1
+            ? { image: cloudRefs[0], imagePreview: previews[0] }
+            : cloudRefs.length > 1
+              ? {
+                  images: cloudRefs,
+                  imagePreviews: previews,
+                  imagePreview: previews[0],
+                }
+              : {}),
+        });
       } finally {
         submitLockRef.current = false;
       }
     },
-    [isStreaming, isStreamingRef, send],
+    [isStreaming, isStreamingRef, pendingImages, send],
   );
+
+  const handlePickImages = useCallback(async () => {
+    if (isStreaming || isStreamingRef.current) return;
+    const picked = await pickChatComposerImages(pendingImages.length);
+    if (!picked.length) return;
+    setPendingImages((prev) => [...prev, ...picked]);
+    bumpScrollToBottom();
+  }, [bumpScrollToBottom, isStreaming, isStreamingRef, pendingImages.length]);
+
+  const handleRemoveImage = useCallback((index: number) => {
+    setPendingImages((prev) => prev.filter((_, i) => i !== index));
+  }, []);
 
   const handleClearChat = useCallback(async () => {
     if (isStreaming || isStreamingRef.current) return;
+    setPendingImages([]);
     await clearChat();
   }, [clearChat, isStreaming, isStreamingRef]);
 
@@ -388,6 +435,41 @@ export function AiAssistantChat({
         return;
       }
 
+      const capabilityAction = resolveWelcomeCapabilityChipAction(
+        trimmed,
+        isActivityBoundForCapabilities(activityLegacyId),
+      );
+      if (capabilityAction) {
+        switch (capabilityAction.type) {
+          case 'send':
+            submitLockRef.current = true;
+            try {
+              await send({ text: capabilityAction.text });
+            } finally {
+              submitLockRef.current = false;
+            }
+            return;
+          case 'travel_guide_sheet':
+            travelGuide.openGuideSheet();
+            return;
+          case 'itinerary_sheet':
+            handleOpenItinerarySheet();
+            return;
+          case 'buddy_post_sheet':
+            buddyPost.openBuddyPostSheetWithTag();
+            return;
+          case 'personality_test':
+            handleOpenPersonalityTest();
+            return;
+          case 'pick_festival_hint':
+            void Taro.showToast({
+              title: '在下方选择活动名绑定场次',
+              icon: 'none',
+            });
+            return;
+        }
+      }
+
       submitLockRef.current = true;
       try {
         await send({ text: trimmed });
@@ -395,7 +477,16 @@ export function AiAssistantChat({
         submitLockRef.current = false;
       }
     },
-    [buddyPost, isStreaming, isStreamingRef, send, travelGuide],
+    [
+      activityLegacyId,
+      buddyPost,
+      handleOpenItinerarySheet,
+      handleOpenPersonalityTest,
+      isStreaming,
+      isStreamingRef,
+      send,
+      travelGuide,
+    ],
   );
 
   const composerBusy =
@@ -431,6 +522,7 @@ export function AiAssistantChat({
       >
         <ChatComposer
           input={input}
+          pendingImages={pendingImages}
           isStreaming={composerBusy}
           activityLegacyId={activityLegacyId}
           activityTitle={activityTitle}
@@ -438,6 +530,8 @@ export function AiAssistantChat({
           activeChipKey={activeChipKey}
           onInputChange={setInput}
           onSubmit={submit}
+          onPickImages={handlePickImages}
+          onRemoveImage={handleRemoveImage}
           onClearChat={handleClearChat}
           clearDisabled={composerBusy}
           onActivityChipClick={handleActivityChipClick}

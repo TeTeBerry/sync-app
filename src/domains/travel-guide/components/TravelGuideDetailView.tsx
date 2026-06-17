@@ -1,3 +1,4 @@
+import { TRAVEL_GUIDE_TITLE } from '@/constants/aiCtaLabels';
 import type { ReactNode } from 'react';
 import type { TravelGuidePlan } from '@/types/travelGuide';
 import {
@@ -134,7 +135,9 @@ export function TravelGuideDetailView({ plan }: TravelGuideDetailViewProps) {
           <View className="s-travel-guide-detail__hero-badge" aria-hidden>
             <Sparkles size={14} color="#ff69b4" />
           </View>
-          <Text className="s-travel-guide-detail__hero-kicker">AI 出行攻略</Text>
+          <Text className="s-travel-guide-detail__hero-kicker">
+            {TRAVEL_GUIDE_TITLE}
+          </Text>
         </View>
 
         <Text className="s-travel-guide-detail__hero-title">{plan.activityName}</Text>

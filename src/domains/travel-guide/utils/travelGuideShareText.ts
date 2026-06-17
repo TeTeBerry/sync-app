@@ -1,8 +1,9 @@
+import { TRAVEL_GUIDE_TITLE } from '@/constants/aiCtaLabels';
 import type { TravelGuidePlan } from '@/types/travelGuide';
 
 export function buildTravelGuideShareText(plan: TravelGuidePlan): string {
   const lines: string[] = [
-    `【${plan.activityName}】AI 出行攻略`,
+    `【${plan.activityName}】${TRAVEL_GUIDE_TITLE}`,
     `📅 ${plan.eventDates}`,
     `📍 ${plan.venue}`,
     `🚩 ${plan.departure}出发 · ${plan.headcount}人 · 住${plan.accommodationNights}晚 · ${plan.budgetLabel}`,
@@ -71,6 +72,6 @@ export function buildTravelGuideShareText(plan: TravelGuidePlan): string {
     lines.push('');
   }
 
-  lines.push('— Sync · AI 出行攻略');
+  lines.push(`— Sync · ${TRAVEL_GUIDE_TITLE}`);
   return lines.join('\n');
 }

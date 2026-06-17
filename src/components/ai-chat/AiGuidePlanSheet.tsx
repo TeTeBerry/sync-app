@@ -11,6 +11,7 @@ import {
   X,
 } from '../../components/icons';
 import { Button, cn } from '../ui';
+import { GENERATE_TRAVEL_GUIDE_CTA } from '../../constants/aiCtaLabels';
 import { useOverlayLock } from '../../hooks/useOverlayLock';
 import {
   fetchTravelGuidePlaceSuggestions,
@@ -239,7 +240,7 @@ export function AiGuidePlanSheet({
               id="ai-guide-plan-sheet-title"
               className="s-ai-guide-plan-sheet__title"
             >
-              AI出行攻略
+              {GENERATE_TRAVEL_GUIDE_CTA}
             </Text>
             <Text className="s-ai-guide-plan-sheet__beta">Beta</Text>
           </View>
@@ -437,7 +438,9 @@ export function AiGuidePlanSheet({
             onClick={handleSubmit}
           >
             <Sparkles size={18} color="#fff" aria-hidden />
-            <Text className="s-ai-guide-plan-sheet__submit-text">生成 AI 攻略</Text>
+            <Text className="s-ai-guide-plan-sheet__submit-text">
+              {GENERATE_TRAVEL_GUIDE_CTA}
+            </Text>
           </Button>
         </View>
       </View>

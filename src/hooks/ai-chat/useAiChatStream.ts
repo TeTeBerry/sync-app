@@ -14,7 +14,7 @@ import { useWsChatStream } from './useWsChatStream';
 import { useTypewriterReply } from './useTypewriterReply';
 
 export interface UseAiChatStreamOptions {
-  welcomeText: string;
+  activityTitle?: string;
   /** 打字机每字间隔（毫秒） */
   typewriterCharDelayMs?: number;
   streamErrorText: string;
@@ -39,7 +39,7 @@ export interface UseAiChatStreamOptions {
 
 export function useAiChatStream(options: UseAiChatStreamOptions) {
   const {
-    welcomeText,
+    activityTitle,
     streamErrorText,
     wsUrl: wsUrlOption,
     sessionId: sessionIdOption,
@@ -73,7 +73,7 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
     showWelcome,
     applyActivityBinding,
   } = useChatSession({
-    welcomeText,
+    activityTitle,
     sessionId: sessionIdOption,
     activityLegacyId,
     userId: userIdOption ?? getClientSessionIdentity().userId,
@@ -85,7 +85,6 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
 
   const { createTypewriter } = useTypewriterReply();
   const { runStream } = useWsChatStream({
-    welcomeText,
     streamErrorText,
     wsUrl,
     activityLegacyIdRef,
@@ -120,7 +119,7 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
 
   const executeSend = useCallback(
     async (sendOptions: SendChatOptions) => {
-      const { text, image, images } = sendOptions;
+      const { text, image, images, imagePreview, imagePreviews } = sendOptions;
       const trimmed = text.trim();
       const hasImages = Boolean(image) || (images && images.length > 0);
       if (!trimmed && !hasImages) return;
@@ -132,7 +131,7 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
         id: createMessageId(),
         from: 'user',
         text: trimmed,
-        imagePreview: image ?? images?.[0],
+        imagePreview: imagePreview ?? imagePreviews?.[0] ?? image ?? images?.[0],
         ocrText: hasImages ? trimmed : undefined,
       };
       const aiMsgId = createMessageId();

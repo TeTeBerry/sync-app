@@ -1,3 +1,8 @@
+import {
+  REGENERATE_CTA,
+  TRAVEL_GUIDE_TITLE,
+  VIEW_TRAVEL_GUIDE_CTA,
+} from '@/constants/aiCtaLabels';
 import type { AiGuidePlanFormValues, TravelGuidePlan } from '@/types/travelGuide';
 import { goAiTravelGuide } from '@/utils/route';
 import {
@@ -55,14 +60,14 @@ export function AiGuideResultCard({
         className="s-ai-guide-result__card"
         disabled={disabled}
         hoverClass="s-ai-guide-result__card--pressed"
-        aria-label="查看 AI 出行攻略"
+        aria-label={VIEW_TRAVEL_GUIDE_CTA}
         onClick={openDetail}
       >
         <View className="s-ai-guide-result__card-head">
           <View className="s-ai-guide-result__card-icon" aria-hidden>
             <Sparkles size={16} color="#ff69b4" />
           </View>
-          <Text className="s-ai-guide-result__card-kicker">AI 出行攻略</Text>
+          <Text className="s-ai-guide-result__card-kicker">{TRAVEL_GUIDE_TITLE}</Text>
         </View>
 
         <Text className="s-ai-guide-result__card-title">{plan.activityName}</Text>
@@ -111,7 +116,7 @@ export function AiGuideResultCard({
         ) : null}
 
         <View className="s-ai-guide-result__cta">
-          <Text className="s-ai-guide-result__cta-label">查看完整攻略</Text>
+          <Text className="s-ai-guide-result__cta-label">{VIEW_TRAVEL_GUIDE_CTA}</Text>
           <ChevronRight size={16} color="#ff69b4" aria-hidden />
         </View>
       </Button>
@@ -141,7 +146,7 @@ export function AiGuideResultCard({
           onClick={onRegenerate}
         >
           <RefreshCw size={16} color="#fff" />
-          <Text className="s-ai-guide-result__action-label">重新规划</Text>
+          <Text className="s-ai-guide-result__action-label">{REGENERATE_CTA}</Text>
         </Button>
       </View>
     </View>
