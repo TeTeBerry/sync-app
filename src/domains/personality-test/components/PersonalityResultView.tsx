@@ -11,7 +11,6 @@ import {
   savePersonalityPoster,
   sharePersonalityPoster,
 } from '@/domains/personality-test';
-import { getPreferredDjIdsForItinerary } from '@/domains/personality-test/utils/itineraryDjPrefs';
 import type { PersonalityEventRecommendation, PersonalityTestResult } from '../types';
 import { getActivityStatusFromActivity } from '@/utils/activityStatus';
 import { goEventDetail, goExclusiveItinerary } from '@/utils/route';
@@ -90,6 +89,7 @@ export const PersonalityResultView: FC<PersonalityResultViewProps> = ({
   const confirmedSoulEvent = lineupEvents.find((event) =>
     eventIncludesDj(event, soul.djName),
   );
+  const itineraryTargetEvent = confirmedSoulEvent ?? lineupEvents[0];
 
   const liveInfoLabel = useMemo(() => {
     if (!confirmedSoulEvent) {
@@ -130,15 +130,14 @@ export const PersonalityResultView: FC<PersonalityResultViewProps> = ({
   ].filter((section) => section.items.length > 0);
 
   const handleGenerateItinerary = () => {
-    if (!confirmedSoulEvent) {
+    if (!itineraryTargetEvent) {
       void Taro.showToast({
-        title: '该活动阵容尚未官宣，暂无法生成行程',
+        title: '当前暂无已官宣阵容的活动，请稍后再试',
         icon: 'none',
       });
       return;
     }
-    const djIds = getPreferredDjIdsForItinerary(result.recommendations);
-    goExclusiveItinerary(confirmedSoulEvent.activityLegacyId, djIds);
+    goExclusiveItinerary(itineraryTargetEvent.activityLegacyId, [soul.djId]);
   };
 
   const handleSetReminder = () => {
@@ -346,7 +345,7 @@ export const PersonalityResultView: FC<PersonalityResultViewProps> = ({
           className="s-personality-result__cta s-personality-result__cta--primary"
           onClick={handleGenerateItinerary}
         >
-          生成专属朝圣行程
+          生成专属行程
         </Button>
         <Button className="s-personality-result__cta" onClick={handleSetReminder}>
           设置开场提醒
