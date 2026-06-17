@@ -4,6 +4,7 @@ import { isWeappCloudRunTransportEnabled } from '../constants/cloud';
 import type { ApiResponse } from '../types/backend';
 import { handleApiUnauthorized } from '../api/handleApiUnauthorized';
 import { getAccessToken, getAuthHeaders } from './authStorage';
+import { getActivityScopeHeaders } from '../domains/activity-scope';
 import { taroRequestData } from './apiRequestBody';
 import {
   buildContainerApiPath,
@@ -50,6 +51,7 @@ function splitFetchInit(init?: ApiFetchInit): {
 function mergeHeaders(headers?: Record<string, string>): Record<string, string> {
   return {
     ...getAuthHeaders(),
+    ...getActivityScopeHeaders(),
     ...(headers ?? {}),
   };
 }

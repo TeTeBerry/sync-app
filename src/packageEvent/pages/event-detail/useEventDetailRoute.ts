@@ -1,5 +1,6 @@
 import { useRouter } from '@tarojs/taro';
 import { useEffect, useMemo, useState } from 'react';
+import { bindActivity } from '../../../domains/activity-scope';
 import { resolveEventDetailIdFromQuery, warmAiAssistant } from '../../../utils/route';
 import { useDeferredMount } from '../../../hooks/useDeferredMount';
 import {
@@ -21,7 +22,7 @@ export function useEventDetailRoute() {
   );
   useEffect(() => {
     if (Number.isFinite(eventId) && eventId > 0) {
-      useNavigationStore.getState().setActiveActivityLegacyId(eventId);
+      bindActivity(eventId);
     }
   }, [eventId]);
 

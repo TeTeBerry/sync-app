@@ -42,13 +42,13 @@ export function useFestivalPlanNavigation(
 
       switch (task.key) {
         case 'travel_guide':
-          actions?.openTravelGuideSheet();
+          actions?.runCapability('travel_guide', { source: 'festival_plan' });
           return;
         case 'itinerary':
-          actions?.openItinerarySheet();
+          actions?.runCapability('itinerary', { source: 'festival_plan' });
           return;
         case 'buddy_post':
-          actions?.openBuddyPostSheet();
+          actions?.runCapability('buddy_post', { source: 'festival_plan' });
           return;
         case 'registration':
           goEventDetail(activityLegacyId);

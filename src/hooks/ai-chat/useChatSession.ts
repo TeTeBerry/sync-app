@@ -11,6 +11,8 @@ import {
   persistSessionId,
 } from '../../utils/session';
 import { buildAiChatScopeKey } from '../../utils/aiChatScope';
+import type { BackendActivity } from '../../types/backend';
+import { bindActivity } from '../../domains/activity-scope';
 import { createWelcomeChatMessage } from '../../utils/aiAssistantCapabilityDiscovery';
 import type { ChatUiMessage } from '../../types/aiChat';
 import { closeAiChatWsConnection } from '../../utils/aiChatWs';
@@ -102,20 +104,24 @@ export function useChatSession(options: UseChatSessionOptions) {
   }, [activityTitle, setMessages]);
 
   const applyActivityBinding = useCallback(
-    (activity: { legacyId: number; name?: string }) => {
+    (activity: { legacyId: number; name?: string; activity?: BackendActivity }) => {
       const legacyId = activity.legacyId;
-      if (!Number.isFinite(legacyId) || legacyId <= 0) {
+      if (
+        !bindActivity(legacyId, {
+          activity: activity.activity,
+          activityName: activity.name,
+          syncChatWelcome: true,
+        })
+      ) {
         return;
       }
 
       const nextScopeKey = buildAiChatScopeKey(legacyId);
-      const welcome = [createWelcomeChatMessage(activity.name, legacyId)];
+      const welcome = useAiChatStore.getState().getScopeMessages(nextScopeKey);
       const nextSessionId = getOrCreateActivitySessionId(legacyId);
 
       sessionIdRef.current = nextSessionId;
       activityLegacyIdRef.current = legacyId;
-      useAiChatStore.getState().setActiveScope(nextScopeKey);
-      useAiChatStore.getState().setScopeMessages(nextScopeKey, welcome);
       messagesRef.current = welcome;
       setMessagesState(welcome);
     },

@@ -27,6 +27,10 @@ export default defineConfig({
         __dirname,
         '../sync-app-backend/src/shared/itinerary/index.ts',
       ),
+      '@sync/festival-plan-contracts': path.resolve(
+        __dirname,
+        '../sync-app-backend/src/shared/festival-plan/index.ts',
+      ),
     },
   },
   define: Object.fromEntries(

@@ -21,6 +21,9 @@
       ],
       "@sync/itinerary-contracts": [
         "../sync-app-backend/src/shared/itinerary/index.ts"
+      ],
+      "@sync/festival-plan-contracts": [
+        "../sync-app-backend/src/shared/festival-plan/index.ts"
       ]
     },
     "types": ["webpack-env", "node", "react"],

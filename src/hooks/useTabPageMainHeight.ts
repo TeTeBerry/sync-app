@@ -2,10 +2,9 @@ import Taro from '@tarojs/taro';
 import { useMemo } from 'react';
 import { stackPageNavChromePx } from '../components/navigation/PageNavigation';
 import { useNavBarInsets } from './useNavBarInsets';
+import { computeTabPageMainHeightFallback } from './tabPageMainHeight.util';
 
-/** Matches BottomNav.scss: row + top padding (px, design @ 375). */
-const TABBAR_ROW_PX = 56;
-const TABBAR_PADDING_TOP_PX = 10;
+export { computeTabPageMainHeightFallback } from './tabPageMainHeight.util';
 
 /** Fallback when window metrics are unavailable (≈ design @ 375 + status bar). */
 export const STACK_PAGE_NAV_PX = 100;
@@ -31,19 +30,7 @@ export function useTabPageMainHeight(
 ): number | undefined {
   const subtractPx = typeof options === 'number' ? options : (options?.subtractPx ?? 0);
 
-  return useMemo(() => {
-    try {
-      const win = Taro.getWindowInfo();
-      const windowHeight = win.windowHeight ?? win.screenHeight ?? 667;
-      const screenHeight = win.screenHeight ?? windowHeight;
-      const safeBottom =
-        win.safeArea != null ? Math.max(0, screenHeight - win.safeArea.bottom) : 0;
-      const tabBarPx = TABBAR_ROW_PX + TABBAR_PADDING_TOP_PX + safeBottom;
-      return Math.max(200, Math.floor(windowHeight - tabBarPx - subtractPx));
-    } catch {
-      return undefined;
-    }
-  }, [subtractPx]);
+  return useMemo(() => computeTabPageMainHeightFallback(subtractPx), [subtractPx]);
 }
 
 /** Stack pages without BottomNav (PageNavigation + internal ScrollView). */

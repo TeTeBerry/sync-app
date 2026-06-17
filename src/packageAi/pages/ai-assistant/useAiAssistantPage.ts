@@ -2,39 +2,29 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import Taro, { useDidShow } from '@tarojs/taro';
 import { useNavBarInsets } from '../../../hooks/useNavBarInsets';
 import { usePageRouteReady } from '../../../hooks/usePageRouteReady';
-import {
-  TAB_PAGE_NAV_PX,
-  useTabPageMainHeight,
-} from '../../../hooks/useTabPageMainHeight';
 import { useResolvedProfile } from '../../../hooks/useResolvedProfile';
 import { useActivityDetailQuery } from '../../../hooks/useSyncApi';
 import {
   selectActiveActivityLegacyId,
   selectConsumeAiAssistantIntent,
-  selectSetActiveActivityLegacyId,
   useNavigationStore,
 } from '../../../stores';
+import { bindActivity, clearActivityScope } from '../../../domains/activity-scope';
 import { resolveAiChatWsUrl } from '../../../constants/api';
 import { isAiChatWsDevLog } from '../../../utils/aiChatWs';
 import { inferUserGenderFromName } from '../../../utils/inferAuthorGender';
 import { useFestivalPlanSummary } from '../../../domains/festival-plan/useFestivalPlanSummary';
 import { useFestivalPlanNavigation } from '../../../domains/festival-plan/useFestivalPlanNavigation';
 import type { FestivalPlanTaskActions } from '../../../domains/festival-plan/festivalPlanTaskActions';
-import { FESTIVAL_PLAN_SUMMARY_COLLAPSED_PX } from '../../../domains/festival-plan/FestivalPlanSummaryBar';
-
-/** Event context strip below header when scoped to an activity. */
-export const AI_EVENT_CONTEXT_PX = 44;
-/** Quick chips + composer row inside chat footer (px @ 375). */
-export const AI_CHAT_COMPOSER_CHROME_PX = 88;
 
 export function useAiAssistantPage() {
   const navInsets = useNavBarInsets();
   const [navBoot] = useState(() => {
     const intent = useNavigationStore.getState().consumeAiAssistantIntent();
     if (intent?.activityLegacyId != null && !Number.isNaN(intent.activityLegacyId)) {
-      useNavigationStore.getState().setActiveActivityLegacyId(intent.activityLegacyId);
+      bindActivity(intent.activityLegacyId);
     } else if (intent) {
-      useNavigationStore.getState().setActiveActivityLegacyId(null);
+      clearActivityScope();
     }
     return {
       initialMessage: intent?.initialMessage?.trim() ?? null,
@@ -53,13 +43,13 @@ export function useAiAssistantPage() {
   );
   const [chatRevision, setChatRevision] = useState(0);
   const [pageShowSeq, setPageShowSeq] = useState(0);
+  const [chromeLayoutSeq, setChromeLayoutSeq] = useState(0);
   const [festivalPlanActions, setFestivalPlanActions] =
     useState<FestivalPlanTaskActions | null>(null);
 
   const consumeAiAssistantIntent = useNavigationStore(selectConsumeAiAssistantIntent);
   const activityLegacyId =
     useNavigationStore(selectActiveActivityLegacyId) ?? undefined;
-  const setActiveActivityLegacyId = useNavigationStore(selectSetActiveActivityLegacyId);
 
   const profileUserData = useResolvedProfile();
   const userGender = useMemo(
@@ -88,15 +78,14 @@ export function useAiAssistantPage() {
     festivalPlanActions,
   );
 
-  const headerSubtractPx = useMemo(() => {
-    const eventBar = showEventContext ? AI_EVENT_CONTEXT_PX : 0;
-    const planBar = showEventContext ? FESTIVAL_PLAN_SUMMARY_COLLAPSED_PX : 0;
-    return navInsets.paddingTop + TAB_PAGE_NAV_PX + eventBar + planBar;
-  }, [navInsets.paddingTop, showEventContext]);
+  const layoutRemeasureKey = useMemo(
+    () => `${showEventContext ? 1 : 0}:${chromeLayoutSeq}`,
+    [chromeLayoutSeq, showEventContext],
+  );
 
-  const chatScrollHeight = useTabPageMainHeight({
-    subtractPx: headerSubtractPx + AI_CHAT_COMPOSER_CHROME_PX,
-  });
+  const handleChromeLayoutChange = useCallback(() => {
+    setChromeLayoutSeq((seq) => seq + 1);
+  }, []);
 
   usePageRouteReady(true);
 
@@ -128,11 +117,11 @@ export function useAiAssistantPage() {
       setPendingAutoGuideForm(intent.autoRunTravelGuideForm);
     }
     if (intent.activityLegacyId != null && !Number.isNaN(intent.activityLegacyId)) {
-      setActiveActivityLegacyId(intent.activityLegacyId);
+      bindActivity(intent.activityLegacyId);
     } else {
-      setActiveActivityLegacyId(null);
+      clearActivityScope();
     }
-  }, [consumeAiAssistantIntent, setActiveActivityLegacyId]);
+  }, [consumeAiAssistantIntent]);
 
   useEffect(() => {
     applyAiAssistantIntent();
@@ -159,7 +148,8 @@ export function useAiAssistantPage() {
     festivalPlan,
     handleFestivalPlanTaskPress,
     setFestivalPlanActions,
-    chatScrollHeight,
+    layoutRemeasureKey,
+    handleChromeLayoutChange,
     activityLegacyId,
     handleInitialMessageSent,
   };

@@ -4,6 +4,7 @@ import { cn } from '../ui';
 import type { ChatUiMessage } from '../../types/aiChat';
 import type { AiGuidePlanFormValues } from '../../types/travelGuide';
 import type { AuthorGender } from '../../utils/inferAuthorGender';
+import type { AiCapability } from '@/domains/ai-capability';
 import { ChatUserAvatar } from './ChatUserAvatar';
 import { AiAssistantActivityCard } from './AiAssistantActivityCard';
 import { RecommendPostCards } from './RecommendPostCards';
@@ -73,9 +74,7 @@ export type ChatMessageRowProps = {
   onSelectSuggestedReply: (reply: string) => void;
   onRegenerateTravelGuide?: (form: AiGuidePlanFormValues) => void;
   onBuddyPostFromTravelGuide?: (form: AiGuidePlanFormValues) => void;
-  onOpenBuddyPostSheet?: () => void;
-  onOpenTravelGuideSheet?: () => void;
-  onOpenItinerarySheet?: () => void;
+  onRunCapability?: (capability: AiCapability) => void;
   onOpenPersonalityTest?: () => void;
 };
 
@@ -91,9 +90,7 @@ function ChatMessageRowInner({
   onSelectSuggestedReply,
   onRegenerateTravelGuide,
   onBuddyPostFromTravelGuide,
-  onOpenBuddyPostSheet,
-  onOpenTravelGuideSheet,
-  onOpenItinerarySheet,
+  onRunCapability,
   onOpenPersonalityTest,
 }: ChatMessageRowProps) {
   const conversationFlow = useAiChatStore((state) =>
@@ -125,19 +122,19 @@ function ChatMessageRowInner({
     !suppressPlanSheetCtAs &&
     !isUser &&
     !msg.streaming &&
-    Boolean(onOpenBuddyPostSheet) &&
+    Boolean(onRunCapability) &&
     (msg.showBuddyPostSheetCta || isBuddyPostTemplatePrompt(msg.text));
   const showTravelGuideSheetCta =
     !suppressPlanSheetCtAs &&
     !isUser &&
     !msg.streaming &&
-    Boolean(onOpenTravelGuideSheet) &&
+    Boolean(onRunCapability) &&
     (msg.showTravelGuideSheetCta || isTravelGuideSheetPrompt(msg.text));
   const showItinerarySheetCta =
     !suppressPlanSheetCtAs &&
     !isUser &&
     !msg.streaming &&
-    Boolean(onOpenItinerarySheet) &&
+    Boolean(onRunCapability) &&
     (msg.showItinerarySheetCta || isItinerarySheetPrompt(msg.text));
   const showPersonalityTestSheetCta =
     !isUser &&
@@ -279,19 +276,19 @@ function ChatMessageRowInner({
               {showBuddyPostTemplateCta ? (
                 <BuddyPostTemplateCta
                   disabled={isStreaming}
-                  onOpenSheet={onOpenBuddyPostSheet!}
+                  onOpenSheet={() => onRunCapability!('buddy_post')}
                 />
               ) : null}
               {showTravelGuideSheetCta ? (
                 <TravelGuideSheetCta
                   disabled={isStreaming}
-                  onOpenSheet={onOpenTravelGuideSheet!}
+                  onOpenSheet={() => onRunCapability!('travel_guide')}
                 />
               ) : null}
               {showItinerarySheetCta ? (
                 <ItinerarySheetCta
                   disabled={isStreaming}
-                  onOpenSheet={onOpenItinerarySheet!}
+                  onOpenSheet={() => onRunCapability!('itinerary')}
                 />
               ) : null}
               {showPersonalityTestSheetCta ? (

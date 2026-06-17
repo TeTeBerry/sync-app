@@ -64,6 +64,7 @@ const AiTabPage: FC = () => {
           <FestivalPlanSummaryBar
             checklist={page.festivalPlan}
             onTaskPress={page.handleFestivalPlanTaskPress}
+            onLayoutChange={page.handleChromeLayoutChange}
           />
         ) : null}
 
@@ -79,7 +80,7 @@ const AiTabPage: FC = () => {
                 activityTitle={page.activityTitle}
                 onInitialMessageSent={page.handleInitialMessageSent}
                 onMessageCountChange={page.onChatMessagesChange}
-                chatScrollHeight={page.chatScrollHeight}
+                layoutRemeasureKey={page.layoutRemeasureKey}
                 userAvatar={page.profileUserData.avatar}
                 userName={page.profileUserData.name}
                 userGender={page.userGender}

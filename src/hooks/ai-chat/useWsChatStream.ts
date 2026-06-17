@@ -15,7 +15,8 @@ import {
   formatAiChatStreamError,
   formatAiChatToastError,
 } from '../../utils/aiChatErrors';
-import { buildSingleTurnUserMessage } from '../../utils/aiChatHistory';
+import { buildLlmChatHistory } from '../../utils/aiChatHistory';
+import { getActiveActivityLegacyId } from '../../domains/activity-scope';
 import { buildAiChatWsSendActor } from '../../api/requestActor';
 import { streamAiChatWs } from '../../utils/aiChatWs';
 import type { TypewriterReveal } from '../../utils/typewriterReveal';
@@ -56,6 +57,7 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
     wsUrl = AI_CHAT_WS_URL,
     activityLegacyIdRef,
     sessionIdRef,
+    messagesRef,
     setMessages,
     getAuthHeaders,
     onPostCreated,
@@ -78,10 +80,10 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
       const trimmed = text.trim();
       if (!trimmed) return;
 
-      const activityId = activityLegacyIdRef.current;
+      const activityId =
+        activityLegacyIdRef.current ?? getActiveActivityLegacyId() ?? undefined;
       const activityHeaders =
         activityId != null ? { 'X-Activity-Id': String(activityId) } : undefined;
-      const history = buildSingleTurnUserMessage(trimmed);
 
       const finishAiMessage = (updater: (current: ChatUiMessage) => ChatUiMessage) => {
         setMessages((prev) => {
@@ -100,6 +102,17 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
         stopProgress?.();
         stopProgress = undefined;
       };
+
+      const history = buildLlmChatHistory(messagesRef.current);
+      if (!history.length) {
+        endProgress();
+        finishAiMessage((message) => ({
+          ...clearAiChatProgress(message),
+          text: '消息不能为空',
+          streaming: false,
+        }));
+        return;
+      }
 
       const pushTypewriterText = throttleRaf((visible: string) => {
         endProgress();
@@ -196,6 +209,7 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
       onTravelGuideReady,
       onItineraryReady,
       persistSessionFromStream,
+      messagesRef,
       sessionIdRef,
       setMessages,
       streamErrorText,

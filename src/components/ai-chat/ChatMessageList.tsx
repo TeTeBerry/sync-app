@@ -2,6 +2,7 @@ import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { ChatUiMessage } from '../../types/aiChat';
 import type { AiGuidePlanFormValues } from '../../types/travelGuide';
 import type { AuthorGender } from '../../utils/inferAuthorGender';
+import type { AiCapability } from '@/domains/ai-capability';
 import { throttleRaf } from '../../utils/throttleRaf';
 import { ChatMessageRow } from './ChatMessageRow';
 import { CHAT_SCROLL_BOTTOM_ID } from './chatScrollBottom';
@@ -25,9 +26,7 @@ export function ChatMessageList({
   onSelectSuggestedReply,
   onRegenerateTravelGuide,
   onBuddyPostFromTravelGuide,
-  onOpenBuddyPostSheet,
-  onOpenTravelGuideSheet,
-  onOpenItinerarySheet,
+  onRunCapability,
   onOpenPersonalityTest,
 }: {
   messages: ChatUiMessage[];
@@ -43,9 +42,7 @@ export function ChatMessageList({
   onSelectSuggestedReply: (reply: string) => void;
   onRegenerateTravelGuide?: (form: AiGuidePlanFormValues) => void;
   onBuddyPostFromTravelGuide?: (form: AiGuidePlanFormValues) => void;
-  onOpenBuddyPostSheet?: () => void;
-  onOpenTravelGuideSheet?: () => void;
-  onOpenItinerarySheet?: () => void;
+  onRunCapability?: (capability: AiCapability) => void;
   onOpenPersonalityTest?: () => void;
 }) {
   const [scrollIntoView, setScrollIntoView] = useState<string | undefined>();
@@ -134,9 +131,7 @@ export function ChatMessageList({
             onSelectSuggestedReply={onSelectSuggestedReply}
             onRegenerateTravelGuide={onRegenerateTravelGuide}
             onBuddyPostFromTravelGuide={onBuddyPostFromTravelGuide}
-            onOpenBuddyPostSheet={onOpenBuddyPostSheet}
-            onOpenTravelGuideSheet={onOpenTravelGuideSheet}
-            onOpenItinerarySheet={onOpenItinerarySheet}
+            onRunCapability={onRunCapability}
             onOpenPersonalityTest={onOpenPersonalityTest}
           />
         ))}

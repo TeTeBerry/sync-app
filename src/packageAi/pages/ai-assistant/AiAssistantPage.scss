@@ -242,6 +242,14 @@
     transition: padding-bottom 0.2s ease;
   }
 
+  &__scroll-host {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
   &__scroll {
     flex: 1;
     min-height: 0;

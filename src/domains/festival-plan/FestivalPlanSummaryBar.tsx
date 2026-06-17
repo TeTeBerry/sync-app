@@ -17,9 +17,11 @@ export const FESTIVAL_PLAN_SUMMARY_COLLAPSED_PX = 92;
 export function FestivalPlanSummaryBar({
   checklist,
   onTaskPress,
+  onLayoutChange,
 }: {
   checklist: FestivalPlanChecklist;
   onTaskPress: (task: FestivalPlanTask) => void;
+  onLayoutChange?: () => void;
 }) {
   const { tasks, completedCount, totalCount, nextTaskKey } = checklist;
   const [expanded, setExpanded] = useState(false);
@@ -27,6 +29,10 @@ export function FestivalPlanSummaryBar({
   useEffect(() => {
     setExpanded(false);
   }, [nextTaskKey]);
+
+  useEffect(() => {
+    onLayoutChange?.();
+  }, [expanded, onLayoutChange, nextTaskKey]);
 
   const visibleTasks = resolveFestivalPlanVisibleTasks(tasks, {
     expanded,

@@ -1,5 +1,6 @@
 import Taro from '@tarojs/taro';
 import { useCallback, useEffect, useState } from 'react';
+import { bindActivity, clearActivityScope } from '../domains/activity-scope';
 import { useNavigationStore } from '../stores/navigationStore';
 import type { ExclusiveItineraryNavIntent } from '../stores/types';
 import { encodeSelectedDjList } from '../domains/performance-itinerary/utils/itineraryBanner';
@@ -21,10 +22,7 @@ import {
 } from './queryString';
 import { getCacheData } from '../hooks/useApiQuery';
 import { findBackendActivityByLegacyId } from './apiMappers';
-import {
-  seedActivityDetailCache,
-  seedActivityDetailFromHomeSignupEvent,
-} from './activityDetailCache';
+import { seedActivityDetailFromHomeSignupEvent } from './activityDetailCache';
 import { isAuthGated, requireAuth } from './authGate';
 import type { LoginInterceptFeature } from '../stores/loginInterceptStore';
 import { useLoginInterceptStore } from '../stores/loginInterceptStore';
@@ -550,15 +548,15 @@ export function goEventDetail(eventId: number | string, options?: { postId?: str
     ? findBackendActivityByLegacyId(activities, legacyId)
     : undefined;
   if (fromList) {
-    seedActivityDetailCache(fromList);
+    bindActivity(legacyId, { activity: fromList });
   } else {
     const summary = getCacheData<HomeSummary>(['home', 'summary']);
     const fromHome = summary?.signupEvents.find((event) => event.id === legacyId);
     if (fromHome) {
       seedActivityDetailFromHomeSignupEvent(fromHome);
     }
+    bindActivity(legacyId);
   }
-  useNavigationStore.getState().setActiveActivityLegacyId(legacyId);
   const query = buildEventDetailQuery(legacyId, options);
   preloadEventSubpackage();
   navigateToSafe(buildPageUrl(ROUTES.EVENT_DETAIL, query), {
@@ -612,7 +610,7 @@ export function goExclusiveItinerary(
   if (options?.reselect) {
     query.reselect = '1';
   }
-  useNavigationStore.getState().setActiveActivityLegacyId(legacyId);
+  bindActivity(legacyId);
   preloadEventSubpackage();
   navigateToSafe(buildPageUrl(ROUTES.EXCLUSIVE_ITINERARY, query));
 }
@@ -627,7 +625,7 @@ export function goMyItinerary(
   if (legacyId != null) {
     query.id = String(legacyId);
     query.activityLegacyId = String(legacyId);
-    useNavigationStore.getState().setActiveActivityLegacyId(legacyId);
+    bindActivity(legacyId);
   }
   const ids = selectedDjIds?.map((id) => id.trim()).filter(Boolean) ?? [];
   if (ids.length > 0) {
@@ -715,9 +713,9 @@ export function goAiAssistant(options?: GoAiAssistantOptions) {
   }
   if (options?.activityLegacyId != null && !Number.isNaN(options.activityLegacyId)) {
     intent.activityLegacyId = options.activityLegacyId;
-    useNavigationStore.getState().setActiveActivityLegacyId(options.activityLegacyId);
+    bindActivity(options.activityLegacyId);
   } else {
-    useNavigationStore.getState().setActiveActivityLegacyId(null);
+    clearActivityScope();
   }
   if (options?.openAiGuideSheet) {
     intent.openAiGuideSheet = true;
