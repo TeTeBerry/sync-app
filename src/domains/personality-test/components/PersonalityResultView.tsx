@@ -14,6 +14,7 @@ import {
 import type { PersonalityEventRecommendation, PersonalityTestResult } from '../types';
 import { getActivityStatusFromActivity } from '@/utils/activityStatus';
 import { goEventDetail, goExclusiveItinerary } from '@/utils/route';
+import { buildPersonalityItinerarySelection } from '../utils/buildPersonalityItinerarySelection';
 import { Text, View } from '@tarojs/components';
 
 type PersonalityResultViewProps = {
@@ -137,9 +138,15 @@ export const PersonalityResultView: FC<PersonalityResultViewProps> = ({
       });
       return;
     }
-    goExclusiveItinerary(itineraryTargetEvent.activityLegacyId, [soul.djId], {
-      focusDjName: soul.djName,
-    });
+    const selection = buildPersonalityItinerarySelection(result, itineraryTargetEvent);
+    goExclusiveItinerary(
+      itineraryTargetEvent.activityLegacyId,
+      selection.selectedDjIds,
+      {
+        focusDjName: selection.focusDjName,
+        selectedDjNames: selection.selectedDjNames,
+      },
+    );
   };
 
   const handleSetReminder = () => {

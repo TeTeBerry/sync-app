@@ -52,6 +52,10 @@ export function useExclusiveItineraryPage() {
   );
 
   const focusDjName = router.params.focusDjName?.trim() ?? '';
+  const selectedDjNames = useMemo(
+    () => parseSelectedDjIds(router.params.selectedDjNames),
+    [router.params.selectedDjNames],
+  );
 
   const [stageFilter, setStageFilter] = useState('all');
   const [genreFilter, setGenreFilter] = useState('all');
@@ -104,18 +108,19 @@ export function useExclusiveItineraryPage() {
     setSelectedIds(parseSelectedDjIds(router.params.selectedDjIds));
     setFocusDjId(undefined);
     setScrollIntoViewId('');
-  }, [activityLegacyId, router.params.selectedDjIds, focusDjName]);
+  }, [activityLegacyId, router.params.selectedDjIds, focusDjName, selectedDjNames]);
 
   useEffect(() => {
     if (!djCatalog.length) return;
 
     const resolved = resolveItineraryDjSelection({
       requestedIds: parseSelectedDjIds(router.params.selectedDjIds),
+      selectedDjNames,
       focusDjName: focusDjName || undefined,
       catalog: djCatalog,
     });
 
-    if (focusDjName) {
+    if (focusDjName || selectedDjNames.length > 0) {
       setStageFilter('all');
       setGenreFilter('all');
       setStyleSearchQuery('');
@@ -123,7 +128,7 @@ export function useExclusiveItineraryPage() {
 
     setSelectedIds(resolved.selectedIds);
     setFocusDjId(resolved.focusDjId);
-  }, [djCatalog, router.params.selectedDjIds, focusDjName]);
+  }, [djCatalog, router.params.selectedDjIds, focusDjName, selectedDjNames]);
 
   useEffect(() => {
     if (!isValidFilterId(stageOptions, stageFilter)) {
@@ -181,10 +186,10 @@ export function useExclusiveItineraryPage() {
     const targetId = itineraryDjCardDomId(focusDjId);
     const scrollTimer = setTimeout(() => {
       setScrollIntoViewId(targetId);
-    }, 120);
+    }, 300);
     const clearTimer = setTimeout(() => {
       setScrollIntoViewId('');
-    }, 1000);
+    }, 1500);
 
     return () => {
       clearTimeout(scrollTimer);

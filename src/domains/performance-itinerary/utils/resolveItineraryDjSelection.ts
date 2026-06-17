@@ -13,6 +13,7 @@ export function itineraryDjCardDomId(djId: string): string {
 
 export function resolveItineraryDjSelection(input: {
   requestedIds: string[];
+  selectedDjNames?: string[];
   focusDjName?: string;
   catalog: ItineraryDjCatalogEntry[];
 }): { selectedIds: string[]; focusDjId?: string } {
@@ -36,6 +37,15 @@ export function resolveItineraryDjSelection(input: {
     }
   }
 
+  for (const name of input.selectedDjNames ?? []) {
+    const trimmed = name.trim();
+    if (!trimmed) continue;
+    const resolved = byName.get(normalizeItineraryDjName(trimmed));
+    if (resolved) {
+      selected.add(resolved);
+    }
+  }
+
   let focusDjId: string | undefined;
   const focusName = input.focusDjName?.trim();
   if (focusName) {
@@ -46,9 +56,7 @@ export function resolveItineraryDjSelection(input: {
   }
 
   if (!focusDjId) {
-    focusDjId = input.requestedIds
-      .map((id) => id.trim())
-      .find((id) => selected.has(id));
+    focusDjId = [...selected][0];
   }
 
   return {

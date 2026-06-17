@@ -6,6 +6,7 @@ import {
 
 const CATALOG = [
   { id: 'carta', name: 'CARTA' },
+  { id: 'dennett', name: 'DENNETT' },
   { id: 'martin-garrix', name: 'MARTIN GARRIX' },
 ];
 
@@ -29,6 +30,18 @@ describe('resolveItineraryDjSelection', () => {
     });
 
     expect(result.selectedIds).toEqual(['carta']);
+    expect(result.focusDjId).toBe('carta');
+  });
+
+  it('resolves multiple djs by name and focuses the first resolved selection', () => {
+    const result = resolveItineraryDjSelection({
+      requestedIds: [],
+      selectedDjNames: ['CARTA', 'DENNETT'],
+      focusDjName: 'MARSHMELLO',
+      catalog: CATALOG,
+    });
+
+    expect(result.selectedIds).toEqual(['carta', 'dennett']);
     expect(result.focusDjId).toBe('carta');
   });
 
