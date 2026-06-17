@@ -11,7 +11,10 @@ import { AiBuddyPostSheet } from '../../../components/ai-chat/AiBuddyPostSheet';
 import { AiGuidePlanSheet } from '../../../components/ai-chat/AiGuidePlanSheet';
 import { useKeyboardInset } from '../../../hooks/useKeyboardInset';
 import type { inferUserGenderFromName } from '../../../utils/inferAuthorGender';
-import type { AiGuidePlanFormValues } from '../../../types/travelGuide';
+import type {
+  AiGuidePlanFormValues,
+  TravelGuidePlan,
+} from '../../../types/travelGuide';
 import { View } from '@tarojs/components';
 import { invalidateCache } from '../../../hooks/useApiQuery';
 import { useAiBuddyPost } from '../../../hooks/useAiBuddyPost';
@@ -131,7 +134,7 @@ export function AiAssistantChat({
     onTravelGuideReady: (event) => {
       if (activityLegacyId == null) return;
       saveTravelGuideDetail(event.guideId, {
-        plan: event.plan,
+        plan: event.plan as unknown as TravelGuidePlan,
         form: event.form,
         activityLegacyId,
       });

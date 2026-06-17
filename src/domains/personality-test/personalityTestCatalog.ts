@@ -81,12 +81,3 @@ export async function loadPersonalityTestCatalog(
   }
   return catalog;
 }
-
-export function clearPersonalityTestCatalogCache(): void {
-  memoryCache = null;
-  try {
-    Taro.removeStorageSync(STORAGE_KEY);
-  } catch {
-    // ignore
-  }
-}

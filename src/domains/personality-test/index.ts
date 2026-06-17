@@ -20,7 +20,6 @@ export type { PersonalityTestCatalog } from './personalityTestCatalog';
 
 export {
   buildTypeMetaMap,
-  clearPersonalityTestCatalogCache,
   getCachedPersonalityTestCatalog,
   getDjSoulProfile,
   getPersonalityMeta,
@@ -35,10 +34,7 @@ export {
   PERSONALITY_TEST_STORAGE_KEY,
 } from './utils/personalityTestStorage';
 
-export { getPreferredDjIdsForItinerary } from './utils/itineraryDjPrefs';
-
 export {
-  generatePersonalityPoster,
   savePersonalityPoster,
   sharePersonalityPoster,
 } from './utils/personalityPosterShare';

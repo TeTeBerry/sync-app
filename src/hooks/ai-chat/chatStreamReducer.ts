@@ -125,7 +125,7 @@ export async function processChatStreamEvents(
         streaming: false,
         travelGuide: {
           guideId: event.guideId,
-          plan: event.plan as TravelGuidePlan,
+          plan: event.plan as unknown as TravelGuidePlan,
           form: event.form,
         },
       }));

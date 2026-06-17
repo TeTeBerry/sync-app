@@ -1,4 +1,1 @@
-export {
-  useAiChatStream,
-  type UseAiChatStreamOptions,
-} from './ai-chat/useAiChatStream';
+export { useAiChatStream } from './ai-chat/useAiChatStream';

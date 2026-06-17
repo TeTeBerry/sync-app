@@ -1,5 +1,3 @@
-import { resolveAiChatWsUrl } from '../../constants/api';
-
 const LOG_PREFIX = '[SYNC AI WS]';
 
 const WS_LOG_WARN_EVENTS = new Set([
@@ -14,15 +12,6 @@ const WS_LOG_WARN_EVENTS = new Set([
 
 export function isAiChatWsDevLog(): boolean {
   return process.env.NODE_ENV !== 'production';
-}
-
-export function logAiChatWsResolvedUrl(context: string): void {
-  if (!isAiChatWsDevLog()) return;
-  console.warn(`${LOG_PREFIX} ${context}`, {
-    wsUrl: resolveAiChatWsUrl(),
-    taroEnv: process.env.TARO_ENV,
-    nodeEnv: process.env.NODE_ENV,
-  });
 }
 
 export function describeRawWsData(raw: unknown): string {
