@@ -4,6 +4,7 @@ import { Button, Input } from '../../../../components/ui';
 import { ScrollView, Text, View } from '@tarojs/components';
 import type { ExclusiveItineraryFilterChip } from '../exclusiveItineraryFilters';
 import type { ExclusiveItineraryDj } from '../types';
+import { itineraryDjCardDomId } from '@/domains/performance-itinerary/utils/resolveItineraryDjSelection';
 
 export type ExclusiveItineraryDjGridProps = {
   selectedCount: number;
@@ -154,6 +155,7 @@ const ExclusiveItineraryDjGrid: React.FC<ExclusiveItineraryDjGridProps> = ({
         return (
           <View
             key={dj.id}
+            id={itineraryDjCardDomId(dj.id)}
             className={[
               's-exclusive-itinerary__card',
               showPink ? 's-exclusive-itinerary__card--pink' : '',

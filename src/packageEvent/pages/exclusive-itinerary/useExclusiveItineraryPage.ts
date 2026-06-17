@@ -23,6 +23,10 @@ import {
 } from './exclusiveItineraryFilters';
 import { mapItineraryDjFromApi } from '@/domains/performance-itinerary/utils/mapItineraryDj';
 import { parseSelectedDjIds } from '@/domains/performance-itinerary/utils/itineraryBanner';
+import {
+  itineraryDjCardDomId,
+  resolveItineraryDjSelection,
+} from '@/domains/performance-itinerary/utils/resolveItineraryDjSelection';
 import type { ExclusiveItineraryDj } from './types';
 import { detectItineraryConflicts } from './itineraryConflict.util';
 import type { ItineraryConflict } from '../../../types/backend';
@@ -47,6 +51,8 @@ export function useExclusiveItineraryPage() {
     [activeActivityLegacyId, router.params],
   );
 
+  const focusDjName = router.params.focusDjName?.trim() ?? '';
+
   const [stageFilter, setStageFilter] = useState('all');
   const [genreFilter, setGenreFilter] = useState('all');
   const [styleSearchQuery, setStyleSearchQuery] = useState('');
@@ -54,6 +60,8 @@ export function useExclusiveItineraryPage() {
   const [selectedIds, setSelectedIds] = useState<string[]>(() =>
     parseSelectedDjIds(router.params.selectedDjIds),
   );
+  const [focusDjId, setFocusDjId] = useState<string | undefined>();
+  const [scrollIntoViewId, setScrollIntoViewId] = useState('');
   const [infoOpen, setInfoOpen] = useState(false);
   const [sortSheetOpen, setSortSheetOpen] = useState(false);
   const [hintModal, setHintModal] = useState<{
@@ -94,15 +102,28 @@ export function useExclusiveItineraryPage() {
     setGenreFilter('all');
     setStageFilter('all');
     setSelectedIds(parseSelectedDjIds(router.params.selectedDjIds));
-  }, [activityLegacyId, router.params.selectedDjIds]);
+    setFocusDjId(undefined);
+    setScrollIntoViewId('');
+  }, [activityLegacyId, router.params.selectedDjIds, focusDjName]);
 
   useEffect(() => {
-    const catalogIds = new Set(djCatalog.map((dj) => dj.id));
-    setSelectedIds((prev) => {
-      const next = prev.filter((id) => catalogIds.has(id));
-      return next.length === prev.length ? prev : next;
+    if (!djCatalog.length) return;
+
+    const resolved = resolveItineraryDjSelection({
+      requestedIds: parseSelectedDjIds(router.params.selectedDjIds),
+      focusDjName: focusDjName || undefined,
+      catalog: djCatalog,
     });
-  }, [djCatalog]);
+
+    if (focusDjName) {
+      setStageFilter('all');
+      setGenreFilter('all');
+      setStyleSearchQuery('');
+    }
+
+    setSelectedIds(resolved.selectedIds);
+    setFocusDjId(resolved.focusDjId);
+  }, [djCatalog, router.params.selectedDjIds, focusDjName]);
 
   useEffect(() => {
     if (!isValidFilterId(stageOptions, stageFilter)) {
@@ -152,6 +173,24 @@ export function useExclusiveItineraryPage() {
     }
     return sorted;
   }, [djCatalog, genreFilter, sortMode, stageFilter, styleSearchQuery]);
+
+  useEffect(() => {
+    if (!focusDjId) return;
+    if (!filteredDjs.some((dj) => dj.id === focusDjId)) return;
+
+    const targetId = itineraryDjCardDomId(focusDjId);
+    const scrollTimer = setTimeout(() => {
+      setScrollIntoViewId(targetId);
+    }, 120);
+    const clearTimer = setTimeout(() => {
+      setScrollIntoViewId('');
+    }, 1000);
+
+    return () => {
+      clearTimeout(scrollTimer);
+      clearTimeout(clearTimer);
+    };
+  }, [focusDjId, filteredDjs]);
 
   const toggleDj = useCallback((id: string) => {
     setConflictDismissed(false);
@@ -276,5 +315,6 @@ export function useExclusiveItineraryPage() {
     djListLoading,
     djListError,
     refetchDjList: scheduleQuery.refetch,
+    scrollIntoViewId,
   };
 }

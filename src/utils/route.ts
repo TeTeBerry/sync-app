@@ -535,6 +535,7 @@ export function goEventDetail(eventId: number | string, options?: { postId?: str
 export function goExclusiveItinerary(
   activityLegacyId: number,
   selectedDjIds?: string[],
+  options?: { focusDjName?: string },
 ) {
   const legacyId = parseActivityLegacyId(activityLegacyId);
   if (legacyId == null) {
@@ -548,6 +549,10 @@ export function goExclusiveItinerary(
   const ids = selectedDjIds?.map((id) => id.trim()).filter(Boolean) ?? [];
   if (ids.length > 0) {
     query.selectedDjIds = ids.join(',');
+  }
+  const focusDjName = options?.focusDjName?.trim();
+  if (focusDjName) {
+    query.focusDjName = focusDjName;
   }
   useNavigationStore.getState().setActiveActivityLegacyId(legacyId);
   preloadEventSubpackage();

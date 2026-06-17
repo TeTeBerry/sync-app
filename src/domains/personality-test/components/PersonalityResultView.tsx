@@ -137,7 +137,9 @@ export const PersonalityResultView: FC<PersonalityResultViewProps> = ({
       });
       return;
     }
-    goExclusiveItinerary(itineraryTargetEvent.activityLegacyId, [soul.djId]);
+    goExclusiveItinerary(itineraryTargetEvent.activityLegacyId, [soul.djId], {
+      focusDjName: soul.djName,
+    });
   };
 
   const handleSetReminder = () => {
@@ -332,9 +334,6 @@ export const PersonalityResultView: FC<PersonalityResultViewProps> = ({
                   {event.reason}
                 </Text>
               </View>
-              <Text className="s-personality-result__event-score">
-                {event.matchScore}
-              </Text>
             </View>
           ))}
         </View>

@@ -45,6 +45,7 @@ const ExclusiveItineraryPage = () => {
     djListLoading,
     djListError,
     refetchDjList,
+    scrollIntoViewId,
   } = useExclusiveItineraryPage();
 
   return (
@@ -68,6 +69,8 @@ const ExclusiveItineraryPage = () => {
         scrollY
         enhanced
         showScrollbar={false}
+        scrollIntoView={scrollIntoViewId}
+        scrollWithAnimation
         className="s-exclusive-itinerary__scroll s-scrollbar-none"
         style={
           mainScrollHeight != null ? { height: `${mainScrollHeight}px` } : undefined
