@@ -60,7 +60,11 @@ export function fuzzyTextMatches(text: string, query: string): boolean {
 }
 
 export function buildEventDetailPostSearchText(post: EventDetailPost): string {
-  return [post.body, post.location, post.name, ...(post.tags ?? [])]
+  const departureCity =
+    'departureCity' in post && typeof post.departureCity === 'string'
+      ? post.departureCity
+      : '';
+  return [post.body, post.location, departureCity, ...(post.tags ?? [])]
     .filter((part) => typeof part === 'string' && part.trim())
     .join(' ');
 }

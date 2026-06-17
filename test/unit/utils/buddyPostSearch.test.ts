@@ -46,4 +46,14 @@ describe('buddyPostSearch', () => {
     const filtered = filterEventDetailPostsByQuery(posts, 'Techno 上海');
     expect(filtered.map((post) => post.id)).toEqual(['both']);
   });
+
+  it('does not match unrelated posts that only share the activity context', () => {
+    const posts = [
+      samplePost({ id: 'match', body: 'EDC Thailand 攻略分享' }),
+      samplePost({ id: 'miss', body: '组队，12.18-12.20，上海，2 人' }),
+    ];
+
+    const filtered = filterEventDetailPostsByQuery(posts, 'EDC');
+    expect(filtered.map((post) => post.id)).toEqual(['match']);
+  });
 });
