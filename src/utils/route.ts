@@ -558,8 +558,10 @@ export function goAiTravelGuide(guideId: string) {
     void Taro.showToast({ title: '攻略信息无效', icon: 'none' });
     return;
   }
-  preloadEventSubpackage();
-  navigateToSafe(buildPageUrl(ROUTES.AI_TRAVEL_GUIDE, { guideId: id }));
+  requireAuth(() => {
+    preloadEventSubpackage();
+    navigateToSafe(buildPageUrl(ROUTES.AI_TRAVEL_GUIDE, { guideId: id }));
+  }, 'ai_assistant');
 }
 
 function resolveActivityLegacyId(meta?: NotificationMeta): number | null {

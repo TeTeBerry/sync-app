@@ -9,6 +9,7 @@ import { generateTravelGuide } from '@/api/sync/travelGuide';
 import { useActivityDetailQuery } from '@/hooks/useSyncApi';
 import { useStackPageMainHeight } from '@/hooks/useTabPageMainHeight';
 import { goAiAssistant, ROUTES } from '@/utils/route';
+import { isAuthGated, requireAuth } from '@/utils/authGate';
 import {
   loadTravelGuideDetail,
   saveTravelGuideDetail,
@@ -69,31 +70,42 @@ export function useAiTravelGuidePage() {
     if (payload || !guideId || !shareSeed) return;
 
     let cancelled = false;
-    setLoading(true);
-    setLoadError(null);
 
-    void generateTravelGuide(shareSeed.activityLegacyId, shareSeed.form)
-      .then(({ plan }) => {
-        if (cancelled) return;
-        const next: TravelGuideDetailPayload = {
-          plan,
-          form: shareSeed.form,
-          activityLegacyId: shareSeed.activityLegacyId,
-          createdAt: new Date().toISOString(),
-        };
-        saveTravelGuideDetail(guideId, next);
-        setPayload(next);
-      })
-      .catch((error) => {
-        if (cancelled) return;
-        const message =
-          error instanceof Error ? error.message : '攻略加载失败，请稍后重试';
-        setLoadError(message);
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
+    const loadFromShare = () => {
+      setLoading(true);
+      setLoadError(null);
 
+      void generateTravelGuide(shareSeed.activityLegacyId, shareSeed.form)
+        .then(({ plan }) => {
+          if (cancelled) return;
+          const next: TravelGuideDetailPayload = {
+            plan,
+            form: shareSeed.form,
+            activityLegacyId: shareSeed.activityLegacyId,
+            createdAt: new Date().toISOString(),
+          };
+          saveTravelGuideDetail(guideId, next);
+          setPayload(next);
+        })
+        .catch((error) => {
+          if (cancelled) return;
+          const message =
+            error instanceof Error ? error.message : '攻略加载失败，请稍后重试';
+          setLoadError(message);
+        })
+        .finally(() => {
+          if (!cancelled) setLoading(false);
+        });
+    };
+
+    if (isAuthGated()) {
+      requireAuth(loadFromShare, 'ai_assistant');
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    loadFromShare();
     return () => {
       cancelled = true;
     };
@@ -151,11 +163,15 @@ export function useAiTravelGuidePage() {
 
   const handleRegenerate = useCallback(() => {
     if (!payload) return;
-    goAiAssistant({
-      activityLegacyId: payload.activityLegacyId,
-      openAiGuideSheet: true,
-      autoRunTravelGuideForm: payload.form,
-    });
+    requireAuth(
+      () =>
+        goAiAssistant({
+          activityLegacyId: payload.activityLegacyId,
+          openAiGuideSheet: true,
+          autoRunTravelGuideForm: payload.form,
+        }),
+      'ai_assistant',
+    );
   }, [payload]);
 
   return {

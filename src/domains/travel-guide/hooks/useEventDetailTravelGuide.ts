@@ -3,6 +3,7 @@ import Taro from '@tarojs/taro';
 import { goAiAssistant } from '@/utils/route';
 import { parseActivityDayCount } from '@/utils/parseActivityDayCount';
 import { eventCityFromLocation } from '@/utils/travelGuideDepartureSuggestions';
+import { requireAuth } from '@/utils/authGate';
 import type { AiGuidePlanFormValues } from '@/types/travelGuide';
 
 export type UseEventDetailTravelGuideOptions = {
@@ -30,11 +31,13 @@ export function useEventDetailTravelGuide({
   );
 
   const openGuideSheet = useCallback(() => {
-    if (!Number.isFinite(eventId) || eventId <= 0) {
-      void Taro.showToast({ title: '活动信息无效', icon: 'none' });
-      return;
-    }
-    setSheetOpen(true);
+    requireAuth(() => {
+      if (!Number.isFinite(eventId) || eventId <= 0) {
+        void Taro.showToast({ title: '活动信息无效', icon: 'none' });
+        return;
+      }
+      setSheetOpen(true);
+    }, 'ai_assistant');
   }, [eventId]);
 
   const closeGuideSheet = useCallback(() => {
@@ -44,7 +47,11 @@ export function useEventDetailTravelGuide({
   const handleGuideSheetSubmit = useCallback(
     (form: AiGuidePlanFormValues) => {
       setSheetOpen(false);
-      goAiAssistant({ activityLegacyId: eventId, autoRunTravelGuideForm: form });
+      requireAuth(
+        () =>
+          goAiAssistant({ activityLegacyId: eventId, autoRunTravelGuideForm: form }),
+        'ai_assistant',
+      );
     },
     [eventId],
   );

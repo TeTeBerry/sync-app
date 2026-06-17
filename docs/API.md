@@ -288,13 +288,21 @@ X-Activity-Id: 4          # 可选，活动 legacyId（REST + AI WebSocket upgra
 
 响应含 `schedulePublished: boolean` — 无官方演出时间表时为 `false`，前端禁止「生成时间表」并提示等待官宣。
 
-### 帖子（已移除）
+### 帖子
 
-以下接口已从后端删除，前端不再调用：
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | `/api/posts/popular` | 热门帖 |
+| GET | `/api/posts?activityLegacyId=` | 活动帖分页 |
+| GET | `/api/posts` | 当前用户帖子（owner） |
+| POST | `/api/posts` | 创建模板帖 |
+| DELETE | `/api/posts/:id` | 删除自己的帖 |
+| GET | `/api/posts/:id/comments` | 评论列表 |
+| POST | `/api/posts/:id/comments` | 发表评论 |
+| POST | `/api/posts/ai-search` | AI 搭伴检索 |
+| GET | `/api/profile/posts` | 个人页我的帖子 |
 
-- `GET/POST/DELETE /api/posts`…
-- `GET /api/profile/posts`
-- `GET /api/posts/popular`
+**已移除**：`PATCH /api/posts/:id`、`POST /api/posts/:id/like`、`GET /api/posts/:id/navigation-target`
 
 ### 消息通知
 
@@ -319,8 +327,9 @@ X-Activity-Id: 4          # 可选，活动 legacyId（REST + AI WebSocket upgra
 }
 ```
 
-- `type`：`activity_update` | `post_rejected` | `post_hidden`（历史通知，跳转个人页）| `activity` — 按类型跳转活动详情 / 个人页
-- `activityLegacyId`：优先于已废弃的字符串 `activityId`
+- `type`：`activity_update` | `post_rejected` | `post_hidden`（跳转个人页）| `activity` — 按类型跳转活动详情 / AI 助手 / 个人页
+- `activityLegacyId`：深链必填；前端 `navigateFromNotification` 直接读取，**不**再请求 `/posts/:id/navigation-target`
+- `postId`：可选，跳转活动详情时用于高亮对应留言
 - **已废弃（列表不返回）**：`like` | `comment` | `comment_reply` | `application`
 
 ---

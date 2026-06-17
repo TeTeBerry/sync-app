@@ -28,7 +28,7 @@ export type TravelGuideGenerationJobResult = {
   errorMessage?: string;
 };
 
-const TRAVEL_GUIDE_POLL_INTERVAL_MS = 2_000;
+const TRAVEL_GUIDE_POLL_INTERVAL_MS = 1_000;
 const TRAVEL_GUIDE_POLL_MAX_ATTEMPTS = 60;
 
 function sleep(ms: number): Promise<void> {

@@ -110,7 +110,9 @@ function EventPostCardInner({
             <PostCardActionBar
               comments={post.comments ?? 0}
               commentsExpanded={commentsExpanded}
-              onOpenComments={() => onOpenComments(post.id)}
+              onToggleComments={() =>
+                commentsExpanded ? onCloseComments(post.id) : onOpenComments(post.id)
+              }
             />
           </View>
         </View>

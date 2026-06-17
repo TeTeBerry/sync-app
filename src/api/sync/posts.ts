@@ -40,13 +40,6 @@ export async function fetchPostsByActivity(activityLegacyId: number) {
   return page.items;
 }
 
-export function fetchPostNavigationTarget(postId: string) {
-  return apiGet<{ postId: string; activityLegacyId: number }>(
-    `/posts/${postId}/navigation-target`,
-    ownerQueryParams(),
-  );
-}
-
 export function createPost(payload: CreatePostPayload) {
   return apiPost<EventDetailPost>('/posts', payload, ownerQueryParams());
 }

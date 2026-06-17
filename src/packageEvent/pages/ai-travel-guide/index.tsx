@@ -8,6 +8,7 @@ import { useEndRouteTransitionOnShow } from '../../../hooks/useEndRouteTransitio
 import { usePageRouteReady } from '../../../hooks/usePageRouteReady';
 import { FileText, RefreshCw, Share2 } from '../../../components/icons';
 import { AI_TRAVEL_GUIDE_DISCLAIMER } from '../../../constants/aiDisclosure';
+import { LoginInterceptHost } from '../../../components/auth/LoginInterceptHost';
 import { ScrollView, Text, View } from '@tarojs/components';
 
 const AiTravelGuidePage = () => {
@@ -80,6 +81,7 @@ const AiTravelGuidePage = () => {
           </Text>
         </View>
       )}
+      <LoginInterceptHost />
     </View>
   );
 };

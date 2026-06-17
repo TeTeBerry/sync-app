@@ -2,7 +2,7 @@
 
 本文梳理 **模板发帖**、活动留言列表展示与 **删除** 的端到端路径，便于联调与回归。
 
-> **2026-06 变更**：帖子 **点赞 / 评论 / 编辑（PATCH）** 已从前后端移除；活动详情仅保留模板发帖、列表展示、搜索与删自己的帖。
+> **2026-06 变更**：帖子 **点赞 / 编辑（PATCH）** 已从前后端移除；活动详情保留模板发帖、列表展示、评论与删自己的帖。留言板 **纯前端搜索**（`messageBoardPostSearch`）与 `GET /posts/:id/navigation-target` 深链解析已下线；通知跳转直接使用 `meta.activityLegacyId`（见 `navigateFromNotification`）。
 
 ---
 
@@ -77,10 +77,10 @@ POST /api/posts
 - `GET /api/posts?activityLegacyId=&limit=&cursor=&anchorPostId=` — 分页 `{ items, nextCursor?, hasMore }`
 - 过滤：`status: active`、`listedInFeed !== false`、排除 `share` 类型现场帖
 - 前端：`useEventPostsInfiniteQuery` + `useEventDetailPosts`（窗口化首屏 6 条、步进 +6）
-- **搜索**：纯前端模糊匹配 `messageBoardPostSearch.ts`（仅 `body` / `location` / `tags`，不含昵称）；搜索激活时自动 `loadMore` 直至无更多页
+- **评论**：活动帖卡片底部评论 icon 展开/收起；`PostCommentSection` + `GET|POST /api/posts/:id/comments`
 - 删帖：`DELETE /api/posts/:id`（仅自己的帖）
 
-`EventDetailPost` 核心字段：`id`, `userId`, `name`, `avatar`, `location`, `createdAt`, `body`, `tags`, `contentTypes`, `images?`
+`EventDetailPost` 核心字段：`id`, `userId`, `name`, `avatar`, `location`, `createdAt`, `body`, `tags`, `contentTypes`, `comments?`, `images?`
 
 ---
 
@@ -114,9 +114,11 @@ POST /api/posts
 | 热门帖 | GET | `/posts/popular` |
 | 我的帖子 | GET | `/posts`（owner 过滤）/ `GET /profile/posts` |
 | 删帖 | DELETE | `/posts/:id` |
-| 深链导航 | GET | `/posts/:id/navigation-target` |
+| 评论列表 | GET | `/posts/:id/comments` |
+| 发表评论 | POST | `/posts/:id/comments` |
+| AI 搭伴检索 | POST | `/posts/ai-search` |
 
-**已移除**（勿再对接）：`PATCH /posts/:id`、`POST /posts/:id/like`、`GET|POST /posts/:id/comments`
+**已移除**（勿再对接）：`PATCH /posts/:id`、`POST /posts/:id/like`、`GET /posts/:id/navigation-target`
 
 ---
 
@@ -125,7 +127,10 @@ POST /api/posts
 - `GET /api/notifications` — 站内信列表（**过滤** 历史点赞/评论/组队申请类通知）
 - `GET /api/notifications/unread-count` — 未读数（同上过滤）
 - 前端 Tab：**全部** / **系统**（活动变更、审核结果、帖子隐藏等）
-- 深链：`navigateFromNotification` — `activity_update` → 活动详情；`post_rejected` → AI 助手；`post_hidden` → 个人页
+- 深链：`navigateFromNotification`（`src/utils/route.ts`）— 读取通知 `meta.activityLegacyId` / `postId`，**不再**请求 `/posts/:id/navigation-target`
+  - `activity_update` / 含 `activityLegacyId` → `goEventDetail(legacyId, { postId? })`
+  - `post_rejected` → AI 助手（带活动上下文）
+  - `post_hidden` → 个人页
 
 **已移除**：点赞/评论通知推送（`NoticeAgent.notifyLike|notifyComment` 已删除）
 
@@ -137,7 +142,7 @@ POST /api/posts
 |------|------|
 | 前端发帖组装 | `test/unit/utils/publishBuddyPost.test.ts` |
 | 前端正文剥离 | `test/unit/utils/postBodyContact.test.ts` |
-| 前端留言搜索 | `test/unit/domains/partner-feed/utils/messageBoardPostSearch.test.ts` |
+| 通知深链跳转 | `test/unit/utils/route.notificationNavigate.test.ts` |
 | 后端写帖 | `test/unit/modules/partner/application/buddy-post-write-flow.spec.ts` |
 | 通知展示 | `test/unit/utils/notificationDisplay.test.ts` |
 
@@ -145,7 +150,7 @@ POST /api/posts
 
 ```bash
 # 前端
-cd sync-app && npm test -- publishBuddyPost postBodyContact messageBoardPostSearch
+cd sync-app && npm test -- publishBuddyPost postBodyContact route.notificationNavigate
 
 # 后端
 cd sync-app-backend && CI=true npm test -- --watchman=false --testPathPattern="buddy-post-write-flow|risk.agent"
@@ -157,7 +162,8 @@ cd sync-app-backend && CI=true npm test -- --watchman=false --testPathPattern="b
 
 - [ ] 模板发帖后列表首条为刚发内容
 - [ ] 帖子正文不展示联系方式
-- [ ] 搜索仅匹配留言正文，不匹配昵称
+- [ ] 评论 icon 可展开/收起；发帖人可回复一级评论
 - [ ] 删自己的帖成功；他人帖无删除按钮
-- [ ] 无点赞/评论入口；`PATCH` 接口 404
+- [ ] 无点赞入口；`PATCH /posts/:id` 接口 404
 - [ ] 通知页无「点赞/评论」Tab；历史点赞/评论通知不展示、不计入未读
+- [ ] 通知深链不依赖 `/posts/:id/navigation-target`
