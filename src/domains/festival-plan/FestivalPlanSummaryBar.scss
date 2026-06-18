@@ -1,3 +1,48 @@
+.s-festival-plan-summary--embedded {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  border-radius: 0;
+}
+
+.s-festival-plan-summary--embedded .s-festival-plan-summary__header {
+  margin-bottom: 6px;
+}
+
+.s-festival-plan-summary--embedded .s-festival-plan-summary__title {
+  color: #d1d1d6;
+  text-transform: none;
+  letter-spacing: 0.02em;
+  font-size: var(--s-type-body-sm);
+}
+
+.s-festival-plan-summary--embedded .s-festival-plan-summary__progress {
+  padding: 2px 8px;
+  border-radius: 9999px;
+  background: rgba(255, 0, 102, 0.12);
+}
+
+.s-festival-plan-summary--embedded .s-festival-plan-summary__task--next {
+  background: rgba(255, 0, 102, 0.08);
+  border-color: rgba(255, 0, 102, 0.2);
+}
+
+.s-festival-plan-summary__progress-bar {
+  height: 3px;
+  margin: 0 0 8px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.s-festival-plan-summary__progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #ff0066, #4cc9f0);
+  transition: width 0.25s ease;
+}
+
 .s-festival-plan-summary {
   flex-shrink: 0;
   margin: 0 12px 8px;

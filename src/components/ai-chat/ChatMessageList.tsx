@@ -6,9 +6,10 @@ import type { AiCapability } from '@/domains/ai-capability';
 import { useChatMessageWindow } from '../../hooks/ai-chat/useChatMessageWindow';
 import { useChatScrollController } from '../../hooks/ai-chat/useChatScrollController';
 import { ChatMessageRow } from './ChatMessageRow';
+import { ChatHistoryHint } from './ChatHistoryHint';
 import { CHAT_SCROLL_BOTTOM_ID } from './chatScrollBottom';
 import { shouldSuppressAutoScrollForMessage } from './chatMessageListScroll';
-import { ScrollView, Text, View } from '@tarojs/components';
+import { ScrollView, View } from '@tarojs/components';
 
 export function ChatMessageList({
   messages,
@@ -113,6 +114,10 @@ export function ChatMessageList({
     onLoadOlderMessages,
   ]);
 
+  const handleHistoryHintPress = useCallback(() => {
+    void handleScrollToUpper();
+  }, [handleScrollToUpper]);
+
   const showHistoryHint = isLoadingHistory || hasHiddenMessages || hasMoreHistory;
 
   return (
@@ -131,13 +136,13 @@ export function ChatMessageList({
     >
       <View className="s-ai-assistant-chat__scroll-inner">
         {showHistoryHint ? (
-          <Text className="s-ai-assistant-chat__history-hint">
-            {isLoadingHistory
-              ? '加载更早消息…'
-              : hasHiddenMessages
-                ? `上滑查看更早的 ${hiddenCount} 条消息`
-                : '上滑加载更早消息'}
-          </Text>
+          <ChatHistoryHint
+            loading={isLoadingHistory}
+            hiddenCount={hiddenCount}
+            hasHiddenMessages={hasHiddenMessages}
+            hasMoreHistory={hasMoreHistory}
+            onPress={handleHistoryHintPress}
+          />
         ) : null}
         {visibleMessages.map((msg, index) => (
           <ChatMessageRow

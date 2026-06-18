@@ -2,7 +2,8 @@ import React, { useCallback } from 'react';
 import { Send, Trash2 } from '../../components/icons';
 import { Button, Input, cn } from '../ui';
 import { useAiChatStore } from '../../stores/aiChatStore';
-import { View, type InputProps as TaroInputProps } from '@tarojs/components';
+import { AI_ASSISTANT_DISCLAIMER } from '../../constants/aiDisclosure';
+import { Text, View, type InputProps as TaroInputProps } from '@tarojs/components';
 
 function readComposerInputValue(
   event: Parameters<NonNullable<TaroInputProps['onInput']>>[0],
@@ -94,6 +95,9 @@ export function ChatComposer({
           <Send size={16} />
         </Button>
       </View>
+      <Text className="s-ai-assistant-chat__composer-disclaimer">
+        {AI_ASSISTANT_DISCLAIMER}
+      </Text>
     </View>
   );
 }

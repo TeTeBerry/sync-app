@@ -18,10 +18,13 @@ export function FestivalPlanSummaryBar({
   checklist,
   onTaskPress,
   onLayoutChange,
+  embedded = false,
 }: {
   checklist: FestivalPlanChecklist;
   onTaskPress: (task: FestivalPlanTask) => void;
   onLayoutChange?: () => void;
+  /** Inside AiTabContextCard — no outer card chrome. */
+  embedded?: boolean;
 }) {
   const { tasks, completedCount, totalCount, nextTaskKey } = checklist;
   const [expanded, setExpanded] = useState(false);
@@ -45,6 +48,7 @@ export function FestivalPlanSummaryBar({
       className={cn(
         's-festival-plan-summary',
         expanded && 's-festival-plan-summary--expanded',
+        embedded && 's-festival-plan-summary--embedded',
       )}
     >
       <Button
@@ -65,6 +69,18 @@ export function FestivalPlanSummaryBar({
           )}
         </View>
       </Button>
+
+      {embedded && totalCount > 0 ? (
+        <View
+          className="s-festival-plan-summary__progress-bar"
+          aria-label={`计划进度 ${completedCount}/${totalCount}`}
+        >
+          <View
+            className="s-festival-plan-summary__progress-fill"
+            style={{ width: `${Math.round((completedCount / totalCount) * 100)}%` }}
+          />
+        </View>
+      ) : null}
 
       {visibleTasks.length > 0 ? (
         <View className="s-festival-plan-summary__tasks">
