@@ -49,7 +49,7 @@ export const HomeMyNextEvent: FC<HomeMyNextEventProps> = ({
           className="s-home-next__btn s-home-next__btn--primary"
           onClick={onOpenPosts}
         >
-          <Text className="s-home-next__btn-text">发结伴帖</Text>
+          <Text className="s-home-next__btn-text">发帖</Text>
         </Button>
         <Button
           className="s-home-next__btn s-home-next__btn--ghost"

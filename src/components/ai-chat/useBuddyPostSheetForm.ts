@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type {
   AiBuddyPostFormValues,
   AiBuddyPostSubmitPayload,
@@ -31,11 +31,19 @@ export function useBuddyPostSheetForm({
   const [headcount, setHeadcount] = useState('');
   const [note, setNote] = useState('');
   const [syncToPostList, setSyncToPostList] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const submittingRef = useRef(false);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      submittingRef.current = false;
+      setIsSubmitting(false);
+      return;
+    }
     setScrollTop(0);
     setSyncToPostList(true);
+    submittingRef.current = false;
+    setIsSubmitting(false);
     const seed = initialValues ?? defaults;
     if (seed) {
       setDateStart(seed.dateStart);
@@ -58,19 +66,26 @@ export function useBuddyPostSheetForm({
     Boolean(dateStart && dateEnd && location.trim() && headcount.trim()) &&
     dateEnd >= dateStart;
 
-  const handleSubmit = useCallback(() => {
-    if (!canSubmit) return;
-    void Promise.resolve(
-      onSubmit({
-        dateStart,
-        dateEnd,
-        location: location.trim(),
-        headcount: headcount.trim(),
-        tags: ['team'],
-        note: note.trim() || undefined,
-        ...(showSyncToFeedOption ? { syncToPostList } : {}),
-      }),
-    );
+  const handleSubmit = useCallback(async () => {
+    if (!canSubmit || submittingRef.current) return;
+    submittingRef.current = true;
+    setIsSubmitting(true);
+    try {
+      await Promise.resolve(
+        onSubmit({
+          dateStart,
+          dateEnd,
+          location: location.trim(),
+          headcount: headcount.trim(),
+          tags: ['team'],
+          note: note.trim() || undefined,
+          ...(showSyncToFeedOption ? { syncToPostList } : {}),
+        }),
+      );
+    } finally {
+      submittingRef.current = false;
+      setIsSubmitting(false);
+    }
   }, [
     canSubmit,
     dateEnd,
@@ -93,6 +108,7 @@ export function useBuddyPostSheetForm({
     syncToPostList,
     noteMaxLength: NOTE_MAX_LENGTH,
     canSubmit,
+    isSubmitting,
     setDateStart,
     setDateEnd,
     setLocation,

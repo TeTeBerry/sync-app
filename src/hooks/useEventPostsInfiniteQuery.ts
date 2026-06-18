@@ -32,6 +32,7 @@ function mergeFetchedPosts(
 ): EventDetailPost[] {
   const byId = new Map<string, EventDetailPost>();
   for (const post of previous) {
+    if (post.id.startsWith('pending-')) continue;
     byId.set(post.id, post);
   }
   for (const post of fetched) {

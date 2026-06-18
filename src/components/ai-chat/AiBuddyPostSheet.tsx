@@ -133,10 +133,15 @@ export function AiBuddyPostSheet({
           <Button
             className={cn(
               's-ai-guide-plan-sheet__submit',
-              !form.canSubmit && 's-ai-guide-plan-sheet__submit--disabled',
+              (!form.canSubmit || form.isSubmitting) &&
+                's-ai-guide-plan-sheet__submit--disabled',
             )}
-            disabled={!form.canSubmit}
-            hoverClass={form.canSubmit ? 's-ai-guide-plan-sheet__submit--pressed' : ''}
+            disabled={!form.canSubmit || form.isSubmitting}
+            hoverClass={
+              form.canSubmit && !form.isSubmitting
+                ? 's-ai-guide-plan-sheet__submit--pressed'
+                : ''
+            }
             onClick={form.handleSubmit}
           >
             <Send size={18} color="#fff" aria-hidden />

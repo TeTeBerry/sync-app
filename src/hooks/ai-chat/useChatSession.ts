@@ -244,6 +244,8 @@ export function useChatSession(options: UseChatSessionOptions) {
   );
 
   useEffect(() => {
+    cancelHistoryLoad();
+
     const nextSessionId = resolveSessionId(options.sessionId, activityLegacyId);
     const sessionChanged = sessionIdRef.current !== nextSessionId;
     sessionIdRef.current = nextSessionId;
@@ -254,6 +256,7 @@ export function useChatSession(options: UseChatSessionOptions) {
     hydrateScopeMessages();
   }, [
     activityLegacyId,
+    cancelHistoryLoad,
     hasInFlightChatTurn,
     hydrateScopeMessages,
     options.sessionId,

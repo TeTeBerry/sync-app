@@ -244,7 +244,7 @@ export function useAiBuddyPost(options: {
     (payload: AiBuddyPostSubmitPayload) => {
       closeSheet();
       setSheetPrefillHint(null);
-      void runPublish(payload);
+      return runPublish(payload);
     },
     [closeSheet, runPublish],
   );

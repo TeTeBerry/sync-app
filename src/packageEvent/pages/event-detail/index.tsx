@@ -195,9 +195,7 @@ const EventDetailPage = () => {
           eventCity={guideEventCity}
           postQuota={buddyPostQuota ?? undefined}
           onClose={closeBuddyPostSheet}
-          onSubmit={(payload) => {
-            void handleBuddyPostSheetSubmit(payload);
-          }}
+          onSubmit={handleBuddyPostSheetSubmit}
         />
       ) : null}
       {guideSheetOpen ? (

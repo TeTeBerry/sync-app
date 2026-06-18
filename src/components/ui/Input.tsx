@@ -107,10 +107,15 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       [onConfirm, onKeyDown],
     );
 
+    const controlledValue = toTaroInputValue(value);
+    const uncontrolledDefault = toTaroInputValue(defaultValue);
+
     const taroProps = {
       ...props,
-      value: toTaroInputValue(value),
-      defaultValue: toTaroInputValue(defaultValue),
+      ...(controlledValue !== undefined ? { value: controlledValue } : {}),
+      ...(controlledValue === undefined && uncontrolledDefault !== undefined
+        ? { defaultValue: uncontrolledDefault }
+        : {}),
       onInput,
       onConfirm,
       onKeyDown: onConfirm || onKeyDown ? handleKeyDown : onKeyDown,

@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { memo, useCallback } from 'react';
 import { ChatMessageList } from '../../../components/ai-chat/ChatMessageList';
 import { ChatComposer } from '../../../components/ai-chat/ChatComposer';
 import { AccountRiskBanner } from '../../../components/account-risk/AccountRiskBanner';
@@ -6,6 +6,9 @@ import { AiBuddyPostSheet } from '../../../components/ai-chat/AiBuddyPostSheet';
 import { AiActivityPickerSheet } from '../../../components/ai-chat/AiActivityPickerSheet';
 import { AiGuidePlanSheet } from '../../../components/ai-chat/AiGuidePlanSheet';
 import type { inferUserGenderFromName } from '../../../utils/inferAuthorGender';
+import type { ChatUiMessage } from '../../../types/aiChat';
+import type { AiGuidePlanFormValues } from '../../../types/travelGuide';
+import type { AiCapability } from '@/domains/ai-capability';
 import { View } from '@tarojs/components';
 import {
   useAiAssistantOrchestrator,
@@ -21,6 +24,117 @@ export type AiAssistantChatProps = UseAiAssistantOrchestratorOptions & {
   layoutRemeasureKey?: string | number;
   userGender?: ReturnType<typeof inferUserGenderFromName>;
 };
+
+type AiAssistantChatFooterProps = {
+  activityLegacyId?: number;
+  activityTitle?: string;
+  composerResetKey: number;
+  composerBusy: boolean;
+  keyboardInset: number;
+  onSubmit: (text: string) => void | Promise<void>;
+  onClearChat: () => void | Promise<void>;
+};
+
+const AiAssistantChatFooter = memo(function AiAssistantChatFooter({
+  activityLegacyId,
+  activityTitle,
+  composerResetKey,
+  composerBusy,
+  keyboardInset,
+  onSubmit,
+  onClearChat,
+}: AiAssistantChatFooterProps) {
+  return (
+    <View
+      className="s-ai-assistant-chat__footer"
+      style={keyboardInset > 0 ? { paddingBottom: `${keyboardInset}px` } : undefined}
+    >
+      <ChatComposer
+        key={activityLegacyId ?? 'none'}
+        resetKey={composerResetKey}
+        isStreaming={composerBusy}
+        activityLegacyId={activityLegacyId}
+        activityTitle={activityTitle}
+        onSubmit={onSubmit}
+        onClearChat={onClearChat}
+        clearDisabled={composerBusy}
+      />
+    </View>
+  );
+});
+
+type AiAssistantChatMessagesProps = {
+  scrollRemeasureKey: string;
+  sheetOverlayOpen: boolean;
+  messages: ChatUiMessage[];
+  isStreaming: boolean;
+  isTravelGuideGenerating: boolean;
+  keyboardInset: number;
+  forceScrollToBottomKey: number;
+  isLoadingHistory: boolean;
+  hasMoreHistory: boolean;
+  loadOlderMessages?: () => Promise<number>;
+  activityLegacyId?: number;
+  userAvatar?: string;
+  userName: string;
+  userGender?: ReturnType<typeof inferUserGenderFromName>;
+  onSelectSuggestedReply: (reply: string) => void;
+  onRegenerateTravelGuide?: (form: AiGuidePlanFormValues) => void;
+  onBuddyPostFromTravelGuide?: (form: AiGuidePlanFormValues) => void;
+  onRunCapability: (capability: AiCapability) => void;
+  onOpenPersonalityTest: () => void;
+};
+
+const AiAssistantChatMessages = memo(function AiAssistantChatMessages({
+  scrollRemeasureKey,
+  sheetOverlayOpen,
+  messages,
+  isStreaming,
+  isTravelGuideGenerating,
+  keyboardInset,
+  forceScrollToBottomKey,
+  isLoadingHistory,
+  hasMoreHistory,
+  loadOlderMessages,
+  activityLegacyId,
+  userAvatar,
+  userName,
+  userGender,
+  onSelectSuggestedReply,
+  onRegenerateTravelGuide,
+  onBuddyPostFromTravelGuide,
+  onRunCapability,
+  onOpenPersonalityTest,
+}: AiAssistantChatMessagesProps) {
+  const scrollAreaHeight = useAiChatScrollAreaHeight(scrollRemeasureKey, {
+    enabled: !sheetOverlayOpen,
+  });
+
+  return (
+    <View id={AI_CHAT_SCROLL_HOST_ID} className="s-ai-assistant-chat__scroll-host">
+      <ChatMessageList
+        messages={messages}
+        isStreaming={isStreaming}
+        isTravelGuideGenerating={isTravelGuideGenerating}
+        scrollAreaHeight={scrollAreaHeight}
+        keyboardInset={keyboardInset}
+        forceScrollToBottomKey={forceScrollToBottomKey}
+        isLoadingHistory={isLoadingHistory}
+        hasMoreHistory={hasMoreHistory}
+        onLoadOlderMessages={loadOlderMessages}
+        activityLegacyId={activityLegacyId}
+        userAvatar={userAvatar}
+        userName={userName}
+        userGender={userGender}
+        onSelectSuggestedReply={onSelectSuggestedReply}
+        onRegenerateTravelGuide={onRegenerateTravelGuide}
+        onBuddyPostFromTravelGuide={onBuddyPostFromTravelGuide}
+        onRunCapability={onRunCapability}
+        onOpenPersonalityTest={onOpenPersonalityTest}
+      />
+    </View>
+  );
+});
 
 export function AiAssistantChat({
   layoutRemeasureKey = 0,
@@ -57,13 +171,16 @@ export function AiAssistantChat({
 
   const scrollRemeasureKey = `${pageShowSeq ?? 0}:${layoutRemeasureKey}:${accountRisk?.status ?? 'normal'}`;
   const sheetOverlayOpen = travelGuideSheetOpen || buddyPost.sheetOpen;
-  const scrollAreaHeight = useAiChatScrollAreaHeight(scrollRemeasureKey, {
-    enabled: !sheetOverlayOpen,
-  });
   const chatKeyboardInset = sheetOverlayOpen ? 0 : keyboardInset;
   const closeTravelGuideSheet = useCallback(() => {
     setTravelGuideSheetOpen(false);
   }, [setTravelGuideSheetOpen]);
+  const handleRunCapability = useCallback(
+    (capability: AiCapability) => {
+      capabilities.capabilityRunner.runCapability(capability, { source: 'chat' });
+    },
+    [capabilities.capabilityRunner],
+  );
 
   return (
     <View className="s-ai-assistant-chat">
@@ -71,50 +188,36 @@ export function AiAssistantChat({
         accountRisk={accountRisk}
         className="s-account-risk-banner--chat"
       />
-      <View id={AI_CHAT_SCROLL_HOST_ID} className="s-ai-assistant-chat__scroll-host">
-        <ChatMessageList
-          messages={messages}
-          isStreaming={isStreaming}
-          isTravelGuideGenerating={travelGuide.isGenerating || buddyPost.isPublishing}
-          scrollAreaHeight={scrollAreaHeight}
-          keyboardInset={chatKeyboardInset}
-          forceScrollToBottomKey={forceScrollToBottomKey}
-          isLoadingHistory={isLoadingHistory}
-          hasMoreHistory={hasMoreHistory}
-          onLoadOlderMessages={loadOlderMessages}
-          activityLegacyId={activityLegacyId}
-          userAvatar={userAvatar}
-          userName={userName}
-          userGender={userGender}
-          onSelectSuggestedReply={composer.handleSelectSuggestedReply}
-          onRegenerateTravelGuide={travelGuide.handleRegenerate}
-          onBuddyPostFromTravelGuide={buddyPost.openBuddyPostSheetFromTravelGuide}
-          onRunCapability={(capability) =>
-            capabilities.capabilityRunner.runCapability(capability, { source: 'chat' })
-          }
-          onOpenPersonalityTest={capabilities.handleOpenPersonalityTest}
-        />
-      </View>
-      <View
-        className="s-ai-assistant-chat__footer"
-        style={
-          chatKeyboardInset > 0
-            ? { paddingBottom: `${chatKeyboardInset}px` }
-            : undefined
-        }
-      >
-        <ChatComposer
-          input={composer.input}
-          isStreaming={composerBusy}
-          isLoadingHistory={isLoadingHistory}
-          activityLegacyId={activityLegacyId}
-          activityTitle={activityTitle}
-          onInputChange={composer.setInput}
-          onSubmit={composer.submit}
-          onClearChat={composer.handleClearChat}
-          clearDisabled={composerBusy}
-        />
-      </View>
+      <AiAssistantChatMessages
+        scrollRemeasureKey={scrollRemeasureKey}
+        sheetOverlayOpen={sheetOverlayOpen}
+        messages={messages}
+        isStreaming={isStreaming}
+        isTravelGuideGenerating={travelGuide.isGenerating || buddyPost.isPublishing}
+        keyboardInset={chatKeyboardInset}
+        forceScrollToBottomKey={forceScrollToBottomKey}
+        isLoadingHistory={isLoadingHistory}
+        hasMoreHistory={hasMoreHistory}
+        loadOlderMessages={loadOlderMessages}
+        activityLegacyId={activityLegacyId}
+        userAvatar={userAvatar}
+        userName={userName}
+        userGender={userGender}
+        onSelectSuggestedReply={composer.handleSelectSuggestedReply}
+        onRegenerateTravelGuide={travelGuide.handleRegenerate}
+        onBuddyPostFromTravelGuide={buddyPost.openBuddyPostSheetFromTravelGuide}
+        onRunCapability={handleRunCapability}
+        onOpenPersonalityTest={capabilities.handleOpenPersonalityTest}
+      />
+      <AiAssistantChatFooter
+        activityLegacyId={activityLegacyId}
+        activityTitle={activityTitle}
+        composerResetKey={composer.composerResetKey}
+        composerBusy={composerBusy}
+        keyboardInset={chatKeyboardInset}
+        onSubmit={composer.submit}
+        onClearChat={composer.handleClearChat}
+      />
 
       {buddyPost.sheetOpen ? (
         <AiBuddyPostSheet

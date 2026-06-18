@@ -32,7 +32,7 @@ export function useAiAssistantComposer(options: {
     openActivityPicker,
   } = options;
 
-  const [input, setInput] = useState('');
+  const [composerResetKey, setComposerResetKey] = useState(0);
   const submitLockRef = useRef(false);
 
   const submit = useCallback(
@@ -45,7 +45,6 @@ export function useAiAssistantComposer(options: {
 
       submitLockRef.current = true;
       try {
-        setInput('');
         await send({ text: trimmed });
       } finally {
         submitLockRef.current = false;
@@ -65,6 +64,7 @@ export function useAiAssistantComposer(options: {
     if (!ok) return;
 
     await clearChat();
+    setComposerResetKey((key) => key + 1);
   }, [clearChat, confirm, isStreaming, isStreamingRef]);
 
   const handleSelectSuggestedReply = useCallback(
@@ -125,8 +125,7 @@ export function useAiAssistantComposer(options: {
   );
 
   return {
-    input,
-    setInput,
+    composerResetKey,
     submit,
     handleClearChat,
     handleSelectSuggestedReply,

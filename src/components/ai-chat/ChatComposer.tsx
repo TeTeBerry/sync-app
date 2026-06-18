@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { memo, useCallback, useEffect, useState } from 'react';
 import { Send, Trash2 } from '../../components/icons';
 import { Button, Input, cn } from '../ui';
 import { useAiChatStore } from '../../stores/aiChatStore';
@@ -11,27 +11,30 @@ function readComposerInputValue(
   return event.detail?.value ?? '';
 }
 
-export function ChatComposer({
-  input,
+export const ChatComposer = memo(function ChatComposer({
   isStreaming,
   activityLegacyId,
   activityTitle,
-  onInputChange,
   onSubmit,
   onClearChat,
   clearDisabled = false,
-  isLoadingHistory = false,
+  resetKey = 0,
 }: {
-  input: string;
   isStreaming: boolean;
   activityLegacyId?: number;
   activityTitle?: string;
-  onInputChange: (value: string) => void;
-  onSubmit: (text: string) => void;
+  onSubmit: (text: string) => void | Promise<void>;
   onClearChat?: () => void | Promise<void>;
   clearDisabled?: boolean;
-  isLoadingHistory?: boolean;
+  /** Bump after clear-chat so the local draft resets without lifting input state. */
+  resetKey?: number;
 }) {
+  const [input, setInput] = useState('');
+
+  useEffect(() => {
+    setInput('');
+  }, [resetKey]);
+
   const conversationFlow = useAiChatStore((state) =>
     state.activeScopeKey
       ? state.buckets[state.activeScopeKey]?.conversationState?.flow
@@ -53,13 +56,19 @@ export function ChatComposer({
     return '说说你想去哪、有什么想了解的…';
   })();
 
-  const isComposerDisabled = isStreaming || isLoadingHistory;
+  const isComposerDisabled = isStreaming;
   const canSend = Boolean(input.trim()) && !isComposerDisabled;
 
   const handleSend = useCallback(() => {
-    if (!canSend) return;
-    onSubmit(input);
-  }, [canSend, input, onSubmit]);
+    const trimmed = input.trim();
+    if (!trimmed || isComposerDisabled) return;
+    setInput('');
+    void Promise.resolve(onSubmit(trimmed));
+  }, [input, isComposerDisabled, onSubmit]);
+
+  const handleInputChange = useCallback((value: string) => {
+    setInput(value);
+  }, []);
 
   return (
     <View className="s-ai-assistant-chat__composer">
@@ -72,8 +81,9 @@ export function ChatComposer({
           placeholder={inputPlaceholder}
           adjustPosition={false}
           cursorSpacing={12}
+          holdKeyboard
           confirmType="send"
-          onInput={(e) => onInputChange(readComposerInputValue(e))}
+          onInput={(e) => handleInputChange(readComposerInputValue(e))}
           onConfirm={handleSend}
         />
         <Button
@@ -100,4 +110,4 @@ export function ChatComposer({
       </Text>
     </View>
   );
-}
+});

@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import Taro from '@tarojs/taro';
 import { useBuddyPostSheetController } from '../../../hooks/useBuddyPostSheetController';
 import type { EventDetailPost } from '../../../types/post';
@@ -26,6 +26,7 @@ export function useEventDetailBuddyPost(
   },
 ) {
   const [isPublishing, setIsPublishing] = useState(false);
+  const publishingRef = useRef(false);
   const {
     sheetOpen,
     setSheetOpen,
@@ -59,11 +60,17 @@ export function useEventDetailBuddyPost(
       },
     ): Promise<boolean> => {
       if (!Number.isFinite(eventId) || eventId <= 0) return false;
-      if (isPublishing) return false;
+      if (publishingRef.current) return false;
 
-      if (!(await guardPublish())) return false;
+      publishingRef.current = true;
+
+      if (!(await guardPublish())) {
+        publishingRef.current = false;
+        return false;
+      }
 
       if (!isApiEnabled()) {
+        publishingRef.current = false;
         void Taro.showToast({ title: '请先配置 API 地址', icon: 'none' });
         return false;
       }
@@ -105,7 +112,6 @@ export function useEventDetailBuddyPost(
 
         if (!submitOptions?.skipListRefresh && listedInFeed) {
           options.replacePost?.(pendingId, post);
-          void options.refreshPosts?.({ silent: true });
         }
         return true;
       } catch (error) {
@@ -120,10 +126,11 @@ export function useEventDetailBuddyPost(
         setSheetOpen(true);
         return false;
       } finally {
+        publishingRef.current = false;
         setIsPublishing(false);
       }
     },
-    [eventId, guardPublish, handlePublishError, isPublishing, options, setSheetOpen],
+    [eventId, guardPublish, handlePublishError, options, setSheetOpen],
   );
 
   return {

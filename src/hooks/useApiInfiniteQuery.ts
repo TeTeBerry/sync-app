@@ -72,10 +72,12 @@ export function useApiInfiniteQuery<TItem extends Identifiable>(
   queryFnRef.current = queryFn;
   const itemsRef = useRef(items);
   itemsRef.current = items;
+  const skipSyncRef = useRef(false);
 
   const writeCache = useCallback(
     (page: InfiniteQueryPage<TItem>) => {
       if (ephemeral) return;
+      skipSyncRef.current = true;
       setCacheData<InfiniteQueryPage<TItem>>(queryKey, () => page);
       broadcastCacheData(queryKey);
     },
@@ -103,6 +105,10 @@ export function useApiInfiniteQuery<TItem extends Identifiable>(
   );
 
   const syncFromCache = useCallback(() => {
+    if (skipSyncRef.current) {
+      skipSyncRef.current = false;
+      return;
+    }
     const entry = readCache();
     if (!entry) return;
     setItems(entry.items);

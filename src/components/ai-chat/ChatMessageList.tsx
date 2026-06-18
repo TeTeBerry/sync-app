@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef } from 'react';
+import { memo, useCallback, useMemo, useRef } from 'react';
 import type { ChatUiMessage } from '../../types/aiChat';
 import type { AiGuidePlanFormValues } from '../../types/travelGuide';
 import type { AuthorGender } from '../../utils/inferAuthorGender';
@@ -11,7 +11,7 @@ import { CHAT_SCROLL_BOTTOM_ID } from './chatScrollBottom';
 import { shouldSuppressAutoScrollForMessage } from './chatMessageListScroll';
 import { ScrollView, View } from '@tarojs/components';
 
-export function ChatMessageList({
+export const ChatMessageList = memo(function ChatMessageList({
   messages,
   isStreaming,
   isTravelGuideGenerating = false,
@@ -168,4 +168,4 @@ export function ChatMessageList({
       </View>
     </ScrollView>
   );
-}
+});
