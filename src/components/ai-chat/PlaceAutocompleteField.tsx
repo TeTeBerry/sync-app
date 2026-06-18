@@ -16,6 +16,8 @@ import { Input, ScrollView, Text, View } from '@tarojs/components';
 export type PlaceAutocompleteFieldProps = {
   value: string;
   onChange: (value: string) => void;
+  /** Called when user picks a suggestion or clears the city anchor by typing. */
+  onCityChange?: (city: string | undefined) => void;
   placeholder: string;
   /** Activity host city — biases POI suggestions when keyword is empty. */
   eventCity?: string;
@@ -31,6 +33,7 @@ export type PlaceAutocompleteFieldProps = {
 export function PlaceAutocompleteField({
   value,
   onChange,
+  onCityChange,
   placeholder,
   eventCity,
   active = true,
@@ -85,15 +88,17 @@ export function PlaceAutocompleteField({
   const pickSuggestion = useCallback(
     (item: DepartureSuggestionItem) => {
       pickingSuggestionRef.current = true;
+      const city = departureCityFromSuggestion(item);
       onChange(departureDisplayValue(item));
-      setRegionCity(departureCityFromSuggestion(item));
+      setRegionCity(city);
+      onCityChange?.(city);
       setPlaceSuggestions([]);
       setShowSuggestions(false);
       setTimeout(() => {
         pickingSuggestionRef.current = false;
       }, 400);
     },
-    [onChange],
+    [onChange, onCityChange],
   );
 
   return (
@@ -109,11 +114,14 @@ export function PlaceAutocompleteField({
           placeholder={placeholder}
           placeholderClass="s-ai-guide-plan-sheet__input-placeholder"
           confirmType="done"
+          holdKeyboard={process.env.TARO_ENV === 'weapp'}
+          adjustPosition={false}
           onFocus={() => setShowSuggestions(true)}
           onInput={(e) => {
             if (pickingSuggestionRef.current) return;
             onChange(e.detail.value ?? '');
             setRegionCity(undefined);
+            onCityChange?.(undefined);
             setShowSuggestions(true);
           }}
           onBlur={() => {

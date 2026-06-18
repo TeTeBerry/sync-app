@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { ChatMessageList } from '../../../components/ai-chat/ChatMessageList';
 import { ChatComposer } from '../../../components/ai-chat/ChatComposer';
 import { AccountRiskBanner } from '../../../components/account-risk/AccountRiskBanner';
@@ -45,11 +45,25 @@ export function AiAssistantChat({
   } = useAiAssistantOrchestrator(orchestratorOptions);
 
   const { buddyPost, travelGuide, composerBusy } = capabilities;
+  const {
+    sheetOpen: travelGuideSheetOpen,
+    setSheetOpen: setTravelGuideSheetOpen,
+    defaultNights: travelGuideDefaultNights,
+    sheetInitialValues: travelGuideSheetInitialValues,
+    handleSheetSubmit: handleTravelGuideSheetSubmit,
+  } = travelGuide;
   const { activityLegacyId, activityTitle, userAvatar, userName, pageShowSeq } =
     orchestratorOptions;
 
   const scrollRemeasureKey = `${pageShowSeq ?? 0}:${layoutRemeasureKey}:${accountRisk?.status ?? 'normal'}`;
-  const scrollAreaHeight = useAiChatScrollAreaHeight(scrollRemeasureKey);
+  const sheetOverlayOpen = travelGuideSheetOpen || buddyPost.sheetOpen;
+  const scrollAreaHeight = useAiChatScrollAreaHeight(scrollRemeasureKey, {
+    enabled: !sheetOverlayOpen,
+  });
+  const chatKeyboardInset = sheetOverlayOpen ? 0 : keyboardInset;
+  const closeTravelGuideSheet = useCallback(() => {
+    setTravelGuideSheetOpen(false);
+  }, [setTravelGuideSheetOpen]);
 
   return (
     <View className="s-ai-assistant-chat">
@@ -63,7 +77,7 @@ export function AiAssistantChat({
           isStreaming={isStreaming}
           isTravelGuideGenerating={travelGuide.isGenerating || buddyPost.isPublishing}
           scrollAreaHeight={scrollAreaHeight}
-          keyboardInset={keyboardInset}
+          keyboardInset={chatKeyboardInset}
           forceScrollToBottomKey={forceScrollToBottomKey}
           isLoadingHistory={isLoadingHistory}
           hasMoreHistory={hasMoreHistory}
@@ -83,7 +97,11 @@ export function AiAssistantChat({
       </View>
       <View
         className="s-ai-assistant-chat__footer"
-        style={keyboardInset > 0 ? { paddingBottom: `${keyboardInset}px` } : undefined}
+        style={
+          chatKeyboardInset > 0
+            ? { paddingBottom: `${chatKeyboardInset}px` }
+            : undefined
+        }
       >
         <ChatComposer
           input={composer.input}
@@ -112,16 +130,14 @@ export function AiAssistantChat({
         />
       ) : null}
 
-      {travelGuide.sheetOpen ? (
-        <AiGuidePlanSheet
-          open
-          defaultNights={travelGuide.defaultNights}
-          eventCity={guideEventCity}
-          initialValues={travelGuide.sheetInitialValues}
-          onClose={() => travelGuide.setSheetOpen(false)}
-          onSubmit={travelGuide.handleSheetSubmit}
-        />
-      ) : null}
+      <AiGuidePlanSheet
+        open={travelGuideSheetOpen}
+        defaultNights={travelGuideDefaultNights}
+        eventCity={guideEventCity}
+        initialValues={travelGuideSheetInitialValues}
+        onClose={closeTravelGuideSheet}
+        onSubmit={handleTravelGuideSheetSubmit}
+      />
 
       {activityBinding.activityPickerOpen ? (
         <AiActivityPickerSheet

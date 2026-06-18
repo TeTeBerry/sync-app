@@ -1,9 +1,8 @@
 import './AiGuidePlanSheet.scss';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useCallback } from 'react';
 import {
   BedDouble,
   Car,
-  MapPin,
   Minus,
   Plus,
   Sparkles,
@@ -13,24 +12,11 @@ import {
 import { Button, cn } from '../ui';
 import { GENERATE_TRAVEL_GUIDE_CTA } from '../../constants/aiCtaLabels';
 import { useOverlayLock } from '../../hooks/useOverlayLock';
-import {
-  fetchTravelGuidePlaceSuggestions,
-  type TravelGuidePlaceSuggestion,
-} from '../../api/sync/travelGuide';
-import {
-  departureCityFromSuggestion,
-  departureDisplayValue,
-  mapPlaceSuggestionsToDepartureItems,
-  normalizeDepartureForSubmit,
-  suggestionRegionForKeyword,
-  type DepartureSuggestionItem,
-} from '../../utils/travelGuideDepartureSuggestions';
-import type {
-  AiGuidePlanFormValues,
-  TravelGuideBudgetTier,
-} from '../../types/travelGuide';
+import type { AiGuidePlanFormValues } from '../../types/travelGuide';
 import { TRAVEL_GUIDE_BUDGET_OPTIONS } from '../../types/travelGuide';
-import { Input, ScrollView, Text, View } from '@tarojs/components';
+import { PlaceAutocompleteField } from './PlaceAutocompleteField';
+import { useAiGuidePlanSheetForm } from './useAiGuidePlanSheetForm';
+import { ScrollView, Text, View } from '@tarojs/components';
 
 export type AiGuidePlanSheetProps = {
   open: boolean;
@@ -104,7 +90,7 @@ function ThemeToggle({
   );
 }
 
-export function AiGuidePlanSheet({
+function AiGuidePlanSheetInner({
   open,
   defaultNights,
   eventCity,
@@ -114,101 +100,33 @@ export function AiGuidePlanSheet({
 }: AiGuidePlanSheetProps) {
   useOverlayLock(open);
 
-  const [scrollTop, setScrollTop] = useState(0);
-  const [departure, setDeparture] = useState('');
-  const [departureCity, setDepartureCity] = useState<string | undefined>();
-  const [headcount, setHeadcount] = useState(2);
-  const [accommodationNights, setAccommodationNights] = useState(defaultNights);
-  const [budgetTier, setBudgetTier] = useState<TravelGuideBudgetTier>('standard');
-  const [selfDrive, setSelfDrive] = useState(false);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [placeSuggestions, setPlaceSuggestions] = useState<
-    TravelGuidePlaceSuggestion[]
-  >([]);
-  const pickingSuggestionRef = useRef(false);
+  const form = useAiGuidePlanSheetForm({
+    open,
+    defaultNights,
+    initialValues,
+    onSubmit,
+  });
+  const {
+    setDeparture,
+    setDepartureCity,
+    setAccommodationNights,
+    setBudgetTier,
+    setSelfDrive,
+  } = form;
 
-  useEffect(() => {
-    if (!open) return;
-    setScrollTop(0);
-    if (initialValues) {
-      setDeparture(initialValues.departure);
-      setDepartureCity(initialValues.departureCity);
-      setHeadcount(initialValues.headcount);
-      setAccommodationNights(initialValues.accommodationNights);
-      setBudgetTier(initialValues.budgetTier);
-      setSelfDrive(Boolean(initialValues.selfDrive));
-      return;
-    }
-    setDeparture('');
-    setDepartureCity(undefined);
-    setHeadcount(2);
-    setAccommodationNights(defaultNights);
-    setBudgetTier('standard');
-    setSelfDrive(false);
-  }, [defaultNights, initialValues, open]);
-
-  useEffect(() => {
-    if (!open || !showSuggestions) {
-      setPlaceSuggestions([]);
-      return;
-    }
-    const q = departure.trim();
-    const region = suggestionRegionForKeyword(q, {
-      departureCity,
-      eventCity,
-    });
-    const timer = setTimeout(
-      () => {
-        void fetchTravelGuidePlaceSuggestions(q, region)
-          .then((res) => {
-            setPlaceSuggestions(res.data ?? []);
-          })
-          .catch(() => setPlaceSuggestions([]));
-      },
-      q ? 280 : 0,
-    );
-    return () => clearTimeout(timer);
-  }, [departure, departureCity, eventCity, open, showSuggestions]);
-
-  const departureSuggestions = useMemo(
-    (): DepartureSuggestionItem[] =>
-      mapPlaceSuggestionsToDepartureItems(placeSuggestions),
-    [placeSuggestions],
+  const handleDepartureChange = useCallback(
+    (value: string) => {
+      setDeparture(value);
+    },
+    [setDeparture],
   );
 
-  const canSubmit = Boolean(departure.trim());
-
-  const pickSuggestion = useCallback((item: DepartureSuggestionItem) => {
-    pickingSuggestionRef.current = true;
-    setDeparture(departureDisplayValue(item));
-    setDepartureCity(departureCityFromSuggestion(item));
-    setPlaceSuggestions([]);
-    setShowSuggestions(false);
-    setTimeout(() => {
-      pickingSuggestionRef.current = false;
-    }, 400);
-  }, []);
-
-  const handleSubmit = useCallback(() => {
-    if (!canSubmit) return;
-    onSubmit({
-      departure: normalizeDepartureForSubmit(departure),
-      departureCity: departureCity?.trim() || undefined,
-      headcount,
-      budgetTier,
-      selfDrive,
-      accommodationNights,
-    });
-  }, [
-    accommodationNights,
-    budgetTier,
-    canSubmit,
-    departure,
-    departureCity,
-    headcount,
-    onSubmit,
-    selfDrive,
-  ]);
+  const handleDepartureCityChange = useCallback(
+    (city: string | undefined) => {
+      setDepartureCity(city);
+    },
+    [setDepartureCity],
+  );
 
   if (!open) return null;
 
@@ -254,79 +172,28 @@ export function AiGuidePlanSheet({
           </Button>
         </View>
 
+        <View className="s-ai-guide-plan-sheet__body-outer">
+          <PlaceAutocompleteField
+            label="出发地"
+            hint="跨城填出发城市（如「上海」）；同城可填公司、车站等具体地点"
+            value={form.departure}
+            onChange={handleDepartureChange}
+            onCityChange={handleDepartureCityChange}
+            placeholder="请输入出发地址"
+            eventCity={eventCity}
+            active={open}
+          />
+        </View>
+
         <ScrollView
           scrollY
           enhanced
           showScrollbar={false}
-          scrollTop={scrollTop}
+          scrollTop={form.scrollTop}
           className="s-ai-guide-plan-sheet__scroll s-scrollbar-none"
           style={{ flex: 1, height: 0, minHeight: 0 }}
         >
           <View className="s-ai-guide-plan-sheet__body">
-            <View className="s-ai-guide-plan-sheet__field">
-              <Text className="s-ai-guide-plan-sheet__label">出发地</Text>
-              <Text className="s-ai-guide-plan-sheet__hint">
-                跨城填出发城市（如「上海」）；同城可填公司、车站等具体地点
-              </Text>
-              <View className="s-ai-guide-plan-sheet__input-wrap">
-                <MapPin
-                  size={18}
-                  className="s-ai-guide-plan-sheet__input-icon"
-                  aria-hidden
-                />
-                <Input
-                  className="s-ai-guide-plan-sheet__input"
-                  type="text"
-                  value={departure}
-                  placeholder="请输入出发地址"
-                  placeholderClass="s-ai-guide-plan-sheet__input-placeholder"
-                  confirmType="done"
-                  onFocus={() => setShowSuggestions(true)}
-                  onInput={(e) => {
-                    if (pickingSuggestionRef.current) return;
-                    setDeparture(e.detail.value ?? '');
-                    setDepartureCity(undefined);
-                    setShowSuggestions(true);
-                  }}
-                  onBlur={() => {
-                    setTimeout(() => {
-                      if (pickingSuggestionRef.current) return;
-                      setShowSuggestions(false);
-                    }, 320);
-                  }}
-                />
-              </View>
-              {showSuggestions && departureSuggestions.length > 0 ? (
-                <ScrollView
-                  scrollY
-                  enhanced
-                  showScrollbar={false}
-                  className="s-ai-guide-plan-sheet__suggest-list s-scrollbar-none"
-                >
-                  {departureSuggestions.map((item) => (
-                    <View
-                      key={`${item.kind}-${item.label}-${item.address ?? ''}`}
-                      className="s-ai-guide-plan-sheet__suggest-item"
-                      hoverClass="s-ai-guide-plan-sheet__suggest-item--pressed"
-                      hoverStayTime={80}
-                      onTap={() => pickSuggestion(item)}
-                    >
-                      <Text className="s-ai-guide-plan-sheet__suggest-title">
-                        {item.kind === 'city' ? `${item.label}（城市）` : item.label}
-                      </Text>
-                      {item.kind === 'place' &&
-                      item.address &&
-                      item.address !== item.label ? (
-                        <Text className="s-ai-guide-plan-sheet__suggest-meta s-line-clamp-2">
-                          {item.address}
-                        </Text>
-                      ) : null}
-                    </View>
-                  ))}
-                </ScrollView>
-              ) : null}
-            </View>
-
             <View className="s-ai-guide-plan-sheet__field">
               <Text className="s-ai-guide-plan-sheet__label">出行人数</Text>
               <View className="s-ai-guide-plan-sheet__card">
@@ -338,14 +205,14 @@ export function AiGuidePlanSheet({
                       aria-hidden
                     />
                     <Text className="s-ai-guide-plan-sheet__card-summary-text">
-                      {headcount} 人
+                      {form.headcount} 人
                     </Text>
                   </View>
                   <InlineStepper
-                    value={headcount}
+                    value={form.headcount}
                     min={1}
                     max={10}
-                    onChange={setHeadcount}
+                    onChange={form.setHeadcount}
                   />
                 </View>
               </View>
@@ -355,7 +222,7 @@ export function AiGuidePlanSheet({
               <Text className="s-ai-guide-plan-sheet__label">住宿预算 / 晚</Text>
               <View className="s-ai-guide-plan-sheet__budget-row">
                 {TRAVEL_GUIDE_BUDGET_OPTIONS.map((opt) => {
-                  const active = budgetTier === opt.id;
+                  const active = form.budgetTier === opt.id;
                   return (
                     <Button
                       key={opt.id}
@@ -394,7 +261,7 @@ export function AiGuidePlanSheet({
                   </View>
                 </View>
                 <ThemeToggle
-                  checked={selfDrive}
+                  checked={form.selfDrive}
                   ariaLabel="是否自驾"
                   onChange={setSelfDrive}
                 />
@@ -412,11 +279,11 @@ export function AiGuidePlanSheet({
                       aria-hidden
                     />
                     <Text className="s-ai-guide-plan-sheet__card-summary-text">
-                      {accommodationNights} 晚
+                      {form.accommodationNights} 晚
                     </Text>
                   </View>
                   <InlineStepper
-                    value={accommodationNights}
+                    value={form.accommodationNights}
                     min={1}
                     max={7}
                     onChange={setAccommodationNights}
@@ -431,11 +298,11 @@ export function AiGuidePlanSheet({
           <Button
             className={cn(
               's-ai-guide-plan-sheet__submit',
-              !canSubmit && 's-ai-guide-plan-sheet__submit--disabled',
+              !form.canSubmit && 's-ai-guide-plan-sheet__submit--disabled',
             )}
-            disabled={!canSubmit}
-            hoverClass={canSubmit ? 's-ai-guide-plan-sheet__submit--pressed' : ''}
-            onClick={handleSubmit}
+            disabled={!form.canSubmit}
+            hoverClass={form.canSubmit ? 's-ai-guide-plan-sheet__submit--pressed' : ''}
+            onClick={form.handleSubmit}
           >
             <Sparkles size={18} color="#fff" aria-hidden />
             <Text className="s-ai-guide-plan-sheet__submit-text">
@@ -447,3 +314,5 @@ export function AiGuidePlanSheet({
     </View>
   );
 }
+
+export const AiGuidePlanSheet = memo(AiGuidePlanSheetInner);

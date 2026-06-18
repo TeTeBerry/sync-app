@@ -167,13 +167,13 @@ export function useAiTravelGuide(options: {
     ],
   );
 
-  const handleSheetSubmit = useCallback(
-    (form: AiGuidePlanFormValues) => {
-      setSheetOpen(false);
-      void runGeneration(form);
-    },
-    [runGeneration],
-  );
+  const runGenerationRef = useRef(runGeneration);
+  runGenerationRef.current = runGeneration;
+
+  const handleSheetSubmit = useCallback((form: AiGuidePlanFormValues) => {
+    setSheetOpen(false);
+    void runGenerationRef.current(form);
+  }, []);
 
   const handleRegenerate = useCallback((form: AiGuidePlanFormValues) => {
     requireAuth(() => {
