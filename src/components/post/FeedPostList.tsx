@@ -3,6 +3,7 @@ import { memo, useMemo, type FC } from 'react';
 import { HOME_FEED_INITIAL_RENDER } from '../../constants/listPerf';
 import { useWindowedList } from '../../hooks/useWindowedList';
 import { PostOwnerDeleteButton } from './PostOwnerDeleteButton';
+import { ContentReportMenuButton } from '../report';
 import { MapPin, Ticket } from '../icons';
 import { WechatEmojiText } from '../wechat-emoji/WechatEmojiText';
 import type { HomeFeedPost } from '../../types/post';
@@ -62,6 +63,14 @@ function FeedPostRowInner({ post, onDelete }: FeedPostRowProps) {
         {isOwn && onDelete ? (
           <View className="s-home-post__head-actions" onClick={stopClickPropagation}>
             <PostOwnerDeleteButton onDelete={() => onDelete(post)} />
+          </View>
+        ) : !isOwn && post.id ? (
+          <View className="s-home-post__head-actions" onClick={stopClickPropagation}>
+            <ContentReportMenuButton
+              targetType="post"
+              targetId={post.id}
+              targetUserId={post.userId}
+            />
           </View>
         ) : null}
       </View>

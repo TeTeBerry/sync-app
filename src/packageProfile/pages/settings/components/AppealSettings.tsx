@@ -49,7 +49,7 @@ export function AppealSettings() {
       <View className="s-settings__card s-appeal-settings__steps">
         <Text className="s-appeal-settings__section-title">申诉步骤</Text>
         <Text className="s-appeal-settings__step">
-          1. 回顾近期在 AI 对话、现场资讯等场景的发言是否含违规表述
+          1. 回顾近期在 AI 对话、发帖与评论等场景的发言是否含违规表述
         </Text>
         <Text className="s-appeal-settings__step">2. {SUPPORT_FEEDBACK_HINT}</Text>
         <Text className="s-appeal-settings__step">

@@ -9,3 +9,4 @@ export * from './travelGuide';
 export * from './travelPlan';
 export * from './personalityTest';
 export * from './festivalPlanProgress';
+export * from './reports';

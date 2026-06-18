@@ -5,6 +5,7 @@ import {
   PostCommentSection,
   PostOwnerDeleteButton,
 } from '../../../components/post';
+import { ContentReportMenuButton } from '../../../components/report';
 import { ImageWithFallback } from '../../../components/ImageWithFallback';
 import { isCurrentUserPostAuthor } from '../../../utils/postOwnership';
 import type { EventDetailPost } from '../../../types/backend';
@@ -84,6 +85,17 @@ function EventPostCardInner({
                 onClick={stopClickPropagation}
               >
                 <PostOwnerDeleteButton onDelete={() => onDelete(post)} />
+              </View>
+            ) : !isOwn ? (
+              <View
+                className="s-event-post__head-actions"
+                onClick={stopClickPropagation}
+              >
+                <ContentReportMenuButton
+                  targetType="post"
+                  targetId={post.id}
+                  targetUserId={post.userId}
+                />
               </View>
             ) : null}
           </View>

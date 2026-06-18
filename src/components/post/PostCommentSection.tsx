@@ -13,6 +13,7 @@ import {
 } from '../../utils/postOwnership';
 import type { EventDetailPost, PostCommentItem } from '../../types/backend';
 import { Button, cn, Input } from '../ui';
+import { ContentReportMenuButton } from '../report';
 import { Image, Text, View } from '@tarojs/components';
 
 const DEFAULT_AVATAR = PLACEHOLDER_AVATAR;
@@ -57,6 +58,7 @@ function CommentRow({
     postAuthorName,
     postAuthorUserId,
   );
+  const isOwnComment = isCurrentUserPostAuthor(comment.authorName, comment.userId);
   const canReply =
     isPostAuthor && !isPostAuthorComment && !nested && !comment.replies?.length;
 
@@ -70,9 +72,19 @@ function CommentRow({
           src={sanitizeRemoteImageUrl(comment.avatar) || DEFAULT_AVATAR}
         />
         <View className="s-post-comments__body-wrap">
-          <View className="s-post-comments__meta">
-            <Text className="s-post-comments__author">{comment.authorName}</Text>
-            <Text className="s-post-comments__time">{comment.time}</Text>
+          <View className="s-post-comments__meta-row">
+            <View className="s-post-comments__meta">
+              <Text className="s-post-comments__author">{comment.authorName}</Text>
+              <Text className="s-post-comments__time">{comment.time}</Text>
+            </View>
+            {!isOwnComment ? (
+              <ContentReportMenuButton
+                targetType="comment"
+                targetId={comment.id}
+                targetUserId={comment.userId}
+                ariaLabel="举报评论"
+              />
+            ) : null}
           </View>
           <Text className="s-post-comments__body">{comment.body}</Text>
           {canReply ? (
