@@ -4,10 +4,6 @@ import {
   type RaverAvatarAssetKey,
 } from '../data/personalityRaverAvatarCatalog';
 
-function isCatalogAvatarKey(key: string): boolean {
-  return (RAVER_AVATAR_ASSET_KEYS as readonly string[]).includes(key);
-}
-
 function pickRandom<T>(items: readonly T[], random: () => number): T {
   const index = Math.floor(random() * items.length);
   return items[Math.min(Math.max(index, 0), items.length - 1)]!;
@@ -17,6 +13,10 @@ export function generatePersonalityRaverAvatarKey(
   random: () => number = Math.random,
 ): RaverAvatarAssetKey {
   return pickRandom(RAVER_AVATAR_ASSET_KEYS, random);
+}
+
+export function isCatalogAvatarKey(key: string): boolean {
+  return (RAVER_AVATAR_ASSET_KEYS as readonly string[]).includes(key);
 }
 
 export function ensurePersonalityResultAvatar(

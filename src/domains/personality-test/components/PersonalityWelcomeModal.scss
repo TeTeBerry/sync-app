@@ -116,7 +116,12 @@ $welcome-muted: #8e8e93;
     box-shadow: none;
 
     .s-personality-welcome-modal__cta-label {
-      color: var(--primary);
+      color: var(--muted-foreground);
+    }
+
+    &:active {
+      opacity: 1;
+      background: rgba(255, 255, 255, 0.18);
     }
   }
 }

@@ -68,7 +68,7 @@ export function PersonalityWelcomeModal({
         >
           {onLoginSave ? (
             <View
-              className="s-personality-welcome-modal__cta s-personality-welcome-modal__cta--secondary"
+              className="s-personality-welcome-modal__cta"
               hoverClass="s-personality-welcome-modal__cta--pressed"
               onClick={onLoginSave}
             >
@@ -78,7 +78,7 @@ export function PersonalityWelcomeModal({
             </View>
           ) : null}
           <View
-            className="s-personality-welcome-modal__cta"
+            className="s-personality-welcome-modal__cta s-personality-welcome-modal__cta--secondary"
             hoverClass="s-personality-welcome-modal__cta--pressed"
             onClick={onClose}
           >

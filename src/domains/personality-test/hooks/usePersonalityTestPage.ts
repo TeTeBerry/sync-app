@@ -239,7 +239,6 @@ export function usePersonalityTestPage() {
 
   const persistNicknameAfterLogin = useCallback(
     async (current: PersonalityTestResult) => {
-      await restorePersonalityTestResultFromServer();
       const saved = await persistPersonalityTestResultToServer(current);
       savePersonalityTestResult(saved);
       setResult(saved);

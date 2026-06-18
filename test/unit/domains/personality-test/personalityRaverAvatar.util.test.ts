@@ -56,11 +56,11 @@ describe('personalityRaverAvatar.util', () => {
   it('preserves existing avatar key for current identity version', () => {
     const existing = {
       ...baseResult,
-      raverAvatarKey: 'avatar/03.webp',
+      raverAvatarKey: 'avatar/cat-cyan-headphones.png',
       raverIdentityVersion: 2,
     };
     expect(ensurePersonalityResultAvatar(existing).raverAvatarKey).toBe(
-      'avatar/03.webp',
+      'avatar/cat-cyan-headphones.png',
     );
   });
 
@@ -81,11 +81,11 @@ describe('personalityRaverAvatar.util', () => {
     const current = {
       ...baseResult,
       raverNickname: '小滤波酱A1B2',
-      raverAvatarKey: 'avatar/03.webp',
+      raverAvatarKey: 'avatar/cat-cyan-headphones.png',
       raverIdentityVersion: 2,
     };
     const next = ensurePersonalityResultIdentity(current);
-    expect(next.raverAvatarKey).toBe('avatar/03.webp');
+    expect(next.raverAvatarKey).toBe('avatar/cat-cyan-headphones.png');
     expect(next.raverNickname).toBe('小滤波酱A1B2');
   });
 

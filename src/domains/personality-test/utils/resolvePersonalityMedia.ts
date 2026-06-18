@@ -11,6 +11,7 @@ function readCachedUrl(cacheKey: string): string | undefined {
     mediaUrlCache.delete(cacheKey);
     return undefined;
   }
+  if (!cached.url) return undefined; // <-- 不返回空字符串
   return cached.url;
 }
 
@@ -87,7 +88,9 @@ export async function resolvePersonalityMediaUrl(source?: string): Promise<strin
 
   const cacheKey = trimmed.startsWith('cloud://') ? trimmed : assetKey;
   const cached = readCachedUrl(cacheKey);
-  if (cached) return cached;
+  if (cached) {
+    return cached;
+  }
 
   const backendUrls = await fetchBackendUrls([assetKey]);
   const backendUrl = backendUrls[assetKey]?.trim() ?? '';
