@@ -105,6 +105,7 @@ export function AiAssistantChat({
         eventCity={guideEventCity}
         initialValues={buddyPost.sheetInitialValues}
         prefillSummaryLines={buddyPost.sheetPrefillHint}
+        postQuota={buddyPost.sheetPostQuota ?? undefined}
         onClose={buddyPost.closeBuddyPostSheet}
         onSubmit={buddyPost.handleSheetSubmit}
       />
@@ -125,6 +126,7 @@ export function AiAssistantChat({
       />
 
       {confirmDialog}
+      {buddyPost.complianceConfirmDialog}
     </View>
   );
 }

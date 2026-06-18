@@ -16,6 +16,8 @@ import { useEventDetailPage } from './useEventDetailPage';
 import { AiBuddyPostSheet } from '../../../components/ai-chat/AiBuddyPostSheet';
 import { AiGuidePlanSheet } from '../../../components/ai-chat/AiGuidePlanSheet';
 import PageNavigation from '../../../components/navigation/PageNavigation';
+import { Button } from '../../../components/ui';
+import { Share2 } from '../../../components/icons';
 import { OverlayAwareScrollView } from '../../../components/layout/OverlayAwareScrollView';
 import { PlatformDisclaimer } from '../../../components/legal/PlatformDisclaimer';
 import { ROUTES } from '../../../utils/route';
@@ -72,6 +74,9 @@ const EventDetailPage = () => {
     guideDefaultNights,
     guideEventCity,
     currentUserAvatar,
+    publishComplianceConfirmDialog,
+    buddyPostQuota,
+    isWeapp,
   } = page;
 
   return (
@@ -91,6 +96,17 @@ const EventDetailPage = () => {
           title={title || (showHeaderSkeleton ? '加载中…' : '')}
           meta={metaLine || undefined}
           fallback={ROUTES.EVENTS}
+          trailing={
+            !showHeaderSkeleton && isWeapp ? (
+              <Button
+                className="s-page-nav__icon-action"
+                aria-label="分享活动"
+                openType="share"
+              >
+                <Share2 size={18} color="#fff" />
+              </Button>
+            ) : undefined
+          }
         />
 
         <OverlayAwareScrollView
@@ -115,7 +131,7 @@ const EventDetailPage = () => {
               onOpenExclusiveItinerary={handleOpenExclusiveItinerary}
             />
 
-            <View className="s-event-detail__posts">
+            <View id="event-detail-posts" className="s-event-detail__posts">
               {!showHeaderSkeleton ? (
                 <EventDetailPostSearchBar
                   value={posts.searchQuery}
@@ -170,12 +186,14 @@ const EventDetailPage = () => {
         />
       ) : null}
       {confirmDialog}
+      {publishComplianceConfirmDialog}
       <LoginInterceptHost />
       <AiBuddyPostSheet
         open={buddyPostSheetOpen}
         activityDate={buddyPostActivityDate}
         activityTitle={buddyPostActivityTitle}
         eventCity={guideEventCity}
+        postQuota={buddyPostQuota ?? undefined}
         onClose={closeBuddyPostSheet}
         onSubmit={(payload) => {
           void handleBuddyPostSheetSubmit(payload);

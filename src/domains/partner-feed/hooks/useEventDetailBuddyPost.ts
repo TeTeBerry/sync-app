@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
 import Taro from '@tarojs/taro';
-import { useAccountRisk } from '../../../hooks/useAccountRisk';
+import { useUgcPublishGuard } from '../../../hooks/useUgcPublishGuard';
+import { useBuddyPostQuotaGate } from '../../../hooks/useBuddyPostQuotaGate';
 import type { EventDetailPost } from '../../../types/post';
 import type { AiBuddyPostSubmitPayload } from '../../../types/buddyPost';
 import {
@@ -27,23 +28,32 @@ export function useEventDetailBuddyPost(
 ) {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
-  const { guardPublish, handlePublishError } = useAccountRisk({
-    enabled: options.accountRiskEnabled ?? true,
-  });
+  const { guardPublish, handlePublishError, complianceConfirmDialog } =
+    useUgcPublishGuard({
+      enabled: options.accountRiskEnabled ?? true,
+    });
+  const { sheetPostQuota, ensureCanOpenBuddyPostSheet, clearSheetPostQuota } =
+    useBuddyPostQuotaGate({
+      activityLegacyId: eventId,
+      activityTitle: options.activityTitle,
+    });
 
   const openBuddyPostSheet = useCallback(() => {
     if (!Number.isFinite(eventId) || eventId <= 0) {
       void Taro.showToast({ title: '活动信息无效', icon: 'none' });
       return;
     }
-    void guardPublish().then((allowed) => {
-      if (allowed) setSheetOpen(true);
+    void guardPublish().then(async (allowed) => {
+      if (!allowed) return;
+      const canOpen = await ensureCanOpenBuddyPostSheet();
+      if (canOpen) setSheetOpen(true);
     });
-  }, [eventId, guardPublish]);
+  }, [ensureCanOpenBuddyPostSheet, eventId, guardPublish]);
 
   const closeBuddyPostSheet = useCallback(() => {
     setSheetOpen(false);
-  }, []);
+    clearSheetPostQuota();
+  }, [clearSheetPostQuota]);
 
   const handleBuddyPostSheetSubmit = useCallback(
     async (
@@ -130,5 +140,7 @@ export function useEventDetailBuddyPost(
     handleBuddyPostSheetSubmit,
     buddyPostActivityDate: options.activityDate,
     buddyPostActivityTitle: options.activityTitle,
+    complianceConfirmDialog,
+    buddyPostQuota: sheetPostQuota,
   };
 }

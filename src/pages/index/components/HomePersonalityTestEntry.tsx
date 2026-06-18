@@ -51,7 +51,7 @@ export const HomePersonalityTestEntry: FC = () => {
     <View className="s-home-personality" aria-label="电音人格测试">
       <View className="s-home-personality__head">
         <Text className="s-home-personality__title">电音人格测试</Text>
-        <Text className="s-home-personality__badge">约 3 分钟</Text>
+        <Text className="s-home-personality__badge">测完可分享</Text>
       </View>
 
       <View
@@ -72,8 +72,8 @@ export const HomePersonalityTestEntry: FC = () => {
             </Text>
             <Text className="s-home-personality__card-desc">
               {cachedSoulDj
-                ? '点击查看完整人格解读、阵容推荐与分享海报'
-                : '8 道场景题（每次随机抽题），含听感题，再匹配本命 DJ 与适合你的电音节活动。'}
+                ? '点击查看完整解读，生成海报分享给好友'
+                : '8 道场景题匹配本命 DJ，生成专属海报分享给同好。'}
             </Text>
           </View>
         </View>
@@ -88,7 +88,7 @@ export const HomePersonalityTestEntry: FC = () => {
 
         <View className="s-home-personality__footer">
           <Text className="s-home-personality__meta">
-            {cachedSoulDj ? '结果已保存 · 可再测' : '登录后开始 · 结果可分享'}
+            {cachedSoulDj ? '结果已保存 · 可再测分享' : '登录后开始 · 约 3 分钟'}
           </Text>
           <View className="s-home-personality__cta">
             <Text className="s-home-personality__cta-text">

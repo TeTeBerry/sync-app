@@ -20,6 +20,8 @@ export function useEventDetailRoute() {
     () => resolveEventDetailIdFromQuery(router.params, activeActivityLegacyId),
     [activeActivityLegacyId, router.params],
   );
+  const highlightPostId = router.params.postId?.trim() ?? '';
+  const focusPostsOnMount = router.params.focusPosts === '1';
   useEffect(() => {
     if (Number.isFinite(eventId) && eventId > 0) {
       bindActivity(eventId);
@@ -36,6 +38,8 @@ export function useEventDetailRoute() {
 
   return {
     eventId,
+    highlightPostId,
+    focusPostsOnMount,
     scrollTop,
     setScrollTop,
     secondaryReady,

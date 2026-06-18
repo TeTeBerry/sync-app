@@ -7,6 +7,8 @@ import {
 describe('notificationDisplay', () => {
   it('maps interaction types to UI categories', () => {
     expect(categoryFromInteractionType('like')).toBe('general');
+    expect(categoryFromInteractionType('comment')).toBe('general');
+    expect(categoryFromInteractionType('comment_reply')).toBe('general');
     expect(categoryFromInteractionType('application')).toBe('general');
     expect(categoryFromInteractionType('team_accepted')).toBe('general');
     expect(categoryFromInteractionType('post_hidden')).toBe('system');

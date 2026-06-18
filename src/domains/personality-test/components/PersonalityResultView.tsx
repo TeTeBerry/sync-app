@@ -27,6 +27,7 @@ import { Text, View } from '@tarojs/components';
 type PersonalityResultViewProps = {
   result: PersonalityTestResult;
   onRestart: () => void;
+  isWeapp?: boolean;
 };
 
 function tierLabel(tier: string): string {
@@ -61,6 +62,7 @@ function formatSpiritConnectionLine(
 export const PersonalityResultView: FC<PersonalityResultViewProps> = ({
   result,
   onRestart,
+  isWeapp = false,
 }) => {
   const [catalog, setCatalog] = useState(() => getCachedPersonalityTestCatalog());
   const soul = result.recommendations.soulMatch;
@@ -496,6 +498,12 @@ export const PersonalityResultView: FC<PersonalityResultViewProps> = ({
           <Share2 size={15} color="#fff" />
           <Text className="s-personality-result__secondary-label">分享海报</Text>
         </Button>
+        {isWeapp ? (
+          <Button className="s-personality-result__secondary" openType="share">
+            <Share2 size={15} color="#fff" />
+            <Text className="s-personality-result__secondary-label">分享给好友</Text>
+          </Button>
+        ) : null}
       </View>
     </View>
   );

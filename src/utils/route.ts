@@ -525,7 +525,7 @@ export function go(url: RoutePath | string) {
 /** Query params for event-detail; keep `id` + `activityLegacyId` in sync for preload/navigate. */
 export function buildEventDetailQuery(
   legacyId: number,
-  options?: { postId?: string },
+  options?: { postId?: string; focusPosts?: boolean },
 ): Record<string, string> {
   const query: Record<string, string> = {
     id: String(legacyId),
@@ -535,10 +535,16 @@ export function buildEventDetailQuery(
   if (postId) {
     query.postId = postId;
   }
+  if (options?.focusPosts) {
+    query.focusPosts = '1';
+  }
   return query;
 }
 
-export function goEventDetail(eventId: number | string, options?: { postId?: string }) {
+export function goEventDetail(
+  eventId: number | string,
+  options?: { postId?: string; focusPosts?: boolean },
+) {
   const legacyId = parseActivityLegacyId(eventId);
   if (legacyId == null) {
     void Taro.showToast({ title: '活动信息无效', icon: 'none' });

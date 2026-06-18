@@ -89,7 +89,7 @@ POST /api/posts
 | 环节 | 文件 | 说明 |
 |------|------|------|
 | 剥离 | `utils/postBodyContact.ts` | 展示前移除 `联系方式：` 段（兼容历史数据） |
-| 使用处 | `EventPostCard`、`FeedPostList`、`ProfilePostsSection` | 活动详情 / 首页 / 个人页 |
+| 使用处 | `EventPostCard`、`ProfilePostsSection` | 活动详情 / 个人页 |
 
 活动详情页底部固定合规提示（`event-detail/index.tsx`）与首页底部（`pages/index/index.tsx`）：
 
@@ -111,7 +111,6 @@ POST /api/posts
 |------|------|------|
 | 发帖 | POST | `/posts` |
 | 活动帖列表 | GET | `/posts?activityLegacyId=` |
-| 热门帖 | GET | `/posts/popular` |
 | 我的帖子 | GET | `/posts`（owner 过滤）/ `GET /profile/posts` |
 | 删帖 | DELETE | `/posts/:id` |
 | 评论列表 | GET | `/posts/:id/comments` |
@@ -128,11 +127,11 @@ POST /api/posts
 - `GET /api/notifications/unread-count` — 未读数（同上过滤）
 - 前端 Tab：**全部** / **系统**（活动变更、审核结果、帖子隐藏等）
 - 深链：`navigateFromNotification`（`src/utils/route.ts`）— 读取通知 `meta.activityLegacyId` / `postId`，**不再**请求 `/posts/:id/navigation-target`
-  - `activity_update` / 含 `activityLegacyId` → `goEventDetail(legacyId, { postId? })`
+  - `activity_update` / `comment` / `comment_reply` / 含 `activityLegacyId` → `goEventDetail(legacyId, { postId? })`
   - `post_rejected` → AI 助手（带活动上下文）
   - `post_hidden` → 个人页
 
-**已移除**：点赞/评论通知推送（`NoticeAgent.notifyLike|notifyComment` 已删除）
+**评论通知**：用户评论帖子 → 通知发帖人（`type: comment`）；发帖人回复评论 → 通知被回复用户（`type: comment_reply`）。不发给自己；尊重用户「消息通知」开关。
 
 ---
 

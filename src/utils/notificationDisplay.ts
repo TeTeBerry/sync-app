@@ -16,6 +16,9 @@ export function categoryFromInteractionType(
     case 'post_hidden':
     case 'activity':
       return 'system';
+    case 'comment':
+    case 'comment_reply':
+      return 'general';
     default:
       return 'general';
   }

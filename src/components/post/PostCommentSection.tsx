@@ -2,7 +2,7 @@ import './PostCommentSection.scss';
 import Taro from '@tarojs/taro';
 import { useCallback, useState, type FC } from 'react';
 import { ChevronUp, Send } from '../icons';
-import { useAccountRisk } from '../../hooks/useAccountRisk';
+import { useUgcPublishGuard } from '../../hooks/useUgcPublishGuard';
 import { commentPostAndInvalidate, usePostCommentsQuery } from '../../hooks/sync/posts';
 import { requireAuth } from '../../utils/authGate';
 import { PLACEHOLDER_AVATAR } from '../../constants/remoteImages';
@@ -129,7 +129,8 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
   onCommentSubmitted,
 }) => {
   const commentsQuery = usePostCommentsQuery(postId, expanded);
-  const { guardPublish, handlePublishError } = useAccountRisk();
+  const { guardPublish, handlePublishError, complianceConfirmDialog } =
+    useUgcPublishGuard();
   const { hasMore, loadMore, loadingMore } = commentsQuery;
   const isPostAuthor = isCurrentUserPostAuthor(postAuthorName, postAuthorUserId);
   const [draft, setDraft] = useState('');
@@ -296,6 +297,8 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
         <Text className="s-btn-label">收起评论</Text>
         <ChevronUp size={14} />
       </Button>
+
+      {complianceConfirmDialog}
     </View>
   );
 };

@@ -50,10 +50,13 @@ REST 与自定义 `useApiQuery` 缓存的分层约定；身份为 **JWT Bearer**
 | `profile.ts`       | `/profile`             |
 | `notifications.ts` | `/notifications`       |
 | `chat.ts`          | `/chat/sessions`       |
-| `liveInfo.ts`      | `.../live-info`        |
 | `itinerary.ts`     | `.../itinerary`        |
 | `travelPlan.ts`    | `.../travel-plan`      |
 | `travelGuide.ts`   | `.../travel-guide`（生成攻略、出发地 inputtips；POI/路线由后端 **高德** API 提供） |
+| `personalityTest.ts` | `/personality-test` |
+| `festivalPlanProgress.ts` | `.../festival-plan-progress` |
+| `reports.ts`       | `/reports`             |
+| `feedback.ts`      | `/feedback`            |
 
 对外仍可从 [`api/syncApi.ts`](../src/api/syncApi.ts) barrel 导入（`import { fetchX } from '../api/syncApi'`）。
 
@@ -64,7 +67,7 @@ REST 与自定义 `useApiQuery` 缓存的分层约定；身份为 **JWT Bearer**
 | 文件               | 内容                                        |
 | ------------------ | ------------------------------------------- |
 | `activities.ts`    | 活动列表、首页 summary、详情、报名          |
-| `posts.ts`         | 热帖、活动帖、评论分页、帖互动 mutation     |
+| `posts.ts`         | 活动帖无限滚动、评论分页、删帖 mutation |
 | `profile.ts`       | 个人摘要、活动列表              |
 | `notifications.ts` | 通知列表与已读                              |
 
@@ -89,7 +92,7 @@ REST 与自定义 `useApiQuery` 缓存的分层约定；身份为 **JWT Bearer**
 | `@sync/chat-contracts` | `shared/chat/` | `types/aiChat.ts`, `types/conversationState.ts` |
 | `@sync/travel-plan-contracts` | `shared/travel-plan/` | `types/travelPlan.ts` |
 | `@sync/itinerary-contracts` | `shared/itinerary/` | `types/itinerary.ts` |
-| `@sync/live-info-contracts` | `shared/live-info/` | `types/liveInfo.ts` |
+| `@sync/festival-plan-contracts` | `shared/festival-plan/` | `types/festivalPlan.ts` |
 
 ### Chat 契约
 

@@ -1,7 +1,7 @@
 # 前端改造 Checklist
 
 > 目标：网关鉴权 + User / Activity / AiAssistant 对齐  
-> 后端对照：`sync-app-backend/docs/BACKEND-REFACTOR-CHECKLIST.md`  
+> 后端对照：`sync-app-backend/docs/archive/BACKEND-REFACTOR-CHECKLIST.md`  
 > API 契约：`docs/API.md`  
 > **策略**：H5 业务先行；登录 / JWT **整段后置**。
 

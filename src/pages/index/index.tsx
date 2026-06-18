@@ -1,8 +1,6 @@
 import './home.scss';
 import { useDidShow } from '@tarojs/taro';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import ThemedPageLoader from '../../components/ThemedPageLoader';
-import { HomeActivityFeed } from './components/HomeActivityFeed';
 import { seedActivityDetailFromFeaturedEvent } from '../../utils/activityDetailCache';
 import { prefetchEventPostsPage } from '../../cache/eventPostsPageCache';
 import { preloadEventSubpackage } from '../../utils/subpackagePreload';
@@ -11,9 +9,7 @@ import {
   useFeaturedEvents,
   useHomeSummary,
   useNotificationUnreadCount,
-  usePopularPosts,
   useRegisteredActivityLegacyIds,
-  mapHomeFeedPost,
 } from '../../hooks/useSyncApi';
 import { isActivityRegistered } from '../../utils/activityRegistration';
 import { resolveFeaturedEventCountdown } from '../../utils/activityStatus';
@@ -28,14 +24,12 @@ import {
 } from '../../utils/route';
 import { joinActivityWithAuth } from '../../utils/joinActivity';
 import { isLoggedIn } from '../../utils/authStorage';
-import { deletePostWithFeedback } from '../../utils/deletePostFeedback';
 import { HomeCountdownCard } from './components/HomeCountdownCard';
 import { HomeFeaturedEvents } from './components/HomeFeaturedEvents';
 import { HomePersonalityTestEntry } from './components/HomePersonalityTestEntry';
 import TabPageHeader from '../../components/navigation/TabPageHeader';
 import { LoginInterceptHost } from '../../components/auth/LoginInterceptHost';
 import { HomeHeaderActions } from './components/HomeHeaderActions';
-import type { HomeFeedPost } from '../../types/post';
 import {
   resolveFeaturedEventLegacyId,
   type FeaturedEvent,
@@ -52,24 +46,21 @@ const Home = () => {
     cancelText: '取消',
   });
 
-  useDidShow(() => {
-    preloadHotRoutes(ROUTES.HOME);
-    if (isLoggedIn()) {
-      void refetchHomeSummary({ background: true });
-    }
-  });
-
-  const {
-    data: summary,
-    isLoading: summaryQueryLoading,
-    refetch: refetchHomeSummary,
-  } = useHomeSummary();
-  const summaryLoading = summaryQueryLoading && !summary;
+  const { data: summary, refetch: refetchHomeSummary } = useHomeSummary();
   const heat = summary?.heat;
   const { items: featuredEvents } = useFeaturedEvents();
   const registeredLegacyIds = useRegisteredActivityLegacyIds();
   const [featuredIndex, setFeaturedIndex] = useState(0);
-  const { data: unreadCount = 0 } = useNotificationUnreadCount();
+  const { data: unreadCount = 0, refetch: refetchUnreadCount } =
+    useNotificationUnreadCount();
+
+  useDidShow(() => {
+    preloadHotRoutes(ROUTES.HOME);
+    if (isLoggedIn()) {
+      void refetchHomeSummary({ background: true });
+      void refetchUnreadCount({ background: true });
+    }
+  });
 
   useEffect(() => {
     setFeaturedIndex(0);
@@ -82,20 +73,6 @@ const Home = () => {
     }
     return resolveFeaturedEventCountdown(event);
   }, [featuredEvents, featuredIndex]);
-
-  const summaryPosts = useMemo(
-    () => (summary?.popularPosts ?? []).map(mapHomeFeedPost),
-    [summary?.popularPosts],
-  );
-  const {
-    posts: feedPosts,
-    isLoading: popularLoading,
-    isError: postsError,
-    refetch: refetchPosts,
-  } = usePopularPosts();
-
-  const posts = summaryPosts.length > 0 ? summaryPosts : feedPosts;
-  const postsLoading = posts.length === 0 && (summaryLoading || popularLoading);
 
   const handleNotification = useCallback(() => {
     requireAuth(() => goNotifications(), 'notification');
@@ -112,14 +89,17 @@ const Home = () => {
     preloadPageSafe(ROUTES.EVENT_DETAIL, buildEventDetailQuery(legacyId));
   }, []);
 
-  const openEventDetail = useCallback((event: FeaturedEvent) => {
-    const legacyId = resolveFeaturedEventLegacyId(event);
-    if (legacyId == null) {
-      return;
-    }
-    seedActivityDetailFromFeaturedEvent(event);
-    goEventDetail(legacyId);
-  }, []);
+  const openEventDetail = useCallback(
+    (event: FeaturedEvent, options?: { focusPosts?: boolean }) => {
+      const legacyId = resolveFeaturedEventLegacyId(event);
+      if (legacyId == null) {
+        return;
+      }
+      seedActivityDetailFromFeaturedEvent(event);
+      goEventDetail(legacyId, options?.focusPosts ? { focusPosts: true } : undefined);
+    },
+    [],
+  );
 
   const handleJoinEvent = useCallback(
     (event: FeaturedEvent) => {
@@ -133,27 +113,11 @@ const Home = () => {
       }
       joinActivityWithAuth(legacyId, {
         alreadyJoined: isActivityRegistered(legacyId, registeredLegacyIds),
-        onSuccess: () => openEventDetail(event),
+        confirm,
+        onSuccess: () => openEventDetail(event, { focusPosts: true }),
       });
     },
-    [openEventDetail, registeredLegacyIds],
-  );
-
-  const handleDeletePost = useCallback(
-    async (post: HomeFeedPost) => {
-      const ok = await confirm({
-        title: '确认删除',
-        message: '删除后无法恢复，确定要删除这条帖子吗？',
-        confirmText: '删除',
-      });
-      if (!ok) return;
-      requireAuth(() => {
-        void deletePostWithFeedback(post.id, {
-          refetchOnFailure: () => refetchPosts(),
-        });
-      }, 'social');
-    },
-    [confirm, refetchPosts],
+    [confirm, openEventDetail, registeredLegacyIds],
   );
 
   const activeTeamCount = heat?.people ?? 0;
@@ -198,20 +162,11 @@ const Home = () => {
 
             <HomePersonalityTestEntry />
 
-            {postsLoading ? (
-              <ThemedPageLoader variant="skeleton-feed" minHeight={240} />
-            ) : postsError ? (
-              <View
-                className="s-home-feed s-home-feed--error"
-                onClick={() => void refetchPosts()}
-                role="button"
-                aria-label="加载失败，点击重试"
-              >
-                <Text className="s-home-feed__error-text">帖子加载失败，点击重试</Text>
-              </View>
-            ) : (
-              <HomeActivityFeed items={posts} onDelete={handleDeletePost} />
-            )}
+            <View className="s-home-feed s-home-feed--muted">
+              <Text className="s-home-feed__hint">
+                报名活动后，可在活动详情查看或发布结伴帖
+              </Text>
+            </View>
 
             <View className="s-home__heat" aria-label="Today heat">
               {activeTeamCount} 人正在发现活动

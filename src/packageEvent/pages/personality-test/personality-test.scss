@@ -53,6 +53,45 @@
     line-height: 1.45;
   }
 
+  &__share-teaser {
+    margin-bottom: 14px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  &__share-teaser-kicker {
+    display: block;
+    margin-bottom: 6px;
+    color: #64d2ff;
+    font-size: var(--s-type-caption);
+    font-weight: var(--s-fw-semibold);
+  }
+
+  &__share-teaser-title {
+    display: block;
+    color: #fff;
+    font-size: var(--s-type-body);
+    font-weight: var(--s-fw-bold);
+    line-height: 1.35;
+  }
+
+  &__share-teaser-dj {
+    display: block;
+    margin-top: 6px;
+    color: #d1d1d6;
+    font-size: var(--s-type-body-sm);
+    line-height: 1.4;
+  }
+
+  &__share-teaser-cta {
+    display: block;
+    margin-top: 8px;
+    color: #ff4d94;
+    font-size: var(--s-type-body-sm);
+    font-weight: var(--s-fw-semibold);
+    line-height: 1.4;
+  }
+
   &__error {
     padding: 28px 0;
     text-align: center;

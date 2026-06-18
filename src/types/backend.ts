@@ -150,23 +150,6 @@ export interface ProfilePostItem {
   activityLegacyId?: number;
 }
 
-export type HomeFeedPostAuthorGender = 'female' | 'male';
-
-export interface HomeFeedPost {
-  id: string;
-  userId?: string;
-  authorGender?: HomeFeedPostAuthorGender;
-  name: string;
-  handle: string;
-  event: string;
-  location: string;
-  body: string;
-  time: string;
-  avatar: string;
-  activityLegacyId?: number;
-  tags?: string[];
-}
-
 export interface EventPostsPage {
   items: EventDetailPost[];
   nextCursor?: string;
@@ -246,8 +229,6 @@ export interface HomeSummary {
     attendees: number;
     going: boolean;
   }>;
-  /** Present when loaded via `GET /home` (merged to avoid extra `/posts/popular` RTT). */
-  popularPosts?: HomeFeedPost[];
 }
 
 export type NotificationType = 'general' | 'interaction' | 'system';

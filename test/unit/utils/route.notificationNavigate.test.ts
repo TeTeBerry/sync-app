@@ -84,4 +84,18 @@ describe('navigateFromNotification', () => {
 
     expect(opened).toBe(true);
   });
+
+  it('opens event detail for comment notifications with post highlight', async () => {
+    const { navigateFromNotification } = await import('@/utils/route');
+    const opened = await navigateFromNotification({
+      type: 'comment',
+      activityLegacyId: 4,
+      postId: 'post-1',
+    });
+
+    expect(opened).toBe(true);
+    const url = String(vi.mocked(Taro.navigateTo).mock.calls[0]?.[0]?.url ?? '');
+    expect(url).toContain('event-detail');
+    expect(url).toContain('postId=post-1');
+  });
 });

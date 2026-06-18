@@ -29,7 +29,7 @@ export function LoginPromptHero({
   const handleLogin = useCallback(async () => {
     if (!legalAccepted) {
       void Taro.showToast({
-        title: '请先阅读并同意用户协议与隐私政策',
+        title: '请先阅读并同意相关协议与社区规范',
         icon: 'none',
       });
       return;

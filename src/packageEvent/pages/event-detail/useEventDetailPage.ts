@@ -1,15 +1,21 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import Taro from '@tarojs/taro';
 import { useActivityDetailQuery, useCurrentUserQuery } from '../../../hooks/useSyncApi';
 import { useEventPostsInfiniteQuery } from '../../../hooks/useEventPostsInfiniteQuery';
-import { useEventDetailPosts, useEventDetailBuddyPost } from '@/domains/partner-feed';
+import {
+  useEventDetailPosts,
+  useEventDetailBuddyPost,
+  EVENT_DETAIL_SCROLL_ID,
+} from '@/domains/partner-feed';
 import { useResolvedProfile } from '../../../hooks/useResolvedProfile';
 import type { ConfirmDialogOptions } from '../../../hooks/useConfirmDialog';
 import { useEventDetailRoute } from './useEventDetailRoute';
 import { useEventDetailActivityHeader } from './useEventDetailActivityHeader';
 import { useEventDetailScrollPreserve } from './useEventDetailScrollPreserve';
 import { useEventDetailTravelGuide } from '@/domains/travel-guide';
+import { useEventDetailWechatShare } from './useEventDetailWechatShare';
 import { goExclusiveItinerary, goMyItinerary } from '../../../utils/route';
+import { scrollElementToCenter } from '../../../utils/scrollToCenter';
 
 export type UseEventDetailPageOptions = {
   confirm: (options: ConfirmDialogOptions) => Promise<boolean>;
@@ -20,10 +26,12 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
   const {
     eventId,
     highlightPostId,
+    focusPostsOnMount,
     scrollTop: routeScrollTop,
     setScrollTop,
     secondaryReady,
   } = route;
+  const focusPostsScrolledRef = useRef(false);
 
   const activityQuery = useActivityDetailQuery(eventId);
   const activityTitle = activityQuery.data?.name;
@@ -34,6 +42,8 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     hasValidEventId: route.hasValidEventId,
     activityQuery,
   });
+
+  const wechatShare = useEventDetailWechatShare({ eventId, activityQuery });
 
   const travelGuide = useEventDetailTravelGuide({
     eventId,
@@ -72,6 +82,19 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
   const scrollTop = scrollFrozen && frozenTop != null ? frozenTop : routeScrollTop;
 
   const postsLoading = postsQuery.isLoading && postsQuery.items.length === 0;
+
+  useEffect(() => {
+    if (!focusPostsOnMount || postsLoading || focusPostsScrolledRef.current) {
+      return;
+    }
+    focusPostsScrolledRef.current = true;
+    void scrollElementToCenter(
+      `#${EVENT_DETAIL_SCROLL_ID}`,
+      '#event-detail-posts',
+      setScrollTop,
+    );
+  }, [focusPostsOnMount, postsLoading]);
+
   const showPostsEnd =
     !posts.searchActive &&
     posts.totalPostCount > 0 &&
@@ -134,5 +157,8 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     guideDefaultNights: travelGuide.guideDefaultNights,
     guideEventCity: travelGuide.guideEventCity,
     invalidEventId: route.invalidEventId,
+    publishComplianceConfirmDialog: templatePost.complianceConfirmDialog,
+    buddyPostQuota: templatePost.buddyPostQuota,
+    isWeapp: wechatShare.isWeapp,
   };
 }

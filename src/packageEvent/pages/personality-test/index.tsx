@@ -35,6 +35,25 @@ const PersonalityTestPage = () => {
         <View className="s-personality-test__inner">
           {page.phase !== 'result' ? (
             <View className="s-personality-test__intro">
+              {page.shareTeaser ? (
+                <View className="s-personality-test__share-teaser">
+                  <Text className="s-personality-test__share-teaser-kicker">
+                    好友分享
+                  </Text>
+                  <Text className="s-personality-test__share-teaser-title">
+                    你的朋友是 {page.shareTeaser.typeEmoji} {page.shareTeaser.typeLabel}{' '}
+                    型 Raver
+                  </Text>
+                  {page.shareTeaser.soulDjName ? (
+                    <Text className="s-personality-test__share-teaser-dj">
+                      本命 DJ：{page.shareTeaser.soulDjName}
+                    </Text>
+                  ) : null}
+                  <Text className="s-personality-test__share-teaser-cta">
+                    你也来测测自己的本命 DJ
+                  </Text>
+                </View>
+              ) : null}
               <Text className="s-personality-test__intro-kicker">
                 场景题 · 无标准答案
               </Text>
@@ -85,7 +104,11 @@ const PersonalityTestPage = () => {
           ) : null}
 
           {page.phase === 'result' && page.result ? (
-            <PersonalityResultView result={page.result} onRestart={page.restart} />
+            <PersonalityResultView
+              result={page.result}
+              onRestart={page.restart}
+              isWeapp={page.isWeapp}
+            />
           ) : null}
         </View>
       </ScrollView>

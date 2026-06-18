@@ -34,11 +34,7 @@ import {
   withCatalogActivityImage,
   withCatalogHomeSummary,
 } from '../../utils/activityCatalog';
-import {
-  persistHomeSummary,
-  persistActivities,
-  seedPopularPostsCache,
-} from '../../utils/homeCacheStorage';
+import { persistHomeSummary, persistActivities } from '../../utils/homeCacheStorage';
 import type { HomeSummary } from '../../types/backend';
 import { patchActivityRegistrationInCaches } from '../../cache/activityCache';
 import {
@@ -94,7 +90,6 @@ export function useHomeSummary() {
       const result = withCatalogHomeSummary(await fetchHomeSummary());
       persistHomeSummary(result);
       seedActivityDetailsFromHomeSummary(result);
-      seedPopularPostsCache(result.popularPosts);
       return result;
     },
     enabled: isLiveApi(),

@@ -26,7 +26,7 @@ vi.mock('@/constants/api', () => ({
   API_BASE_URL: 'https://api.test',
 }));
 
-import { createPost, fetchPopularPosts } from '@/api/sync/posts';
+import { createPost } from '@/api/sync/posts';
 
 function mockSuccessResponse(data: unknown, statusCode = 200) {
   mockRequest.mockImplementation(
@@ -35,30 +35,6 @@ function mockSuccessResponse(data: unknown, statusCode = 200) {
     },
   );
 }
-
-function lastRequestUrl(): string {
-  const call = mockRequest.mock.calls[mockRequest.mock.calls.length - 1];
-  return (call[0] as { url: string }).url;
-}
-
-describe('api/sync/posts query params', () => {
-  beforeEach(() => {
-    mockRequest.mockReset();
-    mockGetAccessToken.mockReturnValue(null);
-    mockGetAuthHeaders.mockReturnValue({});
-    mockGetClientUserId.mockReturnValue('demo-client-id');
-    mockSuccessResponse([]);
-  });
-
-  it('fetchPopularPosts omits userId and authorName when bearer token present', async () => {
-    mockGetAccessToken.mockReturnValue('jwt-token');
-    await fetchPopularPosts(10);
-    const url = lastRequestUrl();
-    expect(url).not.toContain('userId=');
-    expect(url).not.toContain('authorName=');
-    expect(url).toContain('limit=10');
-  });
-});
 
 describe('api/sync/posts createPost', () => {
   beforeEach(() => {

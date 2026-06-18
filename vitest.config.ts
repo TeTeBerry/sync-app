@@ -40,7 +40,7 @@ export default defineConfig({
     ]),
   ),
   test: {
-    include: ['test/**/*.test.ts', 'test/**/*.spec.ts'],
+    include: ['test/**/*.test.ts', 'test/**/*.test.tsx', 'test/**/*.spec.ts'],
     setupFiles: ['./vitest.setup.ts'],
   },
 });

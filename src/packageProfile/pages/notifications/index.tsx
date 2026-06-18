@@ -1,4 +1,5 @@
 import './notifications.scss';
+import { useDidShow } from '@tarojs/taro';
 import React, { useCallback, useMemo, useState } from 'react';
 import ThemedPageLoader from '../../../components/ThemedPageLoader';
 import { usePageRouteReady } from '../../../hooks/usePageRouteReady';
@@ -8,6 +9,7 @@ import PageNavigation from '../../../components/navigation/PageNavigation';
 import {
   clearAllNotificationsAndInvalidate,
   deleteNotificationAndInvalidate,
+  invalidateNotificationQueries,
   markAllNotificationsAsRead,
   markNotificationAsRead,
   useNotificationsQuery,
@@ -41,6 +43,12 @@ const NotificationsPage: React.FC = () => {
   const notifications = notificationsQuery.data ?? [];
   const isLoading = notificationsQuery.isLoading;
   const refetch = notificationsQuery.refetch;
+
+  useDidShow(() => {
+    void refetch({ background: true });
+    void invalidateNotificationQueries();
+  });
+
   const contentReady = !isLoading;
   usePageRouteReady(contentReady);
   const [activeCategory, setActiveCategory] = useState<CategoryFilter>('all');
@@ -169,7 +177,7 @@ const NotificationsPage: React.FC = () => {
             <Bell size={40} className="s-notifications__empty-icon" />
             <View className="s-notifications__empty-title">暂无消息</View>
             <View className="s-notifications__empty-desc">
-              活动变更、审核结果等系统通知会在这里显示。
+              评论回复、活动变更与审核结果等通知会在这里显示。
             </View>
           </View>
         ) : (

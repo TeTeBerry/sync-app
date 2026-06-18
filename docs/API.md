@@ -2,7 +2,7 @@
 
 > **身份**：受保护 REST 需 `Authorization: Bearer`；`@Public()` 路由（health、部分活动读等）可无 token。  
 > 登录：`POST /auth/wechat`（小程序）/ `POST /auth/logout`（吊销 JWT）。  
-> 清单：`docs/FRONTEND-REFACTOR-CHECKLIST.md` / 后端 `docs/BACKEND-REFACTOR-CHECKLIST.md`  
+> 清单：`docs/FRONTEND-REFACTOR-CHECKLIST.md` / 后端 `sync-app-backend/docs/archive/BACKEND-REFACTOR-CHECKLIST.md`  
 > 架构：`../sync-app-backend/docs/ARCHITECTURE.md`
 
 ---
@@ -244,11 +244,6 @@ X-Activity-Id: 4          # 可选，活动 legacyId（REST + AI WebSocket upgra
 | GET | `/api/profile/activities` | 我的报名活动 |
 | GET/PATCH | `/api/users/me` | 当前用户资料（Query 身份） |
 | POST/DELETE | `/api/activities/:legacyId/register` | 活动报名 / 取消 |
-| GET | `/api/activities/:legacyId/live-info` | 现场资讯快照：`zones`、`viewer`、`summary`、`certCount`、`feed`；Query 可选 `zoneTag`、`categoryId`、`certifiedOnly=true` |
-| POST | `/api/activities/:legacyId/live-info/wristband` | 提交手环图 `{ imageUrl }`（`cloud://` fileID 或本地 dev `/uploads/` URL；当日认证） |
-| DELETE | `/api/activities/:legacyId/live-info/wristband` | 清除当日认证 |
-| POST | `/api/activities/:legacyId/live-info/updates` | 发布 `{ zoneTag, ratings: [{ categoryId, score }], remark? }`（须当日认证；5 分钟冷却、每小时上限、同内容 24h 内不可重复） |
-| POST | `/api/activities/:legacyId/live-info/updates/:updateId/like` | 点赞切换 |
 | GET | `/api/notifications` | 通知列表 |
 | GET | `/api/notifications/unread-count` | 未读数 |
 | PATCH | `/api/notifications/:id/read` | 单条已读 |
@@ -259,7 +254,7 @@ X-Activity-Id: 4          # 可选，活动 legacyId（REST + AI WebSocket upgra
 
 后端地图链路见 `sync-app-backend/docs/TRAVEL_GUIDE_MAP.md`；需配置 `AMAP_KEY`。
 
-**UGC 文本**（现场资讯备注 / AI 用户消息 / 资料编辑 / 举报说明等）在落库前可调用微信 `msg_sec_check`（需 `WECHAT_CONTENT_SECURITY_ENABLED=true` 且配置小程序 AppId/Secret）。
+**UGC 文本**（组队帖 / AI 用户消息 / 资料编辑 / 举报说明等）在落库前可调用微信 `msg_sec_check`（需 `WECHAT_CONTENT_SECURITY_ENABLED=true` 且配置小程序 AppId/Secret）。
 
 ### GET `/api/activities/:legacyId/itinerary/schedule`
 
@@ -269,7 +264,7 @@ X-Activity-Id: 4          # 可选，活动 legacyId（REST + AI WebSocket upgra
 
 | 方法 | 路径 | 说明 |
 |------|------|------|
-| GET | `/api/posts/popular` | 热门帖 |
+| GET | `/api/posts/popular` | 热门帖（`GET /home` BFF 可内嵌；**前端首页已不再展示帖流**） |
 | GET | `/api/posts?activityLegacyId=` | 活动帖分页 |
 | GET | `/api/posts` | 当前用户帖子（owner） |
 | POST | `/api/posts` | 创建模板帖 |
@@ -285,13 +280,13 @@ X-Activity-Id: 4          # 可选，活动 legacyId（REST + AI WebSocket upgra
 
 | 方法 | 路径 | 说明 |
 |------|------|------|
-| GET | `/api/notifications` | 通知列表（过滤历史点赞/评论/组队申请） |
-| GET | `/api/notifications/unread-count` | 未读数（同上过滤） |
+| GET | `/api/notifications` | 通知列表 |
+| GET | `/api/notifications/unread-count` | 未读数 |
 | PATCH | `/api/notifications/:id/read` | 单条已读 |
 | PATCH | `/api/notifications/read-all` | 全部已读 |
 | DELETE | `/api/notifications/:id` | 删除单条（若实现） |
 
-前端通知页 Tab：**全部** / **系统**。不再推送或展示点赞/评论类通知。
+前端通知页 Tab：**全部** / **系统**。互动类（评论/回复）归入「全部」；活动变更、审核结果归入「系统」。
 
 ### 通知 `meta`（深链，可选）
 
@@ -304,10 +299,11 @@ X-Activity-Id: 4          # 可选，活动 legacyId（REST + AI WebSocket upgra
 }
 ```
 
-- `type`：`activity_update` | `post_rejected` | `post_hidden`（跳转个人页）| `activity` — 按类型跳转活动详情 / AI 助手 / 个人页
+- `type`：`activity_update` | `post_rejected` | `post_hidden` | `comment` | `comment_reply` | `activity` — 按类型跳转活动详情 / AI 助手 / 个人页
 - `activityLegacyId`：深链必填；前端 `navigateFromNotification` 直接读取，**不**再请求 `/posts/:id/navigation-target`
 - `postId`：可选，跳转活动详情时用于高亮对应留言
-- **已废弃（列表不返回）**：`like` | `comment` | `comment_reply` | `application`
+- `parentCommentId`：回复通知可选，预留评论定位
+- **已废弃（不再推送）**：`like` | `application`
 
 ---
 
@@ -381,4 +377,5 @@ DELETE 响应 `data`：`{ ok: true, activityLegacyId, wasRegistered?: boolean }`
 
 - `/api/tickets`、`/api/pindan` 及相关 profile 拼单接口
 - 探索 Tab、`pages/explore`、`packageEvent/pages/posts` 及 `GET /posts/all`
-- **组队帖子全链路**（2026-06）：`PartnerModule`、`POST/GET/DELETE /api/posts`、`post_created` WS 帧、前端帖流 UI
+- 现场资讯 `live-info` 全链路（手环认证、现场 feed）
+- 帖互动：`PATCH /api/posts/:id`、`POST /api/posts/:id/like`、`GET /api/posts/:id/navigation-target`

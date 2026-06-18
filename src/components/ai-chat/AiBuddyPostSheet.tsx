@@ -11,6 +11,7 @@ import type {
 } from '../../types/buddyPost';
 import { defaultBuddyPostForm } from '../../utils/buddyPostForm';
 import { Input, Picker, ScrollView, Text, Textarea, View } from '@tarojs/components';
+import { buildBuddyPostQuotaHint } from '../../utils/buddyPostQuota';
 
 const NOTE_MAX_LENGTH = 120;
 const BUDDY_PICKER_ICON_COLOR = '#64d2ff';
@@ -28,6 +29,7 @@ export type AiBuddyPostSheetProps = {
   submitLabel?: string | null;
   /** Apply-team flow: let user choose whether the post appears on the activity feed. */
   showSyncToFeedOption?: boolean;
+  postQuota?: { used: number; max: number };
   onClose: () => void;
   onSubmit: (values: AiBuddyPostSubmitPayload) => void | Promise<void>;
 };
@@ -72,6 +74,7 @@ export function AiBuddyPostSheet({
   prefillBannerTitle = null,
   submitLabel = null,
   showSyncToFeedOption = false,
+  postQuota,
   onClose,
   onSubmit,
 }: AiBuddyPostSheetProps) {
@@ -315,6 +318,11 @@ export function AiBuddyPostSheet({
               </View>
               <FeedSyncToggle checked={syncToPostList} onChange={setSyncToPostList} />
             </View>
+          ) : null}
+          {postQuota ? (
+            <Text className="s-ai-buddy-post-sheet__quota-hint">
+              {buildBuddyPostQuotaHint(postQuota)}
+            </Text>
           ) : null}
           <Button
             className={cn(

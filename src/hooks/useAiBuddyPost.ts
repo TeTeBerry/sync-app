@@ -25,7 +25,8 @@ import {
   startAiChatStagedProgress,
   withAiChatProgress,
 } from '../utils/aiChatStagedProgress';
-import { useAccountRisk } from './useAccountRisk';
+import { useUgcPublishGuard } from './useUgcPublishGuard';
+import { useBuddyPostQuotaGate } from './useBuddyPostQuotaGate';
 import { publishBuddyPostFromForm } from '../utils/publishBuddyPost';
 
 export function useAiBuddyPost(options: {
@@ -60,7 +61,19 @@ export function useAiBuddyPost(options: {
   const [sheetPrefillHint, setSheetPrefillHint] = useState<string[] | null>(null);
   const lastFormRef = useRef<AiBuddyPostFormValues | null>(null);
   const publishingRef = useRef(false);
-  const { guardPublish, handlePublishError } = useAccountRisk();
+  const { guardPublish, handlePublishError, complianceConfirmDialog } =
+    useUgcPublishGuard();
+  const { sheetPostQuota, ensureCanOpenBuddyPostSheet, clearSheetPostQuota } =
+    useBuddyPostQuotaGate({
+      activityLegacyId,
+      activityTitle,
+    });
+
+  const tryOpenBuddyPostSheet = useCallback(async () => {
+    const allowed = await guardPublish();
+    if (!allowed) return false;
+    return ensureCanOpenBuddyPostSheet();
+  }, [ensureCanOpenBuddyPostSheet, guardPublish]);
 
   const openBuddyPostSheetWithTag = useCallback(
     (_tagId: BuddyPostTagId = 'team') => {
@@ -87,11 +100,11 @@ export function useAiBuddyPost(options: {
 
       setSheetPrefillHint(null);
       setSheetInitialValues({ ...prefill, tags: ['team'] });
-      void guardPublish().then((allowed) => {
-        if (allowed) setSheetOpen(true);
+      void tryOpenBuddyPostSheet().then((canOpen) => {
+        if (canOpen) setSheetOpen(true);
       });
     },
-    [activityDate, activityLegacyId, guardPublish, isStreaming],
+    [activityDate, activityLegacyId, isStreaming, tryOpenBuddyPostSheet],
   );
 
   const openBuddyPostSheetFromTravelGuide = useCallback(
@@ -107,8 +120,8 @@ export function useAiBuddyPost(options: {
       const prefill = travelGuideFormToBuddyPrefill(guideForm, options.activityDate);
       setSheetInitialValues(prefill.form);
       setSheetPrefillHint(prefill.summaryLines);
-      void guardPublish().then((allowed) => {
-        if (!allowed) return;
+      void tryOpenBuddyPostSheet().then((canOpen) => {
+        if (!canOpen) return;
         setSheetOpen(true);
         void Taro.showToast({
           title: '已根据攻略预填，确认后发布',
@@ -117,7 +130,7 @@ export function useAiBuddyPost(options: {
         });
       });
     },
-    [activityLegacyId, guardPublish, isStreaming, options.activityDate],
+    [activityLegacyId, isStreaming, options.activityDate, tryOpenBuddyPostSheet],
   );
 
   const runPublish = useCallback(
@@ -233,7 +246,8 @@ export function useAiBuddyPost(options: {
   const closeBuddyPostSheet = useCallback(() => {
     setSheetOpen(false);
     setSheetPrefillHint(null);
-  }, []);
+    clearSheetPostQuota();
+  }, [clearSheetPostQuota]);
 
   return {
     sheetOpen,
@@ -244,5 +258,7 @@ export function useAiBuddyPost(options: {
     handleSheetSubmit,
     sheetInitialValues,
     sheetPrefillHint,
+    complianceConfirmDialog,
+    sheetPostQuota,
   };
 }

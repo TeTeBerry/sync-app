@@ -70,6 +70,15 @@
   }
 }
 
+.s-ai-assistant__disclaimer {
+  flex-shrink: 0;
+  margin: 0 16px 8px;
+  font-size: 11px;
+  line-height: 1.45;
+  color: #8e8e93;
+  text-align: center;
+}
+
 .s-ai-assistant__header {
   flex-shrink: 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);

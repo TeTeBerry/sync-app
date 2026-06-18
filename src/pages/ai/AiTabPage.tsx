@@ -11,6 +11,7 @@ import { FestivalPlanSummaryBar } from '../../domains/festival-plan/FestivalPlan
 import { LoginInterceptHost } from '../../components/auth/LoginInterceptHost';
 import { useEndRouteTransitionOnShow } from '../../hooks/useEndRouteTransitionOnShow';
 import { ROUTES } from '../../utils/route';
+import { AI_ASSISTANT_DISCLAIMER } from '../../constants/aiDisclosure';
 
 const AiTabPage: FC = () => {
   useEndRouteTransitionOnShow(ROUTES.AI);
@@ -33,6 +34,8 @@ const AiTabPage: FC = () => {
           navInsets={page.navInsets}
           className="s-tab-page-header--ai"
         />
+
+        <Text className="s-ai-assistant__disclaimer">{AI_ASSISTANT_DISCLAIMER}</Text>
 
         {page.showEventContext ? (
           <View className="s-ai-assistant__event-context">

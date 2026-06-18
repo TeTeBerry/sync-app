@@ -1,17 +1,34 @@
-import Taro from '@tarojs/taro';
-import { useRouter } from '@tarojs/taro';
-import { useCallback, useEffect, useState } from 'react';
+import Taro, {
+  useDidShow,
+  useRouter,
+  useShareAppMessage,
+  useShareTimeline,
+} from '@tarojs/taro';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   fetchPersonalityTestQuestions,
   submitPersonalityTest,
   type PersonalityTestQuestionsResponse,
 } from '@/api/sync/personalityTest';
-import { loadPersonalityTestCatalog } from '@/domains/personality-test/personalityTestCatalog';
+import {
+  getCachedPersonalityTestCatalog,
+  loadPersonalityTestCatalog,
+} from '@/domains/personality-test/personalityTestCatalog';
 import {
   loadPersonalityTestResult,
   restorePersonalityTestResultFromServer,
   savePersonalityTestResult,
 } from '@/domains/personality-test/utils/personalityTestStorage';
+import {
+  buildPersonalityTestShareAppMessage,
+  buildPersonalityTestShareFallback,
+  buildPersonalityTestShareTimeline,
+  buildPersonalityTestShareTitle,
+  buildPersonalityTestTimelineFallback,
+  parsePersonalityTestShareQuery,
+  resolvePersonalityShareTeaser,
+  type PersonalityTestShareTeaser,
+} from '@/domains/personality-test/utils/personalityWechatShare.util';
 import type {
   PersonalityQuestion,
   PersonalityTestAnswers,
@@ -49,6 +66,8 @@ function resolveLoadError(error: unknown): string {
 export function usePersonalityTestPage() {
   const router = useRouter();
   const mainScrollHeight = useStackPageMainHeight();
+  const isWeapp = Taro.getEnv() === Taro.ENV_TYPE.WEAPP;
+  const shareRef = useRef<PersonalityTestResult | null>(null);
 
   const [phase, setPhase] = useState<PersonalityTestPhase>('loading');
   const [questions, setQuestions] = useState<PersonalityQuestion[]>([]);
@@ -57,6 +76,9 @@ export function usePersonalityTestPage() {
   const [answers, setAnswers] = useState<PersonalityTestAnswers>({});
   const [result, setResult] = useState<PersonalityTestResult | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
+  const [shareTeaser, setShareTeaser] = useState<PersonalityTestShareTeaser | null>(
+    null,
+  );
 
   const applyQuestionSet = useCallback((nextQuestions: PersonalityQuestion[]) => {
     setQuestions(nextQuestions);
@@ -120,6 +142,24 @@ export function usePersonalityTestPage() {
         return;
       }
 
+      const shareSeed = parsePersonalityTestShareQuery(router.params);
+      if (shareSeed) {
+        try {
+          const catalog = await loadPersonalityTestCatalog({ force: true });
+          if (!cancelled) {
+            setShareTeaser(resolvePersonalityShareTeaser(catalog, shareSeed));
+          }
+        } catch {
+          if (!cancelled) {
+            setShareTeaser(null);
+          }
+        }
+      }
+
+      if (cancelled) {
+        return;
+      }
+
       void loadQuestions();
     };
 
@@ -128,7 +168,45 @@ export function usePersonalityTestPage() {
     return () => {
       cancelled = true;
     };
-  }, [loadQuestions, router.params.view]);
+  }, [
+    loadQuestions,
+    router.params.view,
+    router.params.share,
+    router.params.primaryType,
+    router.params.soulDjId,
+  ]);
+
+  useEffect(() => {
+    shareRef.current = phase === 'result' && result ? result : null;
+  }, [phase, result]);
+
+  useDidShow(() => {
+    if (!isWeapp) return;
+    void Taro.showShareMenu({
+      withShareTicket: true,
+      menus: ['shareAppMessage', 'shareTimeline'],
+    }).catch(() => undefined);
+  });
+
+  useShareAppMessage(() => {
+    const current = shareRef.current;
+    if (!current) {
+      return buildPersonalityTestShareFallback();
+    }
+    const catalog = getCachedPersonalityTestCatalog();
+    return {
+      title: buildPersonalityTestShareTitle(current, catalog),
+      path: buildPersonalityTestShareAppMessage(current).path,
+    };
+  });
+
+  useShareTimeline(() => {
+    const current = shareRef.current;
+    if (!current) {
+      return buildPersonalityTestTimelineFallback();
+    }
+    return buildPersonalityTestShareTimeline(current);
+  });
 
   const currentQuestion = questions[currentIndex];
   const totalQuestions = questions.length;
@@ -213,6 +291,7 @@ export function usePersonalityTestPage() {
 
   const restart = useCallback(() => {
     setResult(null);
+    setShareTeaser(null);
     setErrorMessage('');
     void loadQuestions();
   }, [loadQuestions]);
@@ -230,6 +309,8 @@ export function usePersonalityTestPage() {
     answers,
     result,
     errorMessage,
+    shareTeaser,
+    isWeapp,
     selectOption,
     goBackQuestion,
     goNextQuestion,

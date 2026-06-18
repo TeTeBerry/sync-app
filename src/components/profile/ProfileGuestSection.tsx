@@ -35,7 +35,7 @@ const LOCKED_FEATURES: LockedFeature[] = [
   {
     icon: <Bell size={18} color="#8e8e93" />,
     title: '消息通知',
-    desc: '评论、点赞与活动提醒',
+    desc: '评论回复与活动提醒',
     feature: 'notification',
   },
 ];

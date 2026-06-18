@@ -41,6 +41,13 @@ export function LegalConsentRow({ checked, onCheckedChange }: LegalConsentRowPro
         >
           《隐私政策》
         </Text>
+        及
+        <Text
+          className="s-legal-consent__link"
+          onClick={(e) => openDoc('community-guidelines', e)}
+        >
+          《社区规范》
+        </Text>
       </Text>
     </View>
   );

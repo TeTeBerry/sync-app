@@ -1,5 +1,4 @@
 import Taro from '@tarojs/taro';
-import { setPopularPostsCache } from '../cache/postCache';
 import {
   broadcastCacheData,
   getCacheKey,
@@ -13,18 +12,11 @@ import {
 } from './activityDetailCache';
 import { withCatalogActivities, withCatalogHomeSummary } from './activityCatalog';
 import { invalidateHome } from './queryInvalidation';
-import type {
-  BackendActivity,
-  HomeFeedPost,
-  HomeSummary,
-  ProfileSummary,
-} from '../types/backend';
+import type { BackendActivity, HomeSummary, ProfileSummary } from '../types/backend';
 
-export const HOME_POPULAR_POSTS_PERSIST_LIMIT = 8;
 export const HOME_CACHE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 
 const SUMMARY_STORAGE_KEY = 'sync:home:summary:v2';
-const POPULAR_STORAGE_KEY = 'sync:home:popular:v2';
 const ACTIVITIES_STORAGE_KEY = 'sync:activities:list:v1';
 const PROFILE_SUMMARY_STORAGE_KEY = 'sync:profile:summary:v1';
 
@@ -82,13 +74,7 @@ export function hydrateAppCachesFromStorage(): void {
       summary,
       summaryEnvelope.savedAt,
     );
-    seedPopularPostsCache(summary.popularPosts);
     seedActivityDetailsFromHomeSummary(summary);
-  }
-
-  const popular = readEnvelopeData<HomeFeedPost[]>(POPULAR_STORAGE_KEY);
-  if (popular?.length) {
-    setPopularPostsCache(popular);
   }
 
   const activitiesEnvelope = readEnvelope<BackendActivity[]>(ACTIVITIES_STORAGE_KEY);
@@ -172,22 +158,4 @@ export function clearHomeCachesOnLogout(): void {
   clearPersistedProfileSummary();
   resetHomeSummaryGoingFlagsInCache();
   invalidateHome();
-}
-
-export function persistPopularPosts(data: HomeFeedPost[]): void {
-  if (!isLiveApi()) {
-    return;
-  }
-  const trimmed = data.slice(0, HOME_POPULAR_POSTS_PERSIST_LIMIT);
-  writeEnvelope(POPULAR_STORAGE_KEY, trimmed);
-}
-
-/** Seed React Query cache when `/home` embeds `popularPosts`. */
-export function seedPopularPostsCache(posts: HomeFeedPost[] | undefined): void {
-  if (!isLiveApi() || !posts?.length) {
-    return;
-  }
-  const trimmed = posts.slice(0, HOME_POPULAR_POSTS_PERSIST_LIMIT);
-  persistPopularPosts(trimmed);
-  setPopularPostsCache(trimmed);
 }

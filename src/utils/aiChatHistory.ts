@@ -72,10 +72,3 @@ export function buildLlmChatHistory(
 
   return truncateToRecentTurns(mapped, maxTurns);
 }
-
-/** @deprecated Use buildLlmChatHistory — single-turn breaks multi-turn slot filling. */
-export function buildSingleTurnUserMessage(text: string): AiChatMessage[] {
-  const trimmed = text.trim();
-  if (!trimmed) return [];
-  return [{ role: 'user', content: trimmed }];
-}
