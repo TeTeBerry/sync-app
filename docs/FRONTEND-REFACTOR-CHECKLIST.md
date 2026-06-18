@@ -96,7 +96,7 @@
 
 ### 登录与鉴权 ✅
 
-- [x] `src/utils/auth.ts` — `POST /auth/dev` + `ensureAuth`
+- [x] `src/utils/auth.ts` — `loginWithWechat` + `ensureAuth`
 - [x] `apiClient` Bearer + 401（`handleApiUnauthorized.ts`）
 - [x] `LoginPromptHero` / `loginWithWechat`（weapp）
 - [x] B2：无效 Bearer → REST 401 + WS 清 session
@@ -128,8 +128,7 @@
 
 | 方法 | 路径 | 前端状态 |
 |------|------|----------|
-| POST | `/auth/dev` | ✅ |
-| POST | `/auth/wechat` | 🟡 前端已接，后端环境需就绪 |
+| POST | `/auth/wechat` | ✅ |
 | GET/PATCH | `/users/me` | ✅ |
 | GET | `/home` | ✅ |
 | GET | `/activities`… | ✅ |
@@ -187,7 +186,7 @@ src/
 
 ### P0（登录）✅
 
-- [x] Bearer 鉴权；已登录业务请求无 demo Query
+- [x] Bearer 鉴权；业务 REST 身份仅走 Header
 - [x] 401 有清晰提示并清 session
 
 ### 性能 ✅

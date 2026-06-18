@@ -21,7 +21,7 @@
 |----|------|
 | `TARO_APP_API_BASE_URL` | HTTPS 业务 API（公众平台 request 合法域名） |
 | `TARO_APP_AI_CHAT_WS_URL` | `wss://…/api/ai/chat/ws`（socket 合法域名） |
-| 后端 `AUTH_MODE` | 含 `wechat`；`POST /api/auth/wechat` 可用 |
+| `WECHAT_MINI_APP_ID` / `WECHAT_MINI_APP_SECRET` | 已配置；`POST /api/auth/wechat` 可用 |
 | 本地联调 | 开发者工具勾选 **不校验合法域名** 时可用 `http://` / `ws://` 局域网 |
 | 真机 / 体验版 | ICP 备案 + HTTPS 合法域名（见 [API.md](./API.md#微信小程序)） |
 
@@ -30,7 +30,7 @@
 1. **退出登录**（若有）— 确认 `shouldSkipAutoLogin` 后不会自动 `wx.login`
 2. **拦截登录** — 活动/个人页 `LoginPromptHero` → 授权昵称头像 → Bearer 写入 storage
 3. **静默登录** — 冷启动 `ensureAuth({ requireProfile: false })` 不弹授权（已登录用户）
-4. **通知** — 打开通知列表；抓包确认 **无** demo Query `userId`（仅 Bearer）
+4. **通知** — 打开通知列表；抓包确认请求仅含 Bearer（无 Query `userId`）
 5. **AI 对话** — 进入 AI 助手发一条消息：
    - WS upgrade 含 `Authorization`
    - `send` body **无** `userId`/`userName`（已登录）

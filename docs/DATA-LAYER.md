@@ -1,35 +1,33 @@
 # 数据层
 
-REST 与自定义 `useApiQuery` 缓存的分层约定；身份为 **JWT + demo Query 双轨**（见 [`API.md`](./API.md)）。
+REST 与自定义 `useApiQuery` 缓存的分层约定；身份为 **JWT Bearer**（见 [`API.md`](./API.md)）。
 
 ## 请求身份
 
 | 模块                                                    | 职责                                                                                                         |
 | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| [`api/requestContext.ts`](../src/api/requestContext.ts) | **`ownerQueryParams()`** — 无 token 时 demo Query（仅 `userId`）；**有 Bearer 时 `{}`** |
+| [`api/requestContext.ts`](../src/api/requestContext.ts) | **`ownerQueryParams()`** — 恒为 `{}`（身份仅走 `Authorization` Header） |
 | [`api/handleApiUnauthorized.ts`](../src/api/handleApiUnauthorized.ts) | 401 清 storage + toast（仅当请求前已有 token） |
 | [`utils/apiClient.ts`](../src/utils/apiClient.ts)       | **`getAuthHeaders()`** + 解析 envelope 401 |
-| [`utils/session.ts`](../src/utils/session.ts)           | `getClientUserId()` / `getClientUserName()` — JWT-aware（展示名，非 demo Query） |
-| [`utils/auth.ts`](../src/utils/auth.ts)                 | `loginWithWechat` / `loginWithDev` / `logout`（`POST /auth/logout` 吊销 JWT） |
+| [`utils/session.ts`](../src/utils/session.ts)           | `getClientUserId()` / `getClientUserName()` — JWT-aware 展示名 |
+| [`utils/auth.ts`](../src/utils/auth.ts)                 | `loginWithWechat` / `ensureAuth` / `logout`（`POST /auth/logout` 吊销 JWT） |
 
 ### REST vs WebSocket
 
-| 通道 | 有 Bearer | 无 token（demo / mock） |
-|------|-----------|-------------------------|
-| **REST** | 不传 demo Query；后端 `JwtAuthGuard` 设置 `req.actor`（`RequestActor`） | `demoActorQueryParams()` → `{ userId }` only（需后端 `AUTH_ALLOW_DEMO=true`） |
-| **AI WebSocket** | Upgrade `Authorization: Bearer`；`send` body **可不传** `userId`/`userName`（后端从 JWT 解析 actor，见 `buildAiChatWsSendActor()`） | body 须 `userId`（demo）；可选 `userName` / `userPhone` |
+| 通道 | 有 Bearer | 无 token |
+|------|-----------|----------|
+| **REST** | `JwtAuthGuard` 设置 `req.actor` | 受保护路由 401；`@Public()` 可访问 |
+| **AI WebSocket** | Upgrade `Authorization: Bearer`；`send` body **可不传** `userId`/`userName` | body 须 `userId`；可选 `userName` / `userPhone` |
 
-无效 JWT：请求头含 **非空 Bearer** 但校验失败 → REST **401**（`登录已过期，请重新登录`），**不**与 demo Query 混用；WS 在 `connect`/`send` 时返回同文案 `error` 帧并关闭连接。
+无效 JWT：请求头含 **非空 Bearer** 但校验失败 → REST **401**（`登录已过期，请重新登录`）；WS 在 `connect`/`send` 时返回同文案 `error` 帧并关闭连接。
 
 辅助函数：
 
 - `hasAuthenticatedRequest()` — `!!getAccessToken()`
-- `demoActorQueryParams()` — demo REST 仅 `userId`
-- `mergeOwnerQueryParams(extra)` — 合并 limit/cursor 等
-- `ownerQueryParamsWithActivity(activityLegacyId?)` — 带活动作用域的 owner Query（历史接口，profile 摘要已不再使用）
+- `mergeOwnerQueryParams(extra)` — 合并 limit/cursor 等业务 Query
 - `resolveRequestUserId()` — React Query `queryKey` 中的用户维度
-- `notificationQueryParams()` — 通知 API：有 Bearer 时 `undefined`（不传 `userId`）；无 token 时 `{ userId }`
-- `buildAiChatWsSendActor()` — [`api/requestActor.ts`](../src/api/requestActor.ts)：已登录 WS `send` 仅传 `userPhone`（如有）；demo 传 `userId`/`userName`
+- `notificationQueryParams()` — 通知 API：恒为 `undefined`（身份走 Bearer）
+- `buildAiChatWsSendActor()` — [`api/requestActor.ts`](../src/api/requestActor.ts)：已登录 WS `send` 仅传 `userPhone`（如有）；未登录传 `userId`/`userName`
 - `getClientSessionIdentity()` / `useClientSessionIdentity()` — 前端会话身份（勿与后端 `RequestActor` 混用）
 
 ### AI WebSocket 可靠性
@@ -74,8 +72,7 @@ REST 与自定义 `useApiQuery` 缓存的分层约定；身份为 **JWT + demo Q
 
 ## 鉴权（前端已实现）
 
-- [x] `ownerQueryParams()` — 有 Bearer 时不发 demo Query
-- [x] Demo Query 仅 `userId`（不再传 Query `authorName`；后端 demo 判定只看 `userId`）
+- [x] `ownerQueryParams()` — 恒为 `{}`；身份仅走 Bearer Header
 - [x] `apiClient` / `uploadImage`（`wx.cloud.uploadFile` → `cloud://` fileID）— 401 清 session + 后端 `message` toast
 - [x] `logout()` — `POST /auth/logout` + 清本地 session
 - [x] AI WebSocket JWT actor（upgrade Bearer；`buildAiChatWsSendActor`）
@@ -109,12 +106,12 @@ REST 与自定义 `useApiQuery` 缓存的分层约定；身份为 **JWT + demo Q
 
 | 后端 `RequestActor` | 前端 `ClientSessionIdentity`（`api/requestActor.ts`） |
 | ------------------- | ----------------------------------------------------- |
-| `source` (`jwt` \| `demo`) | `isAuthenticated` |
+| `source` (`jwt` \| `anonymous`) | `isAuthenticated` |
 | `clientUserId` | `userId` |
 | `displayName` | `displayName` |
-| `resolvedUserId` | （无，由后端解析 demo 映射） |
+| `resolvedUserId` | （无，由后端 JWT 解析） |
 
-REST/WS 发请求用 `ownerQueryParams()` / `buildAiChatWsSendActor()`；勿与后端 actor 类型混用。
+REST/WS 发请求用 `getAuthHeaders()` / `buildAiChatWsSendActor()`；勿与后端 actor 类型混用。
 
 ## 活动上下文 Header
 
