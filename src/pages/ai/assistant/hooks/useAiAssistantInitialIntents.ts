@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import Taro from '@tarojs/taro';
 import type { AiGuidePlanFormValues } from '../../../../types/travelGuide';
-import type { AiCapability } from '@/domains/ai-capability';
+import type { AiCapability, RunCapabilityOptions } from '@/domains/ai-capability';
 
 type TravelGuideApi = {
   handleSheetSubmit: (form: AiGuidePlanFormValues) => void;
@@ -17,7 +17,7 @@ export function useAiAssistantInitialIntents(options: {
   isStreaming: boolean;
   send: (payload: { text: string }) => Promise<void>;
   travelGuide: TravelGuideApi;
-  runCapability: (capability: AiCapability) => void;
+  runCapability: (capability: AiCapability, options?: RunCapabilityOptions) => void;
   onInitialMessageSent?: () => void;
 }) {
   const {

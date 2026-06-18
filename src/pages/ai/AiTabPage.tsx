@@ -1,8 +1,8 @@
-import '../../packageAi/pages/ai-assistant/AiAssistantPage.scss';
+import './assistant/AiAssistantPage.scss';
 import { type FC } from 'react';
 import { ProfileTabErrorBoundary } from '../../components/profile/ProfileTabErrorBoundary';
-import { AiAssistantChat } from '../../packageAi/pages/ai-assistant/AiAssistantChat';
-import { useAiAssistantPage } from '../../packageAi/pages/ai-assistant/useAiAssistantPage';
+import { AiAssistantChat } from './assistant/AiAssistantChat';
+import { useAiAssistantPage } from './assistant/useAiAssistantPage';
 import { FestivalPlanSummaryBar } from '../../domains/festival-plan/FestivalPlanSummaryBar';
 import { LoginInterceptHost } from '../../components/auth/LoginInterceptHost';
 import { useEndRouteTransitionOnShow } from '../../hooks/useEndRouteTransitionOnShow';
@@ -62,6 +62,7 @@ const AiTabPage: FC = () => {
                 pageShowSeq={page.pageShowSeq}
                 activityLegacyId={page.activityLegacyId}
                 activityTitle={page.activityTitle}
+                activityLocation={page.activityQuery.data?.location}
                 onInitialMessageSent={page.handleInitialMessageSent}
                 onMessageCountChange={page.onChatMessagesChange}
                 layoutRemeasureKey={page.layoutRemeasureKey}

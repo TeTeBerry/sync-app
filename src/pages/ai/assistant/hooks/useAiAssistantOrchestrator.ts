@@ -22,6 +22,8 @@ export type UseAiAssistantOrchestratorOptions = {
   initialAutoRunTravelGuideForm?: AiGuidePlanFormValues | null;
   activityLegacyId?: number;
   activityTitle?: string;
+  /** When provided, skips a duplicate activity detail fetch in the orchestrator. */
+  activityLocation?: string;
   onInitialMessageSent?: () => void;
   pageShowSeq?: number;
   onMessageCountChange?: (count: number) => void;
@@ -40,6 +42,7 @@ export function useAiAssistantOrchestrator(options: UseAiAssistantOrchestratorOp
     initialAutoRunTravelGuideForm = null,
     activityLegacyId,
     activityTitle,
+    activityLocation,
     onInitialMessageSent,
     pageShowSeq = 0,
     onMessageCountChange,
@@ -51,7 +54,9 @@ export function useAiAssistantOrchestrator(options: UseAiAssistantOrchestratorOp
   const onActivityBindingActionsChange = options.onActivityBindingActionsChange;
 
   const keyboardInset = useKeyboardInset();
-  const activityQuery = useActivityDetailQuery(activityLegacyId);
+  const activityQuery = useActivityDetailQuery(
+    activityLocation != null ? undefined : activityLegacyId,
+  );
   const { accountRisk } = useAccountRisk();
   const { confirm, confirmDialog } = useConfirmDialog({
     confirmText: '清空',
@@ -59,8 +64,8 @@ export function useAiAssistantOrchestrator(options: UseAiAssistantOrchestratorOp
   });
 
   const guideEventCity = useMemo(
-    () => eventCityFromLocation(activityQuery.data?.location),
-    [activityQuery.data?.location],
+    () => eventCityFromLocation(activityLocation ?? activityQuery.data?.location),
+    [activityLocation, activityQuery.data?.location],
   );
 
   const chat = useAiAssistantChatStream({ activityTitle, activityLegacyId });

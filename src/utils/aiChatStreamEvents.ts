@@ -137,6 +137,25 @@ export function parseStreamEventPayload(
     }
   }
   if (
+    json.type === 'travel_guide_job' &&
+    typeof json.jobId === 'string' &&
+    typeof json.guideId === 'string' &&
+    typeof json.activityLegacyId === 'number' &&
+    json.form &&
+    typeof json.form === 'object'
+  ) {
+    return {
+      type: 'travel_guide_job',
+      jobId: json.jobId,
+      guideId: json.guideId,
+      activityLegacyId: json.activityLegacyId,
+      form: json.form as Extract<
+        AiChatStreamEvent,
+        { type: 'travel_guide_job' }
+      >['form'],
+    };
+  }
+  if (
     json.type === 'travel_guide_ready' &&
     typeof json.guideId === 'string' &&
     json.plan &&

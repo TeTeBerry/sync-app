@@ -20,6 +20,7 @@ const MAIN_PACKAGE_GLOBS = [
   'pages/index',
   'pages/events',
   'pages/profile',
+  'pages/ai',
   'app.tsx',
   'components/navigation',
   'components/post',
@@ -33,6 +34,7 @@ const MAIN_PACKAGE_GLOBS = [
 
 /** Path segments that pull heavy event subpackage / canvas into main chunk */
 const FORBIDDEN_IN_MAIN = [
+  /packageAi\//,
   /packageEvent\//,
   /packageEvent\/pages\/(my-itinerary|exclusive-itinerary)\//,
   /domains\/performance-itinerary\/utils\/itineraryWallpaper/,

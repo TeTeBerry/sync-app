@@ -68,17 +68,9 @@ export function generateTravelGuide(
   );
 }
 
-async function generateTravelGuideViaJob(
-  activityLegacyId: number,
-  payload: AiGuidePlanFormValues,
-): Promise<GenerateTravelGuideResult> {
-  const { jobId } = await apiPost<{ jobId: string }>(
-    `/activities/${activityLegacyId}/travel-guide/generate-async`,
-    payload,
-    ownerQueryParams(),
-    { timeoutMs: CLOUD_RUN_MAX_TIMEOUT_MS, maxRetries: 0 },
-  );
-
+export async function pollTravelGuideGenerationJob(
+  jobId: string,
+): Promise<GenerateTravelGuideResult['plan']> {
   for (let attempt = 0; attempt < TRAVEL_GUIDE_POLL_MAX_ATTEMPTS; attempt += 1) {
     if (attempt > 0) {
       await sleep(TRAVEL_GUIDE_POLL_INTERVAL_MS);
@@ -91,7 +83,7 @@ async function generateTravelGuideViaJob(
     );
 
     if (job.status === 'completed' && job.plan) {
-      return { plan: job.plan };
+      return job.plan;
     }
     if (job.status === 'failed') {
       throw new Error(job.errorMessage || '攻略生成失败，请稍后重试');
@@ -99,4 +91,19 @@ async function generateTravelGuideViaJob(
   }
 
   throw new Error('攻略生成超时，请稍后重试');
+}
+
+async function generateTravelGuideViaJob(
+  activityLegacyId: number,
+  payload: AiGuidePlanFormValues,
+): Promise<GenerateTravelGuideResult> {
+  const { jobId } = await apiPost<{ jobId: string }>(
+    `/activities/${activityLegacyId}/travel-guide/generate-async`,
+    payload,
+    ownerQueryParams(),
+    { timeoutMs: CLOUD_RUN_MAX_TIMEOUT_MS, maxRetries: 0 },
+  );
+
+  const plan = await pollTravelGuideGenerationJob(jobId);
+  return { plan };
 }

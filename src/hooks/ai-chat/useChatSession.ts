@@ -83,7 +83,9 @@ export function useChatSession(options: UseChatSessionOptions) {
       setMessagesState((prev) => {
         const next = typeof action === 'function' ? action(prev) : action;
         messagesRef.current = next;
-        useAiChatStore.getState().setScopeMessages(scopeKey, next);
+        if (!isStreamingRef.current) {
+          useAiChatStore.getState().setScopeMessages(scopeKey, next);
+        }
         return next;
       });
     },
@@ -102,9 +104,15 @@ export function useChatSession(options: UseChatSessionOptions) {
     useAiChatStore.getState().setActiveScope(scopeKey);
   }, [scopeKey]);
 
-  const setIsStreamingRef = useCallback((value: boolean) => {
-    isStreamingRef.current = value;
-  }, []);
+  const setIsStreamingRef = useCallback(
+    (value: boolean) => {
+      isStreamingRef.current = value;
+      if (!value) {
+        useAiChatStore.getState().setScopeMessages(scopeKey, messagesRef.current);
+      }
+    },
+    [scopeKey],
+  );
 
   const cancelHistoryLoad = useCallback(() => {
     historyLoadAbortRef.current?.abort();

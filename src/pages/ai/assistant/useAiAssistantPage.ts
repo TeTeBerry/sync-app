@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import Taro, { useDidShow } from '@tarojs/taro';
+import { useDidShow } from '@tarojs/taro';
 import { useNavBarInsets } from '../../../hooks/useNavBarInsets';
 import { usePageRouteReady } from '../../../hooks/usePageRouteReady';
 import { useResolvedProfile } from '../../../hooks/useResolvedProfile';

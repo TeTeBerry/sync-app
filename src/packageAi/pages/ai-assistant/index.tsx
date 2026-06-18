@@ -1,11 +1,11 @@
 import { useEffect } from 'react';
-import { ROUTES, switchTabTo } from '../../../utils/route';
+import Taro from '@tarojs/taro';
+import { ROUTES } from '../../../utils/route';
 
-/** Legacy subpackage route — forwards to the AI tab. */
-export default function AiAssistantRedirect() {
+/** Legacy subpackage entry — redirects to AI tab. */
+export default function AiAssistantLegacyRedirect() {
   useEffect(() => {
-    switchTabTo(ROUTES.AI);
+    void Taro.switchTab({ url: ROUTES.AI });
   }, []);
-
   return null;
 }

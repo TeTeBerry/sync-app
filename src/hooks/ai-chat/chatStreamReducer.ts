@@ -3,6 +3,8 @@ import Taro from '@tarojs/taro';
 import type { AiChatStreamEvent, ChatUiMessage } from '../../types/aiChat';
 import type { TravelGuidePlan } from '../../types/travelGuide';
 import type { PersonalityTestResult } from '../../domains/personality-test/types';
+import { pollTravelGuideGenerationJob } from '../../api/sync/travelGuide';
+import { saveTravelGuideDetail } from '../../domains/travel-guide/utils/travelGuideDetailStorage';
 import { formatAiChatToastError } from '../../utils/aiChatErrors';
 import { handleApiUnauthorized } from '../../api/handleApiUnauthorized';
 import { closeAiChatWsConnection } from '../../utils/aiChatWs';
@@ -126,6 +128,51 @@ export async function processChatStreamEvents(
         ...message,
         ...applyClientActionToMessage(message, event.action),
       }));
+      continue;
+    }
+
+    if (event.type === 'travel_guide_job') {
+      onProgressEnd?.();
+      finishAiMessage((message) => ({
+        ...message,
+        text: message.text || '正在生成出行攻略…',
+        streaming: true,
+        progressKind: 'travel_guide',
+      }));
+
+      try {
+        const plan = await pollTravelGuideGenerationJob(event.jobId);
+        saveTravelGuideDetail(event.guideId, {
+          plan,
+          form: event.form,
+          activityLegacyId: event.activityLegacyId,
+        });
+        onTravelGuideReady?.({
+          type: 'travel_guide_ready',
+          guideId: event.guideId,
+          plan: plan as unknown as Record<string, unknown>,
+          form: event.form,
+        });
+        finishAiMessageWithoutProgress((message) => ({
+          ...message,
+          text: '已为你生成出行攻略，点击查看完整方案～',
+          streaming: false,
+          travelGuide: {
+            guideId: event.guideId,
+            plan: plan as TravelGuidePlan,
+            form: event.form,
+          },
+        }));
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : '攻略生成失败，请稍后重试';
+        finishAiMessageWithoutProgress((msg) => ({
+          ...msg,
+          text: message,
+          streaming: false,
+        }));
+        void Taro.showToast({ title: message, icon: 'none' });
+      }
       continue;
     }
 

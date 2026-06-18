@@ -113,7 +113,7 @@
 
 ### P0-Wx（微信小程序）
 
-- [ ] 开发者工具 / 真机人工验收（HTTPS 合法域名 + `POST /auth/wechat`；见 [WECHAT-E2E.md](./WECHAT-E2E.md)）
+- [x] 开发者工具 / 真机人工验收（HTTPS 合法域名 + `POST /auth/wechat`；见 [WECHAT-E2E.md](./WECHAT-E2E.md)）
 
 ---
 
