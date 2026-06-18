@@ -52,7 +52,11 @@ const ProfileSettingsSection: React.FC<ProfileSettingsSectionProps> = ({
         <Text className="s-profile__settings-value s-profile__settings-value--risk">
           {accountStatusSummary}
         </Text>
-        <ChevronRight size={18} className="s-profile__settings-chevron" />
+        <ChevronRight
+          size={18}
+          color="#b0b0b0"
+          className="s-profile__settings-chevron"
+        />
       </View>
     ) : null}
 
@@ -62,13 +66,13 @@ const ProfileSettingsSection: React.FC<ProfileSettingsSectionProps> = ({
       onClick={onOpenBuddyPreferences}
     >
       <View className="s-profile__settings-icon s-profile__settings-icon--match">
-        <Music2 size={18} />
+        <Music2 size={18} color="#ff0066" />
       </View>
       <Text className="s-profile__settings-label">用户偏好</Text>
       <Text className="s-profile__settings-value s-profile__settings-value--truncate">
         {buddyPreferencesSummary}
       </Text>
-      <ChevronRight size={18} className="s-profile__settings-chevron" />
+      <ChevronRight size={18} color="#b0b0b0" className="s-profile__settings-chevron" />
     </View>
 
     <View
@@ -77,13 +81,13 @@ const ProfileSettingsSection: React.FC<ProfileSettingsSectionProps> = ({
       onClick={onOpenNotifications}
     >
       <View className="s-profile__settings-icon s-profile__settings-icon--bell">
-        <Bell size={18} />
+        <Bell size={18} color="#4cc9f0" />
       </View>
       <Text className="s-profile__settings-label">通知设置</Text>
       <Text className="s-profile__settings-value">
         {notificationsEnabled ? '已开启' : '已关闭'}
       </Text>
-      <ChevronRight size={18} className="s-profile__settings-chevron" />
+      <ChevronRight size={18} color="#b0b0b0" className="s-profile__settings-chevron" />
     </View>
 
     <View
@@ -92,7 +96,7 @@ const ProfileSettingsSection: React.FC<ProfileSettingsSectionProps> = ({
       onClick={onOpenPrivacy}
     >
       <View className="s-profile__settings-icon s-profile__settings-icon--shield">
-        <Shield size={18} />
+        <Shield size={18} color="#22c55e" />
       </View>
       <Text className="s-profile__settings-label">隐私与安全</Text>
       <ChevronRight size={18} className="s-profile__settings-chevron" />
@@ -104,10 +108,10 @@ const ProfileSettingsSection: React.FC<ProfileSettingsSectionProps> = ({
       onClick={onOpenLegal}
     >
       <View className="s-profile__settings-icon s-profile__settings-icon--help">
-        <FileText size={18} />
+        <FileText size={18} color="#b0b0b0" />
       </View>
       <Text className="s-profile__settings-label">法律与协议</Text>
-      <ChevronRight size={18} className="s-profile__settings-chevron" />
+      <ChevronRight size={18} color="#b0b0b0" className="s-profile__settings-chevron" />
     </View>
 
     <View
@@ -116,10 +120,10 @@ const ProfileSettingsSection: React.FC<ProfileSettingsSectionProps> = ({
       onClick={onOpenHelp}
     >
       <View className="s-profile__settings-icon s-profile__settings-icon--help">
-        <Info size={18} />
+        <Info size={18} color="#b0b0b0" />
       </View>
       <Text className="s-profile__settings-label">帮助与反馈</Text>
-      <ChevronRight size={18} className="s-profile__settings-chevron" />
+      <ChevronRight size={18} color="#b0b0b0" className="s-profile__settings-chevron" />
     </View>
 
     <View
@@ -128,7 +132,7 @@ const ProfileSettingsSection: React.FC<ProfileSettingsSectionProps> = ({
       onClick={onLogout}
     >
       <View className="s-profile__settings-icon s-profile__settings-icon--logout">
-        <LogOut size={18} />
+        <LogOut size={18} color="#ff6467" />
       </View>
       <Text className="s-profile__settings-label s-profile__settings-label--logout">
         退出登录

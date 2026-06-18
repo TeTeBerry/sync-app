@@ -7,6 +7,7 @@ import { useNavBarInsets } from '../../hooks/useNavBarInsets';
 import { useTabPageMainHeight } from '../../hooks/useTabPageMainHeight';
 import ThemedPageLoader from '../../components/ThemedPageLoader';
 import { seedActivityDetailFromEventCard } from '../../utils/activityDetailCache';
+import { prefetchEventPostsPage } from '../../cache/eventPostsPageCache';
 import { preloadEventSubpackage } from '../../utils/subpackagePreload';
 import { buildEventDetailQuery, preloadPageSafe, ROUTES } from '../../utils/route';
 import {
@@ -103,6 +104,7 @@ const Events: React.FC = () => {
     if (id == null) {
       return;
     }
+    prefetchEventPostsPage(id);
     preloadEventSubpackage();
     preloadPageSafe(ROUTES.EVENT_DETAIL, buildEventDetailQuery(id));
   }, []);

@@ -47,7 +47,7 @@ function EventPostSkeletonRow({ rows = 3 }: { rows?: number }) {
   );
 }
 
-function EventPostsSkeleton({ count = 3 }: { count?: number }) {
+function EventPostsSkeleton({ count = 2 }: { count?: number }) {
   return (
     <View className="s-themed-loader__event-posts" aria-hidden>
       {Array.from({ length: count }, (_, index) => (
@@ -76,14 +76,6 @@ function LiveFeedSkeleton() {
 function EventDetailSkeleton() {
   return (
     <View className="s-themed-loader__event" aria-hidden>
-      <View className="s-themed-loader__event-header">
-        <View className="s-themed-loader__chip s-themed-loader__chip--round" />
-        <View className="s-themed-loader__event-title-block">
-          <View className="s-themed-loader__chip s-themed-loader__chip--title" />
-          <View className="s-themed-loader__chip s-themed-loader__chip--meta" />
-        </View>
-        <View className="s-themed-loader__chip s-themed-loader__chip--round" />
-      </View>
       <View className="s-themed-loader__event-ai">
         <SkeletonBlocks rows={2} />
       </View>

@@ -18,6 +18,7 @@ import { AiGuidePlanSheet } from '../../../components/ai-chat/AiGuidePlanSheet';
 import PageNavigation from '../../../components/navigation/PageNavigation';
 import { OverlayAwareScrollView } from '../../../components/layout/OverlayAwareScrollView';
 import { PlatformDisclaimer } from '../../../components/legal/PlatformDisclaimer';
+import { ROUTES } from '../../../utils/route';
 import { Text, View } from '@tarojs/components';
 
 const EventDetailPage = () => {
@@ -55,7 +56,6 @@ const EventDetailPage = () => {
     postsLoading,
     showPostsEnd,
     postsQuery,
-    handleBack,
     handleOpenAiGuide,
     handleOpenTemplateSheet,
     buddyPostSheetOpen,
@@ -88,9 +88,9 @@ const EventDetailPage = () => {
     >
       <View className="s-page-with-tabbar__main s-event-detail__shell">
         <PageNavigation
-          title={title ?? ''}
+          title={title || (showHeaderSkeleton ? '加载中…' : '')}
           meta={metaLine || undefined}
-          onBack={handleBack}
+          fallback={ROUTES.EVENTS}
         />
 
         <OverlayAwareScrollView
@@ -115,8 +115,8 @@ const EventDetailPage = () => {
               onOpenExclusiveItinerary={handleOpenExclusiveItinerary}
             />
 
-            {!showHeaderSkeleton ? (
-              <View className="s-event-detail__posts">
+            <View className="s-event-detail__posts">
+              {!showHeaderSkeleton ? (
                 <EventDetailPostSearchBar
                   value={posts.searchQuery}
                   onChange={posts.setSearchQuery}
@@ -124,34 +124,36 @@ const EventDetailPage = () => {
                   isSearching={posts.searchLoading}
                   matchedCount={posts.searchMatchedCount}
                 />
-                {postsLoading ? (
-                  <ThemedPageLoader variant="skeleton-event-posts" minHeight={200} />
-                ) : posts.searchActive && posts.totalPostCount === 0 ? (
-                  <Text className="s-event-detail__empty">
-                    未找到匹配的帖子，试试其他关键词
-                  </Text>
-                ) : posts.totalPostCount === 0 ? (
-                  <Text className="s-event-detail__empty">
-                    暂无组队帖，来发布第一条吧
-                  </Text>
-                ) : (
-                  <EventPostsVirtualList
-                    onScrollToPostId={posts.scrollToElement}
-                    items={posts.postItems}
-                    highlightPostId={highlightPostId}
-                    expandedCommentPostIds={posts.expandedCommentPostIds}
-                    currentUserAvatar={currentUserAvatar}
-                    onOpenComments={posts.openPostComments}
-                    onCloseComments={posts.closePostComments}
-                    onCommentSubmitted={posts.handleCommentSubmitted}
-                    onDelete={posts.handleDeletePost}
-                    hasMore={postsQuery.hasMore}
-                    hasMoreLocal={posts.hasMoreVisiblePosts}
-                    isLoadingMore={postsQuery.isLoadingMore}
-                  />
-                )}
-              </View>
-            ) : null}
+              ) : null}
+              {postsLoading ? (
+                <ThemedPageLoader variant="skeleton-event-posts" minHeight={160} />
+              ) : !showHeaderSkeleton &&
+                posts.searchActive &&
+                posts.totalPostCount === 0 ? (
+                <Text className="s-event-detail__empty">
+                  未找到匹配的帖子，试试其他关键词
+                </Text>
+              ) : !showHeaderSkeleton && posts.totalPostCount === 0 ? (
+                <Text className="s-event-detail__empty">
+                  暂无组队帖，来发布第一条吧
+                </Text>
+              ) : posts.totalPostCount > 0 ? (
+                <EventPostsVirtualList
+                  onScrollToPostId={posts.scrollToElement}
+                  items={posts.postItems}
+                  highlightPostId={highlightPostId}
+                  expandedCommentPostIds={posts.expandedCommentPostIds}
+                  currentUserAvatar={currentUserAvatar}
+                  onOpenComments={posts.openPostComments}
+                  onCloseComments={posts.closePostComments}
+                  onCommentSubmitted={posts.handleCommentSubmitted}
+                  onDelete={posts.handleDeletePost}
+                  hasMore={postsQuery.hasMore}
+                  hasMoreLocal={posts.hasMoreVisiblePosts}
+                  isLoadingMore={postsQuery.isLoadingMore}
+                />
+              ) : null}
+            </View>
 
             {!showHeaderSkeleton && showPostsEnd ? (
               <Text className="s-event-detail__end">已经到底啦 ~</Text>

@@ -1,10 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  eventPostsPageQueryKey,
+  getEventPostsPageCache,
+  setEventPostsPageCache,
+  EVENT_POSTS_PAGE_SIZE,
+} from '../cache/eventPostsPageCache';
 import { fetchPostsByActivityPage } from '../api/syncApi';
 import { isLiveApi } from '../constants/api';
-import type { EventDetailPost } from '../types/backend';
+import type { EventDetailPost, EventPostsPage } from '../types/backend';
 import { getClientUserId } from '../utils/session';
-
-const DEFAULT_PAGE_SIZE = 10;
+import { prefetchToCache } from './useApiQuery';
 
 function parsePostCreatedAtMs(createdAt?: string): number {
   if (!createdAt) return 0;
@@ -22,6 +27,16 @@ function sortPostsNewestFirst(posts: EventDetailPost[]): EventDetailPost[] {
   });
 }
 
+function readCachedFirstPage(
+  activityLegacyId?: number,
+  anchorPostId?: string,
+): EventPostsPage | undefined {
+  if (activityLegacyId == null || anchorPostId) {
+    return undefined;
+  }
+  return getEventPostsPageCache(activityLegacyId);
+}
+
 export function useEventPostsInfiniteQuery(
   activityLegacyId?: number,
   options?: {
@@ -31,7 +46,7 @@ export function useEventPostsInfiniteQuery(
   },
 ) {
   const tabEnabled = options?.enabled ?? true;
-  const pageSize = options?.pageSize ?? DEFAULT_PAGE_SIZE;
+  const pageSize = options?.pageSize ?? EVENT_POSTS_PAGE_SIZE;
   const anchorPostId = options?.anchorPostId?.trim() || undefined;
   const apiEnabled = isLiveApi();
   const enabled =
@@ -41,10 +56,18 @@ export function useEventPostsInfiniteQuery(
     activityLegacyId > 0 &&
     tabEnabled;
 
-  const [items, setItems] = useState<EventDetailPost[]>([]);
-  const [nextCursor, setNextCursor] = useState<string | undefined>();
-  const [hasMore, setHasMore] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const cachedFirstPage = readCachedFirstPage(activityLegacyId, anchorPostId);
+
+  const [items, setItems] = useState<EventDetailPost[]>(
+    () => cachedFirstPage?.items ?? [],
+  );
+  const [nextCursor, setNextCursor] = useState<string | undefined>(
+    () => cachedFirstPage?.nextCursor,
+  );
+  const [hasMore, setHasMore] = useState(() => cachedFirstPage?.hasMore ?? false);
+  const [isLoading, setIsLoading] = useState(
+    () => enabled && !(cachedFirstPage?.items.length ?? 0),
+  );
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [isError, setIsError] = useState(false);
@@ -65,26 +88,50 @@ export function useEventPostsInfiniteQuery(
     [],
   );
 
+  const fetchFirstPage = useCallback(async (): Promise<EventPostsPage> => {
+    if (activityLegacyId == null) {
+      return { items: [], hasMore: false };
+    }
+    const request = () =>
+      fetchPostsByActivityPage(activityLegacyId, {
+        limit: pageSize,
+        anchorPostId,
+      });
+
+    if (anchorPostId) {
+      return request();
+    }
+
+    const cached = await prefetchToCache(
+      [...eventPostsPageQueryKey(activityLegacyId)],
+      request,
+    );
+    return cached ?? request();
+  }, [activityLegacyId, anchorPostId, pageSize]);
+
   const resetAndLoad = useCallback(
     async (options?: { silent?: boolean }) => {
       if (!enabled || activityLegacyId == null) return;
       const silent = options?.silent === true;
+      const hasCachedItems =
+        (readCachedFirstPage(activityLegacyId, anchorPostId)?.items.length ?? 0) > 0;
+
       if (silent) {
         setIsRefreshing(true);
-      } else {
+      } else if (!hasCachedItems) {
         setIsLoading(true);
       }
       setIsError(false);
       try {
-        const page = await fetchPostsByActivityPage(activityLegacyId, {
-          limit: pageSize,
-          anchorPostId,
-        });
+        const page = await fetchFirstPage();
         setItems((previous) =>
           silent ? mergeFetchedPosts(page.items, previous) : page.items,
         );
         setNextCursor(page.nextCursor);
         setHasMore(page.hasMore);
+        if (!anchorPostId) {
+          setEventPostsPageCache(activityLegacyId, page);
+        }
       } catch {
         if (!silent) {
           setIsError(true);
@@ -100,7 +147,7 @@ export function useEventPostsInfiniteQuery(
         }
       }
     },
-    [activityLegacyId, anchorPostId, enabled, mergeFetchedPosts, pageSize],
+    [activityLegacyId, anchorPostId, enabled, fetchFirstPage, mergeFetchedPosts],
   );
 
   useEffect(() => {
@@ -111,8 +158,16 @@ export function useEventPostsInfiniteQuery(
       setIsLoading(false);
       return;
     }
-    void resetAndLoad();
-  }, [enabled, resetAndLoad, userId]);
+    const cached = readCachedFirstPage(activityLegacyId, anchorPostId);
+    const hasCached = Boolean(cached?.items.length);
+    if (hasCached) {
+      setItems(cached!.items);
+      setNextCursor(cached!.nextCursor);
+      setHasMore(cached!.hasMore);
+      setIsLoading(false);
+    }
+    void resetAndLoad({ silent: hasCached });
+  }, [activityLegacyId, anchorPostId, enabled, resetAndLoad, userId]);
 
   const loadMore = useCallback(async () => {
     if (

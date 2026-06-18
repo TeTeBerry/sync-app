@@ -37,7 +37,7 @@ const AiTabPage: FC = () => {
         {page.showEventContext ? (
           <View className="s-ai-assistant__event-context">
             <View className="s-ai-assistant__event-context-icon" aria-hidden>
-              <CalendarDays size={14} />
+              <CalendarDays size={14} color="#4cc9f0" />
             </View>
             <View className="s-ai-assistant__event-context-text">
               {page.activityQuery.isLoading && !page.activityTitle ? (

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import ThemedPageLoader from '../../components/ThemedPageLoader';
 import { HomeActivityFeed } from './components/HomeActivityFeed';
 import { seedActivityDetailFromFeaturedEvent } from '../../utils/activityDetailCache';
+import { prefetchEventPostsPage } from '../../cache/eventPostsPageCache';
 import { preloadEventSubpackage } from '../../utils/subpackagePreload';
 import { useConfirmDialog } from '../../hooks/useConfirmDialog';
 import {
@@ -106,6 +107,7 @@ const Home = () => {
       return;
     }
     seedActivityDetailFromFeaturedEvent(event);
+    prefetchEventPostsPage(legacyId);
     preloadEventSubpackage();
     preloadPageSafe(ROUTES.EVENT_DETAIL, buildEventDetailQuery(legacyId));
   }, []);

@@ -144,12 +144,22 @@ const EventCardInner: React.FC<EventCardProps> = ({
       {ctaVariant !== 'detail' ? (
         <View className="s-event-card__info-row">
           <View className="s-event-card__info-item">
-            <MapPin size={14} className="s-event-card__info-icon" aria-hidden />
+            <MapPin
+              size={14}
+              color="#8e8e93"
+              className="s-event-card__info-icon"
+              aria-hidden
+            />
             <Text className="s-event-card__info-text">{location}</Text>
           </View>
           {fullDate ? (
             <View className="s-event-card__info-item s-event-card__info-item--date">
-              <Calendar size={14} className="s-event-card__info-icon" aria-hidden />
+              <Calendar
+                size={14}
+                color="#8e8e93"
+                className="s-event-card__info-icon"
+                aria-hidden
+              />
               <Text className="s-event-card__info-text">{fullDate}</Text>
             </View>
           ) : null}

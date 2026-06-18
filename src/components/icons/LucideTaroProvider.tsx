@@ -1,6 +1,9 @@
 import type { PropsWithChildren } from 'react';
 
-/** Per-icon lucide imports use isolated context modules; keep API for app shell. */
+/**
+ * App shell wrapper — per-icon lucide imports cannot share LucideTaroContext.
+ * Default icon color is applied in `icons/index.ts` via `withDefaultIconColor`.
+ */
 export function LucideTaroProvider({
   children,
 }: PropsWithChildren<{

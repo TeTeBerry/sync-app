@@ -108,7 +108,7 @@ const PageNavigation: React.FC<PageNavigationProps> = ({
       hoverClass="s-page-nav__back--pressed"
       onTap={handleBack}
     >
-      <ChevronLeft size={22} />
+      <ChevronLeft size={22} color="#ffffff" aria-hidden />
     </Button>
   );
 

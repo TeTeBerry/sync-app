@@ -86,7 +86,7 @@ const ProfileGuestSection: React.FC<ProfileGuestSectionProps> = ({
           onClick={onOpenLegal}
         >
           <View className="s-profile-guest__settings-icon">
-            <FileText size={18} />
+            <FileText size={18} color="#b0b0b0" />
           </View>
           <Text className="s-profile-guest__settings-label">法律与协议</Text>
           <ChevronRight size={18} color="#636366" />
@@ -97,7 +97,7 @@ const ProfileGuestSection: React.FC<ProfileGuestSectionProps> = ({
           onClick={onOpenHelp}
         >
           <View className="s-profile-guest__settings-icon">
-            <Info size={18} />
+            <Info size={18} color="#b0b0b0" />
           </View>
           <Text className="s-profile-guest__settings-label">帮助与反馈</Text>
           <ChevronRight size={18} color="#636366" />

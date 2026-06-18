@@ -23,6 +23,7 @@ import {
 import { getCacheData } from '../hooks/useApiQuery';
 import { findBackendActivityByLegacyId } from './apiMappers';
 import { seedActivityDetailFromHomeSignupEvent } from './activityDetailCache';
+import { prefetchEventPostsPage } from '../cache/eventPostsPageCache';
 import { isAuthGated, requireAuth } from './authGate';
 import type { LoginInterceptFeature } from '../stores/loginInterceptStore';
 import { useLoginInterceptStore } from '../stores/loginInterceptStore';
@@ -558,6 +559,7 @@ export function goEventDetail(eventId: number | string, options?: { postId?: str
     bindActivity(legacyId);
   }
   const query = buildEventDetailQuery(legacyId, options);
+  prefetchEventPostsPage(legacyId, { anchorPostId: options?.postId });
   preloadEventSubpackage();
   navigateToSafe(buildPageUrl(ROUTES.EVENT_DETAIL, query), {
     eventId: legacyId,

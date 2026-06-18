@@ -1,5 +1,4 @@
 import { useCallback, useMemo } from 'react';
-import { goBack, ROUTES } from '../../../utils/route';
 import { usePageRouteReady } from '../../../hooks/usePageRouteReady';
 import {
   activityStatusCardClass,
@@ -44,10 +43,6 @@ export function useEventDetailActivityHeader({
   const routeContentReady = Boolean(title) || showHeaderSkeleton || showActivityMissing;
   usePageRouteReady(routeContentReady);
 
-  const handleBack = useCallback(() => {
-    goBack(ROUTES.HOME);
-  }, []);
-
   const metaLine = useMemo(() => {
     if (!activityQuery.data) return '';
     const parts = [activityQuery.data.date, activityQuery.data.location].filter(
@@ -80,6 +75,5 @@ export function useEventDetailActivityHeader({
     loadError,
     showActivityMissing,
     onRetryActivity,
-    handleBack,
   };
 }
