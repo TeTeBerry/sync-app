@@ -35,6 +35,9 @@ export function AiAssistantChat({
     guideEventCity,
     messages,
     isStreaming,
+    isLoadingHistory,
+    hasMoreHistory,
+    loadOlderMessages,
     forceScrollToBottomKey,
     composer,
     capabilities,
@@ -62,6 +65,9 @@ export function AiAssistantChat({
           scrollAreaHeight={scrollAreaHeight}
           keyboardInset={keyboardInset}
           forceScrollToBottomKey={forceScrollToBottomKey}
+          isLoadingHistory={isLoadingHistory}
+          hasMoreHistory={hasMoreHistory}
+          onLoadOlderMessages={loadOlderMessages}
           activityLegacyId={activityLegacyId}
           userAvatar={userAvatar}
           userName={userName}
@@ -82,6 +88,7 @@ export function AiAssistantChat({
         <ChatComposer
           input={composer.input}
           isStreaming={composerBusy}
+          isLoadingHistory={isLoadingHistory}
           activityLegacyId={activityLegacyId}
           activityTitle={activityTitle}
           onInputChange={composer.setInput}

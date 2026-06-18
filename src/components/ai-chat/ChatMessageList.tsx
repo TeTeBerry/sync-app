@@ -1,15 +1,14 @@
-import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 import type { ChatUiMessage } from '../../types/aiChat';
 import type { AiGuidePlanFormValues } from '../../types/travelGuide';
 import type { AuthorGender } from '../../utils/inferAuthorGender';
 import type { AiCapability } from '@/domains/ai-capability';
-import { throttleRaf } from '../../utils/throttleRaf';
+import { useChatMessageWindow } from '../../hooks/ai-chat/useChatMessageWindow';
+import { useChatScrollController } from '../../hooks/ai-chat/useChatScrollController';
 import { ChatMessageRow } from './ChatMessageRow';
 import { CHAT_SCROLL_BOTTOM_ID } from './chatScrollBottom';
 import { shouldSuppressAutoScrollForMessage } from './chatMessageListScroll';
-import { ScrollView, View } from '@tarojs/components';
-
-const SCROLL_TOP_STEP = 100_000;
+import { ScrollView, Text, View } from '@tarojs/components';
 
 export function ChatMessageList({
   messages,
@@ -17,8 +16,10 @@ export function ChatMessageList({
   isTravelGuideGenerating = false,
   scrollAreaHeight,
   keyboardInset = 0,
-  /** Bump when re-entering the page or after history sync — scrolls to latest messages. */
   forceScrollToBottomKey = 0,
+  isLoadingHistory = false,
+  hasMoreHistory = false,
+  onLoadOlderMessages,
   activityLegacyId,
   userAvatar,
   userName,
@@ -35,6 +36,9 @@ export function ChatMessageList({
   scrollAreaHeight?: number;
   keyboardInset?: number;
   forceScrollToBottomKey?: number;
+  isLoadingHistory?: boolean;
+  hasMoreHistory?: boolean;
+  onLoadOlderMessages?: () => Promise<number>;
   activityLegacyId?: number;
   userAvatar?: string;
   userName: string;
@@ -45,84 +49,101 @@ export function ChatMessageList({
   onRunCapability?: (capability: AiCapability) => void;
   onOpenPersonalityTest?: () => void;
 }) {
-  const [scrollIntoView, setScrollIntoView] = useState<string | undefined>();
-  const [scrollTop, setScrollTop] = useState(0);
-  const scrollTopRef = useRef(0);
+  const loadingHistoryRef = useRef(false);
+  const {
+    visibleMessages,
+    hiddenCount,
+    hasHiddenMessages,
+    expandWindow,
+    expandWindowBy,
+  } = useChatMessageWindow(messages);
 
   const lastMessage = messages[messages.length - 1];
   const scrollAnchorKey = useMemo(() => {
     if (!lastMessage) return '0';
     const streamLen = lastMessage.streaming ? (lastMessage.text?.length ?? 0) : 0;
     const guide = lastMessage.travelGuide ? 'guide' : '';
-    return `${messages.length}:${lastMessage.id}:${streamLen}:${guide}`;
-  }, [messages.length, lastMessage]);
-
-  const scrollToBottom = useCallback(() => {
-    if (messages.length === 0) return;
-    scrollTopRef.current =
-      scrollTopRef.current >= 5_000_000
-        ? SCROLL_TOP_STEP
-        : scrollTopRef.current + SCROLL_TOP_STEP;
-    setScrollTop(scrollTopRef.current);
-    setScrollIntoView(undefined);
-    const apply = () => setScrollIntoView(CHAT_SCROLL_BOTTOM_ID);
-    setTimeout(apply, 0);
-    setTimeout(apply, 80);
-    setTimeout(apply, 220);
-    setTimeout(apply, 450);
-  }, [messages.length]);
-
-  const scrollToBottomThrottled = useMemo(
-    () => throttleRaf(scrollToBottom),
-    [scrollToBottom],
-  );
+    return `${messages.length}:${lastMessage.id}:${streamLen}:${guide}:${keyboardInset}`;
+  }, [keyboardInset, lastMessage, messages.length]);
 
   const suppressAutoScroll = shouldSuppressAutoScrollForMessage(lastMessage);
 
-  useLayoutEffect(() => {
-    if (suppressAutoScroll) return;
-    scrollToBottomThrottled();
-  }, [
+  const scroll = useChatScrollController({
+    messageCount: messages.length,
+    bottomAnchorId: CHAT_SCROLL_BOTTOM_ID,
+    forceScrollToBottomKey,
     suppressAutoScroll,
-    scrollAnchorKey,
-    isStreaming,
-    isTravelGuideGenerating,
-    keyboardInset,
-    scrollToBottomThrottled,
+    contentRevision: `${scrollAnchorKey}:${isStreaming}:${isTravelGuideGenerating}`,
+  });
+
+  const handleScroll = useCallback(
+    (event: {
+      detail: { scrollTop: number; scrollHeight: number; clientHeight?: number };
+    }) => {
+      scroll.handleScroll(event.detail);
+    },
+    [scroll],
+  );
+
+  const handleScrollToUpper = useCallback(async () => {
+    if (isLoadingHistory || loadingHistoryRef.current) return;
+
+    if (hasHiddenMessages) {
+      expandWindow();
+      return;
+    }
+
+    if (!hasMoreHistory || !onLoadOlderMessages) return;
+
+    loadingHistoryRef.current = true;
+    try {
+      const loadedCount = await onLoadOlderMessages();
+      if (loadedCount) {
+        expandWindowBy(loadedCount);
+      }
+    } finally {
+      loadingHistoryRef.current = false;
+    }
+  }, [
+    expandWindow,
+    expandWindowBy,
+    hasHiddenMessages,
+    hasMoreHistory,
+    isLoadingHistory,
+    onLoadOlderMessages,
   ]);
 
-  useLayoutEffect(() => {
-    if (!forceScrollToBottomKey) return;
-    if (suppressAutoScroll) return;
-    scrollToBottom();
-    const t1 = setTimeout(() => scrollToBottom(), 120);
-    const t2 = setTimeout(() => scrollToBottom(), 320);
-    const t3 = setTimeout(() => scrollToBottom(), 520);
-    return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
-      clearTimeout(t3);
-    };
-  }, [forceScrollToBottomKey, suppressAutoScroll, scrollToBottom]);
+  const showHistoryHint = isLoadingHistory || hasHiddenMessages || hasMoreHistory;
 
   return (
     <ScrollView
       scrollY
       enhanced
       showScrollbar={false}
-      scrollTop={scrollTop}
-      scrollIntoView={scrollIntoView}
+      scrollTop={scroll.scrollTop}
+      scrollIntoView={scroll.scrollIntoView}
       scrollWithAnimation={false}
+      upperThreshold={80}
+      onScroll={handleScroll}
+      onScrollToUpper={handleScrollToUpper}
       className="s-ai-assistant-chat__scroll s-scrollbar-none"
       style={scrollAreaHeight != null ? { height: `${scrollAreaHeight}px` } : undefined}
     >
       <View className="s-ai-assistant-chat__scroll-inner">
-        {messages.map((msg, index) => (
+        {showHistoryHint ? (
+          <Text className="s-ai-assistant-chat__history-hint">
+            {isLoadingHistory
+              ? '加载更早消息…'
+              : hasHiddenMessages
+                ? `上滑查看更早的 ${hiddenCount} 条消息`
+                : '上滑加载更早消息'}
+          </Text>
+        ) : null}
+        {visibleMessages.map((msg, index) => (
           <ChatMessageRow
             key={msg.id}
             msg={msg}
-            index={index}
-            messages={messages}
+            prevMsg={index > 0 ? visibleMessages[index - 1] : undefined}
             isStreaming={isStreaming}
             activityLegacyId={activityLegacyId}
             userAvatar={userAvatar}

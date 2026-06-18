@@ -54,6 +54,13 @@ module.exports = {
             message: 'Import from ../api/requestActor instead.',
           },
         ],
+        patterns: [
+          {
+            group: ['lucide-react-taro/*'],
+            message:
+              'Import icons from @/components/icons (tree-shake + bundle audit).',
+          },
+        ],
       },
     ],
   },

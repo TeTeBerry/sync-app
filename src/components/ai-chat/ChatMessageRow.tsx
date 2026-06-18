@@ -52,20 +52,22 @@ function formatMessageTime(id: string): string | null {
   });
 }
 
-function shouldShowTimestamp(messages: ChatUiMessage[], index: number): boolean {
-  if (index === 0) return true;
-  const currentTs = messageTimestampMs(messages[index].id);
-  const previousTs = messageTimestampMs(messages[index - 1].id);
+function shouldShowTimestamp(
+  prevMsg: ChatUiMessage | undefined,
+  msg: ChatUiMessage,
+): boolean {
+  if (!prevMsg) return true;
+  const currentTs = messageTimestampMs(msg.id);
+  const previousTs = messageTimestampMs(prevMsg.id);
   if (currentTs == null || previousTs == null) {
-    return messages[index].from !== messages[index - 1].from;
+    return msg.from !== prevMsg.from;
   }
   return currentTs - previousTs >= TIMESTAMP_GAP_MS;
 }
 
 export type ChatMessageRowProps = {
   msg: ChatUiMessage;
-  index: number;
-  messages: ChatUiMessage[];
+  prevMsg?: ChatUiMessage;
   isStreaming: boolean;
   activityLegacyId?: number;
   userAvatar?: string;
@@ -80,8 +82,7 @@ export type ChatMessageRowProps = {
 
 function ChatMessageRowInner({
   msg,
-  index,
-  messages,
+  prevMsg,
   isStreaming,
   activityLegacyId,
   userAvatar,
@@ -104,7 +105,7 @@ function ChatMessageRowInner({
   );
   const isUser = msg.from === 'user';
   const timestamp = formatMessageTime(msg.id);
-  const showTimestamp = shouldShowTimestamp(messages, index);
+  const showTimestamp = shouldShowTimestamp(prevMsg, msg);
 
   const publishConfirm =
     !isUser && !msg.streaming ? parsePublishConfirmMessage(msg.text) : null;

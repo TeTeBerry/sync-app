@@ -69,6 +69,8 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
     setMessages,
     messagesRef,
     isLoadingHistory,
+    hasMoreHistory,
+    loadOlderMessages,
     resetSession,
     persistSessionFromStream,
     sessionIdRef,
@@ -195,6 +197,13 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
     [cancelHistoryLoad, executeSend, isStreamingRef],
   );
 
+  const loadOlderMessagesWithCount = useCallback(async () => {
+    const beforeCount = messagesRef.current.length;
+    const loaded = await loadOlderMessages();
+    if (!loaded) return 0;
+    return messagesRef.current.length - beforeCount;
+  }, [loadOlderMessages, messagesRef]);
+
   const clearChat = useCallback(async () => {
     abortRef.current?.abort();
     const scopeKey = useAiChatStore.getState().activeScopeKey;
@@ -212,6 +221,8 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
     isStreaming,
     isStreamingRef,
     isLoadingHistory,
+    hasMoreHistory,
+    loadOlderMessages: loadOlderMessagesWithCount,
     send,
     abort,
     clearChat,

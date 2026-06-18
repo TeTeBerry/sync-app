@@ -12,7 +12,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
 const SRC = path.join(ROOT, 'src');
 
-const LUCIDE_PATTERN = /from\s+['"]lucide-react-taro['"]/;
+const LUCIDE_ROOT_PATTERN = /from\s+['"]lucide-react-taro['"]/;
+const LUCIDE_ICON_PATH_PATTERN = /from\s+['"]lucide-react-taro\/icons\/[^'"]+['"]/;
 const ICONS_DIR = path.join(SRC, 'components', 'icons');
 
 const MAIN_PACKAGE_GLOBS = [
@@ -74,8 +75,14 @@ const errors = [];
 for (const file of walkTsFiles(SRC)) {
   const content = fs.readFileSync(file, 'utf8');
 
-  if (LUCIDE_PATTERN.test(content) && !isUnderIcons(file)) {
+  if (LUCIDE_ROOT_PATTERN.test(content) && !isUnderIcons(file)) {
     errors.push(`${rel(file)}: import lucide-react-taro — use @/components/icons`);
+  }
+
+  if (LUCIDE_ICON_PATH_PATTERN.test(content) && !isUnderIcons(file)) {
+    errors.push(
+      `${rel(file)}: import lucide-react-taro/icons/* — use @/components/icons`,
+    );
   }
 
   if (!isMainPackageFile(file)) {

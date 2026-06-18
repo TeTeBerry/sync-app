@@ -19,16 +19,6 @@ export function useAiAssistantScroll(options: {
     const last = messagesRef.current[messagesRef.current.length - 1];
     if (shouldSuppressAutoScrollForMessage(last)) return;
     bumpScrollToBottom();
-    setTimeout(() => {
-      const latest = messagesRef.current[messagesRef.current.length - 1];
-      if (shouldSuppressAutoScrollForMessage(latest)) return;
-      bumpScrollToBottom();
-    }, 100);
-    setTimeout(() => {
-      const latest = messagesRef.current[messagesRef.current.length - 1];
-      if (shouldSuppressAutoScrollForMessage(latest)) return;
-      bumpScrollToBottom();
-    }, 300);
   }, [bumpScrollToBottom, messagesRef]);
 
   useEffect(() => {
