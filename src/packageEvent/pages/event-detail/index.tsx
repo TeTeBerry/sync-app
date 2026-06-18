@@ -186,7 +186,6 @@ const EventDetailPage = () => {
         />
       ) : null}
       {confirmDialog}
-      {publishComplianceConfirmDialog}
       <LoginInterceptHost />
       <AiBuddyPostSheet
         open={buddyPostSheetOpen}
@@ -207,6 +206,7 @@ const EventDetailPage = () => {
         onSubmit={handleGuideSheetSubmit}
       />
       <PageTabBarChrome />
+      {publishComplianceConfirmDialog}
     </View>
   );
 };

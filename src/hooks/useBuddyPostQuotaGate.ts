@@ -29,8 +29,8 @@ export function useBuddyPostQuotaGate(options: {
       return true;
     }
 
-    const refreshed = await profilePostsQuery.refetch();
-    const posts = refreshed.data ?? profilePostsQuery.data ?? [];
+    const refreshedPosts = await profilePostsQuery.refetch();
+    const posts = refreshedPosts ?? profilePostsQuery.data ?? [];
     const quota = resolveBuddyPostQuota(posts, legacyId);
 
     if (quota.atLimit) {

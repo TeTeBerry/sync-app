@@ -9,6 +9,7 @@ import {
   publishBuddyPostFromForm,
 } from '../../../utils/publishBuddyPost';
 import { isApiEnabled } from '../../../constants/api';
+import { requireAuth } from '../../../utils/authGate';
 import { getClientUserId } from '../../../utils/session';
 
 /** Structured message-board template sheet on event detail. */
@@ -43,11 +44,17 @@ export function useEventDetailBuddyPost(
       void Taro.showToast({ title: '活动信息无效', icon: 'none' });
       return;
     }
-    void guardPublish().then(async (allowed) => {
-      if (!allowed) return;
-      const canOpen = await ensureCanOpenBuddyPostSheet();
-      if (canOpen) setSheetOpen(true);
-    });
+    requireAuth(() => {
+      void (async () => {
+        if (!(await guardPublish())) {
+          return;
+        }
+        const canOpen = await ensureCanOpenBuddyPostSheet();
+        if (canOpen) {
+          setSheetOpen(true);
+        }
+      })();
+    }, 'activity');
   }, [ensureCanOpenBuddyPostSheet, eventId, guardPublish]);
 
   const closeBuddyPostSheet = useCallback(() => {

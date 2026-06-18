@@ -68,8 +68,9 @@ page {
   --overlay-muted-surface-hover: rgba(255, 255, 255, 0.1);
   --overlay-z-popover: 100;
   --overlay-z-sheet: 105;
-  --overlay-z-dialog: 110;
-  --overlay-z-lightbox: 120;
+  /** Above custom tab bar (9999) and event-detail FAB (10001). */
+  --overlay-z-dialog: 10050;
+  --overlay-z-lightbox: 10060;
 
   /* Confirm dialog (center modal @ 375px) */
   --confirm-dialog-backdrop: rgba(0, 0, 0, 0.82);

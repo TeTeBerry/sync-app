@@ -60,7 +60,7 @@
   position: fixed;
   right: 16px;
   bottom: calc(var(--s-tabbar-total) + var(--s-event-detail-legal-footer-h) + 12px);
-  z-index: 100;
+  z-index: 10001;
   pointer-events: none;
 }
 

@@ -10,6 +10,9 @@ import { isLiveApi } from '../../../../constants/api';
 import { isLoggedIn } from '../../../../utils/authStorage';
 import { Button } from '../../../../components/ui';
 import { useOverlayLock } from '../../../../hooks/useOverlayLock';
+import { clearAllLocalUserData } from '../../../../utils/clearAllLocalUserData';
+
+const SHOW_DEV_RESET = process.env.NODE_ENV !== 'production';
 
 const FAQ_QA = [
   {
@@ -33,6 +36,7 @@ export function HelpFeedbackSettings() {
   const [formOpen, setFormOpen] = useState(false);
   const [content, setContent] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [resetting, setResetting] = useState(false);
 
   useOverlayLock(formOpen);
 
@@ -79,6 +83,29 @@ export function HelpFeedbackSettings() {
       setSubmitting(false);
     }
   }, [content]);
+
+  const handleResetLocalData = useCallback(() => {
+    void Taro.showModal({
+      title: '重置本地数据',
+      content:
+        '将清空登录状态、协议勾选、首页缓存、人格测试结果等全部本地数据，并回到首页。仅用于新用户测试，是否继续？',
+      confirmText: '清空并重开',
+      confirmColor: '#ff0066',
+      success: (result) => {
+        if (!result.confirm) {
+          return;
+        }
+        setResetting(true);
+        void clearAllLocalUserData()
+          .catch(() => {
+            void Taro.showToast({ title: '重置失败，请稍后重试', icon: 'none' });
+          })
+          .finally(() => {
+            setResetting(false);
+          });
+      },
+    });
+  }, []);
 
   return (
     <View className="s-settings-help">
@@ -133,6 +160,25 @@ export function HelpFeedbackSettings() {
           </View>
         )}
       </View>
+
+      {SHOW_DEV_RESET ? (
+        <View className="s-settings-help__dev">
+          <Text className="s-settings-help__dev-title">开发测试</Text>
+          <Text className="s-settings-help__dev-desc">
+            模拟首次打开小程序：清空本地 storage
+            与内存缓存（不影响服务端账号，除非已调用退出登录）。
+          </Text>
+          <Button
+            className="s-settings-help__dev-btn"
+            disabled={resetting}
+            onClick={handleResetLocalData}
+          >
+            <Text className="s-btn-label">
+              {resetting ? '重置中…' : '重置本地数据（新用户测试）'}
+            </Text>
+          </Button>
+        </View>
+      ) : null}
     </View>
   );
 }

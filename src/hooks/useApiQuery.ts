@@ -56,6 +56,15 @@ export function invalidateCache(queryKey: (string | number | undefined)[]) {
   }
 }
 
+/** Wipe all in-memory query cache (e.g. local data reset for new-user testing). */
+export function clearAllApiCache(): void {
+  globalCache.clear();
+  inflightByKey.clear();
+  for (const listener of invalidationListeners) {
+    listener('');
+  }
+}
+
 export function setCacheData<T>(
   queryKey: (string | number | undefined)[],
   updater: (prev: T | undefined) => T | undefined,
@@ -148,7 +157,10 @@ export function useApiQuery<T>(options: UseApiQueryOptions<T>) {
   dataRef.current = data;
 
   const fetch = useCallback(
-    async (options?: { force?: boolean; background?: boolean }) => {
+    async (options?: {
+      force?: boolean;
+      background?: boolean;
+    }): Promise<T | undefined> => {
       const force = options?.force ?? false;
       const background = options?.background ?? false;
       const now = Date.now();
@@ -158,10 +170,10 @@ export function useApiQuery<T>(options: UseApiQueryOptions<T>) {
         if (cachedEntry && now - cachedEntry.timestamp < staleTime) {
           setData(cachedEntry.data);
           lastFetchRef.current = cachedEntry.timestamp;
-          return;
+          return cachedEntry.data;
         }
         if (now - lastFetchRef.current < staleTime && dataRef.current !== undefined) {
-          return;
+          return dataRef.current;
         }
       }
 
@@ -191,9 +203,11 @@ export function useApiQuery<T>(options: UseApiQueryOptions<T>) {
         const result = await request;
         setData(result);
         lastFetchRef.current = Date.now();
+        return result;
       } catch (err) {
         setIsError(true);
         setError(err instanceof Error ? err : new Error(String(err)));
+        return undefined;
       } finally {
         if (!background) {
           setIsLoading(false);
