@@ -160,24 +160,6 @@
   font-weight: var(--s-fw-extrabold);
 }
 
-// ── Activity feed ─────────────────────────────────────────────────────────────
-
-.s-home-feed {
-  margin: 0 calc(-1 * var(--s-page-gutter));
-}
-
-.s-home-feed--muted {
-  padding: 0 var(--s-page-gutter) 8px;
-}
-
-.s-home-feed__hint {
-  display: block;
-  font-size: 13px;
-  line-height: 1.5;
-  color: var(--s-color-text-secondary, #8e8e93);
-  text-align: center;
-}
-
 // ── Heat footer ───────────────────────────────────────────────────────────────
 
 .s-home__heat {

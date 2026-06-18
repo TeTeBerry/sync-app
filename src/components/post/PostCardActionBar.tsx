@@ -9,7 +9,7 @@ export type PostCardActionBarProps = {
   onToggleComments: () => void;
 };
 
-const PostCardActionBar: React.FC<PostCardActionBarProps> = ({
+export const PostCardActionBar: React.FC<PostCardActionBarProps> = ({
   comments,
   commentsExpanded,
   onToggleComments,
@@ -38,5 +38,3 @@ const PostCardActionBar: React.FC<PostCardActionBarProps> = ({
     </View>
   );
 };
-
-export default PostCardActionBar;

@@ -56,9 +56,29 @@ export const HomeFeaturedEvents: FC<HomeFeaturedEventsProps> = ({
     return (
       <View className="s-home-showcase" aria-label="热门活动">
         <View className="s-home-showcase__head">
-          <Text className="s-home-showcase__title">热门活动</Text>
+          <Text className="s-home-showcase__title">🎪 热门活动</Text>
+          <View
+            className="s-home-showcase__all"
+            onClick={() => goEventsListTab()}
+            role="button"
+            aria-label="查看全部活动"
+          >
+            <Text className="s-home-showcase__all-text">全部</Text>
+            <ChevronRight size={14} color="var(--primary)" />
+          </View>
         </View>
-        <Text className="s-home-showcase__empty">暂无进行中的活动</Text>
+        <View className="s-home-showcase__empty-wrap">
+          <Text className="s-home-showcase__empty">暂无精选活动</Text>
+          <Text className="s-home-showcase__empty-hint">
+            去活动页看看近期场次与地图
+          </Text>
+          <Button
+            className="s-home-showcase__empty-btn"
+            onClick={() => goEventsListTab()}
+          >
+            <Text className="s-home-showcase__empty-btn-text">浏览近期活动</Text>
+          </Button>
+        </View>
       </View>
     );
   }
