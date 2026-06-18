@@ -2,6 +2,12 @@ import { useEffect, useRef } from 'react';
 import Taro from '@tarojs/taro';
 import type { AiGuidePlanFormValues } from '../../../../types/travelGuide';
 import type { AiCapability, RunCapabilityOptions } from '@/domains/ai-capability';
+import {
+  resolveInitialAutoGuideIntent,
+  resolveInitialGuideSheetIntent,
+  resolveInitialMessageIntent,
+  resolveInitialPrefillGuideIntent,
+} from './aiAssistantInitialIntents.util';
 
 type TravelGuideApi = {
   handleSheetSubmit: (form: AiGuidePlanFormValues) => void;
@@ -39,15 +45,16 @@ export function useAiAssistantInitialIntents(options: {
   const initialAutoGuideHandledRef = useRef(false);
 
   useEffect(() => {
-    if (!initialMessage) return;
-    if (initialMessageHandledRef.current) return;
-
-    const trimmed = initialMessage.trim();
-    if (!trimmed || isStreaming) return;
+    const intent = resolveInitialMessageIntent({
+      initialMessage,
+      isStreaming,
+      alreadyHandled: initialMessageHandledRef.current,
+    });
+    if (intent.kind === 'skip' || intent.kind === 'wait') return;
 
     initialMessageHandledRef.current = true;
     onInitialMessageSent?.();
-    void send({ text: trimmed });
+    void send({ text: intent.text });
   }, [initialMessage, isStreaming, onInitialMessageSent, send]);
 
   useEffect(() => {
@@ -55,9 +62,15 @@ export function useAiAssistantInitialIntents(options: {
       initialGuideSheetHandledRef.current = false;
       return;
     }
-    if (initialPrefillTravelGuideForm) return;
-    if (initialGuideSheetHandledRef.current) return;
-    if (activityLegacyId == null || Number.isNaN(activityLegacyId)) return;
+
+    const action = resolveInitialGuideSheetIntent({
+      initialOpenAiGuideSheet,
+      initialPrefillTravelGuideForm,
+      activityLegacyId,
+      alreadyHandled: initialGuideSheetHandledRef.current,
+    });
+    if (action === 'skip') return;
+
     initialGuideSheetHandledRef.current = true;
     onInitialMessageSent?.();
     runCapability('travel_guide', { source: 'deep_link' });
@@ -70,13 +83,16 @@ export function useAiAssistantInitialIntents(options: {
   ]);
 
   useEffect(() => {
-    const form = initialPrefillTravelGuideForm;
+    const form = resolveInitialPrefillGuideIntent({
+      initialPrefillTravelGuideForm,
+      activityLegacyId,
+      alreadyHandled: initialPrefillGuideHandledRef.current,
+    });
     if (!form) {
       initialPrefillGuideHandledRef.current = false;
       return;
     }
-    if (initialPrefillGuideHandledRef.current) return;
-    if (activityLegacyId == null || Number.isNaN(activityLegacyId)) return;
+
     initialPrefillGuideHandledRef.current = true;
     initialGuideSheetHandledRef.current = true;
     onInitialMessageSent?.();
@@ -91,13 +107,16 @@ export function useAiAssistantInitialIntents(options: {
   ]);
 
   useEffect(() => {
-    const form = initialAutoRunTravelGuideForm;
+    const form = resolveInitialAutoGuideIntent({
+      initialAutoRunTravelGuideForm,
+      activityLegacyId,
+      alreadyHandled: initialAutoGuideHandledRef.current,
+    });
     if (!form) {
       initialAutoGuideHandledRef.current = false;
       return;
     }
-    if (initialAutoGuideHandledRef.current) return;
-    if (activityLegacyId == null || Number.isNaN(activityLegacyId)) return;
+
     initialAutoGuideHandledRef.current = true;
     onInitialMessageSent?.();
     Taro.nextTick(() => {

@@ -81,7 +81,20 @@ export interface TravelGuidePlan {
 
 export interface GenerateTravelGuideResult {
   plan: TravelGuidePlan;
+  guideId?: string;
 }
+
+export type TravelGuidePlanReadResult = {
+  guideId: string;
+  activityLegacyId: number;
+  form: AiGuidePlanFormValues;
+  plan: TravelGuidePlan;
+  createdAt: string;
+};
+
+export type GenerateTravelGuidePayload = AiGuidePlanFormValues & {
+  guideId?: string;
+};
 
 export type TravelGuideChatPayload = {
   guideId: string;

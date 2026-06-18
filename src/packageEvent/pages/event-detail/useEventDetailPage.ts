@@ -27,11 +27,14 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     eventId,
     highlightPostId,
     focusPostsOnMount,
+    openBuddyPostOnMount,
     scrollTop: routeScrollTop,
     setScrollTop,
     secondaryReady,
+    invalidEventId,
   } = route;
   const focusPostsScrolledRef = useRef(false);
+  const buddyPostSheetOpenedRef = useRef(false);
 
   const activityQuery = useActivityDetailQuery(eventId);
   const activityTitle = activityQuery.data?.name;
@@ -94,6 +97,24 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
       setScrollTop,
     );
   }, [focusPostsOnMount, postsLoading]);
+
+  useEffect(() => {
+    if (
+      !openBuddyPostOnMount ||
+      buddyPostSheetOpenedRef.current ||
+      invalidEventId ||
+      !secondaryReady
+    ) {
+      return;
+    }
+    buddyPostSheetOpenedRef.current = true;
+    templatePost.openBuddyPostSheet();
+  }, [
+    openBuddyPostOnMount,
+    invalidEventId,
+    secondaryReady,
+    templatePost.openBuddyPostSheet,
+  ]);
 
   const showPostsEnd =
     !posts.searchActive &&

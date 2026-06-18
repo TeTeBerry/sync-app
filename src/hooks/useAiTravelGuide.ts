@@ -114,7 +114,10 @@ export function useAiTravelGuide(options: {
             throw new Error('请先配置 API 地址');
           }
 
-          const { plan } = await generateTravelGuide(activityLegacyId, form);
+          const { plan } = await generateTravelGuide(activityLegacyId, {
+            ...form,
+            guideId: aiMsgId,
+          });
           const guideId = aiMsgId;
           saveTravelGuideDetail(guideId, {
             plan,

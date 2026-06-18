@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 import { usePageRouteReady } from '../../../hooks/usePageRouteReady';
 import {
   activityStatusCardClass,
@@ -9,6 +9,7 @@ import { stackPageNavChromePx } from '../../../components/navigation/PageNavigat
 import { useNavBarInsets } from '../../../hooks/useNavBarInsets';
 import { useTabPageMainHeight } from '../../../hooks/useTabPageMainHeight';
 import type { useActivityDetailQuery } from '../../../hooks/useSyncApi';
+import { resolveEventDetailHeaderPresentation } from './eventDetailActivityHeader.util';
 
 export type UseEventDetailActivityHeaderOptions = {
   eventId: number;
@@ -17,46 +18,36 @@ export type UseEventDetailActivityHeaderOptions = {
 };
 
 export function useEventDetailActivityHeader({
-  eventId,
+  eventId: _eventId,
   hasValidEventId,
   activityQuery,
 }: UseEventDetailActivityHeaderOptions) {
   const navInsets = useNavBarInsets();
 
-  const title = activityQuery.data?.name;
-  const activityDate = activityQuery.data?.date;
-  const activityLocation = activityQuery.data?.location;
+  const header = resolveEventDetailHeaderPresentation({
+    hasValidEventId,
+    query: activityQuery,
+  });
+  const {
+    title,
+    activityDate,
+    activityLocation,
+    metaLine,
+    showHeaderSkeleton,
+    showActivityMissing,
+    routeContentReady,
+    loadError,
+  } = header;
+
   const isOnSite = isActivityOnSite(activityDate, title);
-
   const activityStatus = getActivityStatusFromActivity(activityDate, title);
-  const showHeaderSkeleton =
-    hasValidEventId &&
-    !title &&
-    !activityQuery.isError &&
-    (activityQuery.isLoading || activityQuery.data === undefined);
-  const showActivityMissing =
-    hasValidEventId &&
-    !title &&
-    !activityQuery.isLoading &&
-    !showHeaderSkeleton &&
-    (activityQuery.isError || activityQuery.data === null);
-  const routeContentReady = Boolean(title) || showHeaderSkeleton || showActivityMissing;
   usePageRouteReady(routeContentReady);
-
-  const metaLine = useMemo(() => {
-    if (!activityQuery.data) return '';
-    const parts = [activityQuery.data.date, activityQuery.data.location].filter(
-      Boolean,
-    );
-    return parts.join(' · ');
-  }, [activityQuery.data]);
 
   const headerChromePx = stackPageNavChromePx(navInsets, {
     meta: Boolean(metaLine),
   });
   const scrollHeight = useTabPageMainHeight(headerChromePx);
 
-  const loadError = activityQuery.isError && !activityQuery.isLoading;
   const onRetryActivity = useCallback(() => {
     void activityQuery.refetch();
   }, [activityQuery]);

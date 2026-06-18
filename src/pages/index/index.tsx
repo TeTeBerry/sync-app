@@ -139,12 +139,19 @@ const Home = () => {
   );
 
   const openSignupEvent = useCallback(
-    (legacyId: number, options?: { focusPosts?: boolean }) => {
+    (legacyId: number, options?: { focusPosts?: boolean; openBuddyPost?: boolean }) => {
       const signupEvent = summary?.signupEvents.find((event) => event.id === legacyId);
       if (signupEvent) {
         seedActivityDetailFromHomeSignupEvent(signupEvent);
       }
-      goEventDetail(legacyId, options?.focusPosts ? { focusPosts: true } : undefined);
+      goEventDetail(
+        legacyId,
+        options?.openBuddyPost
+          ? { openBuddyPost: true }
+          : options?.focusPosts
+            ? { focusPosts: true }
+            : undefined,
+      );
     },
     [summary?.signupEvents],
   );
@@ -160,7 +167,7 @@ const Home = () => {
     if (!nextRegisteredEvent) {
       return;
     }
-    openSignupEvent(nextRegisteredEvent.id, { focusPosts: true });
+    openSignupEvent(nextRegisteredEvent.id, { openBuddyPost: true });
   }, [nextRegisteredEvent, openSignupEvent]);
 
   const heatLabel =

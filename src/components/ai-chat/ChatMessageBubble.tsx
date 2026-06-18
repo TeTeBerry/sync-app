@@ -35,7 +35,6 @@ export function ChatMessageBubble({
     showPublishConfirm,
     showProgressIndicator,
     showTypingIndicator,
-    hasSuggestedReplyChips,
   } = presentation;
 
   return (

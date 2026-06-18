@@ -3,7 +3,6 @@ import { useAccountRisk } from '../../../../hooks/useAccountRisk';
 import { useConfirmDialog } from '../../../../hooks/useConfirmDialog';
 import { useKeyboardInset } from '../../../../hooks/useKeyboardInset';
 import { useActivityDetailQuery } from '../../../../hooks/useSyncApi';
-import { eventCityFromLocation } from '../../../../utils/travelGuideDepartureSuggestions';
 import type { inferUserGenderFromName } from '../../../../utils/inferAuthorGender';
 import type { AiGuidePlanFormValues } from '../../../../types/travelGuide';
 import type { FestivalPlanTaskActions } from '../../../../domains/festival-plan/festivalPlanTaskActions';
@@ -14,6 +13,10 @@ import { useAiActivityBinding } from './useAiActivityBinding';
 import { useAiAssistantCapabilitySheets } from './useAiAssistantCapabilitySheets';
 import { useAiAssistantComposer } from './useAiAssistantComposer';
 import { useAiAssistantInitialIntents } from './useAiAssistantInitialIntents';
+import {
+  resolveOrchestratorActivityQueryId,
+  resolveOrchestratorGuideEventCity,
+} from './aiAssistantOrchestrator.util';
 
 export type UseAiAssistantOrchestratorOptions = {
   initialMessage?: string | null;
@@ -55,7 +58,7 @@ export function useAiAssistantOrchestrator(options: UseAiAssistantOrchestratorOp
 
   const keyboardInset = useKeyboardInset();
   const activityQuery = useActivityDetailQuery(
-    activityLocation != null ? undefined : activityLegacyId,
+    resolveOrchestratorActivityQueryId(activityLegacyId, activityLocation),
   );
   const { accountRisk } = useAccountRisk();
   const { confirm, confirmDialog } = useConfirmDialog({
@@ -64,7 +67,8 @@ export function useAiAssistantOrchestrator(options: UseAiAssistantOrchestratorOp
   });
 
   const guideEventCity = useMemo(
-    () => eventCityFromLocation(activityLocation ?? activityQuery.data?.location),
+    () =>
+      resolveOrchestratorGuideEventCity(activityLocation, activityQuery.data?.location),
     [activityLocation, activityQuery.data?.location],
   );
 

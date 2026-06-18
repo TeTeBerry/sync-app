@@ -525,7 +525,7 @@ export function go(url: RoutePath | string) {
 /** Query params for event-detail; keep `id` + `activityLegacyId` in sync for preload/navigate. */
 export function buildEventDetailQuery(
   legacyId: number,
-  options?: { postId?: string; focusPosts?: boolean },
+  options?: { postId?: string; focusPosts?: boolean; openBuddyPost?: boolean },
 ): Record<string, string> {
   const query: Record<string, string> = {
     id: String(legacyId),
@@ -538,12 +538,15 @@ export function buildEventDetailQuery(
   if (options?.focusPosts) {
     query.focusPosts = '1';
   }
+  if (options?.openBuddyPost) {
+    query.openBuddyPost = '1';
+  }
   return query;
 }
 
 export function goEventDetail(
   eventId: number | string,
-  options?: { postId?: string; focusPosts?: boolean },
+  options?: { postId?: string; focusPosts?: boolean; openBuddyPost?: boolean },
 ) {
   const legacyId = parseActivityLegacyId(eventId);
   if (legacyId == null) {

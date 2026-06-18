@@ -1,7 +1,13 @@
 import { fetchPostsByActivityPage } from '../api/syncApi';
 import { isLiveApi } from '../constants/api';
 import type { EventPostsPage } from '../types/backend';
-import { getCacheData, prefetchToCache, setCacheData } from '../hooks/useApiQuery';
+import type { InfiniteQueryPage } from '../hooks/useApiInfiniteQuery';
+import {
+  broadcastCacheData,
+  getCacheData,
+  prefetchToCache,
+  setCacheData,
+} from '../hooks/useApiQuery';
 
 export const EVENT_POSTS_PAGE_SIZE = 10;
 
@@ -12,17 +18,20 @@ export function eventPostsPageQueryKey(activityLegacyId: number) {
 export function getEventPostsPageCache(
   activityLegacyId: number,
 ): EventPostsPage | undefined {
-  return getCacheData<EventPostsPage>([...eventPostsPageQueryKey(activityLegacyId)]);
+  return getCacheData<InfiniteQueryPage<EventPostsPage['items'][number]>>([
+    ...eventPostsPageQueryKey(activityLegacyId),
+  ]);
 }
 
 export function setEventPostsPageCache(
   activityLegacyId: number,
   page: EventPostsPage,
 ): void {
-  setCacheData<EventPostsPage>(
+  setCacheData<InfiniteQueryPage<EventPostsPage['items'][number]>>(
     [...eventPostsPageQueryKey(activityLegacyId)],
     () => page,
   );
+  broadcastCacheData([...eventPostsPageQueryKey(activityLegacyId)]);
 }
 
 /** Warm first activity post page before event-detail mounts (tap / hover preload). */

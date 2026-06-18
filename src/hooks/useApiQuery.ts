@@ -27,6 +27,24 @@ function subscribeCacheData(listener: InvalidationListener) {
   };
 }
 
+/** Subscribe while mounted — refetch when `invalidateCache` matches this key prefix. */
+export function onCacheInvalidated(cacheKey: string, listener: () => void): () => void {
+  return subscribeInvalidation((prefix) => {
+    if (cacheKey.startsWith(prefix)) {
+      listener();
+    }
+  });
+}
+
+/** Subscribe while mounted — resync when `broadcastCacheData` matches this key prefix. */
+export function onCacheDataUpdated(cacheKey: string, listener: () => void): () => void {
+  return subscribeCacheData((prefix) => {
+    if (cacheKey.startsWith(prefix)) {
+      listener();
+    }
+  });
+}
+
 /** Sync mounted queries from globalCache after an in-place patch (no refetch). */
 export function broadcastCacheData(queryKey: (string | number | undefined)[]) {
   const prefix = getCacheKey(queryKey);
@@ -82,6 +100,13 @@ export function getCacheData<T>(
 ): T | undefined {
   const key = getCacheKey(queryKey);
   return (globalCache.get(key) as CacheEntry<T> | undefined)?.data;
+}
+
+export function getCacheTimestamp(
+  queryKey: (string | number | undefined)[],
+): number | undefined {
+  const key = getCacheKey(queryKey);
+  return (globalCache.get(key) as CacheEntry<unknown> | undefined)?.timestamp;
 }
 
 /** Iterate all cached query entries (for cross-key optimistic patches). */

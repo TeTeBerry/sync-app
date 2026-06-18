@@ -8,6 +8,10 @@ import {
   DEFER_EVENT_SECONDARY_MS,
 } from '../../../utils/timing';
 import { selectActiveActivityLegacyId, useNavigationStore } from '../../../stores';
+import {
+  parseEventDetailRouteFlags,
+  shouldWarmEventDetailAi,
+} from './eventDetailRoute.util';
 
 export function useEventDetailRoute() {
   const router = useRouter();
@@ -20,8 +24,8 @@ export function useEventDetailRoute() {
     () => resolveEventDetailIdFromQuery(router.params, activeActivityLegacyId),
     [activeActivityLegacyId, router.params],
   );
-  const highlightPostId = router.params.postId?.trim() ?? '';
-  const focusPostsOnMount = router.params.focusPosts === '1';
+  const { highlightPostId, focusPostsOnMount, openBuddyPostOnMount } =
+    parseEventDetailRouteFlags(router.params);
   useEffect(() => {
     if (Number.isFinite(eventId) && eventId > 0) {
       bindActivity(eventId);
@@ -29,7 +33,7 @@ export function useEventDetailRoute() {
   }, [eventId]);
 
   useEffect(() => {
-    if (!aiWarmReady) return;
+    if (!shouldWarmEventDetailAi(aiWarmReady)) return;
     warmAiAssistant();
   }, [aiWarmReady]);
 
@@ -40,6 +44,7 @@ export function useEventDetailRoute() {
     eventId,
     highlightPostId,
     focusPostsOnMount,
+    openBuddyPostOnMount,
     scrollTop,
     setScrollTop,
     secondaryReady,

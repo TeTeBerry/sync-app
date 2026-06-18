@@ -5,7 +5,7 @@ import Taro, {
   useShareTimeline,
 } from '@tarojs/taro';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { generateTravelGuide } from '@/api/sync/travelGuide';
+import { fetchTravelGuidePlan, generateTravelGuide } from '@/api/sync/travelGuide';
 import { useActivityDetailQuery } from '@/hooks/useSyncApi';
 import { useStackPageMainHeight } from '@/hooks/useTabPageMainHeight';
 import { goAiAssistant, ROUTES } from '@/utils/route';
@@ -22,16 +22,17 @@ import {
   buildTravelGuideShareTimeline,
   parseTravelGuideFormFromShareQuery,
 } from '../utils/travelGuideWechatShare.util';
+import {
+  computeAiTravelGuideFooterChromePx,
+  resolveTravelGuideShareRef,
+  shouldLoadTravelGuideDetail,
+} from './aiTravelGuidePage.util';
 
 const FOOTER_BASE_PX = 72;
 
 function resolveFooterChromePx(): number {
   try {
-    const win = Taro.getWindowInfo();
-    const screenHeight = win.screenHeight ?? win.windowHeight ?? 667;
-    const safeBottom =
-      win.safeArea != null ? Math.max(0, screenHeight - win.safeArea.bottom) : 0;
-    return FOOTER_BASE_PX + safeBottom;
+    return computeAiTravelGuideFooterChromePx(Taro.getWindowInfo(), FOOTER_BASE_PX);
   } catch {
     return FOOTER_BASE_PX;
   }
@@ -68,52 +69,97 @@ export function useAiTravelGuidePage() {
   }, [cachedPayload]);
 
   useEffect(() => {
-    if (payload || !guideId || !shareSeed) return;
+    if (!shouldLoadTravelGuideDetail({ payload, guideId })) {
+      return;
+    }
 
     let cancelled = false;
 
-    const loadFromShare = () => {
+    const regenerateFromShare = async () => {
+      if (!shareSeed) return;
+
+      const { plan } = await generateTravelGuide(shareSeed.activityLegacyId, {
+        ...shareSeed.form,
+        guideId,
+      });
+      if (cancelled) return;
+
+      const next: TravelGuideDetailPayload = {
+        plan,
+        form: shareSeed.form,
+        activityLegacyId: shareSeed.activityLegacyId,
+        createdAt: new Date().toISOString(),
+      };
+      saveTravelGuideDetail(guideId, next);
+      setPayload(next);
+    };
+
+    const loadDetail = async () => {
       setLoading(true);
       setLoadError(null);
+      let deferLoadingStop = false;
 
-      void generateTravelGuide(shareSeed.activityLegacyId, shareSeed.form)
-        .then(({ plan }) => {
-          if (cancelled) return;
+      try {
+        const remote = await fetchTravelGuidePlan(guideId);
+        if (cancelled) return;
+
+        if (remote) {
           const next: TravelGuideDetailPayload = {
-            plan,
-            form: shareSeed.form,
-            activityLegacyId: shareSeed.activityLegacyId,
-            createdAt: new Date().toISOString(),
+            plan: remote.plan,
+            form: remote.form,
+            activityLegacyId: remote.activityLegacyId,
+            createdAt: remote.createdAt,
           };
           saveTravelGuideDetail(guideId, next);
           setPayload(next);
-        })
-        .catch((error) => {
-          if (cancelled) return;
-          const message =
-            error instanceof Error ? error.message : '攻略加载失败，请稍后重试';
-          setLoadError(message);
-        })
-        .finally(() => {
-          if (!cancelled) setLoading(false);
-        });
+          return;
+        }
+
+        if (!shareSeed) {
+          setLoadError('攻略不存在或已过期');
+          return;
+        }
+
+        const runRegenerate = async () => {
+          try {
+            await regenerateFromShare();
+          } catch (error) {
+            if (cancelled) return;
+            const message =
+              error instanceof Error ? error.message : '攻略加载失败，请稍后重试';
+            setLoadError(message);
+          }
+        };
+
+        if (isAuthGated()) {
+          deferLoadingStop = true;
+          requireAuth(() => {
+            void runRegenerate().finally(() => {
+              if (!cancelled) setLoading(false);
+            });
+          }, 'ai_assistant');
+          return;
+        }
+
+        await runRegenerate();
+      } catch (error) {
+        if (cancelled) return;
+        const message =
+          error instanceof Error ? error.message : '攻略加载失败，请稍后重试';
+        setLoadError(message);
+      } finally {
+        if (!cancelled && !deferLoadingStop) setLoading(false);
+      }
     };
 
-    if (isAuthGated()) {
-      requireAuth(loadFromShare, 'ai_assistant');
-      return () => {
-        cancelled = true;
-      };
-    }
-
-    loadFromShare();
+    void loadDetail();
     return () => {
       cancelled = true;
     };
   }, [guideId, payload, shareSeed]);
 
   useEffect(() => {
-    shareRef.current = payload && guideId ? { guideId, payload } : null;
+    shareRef.current = resolveTravelGuideShareRef({ guideId, payload });
   }, [guideId, payload]);
 
   useDidShow(() => {

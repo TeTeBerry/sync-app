@@ -1,5 +1,6 @@
 import {
   LONG_RUNNING_REQUEST_TIMEOUT_MS,
+  ApiError,
   apiGet,
   apiPost,
 } from '../../utils/apiClient';
@@ -8,8 +9,9 @@ import {
   isWeappCloudRunTransportEnabled,
 } from '../../constants/cloud';
 import type {
-  AiGuidePlanFormValues,
+  GenerateTravelGuidePayload,
   GenerateTravelGuideResult,
+  TravelGuidePlanReadResult,
 } from '../../types/travelGuide';
 import { ownerQueryParams } from '../requestContext';
 
@@ -56,9 +58,27 @@ export function fetchReverseGeocodeLabel(lat: number, lng: number) {
   });
 }
 
+export async function fetchTravelGuidePlan(
+  guideId: string,
+): Promise<TravelGuidePlanReadResult | null> {
+  const id = guideId.trim();
+  if (!id) return null;
+
+  try {
+    return await apiGet<TravelGuidePlanReadResult>(
+      `/travel-guide/plans/${encodeURIComponent(id)}`,
+    );
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 404) {
+      return null;
+    }
+    throw error;
+  }
+}
+
 export function generateTravelGuide(
   activityLegacyId: number,
-  payload: AiGuidePlanFormValues,
+  payload: GenerateTravelGuidePayload,
 ) {
   if (isWeappCloudRunTransportEnabled()) {
     return generateTravelGuideViaJob(activityLegacyId, payload);
@@ -99,7 +119,7 @@ export async function pollTravelGuideGenerationJob(
 
 async function generateTravelGuideViaJob(
   activityLegacyId: number,
-  payload: AiGuidePlanFormValues,
+  payload: GenerateTravelGuidePayload,
 ): Promise<GenerateTravelGuideResult> {
   const { jobId } = await apiPost<{ jobId: string }>(
     `/activities/${activityLegacyId}/travel-guide/generate-async`,
@@ -109,5 +129,5 @@ async function generateTravelGuideViaJob(
   );
 
   const plan = await pollTravelGuideGenerationJob(jobId);
-  return { plan };
+  return { plan, guideId: payload.guideId };
 }
