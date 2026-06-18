@@ -98,32 +98,38 @@ export function AiAssistantChat({
         />
       </View>
 
-      <AiBuddyPostSheet
-        open={buddyPost.sheetOpen}
-        activityDate={activityQuery.data?.date}
-        activityTitle={activityTitle}
-        eventCity={guideEventCity}
-        initialValues={buddyPost.sheetInitialValues}
-        prefillSummaryLines={buddyPost.sheetPrefillHint}
-        postQuota={buddyPost.sheetPostQuota ?? undefined}
-        onClose={buddyPost.closeBuddyPostSheet}
-        onSubmit={buddyPost.handleSheetSubmit}
-      />
+      {buddyPost.sheetOpen ? (
+        <AiBuddyPostSheet
+          open
+          activityDate={activityQuery.data?.date}
+          activityTitle={activityTitle}
+          eventCity={guideEventCity}
+          initialValues={buddyPost.sheetInitialValues}
+          prefillSummaryLines={buddyPost.sheetPrefillHint}
+          postQuota={buddyPost.sheetPostQuota ?? undefined}
+          onClose={buddyPost.closeBuddyPostSheet}
+          onSubmit={buddyPost.handleSheetSubmit}
+        />
+      ) : null}
 
-      <AiGuidePlanSheet
-        open={travelGuide.sheetOpen}
-        defaultNights={travelGuide.defaultNights}
-        eventCity={guideEventCity}
-        initialValues={travelGuide.sheetInitialValues}
-        onClose={() => travelGuide.setSheetOpen(false)}
-        onSubmit={travelGuide.handleSheetSubmit}
-      />
+      {travelGuide.sheetOpen ? (
+        <AiGuidePlanSheet
+          open
+          defaultNights={travelGuide.defaultNights}
+          eventCity={guideEventCity}
+          initialValues={travelGuide.sheetInitialValues}
+          onClose={() => travelGuide.setSheetOpen(false)}
+          onSubmit={travelGuide.handleSheetSubmit}
+        />
+      ) : null}
 
-      <AiActivityPickerSheet
-        open={activityBinding.activityPickerOpen}
-        onClose={activityBinding.closeActivityPicker}
-        onSelect={activityBinding.handleActivityPicked}
-      />
+      {activityBinding.activityPickerOpen ? (
+        <AiActivityPickerSheet
+          open
+          onClose={activityBinding.closeActivityPicker}
+          onSelect={activityBinding.handleActivityPicked}
+        />
+      ) : null}
 
       {confirmDialog}
       {buddyPost.complianceConfirmDialog}

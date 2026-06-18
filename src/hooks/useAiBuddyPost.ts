@@ -25,8 +25,7 @@ import {
   startAiChatStagedProgress,
   withAiChatProgress,
 } from '../utils/aiChatStagedProgress';
-import { useUgcPublishGuard } from './useUgcPublishGuard';
-import { useBuddyPostQuotaGate } from './useBuddyPostQuotaGate';
+import { useBuddyPostSheetController } from './useBuddyPostSheetController';
 import { publishBuddyPostFromForm } from '../utils/publishBuddyPost';
 
 export function useAiBuddyPost(options: {
@@ -54,26 +53,36 @@ export function useAiBuddyPost(options: {
     onPlanningMessagesShown,
   } = options;
 
-  const [sheetOpen, setSheetOpen] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [sheetInitialValues, setSheetInitialValues] =
     useState<AiBuddyPostFormValues | null>(null);
   const [sheetPrefillHint, setSheetPrefillHint] = useState<string[] | null>(null);
   const lastFormRef = useRef<AiBuddyPostFormValues | null>(null);
   const publishingRef = useRef(false);
-  const { guardPublish, handlePublishError, complianceConfirmDialog } =
-    useUgcPublishGuard();
-  const { sheetPostQuota, ensureCanOpenBuddyPostSheet, clearSheetPostQuota } =
-    useBuddyPostQuotaGate({
-      activityLegacyId,
-      activityTitle,
-    });
+  const {
+    sheetOpen,
+    openSheet,
+    closeSheet,
+    sheetPostQuota,
+    guardPublish,
+    handlePublishError,
+    complianceConfirmDialog,
+  } = useBuddyPostSheetController({
+    activityLegacyId,
+    activityTitle,
+  });
 
   const tryOpenBuddyPostSheet = useCallback(async () => {
-    const allowed = await guardPublish();
-    if (!allowed) return false;
-    return ensureCanOpenBuddyPostSheet();
-  }, [ensureCanOpenBuddyPostSheet, guardPublish]);
+    if (isStreaming || publishingRef.current) {
+      void Taro.showToast({ title: '请等待当前操作完成', icon: 'none' });
+      return false;
+    }
+    if (activityLegacyId == null || Number.isNaN(activityLegacyId)) {
+      void Taro.showToast({ title: '请先进入活动后再发帖', icon: 'none' });
+      return false;
+    }
+    return openSheet();
+  }, [activityLegacyId, isStreaming, openSheet]);
 
   const openBuddyPostSheetWithTag = useCallback(
     (_tagId: BuddyPostTagId = 'team') => {
@@ -100,9 +109,7 @@ export function useAiBuddyPost(options: {
 
       setSheetPrefillHint(null);
       setSheetInitialValues({ ...prefill, tags: ['team'] });
-      void tryOpenBuddyPostSheet().then((canOpen) => {
-        if (canOpen) setSheetOpen(true);
-      });
+      void tryOpenBuddyPostSheet();
     },
     [activityDate, activityLegacyId, isStreaming, tryOpenBuddyPostSheet],
   );
@@ -122,7 +129,6 @@ export function useAiBuddyPost(options: {
       setSheetPrefillHint(prefill.summaryLines);
       void tryOpenBuddyPostSheet().then((canOpen) => {
         if (!canOpen) return;
-        setSheetOpen(true);
         void Taro.showToast({
           title: '已根据攻略预填，确认后发布',
           icon: 'none',
@@ -236,22 +242,16 @@ export function useAiBuddyPost(options: {
 
   const handleSheetSubmit = useCallback(
     (payload: AiBuddyPostSubmitPayload) => {
-      setSheetOpen(false);
+      closeSheet();
       setSheetPrefillHint(null);
       void runPublish(payload);
     },
-    [runPublish],
+    [closeSheet, runPublish],
   );
-
-  const closeBuddyPostSheet = useCallback(() => {
-    setSheetOpen(false);
-    setSheetPrefillHint(null);
-    clearSheetPostQuota();
-  }, [clearSheetPostQuota]);
 
   return {
     sheetOpen,
-    closeBuddyPostSheet,
+    closeBuddyPostSheet: closeSheet,
     isPublishing,
     openBuddyPostSheetWithTag,
     openBuddyPostSheetFromTravelGuide,

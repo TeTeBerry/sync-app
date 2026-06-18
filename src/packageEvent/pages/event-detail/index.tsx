@@ -187,24 +187,28 @@ const EventDetailPage = () => {
       ) : null}
       {confirmDialog}
       <LoginInterceptHost />
-      <AiBuddyPostSheet
-        open={buddyPostSheetOpen}
-        activityDate={buddyPostActivityDate}
-        activityTitle={buddyPostActivityTitle}
-        eventCity={guideEventCity}
-        postQuota={buddyPostQuota ?? undefined}
-        onClose={closeBuddyPostSheet}
-        onSubmit={(payload) => {
-          void handleBuddyPostSheetSubmit(payload);
-        }}
-      />
-      <AiGuidePlanSheet
-        open={guideSheetOpen}
-        defaultNights={guideDefaultNights}
-        eventCity={guideEventCity}
-        onClose={closeGuideSheet}
-        onSubmit={handleGuideSheetSubmit}
-      />
+      {buddyPostSheetOpen ? (
+        <AiBuddyPostSheet
+          open
+          activityDate={buddyPostActivityDate}
+          activityTitle={buddyPostActivityTitle}
+          eventCity={guideEventCity}
+          postQuota={buddyPostQuota ?? undefined}
+          onClose={closeBuddyPostSheet}
+          onSubmit={(payload) => {
+            void handleBuddyPostSheetSubmit(payload);
+          }}
+        />
+      ) : null}
+      {guideSheetOpen ? (
+        <AiGuidePlanSheet
+          open
+          defaultNights={guideDefaultNights}
+          eventCity={guideEventCity}
+          onClose={closeGuideSheet}
+          onSubmit={handleGuideSheetSubmit}
+        />
+      ) : null}
       <PageTabBarChrome />
       {publishComplianceConfirmDialog}
     </View>

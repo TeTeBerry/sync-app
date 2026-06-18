@@ -1,7 +1,6 @@
 import { useCallback, useState } from 'react';
 import Taro from '@tarojs/taro';
-import { useUgcPublishGuard } from '../../../hooks/useUgcPublishGuard';
-import { useBuddyPostQuotaGate } from '../../../hooks/useBuddyPostQuotaGate';
+import { useBuddyPostSheetController } from '../../../hooks/useBuddyPostSheetController';
 import type { EventDetailPost } from '../../../types/post';
 import type { AiBuddyPostSubmitPayload } from '../../../types/buddyPost';
 import {
@@ -9,7 +8,6 @@ import {
   publishBuddyPostFromForm,
 } from '../../../utils/publishBuddyPost';
 import { isApiEnabled } from '../../../constants/api';
-import { requireAuth } from '../../../utils/authGate';
 import { getClientUserId } from '../../../utils/session';
 
 /** Structured message-board template sheet on event detail. */
@@ -27,40 +25,29 @@ export function useEventDetailBuddyPost(
     accountRiskEnabled?: boolean;
   },
 ) {
-  const [sheetOpen, setSheetOpen] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
-  const { guardPublish, handlePublishError, complianceConfirmDialog } =
-    useUgcPublishGuard({
-      enabled: options.accountRiskEnabled ?? true,
-    });
-  const { sheetPostQuota, ensureCanOpenBuddyPostSheet, clearSheetPostQuota } =
-    useBuddyPostQuotaGate({
-      activityLegacyId: eventId,
-      activityTitle: options.activityTitle,
-    });
+  const {
+    sheetOpen,
+    setSheetOpen,
+    openSheet,
+    closeSheet,
+    sheetPostQuota,
+    guardPublish,
+    handlePublishError,
+    complianceConfirmDialog,
+  } = useBuddyPostSheetController({
+    activityLegacyId: eventId,
+    activityTitle: options.activityTitle,
+    accountRiskEnabled: options.accountRiskEnabled,
+    authScope: 'activity',
+    onInvalidActivity: () => {
+      void Taro.showToast({ title: '活动信息无效', icon: 'none' });
+    },
+  });
 
   const openBuddyPostSheet = useCallback(() => {
-    if (!Number.isFinite(eventId) || eventId <= 0) {
-      void Taro.showToast({ title: '活动信息无效', icon: 'none' });
-      return;
-    }
-    requireAuth(() => {
-      void (async () => {
-        if (!(await guardPublish())) {
-          return;
-        }
-        const canOpen = await ensureCanOpenBuddyPostSheet();
-        if (canOpen) {
-          setSheetOpen(true);
-        }
-      })();
-    }, 'activity');
-  }, [ensureCanOpenBuddyPostSheet, eventId, guardPublish]);
-
-  const closeBuddyPostSheet = useCallback(() => {
-    setSheetOpen(false);
-    clearSheetPostQuota();
-  }, [clearSheetPostQuota]);
+    void openSheet();
+  }, [openSheet]);
 
   const handleBuddyPostSheetSubmit = useCallback(
     async (
@@ -136,14 +123,14 @@ export function useEventDetailBuddyPost(
         setIsPublishing(false);
       }
     },
-    [eventId, guardPublish, handlePublishError, isPublishing, options],
+    [eventId, guardPublish, handlePublishError, isPublishing, options, setSheetOpen],
   );
 
   return {
     buddyPostSheetOpen: sheetOpen,
     isBuddyPostPublishing: isPublishing,
     openBuddyPostSheet,
-    closeBuddyPostSheet,
+    closeBuddyPostSheet: closeSheet,
     handleBuddyPostSheetSubmit,
     buddyPostActivityDate: options.activityDate,
     buddyPostActivityTitle: options.activityTitle,

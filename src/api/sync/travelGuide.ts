@@ -19,7 +19,11 @@ export type TravelGuidePlaceSuggestion = {
   city?: string;
 };
 
-export type TravelGuideGenerationJobStatus = 'pending' | 'completed' | 'failed';
+export type TravelGuideGenerationJobStatus =
+  | 'pending'
+  | 'running'
+  | 'completed'
+  | 'failed';
 
 export type TravelGuideGenerationJobResult = {
   jobId: string;
