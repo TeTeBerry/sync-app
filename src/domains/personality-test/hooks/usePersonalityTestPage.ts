@@ -7,6 +7,8 @@ import Taro, {
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   fetchPersonalityTestQuestions,
+  fetchPersonalityNicknameUsage,
+  persistPersonalityTestResultToServer,
   submitPersonalityTest,
   type PersonalityTestQuestionsResponse,
 } from '@/api/sync/personalityTest';
@@ -19,6 +21,7 @@ import {
   restorePersonalityTestResultFromServer,
   savePersonalityTestResult,
 } from '@/domains/personality-test/utils/personalityTestStorage';
+import { ensurePersonalityResultIdentity } from '../utils/personalityResultIdentity.util';
 import {
   buildPersonalityTestShareAppMessage,
   buildPersonalityTestShareFallback,
@@ -36,8 +39,8 @@ import type {
 } from '@/domains/personality-test/types';
 import { ROUTES } from '@/utils/route';
 import { ApiError } from '@/utils/apiClient';
-import { requireAuth } from '@/utils/authGate';
 import { isLoggedIn } from '@/utils/authStorage';
+import { requireAuth } from '@/utils/authGate';
 import { useStackPageMainHeight } from '@/hooks/useTabPageMainHeight';
 
 export type PersonalityTestPhase =
@@ -53,9 +56,6 @@ function resolveQuestionIds(questions: PersonalityQuestion[]): string[] {
 
 function resolveLoadError(error: unknown): string {
   if (error instanceof ApiError) {
-    if (error.status === 401 || error.status === 403) {
-      return '请先登录后参与测试';
-    }
     if (error.status === 404) {
       return '测试服务暂未上线，请稍后再试';
     }
@@ -79,6 +79,8 @@ export function usePersonalityTestPage() {
   const [shareTeaser, setShareTeaser] = useState<PersonalityTestShareTeaser | null>(
     null,
   );
+  const [welcomeModalOpen, setWelcomeModalOpen] = useState(false);
+  const [welcomeNicknameUsage, setWelcomeNicknameUsage] = useState<number | null>(null);
 
   const applyQuestionSet = useCallback((nextQuestions: PersonalityQuestion[]) => {
     setQuestions(nextQuestions);
@@ -88,12 +90,6 @@ export function usePersonalityTestPage() {
   }, []);
 
   const loadQuestions = useCallback(async () => {
-    if (!isLoggedIn()) {
-      setErrorMessage('请先登录后参与测试');
-      setPhase('error');
-      return;
-    }
-
     setPhase('loading');
     setErrorMessage('');
     try {
@@ -115,14 +111,8 @@ export function usePersonalityTestPage() {
     let cancelled = false;
 
     const init = async () => {
-      if (!isLoggedIn()) {
-        setErrorMessage('请先登录后参与测试');
-        setPhase('error');
-        return;
-      }
-
       let cached = loadPersonalityTestResult();
-      if (!cached) {
+      if (!cached && isLoggedIn()) {
         cached = await restorePersonalityTestResultFromServer();
       }
 
@@ -228,10 +218,56 @@ export function usePersonalityTestPage() {
   }, []);
 
   const applyResult = useCallback((next: PersonalityTestResult) => {
-    setResult(next);
-    savePersonalityTestResult(next);
+    const withIdentity = ensurePersonalityResultIdentity(next);
+    setResult(withIdentity);
+    savePersonalityTestResult(withIdentity);
     setPhase('result');
+
+    const nickname = withIdentity.raverNickname?.trim();
+    if (!isLoggedIn() && nickname) {
+      setWelcomeModalOpen(true);
+      setWelcomeNicknameUsage(null);
+      void fetchPersonalityNicknameUsage(nickname)
+        .then(({ userCount }) => setWelcomeNicknameUsage(userCount))
+        .catch(() => setWelcomeNicknameUsage(0));
+    }
   }, []);
+
+  const closeWelcomeModal = useCallback(() => {
+    setWelcomeModalOpen(false);
+  }, []);
+
+  const persistNicknameAfterLogin = useCallback(
+    async (current: PersonalityTestResult) => {
+      await restorePersonalityTestResultFromServer();
+      const saved = await persistPersonalityTestResultToServer(current);
+      savePersonalityTestResult(saved);
+      setResult(saved);
+
+      const nickname = saved.raverNickname?.trim();
+      if (nickname) {
+        const { userCount } = await fetchPersonalityNicknameUsage(nickname);
+        setWelcomeNicknameUsage(userCount);
+      }
+
+      void Taro.showToast({ title: '昵称已保存', icon: 'success' });
+    },
+    [],
+  );
+
+  const loginToSaveNickname = useCallback(() => {
+    const current = result;
+    if (!current?.raverNickname?.trim()) {
+      return;
+    }
+
+    setWelcomeModalOpen(false);
+    requireAuth(() => {
+      void persistNicknameAfterLogin(current).catch(() => {
+        void Taro.showToast({ title: '保存失败，请稍后重试', icon: 'none' });
+      });
+    }, 'general');
+  }, [persistNicknameAfterLogin, result]);
 
   const submitAnswers = useCallback(
     async (finalAnswers: PersonalityTestAnswers) => {
@@ -242,11 +278,9 @@ export function usePersonalityTestPage() {
         applyResult(next);
       } catch (error) {
         const message =
-          error instanceof ApiError && error.status === 401
-            ? '请先登录后提交测试'
-            : error instanceof Error && error.message.trim()
-              ? error.message.trim()
-              : '提交失败，请稍后重试';
+          error instanceof Error && error.message.trim()
+            ? error.message.trim()
+            : '提交失败，请稍后重试';
         setErrorMessage(message);
         setPhase('error');
       }
@@ -278,10 +312,6 @@ export function usePersonalityTestPage() {
   }, [answers, submitAnswers]);
 
   const retryError = useCallback(() => {
-    if (!isLoggedIn()) {
-      requireAuth(() => void loadQuestions(), 'activity');
-      return;
-    }
     if (answers && Object.keys(answers).length > 0 && questions.length > 0) {
       void submitAnswers(answers);
       return;
@@ -293,6 +323,8 @@ export function usePersonalityTestPage() {
     setResult(null);
     setShareTeaser(null);
     setErrorMessage('');
+    setWelcomeModalOpen(false);
+    setWelcomeNicknameUsage(null);
     void loadQuestions();
   }, [loadQuestions]);
 
@@ -310,6 +342,8 @@ export function usePersonalityTestPage() {
     result,
     errorMessage,
     shareTeaser,
+    welcomeModalOpen,
+    welcomeNicknameUsage,
     isWeapp,
     selectOption,
     goBackQuestion,
@@ -317,6 +351,8 @@ export function usePersonalityTestPage() {
     retrySubmit,
     retryError,
     restart,
+    closeWelcomeModal,
+    loginToSaveNickname,
     reload: loadQuestions,
   };
 }

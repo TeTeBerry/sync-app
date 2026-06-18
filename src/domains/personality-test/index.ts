@@ -27,6 +27,21 @@ export {
 } from './personalityTestCatalog';
 
 export {
+  ensurePersonalityResultIdentity,
+  ensurePersonalityResultNickname,
+} from './utils/personalityResultIdentity.util';
+
+export {
+  generatePersonalityNickname,
+  PERSONALITY_NICKNAME_CORES,
+} from './utils/personalityNickname.util';
+
+export {
+  generatePersonalityRaverAvatarKey,
+  RAVER_AVATAR_ASSET_KEYS,
+} from './utils/personalityRaverAvatar.util';
+
+export {
   clearPersonalityTestResult,
   loadPersonalityTestResult,
   restorePersonalityTestResultFromServer,

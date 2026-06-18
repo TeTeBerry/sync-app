@@ -2,13 +2,22 @@ import Taro from '@tarojs/taro';
 import { fetchPersonalityTestResult } from '@/api/sync/personalityTest';
 import { getResolvedAuthUserId, isLoggedIn } from '@/utils/authStorage';
 import type { PersonalityTestResult } from '../types';
+import { ensurePersonalityResultIdentity } from './personalityResultIdentity.util';
 
 const STORAGE_KEY = 'sync.personalityTest.result';
+const ANONYMOUS_STORAGE_USER_ID = '__anonymous__';
 
 type StoredPersonalityTestResult = {
   userId: string;
   result: PersonalityTestResult;
 };
+
+function resolveStorageUserId(): string | null {
+  if (isLoggedIn()) {
+    return getResolvedAuthUserId() || null;
+  }
+  return ANONYMOUS_STORAGE_USER_ID;
+}
 
 function readStoredRecord(): StoredPersonalityTestResult | null {
   try {
@@ -34,26 +43,40 @@ function readStoredRecord(): StoredPersonalityTestResult | null {
   }
 }
 
-export function loadPersonalityTestResult(): PersonalityTestResult | null {
-  if (!isLoggedIn()) {
-    return null;
-  }
-
-  const userId = getResolvedAuthUserId();
-  if (!userId) {
-    return null;
-  }
-
+function readStoredResultForUser(userId: string): PersonalityTestResult | null {
   const stored = readStoredRecord();
   if (!stored || stored.userId !== userId) {
     return null;
   }
-
   return stored.result.version === 1 ? stored.result : null;
 }
 
+function backfillStoredIdentity(stored: PersonalityTestResult): PersonalityTestResult {
+  const withIdentity = ensurePersonalityResultIdentity(stored);
+  const identityChanged =
+    withIdentity.raverNickname !== stored.raverNickname ||
+    withIdentity.raverAvatarKey !== stored.raverAvatarKey ||
+    withIdentity.raverIdentityVersion !== stored.raverIdentityVersion;
+  if (identityChanged) {
+    savePersonalityTestResult(withIdentity);
+  }
+  return withIdentity;
+}
+
+export function loadPersonalityTestResult(): PersonalityTestResult | null {
+  const userId = resolveStorageUserId();
+  if (!userId) {
+    return null;
+  }
+  const stored = readStoredResultForUser(userId);
+  if (!stored) {
+    return null;
+  }
+  return backfillStoredIdentity(stored);
+}
+
 export function savePersonalityTestResult(result: PersonalityTestResult): void {
-  const userId = getResolvedAuthUserId();
+  const userId = resolveStorageUserId();
   if (!userId) {
     return;
   }
@@ -79,17 +102,25 @@ export function clearPersonalityTestResult(): void {
 /** Pull the latest saved result from the server into local storage (e.g. after login). */
 export async function restorePersonalityTestResultFromServer(): Promise<PersonalityTestResult | null> {
   if (!isLoggedIn()) {
-    return null;
+    return loadPersonalityTestResult();
   }
 
   try {
     const remote = await fetchPersonalityTestResult();
     if (remote?.version === 1) {
-      savePersonalityTestResult(remote);
-      return remote;
+      const withIdentity = ensurePersonalityResultIdentity(remote);
+      savePersonalityTestResult(withIdentity);
+      return withIdentity;
     }
   } catch {
     // offline or no saved result yet
+  }
+
+  const migrated = readStoredResultForUser(ANONYMOUS_STORAGE_USER_ID);
+  if (migrated) {
+    const withIdentity = ensurePersonalityResultIdentity(migrated);
+    savePersonalityTestResult(withIdentity);
+    return withIdentity;
   }
 
   return loadPersonalityTestResult();

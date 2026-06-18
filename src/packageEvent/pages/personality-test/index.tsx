@@ -5,6 +5,7 @@ import { useEndRouteTransitionOnShow } from '../../../hooks/useEndRouteTransitio
 import { usePageRouteReady } from '../../../hooks/usePageRouteReady';
 import { PersonalityQuestionStep } from '@/domains/personality-test/components/PersonalityQuestionStep';
 import { PersonalityResultView } from '@/domains/personality-test/components/PersonalityResultView';
+import { PersonalityWelcomeModal } from '@/domains/personality-test/components/PersonalityWelcomeModal';
 import { usePersonalityTestPage } from '@/domains/personality-test/hooks/usePersonalityTestPage';
 import { PERSONALITY_POSTER_CANVAS_ID } from '@/domains/personality-test';
 import { LoginInterceptHost } from '../../../components/auth/LoginInterceptHost';
@@ -122,6 +123,14 @@ const PersonalityTestPage = () => {
       />
 
       <LoginInterceptHost />
+
+      <PersonalityWelcomeModal
+        open={page.welcomeModalOpen}
+        nickname={page.result?.raverNickname?.trim() ?? ''}
+        userCount={page.welcomeNicknameUsage}
+        onClose={page.closeWelcomeModal}
+        onLoginSave={page.loginToSaveNickname}
+      />
     </View>
   );
 };

@@ -1,7 +1,6 @@
 import './HomeQuickActions.scss';
 import type { FC } from 'react';
 import { AudioWaveform, Bot, CalendarDays } from '../../../components/icons';
-import { requireAuth } from '../../../utils/authGate';
 import {
   goEventsListTab,
   goPersonalityTest,
@@ -25,9 +24,7 @@ const ACTIONS = [
     hint: '测完可分享',
     icon: AudioWaveform,
     iconColor: '#ff0066',
-    onPress: () => {
-      requireAuth(() => goPersonalityTest(), 'activity');
-    },
+    onPress: () => goPersonalityTest(),
   },
   {
     id: 'ai',

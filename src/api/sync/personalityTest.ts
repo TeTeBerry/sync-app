@@ -46,6 +46,25 @@ export function fetchPersonalityTestResult() {
   );
 }
 
+export function fetchPersonalityNicknameUsage(nickname: string) {
+  const trimmed = nickname.trim();
+  return apiGet<{ nickname: string; userCount: number }>(
+    '/personality-test/nickname-usage',
+    {
+      ...ownerQueryParams(),
+      nickname: trimmed,
+    },
+  );
+}
+
+export function persistPersonalityTestResultToServer(result: PersonalityTestResult) {
+  return apiPost<PersonalityTestResult>(
+    '/personality-test/save',
+    { result },
+    ownerQueryParams(),
+  );
+}
+
 export function submitPersonalityTest(
   answers: PersonalityTestAnswers,
   questionIds: string[],

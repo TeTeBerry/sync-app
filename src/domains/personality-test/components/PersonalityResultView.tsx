@@ -22,7 +22,8 @@ import type { PersonalityEventRecommendation, PersonalityTestResult } from '../t
 import { getActivityStatusFromActivity } from '@/utils/activityStatus';
 import { goEventDetail, goExclusiveItinerary } from '@/utils/route';
 import { buildPersonalityItinerarySelection } from '../utils/buildPersonalityItinerarySelection';
-import { Text, View } from '@tarojs/components';
+import { resolvePersonalityMediaUrl } from '../utils/resolvePersonalityMedia';
+import { Text, View, Image } from '@tarojs/components';
 
 type PersonalityResultViewProps = {
   result: PersonalityTestResult;
@@ -67,6 +68,23 @@ export const PersonalityResultView: FC<PersonalityResultViewProps> = ({
   const [catalog, setCatalog] = useState(() => getCachedPersonalityTestCatalog());
   const soul = result.recommendations.soulMatch;
   const [similarityDisplay, setSimilarityDisplay] = useState(0);
+  const [raverAvatarUrl, setRaverAvatarUrl] = useState('');
+
+  useEffect(() => {
+    if (!result.raverAvatarKey?.trim()) {
+      setRaverAvatarUrl('');
+      return;
+    }
+    let cancelled = false;
+    void resolvePersonalityMediaUrl(result.raverAvatarKey).then((url) => {
+      if (!cancelled) {
+        setRaverAvatarUrl(url);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [result.raverAvatarKey]);
 
   useEffect(() => {
     void loadPersonalityTestCatalog()
@@ -202,6 +220,22 @@ export const PersonalityResultView: FC<PersonalityResultViewProps> = ({
         <Text className="s-personality-result__hero-emoji" aria-hidden>
           {primary.emoji}
         </Text>
+        {result.raverNickname || raverAvatarUrl ? (
+          <View className="s-personality-result__hero-identity">
+            {raverAvatarUrl ? (
+              <Image
+                className="s-personality-result__hero-avatar"
+                src={raverAvatarUrl}
+                mode="aspectFill"
+              />
+            ) : null}
+            {result.raverNickname ? (
+              <Text className="s-personality-result__hero-nickname">
+                {result.raverNickname}
+              </Text>
+            ) : null}
+          </View>
+        ) : null}
         <Text className="s-personality-result__hero-dj">
           {primary.emoji} {soul.djName} {primary.emoji}
         </Text>

@@ -355,7 +355,6 @@ const AUTH_PROTECTED_ROUTES: Partial<Record<RoutePath, LoginInterceptFeature>> =
   [ROUTES.PROFILE_POSTS]: 'social',
   [ROUTES.EXCLUSIVE_ITINERARY]: 'activity',
   [ROUTES.MY_ITINERARY]: 'activity',
-  [ROUTES.PERSONALITY_TEST]: 'activity',
 };
 
 function loginFeatureForUrl(url: string): LoginInterceptFeature | null {
