@@ -3,6 +3,8 @@ import {
   PUBLISH_CONFIRM_MARKER,
   type PublishConfirmPayload,
 } from '../../utils/parsePublishConfirmMessage';
+import { useResolvedAvatarSrc } from '../../hooks/useResolvedAvatarSrc';
+import { resolveAvatarDisplaySrc } from '../../utils/imageUrl';
 import { Image, Text, View } from '@tarojs/components';
 
 export function PublishConfirmCard({
@@ -15,6 +17,8 @@ export function PublishConfirmCard({
   userName: string;
 }) {
   const bodyText = stripTeamHashtags(payload.draftBody);
+  const resolvedAvatar = useResolvedAvatarSrc(userAvatar);
+  const avatarSrc = resolveAvatarDisplaySrc(resolvedAvatar, userAvatar);
 
   return (
     <View className="s-publish-confirm">
@@ -23,10 +27,10 @@ export function PublishConfirmCard({
 
       <View className="s-publish-confirm__preview">
         <View className="s-publish-confirm__preview-header">
-          {userAvatar ? (
+          {avatarSrc ? (
             <Image
               className="s-publish-confirm__avatar"
-              src={userAvatar}
+              src={avatarSrc}
               mode="aspectFill"
             />
           ) : (

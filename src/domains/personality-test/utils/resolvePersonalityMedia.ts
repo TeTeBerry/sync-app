@@ -11,7 +11,7 @@ function readCachedUrl(cacheKey: string): string | undefined {
     mediaUrlCache.delete(cacheKey);
     return undefined;
   }
-  if (!cached.url) return undefined; // <-- 不返回空字符串
+  if (!cached.url) return undefined;
   return cached.url;
 }
 
@@ -33,22 +33,25 @@ function normalizeAssetKey(source: string): string {
 let pendingBackendFetch: Promise<Record<string, string>> | null = null;
 let pendingBackendKeys: string[] = [];
 
-async function fetchBackendUrls(assetKeys: string[]): Promise<Record<string, string>> {
-  if (!isLiveApi() || !assetKeys.length) {
-    return {};
-  }
+function buildUrlMap(assetKeys: string[]): Record<string, string> {
+  return Object.fromEntries(
+    assetKeys
+      .map((key) => [key, readCachedUrl(key) ?? ''] as const)
+      .filter(([, url]) => url),
+  );
+}
 
-  const uncached = assetKeys.filter((key) => !readCachedUrl(key));
-  if (!uncached.length) {
-    return Object.fromEntries(
-      assetKeys.map((key) => [key, readCachedUrl(key) ?? '']).filter(([, url]) => url),
-    );
-  }
-
-  pendingBackendKeys = [...new Set([...pendingBackendKeys, ...uncached])];
-
-  if (!pendingBackendFetch) {
-    const keysToFetch = [...pendingBackendKeys];
+/** Drain queued keys — concurrent callers may append while a batch is in flight. */
+async function drainBackendMediaFetches(): Promise<void> {
+  for (;;) {
+    if (pendingBackendFetch) {
+      await pendingBackendFetch;
+      continue;
+    }
+    if (!pendingBackendKeys.length) {
+      break;
+    }
+    const keysToFetch = [...new Set(pendingBackendKeys)];
     pendingBackendKeys = [];
     pendingBackendFetch = fetchPersonalityTestMediaUrls(keysToFetch)
       .then((response) => {
@@ -66,12 +69,24 @@ async function fetchBackendUrls(assetKeys: string[]): Promise<Record<string, str
       .finally(() => {
         pendingBackendFetch = null;
       });
+    await pendingBackendFetch;
+  }
+}
+
+async function fetchBackendUrls(assetKeys: string[]): Promise<Record<string, string>> {
+  if (!isLiveApi() || !assetKeys.length) {
+    return {};
   }
 
-  await pendingBackendFetch;
-  return Object.fromEntries(
-    assetKeys.map((key) => [key, readCachedUrl(key) ?? '']).filter(([, url]) => url),
-  );
+  const uncached = assetKeys.filter((key) => !readCachedUrl(key));
+  if (!uncached.length) {
+    return buildUrlMap(assetKeys);
+  }
+
+  pendingBackendKeys = [...new Set([...pendingBackendKeys, ...uncached])];
+  await drainBackendMediaFetches();
+
+  return buildUrlMap(assetKeys);
 }
 
 /** Resolve personality-test media URLs from cloud storage via backend API. */

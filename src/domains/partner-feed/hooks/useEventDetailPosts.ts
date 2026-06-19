@@ -15,6 +15,7 @@ import {
   type EventPostListItem,
 } from '../utils/eventPostNormalize';
 import { useEventDetailPostSearch } from './useEventDetailPostSearch';
+import { resolvePersonalityMediaUrls } from '@/domains/personality-test/utils/resolvePersonalityMedia';
 
 export const EVENT_DETAIL_SCROLL_ID = 'event-detail-scroll';
 
@@ -51,6 +52,14 @@ export function useEventDetailPosts({
     const source = search.isActive ? (search.matchedPosts ?? []) : postsQuery.items;
     return normalizeEventPostList(source);
   }, [postsQuery.items, search.isActive, search.matchedPosts]);
+
+  useEffect(() => {
+    const avatarKeys = loadedPostItems
+      .map((item) => item.post.avatar?.trim())
+      .filter((avatar): avatar is string => Boolean(avatar?.startsWith('avatar/')));
+    if (!avatarKeys.length) return;
+    void resolvePersonalityMediaUrls(avatarKeys);
+  }, [loadedPostItems]);
 
   const {
     visibleItems: postItems,

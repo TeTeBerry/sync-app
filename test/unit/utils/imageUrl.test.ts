@@ -63,9 +63,35 @@ describe('resolveImageWithFallbackDisplaySrc', () => {
     expect(resolveImageWithFallbackDisplaySrc(cloud)).toBeUndefined();
   });
 
+  it('blocks unresolved personality avatar keys', async () => {
+    const { resolveImageWithFallbackDisplaySrc } = await import('@/utils/imageUrl');
+    expect(
+      resolveImageWithFallbackDisplaySrc('avatar/bunny-teal-headphones.png'),
+    ).toBeUndefined();
+  });
+
   it('returns HTTPS src for resolved URLs', async () => {
     const { resolveImageWithFallbackDisplaySrc } = await import('@/utils/imageUrl');
     const url = 'https://cdn.example.com/posts/u/a.jpg';
     expect(resolveImageWithFallbackDisplaySrc(url)).toBe(url);
+  });
+});
+
+describe('resolveAvatarDisplaySrc', () => {
+  it('prefers resolved HTTPS URL', async () => {
+    const { resolveAvatarDisplaySrc } = await import('@/utils/imageUrl');
+    expect(
+      resolveAvatarDisplaySrc(
+        'https://cdn.example.com/avatar.png',
+        'avatar/bunny-teal-headphones.png',
+      ),
+    ).toBe('https://cdn.example.com/avatar.png');
+  });
+
+  it('never exposes unresolved avatar keys', async () => {
+    const { resolveAvatarDisplaySrc } = await import('@/utils/imageUrl');
+    expect(
+      resolveAvatarDisplaySrc('', 'avatar/bunny-teal-headphones.png', 'fallback'),
+    ).toBe('fallback');
   });
 });

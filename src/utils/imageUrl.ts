@@ -29,16 +29,38 @@ function unsplashDimensions(url: URL): { width: number; height: number } {
   return { width: w, height: isSquareCrop ? w : Math.round(w * 0.75) };
 }
 
-/** ImageWithFallback display `src`: block unresolved `cloud://` fileIDs. */
+/** CloudBase personality-test avatar object key (not a local bundle path). */
+export function isPersonalityAvatarAssetKey(src: string | undefined): boolean {
+  return Boolean(src?.trim().startsWith('avatar/'));
+}
+
+/** ImageWithFallback display `src`: block unresolved cloud references. */
 export function resolveImageWithFallbackDisplaySrc(
   resolvedSrc: string | undefined,
 ): string | undefined {
   const trimmed = resolvedSrc?.trim();
   if (!trimmed) return undefined;
-  if (isCloudStorageFileId(trimmed)) {
+  if (isCloudStorageFileId(trimmed) || isPersonalityAvatarAssetKey(trimmed)) {
     return undefined;
   }
   return trimmed;
+}
+
+/** Avatar `Image` src: prefer resolved HTTPS URL; never expose unresolved storage keys. */
+export function resolveAvatarDisplaySrc(
+  resolvedSrc: string | undefined,
+  rawSrc?: string,
+  fallback = '',
+): string {
+  const resolved = resolvedSrc?.trim();
+  if (resolved) return resolved;
+
+  const raw = rawSrc?.trim();
+  if (!raw || isPersonalityAvatarAssetKey(raw) || isCloudStorageFileId(raw)) {
+    return fallback;
+  }
+
+  return sanitizeRemoteImageUrl(raw) ?? raw;
 }
 
 /** Resolve `/uploads/...` against API host (local Nest dev only). */

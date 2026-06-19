@@ -9,6 +9,7 @@ import { ContentReportMenuButton } from '../../../components/report';
 import { ImageWithFallback } from '../../../components/ImageWithFallback';
 import { useDisplayUserIdentity } from '../../../hooks/useDisplayUserIdentity';
 import { useResolvedAvatarSrc } from '../../../hooks/useResolvedAvatarSrc';
+import { resolveAvatarDisplaySrc } from '../../../utils/imageUrl';
 import { isCurrentUserPostAuthor } from '../../../utils/postOwnership';
 import type { EventDetailPost } from '../../../types/backend';
 import { stripPostBodyContact } from '../../../utils/postBodyContact';
@@ -55,7 +56,7 @@ function EventPostCardInner({
 
   const avatarKey = isOwn ? displayIdentity.avatar?.trim() || post.avatar : post.avatar;
   const resolvedAvatarSrc = useResolvedAvatarSrc(avatarKey);
-  const avatarSrc = resolvedAvatarSrc || avatarKey;
+  const avatarSrc = resolveAvatarDisplaySrc(resolvedAvatarSrc, avatarKey);
 
   const stopClickPropagation = (event: { stopPropagation?: () => void }) => {
     event.stopPropagation?.();

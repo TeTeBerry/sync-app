@@ -1,4 +1,6 @@
 import { Image, Text } from '@tarojs/components';
+import { useResolvedAvatarSrc } from '../../hooks/useResolvedAvatarSrc';
+import { resolveAvatarDisplaySrc } from '../../utils/imageUrl';
 import { cn } from '../ui';
 import type { AuthorGender } from '../../utils/inferAuthorGender';
 
@@ -12,6 +14,8 @@ export function ChatUserAvatar({
   userGender?: AuthorGender;
 }) {
   const initial = name.trim().charAt(0).toUpperCase() || '我';
+  const resolvedAvatar = useResolvedAvatarSrc(avatar);
+  const avatarSrc = resolveAvatarDisplaySrc(resolvedAvatar, avatar);
 
   const genderClass =
     userGender === 'female'
@@ -20,7 +24,7 @@ export function ChatUserAvatar({
         ? 's-ai-assistant-chat__avatar--user--male'
         : undefined;
 
-  if (avatar?.trim()) {
+  if (avatarSrc) {
     return (
       <Image
         className={cn(
@@ -28,7 +32,7 @@ export function ChatUserAvatar({
           's-ai-assistant-chat__avatar--user',
           genderClass,
         )}
-        src={avatar}
+        src={avatarSrc}
         alt={name}
       />
     );

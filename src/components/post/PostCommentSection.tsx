@@ -8,7 +8,8 @@ import { requireAuth } from '../../utils/authGate';
 import { getUgcContactValidationError } from '../../utils/ugcContactValidation';
 import { requestPostEngagementSubscribe } from '../../utils/wechatSubscribeMessage';
 import { PLACEHOLDER_AVATAR } from '../../constants/remoteImages';
-import { sanitizeRemoteImageUrl } from '../../utils/imageUrl';
+import { useResolvedAvatarSrc } from '../../hooks/useResolvedAvatarSrc';
+import { resolveAvatarDisplaySrc } from '../../utils/imageUrl';
 import {
   isCommentByPostAuthor,
   isCurrentUserPostAuthor,
@@ -54,6 +55,12 @@ function CommentRow({
   replyTargetId,
   onStartReply,
 }: CommentRowProps) {
+  const resolvedAvatar = useResolvedAvatarSrc(comment.avatar);
+  const avatarSrc = resolveAvatarDisplaySrc(
+    resolvedAvatar,
+    comment.avatar,
+    DEFAULT_AVATAR,
+  );
   const isPostAuthorComment = isCommentByPostAuthor(
     comment.authorName,
     comment.userId,
@@ -69,10 +76,7 @@ function CommentRow({
       <View
         className={`s-post-comments__item${nested ? ' s-post-comments__item--reply' : ''}`}
       >
-        <Image
-          className="s-post-comments__avatar"
-          src={sanitizeRemoteImageUrl(comment.avatar) || DEFAULT_AVATAR}
-        />
+        <Image className="s-post-comments__avatar" src={avatarSrc} />
         <View className="s-post-comments__body-wrap">
           <View className="s-post-comments__meta-row">
             <View className="s-post-comments__meta">
@@ -194,8 +198,12 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
     setReplyTarget((prev) => (prev?.commentId === target.commentId ? null : target));
   }, []);
 
-  const userAvatar =
-    sanitizeRemoteImageUrl(currentUserAvatar?.trim()) || DEFAULT_AVATAR;
+  const resolvedCurrentUserAvatar = useResolvedAvatarSrc(currentUserAvatar);
+  const userAvatar = resolveAvatarDisplaySrc(
+    resolvedCurrentUserAvatar,
+    currentUserAvatar,
+    DEFAULT_AVATAR,
+  );
   const comments = commentsQuery.data ?? [];
   const canSend = Boolean(draft.trim()) && !submitting;
   const isEmptyList =

@@ -1,7 +1,8 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo } from 'react';
 import { Check, Music2 } from '../../components/icons';
-import { sanitizeRemoteImageUrl } from '../../utils/imageUrl';
-import { resolvePersonalityMediaUrl } from '../../domains/personality-test/utils/resolvePersonalityMedia';
+import { PLACEHOLDER_AVATAR } from '../../constants/remoteImages';
+import { useResolvedAvatarSrc } from '../../hooks/useResolvedAvatarSrc';
+import { resolveAvatarDisplaySrc } from '../../utils/imageUrl';
 import type { ProfileDisplayUser } from './profileSummaryUtils';
 import { Image, Text, View } from '@tarojs/components';
 
@@ -20,34 +21,18 @@ const ProfileSummarySection: React.FC<ProfileSummarySectionProps> = ({
   );
   const verified = user.verified;
 
-  const [avatarUrl, setAvatarUrl] = useState('');
-  useEffect(() => {
-    const avatar = user.avatar?.trim();
-    if (!avatar) {
-      setAvatarUrl('');
-      return;
-    }
-    if (avatar.startsWith('avatar/')) {
-      let cancelled = false;
-      void resolvePersonalityMediaUrl(avatar).then((url) => {
-        if (!cancelled) setAvatarUrl(url);
-      });
-      return () => {
-        cancelled = true;
-      };
-    }
-    setAvatarUrl(sanitizeRemoteImageUrl(avatar) ?? avatar);
-  }, [user.avatar]);
+  const resolvedAvatar = useResolvedAvatarSrc(user.avatar);
+  const avatarSrc = resolveAvatarDisplaySrc(
+    resolvedAvatar,
+    user.avatar,
+    PLACEHOLDER_AVATAR,
+  );
 
   return (
     <View className="s-profile__card">
       <View className="s-profile__card-top">
         <View className="s-profile__avatar-wrap">
-          <Image
-            className="s-profile__avatar"
-            src={avatarUrl || sanitizeRemoteImageUrl(user.avatar) || user.avatar}
-            alt={user.name}
-          />
+          <Image className="s-profile__avatar" src={avatarSrc} alt={user.name} />
           <View className="s-profile__online-dot" aria-label="在线" />
         </View>
 
