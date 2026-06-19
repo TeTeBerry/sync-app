@@ -99,7 +99,6 @@ export function clearPersonalityTestResult(): void {
   }
 }
 
-/** Pull the latest saved result from the server into local storage (e.g. after login). */
 export async function restorePersonalityTestResultFromServer(): Promise<PersonalityTestResult | null> {
   if (!isLoggedIn()) {
     return loadPersonalityTestResult();

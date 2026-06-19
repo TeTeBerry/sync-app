@@ -5,6 +5,7 @@ import { ChevronUp, Send } from '../icons';
 import { useUgcPublishGuard } from '../../hooks/useUgcPublishGuard';
 import { commentPostAndInvalidate, usePostCommentsQuery } from '../../hooks/sync/posts';
 import { requireAuth } from '../../utils/authGate';
+import { getUgcContactValidationError } from '../../utils/ugcContactValidation';
 import { PLACEHOLDER_AVATAR } from '../../constants/remoteImages';
 import { sanitizeRemoteImageUrl } from '../../utils/imageUrl';
 import {
@@ -142,6 +143,12 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
   const handleSubmit = useCallback(() => {
     const body = draft.trim();
     if (!body || submitting) return;
+
+    const contactError = getUgcContactValidationError(body);
+    if (contactError) {
+      void Taro.showToast({ title: contactError, icon: 'none' });
+      return;
+    }
 
     const submitComment = () => {
       void (async () => {

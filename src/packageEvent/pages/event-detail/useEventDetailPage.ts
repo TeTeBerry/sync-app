@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import Taro from '@tarojs/taro';
 import { useActivityDetailQuery } from '../../../hooks/useSyncApi';
 import { useEventPostsInfiniteQuery } from '../../../hooks/useEventPostsInfiniteQuery';
@@ -9,6 +9,7 @@ import {
 } from '@/domains/partner-feed';
 import { useDisplayUserIdentity } from '../../../hooks/useDisplayUserIdentity';
 import { useResolvedAvatarSrc } from '../../../hooks/useResolvedAvatarSrc';
+import { useNavigationStore } from '../../../stores/navigationStore';
 import type { ConfirmDialogOptions } from '../../../hooks/useConfirmDialog';
 import { useEventDetailRoute } from './useEventDetailRoute';
 import { useEventDetailActivityHeader } from './useEventDetailActivityHeader';
@@ -36,6 +37,10 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
   } = route;
   const focusPostsScrolledRef = useRef(false);
   const buddyPostSheetOpenedRef = useRef(false);
+  const buddyPostNavIntent = useMemo(
+    () => useNavigationStore.getState().consumeEventDetailBuddyPostIntent(),
+    [],
+  );
 
   const activityQuery = useActivityDetailQuery(eventId);
   const activityTitle = activityQuery.data?.name;
@@ -61,12 +66,22 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     anchorPostId: highlightPostId || undefined,
   });
 
+  const buddyPostPrefill =
+    buddyPostNavIntent?.activityLegacyId === eventId
+      ? {
+          initialValues: buddyPostNavIntent.initialValues,
+          prefillSummaryLines: buddyPostNavIntent.prefillSummaryLines,
+          prefillBannerTitle: buddyPostNavIntent.prefillBannerTitle,
+        }
+      : undefined;
+
   const templatePost = useEventDetailBuddyPost(eventId, {
     activityTitle,
     activityDate,
     authorName: displayIdentity.name,
     authorAvatar: displayIdentity.avatar,
     authorHandle: displayIdentity.handle,
+    buddyPostPrefill,
     refreshPosts: postsQuery.refetch,
     prependPost: postsQuery.prependItem,
     replacePost: postsQuery.replaceItem,
@@ -163,6 +178,9 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     handleBuddyPostSheetSubmit: templatePost.handleBuddyPostSheetSubmit,
     buddyPostActivityDate: templatePost.buddyPostActivityDate,
     buddyPostActivityTitle: templatePost.buddyPostActivityTitle,
+    buddyPostSheetInitialValues: templatePost.buddyPostSheetInitialValues,
+    buddyPostPrefillSummaryLines: templatePost.buddyPostPrefillSummaryLines,
+    buddyPostPrefillBannerTitle: templatePost.buddyPostPrefillBannerTitle,
     posts,
     postsLoading,
     showPostsEnd,

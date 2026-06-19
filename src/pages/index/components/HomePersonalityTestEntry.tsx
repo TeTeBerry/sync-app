@@ -1,25 +1,34 @@
 import './HomePersonalityTestEntry.scss';
 import type { FC } from 'react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { useDidShow } from '@tarojs/taro';
 import { AudioWaveform, ChevronRight } from '../../../components/icons';
-import { loadPersonalityTestResult } from '@/domains/personality-test';
+import { resolvePersonalityTestSoulDjName } from '@/domains/personality-test';
+import { useAuthSession } from '../../../hooks/useAuthSession';
 import { goPersonalityTest } from '../../../utils/route';
 import { Text, View } from '@tarojs/components';
 
 const GENRE_TAGS = ['Techno', 'House', 'Trance', 'Bass'] as const;
 
 export const HomePersonalityTestEntry: FC = () => {
+  const { loggedIn } = useAuthSession();
   const [cachedSoulDj, setCachedSoulDj] = useState<string | null>(null);
 
-  useEffect(() => {
-    const result = loadPersonalityTestResult();
-    setCachedSoulDj(result?.recommendations.soulMatch.djName ?? null);
+  const refreshEntry = useCallback(async () => {
+    const soulDj = await resolvePersonalityTestSoulDjName();
+    setCachedSoulDj(soulDj);
   }, []);
 
+  useEffect(() => {
+    void refreshEntry();
+  }, [loggedIn, refreshEntry]);
+
+  useDidShow(() => {
+    void refreshEntry();
+  });
+
   const handleStart = () => {
-    const soulDj =
-      loadPersonalityTestResult()?.recommendations.soulMatch.djName ?? cachedSoulDj;
-    goPersonalityTest({ viewResult: Boolean(soulDj) });
+    goPersonalityTest({ viewResult: Boolean(cachedSoulDj) });
   };
 
   return (

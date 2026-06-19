@@ -65,6 +65,9 @@ const EventDetailPage = () => {
     handleBuddyPostSheetSubmit,
     buddyPostActivityDate,
     buddyPostActivityTitle,
+    buddyPostSheetInitialValues,
+    buddyPostPrefillSummaryLines,
+    buddyPostPrefillBannerTitle,
     activityTitle,
     handleOpenMyItinerary,
     handleOpenExclusiveItinerary,
@@ -193,6 +196,9 @@ const EventDetailPage = () => {
           activityDate={buddyPostActivityDate}
           activityTitle={buddyPostActivityTitle}
           eventCity={guideEventCity}
+          initialValues={buddyPostSheetInitialValues}
+          prefillSummaryLines={buddyPostPrefillSummaryLines}
+          prefillBannerTitle={buddyPostPrefillBannerTitle}
           postQuota={buddyPostQuota ?? undefined}
           onClose={closeBuddyPostSheet}
           onSubmit={handleBuddyPostSheetSubmit}

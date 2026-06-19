@@ -49,9 +49,16 @@ export {
   PERSONALITY_TEST_STORAGE_KEY,
 } from './utils/personalityTestStorage';
 
+export { resolvePersonalityTestSoulDjName } from './utils/resolvePersonalityTestSoulDjName';
+
 export {
   savePersonalityPoster,
   sharePersonalityPoster,
 } from './utils/personalityPosterShare';
 
 export { PERSONALITY_POSTER_CANVAS_ID } from './utils/personalityPosterCanvas';
+
+export {
+  buildPersonalityBuddyPostPrefill,
+  type PersonalityBuddyPostPrefill,
+} from './utils/buildPersonalityBuddyPostPrefill';

@@ -78,6 +78,8 @@ POST /api/posts
 - 过滤：`status: active`、`listedInFeed !== false`
 - 前端：`useEventPostsInfiniteQuery` + `useEventDetailPosts`（窗口化首屏 6 条、步进 +6）
 - **评论**：活动帖卡片底部评论 icon 展开/收起；`PostCommentSection` + `GET|POST /api/posts/:id/comments`
+  - 前端：`useUgcPublishGuard`（账号风控 + 合规确认）+ 本地联系方式校验（`ugcContactValidation`）
+  - 后端：`assertCommentBodySafe` — 禁联系方式、票务敏感词、微信 `msg_sec_check`、规则风控
 - 删帖：`DELETE /api/posts/:id`（仅自己的帖）
 
 `EventDetailPost` 核心字段：`id`, `userId`, `name`, `avatar`, `location`, `createdAt`, `body`, `tags`, `comments?`
@@ -141,8 +143,10 @@ POST /api/posts
 |------|------|
 | 前端发帖组装 | `test/unit/utils/publishBuddyPost.test.ts` |
 | 前端正文剥离 | `test/unit/utils/postBodyContact.test.ts` |
+| 评论联系方式校验 | `test/unit/utils/ugcContactValidation.test.ts` |
 | 通知深链跳转 | `test/unit/utils/route.notificationNavigate.test.ts` |
 | 后端写帖 | `test/unit/modules/partner/application/buddy-post-write-flow.spec.ts` |
+| 后端评论 UGC | `test/unit/modules/partner/application/post-comment.service.spec.ts` |
 | 通知展示 | `test/unit/utils/notificationDisplay.test.ts` |
 
 本地执行：

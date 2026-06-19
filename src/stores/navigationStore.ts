@@ -1,5 +1,9 @@
 import { create } from 'zustand';
-import type { AiAssistantNavIntent, ExclusiveItineraryNavIntent } from './types';
+import type {
+  AiAssistantNavIntent,
+  EventDetailBuddyPostNavIntent,
+  ExclusiveItineraryNavIntent,
+} from './types';
 
 export type RouteTransitionState = {
   active: boolean;
@@ -11,12 +15,15 @@ export type RouteTransitionState = {
 export interface NavigationState {
   aiAssistantIntent: AiAssistantNavIntent | null;
   exclusiveItineraryIntent: ExclusiveItineraryNavIntent | null;
+  eventDetailBuddyPostIntent: EventDetailBuddyPostNavIntent | null;
   activeActivityLegacyId: number | null;
   routeTransition: RouteTransitionState;
   setAiAssistantIntent: (intent: AiAssistantNavIntent | null) => void;
   consumeAiAssistantIntent: () => AiAssistantNavIntent | null;
   setExclusiveItineraryIntent: (intent: ExclusiveItineraryNavIntent | null) => void;
   consumeExclusiveItineraryIntent: () => ExclusiveItineraryNavIntent | null;
+  setEventDetailBuddyPostIntent: (intent: EventDetailBuddyPostNavIntent | null) => void;
+  consumeEventDetailBuddyPostIntent: () => EventDetailBuddyPostNavIntent | null;
   setActiveActivityLegacyId: (legacyId: number | null) => void;
   beginRouteTransition: (options?: { eventId?: number; tabTarget?: string }) => void;
   endRouteTransition: () => void;
@@ -25,6 +32,7 @@ export interface NavigationState {
 export const useNavigationStore = create<NavigationState>((set, get) => ({
   aiAssistantIntent: null,
   exclusiveItineraryIntent: null,
+  eventDetailBuddyPostIntent: null,
   activeActivityLegacyId: null,
   routeTransition: { active: false },
 
@@ -39,6 +47,14 @@ export const useNavigationStore = create<NavigationState>((set, get) => ({
   consumeExclusiveItineraryIntent: () => {
     const intent = get().exclusiveItineraryIntent;
     if (intent) set({ exclusiveItineraryIntent: null });
+    return intent;
+  },
+
+  setEventDetailBuddyPostIntent: (intent) =>
+    set({ eventDetailBuddyPostIntent: intent }),
+  consumeEventDetailBuddyPostIntent: () => {
+    const intent = get().eventDetailBuddyPostIntent;
+    if (intent) set({ eventDetailBuddyPostIntent: null });
     return intent;
   },
 

@@ -17,10 +17,15 @@ import {
   loadPersonalityTestCatalog,
   savePersonalityPoster,
   sharePersonalityPoster,
+  buildPersonalityBuddyPostPrefill,
 } from '@/domains/personality-test';
 import type { PersonalityEventRecommendation, PersonalityTestResult } from '../types';
 import { getActivityStatusFromActivity } from '@/utils/activityStatus';
-import { goEventDetail, goExclusiveItinerary } from '@/utils/route';
+import {
+  goEventDetail,
+  goEventDetailWithBuddyPostPrefill,
+  goExclusiveItinerary,
+} from '@/utils/route';
 import { buildPersonalityItinerarySelection } from '../utils/buildPersonalityItinerarySelection';
 import { resolvePersonalityMediaUrl } from '../utils/resolvePersonalityMedia';
 import { Text, View, Image } from '@tarojs/components';
@@ -157,6 +162,22 @@ export const PersonalityResultView: FC<PersonalityResultViewProps> = ({
     { title: '挑战曲风', items: result.recommendations.challenge },
   ].filter((section) => section.items.length > 0);
 
+  const handlePrefillBuddyPost = () => {
+    if (!itineraryTargetEvent) {
+      void Taro.showToast({
+        title: '当前暂无推荐活动，请稍后再试',
+        icon: 'none',
+      });
+      return;
+    }
+    const prefill = buildPersonalityBuddyPostPrefill(
+      result,
+      itineraryTargetEvent,
+      catalog,
+    );
+    goEventDetailWithBuddyPostPrefill(itineraryTargetEvent.activityLegacyId, prefill);
+  };
+
   const handleGenerateItinerary = () => {
     if (!itineraryTargetEvent) {
       void Taro.showToast({
@@ -174,22 +195,6 @@ export const PersonalityResultView: FC<PersonalityResultViewProps> = ({
         selectedDjNames: selection.selectedDjNames,
       },
     );
-  };
-
-  const handleSetReminder = () => {
-    if (!confirmedSoulEvent) {
-      void Taro.showToast({
-        title: '阵容公布后可设置演出提醒',
-        icon: 'none',
-      });
-      return;
-    }
-    void Taro.showModal({
-      title: '开场提醒',
-      content: `将在 ${soul.djName} 于「${confirmedSoulEvent.name}」的演出时段公布后通知你。`,
-      confirmText: '好的',
-      showCancel: false,
-    });
   };
 
   const handleSavePoster = async () => {
@@ -504,12 +509,12 @@ export const PersonalityResultView: FC<PersonalityResultViewProps> = ({
       <View className="s-personality-result__primary-actions">
         <Button
           className="s-personality-result__cta s-personality-result__cta--primary"
-          onClick={handleGenerateItinerary}
+          onClick={handlePrefillBuddyPost}
         >
-          生成专属行程
+          预填组队帖
         </Button>
-        <Button className="s-personality-result__cta" onClick={handleSetReminder}>
-          设置开场提醒
+        <Button className="s-personality-result__cta" onClick={handleGenerateItinerary}>
+          生成专属行程
         </Button>
       </View>
 

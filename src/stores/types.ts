@@ -1,3 +1,4 @@
+import type { AiBuddyPostFormValues } from '../types/buddyPost';
 import type { AiGuidePlanFormValues } from '../types/travelGuide';
 
 export type AiAssistantNavIntent = {
@@ -16,4 +17,11 @@ export type ExclusiveItineraryNavIntent = {
   selectedDjIds: string[];
   selectedDjNames: string[];
   focusDjName?: string;
+};
+
+export type EventDetailBuddyPostNavIntent = {
+  activityLegacyId: number;
+  initialValues: AiBuddyPostFormValues;
+  prefillSummaryLines?: string[];
+  prefillBannerTitle?: string;
 };

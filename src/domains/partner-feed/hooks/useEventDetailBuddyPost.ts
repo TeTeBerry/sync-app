@@ -2,13 +2,22 @@ import { useCallback, useRef, useState } from 'react';
 import Taro from '@tarojs/taro';
 import { useBuddyPostSheetController } from '../../../hooks/useBuddyPostSheetController';
 import type { EventDetailPost } from '../../../types/post';
-import type { AiBuddyPostSubmitPayload } from '../../../types/buddyPost';
+import type {
+  AiBuddyPostFormValues,
+  AiBuddyPostSubmitPayload,
+} from '../../../types/buddyPost';
 import {
   buildOptimisticBuddyPost,
   publishBuddyPostFromForm,
 } from '../../../utils/publishBuddyPost';
 import { isApiEnabled } from '../../../constants/api';
 import { getClientUserId } from '../../../utils/session';
+
+export type EventDetailBuddyPostPrefillOptions = {
+  initialValues: AiBuddyPostFormValues;
+  prefillSummaryLines?: string[];
+  prefillBannerTitle?: string;
+};
 
 /** Structured message-board template sheet on event detail. */
 export function useEventDetailBuddyPost(
@@ -19,6 +28,7 @@ export function useEventDetailBuddyPost(
     authorName: string;
     authorAvatar?: string;
     authorHandle?: string;
+    buddyPostPrefill?: EventDetailBuddyPostPrefillOptions;
     refreshPosts?: (options?: { silent?: boolean }) => Promise<void>;
     prependPost?: (post: EventDetailPost) => void;
     replacePost?: (pendingId: string, post: EventDetailPost) => void;
@@ -28,6 +38,16 @@ export function useEventDetailBuddyPost(
 ) {
   const [isPublishing, setIsPublishing] = useState(false);
   const publishingRef = useRef(false);
+  const [sheetInitialValues, setSheetInitialValues] =
+    useState<AiBuddyPostFormValues | null>(
+      () => options.buddyPostPrefill?.initialValues ?? null,
+    );
+  const [sheetPrefillSummaryLines, setSheetPrefillSummaryLines] = useState<
+    string[] | null
+  >(() => options.buddyPostPrefill?.prefillSummaryLines ?? null);
+  const [sheetPrefillBannerTitle, setSheetPrefillBannerTitle] = useState<string | null>(
+    () => options.buddyPostPrefill?.prefillBannerTitle ?? null,
+  );
   const {
     sheetOpen,
     setSheetOpen,
@@ -50,6 +70,13 @@ export function useEventDetailBuddyPost(
   const openBuddyPostSheet = useCallback(() => {
     void openSheet();
   }, [openSheet]);
+
+  const closeBuddyPostSheet = useCallback(() => {
+    closeSheet();
+    setSheetInitialValues(null);
+    setSheetPrefillSummaryLines(null);
+    setSheetPrefillBannerTitle(null);
+  }, [closeSheet]);
 
   const handleBuddyPostSheetSubmit = useCallback(
     async (
@@ -84,6 +111,9 @@ export function useEventDetailBuddyPost(
 
       setIsPublishing(true);
       setSheetOpen(false);
+      setSheetInitialValues(null);
+      setSheetPrefillSummaryLines(null);
+      setSheetPrefillBannerTitle(null);
 
       if (!submitOptions?.skipListRefresh && listedInFeed) {
         options.prependPost?.(
@@ -139,8 +169,11 @@ export function useEventDetailBuddyPost(
     buddyPostSheetOpen: sheetOpen,
     isBuddyPostPublishing: isPublishing,
     openBuddyPostSheet,
-    closeBuddyPostSheet: closeSheet,
+    closeBuddyPostSheet,
     handleBuddyPostSheetSubmit,
+    buddyPostSheetInitialValues: sheetInitialValues,
+    buddyPostPrefillSummaryLines: sheetPrefillSummaryLines,
+    buddyPostPrefillBannerTitle: sheetPrefillBannerTitle,
     buddyPostActivityDate: options.activityDate,
     buddyPostActivityTitle: options.activityTitle,
     complianceConfirmDialog,

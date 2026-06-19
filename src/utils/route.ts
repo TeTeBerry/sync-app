@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { bindActivity, clearActivityScope } from '../domains/activity-scope';
 import { useNavigationStore } from '../stores/navigationStore';
 import type { ExclusiveItineraryNavIntent } from '../stores/types';
+import type { PersonalityBuddyPostPrefill } from '../domains/personality-test/utils/buildPersonalityBuddyPostPrefill';
 import { encodeSelectedDjList } from '../domains/performance-itinerary/utils/itineraryBanner';
 import type { NavigationState } from '../stores/navigationStore';
 import type { AiAssistantNavIntent } from '../stores/types';
@@ -572,6 +573,24 @@ export function goEventDetail(
   navigateToSafe(buildPageUrl(ROUTES.EVENT_DETAIL, query), {
     eventId: legacyId,
   });
+}
+
+export function goEventDetailWithBuddyPostPrefill(
+  eventId: number | string,
+  prefill: PersonalityBuddyPostPrefill,
+) {
+  const legacyId = parseActivityLegacyId(eventId);
+  if (legacyId == null) {
+    void Taro.showToast({ title: '活动信息无效', icon: 'none' });
+    return;
+  }
+  useNavigationStore.getState().setEventDetailBuddyPostIntent({
+    activityLegacyId: legacyId,
+    initialValues: prefill.form,
+    prefillSummaryLines: prefill.summaryLines,
+    prefillBannerTitle: prefill.bannerTitle,
+  });
+  goEventDetail(legacyId, { openBuddyPost: true, focusPosts: true });
 }
 
 export function goExclusiveItinerary(
