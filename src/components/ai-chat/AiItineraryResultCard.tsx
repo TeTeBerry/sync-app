@@ -1,10 +1,11 @@
-import { ITINERARY_TITLE, VIEW_ITINERARY_CTA } from '@/constants/aiCtaLabels';
+import { getItineraryTitle, getViewItineraryCta } from '@/constants/aiCtaLabels';
 import type { GenerateItineraryResult } from '@/types/itinerary';
 import { goMyItinerary } from '@/utils/route';
 import { useItineraryStore } from '@/domains/performance-itinerary/store';
 import { ChevronRight, Music2 } from '../../components/icons';
 import { Button } from '../ui';
 import { Text, View } from '@tarojs/components';
+import { useT } from '@/hooks/useI18n';
 import './AiItineraryResultCard.scss';
 
 export type AiItineraryResultCardProps = {
@@ -20,6 +21,7 @@ export function AiItineraryResultCard({
   result,
   disabled = false,
 }: AiItineraryResultCardProps) {
+  useT();
   const dayCount = result.itinerary.days.length;
   const conflictCount = result.conflicts.length;
 
@@ -37,14 +39,16 @@ export function AiItineraryResultCard({
         className="s-ai-itinerary-result__card"
         disabled={disabled}
         hoverClass="s-ai-itinerary-result__card--pressed"
-        aria-label={VIEW_ITINERARY_CTA}
+        aria-label={getViewItineraryCta()}
         onClick={openDetail}
       >
         <View className="s-ai-itinerary-result__card-head">
           <View className="s-ai-itinerary-result__card-icon" aria-hidden>
             <Music2 size={16} color="#a855f7" />
           </View>
-          <Text className="s-ai-itinerary-result__card-kicker">{ITINERARY_TITLE}</Text>
+          <Text className="s-ai-itinerary-result__card-kicker">
+            {getItineraryTitle()}
+          </Text>
         </View>
 
         <Text className="s-ai-itinerary-result__card-title">
@@ -65,7 +69,7 @@ export function AiItineraryResultCard({
 
         <View className="s-ai-itinerary-result__foot">
           <Text className="s-ai-itinerary-result__foot-label">
-            {VIEW_ITINERARY_CTA}
+            {getViewItineraryCta()}
           </Text>
           <ChevronRight size={14} color="#a855f7" />
         </View>

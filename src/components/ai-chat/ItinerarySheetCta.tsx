@@ -7,8 +7,6 @@ export type ItinerarySheetCtaProps = {
   onPress: () => void;
 };
 
-import { useT } from '@/hooks/useI18n';
-
 export function ItinerarySheetCta({ onPress }: ItinerarySheetCtaProps) {
   useT();
   const label = getItinerarySheetActionLabel();

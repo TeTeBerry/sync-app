@@ -1,13 +1,14 @@
 import './TravelPlanReceiptOcrTip.scss';
 import Taro from '@tarojs/taro';
 import {
-  TRAVEL_PLAN_RECEIPT_OCR_CTA,
-  TRAVEL_PLAN_RECEIPT_OCR_TIP,
+  getTravelPlanReceiptOcrCta,
+  getTravelPlanReceiptOcrTip,
 } from '@/constants/aiCtaLabels';
 import { goMyItinerary } from '@/utils/route';
 import { ChevronRight, ImageIcon } from '@/components/icons';
 import { Button } from '@/components/ui';
 import { Text, View } from '@tarojs/components';
+import { useT } from '@/hooks/useI18n';
 
 export type TravelPlanReceiptOcrTipProps = {
   activityLegacyId?: number;
@@ -20,6 +21,8 @@ export function TravelPlanReceiptOcrTip({
   disabled = false,
   className,
 }: TravelPlanReceiptOcrTipProps) {
+  useT();
+
   const handleClick = () => {
     if (disabled) return;
     if (activityLegacyId == null || Number.isNaN(activityLegacyId)) {
@@ -41,10 +44,10 @@ export function TravelPlanReceiptOcrTip({
       </View>
       <View className="s-travel-plan-receipt-ocr-tip__copy">
         <Text className="s-travel-plan-receipt-ocr-tip__title">
-          {TRAVEL_PLAN_RECEIPT_OCR_TIP}
+          {getTravelPlanReceiptOcrTip()}
         </Text>
         <Text className="s-travel-plan-receipt-ocr-tip__cta">
-          {TRAVEL_PLAN_RECEIPT_OCR_CTA}
+          {getTravelPlanReceiptOcrCta()}
         </Text>
       </View>
       <ChevronRight size={16} color="#bf5af2" aria-hidden />

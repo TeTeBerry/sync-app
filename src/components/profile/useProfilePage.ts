@@ -115,8 +115,6 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
     }
   }, [apiEnabled, loggedIn, summaryQuery]);
 
-  import { t } from '@/i18n';
-
   const handleLogout = useCallback(async () => {
     const ok = await confirm({
       title: t('profile.logout.title'),
