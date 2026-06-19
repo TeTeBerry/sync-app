@@ -66,7 +66,7 @@ REST 与自定义 `useApiQuery` 缓存的分层约定；身份为 **JWT Bearer**
 
 | 文件               | 内容                                        |
 | ------------------ | ------------------------------------------- |
-| `activities.ts`    | 活动列表、首页 summary、详情、报名          |
+| `activities.ts`    | 活动列表、首页 summary、详情、活动选择同步    |
 | `posts.ts`         | 活动帖无限滚动、评论分页、删帖 mutation |
 | `profile.ts`       | 个人摘要、活动列表              |
 | `notifications.ts` | 通知列表与已读                              |

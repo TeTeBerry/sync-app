@@ -25,7 +25,7 @@
 | P3-dev | check / husky / CI | ✅ 完成 |
 | AE | 活动域 `domains/` + `@sync/*-contracts` | ✅ 完成 |
 
-**产品约定**：首页为活动报名列表；活动详情提供 AI 咨询、出行攻略与行程入口；无帖流。
+**产品约定**：用户进入活动详情或绑定活动即视为「选择」；首页展示热门活动与「我的下一场」准备进度；活动详情提供 AI 咨询、出行攻略与行程入口；无帖流。
 
 **工程**：`npm run check`；pre-commit lint-staged；CI 见 `.github/workflows/ci.yml`；工作区 [`../../CONTRIBUTING.md`](../../CONTRIBUTING.md)。
 
@@ -51,8 +51,8 @@
 
 ### P2 — 活动详情 ✅
 
-- [x] `syncApi`：`registerForActivity`、`cancelActivityRegistration`、`fetchCurrentUser`、`updateCurrentUser`
-- [x] 首页「加入」→ `POST /activities/:legacyId/register`
+- [x] `syncApi`：`registerForActivity`、`fetchCurrentUser`、`updateCurrentUser`
+- [x] 选择活动（静默）→ `POST /activities/:legacyId/register`（`bindActivity` / 进入详情）
 - [x] `domains/partner-feed/` — `EventDetailComposerSection`、行程菜单（AI 咨询入口）
 - [x] `useEventDetailPage` + `useEventDetailRoute` + `useEventDetailTravelGuide`
 
@@ -180,7 +180,7 @@ src/
 ### 核心功能 ✅
 
 - [x] 活动 Tab / 详情数据来自 API
-- [x] 首页「加入」报名有效
+- [x] 进入活动详情即记录选择（无独立报名按钮）
 - [x] 活动页 → AI 助手（带 `activityLegacyId`）→ 攻略 / 活动推荐
 - [x] 探索 Tab 已下线
 

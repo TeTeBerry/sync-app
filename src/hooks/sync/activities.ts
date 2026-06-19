@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef } from 'react';
 import {
-  cancelActivityRegistration,
   fetchActivities,
   fetchActivityByLegacyId,
   fetchHomeSummary,
@@ -36,9 +35,9 @@ import {
 } from '../../utils/activityCatalog';
 import { persistHomeSummary, persistActivities } from '../../utils/homeCacheStorage';
 import type { HomeSummary } from '../../types/backend';
-import { patchActivityRegistrationInCaches } from '../../cache/activityCache';
+import { patchActivitySelectionInCaches } from '../../cache/activityCache';
 import {
-  invalidateRegistrationProfile,
+  invalidateActivitySelectionProfile,
   invalidateUser,
   invalidateProfile,
 } from '../../utils/queryInvalidation';
@@ -47,7 +46,7 @@ import type { QueryEnableOptions } from './types';
 import type { UpdateCurrentUserPayload } from '../../types/backend';
 import { updateCurrentUser } from '../../api/sync/users';
 import { useProfileActivitiesQuery } from './profile';
-import { buildRegisteredActivityLegacyIds } from '../../utils/activityRegistration';
+import { buildSelectedActivityLegacyIds } from '../../utils/activitySelection';
 
 export function useActivitiesQuery(options?: QueryEnableOptions) {
   const tabEnabled = options?.enabled ?? true;
@@ -119,14 +118,14 @@ export function useHomeSummary() {
   return query;
 }
 
-export function useRegisteredActivityLegacyIds() {
+export function useSelectedActivityLegacyIds() {
   const { data: summary } = useHomeSummary();
   const profileActivitiesQuery = useProfileActivitiesQuery();
   const loggedIn = isLoggedIn();
 
   return useMemo(
     () =>
-      buildRegisteredActivityLegacyIds(
+      buildSelectedActivityLegacyIds(
         loggedIn ? summary?.signupEvents : undefined,
         loggedIn ? profileActivitiesQuery.data : undefined,
       ),
@@ -136,15 +135,15 @@ export function useRegisteredActivityLegacyIds() {
 
 export function useFeaturedEvents() {
   const { data: summary, isLoading } = useHomeSummary();
-  const registeredLegacyIds = useRegisteredActivityLegacyIds();
+  const selectedLegacyIds = useSelectedActivityLegacyIds();
 
   const items = useMemo((): FeaturedEvent[] => {
-    const signupEvents = summary?.signupEvents ?? [];
-    const active = signupEvents.filter(
+    const homeEvents = summary?.signupEvents ?? [];
+    const active = homeEvents.filter(
       (item) => getActivityStatusFromActivity(item.date, item.title) !== 'ended',
     );
-    return pickHomeFeaturedEvents(active, registeredLegacyIds);
-  }, [summary, registeredLegacyIds]);
+    return pickHomeFeaturedEvents(active, selectedLegacyIds);
+  }, [summary, selectedLegacyIds]);
 
   return {
     items,
@@ -175,33 +174,19 @@ export function useActivityDetailQuery(legacyId?: number) {
   });
 }
 
-export async function invalidateRegistrationQueries() {
-  await invalidateRegistrationProfile();
-}
-
+/** Persist activity selection server-side and refresh profile caches. */
 export async function registerForActivityAndInvalidate(legacyId: number) {
   const result = await registerForActivity(legacyId);
-  patchActivityRegistrationInCaches({
+  patchActivitySelectionInCaches({
     legacyId,
     attendees: result.attendees,
     going: true,
   });
   try {
-    await invalidateRegistrationQueries();
+    await invalidateActivitySelectionProfile();
   } catch {
-    // Registration succeeded; cache refresh is best-effort.
+    // Selection succeeded; cache refresh is best-effort.
   }
-  return result;
-}
-
-export async function cancelActivityRegistrationAndInvalidate(legacyId: number) {
-  const result = await cancelActivityRegistration(legacyId);
-  patchActivityRegistrationInCaches({
-    legacyId,
-    attendees: result.attendees,
-    going: false,
-  });
-  await invalidateRegistrationQueries();
   return result;
 }
 

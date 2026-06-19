@@ -10,11 +10,7 @@ import { seedActivityDetailFromEventCard } from '../../utils/activityDetailCache
 import { prefetchEventPostsPage } from '../../cache/eventPostsPageCache';
 import { preloadEventSubpackage } from '../../utils/subpackagePreload';
 import { buildEventDetailQuery, preloadPageSafe, ROUTES } from '../../utils/route';
-import {
-  useEventList,
-  useHomeSummary,
-  useRegisteredActivityLegacyIds,
-} from '../../hooks/useSyncApi';
+import { useEventList, useHomeSummary } from '../../hooks/useSyncApi';
 import { resolveEventCardLegacyId } from '../../utils/apiMappers';
 import { goEventDetail, preloadHotRoutes } from '../../utils/route';
 import { isLoggedIn } from '../../utils/authStorage';
@@ -50,7 +46,6 @@ const Events: React.FC = () => {
 
   const { events, isLoading, isError, refetch } = useEventList();
   const { refetch: refetchHomeSummary } = useHomeSummary();
-  const registeredLegacyIds = useRegisteredActivityLegacyIds();
   const [viewTab, setViewTab] = useState<EventsViewTab>('calendar');
   const [selectedDay, setSelectedDay] = useState(todayCalendarParts);
 
@@ -165,7 +160,6 @@ const Events: React.FC = () => {
                 events={upcomingEvents}
                 listHeight={listScrollHeight ?? undefined}
                 isError={isError}
-                registeredLegacyIds={registeredLegacyIds}
                 onRetry={() => void refetch()}
                 onOpenDetail={openDetail}
                 onWarmDetail={warmEventDetail}
@@ -194,7 +188,6 @@ const Events: React.FC = () => {
                     events={allEventsByDate}
                     isError={isError}
                     emptyText="暂无活动"
-                    registeredLegacyIds={registeredLegacyIds}
                     onRetry={() => void refetch()}
                     onOpenDetail={openDetail}
                     onWarmDetail={warmEventDetail}
@@ -218,7 +211,6 @@ const Events: React.FC = () => {
                   <EventsActivityList
                     events={calendarListEvents}
                     isError={isError}
-                    registeredLegacyIds={registeredLegacyIds}
                     onRetry={() => void refetch()}
                     onOpenDetail={openDetail}
                     onWarmDetail={warmEventDetail}

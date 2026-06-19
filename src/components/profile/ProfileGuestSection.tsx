@@ -23,7 +23,7 @@ const LOCKED_FEATURES: LockedFeature[] = [
   {
     icon: <Zap size={18} color="#ff0066" />,
     title: '我的活动',
-    desc: '报名记录与行程管理',
+    desc: '活动记录与行程管理',
     feature: 'activity',
   },
   {

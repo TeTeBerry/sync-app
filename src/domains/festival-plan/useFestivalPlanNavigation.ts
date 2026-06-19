@@ -33,9 +33,6 @@ export function useFestivalPlanNavigation(
               void Taro.navigateTo({ url: ROUTES.PROFILE_POSTS });
             }
             return;
-          case 'registration':
-            goEventDetail(activityLegacyId);
-            return;
         }
         return;
       }
@@ -49,9 +46,6 @@ export function useFestivalPlanNavigation(
           return;
         case 'buddy_post':
           actions?.runCapability('buddy_post', { source: 'festival_plan' });
-          return;
-        case 'registration':
-          goEventDetail(activityLegacyId);
           return;
       }
     },

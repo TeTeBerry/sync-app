@@ -43,8 +43,8 @@ export function invalidateAllPosts() {
   invalidateCache(['profile', 'summary']);
 }
 
-/** 失效注册相关的个人资料查询（不刷新首页/活动列表，避免覆盖乐观更新） */
-export function invalidateRegistrationProfile() {
+/** 失效活动选择相关的个人资料查询（不刷新首页，避免覆盖乐观更新） */
+export function invalidateActivitySelectionProfile() {
   invalidateProfile();
   invalidateUser();
 }

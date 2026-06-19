@@ -14,7 +14,6 @@ type EventsActivityMapTabProps = {
   events: EventCardUi[];
   listHeight?: number;
   isError: boolean;
-  registeredLegacyIds: Set<number>;
   onRetry: () => void;
   onOpenDetail: (legacyId: string) => void;
   onWarmDetail: (event: EventCardUi) => void;
@@ -24,7 +23,6 @@ export const EventsActivityMapTab: FC<EventsActivityMapTabProps> = ({
   events,
   listHeight,
   isError,
-  registeredLegacyIds,
   onRetry,
   onOpenDetail,
   onWarmDetail,
@@ -113,7 +111,6 @@ export const EventsActivityMapTab: FC<EventsActivityMapTabProps> = ({
             events={regionActivities}
             isError={isError}
             emptyText="该区域暂无活动"
-            registeredLegacyIds={registeredLegacyIds}
             onRetry={onRetry}
             onOpenDetail={onOpenDetail}
             onWarmDetail={onWarmDetail}

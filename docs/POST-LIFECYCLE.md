@@ -172,3 +172,25 @@ cd sync-app-backend && CI=true npm test -- --watchman=false --testPathPattern="b
 - [ ] 无点赞入口；`PATCH /posts/:id` 接口 404
 - [ ] 通知页无「点赞/评论」Tab；历史点赞/评论通知不展示、不计入未读
 - [ ] 通知深链不依赖 `/posts/:id/navigation-target`
+
+---
+
+## 十一、Dev mock 组队帖（仅开发 / 联调）
+
+后端 `PostDevMockSeedService` 在 **非 production** 启动时为 Tomorrowland Thailand（`activityLegacyId = 1`）写入演示组队帖，便于空列表联调。
+
+| 条件 | 行为 |
+|------|------|
+| `NODE_ENV=production` | **永不 seed**（上架默认安全） |
+| `DISABLE_DEV_MOCK_POSTS=true` | 跳过 seed（本地 / staging 也可关闭） |
+| 否则（dev 默认） | 启动时 upsert mock 帖 |
+
+**识别 mock 数据**：`userId` 前缀 `demo-mock-tml-`（`DEV_MOCK_TML_POST_USER_PREFIX`），活动 `legacyId=1`。
+
+实现：`sync-app-backend/src/modules/partner/application/post-dev-mock-seed.service.ts`
+
+### 上架验收
+
+- [ ] 生产实例 `NODE_ENV=production`，启动日志**无** `Dev mock buddy posts for TML Thailand`
+- [ ] 生产活动详情帖 API 返回列表中**无** `userId` 以 `demo-mock-tml-` 开头的帖子
+- [ ] 本地需关闭 mock 时：`.env` 设 `DISABLE_DEV_MOCK_POSTS=true` 后重启后端

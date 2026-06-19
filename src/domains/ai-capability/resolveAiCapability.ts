@@ -47,7 +47,5 @@ export function capabilityFromFestivalPlanTaskKey(
       return 'itinerary';
     case 'buddy_post':
       return 'buddy_post';
-    case 'registration':
-      return null;
   }
 }

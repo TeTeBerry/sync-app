@@ -24,14 +24,3 @@ export function findBuddyPostInChatMessages(
   }
   return null;
 }
-
-export function hasRegisteredActivityInChatMessages(
-  messages: ChatUiMessage[],
-  activityLegacyId: number,
-): boolean {
-  return messages.some(
-    (message) =>
-      message.registeredActivity?.activityLegacyId === activityLegacyId &&
-      !message.registeredActivity.alreadyRegistered,
-  );
-}

@@ -1,4 +1,5 @@
 import { TRAVEL_GUIDE_TITLE } from '@/constants/aiCtaLabels';
+import { AI_TRAVEL_GUIDE_DISCLAIMER } from '@/constants/aiDisclosure';
 import type { TravelGuidePlan } from '@/types/travelGuide';
 
 export function buildTravelGuideShareText(plan: TravelGuidePlan): string {
@@ -73,5 +74,7 @@ export function buildTravelGuideShareText(plan: TravelGuidePlan): string {
   }
 
   lines.push(`— Sync · ${TRAVEL_GUIDE_TITLE}`);
+  lines.push('');
+  lines.push(AI_TRAVEL_GUIDE_DISCLAIMER);
   return lines.join('\n');
 }

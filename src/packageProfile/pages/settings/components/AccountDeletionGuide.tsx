@@ -5,7 +5,7 @@ import { SUPPORT_EMAIL } from '../../../../constants/supportContact';
 
 const DELETION_DATA_SCOPE = [
   '账号与微信 openid 关联信息',
-  '个人资料、报名记录与偏好设置',
+  '个人资料、活动记录与偏好设置',
   '你发布的组队帖、评论与 AI 对话记录',
   '行程、攻略、性格测试等工具内数据',
 ] as const;

@@ -5,32 +5,32 @@ import {
   getActivityStatusFromActivity,
 } from '../../../utils/activityStatus';
 
-type SignupEvent = HomeSummary['signupEvents'][number];
+type HomeActivityEvent = HomeSummary['signupEvents'][number];
 
-/** Nearest upcoming activity the user has registered for. */
-export function pickNextRegisteredEvent(
-  signupEvents: SignupEvent[] | undefined,
-  registeredLegacyIds: Set<number>,
+/** Nearest upcoming activity the user has selected. */
+export function pickNextSelectedEvent(
+  homeEvents: HomeActivityEvent[] | undefined,
+  selectedLegacyIds: Set<number>,
   now?: Date,
-): SignupEvent | null {
-  if (!signupEvents?.length || registeredLegacyIds.size === 0) {
+): HomeActivityEvent | null {
+  if (!homeEvents?.length || selectedLegacyIds.size === 0) {
     return null;
   }
 
-  const registered = signupEvents.filter((event) => {
+  const selected = homeEvents.filter((event) => {
     const legacyId = parseActivityLegacyId(event.id);
     return (
       legacyId != null &&
-      registeredLegacyIds.has(legacyId) &&
+      selectedLegacyIds.has(legacyId) &&
       getActivityStatusFromActivity(event.date, event.title, now) !== 'ended'
     );
   });
 
-  if (registered.length === 0) {
+  if (selected.length === 0) {
     return null;
   }
 
-  return [...registered].sort((a, b) =>
+  return [...selected].sort((a, b) =>
     compareActivitiesNearestFirst(
       { date: a.date, title: a.title },
       { date: b.date, title: b.title },

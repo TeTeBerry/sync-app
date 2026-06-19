@@ -2,14 +2,12 @@ import type { FC } from 'react';
 import { EventCard } from '../../../components/event';
 import { ListState } from '../../../components/ListState';
 import type { EventCardUi } from '../../../utils/apiMappers';
-import { resolveEventCardLegacyId } from '../../../utils/apiMappers';
 import { View } from '@tarojs/components';
 
 type EventsActivityListProps = {
   events: EventCardUi[];
   isError: boolean;
   emptyText?: string;
-  registeredLegacyIds: Set<number>;
   onRetry: () => void;
   onOpenDetail: (legacyId: string) => void;
   onWarmDetail: (event: EventCardUi) => void;
@@ -19,7 +17,6 @@ export const EventsActivityList: FC<EventsActivityListProps> = ({
   events,
   isError,
   emptyText = '暂无活动',
-  registeredLegacyIds,
   onRetry,
   onOpenDetail,
   onWarmDetail,
@@ -61,9 +58,7 @@ export const EventsActivityList: FC<EventsActivityListProps> = ({
               attendees={event.attendees}
               hot={event.hot}
               category={event.category}
-              going={registeredLegacyIds.has(resolveEventCardLegacyId(event.id) ?? -1)}
               variant="list"
-              ctaVariant="detail"
               onTeamUp={() => onOpenDetail(event.id)}
               onTeamUpWarmup={() => onWarmDetail(event)}
             />

@@ -15,7 +15,7 @@ function activityTitleFallback(title: unknown): string {
 
 const EVENT_STATUS_TEXT: Record<string, string> = {
   upcoming: '即将参加',
-  registered: '已报名',
+  registered: '已选择',
   attended: '已参加',
   completed: '已结束',
 };
@@ -39,9 +39,9 @@ const ProfileActivitiesSection: React.FC<ProfileActivitiesSectionProps> = ({
           <View className="s-profile-section__empty-icon s-profile-section__empty-icon--activities">
             <Ticket size={22} />
           </View>
-          <Text className="s-profile-section__empty-title">还没有报名活动</Text>
+          <Text className="s-profile-section__empty-title">还没有选择活动</Text>
           <Text className="s-profile-section__empty-hint">
-            在首页或活动页报名后，会显示在这里
+            在首页或活动页进入活动详情后，会显示在这里
           </Text>
         </View>
       ) : (
@@ -102,9 +102,9 @@ const ProfileActivitiesSection: React.FC<ProfileActivitiesSectionProps> = ({
           <View className="s-profile-section__empty-icon s-profile-section__empty-icon--activities">
             <Ticket size={22} />
           </View>
-          <Text className="s-profile-section__empty-title">还没有报名活动</Text>
+          <Text className="s-profile-section__empty-title">还没有选择活动</Text>
           <Text className="s-profile-section__empty-hint">
-            在首页或活动页报名后，会显示在这里
+            在首页或活动页进入活动详情后，会显示在这里
           </Text>
         </View>
       )}

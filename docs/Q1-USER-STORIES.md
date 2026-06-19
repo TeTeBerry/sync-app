@@ -13,7 +13,7 @@
 |----|------|------|------|
 | US-Q1-01 | 首页「我的下一场」准备进度 | ✅ | |
 | US-Q1-02 | 活动详情准备清单入口 | ✅ | 含出行攻略卡片「生成/查看」切换 |
-| US-Q1-03 | 新用户 3 步引导 | 🔲 | |
+| US-Q1-03 | 新用户 3 步引导 | ✅ | 首页首次登录后轻量 Sheet |
 | US-Q1-04 | 活动信息来源标注 | 🔲 | |
 | US-Q1-05 | 官方购票外链 | ⏸ | 产品暂缓 |
 | US-Q1-06 | 阵容未官宣空状态 + 订阅 | ✅ | 模板 #624 活动预约提醒 |
@@ -27,9 +27,9 @@
 | US-Q1-14 | 评论订阅消息验收 | ✅ | 前端 env + `WECHAT-E2E.md` |
 | US-Q1-15 | 首页新回复深链 | ✅ | |
 | US-Q1-16 | 人格测试分享优化 | 🔲 | |
-| US-Q1-17 | 攻略分享合规文案 | 🔲 | 详情页已有声明，复制文案待补 |
+| US-Q1-17 | 攻略分享合规文案 | ✅ | 复制文案含免责声明 |
 | US-Q1-18 | 活动详情免责声明 | ✅ | |
-| US-Q1-19 | Dev mock 开关说明 | 🔲 | |
+| US-Q1-19 | Dev mock 开关说明 | ✅ | `POST-LIFECYCLE.md` §十一 |
 
 **增量交付（无独立 Story 编号）**
 
@@ -49,14 +49,14 @@
 ### US-Q1-01 · 首页「我的下一场」展示准备进度 P0 · M · ✅ 已完成
 
 **Story**  
-作为已报名用户，我想在首页看到下场活动的准备进度（攻略/时间表/组队/报名），以便知道还差什么。
+作为已选择活动的用户，我想在首页看到下场活动的准备进度（攻略/时间表/组队），以便知道还差什么。
 
 **验收标准**
 
-- [x] `HomeMyNextEvent` 或相邻区域展示 `FestivalPlan` 进度（如 `2/4` + 下一项任务名）
+- [x] `HomeMyNextEvent` 或相邻区域展示 `FestivalPlan` 进度（如 `2/3` + 下一项任务名）
 - [x] 数据来自已有 `useFestivalPlanSummary` 或 `GET festival-plan-progress`（与 AI Tab 一致）
 - [x] 点击进度条跳转活动详情或 AI Tab 对应任务
-- [x] 未报名用户不展示该模块
+- [x] 未选择活动用户不展示该模块
 
 **技术提示**：`pages/index/`、`domains/festival-plan/`、`hooks/sync/festivalPlanProgress.ts`
 
@@ -82,17 +82,17 @@
 
 ---
 
-### US-Q1-03 · 新用户 3 步引导（可选跳过） P1 · L · 🔲 未开始
+### US-Q1-03 · 新用户 3 步引导（可选跳过） P1 · L · ✅ 已完成
 
 **Story**  
-作为首次登录用户，我想被引导完成「选活动 → 报名 → 打开 AI 生成攻略」，以便快速理解产品价值。
+作为首次登录用户，我想被引导完成「选活动 → 打开 AI 生成攻略」，以便快速理解产品价值。
 
 **验收标准**
 
-- [ ] 首次登录后展示最多 3 步轻引导（非强制全屏广告）
-- [ ] 可跳过；跳过后不再自动弹出（localStorage 标记）
-- [ ] 每步跳转现有页面（活动列表 / 详情报名 / AI Tab）
-- [ ] 引导结束不自动发帖、不收集额外权限
+- [x] 首次登录后展示最多 2 步轻引导（非强制全屏广告）
+- [x] 可跳过；跳过后不再自动弹出（localStorage 标记）
+- [x] 每步跳转现有页面（活动列表 / 活动详情 / AI Tab）
+- [x] 引导结束不自动发帖、不收集额外权限
 
 **技术提示**：新建 `components/onboarding/` 或首页 overlay；`utils/auth.ts` 登录成功回调
 
@@ -331,14 +331,14 @@
 
 ---
 
-### US-Q1-17 · 出行攻略分享文案合规检查 P1 · S · 🔲 部分完成
+### US-Q1-17 · 出行攻略分享文案合规检查 P1 · S · ✅ 已完成
 
 **Story**  
 作为分享攻略的用户，复制/分享文案中应包含「仅供参考、自行核实」提示。
 
 **验收标准**
 
-- [ ] `travelGuideShareText` 或分享按钮附带一行 `AI_TRAVEL_GUIDE_DISCLAIMER` 摘要
+- [x] `travelGuideShareText` 或分享按钮附带一行 `AI_TRAVEL_GUIDE_DISCLAIMER` 摘要
 - [x] 攻略详情页展示 `AI_TRAVEL_GUIDE_DISCLAIMER`，不出现「平台代购/订票」表述
 
 **技术提示**：`domains/travel-guide/utils/travelGuideShareText.ts`
@@ -365,15 +365,15 @@
 
 ---
 
-### US-Q1-19 · Dev mock 数据开关说明 P1 · S · 🔲 未开始
+### US-Q1-19 · Dev mock 数据开关说明 P1 · S · ✅ 已完成
 
 **Story**  
 作为开发者，我想在文档中明确 dev mock 帖开关，以免误带到生产。
 
 **验收标准**
 
-- [ ] `README` 或 `POST-LIFECYCLE.md` 说明 `DISABLE_DEV_MOCK_POSTS`、`PostDevMockSeedService` 仅非 production
-- [ ] 生产构建 `NODE_ENV=production` 不 seed mock
+- [x] `README` 或 `POST-LIFECYCLE.md` 说明 `DISABLE_DEV_MOCK_POSTS`、`PostDevMockSeedService` 仅非 production
+- [x] 生产构建 `NODE_ENV=production` 不 seed mock
 
 **技术提示**：`post-dev-mock-seed.service.ts`
 
@@ -407,9 +407,9 @@
 | 6 | US-Q1-12 / US-Q1-13 | 反馈与注销指引 | ✅ |
 | 7 | US-Q1-04 | 信息来源标注 | 🔲 |
 
-### Sprint 3（增长 · 可选）— 🔲 待排期
+### Sprint 3（增长 · 可选）— 部分完成
 
-US-Q1-03、US-Q1-16、US-Q1-17（复制文案免责声明）
+US-Q1-03 ✅；US-Q1-16、US-Q1-17（微信分享标题）待排期
 
 ---
 

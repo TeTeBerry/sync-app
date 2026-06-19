@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { getCacheData, setCacheDataByKey, getCacheKey } from '@/hooks/useApiQuery';
-import { patchActivityRegistrationInCaches } from '@/cache/activityCache';
+import { patchActivitySelectionInCaches } from '@/cache/activityCache';
 import type { BackendActivity, HomeSummary } from '@/types/backend';
 
 const legacyId = 4;
@@ -41,8 +41,8 @@ describe('activityCache', () => {
     setCacheDataByKey(getCacheKey(['activities']), activities);
   });
 
-  it('patchActivityRegistrationInCaches sets attendees and going from server total', () => {
-    patchActivityRegistrationInCaches({
+  it('patchActivitySelectionInCaches sets attendees and going from server total', () => {
+    patchActivitySelectionInCaches({
       legacyId,
       attendees: 6,
       going: true,
@@ -58,7 +58,7 @@ describe('activityCache', () => {
   });
 
   it('updates going without changing attendees when total unchanged', () => {
-    patchActivityRegistrationInCaches({
+    patchActivitySelectionInCaches({
       legacyId,
       attendees: 5,
       going: true,
@@ -71,7 +71,7 @@ describe('activityCache', () => {
   });
 
   it('decrements attendees on unregister', () => {
-    patchActivityRegistrationInCaches({
+    patchActivitySelectionInCaches({
       legacyId,
       attendees: 4,
       going: false,

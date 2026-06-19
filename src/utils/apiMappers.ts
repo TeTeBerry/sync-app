@@ -109,13 +109,13 @@ export function mapSignupEventToFeaturedEvent(item: SignupEvent): FeaturedEvent 
   };
 }
 
-/** 首页热门活动：未报名时按开始时间就近；已报名时已报名活动靠前并按开始时间就近，其余活动随后同样按时间排序。 */
+/** 首页热门活动：未选择时按开始时间就近；已选择的活动靠前并按开始时间就近，其余活动随后同样按时间排序。 */
 export function pickHomeFeaturedEvents(
   signupEvents: SignupEvent[],
-  registeredLegacyIds?: Set<number>,
+  selectedLegacyIds?: Set<number>,
   now?: Date,
 ): FeaturedEvent[] {
-  const hasRegistrations = (registeredLegacyIds?.size ?? 0) > 0;
+  const hasSelections = (selectedLegacyIds?.size ?? 0) > 0;
 
   const sortNearest = (items: SignupEvent[]) =>
     [...items].sort((a, b) =>
@@ -127,20 +127,20 @@ export function pickHomeFeaturedEvents(
     );
 
   let ordered: SignupEvent[];
-  if (!hasRegistrations) {
+  if (!hasSelections) {
     ordered = sortNearest(signupEvents);
   } else {
-    const registered: SignupEvent[] = [];
-    const unregistered: SignupEvent[] = [];
+    const selected: SignupEvent[] = [];
+    const rest: SignupEvent[] = [];
     for (const event of signupEvents) {
       const legacyId = parseActivityLegacyId(event.id);
-      if (legacyId != null && registeredLegacyIds!.has(legacyId)) {
-        registered.push(event);
+      if (legacyId != null && selectedLegacyIds!.has(legacyId)) {
+        selected.push(event);
       } else {
-        unregistered.push(event);
+        rest.push(event);
       }
     }
-    ordered = [...sortNearest(registered), ...sortNearest(unregistered)];
+    ordered = [...sortNearest(selected), ...sortNearest(rest)];
   }
 
   return ordered.map((item) => mapSignupEventToFeaturedEvent(item));

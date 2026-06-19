@@ -4,14 +4,12 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { seedActivityDetailFromFeaturedEvent } from '../../utils/activityDetailCache';
 import { prefetchEventPostsPage } from '../../cache/eventPostsPageCache';
 import { preloadEventSubpackage } from '../../utils/subpackagePreload';
-import { useConfirmDialog } from '../../hooks/useConfirmDialog';
 import {
   useFeaturedEvents,
   useHomeSummary,
   useNotificationUnreadCount,
-  useRegisteredActivityLegacyIds,
+  useSelectedActivityLegacyIds,
 } from '../../hooks/useSyncApi';
-import { isActivityRegistered } from '../../utils/activityRegistration';
 import { resolveFeaturedEventCountdown } from '../../utils/activityStatus';
 import { requireAuth } from '../../utils/authGate';
 import {
@@ -22,7 +20,6 @@ import {
   preloadPageSafe,
   ROUTES,
 } from '../../utils/route';
-import { joinActivityWithAuth } from '../../utils/joinActivity';
 import { isLoggedIn } from '../../utils/authStorage';
 import { HomeCountdownCard } from './components/HomeCountdownCard';
 import { HomeFeaturedEvents } from './components/HomeFeaturedEvents';
@@ -39,24 +36,23 @@ import {
 } from '../../utils/apiMappers';
 import { useAuthSession } from '../../hooks/useAuthSession';
 import { seedActivityDetailFromHomeSignupEvent } from '../../utils/activityDetailCache';
-import { pickNextRegisteredEvent } from './utils/pickNextRegisteredEvent';
+import { pickNextSelectedEvent } from './utils/pickNextSelectedEvent';
 import { useHomeFestivalPlanNavigation } from '@/domains/festival-plan/hooks/useHomeFestivalPlanNavigation';
 import { useNavBarInsets } from '../../hooks/useNavBarInsets';
 import { useEndRouteTransitionOnShow } from '../../hooks/useEndRouteTransitionOnShow';
 import { OverlayAwareScrollView } from '../../components/layout/OverlayAwareScrollView';
 import { PlatformDisclaimer } from '../../components/legal/PlatformDisclaimer';
+import { NewUserOnboardingSheet } from '../../components/onboarding/NewUserOnboardingSheet';
+import { useNewUserOnboarding } from '../../hooks/useNewUserOnboarding';
 import { View } from '@tarojs/components';
 
 const Home = () => {
   useEndRouteTransitionOnShow(ROUTES.HOME);
-  const { confirm, confirmDialog } = useConfirmDialog({
-    cancelText: '取消',
-  });
 
   const { data: summary, refetch: refetchHomeSummary } = useHomeSummary();
   const heat = summary?.heat;
   const { items: featuredEvents } = useFeaturedEvents();
-  const registeredLegacyIds = useRegisteredActivityLegacyIds();
+  const selectedLegacyIds = useSelectedActivityLegacyIds();
   const { loggedIn } = useAuthSession();
   const [featuredIndex, setFeaturedIndex] = useState(0);
   const { data: unreadCount = 0, refetch: refetchUnreadCount } =
@@ -81,6 +77,16 @@ const Home = () => {
     }
     return resolveFeaturedEventCountdown(event);
   }, [featuredEvents, featuredIndex]);
+
+  const featuredLegacyId = useMemo(() => {
+    const event = featuredEvents[featuredIndex];
+    if (!event) return undefined;
+    return resolveFeaturedEventLegacyId(event) ?? undefined;
+  }, [featuredEvents, featuredIndex]);
+
+  const { onboardingOpen, onboardingSteps, dismissOnboarding } = useNewUserOnboarding({
+    featuredActivityLegacyId: featuredLegacyId,
+  });
 
   const handleNotification = useCallback(() => {
     requireAuth(() => goNotifications(), 'notification');
@@ -109,39 +115,18 @@ const Home = () => {
     [],
   );
 
-  const handleJoinEvent = useCallback(
-    (event: FeaturedEvent) => {
-      const legacyId = resolveFeaturedEventLegacyId(event);
-      if (legacyId == null) {
-        return;
-      }
-      if (isActivityRegistered(legacyId, registeredLegacyIds)) {
-        openEventDetail(event);
-        return;
-      }
-      joinActivityWithAuth(legacyId, {
-        alreadyJoined: isActivityRegistered(legacyId, registeredLegacyIds),
-        confirm,
-        onSuccess: () => openEventDetail(event, { focusPosts: true }),
-      });
-    },
-    [confirm, openEventDetail, registeredLegacyIds],
-  );
-
   const activeTeamCount = heat?.people ?? 0;
   const navInsets = useNavBarInsets();
 
-  const nextRegisteredEvent = useMemo(
+  const nextSelectedEvent = useMemo(
     () =>
-      loggedIn
-        ? pickNextRegisteredEvent(summary?.signupEvents, registeredLegacyIds)
-        : null,
-    [loggedIn, summary?.signupEvents, registeredLegacyIds],
+      loggedIn ? pickNextSelectedEvent(summary?.signupEvents, selectedLegacyIds) : null,
+    [loggedIn, summary?.signupEvents, selectedLegacyIds],
   );
 
-  const homeFestivalPlan = useHomeFestivalPlanNavigation(nextRegisteredEvent?.id);
+  const homeFestivalPlan = useHomeFestivalPlanNavigation(nextSelectedEvent?.id);
 
-  const openSignupEvent = useCallback(
+  const openHomeActivity = useCallback(
     (
       legacyId: number,
       options?: {
@@ -174,34 +159,34 @@ const Home = () => {
   );
 
   const handleNextEventView = useCallback(() => {
-    if (!nextRegisteredEvent) {
+    if (!nextSelectedEvent) {
       return;
     }
-    openSignupEvent(nextRegisteredEvent.id);
-  }, [nextRegisteredEvent, openSignupEvent]);
+    openHomeActivity(nextSelectedEvent.id);
+  }, [nextSelectedEvent, openHomeActivity]);
 
   const handleNextEventPosts = useCallback(() => {
-    if (!nextRegisteredEvent) {
+    if (!nextSelectedEvent) {
       return;
     }
-    openSignupEvent(nextRegisteredEvent.id, { openBuddyPost: true });
-  }, [nextRegisteredEvent, openSignupEvent]);
+    openHomeActivity(nextSelectedEvent.id, { openBuddyPost: true });
+  }, [nextSelectedEvent, openHomeActivity]);
 
   const handleNextEventPostReplies = useCallback(() => {
     const engagement = summary?.myNextEventPostEngagement;
-    if (!nextRegisteredEvent || !engagement?.postId) {
+    if (!nextSelectedEvent || !engagement?.postId) {
       return;
     }
-    openSignupEvent(nextRegisteredEvent.id, {
+    openHomeActivity(nextSelectedEvent.id, {
       postId: engagement.postId,
       focusPosts: true,
       openComments: true,
     });
-  }, [nextRegisteredEvent, openSignupEvent, summary?.myNextEventPostEngagement]);
+  }, [nextSelectedEvent, openHomeActivity, summary?.myNextEventPostEngagement]);
 
   const heatLabel =
     activeTeamCount > 0
-      ? `近 ${activeTeamCount} 人已报名近期活动`
+      ? `近 ${activeTeamCount} 人已选择近期活动`
       : '近期活动持续更新中';
 
   return (
@@ -227,9 +212,9 @@ const Home = () => {
               }
             />
 
-            {nextRegisteredEvent ? (
+            {nextSelectedEvent ? (
               <HomeMyNextEvent
-                event={nextRegisteredEvent}
+                event={nextSelectedEvent}
                 postEngagement={summary?.myNextEventPostEngagement ?? undefined}
                 festivalPlan={homeFestivalPlan.checklist}
                 onViewDetail={handleNextEventView}
@@ -251,11 +236,9 @@ const Home = () => {
 
             <HomeFeaturedEvents
               items={featuredEvents}
-              registeredLegacyIds={registeredLegacyIds}
               activeIndex={featuredIndex}
               onActiveIndexChange={setFeaturedIndex}
               onEventClick={openEventDetail}
-              onJoinClick={handleJoinEvent}
               onEventPreload={handleEventPreload}
             />
 
@@ -274,7 +257,11 @@ const Home = () => {
         <PlatformDisclaimer variant="fixed" />
       </View>
 
-      {confirmDialog}
+      <NewUserOnboardingSheet
+        open={onboardingOpen}
+        steps={onboardingSteps}
+        onDismiss={dismissOnboarding}
+      />
       <LoginInterceptHost />
     </View>
   );

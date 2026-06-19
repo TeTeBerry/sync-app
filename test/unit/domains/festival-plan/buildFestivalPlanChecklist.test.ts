@@ -8,11 +8,10 @@ describe('buildFestivalPlanChecklist', () => {
       travelGuideId: 'g1',
       hasItinerary: false,
       hasBuddyPost: false,
-      isRegistered: false,
     });
 
     expect(checklist.completedCount).toBe(1);
-    expect(checklist.totalCount).toBe(4);
+    expect(checklist.totalCount).toBe(3);
     expect(checklist.nextTaskKey).toBe('itinerary');
 
     const itinerary = checklist.tasks.find((task) => task.key === 'itinerary');
@@ -31,7 +30,6 @@ describe('buildFestivalPlanChecklist', () => {
       hasItinerary: true,
       itineraryDayCount: 3,
       hasBuddyPost: false,
-      isRegistered: false,
     });
 
     const itinerary = checklist.tasks.find((task) => task.key === 'itinerary');

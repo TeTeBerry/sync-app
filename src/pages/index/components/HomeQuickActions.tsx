@@ -60,7 +60,7 @@ export const HomeQuickActions: FC = () => (
       })}
     </View>
     <Text className="s-home-quick__note">
-      报名活动后可在详情页发布结伴帖；线下结伴请自行甄别风险
+      选择活动后可在详情页发布结伴帖；线下结伴请自行甄别风险
     </Text>
   </View>
 );

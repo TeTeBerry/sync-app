@@ -9,7 +9,6 @@ describe('resolveFestivalPlanVisibleTasks', () => {
       travelGuideId: 'g1',
       hasItinerary: false,
       hasBuddyPost: false,
-      isRegistered: false,
     });
 
     const visible = resolveFestivalPlanVisibleTasks(checklist.tasks, {
@@ -27,7 +26,6 @@ describe('resolveFestivalPlanVisibleTasks', () => {
       travelGuideId: 'g1',
       hasItinerary: false,
       hasBuddyPost: false,
-      isRegistered: false,
     });
 
     const visible = resolveFestivalPlanVisibleTasks(checklist.tasks, {
@@ -35,7 +33,7 @@ describe('resolveFestivalPlanVisibleTasks', () => {
       nextTaskKey: checklist.nextTaskKey,
     });
 
-    expect(visible).toHaveLength(4);
+    expect(visible).toHaveLength(3);
   });
 
   it('shows no tasks when collapsed and all complete', () => {
@@ -44,7 +42,6 @@ describe('resolveFestivalPlanVisibleTasks', () => {
       hasItinerary: true,
       itineraryDayCount: 2,
       hasBuddyPost: true,
-      isRegistered: true,
     });
 
     const visible = resolveFestivalPlanVisibleTasks(checklist.tasks, {

@@ -22,6 +22,5 @@ export function mergeFestivalPlanProgressInput(
     itinerarySelectedDjIds,
     hasBuddyPost: Boolean(buddyPostId),
     buddyPostId,
-    isRegistered: Boolean(local.isRegistered) || Boolean(server?.isRegistered),
   };
 }

@@ -10,12 +10,10 @@ describe('mergeFestivalPlanProgressInput', () => {
         travelGuideId: 'server-guide',
         hasItinerary: false,
         hasBuddyPost: false,
-        isRegistered: false,
       },
       {
         travelGuideId: 'local-guide',
         buddyPostId: 'chat-post',
-        isRegistered: true,
       },
     );
 
@@ -27,7 +25,6 @@ describe('mergeFestivalPlanProgressInput', () => {
       itinerarySelectedDjIds: undefined,
       hasBuddyPost: true,
       buddyPostId: 'chat-post',
-      isRegistered: true,
     });
   });
 
@@ -41,7 +38,6 @@ describe('mergeFestivalPlanProgressInput', () => {
         itinerarySelectedDjIds: ['dj-1'],
         hasBuddyPost: true,
         buddyPostId: 'post-1',
-        isRegistered: true,
       },
       {},
     );
@@ -49,6 +45,5 @@ describe('mergeFestivalPlanProgressInput', () => {
     expect(merged.hasItinerary).toBe(true);
     expect(merged.itineraryDayCount).toBe(2);
     expect(merged.buddyPostId).toBe('post-1');
-    expect(merged.isRegistered).toBe(true);
   });
 });

@@ -12,29 +12,23 @@ import {
   resolveFeaturedEventLegacyId,
   type FeaturedEvent,
 } from '../../../utils/apiMappers';
-import { isActivityRegistered } from '../../../utils/activityRegistration';
 import { featuredPostImageUrl, thumbnailImageUrl } from '../../../utils/imageUrl';
-import { useRouteTransitionActive } from '../../../utils/route';
 import { goEventsListTab } from '../../../utils/route';
 import { Image, Swiper, SwiperItem, Text, View } from '@tarojs/components';
 
 type HomeFeaturedEventsProps = {
   items: FeaturedEvent[];
-  registeredLegacyIds: Set<number>;
   activeIndex?: number;
   onActiveIndexChange?: (index: number) => void;
   onEventClick: (item: FeaturedEvent) => void;
-  onJoinClick: (item: FeaturedEvent) => void;
   onEventPreload?: (item: FeaturedEvent) => void;
 };
 
 export const HomeFeaturedEvents: FC<HomeFeaturedEventsProps> = ({
   items,
-  registeredLegacyIds,
   activeIndex,
   onActiveIndexChange,
   onEventClick,
-  onJoinClick,
   onEventPreload,
 }) => {
   const [internalIndex, setInternalIndex] = useState(0);
@@ -114,9 +108,7 @@ export const HomeFeaturedEvents: FC<HomeFeaturedEventsProps> = ({
             <HomeFeaturedEventCard
               event={event}
               index={index}
-              registeredLegacyIds={registeredLegacyIds}
               onEventClick={onEventClick}
-              onJoinClick={onJoinClick}
               onEventPreload={onEventPreload}
             />
           </SwiperItem>
@@ -129,41 +121,27 @@ export const HomeFeaturedEvents: FC<HomeFeaturedEventsProps> = ({
 function HomeFeaturedEventCard({
   event,
   index,
-  registeredLegacyIds,
   onEventClick,
-  onJoinClick,
   onEventPreload,
 }: {
   event: FeaturedEvent;
   index: number;
-  registeredLegacyIds: Set<number>;
   onEventClick: (item: FeaturedEvent) => void;
-  onJoinClick: (item: FeaturedEvent) => void;
   onEventPreload?: (item: FeaturedEvent) => void;
 }) {
   const status = getActivityStatusFromActivity(event.date, event.title);
   const venue = event.venue?.trim() ?? '';
   const legacyId = resolveFeaturedEventLegacyId(event);
-  const isJoinNavigating = useRouteTransitionActive(legacyId ?? undefined);
   const heroSrc =
     featuredPostImageUrl(event.image, 720) ??
     thumbnailImageUrl(event.image, 480) ??
     event.image;
-  const showJoined = isActivityRegistered(legacyId, registeredLegacyIds);
   const categoryLabel = formatActivityCategoryLabel(event.category);
 
   const handlePreload = () => {
     if (legacyId == null) return;
     onEventPreload?.(event);
   };
-
-  const joinLabel = (() => {
-    if (isJoinNavigating) return '加入中…';
-    if (status === 'ended') return '已结束';
-    return '立即参与';
-  })();
-
-  const showJoinButton = !showJoined;
 
   const openDetail = () => {
     if (legacyId == null) return;
@@ -172,11 +150,7 @@ function HomeFeaturedEventCard({
 
   return (
     <View
-      className={[
-        's-home-showcase-card',
-        activityStatusCardClass(status),
-        showJoined && 's-home-showcase-card--joined',
-      ]
+      className={['s-home-showcase-card', activityStatusCardClass(status)]
         .filter(Boolean)
         .join(' ')}
       role="button"
@@ -239,25 +213,6 @@ function HomeFeaturedEventCard({
           ) : null}
           <Text className="s-home-showcase-card__count">{event.attendeeCount} 人</Text>
         </View>
-
-        {showJoinButton ? (
-          <Button
-            className={[
-              's-home-showcase-card__cta',
-              isJoinNavigating && 's-home-showcase-card__cta--loading',
-            ]
-              .filter(Boolean)
-              .join(' ')}
-            disabled={status === 'ended' || isJoinNavigating || legacyId == null}
-            onTouchStart={handlePreload}
-            onClick={(clickEvent) => {
-              clickEvent.stopPropagation();
-              onJoinClick(event);
-            }}
-          >
-            <Text className="s-home-showcase-card__cta-text">{joinLabel}</Text>
-          </Button>
-        ) : null}
       </View>
     </View>
   );

@@ -8,16 +8,16 @@ import {
 import { persistHomeSummary } from '../utils/homeCacheStorage';
 import type { BackendActivity, HomeSummary } from '../types/backend';
 
-export type ActivityRegistrationPatch = {
+export type ActivitySelectionPatch = {
   legacyId: number;
   /** Set absolute attendee total when the server returns it. */
   attendees?: number;
   going?: boolean;
 };
 
-function patchHomeSummaryRegistration(
+function patchHomeSummarySelection(
   prev: HomeSummary | undefined,
-  patch: ActivityRegistrationPatch,
+  patch: ActivitySelectionPatch,
 ): HomeSummary | undefined {
   if (!prev) return prev;
 
@@ -72,12 +72,10 @@ function patchActivityDetailCaches(legacyId: number, attendees?: number): void {
   });
 }
 
-/** Sync registration state across home + activity list caches without a home refetch. */
-export function patchActivityRegistrationInCaches(
-  patch: ActivityRegistrationPatch,
-): void {
+/** Sync activity selection across home + activity list caches without a home refetch. */
+export function patchActivitySelectionInCaches(patch: ActivitySelectionPatch): void {
   setCacheData<HomeSummary>(['home', 'summary'], (prev) =>
-    patchHomeSummaryRegistration(prev, patch),
+    patchHomeSummarySelection(prev, patch),
   );
 
   if (patch.attendees !== undefined) {

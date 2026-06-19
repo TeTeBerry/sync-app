@@ -1,8 +1,7 @@
-import { ApiError, apiDelete, apiGet, apiPost } from '../../utils/apiClient';
+import { ApiError, apiGet, apiPost } from '../../utils/apiClient';
 import { getActivityTypeLabel } from '../../constants/activityType';
 import type {
   ActivityRegistrationResult,
-  ActivityUnregisterResult,
   BackendActivity,
   HomeSummary,
 } from '../../types/backend';
@@ -62,13 +61,6 @@ export function registerForActivity(legacyId: number) {
   return apiPost<ActivityRegistrationResult>(
     `/activities/${legacyId}/register`,
     {},
-    ownerQueryParams(),
-  );
-}
-
-export function cancelActivityRegistration(legacyId: number) {
-  return apiDelete<ActivityUnregisterResult>(
-    `/activities/${legacyId}/register`,
     ownerQueryParams(),
   );
 }

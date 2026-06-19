@@ -24,7 +24,6 @@ export type FestivalPlanChecklist = {
   itineraryDayCount?: number;
   itinerarySelectedDjIds?: string[];
   buddyPostId?: string;
-  isRegistered: boolean;
 };
 
 export type FestivalPlanProgressInput = {
@@ -35,7 +34,6 @@ export type FestivalPlanProgressInput = {
   itinerarySelectedDjIds?: string[];
   hasBuddyPost: boolean;
   buddyPostId?: string;
-  isRegistered: boolean;
 };
 
 export function buildFestivalPlanChecklist(
@@ -45,7 +43,6 @@ export function buildFestivalPlanChecklist(
     travel_guide: input.hasTravelGuide,
     itinerary: input.hasItinerary,
     buddy_post: input.hasBuddyPost,
-    registration: input.isRegistered,
   };
 
   const nextTaskKey = FESTIVAL_PLAN_TASK_ORDER.find((key) => !doneByKey[key]);
@@ -80,6 +77,5 @@ export function buildFestivalPlanChecklist(
     itineraryDayCount: input.itineraryDayCount,
     itinerarySelectedDjIds: input.itinerarySelectedDjIds,
     buddyPostId: input.buddyPostId,
-    isRegistered: input.isRegistered,
   };
 }

@@ -5,6 +5,7 @@ import { useNavigationStore } from '@/stores/navigationStore';
 import { seedActivityDetailCache } from '@/utils/activityDetailCache';
 import { createWelcomeChatMessage } from '@/utils/aiAssistantCapabilityDiscovery';
 import { buildAiChatScopeKey } from '@/utils/aiChatScope';
+import { registerActivityOnSelectSilently } from '@/utils/registerActivityOnSelect';
 
 export const ACTIVITY_SCOPE_HEADER = 'X-Activity-Id';
 
@@ -63,6 +64,8 @@ export function bindActivity(
       options.activityName?.trim() || options.activity?.name?.trim() || '本场活动';
     void Taro.showToast({ title: `已绑定「${title}」`, icon: 'none' });
   }
+
+  registerActivityOnSelectSilently(normalized);
 
   return true;
 }

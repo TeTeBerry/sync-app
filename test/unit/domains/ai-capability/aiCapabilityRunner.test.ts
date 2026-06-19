@@ -55,6 +55,6 @@ describe('resolveAiCapability', () => {
 
   it('maps festival plan task keys', () => {
     expect(capabilityFromFestivalPlanTaskKey('travel_guide')).toBe('travel_guide');
-    expect(capabilityFromFestivalPlanTaskKey('registration')).toBeNull();
+    expect(capabilityFromFestivalPlanTaskKey('buddy_post')).toBe('buddy_post');
   });
 });

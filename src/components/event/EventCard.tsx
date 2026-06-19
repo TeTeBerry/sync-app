@@ -1,16 +1,8 @@
 import './EventCard.scss';
 import React, { memo, useMemo } from 'react';
-import AvatarGroup from '../AvatarGroup';
 import { ImageWithFallback } from '../ImageWithFallback';
 import { Button } from '../ui';
-import {
-  Calendar,
-  Flame,
-  MapPin,
-  Sparkles,
-  Ticket,
-  Users,
-} from '../../components/icons';
+import { Flame, Ticket, Users } from '../../components/icons';
 import { GENERATE_TRAVEL_GUIDE_CTA } from '../../constants/aiCtaLabels';
 import {
   activityStatusCardClass,
@@ -19,10 +11,7 @@ import {
 import { Text, View } from '@tarojs/components';
 import {
   deriveEventCardStats,
-  formatEventDateBadge,
-  formatEventFullDate,
   formatEventHeroMetaLine,
-  formatEventHeroSubtitle,
 } from '../../utils/eventCardDisplay';
 import { PLACEHOLDER_EVENT_HERO } from '../../constants/remoteImages';
 import { thumbnailImageUrl } from '../../utils/imageUrl';
@@ -37,10 +26,8 @@ interface EventCardProps {
   image?: string;
   attendees?: number;
   hot?: boolean;
-  going?: boolean;
   variant?: 'default' | 'list';
   category?: string;
-  ctaVariant?: 'join' | 'detail';
   onTeamUp?: () => void;
   onTeamUpWarmup?: () => void;
 }
@@ -53,10 +40,8 @@ const EventCardInner: React.FC<EventCardProps> = ({
   image = PLACEHOLDER_EVENT_HERO,
   attendees = 0,
   hot = false,
-  going = false,
   variant = 'list',
   category = '电音节',
-  ctaVariant = 'join',
   onTeamUp,
   onTeamUpWarmup,
 }) => {
@@ -64,14 +49,9 @@ const EventCardInner: React.FC<EventCardProps> = ({
   const isNavigating = useRouteTransitionActive(legacyId ?? undefined);
   const thumbSrc = thumbnailImageUrl(image, variant === 'list' ? 200 : 320);
   const status = getActivityStatusFromActivity(date, title);
-  const dateBadge = useMemo(() => formatEventDateBadge(date), [date]);
-  const fullDate = useMemo(() => formatEventFullDate(date, title), [date, title]);
   const heroSubtitle = useMemo(
-    () =>
-      ctaVariant === 'detail'
-        ? formatEventHeroMetaLine(date, location)
-        : formatEventHeroSubtitle(title, location),
-    [ctaVariant, date, location, title],
+    () => formatEventHeroMetaLine(date, location),
+    [date, location],
   );
   const stats = useMemo(() => deriveEventCardStats(attendees), [attendees]);
 
@@ -115,17 +95,6 @@ const EventCardInner: React.FC<EventCardProps> = ({
         />
         <View className="s-event-card__hero-scrim" aria-hidden />
 
-        {ctaVariant !== 'detail' ? (
-          <View className="s-event-card__date-badge" aria-hidden>
-            <Text className="s-event-card__date-primary">{dateBadge.primary}</Text>
-            {dateBadge.secondary ? (
-              <Text className="s-event-card__date-secondary">
-                {dateBadge.secondary}
-              </Text>
-            ) : null}
-          </View>
-        ) : null}
-
         {hot ? (
           <Text className="s-event-card__hot-tag">
             <Flame size={12} aria-hidden />
@@ -141,67 +110,25 @@ const EventCardInner: React.FC<EventCardProps> = ({
         </View>
       </View>
 
-      {ctaVariant !== 'detail' ? (
-        <View className="s-event-card__info-row">
-          <View className="s-event-card__info-item">
-            <MapPin
-              size={14}
-              color="#8e8e93"
-              className="s-event-card__info-icon"
-              aria-hidden
-            />
-            <Text className="s-event-card__info-text">{location}</Text>
+      <View className="s-event-card__footer s-event-card__footer--detail">
+        <View className="s-event-card__detail-meta">
+          <View className="s-event-card__joined">
+            <Users size={14} aria-hidden />
+            <Text className="s-event-card__joined-text">{`${stats.teamPostCount}+ 条组队帖`}</Text>
           </View>
-          {fullDate ? (
-            <View className="s-event-card__info-item s-event-card__info-item--date">
-              <Calendar
-                size={14}
-                color="#8e8e93"
-                className="s-event-card__info-icon"
-                aria-hidden
-              />
-              <Text className="s-event-card__info-text">{fullDate}</Text>
-            </View>
-          ) : null}
+          <View className="s-event-card__detail-tags">
+            <Text className="s-event-card__detail-tag">{category}</Text>
+            <Text className="s-event-card__detail-tag s-event-card__detail-tag--ai">
+              ✨ {GENERATE_TRAVEL_GUIDE_CTA}
+            </Text>
+          </View>
         </View>
-      ) : null}
-
-      <View
-        className={[
-          's-event-card__footer',
-          ctaVariant === 'detail' ? 's-event-card__footer--detail' : '',
-        ]
-          .filter(Boolean)
-          .join(' ')}
-      >
-        {ctaVariant === 'detail' ? (
-          <View className="s-event-card__detail-meta">
-            <View className="s-event-card__joined">
-              <Users size={14} aria-hidden />
-              <Text className="s-event-card__joined-text">{`${attendees}+ 人已加入`}</Text>
-            </View>
-            <View className="s-event-card__detail-tags">
-              <Text className="s-event-card__detail-tag">{category}</Text>
-              <Text className="s-event-card__detail-tag s-event-card__detail-tag--ai">
-                ✨ {GENERATE_TRAVEL_GUIDE_CTA}
-              </Text>
-            </View>
-          </View>
-        ) : (
-          <View className="s-event-card__social">
-            <AvatarGroup total={attendees} />
-            <View className="s-event-card__team-posts">
-              <Users size={13} aria-hidden />
-              <Text>{`${stats.teamPostCount} 条组队帖`}</Text>
-            </View>
-          </View>
-        )}
 
         <View className="s-event-card__cta">
           <Button
             className={[
               's-event-card__team-btn',
-              ctaVariant === 'detail' ? 's-event-card__team-btn--detail' : '',
+              's-event-card__team-btn--detail',
               isNavigating ? 's-event-card__team-btn--loading' : '',
             ]
               .filter(Boolean)
@@ -216,19 +143,9 @@ const EventCardInner: React.FC<EventCardProps> = ({
               onTeamUp?.();
             }}
           >
-            {ctaVariant === 'detail' ? (
-              <Ticket size={15} aria-hidden />
-            ) : (
-              <Sparkles size={15} aria-hidden />
-            )}
+            <Ticket size={15} aria-hidden />
             <Text className="s-event-card__team-btn-text">
-              {ctaVariant === 'detail'
-                ? '进入详情'
-                : isNavigating
-                  ? '加入中…'
-                  : going
-                    ? '已加入'
-                    : '加入'}
+              {isNavigating ? '打开中…' : '进入详情'}
             </Text>
           </Button>
         </View>

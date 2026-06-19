@@ -11,7 +11,6 @@ import {
 import {
   findBuddyPostInChatMessages,
   findTravelGuideInChatMessages,
-  hasRegisteredActivityInChatMessages,
 } from './festivalPlanFromChat';
 import { mergeFestivalPlanProgressInput } from './mergeFestivalPlanProgressInput';
 
@@ -59,10 +58,6 @@ export function useFestivalPlanSummary(
     }
 
     const localBuddyPostId = findBuddyPostInChatMessages(scopeMessages)?.postId;
-    const localIsRegistered = hasRegisteredActivityInChatMessages(
-      scopeMessages,
-      activityLegacyId,
-    );
 
     return buildFestivalPlanChecklist(
       mergeFestivalPlanProgressInput(progressQuery.data, {
@@ -71,7 +66,6 @@ export function useFestivalPlanSummary(
         itineraryDayCount: localItineraryDayCount,
         itinerarySelectedDjIds: localItinerarySelectedDjIds,
         buddyPostId: localBuddyPostId,
-        isRegistered: localIsRegistered,
       }),
     );
   }, [activityLegacyId, pendingItinerary, progressQuery.data, refreshKey]);

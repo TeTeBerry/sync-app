@@ -241,9 +241,9 @@ X-Activity-Id: 4          # 可选，活动 legacyId（REST + AI WebSocket upgra
 | GET | `/api/activities/resolve?keyword=` | 活动关键词解析（按 code / 名称 / 别名查找） |
 | GET | `/api/activities/:legacyId` | 活动详情 |
 | GET | `/api/profile` | 个人资料摘要 |
-| GET | `/api/profile/activities` | 我的报名活动 |
+| GET | `/api/profile/activities` | 我的活动（已选择） |
 | GET/PATCH | `/api/users/me` | 当前用户资料（Query 身份） |
-| POST/DELETE | `/api/activities/:legacyId/register` | 活动报名 / 取消 |
+| POST/DELETE | `/api/activities/:legacyId/register` | 记录 / 取消活动选择（前端进入详情或绑定时自动 POST） |
 | GET | `/api/notifications` | 通知列表 |
 | GET | `/api/notifications/unread-count` | 未读数 |
 | PATCH | `/api/notifications/:id/read` | 单条已读 |
@@ -307,7 +307,12 @@ X-Activity-Id: 4          # 可选，活动 legacyId（REST + AI WebSocket upgra
 
 ---
 
-## REST 接口（用户与报名）
+## REST 接口（用户与活动选择）
+
+### 活动选择（产品语义）
+
+- 用户**进入活动详情**或**在 AI / 活动选择器绑定活动**时，前端静默调用 `POST /activities/:legacyId/register`（见 `registerActivityOnSelectSilently`）。
+- 无独立「报名 / 加入」按钮；`DELETE` 保留供 AI 助手「取消选择」工具使用，前端无单独入口。
 
 ### `GET/PATCH /api/users/me`
 
@@ -351,12 +356,14 @@ Query：`targetType=user` | `comment`、`targetId`
 
 ### `POST/DELETE /api/activities/:legacyId/register`
 
+记录或取消用户对活动的选择意向（非票务交易）。
+
 - **已登录**：仅 Bearer
 - **未登录（开发）**：Query `userId` only
 
-POST 响应 `data`：`{ ok: true, activityLegacyId, status: "registered", alreadyRegistered?: boolean }`
+POST 响应 `data`：`{ ok: true, activityLegacyId, status: "registered", attendees, alreadyRegistered?: boolean }`
 
-DELETE 响应 `data`：`{ ok: true, activityLegacyId, wasRegistered?: boolean }`
+DELETE 响应 `data`：`{ ok: true, activityLegacyId, attendees?, wasRegistered?: boolean }`
 
 ---
 
