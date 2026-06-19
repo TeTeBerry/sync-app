@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDidShow } from '@tarojs/taro';
 import { useNavBarInsets } from '../../../hooks/useNavBarInsets';
 import { usePageRouteReady } from '../../../hooks/usePageRouteReady';
-import { useResolvedProfile } from '../../../hooks/useResolvedProfile';
+import { useDisplayUserIdentity } from '../../../hooks/useDisplayUserIdentity';
 import { useActivityDetailQuery } from '../../../hooks/useSyncApi';
 import {
   selectActiveActivityLegacyId,
@@ -58,7 +58,7 @@ export function useAiAssistantPage() {
   const activityLegacyId =
     useNavigationStore(selectActiveActivityLegacyId) ?? undefined;
 
-  const profileUserData = useResolvedProfile();
+  const profileUserData = useDisplayUserIdentity();
   const userGender = useMemo(
     () => inferUserGenderFromName(profileUserData.name),
     [profileUserData.name],

@@ -18,6 +18,7 @@ export function useEventDetailBuddyPost(
     activityDate?: string;
     authorName: string;
     authorAvatar?: string;
+    authorHandle?: string;
     refreshPosts?: (options?: { silent?: boolean }) => Promise<void>;
     prependPost?: (post: EventDetailPost) => void;
     replacePost?: (pendingId: string, post: EventDetailPost) => void;
@@ -91,6 +92,7 @@ export function useEventDetailBuddyPost(
             form,
             authorName: options.authorName,
             authorAvatar: options.authorAvatar,
+            authorHandle: options.authorHandle,
             userId: getClientUserId(),
           }),
         );

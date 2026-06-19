@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useRef } from 'react';
 import Taro from '@tarojs/taro';
-import { useActivityDetailQuery, useCurrentUserQuery } from '../../../hooks/useSyncApi';
+import { useActivityDetailQuery } from '../../../hooks/useSyncApi';
 import { useEventPostsInfiniteQuery } from '../../../hooks/useEventPostsInfiniteQuery';
 import {
   useEventDetailPosts,
   useEventDetailBuddyPost,
   EVENT_DETAIL_SCROLL_ID,
 } from '@/domains/partner-feed';
-import { useResolvedProfile } from '../../../hooks/useResolvedProfile';
+import { useDisplayUserIdentity } from '../../../hooks/useDisplayUserIdentity';
+import { useResolvedAvatarSrc } from '../../../hooks/useResolvedAvatarSrc';
 import type { ConfirmDialogOptions } from '../../../hooks/useConfirmDialog';
 import { useEventDetailRoute } from './useEventDetailRoute';
 import { useEventDetailActivityHeader } from './useEventDetailActivityHeader';
@@ -53,9 +54,8 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     activityDate,
     activityLocation,
   });
-  const currentUserQuery = useCurrentUserQuery();
-  const profileUser = useResolvedProfile();
-  const displayUserName = currentUserQuery.data?.name ?? profileUser.name ?? '用户';
+  const displayIdentity = useDisplayUserIdentity();
+  const resolvedCurrentUserAvatar = useResolvedAvatarSrc(displayIdentity.avatar);
 
   const postsQuery = useEventPostsInfiniteQuery(eventId, {
     anchorPostId: highlightPostId || undefined,
@@ -64,8 +64,9 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
   const templatePost = useEventDetailBuddyPost(eventId, {
     activityTitle,
     activityDate,
-    authorName: displayUserName,
-    authorAvatar: currentUserQuery.data?.avatar,
+    authorName: displayIdentity.name,
+    authorAvatar: displayIdentity.avatar,
+    authorHandle: displayIdentity.handle,
     refreshPosts: postsQuery.refetch,
     prependPost: postsQuery.prependItem,
     replacePost: postsQuery.replaceItem,
@@ -166,8 +167,8 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     postsLoading,
     showPostsEnd,
     postsQuery,
-    displayUserName,
-    currentUserAvatar: currentUserQuery.data?.avatar,
+    displayUserName: displayIdentity.name,
+    currentUserAvatar: resolvedCurrentUserAvatar,
     handleOpenAiGuide: travelGuide.openGuideSheet,
     activityTitle,
     handleOpenMyItinerary,

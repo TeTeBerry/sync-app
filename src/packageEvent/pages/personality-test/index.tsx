@@ -26,6 +26,7 @@ const PersonalityTestPage = () => {
         scrollY
         enhanced
         showScrollbar={false}
+        scrollTop={page.scrollTop}
         className="s-personality-test__scroll s-scrollbar-none"
         style={
           page.mainScrollHeight != null

@@ -11,6 +11,7 @@ export function buildOptimisticBuddyPost(params: {
   form: AiBuddyPostFormValues;
   authorName: string;
   authorAvatar?: string;
+  authorHandle?: string;
   userId?: string;
   location?: string;
 }): EventDetailPost {
@@ -22,6 +23,7 @@ export function buildOptimisticBuddyPost(params: {
     id: params.pendingId,
     userId: params.userId,
     name: params.authorName,
+    handle: params.authorHandle?.trim() || undefined,
     avatar: params.authorAvatar?.trim() || '',
     location: params.location?.trim() || params.form.location.trim(),
     createdAt: new Date().toISOString(),

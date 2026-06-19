@@ -7,10 +7,12 @@ import {
 } from '../../../components/post';
 import { ContentReportMenuButton } from '../../../components/report';
 import { ImageWithFallback } from '../../../components/ImageWithFallback';
+import { useDisplayUserIdentity } from '../../../hooks/useDisplayUserIdentity';
+import { useResolvedAvatarSrc } from '../../../hooks/useResolvedAvatarSrc';
 import { isCurrentUserPostAuthor } from '../../../utils/postOwnership';
 import type { EventDetailPost } from '../../../types/backend';
 import { stripPostBodyContact } from '../../../utils/postBodyContact';
-import { formatEventPostHandle } from '../utils/eventPostDisplay';
+import { formatPostHandle } from '../utils/eventPostDisplay';
 import { Text, View } from '@tarojs/components';
 
 export type EventPostCardProps = {
@@ -36,11 +38,24 @@ function EventPostCardInner({
   onDelete,
   onCommentSubmitted,
 }: EventPostCardProps) {
+  const displayIdentity = useDisplayUserIdentity();
   const displayBody = useMemo(() => stripPostBodyContact(post.body), [post.body]);
   const submetaLocation = post.location?.trim() ?? '';
 
-  const postName = post.name?.trim() || '用户';
-  const isOwn = isCurrentUserPostAuthor(postName, post.userId);
+  const isOwn = isCurrentUserPostAuthor(post.name, post.userId);
+
+  const postName = isOwn
+    ? displayIdentity.name?.trim() || post.name?.trim() || '用户'
+    : post.name?.trim() || '用户';
+
+  const postHandle = formatPostHandle(
+    postName,
+    isOwn ? displayIdentity.handle : post.handle,
+  );
+
+  const avatarKey = isOwn ? displayIdentity.avatar?.trim() || post.avatar : post.avatar;
+  const resolvedAvatarSrc = useResolvedAvatarSrc(avatarKey);
+  const avatarSrc = resolvedAvatarSrc || avatarKey;
 
   const stopClickPropagation = (event: { stopPropagation?: () => void }) => {
     event.stopPropagation?.();
@@ -55,7 +70,7 @@ function EventPostCardInner({
       <View className="s-event-post__header">
         <View className="s-event-post__avatar-wrap">
           <ImageWithFallback
-            src={post.avatar}
+            src={avatarSrc}
             alt={postName}
             imageClassName="s-event-post__avatar"
             placeholderClassName="s-event-post__avatar s-event-post__avatar--placeholder"
@@ -67,9 +82,7 @@ function EventPostCardInner({
             <View className="s-event-post__identity">
               <View className="s-event-post__name-row">
                 <Text className="s-event-post__user-name">{postName}</Text>
-                <Text className="s-event-post__user-handle">
-                  {formatEventPostHandle(postName)}
-                </Text>
+                <Text className="s-event-post__user-handle">{postHandle}</Text>
               </View>
               <View className="s-event-post__submeta">
                 <MapPin size={12} color="#8e8e93" aria-hidden />
@@ -122,7 +135,7 @@ function EventPostCardInner({
       {commentsExpanded ? (
         <PostCommentSection
           postId={post.id}
-          postAuthorName={post.name}
+          postAuthorName={postName}
           postAuthorUserId={post.userId}
           expanded
           onToggleExpanded={() => onCloseComments(post.id)}

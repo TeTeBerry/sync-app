@@ -42,6 +42,7 @@ import { ApiError } from '@/utils/apiClient';
 import { isLoggedIn } from '@/utils/authStorage';
 import { requireAuth } from '@/utils/authGate';
 import { useStackPageMainHeight } from '@/hooks/useTabPageMainHeight';
+import { applyScrollTop } from '@/utils/scrollToCenter';
 
 export type PersonalityTestPhase =
   | 'loading'
@@ -81,6 +82,11 @@ export function usePersonalityTestPage() {
   );
   const [welcomeModalOpen, setWelcomeModalOpen] = useState(false);
   const [welcomeNicknameUsage, setWelcomeNicknameUsage] = useState<number | null>(null);
+  const [scrollTop, setScrollTop] = useState<number | undefined>(0);
+
+  const scrollToTop = useCallback(() => {
+    applyScrollTop(setScrollTop, 0);
+  }, []);
 
   const applyQuestionSet = useCallback((nextQuestions: PersonalityQuestion[]) => {
     setQuestions(nextQuestions);
@@ -170,7 +176,17 @@ export function usePersonalityTestPage() {
     shareRef.current = phase === 'result' && result ? result : null;
   }, [phase, result]);
 
+  useEffect(() => {
+    if (phase === 'result' && result) {
+      scrollToTop();
+    }
+  }, [phase, result, scrollToTop]);
+
   useDidShow(() => {
+    if (phase === 'result' && result) {
+      scrollToTop();
+    }
+
     if (!isWeapp) return;
     void Taro.showShareMenu({
       withShareTicket: true,
@@ -324,12 +340,14 @@ export function usePersonalityTestPage() {
     setErrorMessage('');
     setWelcomeModalOpen(false);
     setWelcomeNicknameUsage(null);
+    scrollToTop();
     void loadQuestions();
-  }, [loadQuestions]);
+  }, [loadQuestions, scrollToTop]);
 
   return {
     navFallback: ROUTES.HOME,
     mainScrollHeight,
+    scrollTop,
     phase,
     questions,
     currentIndex,

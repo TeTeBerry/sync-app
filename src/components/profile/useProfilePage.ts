@@ -30,7 +30,7 @@ import {
 } from './profileSummaryUtils';
 import { formatBuddyPreferencesSummary } from '../../constants/buddyPreferences';
 import { deriveInterestTag } from './utils';
-import { loadPersonalityTestResult } from '../../domains/personality-test/utils/personalityTestStorage';
+import { applyPersonalityTestIdentity } from '../../utils/displayUserIdentity';
 
 export type UseProfilePageOptions = {
   confirm: (options: ConfirmDialogOptions) => Promise<boolean>;
@@ -54,15 +54,7 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
 
   const profileUserData = useMemo((): ProfileDisplayUser => {
     const base = normalizeProfileUserData((summaryQuery.data ?? {}) as ProfileSummary);
-    // 如果本地有人格测试结果，用 Raver 身份覆盖
-    const localResult = loadPersonalityTestResult();
-    if (localResult?.raverNickname?.trim()) {
-      base.name = localResult.raverNickname.trim();
-    }
-    if (localResult?.raverAvatarKey?.trim()) {
-      base.avatar = localResult.raverAvatarKey.trim();
-    }
-    return base;
+    return applyPersonalityTestIdentity(base);
   }, [summaryQuery.data]);
 
   const profileLoading =

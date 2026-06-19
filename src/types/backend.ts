@@ -176,6 +176,7 @@ export interface EventDetailPost {
   id: string;
   userId?: string;
   name: string;
+  handle?: string;
   location: string;
   createdAt?: string;
   body: string;
