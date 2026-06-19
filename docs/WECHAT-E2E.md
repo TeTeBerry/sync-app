@@ -37,6 +37,35 @@
    - 收到 `connected` 且 `auth: "jwt"`（dev 日志）
 6. **401 / 过期** — 将 storage 中 token 改为无效值 → 任意 REST 或 AI 发消息 → toast「登录已过期」且 session 清空
 
+## 订阅消息（评论 / 活动更新）
+
+### 公众平台配置
+
+1. 登录 [微信公众平台](https://mp.weixin.qq.com/) → 功能 → 订阅消息。
+2. 申请模板（类目需与小程序一致，一般为文娱 / 信息查询类）：
+   - **评论提醒**：公共模板「新评论提醒」#25486（字段示例 `thing2` 评论内容、`time3` 时间）。
+   - **评论回复**：公共模板「评论回复通知」#25365（字段示例 `thing2`、`time4`）。
+   - **活动更新**：公共模板「活动预约提醒」#624（`thing2` 活动名称、`date3` 活动日期、`thing10` 变更说明、`amount21` 占位「详见活动页」— 非真实票价）
+3. 将模板 ID 写入环境变量（前后端 ID 须一致）：
+
+| 前端 `sync-app` | 后端 `sync-app-backend` |
+|-----------------|-------------------------|
+| `TARO_APP_SUBSCRIBE_TMPL_COMMENT` | `WECHAT_SUBSCRIBE_COMMENT_TEMPLATE_ID` |
+| `TARO_APP_SUBSCRIBE_TMPL_COMMENT_REPLY` | `WECHAT_SUBSCRIBE_COMMENT_REPLY_TEMPLATE_ID` |
+| `TARO_APP_SUBSCRIBE_TMPL_ACTIVITY_UPDATE` | `WECHAT_SUBSCRIBE_ACTIVITY_UPDATE_TEMPLATE_ID` |
+
+活动更新字段映射（模板 #624「活动预约提醒」）：
+
+- `WECHAT_SUBSCRIBE_ACTIVITY_FIELD_NAME` → `thing2`（活动名称）
+- `WECHAT_SUBSCRIBE_ACTIVITY_FIELD_DATE` → `date3`（活动举办日期，取自活动 `date` 字段）
+- `WECHAT_SUBSCRIBE_ACTIVITY_FIELD_LOCATION` → `thing10`（活动地点 / 地址）
+- `WECHAT_SUBSCRIBE_ACTIVITY_FIELD_AMOUNT` → `amount21`（占位「详见活动页」，不展示票价）
+
+### 真机验收
+
+1. **评论/回复**：发帖或评论成功后弹出订阅授权；他人互动后收到微信服务通知，点击进入活动详情帖子评论区。
+2. **活动更新**：专属时间表页在阵容未官宣时点击「订阅活动更新」并授权；后台活动信息变更后，已报名且已授权用户收到订阅消息，点击进入专属时间表页。
+
 ## 失败排查
 
 | 现象 | 检查 |

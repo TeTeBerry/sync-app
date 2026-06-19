@@ -93,9 +93,7 @@ POST /api/posts
 | 剥离 | `utils/postBodyContact.ts` | 展示前移除 `联系方式：` 段（兼容历史数据） |
 | 使用处 | `EventPostCard`、`ProfilePostsSection` | 活动详情 / 个人页 |
 
-活动详情页底部固定合规提示（`event-detail/index.tsx`）与首页底部（`pages/index/index.tsx`）：
-
-> 本平台免费提供电音节资讯与结伴交流工具，不在平台内销售票务或收取服务费；用户线下自发贴须自行甄别风险。
+活动详情页底部固定合规提示（`event-detail/index.tsx`）与首页底部（`pages/index/index.tsx`）均使用 `constants/platformDisclaimer.ts` 中的 `PLATFORM_DISCLAIMER_TEXT`（单点维护，勿在 UI 硬编码）。
 
 ---
 

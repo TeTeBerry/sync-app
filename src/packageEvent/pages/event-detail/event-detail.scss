@@ -51,6 +51,21 @@
   box-sizing: border-box;
 }
 
+.s-event-detail__festival-plan {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.s-event-detail__festival-plan-kicker {
+  color: #8e8e93;
+  font-size: var(--s-type-caption);
+  font-weight: var(--s-fw-semibold);
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+}
+
 .s-event-detail__ai-travel-guide {
   width: 100%;
   box-sizing: border-box;
@@ -313,6 +328,62 @@
   display: flex;
   flex-direction: column;
   padding: 0 var(--s-page-gutter) 8px;
+}
+
+.s-event-detail-post-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 10px;
+
+  &__hint {
+    color: #8e8e93;
+    font-size: var(--s-type-caption);
+    line-height: 1.35;
+    margin-bottom: 4px;
+  }
+
+  &__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  &__chip {
+    padding: 6px 12px;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+
+    &--active {
+      border-color: rgba(76, 201, 240, 0.45);
+      background: rgba(76, 201, 240, 0.12);
+    }
+  }
+
+  &__chip-text {
+    color: #d1d1d6;
+    font-size: var(--s-type-caption);
+    font-weight: var(--s-fw-semibold);
+  }
+
+  &__chip--active &__chip-text {
+    color: #4cc9f0;
+  }
+
+  &__row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  &__clear {
+    color: #4cc9f0;
+    font-size: var(--s-type-caption);
+    font-weight: var(--s-fw-semibold);
+    flex-shrink: 0;
+  }
 }
 
 .s-event-detail-post-search {
@@ -765,10 +836,11 @@
 }
 
 .s-event-detail__empty {
-  padding: 40px 16px;
+  padding: 24px 16px;
   text-align: center;
   color: #8e8e93;
-  font-size: var(--s-type-body-sm);
+  font-size: var(--s-type-caption);
+  line-height: 1.45;
 }
 
 .s-event-detail__fallback {

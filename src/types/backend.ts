@@ -24,7 +24,7 @@ export interface BackendActivity {
   externalUrl?: string;
 }
 
-export type PrivacyLevel = 'public' | 'friends' | 'private';
+export type PrivacyLevel = 'public' | 'private';
 
 export type ReportCategory = 'ads' | 'scalper' | 'vulgar';
 
@@ -90,6 +90,7 @@ export interface ReportResult {
 
 export interface FeedbackPayload {
   content: string;
+  type?: 'general' | 'account_deletion';
 }
 
 export interface FeedbackResult {
@@ -178,6 +179,7 @@ export interface EventDetailPost {
   name: string;
   handle?: string;
   location: string;
+  departureCity?: string;
   createdAt?: string;
   body: string;
   tags: string[];

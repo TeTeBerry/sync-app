@@ -5,7 +5,13 @@ export const PROFILE_STORAGE_KEYS = {
   privacy: 'profile.privacyLevel',
 } as const;
 
-export type ProfilePrivacyLevel = 'public' | 'friends' | 'private';
+export type ProfilePrivacyLevel = 'public' | 'private';
+
+function normalizeStoredPrivacyLevel(
+  value: ProfilePrivacyLevel | 'friends',
+): ProfilePrivacyLevel {
+  return value === 'friends' ? 'private' : value;
+}
 
 function readStorage<T>(key: string, fallback: T): T {
   try {
@@ -29,7 +35,11 @@ export function readProfileNotificationsEnabled(fallback = true): boolean {
 export function readProfilePrivacyLevel(
   fallback: ProfilePrivacyLevel = 'public',
 ): ProfilePrivacyLevel {
-  return readStorage<ProfilePrivacyLevel>(PROFILE_STORAGE_KEYS.privacy, fallback);
+  const raw = readStorage<ProfilePrivacyLevel | 'friends'>(
+    PROFILE_STORAGE_KEYS.privacy,
+    fallback,
+  );
+  return normalizeStoredPrivacyLevel(raw);
 }
 
 export function writeProfileNotificationsEnabled(value: boolean): void {

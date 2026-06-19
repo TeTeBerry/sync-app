@@ -37,13 +37,23 @@ export function EventPostsVirtualList({
   const highlightScrolledRef = useRef<string | null>(null);
 
   useEffect(() => {
+    highlightScrolledRef.current = null;
+  }, [highlightPostId]);
+
+  useEffect(() => {
     if (!highlightPostId) return;
     if (highlightScrolledRef.current === highlightPostId) return;
     if (!items.some((item) => item.post.id === highlightPostId)) return;
 
     highlightScrolledRef.current = highlightPostId;
     const elId = `post-${highlightPostId}`;
-    setTimeout(() => onScrollToPostId?.(elId), 150);
+    const scrollTimer = setTimeout(() => onScrollToPostId?.(elId), 280);
+    const retryTimer = setTimeout(() => onScrollToPostId?.(elId), 700);
+
+    return () => {
+      clearTimeout(scrollTimer);
+      clearTimeout(retryTimer);
+    };
   }, [highlightPostId, items, onScrollToPostId]);
 
   return (

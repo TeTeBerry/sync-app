@@ -42,6 +42,8 @@ declare namespace NodeJS {
     TARO_APP_SUBSCRIBE_TMPL_COMMENT?: string;
     /** 微信订阅消息：评论回复提醒模板 ID（可与评论共用） */
     TARO_APP_SUBSCRIBE_TMPL_COMMENT_REPLY?: string;
+    /** 微信订阅消息：活动阵容/时间表更新提醒模板 ID */
+    TARO_APP_SUBSCRIBE_TMPL_ACTIVITY_UPDATE?: string;
     TARO_ENV?:
       | 'weapp'
       | 'swan'

@@ -8,4 +8,7 @@ export const UGC_PUBLISH_COMPLIANCE_TITLE = '发布前确认';
 export const UGC_PUBLISH_COMPLIANCE_MESSAGE =
   '请确认你发布或评论的内容不含手机号、微信号、QQ、邮箱或链接等联系方式，不涉及收费组团或票务倒卖；结伴为用户自发行为，线下见面请自行甄别风险。';
 
+export const BUDDY_POST_PUBLISH_SUCCESS_MESSAGE =
+  '帖子已发布。内容为公开信息展示，请勿留联系方式；线下结伴请自行甄别。';
+
 export const UGC_PUBLISH_COMPLIANCE_CONFIRM_TEXT = '我已阅读并同意';

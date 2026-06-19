@@ -1,7 +1,7 @@
 import './exclusive-itinerary.scss';
 import { Info } from '../../../components/icons';
 import { Button } from '../../../components/ui';
-import { ScrollView, View } from '@tarojs/components';
+import { ScrollView, Text, View } from '@tarojs/components';
 import ActionSheet from '../../../components/ActionSheet';
 import ThemedPageLoader from '../../../components/ThemedPageLoader';
 import PageNavigation from '../../../components/navigation/PageNavigation';
@@ -10,6 +10,7 @@ import { useEndRouteTransitionOnShow } from '../../../hooks/useEndRouteTransitio
 import { ExclusiveItineraryConflictBanner } from './ExclusiveItineraryConflictBanner';
 import ExclusiveItineraryDjGrid from './components/ExclusiveItineraryDjGrid';
 import ExclusiveItineraryFooter from './components/ExclusiveItineraryFooter';
+import { ExclusiveItineraryUnpublishedBanner } from './ExclusiveItineraryUnpublishedBanner';
 import { useExclusiveItineraryPage } from './useExclusiveItineraryPage';
 
 const ExclusiveItineraryPage = () => {
@@ -47,6 +48,7 @@ const ExclusiveItineraryPage = () => {
     refetchDjList,
     scrollIntoViewId,
     skipDjSelectionPending,
+    lineupPending,
   } = useExclusiveItineraryPage();
 
   if (skipDjSelectionPending) {
@@ -86,6 +88,12 @@ const ExclusiveItineraryPage = () => {
         }
       >
         <View className="s-exclusive-itinerary__inner">
+          {lineupPending ? (
+            <ExclusiveItineraryUnpublishedBanner
+              showEmptyLineup={filteredDjs.length === 0}
+            />
+          ) : null}
+
           {showConflictBanner ? (
             <ExclusiveItineraryConflictBanner
               conflicts={conflicts}
@@ -104,6 +112,10 @@ const ExclusiveItineraryPage = () => {
             >
               阵容加载失败，点击重试
             </View>
+          ) : lineupPending && filteredDjs.length === 0 ? (
+            <Text className="s-exclusive-itinerary__empty-lineup">
+              暂无可浏览阵容，订阅后将在通知中心提醒你
+            </Text>
           ) : (
             <ExclusiveItineraryDjGrid
               selectedCount={selectedIds.length}

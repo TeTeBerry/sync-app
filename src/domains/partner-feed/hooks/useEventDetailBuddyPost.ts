@@ -13,6 +13,7 @@ import {
 import { requestPostEngagementSubscribe } from '../../../utils/wechatSubscribeMessage';
 import { isApiEnabled } from '../../../constants/api';
 import { getClientUserId } from '../../../utils/session';
+import { BUDDY_POST_PUBLISH_SUCCESS_MESSAGE } from '../../../constants/ugcPublishCompliance';
 
 export type EventDetailBuddyPostPrefillOptions = {
   initialValues: AiBuddyPostFormValues;
@@ -130,7 +131,11 @@ export function useEventDetailBuddyPost(
       }
 
       if (!submitOptions?.quiet) {
-        void Taro.showToast({ title: '帖子已发布', icon: 'success' });
+        void Taro.showToast({
+          title: BUDDY_POST_PUBLISH_SUCCESS_MESSAGE,
+          icon: 'success',
+          duration: 3000,
+        });
       }
 
       try {

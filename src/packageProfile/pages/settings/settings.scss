@@ -460,3 +460,113 @@ button[type='default'].s-settings__option {
     opacity: 0.85;
   }
 }
+
+.s-settings-help__success {
+  margin-bottom: 20px;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(76, 201, 240, 0.28);
+  background: rgba(76, 201, 240, 0.08);
+}
+
+.s-settings-help__success-title {
+  display: block;
+  margin-bottom: 8px;
+  color: #4cc9f0;
+  font-size: var(--s-type-body);
+  font-weight: var(--s-fw-bold);
+}
+
+.s-settings-help__success-meta {
+  display: block;
+  color: #d1d1d6;
+  font-size: var(--s-type-body-sm);
+  line-height: 1.45;
+}
+
+.s-settings-help__success-hint {
+  display: block;
+  margin-top: 8px;
+  color: #8e8e93;
+  font-size: var(--s-type-caption);
+  line-height: 1.45;
+}
+
+.s-settings-help__success-btn {
+  margin-top: 12px;
+}
+
+.s-settings-help__deletion {
+  margin-bottom: 20px;
+}
+
+.s-settings-help__deletion-title {
+  display: block;
+  margin-bottom: 8px;
+  color: #fff;
+  font-size: var(--s-type-body);
+  font-weight: var(--s-fw-bold);
+}
+
+.s-settings-help__deletion-desc {
+  display: block;
+  margin-bottom: 12px;
+  color: #8e8e93;
+  font-size: var(--s-type-body-sm);
+  line-height: 1.45;
+}
+
+.s-settings-help__deletion-steps {
+  margin-bottom: 12px;
+}
+
+.s-settings-help__deletion-step-title {
+  display: block;
+  margin-bottom: 8px;
+  color: #fff;
+  font-size: var(--s-type-body-sm);
+  font-weight: var(--s-fw-semibold);
+}
+
+.s-settings-help__deletion-step {
+  display: block;
+  margin-bottom: 8px;
+  color: #d1d1d6;
+  font-size: var(--s-type-body-sm);
+  line-height: 1.45;
+}
+
+.s-settings-help__deletion-bullet {
+  display: block;
+  margin-bottom: 6px;
+  color: #8e8e93;
+  font-size: var(--s-type-caption);
+  line-height: 1.4;
+}
+
+.s-settings-help__deletion-footnote {
+  display: block;
+  margin-top: 8px;
+  color: #636366;
+  font-size: var(--s-type-caption);
+  line-height: 1.4;
+}
+
+.s-settings-help__deletion-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.s-settings-help__deletion-btn {
+  flex: 1;
+  min-height: 36px;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.s-settings-help__deletion-btn--primary {
+  border-color: rgba(76, 201, 240, 0.35);
+  background: rgba(76, 201, 240, 0.12);
+}

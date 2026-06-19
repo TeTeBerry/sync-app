@@ -50,13 +50,11 @@ const SECTION_TITLES: Record<SettingsSection, string> = {
 
 const PRIVACY_LABELS: Record<PrivacyLevel, string> = {
   public: '公开',
-  friends: '仅好友',
   private: '私密',
 };
 
 const PRIVACY_DESCS: Record<PrivacyLevel, string> = {
   public: '所有人可见你的主页和活动记录',
-  friends: '仅互相关注的用户可见',
   private: '仅自己可见',
 };
 
@@ -103,9 +101,11 @@ const SettingsPage: React.FC = () => {
 
   useEffect(() => {
     if (!currentUser?.privacyLevel) return;
-    setPrivacyLevel(currentUser.privacyLevel);
-    setStorePrivacyLevel(currentUser.privacyLevel);
-    writeProfilePrivacyLevel(currentUser.privacyLevel);
+    const level =
+      currentUser.privacyLevel === 'friends' ? 'private' : currentUser.privacyLevel;
+    setPrivacyLevel(level);
+    setStorePrivacyLevel(level);
+    writeProfilePrivacyLevel(level);
   }, [currentUser?.privacyLevel, setStorePrivacyLevel]);
 
   const toggleNotifications = useCallback(() => {
@@ -150,7 +150,7 @@ const SettingsPage: React.FC = () => {
     [setStorePrivacyLevel],
   );
 
-  const privacyOptions: PrivacyLevel[] = ['public', 'friends', 'private'];
+  const privacyOptions: PrivacyLevel[] = ['public', 'private'];
 
   const scrollStyle =
     mainScrollHeight != null ? { height: `${mainScrollHeight}px` } : undefined;

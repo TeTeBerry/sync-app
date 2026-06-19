@@ -12,6 +12,7 @@ export function normalizeEventPostListItem(item: EventDetailPost): EventPostList
     id: item.id,
     userId: item.userId,
     location: item.location,
+    departureCity: item.departureCity?.trim() || undefined,
     createdAt: item.createdAt,
     body: item.body ?? '',
     tags: item.tags ?? [],

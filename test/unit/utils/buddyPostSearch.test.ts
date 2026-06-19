@@ -37,6 +37,16 @@ describe('buddyPostSearch', () => {
     expect(filtered.map((post) => post.id)).toEqual(['match']);
   });
 
+  it('matches date keywords in post content', () => {
+    const posts = [
+      samplePost({ id: 'match', body: '3月15日出发' }),
+      samplePost({ id: 'miss', body: '周末场求搭子' }),
+    ];
+
+    const filtered = filterEventDetailPostsByQuery(posts, '3月');
+    expect(filtered.map((post) => post.id)).toEqual(['match']);
+  });
+
   it('requires every token to match', () => {
     const posts = [
       samplePost({ id: 'both', body: 'Techno 上海组队', location: '上海' }),

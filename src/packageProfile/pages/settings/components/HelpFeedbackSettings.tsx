@@ -1,6 +1,7 @@
 import Taro from '@tarojs/taro';
 import { useCallback, useState } from 'react';
 import { Text, Textarea, View } from '@tarojs/components';
+import { Button } from '../../../../components/ui';
 import {
   GENERATE_TRAVEL_GUIDE_CTA,
   TRAVEL_GUIDE_TITLE,
@@ -8,9 +9,10 @@ import {
 import { submitUserFeedback } from '../../../../api/sync/feedback';
 import { isLiveApi } from '../../../../constants/api';
 import { isLoggedIn } from '../../../../utils/authStorage';
-import { Button } from '../../../../components/ui';
 import { useOverlayLock } from '../../../../hooks/useOverlayLock';
 import { clearAllLocalUserData } from '../../../../utils/clearAllLocalUserData';
+import { SUPPORT_EMAIL } from '../../../../constants/supportContact';
+import { AccountDeletionGuide } from '@/packageProfile/pages/settings/components/AccountDeletionGuide';
 
 const SHOW_DEV_RESET = process.env.NODE_ENV !== 'production';
 
@@ -32,16 +34,30 @@ const FAQ_QA = [
 const CONTENT_MIN = 5;
 const CONTENT_MAX = 1000;
 
+const FEEDBACK_SUCCESS_HINT =
+  '我们将在合理期限内通过邮箱或站内通知回复，不承诺具体响应时间。';
+
+type FeedbackSuccessState = {
+  id: string;
+  submittedAt: string;
+};
+
 export function HelpFeedbackSettings() {
   const [formOpen, setFormOpen] = useState(false);
   const [content, setContent] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [resetting, setResetting] = useState(false);
+  const [success, setSuccess] = useState<FeedbackSuccessState | null>(null);
+  const [deletionPrefill, setDeletionPrefill] = useState(false);
 
   useOverlayLock(formOpen);
 
-  const openForm = useCallback(() => {
+  const openForm = useCallback((options?: { accountDeletion?: boolean }) => {
     if (!isLiveApi() || isLoggedIn()) {
+      setDeletionPrefill(options?.accountDeletion ?? false);
+      if (options?.accountDeletion) {
+        setContent('申请删除账号与全部个人数据');
+      }
       setFormOpen(true);
       return;
     }
@@ -52,6 +68,7 @@ export function HelpFeedbackSettings() {
     if (submitting) return;
     setFormOpen(false);
     setContent('');
+    setDeletionPrefill(false);
   }, [submitting]);
 
   const handleSubmit = useCallback(async () => {
@@ -72,17 +89,31 @@ export function HelpFeedbackSettings() {
     setSubmitting(true);
     try {
       if (isLiveApi()) {
-        await submitUserFeedback({ content: trimmed });
+        const result = await submitUserFeedback({
+          content: trimmed,
+          type: deletionPrefill ? 'account_deletion' : 'general',
+        });
+        setSuccess({
+          id: result.id,
+          submittedAt: new Date().toLocaleString('zh-CN', {
+            hour12: false,
+          }),
+        });
+      } else {
+        setSuccess({
+          id: 'local-preview',
+          submittedAt: new Date().toLocaleString('zh-CN', { hour12: false }),
+        });
       }
-      void Taro.showToast({ title: '反馈已提交，感谢！', icon: 'success' });
       setContent('');
       setFormOpen(false);
+      setDeletionPrefill(false);
     } catch {
       void Taro.showToast({ title: '提交失败，请稍后重试', icon: 'none' });
     } finally {
       setSubmitting(false);
     }
-  }, [content]);
+  }, [content, deletionPrefill]);
 
   const handleResetLocalData = useCallback(() => {
     void Taro.showModal({
@@ -109,6 +140,10 @@ export function HelpFeedbackSettings() {
 
   return (
     <View className="s-settings-help">
+      <AccountDeletionGuide
+        onStartDeletionFeedback={() => openForm({ accountDeletion: true })}
+      />
+
       <View className="s-settings__card s-settings__faq">
         {FAQ_QA.map((item, idx) => (
           <View key={idx} className="s-settings__faq-item">
@@ -118,9 +153,32 @@ export function HelpFeedbackSettings() {
         ))}
       </View>
 
+      {success ? (
+        <View className="s-settings-help__success" aria-label="反馈提交成功">
+          <Text className="s-settings-help__success-title">反馈已提交</Text>
+          <Text className="s-settings-help__success-meta">编号：{success.id}</Text>
+          <Text className="s-settings-help__success-meta">
+            时间：{success.submittedAt}
+          </Text>
+          <Text className="s-settings-help__success-hint">{FEEDBACK_SUCCESS_HINT}</Text>
+          <Text className="s-settings-help__success-hint">
+            联系邮箱：{SUPPORT_EMAIL}
+          </Text>
+          <Button
+            className="s-settings__feedback-btn s-settings-help__success-btn"
+            onClick={() => {
+              setSuccess(null);
+              openForm();
+            }}
+          >
+            <Text className="s-btn-label">继续提交反馈</Text>
+          </Button>
+        </View>
+      ) : null}
+
       <View className="s-settings-help__action">
         {!formOpen ? (
-          <Button className="s-settings__feedback-btn" onClick={openForm}>
+          <Button className="s-settings__feedback-btn" onClick={() => openForm()}>
             <Text className="s-btn-label">提交反馈</Text>
           </Button>
         ) : (

@@ -33,6 +33,7 @@ export interface ProcessChatStreamEventsOptions {
     event: Extract<AiChatStreamEvent, { type: 'itinerary_ready' }>,
   ) => void;
   onProgressEnd?: () => void;
+  activityLegacyId?: number;
 }
 
 export async function processChatStreamEvents(
@@ -50,6 +51,7 @@ export async function processChatStreamEvents(
     onTravelGuideReady,
     onItineraryReady,
     onProgressEnd,
+    activityLegacyId,
   } = options;
 
   const finishAiMessage = (updater: (current: ChatUiMessage) => ChatUiMessage) => {
@@ -177,6 +179,13 @@ export async function processChatStreamEvents(
     }
 
     if (event.type === 'travel_guide_ready') {
+      if (activityLegacyId != null) {
+        saveTravelGuideDetail(event.guideId, {
+          plan: event.plan as unknown as TravelGuidePlan,
+          form: event.form,
+          activityLegacyId,
+        });
+      }
       onTravelGuideReady?.(event);
       finishAiMessageWithoutProgress((message) => ({
         ...message,

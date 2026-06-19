@@ -27,6 +27,7 @@ import {
 } from '../utils/aiChatStagedProgress';
 import { useBuddyPostSheetController } from './useBuddyPostSheetController';
 import { publishBuddyPostFromForm } from '../utils/publishBuddyPost';
+import { BUDDY_POST_PUBLISH_SUCCESS_MESSAGE } from '../constants/ugcPublishCompliance';
 
 export function useAiBuddyPost(options: {
   activityLegacyId?: number;
@@ -204,7 +205,11 @@ export function useAiBuddyPost(options: {
         setMessages(messagesRef.current);
         onPublished?.();
         Taro.nextTick(() => onPlanningMessagesShown?.());
-        void Taro.showToast({ title: '组队帖已发布', icon: 'success' });
+        void Taro.showToast({
+          title: BUDDY_POST_PUBLISH_SUCCESS_MESSAGE,
+          icon: 'success',
+          duration: 3000,
+        });
       } catch (error) {
         if (await handlePublishError(error)) {
           messagesRef.current = messagesRef.current.map((m) =>

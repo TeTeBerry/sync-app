@@ -15,6 +15,8 @@ import {
   type EventPostListItem,
 } from '../utils/eventPostNormalize';
 import { useEventDetailPostSearch } from './useEventDetailPostSearch';
+import { useEventDetailPostFilters } from './useEventDetailPostFilters';
+import { filterEventDetailPostsByRules } from '../utils/filterEventDetailPostsByRules';
 import { resolvePersonalityMediaUrls } from '@/domains/personality-test/utils/resolvePersonalityMedia';
 
 export const EVENT_DETAIL_SCROLL_ID = 'event-detail-scroll';
@@ -43,15 +45,28 @@ export function useEventDetailPosts({
   );
   const autoOpenedCommentsRef = useRef<string | null>(null);
 
+  const postFilters = useEventDetailPostFilters(postsQuery.items);
+
+  const ruleFilteredPosts = useMemo(
+    () => filterEventDetailPostsByRules(postsQuery.items, postFilters.filters),
+    [postFilters.filters, postsQuery.items],
+  );
+
   const search = useEventDetailPostSearch({
     activityLegacyId,
-    loadedPosts: postsQuery.items,
+    loadedPosts: ruleFilteredPosts,
+    ruleFiltersActive: postFilters.isActive,
   });
 
+  useEffect(() => {
+    if (!search.isActive) return;
+    postFilters.clearFilters();
+  }, [search.isActive, postFilters.clearFilters]);
+
   const loadedPostItems = useMemo((): EventPostListItem[] => {
-    const source = search.isActive ? (search.matchedPosts ?? []) : postsQuery.items;
+    const source = search.isActive ? (search.matchedPosts ?? []) : ruleFilteredPosts;
     return normalizeEventPostList(source);
-  }, [postsQuery.items, search.isActive, search.matchedPosts]);
+  }, [ruleFilteredPosts, search.isActive, search.matchedPosts]);
 
   useEffect(() => {
     const avatarKeys = loadedPostItems
@@ -72,7 +87,7 @@ export function useEventDetailPosts({
   });
 
   const handleScrollToLower = useCallback(() => {
-    if (search.isActive) {
+    if (search.isActive || postFilters.isActive) {
       return;
     }
     if (hasMoreVisiblePosts) {
@@ -80,7 +95,13 @@ export function useEventDetailPosts({
       return;
     }
     void postsQuery.loadMore();
-  }, [hasMoreVisiblePosts, search.isActive, showMoreVisiblePosts, postsQuery]);
+  }, [
+    hasMoreVisiblePosts,
+    postFilters.isActive,
+    search.isActive,
+    showMoreVisiblePosts,
+    postsQuery,
+  ]);
 
   const scrollToElement = useCallback(
     (elementId: string) => {
@@ -174,7 +195,8 @@ export function useEventDetailPosts({
   return {
     postItems,
     totalPostCount: loadedPostItems.length,
-    hasMoreVisiblePosts: search.isActive ? false : hasMoreVisiblePosts,
+    hasMoreVisiblePosts:
+      search.isActive || postFilters.isActive ? false : hasMoreVisiblePosts,
     expandedCommentPostIds,
     handleScrollToLower,
     scrollToElement,
@@ -188,5 +210,11 @@ export function useEventDetailPosts({
     searchActive: search.isActive,
     searchLoading: search.isSearching,
     searchMatchedCount: search.matchedCount,
+    searchUsedLocalFallback: search.usedLocalFallback,
+    postFilterCityOptions: postFilters.cityOptions,
+    postFilterSelectedCity: postFilters.selectedCity,
+    setPostFilterSelectedCity: postFilters.setSelectedCity,
+    postFiltersActive: postFilters.isActive,
+    clearPostFilters: postFilters.clearFilters,
   };
 }

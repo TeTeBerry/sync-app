@@ -71,6 +71,56 @@
   line-height: 1.35;
 }
 
+.s-home-next__plan-progress {
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(76, 201, 240, 0.08);
+  border: 1px solid rgba(76, 201, 240, 0.2);
+  -webkit-tap-highlight-color: transparent;
+
+  &:active {
+    opacity: 0.9;
+  }
+}
+
+.s-home-next__plan-progress-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.s-home-next__plan-progress-label {
+  color: #4cc9f0;
+  font-size: var(--s-type-body-sm);
+  font-weight: var(--s-fw-semibold);
+  line-height: 1.35;
+}
+
+.s-home-next__plan-progress-next {
+  color: #d1d1d6;
+  font-size: var(--s-type-caption);
+  font-weight: var(--s-fw-semibold);
+  line-height: 1.2;
+  flex-shrink: 0;
+}
+
+.s-home-next__plan-progress-bar {
+  height: 4px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.s-home-next__plan-progress-fill {
+  height: 100%;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, #4cc9f0 0%, #ff0066 100%);
+  transition: width 0.2s ease;
+}
+
 .s-home-next__reply-hint {
   display: flex;
   align-items: center;

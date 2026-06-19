@@ -1,25 +1,34 @@
+import Taro from '@tarojs/taro';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { searchBuddyPostsWithAi } from '../../../api/sync/posts';
 import { isLiveApi } from '../../../constants/api';
 import type { EventDetailPost } from '../../../types/post';
-import { filterEventDetailPostsByQuery } from '../../../utils/buddyPostSearch';
+import {
+  filterEventDetailPostsByQuery,
+  resolveBuddySearchTerms,
+} from '../../../utils/buddyPostSearch';
 
 const SEARCH_DEBOUNCE_MS = 280;
+const SEARCH_FAIL_TOAST = '搜索暂时不可用，请用关键词筛选或稍后再试';
 
 export type UseEventDetailPostSearchParams = {
   activityLegacyId?: number;
   loadedPosts: EventDetailPost[];
+  ruleFiltersActive?: boolean;
 };
 
 export function useEventDetailPostSearch({
   activityLegacyId,
   loadedPosts,
+  ruleFiltersActive = false,
 }: UseEventDetailPostSearchParams) {
   const [query, setQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [apiResults, setApiResults] = useState<EventDetailPost[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [usedLocalFallback, setUsedLocalFallback] = useState(false);
   const requestSeqRef = useRef(0);
+  const lastFailToastQueryRef = useRef('');
 
   const useRemoteSearch =
     isLiveApi() &&
@@ -41,32 +50,63 @@ export function useEventDetailPostSearch({
     if (!debouncedQuery || !useRemoteSearch || activityLegacyId == null) {
       setApiResults([]);
       setIsSearching(false);
+      setUsedLocalFallback(false);
       return;
     }
 
     const requestSeq = ++requestSeqRef.current;
     setIsSearching(true);
+    setUsedLocalFallback(false);
 
     void searchBuddyPostsWithAi(debouncedQuery, activityLegacyId)
       .then((result) => {
         if (requestSeq !== requestSeqRef.current) return;
         setApiResults(result.items);
+        setUsedLocalFallback(false);
       })
       .catch(() => {
         if (requestSeq !== requestSeqRef.current) return;
         setApiResults([]);
+        const fallbackTerms = resolveBuddySearchTerms(trimmedQuery);
+        if (!ruleFiltersActive && fallbackTerms.length > 0) {
+          setUsedLocalFallback(true);
+        } else {
+          setUsedLocalFallback(false);
+        }
+        if (lastFailToastQueryRef.current !== debouncedQuery) {
+          lastFailToastQueryRef.current = debouncedQuery;
+          void Taro.showToast({
+            title: SEARCH_FAIL_TOAST,
+            icon: 'none',
+            duration: 3000,
+          });
+        }
       })
       .finally(() => {
         if (requestSeq !== requestSeqRef.current) return;
         setIsSearching(false);
       });
-  }, [activityLegacyId, debouncedQuery, useRemoteSearch]);
+  }, [
+    activityLegacyId,
+    debouncedQuery,
+    ruleFiltersActive,
+    trimmedQuery,
+    useRemoteSearch,
+  ]);
 
   const matchedPosts = useMemo(() => {
     if (!isActive) return null;
+
     if (useRemoteSearch) {
-      return debouncedQuery === trimmedQuery ? apiResults : [];
+      if (debouncedQuery !== trimmedQuery) {
+        return [];
+      }
+      if (usedLocalFallback) {
+        return filterEventDetailPostsByQuery(loadedPosts, trimmedQuery);
+      }
+      return apiResults;
     }
+
     return filterEventDetailPostsByQuery(loadedPosts, trimmedQuery);
   }, [
     apiResults,
@@ -75,6 +115,7 @@ export function useEventDetailPostSearch({
     loadedPosts,
     trimmedQuery,
     useRemoteSearch,
+    usedLocalFallback,
   ]);
 
   const clearSearch = () => {
@@ -82,6 +123,8 @@ export function useEventDetailPostSearch({
     setDebouncedQuery('');
     setApiResults([]);
     setIsSearching(false);
+    setUsedLocalFallback(false);
+    lastFailToastQueryRef.current = '';
   };
 
   return {
@@ -92,5 +135,6 @@ export function useEventDetailPostSearch({
     isSearching: useRemoteSearch && isSearching,
     matchedPosts,
     matchedCount: matchedPosts?.length ?? 0,
+    usedLocalFallback,
   };
 }

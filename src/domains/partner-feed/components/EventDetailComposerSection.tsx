@@ -2,7 +2,10 @@ import React from 'react';
 import ThemedPageLoader from '../../../components/ThemedPageLoader';
 import { EventDetailAiTravelGuideCard } from '@/domains/travel-guide/components/EventDetailAiTravelGuideCard';
 import { EventDetailItineraryMenu } from './EventDetailItineraryMenu';
-import { View } from '@tarojs/components';
+import { FestivalPlanSummaryBar } from '@/domains/festival-plan/FestivalPlanSummaryBar';
+import type { FestivalPlanChecklist } from '@/domains/festival-plan/buildFestivalPlanChecklist';
+import type { FestivalPlanTask } from '@/domains/festival-plan/buildFestivalPlanChecklist';
+import { Text, View } from '@tarojs/components';
 
 export type EventDetailComposerSectionProps = {
   showHeaderSkeleton: boolean;
@@ -10,6 +13,10 @@ export type EventDetailComposerSectionProps = {
   activityTitle?: string;
   onOpenMyItinerary: () => void;
   onOpenExclusiveItinerary: () => void;
+  festivalPlanChecklist?: FestivalPlanChecklist | null;
+  onFestivalPlanTaskPress?: (task: FestivalPlanTask) => void;
+  showFestivalPlan?: boolean;
+  travelGuideGenerated?: boolean;
 };
 
 export const EventDetailComposerSection: React.FC<EventDetailComposerSectionProps> = ({
@@ -18,6 +25,10 @@ export const EventDetailComposerSection: React.FC<EventDetailComposerSectionProp
   activityTitle,
   onOpenMyItinerary,
   onOpenExclusiveItinerary,
+  festivalPlanChecklist,
+  onFestivalPlanTaskPress,
+  showFestivalPlan = false,
+  travelGuideGenerated = false,
 }) => {
   if (showHeaderSkeleton) {
     return <ThemedPageLoader variant="skeleton-event" minHeight={360} />;
@@ -25,7 +36,19 @@ export const EventDetailComposerSection: React.FC<EventDetailComposerSectionProp
 
   return (
     <View className="s-event-detail__action-list">
-      <EventDetailAiTravelGuideCard onClick={onAiGuideClick} />
+      {showFestivalPlan && festivalPlanChecklist && onFestivalPlanTaskPress ? (
+        <View className="s-event-detail__festival-plan">
+          <Text className="s-event-detail__festival-plan-kicker">个人准备记录</Text>
+          <FestivalPlanSummaryBar
+            checklist={festivalPlanChecklist}
+            onTaskPress={onFestivalPlanTaskPress}
+          />
+        </View>
+      ) : null}
+      <EventDetailAiTravelGuideCard
+        generated={travelGuideGenerated}
+        onClick={onAiGuideClick}
+      />
       <EventDetailItineraryMenu
         activityTitle={activityTitle}
         onOpenMyItinerary={onOpenMyItinerary}

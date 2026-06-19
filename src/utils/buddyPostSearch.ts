@@ -64,7 +64,7 @@ export function buildEventDetailPostSearchText(post: EventDetailPost): string {
     'departureCity' in post && typeof post.departureCity === 'string'
       ? post.departureCity
       : '';
-  return [post.body, post.location, departureCity, ...(post.tags ?? [])]
+  return [post.body, post.location, departureCity, post.createdAt, ...(post.tags ?? [])]
     .filter((part) => typeof part === 'string' && part.trim())
     .join(' ');
 }

@@ -3,14 +3,21 @@ import type { FC } from 'react';
 import { CalendarDays, ChevronRight, MessageCircle } from '../../../components/icons';
 import { Button } from '../../../components/ui';
 import type { HomeSummary } from '../../../types/backend';
+import type {
+  FestivalPlanChecklist,
+  FestivalPlanTask,
+} from '@/domains/festival-plan/useFestivalPlanSummary';
 import { Text, View } from '@tarojs/components';
 
 type HomeMyNextEventProps = {
   event: HomeSummary['signupEvents'][number];
   postEngagement?: HomeSummary['myNextEventPostEngagement'];
+  festivalPlan?: FestivalPlanChecklist | null;
   onViewDetail: () => void;
   onOpenPosts: () => void;
   onOpenPostReplies?: () => void;
+  onFestivalPlanPress?: () => void;
+  onNextTaskPress?: (task: FestivalPlanTask) => void;
 };
 
 function formatReplyHint(count: number): string {
@@ -20,13 +27,37 @@ function formatReplyHint(count: number): string {
 export const HomeMyNextEvent: FC<HomeMyNextEventProps> = ({
   event,
   postEngagement,
+  festivalPlan,
   onViewDetail,
   onOpenPosts,
   onOpenPostReplies,
+  onFestivalPlanPress,
+  onNextTaskPress,
 }) => {
   const venue = event.location?.trim() ?? '';
   const unreadReplyCount = postEngagement?.unreadReplyCount ?? 0;
   const showReplyHint = unreadReplyCount > 0 && Boolean(onOpenPostReplies);
+  const nextTask =
+    festivalPlan?.nextTaskKey != null
+      ? festivalPlan.tasks.find((task) => task.key === festivalPlan.nextTaskKey)
+      : undefined;
+  const showFestivalPlanProgress = festivalPlan != null && festivalPlan.totalCount > 0;
+  const progressPercent =
+    festivalPlan != null && festivalPlan.totalCount > 0
+      ? Math.round((festivalPlan.completedCount / festivalPlan.totalCount) * 100)
+      : 0;
+
+  const handleProgressPress = () => {
+    if (nextTask && onNextTaskPress) {
+      onNextTaskPress(nextTask);
+      return;
+    }
+    if (onFestivalPlanPress) {
+      onFestivalPlanPress();
+      return;
+    }
+    onViewDetail();
+  };
 
   return (
     <View className="s-home-next" aria-label="我的下一场活动">
@@ -53,6 +84,32 @@ export const HomeMyNextEvent: FC<HomeMyNextEventProps> = ({
           {venue ? ` · ${venue}` : ''}
         </Text>
       </View>
+
+      {showFestivalPlanProgress ? (
+        <View
+          className="s-home-next__plan-progress"
+          onClick={handleProgressPress}
+          role="button"
+          aria-label={`准备进度 ${festivalPlan.completedCount}/${festivalPlan.totalCount}`}
+        >
+          <View className="s-home-next__plan-progress-head">
+            <Text className="s-home-next__plan-progress-label">
+              准备进度 {festivalPlan.completedCount}/{festivalPlan.totalCount}
+            </Text>
+            {nextTask ? (
+              <Text className="s-home-next__plan-progress-next">
+                {nextTask.trailingLabel}
+              </Text>
+            ) : null}
+          </View>
+          <View className="s-home-next__plan-progress-bar" aria-hidden>
+            <View
+              className="s-home-next__plan-progress-fill"
+              style={{ width: `${progressPercent}%` }}
+            />
+          </View>
+        </View>
+      ) : null}
 
       {showReplyHint ? (
         <View

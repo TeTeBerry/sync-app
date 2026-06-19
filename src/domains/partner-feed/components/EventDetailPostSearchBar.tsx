@@ -8,6 +8,7 @@ type EventDetailPostSearchBarProps = {
   onClear: () => void;
   isSearching?: boolean;
   matchedCount?: number;
+  usedLocalFallback?: boolean;
 };
 
 export function EventDetailPostSearchBar({
@@ -16,6 +17,7 @@ export function EventDetailPostSearchBar({
   onClear,
   isSearching = false,
   matchedCount,
+  usedLocalFallback = false,
 }: EventDetailPostSearchBarProps) {
   const showMeta = value.trim().length > 0;
 
@@ -26,7 +28,7 @@ export function EventDetailPostSearchBar({
         <Input
           className="s-event-detail-post-search__input"
           value={value}
-          placeholder="搜索帖子内容、标签、地点"
+          placeholder="搜索日期、内容、标签或地点"
           placeholderClass="s-event-detail-post-search__placeholder"
           confirmType="search"
           onInput={(event) => onChange(event.detail.value)}
@@ -44,7 +46,11 @@ export function EventDetailPostSearchBar({
       </View>
       {showMeta ? (
         <Text className="s-event-detail-post-search__meta">
-          {isSearching ? '搜索中…' : `找到 ${matchedCount ?? 0} 条匹配`}
+          {isSearching
+            ? '搜索中…'
+            : usedLocalFallback
+              ? `已改为本地匹配，找到 ${matchedCount ?? 0} 条`
+              : `找到 ${matchedCount ?? 0} 条匹配`}
         </Text>
       ) : null}
     </View>

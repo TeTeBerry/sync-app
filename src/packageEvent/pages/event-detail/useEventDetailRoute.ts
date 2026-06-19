@@ -29,6 +29,7 @@ export function useEventDetailRoute() {
     focusPostsOnMount,
     openBuddyPostOnMount,
     openCommentsOnMount,
+    openGuideOnMount,
   } = parseEventDetailRouteFlags(router.params);
   useEffect(() => {
     if (Number.isFinite(eventId) && eventId > 0) {
@@ -50,6 +51,7 @@ export function useEventDetailRoute() {
     focusPostsOnMount,
     openBuddyPostOnMount,
     openCommentsOnMount,
+    openGuideOnMount,
     scrollTop,
     setScrollTop,
     secondaryReady,

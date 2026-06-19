@@ -530,6 +530,7 @@ export function buildEventDetailQuery(
     focusPosts?: boolean;
     openBuddyPost?: boolean;
     openComments?: boolean;
+    openGuide?: boolean;
   },
 ): Record<string, string> {
   const query: Record<string, string> = {
@@ -549,6 +550,9 @@ export function buildEventDetailQuery(
   if (options?.openComments) {
     query.openComments = '1';
   }
+  if (options?.openGuide) {
+    query.openGuide = '1';
+  }
   return query;
 }
 
@@ -559,6 +563,7 @@ export function goEventDetail(
     focusPosts?: boolean;
     openBuddyPost?: boolean;
     openComments?: boolean;
+    openGuide?: boolean;
   },
 ) {
   const legacyId = parseActivityLegacyId(eventId);

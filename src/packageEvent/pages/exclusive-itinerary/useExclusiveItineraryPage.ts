@@ -324,10 +324,15 @@ export function useExclusiveItineraryPage() {
 
   const showConflictBanner = !conflictDismissed && conflicts.length > 0;
 
+  const schedulePublished = scheduleQuery.data?.schedulePublished ?? true;
+  const lineupPending = schedulePublished === false;
+
   return {
     activityLegacyId,
     navFallback,
     mainScrollHeight,
+    schedulePublished,
+    lineupPending,
     conflicts,
     showConflictBanner,
     onDismissConflicts: () => setConflictDismissed(true),

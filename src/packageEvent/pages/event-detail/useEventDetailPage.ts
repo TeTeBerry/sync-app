@@ -15,8 +15,14 @@ import { useEventDetailRoute } from './useEventDetailRoute';
 import { useEventDetailActivityHeader } from './useEventDetailActivityHeader';
 import { useEventDetailScrollPreserve } from './useEventDetailScrollPreserve';
 import { useEventDetailTravelGuide } from '@/domains/travel-guide';
+import { findLatestTravelGuideForActivity } from '@/domains/travel-guide/utils/travelGuideDetailStorage';
 import { useEventDetailWechatShare } from './useEventDetailWechatShare';
-import { goExclusiveItinerary, goMyItinerary } from '../../../utils/route';
+import { useEventDetailFestivalPlan } from '@/domains/festival-plan/hooks/useEventDetailFestivalPlan';
+import {
+  goExclusiveItinerary,
+  goMyItinerary,
+  goAiTravelGuide,
+} from '../../../utils/route';
 import { scrollElementToCenter } from '../../../utils/scrollToCenter';
 
 export type UseEventDetailPageOptions = {
@@ -31,6 +37,7 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     focusPostsOnMount,
     openBuddyPostOnMount,
     openCommentsOnMount,
+    openGuideOnMount,
     scrollTop: routeScrollTop,
     setScrollTop,
     secondaryReady,
@@ -38,6 +45,7 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
   } = route;
   const focusPostsScrolledRef = useRef(false);
   const buddyPostSheetOpenedRef = useRef(false);
+  const guideSheetOpenedRef = useRef(false);
   const buddyPostNavIntent = useMemo(
     () => useNavigationStore.getState().consumeEventDetailBuddyPostIntent(),
     [],
@@ -165,6 +173,46 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     goExclusiveItinerary(eventId);
   }, [assertValidEventId, eventId]);
 
+  const festivalPlan = useEventDetailFestivalPlan({
+    activityLegacyId: eventId,
+    openTravelGuideSheet: travelGuide.openGuideSheet,
+    openItinerary: handleOpenExclusiveItinerary,
+    openBuddyPostSheet: templatePost.openBuddyPostSheet,
+  });
+
+  const handleOpenAiGuide = useCallback(() => {
+    const guideId =
+      festivalPlan.checklist?.travelGuideId?.trim() ||
+      findLatestTravelGuideForActivity(eventId)?.guideId;
+    if (guideId) {
+      goAiTravelGuide(guideId);
+      return;
+    }
+    travelGuide.openGuideSheet();
+  }, [eventId, festivalPlan.checklist, travelGuide.openGuideSheet]);
+
+  const travelGuideGenerated = useMemo(
+    () =>
+      Boolean(
+        festivalPlan.checklist?.travelGuideId ||
+        findLatestTravelGuideForActivity(eventId),
+      ),
+    [eventId, festivalPlan.checklist],
+  );
+
+  useEffect(() => {
+    if (
+      !openGuideOnMount ||
+      guideSheetOpenedRef.current ||
+      invalidEventId ||
+      !secondaryReady
+    ) {
+      return;
+    }
+    guideSheetOpenedRef.current = true;
+    travelGuide.openGuideSheet();
+  }, [openGuideOnMount, invalidEventId, secondaryReady, travelGuide.openGuideSheet]);
+
   const isPublishing = templatePost.isBuddyPostPublishing;
 
   return {
@@ -190,7 +238,7 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     postsQuery,
     displayUserName: displayIdentity.name,
     currentUserAvatar: resolvedCurrentUserAvatar,
-    handleOpenAiGuide: travelGuide.openGuideSheet,
+    handleOpenAiGuide,
     activityTitle,
     handleOpenMyItinerary,
     handleOpenExclusiveItinerary,
@@ -203,5 +251,8 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     publishComplianceConfirmDialog: templatePost.complianceConfirmDialog,
     buddyPostQuota: templatePost.buddyPostQuota,
     isWeapp: wechatShare.isWeapp,
+    festivalPlanChecklist: festivalPlan.checklist,
+    onFestivalPlanTaskPress: festivalPlan.onTaskPress,
+    travelGuideGenerated,
   };
 }

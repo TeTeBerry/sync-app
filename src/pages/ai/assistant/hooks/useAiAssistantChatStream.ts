@@ -4,8 +4,10 @@ import { invalidatePostQueries } from '../../../../hooks/useSyncApi';
 import { invalidateCache } from '../../../../hooks/useApiQuery';
 import { getAuthHeaders } from '../../../../utils/authStorage';
 import { saveTravelGuideDetail } from '../../../../domains/travel-guide/utils/travelGuideDetailStorage';
+import { getActiveActivityLegacyId } from '../../../../domains/activity-scope';
 import { useItineraryStore } from '../../../../domains/performance-itinerary/store';
 import type { TravelGuidePlan } from '../../../../types/travelGuide';
+import { BUDDY_POST_PUBLISH_SUCCESS_MESSAGE } from '../../../../constants/ugcPublishCompliance';
 
 export function useAiAssistantChatStream(options: {
   activityTitle?: string;
@@ -25,8 +27,9 @@ export function useAiAssistantChatStream(options: {
         invalidateCache(['posts', 'activity', scopedId]);
       }
       void Taro.showToast({
-        title: '组队帖已发布',
+        title: BUDDY_POST_PUBLISH_SUCCESS_MESSAGE,
         icon: 'success',
+        duration: 3000,
       });
     },
     onExistingPost: () => {
@@ -37,11 +40,12 @@ export function useAiAssistantChatStream(options: {
       });
     },
     onTravelGuideReady: (event) => {
-      if (activityLegacyId == null) return;
+      const legacyId = activityLegacyId ?? getActiveActivityLegacyId() ?? undefined;
+      if (legacyId == null) return;
       saveTravelGuideDetail(event.guideId, {
         plan: event.plan as unknown as TravelGuidePlan,
         form: event.form,
-        activityLegacyId,
+        activityLegacyId: legacyId,
       });
     },
     onItineraryReady: (event) => {

@@ -171,6 +171,7 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
           onTravelGuideReady,
           onItineraryReady,
           onProgressEnd: endProgress,
+          activityLegacyId: activityId,
         });
       } catch (error) {
         if ((error as Error).name === 'AbortError') {

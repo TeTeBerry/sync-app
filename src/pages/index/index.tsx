@@ -40,6 +40,7 @@ import {
 import { useAuthSession } from '../../hooks/useAuthSession';
 import { seedActivityDetailFromHomeSignupEvent } from '../../utils/activityDetailCache';
 import { pickNextRegisteredEvent } from './utils/pickNextRegisteredEvent';
+import { useHomeFestivalPlanNavigation } from '@/domains/festival-plan/hooks/useHomeFestivalPlanNavigation';
 import { useNavBarInsets } from '../../hooks/useNavBarInsets';
 import { useEndRouteTransitionOnShow } from '../../hooks/useEndRouteTransitionOnShow';
 import { OverlayAwareScrollView } from '../../components/layout/OverlayAwareScrollView';
@@ -138,6 +139,8 @@ const Home = () => {
     [loggedIn, summary?.signupEvents, registeredLegacyIds],
   );
 
+  const homeFestivalPlan = useHomeFestivalPlanNavigation(nextRegisteredEvent?.id);
+
   const openSignupEvent = useCallback(
     (
       legacyId: number,
@@ -228,6 +231,7 @@ const Home = () => {
               <HomeMyNextEvent
                 event={nextRegisteredEvent}
                 postEngagement={summary?.myNextEventPostEngagement ?? undefined}
+                festivalPlan={homeFestivalPlan.checklist}
                 onViewDetail={handleNextEventView}
                 onOpenPosts={handleNextEventPosts}
                 onOpenPostReplies={
@@ -235,6 +239,8 @@ const Home = () => {
                     ? handleNextEventPostReplies
                     : undefined
                 }
+                onFestivalPlanPress={homeFestivalPlan.openFestivalPlanHub}
+                onNextTaskPress={homeFestivalPlan.onTaskPress}
               />
             ) : null}
 

@@ -6,7 +6,7 @@ import { requireAuth } from '../utils/authGate';
 import { getApiErrorMessage } from '../utils/apiErrorMessage';
 import {
   buildReportedStatusMessage,
-  REPORT_SUBMIT_SUCCESS_MESSAGE,
+  buildReportSubmitSuccessMessage,
 } from '../utils/reportLabels';
 
 export type ContentReportTarget = {
@@ -77,9 +77,13 @@ export function useContentReport(target: ContentReportTarget) {
           category,
         });
         setCategorySheetOpen(false);
+        const status = await fetchReportStatus(target.targetType, target.targetId);
         await Taro.showModal({
           title: '举报已提交',
-          content: REPORT_SUBMIT_SUCCESS_MESSAGE,
+          content: buildReportSubmitSuccessMessage({
+            category: status.category ?? category,
+            reviewStatus: status.reviewStatus ?? 'pending',
+          }),
           showCancel: false,
           confirmText: '知道了',
         });

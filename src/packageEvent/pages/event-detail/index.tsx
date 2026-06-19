@@ -8,6 +8,7 @@ import EventDetailFallback from './components/EventDetailFallback';
 import {
   EventDetailComposerSection,
   EventDetailPostSearchBar,
+  EventDetailPostFilterBar,
   EventDetailTemplatePostFab,
   EventPostsVirtualList,
   EVENT_DETAIL_SCROLL_ID,
@@ -22,6 +23,7 @@ import { OverlayAwareScrollView } from '../../../components/layout/OverlayAwareS
 import { PlatformDisclaimer } from '../../../components/legal/PlatformDisclaimer';
 import { ROUTES } from '../../../utils/route';
 import { Text, View } from '@tarojs/components';
+import { useAuthSession } from '../../../hooks/useAuthSession';
 
 const EventDetailPage = () => {
   useEndRouteTransitionOnShow();
@@ -29,6 +31,7 @@ const EventDetailPage = () => {
     cancelText: '取消',
   });
   const page = useEventDetailPage({ confirm });
+  const { loggedIn } = useAuthSession();
 
   if (page.invalidEventId) {
     return <EventDetailFallback variant="invalidId" />;
@@ -80,6 +83,9 @@ const EventDetailPage = () => {
     publishComplianceConfirmDialog,
     buddyPostQuota,
     isWeapp,
+    festivalPlanChecklist,
+    onFestivalPlanTaskPress,
+    travelGuideGenerated,
   } = page;
 
   return (
@@ -132,17 +138,32 @@ const EventDetailPage = () => {
               activityTitle={activityTitle}
               onOpenMyItinerary={handleOpenMyItinerary}
               onOpenExclusiveItinerary={handleOpenExclusiveItinerary}
+              showFestivalPlan={loggedIn && Boolean(festivalPlanChecklist)}
+              festivalPlanChecklist={festivalPlanChecklist}
+              onFestivalPlanTaskPress={onFestivalPlanTaskPress}
+              travelGuideGenerated={travelGuideGenerated}
             />
 
             <View id="event-detail-posts" className="s-event-detail__posts">
               {!showHeaderSkeleton ? (
-                <EventDetailPostSearchBar
-                  value={posts.searchQuery}
-                  onChange={posts.setSearchQuery}
-                  onClear={posts.clearSearchQuery}
-                  isSearching={posts.searchLoading}
-                  matchedCount={posts.searchMatchedCount}
-                />
+                <>
+                  <EventDetailPostFilterBar
+                    cityOptions={posts.postFilterCityOptions}
+                    selectedCity={posts.postFilterSelectedCity}
+                    onSelectedCityChange={posts.setPostFilterSelectedCity}
+                    disabled={posts.searchActive}
+                    isActive={posts.postFiltersActive}
+                    onClear={posts.clearPostFilters}
+                  />
+                  <EventDetailPostSearchBar
+                    value={posts.searchQuery}
+                    onChange={posts.setSearchQuery}
+                    onClear={posts.clearSearchQuery}
+                    isSearching={posts.searchLoading}
+                    matchedCount={posts.searchMatchedCount}
+                    usedLocalFallback={posts.searchUsedLocalFallback}
+                  />
+                </>
               ) : null}
               {postsLoading ? (
                 <ThemedPageLoader variant="skeleton-event-posts" minHeight={160} />

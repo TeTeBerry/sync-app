@@ -12,6 +12,7 @@ export { EventDetailComposerSection } from './components/EventDetailComposerSect
 export type { EventDetailComposerSectionProps } from './components/EventDetailComposerSection';
 export { EventDetailTemplatePostFab } from './components/EventDetailTemplatePostFab';
 export { EventDetailPostSearchBar } from './components/EventDetailPostSearchBar';
+export { EventDetailPostFilterBar } from './components/EventDetailPostFilterBar';
 export {
   normalizeEventPostList,
   normalizeEventPostListItem,
