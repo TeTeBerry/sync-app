@@ -1,18 +1,29 @@
 import Taro from '@tarojs/taro';
 
-const COMMENT_TMPL = process.env.TARO_APP_SUBSCRIBE_TMPL_COMMENT?.trim() ?? '';
-const COMMENT_REPLY_TMPL =
-  process.env.TARO_APP_SUBSCRIBE_TMPL_COMMENT_REPLY?.trim() ?? COMMENT_TMPL;
+/** Compile-time injection — keep keys in `.env` / `.env.production` (empty ok). */
+const COMMENT_TMPL = (process.env.TARO_APP_SUBSCRIBE_TMPL_COMMENT || '').trim();
+const COMMENT_REPLY_TMPL = (
+  process.env.TARO_APP_SUBSCRIBE_TMPL_COMMENT_REPLY ||
+  COMMENT_TMPL ||
+  ''
+).trim();
+
+function isWeappRuntime(): boolean {
+  return Taro.getEnv() === Taro.ENV_TYPE.WEAPP;
+}
 
 /** Request WeChat subscribe-message consent for post comment/reply alerts. */
 export async function requestPostEngagementSubscribe(): Promise<void> {
-  if (process.env.TARO_ENV !== 'weapp') return;
+  if (!isWeappRuntime()) return;
 
   const tmplIds = [...new Set([COMMENT_TMPL, COMMENT_REPLY_TMPL].filter(Boolean))];
   if (!tmplIds.length) return;
 
   try {
-    await Taro.requestSubscribeMessage({ tmplIds });
+    // WeChat weapp uses tmplIds; Taro's Option type incorrectly requires entityIds (Alipay) too.
+    await Taro.requestSubscribeMessage({
+      tmplIds,
+    } as Taro.requestSubscribeMessage.Option);
   } catch {
     // user declined or quota exhausted
   }
