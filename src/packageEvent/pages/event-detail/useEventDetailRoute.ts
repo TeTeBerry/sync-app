@@ -24,8 +24,12 @@ export function useEventDetailRoute() {
     () => resolveEventDetailIdFromQuery(router.params, activeActivityLegacyId),
     [activeActivityLegacyId, router.params],
   );
-  const { highlightPostId, focusPostsOnMount, openBuddyPostOnMount } =
-    parseEventDetailRouteFlags(router.params);
+  const {
+    highlightPostId,
+    focusPostsOnMount,
+    openBuddyPostOnMount,
+    openCommentsOnMount,
+  } = parseEventDetailRouteFlags(router.params);
   useEffect(() => {
     if (Number.isFinite(eventId) && eventId > 0) {
       bindActivity(eventId);
@@ -45,6 +49,7 @@ export function useEventDetailRoute() {
     highlightPostId,
     focusPostsOnMount,
     openBuddyPostOnMount,
+    openCommentsOnMount,
     scrollTop,
     setScrollTop,
     secondaryReady,

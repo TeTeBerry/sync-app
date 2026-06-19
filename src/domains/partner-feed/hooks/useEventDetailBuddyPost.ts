@@ -10,6 +10,7 @@ import {
   buildOptimisticBuddyPost,
   publishBuddyPostFromForm,
 } from '../../../utils/publishBuddyPost';
+import { requestPostEngagementSubscribe } from '../../../utils/wechatSubscribeMessage';
 import { isApiEnabled } from '../../../constants/api';
 import { getClientUserId } from '../../../utils/session';
 
@@ -145,6 +146,7 @@ export function useEventDetailBuddyPost(
         if (!submitOptions?.skipListRefresh && listedInFeed) {
           options.replacePost?.(pendingId, post);
         }
+        void requestPostEngagementSubscribe();
         return true;
       } catch (error) {
         if (!submitOptions?.skipListRefresh && listedInFeed) {

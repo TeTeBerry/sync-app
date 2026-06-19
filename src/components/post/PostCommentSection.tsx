@@ -6,6 +6,7 @@ import { useUgcPublishGuard } from '../../hooks/useUgcPublishGuard';
 import { commentPostAndInvalidate, usePostCommentsQuery } from '../../hooks/sync/posts';
 import { requireAuth } from '../../utils/authGate';
 import { getUgcContactValidationError } from '../../utils/ugcContactValidation';
+import { requestPostEngagementSubscribe } from '../../utils/wechatSubscribeMessage';
 import { PLACEHOLDER_AVATAR } from '../../constants/remoteImages';
 import { sanitizeRemoteImageUrl } from '../../utils/imageUrl';
 import {
@@ -164,6 +165,7 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
           setReplyTarget(null);
           onCommentSubmitted?.(updated);
           void Taro.showToast({ title: '评论成功', icon: 'success' });
+          void requestPostEngagementSubscribe();
         } catch (err: unknown) {
           if (await handlePublishError(err)) return;
           const message =

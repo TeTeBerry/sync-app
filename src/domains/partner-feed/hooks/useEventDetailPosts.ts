@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ConfirmDialogOptions } from '../../../hooks/useConfirmDialog';
 import { useEventPostsInfiniteQuery } from '../../../hooks/useEventPostsInfiniteQuery';
 import { requireAuth } from '../../../utils/authGate';
@@ -25,6 +25,8 @@ export type UseEventDetailPostsParams = {
   postsQuery: EventPostsQuery;
   confirm: (options: ConfirmDialogOptions) => Promise<boolean>;
   setScrollTop: (value: number | undefined) => void;
+  highlightPostId?: string;
+  openCommentsOnMount?: boolean;
 };
 
 export function useEventDetailPosts({
@@ -32,10 +34,13 @@ export function useEventDetailPosts({
   postsQuery,
   confirm,
   setScrollTop,
+  highlightPostId = '',
+  openCommentsOnMount = false,
 }: UseEventDetailPostsParams) {
   const [expandedCommentPostIds, setExpandedCommentPostIds] = useState<Set<string>>(
     () => new Set(),
   );
+  const autoOpenedCommentsRef = useRef<string | null>(null);
 
   const search = useEventDetailPostSearch({
     activityLegacyId,
@@ -139,6 +144,16 @@ export function useEventDetailPosts({
       return next;
     });
   }, []);
+
+  useEffect(() => {
+    const postId = highlightPostId.trim();
+    if (!openCommentsOnMount || !postId) return;
+    if (autoOpenedCommentsRef.current === postId) return;
+    if (!loadedPostItems.some((item) => item.post.id === postId)) return;
+
+    autoOpenedCommentsRef.current = postId;
+    openPostComments(postId);
+  }, [highlightPostId, loadedPostItems, openCommentsOnMount, openPostComments]);
 
   const handleCommentSubmitted = useCallback(
     (updated: Pick<EventDetailPost, 'id' | 'comments'>) => {

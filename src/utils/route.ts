@@ -525,7 +525,12 @@ export function go(url: RoutePath | string) {
 /** Query params for event-detail; keep `id` + `activityLegacyId` in sync for preload/navigate. */
 export function buildEventDetailQuery(
   legacyId: number,
-  options?: { postId?: string; focusPosts?: boolean; openBuddyPost?: boolean },
+  options?: {
+    postId?: string;
+    focusPosts?: boolean;
+    openBuddyPost?: boolean;
+    openComments?: boolean;
+  },
 ): Record<string, string> {
   const query: Record<string, string> = {
     id: String(legacyId),
@@ -541,12 +546,20 @@ export function buildEventDetailQuery(
   if (options?.openBuddyPost) {
     query.openBuddyPost = '1';
   }
+  if (options?.openComments) {
+    query.openComments = '1';
+  }
   return query;
 }
 
 export function goEventDetail(
   eventId: number | string,
-  options?: { postId?: string; focusPosts?: boolean; openBuddyPost?: boolean },
+  options?: {
+    postId?: string;
+    focusPosts?: boolean;
+    openBuddyPost?: boolean;
+    openComments?: boolean;
+  },
 ) {
   const legacyId = parseActivityLegacyId(eventId);
   if (legacyId == null) {
@@ -717,7 +730,18 @@ export async function navigateFromNotification(
   const legacyId = resolveActivityLegacyId(meta);
   if (legacyId == null) return false;
 
-  goEventDetail(legacyId, postId ? { postId } : undefined);
+  const opensPostThread = meta.type === 'comment' || meta.type === 'comment_reply';
+
+  goEventDetail(
+    legacyId,
+    postId
+      ? {
+          postId,
+          focusPosts: opensPostThread || undefined,
+          openComments: opensPostThread || undefined,
+        }
+      : undefined,
+  );
   return true;
 }
 

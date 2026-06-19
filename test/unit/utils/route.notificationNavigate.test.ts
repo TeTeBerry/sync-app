@@ -97,5 +97,7 @@ describe('navigateFromNotification', () => {
     const url = String(vi.mocked(Taro.navigateTo).mock.calls[0]?.[0]?.url ?? '');
     expect(url).toContain('event-detail');
     expect(url).toContain('postId=post-1');
+    expect(url).toContain('focusPosts=1');
+    expect(url).toContain('openComments=1');
   });
 });

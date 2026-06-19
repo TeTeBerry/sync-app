@@ -139,7 +139,15 @@ const Home = () => {
   );
 
   const openSignupEvent = useCallback(
-    (legacyId: number, options?: { focusPosts?: boolean; openBuddyPost?: boolean }) => {
+    (
+      legacyId: number,
+      options?: {
+        focusPosts?: boolean;
+        openBuddyPost?: boolean;
+        postId?: string;
+        openComments?: boolean;
+      },
+    ) => {
       const signupEvent = summary?.signupEvents.find((event) => event.id === legacyId);
       if (signupEvent) {
         seedActivityDetailFromHomeSignupEvent(signupEvent);
@@ -148,9 +156,15 @@ const Home = () => {
         legacyId,
         options?.openBuddyPost
           ? { openBuddyPost: true }
-          : options?.focusPosts
-            ? { focusPosts: true }
-            : undefined,
+          : options?.postId
+            ? {
+                postId: options.postId,
+                focusPosts: options.focusPosts ?? true,
+                openComments: options.openComments ?? true,
+              }
+            : options?.focusPosts
+              ? { focusPosts: true }
+              : undefined,
       );
     },
     [summary?.signupEvents],
@@ -169,6 +183,18 @@ const Home = () => {
     }
     openSignupEvent(nextRegisteredEvent.id, { openBuddyPost: true });
   }, [nextRegisteredEvent, openSignupEvent]);
+
+  const handleNextEventPostReplies = useCallback(() => {
+    const engagement = summary?.myNextEventPostEngagement;
+    if (!nextRegisteredEvent || !engagement?.postId) {
+      return;
+    }
+    openSignupEvent(nextRegisteredEvent.id, {
+      postId: engagement.postId,
+      focusPosts: true,
+      openComments: true,
+    });
+  }, [nextRegisteredEvent, openSignupEvent, summary?.myNextEventPostEngagement]);
 
   const heatLabel =
     activeTeamCount > 0
@@ -201,8 +227,14 @@ const Home = () => {
             {nextRegisteredEvent ? (
               <HomeMyNextEvent
                 event={nextRegisteredEvent}
+                postEngagement={summary?.myNextEventPostEngagement ?? undefined}
                 onViewDetail={handleNextEventView}
                 onOpenPosts={handleNextEventPosts}
+                onOpenPostReplies={
+                  summary?.myNextEventPostEngagement?.unreadReplyCount
+                    ? handleNextEventPostReplies
+                    : undefined
+                }
               />
             ) : null}
 

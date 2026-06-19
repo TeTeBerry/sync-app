@@ -30,6 +30,7 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     highlightPostId,
     focusPostsOnMount,
     openBuddyPostOnMount,
+    openCommentsOnMount,
     scrollTop: routeScrollTop,
     setScrollTop,
     secondaryReady,
@@ -96,6 +97,8 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     postsQuery,
     confirm,
     setScrollTop,
+    highlightPostId,
+    openCommentsOnMount,
   });
 
   const scrollTop = scrollFrozen && frozenTop != null ? frozenTop : routeScrollTop;

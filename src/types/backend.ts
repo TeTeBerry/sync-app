@@ -230,6 +230,11 @@ export interface HomeSummary {
     attendees: number;
     going: boolean;
   }>;
+  myNextEventPostEngagement?: {
+    activityLegacyId: number;
+    postId: string;
+    unreadReplyCount: number;
+  } | null;
 }
 
 export type NotificationType = 'general' | 'interaction' | 'system';

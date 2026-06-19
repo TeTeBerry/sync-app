@@ -71,6 +71,30 @@
   line-height: 1.35;
 }
 
+.s-home-next__reply-hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 0, 102, 0.1);
+  border: 1px solid rgba(255, 0, 102, 0.22);
+  -webkit-tap-highlight-color: transparent;
+
+  &:active {
+    opacity: 0.9;
+  }
+}
+
+.s-home-next__reply-hint-text {
+  flex: 1;
+  color: #ff4d94;
+  font-size: var(--s-type-body-sm);
+  font-weight: var(--s-fw-semibold);
+  line-height: 1.35;
+}
+
 .s-home-next__actions {
   display: flex;
   gap: 8px;

@@ -16,6 +16,21 @@ describe('eventDetailRoute.util', () => {
       highlightPostId: 'abc',
       focusPostsOnMount: true,
       openBuddyPostOnMount: true,
+      openCommentsOnMount: false,
+    });
+  });
+
+  it('parses openComments flag from query', () => {
+    expect(
+      parseEventDetailRouteFlags({
+        postId: 'post-1',
+        openComments: '1',
+      }),
+    ).toEqual({
+      highlightPostId: 'post-1',
+      focusPostsOnMount: false,
+      openBuddyPostOnMount: false,
+      openCommentsOnMount: true,
     });
   });
 
@@ -24,6 +39,7 @@ describe('eventDetailRoute.util', () => {
       highlightPostId: '',
       focusPostsOnMount: false,
       openBuddyPostOnMount: false,
+      openCommentsOnMount: false,
     });
   });
 

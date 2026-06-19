@@ -38,6 +38,10 @@ declare namespace NodeJS {
     TARO_APP_CLOUDBASE_ENV_ID?: string;
     /** CloudBase 云托管服务名；本地留空，生产见 `.env.production` */
     TARO_APP_CLOUD_RUN_SERVICE?: string;
+    /** 微信订阅消息：组队帖评论提醒模板 ID */
+    TARO_APP_SUBSCRIBE_TMPL_COMMENT?: string;
+    /** 微信订阅消息：评论回复提醒模板 ID（可与评论共用） */
+    TARO_APP_SUBSCRIBE_TMPL_COMMENT_REPLY?: string;
     TARO_ENV?:
       | 'weapp'
       | 'swan'
