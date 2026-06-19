@@ -6,9 +6,9 @@ import {
   capabilityFromWelcomeChipAction,
 } from '@/domains/ai-capability/resolveAiCapability';
 import {
-  BUDDY_POST_CTA,
-  GENERATE_ITINERARY_CTA,
-  GENERATE_TRAVEL_GUIDE_CTA,
+  getBuddyPostCta,
+  getGenerateItineraryCta,
+  getGenerateTravelGuideCta,
 } from '@/constants/aiCtaLabels';
 
 describe('runAiCapability', () => {
@@ -46,11 +46,13 @@ describe('resolveAiCapability', () => {
   });
 
   it('maps suggested reply labels', () => {
-    expect(capabilityFromSuggestedReplyLabel(GENERATE_TRAVEL_GUIDE_CTA)).toBe(
+    expect(capabilityFromSuggestedReplyLabel(getGenerateTravelGuideCta())).toBe(
       'travel_guide',
     );
-    expect(capabilityFromSuggestedReplyLabel(GENERATE_ITINERARY_CTA)).toBe('itinerary');
-    expect(capabilityFromSuggestedReplyLabel(BUDDY_POST_CTA)).toBe('buddy_post');
+    expect(capabilityFromSuggestedReplyLabel(getGenerateItineraryCta())).toBe(
+      'itinerary',
+    );
+    expect(capabilityFromSuggestedReplyLabel(getBuddyPostCta())).toBe('buddy_post');
   });
 
   it('maps festival plan task keys', () => {

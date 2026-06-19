@@ -18,9 +18,12 @@ import {
   prefetchCoreQueriesOnLaunch,
   prefetchProfileIfMissing,
 } from './utils/appLaunchPrefetch';
+import { useLocaleStore } from './i18n/localeStore';
+import { t } from './i18n';
 
 export default function App({ children }: PropsWithChildren) {
   useLaunch(() => {
+    useLocaleStore.getState().hydrate();
     initCloudBase();
     if (isLiveApi()) {
       prefetchCoreQueriesOnLaunch();
@@ -30,7 +33,7 @@ export default function App({ children }: PropsWithChildren) {
         })
         .catch((error) => {
           const message =
-            error instanceof Error ? error.message : '登录失败，请稍后重试';
+            error instanceof Error ? error.message : t('auth.loginFailed');
           console.warn('[auth] ensureAuth failed:', message);
         });
     }

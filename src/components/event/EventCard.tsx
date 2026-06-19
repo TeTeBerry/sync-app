@@ -3,7 +3,7 @@ import React, { memo, useMemo } from 'react';
 import { ImageWithFallback } from '../ImageWithFallback';
 import { Button } from '../ui';
 import { Flame, Ticket, Users } from '../../components/icons';
-import { GENERATE_TRAVEL_GUIDE_CTA } from '../../constants/aiCtaLabels';
+import { getGenerateTravelGuideCta } from '../../constants/aiCtaLabels';
 import {
   activityStatusCardClass,
   getActivityStatusFromActivity,
@@ -17,6 +17,7 @@ import { PLACEHOLDER_EVENT_HERO } from '../../constants/remoteImages';
 import { thumbnailImageUrl } from '../../utils/imageUrl';
 import { resolveEventCardLegacyId } from '../../utils/apiMappers';
 import { useRouteTransitionActive } from '../../utils/route';
+import { useT } from '@/hooks/useI18n';
 
 interface EventCardProps {
   id?: string;
@@ -41,10 +42,13 @@ const EventCardInner: React.FC<EventCardProps> = ({
   attendees = 0,
   hot = false,
   variant = 'list',
-  category = '电音节',
+  category = '',
   onTeamUp,
   onTeamUpWarmup,
 }) => {
+  const t = useT();
+  const travelGuideCta = getGenerateTravelGuideCta();
+  const displayCategory = category || t('eventCard.category');
   const legacyId = resolveEventCardLegacyId(id);
   const isNavigating = useRouteTransitionActive(legacyId ?? undefined);
   const thumbSrc = thumbnailImageUrl(image, variant === 'list' ? 200 : 320);
@@ -98,7 +102,7 @@ const EventCardInner: React.FC<EventCardProps> = ({
         {hot ? (
           <Text className="s-event-card__hot-tag">
             <Flame size={12} aria-hidden />
-            热门
+            {t('common.hot')}
           </Text>
         ) : null}
 
@@ -114,12 +118,14 @@ const EventCardInner: React.FC<EventCardProps> = ({
         <View className="s-event-card__detail-meta">
           <View className="s-event-card__joined">
             <Users size={14} aria-hidden />
-            <Text className="s-event-card__joined-text">{`${stats.teamPostCount}+ 条组队帖`}</Text>
+            <Text className="s-event-card__joined-text">
+              {t('common.teamPosts', { count: stats.teamPostCount })}
+            </Text>
           </View>
           <View className="s-event-card__detail-tags">
-            <Text className="s-event-card__detail-tag">{category}</Text>
+            <Text className="s-event-card__detail-tag">{displayCategory}</Text>
             <Text className="s-event-card__detail-tag s-event-card__detail-tag--ai">
-              ✨ {GENERATE_TRAVEL_GUIDE_CTA}
+              {t('eventCard.aiTag', { cta: travelGuideCta })}
             </Text>
           </View>
         </View>

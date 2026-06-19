@@ -3,6 +3,7 @@ import React, { useCallback } from 'react';
 import { Text, View } from '@tarojs/components';
 import type { LegalDocId } from '../../legal';
 import { goLegalDocument } from '../../utils/legalRoute';
+import { useT } from '@/hooks/useI18n';
 
 export type LegalConsentRowProps = {
   checked: boolean;
@@ -15,6 +16,8 @@ function openDoc(doc: LegalDocId, event?: { stopPropagation?: () => void }) {
 }
 
 export function LegalConsentRow({ checked, onCheckedChange }: LegalConsentRowProps) {
+  const t = useT();
+
   const toggle = useCallback(() => {
     onCheckedChange(!checked);
   }, [checked, onCheckedChange]);
@@ -27,26 +30,26 @@ export function LegalConsentRow({ checked, onCheckedChange }: LegalConsentRowPro
         {checked ? <Text className="s-legal-consent__check-mark">✓</Text> : null}
       </View>
       <Text className="s-legal-consent__text">
-        我已阅读并同意
+        {t('legal.consentPrefix')}
         <Text
           className="s-legal-consent__link"
           onClick={(e) => openDoc('user-agreement', e)}
         >
-          《用户服务协议》
+          {t('legal.userAgreement')}
         </Text>
-        和
+        {t('legal.consentAnd')}
         <Text
           className="s-legal-consent__link"
           onClick={(e) => openDoc('privacy-policy', e)}
         >
-          《隐私政策》
+          {t('legal.privacyPolicy')}
         </Text>
-        及
+        {t('legal.consentAlso')}
         <Text
           className="s-legal-consent__link"
           onClick={(e) => openDoc('community-guidelines', e)}
         >
-          《社区规范》
+          {t('legal.communityGuidelines')}
         </Text>
       </Text>
     </View>

@@ -13,21 +13,23 @@ import {
 } from '../../../legal';
 import { ROUTES } from '../../../utils/route';
 import { ScrollView, Text, View } from '@tarojs/components';
+import { useI18n } from '@/hooks/useI18n';
 
 const LegalDocumentPage: React.FC = () => {
   useEndRouteTransitionOnShow();
   const mainScrollHeight = useStackPageMainHeight();
   const router = useRouter();
   const docId = router.params.doc as LegalDocId | undefined;
+  const { locale, t } = useI18n();
 
-  const document = useMemo(() => getLegalDocument(docId), [docId]);
+  const document = useMemo(() => getLegalDocument(docId, locale), [docId, locale]);
 
   if (!document) {
     return (
       <View data-cmp="LegalDocument" className="s-legal-doc">
-        <PageNavigation title="文档" fallback={ROUTES.PROFILE} />
+        <PageNavigation title={t('legal.docTitle')} fallback={ROUTES.PROFILE} />
         <View className="s-legal-doc__empty">
-          <Text>未找到该文档</Text>
+          <Text>{t('legal.docNotFound')}</Text>
         </View>
       </View>
     );
@@ -47,8 +49,11 @@ const LegalDocumentPage: React.FC = () => {
       >
         <View className="s-legal-doc__main">
           <Text className="s-legal-doc__meta">
-            {APP_DISPLAY_NAME} · 更新日期：{document.updatedAt} · 版本{' '}
-            {document.version}
+            {t('legal.meta', {
+              app: APP_DISPLAY_NAME,
+              date: document.updatedAt,
+              version: document.version,
+            })}
           </Text>
           {document.preamble ? (
             <Text className="s-legal-doc__preamble">{document.preamble}</Text>
@@ -65,11 +70,11 @@ const LegalDocumentPage: React.FC = () => {
           ))}
           <View className="s-legal-doc__footer">
             <Text className="s-legal-doc__footer-text">
-              运营者：{LEGAL_OPERATOR_NAME}
+              {t('legal.footerOperator', { name: LEGAL_OPERATOR_NAME })}
               {'\n'}
-              联系邮箱：{LEGAL_CONTACT_EMAIL}
+              {t('legal.footerContact', { email: LEGAL_CONTACT_EMAIL })}
               {'\n'}
-              你可通过「设置 → 帮助与反馈」提交问题。
+              {t('legal.footerHelp')}
             </Text>
           </View>
         </View>

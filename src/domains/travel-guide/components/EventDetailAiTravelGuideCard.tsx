@@ -1,10 +1,11 @@
 import { ChevronRight, Map } from '../../../components/icons';
 import {
-  GENERATE_TRAVEL_GUIDE_CTA,
-  VIEW_TRAVEL_GUIDE_CTA,
+  getGenerateTravelGuideCta,
+  getViewTravelGuideCta,
 } from '../../../constants/aiCtaLabels';
 import { Button } from '../../../components/ui';
 import { Text, View } from '@tarojs/components';
+import { useT } from '@/hooks/useI18n';
 
 type EventDetailAiTravelGuideCardProps = {
   generated?: boolean;
@@ -15,10 +16,11 @@ export function EventDetailAiTravelGuideCard({
   generated = false,
   onClick,
 }: EventDetailAiTravelGuideCardProps) {
-  const title = generated ? VIEW_TRAVEL_GUIDE_CTA : GENERATE_TRAVEL_GUIDE_CTA;
+  const t = useT();
+  const title = generated ? getViewTravelGuideCta() : getGenerateTravelGuideCta();
   const subtitle = generated
-    ? '查看上次生成的交通/住宿/散场方案'
-    : '交通 · 住宿 · 散场建议';
+    ? t('eventDetail.travelGuideSubtitleGenerated')
+    : t('eventDetail.travelGuideSubtitleNew');
 
   return (
     <View className="s-event-detail__ai-travel-guide">

@@ -1,33 +1,30 @@
-import { MapPin } from '../../components/icons';
-import { Button } from '../ui';
-import { TRAVEL_GUIDE_SHEET_ACTION_LABEL } from '../../utils/travelGuidePromptMessage';
-import { Text, View } from '@tarojs/components';
 import './TravelGuideSheetCta.scss';
+import { Text, View } from '@tarojs/components';
+import { getTravelGuideSheetActionLabel } from '../../utils/travelGuidePromptMessage';
+import { useT } from '@/hooks/useI18n';
 
-export function TravelGuideSheetCta({
-  disabled,
-  onOpenSheet,
-}: {
-  disabled?: boolean;
-  onOpenSheet: () => void;
-}) {
+export type TravelGuideSheetCtaProps = {
+  onPress: () => void;
+};
+
+export function TravelGuideSheetCta({ onPress }: TravelGuideSheetCtaProps) {
+  useT();
+  const label = getTravelGuideSheetActionLabel();
+
   return (
-    <Button
+    <View
       className="s-travel-guide-sheet-cta"
-      disabled={disabled}
       hoverClass="s-travel-guide-sheet-cta--pressed"
-      aria-label={TRAVEL_GUIDE_SHEET_ACTION_LABEL}
-      onClick={onOpenSheet}
+      onClick={onPress}
+      role="button"
+      aria-label={label}
     >
-      <MapPin size={18} color="#fff" />
-      <View className="s-travel-guide-sheet-cta__text">
-        <Text className="s-travel-guide-sheet-cta__title">
-          {TRAVEL_GUIDE_SHEET_ACTION_LABEL}
+      <View className="s-travel-guide-sheet-cta__inner">
+        <Text className="s-travel-guide-sheet-cta__sparkle" aria-hidden>
+          ✨
         </Text>
-        <Text className="s-travel-guide-sheet-cta__sub">
-          填写出发地、人数、预算与住宿晚数
-        </Text>
+        <Text className="s-travel-guide-sheet-cta__label">{label}</Text>
       </View>
-    </Button>
+    </View>
   );
 }

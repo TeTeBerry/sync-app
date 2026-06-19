@@ -1,24 +1,54 @@
-/** Unified AI assistant CTA copy — verb + object. */
-export const GENERATE_TRAVEL_GUIDE_CTA = '生成出行攻略';
-export const GENERATE_ITINERARY_CTA = '生成专属行程';
-export const BUDDY_POST_CTA = '组队发帖';
-export const START_PERSONALITY_TEST_CTA = '开始人格测试';
+import { t } from '@/i18n';
 
-/** Result / page titles (noun, not action). */
-export const TRAVEL_GUIDE_TITLE = '出行攻略';
-export const ITINERARY_TITLE = '专属行程';
+/** Unified AI assistant CTA copy — resolved at call time for i18n. */
+export function getGenerateTravelGuideCta(): string {
+  return t('ai.generateTravelGuide');
+}
 
-export const VIEW_TRAVEL_GUIDE_CTA = '查看出行攻略';
-export const VIEW_ITINERARY_CTA = '查看专属行程';
-export const REGENERATE_CTA = '重新生成';
+export function getGenerateItineraryCta(): string {
+  return t('ai.generateItinerary');
+}
 
-export const TRAVEL_GUIDE_GENERATING_TEXT = '正在生成出行攻略…';
-export const TRAVEL_GUIDE_GENERATING_STAGES = [
-  '正在检索场馆周边酒店与夜宵…',
-  '正在整理交通与预算…',
-  '正在润色攻略文案…',
-] as const;
+export function getBuddyPostCta(): string {
+  return t('ai.buddyPost');
+}
 
-/** Travel plan receipt OCR — surfaced after travel guide generation. */
-export const TRAVEL_PLAN_RECEIPT_OCR_TIP = '有机票/酒店订单？去行程页拍票根自动记账';
-export const TRAVEL_PLAN_RECEIPT_OCR_CTA = '去行程页记账';
+export function getStartPersonalityTestCta(): string {
+  return t('ai.startPersonalityTest');
+}
+
+export function getTravelGuideTitle(): string {
+  return t('ai.travelGuideTitle');
+}
+
+export function getItineraryTitle(): string {
+  return t('ai.itineraryTitle');
+}
+
+export function getViewTravelGuideCta(): string {
+  return t('ai.viewTravelGuide');
+}
+
+export function getViewItineraryCta(): string {
+  return t('ai.viewItinerary');
+}
+
+export function getRegenerateCta(): string {
+  return t('ai.regenerate');
+}
+
+export function getTravelGuideGeneratingText(): string {
+  return t('ai.generatingTravelGuide');
+}
+
+export function getTravelGuideGeneratingStages(): readonly string[] {
+  return [t('ai.generatingStage1'), t('ai.generatingStage2'), t('ai.generatingStage3')];
+}
+
+export function getTravelPlanReceiptOcrTip(): string {
+  return t('ai.receiptOcrTip');
+}
+
+export function getTravelPlanReceiptOcrCta(): string {
+  return t('ai.receiptOcrCta');
+}

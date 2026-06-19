@@ -1,23 +1,41 @@
 import type { ChatUiMessage } from '../types/aiChat';
 import {
-  BUDDY_POST_CTA,
-  GENERATE_ITINERARY_CTA,
-  GENERATE_TRAVEL_GUIDE_CTA,
-  START_PERSONALITY_TEST_CTA,
+  getBuddyPostCta,
+  getGenerateItineraryCta,
+  getGenerateTravelGuideCta,
+  getStartPersonalityTestCta,
 } from '../constants/aiCtaLabels';
 import { createMessageId } from '../hooks/ai-chat/createMessageId';
 import { buildAiAssistantWelcomeText } from './aiAssistantWelcome';
+import { labelMatchesKey, t } from '@/i18n';
 
-export const LINEUP_CAPABILITY_LABEL = '查阵容';
-export const TRAVEL_GUIDE_CAPABILITY_LABEL = GENERATE_TRAVEL_GUIDE_CTA;
-export const ITINERARY_CAPABILITY_LABEL = GENERATE_ITINERARY_CTA;
-export const BUDDY_POST_CAPABILITY_LABEL = BUDDY_POST_CTA;
+export function getLineupCapabilityLabel(): string {
+  return t('ai.lineup');
+}
 
-export const PICK_FESTIVAL_CAPABILITY_LABEL = '选一场电音节';
-export const NEAR_EVENTS_CAPABILITY_LABEL = '最近有什么活动';
-export const PERSONALITY_CAPABILITY_LABEL = START_PERSONALITY_TEST_CTA;
+export function getTravelGuideCapabilityLabel(): string {
+  return getGenerateTravelGuideCta();
+}
 
-const NEAR_EVENTS_SUBMIT_TEXT = '查最近活动';
+export function getItineraryCapabilityLabel(): string {
+  return getGenerateItineraryCta();
+}
+
+export function getBuddyPostCapabilityLabel(): string {
+  return getBuddyPostCta();
+}
+
+export function getPickFestivalCapabilityLabel(): string {
+  return t('ai.pickFestival');
+}
+
+export function getNearEventsCapabilityLabel(): string {
+  return t('ai.nearEvents');
+}
+
+export function getPersonalityCapabilityLabel(): string {
+  return getStartPersonalityTestCta();
+}
 
 export type WelcomeCapabilityChipAction =
   | { type: 'send'; text: string }
@@ -35,12 +53,12 @@ export function isActivityBoundForCapabilities(
 
 export function buildWelcomeCapabilityChipLabels(activityBound: boolean): string[] {
   if (activityBound) {
-    return [LINEUP_CAPABILITY_LABEL];
+    return [getLineupCapabilityLabel()];
   }
   return [
-    PICK_FESTIVAL_CAPABILITY_LABEL,
-    NEAR_EVENTS_CAPABILITY_LABEL,
-    PERSONALITY_CAPABILITY_LABEL,
+    getPickFestivalCapabilityLabel(),
+    getNearEventsCapabilityLabel(),
+    getPersonalityCapabilityLabel(),
   ];
 }
 
@@ -52,30 +70,32 @@ export function resolveWelcomeCapabilityChipAction(
   if (!trimmed) return null;
 
   if (activityBound) {
-    switch (trimmed) {
-      case LINEUP_CAPABILITY_LABEL:
-        return { type: 'send', text: '查阵容' };
-      case TRAVEL_GUIDE_CAPABILITY_LABEL:
-        return { type: 'travel_guide_sheet' };
-      case ITINERARY_CAPABILITY_LABEL:
-        return { type: 'itinerary_sheet' };
-      case BUDDY_POST_CAPABILITY_LABEL:
-        return { type: 'buddy_post_sheet' };
-      default:
-        return null;
+    if (labelMatchesKey(trimmed, 'ai.lineup') || trimmed === '查阵容') {
+      return { type: 'send', text: t('ai.lineup') };
     }
+    if (labelMatchesKey(trimmed, 'ai.generateTravelGuide')) {
+      return { type: 'travel_guide_sheet' };
+    }
+    if (labelMatchesKey(trimmed, 'ai.generateItinerary')) {
+      return { type: 'itinerary_sheet' };
+    }
+    if (labelMatchesKey(trimmed, 'ai.buddyPost')) {
+      return { type: 'buddy_post_sheet' };
+    }
+    return null;
   }
 
-  switch (trimmed) {
-    case PICK_FESTIVAL_CAPABILITY_LABEL:
-      return { type: 'pick_festival_sheet' };
-    case NEAR_EVENTS_CAPABILITY_LABEL:
-      return { type: 'send', text: NEAR_EVENTS_SUBMIT_TEXT };
-    case PERSONALITY_CAPABILITY_LABEL:
-      return { type: 'personality_test' };
-    default:
-      return null;
+  if (labelMatchesKey(trimmed, 'ai.pickFestival')) {
+    return { type: 'pick_festival_sheet' };
   }
+  if (labelMatchesKey(trimmed, 'ai.nearEvents')) {
+    return { type: 'send', text: t('ai.nearEventsSubmit') };
+  }
+  if (labelMatchesKey(trimmed, 'ai.startPersonalityTest')) {
+    return { type: 'personality_test' };
+  }
+
+  return null;
 }
 
 export function createWelcomeChatMessage(

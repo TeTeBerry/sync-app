@@ -1,6 +1,7 @@
-import { BUDDY_POST_SHEET_ACTION_LABEL } from '@/utils/buddyPostPromptMessage';
-import { ITINERARY_SHEET_ACTION_LABEL } from '@/utils/itineraryPromptMessage';
-import { TRAVEL_GUIDE_SHEET_ACTION_LABEL } from '@/utils/travelGuidePromptMessage';
+import { getBuddyPostSheetActionLabel } from '@/utils/buddyPostPromptMessage';
+import { getItinerarySheetActionLabel } from '@/utils/itineraryPromptMessage';
+import { getTravelGuideSheetActionLabel } from '@/utils/travelGuidePromptMessage';
+import { labelMatchesKey } from '@/i18n';
 import type { WelcomeCapabilityChipAction } from '@/utils/aiAssistantCapabilityDiscovery';
 import type { FestivalPlanTaskKey } from '@/domains/festival-plan/festivalPlanTaskDefs';
 import type { AiCapability } from './types';
@@ -24,13 +25,24 @@ export function capabilityFromSuggestedReplyLabel(label: string): AiCapability |
   const trimmed = label.trim();
   if (!trimmed) return null;
 
-  if (trimmed === TRAVEL_GUIDE_SHEET_ACTION_LABEL) {
+  if (labelMatchesKey(trimmed, 'ai.generateTravelGuide')) {
     return 'travel_guide';
   }
-  if (trimmed === ITINERARY_SHEET_ACTION_LABEL) {
+  if (labelMatchesKey(trimmed, 'ai.generateItinerary')) {
     return 'itinerary';
   }
-  if (trimmed === BUDDY_POST_SHEET_ACTION_LABEL) {
+  if (labelMatchesKey(trimmed, 'ai.buddyPost')) {
+    return 'buddy_post';
+  }
+
+  // Backend may still send Chinese sheet labels
+  if (trimmed === getTravelGuideSheetActionLabel()) {
+    return 'travel_guide';
+  }
+  if (trimmed === getItinerarySheetActionLabel()) {
+    return 'itinerary';
+  }
+  if (trimmed === getBuddyPostSheetActionLabel()) {
     return 'buddy_post';
   }
 

@@ -31,6 +31,7 @@ import {
 import { formatBuddyPreferencesSummary } from '../../constants/buddyPreferences';
 import { deriveInterestTag } from './utils';
 import { applyPersonalityTestIdentity } from '../../utils/displayUserIdentity';
+import { t } from '@/i18n';
 
 export type UseProfilePageOptions = {
   confirm: (options: ConfirmDialogOptions) => Promise<boolean>;
@@ -94,7 +95,8 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
         | 'help'
         | 'legal'
         | 'buddy-prefs'
-        | 'appeal',
+        | 'appeal'
+        | 'language',
     ) => {
       go(`${ROUTES.SETTINGS}?section=${section}`);
     },
@@ -113,16 +115,18 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
     }
   }, [apiEnabled, loggedIn, summaryQuery]);
 
+  import { t } from '@/i18n';
+
   const handleLogout = useCallback(async () => {
     const ok = await confirm({
-      title: '退出登录',
-      message: '确定要退出当前账号吗？退出后需重新登录才能使用个人功能。',
-      confirmText: '退出登录',
+      title: t('profile.logout.title'),
+      message: t('profile.logout.message'),
+      confirmText: t('profile.logout.confirm'),
     });
     if (!ok) return;
     await logout();
     refreshAuthSession();
-    void Taro.showToast({ title: '已退出登录', icon: 'success' });
+    void Taro.showToast({ title: t('profile.logout.done'), icon: 'success' });
   }, [confirm, refreshAuthSession]);
 
   const buddyPreferencesSummary = formatBuddyPreferencesSummary(
@@ -144,6 +148,7 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
       requireAuth(() => openSettings('buddy-prefs'), 'general');
     },
     onOpenPrivacy: () => openSettings('privacy'),
+    onOpenLanguage: () => openSettings('language'),
     onOpenAccountAppeal: () => {
       requireAuth(() => openSettings('appeal'), 'general');
     },

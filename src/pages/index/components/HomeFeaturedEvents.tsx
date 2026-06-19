@@ -15,6 +15,7 @@ import {
 import { featuredPostImageUrl, thumbnailImageUrl } from '../../../utils/imageUrl';
 import { goEventsListTab } from '../../../utils/route';
 import { Image, Swiper, SwiperItem, Text, View } from '@tarojs/components';
+import { useT } from '@/hooks/useI18n';
 
 type HomeFeaturedEventsProps = {
   items: FeaturedEvent[];
@@ -31,8 +32,10 @@ export const HomeFeaturedEvents: FC<HomeFeaturedEventsProps> = ({
   onEventClick,
   onEventPreload,
 }) => {
+  const t = useT();
   const [internalIndex, setInternalIndex] = useState(0);
   const currentIndex = activeIndex ?? internalIndex;
+  const featuredTitle = `🎪 ${t('home.featuredTitle')}`;
 
   useEffect(() => {
     if (activeIndex === undefined) {
@@ -46,31 +49,34 @@ export const HomeFeaturedEvents: FC<HomeFeaturedEventsProps> = ({
       setInternalIndex(index);
     }
   };
+
   if (items.length === 0) {
     return (
-      <View className="s-home-showcase" aria-label="热门活动">
+      <View className="s-home-showcase" aria-label={t('home.featuredTitle')}>
         <View className="s-home-showcase__head">
-          <Text className="s-home-showcase__title">🎪 热门活动</Text>
+          <Text className="s-home-showcase__title">{featuredTitle}</Text>
           <View
             className="s-home-showcase__all"
             onClick={() => goEventsListTab()}
             role="button"
-            aria-label="查看全部活动"
+            aria-label={t('common.viewAllEvents')}
           >
-            <Text className="s-home-showcase__all-text">全部</Text>
+            <Text className="s-home-showcase__all-text">{t('common.all')}</Text>
             <ChevronRight size={14} color="var(--primary)" />
           </View>
         </View>
         <View className="s-home-showcase__empty-wrap">
-          <Text className="s-home-showcase__empty">暂无精选活动</Text>
+          <Text className="s-home-showcase__empty">{t('home.featuredEmpty')}</Text>
           <Text className="s-home-showcase__empty-hint">
-            去活动页看看近期场次与地图
+            {t('home.featuredEmptyHint')}
           </Text>
           <Button
             className="s-home-showcase__empty-btn"
             onClick={() => goEventsListTab()}
           >
-            <Text className="s-home-showcase__empty-btn-text">浏览近期活动</Text>
+            <Text className="s-home-showcase__empty-btn-text">
+              {t('home.featuredBrowse')}
+            </Text>
           </Button>
         </View>
       </View>
@@ -78,16 +84,16 @@ export const HomeFeaturedEvents: FC<HomeFeaturedEventsProps> = ({
   }
 
   return (
-    <View className="s-home-showcase" aria-label="热门活动">
+    <View className="s-home-showcase" aria-label={t('home.featuredTitle')}>
       <View className="s-home-showcase__head">
-        <Text className="s-home-showcase__title">🎪 热门活动</Text>
+        <Text className="s-home-showcase__title">{featuredTitle}</Text>
         <View
           className="s-home-showcase__all"
           onClick={() => goEventsListTab()}
           role="button"
-          aria-label="查看全部活动"
+          aria-label={t('common.viewAllEvents')}
         >
-          <Text className="s-home-showcase__all-text">全部</Text>
+          <Text className="s-home-showcase__all-text">{t('common.all')}</Text>
           <ChevronRight size={14} color="var(--primary)" />
         </View>
       </View>
@@ -129,6 +135,7 @@ function HomeFeaturedEventCard({
   onEventClick: (item: FeaturedEvent) => void;
   onEventPreload?: (item: FeaturedEvent) => void;
 }) {
+  const t = useT();
   const status = getActivityStatusFromActivity(event.date, event.title);
   const venue = event.venue?.trim() ?? '';
   const legacyId = resolveFeaturedEventLegacyId(event);
@@ -154,7 +161,7 @@ function HomeFeaturedEventCard({
         .filter(Boolean)
         .join(' ')}
       role="button"
-      aria-label={`查看${event.title}`}
+      aria-label={t('home.viewEventAria', { title: event.title })}
       onTouchStart={handlePreload}
       onClick={openDetail}
     >
@@ -177,7 +184,7 @@ function HomeFeaturedEventCard({
         </View>
         {event.isHot ? (
           <View className="s-home-showcase-card__tag s-home-showcase-card__tag--hot">
-            <Text className="s-home-showcase-card__tag-text">🔥 热门</Text>
+            <Text className="s-home-showcase-card__tag-text">🔥 {t('common.hot')}</Text>
           </View>
         ) : null}
       </View>
@@ -211,7 +218,9 @@ function HomeFeaturedEventCard({
               ))}
             </View>
           ) : null}
-          <Text className="s-home-showcase-card__count">{event.attendeeCount} 人</Text>
+          <Text className="s-home-showcase-card__count">
+            {t('common.people', { count: event.attendeeCount })}
+          </Text>
         </View>
       </View>
     </View>

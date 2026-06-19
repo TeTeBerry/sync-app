@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
-  BUDDY_POST_CTA,
-  GENERATE_ITINERARY_CTA,
-  GENERATE_TRAVEL_GUIDE_CTA,
+  getBuddyPostCta,
+  getGenerateItineraryCta,
+  getGenerateTravelGuideCta,
 } from '@/constants/aiCtaLabels';
 import {
   filterChecklistDuplicateSuggestedReplies,
@@ -28,18 +28,21 @@ describe('aiAssistantEntryPolicy', () => {
   it('filters checklist-duplicate suggested replies when bound', () => {
     expect(
       filterChecklistDuplicateSuggestedReplies(
-        ['查阵容', GENERATE_TRAVEL_GUIDE_CTA, '其他问题'],
+        ['查阵容', getGenerateTravelGuideCta(), '其他问题'],
         8,
       ),
     ).toEqual(['查阵容', '其他问题']);
     expect(
       filterChecklistDuplicateSuggestedReplies(
-        [GENERATE_ITINERARY_CTA, BUDDY_POST_CTA],
+        [getGenerateItineraryCta(), getBuddyPostCta()],
         8,
       ),
     ).toBeUndefined();
     expect(
-      filterChecklistDuplicateSuggestedReplies([GENERATE_TRAVEL_GUIDE_CTA], undefined),
-    ).toEqual([GENERATE_TRAVEL_GUIDE_CTA]);
+      filterChecklistDuplicateSuggestedReplies(
+        [getGenerateTravelGuideCta()],
+        undefined,
+      ),
+    ).toEqual([getGenerateTravelGuideCta()]);
   });
 });

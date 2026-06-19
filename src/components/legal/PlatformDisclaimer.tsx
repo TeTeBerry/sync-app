@@ -1,12 +1,15 @@
 import './PlatformDisclaimer.scss';
-import { PLATFORM_DISCLAIMER_TEXT } from '../../constants/platformDisclaimer';
+import { getPlatformDisclaimerText } from '../../constants/platformDisclaimer';
 import { Text, View } from '@tarojs/components';
+import { useT } from '@/hooks/useI18n';
 
 export type PlatformDisclaimerProps = {
   variant?: 'fixed' | 'inline';
 };
 
 export function PlatformDisclaimer({ variant = 'inline' }: PlatformDisclaimerProps) {
+  const t = useT();
+
   return (
     <View
       className={[
@@ -16,9 +19,9 @@ export function PlatformDisclaimer({ variant = 'inline' }: PlatformDisclaimerPro
       ]
         .filter(Boolean)
         .join(' ')}
-      aria-label="平台声明"
+      aria-label={t('platform.disclaimerAria')}
     >
-      <Text className="s-platform-disclaimer__text">{PLATFORM_DISCLAIMER_TEXT}</Text>
+      <Text className="s-platform-disclaimer__text">{getPlatformDisclaimerText()}</Text>
     </View>
   );
 }

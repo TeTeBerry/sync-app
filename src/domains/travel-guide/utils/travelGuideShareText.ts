@@ -1,10 +1,10 @@
-import { TRAVEL_GUIDE_TITLE } from '@/constants/aiCtaLabels';
+import { getTravelGuideTitle } from '@/constants/aiCtaLabels';
 import { AI_TRAVEL_GUIDE_DISCLAIMER } from '@/constants/aiDisclosure';
 import type { TravelGuidePlan } from '@/types/travelGuide';
 
 export function buildTravelGuideShareText(plan: TravelGuidePlan): string {
   const lines: string[] = [
-    `【${plan.activityName}】${TRAVEL_GUIDE_TITLE}`,
+    `【${plan.activityName}】${getTravelGuideTitle()}`,
     `📅 ${plan.eventDates}`,
     `📍 ${plan.venue}`,
     `🚩 ${plan.departure}出发 · ${plan.headcount}人 · 住${plan.accommodationNights}晚 · ${plan.budgetLabel}`,
@@ -73,7 +73,7 @@ export function buildTravelGuideShareText(plan: TravelGuidePlan): string {
     lines.push('');
   }
 
-  lines.push(`— Sync · ${TRAVEL_GUIDE_TITLE}`);
+  lines.push(`— Sync · ${getTravelGuideTitle()}`);
   lines.push('');
   lines.push(AI_TRAVEL_GUIDE_DISCLAIMER);
   return lines.join('\n');

@@ -1,9 +1,13 @@
-import { BUDDY_POST_CTA } from '../constants/aiCtaLabels';
+import { getBuddyPostCta } from '../constants/aiCtaLabels';
+import { labelMatchesKey, translate } from '@/i18n';
 
 /** Keep in sync with sync-app-backend/src/ai/publish/buddy-post-flow.util.ts */
 export const SELF_POST_COLLECT_BODY_MARKER = '【填写组队帖】';
 export const REQUIRE_BUDDY_POST_MARKER = '【先填写组队信息】';
-export const BUDDY_POST_SHEET_ACTION_LABEL = BUDDY_POST_CTA;
+
+export function getBuddyPostSheetActionLabel(): string {
+  return getBuddyPostCta();
+}
 
 export function isBuddyPostTemplatePrompt(text?: string | null): boolean {
   const trimmed = text?.trim();
@@ -16,5 +20,10 @@ export function isBuddyPostTemplatePrompt(text?: string | null): boolean {
 
 export function filterBuddyPostSheetShortcutReplies(replies?: string[]): string[] {
   if (!replies?.length) return [];
-  return replies.filter((reply) => reply.trim() !== BUDDY_POST_SHEET_ACTION_LABEL);
+  const labels = [
+    getBuddyPostSheetActionLabel(),
+    translate('ai.buddyPost', 'zh-CN'),
+    translate('ai.buddyPost', 'en-US'),
+  ];
+  return replies.filter((reply) => !labels.includes(reply.trim()));
 }

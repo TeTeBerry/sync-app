@@ -1,6 +1,6 @@
 import './settings.scss';
 import Taro, { useRouter } from '@tarojs/taro';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Check, ChevronRight } from '../../../components/icons';
 import PageNavigation from '../../../components/navigation/PageNavigation';
 import { ROUTES } from '../../../utils/route';
@@ -28,35 +28,21 @@ import { useAccountRisk } from '../../../hooks/useAccountRisk';
 import { BuddyPreferencesSettings } from './components/BuddyPreferencesSettings';
 import { AppealSettings } from './components/AppealSettings';
 import { HelpFeedbackSettings } from './components/HelpFeedbackSettings';
-import { LEGAL_DOC_LIST } from '../../../legal';
+import { getLegalDocList } from '../../../legal';
 import { goLegalDocument } from '../../../utils/legalRoute';
+import { useI18n } from '@/hooks/useI18n';
+import type { AppLocale } from '@/i18n/types';
+
 type SettingsSection =
   | 'notifications'
   | 'privacy'
   | 'help'
   | 'legal'
   | 'buddy-prefs'
-  | 'appeal';
+  | 'appeal'
+  | 'language';
+
 type PrivacyLevel = ProfilePrivacyLevel;
-
-const SECTION_TITLES: Record<SettingsSection, string> = {
-  notifications: '消息通知',
-  privacy: '隐私设置',
-  help: '帮助与反馈',
-  legal: '法律与协议',
-  'buddy-prefs': '用户偏好',
-  appeal: '申诉说明',
-};
-
-const PRIVACY_LABELS: Record<PrivacyLevel, string> = {
-  public: '公开',
-  private: '私密',
-};
-
-const PRIVACY_DESCS: Record<PrivacyLevel, string> = {
-  public: '所有人可见你的主页和活动记录',
-  private: '仅自己可见',
-};
 
 const SettingsPage: React.FC = () => {
   useEndRouteTransitionOnShow();
@@ -65,6 +51,38 @@ const SettingsPage: React.FC = () => {
   const section = (router.params.section ?? 'notifications') as SettingsSection;
   const { data: currentUser } = useCurrentUserQuery();
   const { accountRisk, refreshAccountRisk } = useAccountRisk();
+  const { locale, setLocale, t } = useI18n();
+
+  const sectionTitles: Record<SettingsSection, string> = useMemo(
+    () => ({
+      notifications: t('settings.notifications'),
+      privacy: t('settings.privacy'),
+      help: t('settings.help'),
+      legal: t('settings.legal'),
+      'buddy-prefs': t('settings.buddyPrefs'),
+      appeal: t('settings.appeal'),
+      language: t('settings.language'),
+    }),
+    [t],
+  );
+
+  const privacyLabels: Record<PrivacyLevel, string> = useMemo(
+    () => ({
+      public: t('settings.privacyPublic'),
+      private: t('settings.privacyPrivate'),
+    }),
+    [t],
+  );
+
+  const privacyDescs: Record<PrivacyLevel, string> = useMemo(
+    () => ({
+      public: t('settings.privacyPublicDesc'),
+      private: t('settings.privacyPrivateDesc'),
+    }),
+    [t],
+  );
+
+  const legalDocList = useMemo(() => getLegalDocList(locale), [locale]);
 
   useEffect(() => {
     if (isLiveApi() && isLoggedIn()) {
@@ -85,12 +103,12 @@ const SettingsPage: React.FC = () => {
   const setStorePrivacyLevel = useProfilePageStore((state) => state.setPrivacyLevel);
 
   useEffect(() => {
-    if (!isLiveApi()) return; // skip login guard when API is not configured
+    if (!isLiveApi()) return;
     if ((section === 'buddy-prefs' || section === 'appeal') && !isLoggedIn()) {
-      void Taro.showToast({ title: '请先登录', icon: 'none' });
+      void Taro.showToast({ title: t('common.loginRequired'), icon: 'none' });
       void Taro.navigateBack();
     }
-  }, [section]);
+  }, [section, t]);
 
   useEffect(() => {
     if (currentUser?.notificationsEnabled == null) return;
@@ -141,16 +159,28 @@ const SettingsPage: React.FC = () => {
       writeProfilePrivacyLevel(level);
       void updateCurrentUserAndInvalidate({ privacyLevel: level })
         .then(() => {
-          void Taro.showToast({ title: '已保存', icon: 'success' });
+          void Taro.showToast({ title: t('common.save'), icon: 'success' });
         })
         .catch(() => {
-          void Taro.showToast({ title: '请求失败，请稍后重试', icon: 'none' });
+          void Taro.showToast({ title: t('common.requestFailed'), icon: 'none' });
         });
     },
-    [setStorePrivacyLevel],
+    [setStorePrivacyLevel, t],
+  );
+
+  const selectLocale = useCallback(
+    (next: AppLocale) => {
+      setLocale(next);
+      void Taro.showToast({ title: t('common.save'), icon: 'success' });
+    },
+    [setLocale, t],
   );
 
   const privacyOptions: PrivacyLevel[] = ['public', 'private'];
+  const languageOptions: { value: AppLocale; label: string }[] = [
+    { value: 'zh-CN', label: t('settings.languageZh') },
+    { value: 'en-US', label: t('settings.languageEn') },
+  ];
 
   const scrollStyle =
     mainScrollHeight != null ? { height: `${mainScrollHeight}px` } : undefined;
@@ -158,7 +188,7 @@ const SettingsPage: React.FC = () => {
   return (
     <View data-cmp="Settings" className="s-settings">
       <PageNavigation
-        title={SECTION_TITLES[section]}
+        title={sectionTitles[section]}
         fallback={ROUTES.PROFILE}
         tone="surface"
       />
@@ -202,9 +232,11 @@ const SettingsPage: React.FC = () => {
               <View className="s-settings__card">
                 <View className="s-settings__row">
                   <View>
-                    <View className="s-settings__row-label">推送通知</View>
+                    <View className="s-settings__row-label">
+                      {t('settings.pushNotifications')}
+                    </View>
                     <View className="s-settings__row-desc">
-                      接收活动提醒、互动消息等
+                      {t('settings.pushNotificationsDesc')}
                     </View>
                   </View>
                   <Button
@@ -218,8 +250,12 @@ const SettingsPage: React.FC = () => {
                 </View>
                 <View className="s-settings__row">
                   <View>
-                    <View className="s-settings__row-label">活动提醒</View>
-                    <View className="s-settings__row-desc">活动开始前 24 小时提醒</View>
+                    <View className="s-settings__row-label">
+                      {t('settings.activityReminder')}
+                    </View>
+                    <View className="s-settings__row-desc">
+                      {t('settings.activityReminderDesc')}
+                    </View>
                   </View>
                   <Button
                     role="switch"
@@ -243,10 +279,10 @@ const SettingsPage: React.FC = () => {
                   >
                     <View>
                       <View className="s-settings__option-label">
-                        {PRIVACY_LABELS[level]}
+                        {privacyLabels[level]}
                       </View>
                       <View className="s-settings__option-desc">
-                        {PRIVACY_DESCS[level]}
+                        {privacyDescs[level]}
                       </View>
                     </View>
                     {privacyLevel === level && (
@@ -257,9 +293,38 @@ const SettingsPage: React.FC = () => {
               </View>
             )}
 
+            {section === 'language' && (
+              <View className="s-settings__card">
+                <View className="s-settings__row s-settings__row--static">
+                  <View>
+                    <View className="s-settings__row-label">
+                      {t('settings.language')}
+                    </View>
+                    <View className="s-settings__row-desc">
+                      {t('settings.languageDesc')}
+                    </View>
+                  </View>
+                </View>
+                {languageOptions.map((option) => (
+                  <Button
+                    key={option.value}
+                    className={`s-settings__option${locale === option.value ? ' s-settings__option--selected' : ''}`}
+                    onClick={() => selectLocale(option.value)}
+                  >
+                    <View>
+                      <View className="s-settings__option-label">{option.label}</View>
+                    </View>
+                    {locale === option.value && (
+                      <Check size={20} className="s-settings__check" />
+                    )}
+                  </Button>
+                ))}
+              </View>
+            )}
+
             {section === 'legal' && (
               <View className="s-settings__card">
-                {LEGAL_DOC_LIST.map((doc) => (
+                {legalDocList.map((doc) => (
                   <View
                     key={doc.id}
                     className="s-settings__option s-settings__option--row"
@@ -269,7 +334,7 @@ const SettingsPage: React.FC = () => {
                     <View className="s-settings__option-copy">
                       <Text className="s-settings__option-label">{doc.title}</Text>
                       <Text className="s-settings__option-desc">
-                        更新于 {doc.updatedAt}
+                        {t('common.updatedAt', { date: doc.updatedAt })}
                       </Text>
                     </View>
                     <ChevronRight size={18} color="#636366" />

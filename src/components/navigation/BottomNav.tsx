@@ -16,6 +16,7 @@ import {
   syncTabBarFromCurrentPage,
   useActiveRoutePath,
 } from '../../utils/route';
+import { useT } from '@/hooks/useI18n';
 
 function preloadSubpackagesForTab(path: RoutePath) {
   if (path === ROUTES.HOME || path === ROUTES.EVENTS || path === ROUTES.AI) {
@@ -37,12 +38,13 @@ function handleTabPress(path: RoutePath, isActive: boolean) {
 
 const BottomNav: React.FC = () => {
   const activePath = useActiveRoutePath();
+  const t = useT();
 
   const navItems = [
-    { path: ROUTES.HOME, icon: House, label: '首页' },
-    { path: ROUTES.AI, icon: Bot, label: 'AI助手' },
-    { path: ROUTES.EVENTS, icon: CalendarDays, label: '活动' },
-    { path: ROUTES.PROFILE, icon: User, label: '我的' },
+    { path: ROUTES.HOME, icon: House, label: t('tab.home') },
+    { path: ROUTES.AI, icon: Bot, label: t('tab.ai') },
+    { path: ROUTES.EVENTS, icon: CalendarDays, label: t('tab.events') },
+    { path: ROUTES.PROFILE, icon: User, label: t('tab.profile') },
   ];
 
   return (

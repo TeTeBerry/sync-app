@@ -1,7 +1,7 @@
 import {
-  REGENERATE_CTA,
-  TRAVEL_GUIDE_TITLE,
-  VIEW_TRAVEL_GUIDE_CTA,
+  getRegenerateCta,
+  getTravelGuideTitle,
+  getViewTravelGuideCta,
 } from '@/constants/aiCtaLabels';
 import type { AiGuidePlanFormValues, TravelGuidePlan } from '@/types/travelGuide';
 import { goAiTravelGuide } from '@/utils/route';
@@ -14,6 +14,7 @@ import { ChevronRight, Map, RefreshCw, Sparkles, Users } from '../../components/
 import { TravelPlanReceiptOcrTip } from '@/domains/travel-plan';
 import { Button } from '../ui';
 import { Text, View } from '@tarojs/components';
+import { useT } from '@/hooks/useI18n';
 import './AiGuideResultCard.scss';
 
 export type AiGuideResultCardProps = {
@@ -49,6 +50,7 @@ export function AiGuideResultCard({
   onRegenerate,
   onBuddyPostFromGuide,
 }: AiGuideResultCardProps) {
+  useT();
   const highlights = previewHighlights(plan);
   const total = findTravelGuideTotalBudgetItem(plan);
 
@@ -63,14 +65,16 @@ export function AiGuideResultCard({
         className="s-ai-guide-result__card"
         disabled={disabled}
         hoverClass="s-ai-guide-result__card--pressed"
-        aria-label={VIEW_TRAVEL_GUIDE_CTA}
+        aria-label={getViewTravelGuideCta()}
         onClick={openDetail}
       >
         <View className="s-ai-guide-result__card-head">
           <View className="s-ai-guide-result__card-icon" aria-hidden>
             <Sparkles size={16} color="#ff69b4" />
           </View>
-          <Text className="s-ai-guide-result__card-kicker">{TRAVEL_GUIDE_TITLE}</Text>
+          <Text className="s-ai-guide-result__card-kicker">
+            {getTravelGuideTitle()}
+          </Text>
         </View>
 
         <Text className="s-ai-guide-result__card-title">{plan.activityName}</Text>
@@ -119,7 +123,9 @@ export function AiGuideResultCard({
         ) : null}
 
         <View className="s-ai-guide-result__cta">
-          <Text className="s-ai-guide-result__cta-label">{VIEW_TRAVEL_GUIDE_CTA}</Text>
+          <Text className="s-ai-guide-result__cta-label">
+            {getViewTravelGuideCta()}
+          </Text>
           <ChevronRight size={16} color="#ff69b4" aria-hidden />
         </View>
       </Button>
@@ -154,7 +160,7 @@ export function AiGuideResultCard({
           onClick={onRegenerate}
         >
           <RefreshCw size={16} color="#fff" />
-          <Text className="s-ai-guide-result__action-label">{REGENERATE_CTA}</Text>
+          <Text className="s-ai-guide-result__action-label">{getRegenerateCta()}</Text>
         </Button>
       </View>
     </View>

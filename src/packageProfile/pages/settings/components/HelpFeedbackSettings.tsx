@@ -3,9 +3,10 @@ import { useCallback, useState } from 'react';
 import { Text, Textarea, View } from '@tarojs/components';
 import { Button } from '../../../../components/ui';
 import {
-  GENERATE_TRAVEL_GUIDE_CTA,
-  TRAVEL_GUIDE_TITLE,
+  getGenerateTravelGuideCta,
+  getTravelGuideTitle,
 } from '../../../../constants/aiCtaLabels';
+import { useT } from '@/hooks/useI18n';
 import { submitUserFeedback } from '../../../../api/sync/feedback';
 import { isLiveApi } from '../../../../constants/api';
 import { isLoggedIn } from '../../../../utils/authStorage';
@@ -15,21 +16,6 @@ import { SUPPORT_EMAIL } from '../../../../constants/supportContact';
 import { AccountDeletionGuide } from '@/packageProfile/pages/settings/components/AccountDeletionGuide';
 
 const SHOW_DEV_RESET = process.env.NODE_ENV !== 'production';
-
-const FAQ_QA = [
-  {
-    q: `如何使用${TRAVEL_GUIDE_TITLE}？`,
-    a: `进入活动详情或 AI 助手，点「${GENERATE_TRAVEL_GUIDE_CTA}」或描述出发地、人数、预算，即可生成交通/住宿/散场建议。`,
-  },
-  {
-    q: '如何查看活动信息？',
-    a: '在首页或活动 Tab 浏览电音节，进入活动详情可查看阵容、行程与结伴入口。',
-  },
-  {
-    q: '如何提升个人影响力？',
-    a: '参与活动、完善个人资料、使用 AI 攻略与结伴互动等功能，可获得更好的活动体验。',
-  },
-] as const;
 
 const CONTENT_MIN = 5;
 const CONTENT_MAX = 1000;
@@ -43,6 +29,23 @@ type FeedbackSuccessState = {
 };
 
 export function HelpFeedbackSettings() {
+  const t = useT();
+
+  const faqItems = [
+    {
+      q: `如何使用${getTravelGuideTitle()}？`,
+      a: `进入活动详情或 AI 助手，点「${getGenerateTravelGuideCta()}」或描述出发地、人数、预算，即可生成交通/住宿/散场建议。`,
+    },
+    {
+      q: '如何查看活动信息？',
+      a: '在首页或活动 Tab 浏览电音节，进入活动详情可查看阵容、行程与结伴入口。',
+    },
+    {
+      q: '如何提升个人影响力？',
+      a: '参与活动、完善个人资料、使用 AI 攻略与结伴互动等功能，可获得更好的活动体验。',
+    },
+  ];
+
   const [formOpen, setFormOpen] = useState(false);
   const [content, setContent] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -52,17 +55,20 @@ export function HelpFeedbackSettings() {
 
   useOverlayLock(formOpen);
 
-  const openForm = useCallback((options?: { accountDeletion?: boolean }) => {
-    if (!isLiveApi() || isLoggedIn()) {
-      setDeletionPrefill(options?.accountDeletion ?? false);
-      if (options?.accountDeletion) {
-        setContent('申请删除账号与全部个人数据');
+  const openForm = useCallback(
+    (options?: { accountDeletion?: boolean }) => {
+      if (!isLiveApi() || isLoggedIn()) {
+        setDeletionPrefill(options?.accountDeletion ?? false);
+        if (options?.accountDeletion) {
+          setContent('申请删除账号与全部个人数据');
+        }
+        setFormOpen(true);
+        return;
       }
-      setFormOpen(true);
-      return;
-    }
-    void Taro.showToast({ title: '请先登录后再提交反馈', icon: 'none' });
-  }, []);
+      void Taro.showToast({ title: t('auth.feedbackLoginRequired'), icon: 'none' });
+    },
+    [t],
+  );
 
   const closeForm = useCallback(() => {
     if (submitting) return;
@@ -82,7 +88,7 @@ export function HelpFeedbackSettings() {
     }
 
     if (isLiveApi() && !isLoggedIn()) {
-      void Taro.showToast({ title: '请先登录后再提交反馈', icon: 'none' });
+      void Taro.showToast({ title: t('auth.feedbackLoginRequired'), icon: 'none' });
       return;
     }
 
@@ -109,7 +115,7 @@ export function HelpFeedbackSettings() {
       setFormOpen(false);
       setDeletionPrefill(false);
     } catch {
-      void Taro.showToast({ title: '提交失败，请稍后重试', icon: 'none' });
+      void Taro.showToast({ title: t('common.requestFailed'), icon: 'none' });
     } finally {
       setSubmitting(false);
     }
@@ -145,7 +151,7 @@ export function HelpFeedbackSettings() {
       />
 
       <View className="s-settings__card s-settings__faq">
-        {FAQ_QA.map((item, idx) => (
+        {faqItems.map((item, idx) => (
           <View key={idx} className="s-settings__faq-item">
             <View className="s-settings__faq-q">{item.q}</View>
             <View className="s-settings__faq-a">{item.a}</View>

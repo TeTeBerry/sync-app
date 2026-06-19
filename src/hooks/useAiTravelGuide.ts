@@ -13,7 +13,7 @@ import type { ChatUiMessage } from '../types/aiChat';
 import type { AiGuidePlanFormValues } from '../types/travelGuide';
 import { travelGuideBudgetLabel } from '../types/travelGuide';
 import { saveTravelGuideDetail } from '../domains/travel-guide/utils/travelGuideDetailStorage';
-import { TRAVEL_GUIDE_TITLE } from '../constants/aiCtaLabels';
+import { getTravelGuideTitle } from '../constants/aiCtaLabels';
 import {
   startAiChatStagedProgress,
   withAiChatProgress,
@@ -24,7 +24,7 @@ import { isAuthGated, requireAuth } from '../utils/authGate';
 function buildUserSummary(form: AiGuidePlanFormValues, activityTitle: string): string {
   const budget = travelGuideBudgetLabel(form.budgetTier);
   const drive = form.selfDrive ? '自驾' : '非自驾';
-  return `生成「${activityTitle}」${TRAVEL_GUIDE_TITLE}：${form.departure}出发，${form.headcount}人，住${form.accommodationNights}晚，${budget}，${drive}`;
+  return `生成「${activityTitle}」${getTravelGuideTitle()}：${form.departure}出发，${form.headcount}人，住${form.accommodationNights}晚，${budget}，${drive}`;
 }
 
 export function useAiTravelGuide(options: {

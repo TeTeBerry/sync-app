@@ -5,22 +5,23 @@ import {
   resolveWelcomeCapabilityChipAction,
 } from '@/utils/aiAssistantCapabilityDiscovery';
 import {
-  BUDDY_POST_CTA,
-  GENERATE_ITINERARY_CTA,
-  GENERATE_TRAVEL_GUIDE_CTA,
-  START_PERSONALITY_TEST_CTA,
+  getBuddyPostCta,
+  getGenerateItineraryCta,
+  getGenerateTravelGuideCta,
+  getStartPersonalityTestCta,
 } from '@/constants/aiCtaLabels';
+import { t } from '@/i18n';
 
 describe('aiAssistantCapabilityDiscovery', () => {
   it('shows bound lineup chip only — plan tasks live in festival checklist', () => {
-    expect(buildWelcomeCapabilityChipLabels(true)).toEqual(['查阵容']);
+    expect(buildWelcomeCapabilityChipLabels(true)).toEqual([t('ai.lineup')]);
   });
 
   it('shows unbound discovery chips', () => {
     expect(buildWelcomeCapabilityChipLabels(false)).toEqual([
-      '选一场电音节',
-      '最近有什么活动',
-      START_PERSONALITY_TEST_CTA,
+      t('ai.pickFestival'),
+      t('ai.nearEvents'),
+      getStartPersonalityTestCta(),
     ]);
   });
 
@@ -28,38 +29,40 @@ describe('aiAssistantCapabilityDiscovery', () => {
     const message = createWelcomeChatMessage('EDC Thailand 2026', 8);
     expect(message.isWelcome).toBe(true);
     expect(message.text).toContain('EDC Thailand 2026');
-    expect(message.suggestedReplies).toEqual(['查阵容']);
+    expect(message.suggestedReplies).toEqual([t('ai.lineup')]);
   });
 
   it('maps bound chip labels to actions', () => {
-    expect(resolveWelcomeCapabilityChipAction('查阵容', true)).toEqual({
+    expect(resolveWelcomeCapabilityChipAction(t('ai.lineup'), true)).toEqual({
       type: 'send',
-      text: '查阵容',
+      text: t('ai.lineup'),
     });
-    expect(resolveWelcomeCapabilityChipAction(GENERATE_TRAVEL_GUIDE_CTA, true)).toEqual(
+    expect(
+      resolveWelcomeCapabilityChipAction(getGenerateTravelGuideCta(), true),
+    ).toEqual({
+      type: 'travel_guide_sheet',
+    });
+    expect(resolveWelcomeCapabilityChipAction(getGenerateItineraryCta(), true)).toEqual(
       {
-        type: 'travel_guide_sheet',
+        type: 'itinerary_sheet',
       },
     );
-    expect(resolveWelcomeCapabilityChipAction(GENERATE_ITINERARY_CTA, true)).toEqual({
-      type: 'itinerary_sheet',
-    });
-    expect(resolveWelcomeCapabilityChipAction(BUDDY_POST_CTA, true)).toEqual({
+    expect(resolveWelcomeCapabilityChipAction(getBuddyPostCta(), true)).toEqual({
       type: 'buddy_post_sheet',
     });
   });
 
   it('maps unbound chip labels to actions', () => {
-    expect(resolveWelcomeCapabilityChipAction('最近有什么活动', false)).toEqual({
+    expect(resolveWelcomeCapabilityChipAction(t('ai.nearEvents'), false)).toEqual({
       type: 'send',
-      text: '查最近活动',
+      text: t('ai.nearEventsSubmit'),
     });
     expect(
-      resolveWelcomeCapabilityChipAction(START_PERSONALITY_TEST_CTA, false),
+      resolveWelcomeCapabilityChipAction(getStartPersonalityTestCta(), false),
     ).toEqual({
       type: 'personality_test',
     });
-    expect(resolveWelcomeCapabilityChipAction('选一场电音节', false)).toEqual({
+    expect(resolveWelcomeCapabilityChipAction(t('ai.pickFestival'), false)).toEqual({
       type: 'pick_festival_sheet',
     });
   });

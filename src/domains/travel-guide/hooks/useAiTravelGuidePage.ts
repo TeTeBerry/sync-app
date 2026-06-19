@@ -15,7 +15,7 @@ import {
   saveTravelGuideDetail,
   type TravelGuideDetailPayload,
 } from '../utils/travelGuideDetailStorage';
-import { TRAVEL_GUIDE_TITLE } from '@/constants/aiCtaLabels';
+import { getTravelGuideTitle } from '@/constants/aiCtaLabels';
 import { buildTravelGuideShareText } from '../utils/travelGuideShareText';
 import {
   buildTravelGuideShareAppMessage,
@@ -173,7 +173,7 @@ export function useAiTravelGuidePage() {
   useShareAppMessage(() => {
     const current = shareRef.current;
     if (!current) {
-      return { title: TRAVEL_GUIDE_TITLE, path: ROUTES.AI_TRAVEL_GUIDE };
+      return { title: getTravelGuideTitle(), path: ROUTES.AI_TRAVEL_GUIDE };
     }
     return buildTravelGuideShareAppMessage(
       current.guideId,
@@ -185,7 +185,7 @@ export function useAiTravelGuidePage() {
   useShareTimeline(() => {
     const current = shareRef.current;
     if (!current) {
-      return { title: TRAVEL_GUIDE_TITLE };
+      return { title: getTravelGuideTitle() };
     }
     return buildTravelGuideShareTimeline(
       current.guideId,

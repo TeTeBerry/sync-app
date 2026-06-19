@@ -1,15 +1,16 @@
-import {
-  BUDDY_POST_CTA,
-  GENERATE_ITINERARY_CTA,
-  GENERATE_TRAVEL_GUIDE_CTA,
-} from '../constants/aiCtaLabels';
+import { labelMatchesKey } from '@/i18n';
 import { isActivityBoundForCapabilities } from './aiAssistantCapabilityDiscovery';
 
-const CHECKLIST_DUPLICATE_REPLY_LABELS = new Set([
-  GENERATE_TRAVEL_GUIDE_CTA,
-  GENERATE_ITINERARY_CTA,
-  BUDDY_POST_CTA,
-]);
+const CHECKLIST_DUPLICATE_KEYS = [
+  'ai.generateTravelGuide',
+  'ai.generateItinerary',
+  'ai.buddyPost',
+] as const;
+
+function isChecklistDuplicateReply(reply: string): boolean {
+  const trimmed = reply.trim();
+  return CHECKLIST_DUPLICATE_KEYS.some((key) => labelMatchesKey(trimmed, key));
+}
 
 /** Composer festival shortcut chips are replaced by welcome picker + event context. */
 export function shouldShowComposerActivityChips(): boolean {
@@ -37,8 +38,6 @@ export function filterChecklistDuplicateSuggestedReplies(
   if (!isActivityBoundForCapabilities(activityLegacyId) || !replies?.length) {
     return replies;
   }
-  const filtered = replies.filter(
-    (reply) => !CHECKLIST_DUPLICATE_REPLY_LABELS.has(reply.trim()),
-  );
+  const filtered = replies.filter((reply) => !isChecklistDuplicateReply(reply));
   return filtered.length > 0 ? filtered : undefined;
 }

@@ -1,3 +1,5 @@
-/** 平台底部固定免责声明（首页、活动详情等） */
-export const PLATFORM_DISCLAIMER_TEXT =
-  '本平台免费提供电音节资讯与结伴交流工具，不在平台内销售票务或收取服务费；用户线下自发结伴须自行甄别风险。';
+import { t } from '@/i18n';
+
+export function getPlatformDisclaimerText(): string {
+  return t('platform.disclaimer');
+}

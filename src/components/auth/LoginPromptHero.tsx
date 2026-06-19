@@ -10,6 +10,7 @@ import { LegalConsentRow } from '../legal/LegalConsentRow';
 import { loginWithWechat } from '../../utils/auth';
 import { hasLegalConsent, writeLegalConsent } from '../../utils/legalConsentStorage';
 import { switchTabTo, ROUTES } from '../../utils/route';
+import { useT } from '@/hooks/useI18n';
 
 export type LoginPromptHeroProps = {
   className?: string;
@@ -23,20 +24,21 @@ export function LoginPromptHero({
   onLoggedIn,
   onBrowseEvents,
 }: LoginPromptHeroProps) {
+  const t = useT();
   const [loggingIn, setLoggingIn] = useState(false);
   const [legalAccepted, setLegalAccepted] = useState(() => hasLegalConsent());
 
   const handleLogin = useCallback(async () => {
     if (!legalAccepted) {
       void Taro.showToast({
-        title: '请先阅读并同意相关协议与社区规范',
+        title: t('auth.acceptLegalToast'),
         icon: 'none',
       });
       return;
     }
 
     if (!isLiveApi()) {
-      void Taro.showToast({ title: '请配置 API 地址', icon: 'none' });
+      void Taro.showToast({ title: t('auth.configureApi'), icon: 'none' });
       return;
     }
 
@@ -46,24 +48,24 @@ export function LoginPromptHero({
         await loginWithWechat({ requireProfile: true });
       } else {
         void Taro.showToast({
-          title: '请在微信小程序中登录',
+          title: t('auth.wechatOnly'),
           icon: 'none',
         });
         return;
       }
       writeLegalConsent();
       onLoggedIn?.();
-      void Taro.showToast({ title: '登录成功', icon: 'success' });
+      void Taro.showToast({ title: t('auth.loginSuccess'), icon: 'success' });
     } catch (error) {
       const message =
         error instanceof Error && error.message.trim()
           ? error.message
-          : '登录失败，请稍后重试';
+          : t('auth.loginFailed');
       void Taro.showToast({ title: message, icon: 'none' });
     } finally {
       setLoggingIn(false);
     }
-  }, [legalAccepted, onLoggedIn]);
+  }, [legalAccepted, onLoggedIn, t]);
 
   const browseEvents = useCallback(() => {
     if (onBrowseEvents) {
@@ -74,13 +76,16 @@ export function LoginPromptHero({
   }, [onBrowseEvents]);
 
   return (
-    <View className={className ?? 's-login-prompt-hero'} aria-label="登录引导">
+    <View
+      className={className ?? 's-login-prompt-hero'}
+      aria-label={t('auth.loginHeroAria')}
+    >
       <View className="s-login-prompt-hero__avatar" aria-hidden>
         <SyncBrandMark className="s-login-prompt-hero__brand-mark" />
       </View>
-      <Text className="s-login-prompt-hero__title">登录后开启你的电音之旅</Text>
+      <Text className="s-login-prompt-hero__title">{t('auth.loginHeroTitle')}</Text>
       <Text className="s-login-prompt-hero__subtitle">
-        参加活动、发布组队帖，并管理专属权益
+        {t('auth.loginHeroSubtitle')}
       </Text>
 
       <View className="s-login-prompt-hero__highlights" aria-hidden>
@@ -89,7 +94,7 @@ export function LoginPromptHero({
             <Bot size={14} color="#64d2ff" strokeWidth={2.25} />
           </View>
           <View className="s-login-prompt-hero__chip-label-wrap">
-            <Text className="s-login-prompt-hero__chip-label">AI 助手</Text>
+            <Text className="s-login-prompt-hero__chip-label">{t('auth.chipAi')}</Text>
           </View>
         </View>
         <View className="s-login-prompt-hero__chip">
@@ -97,7 +102,9 @@ export function LoginPromptHero({
             <Zap size={14} color="#bf5af2" />
           </View>
           <View className="s-login-prompt-hero__chip-label-wrap">
-            <Text className="s-login-prompt-hero__chip-label">活动组队</Text>
+            <Text className="s-login-prompt-hero__chip-label">
+              {t('auth.chipTeam')}
+            </Text>
           </View>
         </View>
       </View>
@@ -111,7 +118,7 @@ export function LoginPromptHero({
         onClick={handleLogin}
       >
         <Text className="s-login-prompt-hero__login-btn-text">
-          {process.env.TARO_ENV === 'weapp' ? '微信一键登录' : '登录'}
+          {process.env.TARO_ENV === 'weapp' ? t('auth.wechatLogin') : t('auth.login')}
         </Text>
       </Button>
 
@@ -120,7 +127,9 @@ export function LoginPromptHero({
         hoverClass="s-login-prompt-hero__browse--pressed"
         onClick={browseEvents}
       >
-        <Text className="s-login-prompt-hero__browse-text">先浏览活动</Text>
+        <Text className="s-login-prompt-hero__browse-text">
+          {t('auth.browseFirst')}
+        </Text>
         <ChevronRight size={16} color="#8e8e93" />
       </View>
     </View>

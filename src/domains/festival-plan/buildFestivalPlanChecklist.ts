@@ -1,8 +1,9 @@
+import { t } from '@/i18n';
 import {
-  FESTIVAL_PLAN_TASK_DEFS,
   FESTIVAL_PLAN_TASK_ORDER,
   type FestivalPlanTaskKey,
 } from './festivalPlanTaskDefs';
+import { getFestivalPlanTaskDefs } from './festivalPlanTaskLabels';
 
 export type FestivalPlanTask = {
   key: FestivalPlanTaskKey;
@@ -50,12 +51,16 @@ export function buildFestivalPlanChecklist(
     (key) => doneByKey[key],
   ).length;
 
+  const taskDefs = getFestivalPlanTaskDefs();
+
   const tasks: FestivalPlanTask[] = FESTIVAL_PLAN_TASK_ORDER.map((key) => {
-    const def = FESTIVAL_PLAN_TASK_DEFS[key];
+    const def = taskDefs[key];
     const done = doneByKey[key];
     let doneLabel = def.doneLabel;
     if (key === 'itinerary' && done && input.itineraryDayCount) {
-      doneLabel = `${input.itineraryDayCount} 天行程`;
+      doneLabel = t('festivalPlan.itineraryDoneDays', {
+        count: input.itineraryDayCount,
+      });
     }
 
     return {

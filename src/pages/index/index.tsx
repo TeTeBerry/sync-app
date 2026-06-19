@@ -44,10 +44,12 @@ import { OverlayAwareScrollView } from '../../components/layout/OverlayAwareScro
 import { PlatformDisclaimer } from '../../components/legal/PlatformDisclaimer';
 import { NewUserOnboardingSheet } from '../../components/onboarding/NewUserOnboardingSheet';
 import { useNewUserOnboarding } from '../../hooks/useNewUserOnboarding';
+import { useT } from '@/hooks/useI18n';
 import { View } from '@tarojs/components';
 
 const Home = () => {
   useEndRouteTransitionOnShow(ROUTES.HOME);
+  const t = useT();
 
   const { data: summary, refetch: refetchHomeSummary } = useHomeSummary();
   const heat = summary?.heat;
@@ -186,8 +188,8 @@ const Home = () => {
 
   const heatLabel =
     activeTeamCount > 0
-      ? `近 ${activeTeamCount} 人已选择近期活动`
-      : '近期活动持续更新中';
+      ? t('home.heatActive', { count: activeTeamCount })
+      : t('home.heatIdle');
 
   return (
     <View data-cmp="Home" className="s-page-with-tabbar s-home--with-legal-footer">
@@ -201,7 +203,7 @@ const Home = () => {
           <View className="s-home__scroll-inner">
             <TabPageHeader
               className="s-tab-page-header--home"
-              brandSubtitle="发现电音节 · 找同好结伴"
+              brandSubtitle={t('home.brandSubtitle')}
               navInsets={navInsets}
               paddingRightGutterPx={16}
               trailing={
@@ -248,7 +250,7 @@ const Home = () => {
 
             <HomeQuickActions />
 
-            <View className="s-home__heat" aria-label="Activity interest">
+            <View className="s-home__heat" aria-label={t('home.countdownAria')}>
               {heatLabel}
             </View>
           </View>

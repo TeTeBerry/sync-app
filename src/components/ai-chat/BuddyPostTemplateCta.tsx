@@ -1,33 +1,30 @@
-import { Users } from '../../components/icons';
-import { Button } from '../ui';
-import { BUDDY_POST_SHEET_ACTION_LABEL } from '../../utils/buddyPostPromptMessage';
-import { Text, View } from '@tarojs/components';
 import './BuddyPostTemplateCta.scss';
+import { Text, View } from '@tarojs/components';
+import { getBuddyPostSheetActionLabel } from '../../utils/buddyPostPromptMessage';
+import { useT } from '@/hooks/useI18n';
 
-export function BuddyPostTemplateCta({
-  disabled,
-  onOpenSheet,
-}: {
-  disabled?: boolean;
-  onOpenSheet: () => void;
-}) {
+export type BuddyPostTemplateCtaProps = {
+  onPress: () => void;
+};
+
+export function BuddyPostTemplateCta({ onPress }: BuddyPostTemplateCtaProps) {
+  useT();
+  const label = getBuddyPostSheetActionLabel();
+
   return (
-    <Button
+    <View
       className="s-buddy-post-template-cta"
-      disabled={disabled}
       hoverClass="s-buddy-post-template-cta--pressed"
-      aria-label={BUDDY_POST_SHEET_ACTION_LABEL}
-      onClick={onOpenSheet}
+      onClick={onPress}
+      role="button"
+      aria-label={label}
     >
-      <Users size={18} color="#fff" />
-      <View className="s-buddy-post-template-cta__text">
-        <Text className="s-buddy-post-template-cta__title">
-          {BUDDY_POST_SHEET_ACTION_LABEL}
+      <View className="s-buddy-post-template-cta__inner">
+        <Text className="s-buddy-post-template-cta__sparkle" aria-hidden>
+          ✨
         </Text>
-        <Text className="s-buddy-post-template-cta__sub">
-          用表单填写活动时间、集合点与人数
-        </Text>
+        <Text className="s-buddy-post-template-cta__label">{label}</Text>
       </View>
-    </Button>
+    </View>
   );
 }

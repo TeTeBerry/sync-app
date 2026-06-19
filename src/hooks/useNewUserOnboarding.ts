@@ -11,6 +11,7 @@ import {
   markNewUserOnboardingSeen,
 } from '@/utils/onboardingStorage';
 import { goEventDetail, goEventsListTab, switchTabTo, ROUTES } from '@/utils/route';
+import { useT } from '@/hooks/useI18n';
 
 export type UseNewUserOnboardingOptions = {
   featuredActivityLegacyId?: number;
@@ -18,6 +19,7 @@ export type UseNewUserOnboardingOptions = {
 
 export function useNewUserOnboarding(options: UseNewUserOnboardingOptions = {}) {
   const { featuredActivityLegacyId } = options;
+  const t = useT();
   const [open, setOpen] = useState(false);
 
   const dismiss = useCallback(() => {
@@ -41,11 +43,13 @@ export function useNewUserOnboarding(options: UseNewUserOnboardingOptions = {}) 
 
     return [
       {
-        title: '选一场活动',
+        title: t('onboarding.step1Title'),
         description: joinLegacyId
-          ? '在活动 Tab 浏览电音节，或直接进入本场活动详情。选择活动后会自动记录你的参与意向。'
-          : '在活动 Tab 浏览电音节资讯，挑选你想参加的活动。',
-        actionLabel: joinLegacyId ? '进入本场活动' : '去活动列表',
+          ? t('onboarding.step1Desc')
+          : t('onboarding.step1DescBrowse'),
+        actionLabel: joinLegacyId
+          ? t('onboarding.step1ActionFeatured')
+          : t('onboarding.step1ActionList'),
         onAction: () => {
           if (joinLegacyId) {
             dismissAnd(() => goEventDetail(joinLegacyId));
@@ -55,14 +59,13 @@ export function useNewUserOnboarding(options: UseNewUserOnboardingOptions = {}) 
         },
       },
       {
-        title: '生成出行攻略',
-        description:
-          '在 AI 助手绑定活动后，可生成交通、住宿与散场参考（AI 内容仅供参考）。',
-        actionLabel: '打开 AI 助手',
+        title: t('onboarding.step2Title'),
+        description: t('onboarding.step2Desc'),
+        actionLabel: t('onboarding.step2Action'),
         onAction: () => dismissAnd(() => switchTabTo(ROUTES.AI)),
       },
     ];
-  }, [dismissAnd, featuredActivityLegacyId]);
+  }, [dismissAnd, featuredActivityLegacyId, t]);
 
   const evaluateOnShow = useCallback(() => {
     if (!isLoggedIn() || !hasLegalConsent() || hasSeenNewUserOnboarding()) {

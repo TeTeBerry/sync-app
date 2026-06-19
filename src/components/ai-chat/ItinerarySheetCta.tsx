@@ -1,31 +1,32 @@
-import { Music2 } from '../../components/icons';
-import { Button } from '../ui';
-import { ITINERARY_SHEET_ACTION_LABEL } from '../../utils/itineraryPromptMessage';
-import { Text, View } from '@tarojs/components';
 import './ItinerarySheetCta.scss';
+import { Text, View } from '@tarojs/components';
+import { getItinerarySheetActionLabel } from '../../utils/itineraryPromptMessage';
+import { useT } from '@/hooks/useI18n';
 
-export function ItinerarySheetCta({
-  disabled,
-  onOpenSheet,
-}: {
-  disabled?: boolean;
-  onOpenSheet: () => void;
-}) {
+export type ItinerarySheetCtaProps = {
+  onPress: () => void;
+};
+
+import { useT } from '@/hooks/useI18n';
+
+export function ItinerarySheetCta({ onPress }: ItinerarySheetCtaProps) {
+  useT();
+  const label = getItinerarySheetActionLabel();
+
   return (
-    <Button
+    <View
       className="s-itinerary-sheet-cta"
-      disabled={disabled}
       hoverClass="s-itinerary-sheet-cta--pressed"
-      aria-label={ITINERARY_SHEET_ACTION_LABEL}
-      onClick={onOpenSheet}
+      onClick={onPress}
+      role="button"
+      aria-label={label}
     >
-      <Music2 size={18} color="#fff" />
-      <View className="s-itinerary-sheet-cta__text">
-        <Text className="s-itinerary-sheet-cta__title">
-          {ITINERARY_SHEET_ACTION_LABEL}
+      <View className="s-itinerary-sheet-cta__inner">
+        <Text className="s-itinerary-sheet-cta__sparkle" aria-hidden>
+          ✨
         </Text>
-        <Text className="s-itinerary-sheet-cta__sub">选择想看的 DJ，生成专属行程</Text>
+        <Text className="s-itinerary-sheet-cta__label">{label}</Text>
       </View>
-    </Button>
+    </View>
   );
 }

@@ -1,10 +1,11 @@
 import './ProfileGuestSection.scss';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Bell, ChevronRight, FileText, Info, Lock, Zap } from '../../components/icons';
 import { LoginPromptHero } from '../auth/LoginPromptHero';
 import { requireAuth } from '../../utils/authGate';
 import { go, ROUTES } from '../../utils/route';
 import { Text, View } from '@tarojs/components';
+import { useT } from '@/hooks/useI18n';
 
 export type ProfileGuestSectionProps = {
   onLoggedIn: () => void;
@@ -19,32 +20,37 @@ type LockedFeature = {
   feature: 'activity' | 'social' | 'notification';
 };
 
-const LOCKED_FEATURES: LockedFeature[] = [
-  {
-    icon: <Zap size={18} color="#ff0066" />,
-    title: '我的活动',
-    desc: '活动记录与行程管理',
-    feature: 'activity',
-  },
-  {
-    icon: <FileText size={18} color="#bf5af2" />,
-    title: '我的帖子',
-    desc: '模板帖与留言管理',
-    feature: 'social',
-  },
-  {
-    icon: <Bell size={18} color="#8e8e93" />,
-    title: '消息通知',
-    desc: '评论回复与活动提醒',
-    feature: 'notification',
-  },
-];
-
 const ProfileGuestSection: React.FC<ProfileGuestSectionProps> = ({
   onLoggedIn,
   onOpenHelp,
   onOpenLegal,
 }) => {
+  const t = useT();
+
+  const lockedFeatures = useMemo(
+    (): LockedFeature[] => [
+      {
+        icon: <Zap size={18} color="#ff0066" />,
+        title: t('profile.guest.activitiesTitle'),
+        desc: t('profile.guest.activitiesDesc'),
+        feature: 'activity',
+      },
+      {
+        icon: <FileText size={18} color="#bf5af2" />,
+        title: t('profile.guest.postsTitle'),
+        desc: t('profile.guest.postsDesc'),
+        feature: 'social',
+      },
+      {
+        icon: <Bell size={18} color="#8e8e93" />,
+        title: t('profile.guest.notificationsTitle'),
+        desc: t('profile.guest.notificationsDesc'),
+        feature: 'notification',
+      },
+    ],
+    [t],
+  );
+
   const openLockedRoute = useCallback((feature: LockedFeature['feature']) => {
     const routes = {
       activity: ROUTES.PROFILE_ACTIVITIES,
@@ -55,16 +61,18 @@ const ProfileGuestSection: React.FC<ProfileGuestSectionProps> = ({
   }, []);
 
   return (
-    <View className="s-profile-guest" aria-label="未登录">
+    <View className="s-profile-guest" aria-label={t('profile.guest.aria')}>
       <View className="s-profile-guest__hero">
         <LoginPromptHero onLoggedIn={onLoggedIn} />
       </View>
 
       <View className="s-profile-guest__locked-card">
-        <Text className="s-profile-guest__locked-head">登录后可用</Text>
-        {LOCKED_FEATURES.map((item) => (
+        <Text className="s-profile-guest__locked-head">
+          {t('profile.guest.loginAfter')}
+        </Text>
+        {lockedFeatures.map((item) => (
           <View
-            key={item.title}
+            key={item.feature}
             className="s-profile-guest__locked-row"
             hoverClass="s-profile-guest__locked-row--pressed"
             onClick={() => openLockedRoute(item.feature)}
@@ -88,7 +96,9 @@ const ProfileGuestSection: React.FC<ProfileGuestSectionProps> = ({
           <View className="s-profile-guest__settings-icon">
             <FileText size={18} color="#b0b0b0" />
           </View>
-          <Text className="s-profile-guest__settings-label">法律与协议</Text>
+          <Text className="s-profile-guest__settings-label">
+            {t('profile.guest.legal')}
+          </Text>
           <ChevronRight size={18} color="#636366" />
         </View>
         <View
@@ -99,7 +109,9 @@ const ProfileGuestSection: React.FC<ProfileGuestSectionProps> = ({
           <View className="s-profile-guest__settings-icon">
             <Info size={18} color="#b0b0b0" />
           </View>
-          <Text className="s-profile-guest__settings-label">帮助与反馈</Text>
+          <Text className="s-profile-guest__settings-label">
+            {t('profile.settings.help')}
+          </Text>
           <ChevronRight size={18} color="#636366" />
         </View>
       </View>

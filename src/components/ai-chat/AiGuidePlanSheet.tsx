@@ -10,7 +10,7 @@ import {
   X,
 } from '../../components/icons';
 import { Button, cn } from '../ui';
-import { GENERATE_TRAVEL_GUIDE_CTA } from '../../constants/aiCtaLabels';
+import { getGenerateTravelGuideCta } from '../../constants/aiCtaLabels';
 import { useOverlayLock } from '../../hooks/useOverlayLock';
 import type { AiGuidePlanFormValues } from '../../types/travelGuide';
 import { TRAVEL_GUIDE_BUDGET_OPTIONS } from '../../types/travelGuide';
@@ -158,7 +158,7 @@ function AiGuidePlanSheetInner({
               id="ai-guide-plan-sheet-title"
               className="s-ai-guide-plan-sheet__title"
             >
-              {GENERATE_TRAVEL_GUIDE_CTA}
+              {getGenerateTravelGuideCta()}
             </Text>
             <Text className="s-ai-guide-plan-sheet__beta">Beta</Text>
           </View>
@@ -306,7 +306,7 @@ function AiGuidePlanSheetInner({
           >
             <Sparkles size={18} color="#fff" aria-hidden />
             <Text className="s-ai-guide-plan-sheet__submit-text">
-              {GENERATE_TRAVEL_GUIDE_CTA}
+              {getGenerateTravelGuideCta()}
             </Text>
           </Button>
         </View>

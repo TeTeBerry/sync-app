@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-  BUDDY_POST_SHEET_ACTION_LABEL,
+  getBuddyPostSheetActionLabel,
   filterBuddyPostSheetShortcutReplies,
   isBuddyPostTemplatePrompt,
   REQUIRE_BUDDY_POST_MARKER,
@@ -22,7 +22,7 @@ describe('buddyPostPromptMessage', () => {
     expect(
       filterBuddyPostSheetShortcutReplies([
         '6.13-6.14 上海 2人 拼房',
-        BUDDY_POST_SHEET_ACTION_LABEL,
+        getBuddyPostSheetActionLabel(),
       ]),
     ).toEqual(['6.13-6.14 上海 2人 拼房']);
   });

@@ -1,6 +1,7 @@
 import './NewUserOnboardingSheet.scss';
 import { Text, View } from '@tarojs/components';
 import { useOverlayLock } from '@/hooks/useOverlayLock';
+import { useT } from '@/hooks/useI18n';
 
 export type NewUserOnboardingStep = {
   title: string;
@@ -21,6 +22,7 @@ export function NewUserOnboardingSheet({
   steps,
   onDismiss,
 }: NewUserOnboardingSheetProps) {
+  const t = useT();
   useOverlayLock(open);
 
   if (!open) {
@@ -38,10 +40,10 @@ export function NewUserOnboardingSheet({
       >
         <View className="s-new-user-onboarding__body">
           <Text id="new-user-onboarding-title" className="s-new-user-onboarding__title">
-            3 步开始准备你的第一场
+            {t('onboarding.sheetTitle')}
           </Text>
           <Text className="s-new-user-onboarding__subtitle">
-            免费资讯与工具，平台不销售票务、不提供站内联系或担保。
+            {t('onboarding.sheetSubtitle')}
           </Text>
 
           <View className="s-new-user-onboarding__steps">
@@ -89,7 +91,9 @@ export function NewUserOnboardingSheet({
             onClick={onDismiss}
             role="button"
           >
-            <Text className="s-new-user-onboarding__skip-label">跳过</Text>
+            <Text className="s-new-user-onboarding__skip-label">
+              {t('onboarding.skip')}
+            </Text>
           </View>
         </View>
       </View>

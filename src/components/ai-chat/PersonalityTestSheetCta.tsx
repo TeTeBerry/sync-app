@@ -1,8 +1,9 @@
 import { Sparkles } from '../../components/icons';
 import { Button } from '../ui';
-import { PERSONALITY_TEST_SHEET_ACTION_LABEL } from '../../utils/personalityTestPromptMessage';
+import { getPersonalityTestSheetActionLabel } from '../../utils/personalityTestPromptMessage';
 import { Text, View } from '@tarojs/components';
 import './PersonalityTestSheetCta.scss';
+import { useT } from '@/hooks/useI18n';
 
 export function PersonalityTestSheetCta({
   disabled,
@@ -11,21 +12,22 @@ export function PersonalityTestSheetCta({
   disabled?: boolean;
   onOpenSheet: () => void;
 }) {
+  const t = useT();
+  const label = getPersonalityTestSheetActionLabel();
+
   return (
     <Button
       className="s-personality-test-sheet-cta"
       disabled={disabled}
       hoverClass="s-personality-test-sheet-cta--pressed"
-      aria-label={PERSONALITY_TEST_SHEET_ACTION_LABEL}
+      aria-label={label}
       onClick={onOpenSheet}
     >
       <Sparkles size={18} color="#fff" />
       <View className="s-personality-test-sheet-cta__text">
-        <Text className="s-personality-test-sheet-cta__title">
-          {PERSONALITY_TEST_SHEET_ACTION_LABEL}
-        </Text>
+        <Text className="s-personality-test-sheet-cta__title">{label}</Text>
         <Text className="s-personality-test-sheet-cta__sub">
-          约 2 分钟，推荐契合 DJ 与活动
+          {t('ai.personalityTestSheetSub')}
         </Text>
       </View>
     </Button>

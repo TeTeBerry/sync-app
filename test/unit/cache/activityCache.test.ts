@@ -24,6 +24,7 @@ const homeSummary: HomeSummary = {
 
 const activities: BackendActivity[] = [
   {
+    _id: 'activity-4',
     legacyId,
     name: '风暴电音节',
     code: 'storm',
