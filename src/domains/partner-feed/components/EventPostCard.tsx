@@ -41,7 +41,10 @@ function EventPostCardInner({
   onCommentSubmitted,
 }: EventPostCardProps) {
   const displayIdentity = useDisplayUserIdentity();
-  const displayBody = useMemo(() => stripPostBodyContact(post.body), [post.body]);
+  const displayBody = useMemo(
+    () => stripPostBodyContact(post.bodyPreview || post.body || ''),
+    [post.bodyPreview, post.body],
+  );
   const submetaLocation = post.location?.trim() ?? '';
 
   const isOwn = isCurrentUserPostAuthor(post.name, post.userId);

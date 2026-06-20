@@ -15,6 +15,7 @@ export function normalizeEventPostListItem(item: EventDetailPost): EventPostList
     departureCity: item.departureCity?.trim() || undefined,
     createdAt: item.createdAt,
     body: item.body ?? '',
+    bodyPreview: item.bodyPreview ?? '',
     tags: item.tags ?? [],
     name: item.name?.trim() || '用户',
     avatar: sanitizeRemoteImageUrl(item.avatar) ?? item.avatar,

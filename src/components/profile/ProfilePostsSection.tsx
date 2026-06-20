@@ -32,7 +32,10 @@ function ProfilePostItem({
   onSelect?: (item: ProfilePostItem) => void;
   onDelete?: (item: ProfilePostItem) => void;
 }) {
-  const displayBody = useMemo(() => stripPostBodyContact(item.content), [item.content]);
+  const displayBody = useMemo(
+    () => stripPostBodyContact(item.contentPreview || item.content || ''),
+    [item.contentPreview, item.content],
+  );
 
   const stopClickPropagation = (event: { stopPropagation?: () => void }) => {
     event.stopPropagation?.();

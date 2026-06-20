@@ -146,9 +146,22 @@ export interface ProfileActivityItem {
 export interface ProfilePostItem {
   id: string;
   title: string;
-  content: string;
+  content?: string;
+  contentPreview?: string;
   date: string;
   activityLegacyId?: number;
+}
+
+export interface ProfilePostsPage {
+  items: ProfilePostItem[];
+  nextCursor?: string;
+  hasMore: boolean;
+}
+
+export interface ProfilePostsPage {
+  items: ProfilePostItem[];
+  nextCursor?: string;
+  hasMore: boolean;
 }
 
 export interface EventPostsPage {
@@ -181,7 +194,8 @@ export interface EventDetailPost {
   location: string;
   departureCity?: string;
   createdAt?: string;
-  body: string;
+  body?: string;
+  bodyPreview?: string;
   tags: string[];
   avatar: string;
   comments?: number;
