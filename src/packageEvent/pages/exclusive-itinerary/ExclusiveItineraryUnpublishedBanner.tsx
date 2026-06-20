@@ -2,6 +2,7 @@ import { Button } from '../../../components/ui';
 import { requireAuth } from '../../../utils/authGate';
 import { requestActivityUpdateSubscribe } from '../../../utils/wechatSubscribeMessage';
 import { Text, View } from '@tarojs/components';
+import { useT } from '@/hooks/useI18n';
 
 type ExclusiveItineraryUnpublishedBannerProps = {
   showEmptyLineup?: boolean;
@@ -10,6 +11,7 @@ type ExclusiveItineraryUnpublishedBannerProps = {
 export function ExclusiveItineraryUnpublishedBanner({
   showEmptyLineup = false,
 }: ExclusiveItineraryUnpublishedBannerProps) {
+  const t = useT();
   const handleSubscribe = () => {
     requireAuth(() => {
       void requestActivityUpdateSubscribe();

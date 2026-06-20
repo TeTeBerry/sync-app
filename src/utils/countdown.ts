@@ -5,10 +5,10 @@ function pad2(n: number): string {
 }
 
 export const EMPTY_COUNTDOWN_PARTS: CountdownPart[] = [
-  { value: '--', unit: 'd' },
-  { value: '--', unit: 'h' },
-  { value: '--', unit: 'm' },
-  { value: '--', unit: 's', accent: true },
+  { value: '--', unit: 'countdown.days' },
+  { value: '--', unit: 'countdown.hours' },
+  { value: '--', unit: 'countdown.minutes', accent: true },
+  { value: '--', unit: 'countdown.seconds' },
 ];
 
 export function getCountdownParts(target: Date, now = new Date()): CountdownPart[] {
@@ -20,10 +20,19 @@ export function getCountdownParts(target: Date, now = new Date()): CountdownPart
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
 
+  // 如果总时长超过1天，显示天、小时、分钟
+  if (days > 0) {
+    return [
+      { value: pad2(days), unit: 'countdown.days' },
+      { value: pad2(hours), unit: 'countdown.hours' },
+      { value: pad2(minutes), unit: 'countdown.minutes', accent: true },
+    ];
+  }
+
+  // 否则显示小时、分钟、秒
   return [
-    { value: pad2(days), unit: 'd' },
-    { value: pad2(hours), unit: 'h' },
-    { value: pad2(minutes), unit: 'm' },
-    { value: pad2(seconds), unit: 's', accent: true },
+    { value: pad2(hours), unit: 'countdown.hours' },
+    { value: pad2(minutes), unit: 'countdown.minutes', accent: true },
+    { value: pad2(seconds), unit: 'countdown.seconds' },
   ];
 }

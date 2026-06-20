@@ -5,6 +5,8 @@ import { useT } from '@/hooks/useI18n';
 
 export type ItinerarySheetCtaProps = {
   onPress: () => void;
+  disabled?: boolean;
+  onOpenSheet?: () => void;
 };
 
 export function ItinerarySheetCta({ onPress }: ItinerarySheetCtaProps) {

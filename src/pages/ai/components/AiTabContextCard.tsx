@@ -3,6 +3,7 @@ import type { FC, ReactNode } from 'react';
 import { CalendarDays, ChevronRight, MapPin } from '../../../components/icons';
 import { Button } from '../../../components/ui';
 import { Text, View } from '@tarojs/components';
+import { useT } from '@/hooks/useI18n';
 
 type AiTabContextCardProps = {
   showEventContext: boolean;
@@ -23,16 +24,22 @@ export const AiTabContextCard: FC<AiTabContextCardProps> = ({
   onPickActivity,
   planSlot,
 }) => {
+  const t = useT();
   if (!showEventContext) {
     return (
-      <View className="s-ai-tab-context s-ai-tab-context--pick" aria-label="选择活动">
+      <View
+        className="s-ai-tab-context s-ai-tab-context--pick"
+        aria-label={t('ai.pickActivityTitle')}
+      >
         <View className="s-ai-tab-context__pick-icon" aria-hidden>
           <MapPin size={18} color="#4cc9f0" />
         </View>
         <View className="s-ai-tab-context__pick-copy">
-          <Text className="s-ai-tab-context__pick-title">先选一场活动</Text>
+          <Text className="s-ai-tab-context__pick-title">
+            {t('ai.pickActivityTitle')}
+          </Text>
           <Text className="s-ai-tab-context__pick-desc">
-            绑定后可生成出行攻略、待办清单与组队建议
+            {t('ai.pickActivityDesc')}
           </Text>
         </View>
         <Button
@@ -40,7 +47,9 @@ export const AiTabContextCard: FC<AiTabContextCardProps> = ({
           hoverClass="s-ai-tab-context__pick-btn--pressed"
           onClick={onPickActivity}
         >
-          <Text className="s-ai-tab-context__pick-btn-text">选择</Text>
+          <Text className="s-ai-tab-context__pick-btn-text">
+            {t('ai.pickActivityBtn')}
+          </Text>
           <ChevronRight size={14} color="#4cc9f0" />
         </Button>
       </View>
@@ -48,7 +57,7 @@ export const AiTabContextCard: FC<AiTabContextCardProps> = ({
   }
 
   return (
-    <View className="s-ai-tab-context" aria-label="当前活动与计划">
+    <View className="s-ai-tab-context" aria-label={t('ai.currentActivity')}>
       <View className="s-ai-tab-context__glow" aria-hidden />
 
       <View className="s-ai-tab-context__event">
@@ -57,12 +66,16 @@ export const AiTabContextCard: FC<AiTabContextCardProps> = ({
         </View>
         <View className="s-ai-tab-context__event-copy">
           {activityLoading && !activityTitle ? (
-            <Text className="s-ai-tab-context__event-title">加载活动信息…</Text>
+            <Text className="s-ai-tab-context__event-title">
+              {t('ai.loadingActivity')}
+            </Text>
           ) : (
             <>
-              <Text className="s-ai-tab-context__event-kicker">当前活动</Text>
+              <Text className="s-ai-tab-context__event-kicker">
+                {t('ai.currentActivity')}
+              </Text>
               <Text className="s-ai-tab-context__event-title">
-                {activityTitle ?? '本场活动'}
+                {activityTitle ?? t('ai.thisActivity')}
               </Text>
               {activityMeta ? (
                 <Text className="s-ai-tab-context__event-meta">{activityMeta}</Text>
@@ -75,7 +88,7 @@ export const AiTabContextCard: FC<AiTabContextCardProps> = ({
           hoverClass="s-ai-tab-context__switch--pressed"
           onClick={onSwitchActivity}
         >
-          切换
+          {t('ai.switchActivity')}
         </Button>
       </View>
 

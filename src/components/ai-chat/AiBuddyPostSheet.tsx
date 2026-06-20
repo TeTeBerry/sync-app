@@ -12,6 +12,7 @@ import { BuddyPostFeedSyncToggle } from './BuddyPostFeedSyncToggle';
 import { BuddyPostSheetFormFields } from './BuddyPostSheetFormFields';
 import { useBuddyPostSheetForm } from './useBuddyPostSheetForm';
 import { ScrollView, Text, View } from '@tarojs/components';
+import { useT } from '@/hooks/useI18n';
 
 export type AiBuddyPostSheetProps = {
   open: boolean;
@@ -26,7 +27,7 @@ export type AiBuddyPostSheetProps = {
   submitLabel?: string | null;
   /** Apply-team flow: let user choose whether the post appears on the activity feed. */
   showSyncToFeedOption?: boolean;
-  postQuota?: { used: number; max: number };
+  postQuota?: { used: number; max: number; remaining: number; atLimit: boolean };
   onClose: () => void;
   onSubmit: (values: AiBuddyPostSubmitPayload) => void | Promise<void>;
 };
@@ -45,6 +46,7 @@ export function AiBuddyPostSheet({
   onClose,
   onSubmit,
 }: AiBuddyPostSheetProps) {
+  const t = useT();
   useOverlayLock(open);
 
   const form = useBuddyPostSheetForm({

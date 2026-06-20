@@ -43,7 +43,7 @@ export function useEventDetailWechatShare(options: {
     if (!isWeapp) return;
     void Taro.showShareMenu({
       withShareTicket: true,
-      menus: ['shareAppMessage', 'shareTimeline'],
+      showShareItems: ['shareAppMessage', 'shareTimeline'],
     }).catch(() => undefined);
   });
 

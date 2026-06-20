@@ -5,6 +5,8 @@ import { useT } from '@/hooks/useI18n';
 
 export type BuddyPostTemplateCtaProps = {
   onPress: () => void;
+  disabled?: boolean;
+  onOpenSheet?: () => void;
 };
 
 export function BuddyPostTemplateCta({ onPress }: BuddyPostTemplateCtaProps) {

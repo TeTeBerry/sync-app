@@ -2,6 +2,7 @@ import './exclusive-itinerary.scss';
 import { Info } from '../../../components/icons';
 import { Button } from '../../../components/ui';
 import { ScrollView, Text, View } from '@tarojs/components';
+import { useT } from '@/hooks/useI18n';
 import ActionSheet from '../../../components/ActionSheet';
 import ThemedPageLoader from '../../../components/ThemedPageLoader';
 import PageNavigation from '../../../components/navigation/PageNavigation';
@@ -15,6 +16,7 @@ import { useExclusiveItineraryPage } from './useExclusiveItineraryPage';
 
 const ExclusiveItineraryPage = () => {
   useEndRouteTransitionOnShow();
+  const t = useT();
   const {
     navFallback,
     mainScrollHeight,

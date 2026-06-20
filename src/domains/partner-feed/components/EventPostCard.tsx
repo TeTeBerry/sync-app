@@ -16,6 +16,7 @@ import type { EventDetailPost } from '../../../types/backend';
 import { stripPostBodyContact } from '../../../utils/postBodyContact';
 import { formatPostHandle } from '../utils/eventPostDisplay';
 import { Text, View } from '@tarojs/components';
+import { useT } from '@/hooks/useI18n';
 
 export type EventPostCardProps = {
   post: EventDetailPost;
@@ -40,6 +41,7 @@ function EventPostCardInner({
   onDelete,
   onCommentSubmitted,
 }: EventPostCardProps) {
+  const t = useT();
   const displayIdentity = useDisplayUserIdentity();
   const displayBody = useMemo(
     () => stripPostBodyContact(post.bodyPreview || post.body || ''),

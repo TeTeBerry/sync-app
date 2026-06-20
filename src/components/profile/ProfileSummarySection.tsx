@@ -5,6 +5,7 @@ import { useResolvedAvatarSrc } from '../../hooks/useResolvedAvatarSrc';
 import { resolveAvatarDisplaySrc } from '../../utils/imageUrl';
 import type { ProfileDisplayUser } from './profileSummaryUtils';
 import { Image, Text, View } from '@tarojs/components';
+import { useT } from '@/hooks/useI18n';
 
 export type ProfileSummarySectionProps = {
   user: ProfileDisplayUser;
@@ -15,6 +16,7 @@ const ProfileSummarySection: React.FC<ProfileSummarySectionProps> = ({
   user,
   interestTag,
 }) => {
+  const t = useT();
   const metaParts = useMemo(
     () => [user.handle, user.location, user.bio].filter(Boolean),
     [user.bio, user.handle, user.location],

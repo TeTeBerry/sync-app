@@ -23,10 +23,12 @@ import { OverlayAwareScrollView } from '../../../components/layout/OverlayAwareS
 import { PlatformDisclaimer } from '../../../components/legal/PlatformDisclaimer';
 import { ROUTES } from '../../../utils/route';
 import { Text, View } from '@tarojs/components';
+import { useT } from '@/hooks/useI18n';
 import { useAuthSession } from '../../../hooks/useAuthSession';
 
 const EventDetailPage = () => {
   useEndRouteTransitionOnShow();
+  const t = useT();
   const { confirm, confirmDialog } = useConfirmDialog({
     cancelText: t('common.cancel'),
   });
@@ -46,7 +48,7 @@ const EventDetailPage = () => {
   }
 
   const {
-    _eventId,
+    eventId,
     highlightPostId,
     title,
     metaLine,

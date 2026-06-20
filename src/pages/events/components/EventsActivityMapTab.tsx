@@ -1,6 +1,7 @@
 import type { FC } from 'react';
 import { useMemo, useState } from 'react';
 import { Map, ScrollView, Text, View } from '@tarojs/components';
+import { useT } from '@/hooks/useI18n';
 import type { ActivityMapRegion } from '../../../constants/activityMapRegion';
 import { getActivityStatusFromActivity } from '../../../utils/activityStatus';
 import type { EventCardUi } from '../../../utils/apiMappers';
@@ -27,6 +28,7 @@ export const EventsActivityMapTab: FC<EventsActivityMapTabProps> = ({
   onOpenDetail,
   onWarmDetail,
 }) => {
+  const t = useT();
   const [region, setRegion] = useState<ActivityMapRegion>('domestic');
 
   const upcomingEvents = useMemo(

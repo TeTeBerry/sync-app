@@ -21,7 +21,7 @@ export function TravelPlanReceiptOcrTip({
   disabled = false,
   className,
 }: TravelPlanReceiptOcrTipProps) {
-  useT();
+  const t = useT();
 
   const handleClick = () => {
     if (disabled) return;

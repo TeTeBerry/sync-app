@@ -3,6 +3,7 @@ import { EventCard } from '../../../components/event';
 import { ListState } from '../../../components/ListState';
 import type { EventCardUi } from '../../../utils/apiMappers';
 import { View } from '@tarojs/components';
+import { useT } from '@/hooks/useI18n';
 
 type EventsActivityListProps = {
   events: EventCardUi[];
@@ -16,12 +17,13 @@ type EventsActivityListProps = {
 export const EventsActivityList: FC<EventsActivityListProps> = ({
   events,
   isError,
-  emptyText = t('events.empty'),
+  emptyText,
   onRetry,
   onOpenDetail,
   onWarmDetail,
 }) => {
   const t = useT();
+  const finalEmptyText = emptyText ?? t('events.empty');
   return (
     <ListState
       isLoading={false}
@@ -29,7 +31,7 @@ export const EventsActivityList: FC<EventsActivityListProps> = ({
       isEmpty={!isError && events.length === 0}
       loadingText={t('events.loading')}
       errorText={t('events.loadFailed')}
-      emptyText={emptyText}
+      emptyText={finalEmptyText}
       onRetry={onRetry}
       retryText={t('common.retry')}
       stateClassName="s-events__state"

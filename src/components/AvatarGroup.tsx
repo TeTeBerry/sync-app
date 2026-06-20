@@ -3,6 +3,7 @@ import React from 'react';
 import { thumbnailImageUrl } from '../utils/imageUrl';
 import { IMAGE_SIZE } from '../constants/imageSizes';
 import { Image, Text, View } from '@tarojs/components';
+import { useT } from '@/hooks/useI18n';
 
 interface AvatarGroupProps {
   avatars?: string[];
@@ -15,6 +16,7 @@ const AvatarGroup: React.FC<AvatarGroupProps> = ({
   max = 3,
   total = 0,
 }) => {
+  const t = useT();
   const displayAvatars = avatars.slice(0, max);
 
   return (

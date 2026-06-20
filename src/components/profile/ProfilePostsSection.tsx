@@ -12,6 +12,7 @@ import {
   PROFILE_LIST_RENDER_STEP,
 } from '../../constants/listPerf';
 import { Button } from '../../components/ui';
+import { useT } from '@/hooks/useI18n';
 
 const PROFILE_POST_STAT_ICON_SIZE = 14;
 
@@ -107,6 +108,7 @@ const ProfilePostsSection: React.FC<ProfilePostsSectionProps> = ({
   onSelect,
   onDelete,
 }) => {
+  const t = useT();
   const { visibleItems, showMore, hasMoreToShow, hiddenCount, resetWindow } =
     useWindowedList(items, {
       initialSize: PROFILE_LIST_INITIAL_RENDER,

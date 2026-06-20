@@ -2,6 +2,7 @@ import './events.scss';
 import { useDidShow } from '@tarojs/taro';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { View, Text, ScrollView } from '@tarojs/components';
+import { useT } from '@/hooks/useI18n';
 import { useEndRouteTransitionOnShow } from '../../hooks/useEndRouteTransitionOnShow';
 import { useNavBarInsets } from '../../hooks/useNavBarInsets';
 import { useTabPageMainHeight } from '../../hooks/useTabPageMainHeight';
@@ -43,6 +44,7 @@ const EVENTS_CHROME_PX = 118;
 
 const Events: React.FC = () => {
   useEndRouteTransitionOnShow(ROUTES.EVENTS);
+  const t = useT();
 
   const navInsets = useNavBarInsets();
   const listScrollHeight = useTabPageMainHeight(

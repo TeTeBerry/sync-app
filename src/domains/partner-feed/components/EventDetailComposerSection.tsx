@@ -6,6 +6,7 @@ import { FestivalPlanSummaryBar } from '@/domains/festival-plan/FestivalPlanSumm
 import type { FestivalPlanChecklist } from '@/domains/festival-plan/buildFestivalPlanChecklist';
 import type { FestivalPlanTask } from '@/domains/festival-plan/buildFestivalPlanChecklist';
 import { Text, View } from '@tarojs/components';
+import { useT } from '@/hooks/useI18n';
 
 export type EventDetailComposerSectionProps = {
   showHeaderSkeleton: boolean;
@@ -30,6 +31,7 @@ export const EventDetailComposerSection: React.FC<EventDetailComposerSectionProp
   showFestivalPlan = false,
   travelGuideGenerated = false,
 }) => {
+  const t = useT();
   if (showHeaderSkeleton) {
     return <ThemedPageLoader variant="skeleton-event" minHeight={360} />;
   }

@@ -1,6 +1,7 @@
 import type { FC } from 'react';
 import { useCountdown } from '../../../hooks/useCountdown';
 import { Text, View } from '@tarojs/components';
+import { useT } from '@/hooks/useI18n';
 
 type HomeCountdownCardProps = {
   eventName?: string;
@@ -13,6 +14,7 @@ export const HomeCountdownCard: FC<HomeCountdownCardProps> = ({
 }) => {
   const hasTarget = targetAt != null && eventName != null && eventName.length > 0;
   const parts = useCountdown(hasTarget ? targetAt : null);
+  const t = useT();
   const ariaLabel = hasTarget
     ? `${eventName} countdown`
     : 'Upcoming activity countdown';
@@ -33,7 +35,7 @@ export const HomeCountdownCard: FC<HomeCountdownCardProps> = ({
                 >
                   {part.value}
                 </Text>
-                <Text className="s-home-countdown__unit">{part.unit}</Text>
+                <Text className="s-home-countdown__unit">{t(part.unit)}</Text>
               </View>
             </View>
             {index < parts.length - 1 ? (
@@ -44,11 +46,9 @@ export const HomeCountdownCard: FC<HomeCountdownCardProps> = ({
       </View>
       <Text className="s-home-countdown__copy">
         {hasTarget ? (
-          <>
-            距<Text className="s-home-countdown__copy-event">{eventName}</Text>开场还有
-          </>
+          <>{t('countdown.untilStart', { eventName })}</>
         ) : (
-          '暂无即将开始的活动'
+          t('countdown.noUpcoming')
         )}
       </Text>
     </View>

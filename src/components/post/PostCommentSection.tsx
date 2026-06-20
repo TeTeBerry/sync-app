@@ -26,6 +26,7 @@ import type { EventDetailPost, PostCommentItem } from '../../types/backend';
 import { Button, cn, Input } from '../ui';
 import { ContentReportMenuButton } from '../report';
 import { Image, Text, View } from '@tarojs/components';
+import { useT } from '@/hooks/useI18n';
 
 const DEFAULT_AVATAR = PLACEHOLDER_AVATAR;
 
@@ -165,6 +166,7 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
   currentUserAvatar,
   onCommentSubmitted,
 }) => {
+  const t = useT();
   const commentsQuery = usePostCommentsQuery(postId, expanded);
   const { guardPublish, handlePublishError, complianceConfirmDialog } =
     useUgcPublishGuard();

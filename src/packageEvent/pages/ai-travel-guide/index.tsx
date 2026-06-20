@@ -17,7 +17,7 @@ import { ScrollView, Text, View } from '@tarojs/components';
 const AiTravelGuidePage = () => {
   useEndRouteTransitionOnShow();
   const page = useAiTravelGuidePage();
-  useT();
+  const t = useT();
   usePageRouteReady(Boolean(page.payload) && !page.loading);
 
   return (

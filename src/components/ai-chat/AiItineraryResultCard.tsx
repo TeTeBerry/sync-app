@@ -21,7 +21,7 @@ export function AiItineraryResultCard({
   result,
   disabled = false,
 }: AiItineraryResultCardProps) {
-  useT();
+  const t = useT();
   const dayCount = result.itinerary.days.length;
   const conflictCount = result.conflicts.length;
 

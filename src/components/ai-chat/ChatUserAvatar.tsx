@@ -3,6 +3,7 @@ import { useResolvedAvatarSrc } from '../../hooks/useResolvedAvatarSrc';
 import { resolveAvatarDisplaySrc } from '../../utils/imageUrl';
 import { cn } from '../ui';
 import type { AuthorGender } from '../../utils/inferAuthorGender';
+import { useT } from '@/hooks/useI18n';
 
 export function ChatUserAvatar({
   avatar,
@@ -13,6 +14,7 @@ export function ChatUserAvatar({
   name: string;
   userGender?: AuthorGender;
 }) {
+  const t = useT();
   const initial = name.trim().charAt(0).toUpperCase() || t('common.me');
   const resolvedAvatar = useResolvedAvatarSrc(avatar);
   const avatarSrc = resolveAvatarDisplaySrc(resolvedAvatar, avatar);

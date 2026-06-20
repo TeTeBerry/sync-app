@@ -6,6 +6,7 @@ import {
 import { useResolvedAvatarSrc } from '../../hooks/useResolvedAvatarSrc';
 import { resolveAvatarDisplaySrc } from '../../utils/imageUrl';
 import { Image, Text, View } from '@tarojs/components';
+import { useT } from '@/hooks/useI18n';
 
 export function PublishConfirmCard({
   payload,
@@ -16,6 +17,7 @@ export function PublishConfirmCard({
   userAvatar?: string;
   userName: string;
 }) {
+  const t = useT();
   const bodyText = stripTeamHashtags(payload.draftBody);
   const resolvedAvatar = useResolvedAvatarSrc(userAvatar);
   const avatarSrc = resolveAvatarDisplaySrc(resolvedAvatar, userAvatar);
