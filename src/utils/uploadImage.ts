@@ -1,4 +1,3 @@
-import Taro from '@tarojs/taro';
 import { isCloudStorageUploadEnabled } from '../constants/cloud';
 import { uploadImagesToCloud } from './cloudUpload';
 

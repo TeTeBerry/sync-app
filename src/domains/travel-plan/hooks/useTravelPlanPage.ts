@@ -125,7 +125,7 @@ export function useTravelPlanPage({
     activityQuery.data?.location,
     effectiveActivityLegacyId,
     resolvedEventMeta,
-    scheduleQuery.data?.sessions?.length,
+    scheduleQuery.data?.sessions,
   ]);
 
   const activityNodes = useMemo(() => {
@@ -196,7 +196,7 @@ export function useTravelPlanPage({
       return fromNodes;
     }
     return activityQuery.data?.date?.trim() || '';
-  }, [activityQuery.data?.date, apiEnabled, nodes]);
+  }, [activityQuery.data?.date, nodes]);
 
   const pageMeta = useMemo(() => {
     const title = resolvedEventMeta;

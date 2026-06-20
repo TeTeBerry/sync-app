@@ -45,10 +45,6 @@ function readEnvelope<T>(storageKey: string): CacheEnvelope<T> | undefined {
   }
 }
 
-function readEnvelopeData<T>(storageKey: string): T | undefined {
-  return readEnvelope<T>(storageKey)?.data;
-}
-
 function writeEnvelope<T>(storageKey: string, data: T): void {
   try {
     const payload: CacheEnvelope<T> = {

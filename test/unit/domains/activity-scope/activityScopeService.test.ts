@@ -1,6 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { useAiChatStore } from '@/stores/aiChatStore';
-import { useNavigationStore } from '@/stores/navigationStore';
 import {
   bindActivity,
   clearActivityScope,

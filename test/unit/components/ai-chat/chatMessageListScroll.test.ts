@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import { shouldSuppressAutoScrollForMessage } from '@/components/ai-chat/chatMessageListScroll';
-import type { ChatUiMessage } from '@/types/aiChat';
 
 describe('shouldSuppressAutoScrollForMessage', () => {
   it('suppresses for activity recommendation and travel guide', () => {

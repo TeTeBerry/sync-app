@@ -21,7 +21,6 @@ import {
 import {
   compareActivitiesNearestFirst,
   getActivityStatusFromActivity,
-  type ActivityDateFields,
 } from '../../utils/activityStatus';
 import {
   mapActivitiesToEvents,
@@ -34,7 +33,6 @@ import {
   withCatalogHomeSummary,
 } from '../../utils/activityCatalog';
 import { persistHomeSummary, persistActivities } from '../../utils/homeCacheStorage';
-import type { HomeSummary } from '../../types/backend';
 import {
   patchActivitySelectionInCaches,
   patchProfileSummaryOnSelection,

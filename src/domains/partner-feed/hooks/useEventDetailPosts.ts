@@ -64,7 +64,7 @@ export function useEventDetailPosts({
   useEffect(() => {
     if (!search.isActive) return;
     postFilters.clearFilters();
-  }, [search.isActive, postFilters.clearFilters]);
+  }, [search.isActive, postFilters]);
 
   const loadedPostItems = useMemo((): EventPostListItem[] => {
     const source = search.isActive ? (search.matchedPosts ?? []) : ruleFilteredPosts;

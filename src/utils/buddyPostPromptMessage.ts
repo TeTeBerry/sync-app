@@ -1,5 +1,5 @@
 import { getBuddyPostCta } from '../constants/aiCtaLabels';
-import { labelMatchesKey, translate } from '@/i18n';
+import { translate } from '@/i18n';
 
 /** Keep in sync with sync-app-backend/src/ai/publish/buddy-post-flow.util.ts */
 export const SELF_POST_COLLECT_BODY_MARKER = '【填写组队帖】';

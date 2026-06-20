@@ -62,13 +62,7 @@ export function useBuddyPostSheetController(
     }
 
     return tryOpen();
-  }, [
-    ensureCanOpenBuddyPostSheet,
-    guardPublish,
-    options.activityLegacyId,
-    options.authScope,
-    options.onInvalidActivity,
-  ]);
+  }, [ensureCanOpenBuddyPostSheet, guardPublish, options]);
 
   return {
     sheetOpen,

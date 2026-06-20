@@ -77,9 +77,8 @@ const NotificationsPage: React.FC = () => {
   );
 
   const filteredNotifications = useMemo(() => {
-    const notifications = notificationsQuery.data ?? [];
-    if (activeCategory === 'all') return notifications;
-    return notifications.filter(
+    if (activeCategory === 'all') return notificationsQuery.data ?? [];
+    return (notificationsQuery.data ?? []).filter(
       (item) => getNotificationCategory(item.meta) === activeCategory,
     );
   }, [activeCategory, notificationsQuery.data]);
@@ -189,7 +188,7 @@ const NotificationsPage: React.FC = () => {
           })}
         </View>
 
-        {notifications.length > 0 && (
+        {(notificationsQuery.data ?? []).length > 0 && (
           <View className="s-notifications__toolbar">
             {unreadCount > 0 && (
               <Button
@@ -208,7 +207,7 @@ const NotificationsPage: React.FC = () => {
           </View>
         )}
 
-        {isLoading && notifications.length === 0 ? (
+        {isLoading && (notificationsQuery.data ?? []).length === 0 ? (
           <ThemedPageLoader variant="skeleton-feed" minHeight={280} />
         ) : filteredNotifications.length === 0 ? (
           <View className="s-notifications__empty">

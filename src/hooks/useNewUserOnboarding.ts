@@ -1,9 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import { useDidShow } from '@tarojs/taro';
-import {
-  NewUserOnboardingSheet,
-  type NewUserOnboardingStep,
-} from '@/components/onboarding/NewUserOnboardingSheet';
+import { type NewUserOnboardingStep } from '@/components/onboarding/NewUserOnboardingSheet';
 import { isLoggedIn } from '@/utils/authStorage';
 import { hasLegalConsent } from '@/utils/legalConsentStorage';
 import {

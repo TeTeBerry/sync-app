@@ -18,13 +18,8 @@ export function ContentReportMenuButton({
   ariaLabel = '更多',
   ...target
 }: ContentReportMenuButtonProps) {
-  const {
-    categorySheetOpen,
-    submitting,
-    openOverflowMenu,
-    closeCategorySheet,
-    submitCategory,
-  } = useContentReport(target);
+  const { categorySheetOpen, openOverflowMenu, closeCategorySheet, submitCategory } =
+    useContentReport(target);
 
   return (
     <>

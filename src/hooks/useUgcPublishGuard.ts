@@ -38,7 +38,7 @@ export function useUgcPublishGuard(options?: QueryEnableOptions) {
       ackUgcPublishCompliance();
     }
     return accepted;
-  }, [accountRisk.guardPublish, confirm]);
+  }, [accountRisk, confirm]);
 
   return {
     ...accountRisk,

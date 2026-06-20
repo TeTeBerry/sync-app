@@ -164,13 +164,7 @@ export function usePersonalityTestPage() {
     return () => {
       cancelled = true;
     };
-  }, [
-    loadQuestions,
-    router.params.view,
-    router.params.share,
-    router.params.primaryType,
-    router.params.soulDjId,
-  ]);
+  }, [loadQuestions, router.params]);
 
   useEffect(() => {
     shareRef.current = phase === 'result' && result ? result : null;
@@ -189,8 +183,7 @@ export function usePersonalityTestPage() {
 
     if (!isWeapp) return;
     void Taro.showShareMenu({
-      withShareTicket: true,
-      menus: ['shareAppMessage', 'shareTimeline'],
+      showShareItems: ['shareAppMessage', 'shareTimeline'],
     }).catch(() => undefined);
   });
 

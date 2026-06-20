@@ -115,7 +115,7 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
       scrollPreserve.handleScroll(scrollTop);
       posts.handleListScroll(scrollTop);
     },
-    [scrollPreserve.handleScroll, posts.handleListScroll],
+    [scrollPreserve, posts],
   );
 
   const scrollTop = scrollFrozen && frozenTop != null ? frozenTop : routeScrollTop;
@@ -132,7 +132,7 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
       '#event-detail-posts',
       setScrollTop,
     );
-  }, [focusPostsOnMount, postsLoading]);
+  }, [focusPostsOnMount, postsLoading, setScrollTop]);
 
   useEffect(() => {
     if (
@@ -145,12 +145,7 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     }
     buddyPostSheetOpenedRef.current = true;
     templatePost.openBuddyPostSheet();
-  }, [
-    openBuddyPostOnMount,
-    invalidEventId,
-    secondaryReady,
-    templatePost.openBuddyPostSheet,
-  ]);
+  }, [openBuddyPostOnMount, invalidEventId, secondaryReady, templatePost]);
 
   const showPostsEnd =
     !posts.searchActive &&
@@ -198,7 +193,7 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
       return;
     }
     travelGuide.openGuideSheet();
-  }, [eventId, festivalPlan.checklist, travelGuide.openGuideSheet]);
+  }, [eventId, festivalPlan.checklist, travelGuide]);
 
   const travelGuideGenerated = useMemo(
     () =>
@@ -220,7 +215,7 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     }
     guideSheetOpenedRef.current = true;
     travelGuide.openGuideSheet();
-  }, [openGuideOnMount, invalidEventId, secondaryReady, travelGuide.openGuideSheet]);
+  }, [openGuideOnMount, invalidEventId, secondaryReady, travelGuide]);
 
   const isPublishing = templatePost.isBuddyPostPublishing;
 

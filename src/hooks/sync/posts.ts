@@ -3,7 +3,6 @@ import { addPostComment, deletePost, fetchPostComments } from '../../api/sync/po
 import type { PostCommentItem } from '../../types/backend';
 import { POST_COMMENTS_PAGE_SIZE } from '../../constants/listPerf';
 import { removePostFromCaches } from '../../cache/postCache';
-import { sanitizeRemoteImageUrl } from '../../utils/imageUrl';
 import { invalidateAllPosts } from '../../utils/queryInvalidation';
 import { STALE_POST_COMMENTS_MS } from '../../constants/queryCache';
 import { invalidateCache, useApiQuery } from '../useApiQuery';
