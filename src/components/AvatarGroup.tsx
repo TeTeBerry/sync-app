@@ -1,6 +1,7 @@
 import './AvatarGroup.scss';
 import React from 'react';
 import { thumbnailImageUrl } from '../utils/imageUrl';
+import { IMAGE_SIZE } from '../constants/imageSizes';
 import { Image, Text, View } from '@tarojs/components';
 
 interface AvatarGroupProps {
@@ -23,7 +24,7 @@ const AvatarGroup: React.FC<AvatarGroupProps> = ({
           {displayAvatars.map((url, i) => (
             <Image
               key={url + i}
-              src={thumbnailImageUrl(url, 80) ?? url}
+              src={thumbnailImageUrl(url, IMAGE_SIZE.avatarMd) ?? url}
               className="s-avatar-group__avatar"
             />
           ))}

@@ -9,7 +9,15 @@ import { getUgcContactValidationError } from '../../utils/ugcContactValidation';
 import { requestPostEngagementSubscribe } from '../../utils/wechatSubscribeMessage';
 import { PLACEHOLDER_AVATAR } from '../../constants/remoteImages';
 import { useResolvedAvatarSrc } from '../../hooks/useResolvedAvatarSrc';
-import { resolveAvatarDisplaySrc } from '../../utils/imageUrl';
+import { resolveAvatarDisplaySrc, thumbnailImageUrl } from '../../utils/imageUrl';
+import { IMAGE_SIZE } from '../../constants/imageSizes';
+import {
+  POST_COMMENTS_INITIAL_RENDER,
+  POST_COMMENTS_MAX_VISIBLE,
+  POST_COMMENTS_RENDER_STEP,
+  POST_COMMENT_REPLIES_PREVIEW,
+} from '../../constants/listPerf';
+import { useWindowedList } from '../../hooks/useWindowedList';
 import {
   isCommentByPostAuthor,
   isCurrentUserPostAuthor,
@@ -55,10 +63,11 @@ function CommentRow({
   replyTargetId,
   onStartReply,
 }: CommentRowProps) {
+  const [repliesExpanded, setRepliesExpanded] = useState(false);
   const resolvedAvatar = useResolvedAvatarSrc(comment.avatar);
   const avatarSrc = resolveAvatarDisplaySrc(
     resolvedAvatar,
-    comment.avatar,
+    thumbnailImageUrl(comment.avatar, IMAGE_SIZE.avatarSm) ?? comment.avatar,
     DEFAULT_AVATAR,
   );
   const isPostAuthorComment = isCommentByPostAuthor(
@@ -76,7 +85,7 @@ function CommentRow({
       <View
         className={`s-post-comments__item${nested ? ' s-post-comments__item--reply' : ''}`}
       >
-        <Image className="s-post-comments__avatar" src={avatarSrc} />
+        <Image className="s-post-comments__avatar" src={avatarSrc} lazyLoad />
         <View className="s-post-comments__body-wrap">
           <View className="s-post-comments__meta-row">
             <View className="s-post-comments__meta">
@@ -110,17 +119,37 @@ function CommentRow({
           ) : null}
         </View>
       </View>
-      {comment.replies?.map((reply) => (
-        <CommentRow
-          key={reply.id}
-          comment={reply}
-          nested
-          isPostAuthor={isPostAuthor}
-          postAuthorName={postAuthorName}
-          postAuthorUserId={postAuthorUserId}
-          onStartReply={onStartReply}
-        />
-      ))}
+      {(() => {
+        const replies = comment.replies ?? [];
+        if (!replies.length) return null;
+        const visibleReplies = repliesExpanded
+          ? replies
+          : replies.slice(0, POST_COMMENT_REPLIES_PREVIEW);
+        const hiddenCount = replies.length - visibleReplies.length;
+        return (
+          <>
+            {visibleReplies.map((reply) => (
+              <CommentRow
+                key={reply.id}
+                comment={reply}
+                nested
+                isPostAuthor={isPostAuthor}
+                postAuthorName={postAuthorName}
+                postAuthorUserId={postAuthorUserId}
+                onStartReply={onStartReply}
+              />
+            ))}
+            {hiddenCount > 0 && !repliesExpanded ? (
+              <Button
+                className="s-post-comments__replies-more"
+                onClick={() => setRepliesExpanded(true)}
+              >
+                <Text className="s-btn-label">还有 {hiddenCount} 条回复</Text>
+              </Button>
+            ) : null}
+          </>
+        );
+      })()}
     </>
   );
 }
@@ -205,6 +234,15 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
     DEFAULT_AVATAR,
   );
   const comments = commentsQuery.data ?? [];
+  const {
+    visibleItems: visibleComments,
+    hasMoreToShow: hasMoreVisibleComments,
+    showMore: showMoreVisibleComments,
+  } = useWindowedList(comments, {
+    initialSize: POST_COMMENTS_INITIAL_RENDER,
+    step: POST_COMMENTS_RENDER_STEP,
+    maxVisible: POST_COMMENTS_MAX_VISIBLE,
+  });
   const canSend = Boolean(draft.trim()) && !submitting;
   const isEmptyList =
     !commentsQuery.isLoading && !commentsQuery.isError && comments.length === 0;
@@ -227,7 +265,7 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
           <Text className="s-post-comments__status">暂无评论，来抢沙发吧</Text>
         ) : (
           <>
-            {comments.map((comment) => (
+            {visibleComments.map((comment) => (
               <CommentRow
                 key={comment.id}
                 comment={comment}
@@ -238,6 +276,14 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
                 onStartReply={startReply}
               />
             ))}
+            {hasMoreVisibleComments ? (
+              <Button
+                className="s-post-comments__load-more"
+                onClick={showMoreVisibleComments}
+              >
+                <Text className="s-btn-label">显示更多评论</Text>
+              </Button>
+            ) : null}
             {hasMore ? (
               <Button
                 className="s-post-comments__load-more"

@@ -98,7 +98,8 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     accountRiskEnabled: secondaryReady,
   });
 
-  const { handleScroll, frozenTop, scrollFrozen } = useEventDetailScrollPreserve();
+  const scrollPreserve = useEventDetailScrollPreserve();
+  const { frozenTop, scrollFrozen } = scrollPreserve;
 
   const posts = useEventDetailPosts({
     activityLegacyId: eventId,
@@ -108,6 +109,14 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     highlightPostId,
     openCommentsOnMount,
   });
+
+  const handleScroll = useCallback(
+    (scrollTop: number) => {
+      scrollPreserve.handleScroll(scrollTop);
+      posts.handleListScroll(scrollTop);
+    },
+    [scrollPreserve.handleScroll, posts.handleListScroll],
+  );
 
   const scrollTop = scrollFrozen && frozenTop != null ? frozenTop : routeScrollTop;
 

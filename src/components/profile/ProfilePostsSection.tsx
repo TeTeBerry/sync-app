@@ -1,10 +1,17 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Clock, MessageSquare } from '../../components/icons';
 import { PostOwnerDeleteButton } from '../post';
 import { stripPostBodyContact } from '../../utils/postBodyContact';
 import { ProfileCollapsibleSection } from './ProfileCollapsibleSection';
 import type { ProfilePostItem } from '../../types/backend';
 import { Text, View } from '@tarojs/components';
+import { useWindowedList } from '../../hooks/useWindowedList';
+import {
+  PROFILE_LIST_INITIAL_RENDER,
+  PROFILE_LIST_MAX_VISIBLE,
+  PROFILE_LIST_RENDER_STEP,
+} from '../../constants/listPerf';
+import { Button } from '../../components/ui';
 
 const PROFILE_POST_STAT_ICON_SIZE = 14;
 
@@ -97,6 +104,17 @@ const ProfilePostsSection: React.FC<ProfilePostsSectionProps> = ({
   onSelect,
   onDelete,
 }) => {
+  const { visibleItems, showMore, hasMoreToShow, hiddenCount, resetWindow } =
+    useWindowedList(items, {
+      initialSize: PROFILE_LIST_INITIAL_RENDER,
+      step: PROFILE_LIST_RENDER_STEP,
+      maxVisible: PROFILE_LIST_MAX_VISIBLE,
+    });
+
+  useEffect(() => {
+    resetWindow();
+  }, [items.length, resetWindow]);
+
   if (mode === 'list') {
     return (
       <View className="s-profile-section__body s-profile-section__body--standalone">
@@ -111,7 +129,14 @@ const ProfilePostsSection: React.FC<ProfilePostsSectionProps> = ({
             </Text>
           </View>
         ) : (
-          renderPostItems(items, onSelect, onDelete)
+          <>
+            {renderPostItems(visibleItems, onSelect, onDelete)}
+            {hasMoreToShow ? (
+              <Button className="s-profile-section__show-more" onClick={showMore}>
+                <Text>还有 {hiddenCount} 条帖子</Text>
+              </Button>
+            ) : null}
+          </>
         )}
       </View>
     );

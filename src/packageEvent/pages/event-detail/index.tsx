@@ -190,6 +190,8 @@ const EventDetailPage = () => {
                   onDelete={posts.handleDeletePost}
                   hasMore={postsQuery.hasMore}
                   hasMoreLocal={posts.hasMoreVisiblePosts}
+                  hiddenLocalCount={posts.hiddenPostCount}
+                  onShowMoreLocal={posts.showMoreVisiblePosts}
                   isLoadingMore={postsQuery.isLoadingMore}
                 />
               ) : null}

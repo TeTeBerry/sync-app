@@ -15,6 +15,7 @@ import {
 } from '../../utils/eventCardDisplay';
 import { PLACEHOLDER_EVENT_HERO } from '../../constants/remoteImages';
 import { thumbnailImageUrl } from '../../utils/imageUrl';
+import { IMAGE_SIZE } from '../../constants/imageSizes';
 import { resolveEventCardLegacyId } from '../../utils/apiMappers';
 import { useRouteTransitionActive } from '../../utils/route';
 import { useT } from '@/hooks/useI18n';
@@ -51,7 +52,10 @@ const EventCardInner: React.FC<EventCardProps> = ({
   const displayCategory = category || t('eventCard.category');
   const legacyId = resolveEventCardLegacyId(id);
   const isNavigating = useRouteTransitionActive(legacyId ?? undefined);
-  const thumbSrc = thumbnailImageUrl(image, variant === 'list' ? 200 : 320);
+  const thumbSrc = thumbnailImageUrl(
+    image,
+    variant === 'list' ? IMAGE_SIZE.eventCardList : IMAGE_SIZE.eventCardDefault,
+  );
   const status = getActivityStatusFromActivity(date, title);
   const heroSubtitle = useMemo(
     () => formatEventHeroMetaLine(date, location),

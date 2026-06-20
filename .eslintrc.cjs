@@ -46,12 +46,16 @@ module.exports = {
               'Import icons from @/components/icons (tree-shake + bundle audit).',
           },
           {
-            name: '@/api/aiChatActor',
-            message: 'Import from @/api/requestActor instead.',
+            name: 'lodash',
+            message: 'Use native utilities; lodash is not bundled for mini program.',
           },
           {
-            name: '../api/aiChatActor',
-            message: 'Import from ../api/requestActor instead.',
+            name: 'date-fns',
+            message: 'Use dateTimeNative or dayjs in travel-plan only.',
+          },
+          {
+            name: '@/api/aiChatActor',
+            message: 'Import from @/api/requestActor instead.',
           },
         ],
         patterns: [

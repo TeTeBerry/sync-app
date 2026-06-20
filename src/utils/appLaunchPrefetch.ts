@@ -1,20 +1,13 @@
-import { fetchActivities, fetchHomeSummary } from '../api/sync/activities';
+import { fetchHomeSummary } from '../api/sync/activities';
 import { fetchProfileSummary } from '../api/sync/profile';
 import { isLiveApi } from '../constants/api';
 import { isWeappCloudRunTransportEnabled } from '../constants/cloud';
 import { getCacheData, prefetchToCache } from '../hooks/useApiQuery';
-import {
-  seedActivityDetailsFromHomeSummary,
-  seedActivityDetailsFromList,
-} from './activityDetailCache';
-import { withCatalogActivities, withCatalogHomeSummary } from './activityCatalog';
+import { seedActivityDetailsFromHomeSummary } from './activityDetailCache';
+import { withCatalogHomeSummary } from './activityCatalog';
 import { apiGet } from './apiClient';
 import { isLoggedIn } from './authStorage';
-import {
-  persistActivities,
-  persistHomeSummary,
-  persistProfileSummary,
-} from './homeCacheStorage';
+import { persistHomeSummary, persistProfileSummary } from './homeCacheStorage';
 
 /** Wake Cloud Run container before user-facing requests (experience build cold start). */
 export async function warmCloudRunContainer(): Promise<void> {
@@ -53,15 +46,6 @@ export function prefetchCoreQueriesOnLaunch(): void {
       persistHomeSummary(result);
       seedActivityDetailsFromHomeSummary(result);
       return result;
-    });
-  }
-
-  if (!getCacheData(['activities'])) {
-    void prefetchToCache(['activities'], async () => {
-      const activities = withCatalogActivities(await fetchActivities());
-      seedActivityDetailsFromList(activities);
-      persistActivities(activities);
-      return activities;
     });
   }
 

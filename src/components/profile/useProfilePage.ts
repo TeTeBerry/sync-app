@@ -32,6 +32,7 @@ import { formatBuddyPreferencesSummary } from '../../constants/buddyPreferences'
 import { deriveInterestTag } from './utils';
 import { applyPersonalityTestIdentity } from '../../utils/displayUserIdentity';
 import { t } from '@/i18n';
+import { useStaleBackgroundRefetch } from '../../hooks/useStaleBackgroundRefetch';
 
 export type UseProfilePageOptions = {
   confirm: (options: ConfirmDialogOptions) => Promise<boolean>;
@@ -67,15 +68,23 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
 
   useEndRouteTransitionOnShow(ROUTES.PROFILE);
 
+  useStaleBackgroundRefetch({
+    refetch: summaryQuery.refetch,
+    queryKey: ['profile', 'summary'],
+    staleTime: 60_000,
+    enabled: apiEnabled && loggedIn,
+  });
+  useStaleBackgroundRefetch({
+    refetch: currentUserQuery.refetch,
+    queryKey: ['users', 'me'],
+    staleTime: 60_000,
+    enabled: apiEnabled && loggedIn,
+  });
+
   useDidShow(() => {
     preloadHotRoutes(ROUTES.PROFILE);
     setNotificationsEnabled(readProfileNotificationsEnabled());
     setPrivacyLevel(readProfilePrivacyLevel());
-    if (apiEnabled && loggedIn) {
-      void summaryQuery.refetch({ background: true });
-      void currentUserQuery.refetch({ background: true });
-      return;
-    }
     if (apiEnabled && !loggedIn && !shouldSkipAutoLogin()) {
       void ensureAuth().then((result) => {
         if (result) refreshAuthSession();

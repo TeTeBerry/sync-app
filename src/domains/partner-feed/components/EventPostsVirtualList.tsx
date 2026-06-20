@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import type { EventPostListItem } from '../utils/eventPostNormalize';
 import { EventPostCard, type EventPostCardProps } from './EventPostCard';
 import { Text, View } from '@tarojs/components';
+import { useT } from '@/hooks/useI18n';
 
 export type { EventPostListItem };
 
@@ -17,6 +18,8 @@ type EventPostsVirtualListProps = {
   onDelete?: EventPostCardProps['onDelete'];
   hasMore?: boolean;
   hasMoreLocal?: boolean;
+  hiddenLocalCount?: number;
+  onShowMoreLocal?: () => void;
   isLoadingMore?: boolean;
 };
 
@@ -32,8 +35,11 @@ export function EventPostsVirtualList({
   onDelete,
   hasMore = false,
   hasMoreLocal = false,
+  hiddenLocalCount = 0,
+  onShowMoreLocal,
   isLoadingMore = false,
 }: EventPostsVirtualListProps) {
+  const t = useT();
   const highlightScrolledRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -60,6 +66,7 @@ export function EventPostsVirtualList({
     <View className="s-event-posts-list">
       {items.map((item) => {
         const highlighted = item.post.id === highlightPostId;
+        const commentsExpanded = expandedCommentPostIds.has(item.post.id);
         return (
           <View
             key={item.post.id}
@@ -70,7 +77,7 @@ export function EventPostsVirtualList({
               post={item.post}
               publishTimeLabel={item.publishTimeLabel}
               highlighted={highlighted}
-              commentsExpanded={expandedCommentPostIds.has(item.post.id)}
+              commentsExpanded={commentsExpanded}
               currentUserAvatar={currentUserAvatar}
               onOpenComments={onOpenComments}
               onCloseComments={onCloseComments}
@@ -80,8 +87,20 @@ export function EventPostsVirtualList({
           </View>
         );
       })}
+      {hasMoreLocal && hiddenLocalCount > 0 ? (
+        <View
+          className="s-event-posts-list__more-local"
+          hoverClass="s-event-posts-list__more-local--pressed"
+          onClick={onShowMoreLocal}
+          role="button"
+        >
+          <Text className="s-event-posts-list__more-local-text">
+            {t('eventDetail.postsShowMore', { count: hiddenLocalCount })}
+          </Text>
+        </View>
+      ) : null}
       {isLoadingMore ? (
-        <Text className="s-event-posts-list__loading">加载中…</Text>
+        <Text className="s-event-posts-list__loading">{t('common.loading')}</Text>
       ) : null}
       {!isLoadingMore && !hasMoreLocal && !hasMore && items.length > 0 ? null : null}
     </View>

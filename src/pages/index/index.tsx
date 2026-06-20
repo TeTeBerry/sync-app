@@ -21,6 +21,10 @@ import {
   ROUTES,
 } from '../../utils/route';
 import { isLoggedIn } from '../../utils/authStorage';
+import { resolveRequestUserId } from '../../api/requestContext';
+import { notificationUnreadQueryKey } from '../../cache/notificationCache';
+import { STALE_HOME_SUMMARY_MS } from '../../constants/queryCache';
+import { useStaleBackgroundRefetch } from '../../hooks/useStaleBackgroundRefetch';
 import { HomeCountdownCard } from './components/HomeCountdownCard';
 import { HomeFeaturedEvents } from './components/HomeFeaturedEvents';
 import { HomePersonalityTestEntry } from './components/HomePersonalityTestEntry';
@@ -60,12 +64,21 @@ const Home = () => {
   const { data: unreadCount = 0, refetch: refetchUnreadCount } =
     useNotificationUnreadCount();
 
+  useStaleBackgroundRefetch({
+    refetch: refetchHomeSummary,
+    queryKey: ['home', 'summary'],
+    staleTime: STALE_HOME_SUMMARY_MS,
+    enabled: isLoggedIn(),
+  });
+  useStaleBackgroundRefetch({
+    refetch: refetchUnreadCount,
+    queryKey: [...notificationUnreadQueryKey(resolveRequestUserId())],
+    staleTime: 30_000,
+    enabled: isLoggedIn(),
+  });
+
   useDidShow(() => {
     preloadHotRoutes(ROUTES.HOME);
-    if (isLoggedIn()) {
-      void refetchHomeSummary({ background: true });
-      void refetchUnreadCount({ background: true });
-    }
   });
 
   useEffect(() => {

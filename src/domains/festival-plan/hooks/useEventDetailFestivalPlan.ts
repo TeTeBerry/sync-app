@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react';
 import { useDidShow } from '@tarojs/taro';
 import { runAiCapability } from '@/domains/ai-capability/runAiCapability';
 import type { AiCapability } from '@/domains/ai-capability/types';
-import { invalidateCache } from '@/hooks/useApiQuery';
 import { useFestivalPlanSummary } from '../useFestivalPlanSummary';
 import { useFestivalPlanNavigation } from '../useFestivalPlanNavigation';
 import type { FestivalPlanTaskActions } from '../festivalPlanTaskActions';
@@ -24,9 +23,6 @@ export function useEventDetailFestivalPlan({
 
   useDidShow(() => {
     setRefreshKey((key) => key + 1);
-    if (activityLegacyId != null && !Number.isNaN(activityLegacyId)) {
-      invalidateCache(['festival-plan', 'progress', activityLegacyId]);
-    }
   });
 
   const checklist = useFestivalPlanSummary(activityLegacyId, refreshKey);

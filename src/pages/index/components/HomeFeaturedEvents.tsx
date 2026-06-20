@@ -13,6 +13,7 @@ import {
   type FeaturedEvent,
 } from '../../../utils/apiMappers';
 import { featuredPostImageUrl, thumbnailImageUrl } from '../../../utils/imageUrl';
+import { IMAGE_SIZE } from '../../../constants/imageSizes';
 import { goEventsListTab } from '../../../utils/route';
 import { Image, Swiper, SwiperItem, Text, View } from '@tarojs/components';
 import { useT } from '@/hooks/useI18n';
@@ -140,7 +141,7 @@ function HomeFeaturedEventCard({
   const venue = event.venue?.trim() ?? '';
   const legacyId = resolveFeaturedEventLegacyId(event);
   const heroSrc =
-    featuredPostImageUrl(event.image, 720) ??
+    featuredPostImageUrl(event.image, IMAGE_SIZE.featuredHero) ??
     thumbnailImageUrl(event.image, 480) ??
     event.image;
   const categoryLabel = formatActivityCategoryLabel(event.category);
@@ -209,7 +210,7 @@ function HomeFeaturedEventCard({
               {(event.guests ?? []).slice(0, 3).map((guest, guestIndex) => (
                 <Image
                   key={guest}
-                  src={thumbnailImageUrl(guest, 48) ?? guest}
+                  src={thumbnailImageUrl(guest, IMAGE_SIZE.avatarSm) ?? guest}
                   className="s-home-showcase-card__avatar"
                   mode="aspectFill"
                   lazyLoad

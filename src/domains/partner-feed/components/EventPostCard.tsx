@@ -9,7 +9,8 @@ import { ContentReportMenuButton } from '../../../components/report';
 import { ImageWithFallback } from '../../../components/ImageWithFallback';
 import { useDisplayUserIdentity } from '../../../hooks/useDisplayUserIdentity';
 import { useResolvedAvatarSrc } from '../../../hooks/useResolvedAvatarSrc';
-import { resolveAvatarDisplaySrc } from '../../../utils/imageUrl';
+import { resolveAvatarDisplaySrc, thumbnailImageUrl } from '../../../utils/imageUrl';
+import { IMAGE_SIZE } from '../../../constants/imageSizes';
 import { isCurrentUserPostAuthor } from '../../../utils/postOwnership';
 import type { EventDetailPost } from '../../../types/backend';
 import { stripPostBodyContact } from '../../../utils/postBodyContact';
@@ -56,7 +57,10 @@ function EventPostCardInner({
 
   const avatarKey = isOwn ? displayIdentity.avatar?.trim() || post.avatar : post.avatar;
   const resolvedAvatarSrc = useResolvedAvatarSrc(avatarKey);
-  const avatarSrc = resolveAvatarDisplaySrc(resolvedAvatarSrc, avatarKey);
+  const avatarSrc = resolveAvatarDisplaySrc(
+    resolvedAvatarSrc,
+    thumbnailImageUrl(avatarKey, IMAGE_SIZE.avatarSm) ?? avatarKey,
+  );
 
   const stopClickPropagation = (event: { stopPropagation?: () => void }) => {
     event.stopPropagation?.();
@@ -148,4 +152,14 @@ function EventPostCardInner({
   );
 }
 
-export const EventPostCard = memo(EventPostCardInner);
+export const EventPostCard = memo(EventPostCardInner, (prev, next) => {
+  return (
+    prev.post.id === next.post.id &&
+    prev.post.body === next.post.body &&
+    prev.post.comments === next.post.comments &&
+    prev.highlighted === next.highlighted &&
+    prev.commentsExpanded === next.commentsExpanded &&
+    prev.publishTimeLabel === next.publishTimeLabel &&
+    prev.currentUserAvatar === next.currentUserAvatar
+  );
+});

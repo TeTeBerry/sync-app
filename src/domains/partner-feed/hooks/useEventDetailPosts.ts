@@ -6,8 +6,11 @@ import { deletePostWithFeedback } from '../../../utils/deletePostFeedback';
 import { scrollElementToCenter } from '../../../utils/scrollToCenter';
 import type { EventDetailPost } from '../../../types/post';
 import {
+  EVENT_POST_ESTIMATED_HEIGHT_PX,
   EVENT_POSTS_INITIAL_RENDER,
+  EVENT_POSTS_MAX_MOUNTED,
   EVENT_POSTS_RENDER_STEP,
+  EVENT_POSTS_SLIDE_BUFFER,
 } from '../../../constants/listPerf';
 import { useWindowedList } from '../../../hooks/useWindowedList';
 import {
@@ -68,6 +71,28 @@ export function useEventDetailPosts({
     return normalizeEventPostList(source);
   }, [ruleFilteredPosts, search.isActive, search.matchedPosts]);
 
+  const {
+    visibleItems: postItems,
+    windowStart,
+    windowEnd,
+    hiddenCount,
+    hasMoreToShow: hasMoreVisiblePosts,
+    showMore: showMoreVisiblePosts,
+    ensureIndexVisible,
+    setScrollFocalIndex,
+    resetWindow,
+  } = useWindowedList(loadedPostItems, {
+    initialSize: EVENT_POSTS_INITIAL_RENDER,
+    step: EVENT_POSTS_RENDER_STEP,
+    maxVisible: EVENT_POSTS_MAX_MOUNTED,
+    slidingWindow: true,
+    slideBuffer: EVENT_POSTS_SLIDE_BUFFER,
+  });
+
+  useEffect(() => {
+    resetWindow();
+  }, [search.isActive, postFilters.isActive, resetWindow]);
+
   useEffect(() => {
     const avatarKeys = loadedPostItems
       .map((item) => item.post.avatar?.trim())
@@ -76,15 +101,34 @@ export function useEventDetailPosts({
     void resolvePersonalityMediaUrls(avatarKeys);
   }, [loadedPostItems]);
 
-  const {
-    visibleItems: postItems,
-    hasMoreToShow: hasMoreVisiblePosts,
-    showMore: showMoreVisiblePosts,
-    ensureIndexVisible,
-  } = useWindowedList(loadedPostItems, {
-    initialSize: EVENT_POSTS_INITIAL_RENDER,
-    step: EVENT_POSTS_RENDER_STEP,
-  });
+  const visiblePostIds = useMemo(
+    () => new Set(postItems.map((item) => item.post.id)),
+    [postItems],
+  );
+
+  useEffect(() => {
+    const highlight = highlightPostId.trim();
+    setExpandedCommentPostIds((prev) => {
+      let changed = false;
+      const next = new Set<string>();
+      for (const id of prev) {
+        if (visiblePostIds.has(id) || id === highlight) {
+          next.add(id);
+        } else {
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+  }, [visiblePostIds, highlightPostId]);
+
+  const handleListScroll = useCallback(
+    (scrollTop: number) => {
+      const index = Math.floor(scrollTop / EVENT_POST_ESTIMATED_HEIGHT_PX);
+      setScrollFocalIndex(index);
+    },
+    [setScrollFocalIndex],
+  );
 
   const handleScrollToLower = useCallback(() => {
     if (search.isActive || postFilters.isActive) {
@@ -195,15 +239,20 @@ export function useEventDetailPosts({
   return {
     postItems,
     totalPostCount: loadedPostItems.length,
+    hiddenPostCount: hiddenCount,
+    windowStart,
+    windowEnd,
     hasMoreVisiblePosts:
       search.isActive || postFilters.isActive ? false : hasMoreVisiblePosts,
     expandedCommentPostIds,
+    handleListScroll,
     handleScrollToLower,
     scrollToElement,
     handleDeletePost,
     openPostComments,
     closePostComments,
     handleCommentSubmitted,
+    showMoreVisiblePosts,
     searchQuery: search.query,
     setSearchQuery: search.setQuery,
     clearSearchQuery: search.clearSearch,

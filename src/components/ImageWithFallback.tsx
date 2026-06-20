@@ -61,7 +61,6 @@ export const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
   const showLoadingPlaceholder =
     placeholderUntilLoaded && showImage && !loaded && !broken;
   const isH5 = process.env.TARO_ENV === 'h5';
-  const isWeapp = process.env.TARO_ENV === 'weapp';
   const imgLoading = isH5 && priority ? 'eager' : undefined;
   const imgDecoding = isH5 && priority ? 'sync' : undefined;
   const imgFetchPriority = isH5 && priority ? ('high' as const) : undefined;
@@ -92,7 +91,7 @@ export const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
       mode={mode}
       className={className}
       {...(isH5 ? { referrerPolicy } : {})}
-      lazyLoad={isWeapp ? false : !priority}
+      lazyLoad={!priority}
       {...(imgLoading ? { loading: imgLoading } : {})}
       {...(imgDecoding ? { decoding: imgDecoding } : {})}
       {...(imgFetchPriority ? { fetchPriority: imgFetchPriority } : {})}

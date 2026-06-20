@@ -5,8 +5,8 @@ import {
   setCacheData,
   setCacheDataByKey,
 } from '../hooks/useApiQuery';
-import { persistHomeSummary } from '../utils/homeCacheStorage';
-import type { BackendActivity, HomeSummary } from '../types/backend';
+import { persistHomeSummary, persistProfileSummary } from '../utils/homeCacheStorage';
+import type { BackendActivity, HomeSummary, ProfileSummary } from '../types/backend';
 
 export type ActivitySelectionPatch = {
   legacyId: number;
@@ -92,4 +92,36 @@ export function patchActivitySelectionInCaches(patch: ActivitySelectionPatch): v
   if (summary) {
     persistHomeSummary(summary);
   }
+}
+
+/** Optimistically bump profile stats when user selects a new activity. */
+export function patchProfileSummaryOnSelection(options: {
+  isNewSelection: boolean;
+}): boolean {
+  if (!options.isNewSelection) {
+    return getCacheData<ProfileSummary>(['profile', 'summary']) != null;
+  }
+
+  let patched = false;
+  setCacheData<ProfileSummary>(['profile', 'summary'], (prev) => {
+    if (!prev) return prev;
+    patched = true;
+    return {
+      ...prev,
+      stats: {
+        ...prev.stats,
+        events: (prev.stats.events ?? 0) + 1,
+      },
+    };
+  });
+
+  if (patched) {
+    broadcastCacheData(['profile', 'summary']);
+    const summary = getCacheData<ProfileSummary>(['profile', 'summary']);
+    if (summary) {
+      persistProfileSummary(summary);
+    }
+  }
+
+  return patched;
 }

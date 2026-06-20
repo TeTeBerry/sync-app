@@ -35,9 +35,12 @@ import {
 } from '../../utils/activityCatalog';
 import { persistHomeSummary, persistActivities } from '../../utils/homeCacheStorage';
 import type { HomeSummary } from '../../types/backend';
-import { patchActivitySelectionInCaches } from '../../cache/activityCache';
 import {
-  invalidateActivitySelectionProfile,
+  patchActivitySelectionInCaches,
+  patchProfileSummaryOnSelection,
+} from '../../cache/activityCache';
+import {
+  invalidateProfileSummary,
   invalidateUser,
   invalidateProfile,
 } from '../../utils/queryInvalidation';
@@ -182,10 +185,15 @@ export async function registerForActivityAndInvalidate(legacyId: number) {
     attendees: result.attendees,
     going: true,
   });
-  try {
-    await invalidateActivitySelectionProfile();
-  } catch {
-    // Selection succeeded; cache refresh is best-effort.
+  const patched = patchProfileSummaryOnSelection({
+    isNewSelection: !result.alreadyRegistered,
+  });
+  if (!patched) {
+    try {
+      await invalidateProfileSummary();
+    } catch {
+      // Selection succeeded; cache refresh is best-effort.
+    }
   }
   return result;
 }

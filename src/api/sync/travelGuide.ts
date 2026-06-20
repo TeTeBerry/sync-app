@@ -34,11 +34,17 @@ export type TravelGuideGenerationJobResult = {
   errorMessage?: string;
 };
 
-const TRAVEL_GUIDE_POLL_INTERVAL_MS = 1_000;
 const TRAVEL_GUIDE_POLL_MAX_ATTEMPTS = 60;
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/** Adaptive poll interval — fewer RTTs on long-running jobs. */
+function travelGuidePollDelayMs(attempt: number, elapsedMs: number): number {
+  if (attempt < 3) return 1_000;
+  if (elapsedMs < 15_000) return 2_000;
+  return 5_000;
 }
 
 export function fetchTravelGuidePlaceSuggestions(keyword: string, region?: string) {
@@ -95,9 +101,12 @@ export function generateTravelGuide(
 export async function pollTravelGuideGenerationJob(
   jobId: string,
 ): Promise<GenerateTravelGuideResult['plan']> {
+  const startedAt = Date.now();
+
   for (let attempt = 0; attempt < TRAVEL_GUIDE_POLL_MAX_ATTEMPTS; attempt += 1) {
     if (attempt > 0) {
-      await sleep(TRAVEL_GUIDE_POLL_INTERVAL_MS);
+      const elapsedMs = Date.now() - startedAt;
+      await sleep(travelGuidePollDelayMs(attempt, elapsedMs));
     }
 
     const job = await apiGet<TravelGuideGenerationJobResult>(

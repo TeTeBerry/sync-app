@@ -14,6 +14,11 @@ import { useEventList, useHomeSummary } from '../../hooks/useSyncApi';
 import { resolveEventCardLegacyId } from '../../utils/apiMappers';
 import { goEventDetail, preloadHotRoutes } from '../../utils/route';
 import { isLoggedIn } from '../../utils/authStorage';
+import {
+  STALE_ACTIVITIES_LIST_MS,
+  STALE_HOME_SUMMARY_MS,
+} from '../../constants/queryCache';
+import { useStaleBackgroundRefetch } from '../../hooks/useStaleBackgroundRefetch';
 import { activityOccursOnDay, todayCalendarParts } from '../../utils/activityCalendar';
 import {
   compareActivitiesNearestFirst,
@@ -49,15 +54,24 @@ const Events: React.FC = () => {
   const [viewTab, setViewTab] = useState<EventsViewTab>('calendar');
   const [selectedDay, setSelectedDay] = useState(todayCalendarParts);
 
+  useStaleBackgroundRefetch({
+    refetch: refetchHomeSummary,
+    queryKey: ['home', 'summary'],
+    staleTime: STALE_HOME_SUMMARY_MS,
+    enabled: isLoggedIn(),
+  });
+  useStaleBackgroundRefetch({
+    refetch,
+    queryKey: ['activities'],
+    staleTime: STALE_ACTIVITIES_LIST_MS,
+    enabled: isLoggedIn(),
+  });
+
   useDidShow(() => {
     preloadHotRoutes(ROUTES.EVENTS);
     const intent = consumeEventsViewTabIntent();
     if (intent) {
       setViewTab(intent);
-    }
-    if (isLoggedIn()) {
-      void refetchHomeSummary({ background: true });
-      void refetch();
     }
   });
 

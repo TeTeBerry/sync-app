@@ -1,6 +1,6 @@
 import './notifications.scss';
 import { useDidShow } from '@tarojs/taro';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import ThemedPageLoader from '../../../components/ThemedPageLoader';
 import { usePageRouteReady } from '../../../hooks/usePageRouteReady';
 import { useEndRouteTransitionOnShow } from '../../../hooks/useEndRouteTransitionOnShow';
@@ -14,6 +14,8 @@ import {
   markNotificationAsRead,
   useNotificationsQuery,
 } from '../../../hooks/useSyncApi';
+import { notificationListQueryKey } from '../../../cache/notificationCache';
+import { resolveRequestUserId } from '../../../api/requestContext';
 import { useConfirmDialog } from '../../../hooks/useConfirmDialog';
 import type { AppNotification } from '../../../types/backend';
 import {
@@ -25,6 +27,13 @@ import {
 import { navigateFromNotification, ROUTES } from '../../../utils/route';
 import { Button } from '../../../components/ui';
 import { Text, View } from '@tarojs/components';
+import { useStaleBackgroundRefetch } from '../../../hooks/useStaleBackgroundRefetch';
+import { useWindowedList } from '../../../hooks/useWindowedList';
+import {
+  PROFILE_LIST_INITIAL_RENDER,
+  PROFILE_LIST_MAX_VISIBLE,
+  PROFILE_LIST_RENDER_STEP,
+} from '../../../constants/listPerf';
 
 type CategoryFilter = 'all' | 'system';
 
@@ -44,8 +53,13 @@ const NotificationsPage: React.FC = () => {
   const isLoading = notificationsQuery.isLoading;
   const refetch = notificationsQuery.refetch;
 
+  useStaleBackgroundRefetch({
+    refetch,
+    queryKey: [...notificationListQueryKey(resolveRequestUserId())],
+    staleTime: 30_000,
+  });
+
   useDidShow(() => {
-    void refetch({ background: true });
     void invalidateNotificationQueries();
   });
 
@@ -67,6 +81,22 @@ const NotificationsPage: React.FC = () => {
       (item) => getNotificationCategory(item.meta) === activeCategory,
     );
   }, [activeCategory, notifications]);
+
+  const {
+    visibleItems: visibleNotifications,
+    showMore: showMoreNotifications,
+    hasMoreToShow: hasMoreNotifications,
+    hiddenCount: hiddenNotificationCount,
+    resetWindow: resetNotificationWindow,
+  } = useWindowedList(filteredNotifications, {
+    initialSize: PROFILE_LIST_INITIAL_RENDER,
+    step: PROFILE_LIST_RENDER_STEP,
+    maxVisible: PROFILE_LIST_MAX_VISIBLE,
+  });
+
+  useEffect(() => {
+    resetNotificationWindow();
+  }, [activeCategory, resetNotificationWindow]);
 
   const unreadTabCounts = useMemo(() => {
     const counts: Record<CategoryFilter, number> = {
@@ -182,7 +212,7 @@ const NotificationsPage: React.FC = () => {
           </View>
         ) : (
           <View className="s-notifications__list">
-            {filteredNotifications.map((item) => {
+            {visibleNotifications.map((item) => {
               const display = resolveNotificationText(item);
               return (
                 <View
@@ -221,6 +251,16 @@ const NotificationsPage: React.FC = () => {
                 </View>
               );
             })}
+            {hasMoreNotifications ? (
+              <Button
+                className="s-notifications__show-more"
+                onClick={showMoreNotifications}
+              >
+                <Text className="s-btn-label">
+                  还有 {hiddenNotificationCount} 条消息
+                </Text>
+              </Button>
+            ) : null}
           </View>
         )}
       </View>

@@ -7,8 +7,7 @@ export function invalidateNotifications() {
 
 /** 失效用户个人资料查询 */
 export function invalidateProfile() {
-  invalidateProfileActivities();
-  invalidateProfileSummary();
+  invalidateCache(['profile']);
 }
 
 /** 失效个人资料摘要（个人 tab 展示） */

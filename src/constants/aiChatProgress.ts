@@ -1,3 +1,4 @@
+import { t } from '@/i18n';
 import {
   getTravelGuideGeneratingStages,
   getTravelGuideGeneratingText,
@@ -14,13 +15,17 @@ export type AiChatProgressKind =
 
 function buildAiChatProgressStages(): Record<AiChatProgressKind, readonly string[]> {
   return {
-    thinking: ['思考中…', '正在理解你的问题…'],
-    lineup: ['正在查阵容…', '正在整理艺人名单…', '正在匹配曲风标签…'],
-    activity: ['正在查活动…', '正在检索近期场次…'],
+    thinking: [t('ai.progressThinking0'), t('ai.progressThinking1')],
+    lineup: [t('ai.progressLineup0'), t('ai.progressLineup1'), t('ai.progressLineup2')],
+    activity: [t('ai.progressActivity0'), t('ai.progressActivity1')],
     travel_guide: [getTravelGuideGeneratingText(), ...getTravelGuideGeneratingStages()],
-    itinerary: ['正在生成专属行程…', '正在分析你的偏好…', '正在排演出时段…'],
-    buddy_post: ['正在发布组队帖…', '正在同步到活动页…'],
-    dj_info: ['正在查询艺人信息…', '正在检索代表作与风格…'],
+    itinerary: [
+      t('ai.progressItinerary0'),
+      t('ai.progressItinerary1'),
+      t('ai.progressItinerary2'),
+    ],
+    buddy_post: [t('ai.progressBuddyPost0'), t('ai.progressBuddyPost1')],
+    dj_info: [t('ai.progressDjInfo0'), t('ai.progressDjInfo1')],
   };
 }
 

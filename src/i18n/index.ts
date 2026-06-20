@@ -3,4 +3,5 @@ export { APP_LOCALES, DEFAULT_LOCALE } from './types';
 export { translate, t, labelMatchesKey } from './translate';
 export type { TranslateParams } from './translate';
 export { useLocaleStore } from './localeStore';
+export { loadMessages } from './messages';
 export { readStoredLocale, writeStoredLocale } from './localeStorage';

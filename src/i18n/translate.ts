@@ -1,7 +1,10 @@
 import type { AppLocale, MessageTree } from './types';
 import { DEFAULT_LOCALE } from './types';
-import { messages } from './messages';
+import { ensureDefaultMessagesLoaded, getLoadedMessages } from './messages';
+import { LABEL_ALIASES } from './labelAliases';
 import { useLocaleStore } from './localeStore';
+
+ensureDefaultMessagesLoaded();
 
 export type TranslateParams = Record<string, string | number>;
 
@@ -23,15 +26,19 @@ function interpolate(template: string, params?: TranslateParams): string {
   );
 }
 
+function messageTreeFor(locale: AppLocale): MessageTree | undefined {
+  return getLoadedMessages(locale);
+}
+
 export function translate(
   key: string,
   locale: AppLocale = DEFAULT_LOCALE,
   params?: TranslateParams,
 ): string {
   const path = key.split('.');
-  const value = resolvePath(messages[locale], path);
+  const value = resolvePath(messageTreeFor(locale) ?? {}, path);
   if (value == null) {
-    const fallback = resolvePath(messages[DEFAULT_LOCALE], path);
+    const fallback = resolvePath(messageTreeFor(DEFAULT_LOCALE) ?? {}, path);
     if (fallback == null) return key;
     return interpolate(fallback, params);
   }
@@ -48,5 +55,11 @@ export function t(key: string, params?: TranslateParams): string {
 export function labelMatchesKey(label: string, key: string): boolean {
   const trimmed = label.trim();
   if (!trimmed) return false;
+
+  const aliases = LABEL_ALIASES[key];
+  if (aliases) {
+    return aliases[0] === trimmed || aliases[1] === trimmed;
+  }
+
   return translate(key, 'zh-CN') === trimmed || translate(key, 'en-US') === trimmed;
 }

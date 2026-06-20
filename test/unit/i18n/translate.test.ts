@@ -1,8 +1,13 @@
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { labelMatchesKey, translate } from '@/i18n/translate';
 import { useLocaleStore } from '@/i18n/localeStore';
+import { loadMessages } from '@/i18n/messages';
 
 describe('i18n translate', () => {
+  beforeEach(async () => {
+    await loadMessages('en-US');
+  });
+
   it('resolves zh-CN messages', () => {
     expect(translate('tab.home', 'zh-CN')).toBe('首页');
     expect(translate('tab.home', 'en-US')).toBe('Home');
