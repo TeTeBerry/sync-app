@@ -16,21 +16,22 @@ type EventsActivityListProps = {
 export const EventsActivityList: FC<EventsActivityListProps> = ({
   events,
   isError,
-  emptyText = '暂无活动',
+  emptyText = t('events.empty'),
   onRetry,
   onOpenDetail,
   onWarmDetail,
 }) => {
+  const t = useT();
   return (
     <ListState
       isLoading={false}
       isError={isError}
       isEmpty={!isError && events.length === 0}
-      loadingText="加载活动中..."
-      errorText="活动列表加载失败"
+      loadingText={t('events.loading')}
+      errorText={t('events.loadFailed')}
       emptyText={emptyText}
       onRetry={onRetry}
-      retryText="重试"
+      retryText={t('common.retry')}
       stateClassName="s-events__state"
       retryClassName="s-events__retry"
     >

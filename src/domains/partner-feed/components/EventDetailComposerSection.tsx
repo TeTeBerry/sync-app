@@ -38,7 +38,9 @@ export const EventDetailComposerSection: React.FC<EventDetailComposerSectionProp
     <View className="s-event-detail__action-list">
       {showFestivalPlan && festivalPlanChecklist && onFestivalPlanTaskPress ? (
         <View className="s-event-detail__festival-plan">
-          <Text className="s-event-detail__festival-plan-kicker">个人准备记录</Text>
+          <Text className="s-event-detail__festival-plan-kicker">
+            {t('eventDetail.personalRecord')}
+          </Text>
           <FestivalPlanSummaryBar
             checklist={festivalPlanChecklist}
             onTaskPress={onFestivalPlanTaskPress}

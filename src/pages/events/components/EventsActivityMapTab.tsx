@@ -77,22 +77,24 @@ export const EventsActivityMapTab: FC<EventsActivityMapTabProps> = ({
               className="s-events-map-tab__locate"
               onClick={moveToUserLocation}
               role="button"
-              aria-label="定位到当前位置"
+              aria-label={t('map.locateAria')}
             >
-              <Text className="s-events-map-tab__locate-text">定位</Text>
+              <Text className="s-events-map-tab__locate-text">{t('map.locate')}</Text>
             </View>
             <View
               className="s-events-map-tab__nav"
               onClick={openRoutePlan}
               role="button"
-              aria-label="导航到活动"
+              aria-label={t('map.navigateAria')}
             >
-              <Text className="s-events-map-tab__nav-text">导航</Text>
+              <Text className="s-events-map-tab__nav-text">{t('map.navigate')}</Text>
             </View>
           </>
         ) : (
           <View className="s-events-map-tab__empty-map" aria-hidden>
-            <Text className="s-events-map-tab__empty-map-text">该区域暂无活动坐标</Text>
+            <Text className="s-events-map-tab__empty-map-text">
+              {t('map.emptyCoords')}
+            </Text>
           </View>
         )}
       </View>
@@ -110,7 +112,7 @@ export const EventsActivityMapTab: FC<EventsActivityMapTabProps> = ({
           <EventsActivityList
             events={regionActivities}
             isError={isError}
-            emptyText="该区域暂无活动"
+            emptyText={t('map.emptyEvents')}
             onRetry={onRetry}
             onOpenDetail={onOpenDetail}
             onWarmDetail={onWarmDetail}

@@ -33,7 +33,7 @@ const ProfileSummarySection: React.FC<ProfileSummarySectionProps> = ({
       <View className="s-profile__card-top">
         <View className="s-profile__avatar-wrap">
           <Image className="s-profile__avatar" src={avatarSrc} alt={user.name} />
-          <View className="s-profile__online-dot" aria-label="在线" />
+          <View className="s-profile__online-dot" aria-label={t('profile.online')} />
         </View>
 
         <View className="s-profile__info">
@@ -52,7 +52,7 @@ const ProfileSummarySection: React.FC<ProfileSummarySectionProps> = ({
               {verified ? (
                 <View className="s-profile__tag s-profile__tag--verified">
                   <Check size={12} strokeWidth={3} />
-                  <Text>已认证</Text>
+                  <Text>{t('profile.verified')}</Text>
                 </View>
               ) : null}
             </View>
@@ -60,14 +60,14 @@ const ProfileSummarySection: React.FC<ProfileSummarySectionProps> = ({
         </View>
       </View>
 
-      <View className="s-profile__stats" aria-label="个人数据">
+      <View className="s-profile__stats" aria-label={t('profile.stats')}>
         <View className="s-profile__stat">
           <Text className="s-profile__stat-value">{user.stats.events}</Text>
-          <Text className="s-profile__stat-label">参加活动</Text>
+          <Text className="s-profile__stat-label">{t('profile.eventsLabel')}</Text>
         </View>
         <View className="s-profile__stat">
           <Text className="s-profile__stat-value">{user.stats.posts}</Text>
-          <Text className="s-profile__stat-label">帖子</Text>
+          <Text className="s-profile__stat-label">{t('profile.postsLabel')}</Text>
         </View>
       </View>
     </View>

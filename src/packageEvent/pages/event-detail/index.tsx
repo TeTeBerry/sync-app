@@ -28,7 +28,7 @@ import { useAuthSession } from '../../../hooks/useAuthSession';
 const EventDetailPage = () => {
   useEndRouteTransitionOnShow();
   const { confirm, confirmDialog } = useConfirmDialog({
-    cancelText: '取消',
+    cancelText: t('common.cancel'),
   });
   const page = useEventDetailPage({ confirm });
   const { loggedIn } = useAuthSession();
@@ -102,14 +102,14 @@ const EventDetailPage = () => {
     >
       <View className="s-page-with-tabbar__main s-event-detail__shell">
         <PageNavigation
-          title={title || (showHeaderSkeleton ? '加载中…' : '')}
+          title={title || (showHeaderSkeleton ? t('common.loading') : '')}
           meta={metaLine || undefined}
           fallback={ROUTES.EVENTS}
           trailing={
             !showHeaderSkeleton && isWeapp ? (
               <Button
                 className="s-page-nav__icon-action"
-                aria-label="分享活动"
+                aria-label={t('common.openDetail')}
                 openType="share"
               >
                 <Share2 size={18} color="#fff" />
@@ -171,11 +171,11 @@ const EventDetailPage = () => {
                 posts.searchActive &&
                 posts.totalPostCount === 0 ? (
                 <Text className="s-event-detail__empty">
-                  未找到匹配的帖子，试试其他关键词
+                  {t('eventDetail.searchEmpty')}
                 </Text>
               ) : !showHeaderSkeleton && posts.totalPostCount === 0 ? (
                 <Text className="s-event-detail__empty">
-                  暂无组队帖，来发布第一条吧
+                  {t('eventDetail.postsEmpty')}
                 </Text>
               ) : posts.totalPostCount > 0 ? (
                 <EventPostsVirtualList
@@ -198,7 +198,7 @@ const EventDetailPage = () => {
             </View>
 
             {!showHeaderSkeleton && showPostsEnd ? (
-              <Text className="s-event-detail__end">已经到底啦 ~</Text>
+              <Text className="s-event-detail__end">{t('eventDetail.endOfList')}</Text>
             ) : null}
           </View>
         </OverlayAwareScrollView>

@@ -155,7 +155,7 @@ const EventCardInner: React.FC<EventCardProps> = ({
           >
             <Ticket size={15} aria-hidden />
             <Text className="s-event-card__team-btn-text">
-              {isNavigating ? '打开中…' : '进入详情'}
+              {isNavigating ? t('eventCard.opening') : t('eventCard.openDetail')}
             </Text>
           </Button>
         </View>

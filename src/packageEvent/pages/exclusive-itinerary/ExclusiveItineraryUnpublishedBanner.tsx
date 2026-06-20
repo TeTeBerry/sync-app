@@ -19,17 +19,23 @@ export function ExclusiveItineraryUnpublishedBanner({
   return (
     <View className="s-exclusive-itinerary__unpublished">
       <Text className="s-exclusive-itinerary__unpublished-title">
-        {showEmptyLineup ? '阵容尚未官宣' : '时间表尚未发布'}
+        {showEmptyLineup
+          ? t('itinerary.unpublishedBanner.title', {
+              text: t('itinerary.unpublishedBanner.lineupNotAnnounced'),
+            })
+          : t('itinerary.unpublishedBanner.title', {
+              text: t('itinerary.unpublishedBanner.scheduleNotPublished'),
+            })}
       </Text>
       <Text className="s-exclusive-itinerary__unpublished-desc">
-        阵容尚未官宣，请留意主办方发布。平台不承诺官宣时间。
+        {t('itinerary.unpublishedBanner.hint')}
       </Text>
       <Button
         className="s-exclusive-itinerary__unpublished-btn"
         onClick={handleSubscribe}
       >
         <Text className="s-exclusive-itinerary__unpublished-btn-text">
-          订阅活动更新
+          {t('itinerary.unpublishedBanner.subscribe')}
         </Text>
       </Button>
     </View>

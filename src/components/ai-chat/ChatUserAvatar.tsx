@@ -13,7 +13,7 @@ export function ChatUserAvatar({
   name: string;
   userGender?: AuthorGender;
 }) {
-  const initial = name.trim().charAt(0).toUpperCase() || '我';
+  const initial = name.trim().charAt(0).toUpperCase() || t('common.me');
   const resolvedAvatar = useResolvedAvatarSrc(avatar);
   const avatarSrc = resolveAvatarDisplaySrc(resolvedAvatar, avatar);
 

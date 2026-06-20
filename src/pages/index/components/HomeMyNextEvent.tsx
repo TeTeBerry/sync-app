@@ -7,6 +7,7 @@ import type {
   FestivalPlanChecklist,
   FestivalPlanTask,
 } from '@/domains/festival-plan/useFestivalPlanSummary';
+import { useT } from '@/hooks/useI18n';
 import { Text, View } from '@tarojs/components';
 
 type HomeMyNextEventProps = {
@@ -20,8 +21,11 @@ type HomeMyNextEventProps = {
   onNextTaskPress?: (task: FestivalPlanTask) => void;
 };
 
-function formatReplyHint(count: number): string {
-  return count > 99 ? '你的组队帖有 99+ 条新回复' : `你的组队帖有 ${count} 条新回复`;
+function formatReplyHint(
+  count: number,
+  t: (key: string, params?: Record<string, string | number>) => string,
+): string {
+  return count > 99 ? t('home.newRepliesMax') : t('home.newReplies', { count: count });
 }
 
 export const HomeMyNextEvent: FC<HomeMyNextEventProps> = ({
@@ -34,6 +38,7 @@ export const HomeMyNextEvent: FC<HomeMyNextEventProps> = ({
   onFestivalPlanPress,
   onNextTaskPress,
 }) => {
+  const t = useT();
   const venue = event.location?.trim() ?? '';
   const unreadReplyCount = postEngagement?.unreadReplyCount ?? 0;
   const showReplyHint = unreadReplyCount > 0 && Boolean(onOpenPostReplies);
@@ -60,19 +65,19 @@ export const HomeMyNextEvent: FC<HomeMyNextEventProps> = ({
   };
 
   return (
-    <View className="s-home-next" aria-label="我的下一场活动">
+    <View className="s-home-next" aria-label={t('home.myNextEvent')}>
       <View className="s-home-next__head">
         <View className="s-home-next__kicker" aria-hidden>
           <CalendarDays size={14} color="#4cc9f0" />
-          <Text className="s-home-next__kicker-text">我的下一场</Text>
+          <Text className="s-home-next__kicker-text">{t('home.myNextEvent')}</Text>
         </View>
         <View
           className="s-home-next__detail-link"
           onClick={onViewDetail}
           role="button"
-          aria-label={`查看${event.title}`}
+          aria-label={`${t('home.detail')} ${event.title}`}
         >
-          <Text className="s-home-next__detail-link-text">详情</Text>
+          <Text className="s-home-next__detail-link-text">{t('home.detail')}</Text>
           <ChevronRight size={14} color="#4cc9f0" />
         </View>
       </View>
@@ -90,11 +95,17 @@ export const HomeMyNextEvent: FC<HomeMyNextEventProps> = ({
           className="s-home-next__plan-progress"
           onClick={handleProgressPress}
           role="button"
-          aria-label={`准备进度 ${festivalPlan.completedCount}/${festivalPlan.totalCount}`}
+          aria-label={t('home.progressAria', {
+            completed: festivalPlan.completedCount,
+            total: festivalPlan.totalCount,
+          })}
         >
           <View className="s-home-next__plan-progress-head">
             <Text className="s-home-next__plan-progress-label">
-              准备进度 {festivalPlan.completedCount}/{festivalPlan.totalCount}
+              {t('home.progress', {
+                completed: festivalPlan.completedCount,
+                total: festivalPlan.totalCount,
+              })}
             </Text>
             {nextTask ? (
               <Text className="s-home-next__plan-progress-next">
@@ -116,11 +127,11 @@ export const HomeMyNextEvent: FC<HomeMyNextEventProps> = ({
           className="s-home-next__reply-hint"
           onClick={onOpenPostReplies}
           role="button"
-          aria-label={formatReplyHint(unreadReplyCount)}
+          aria-label={formatReplyHint(unreadReplyCount, t)}
         >
           <MessageCircle size={14} color="#ff0066" />
           <Text className="s-home-next__reply-hint-text">
-            {formatReplyHint(unreadReplyCount)}
+            {formatReplyHint(unreadReplyCount, t)}
           </Text>
           <ChevronRight size={14} color="#ff0066" />
         </View>
@@ -131,14 +142,14 @@ export const HomeMyNextEvent: FC<HomeMyNextEventProps> = ({
           className="s-home-next__btn s-home-next__btn--primary"
           onClick={onOpenPosts}
         >
-          <Text className="s-home-next__btn-text">发帖</Text>
+          <Text className="s-home-next__btn-text">{t('home.post')}</Text>
         </Button>
         <Button
           className="s-home-next__btn s-home-next__btn--ghost"
           onClick={onViewDetail}
         >
           <Text className="s-home-next__btn-text s-home-next__btn-text--ghost">
-            查看活动
+            {t('home.viewEvent')}
           </Text>
         </Button>
       </View>

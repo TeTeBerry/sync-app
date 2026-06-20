@@ -1,6 +1,7 @@
 import { Search, X } from '../../../components/icons';
 import { Input } from '../../../components/ui';
 import { Text, View } from '@tarojs/components';
+import { useT } from '@/hooks/useI18n';
 
 type EventDetailPostSearchBarProps = {
   value: string;
@@ -19,6 +20,7 @@ export function EventDetailPostSearchBar({
   matchedCount,
   usedLocalFallback = false,
 }: EventDetailPostSearchBarProps) {
+  const t = useT();
   const showMeta = value.trim().length > 0;
 
   return (
@@ -28,7 +30,7 @@ export function EventDetailPostSearchBar({
         <Input
           className="s-event-detail-post-search__input"
           value={value}
-          placeholder="搜索日期、内容、标签或地点"
+          placeholder={t('eventDetail.searchPlaceholder')}
           placeholderClass="s-event-detail-post-search__placeholder"
           confirmType="search"
           onInput={(event) => onChange(event.detail.value)}
@@ -38,7 +40,7 @@ export function EventDetailPostSearchBar({
           <View
             className="s-event-detail-post-search__clear"
             onClick={onClear}
-            aria-label="清除搜索"
+            aria-label={t('eventDetail.clearSearch')}
           >
             <X size={16} color="#8e8e93" aria-hidden />
           </View>
@@ -47,10 +49,10 @@ export function EventDetailPostSearchBar({
       {showMeta ? (
         <Text className="s-event-detail-post-search__meta">
           {isSearching
-            ? '搜索中…'
+            ? t('eventDetail.searching')
             : usedLocalFallback
-              ? `已改为本地匹配，找到 ${matchedCount ?? 0} 条`
-              : `找到 ${matchedCount ?? 0} 条匹配`}
+              ? t('eventDetail.localMatch', { count: matchedCount ?? 0 })
+              : t('eventDetail.matchFound', { count: matchedCount ?? 0 })}
         </Text>
       ) : null}
     </View>

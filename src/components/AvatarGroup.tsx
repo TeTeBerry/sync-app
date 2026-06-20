@@ -31,7 +31,9 @@ const AvatarGroup: React.FC<AvatarGroupProps> = ({
         </View>
       ) : null}
       {total > 0 ? (
-        <Text className="s-avatar-group__count">{total.toLocaleString()} 参与</Text>
+        <Text className="s-avatar-group__count">
+          {t('avatarGroup.participants', { count: total.toLocaleString() })}
+        </Text>
       ) : null}
     </View>
   );

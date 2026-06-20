@@ -34,6 +34,7 @@ import {
   PROFILE_LIST_MAX_VISIBLE,
   PROFILE_LIST_RENDER_STEP,
 } from '../../../constants/listPerf';
+import { useT } from '@/hooks/useI18n';
 
 type CategoryFilter = 'all' | 'system';
 
@@ -48,8 +49,8 @@ function NotificationIcon({ category }: { category: NotificationCategory }) {
 
 const NotificationsPage: React.FC = () => {
   useEndRouteTransitionOnShow();
+  const t = useT();
   const notificationsQuery = useNotificationsQuery();
-  const notifications = notificationsQuery.data ?? [];
   const isLoading = notificationsQuery.isLoading;
   const refetch = notificationsQuery.refetch;
 
@@ -67,20 +68,21 @@ const NotificationsPage: React.FC = () => {
   usePageRouteReady(contentReady);
   const [activeCategory, setActiveCategory] = useState<CategoryFilter>('all');
   const { confirm, confirmDialog } = useConfirmDialog({
-    cancelText: '取消',
+    cancelText: t('common.cancel'),
   });
 
   const unreadCount = useMemo(
-    () => notifications.filter((item) => !item.read).length,
-    [notifications],
+    () => (notificationsQuery.data ?? []).filter((item) => !item.read).length,
+    [notificationsQuery.data],
   );
 
   const filteredNotifications = useMemo(() => {
+    const notifications = notificationsQuery.data ?? [];
     if (activeCategory === 'all') return notifications;
     return notifications.filter(
       (item) => getNotificationCategory(item.meta) === activeCategory,
     );
-  }, [activeCategory, notifications]);
+  }, [activeCategory, notificationsQuery.data]);
 
   const {
     visibleItems: visibleNotifications,
@@ -103,7 +105,7 @@ const NotificationsPage: React.FC = () => {
       all: 0,
       system: 0,
     };
-    for (const item of notifications) {
+    for (const item of notificationsQuery.data ?? []) {
       if (item.read) continue;
       counts.all += 1;
       if (getNotificationCategory(item.meta) === 'system') {
@@ -111,7 +113,7 @@ const NotificationsPage: React.FC = () => {
       }
     }
     return counts;
-  }, [notifications]);
+  }, [notificationsQuery.data]);
 
   const handleMarkAll = useCallback(async () => {
     if (unreadCount === 0) return;
@@ -120,30 +122,30 @@ const NotificationsPage: React.FC = () => {
   }, [refetch, unreadCount]);
 
   const handleClearAll = useCallback(async () => {
-    if (notifications.length === 0) return;
+    if ((notificationsQuery.data ?? []).length === 0) return;
     const confirmed = await confirm({
-      title: '清空全部消息',
-      message: '确定要删除所有消息吗？此操作不可撤销。',
-      confirmText: '清空全部',
+      title: t('notifications.clearAllTitle'),
+      message: t('notifications.clearAllMessage'),
+      confirmText: t('notifications.confirmText'),
     });
     if (!confirmed) return;
     await clearAllNotificationsAndInvalidate();
     await refetch();
-  }, [confirm, notifications.length, refetch]);
+  }, [confirm, notificationsQuery.data, refetch, t]);
 
   const handleDelete = useCallback(
     async (event: { stopPropagation: () => void }, item: AppNotification) => {
       event.stopPropagation();
       const confirmed = await confirm({
-        title: '删除消息',
-        message: '确定要删除这条消息吗？',
-        confirmText: '删除',
+        title: t('notifications.deleteTitle'),
+        message: t('notifications.deleteMessage'),
+        confirmText: t('notifications.deleteConfirmText'),
       });
       if (!confirmed) return;
       await deleteNotificationAndInvalidate(item.id);
       await refetch();
     },
-    [confirm, refetch],
+    [confirm, refetch, t],
   );
 
   const handleItemClick = useCallback(async (item: AppNotification) => {
@@ -155,7 +157,11 @@ const NotificationsPage: React.FC = () => {
 
   return (
     <View data-cmp="Notifications" className="s-notifications">
-      <PageNavigation title="消息通知" fallback={ROUTES.HOME} tone="surface" />
+      <PageNavigation
+        title={t('notifications.title')}
+        fallback={ROUTES.HOME}
+        tone="surface"
+      />
 
       <View className="s-notifications__main">
         <View className="s-notifications__tabs" role="tablist">
@@ -171,7 +177,9 @@ const NotificationsPage: React.FC = () => {
                 onClick={() => setActiveCategory(category)}
               >
                 <Text className="s-btn-label">
-                  {category === 'all' ? '全部' : '系统'}
+                  {category === 'all'
+                    ? t('notifications.categoryAll')
+                    : t('notifications.categorySystem')}
                 </Text>
                 {count > 0 && (
                   <Text className="s-notifications__tab-count">{count}</Text>
@@ -188,14 +196,14 @@ const NotificationsPage: React.FC = () => {
                 className="s-notifications__toolbar-btn"
                 onClick={() => void handleMarkAll()}
               >
-                <Text className="s-btn-label">全部已读</Text>
+                <Text className="s-btn-label">{t('notifications.markAllRead')}</Text>
               </Button>
             )}
             <Button
               className="s-notifications__toolbar-btn"
               onClick={() => void handleClearAll()}
             >
-              <Text className="s-btn-label">清空全部</Text>
+              <Text className="s-btn-label">{t('notifications.clearAll')}</Text>
             </Button>
           </View>
         )}
@@ -205,9 +213,11 @@ const NotificationsPage: React.FC = () => {
         ) : filteredNotifications.length === 0 ? (
           <View className="s-notifications__empty">
             <Bell size={40} className="s-notifications__empty-icon" />
-            <View className="s-notifications__empty-title">暂无消息</View>
+            <View className="s-notifications__empty-title">
+              {t('notifications.emptyTitle')}
+            </View>
             <View className="s-notifications__empty-desc">
-              评论回复、活动变更与审核结果等通知会在这里显示。
+              {t('notifications.emptyDesc')}
             </View>
           </View>
         ) : (
@@ -257,7 +267,7 @@ const NotificationsPage: React.FC = () => {
                 onClick={showMoreNotifications}
               >
                 <Text className="s-btn-label">
-                  还有 {hiddenNotificationCount} 条消息
+                  {t('notifications.showMore', { count: hiddenNotificationCount })}
                 </Text>
               </Button>
             ) : null}

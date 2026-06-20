@@ -19,4 +19,4 @@ export function useT() {
   return useI18n().t;
 }
 
-export type { AppLocale };
+export type { AppLocale, TranslateParams };

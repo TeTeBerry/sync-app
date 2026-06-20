@@ -62,12 +62,12 @@ const ExclusiveItineraryPage = () => {
   return (
     <View data-cmp="ExclusiveItineraryPage" className="s-exclusive-itinerary">
       <PageNavigation
-        title="我的电音时间表"
+        title={t('itinerary.title')}
         fallback={navFallback}
         trailing={
           <Button
             className="s-page-nav__icon-action"
-            aria-label="说明"
+            aria-label={t('itinerary.infoAria')}
             hoverClass="s-page-nav__icon-action--pressed"
             onTap={openInfo}
           >
@@ -108,13 +108,13 @@ const ExclusiveItineraryPage = () => {
               className="s-exclusive-itinerary__load-error"
               onClick={() => void refetchDjList()}
               role="button"
-              aria-label="阵容加载失败，点击重试"
+              aria-label={t('itinerary.lineupLoadFailed')}
             >
-              阵容加载失败，点击重试
+              {t('itinerary.lineupLoadFailed')}
             </View>
           ) : lineupPending && filteredDjs.length === 0 ? (
             <Text className="s-exclusive-itinerary__empty-lineup">
-              暂无可浏览阵容，订阅后将在通知中心提醒你
+              {t('itinerary.lineupEmpty')}
             </Text>
           ) : (
             <ExclusiveItineraryDjGrid
@@ -155,9 +155,9 @@ const ExclusiveItineraryPage = () => {
 
       <ActionSheet
         open={sortSheetOpen}
-        title="排序方式"
+        title={t('itinerary.sortTitle')}
         items={sortSheetItems}
-        cancelLabel="取消"
+        cancelLabel={t('itinerary.sortCancel')}
         onCancel={closeSortSheet}
       />
     </View>

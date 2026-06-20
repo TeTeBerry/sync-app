@@ -25,7 +25,11 @@ const AiTravelGuidePage = () => {
       <PageNavigation title={getTravelGuideTitle()} fallback={page.navFallback} />
 
       {page.loading ? (
-        <ThemedPageLoader variant="spinner" label="正在加载攻略…" minHeight={280} />
+        <ThemedPageLoader
+          variant="spinner"
+          label={t('travelGuide.loading')}
+          minHeight={280}
+        />
       ) : page.payload ? (
         <View className="s-ai-travel-guide-page__body">
           <ScrollView
@@ -66,7 +70,7 @@ const AiTravelGuidePage = () => {
               >
                 <Share2 size={16} color="#fff" />
                 <Text className="s-ai-travel-guide-page__footer-btn-label">
-                  分享给好友
+                  {t('travelGuide.share')}
                 </Text>
               </Button>
             ) : null}
@@ -77,17 +81,19 @@ const AiTravelGuidePage = () => {
               onClick={() => void page.handleCopyShare()}
             >
               <FileText size={16} color="#fff" />
-              <Text className="s-ai-travel-guide-page__footer-btn-label">复制文案</Text>
+              <Text className="s-ai-travel-guide-page__footer-btn-label">
+                {t('travelGuide.copyText')}
+              </Text>
             </Button>
           </View>
         </View>
       ) : (
         <View className="s-ai-travel-guide-page__empty">
           <Text className="s-ai-travel-guide-page__empty-title">
-            {page.loadError ?? '攻略不存在或已过期'}
+            {page.loadError ?? t('travelGuide.notFound')}
           </Text>
           <Text className="s-ai-travel-guide-page__empty-sub">
-            请返回 AI 对话重新生成出行攻略
+            {t('travelGuide.notFoundHint')}
           </Text>
         </View>
       )}

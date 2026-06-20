@@ -16,17 +16,20 @@ type TravelGuideDetailHeroProps = {
 
 export function TravelGuideDetailHero({ plan }: TravelGuideDetailHeroProps) {
   useT();
+  const t = useT();
   const totalBudget = findTravelGuideTotalBudgetItem(plan);
   const perPerson = totalBudget
     ? travelGuideBudgetPerPersonRange(totalBudget.range, plan.headcount)
     : null;
 
   const chips = [
-    plan.departure ? `${plan.departure}出发` : null,
-    plan.headcount > 0 ? `${plan.headcount}人` : null,
-    plan.accommodationNights > 0 ? `住${plan.accommodationNights}晚` : null,
+    plan.departure ? `${plan.departure}${t('travelPlan.departureLabel')}` : null,
+    plan.headcount > 0 ? `${plan.headcount}${t('travelPlan.headcountUnit')}` : null,
+    plan.accommodationNights > 0
+      ? `${t('travelPlan.nightsLabel', { count: plan.accommodationNights })}`
+      : null,
     plan.budgetLabel ? shortTravelGuideBudgetLabel(plan.budgetLabel) : null,
-    plan.selfDrive ? '自驾' : null,
+    plan.selfDrive ? t('travelPlan.driveYes') : t('travelPlan.driveNo'),
   ].filter(Boolean);
 
   return (

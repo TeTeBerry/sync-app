@@ -126,9 +126,11 @@ const ProfilePostsSection: React.FC<ProfilePostsSectionProps> = ({
             <View className="s-profile-section__empty-icon s-profile-section__empty-icon--posts">
               <MessageSquare size={22} />
             </View>
-            <Text className="s-profile-section__empty-title">还没有帖子</Text>
+            <Text className="s-profile-section__empty-title">
+              {t('posts.emptyTitle')}
+            </Text>
             <Text className="s-profile-section__empty-hint">
-              在活动详情发布模板帖或留言
+              {t('posts.emptyHint')}
             </Text>
           </View>
         ) : (
@@ -136,7 +138,7 @@ const ProfilePostsSection: React.FC<ProfilePostsSectionProps> = ({
             {renderPostItems(visibleItems, onSelect, onDelete)}
             {hasMoreToShow ? (
               <Button className="s-profile-section__show-more" onClick={showMore}>
-                <Text>还有 {hiddenCount} 条帖子</Text>
+                <Text>{t('posts.hiddenCount', { count: hiddenCount })}</Text>
               </Button>
             ) : null}
           </>
@@ -149,17 +151,17 @@ const ProfilePostsSection: React.FC<ProfilePostsSectionProps> = ({
     <ProfileCollapsibleSection
       variant="posts"
       icon={<MessageSquare size={14} />}
-      title="我的帖子"
+      title={t('posts.myPosts')}
       items={items}
       renderEmpty={() => (
         <View className="s-profile-section__empty">
           <View className="s-profile-section__empty-icon s-profile-section__empty-icon--posts">
             <MessageSquare size={22} />
           </View>
-          <Text className="s-profile-section__empty-title">还没有帖子</Text>
-          <Text className="s-profile-section__empty-hint">
-            在活动详情发布模板帖或留言
+          <Text className="s-profile-section__empty-title">
+            {t('posts.emptyTitle')}
           </Text>
+          <Text className="s-profile-section__empty-hint">{t('posts.emptyHint')}</Text>
         </View>
       )}
     >

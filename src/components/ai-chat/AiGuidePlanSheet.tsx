@@ -16,12 +16,13 @@ import type { AiGuidePlanFormValues } from '../../types/travelGuide';
 import { TRAVEL_GUIDE_BUDGET_OPTIONS } from '../../types/travelGuide';
 import { PlaceAutocompleteField } from './PlaceAutocompleteField';
 import { useAiGuidePlanSheetForm } from './useAiGuidePlanSheetForm';
+import { useT } from '@/hooks/useI18n';
 import { ScrollView, Text, View } from '@tarojs/components';
 
 export type AiGuidePlanSheetProps = {
   open: boolean;
   defaultNights: number;
-  /** 活动举办城市，用于未指定出发城市时的 POI 区域约束 */
+  /** Activity host city, used for POI area constraints when departure city is not specified */
   eventCity?: string;
   initialValues?: AiGuidePlanFormValues | null;
   onClose: () => void;
@@ -33,11 +34,15 @@ function InlineStepper({
   min,
   max,
   onChange,
+  ariaDecrease,
+  ariaIncrease,
 }: {
   value: number;
   min: number;
   max: number;
   onChange: (next: number) => void;
+  ariaDecrease: string;
+  ariaIncrease: string;
 }) {
   return (
     <View className="s-ai-guide-plan-sheet__inline-stepper">
@@ -45,7 +50,7 @@ function InlineStepper({
         className="s-ai-guide-plan-sheet__inline-stepper-btn"
         disabled={value <= min}
         hoverClass="s-ai-guide-plan-sheet__inline-stepper-btn--pressed"
-        aria-label="减少"
+        aria-label={ariaDecrease}
         onClick={() => onChange(Math.max(min, value - 1))}
       >
         <Minus size={16} color="#fff" aria-hidden />
@@ -55,7 +60,7 @@ function InlineStepper({
         className="s-ai-guide-plan-sheet__inline-stepper-btn"
         disabled={value >= max}
         hoverClass="s-ai-guide-plan-sheet__inline-stepper-btn--pressed"
-        aria-label="增加"
+        aria-label={ariaIncrease}
         onClick={() => onChange(Math.min(max, value + 1))}
       >
         <Plus size={16} color="#fff" aria-hidden />
@@ -98,6 +103,7 @@ function AiGuidePlanSheetInner({
   onClose,
   onSubmit,
 }: AiGuidePlanSheetProps) {
+  const t = useT();
   useOverlayLock(open);
 
   const form = useAiGuidePlanSheetForm({
@@ -165,7 +171,7 @@ function AiGuidePlanSheetInner({
           <Button
             className="s-ai-guide-plan-sheet__close"
             hoverClass="s-ai-guide-plan-sheet__close--pressed"
-            aria-label="关闭"
+            aria-label={t('travelPlan.closeAria')}
             onClick={onClose}
           >
             <X size={18} color="#fff" aria-hidden />
@@ -174,12 +180,12 @@ function AiGuidePlanSheetInner({
 
         <View className="s-ai-guide-plan-sheet__body-outer">
           <PlaceAutocompleteField
-            label="出发地"
-            hint="跨城填出发城市（如「上海」）；同城可填公司、车站等具体地点"
+            label={t('travelPlan.departureLabel')}
+            hint={t('travelPlan.departureHint')}
             value={form.departure}
             onChange={handleDepartureChange}
             onCityChange={handleDepartureCityChange}
-            placeholder="请输入出发地址"
+            placeholder={t('travelPlan.departurePlaceholder')}
             eventCity={eventCity}
             active={open}
           />
@@ -195,7 +201,9 @@ function AiGuidePlanSheetInner({
         >
           <View className="s-ai-guide-plan-sheet__body">
             <View className="s-ai-guide-plan-sheet__field">
-              <Text className="s-ai-guide-plan-sheet__label">出行人数</Text>
+              <Text className="s-ai-guide-plan-sheet__label">
+                {t('travelPlan.headcountLabel')}
+              </Text>
               <View className="s-ai-guide-plan-sheet__card">
                 <View className="s-ai-guide-plan-sheet__card-row">
                   <View className="s-ai-guide-plan-sheet__card-summary">
@@ -205,7 +213,7 @@ function AiGuidePlanSheetInner({
                       aria-hidden
                     />
                     <Text className="s-ai-guide-plan-sheet__card-summary-text">
-                      {form.headcount} 人
+                      {form.headcount} {t('travelPlan.headcountUnit')}
                     </Text>
                   </View>
                   <InlineStepper
@@ -213,13 +221,17 @@ function AiGuidePlanSheetInner({
                     min={1}
                     max={10}
                     onChange={form.setHeadcount}
+                    ariaDecrease={t('travelPlan.decreaseAria')}
+                    ariaIncrease={t('travelPlan.increaseAria')}
                   />
                 </View>
               </View>
             </View>
 
             <View className="s-ai-guide-plan-sheet__field">
-              <Text className="s-ai-guide-plan-sheet__label">住宿预算 / 晚</Text>
+              <Text className="s-ai-guide-plan-sheet__label">
+                {t('travelPlan.budgetLabel')}
+              </Text>
               <View className="s-ai-guide-plan-sheet__budget-row">
                 {TRAVEL_GUIDE_BUDGET_OPTIONS.map((opt) => {
                   const active = form.budgetTier === opt.id;
@@ -254,22 +266,26 @@ function AiGuidePlanSheetInner({
                     aria-hidden
                   />
                   <View className="s-ai-guide-plan-sheet__drive-text">
-                    <Text className="s-ai-guide-plan-sheet__drive-title">是否自驾</Text>
+                    <Text className="s-ai-guide-plan-sheet__drive-title">
+                      {t('travelPlan.driveTitle')}
+                    </Text>
                     <Text className="s-ai-guide-plan-sheet__drive-hint">
-                      影响交通路线推荐
+                      {t('travelPlan.driveHint')}
                     </Text>
                   </View>
                 </View>
                 <ThemeToggle
                   checked={form.selfDrive}
-                  ariaLabel="是否自驾"
+                  ariaLabel={t('travelPlan.driveYes')}
                   onChange={setSelfDrive}
                 />
               </View>
             </View>
 
             <View className="s-ai-guide-plan-sheet__field">
-              <Text className="s-ai-guide-plan-sheet__label">住宿天数</Text>
+              <Text className="s-ai-guide-plan-sheet__label">
+                {t('travelPlan.nightsLabel')}
+              </Text>
               <View className="s-ai-guide-plan-sheet__card">
                 <View className="s-ai-guide-plan-sheet__card-row">
                   <View className="s-ai-guide-plan-sheet__card-summary">
@@ -279,7 +295,7 @@ function AiGuidePlanSheetInner({
                       aria-hidden
                     />
                     <Text className="s-ai-guide-plan-sheet__card-summary-text">
-                      {form.accommodationNights} 晚
+                      {form.accommodationNights} {t('travelPlan.nightsUnit')}
                     </Text>
                   </View>
                   <InlineStepper
@@ -287,6 +303,8 @@ function AiGuidePlanSheetInner({
                     min={1}
                     max={7}
                     onChange={setAccommodationNights}
+                    ariaDecrease={t('travelPlan.decreaseAria')}
+                    ariaIncrease={t('travelPlan.increaseAria')}
                   />
                 </View>
               </View>

@@ -97,7 +97,7 @@ function CommentRow({
                 targetType="comment"
                 targetId={comment.id}
                 targetUserId={comment.userId}
-                ariaLabel="举报评论"
+                ariaLabel={t('comments.reportAria')}
               />
             ) : null}
           </View>
@@ -113,7 +113,7 @@ function CommentRow({
                   })
                 }
               >
-                <Text className="s-btn-label">回复</Text>
+                <Text className="s-btn-label">{t('comments.reply')}</Text>
               </Button>
             </View>
           ) : null}
@@ -144,7 +144,9 @@ function CommentRow({
                 className="s-post-comments__replies-more"
                 onClick={() => setRepliesExpanded(true)}
               >
-                <Text className="s-btn-label">还有 {hiddenCount} 条回复</Text>
+                <Text className="s-btn-label">
+                  {t('comments.repliesMore', { count: hiddenCount })}
+                </Text>
               </Button>
             ) : null}
           </>
@@ -172,7 +174,9 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
   const [submitting, setSubmitting] = useState(false);
   const [replyTarget, setReplyTarget] = useState<ReplyTarget | null>(null);
 
-  const placeholder = replyTarget ? `回复 @${replyTarget.authorName}` : '说点什么...';
+  const placeholder = replyTarget
+    ? t('comments.replyTo', { name: replyTarget.authorName })
+    : t('comments.placeholder');
 
   const handleSubmit = useCallback(() => {
     const body = draft.trim();
@@ -197,14 +201,14 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
           setDraft('');
           setReplyTarget(null);
           onCommentSubmitted?.(updated);
-          void Taro.showToast({ title: '评论成功', icon: 'success' });
+          void Taro.showToast({ title: t('comments.submitSuccess'), icon: 'success' });
           void requestPostEngagementSubscribe();
         } catch (err: unknown) {
           if (await handlePublishError(err)) return;
           const message =
             err instanceof Error && err.message.trim()
               ? err.message.trim()
-              : '评论失败';
+              : t('comments.submitFailed');
           void Taro.showToast({ title: message, icon: 'none' });
         } finally {
           setSubmitting(false);
@@ -258,11 +262,11 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
         )}
       >
         {commentsQuery.isLoading ? (
-          <Text className="s-post-comments__status">加载中…</Text>
+          <Text className="s-post-comments__status">{t('comments.loading')}</Text>
         ) : commentsQuery.isError ? (
-          <Text className="s-post-comments__status">评论加载失败</Text>
+          <Text className="s-post-comments__status">{t('comments.loadFailed')}</Text>
         ) : comments.length === 0 ? (
-          <Text className="s-post-comments__status">暂无评论，来抢沙发吧</Text>
+          <Text className="s-post-comments__status">{t('comments.empty')}</Text>
         ) : (
           <>
             {visibleComments.map((comment) => (
@@ -281,7 +285,7 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
                 className="s-post-comments__load-more"
                 onClick={showMoreVisibleComments}
               >
-                <Text className="s-btn-label">显示更多评论</Text>
+                <Text className="s-btn-label">{t('comments.showMore')}</Text>
               </Button>
             ) : null}
             {hasMore ? (
@@ -291,7 +295,7 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
                 onClick={() => void loadMore()}
               >
                 <Text className="s-btn-label">
-                  {loadingMore ? '加载中…' : '加载更多评论'}
+                  {loadingMore ? t('comments.loading') : t('comments.loadMore')}
                 </Text>
               </Button>
             ) : null}
@@ -302,13 +306,13 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
       {replyTarget ? (
         <View className="s-post-comments__reply-bar">
           <Text className="s-post-comments__reply-bar-text">
-            回复 @{replyTarget.authorName}
+            {t('comments.replyTo', { name: replyTarget.authorName })}
           </Text>
           <Button
             className="s-post-comments__reply-bar-cancel"
             onClick={() => setReplyTarget(null)}
           >
-            <Text className="s-btn-label">取消</Text>
+            <Text className="s-btn-label">{t('comments.cancelReply')}</Text>
           </Button>
         </View>
       ) : null}
@@ -342,7 +346,7 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
               's-post-comments__send',
               canSend && 's-post-comments__send--active',
             )}
-            aria-label="发送评论"
+            aria-label={t('comments.send')}
             disabled={!canSend}
             onClick={handleSubmit}
           >
@@ -357,7 +361,7 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
       </View>
 
       <Button className="s-post-comments__toggle" onClick={onToggleExpanded}>
-        <Text className="s-btn-label">收起评论</Text>
+        <Text className="s-btn-label">{t('comments.collapse')}</Text>
         <ChevronUp size={14} />
       </Button>
 

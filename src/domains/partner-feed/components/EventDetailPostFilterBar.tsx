@@ -1,4 +1,5 @@
 import { Text, View } from '@tarojs/components';
+import { useT } from '@/hooks/useI18n';
 
 type EventDetailPostFilterBarProps = {
   cityOptions: string[];
@@ -17,10 +18,11 @@ export function EventDetailPostFilterBar({
   onClear,
   isActive = false,
 }: EventDetailPostFilterBarProps) {
+  const t = useT();
   if (disabled) {
     return (
       <Text className="s-event-detail-post-filter__hint">
-        筛选与 AI 搜索不可同时使用，请清空搜索框后再筛选
+        {t('eventDetail.filterHint')}
       </Text>
     );
   }
@@ -32,7 +34,10 @@ export function EventDetailPostFilterBar({
   return (
     <View className="s-event-detail-post-filter">
       <View className="s-event-detail-post-filter__row">
-        <View className="s-event-detail-post-filter__chips" aria-label="按出发城市筛选">
+        <View
+          className="s-event-detail-post-filter__chips"
+          aria-label={t('eventDetail.filterByCity')}
+        >
           {cityOptions.map((city) => {
             const active = selectedCity === city;
             return (
@@ -59,7 +64,7 @@ export function EventDetailPostFilterBar({
             onClick={onClear}
             role="button"
           >
-            清除筛选
+            {t('eventDetail.clearFilter')}
           </Text>
         ) : null}
       </View>

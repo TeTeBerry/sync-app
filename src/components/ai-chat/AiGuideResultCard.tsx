@@ -27,16 +27,23 @@ export type AiGuideResultCardProps = {
   onBuddyPostFromGuide?: () => void;
 };
 
-function previewHighlights(plan: TravelGuidePlan): string[] {
+function previewHighlights(
+  plan: TravelGuidePlan,
+  t: (key: string, params?: Record<string, unknown>) => string,
+): string[] {
   const highlights: string[] = [];
   const transport = plan.transport.lines[0]?.trim();
   if (transport) highlights.push(transport);
 
   const schemes = plan.accommodation.schemes;
   if (schemes?.length) {
-    highlights.push(`住宿 ${schemes.map((s) => s.label).join(' / ')}`);
+    highlights.push(
+      t('travelPlan.accommodation', { label: schemes.map((s) => s.label).join(' / ') }),
+    );
   } else if (plan.accommodation.hotels[0]?.name) {
-    highlights.push(`住宿 ${plan.accommodation.hotels[0].name}`);
+    highlights.push(
+      t('travelPlan.accommodation', { label: plan.accommodation.hotels[0].name }),
+    );
   }
 
   return highlights.slice(0, 2);
@@ -50,8 +57,8 @@ export function AiGuideResultCard({
   onRegenerate,
   onBuddyPostFromGuide,
 }: AiGuideResultCardProps) {
-  useT();
-  const highlights = previewHighlights(plan);
+  const t = useT();
+  const highlights = previewHighlights(plan, t);
   const total = findTravelGuideTotalBudgetItem(plan);
 
   const openDetail = () => {
@@ -91,22 +98,28 @@ export function AiGuideResultCard({
 
         <View className="s-ai-guide-result__chips">
           <Text className="s-ai-guide-result__chip">{plan.departure}</Text>
-          <Text className="s-ai-guide-result__chip">{plan.headcount}人</Text>
+          <Text className="s-ai-guide-result__chip">
+            {t('travelPlan.headcountUnit', { count: plan.headcount })}
+          </Text>
           <Text className="s-ai-guide-result__chip">
             {shortTravelGuideBudgetLabel(plan.budgetLabel)}
           </Text>
           <Text className="s-ai-guide-result__chip">
-            {plan.selfDrive ? '自驾' : '公交'}
+            {plan.selfDrive ? t('travelPlan.driveYes') : t('travelPlan.driveNo')}
           </Text>
         </View>
 
         {total ? (
           <View className="s-ai-guide-result__budget-strip">
-            <Text className="s-ai-guide-result__budget-strip-label">合计</Text>
+            <Text className="s-ai-guide-result__budget-strip-label">
+              {t('travelPlan.totalLabel')}
+            </Text>
             <Text className="s-ai-guide-result__budget-strip-value">{total.range}</Text>
             {plan.headcount > 1 ? (
               <Text className="s-ai-guide-result__budget-strip-sub">
-                人均 {travelGuideBudgetPerPersonRange(total.range, plan.headcount)}
+                {t('travelPlan.budgetPerPerson', {
+                  amount: travelGuideBudgetPerPersonRange(total.range, plan.headcount),
+                })}
               </Text>
             ) : null}
           </View>
@@ -139,9 +152,11 @@ export function AiGuideResultCard({
         >
           <Users size={18} color="#fff" />
           <View className="s-ai-guide-result__buddy-cta-text">
-            <Text className="s-ai-guide-result__buddy-cta-title">一键发帖</Text>
+            <Text className="s-ai-guide-result__buddy-cta-title">
+              {t('travelPlan.buddyCtaTitle')}
+            </Text>
             <Text className="s-ai-guide-result__buddy-cta-sub">
-              用攻略里的出发地、人数预填发帖
+              {t('travelPlan.buddyCtaHint')}
             </Text>
           </View>
         </Button>

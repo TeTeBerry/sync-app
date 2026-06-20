@@ -26,7 +26,7 @@ export function TravelPlanReceiptOcrTip({
   const handleClick = () => {
     if (disabled) return;
     if (activityLegacyId == null || Number.isNaN(activityLegacyId)) {
-      void Taro.showToast({ title: '请先绑定活动', icon: 'none' });
+      void Taro.showToast({ title: t('common.pleaseSelectEvent'), icon: 'none' });
       return;
     }
     goMyItinerary(activityLegacyId);

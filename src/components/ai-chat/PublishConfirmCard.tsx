@@ -23,8 +23,9 @@ export function PublishConfirmCard({
   return (
     <View className="s-publish-confirm">
       <Text className="s-publish-confirm__title">{PUBLISH_CONFIRM_MARKER}</Text>
-      <Text className="s-publish-confirm__context">{`「${payload.activityLabel}」帖子预览`}</Text>
-
+      <Text className="s-publish-confirm__context">
+        {t('ai.postPreview', { activity: payload.activityLabel })}
+      </Text>
       <View className="s-publish-confirm__preview">
         <View className="s-publish-confirm__preview-header">
           {avatarSrc ? (
@@ -40,7 +41,7 @@ export function PublishConfirmCard({
           )}
           <View className="s-publish-confirm__author">
             <Text className="s-publish-confirm__author-name">{userName}</Text>
-            <Text className="s-publish-confirm__author-meta">待发布 · 草稿</Text>
+            <Text className="s-publish-confirm__author-meta">{t('ai.postStatus')}</Text>
           </View>
         </View>
 

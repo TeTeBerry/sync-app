@@ -56,13 +56,15 @@ export function AiItineraryResultCard({
         </Text>
 
         <View className="s-ai-itinerary-result__chips">
-          <Text className="s-ai-itinerary-result__chip">{dayCount} 天行程</Text>
           <Text className="s-ai-itinerary-result__chip">
-            已选 {selectedDjIds.length} 位 DJ
+            {t('travelPlan.dayPlan', { count: dayCount })}
+          </Text>
+          <Text className="s-ai-itinerary-result__chip">
+            {t('travelPlan.selectedDj', { count: selectedDjIds.length })}
           </Text>
           {conflictCount > 0 ? (
             <Text className="s-ai-itinerary-result__chip s-ai-itinerary-result__chip--warn">
-              {conflictCount} 处冲突
+              {t('travelPlan.conflictCount', { count: conflictCount })}
             </Text>
           ) : null}
         </View>

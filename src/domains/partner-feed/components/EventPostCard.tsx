@@ -50,8 +50,8 @@ function EventPostCardInner({
   const isOwn = isCurrentUserPostAuthor(post.name, post.userId);
 
   const postName = isOwn
-    ? displayIdentity.name?.trim() || post.name?.trim() || '用户'
-    : post.name?.trim() || '用户';
+    ? displayIdentity.name?.trim() || post.name?.trim() || t('common.user')
+    : post.name?.trim() || t('common.user');
 
   const postHandle = formatPostHandle(
     postName,

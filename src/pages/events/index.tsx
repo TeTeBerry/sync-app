@@ -196,12 +196,14 @@ const Events: React.FC = () => {
               ) : viewTab === 'list' ? (
                 <>
                   <View className="s-events__section-head s-events__section-head--list">
-                    <Text className="s-events__section-title">全部活动</Text>
+                    <Text className="s-events__section-title">
+                      {t('events.allActivities')}
+                    </Text>
                   </View>
                   <EventsActivityList
                     events={allEventsByDate}
                     isError={isError}
-                    emptyText="暂无活动"
+                    emptyText={t('events.empty')}
                     onRetry={() => void refetch()}
                     onOpenDetail={openDetail}
                     onWarmDetail={warmEventDetail}
@@ -219,7 +221,9 @@ const Events: React.FC = () => {
                   />
 
                   <View className="s-events__section-head">
-                    <Text className="s-events__section-title">近期全部活动</Text>
+                    <Text className="s-events__section-title">
+                      {t('events.recentAll')}
+                    </Text>
                   </View>
 
                   <EventsActivityList
