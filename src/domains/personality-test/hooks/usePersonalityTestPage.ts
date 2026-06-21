@@ -295,7 +295,7 @@ export function usePersonalityTestPage() {
         setPhase('error');
       }
     },
-    [applyResult, questionIds],
+    [applyResult, questionIds, t],
   );
 
   const goNextQuestion = useCallback(() => {

@@ -75,7 +75,7 @@ export function useAiTravelGuide(options: {
       setSheetInitialValues(lastFormRef.current);
       setSheetOpen(true);
     }, 'ai_assistant');
-  }, [activityLegacyId, isStreaming]);
+  }, [activityLegacyId, isStreaming, t]);
 
   const runGeneration = useCallback(
     async (

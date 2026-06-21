@@ -23,3 +23,17 @@ export function writeStoredLocale(locale: AppLocale): void {
 export function isAppLocale(value: string): value is AppLocale {
   return (APP_LOCALES as readonly string[]).includes(value);
 }
+
+/**
+ * Check if we should enable browser language detection
+ * Returns false if the user has explicitly set a preference different from default
+ */
+export function shouldUseBrowserLanguageDetection(): boolean {
+  try {
+    const storedLocale = readStoredLocale();
+    // Only enable browser detection if user hasn't explicitly chosen a language other than default
+    return storedLocale === 'zh-CN';
+  } catch {
+    return true;
+  }
+}
