@@ -25,18 +25,16 @@ export const HomeCountdownCard: FC<HomeCountdownCardProps> = ({
         {parts.map((part, index) => (
           <View key={part.unit} className="s-home-countdown__segment">
             <View className="s-home-countdown__part">
-              <View className="s-home-countdown__num-wrap">
-                <Text
-                  className={
-                    part.accent
-                      ? 's-home-countdown__num s-home-countdown__num--accent'
-                      : 's-home-countdown__num'
-                  }
-                >
-                  {part.value}
-                </Text>
-                <Text className="s-home-countdown__unit">{t(part.unit)}</Text>
-              </View>
+              <Text
+                className={
+                  part.accent
+                    ? 's-home-countdown__num s-home-countdown__num--accent'
+                    : 's-home-countdown__num'
+                }
+              >
+                {part.value}
+              </Text>
+              <Text className="s-home-countdown__unit">{t(part.unit)}</Text>
             </View>
             {index < parts.length - 1 ? (
               <Text className="s-home-countdown__sep">·</Text>

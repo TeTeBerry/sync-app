@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import {
   fetchActivities,
   fetchActivityByLegacyId,
+  fetchCatalogLineupArtists,
   fetchHomeSummary,
   registerForActivity,
 } from '../../api/sync/activities';
@@ -81,6 +82,17 @@ export function useEventList(options?: QueryEnableOptions) {
     isError: tabEnabled && query.isError,
     refetch: query.refetch,
   };
+}
+
+export function useCatalogLineupArtists(options?: QueryEnableOptions) {
+  const tabEnabled = options?.enabled ?? true;
+
+  return useApiQuery({
+    queryKey: ['activities', 'lineup-artists'],
+    queryFn: fetchCatalogLineupArtists,
+    enabled: isLiveApi() && tabEnabled,
+    staleTime: STALE_ACTIVITIES_LIST_MS,
+  });
 }
 
 export function useHomeSummary() {

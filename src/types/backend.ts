@@ -4,6 +4,14 @@ export interface ApiResponse<T> {
   data: T;
 }
 
+export interface CatalogLineupArtist {
+  id: string;
+  name: string;
+  genreLabel: string;
+  activityCount: number;
+  thumbnail?: string;
+}
+
 export interface BackendActivity {
   _id: string;
   legacyId: number;
@@ -141,6 +149,7 @@ export interface ProfileActivityItem {
   location: string;
   image: string;
   status: 'registered' | 'attended';
+  activityLegacyId: string;
 }
 
 export interface ProfilePostItem {

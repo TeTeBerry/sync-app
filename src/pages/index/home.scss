@@ -70,7 +70,7 @@
 .s-home-countdown {
   box-sizing: border-box;
   max-width: 100%;
-  padding: 16px 12px 14px;
+  padding: 18px 16px 16px;
   border-radius: 16px;
   background: #1a1a1a;
   margin-bottom: 24px;
@@ -82,9 +82,9 @@
   align-items: flex-end;
   justify-content: center;
   flex-wrap: nowrap;
-  gap: 4px;
+  gap: 0;
   max-width: 100%;
-  margin: 0 auto 10px;
+  margin: 0 auto 14px;
   overflow: hidden;
   box-sizing: border-box;
 }
@@ -92,23 +92,15 @@
 .s-home-countdown__segment {
   display: inline-flex;
   align-items: flex-end;
-  gap: 4px;
-  flex-shrink: 1;
-  min-width: 0;
+  gap: 14px;
+  flex-shrink: 0;
 }
 
 .s-home-countdown__part {
   display: inline-flex;
+  flex-direction: row;
   align-items: flex-end;
-  flex-shrink: 1;
-  min-width: 0;
-}
-
-.s-home-countdown__num-wrap {
-  position: relative;
-  display: inline-block;
-  padding-right: 10px;
-  padding-bottom: 2px;
+  gap: 4px;
 }
 
 .s-home-countdown__num {
@@ -125,14 +117,13 @@
 }
 
 .s-home-countdown__unit {
-  position: absolute;
-  right: 0;
-  bottom: 4px;
-  font-size: var(--s-type-meta);
+  flex-shrink: 0;
+  font-size: var(--s-type-small);
   font-weight: var(--s-fw-extrabold);
   line-height: 1;
   color: #ff3b30;
-  text-transform: lowercase;
+  white-space: nowrap;
+  padding-bottom: 5px;
 }
 
 .s-home-countdown__sep {
@@ -141,7 +132,7 @@
   font-size: var(--s-type-display-sm);
   line-height: 1;
   font-weight: var(--s-fw-black);
-  margin-bottom: 6px;
+  margin: 0 2px 8px;
 }
 
 .s-home-countdown__copy {
@@ -149,9 +140,10 @@
   box-sizing: border-box;
   width: 100%;
   margin: 0;
+  padding: 0 4px;
   text-align: center;
   font-size: var(--s-type-body-sm);
-  line-height: 1.35;
+  line-height: 1.5;
   color: #8e8e93;
 }
 

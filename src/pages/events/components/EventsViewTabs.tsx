@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import { CalendarDays, List, Map } from '../../../components/icons';
+import { CalendarDays, List, Users } from '../../../components/icons';
 import { Text, View } from '@tarojs/components';
 import { useT } from '@/hooks/useI18n';
 
@@ -12,9 +12,9 @@ const TABS: Array<{
   labelKey: string;
   Icon: typeof CalendarDays;
 }> = [
-  { id: 'calendar', labelKey: 'events.viewTabs.calendar', Icon: CalendarDays },
-  { id: 'map', labelKey: 'events.viewTabs.map', Icon: Map },
   { id: 'list', labelKey: 'events.viewTabs.list', Icon: List },
+  { id: 'calendar', labelKey: 'events.viewTabs.calendar', Icon: CalendarDays },
+  { id: 'artists', labelKey: 'events.viewTabs.artists', Icon: Users },
 ];
 
 type EventsViewTabsProps = {

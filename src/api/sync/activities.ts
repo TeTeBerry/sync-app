@@ -3,12 +3,17 @@ import { getActivityTypeLabel } from '../../constants/activityType';
 import type {
   ActivityRegistrationResult,
   BackendActivity,
+  CatalogLineupArtist,
   HomeSummary,
 } from '../../types/backend';
 import { ownerQueryParams } from '../requestContext';
 
 export function fetchActivities() {
   return apiGet<BackendActivity[]>('/activities');
+}
+
+export function fetchCatalogLineupArtists() {
+  return apiGet<CatalogLineupArtist[]>('/activities/lineup-artists');
 }
 
 export function resolveActivityByKeyword(keyword: string) {

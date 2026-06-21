@@ -1,6 +1,6 @@
 import Taro from '@tarojs/taro';
 
-export type EventsViewTab = 'calendar' | 'map' | 'list';
+export type EventsViewTab = 'calendar' | 'artists' | 'list';
 
 const STORAGE_KEY = 'sync:events:view-tab-intent';
 
@@ -17,7 +17,7 @@ export function consumeEventsViewTabIntent(): EventsViewTab | null {
   try {
     const value = Taro.getStorageSync(STORAGE_KEY);
     Taro.removeStorageSync(STORAGE_KEY);
-    if (value === 'calendar' || value === 'map' || value === 'list') {
+    if (value === 'calendar' || value === 'artists' || value === 'list') {
       return value;
     }
   } catch {

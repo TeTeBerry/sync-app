@@ -8,7 +8,7 @@ import { isLiveApi } from '../../../constants/api';
 import { useProfileActivitiesQuery } from '../../../hooks/useSyncApi';
 import { invalidateProfileActivities } from '../../../utils/queryInvalidation';
 import { useStackPageMainHeight } from '../../../hooks/useTabPageMainHeight';
-import { ROUTES } from '../../../utils/route';
+import { goEventDetail, ROUTES } from '../../../utils/route';
 import { useEndRouteTransitionOnShow } from '../../../hooks/useEndRouteTransitionOnShow';
 import { ScrollView, View } from '@tarojs/components';
 
@@ -43,7 +43,11 @@ const ProfileActivitiesPage: React.FC = () => {
           {loading ? (
             <ThemedPageLoader variant="inline" label="加载活动…" minHeight={120} />
           ) : (
-            <ProfileActivitiesSection items={activities} mode="list" />
+            <ProfileActivitiesSection
+              items={activities}
+              mode="list"
+              onClick={(activityLegacyId) => goEventDetail(activityLegacyId)}
+            />
           )}
         </View>
       </ScrollView>

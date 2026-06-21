@@ -1,6 +1,6 @@
 import type { FC } from 'react';
 import { Text, View } from '@tarojs/components';
-import { Map } from './icons';
+import { Users } from './icons';
 import { useT } from '@/hooks/useI18n';
 import './MapFeatureDeveloping.scss';
 
@@ -16,14 +16,14 @@ const MapFeatureDeveloping: FC<MapFeatureDevelopingProps> = ({
   subtitle,
 }) => {
   const t = useT();
-  const displayTitle = title ?? t('map.developingTitle');
-  const displaySubtitle = subtitle ?? t('map.developingSubtitle');
+  const displayTitle = title ?? t('events.artists');
+  const displaySubtitle = subtitle ?? t('events.artistsHint');
   return (
     <View
       data-cmp="MapFeatureDeveloping"
-      className={['s-map-developing', className].filter(Boolean).join(' ')}
+      className={`s-map-developing ${className || ''}`.trim()}
     >
-      <Map size={36} color="#8e8e93" aria-hidden />
+      <Users size={36} color="#8e8e93" aria-hidden />
       <Text className="s-map-developing__title">{displayTitle}</Text>
       <Text className="s-map-developing__subtitle">{displaySubtitle}</Text>
     </View>

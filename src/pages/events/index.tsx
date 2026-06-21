@@ -30,7 +30,7 @@ import {
 import { EventsPageHeader } from './components/EventsPageHeader';
 import { EventsViewTabs, type EventsViewTab } from './components/EventsViewTabs';
 import { EventsActivityCalendar } from './components/EventsActivityCalendar';
-import { EventsActivityMapTab } from './components/EventsActivityMapTab';
+import { EventsActivityArtistsTab } from './components/EventsActivityArtistsTab';
 import { EventsActivityList } from './components/EventsActivityList';
 import {
   isFestivalEvent,
@@ -53,7 +53,7 @@ const Events: React.FC = () => {
 
   const { events, isLoading, isError, refetch } = useEventList();
   const { refetch: refetchHomeSummary } = useHomeSummary();
-  const [viewTab, setViewTab] = useState<EventsViewTab>('calendar');
+  const [viewTab, setViewTab] = useState<EventsViewTab>('list');
   const [selectedDay, setSelectedDay] = useState(todayCalendarParts);
 
   useStaleBackgroundRefetch({
@@ -72,7 +72,8 @@ const Events: React.FC = () => {
   useDidShow(() => {
     preloadHotRoutes(ROUTES.EVENTS);
     const intent = consumeEventsViewTabIntent();
-    if (intent) {
+    // Always default to the first tab ('calendar') unless there's a specific reason to use a different one
+    if (intent && intent === 'calendar') {
       setViewTab(intent);
     }
   });
@@ -137,7 +138,10 @@ const Events: React.FC = () => {
 
   const festivalEvents = useMemo(() => sortFestivalEventsByDate(events), [events]);
 
-  const allEventsByDate = useMemo(() => sortAllEventsByDate(events), [events]);
+  const allEventsByDate = useMemo(
+    () => sortAllEventsByDate(upcomingEvents),
+    [upcomingEvents],
+  );
 
   const calendarListEvents = useMemo(() => {
     const base = upcomingEvents
@@ -167,21 +171,8 @@ const Events: React.FC = () => {
           <EventsViewTabs activeTab={viewTab} onChange={setViewTab} />
         </View>
 
-        {viewTab === 'map' ? (
-          <View className="s-events__main s-events__main--map">
-            {isLoading ? (
-              <ThemedPageLoader variant="skeleton-feed" minHeight={280} />
-            ) : (
-              <EventsActivityMapTab
-                events={upcomingEvents}
-                listHeight={listScrollHeight ?? undefined}
-                isError={isError}
-                onRetry={() => void refetch()}
-                onOpenDetail={openDetail}
-                onWarmDetail={warmEventDetail}
-              />
-            )}
-          </View>
+        {viewTab === 'artists' ? (
+          <EventsActivityArtistsTab listHeight={listScrollHeight ?? undefined} />
         ) : (
           <ScrollView
             scrollY

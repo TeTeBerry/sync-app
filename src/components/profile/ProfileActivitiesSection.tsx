@@ -6,6 +6,7 @@ import { ProfileCollapsibleSection } from './ProfileCollapsibleSection';
 import type { ProfileActivityItem } from '../../types/backend';
 import { compareActivityDateDesc } from '../../utils/activityStatus';
 import { safeTrim } from '../../utils/safeString';
+import { goEventDetail } from '../../utils/route';
 import { Text, View } from '@tarojs/components';
 import { useT } from '@/hooks/useI18n';
 
@@ -18,11 +19,13 @@ export type ProfileActivitiesSectionProps = {
   items: ProfileActivityItem[];
   /** `list` renders all items without collapsible chrome (detail sub-page). */
   mode?: 'collapsible' | 'list';
+  onClick?: (activityLegacyId: string) => void;
 };
 
 const ProfileActivitiesSection: React.FC<ProfileActivitiesSectionProps> = ({
   items,
   mode = 'collapsible',
+  onClick,
 }) => {
   const t = useT();
   const sortedItems = useMemo(() => [...items].sort(compareActivityDateDesc), [items]);
@@ -58,7 +61,11 @@ const ProfileActivitiesSection: React.FC<ProfileActivitiesSectionProps> = ({
       {sortedItems.length === 0
         ? emptyState
         : sortedItems.map((item) => (
-            <View key={item.id} className="s-profile-activity">
+            <View
+              key={item.id}
+              className="s-profile-activity"
+              onClick={() => onClick?.(item.activityLegacyId)}
+            >
               <ImageWithFallback
                 src={item.image}
                 alt=""
@@ -112,7 +119,11 @@ const ProfileActivitiesSection: React.FC<ProfileActivitiesSectionProps> = ({
     >
       {(pageItems) =>
         pageItems.map((item) => (
-          <View key={item.id} className="s-profile-activity">
+          <View
+            key={item.id}
+            className="s-profile-activity"
+            onClick={() => onClick?.(item.activityLegacyId)}
+          >
             <ImageWithFallback
               src={item.image}
               alt=""
