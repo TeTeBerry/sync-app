@@ -1,7 +1,5 @@
-import './BuddyPostTemplateCta.scss';
-import { Text, View } from '@tarojs/components';
 import { getBuddyPostSheetActionLabel } from '../../utils/buddyPostPromptMessage';
-import { useT } from '@/hooks/useI18n';
+import { SheetActionChip } from './SheetActionChip';
 
 export type BuddyPostTemplateCtaProps = {
   onPress: () => void;
@@ -9,24 +7,13 @@ export type BuddyPostTemplateCtaProps = {
   onOpenSheet?: () => void;
 };
 
-export function BuddyPostTemplateCta({ onPress }: BuddyPostTemplateCtaProps) {
-  useT();
-  const label = getBuddyPostSheetActionLabel();
-
+export function BuddyPostTemplateCta({ onPress, disabled }: BuddyPostTemplateCtaProps) {
   return (
-    <View
-      className="s-buddy-post-template-cta"
-      hoverClass="s-buddy-post-template-cta--pressed"
-      onClick={onPress}
-      role="button"
-      aria-label={label}
-    >
-      <View className="s-buddy-post-template-cta__inner">
-        <Text className="s-buddy-post-template-cta__sparkle" aria-hidden>
-          ✨
-        </Text>
-        <Text className="s-buddy-post-template-cta__label">{label}</Text>
-      </View>
-    </View>
+    <SheetActionChip
+      label={getBuddyPostSheetActionLabel()}
+      variant="buddy_post"
+      disabled={disabled}
+      onPress={onPress}
+    />
   );
 }

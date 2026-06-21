@@ -1,0 +1,66 @@
+@use '../../styles/chat' as chat;
+
+.s-sheet-action-chip {
+  @include chat.chat-pill-chip;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  align-self: flex-start;
+  max-width: 100%;
+  min-height: 40px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  box-sizing: border-box;
+
+  &--pressed {
+    opacity: 0.9;
+    transform: scale(0.99);
+  }
+
+  &--disabled {
+    opacity: 0.45;
+    pointer-events: none;
+  }
+
+  &--travel_guide {
+    color: #fff;
+    border-color: rgba(var(--primary-rgb), 0.45);
+    background: rgba(var(--primary-rgb), 0.16);
+    box-shadow: 0 4px 16px rgba(var(--primary-rgb), 0.22);
+  }
+
+  &--itinerary {
+    color: #fff;
+    border-color: rgba(168, 85, 247, 0.45);
+    background: rgba(124, 58, 237, 0.18);
+    box-shadow: 0 4px 16px rgba(124, 58, 237, 0.2);
+  }
+
+  &--buddy_post {
+    color: #fff;
+    border-color: rgba(76, 201, 240, 0.4);
+    background: rgba(76, 201, 240, 0.12);
+    box-shadow: 0 4px 16px rgba(76, 201, 240, 0.16);
+  }
+
+  &--personality {
+    color: #fff;
+    border-color: rgba(236, 72, 153, 0.42);
+    background: rgba(236, 72, 153, 0.14);
+    box-shadow: 0 4px 16px rgba(236, 72, 153, 0.18);
+  }
+
+  &__label {
+    font-size: var(--s-type-meta);
+    font-weight: var(--s-fw-semibold);
+    line-height: 1.35;
+    white-space: nowrap;
+  }
+
+  &__arrow {
+    flex-shrink: 0;
+    font-size: var(--s-type-meta);
+    color: rgba(255, 255, 255, 0.55);
+    line-height: 1;
+  }
+}

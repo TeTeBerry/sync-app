@@ -17,6 +17,7 @@ import { createMessageId } from './createMessageId';
 import { useChatSession } from './useChatSession';
 import { useWsChatStream } from './useWsChatStream';
 import { useTypewriterReply } from './useTypewriterReply';
+import type { FestivalPlanTaskKey } from '../../domains/festival-plan/festivalPlanTaskDefs';
 
 export interface UseAiChatStreamOptions {
   activityTitle?: string;
@@ -29,6 +30,7 @@ export interface UseAiChatStreamOptions {
   userName?: string;
   userPhone?: string;
   activityLegacyId?: number;
+  festivalPlanNextTaskKey?: FestivalPlanTaskKey;
   getAuthHeaders?: () => Record<string, string>;
   onPostCreated?: (event: Extract<AiChatStreamEvent, { type: 'post_created' }>) => void;
   onExistingPost?: (
@@ -52,6 +54,7 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
     userName: userNameOption,
     userPhone: userPhoneOption,
     activityLegacyId,
+    festivalPlanNextTaskKey,
     getAuthHeaders,
     onPostCreated,
     onExistingPost,
@@ -61,6 +64,7 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
   } = options;
 
   const activityLegacyIdRef = useRef(activityLegacyId);
+  const festivalPlanNextTaskKeyRef = useRef(festivalPlanNextTaskKey);
   const [isStreaming, setIsStreaming] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
 
@@ -95,6 +99,7 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
     streamErrorText,
     wsUrl,
     activityLegacyIdRef,
+    festivalPlanNextTaskKeyRef,
     sessionIdRef,
     messagesRef,
     setMessages,
@@ -111,6 +116,10 @@ export function useAiChatStream(options: UseAiChatStreamOptions) {
   useEffect(() => {
     activityLegacyIdRef.current = activityLegacyId;
   }, [activityLegacyId]);
+
+  useEffect(() => {
+    festivalPlanNextTaskKeyRef.current = festivalPlanNextTaskKey;
+  }, [festivalPlanNextTaskKey]);
 
   useEffect(() => {
     setIsStreamingRef(isStreaming);

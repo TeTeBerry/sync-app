@@ -93,17 +93,13 @@ function festivalPlanTaskKeyToChipAction(
 
 export function buildWelcomeCapabilityChipLabels(
   activityBound: boolean,
-  nextTaskKey?: FestivalPlanTaskKey,
+  _nextTaskKey?: FestivalPlanTaskKey,
 ): string[] {
   if (activityBound) {
-    const chips: string[] = [];
-    if (nextTaskKey) {
-      chips.push(getFestivalPlanTaskDefs()[nextTaskKey].actionLabel);
-    }
-    chips.push(getLineupCapabilityLabel());
-    return chips;
+    // Bound: plan tasks → FestivalPlanSummaryBar; browse → AiQuickActions.
+    return [];
   }
-  return [getPickFestivalCapabilityLabel(), getNearEventsCapabilityLabel()];
+  return [getNearEventsCapabilityLabel()];
 }
 
 export function resolveWelcomeCapabilityChipAction(

@@ -5,10 +5,14 @@ import {
   getGenerateTravelGuideCta,
 } from '@/constants/aiCtaLabels';
 import {
+  filterBoundSuggestedReplies,
   filterChecklistDuplicateSuggestedReplies,
   shouldShowComposerActivityChips,
+  shouldSuppressPersonalityTestCta,
   shouldSuppressPlanSheetCtAs,
 } from '@/utils/aiAssistantEntryPolicy';
+import { getStartPersonalityTestCta } from '@/constants/aiCtaLabels';
+import { t } from '@/i18n';
 
 describe('aiAssistantEntryPolicy', () => {
   it('hides composer activity shortcut chips', () => {
@@ -44,5 +48,16 @@ describe('aiAssistantEntryPolicy', () => {
         undefined,
       ),
     ).toEqual([getGenerateTravelGuideCta()]);
+  });
+
+  it('filters off-prep suggested replies when bound', () => {
+    expect(
+      filterBoundSuggestedReplies(
+        ['查阵容', getStartPersonalityTestCta(), t('ai.pickFestival')],
+        8,
+      ),
+    ).toEqual(['查阵容']);
+    expect(shouldSuppressPersonalityTestCta(8)).toBe(true);
+    expect(shouldSuppressPersonalityTestCta(undefined)).toBe(false);
   });
 });

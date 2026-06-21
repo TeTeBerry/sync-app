@@ -9,6 +9,7 @@ import type { inferUserGenderFromName } from '../../../utils/inferAuthorGender';
 import type { ChatUiMessage } from '../../../types/aiChat';
 import type { AiGuidePlanFormValues } from '../../../types/travelGuide';
 import type { AiCapability } from '@/domains/ai-capability';
+import { cn } from '@/components/ui';
 import { View } from '@tarojs/components';
 import {
   useAiAssistantOrchestrator,
@@ -18,10 +19,13 @@ import {
   AI_CHAT_SCROLL_HOST_ID,
   useAiChatScrollAreaHeight,
 } from './hooks/useAiChatScrollAreaHeight';
+import { AiAssistantChatCollapse } from '../components/AiAssistantChatCollapse';
+import { isWeappRuntime } from './aiChatLayout.util';
 
 export type AiAssistantChatProps = UseAiAssistantOrchestratorOptions & {
   /** Bump when chrome above the chat column changes size (festival plan expand, etc.). */
   layoutRemeasureKey?: string | number;
+  onChatChromeLayoutChange?: () => void;
   userGender?: ReturnType<typeof inferUserGenderFromName>;
 };
 
@@ -46,7 +50,10 @@ const AiAssistantChatFooter = memo(function AiAssistantChatFooter({
 }: AiAssistantChatFooterProps) {
   return (
     <View
-      className="s-ai-assistant-chat__footer"
+      className={cn(
+        's-ai-assistant-chat__footer',
+        isWeappRuntime && 's-ai-assistant-chat__footer--weapp-fixed',
+      )}
       style={keyboardInset > 0 ? { paddingBottom: `${keyboardInset}px` } : undefined}
     >
       <ChatComposer
@@ -117,6 +124,7 @@ const AiAssistantChatMessages = memo(function AiAssistantChatMessages({
         isStreaming={isStreaming}
         isTravelGuideGenerating={isTravelGuideGenerating}
         scrollAreaHeight={scrollAreaHeight}
+        reserveComposerSpace={isWeappRuntime}
         keyboardInset={keyboardInset}
         forceScrollToBottomKey={forceScrollToBottomKey}
         isLoadingHistory={isLoadingHistory}
@@ -138,6 +146,7 @@ const AiAssistantChatMessages = memo(function AiAssistantChatMessages({
 
 export function AiAssistantChat({
   layoutRemeasureKey = 0,
+  onChatChromeLayoutChange,
   userGender,
   ...orchestratorOptions
 }: AiAssistantChatProps) {
@@ -183,32 +192,43 @@ export function AiAssistantChat({
   );
 
   return (
-    <View className="s-ai-assistant-chat">
+    <View
+      className={cn(
+        's-ai-assistant-chat',
+        isWeappRuntime && 's-ai-assistant-chat--weapp-fixed-composer',
+      )}
+    >
       <AccountRiskBanner
         accountRisk={accountRisk}
         className="s-account-risk-banner--chat"
       />
-      <AiAssistantChatMessages
-        scrollRemeasureKey={scrollRemeasureKey}
-        sheetOverlayOpen={sheetOverlayOpen}
-        messages={messages}
-        isStreaming={isStreaming}
-        isTravelGuideGenerating={travelGuide.isGenerating || buddyPost.isPublishing}
-        keyboardInset={chatKeyboardInset}
-        forceScrollToBottomKey={forceScrollToBottomKey}
-        isLoadingHistory={isLoadingHistory}
-        hasMoreHistory={hasMoreHistory}
-        loadOlderMessages={loadOlderMessages}
+      <AiAssistantChatCollapse
         activityLegacyId={activityLegacyId}
-        userAvatar={userAvatar}
-        userName={userName}
-        userGender={userGender}
-        onSelectSuggestedReply={composer.handleSelectSuggestedReply}
-        onRegenerateTravelGuide={travelGuide.handleRegenerate}
-        onBuddyPostFromTravelGuide={buddyPost.openBuddyPostSheetFromTravelGuide}
-        onRunCapability={handleRunCapability}
-        onOpenPersonalityTest={capabilities.handleOpenPersonalityTest}
-      />
+        onLayoutChange={onChatChromeLayoutChange}
+      >
+        <AiAssistantChatMessages
+          scrollRemeasureKey={scrollRemeasureKey}
+          sheetOverlayOpen={sheetOverlayOpen}
+          messages={messages}
+          isStreaming={isStreaming}
+          isTravelGuideGenerating={travelGuide.isGenerating || buddyPost.isPublishing}
+          keyboardInset={chatKeyboardInset}
+          forceScrollToBottomKey={forceScrollToBottomKey}
+          isLoadingHistory={isLoadingHistory}
+          hasMoreHistory={hasMoreHistory}
+          loadOlderMessages={loadOlderMessages}
+          activityLegacyId={activityLegacyId}
+          userAvatar={userAvatar}
+          userName={userName}
+          userGender={userGender}
+          onSelectSuggestedReply={composer.handleSelectSuggestedReply}
+          onRegenerateTravelGuide={travelGuide.handleRegenerate}
+          onBuddyPostFromTravelGuide={buddyPost.openBuddyPostSheetFromTravelGuide}
+          onRunCapability={handleRunCapability}
+          onOpenPersonalityTest={capabilities.handleOpenPersonalityTest}
+        />
+      </AiAssistantChatCollapse>
+
       <AiAssistantChatFooter
         activityLegacyId={activityLegacyId}
         activityTitle={activityTitle}

@@ -257,7 +257,7 @@ export const enUS: MessageTree = {
     welcomeBound:
       '👋 Locked on «{{title}}». Finish “Festival plan” above first; add details below if needed.',
     welcomeUnbound:
-      '👋 Pick a festival to bind your event, then start guide, itinerary, and buddy post prep.',
+      '👋 Bind an event to generate your guide, itinerary, and buddy post.',
     personalityTestSheetSub: '~2 min · DJ and event matches',
     progressThinking0: 'Thinking…',
     progressThinking1: 'Understanding your question…',
@@ -279,6 +279,10 @@ export const enUS: MessageTree = {
     pickActivityTitle: 'Pick an event first',
     pickActivityDesc: 'Bind to generate travel guide, itinerary, and buddy post',
     quickActionsTitle: 'Quick actions',
+    chatSectionTitle: 'Chat',
+    chatExpand: 'Expand chat',
+    chatCollapse: 'Collapse chat',
+    chatCollapsedHint: 'Use quick actions above to keep prepping',
     pickActivityBtn: 'Pick',
     currentActivity: 'Current event',
     switchActivity: 'Switch',
@@ -292,9 +296,9 @@ export const enUS: MessageTree = {
     publishBuddyPost: 'Publish buddy post',
     composerPlaceholderBound: 'Describe your buddy needs for "{{title}}"…',
     composerPlaceholderUnbound:
-      'Describe your buddy needs, e.g. departure, headcount, dates…',
-    composerPlaceholderActivity: 'Ask about "{{title}}"…',
-    composerPlaceholderDefault: 'Where do you want to go? What do you want to know?…',
+      'Describe buddy needs, e.g. departure, headcount, dates…',
+    composerPlaceholderActivity: 'e.g. travel guide, artist lineup…',
+    composerPlaceholderDefault: "Ask what's coming up, or name a city you're eyeing…",
     clearConversation: 'Clear conversation',
     typing: 'AI is thinking',
     activityDateRange: 'Activity dates',
@@ -344,8 +348,12 @@ export const enUS: MessageTree = {
     step1ActionList: 'Browse events',
     step2Title: 'Generate a travel guide',
     step2Desc:
-      'Bind an event in AI to get transport, stay, and exit tips (AI content is for reference).',
-    step2Action: 'Open AI assistant',
+      'Bind an event on Prep to get transport, stay, and exit tips (AI content is for reference).',
+    step2Action: 'Open Prep',
+    step3Title: 'Post for buddies',
+    step3Desc:
+      'Share departure, headcount, and plans to find buddies (we do not match or provide in-app contact).',
+    step3Action: 'Create buddy post',
   },
   eventDetail: {
     invalidActivity: 'Invalid event',
@@ -562,7 +570,9 @@ export const enUS: MessageTree = {
     step1Badge: '{{count}} selected',
     stageFilter: 'Stage filter',
     genreFilter: 'Genre filter',
-    searchPlaceholder: 'Search DJs or genres',
+    searchPlaceholder: 'Search genres, e.g. Techno, House, dnb',
+    djCount: '{{count}} DJs',
+    clearStyleSearchAria: 'Clear genre search',
     infoAria: 'Info',
     lineupLoadFailed: 'Lineup failed to load. Tap to retry.',
     lineupEmpty: 'No lineup available yet. Subscribe to get notified.',

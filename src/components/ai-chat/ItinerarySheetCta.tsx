@@ -1,7 +1,5 @@
-import './ItinerarySheetCta.scss';
-import { Text, View } from '@tarojs/components';
 import { getItinerarySheetActionLabel } from '../../utils/itineraryPromptMessage';
-import { useT } from '@/hooks/useI18n';
+import { SheetActionChip } from './SheetActionChip';
 
 export type ItinerarySheetCtaProps = {
   onPress: () => void;
@@ -9,24 +7,13 @@ export type ItinerarySheetCtaProps = {
   onOpenSheet?: () => void;
 };
 
-export function ItinerarySheetCta({ onPress }: ItinerarySheetCtaProps) {
-  useT();
-  const label = getItinerarySheetActionLabel();
-
+export function ItinerarySheetCta({ onPress, disabled }: ItinerarySheetCtaProps) {
   return (
-    <View
-      className="s-itinerary-sheet-cta"
-      hoverClass="s-itinerary-sheet-cta--pressed"
-      onClick={onPress}
-      role="button"
-      aria-label={label}
-    >
-      <View className="s-itinerary-sheet-cta__inner">
-        <Text className="s-itinerary-sheet-cta__sparkle" aria-hidden>
-          ✨
-        </Text>
-        <Text className="s-itinerary-sheet-cta__label">{label}</Text>
-      </View>
-    </View>
+    <SheetActionChip
+      label={getItinerarySheetActionLabel()}
+      variant="itinerary"
+      disabled={disabled}
+      onPress={onPress}
+    />
   );
 }

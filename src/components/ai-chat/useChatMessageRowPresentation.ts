@@ -10,7 +10,8 @@ import { isTravelGuideSheetPrompt } from '../../utils/travelGuidePromptMessage';
 import { isItinerarySheetPrompt } from '../../utils/itineraryPromptMessage';
 import { isPersonalityTestSheetPrompt } from '../../utils/personalityTestPromptMessage';
 import {
-  filterChecklistDuplicateSuggestedReplies,
+  filterBoundSuggestedReplies,
+  shouldSuppressPersonalityTestCta,
   shouldSuppressPlanSheetCtAs,
 } from '../../utils/aiAssistantEntryPolicy';
 import { useAiChatStore } from '../../stores/aiChatStore';
@@ -52,12 +53,13 @@ export function useChatMessageRowPresentation({
   const hasPostCards = Boolean(msg.createdPost);
   const hasMatchedPosts = Boolean(msg.matchedPosts?.length);
   const hasActivityCard = Boolean(msg.recommendedActivity);
-  const suggestedReplyChips = msg.isWelcome
-    ? (msg.suggestedReplies ?? [])
-    : (filterChecklistDuplicateSuggestedReplies(
-        filterBuddyPostSheetShortcutReplies(msg.suggestedReplies),
-        activityLegacyId,
-      ) ?? []);
+  const suggestedReplyChips =
+    msg.isWelcome || msg.isPrepGuidance
+      ? (msg.suggestedReplies ?? [])
+      : (filterBoundSuggestedReplies(
+          filterBuddyPostSheetShortcutReplies(msg.suggestedReplies),
+          activityLegacyId,
+        ) ?? []);
   const hasSuggestedReplyChips = suggestedReplyChips.length > 0;
   const showBuddyPostTemplateCta =
     !suppressPlanSheetCtAs &&
@@ -78,6 +80,7 @@ export function useChatMessageRowPresentation({
     Boolean(onRunCapability) &&
     (msg.showItinerarySheetCta || isItinerarySheetPrompt(msg.text));
   const showPersonalityTestSheetCta =
+    !shouldSuppressPersonalityTestCta(activityLegacyId) &&
     !isUser &&
     !msg.streaming &&
     Boolean(onOpenPersonalityTest) &&

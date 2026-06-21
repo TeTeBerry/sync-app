@@ -9,6 +9,7 @@ export type ChatScrollController = {
   scrollTop: number;
   scrollIntoView?: string;
   scrollToBottom: (options?: { force?: boolean }) => void;
+  scrollToTop: () => void;
   handleScroll: (detail: {
     scrollTop: number;
     scrollHeight: number;
@@ -44,6 +45,13 @@ export function useChatScrollController(options: {
     setScrollIntoView(undefined);
     setScrollIntoView(bottomAnchorId);
   }, [bottomAnchorId]);
+
+  const scrollToTop = useCallback(() => {
+    nearBottomRef.current = false;
+    scrollTopRef.current = 0;
+    setScrollTop(0);
+    setScrollIntoView(undefined);
+  }, []);
 
   const scrollToBottom = useCallback(
     (scrollOptions?: { force?: boolean }) => {
@@ -107,6 +115,7 @@ export function useChatScrollController(options: {
     scrollTop,
     scrollIntoView,
     scrollToBottom,
+    scrollToTop,
     handleScroll,
     isNearBottom: () => nearBottomRef.current,
   };

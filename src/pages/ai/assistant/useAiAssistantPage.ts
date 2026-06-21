@@ -55,7 +55,7 @@ export function useAiAssistantPage() {
   const [pendingAutoGuideForm, setPendingAutoGuideForm] = useState(
     navBoot.autoRunTravelGuideForm,
   );
-  const [chatRevision, setChatRevision] = useState(0);
+  const [chatMessageCount, setChatMessageCount] = useState(0);
   const [pageShowSeq, setPageShowSeq] = useState(0);
   const [chromeLayoutSeq, setChromeLayoutSeq] = useState(0);
   const [festivalPlanActions, setFestivalPlanActions] =
@@ -88,7 +88,7 @@ export function useAiAssistantPage() {
     hasEventScope && Boolean(activityTitle || activityQuery.isLoading);
   const festivalPlan = useFestivalPlanSummary(
     activityLegacyId,
-    pageShowSeq + chatRevision,
+    pageShowSeq + chatMessageCount,
   );
   const handleFestivalPlanTaskPress = useFestivalPlanNavigation(
     activityLegacyId,
@@ -181,7 +181,7 @@ export function useAiAssistantPage() {
     pendingPrefillGuideForm,
     pendingAutoGuideForm,
     pageShowSeq,
-    onChatMessagesChange: setChatRevision,
+    onChatMessagesChange: setChatMessageCount,
     profileUserData,
     userGender,
     activityQuery,
@@ -197,6 +197,7 @@ export function useAiAssistantPage() {
     setQuickActionsHandlers,
     layoutRemeasureKey,
     handleChromeLayoutChange,
+    chatMessageCount,
     activityLegacyId,
     handleInitialMessageSent,
   };

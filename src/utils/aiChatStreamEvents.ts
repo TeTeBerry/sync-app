@@ -107,6 +107,9 @@ export function parseStreamEventPayload(
       replies: json.replies.filter((item): item is string => typeof item === 'string'),
     };
   }
+  if (json.type === 'prep_guidance') {
+    return { type: 'prep_guidance' };
+  }
   if (
     json.type === 'conversation_patch' &&
     json.state &&

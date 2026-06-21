@@ -41,6 +41,7 @@ const ExclusiveItineraryDjGrid: React.FC<ExclusiveItineraryDjGridProps> = ({
   onToggleDj,
 }) => {
   const t = useT();
+
   return (
     <>
       <View className="s-exclusive-itinerary__step">
@@ -75,11 +76,9 @@ const ExclusiveItineraryDjGrid: React.FC<ExclusiveItineraryDjGridProps> = ({
                     .filter(Boolean)
                     .join(' ')}
                   hoverClass="s-exclusive-itinerary__chip--pressed"
-                  onClick={() => onStageFilterChange(stage.id)}
+                  onTap={() => onStageFilterChange(stage.id)}
                 >
-                  <Text className="s-exclusive-itinerary__chip-text">
-                    {stage.label}
-                  </Text>
+                  {stage.label}
                   {active ? <Check size={14} color="#ffffff" aria-hidden /> : null}
                 </Button>
               );
@@ -92,6 +91,29 @@ const ExclusiveItineraryDjGrid: React.FC<ExclusiveItineraryDjGridProps> = ({
         <Text className="s-exclusive-itinerary__filter-label">
           {t('itinerary.genreFilter')}
         </Text>
+        <View className="s-exclusive-itinerary__style-search">
+          <Search size={16} color="#8e8e93" aria-hidden />
+          <Input
+            className="s-exclusive-itinerary__style-search-input"
+            placeholder={t('itinerary.searchPlaceholder')}
+            placeholderClass="s-exclusive-itinerary__style-search-placeholder"
+            value={styleSearchQuery}
+            confirmType="search"
+            onInput={(event) => onStyleSearchQueryChange(event.detail.value)}
+            onConfirm={(event) => onStyleSearchQueryChange(event.detail.value)}
+          />
+          {styleSearchQuery.trim() ? (
+            <View
+              className="s-exclusive-itinerary__style-search-clear"
+              hoverClass="s-exclusive-itinerary__style-search-clear--pressed"
+              hoverStayTime={80}
+              aria-label={t('itinerary.clearStyleSearchAria')}
+              onClick={() => onStyleSearchQueryChange('')}
+            >
+              <X size={14} color="#8e8e93" aria-hidden />
+            </View>
+          ) : null}
+        </View>
         <ScrollView
           scrollX
           enhanced
@@ -111,11 +133,9 @@ const ExclusiveItineraryDjGrid: React.FC<ExclusiveItineraryDjGridProps> = ({
                     .filter(Boolean)
                     .join(' ')}
                   hoverClass="s-exclusive-itinerary__chip--pressed"
-                  onClick={() => onGenreFilterChange(genre.id)}
+                  onTap={() => onGenreFilterChange(genre.id)}
                 >
-                  <Text className="s-exclusive-itinerary__chip-text">
-                    {genre.label}
-                  </Text>
+                  {genre.label}
                   {active ? <Check size={14} color="#ffffff" aria-hidden /> : null}
                 </Button>
               );
@@ -124,55 +144,73 @@ const ExclusiveItineraryDjGrid: React.FC<ExclusiveItineraryDjGridProps> = ({
         </ScrollView>
       </View>
 
-      <View className="s-exclusive-itinerary__search-row">
-        <View className="s-exclusive-itinerary__search-wrap">
-          <Search size={16} color="#8e8e93" aria-hidden />
-          <Input
-            className="s-exclusive-itinerary__search-input"
-            type="text"
-            value={styleSearchQuery}
-            placeholder={t('itinerary.searchPlaceholder')}
-            confirmType="search"
-            onInput={(e) => onStyleSearchQueryChange(e.detail?.value ?? '')}
-          />
-          {styleSearchQuery ? (
-            <Button
-              className="s-exclusive-itinerary__search-clear"
-              onClick={() => onStyleSearchQueryChange('')}
-            >
-              <X size={14} color="#8e8e93" />
-            </Button>
-          ) : null}
-        </View>
-        <Button className="s-exclusive-itinerary__sort-btn" onClick={onOpenSortSheet}>
-          <Text className="s-exclusive-itinerary__sort-btn-text">{sortMode}</Text>
-          <ChevronDown size={14} color="#8e8e93" />
+      <View className="s-exclusive-itinerary__list-head">
+        <Text className="s-exclusive-itinerary__list-count">
+          {t('itinerary.djCount', { count: filteredDjs.length })}
+        </Text>
+        <Button
+          className="s-exclusive-itinerary__sort-btn"
+          hoverClass="s-exclusive-itinerary__sort-btn--pressed"
+          onTap={onOpenSortSheet}
+        >
+          <Text>{sortMode}</Text>
+          <ChevronDown size={14} color="var(--primary)" />
         </Button>
       </View>
 
-      <View className="s-exclusive-itinerary__dj-grid">
+      <View className="s-exclusive-itinerary__grid">
         {filteredDjs.map((dj) => {
-          const selected = selectedIds.includes(dj.id);
-          const domId = itineraryDjCardDomId(dj.id);
+          const selectionIndex = selectedIds.indexOf(dj.id);
+          const isSelected = selectionIndex >= 0;
+          const accent = isSelected && selectionIndex % 2 === 1 ? 'purple' : 'pink';
+          const showPurple = isSelected && accent === 'purple';
+          const showPink = isSelected && accent === 'pink';
+
           return (
-            <Button
+            <View
               key={dj.id}
-              id={domId}
+              id={itineraryDjCardDomId(dj.id)}
               className={[
-                's-exclusive-itinerary__dj-card',
-                selected ? 's-exclusive-itinerary__dj-card--selected' : '',
+                's-exclusive-itinerary__card',
+                showPink ? 's-exclusive-itinerary__card--pink' : '',
+                showPurple ? 's-exclusive-itinerary__card--purple' : '',
               ]
                 .filter(Boolean)
                 .join(' ')}
-              hoverClass="s-exclusive-itinerary__dj-card--pressed"
+              hoverClass="s-exclusive-itinerary__card--pressed"
+              hoverStartTime={0}
+              hoverStayTime={50}
+              aria-label={`${dj.name}，${dj.genreLabel}`}
               onClick={() => onToggleDj(dj.id)}
             >
-              <View className="s-exclusive-itinerary__dj-card-check">
-                {selected ? <Check size={20} color="#64d2ff" /> : null}
-              </View>
-              <Text className="s-exclusive-itinerary__dj-card-name">{dj.name}</Text>
-              <Text className="s-exclusive-itinerary__dj-card-genre">{dj.genre}</Text>
-            </Button>
+              {isSelected ? (
+                <View
+                  className={[
+                    's-exclusive-itinerary__check',
+                    's-exclusive-itinerary__check--corner',
+                    showPurple
+                      ? 's-exclusive-itinerary__check--purple'
+                      : 's-exclusive-itinerary__check--pink',
+                  ].join(' ')}
+                  aria-hidden
+                >
+                  <Check size={13} color="#fff" strokeWidth={3} />
+                </View>
+              ) : null}
+              <Text className="s-exclusive-itinerary__name">{dj.name}</Text>
+              <Text
+                className="s-exclusive-itinerary__genre"
+                style={{
+                  color: isSelected
+                    ? showPurple
+                      ? '#7b61ff'
+                      : 'var(--primary)'
+                    : dj.genreColor,
+                }}
+              >
+                {dj.genreLabel}
+              </Text>
+            </View>
           );
         })}
       </View>

@@ -11,6 +11,7 @@ import {
   goEventDetail,
   goEventsListTab,
   goAiAssistantTravelGuideSheet,
+  goAiAssistantBuddyPostSheet,
   goPrepTab,
 } from '@/utils/route';
 import { useT } from '@/hooks/useI18n';
@@ -67,6 +68,18 @@ export function useNewUserOnboarding(options: UseNewUserOnboardingOptions = {}) 
         onAction: () => {
           if (joinLegacyId) {
             dismissAnd(() => goAiAssistantTravelGuideSheet(joinLegacyId));
+            return;
+          }
+          dismissAnd(() => goPrepTab());
+        },
+      },
+      {
+        title: t('onboarding.step3Title'),
+        description: t('onboarding.step3Desc'),
+        actionLabel: t('onboarding.step3Action'),
+        onAction: () => {
+          if (joinLegacyId) {
+            dismissAnd(() => goAiAssistantBuddyPostSheet(joinLegacyId));
             return;
           }
           dismissAnd(() => goPrepTab());

@@ -17,7 +17,7 @@ describe('buildFestivalPlanChecklist', () => {
     const itinerary = checklist.tasks.find((task) => task.key === 'itinerary');
     expect(itinerary?.done).toBe(false);
     expect(itinerary?.isNext).toBe(true);
-    expect(itinerary?.trailingLabel).toBe('生成专属行程');
+    expect(itinerary?.trailingLabel).toBe('排专属行程');
 
     const travelGuide = checklist.tasks.find((task) => task.key === 'travel_guide');
     expect(travelGuide?.done).toBe(true);

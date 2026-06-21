@@ -14,6 +14,8 @@ import { patchChatMessage } from '../../utils/chatMessages';
 import { clearAiChatProgress } from '../../utils/aiChatStagedProgress';
 import { applyClientActionToMessage } from '../../utils/aiChatClientAction';
 import { applyStreamEventToSessionStore } from './useChatStreamStoreSync';
+import type { FestivalPlanTaskKey } from '../../domains/festival-plan/festivalPlanTaskDefs';
+import { withPrepGuidanceChips } from '../../utils/aiPrepGuidanceChips';
 
 export interface ProcessChatStreamEventsOptions {
   stream: AsyncGenerator<AiChatStreamEvent>;
@@ -34,6 +36,7 @@ export interface ProcessChatStreamEventsOptions {
   ) => void;
   onProgressEnd?: () => void;
   activityLegacyId?: number;
+  festivalPlanNextTaskKey?: FestivalPlanTaskKey;
 }
 
 export async function processChatStreamEvents(
@@ -52,6 +55,7 @@ export async function processChatStreamEvents(
     onItineraryReady,
     onProgressEnd,
     activityLegacyId,
+    festivalPlanNextTaskKey,
   } = options;
 
   const finishAiMessage = (updater: (current: ChatUiMessage) => ChatUiMessage) => {
@@ -117,6 +121,14 @@ export async function processChatStreamEvents(
       finishAiMessage((message) => ({
         ...message,
         suggestedReplies: event.replies,
+      }));
+      continue;
+    }
+
+    if (event.type === 'prep_guidance') {
+      finishAiMessage((message) => ({
+        ...message,
+        isPrepGuidance: true,
       }));
       continue;
     }
@@ -277,11 +289,17 @@ export async function processChatStreamEvents(
         streaming: false,
       }));
       await typewriter.waitUntilComplete();
-      finishAiMessage((message) => ({
-        ...clearAiChatProgress(message),
-        text: typewriter.getTarget() || message.text,
-        streaming: false,
-      }));
+      finishAiMessage((message) =>
+        withPrepGuidanceChips(
+          {
+            ...clearAiChatProgress(message),
+            text: typewriter.getTarget() || message.text,
+            streaming: false,
+          },
+          activityLegacyId,
+          festivalPlanNextTaskKey,
+        ),
+      );
       if (event.sessionId) {
         persistSessionFromStream(event.sessionId);
       }

@@ -1,9 +1,10 @@
-import React, { memo, useCallback, useEffect, useState } from 'react';
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { Send, Trash2 } from '../../components/icons';
 import { Button, Input, cn } from '../ui';
 import { useAiChatStore } from '../../stores/aiChatStore';
 import { AI_ASSISTANT_DISCLAIMER } from '../../constants/aiDisclosure';
 import { useT } from '@/hooks/useI18n';
+import { isWeappRuntime } from '@/pages/ai/assistant/aiChatLayout.util';
 import { Text, View, type InputProps as TaroInputProps } from '@tarojs/components';
 
 function readComposerInputValue(
@@ -31,11 +32,23 @@ export const ChatComposer = memo(function ChatComposer({
   resetKey?: number;
 }) {
   const [input, setInput] = useState('');
+  const [canSend, setCanSend] = useState(false);
+  const [weappInputKey, setWeappInputKey] = useState(0);
+  const draftRef = useRef('');
   const t = useT();
 
-  useEffect(() => {
+  const resetDraft = useCallback(() => {
+    draftRef.current = '';
     setInput('');
-  }, [resetKey]);
+    setCanSend(false);
+    if (isWeappRuntime) {
+      setWeappInputKey((key) => key + 1);
+    }
+  }, []);
+
+  useEffect(() => {
+    resetDraft();
+  }, [resetKey, resetDraft]);
 
   const conversationFlow = useAiChatStore((state) =>
     state.activeScopeKey
@@ -59,31 +72,43 @@ export const ChatComposer = memo(function ChatComposer({
   })();
 
   const isComposerDisabled = isStreaming;
-  const canSend = Boolean(input.trim()) && !isComposerDisabled;
+  const sendEnabled =
+    (isWeappRuntime ? canSend : Boolean(input.trim())) && !isComposerDisabled;
 
   const handleSend = useCallback(() => {
-    const trimmed = input.trim();
+    const trimmed = isWeappRuntime ? draftRef.current.trim() : input.trim();
     if (!trimmed || isComposerDisabled) return;
-    setInput('');
+    resetDraft();
     void Promise.resolve(onSubmit(trimmed));
-  }, [input, isComposerDisabled, onSubmit]);
+  }, [input, isComposerDisabled, onSubmit, resetDraft]);
 
   const handleInputChange = useCallback((value: string) => {
+    draftRef.current = value;
+    if (isWeappRuntime) {
+      setCanSend(Boolean(value.trim()));
+      return;
+    }
     setInput(value);
   }, []);
+
+  const composerInputKey = isWeappRuntime
+    ? `composer-${resetKey}-${weappInputKey}`
+    : `composer-${resetKey}`;
 
   return (
     <View className="s-ai-assistant-chat__composer">
       <View className="s-ai-assistant-chat__composer-inner">
         <Input
+          key={composerInputKey}
           variant="ai-assistant-chat"
           type="text"
-          value={input}
+          {...(isWeappRuntime ? { defaultValue: '' } : { value: input })}
           disabled={isComposerDisabled}
           placeholder={inputPlaceholder}
           adjustPosition={false}
           cursorSpacing={12}
-          holdKeyboard
+          holdKeyboard={isWeappRuntime}
+          alwaysEmbed={isWeappRuntime}
           confirmType="send"
           onInput={(e) => handleInputChange(readComposerInputValue(e))}
           onConfirm={handleSend}
@@ -99,9 +124,9 @@ export const ChatComposer = memo(function ChatComposer({
         <Button
           className={cn(
             's-ai-assistant-chat__send',
-            canSend && 's-ai-assistant-chat__send--active',
+            sendEnabled && 's-ai-assistant-chat__send--active',
           )}
-          disabled={!canSend}
+          disabled={!sendEnabled}
           onClick={handleSend}
         >
           <Send size={16} />

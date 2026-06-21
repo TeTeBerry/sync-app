@@ -1,12 +1,22 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import Taro from '@tarojs/taro';
+import Taro, { getCurrentInstance } from '@tarojs/taro';
 
 const MIN_HEIGHT_PX = 80;
+
+function getSelectorQueryScope(): TaroGeneral.IAnyObject | undefined {
+  const inst = getCurrentInstance();
+  return (inst?.page ?? inst) as TaroGeneral.IAnyObject | undefined;
+}
 
 function queryElementHeight(selector: string): Promise<number | undefined> {
   return new Promise((resolve) => {
     try {
-      const query = Taro.createSelectorQuery();
+      const scope =
+        process.env.TARO_ENV === 'weapp' ? getSelectorQueryScope() : undefined;
+      let query = Taro.createSelectorQuery();
+      if (scope) {
+        query = query.in(scope);
+      }
       query.select(selector).boundingClientRect();
       query.exec((res) => {
         const rect = res?.[0] as { height?: number } | null | undefined;
@@ -39,7 +49,9 @@ export function useMeasuredElementHeight(
   options?: UseMeasuredElementHeightOptions,
 ): number | undefined {
   const enabled = options?.enabled !== false;
-  const [height, setHeight] = useState<number | undefined>(options?.fallbackHeight);
+  // Avoid seeding ScrollView with a full-page fallback before flex layout settles —
+  // that oversizes the scroll layer and can block the composer on WeChat.
+  const [height, setHeight] = useState<number | undefined>(undefined);
   const observerRef = useRef<ResizeObserver | null>(null);
 
   const measure = useCallback(async () => {

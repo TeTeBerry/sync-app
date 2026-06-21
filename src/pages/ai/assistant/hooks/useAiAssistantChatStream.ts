@@ -8,17 +8,20 @@ import { getActiveActivityLegacyId } from '../../../../domains/activity-scope';
 import { useItineraryStore } from '../../../../domains/performance-itinerary/store';
 import type { TravelGuidePlan } from '../../../../types/travelGuide';
 import { BUDDY_POST_PUBLISH_SUCCESS_MESSAGE } from '../../../../constants/ugcPublishCompliance';
+import type { FestivalPlanTaskKey } from '../../../../domains/festival-plan/festivalPlanTaskDefs';
 
 export function useAiAssistantChatStream(options: {
   activityTitle?: string;
   activityLegacyId?: number;
+  festivalPlanNextTaskKey?: FestivalPlanTaskKey;
 }) {
-  const { activityTitle, activityLegacyId } = options;
+  const { activityTitle, activityLegacyId, festivalPlanNextTaskKey } = options;
 
   return useAiChatStream({
     activityTitle,
     streamErrorText: '抱歉，回复出错了，请稍后再试。',
     activityLegacyId,
+    festivalPlanNextTaskKey,
     getAuthHeaders,
     onPostCreated: async (event) => {
       await invalidatePostQueries();

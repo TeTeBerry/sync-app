@@ -38,9 +38,6 @@ export const AiTabContextCard: FC<AiTabContextCardProps> = ({
           <Text className="s-ai-tab-context__pick-title">
             {t('ai.pickActivityTitle')}
           </Text>
-          <Text className="s-ai-tab-context__pick-desc">
-            {t('ai.pickActivityDesc')}
-          </Text>
         </View>
         <Button
           className="s-ai-tab-context__pick-btn"

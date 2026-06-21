@@ -273,6 +273,8 @@
 }
 
 .s-ai-assistant-chat {
+  --s-ai-chat-composer-h: 96px;
+  position: relative;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -280,13 +282,31 @@
   box-sizing: border-box;
   overflow: hidden;
 
+  &--weapp-fixed-composer {
+    .s-ai-assistant-chat-collapse {
+      padding-bottom: var(--s-ai-chat-composer-h);
+    }
+  }
+
   &__footer {
     flex-shrink: 0;
+    position: relative;
+    z-index: 10;
     margin-top: auto;
     background: rgba(0, 0, 0, 0.92);
     backdrop-filter: blur(12px);
     border-top: 1px solid rgba(255, 255, 255, 0.06);
     transition: padding-bottom 0.2s ease;
+
+    &--weapp-fixed {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 100;
+      margin-top: 0;
+      pointer-events: auto;
+    }
   }
 
   &__scroll-host {
@@ -295,6 +315,8 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    position: relative;
+    z-index: 0;
   }
 
   &__scroll {
@@ -311,6 +333,10 @@
     gap: 12px;
     box-sizing: border-box;
     padding: 8px 16px 16px;
+
+    &--composer-fixed {
+      padding-bottom: calc(var(--s-ai-chat-composer-h, 96px) + 8px);
+    }
   }
 
   &__scroll-bottom {

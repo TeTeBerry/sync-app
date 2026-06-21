@@ -1,4 +1,4 @@
-import { memo, useCallback, useMemo, useRef } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import type { ChatUiMessage } from '../../types/aiChat';
 import type { AiGuidePlanFormValues } from '../../types/travelGuide';
 import type { AuthorGender } from '../../utils/inferAuthorGender';
@@ -9,6 +9,8 @@ import { ChatMessageRow } from './ChatMessageRow';
 import { ChatHistoryHint } from './ChatHistoryHint';
 import { CHAT_SCROLL_BOTTOM_ID } from './chatScrollBottom';
 import { shouldSuppressAutoScrollForMessage } from './chatMessageListScroll';
+import { isWeappRuntime } from '@/pages/ai/assistant/aiChatLayout.util';
+import { useChatCollapseExpanded } from '@/pages/ai/components/chatCollapseExpandedContext';
 import { ScrollView, View } from '@tarojs/components';
 
 export const ChatMessageList = memo(function ChatMessageList({
@@ -16,6 +18,7 @@ export const ChatMessageList = memo(function ChatMessageList({
   isStreaming,
   isTravelGuideGenerating = false,
   scrollAreaHeight,
+  reserveComposerSpace = false,
   keyboardInset = 0,
   forceScrollToBottomKey = 0,
   isLoadingHistory = false,
@@ -35,6 +38,7 @@ export const ChatMessageList = memo(function ChatMessageList({
   isStreaming: boolean;
   isTravelGuideGenerating?: boolean;
   scrollAreaHeight?: number;
+  reserveComposerSpace?: boolean;
   keyboardInset?: number;
   forceScrollToBottomKey?: number;
   isLoadingHistory?: boolean;
@@ -51,6 +55,8 @@ export const ChatMessageList = memo(function ChatMessageList({
   onOpenPersonalityTest?: () => void;
 }) {
   const loadingHistoryRef = useRef(false);
+  const chatExpanded = useChatCollapseExpanded();
+  const previewCollapsed = !chatExpanded;
   const {
     visibleMessages,
     hiddenCount,
@@ -73,9 +79,16 @@ export const ChatMessageList = memo(function ChatMessageList({
     messageCount: messages.length,
     bottomAnchorId: CHAT_SCROLL_BOTTOM_ID,
     forceScrollToBottomKey,
-    suppressAutoScroll,
+    suppressAutoScroll: previewCollapsed || suppressAutoScroll,
     contentRevision: `${scrollAnchorKey}:${isStreaming}:${isTravelGuideGenerating}`,
   });
+
+  const { scrollToTop } = scroll;
+
+  useEffect(() => {
+    if (!previewCollapsed) return;
+    scrollToTop();
+  }, [previewCollapsed, scrollAnchorKey, scrollToTop]);
 
   const handleScroll = useCallback(
     (event: {
@@ -123,7 +136,7 @@ export const ChatMessageList = memo(function ChatMessageList({
   return (
     <ScrollView
       scrollY
-      enhanced
+      enhanced={!isWeappRuntime}
       showScrollbar={false}
       scrollTop={scroll.scrollTop}
       scrollIntoView={scroll.scrollIntoView}
@@ -134,7 +147,14 @@ export const ChatMessageList = memo(function ChatMessageList({
       className="s-ai-assistant-chat__scroll s-scrollbar-none"
       style={scrollAreaHeight != null ? { height: `${scrollAreaHeight}px` } : undefined}
     >
-      <View className="s-ai-assistant-chat__scroll-inner">
+      <View
+        className={[
+          's-ai-assistant-chat__scroll-inner',
+          reserveComposerSpace && 's-ai-assistant-chat__scroll-inner--composer-fixed',
+        ]
+          .filter(Boolean)
+          .join(' ')}
+      >
         {showHistoryHint ? (
           <ChatHistoryHint
             loading={isLoadingHistory}

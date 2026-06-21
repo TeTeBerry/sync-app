@@ -1,7 +1,5 @@
-import './TravelGuideSheetCta.scss';
-import { Text, View } from '@tarojs/components';
 import { getTravelGuideSheetActionLabel } from '../../utils/travelGuidePromptMessage';
-import { useT } from '@/hooks/useI18n';
+import { SheetActionChip } from './SheetActionChip';
 
 export type TravelGuideSheetCtaProps = {
   onPress: () => void;
@@ -9,24 +7,13 @@ export type TravelGuideSheetCtaProps = {
   onOpenSheet?: () => void;
 };
 
-export function TravelGuideSheetCta({ onPress }: TravelGuideSheetCtaProps) {
-  useT();
-  const label = getTravelGuideSheetActionLabel();
-
+export function TravelGuideSheetCta({ onPress, disabled }: TravelGuideSheetCtaProps) {
   return (
-    <View
-      className="s-travel-guide-sheet-cta"
-      hoverClass="s-travel-guide-sheet-cta--pressed"
-      onClick={onPress}
-      role="button"
-      aria-label={label}
-    >
-      <View className="s-travel-guide-sheet-cta__inner">
-        <Text className="s-travel-guide-sheet-cta__sparkle" aria-hidden>
-          ✨
-        </Text>
-        <Text className="s-travel-guide-sheet-cta__label">{label}</Text>
-      </View>
-    </View>
+    <SheetActionChip
+      label={getTravelGuideSheetActionLabel()}
+      variant="travel_guide"
+      disabled={disabled}
+      onPress={onPress}
+    />
   );
 }

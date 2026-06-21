@@ -46,6 +46,8 @@ export interface InputProps extends Omit<
   cursorSpacing?: number;
   /** WeChat: keep keyboard open when tapping other controls. */
   holdKeyboard?: boolean;
+  /** WeChat: same-layer rendering to avoid scroll/input stacking issues. */
+  alwaysEmbed?: boolean;
   /** WeChat: placeholder text style class. */
   placeholderClass?: string;
   /** WeChat: keyboard confirm button type. */
@@ -87,6 +89,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       adjustPosition,
       cursorSpacing,
       holdKeyboard,
+      alwaysEmbed,
       confirmType,
       ...props
     },
@@ -124,12 +127,14 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         ? {
             adjustPosition: adjustPosition ?? true,
             cursorSpacing: cursorSpacing ?? (variant === 'chat' ? 120 : 24),
+            alwaysEmbed: alwaysEmbed ?? true,
           }
         : {
             ...(adjustPosition != null ? { adjustPosition } : {}),
             ...(cursorSpacing != null ? { cursorSpacing } : {}),
           }),
       ...(holdKeyboard != null ? { holdKeyboard } : {}),
+      ...(alwaysEmbed != null ? { alwaysEmbed } : {}),
     } as TaroNativeInputProps & { onConfirm?: () => void };
 
     if (!variant) {

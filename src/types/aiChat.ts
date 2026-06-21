@@ -66,6 +66,8 @@ export type ChatUiMessage = {
   showPersonalityTestSheetCta?: boolean;
   /** 首屏欢迎消息，展示能力发现 chips 时不过滤组队发帖等标签 */
   isWelcome?: boolean;
+  /** 离题引导 chips，展示逻辑同 isWelcome，绕过 checklist 去重过滤 */
+  isPrepGuidance?: boolean;
 };
 
 export interface SendChatOptions {

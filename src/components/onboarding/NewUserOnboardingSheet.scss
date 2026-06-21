@@ -26,6 +26,8 @@
 .s-new-user-onboarding__body {
   padding: 20px 20px 8px;
   box-sizing: border-box;
+  max-height: min(72vh, 520px);
+  overflow-y: auto;
 }
 
 .s-new-user-onboarding__title {

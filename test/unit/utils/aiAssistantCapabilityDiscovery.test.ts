@@ -14,34 +14,22 @@ import { getFestivalPlanTaskDefs } from '@/domains/festival-plan/festivalPlanTas
 import { t } from '@/i18n';
 
 describe('aiAssistantCapabilityDiscovery', () => {
-  it('shows bound chips with next task and lineup', () => {
+  it('shows no bound welcome chips (plan bar + quick actions cover tasks)', () => {
     const defs = getFestivalPlanTaskDefs();
-    expect(buildWelcomeCapabilityChipLabels(true, 'travel_guide')).toEqual([
-      defs.travel_guide.actionLabel,
-      t('ai.lineup'),
-    ]);
+    expect(buildWelcomeCapabilityChipLabels(true, 'travel_guide')).toEqual([]);
+    expect(buildWelcomeCapabilityChipLabels(true)).toEqual([]);
+    expect(defs.travel_guide.actionLabel).toBeTruthy();
   });
 
-  it('shows bound lineup chip only when plan is complete', () => {
-    expect(buildWelcomeCapabilityChipLabels(true)).toEqual([t('ai.lineup')]);
+  it('shows unbound discovery chip without pick-festival duplicate', () => {
+    expect(buildWelcomeCapabilityChipLabels(false)).toEqual([t('ai.nearEvents')]);
   });
 
-  it('shows unbound discovery chips without personality test', () => {
-    expect(buildWelcomeCapabilityChipLabels(false)).toEqual([
-      t('ai.pickFestival'),
-      t('ai.nearEvents'),
-    ]);
-  });
-
-  it('creates welcome message with capability chips', () => {
-    const defs = getFestivalPlanTaskDefs();
+  it('creates welcome message without bound capability chips', () => {
     const message = createWelcomeChatMessage('EDC Thailand 2026', 8, 'travel_guide');
     expect(message.isWelcome).toBe(true);
     expect(message.text).toContain('EDC Thailand 2026');
-    expect(message.suggestedReplies).toEqual([
-      defs.travel_guide.actionLabel,
-      t('ai.lineup'),
-    ]);
+    expect(message.suggestedReplies).toEqual([]);
   });
 
   it('maps festival plan action labels to task keys', () => {

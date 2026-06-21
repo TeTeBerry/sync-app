@@ -52,12 +52,10 @@ const AiTabPage: FC = () => {
           }
         />
 
-        {page.showEventContext && page.festivalPlan && page.quickActionsHandlers ? (
+        {page.showEventContext && page.quickActionsHandlers ? (
           <AiQuickActions
-            checklist={page.festivalPlan}
             onLineupPress={page.quickActionsHandlers.openLineup}
             onSchedulePress={page.quickActionsHandlers.openSchedule}
-            onTaskPress={page.handleFestivalPlanTaskPress}
             onLayoutChange={page.handleChromeLayoutChange}
           />
         ) : null}
@@ -79,6 +77,7 @@ const AiTabPage: FC = () => {
                 onInitialMessageSent={page.handleInitialMessageSent}
                 onMessageCountChange={page.onChatMessagesChange}
                 layoutRemeasureKey={page.layoutRemeasureKey}
+                onChatChromeLayoutChange={page.handleChromeLayoutChange}
                 userAvatar={page.profileUserData.avatar}
                 userName={page.profileUserData.name}
                 userGender={page.userGender}

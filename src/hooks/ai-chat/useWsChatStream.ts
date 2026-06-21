@@ -24,11 +24,13 @@ import { patchChatMessage } from '../../utils/chatMessages';
 import { clearAiChatProgress } from '../../utils/aiChatStagedProgress';
 import { throttleRaf } from '../../utils/throttleRaf';
 import { processChatStreamEvents } from './chatStreamReducer';
+import type { FestivalPlanTaskKey } from '../../domains/festival-plan/festivalPlanTaskDefs';
 
 export interface UseWsChatStreamOptions {
   streamErrorText: string;
   wsUrl?: string;
   activityLegacyIdRef: MutableRefObject<number | undefined>;
+  festivalPlanNextTaskKeyRef?: MutableRefObject<FestivalPlanTaskKey | undefined>;
   sessionIdRef: MutableRefObject<string>;
   messagesRef: MutableRefObject<ChatUiMessage[]>;
   setMessages: Dispatch<SetStateAction<ChatUiMessage[]>>;
@@ -56,6 +58,7 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
     streamErrorText,
     wsUrl = AI_CHAT_WS_URL,
     activityLegacyIdRef,
+    festivalPlanNextTaskKeyRef,
     sessionIdRef,
     messagesRef,
     setMessages,
@@ -172,6 +175,7 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
           onItineraryReady,
           onProgressEnd: endProgress,
           activityLegacyId: activityId,
+          festivalPlanNextTaskKey: festivalPlanNextTaskKeyRef?.current,
         });
       } catch (error) {
         if ((error as Error).name === 'AbortError') {
@@ -202,6 +206,7 @@ export function useWsChatStream(options: UseWsChatStreamOptions) {
     },
     [
       activityLegacyIdRef,
+      festivalPlanNextTaskKeyRef,
       wsUrl,
       createTypewriter,
       getAuthHeaders,

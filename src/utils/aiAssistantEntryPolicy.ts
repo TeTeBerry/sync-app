@@ -7,9 +7,21 @@ const CHECKLIST_DUPLICATE_KEYS = [
   'ai.buddyPost',
 ] as const;
 
+const OFF_PREP_REPLY_KEYS = [
+  'ai.startPersonalityTest',
+  'ai.pickFestival',
+  'ai.nearEvents',
+  'ai.nearEventsSubmit',
+] as const;
+
 function isChecklistDuplicateReply(reply: string): boolean {
   const trimmed = reply.trim();
   return CHECKLIST_DUPLICATE_KEYS.some((key) => labelMatchesKey(trimmed, key));
+}
+
+function isOffPrepReply(reply: string): boolean {
+  const trimmed = reply.trim();
+  return OFF_PREP_REPLY_KEYS.some((key) => labelMatchesKey(trimmed, key));
 }
 
 /** Composer festival shortcut chips are replaced by welcome picker + event context. */
@@ -31,13 +43,26 @@ export function shouldSuppressPlanSheetCtAs(
   return true;
 }
 
-export function filterChecklistDuplicateSuggestedReplies(
+export function shouldSuppressPersonalityTestCta(activityLegacyId?: number): boolean {
+  return isActivityBoundForCapabilities(activityLegacyId);
+}
+
+export function filterBoundSuggestedReplies(
   replies: string[] | undefined,
   activityLegacyId?: number,
 ): string[] | undefined {
   if (!isActivityBoundForCapabilities(activityLegacyId) || !replies?.length) {
     return replies;
   }
-  const filtered = replies.filter((reply) => !isChecklistDuplicateReply(reply));
+  const filtered = replies.filter(
+    (reply) => !isChecklistDuplicateReply(reply) && !isOffPrepReply(reply),
+  );
   return filtered.length > 0 ? filtered : undefined;
+}
+
+export function filterChecklistDuplicateSuggestedReplies(
+  replies: string[] | undefined,
+  activityLegacyId?: number,
+): string[] | undefined {
+  return filterBoundSuggestedReplies(replies, activityLegacyId);
 }

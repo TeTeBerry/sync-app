@@ -90,7 +90,11 @@ export function useAiAssistantOrchestrator(options: UseAiAssistantOrchestratorOp
     [activityLocation, activityQuery.data?.location],
   );
 
-  const chat = useAiAssistantChatStream({ activityTitle, activityLegacyId });
+  const chat = useAiAssistantChatStream({
+    activityTitle,
+    activityLegacyId,
+    festivalPlanNextTaskKey,
+  });
   const { forceScrollToBottomKey, scheduleScrollToBottom } = useAiAssistantScroll({
     messagesRef: chat.messagesRef,
     messageCount: chat.messages.length,
