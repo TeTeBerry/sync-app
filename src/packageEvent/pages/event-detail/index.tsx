@@ -80,6 +80,7 @@ const EventDetailPage = () => {
     handleGuideSheetSubmit,
     guideDefaultNights,
     guideEventCity,
+    guideSheetInitialValues,
     currentUserAvatar,
     publishComplianceConfirmDialog,
     buddyPostQuota,
@@ -184,8 +185,10 @@ const EventDetailPage = () => {
                   items={posts.postItems}
                   highlightPostId={highlightPostId}
                   expandedCommentPostIds={posts.expandedCommentPostIds}
+                  getCommentDraft={posts.getCommentDraft}
                   currentUserAvatar={currentUserAvatar}
                   onOpenComments={posts.openPostComments}
+                  onApplyJoin={posts.openApplyJoinComments}
                   onCloseComments={posts.closePostComments}
                   onCommentSubmitted={posts.handleCommentSubmitted}
                   onDelete={posts.handleDeletePost}
@@ -233,6 +236,7 @@ const EventDetailPage = () => {
           open
           defaultNights={guideDefaultNights}
           eventCity={guideEventCity}
+          initialValues={guideSheetInitialValues}
           onClose={closeGuideSheet}
           onSubmit={handleGuideSheetSubmit}
         />

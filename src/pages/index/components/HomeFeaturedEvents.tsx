@@ -117,6 +117,7 @@ export const HomeFeaturedEvents: FC<HomeFeaturedEventsProps> = ({
               index={index}
               onEventClick={onEventClick}
               onEventPreload={onEventPreload}
+              onCardFocus={handleSwiperChange}
             />
           </SwiperItem>
         ))}
@@ -130,11 +131,13 @@ function HomeFeaturedEventCard({
   index,
   onEventClick,
   onEventPreload,
+  onCardFocus,
 }: {
   event: FeaturedEvent;
   index: number;
   onEventClick: (item: FeaturedEvent) => void;
   onEventPreload?: (item: FeaturedEvent) => void;
+  onCardFocus?: (index: number) => void;
 }) {
   const t = useT();
   const status = getActivityStatusFromActivity(event.date, event.title);
@@ -153,6 +156,7 @@ function HomeFeaturedEventCard({
 
   const openDetail = () => {
     if (legacyId == null) return;
+    onCardFocus?.(index);
     onEventClick(event);
   };
 

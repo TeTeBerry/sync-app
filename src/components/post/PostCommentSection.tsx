@@ -1,6 +1,6 @@
 import './PostCommentSection.scss';
 import Taro from '@tarojs/taro';
-import { useCallback, useState, type FC } from 'react';
+import { useCallback, useEffect, useRef, useState, type FC } from 'react';
 import { ChevronUp, Send } from '../icons';
 import { useUgcPublishGuard } from '../../hooks/useUgcPublishGuard';
 import { commentPostAndInvalidate, usePostCommentsQuery } from '../../hooks/sync/posts';
@@ -38,6 +38,8 @@ export type PostCommentSectionProps = {
   onToggleExpanded: () => void;
   currentUserAvatar?: string;
   onCommentSubmitted?: (updated: Pick<EventDetailPost, 'id' | 'comments'>) => void;
+  initialCommentDraft?: string | null;
+  showApplyJoinHint?: boolean;
 };
 
 type ReplyTarget = {
@@ -168,6 +170,8 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
   onToggleExpanded,
   currentUserAvatar,
   onCommentSubmitted,
+  initialCommentDraft,
+  showApplyJoinHint = false,
 }) => {
   const t = useT();
   const commentsQuery = usePostCommentsQuery(postId, expanded);
@@ -178,6 +182,16 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
   const [draft, setDraft] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [replyTarget, setReplyTarget] = useState<ReplyTarget | null>(null);
+  const appliedDraftRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!expanded) return;
+    const nextDraft = initialCommentDraft?.trim();
+    if (!nextDraft) return;
+    if (appliedDraftRef.current === nextDraft) return;
+    setDraft(nextDraft);
+    appliedDraftRef.current = nextDraft;
+  }, [expanded, initialCommentDraft]);
 
   const placeholder = replyTarget
     ? t('comments.replyTo', { name: replyTarget.authorName })
@@ -325,6 +339,12 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
             <Text className="s-btn-label">{t('comments.cancelReply')}</Text>
           </Button>
         </View>
+      ) : null}
+
+      {showApplyJoinHint ? (
+        <Text className="s-post-comments__apply-hint">
+          {t('eventDetail.applyJoinPublicHint')}
+        </Text>
       ) : null}
 
       <View className="s-post-comments__composer">

@@ -1,6 +1,6 @@
 import './home.scss';
 import { useDidShow } from '@tarojs/taro';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { seedActivityDetailFromFeaturedEvent } from '../../utils/activityDetailCache';
 import { prefetchEventPostsPage } from '../../cache/eventPostsPageCache';
 import { preloadEventSubpackage } from '../../utils/subpackagePreload';
@@ -41,7 +41,13 @@ import {
 import { useAuthSession } from '../../hooks/useAuthSession';
 import { seedActivityDetailFromHomeSignupEvent } from '../../utils/activityDetailCache';
 import { pickNextSelectedEvent } from './utils/pickNextSelectedEvent';
+import {
+  buildFeaturedEventsKey,
+  resolveFeaturedIndexAfterListChange,
+} from './utils/homeFeaturedIndex';
+import { resolveHomeFindTeamActivityId } from './utils/resolveHomeActivityId';
 import { useHomeFestivalPlanNavigation } from '@/domains/festival-plan/hooks/useHomeFestivalPlanNavigation';
+import { getActiveActivityLegacyId } from '@/domains/activity-scope';
 import { useNavBarInsets } from '../../hooks/useNavBarInsets';
 import { useEndRouteTransitionOnShow } from '../../hooks/useEndRouteTransitionOnShow';
 import { OverlayAwareScrollView } from '../../components/layout/OverlayAwareScrollView';
@@ -81,9 +87,24 @@ const Home = () => {
     preloadHotRoutes(ROUTES.HOME);
   });
 
+  const featuredEventsKey = useMemo(
+    () => buildFeaturedEventsKey(featuredEvents),
+    [featuredEvents],
+  );
+  const featuredEventsKeyRef = useRef(featuredEventsKey);
+
   useEffect(() => {
-    setFeaturedIndex(0);
-  }, [featuredEvents]);
+    const prevKey = featuredEventsKeyRef.current;
+    featuredEventsKeyRef.current = featuredEventsKey;
+    setFeaturedIndex((prev) =>
+      resolveFeaturedIndexAfterListChange(
+        prev,
+        prevKey,
+        featuredEventsKey,
+        featuredEvents.length,
+      ),
+    );
+  }, [featuredEventsKey, featuredEvents.length]);
 
   const featuredCountdown = useMemo(() => {
     const event = featuredEvents[featuredIndex];
@@ -199,6 +220,24 @@ const Home = () => {
     });
   }, [nextSelectedEvent, openHomeActivity, summary?.myNextEventPostEngagement]);
 
+  const homeFindTeamActivityId = useMemo(
+    () =>
+      resolveHomeFindTeamActivityId({
+        activeActivityLegacyId: getActiveActivityLegacyId(),
+        nextSelectedEventId: nextSelectedEvent?.id,
+        featuredLegacyId,
+      }),
+    [nextSelectedEvent?.id, featuredLegacyId],
+  );
+
+  const homeLookupActivityId = useMemo(() => {
+    const activeId = getActiveActivityLegacyId();
+    if (activeId != null && !Number.isNaN(activeId)) {
+      return activeId;
+    }
+    return featuredLegacyId;
+  }, [featuredLegacyId]);
+
   const heatLabel =
     activeTeamCount > 0
       ? t('home.heatActive', { count: activeTeamCount })
@@ -259,7 +298,10 @@ const Home = () => {
 
             <HomePersonalityTestEntry />
 
-            <HomeAiEntry />
+            <HomeAiEntry
+              findTeamActivityId={homeFindTeamActivityId}
+              lookupActivityId={homeLookupActivityId}
+            />
 
             <HomeQuickActions />
 

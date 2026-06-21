@@ -12,7 +12,9 @@ type EventPostsVirtualListProps = {
   highlightPostId: string;
   expandedCommentPostIds: Set<string>;
   currentUserAvatar?: string;
+  getCommentDraft: (postId: string) => string | undefined;
   onOpenComments: (postId: string) => void;
+  onApplyJoin: (postId: string) => void;
   onCloseComments: (postId: string) => void;
   onCommentSubmitted?: EventPostCardProps['onCommentSubmitted'];
   onDelete?: EventPostCardProps['onDelete'];
@@ -29,7 +31,9 @@ export function EventPostsVirtualList({
   highlightPostId,
   expandedCommentPostIds,
   currentUserAvatar,
+  getCommentDraft,
   onOpenComments,
+  onApplyJoin,
   onCloseComments,
   onCommentSubmitted,
   onDelete,
@@ -79,7 +83,9 @@ export function EventPostsVirtualList({
               highlighted={highlighted}
               commentsExpanded={commentsExpanded}
               currentUserAvatar={currentUserAvatar}
+              commentDraft={getCommentDraft(item.post.id)}
               onOpenComments={onOpenComments}
+              onApplyJoin={onApplyJoin}
               onCloseComments={onCloseComments}
               onCommentSubmitted={onCommentSubmitted}
               onDelete={onDelete}

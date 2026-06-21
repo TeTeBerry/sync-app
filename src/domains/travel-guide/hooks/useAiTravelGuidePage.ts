@@ -8,7 +8,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { fetchTravelGuidePlan, generateTravelGuide } from '@/api/sync/travelGuide';
 import { useActivityDetailQuery } from '@/hooks/useSyncApi';
 import { useStackPageMainHeight } from '@/hooks/useTabPageMainHeight';
-import { goAiAssistant, ROUTES } from '@/utils/route';
+import { goEventDetailTravelGuideSheet, ROUTES } from '@/utils/route';
 import { isAuthGated, requireAuth } from '@/utils/authGate';
 import {
   loadTravelGuideDetail,
@@ -213,11 +213,7 @@ export function useAiTravelGuidePage() {
   const handleRegenerate = useCallback(() => {
     if (!payload) return;
     requireAuth(
-      () =>
-        goAiAssistant({
-          activityLegacyId: payload.activityLegacyId,
-          prefillTravelGuideForm: payload.form,
-        }),
+      () => goEventDetailTravelGuideSheet(payload.activityLegacyId, payload.form),
       'ai_assistant',
     );
   }, [payload]);
@@ -229,7 +225,7 @@ export function useAiTravelGuidePage() {
     loading,
     loadError,
     mainScrollHeight,
-    navFallback: ROUTES.AI,
+    navFallback: ROUTES.HOME,
     sharing,
     isWeapp,
     handleCopyShare,

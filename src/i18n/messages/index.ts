@@ -26,7 +26,6 @@ export const COMMON_TRANSLATION_KEYS: string[] = [
   '.viewMore',
   'viewAll',
   'tab.home',
-  'tab.ai',
   'tab.events',
   'tab.profile',
   // Add more common keys as needed
@@ -57,7 +56,6 @@ export const TRANSLATION_PRIORITY: Record<LoadingPriority, string[]> = {
     'common.back',
     'common.more',
     'common.me',
-    'tab.ai',
     'tab.events',
   ],
   [LoadingPriority.LOW]: [

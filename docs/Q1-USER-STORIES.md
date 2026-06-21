@@ -3,7 +3,8 @@
 > **产品定位**：免费电音节资讯 + 观演准备工具 + 用户自发结伴信息展示。  
 > **合规红线**：不收费、不卖票、不撮合交易、不提供站内联系/私信。  
 > **主体**：OPC · 仅有 ICP 备案，无 ICP 经营许可证。  
-> **功能总览**：[PRODUCT.md](./PRODUCT.md)（与代码对齐的 Tab / 分包 / Festival Plan 说明）  
+> **功能总览**：[PRODUCT.md](./PRODUCT.md)  
+> **Q2 整改排期**：[Q2-USER-STORIES.md](./Q2-USER-STORIES.md)  
 > **关联代码**：Festival Plan `domains/festival-plan/`；结伴 `domains/partner-feed/`；协议 `src/legal/`。
 
 **Story 格式**：`US-Q1-xx` · 优先级 P0/P1 · 体量 S/M/L · 依赖 · **状态**（✅ 已完成 / ⏸ 暂缓 / 🔲 未开始）

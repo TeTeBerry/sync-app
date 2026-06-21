@@ -1,6 +1,6 @@
 # SYNC · Mini Program (Taro + React)
 
-WeChat mini program (primary target) and optional H5 build for **SYNC** — discover electronic music festivals, select activities, plan with AI (travel guides, itineraries, buddy posts), and track per-event prep on the home screen.
+WeChat mini program (primary target) and optional H5 build for **SYNC** — discover electronic music festivals, select activities, plan with AI tools (travel guides, itineraries, buddy posts), and track per-event prep on the home screen.
 
 The UI was migrated from a Vite mobile app to **Taro 4 + React**. Styles use **Sass**: global tokens in `src/styles/`, component-level `.scss` beside pages and components.
 
@@ -10,15 +10,14 @@ Full feature map (Chinese): [docs/PRODUCT.md](docs/PRODUCT.md). User stories: [d
 
 | Area | Behavior |
 |------|----------|
-| **Positioning** | Free EDM festival info + prep tools + public buddy-post feed (no ticketing, no in-app contact) |
+| **Positioning** | Free EDM festival info + public buddy-post feed; recruit search via AI on event detail (no ticketing, no in-app contact) |
 | **Activity selection** | Entering activity detail or binding an activity silently records interest via `POST /activities/:legacyId/register` — no separate “sign up” button |
-| **Home** | Featured events, countdown, “my next event” with Festival Plan progress, post-reply deep links, quick actions, new-user onboarding |
-| **Prep tab** (`准备`) | WebSocket AI chat bound to an activity; capability sheets for travel guide, exclusive itinerary, buddy post; embedded Festival Plan bar |
-| **Events tab** | List, calendar, and catalog artists sub-tabs (map UI exists in code but is **not** wired to the tab bar yet) |
+| **Home** | Featured events, countdown, “my next event” with Festival Plan progress, post-reply deep links, dual CTA (search festivals / find crew), new-user onboarding |
+| **Events tab** | List, calendar, and catalog artists sub-tabs; **list tab search filter** for festival lookup |
 | **Event detail** | Lineup, buddy-post feed with filters/search, AI travel guide card, Festival Plan checklist, lineup-unpublished subscribe |
 | **Subpackages** | Exclusive itinerary, my itinerary, personality test (Soul DJ), travel guide detail, profile activities/posts, settings, notifications |
 | **Profile** | Account summary, selected activities, posts, settings, legal docs, account-deletion guidance |
-| **Festival Plan** | Three-task prep loop: travel guide → itinerary → buddy post; progress on home, event detail, and prep tab (`domains/festival-plan/`) |
+| **Festival Plan** | Three-task prep loop: travel guide → itinerary → buddy post; progress on home and event detail (`domains/festival-plan/`) |
 
 ## Tech stack
 
@@ -28,7 +27,7 @@ Full feature map (Chinese): [docs/PRODUCT.md](docs/PRODUCT.md). User stories: [d
 | Language | TypeScript |
 | Styling | Sass (BEM with `s-` prefix) |
 | Data | React Query–style hooks (`hooks/sync/`), Zustand where needed |
-| API | REST + WebSocket to [sync-app-backend](../sync-app-backend) |
+| API | REST to [sync-app-backend](../sync-app-backend); legacy AI chat WebSocket disabled by default |
 | Contracts | `@sync/*-contracts` aliases → backend `src/shared/` |
 
 ## Prerequisites
@@ -175,8 +174,9 @@ Husky + lint-staged on commit.
 
 | Document | Description |
 |----------|-------------|
-| [docs/PRODUCT.md](docs/PRODUCT.md) | Current product features & information architecture |
-| [docs/Q1-USER-STORIES.md](docs/Q1-USER-STORIES.md) | Q1 user stories, compliance scope, backlog |
+| [docs/PRODUCT.md](docs/PRODUCT.md) | Product strategy, IA, compliance & code index |
+| [docs/Q2-USER-STORIES.md](docs/Q2-USER-STORIES.md) | **Q2 roadmap**：AI 查节 / 找队、招募改版、准备 Tab 瘦身 |
+| [docs/Q1-USER-STORIES.md](docs/Q1-USER-STORIES.md) | Q1 user stories (completed baseline) |
 | [docs/API.md](docs/API.md) | REST / WebSocket contract |
 | [docs/DATA-LAYER.md](docs/DATA-LAYER.md) | Hooks, caches, auth |
 | [docs/COMPONENT-ARCHITECTURE.md](docs/COMPONENT-ARCHITECTURE.md) | UI layering |

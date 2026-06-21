@@ -1,0 +1,27 @@
+.s-events-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 16px 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(28, 28, 30, 0.96);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.s-events-search__input {
+  flex: 1;
+  min-width: 0;
+  font-size: 15px;
+  color: #fff;
+  line-height: 1.3;
+}
+
+.s-events-search__clear {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}

@@ -23,6 +23,10 @@ import { filterEventDetailPostsByRules } from '../utils/filterEventDetailPostsBy
 import { resolvePersonalityMediaUrls } from '@/domains/personality-test/utils/resolvePersonalityMedia';
 import { t } from '@/i18n/translate';
 
+export type OpenPostCommentsOptions = {
+  draft?: string;
+};
+
 export const EVENT_DETAIL_SCROLL_ID = 'event-detail-scroll';
 
 type EventPostsQuery = ReturnType<typeof useEventPostsInfiniteQuery>;
@@ -34,6 +38,7 @@ export type UseEventDetailPostsParams = {
   setScrollTop: (value: number | undefined) => void;
   highlightPostId?: string;
   openCommentsOnMount?: boolean;
+  buildApplyCommentDraft?: (post: EventDetailPost) => string;
 };
 
 export function useEventDetailPosts({
@@ -43,10 +48,14 @@ export function useEventDetailPosts({
   setScrollTop,
   highlightPostId = '',
   openCommentsOnMount = false,
+  buildApplyCommentDraft,
 }: UseEventDetailPostsParams) {
   const [expandedCommentPostIds, setExpandedCommentPostIds] = useState<Set<string>>(
     () => new Set(),
   );
+  const [commentDraftByPostId, setCommentDraftByPostId] = useState<
+    Record<string, string>
+  >({});
   const autoOpenedCommentsRef = useRef<string | null>(null);
 
   const postFilters = useEventDetailPostFilters(postsQuery.items);
@@ -197,9 +206,14 @@ export function useEventDetailPosts({
   );
 
   const openPostComments = useCallback(
-    (postId: string) => {
+    (postId: string, options?: OpenPostCommentsOptions) => {
       const index = loadedPostItems.findIndex((item) => item.post.id === postId);
       if (index >= 0) ensureIndexVisible(index);
+
+      const draft = options?.draft?.trim();
+      if (draft) {
+        setCommentDraftByPostId((prev) => ({ ...prev, [postId]: draft }));
+      }
 
       setExpandedCommentPostIds((prev) => {
         if (prev.has(postId)) return prev;
@@ -218,7 +232,32 @@ export function useEventDetailPosts({
       next.delete(postId);
       return next;
     });
+    setCommentDraftByPostId((prev) => {
+      if (!(postId in prev)) return prev;
+      const next = { ...prev };
+      delete next[postId];
+      return next;
+    });
   }, []);
+
+  const openApplyJoinComments = useCallback(
+    (postId: string) => {
+      requireAuth(() => {
+        const post = loadedPostItems.find((item) => item.post.id === postId)?.post;
+        if (!post || !buildApplyCommentDraft) {
+          openPostComments(postId);
+          return;
+        }
+        openPostComments(postId, { draft: buildApplyCommentDraft(post) });
+      }, 'social');
+    },
+    [buildApplyCommentDraft, loadedPostItems, openPostComments],
+  );
+
+  const getCommentDraft = useCallback(
+    (postId: string) => commentDraftByPostId[postId],
+    [commentDraftByPostId],
+  );
 
   useEffect(() => {
     const postId = highlightPostId.trim();
@@ -232,6 +271,12 @@ export function useEventDetailPosts({
 
   const handleCommentSubmitted = useCallback(
     (updated: Pick<EventDetailPost, 'id' | 'comments'>) => {
+      setCommentDraftByPostId((prev) => {
+        if (!(updated.id in prev)) return prev;
+        const next = { ...prev };
+        delete next[updated.id];
+        return next;
+      });
       postsQuery.patchItem(updated);
     },
     [postsQuery],
@@ -252,6 +297,9 @@ export function useEventDetailPosts({
     handleDeletePost,
     openPostComments,
     closePostComments,
+    openApplyJoinComments,
+    getCommentDraft,
+    commentDraftByPostId,
     handleCommentSubmitted,
     showMoreVisiblePosts,
     searchQuery: search.query,

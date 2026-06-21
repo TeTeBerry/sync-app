@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import type {
-  AiAssistantNavIntent,
   EventDetailBuddyPostNavIntent,
+  EventDetailTravelGuideNavIntent,
   ExclusiveItineraryNavIntent,
 } from './types';
 
@@ -13,35 +13,30 @@ export type RouteTransitionState = {
 };
 
 export interface NavigationState {
-  aiAssistantIntent: AiAssistantNavIntent | null;
   exclusiveItineraryIntent: ExclusiveItineraryNavIntent | null;
   eventDetailBuddyPostIntent: EventDetailBuddyPostNavIntent | null;
+  eventDetailTravelGuideIntent: EventDetailTravelGuideNavIntent | null;
   activeActivityLegacyId: number | null;
   routeTransition: RouteTransitionState;
-  setAiAssistantIntent: (intent: AiAssistantNavIntent | null) => void;
-  consumeAiAssistantIntent: () => AiAssistantNavIntent | null;
   setExclusiveItineraryIntent: (intent: ExclusiveItineraryNavIntent | null) => void;
   consumeExclusiveItineraryIntent: () => ExclusiveItineraryNavIntent | null;
   setEventDetailBuddyPostIntent: (intent: EventDetailBuddyPostNavIntent | null) => void;
   consumeEventDetailBuddyPostIntent: () => EventDetailBuddyPostNavIntent | null;
+  setEventDetailTravelGuideIntent: (
+    intent: EventDetailTravelGuideNavIntent | null,
+  ) => void;
+  consumeEventDetailTravelGuideIntent: () => EventDetailTravelGuideNavIntent | null;
   setActiveActivityLegacyId: (legacyId: number | null) => void;
   beginRouteTransition: (options?: { eventId?: number; tabTarget?: string }) => void;
   endRouteTransition: () => void;
 }
 
 export const useNavigationStore = create<NavigationState>((set, get) => ({
-  aiAssistantIntent: null,
   exclusiveItineraryIntent: null,
   eventDetailBuddyPostIntent: null,
+  eventDetailTravelGuideIntent: null,
   activeActivityLegacyId: null,
   routeTransition: { active: false },
-
-  setAiAssistantIntent: (intent) => set({ aiAssistantIntent: intent }),
-  consumeAiAssistantIntent: () => {
-    const intent = get().aiAssistantIntent;
-    if (intent) set({ aiAssistantIntent: null });
-    return intent;
-  },
 
   setExclusiveItineraryIntent: (intent) => set({ exclusiveItineraryIntent: intent }),
   consumeExclusiveItineraryIntent: () => {
@@ -55,6 +50,14 @@ export const useNavigationStore = create<NavigationState>((set, get) => ({
   consumeEventDetailBuddyPostIntent: () => {
     const intent = get().eventDetailBuddyPostIntent;
     if (intent) set({ eventDetailBuddyPostIntent: null });
+    return intent;
+  },
+
+  setEventDetailTravelGuideIntent: (intent) =>
+    set({ eventDetailTravelGuideIntent: intent }),
+  consumeEventDetailTravelGuideIntent: () => {
+    const intent = get().eventDetailTravelGuideIntent;
+    if (intent) set({ eventDetailTravelGuideIntent: null });
     return intent;
   },
 

@@ -6,13 +6,8 @@ export default {
   requiredPrivateInfos: ['getLocation'] as const,
   /** 微信「代码质量」要求开启按需注入，见开发者工具 → 代码质量 → 组件 */
   lazyCodeLoading: 'requiredComponents',
-  /** 主包：4 个 Tab，缩小首包体积 */
-  pages: [
-    'pages/index/index',
-    'pages/ai/index',
-    'pages/events/index',
-    'pages/profile/index',
-  ],
+  /** 主包：3 个 Tab */
+  pages: ['pages/index/index', 'pages/events/index', 'pages/profile/index'],
   subPackages: [
     {
       root: 'packageEvent',
@@ -50,7 +45,6 @@ export default {
     borderStyle: '@tabBorderStyle',
     list: [
       { pagePath: 'pages/index/index', text: '首页' },
-      { pagePath: 'pages/ai/index', text: '准备' },
       { pagePath: 'pages/events/index', text: '活动' },
       { pagePath: 'pages/profile/index', text: '我的' },
     ],
@@ -76,13 +70,8 @@ export default {
       desc: '保存行程屏保图片到你的相册',
     },
   },
-  /** Wi‑Fi only: avoid competing with home API on cellular; AI 分包在首次进入助手时再加载 */
   preloadRule: {
     'pages/index/index': {
-      network: 'wifi',
-      packages: ['event'],
-    },
-    'pages/ai/index': {
       network: 'wifi',
       packages: ['event'],
     },

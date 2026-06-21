@@ -1,10 +1,8 @@
 import { useMemo, useState } from 'react';
 import { useDidShow } from '@tarojs/taro';
-import { runAiCapability } from '@/domains/ai-capability/runAiCapability';
-import type { AiCapability } from '@/domains/ai-capability/types';
 import { useFestivalPlanSummary } from '../useFestivalPlanSummary';
 import { useFestivalPlanNavigation } from '../useFestivalPlanNavigation';
-import type { FestivalPlanTaskActions } from '../festivalPlanTaskActions';
+import { createFestivalPlanTaskActions } from '../festivalPlanRouteHandlers';
 
 export type UseEventDetailFestivalPlanParams = {
   activityLegacyId?: number;
@@ -27,17 +25,13 @@ export function useEventDetailFestivalPlan({
 
   const checklist = useFestivalPlanSummary(activityLegacyId, refreshKey);
 
-  const actions = useMemo<FestivalPlanTaskActions>(
-    () => ({
-      runCapability: (capability: AiCapability) => {
-        runAiCapability(capability, {
-          openTravelGuideSheet,
-          openItinerary,
-          openBuddyPostSheet,
-        });
-      },
-      openBuddyPostSheet,
-    }),
+  const actions = useMemo(
+    () =>
+      createFestivalPlanTaskActions({
+        openTravelGuideSheet,
+        openItinerary,
+        openBuddyPostSheet,
+      }),
     [openBuddyPostSheet, openItinerary, openTravelGuideSheet],
   );
 

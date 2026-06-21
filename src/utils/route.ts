@@ -1,17 +1,14 @@
 import Taro from '@tarojs/taro';
 import { useCallback, useEffect, useState } from 'react';
-import { bindActivity, clearActivityScope } from '../domains/activity-scope';
+import { bindActivity } from '../domains/activity-scope';
 import { useNavigationStore } from '../stores/navigationStore';
 import type { ExclusiveItineraryNavIntent } from '../stores/types';
 import type { PersonalityBuddyPostPrefill } from '../domains/personality-test/utils/buildPersonalityBuddyPostPrefill';
-import { encodeSelectedDjList } from '../domains/performance-itinerary/utils/itineraryBanner';
-import type { NavigationState } from '../stores/navigationStore';
-import type { AiAssistantNavIntent } from '../stores/types';
+import type { AiGuidePlanFormValues } from '../types/travelGuide';
 import type { BackendActivity, HomeSummary, NotificationMeta } from '../types/backend';
 import { PRELOAD_HOT_ROUTES_MS } from './timing';
 import {
   ensureEventSubpackageLoaded,
-  preloadAiSubpackage,
   preloadEventSubpackage,
   preloadProfileSubpackage,
 } from './subpackagePreload';
@@ -29,17 +26,17 @@ import { isAuthGated, requireAuth } from './authGate';
 import type { LoginInterceptFeature } from '../stores/loginInterceptStore';
 import { useLoginInterceptStore } from '../stores/loginInterceptStore';
 import { setEventsViewTabIntent } from './eventsTabIntent';
+import { setEventsSearchQuery } from './eventsSearchIntent';
 
 export const ROUTES = {
   HOME: '/pages/index/index',
-  AI: '/pages/ai/index',
   EVENTS: '/pages/events/index',
   PROFILE: '/pages/profile/index',
   PROFILE_ACTIVITIES: '/packageProfile/pages/profile-activities/index',
   PROFILE_POSTS: '/packageProfile/pages/profile-posts/index',
   SETTINGS: '/packageProfile/pages/settings/index',
   LEGAL_DOCUMENT: '/packageProfile/pages/legal-document/index',
-  /** Legacy subpackage deep link — `packageAi/pages/ai-assistant` redirects to `ROUTES.AI`. */
+  /** Legacy subpackage deep link — redirects to home. */
   AI_ASSISTANT: '/packageAi/pages/ai-assistant/index',
   EVENT_DETAIL: '/packageEvent/pages/event-detail/index',
   EXCLUSIVE_ITINERARY: '/packageEvent/pages/exclusive-itinerary/index',
@@ -53,16 +50,11 @@ export type RoutePath = (typeof ROUTES)[keyof typeof ROUTES];
 
 const TAB_ROUTE_PATHS = new Set<RoutePath>([
   ROUTES.HOME,
-  ROUTES.AI,
   ROUTES.EVENTS,
   ROUTES.PROFILE,
 ]);
 
-type PreloadTabPath =
-  | typeof ROUTES.HOME
-  | typeof ROUTES.AI
-  | typeof ROUTES.EVENTS
-  | typeof ROUTES.PROFILE;
+type PreloadTabPath = typeof ROUTES.HOME | typeof ROUTES.EVENTS | typeof ROUTES.PROFILE;
 
 export type TabRoutePath = PreloadTabPath;
 
@@ -74,16 +66,12 @@ const PRELOAD_PAGE_ROUTES_BY_TAB: Record<PreloadTabPath, RoutePath[]> = {
     ROUTES.PERSONALITY_TEST,
     ROUTES.AI_TRAVEL_GUIDE,
   ],
-  [ROUTES.AI]: [ROUTES.EVENT_DETAIL, ROUTES.AI_TRAVEL_GUIDE],
   [ROUTES.EVENTS]: [ROUTES.EVENT_DETAIL],
   [ROUTES.PROFILE]: [ROUTES.NOTIFICATIONS],
 };
 
 function preloadSubpackagesForTab(tab: PreloadTabPath): void {
   preloadEventSubpackage();
-  if (tab === ROUTES.AI) {
-    preloadAiSubpackage();
-  }
   if (tab === ROUTES.PROFILE) {
     preloadProfileSubpackage();
   }
@@ -107,7 +95,7 @@ export function resolveTabRouteFromPath(path: string): PreloadTabPath | null {
     return ROUTES.PROFILE;
   }
   if (base.startsWith('/packageAi/')) {
-    return ROUTES.AI;
+    return ROUTES.HOME;
   }
   return null;
 }
@@ -392,7 +380,6 @@ export function endRouteTransition() {
 }
 
 const AUTH_PROTECTED_ROUTES: Partial<Record<RoutePath, LoginInterceptFeature>> = {
-  [ROUTES.AI]: 'ai_assistant',
   [ROUTES.AI_ASSISTANT]: 'ai_assistant',
   [ROUTES.NOTIFICATIONS]: 'notification',
   [ROUTES.PROFILE_ACTIVITIES]: 'activity',
@@ -483,6 +470,15 @@ function redirectToSafe(url: string) {
 /** Open activities tab on the list view (e.g. home 「全部」). */
 export function goEventsListTab() {
   setEventsViewTabIntent('list');
+  switchTabTo(ROUTES.EVENTS);
+}
+
+/** Open activities tab with optional list search prefilled (from home 查节 / example chips). */
+export function goEventsWithSearch(query?: string) {
+  setEventsViewTabIntent('list');
+  if (query?.trim()) {
+    setEventsSearchQuery(query.trim());
+  }
   switchTabTo(ROUTES.EVENTS);
 }
 
@@ -774,7 +770,7 @@ export async function navigateFromNotification(
   if (meta.type === 'post_rejected') {
     const legacyId = resolveActivityLegacyId(meta);
     if (legacyId == null) return false;
-    goAiAssistant({ activityLegacyId: legacyId });
+    goEventDetail(legacyId, { focusPosts: true });
     return true;
   }
 
@@ -800,32 +796,22 @@ export function goProfile() {
   switchTabTo(ROUTES.PROFILE);
 }
 
-export type GoAiAssistantOptions = Pick<
-  AiAssistantNavIntent,
-  | 'initialMessage'
-  | 'activityLegacyId'
-  | 'openAiGuideSheet'
-  | 'openItinerarySheet'
-  | 'openBuddyPostSheet'
-  | 'prefillTravelGuideForm'
-  | 'autoRunTravelGuideForm'
->;
-
-/** Pre-download AI subpackage (touch / mount). */
-export function warmAiAssistant(): void {
-  preloadAiSubpackage();
+export function goEventDetailTravelGuideSheet(
+  activityLegacyId: number,
+  prefill?: AiGuidePlanFormValues,
+) {
+  if (prefill) {
+    useNavigationStore.getState().setEventDetailTravelGuideIntent({
+      activityLegacyId,
+      prefillTravelGuideForm: prefill,
+    });
+  }
+  goEventDetail(activityLegacyId, { openGuide: true });
 }
 
-export function goAiAssistantTravelGuideSheet(activityLegacyId: number) {
-  goAiAssistant({ activityLegacyId, openAiGuideSheet: true });
-}
-
-export function goAiAssistantItinerarySheet(activityLegacyId: number) {
-  goAiAssistant({ activityLegacyId, openItinerarySheet: true });
-}
-
-export function goAiAssistantBuddyPostSheet(activityLegacyId: number) {
-  goAiAssistant({ activityLegacyId, openBuddyPostSheet: true });
+/** @deprecated Use goEventDetail with openBuddyPost */
+export function goEventDetailBuddyPostSheet(activityLegacyId: number) {
+  goEventDetail(activityLegacyId, { openBuddyPost: true, focusPosts: true });
 }
 
 /** Browse activity lineup (DJ grid from official schedule). */
@@ -843,60 +829,6 @@ export function goActivitySchedule(
     return;
   }
   goExclusiveItinerary(activityLegacyId);
-}
-
-/** Open Prep tab; binds activity when legacyId is provided. */
-export function goPrepTab(activityLegacyId?: number) {
-  if (activityLegacyId != null && !Number.isNaN(activityLegacyId)) {
-    goAiAssistant({ activityLegacyId });
-    return;
-  }
-  switchTabTo(ROUTES.AI);
-}
-
-export function goAiAssistant(options?: GoAiAssistantOptions) {
-  const intent: AiAssistantNavIntent = {};
-  if (options?.initialMessage?.trim()) {
-    intent.initialMessage = options.initialMessage.trim();
-  }
-  if (options?.activityLegacyId != null && !Number.isNaN(options.activityLegacyId)) {
-    intent.activityLegacyId = options.activityLegacyId;
-    bindActivity(options.activityLegacyId);
-  } else {
-    clearActivityScope();
-  }
-  if (options?.openAiGuideSheet) {
-    intent.openAiGuideSheet = true;
-  }
-  if (options?.openItinerarySheet) {
-    intent.openItinerarySheet = true;
-  }
-  if (options?.openBuddyPostSheet) {
-    intent.openBuddyPostSheet = true;
-  }
-  if (options?.prefillTravelGuideForm) {
-    intent.prefillTravelGuideForm = options.prefillTravelGuideForm;
-  }
-  if (options?.autoRunTravelGuideForm) {
-    intent.autoRunTravelGuideForm = options.autoRunTravelGuideForm;
-  }
-  if (
-    intent.initialMessage ||
-    intent.activityLegacyId != null ||
-    intent.openAiGuideSheet ||
-    intent.openItinerarySheet ||
-    intent.openBuddyPostSheet ||
-    intent.prefillTravelGuideForm ||
-    intent.autoRunTravelGuideForm
-  ) {
-    useNavigationStore.getState().setAiAssistantIntent(intent);
-  }
-
-  warmAiAssistant();
-  switchTabTo(ROUTES.AI);
-  if (isAuthGated()) {
-    useLoginInterceptStore.getState().show('ai_assistant', () => {});
-  }
 }
 
 export function goNotifications() {

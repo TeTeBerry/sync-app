@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import Taro from '@tarojs/taro';
-import { goAiAssistant } from '@/utils/route';
+import { runTravelGuideGeneration } from '@/domains/travel-guide/runTravelGuideGeneration';
 import { parseActivityDayCount } from '@/utils/parseActivityDayCount';
 import { eventCityFromLocation } from '@/utils/travelGuideDepartureSuggestions';
 import { requireAuth } from '@/utils/authGate';
@@ -10,15 +10,20 @@ export type UseEventDetailTravelGuideOptions = {
   eventId: number;
   activityDate?: string;
   activityLocation?: string;
+  /** Prefill sheet from navigation intent (e.g. regenerate from guide detail). */
+  initialGuideForm?: AiGuidePlanFormValues | null;
 };
 
-/** Travel-guide plan sheet on event detail — no navigation until the user submits. */
+/** Travel-guide plan sheet on event detail — generation stays on detail / guide detail page. */
 export function useEventDetailTravelGuide({
   eventId,
   activityDate,
   activityLocation,
+  initialGuideForm = null,
 }: UseEventDetailTravelGuideOptions) {
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [sheetInitialValues, setSheetInitialValues] =
+    useState<AiGuidePlanFormValues | null>(initialGuideForm);
 
   const defaultNights = useMemo(
     () => parseActivityDayCount(activityDate),
@@ -30,15 +35,21 @@ export function useEventDetailTravelGuide({
     [activityLocation],
   );
 
-  const openGuideSheet = useCallback(() => {
-    requireAuth(() => {
-      if (!Number.isFinite(eventId) || eventId <= 0) {
-        void Taro.showToast({ title: '活动信息无效', icon: 'none' });
-        return;
-      }
-      setSheetOpen(true);
-    }, 'ai_assistant');
-  }, [eventId]);
+  const openGuideSheet = useCallback(
+    (prefill?: AiGuidePlanFormValues | null) => {
+      requireAuth(() => {
+        if (!Number.isFinite(eventId) || eventId <= 0) {
+          void Taro.showToast({ title: '活动信息无效', icon: 'none' });
+          return;
+        }
+        if (prefill) {
+          setSheetInitialValues(prefill);
+        }
+        setSheetOpen(true);
+      }, 'ai_assistant');
+    },
+    [eventId],
+  );
 
   const closeGuideSheet = useCallback(() => {
     setSheetOpen(false);
@@ -47,11 +58,7 @@ export function useEventDetailTravelGuide({
   const handleGuideSheetSubmit = useCallback(
     (form: AiGuidePlanFormValues) => {
       setSheetOpen(false);
-      requireAuth(
-        () =>
-          goAiAssistant({ activityLegacyId: eventId, autoRunTravelGuideForm: form }),
-        'ai_assistant',
-      );
+      void runTravelGuideGeneration(eventId, form);
     },
     [eventId],
   );
@@ -63,5 +70,6 @@ export function useEventDetailTravelGuide({
     handleGuideSheetSubmit,
     guideDefaultNights: defaultNights,
     guideEventCity: eventCity,
+    guideSheetInitialValues: sheetInitialValues,
   };
 }

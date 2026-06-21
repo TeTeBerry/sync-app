@@ -5,7 +5,7 @@ vi.hoisted(() => {
 });
 
 import Taro from '@tarojs/taro';
-import { endRouteTransition, goAiAssistant, goNotifications } from '@/utils/route';
+import { endRouteTransition, goEventsWithSearch, goNotifications } from '@/utils/route';
 
 const mockIsLoggedIn = vi.fn(() => false);
 const mockShow = vi.fn();
@@ -37,6 +37,9 @@ vi.mock('@tarojs/taro', () => ({
     showToast: vi.fn(),
     navigateBack: vi.fn(),
     preloadPage: vi.fn(() => Promise.resolve()),
+    setStorageSync: vi.fn(),
+    getStorageSync: vi.fn(),
+    removeStorageSync: vi.fn(),
   },
   useDidShow: vi.fn((cb: () => void) => {
     cb();
@@ -64,7 +67,6 @@ vi.mock('@/stores/navigationStore', () => ({
   useNavigationStore: {
     getState: () => ({
       setActiveActivityLegacyId: vi.fn(),
-      setAiAssistantIntent: vi.fn(),
       beginRouteTransition: vi.fn(),
       endRouteTransition: vi.fn(),
     }),
@@ -78,16 +80,12 @@ describe('route auth gate', () => {
     mockIsLoggedIn.mockReturnValue(false);
   });
 
-  it('goAiAssistant switches to AI tab and opens login when logged out', async () => {
-    goAiAssistant();
+  it('goEventsWithSearch switches to events tab without login gate', async () => {
+    goEventsWithSearch('edc');
     await vi.waitUntil(() => vi.mocked(Taro.switchTab).mock.calls.length > 0);
-    expect(Taro.switchTab).toHaveBeenCalled();
-    expect(mockShow).toHaveBeenCalledWith('ai_assistant', expect.any(Function));
-  });
-
-  it('goAiAssistant switches to AI tab when logged in', () => {
-    mockIsLoggedIn.mockReturnValue(true);
-    goAiAssistant();
+    expect(Taro.switchTab).toHaveBeenCalledWith(
+      expect.objectContaining({ url: '/pages/events/index' }),
+    );
     expect(mockShow).not.toHaveBeenCalled();
   });
 

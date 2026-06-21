@@ -1,7 +1,6 @@
 import './HomeQuickActions.scss';
-import { CalendarDays, Bot, AudioWaveform } from '../../../components/icons';
-import { goEventsListTab, goPersonalityTest, goPrepTab } from '../../../utils/route';
-import { getActiveActivityLegacyId } from '@/domains/activity-scope';
+import { CalendarDays, AudioWaveform } from '../../../components/icons';
+import { goEventsListTab, goPersonalityTest } from '../../../utils/route';
 import { Text, View } from '@tarojs/components';
 import { useT } from '@/hooks/useI18n';
 
@@ -24,14 +23,6 @@ export const HomeQuickActions = () => {
       icon: AudioWaveform,
       iconColor: '#ff0066',
       onPress: () => goPersonalityTest(),
-    },
-    {
-      id: 'ai',
-      label: t('home.quickAi'),
-      hint: t('home.quickAiHint'),
-      icon: Bot,
-      iconColor: '#4cc9f0',
-      onPress: () => goPrepTab(getActiveActivityLegacyId() ?? undefined),
     },
   ] as const;
 

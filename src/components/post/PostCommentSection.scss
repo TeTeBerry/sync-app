@@ -189,6 +189,14 @@
   font-weight: var(--s-fw-semibold);
 }
 
+.s-post-comments__apply-hint {
+  display: block;
+  margin-bottom: 8px;
+  color: #636366;
+  font-size: 11px;
+  line-height: 1.35;
+}
+
 .s-post-comments__composer {
   display: flex;
   align-items: center;

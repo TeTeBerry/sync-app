@@ -6,7 +6,7 @@ describe('shouldEndRouteTransitionOnShow', () => {
   it('does nothing when transition is inactive', () => {
     expect(
       shouldEndRouteTransitionOnShow(
-        { active: false, tabTarget: ROUTES.AI },
+        { active: false, tabTarget: ROUTES.EVENTS },
         ROUTES.HOME,
       ),
     ).toBe(false);
@@ -19,7 +19,7 @@ describe('shouldEndRouteTransitionOnShow', () => {
   it('skips intermediate tab pages while switching to another tab', () => {
     expect(
       shouldEndRouteTransitionOnShow(
-        { active: true, tabTarget: ROUTES.AI },
+        { active: true, tabTarget: ROUTES.EVENTS },
         ROUTES.HOME,
       ),
     ).toBe(false);
@@ -27,7 +27,10 @@ describe('shouldEndRouteTransitionOnShow', () => {
 
   it('ends when the destination tab becomes visible', () => {
     expect(
-      shouldEndRouteTransitionOnShow({ active: true, tabTarget: ROUTES.AI }, ROUTES.AI),
+      shouldEndRouteTransitionOnShow(
+        { active: true, tabTarget: ROUTES.EVENTS },
+        ROUTES.EVENTS,
+      ),
     ).toBe(true);
   });
 });

@@ -9,10 +9,10 @@ import {
 } from '@/utils/onboardingStorage';
 import {
   goEventDetail,
+  goEventDetailBuddyPostSheet,
+  goEventDetailTravelGuideSheet,
   goEventsListTab,
-  goAiAssistantTravelGuideSheet,
-  goAiAssistantBuddyPostSheet,
-  goPrepTab,
+  goEventsWithSearch,
 } from '@/utils/route';
 import { useT } from '@/hooks/useI18n';
 
@@ -58,7 +58,7 @@ export function useNewUserOnboarding(options: UseNewUserOnboardingOptions = {}) 
             dismissAnd(() => goEventDetail(joinLegacyId));
             return;
           }
-          dismissAnd(() => goEventsListTab());
+          dismissAnd(() => goEventsWithSearch());
         },
       },
       {
@@ -67,10 +67,10 @@ export function useNewUserOnboarding(options: UseNewUserOnboardingOptions = {}) 
         actionLabel: t('onboarding.step2Action'),
         onAction: () => {
           if (joinLegacyId) {
-            dismissAnd(() => goAiAssistantTravelGuideSheet(joinLegacyId));
+            dismissAnd(() => goEventDetailTravelGuideSheet(joinLegacyId));
             return;
           }
-          dismissAnd(() => goPrepTab());
+          dismissAnd(() => goEventsListTab());
         },
       },
       {
@@ -79,10 +79,10 @@ export function useNewUserOnboarding(options: UseNewUserOnboardingOptions = {}) 
         actionLabel: t('onboarding.step3Action'),
         onAction: () => {
           if (joinLegacyId) {
-            dismissAnd(() => goAiAssistantBuddyPostSheet(joinLegacyId));
+            dismissAnd(() => goEventDetailBuddyPostSheet(joinLegacyId));
             return;
           }
-          dismissAnd(() => goPrepTab());
+          dismissAnd(() => goEventsListTab());
         },
       },
     ];

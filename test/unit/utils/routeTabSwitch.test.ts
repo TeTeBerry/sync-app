@@ -101,7 +101,7 @@ describe('tab switch loading', () => {
   it('resolveTabRouteFromPath maps tab roots and profile subpackage routes', () => {
     expect(resolveTabRouteFromPath(ROUTES.PROFILE)).toBe(ROUTES.PROFILE);
     expect(resolveTabRouteFromPath(ROUTES.SETTINGS)).toBe(ROUTES.PROFILE);
-    expect(resolveTabRouteFromPath(ROUTES.AI_ASSISTANT)).toBe(ROUTES.AI);
+    expect(resolveTabRouteFromPath(ROUTES.AI_ASSISTANT)).toBe(ROUTES.HOME);
     expect(resolveTabRouteFromPath(ROUTES.EVENT_DETAIL)).toBeNull();
   });
 
@@ -122,13 +122,13 @@ describe('tab switch loading', () => {
   });
 
   it('clears stuck optimistic tab when user retaps current tab root during switch', () => {
-    syncTabBarRoute(ROUTES.AI);
+    syncTabBarRoute(ROUTES.EVENTS);
     switchTabTo(ROUTES.HOME);
     expect(useNavigationStore.getState().routeTransition.active).toBe(false);
   });
 
   it('queues a new tab when optimistic path points at another tab', async () => {
-    syncTabBarRoute(ROUTES.AI);
+    syncTabBarRoute(ROUTES.EVENTS);
     switchTabTo(ROUTES.EVENTS);
     await vi.waitUntil(() => vi.mocked(Taro.switchTab).mock.calls.length > 0);
     expect(Taro.switchTab).toHaveBeenCalledWith(

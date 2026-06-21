@@ -11,4 +11,11 @@ export const LABEL_ALIASES: Record<string, readonly string[]> = {
   'ai.pickFestival': ['选一场电音节', 'Pick a festival'],
   'ai.nearEvents': ['最近有什么活动', 'Events coming up'],
   'ai.nearEventsSubmit': ['查最近活动', 'Show nearby events'],
+  'ai.chipFindTeam': ['去找队', 'Find a crew'],
+  'ai.chipFindRecruits': ['找招募帖', 'Find recruit posts'],
+  'ai.chipWhenIsEvent': ['这场什么时候', 'When is this event?'],
+  'ai.chipLineupOverview': ['阵容有哪些', 'Who is on the lineup?'],
+  'home.exampleTomorrowlandWhen': ['Tomorrowland 什么时候', 'When is Tomorrowland?'],
+  'home.exampleEdcLineup': ['EDC 阵容官宣了吗', 'EDC lineup announced?'],
+  'home.exampleNearFestivals': ['最近有什么电音节', 'What festivals are coming up?'],
 };

@@ -2,16 +2,10 @@ import { useMemo } from 'react';
 import { useFestivalPlanProgressQuery } from '@/hooks/sync/festivalPlanProgress';
 import { useItineraryStore } from '@/domains/performance-itinerary/store';
 import { findLatestTravelGuideForActivity } from '@/domains/travel-guide/utils/travelGuideDetailStorage';
-import { useAiChatStore } from '@/stores/aiChatStore';
-import { buildAiChatScopeKey } from '@/utils/aiChatScope';
 import {
   buildFestivalPlanChecklist,
   type FestivalPlanChecklist,
 } from './buildFestivalPlanChecklist';
-import {
-  findBuddyPostInChatMessages,
-  findTravelGuideInChatMessages,
-} from './festivalPlanFromChat';
 import { mergeFestivalPlanProgressInput } from './mergeFestivalPlanProgressInput';
 
 export type {
@@ -34,17 +28,8 @@ export function useFestivalPlanSummary(
 
     void refreshKey;
 
-    const scopeMessages = useAiChatStore
-      .getState()
-      .getScopeMessages(buildAiChatScopeKey(activityLegacyId));
-
-    let localTravelGuideId: string | undefined;
     const storedGuide = findLatestTravelGuideForActivity(activityLegacyId);
-    if (storedGuide) {
-      localTravelGuideId = storedGuide.guideId;
-    } else {
-      localTravelGuideId = findTravelGuideInChatMessages(scopeMessages)?.guideId;
-    }
+    const localTravelGuideId = storedGuide?.guideId;
 
     let localItineraryDayCount: number | undefined;
     let localItinerarySelectedDjIds: string[] | undefined;
@@ -57,15 +42,12 @@ export function useFestivalPlanSummary(
       localItinerarySelectedDjIds = pending.selectedDjIds;
     }
 
-    const localBuddyPostId = findBuddyPostInChatMessages(scopeMessages)?.postId;
-
     return buildFestivalPlanChecklist(
       mergeFestivalPlanProgressInput(progressQuery.data, {
         travelGuideId: localTravelGuideId,
         hasItinerary: localHasItinerary,
         itineraryDayCount: localItineraryDayCount,
         itinerarySelectedDjIds: localItinerarySelectedDjIds,
-        buddyPostId: localBuddyPostId,
       }),
     );
   }, [activityLegacyId, pendingItinerary, progressQuery.data, refreshKey]);

@@ -3,7 +3,6 @@ export * from './users';
 export * from './posts';
 export * from './profile';
 export * from './notifications';
-export * from './chat';
 export * from './itinerary';
 export * from './travelGuide';
 export * from './travelPlan';

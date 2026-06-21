@@ -3,9 +3,8 @@ import React from 'react';
 import { useDidShow } from '@tarojs/taro';
 import { Button } from '../ui';
 import { View, Text } from '@tarojs/components';
-import { Bot, CalendarDays, House, User } from '../../components/icons';
+import { CalendarDays, House, User } from '../../components/icons';
 import {
-  preloadAiSubpackage,
   preloadEventSubpackage,
   preloadProfileSubpackage,
 } from '../../utils/subpackagePreload';
@@ -20,11 +19,8 @@ import {
 import { useT } from '@/hooks/useI18n';
 
 function preloadSubpackagesForTab(path: RoutePath) {
-  if (path === ROUTES.HOME || path === ROUTES.EVENTS || path === ROUTES.AI) {
+  if (path === ROUTES.HOME || path === ROUTES.EVENTS) {
     preloadEventSubpackage();
-  }
-  if (path === ROUTES.AI) {
-    preloadAiSubpackage();
   }
   if (path === ROUTES.PROFILE) {
     preloadProfileSubpackage();
@@ -32,7 +28,6 @@ function preloadSubpackagesForTab(path: RoutePath) {
 }
 
 function handleTabPress(path: RoutePath, isActive: boolean) {
-  // On subpackage stack pages the tab can look active while route is not the tab root.
   if (isActive && isOnTabRoot(path)) {
     return;
   }
@@ -46,7 +41,6 @@ const BottomNav: React.FC = () => {
 
   const navItems = [
     { path: ROUTES.HOME, icon: House, label: t('tab.home') },
-    { path: ROUTES.AI, icon: Bot, label: t('tab.ai') },
     { path: ROUTES.EVENTS, icon: CalendarDays, label: t('tab.events') },
     { path: ROUTES.PROFILE, icon: User, label: t('tab.profile') },
   ];

@@ -20,7 +20,6 @@ const MAIN_PACKAGE_GLOBS = [
   'pages/index',
   'pages/events',
   'pages/profile',
-  'pages/ai',
   'app.tsx',
   'components/navigation',
   'components/post',

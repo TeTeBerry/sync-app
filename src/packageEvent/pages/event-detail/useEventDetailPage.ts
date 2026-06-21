@@ -22,8 +22,9 @@ import {
   goExclusiveItinerary,
   goMyItinerary,
   goAiTravelGuide,
-  goAiAssistantTravelGuideSheet,
 } from '../../../utils/route';
+import { buildRecruitApplyCommentDraft } from '@/domains/partner-feed/utils/buildRecruitApplyCommentDraft';
+import type { EventDetailPost } from '../../../types/backend';
 import { scrollElementToCenter } from '../../../utils/scrollToCenter';
 import { t } from '@/i18n/translate';
 
@@ -52,6 +53,10 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     () => useNavigationStore.getState().consumeEventDetailBuddyPostIntent(),
     [],
   );
+  const travelGuideNavIntent = useMemo(
+    () => useNavigationStore.getState().consumeEventDetailTravelGuideIntent(),
+    [],
+  );
 
   const activityQuery = useActivityDetailQuery(eventId);
   const activityTitle = activityQuery.data?.name;
@@ -69,6 +74,7 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     eventId,
     activityDate,
     activityLocation,
+    initialGuideForm: travelGuideNavIntent?.prefillTravelGuideForm ?? null,
   });
   const displayIdentity = useDisplayUserIdentity();
   const resolvedCurrentUserAvatar = useResolvedAvatarSrc(displayIdentity.avatar);
@@ -103,6 +109,23 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
   const scrollPreserve = useEventDetailScrollPreserve();
   const { frozenTop, scrollFrozen } = scrollPreserve;
 
+  const buildApplyCommentDraft = useCallback(
+    (post: EventDetailPost) => {
+      const latestGuide = findLatestTravelGuideForActivity(eventId);
+      return buildRecruitApplyCommentDraft({
+        post,
+        userLocation: displayIdentity.location,
+        travelGuide: latestGuide
+          ? {
+              departure: latestGuide.form.departure,
+              headcount: latestGuide.form.headcount,
+            }
+          : undefined,
+      });
+    },
+    [displayIdentity.location, eventId],
+  );
+
   const posts = useEventDetailPosts({
     activityLegacyId: eventId,
     postsQuery,
@@ -110,6 +133,7 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     setScrollTop,
     highlightPostId,
     openCommentsOnMount,
+    buildApplyCommentDraft,
   });
 
   const handleScroll = useCallback(
@@ -179,16 +203,9 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     goExclusiveItinerary(eventId);
   }, [assertValidEventId, eventId]);
 
-  const openAiTravelGuideSheet = useCallback(() => {
-    if (!assertValidEventId()) {
-      return;
-    }
-    goAiAssistantTravelGuideSheet(eventId);
-  }, [assertValidEventId, eventId]);
-
   const festivalPlan = useEventDetailFestivalPlan({
     activityLegacyId: eventId,
-    openTravelGuideSheet: openAiTravelGuideSheet,
+    openTravelGuideSheet: travelGuide.openGuideSheet,
     openItinerary: handleOpenExclusiveItinerary,
     openBuddyPostSheet: templatePost.openBuddyPostSheet,
   });
@@ -201,8 +218,8 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
       goAiTravelGuide(guideId);
       return;
     }
-    openAiTravelGuideSheet();
-  }, [eventId, festivalPlan.checklist, openAiTravelGuideSheet]);
+    travelGuide.openGuideSheet();
+  }, [eventId, festivalPlan.checklist, travelGuide.openGuideSheet]);
 
   const travelGuideGenerated = useMemo(
     () =>
@@ -223,8 +240,14 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
       return;
     }
     guideSheetOpenedRef.current = true;
-    openAiTravelGuideSheet();
-  }, [openGuideOnMount, invalidEventId, secondaryReady, openAiTravelGuideSheet]);
+    travelGuide.openGuideSheet(travelGuideNavIntent?.prefillTravelGuideForm ?? null);
+  }, [
+    openGuideOnMount,
+    invalidEventId,
+    secondaryReady,
+    travelGuide.openGuideSheet,
+    travelGuideNavIntent?.prefillTravelGuideForm,
+  ]);
 
   const isPublishing = templatePost.isBuddyPostPublishing;
 
@@ -260,6 +283,7 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     handleGuideSheetSubmit: travelGuide.handleGuideSheetSubmit,
     guideDefaultNights: travelGuide.guideDefaultNights,
     guideEventCity: travelGuide.guideEventCity,
+    guideSheetInitialValues: travelGuide.guideSheetInitialValues,
     invalidEventId: route.invalidEventId,
     publishComplianceConfirmDialog: templatePost.complianceConfirmDialog,
     buddyPostQuota: templatePost.buddyPostQuota,

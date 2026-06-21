@@ -38,9 +38,12 @@ import {
   sortFestivalEventsByDate,
 } from './utils/festivalEvents';
 import { consumeEventsViewTabIntent } from '../../utils/eventsTabIntent';
+import { consumeEventsSearchQuery } from '../../utils/eventsSearchIntent';
+import { filterActivitiesForEventsSearch } from '../../utils/filterActivitiesForEventsSearch';
+import { EventsSearchBar } from './components/EventsSearchBar';
 
-/** Header + view tabs (px, design @ 375). */
-const EVENTS_CHROME_PX = 118;
+/** Header + search + view tabs (px, design @ 375). */
+const EVENTS_CHROME_PX = 170;
 
 const Events: React.FC = () => {
   useEndRouteTransitionOnShow(ROUTES.EVENTS);
@@ -55,6 +58,7 @@ const Events: React.FC = () => {
   const { refetch: refetchHomeSummary } = useHomeSummary();
   const [viewTab, setViewTab] = useState<EventsViewTab>('list');
   const [selectedDay, setSelectedDay] = useState(todayCalendarParts);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useStaleBackgroundRefetch({
     refetch: refetchHomeSummary,
@@ -71,10 +75,14 @@ const Events: React.FC = () => {
 
   useDidShow(() => {
     preloadHotRoutes(ROUTES.EVENTS);
-    const intent = consumeEventsViewTabIntent();
-    // Always default to the first tab ('calendar') unless there's a specific reason to use a different one
-    if (intent && intent === 'calendar') {
-      setViewTab(intent);
+    const tabIntent = consumeEventsViewTabIntent();
+    if (tabIntent) {
+      setViewTab(tabIntent);
+    }
+    const searchIntent = consumeEventsSearchQuery();
+    if (searchIntent != null) {
+      setSearchQuery(searchIntent);
+      setViewTab('list');
     }
   });
 
@@ -143,6 +151,18 @@ const Events: React.FC = () => {
     [upcomingEvents],
   );
 
+  const filteredListEvents = useMemo(
+    () => filterActivitiesForEventsSearch(allEventsByDate, searchQuery),
+    [allEventsByDate, searchQuery],
+  );
+
+  const listEmptyText = useMemo(() => {
+    if (searchQuery.trim()) {
+      return t('events.searchEmpty');
+    }
+    return t('events.empty');
+  }, [searchQuery, t]);
+
   const calendarListEvents = useMemo(() => {
     const base = upcomingEvents
       .filter(isFestivalEvent)
@@ -167,6 +187,7 @@ const Events: React.FC = () => {
     <View className="s-page-shell s-page-with-tabbar">
       <View className="s-page-with-tabbar__main s-events">
         <EventsPageHeader navInsets={navInsets} upcomingCount={upcomingEvents.length} />
+        <EventsSearchBar value={searchQuery} onChange={setSearchQuery} />
         <View className="s-events__view-tabs-wrap">
           <EventsViewTabs activeTab={viewTab} onChange={setViewTab} />
         </View>
@@ -194,9 +215,9 @@ const Events: React.FC = () => {
                     </Text>
                   </View>
                   <EventsActivityList
-                    events={allEventsByDate}
+                    events={filteredListEvents}
                     isError={isError}
-                    emptyText={t('events.empty')}
+                    emptyText={listEmptyText}
                     onRetry={() => void refetch()}
                     onOpenDetail={openDetail}
                     onWarmDetail={warmEventDetail}

@@ -1,163 +1,296 @@
-# SYNC 小程序 · 产品功能说明
+# SYNC 小程序 · 产品说明
 
-> 与代码实现对齐的**当前功能**文档。用户故事与排期见 [Q1-USER-STORIES.md](./Q1-USER-STORIES.md)；REST/WS 契约见 [API.md](./API.md)。
+> **当前实现**与**目标形态**合一文档。Q1 交付见 [Q1-USER-STORIES.md](./Q1-USER-STORIES.md)；**Q2 整改与推广主轴**见 [Q2-USER-STORIES.md](./Q2-USER-STORIES.md)。REST/WS 契约见 [API.md](./API.md)。
 
 **最后更新**：2026-06-21
 
-## 产品定位
+---
+
+## 一、战略定位
+
+### 1.1 对外一句话（Q2 目标）
+
+**电音节资讯与公开组队招募；招募支持 AI 筛选。**
+
+（历史口径「用 AI 查电音节」已收口为：**活动 Tab 列表搜索** + **活动详情资讯**，不再提供多轮 AI 对话入口。）
+
+### 1.2 双主轴 + 一底座
+
+| 层级 | 用户故事 | 产品形态 |
+|------|----------|----------|
+| **主轴 A · 查节** | 我想查某场节的时间、地点、阵容 | AI 查节 + 活动 Tab + 活动详情资讯 |
+| **主轴 B · 找队** | 我想找人一起去 | **公开组队招募墙** + **AI 检索公开帖** + **公开评论**互动 |
+| **底座** | 一切围绕「某场活动」 | 选活动 / 绑活动；攻略·行程降为**个人观演准备工具** |
+
+### 1.3 主体与合规边界
 
 | 项 | 说明 |
 |----|------|
-| **一句话** | 免费电音节资讯 + 观演准备工具 + 用户自发结伴信息展示 |
-| **品牌副标题** | 发现电音节 · 找同好结伴 |
-| **合规边界** | 不收费、不卖票、不撮合交易、不提供站内联系/私信（见 `src/legal/`、`constants/platformDisclaimer.ts`） |
-| **主体资质** | OPC · ICP 备案（非经营性） |
+| **主体资质** | OPC · **仅 ICP 备案**（非经营性），无 ICP 经营许可证 |
+| **服务性质** | 免费的信息与工具服务（见 `src/legal/user-agreement.ts`） |
+| **平台免责** | `constants/platformDisclaimer.ts` · 首页/详情底部常驻 |
 
-## 信息架构
+**合规红线（全程不突破）**
 
-### 主包 Tab（4 个）
+| 不做 | 原因 |
+|------|------|
+| 付费会员 / 付费 AI / 付费匹配 | 经营性 |
+| 站内私信、队内私密评论、「联系队友」、展示联系方式 | 撮合 + 私密 UGC |
+| 「配对成功」「平台担保」「智能匹配最佳搭子」 | 撮合承诺 |
+| 票务销售、返佣购票 | 票务资质 |
+| 点赞 | 已移除；无社交互动信号 |
 
-| Tab | 路由 | 文案 | 职责 |
-|-----|------|------|------|
-| 首页 | `pages/index/index` | 首页 | 精选活动、我的下一场、倒计时、快捷入口 |
-| 准备 | `pages/ai/index` | 准备 | AI 对话 + Festival Plan + 攻略/行程/组队能力 Sheet |
-| 活动 | `pages/events/index` | 活动 | 活动列表 / 日历 / 艺人目录 |
-| 我的 | `pages/profile/index` | 我的 | 资料、已选活动、帖子、设置 |
+**允许的能力与表述**
 
-底栏为自定义 TabBar（`components/navigation/BottomNav`）。`packageAi/pages/ai-assistant` 为遗留深链，重定向至准备 Tab。
+| 可以做 | 表述方式 |
+|--------|----------|
+| AI 找队 | **检索 / 筛选公开组队招募帖**，展示解析条件（出发地、日期、人数） |
+| 申请加入 | 卡片主按钮 **「申请加入」** → 展开评论区并 **预填模板** → 发送为**公开评论**（非私密申请） |
+| 组队招募帖 | **招募中 / 已满** 状态 + 人数进度（帖主自维护，平台不保证组满） |
 
-### 分包页面
+> 历史曾实现 `team-chat`、申请 inbox、邀请接受/拒绝等能力，已回撤（`refactor(partner): remove team chat`）。Q2 **不恢复**私密组队通讯路线。
+
+### 1.4 推广话术自检
+
+**对外一句话**
+
+- ✅ 用 AI 查电音节，帮你在**公开组队信息**里找同行
+- ❌ 发现电音节 · 找同好结伴（Q1 口径，已废弃）
+
+**应用内 CTA / 按钮**
+
+| 场景 | ✅ 可用 | ❌ 禁止 |
+|------|---------|---------|
+| 首页双 CTA | 查电音节 / 找组队 | 观演准备（作为主 CTA）、智能配对 |
+| 招募卡片 | 申请加入、查看公开回复 | 联系队友、私信、投递 inbox |
+| AI 找队结果 | 找到 N 条合适的公开招募 | 找到 N 条匹配、配对成功 |
+| 发帖成功 | 招募帖已发布 · 公开信息展示 | 已为你匹配到队友 |
+
+**分享 / 海报 / 推送**
+
+| 场景 | ✅ 可用 | ❌ 禁止 |
+|------|---------|---------|
+| 小程序分享标题 | `{活动名} · 电音节资讯` | 保证组满、平台担保 |
+| 人格测试海报 | 测测你的本命 DJ | 无 disclaimer 的 buddy-matching |
+| 推送文案 | 你的招募帖有 N 条新公开回复 | 3 人想联系你、接受邀请 |
+
+**英文（en-US）特别注意**
+
+- ✅ public recruit discovery / public recruit posts
+- ❌ buddy-matching（`platform.disclaimer` 已移除）
+
+**上线前 grep 自检（`src/`）**
+
+```bash
+rg '联系队友|配对成功|平台担保|智能配对|buddy-matching' src/
+```
+
+应无命中（docs 历史描述除外）。
+
+---
+
+## 二、信息架构
+
+### 2.1 主包 Tab（3 个）
+
+| Tab | 路由 | 文案 | 当前职责 |
+|-----|------|------|----------|
+| 首页 | `pages/index/index` | 首页 | 精选、我的下一场、**双 CTA（搜节/找队）**、示例 Chip |
+| 活动 | `pages/events/index` | 活动 | 列表 / 日历 / 艺人；**列表 Tab 搜索过滤** |
+| 我的 | `pages/profile/index` | 我的 | 资料、帖、设置 |
+
+底栏：`components/navigation/BottomNav`（3 Tab）。`packageAi/pages/ai-assistant` 遗留深链 → 重定向首页或活动 Tab（带搜索 intent）。
+
+### 2.2 分包页面
 
 | 分包 | 页面 | 说明 |
 |------|------|------|
-| `packageEvent` | `event-detail` | 活动详情：阵容、组队帖流、出行攻略卡片、Festival Plan |
-| | `exclusive-itinerary` | 专属时间表：DJ 筛选、冲突检测、生成行程 |
-| | `my-itinerary` | 已生成行程查看 |
-| | `personality-test` | Raver 人格测试（Soul DJ） |
+| `packageEvent` | `event-detail` | **组队招募墙（Q2 主战场）**、阵容、攻略、准备清单（折叠） |
+| | `exclusive-itinerary` | 专属时间表 |
+| | `my-itinerary` | 已生成行程 |
+| | `personality-test` | 人格测试 → 推荐节 → 找队/发招募 |
 | | `ai-travel-guide` | 出行攻略详情 |
-| `packageProfile` | `profile-activities` | 已选活动列表 |
-| | `profile-posts` | 我的组队帖 |
-| | `settings` | 设置、隐私、帮助反馈、账号注销指引 |
-| | `legal-document` | 用户协议 / 隐私政策 |
-| | `notifications` | 站内通知 |
+| `packageProfile` | `profile-activities` / `profile-posts` / `settings` / `legal-document` / `notifications` | 同现网 |
 
-Wi‑Fi 下 `preloadRule` 预加载 `event` / `profile` 分包（见 `app.config.ts`）。
+### 2.3 页面职责（Q2 终局）
 
-## 核心闭环：Festival Plan
+```text
+                    ┌─────────────────────────────────┐
+                    │  首页：搜节 | 找队；我的下一场含回复提醒 │
+                    └───────────────┬─────────────────┘
+                                    │
+          ┌─────────────────────────┼─────────────────────────┐
+          ▼                         ▼                         ▼
+   ┌─────────────┐          ┌───────────────┐          ┌─────────────┐
+   │  活动 Tab    │          │  活动详情      │          │  我的        │
+   │  搜节(列表)  │          │  招募墙(主)    │          │  资料/帖/设置 │
+   │             │          │  AI找队搜索    │          │             │
+   │             │          │  公开评论      │          │             │
+   │             │          │  观演准备(折叠) │          │             │
+   └─────────────┘          └───────────────┘          └─────────────┘
+          │                         │
+          └──────── 选活动 / 绑活动 ──┘
+```
 
-用户选择活动后，产品引导完成三项**个人准备记录**（非平台承诺）：
+### 2.4 ~~准备 Tab 方案 C~~（已下线 · US-Q2-22）
 
-| 任务 key | 用户价值 | 完成判定 | 入口 |
-|----------|----------|----------|------|
-| `travel_guide` | AI 出行攻略（出发地、人数、预算等） | 已生成攻略 | 准备 Tab Sheet / AI 对话 |
-| `itinerary` | 专属 DJ 时间表 | 已选 DJ 并生成行程 | `exclusive-itinerary` |
-| `buddy_post` | 公开组队帖 | 已发帖 | 活动详情 / 准备 Tab Sheet |
+**2026-06**：移除底栏「准备」Tab 与 WebSocket 多轮对话。查节改由 **活动 Tab 列表搜索**；找队改由 **活动详情招募区**；攻略/行程/发招募在详情 Sheet 或分包页完成。
 
-进度在以下位置**统一展示**（`domains/festival-plan/`）：
+### 2.5 Festival Plan（观演准备 · 降优先级）
 
-- 首页 `HomeMyNextEvent`（`2/3` + 下一项 CTA）
-- 活动详情 `FestivalPlanSummaryBar`
-- 准备 Tab `AiTabContextCard` 内嵌进度条
+三项**个人准备记录**（非平台承诺）：攻略 → 行程 → 发招募。
 
-数据：`GET festival-plan-progress` + 本地 chat / 攻略缓存合并（`useFestivalPlanSummary`）。
+| 任务 | Q2 统一跳转 |
+|------|-------------|
+| `travel_guide` | 活动详情开 Sheet → 生成 |
+| `itinerary` | `exclusive-itinerary` |
+| `buddy_post` | 活动详情发**招募帖** |
 
-## 按 Tab 功能
+进度条展示：**首页「我的下一场」+ 活动详情折叠区**。
 
-### 首页
+---
 
-- **我的下一场**：已登录且已选活动时展示；含 Festival Plan 进度、组队帖新回复深链（`postId` + `openComments`）
-- **精选活动轮播** + 倒计时卡片
-- **快捷入口**：浏览活动、人格测试、打开准备 Tab
-- **社会证明**：`近 N 人已选择近期活动`（`home.summary.heat`）
-- **新用户引导**：首次登录轻量 Sheet（选活动 → 生成攻略 → 发帖，可跳过）
-- **平台免责声明**：底部固定 `PlatformDisclaimer`
+## 三、组队招募（Q2 核心改版）
 
-### 准备（原 AI Tab）
+### 3.1 命名
 
-- 绑定活动上下文卡片；未绑定时引导选活动
-- WebSocket AI 对话（`useAiChatStream`）
-- 能力 Sheet：**出行攻略**、**专属时间表**、**组队帖**（可从攻略预填）
-- 快捷操作：阵容、时间表入口（`AiQuickActions`）
-- 按用户性别切换主题色（`s-ai-assistant--female/male`）
+| 现网 | Q2 |
+|------|-----|
+| 发帖 / 活动帖子 | **发招募 / 组队招募** |
+| 模板帖 | **招募帖**（结构化字段 + 公开列表） |
 
-### 活动
+### 3.2 招募帖卡片（对齐设计稿 · 合规裁剪）
 
-三个子 Tab（`EventsViewTabs`）：
+**保留**
 
-| 子 Tab | 说明 |
-|--------|------|
-| **列表** | 全部未结束活动，按日期排序 |
-| **日历** | 月历 + 选中日活动列表 |
-| **艺人** | 全站阵容艺人目录（`useCatalogLineupArtists`） |
+- 用户信息、正文、`#组队` 标签
+- 状态角标：**招募中** / **已满**（帖主切换）
+- 人数进度：**2/3**（`slotsFilled` / `slotsTotal`）
+- 主按钮：**申请加入**（入口）→ 展开评论区 + **预填可编辑模板**（实现）→ `POST /posts/:id/comments`
+- 评论 icon + 数量（**全员可见**，可浏览全部公开讨论）
+- FAB **+** 发招募
+- **无点赞**（现网已移除 like）
 
-> **地图**：`EventsActivityMapTab` 与 `useEventsActivityMap` 已实现，但**尚未挂载**到活动 Tab UI；`app.config.ts` 仍声明 `getLocation` 权限供未来启用。勿在对外文档中写「活动页含地图 Tab」。
+**不做（相对设计稿）**
 
-### 我的
+| 设计稿元素 | Q2 处理 |
+|------------|---------|
+| 「联系队友」 | **删除** |
+| 私密「投递」inbox | → **「N 条公开回复」**，跳转帖+评论区 |
+| 组队邀请 接受/拒绝 | **不做**；邀请 = 公开评论 |
+| 申请仅队长可见 | **不做**；申请 = 点主按钮后发**公开评论** |
 
-- 登录 / 游客态
-- 已选活动、组队帖入口
-- 设置：隐私（`public` / `private`）、通知偏好、帮助反馈、法律文档、账号注销指引
-- 账号风险横幅（发帖受限时）
+### 3.3 AI 找队
 
-## 活动详情
-
-- 进入详情或绑定活动 → 静默 `POST /activities/:legacyId/register`（无独立「报名」按钮）
-- 阵容、活动信息、合规免责声明
-- **出行攻略卡片**：未生成显示「生成」；已生成显示「查看」（本地 + 服务端持久化）
-- **组队帖流**：出发城市 chip 筛选、关键词搜索（含日期）；AI 搜索失败降级本地过滤
-- 发帖成功合规提示；禁止帖内联系方式（UGC 审核）
-- `schedulePublished === false` 时：阵容空状态 + 微信订阅「活动更新」（模板 #624）
-
-## 专属时间表（`exclusive-itinerary`）
-
-- 按舞台、曲风（House / Techno / Trance 等）、风格搜索筛选 DJ
-- 多选 DJ、时间冲突提示、排序
-- 阵容未官宣时展示 `ExclusiveItineraryUnpublishedBanner`
-- 筛选逻辑：`exclusiveItineraryFilters.ts`
-
-## 人格测试
-
-- 问卷 → Soul DJ 类型结果 → 可生成分享海报（Canvas）
-- 好友分享落地页展示 teaser（`shareTeaser`）
-- **待优化**：微信分享卡片文案/配图（US-Q1-16）
-
-## 微信能力
-
-| 能力 | 用途 |
+| 入口 | 实现 |
 |------|------|
-| 订阅消息 | 活动更新 #624、评论回复（见 `WECHAT-E2E.md`） |
-| `wx.cloud.callContainer` | 生产环境 REST |
-| `wx.cloud.connectContainer` | 生产环境 AI WebSocket |
-| DarkMode | `darkmode: true` + `theme.json` |
-| 定位 | 预留活动地图（未上线 Tab） |
+| 活动详情招募区 | **已有**：帖列表上方 `EventDetailPostSearchBar` + 城市 chip；`POST /posts/ai-search`；结果替换列表 |
+| ~~准备 Tab 对话~~ | **已移除**（US-Q2-22） |
+| Q2 待优化 | 文案改为「AI 找队」、公开招募表述、无结果引导发招募、（可选）展示解析条件 |
 
-## 工程特性（影响体验）
+后端：`PostSearchService` · `BuddyPostSearchParseService` · 关键词相关性优先排序，再结合用户资料（城市/曲风偏好）作次要排序；非付费匹配。
 
-- 活动详情种子缓存 + 分包预加载（`activityDetailCache`、`preloadHotRoutes`）
-- AI 请求超时 60s（攻略/行程生成）
-- 主包仅 4 Tab，重组件在分包（见 [BUNDLE-SIZE.md](./BUNDLE-SIZE.md)）
-- 中英文 i18n（`src/i18n/`，默认 zh-CN）
+### 3.4 评论与互动
 
-## 已知缺口（产品待办）
+- 全站**公开评论**（`GET|POST /posts/:id/comments`）
+- 禁联系方式 · 票务词 · `msg_sec_check`
+- 通知：`comment` / `comment_reply` + 微信订阅；首页 `myNextEventPostEngagement`
 
-与 [Q1-USER-STORIES.md](./Q1-USER-STORIES.md) 一致：
+详见 [POST-LIFECYCLE.md](./POST-LIFECYCLE.md)。
+
+---
+
+## 四、AI 查节（主轴 A）
+
+| 能力 | 实现 |
+|------|------|
+| 列表搜索 | 活动 Tab 搜索框 + 客户端 filter（`filterActivitiesForEventsSearch`） |
+| 详情资讯 | 活动详情阵容、时间地点；可选 US-Q2-12 来源标注 |
+| ~~Agent 对话查节~~ | **已下线**（后端 WS 默认关闭，见 US-Q2-22） |
+| 信任 | US-Q1-04 信息来源；未官宣可订阅 #624 |
+
+---
+
+## 五、现网功能摘要（截至 Q1 完成）
+
+### 活动详情（当前）
+
+- 静默 `POST /activities/:legacyId/register`
+- 组队招募区：城市 chip + **AI 找队搜索条**（与帖列表同区，`EventDetailPostSearchBar` → `POST /posts/ai-search`）
+- 出行攻略卡片、Festival Plan 条、阵容未官宣订阅
+
+### 活动 Tab
+
+- 列表 / 日历 / 艺人（**地图组件已实现未挂载**）
+- Q2（US-Q2-13）：顶部搜索框 → **即时过滤活动列表**；0 结果时引导换关键词或浏览全部（无 AI 对话兜底）
+
+### 微信能力
+
+- 订阅消息、Cloud Run REST/WS、DarkMode
+
+### 工程
+
+- 分包预加载、详情缓存、AI 超时 60s · 见 [BUNDLE-SIZE.md](./BUNDLE-SIZE.md)
+
+---
+
+## 六、Q2 路线图摘要
+
+| 阶段 | 周期 | 重点 |
+|------|------|------|
+| **0 决策** | 1 周 | 方案 C、招募 UI 合规裁剪、律师过稿 |
+| **1 合规口径** | 1–2 周 | 全站文案、免责统一 |
+| **2 招募改版** | 2–4 周 | 招募卡片、AI 找队专区、公开申请、统一 Festival Plan 跳转 |
+| **3 去对话化** | 2026-06 | ✅ US-Q2-22：3 Tab、活动搜索、详情 AI 找队/攻略 |
+| **4 增长** | 6–10 周 | 人格测试分享、艺人串联、种子帖、指标 |
+
+完整 Story 与验收：[Q2-USER-STORIES.md](./Q2-USER-STORIES.md)。
+
+---
+
+## 七、关键指标（Q2）
+
+| 指标 | 说明 |
+|------|------|
+| AI 找队使用率 | 详情 AI 搜索 / 进详情 UV |
+| 招募 → 公开回复转化 | 「申请加入」后发公开评论比例 |
+| 发招募转化 | 浏览招募墙后发帖率 |
+| AI 查节调用 | Agent 工具 + 首页示例 CTR |
+| 查节 → 选活动 | register 或进详情率 |
+| 合规 | 类目/资质驳回 0；联系方式拦截正常 |
+
+---
+
+## 八、待办与决策项
+
+### 自 Q1 延续
 
 | ID | 功能 | 状态 |
 |----|------|------|
-| US-Q1-04 | 活动信息来源标注 | 未开始 |
-| US-Q1-05 | 官方购票外链 | 暂缓 |
-| US-Q1-16 | 人格测试分享卡片优化 | 未开始 |
-| — | 活动 Tab 地图视图上线 | 代码已有，UI 未接入 |
+| US-Q1-04 | 活动信息来源标注 | Q2 Epic D |
+| US-Q1-05 | 官方购票外链 | 继续暂缓 |
+| US-Q1-16 | 人格测试分享 | Q2 Epic G |
+| — | 活动 Tab 地图 | **决策**：上线或删代码 |
 
-## 代码索引
+### 明确不做（Q2）
+
+- 队内私密评论、team-chat、私信、「联系队友」
+- 私密投递 inbox、邀请接受/拒绝协议
+- 点赞、付费匹配、票务返佣
+
+---
+
+## 九、代码索引
 
 | 领域 | 路径 |
 |------|------|
+| 组队招募 / 帖流 | `src/domains/partner-feed/` |
+| AI 找队搜索 | `useEventDetailPostSearch.ts` · `api/sync/posts.ts` |
+| 后端 AI 搜索 | `sync-app-backend/.../post-search.service.ts` |
 | Festival Plan | `src/domains/festival-plan/` |
 | 出行攻略 | `src/domains/travel-guide/` |
-| 组队帖 | `src/domains/partner-feed/` |
 | 人格测试 | `src/domains/personality-test/` |
-| 活动绑定 | `src/domains/activity-scope/` |
+| 活动搜索 | `pages/events/` · `filterActivitiesForEventsSearch.ts` |
+| Agent 工具 | `sync-app-backend/src/ai/agent/tools/` |
+| 发帖链路 | [POST-LIFECYCLE.md](./POST-LIFECYCLE.md) |
 | 路由 | `src/utils/route.ts` |
-| 静默选活动 | `src/utils/registerActivityOnSelect.ts` |
-| 页面配置 | `src/app.config.ts` |

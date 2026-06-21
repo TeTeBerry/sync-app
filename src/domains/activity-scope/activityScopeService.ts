@@ -1,10 +1,7 @@
 import Taro from '@tarojs/taro';
 import type { BackendActivity } from '@/types/backend';
-import { useAiChatStore } from '@/stores/aiChatStore';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { seedActivityDetailCache } from '@/utils/activityDetailCache';
-import { createWelcomeChatMessage } from '@/utils/aiAssistantCapabilityDiscovery';
-import { buildAiChatScopeKey } from '@/utils/aiChatScope';
 import { registerActivityOnSelectSilently } from '@/utils/registerActivityOnSelect';
 
 export const ACTIVITY_SCOPE_HEADER = 'X-Activity-Id';
@@ -12,8 +9,6 @@ export const ACTIVITY_SCOPE_HEADER = 'X-Activity-Id';
 export type BindActivityOptions = {
   activityName?: string;
   activity?: BackendActivity;
-  /** Write a fresh welcome message into the chat scope bucket. */
-  syncChatWelcome?: boolean;
   showToast?: boolean;
 };
 
@@ -33,8 +28,8 @@ export function getActivityScopeHeaders(): Record<string, string> {
 }
 
 /**
- * Single entry for activity scope: navigation store + AI chat scope bucket.
- * HTTP / WS callers should read `getActivityScopeHeaders()` or `getActiveActivityLegacyId()`.
+ * Single entry for activity scope: navigation store.
+ * HTTP callers should read `getActivityScopeHeaders()` or `getActiveActivityLegacyId()`.
  */
 export function bindActivity(
   legacyId: number,
@@ -49,16 +44,6 @@ export function bindActivity(
 
   useNavigationStore.getState().setActiveActivityLegacyId(normalized);
 
-  const scopeKey = buildAiChatScopeKey(normalized);
-  useAiChatStore.getState().setActiveScope(scopeKey);
-
-  if (options.syncChatWelcome) {
-    const name =
-      options.activityName?.trim() || options.activity?.name?.trim() || undefined;
-    const welcome = [createWelcomeChatMessage(name, normalized)];
-    useAiChatStore.getState().setScopeMessages(scopeKey, welcome);
-  }
-
   if (options.showToast) {
     const title =
       options.activityName?.trim() || options.activity?.name?.trim() || '本场活动';
@@ -72,7 +57,6 @@ export function bindActivity(
 
 export function clearActivityScope(): void {
   useNavigationStore.getState().setActiveActivityLegacyId(null);
-  useAiChatStore.getState().setActiveScope(buildAiChatScopeKey(undefined));
 }
 
 export function bindActivityFromPicker(activity: BackendActivity): boolean {
@@ -84,7 +68,6 @@ export function bindActivityFromPicker(activity: BackendActivity): boolean {
   return bindActivity(activity.legacyId, {
     activity,
     activityName,
-    syncChatWelcome: true,
     showToast: true,
   });
 }
