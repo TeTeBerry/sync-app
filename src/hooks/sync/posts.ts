@@ -1,5 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
-import { addPostComment, deletePost, fetchPostComments } from '../../api/sync/posts';
+import {
+  addPostComment,
+  deletePost,
+  deletePostComment,
+  fetchPostComments,
+} from '../../api/sync/posts';
 import type { PostCommentItem } from '../../types/backend';
 import { POST_COMMENTS_PAGE_SIZE } from '../../constants/listPerf';
 import { removePostFromCaches } from '../../cache/postCache';
@@ -95,6 +100,12 @@ export async function commentPostAndInvalidate(
   parentCommentId?: string,
 ) {
   const updated = await addPostComment(postId, body, parentCommentId);
+  invalidatePostComments(postId);
+  return updated;
+}
+
+export async function deleteCommentAndInvalidate(postId: string, commentId: string) {
+  const updated = await deletePostComment(postId, commentId);
   invalidatePostComments(postId);
   return updated;
 }

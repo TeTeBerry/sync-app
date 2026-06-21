@@ -309,6 +309,7 @@ export function useEventDetailPosts({
     searchLoading: search.isSearching,
     searchMatchedCount: search.matchedCount,
     searchUsedLocalFallback: search.usedLocalFallback,
+    searchParsed: search.searchParsed,
     postFilterCityOptions: postFilters.cityOptions,
     postFilterSelectedCity: postFilters.selectedCity,
     setPostFilterSelectedCity: postFilters.setSelectedCity,

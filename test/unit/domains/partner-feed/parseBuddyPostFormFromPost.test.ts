@@ -1,0 +1,60 @@
+import { describe, expect, it } from 'vitest';
+import {
+  parseBuddyPostDateShort,
+  parseBuddyPostFormFromPost,
+} from '@/domains/partner-feed/utils/parseBuddyPostFormFromPost';
+
+describe('parseBuddyPostDateShort', () => {
+  it('parses single-day and range formats', () => {
+    expect(parseBuddyPostDateShort('6.13', 2026)).toEqual({
+      dateStart: '2026-06-13',
+      dateEnd: '2026-06-13',
+    });
+    expect(parseBuddyPostDateShort('6.13-14', 2026)).toEqual({
+      dateStart: '2026-06-13',
+      dateEnd: '2026-06-14',
+    });
+    expect(parseBuddyPostDateShort('6.13-7.14', 2026)).toEqual({
+      dateStart: '2026-06-13',
+      dateEnd: '2026-07-14',
+    });
+  });
+});
+
+describe('parseBuddyPostFormFromPost', () => {
+  it('maps structured buddy post back to form values', () => {
+    const form = parseBuddyPostFormFromPost(
+      {
+        body: '组队，6.13-6.14，上海，2人，女生优先\n\n#组队',
+        location: '上海',
+        tags: ['#组队'],
+        slotsTotal: 2,
+      },
+      '06/13-14/2026',
+    );
+
+    expect(form).toEqual({
+      dateStart: '2026-06-13',
+      dateEnd: '2026-06-14',
+      location: '上海',
+      headcount: '2人',
+      tags: ['team'],
+      note: '女生优先',
+    });
+  });
+
+  it('falls back to slots fields when headcount segment is missing', () => {
+    const form = parseBuddyPostFormFromPost(
+      {
+        body: '组队，6.13，上海',
+        location: '上海',
+        tags: ['#组队'],
+        slotsFilled: 1,
+        slotsTotal: 3,
+      },
+      '06/13-14/2026',
+    );
+
+    expect(form?.headcount).toBe('1/3');
+  });
+});

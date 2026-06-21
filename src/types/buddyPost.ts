@@ -7,7 +7,7 @@ export type AiBuddyPostFormValues = {
   /** YYYY-MM-DD */
   dateEnd: string;
   location: string;
-  /** 文本输入，如「2人」「2-3人」 */
+  /** 文本输入，如「2人」「2-3人」「1/3」 */
   headcount: string;
   tags: BuddyPostTagId[];
   note?: string;

@@ -7,6 +7,8 @@ import { fetchPostsByActivityPage } from '../api/syncApi';
 import { isLiveApi } from '../constants/api';
 import type { EventDetailPost } from '../types/backend';
 import { STALE_POSTS_FEED_MS } from '../constants/queryCache';
+import { isLoggedIn } from '../utils/authStorage';
+import { subscribeAuthSessionChange } from '../utils/authSession';
 import { getClientUserId } from '../utils/session';
 import { useApiInfiniteQuery } from './useApiInfiniteQuery';
 
@@ -120,6 +122,15 @@ export function useEventPostsInfiniteQuery(
     userIdRef.current = userId;
     void refetch({ silent: true });
   }, [enabled, refetch, userId]);
+
+  useEffect(() => {
+    if (!enabled) return;
+    return subscribeAuthSessionChange(() => {
+      if (isLoggedIn()) {
+        void refetch({ silent: true });
+      }
+    });
+  }, [enabled, refetch]);
 
   return { ...rest, refetch };
 }

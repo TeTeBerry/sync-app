@@ -211,6 +211,9 @@ export interface EventDetailPost {
   /** Present on create when moderation hides the post from public feeds. */
   status?: 'active' | 'hidden';
   moderationReason?: string;
+  recruitStatus?: 'open' | 'full';
+  slotsTotal?: number;
+  slotsFilled?: number;
 }
 
 export interface PostCommentItem {
@@ -237,6 +240,9 @@ export interface CreatePostPayload {
   tags?: string[];
   /** Default true. False = stored but hidden from activity/popular feeds. */
   listedInFeed?: boolean;
+  recruitStatus?: 'open' | 'full';
+  slotsTotal?: number;
+  slotsFilled?: number;
 }
 
 export interface HomeSummary {

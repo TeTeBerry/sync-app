@@ -9,11 +9,16 @@ import type {
 import {
   buildOptimisticBuddyPost,
   publishBuddyPostFromForm,
+  updateBuddyPostFromForm,
 } from '../../../utils/publishBuddyPost';
+import { parseBuddyPostFormFromPost } from '../utils/parseBuddyPostFormFromPost';
 import { requestPostEngagementSubscribe } from '../../../utils/wechatSubscribeMessage';
 import { isApiEnabled } from '../../../constants/api';
 import { getClientUserId } from '../../../utils/session';
 import { BUDDY_POST_PUBLISH_SUCCESS_MESSAGE } from '../../../constants/ugcPublishCompliance';
+import { useOverlayLockStore } from '../../../stores/overlayLockStore';
+import { requireAuth } from '../../../utils/authGate';
+import { t } from '@/i18n/translate';
 
 export type EventDetailBuddyPostPrefillOptions = {
   initialValues: AiBuddyPostFormValues;
@@ -35,7 +40,10 @@ export function useEventDetailBuddyPost(
     prependPost?: (post: EventDetailPost) => void;
     replacePost?: (pendingId: string, post: EventDetailPost) => void;
     removePost?: (postId: string) => void;
+    patchPost?: (post: EventDetailPost) => void;
     accountRiskEnabled?: boolean;
+    freezeScroll?: () => void;
+    releaseScroll?: () => void;
   },
 ) {
   const [isPublishing, setIsPublishing] = useState(false);
@@ -50,6 +58,7 @@ export function useEventDetailBuddyPost(
   const [sheetPrefillBannerTitle, setSheetPrefillBannerTitle] = useState<string | null>(
     () => options.buddyPostPrefill?.prefillBannerTitle ?? null,
   );
+  const [editingPost, setEditingPost] = useState<EventDetailPost | null>(null);
   const {
     sheetOpen,
     setSheetOpen,
@@ -64,6 +73,7 @@ export function useEventDetailBuddyPost(
     activityTitle: options.activityTitle,
     accountRiskEnabled: options.accountRiskEnabled,
     authScope: 'activity',
+    onBeforeOpen: options.freezeScroll,
     onInvalidActivity: () => {
       void Taro.showToast({ title: '活动信息无效', icon: 'none' });
     },
@@ -75,10 +85,39 @@ export function useEventDetailBuddyPost(
 
   const closeBuddyPostSheet = useCallback(() => {
     closeSheet();
+    useOverlayLockStore.getState().reset();
     setSheetInitialValues(null);
     setSheetPrefillSummaryLines(null);
     setSheetPrefillBannerTitle(null);
-  }, [closeSheet]);
+    setEditingPost(null);
+    options.releaseScroll?.();
+  }, [closeSheet, options]);
+
+  const openEditBuddyPostSheet = useCallback(
+    (post: EventDetailPost) => {
+      if (!Number.isFinite(eventId) || eventId <= 0) return;
+
+      requireAuth(async () => {
+        if (!(await guardPublish())) {
+          return;
+        }
+
+        const initialValues = parseBuddyPostFormFromPost(post, options.activityDate);
+        if (!initialValues) {
+          void Taro.showToast({ title: '活动日期无效，暂无法编辑', icon: 'none' });
+          return;
+        }
+
+        options.freezeScroll?.();
+        setEditingPost(post);
+        setSheetInitialValues(initialValues);
+        setSheetPrefillSummaryLines(null);
+        setSheetPrefillBannerTitle(null);
+        setSheetOpen(true);
+      }, 'activity');
+    },
+    [eventId, guardPublish, options.activityDate, options.freezeScroll, setSheetOpen],
+  );
 
   const handleBuddyPostSheetSubmit = useCallback(
     async (
@@ -110,12 +149,46 @@ export function useEventDetailBuddyPost(
       const listedInFeed =
         submitOptions?.listedInFeed ?? payload.syncToPostList !== false;
       const pendingId = `pending-${Date.now()}`;
+      const postBeingEdited = editingPost;
+      const editingPostId = postBeingEdited?.id;
 
       setIsPublishing(true);
       setSheetOpen(false);
       setSheetInitialValues(null);
       setSheetPrefillSummaryLines(null);
       setSheetPrefillBannerTitle(null);
+      setEditingPost(null);
+      options.releaseScroll?.();
+
+      if (editingPostId && postBeingEdited) {
+        try {
+          const updated = await updateBuddyPostFromForm({
+            postId: editingPostId,
+            form,
+            recruitStatus: postBeingEdited.recruitStatus,
+          });
+          options.patchPost?.(updated);
+          void Taro.showToast({
+            title: t('eventDetail.buddyPostUpdated'),
+            icon: 'success',
+          });
+        } catch (error) {
+          if (await handlePublishError(error)) {
+            return;
+          }
+          const message =
+            error instanceof Error ? error.message : '更新失败，请稍后重试';
+          void Taro.showToast({ title: message, icon: 'none' });
+          options.freezeScroll?.();
+          setEditingPost(postBeingEdited);
+          setSheetInitialValues(form);
+          setSheetOpen(true);
+        } finally {
+          publishingRef.current = false;
+          setIsPublishing(false);
+        }
+        return;
+      }
 
       if (!submitOptions?.skipListRefresh && listedInFeed) {
         options.prependPost?.(
@@ -161,19 +234,22 @@ export function useEventDetailBuddyPost(
         }
         const message = error instanceof Error ? error.message : '发布失败，请稍后重试';
         void Taro.showToast({ title: message, icon: 'none' });
+        options.freezeScroll?.();
         setSheetOpen(true);
       } finally {
         publishingRef.current = false;
         setIsPublishing(false);
       }
     },
-    [eventId, guardPublish, handlePublishError, options, setSheetOpen],
+    [editingPost, eventId, guardPublish, handlePublishError, options, setSheetOpen],
   );
 
   return {
     buddyPostSheetOpen: sheetOpen,
     isBuddyPostPublishing: isPublishing,
+    isBuddyPostEditing: Boolean(editingPost),
     openBuddyPostSheet,
+    openEditBuddyPostSheet,
     closeBuddyPostSheet,
     handleBuddyPostSheetSubmit,
     buddyPostSheetInitialValues: sheetInitialValues,

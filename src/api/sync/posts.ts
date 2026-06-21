@@ -1,4 +1,4 @@
-import { apiDelete, apiGet, apiPost } from '../../utils/apiClient';
+import { apiDelete, apiGet, apiPatch, apiPost } from '../../utils/apiClient';
 import type {
   CreatePostPayload,
   BuddyPostAiSearchResult,
@@ -35,6 +35,34 @@ export function deletePost(postId: string) {
   return apiDelete<{ ok: true }>(`/posts/${postId}`, ownerQueryParams());
 }
 
+export type UpdatePostPayload = {
+  body: string;
+  location?: string;
+  departureCity?: string;
+  tags?: string[];
+  recruitStatus?: 'open' | 'full';
+  slotsTotal?: number;
+  slotsFilled?: number;
+};
+
+export function updatePost(postId: string, payload: UpdatePostPayload) {
+  return apiPatch<EventDetailPost>(`/posts/${postId}`, payload, ownerQueryParams());
+}
+
+export type UpdatePostRecruitPayload = {
+  recruitStatus: 'open' | 'full';
+  slotsTotal?: number;
+  slotsFilled?: number;
+};
+
+export function updatePostRecruit(postId: string, payload: UpdatePostRecruitPayload) {
+  return apiPatch<EventDetailPost>(
+    `/posts/${postId}/recruit`,
+    payload,
+    ownerQueryParams(),
+  );
+}
+
 export type FetchPostCommentsOptions = {
   limit?: number;
   cursor?: string;
@@ -58,6 +86,13 @@ export function addPostComment(postId: string, body: string, parentCommentId?: s
   return apiPost<{ id: string; comments: number }>(
     `/posts/${postId}/comments`,
     { body, ...(parentCommentId ? { parentCommentId } : {}) },
+    ownerQueryParams(),
+  );
+}
+
+export function deletePostComment(postId: string, commentId: string) {
+  return apiDelete<{ id: string; comments: number }>(
+    `/posts/${postId}/comments/${commentId}`,
     ownerQueryParams(),
   );
 }

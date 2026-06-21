@@ -10,6 +10,8 @@ type UseBuddyPostSheetControllerOptions = {
   /** When set, opening the sheet requires login for that scope. */
   authScope?: 'activity';
   onInvalidActivity?: () => void;
+  /** Called synchronously before the sheet is shown (e.g. pin page scroll). */
+  onBeforeOpen?: () => void;
 };
 
 /** Shared open/close + quota gate for buddy-post sheets (AI tab + event detail). */
@@ -45,6 +47,7 @@ export function useBuddyPostSheetController(
       }
       const canOpen = await ensureCanOpenBuddyPostSheet();
       if (canOpen) {
+        options.onBeforeOpen?.();
         setSheetOpen(true);
       }
       return canOpen;

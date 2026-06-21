@@ -25,6 +25,7 @@ export type AiBuddyPostSheetProps = {
   prefillSummaryLines?: string[] | null;
   prefillBannerTitle?: string | null;
   submitLabel?: string | null;
+  sheetTitle?: string | null;
   /** Apply-team flow: let user choose whether the post appears on the activity feed. */
   showSyncToFeedOption?: boolean;
   postQuota?: { used: number; max: number; remaining: number; atLimit: boolean };
@@ -41,6 +42,7 @@ export function AiBuddyPostSheet({
   prefillSummaryLines = null,
   prefillBannerTitle = null,
   submitLabel = null,
+  sheetTitle = null,
   showSyncToFeedOption = false,
   postQuota,
   onClose,
@@ -82,7 +84,7 @@ export function AiBuddyPostSheet({
               id="ai-buddy-post-sheet-title"
               className="s-ai-guide-plan-sheet__title"
             >
-              {t('ai.buddyPostSheetTitle')}
+              {sheetTitle?.trim() || t('ai.buddyPostSheetTitle')}
             </Text>
           </View>
           <Button

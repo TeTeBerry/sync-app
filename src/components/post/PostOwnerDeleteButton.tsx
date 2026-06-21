@@ -8,11 +8,13 @@ const DELETE_COLOR = '#ff6467';
 export type PostOwnerDeleteButtonProps = {
   onDelete: () => void;
   className?: string;
+  iconSize?: number;
 };
 
 export function PostOwnerDeleteButton({
   onDelete,
   className,
+  iconSize = 16,
 }: PostOwnerDeleteButtonProps) {
   return (
     <Button
@@ -24,7 +26,7 @@ export function PostOwnerDeleteButton({
       }}
     >
       <View className="s-post-owner-delete__icon">
-        <Trash2 size={16} color={DELETE_COLOR} />
+        <Trash2 size={iconSize} color={DELETE_COLOR} />
       </View>
     </Button>
   );

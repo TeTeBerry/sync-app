@@ -30,4 +30,12 @@ describe('overlayLockStore', () => {
     useOverlayLockStore.getState().release();
     expect(useOverlayLockStore.getState().lockCount).toBe(0);
   });
+
+  it('reset clears any leaked locks', () => {
+    const { acquire, reset } = useOverlayLockStore.getState();
+    acquire();
+    acquire();
+    reset();
+    expect(useOverlayLockStore.getState().lockCount).toBe(0);
+  });
 });

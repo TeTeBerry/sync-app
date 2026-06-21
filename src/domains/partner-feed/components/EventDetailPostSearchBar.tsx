@@ -10,6 +10,7 @@ type EventDetailPostSearchBarProps = {
   isSearching?: boolean;
   matchedCount?: number;
   usedLocalFallback?: boolean;
+  parsedSummary?: string | null;
 };
 
 export function EventDetailPostSearchBar({
@@ -19,12 +20,17 @@ export function EventDetailPostSearchBar({
   isSearching = false,
   matchedCount,
   usedLocalFallback = false,
+  parsedSummary,
 }: EventDetailPostSearchBarProps) {
   const t = useT();
   const showMeta = value.trim().length > 0;
+  const parsedLine = parsedSummary?.trim();
 
   return (
     <View className="s-event-detail-post-search">
+      <Text className="s-event-detail-post-search__kicker">
+        {t('eventDetail.aiFindTeamKicker')}
+      </Text>
       <View className="s-event-detail-post-search__field">
         <Search size={16} color="#8e8e93" aria-hidden />
         <Input
@@ -47,13 +53,20 @@ export function EventDetailPostSearchBar({
         ) : null}
       </View>
       {showMeta ? (
-        <Text className="s-event-detail-post-search__meta">
-          {isSearching
-            ? t('eventDetail.searching')
-            : usedLocalFallback
-              ? t('eventDetail.localMatch', { count: matchedCount ?? 0 })
-              : t('eventDetail.matchFound', { count: matchedCount ?? 0 })}
-        </Text>
+        <View className="s-event-detail-post-search__meta-wrap">
+          <Text className="s-event-detail-post-search__meta">
+            {isSearching
+              ? t('eventDetail.searching')
+              : usedLocalFallback
+                ? t('eventDetail.localMatch', { count: matchedCount ?? 0 })
+                : t('eventDetail.matchFound', { count: matchedCount ?? 0 })}
+          </Text>
+          {!isSearching && parsedLine ? (
+            <Text className="s-event-detail-post-search__parsed">
+              {t('eventDetail.searchParsedLabel', { summary: parsedLine })}
+            </Text>
+          ) : null}
+        </View>
       ) : null}
     </View>
   );

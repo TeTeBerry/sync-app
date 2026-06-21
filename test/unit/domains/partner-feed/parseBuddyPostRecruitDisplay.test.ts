@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { parseBuddyPostRecruitDisplay } from '@/domains/partner-feed/utils/parseBuddyPostRecruitDisplay';
+import {
+  parseBuddyPostRecruitDisplay,
+  resolveBuddyPostRecruitDisplay,
+} from '@/domains/partner-feed/utils/parseBuddyPostRecruitDisplay';
 
 describe('parseBuddyPostRecruitDisplay', () => {
   it('parses filled/total fraction', () => {
@@ -34,5 +37,32 @@ describe('parseBuddyPostRecruitDisplay', () => {
   it('returns open status when body is empty', () => {
     expect(parseBuddyPostRecruitDisplay('')).toEqual({ recruitStatus: 'open' });
     expect(parseBuddyPostRecruitDisplay(undefined)).toEqual({ recruitStatus: 'open' });
+  });
+
+  it('resolveBuddyPostRecruitDisplay prefers structured post fields', () => {
+    expect(
+      resolveBuddyPostRecruitDisplay({
+        body: '组队，2人',
+        recruitStatus: 'full',
+        slotsTotal: 4,
+        slotsFilled: 4,
+      }),
+    ).toEqual({
+      recruitStatus: 'full',
+      slotsTotal: 4,
+      slotsFilled: 4,
+    });
+  });
+
+  it('resolveBuddyPostRecruitDisplay falls back to body when fields missing', () => {
+    expect(
+      resolveBuddyPostRecruitDisplay({
+        body: '组队，1/3',
+      }),
+    ).toEqual({
+      recruitStatus: 'open',
+      slotsFilled: 1,
+      slotsTotal: 3,
+    });
   });
 });

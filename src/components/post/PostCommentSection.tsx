@@ -3,11 +3,16 @@ import Taro from '@tarojs/taro';
 import { useCallback, useEffect, useRef, useState, type FC } from 'react';
 import { ChevronUp, Send } from '../icons';
 import { useUgcPublishGuard } from '../../hooks/useUgcPublishGuard';
-import { commentPostAndInvalidate, usePostCommentsQuery } from '../../hooks/sync/posts';
+import {
+  commentPostAndInvalidate,
+  deleteCommentAndInvalidate,
+  usePostCommentsQuery,
+} from '../../hooks/sync/posts';
 import { requireAuth } from '../../utils/authGate';
 import { getUgcContactValidationError } from '../../utils/ugcContactValidation';
 import { requestPostEngagementSubscribe } from '../../utils/wechatSubscribeMessage';
 import { PLACEHOLDER_AVATAR } from '../../constants/remoteImages';
+import { useDisplayUserIdentity } from '../../hooks/useDisplayUserIdentity';
 import { useResolvedAvatarSrc } from '../../hooks/useResolvedAvatarSrc';
 import { resolveAvatarDisplaySrc, thumbnailImageUrl } from '../../utils/imageUrl';
 import { IMAGE_SIZE } from '../../constants/imageSizes';
@@ -24,6 +29,7 @@ import {
 } from '../../utils/postOwnership';
 import type { EventDetailPost, PostCommentItem } from '../../types/backend';
 import { Button, cn, Input } from '../ui';
+import { PostOwnerDeleteButton } from './PostOwnerDeleteButton';
 import { ContentReportMenuButton } from '../report';
 import { Image, Text, View } from '@tarojs/components';
 import { useT } from '@/hooks/useI18n';
@@ -53,8 +59,10 @@ type CommentRowProps = {
   isPostAuthor: boolean;
   postAuthorName: string;
   postAuthorUserId?: string;
+  postId: string;
   replyTargetId?: string;
   onStartReply: (target: ReplyTarget) => void;
+  onDeleteComment?: (commentId: string) => void;
   t: (key: string, params?: Record<string, string | number>) => string;
 };
 
@@ -64,24 +72,33 @@ function CommentRow({
   isPostAuthor,
   postAuthorName,
   postAuthorUserId,
+  postId,
   replyTargetId,
   onStartReply,
+  onDeleteComment,
   t,
 }: CommentRowProps) {
   const [repliesExpanded, setRepliesExpanded] = useState(false);
-  const resolvedAvatar = useResolvedAvatarSrc(comment.avatar);
+  const displayIdentity = useDisplayUserIdentity();
+  const isOwnComment = isCurrentUserPostAuthor(comment.authorName, comment.userId);
+  const displayName = isOwnComment
+    ? displayIdentity.name?.trim() || comment.authorName
+    : comment.authorName;
+  const avatarKey = isOwnComment
+    ? displayIdentity.avatar?.trim() || comment.avatar
+    : comment.avatar;
+  const resolvedAvatar = useResolvedAvatarSrc(avatarKey);
   const avatarSrc = resolveAvatarDisplaySrc(
     resolvedAvatar,
-    thumbnailImageUrl(comment.avatar, IMAGE_SIZE.avatarSm) ?? comment.avatar,
+    thumbnailImageUrl(avatarKey, IMAGE_SIZE.avatarSm) ?? avatarKey,
     DEFAULT_AVATAR,
   );
   const isPostAuthorComment = isCommentByPostAuthor(
-    comment.authorName,
+    displayName,
     comment.userId,
     postAuthorName,
     postAuthorUserId,
   );
-  const isOwnComment = isCurrentUserPostAuthor(comment.authorName, comment.userId);
   const canReply =
     isPostAuthor && !isPostAuthorComment && !nested && !comment.replies?.length;
 
@@ -94,7 +111,7 @@ function CommentRow({
         <View className="s-post-comments__body-wrap">
           <View className="s-post-comments__meta-row">
             <View className="s-post-comments__meta">
-              <Text className="s-post-comments__author">{comment.authorName}</Text>
+              <Text className="s-post-comments__author">{displayName}</Text>
               <Text className="s-post-comments__time">{comment.time}</Text>
             </View>
             {!isOwnComment ? (
@@ -103,6 +120,12 @@ function CommentRow({
                 targetId={comment.id}
                 targetUserId={comment.userId}
                 ariaLabel={t('comments.reportAria')}
+              />
+            ) : onDeleteComment ? (
+              <PostOwnerDeleteButton
+                className="s-post-comments__delete"
+                iconSize={12}
+                onDelete={() => onDeleteComment(comment.id)}
               />
             ) : null}
           </View>
@@ -141,7 +164,9 @@ function CommentRow({
                 isPostAuthor={isPostAuthor}
                 postAuthorName={postAuthorName}
                 postAuthorUserId={postAuthorUserId}
+                postId={postId}
                 onStartReply={onStartReply}
+                onDeleteComment={onDeleteComment}
                 t={t}
               />
             ))}
@@ -174,6 +199,7 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
   showApplyJoinHint = false,
 }) => {
   const t = useT();
+  const displayIdentity = useDisplayUserIdentity();
   const commentsQuery = usePostCommentsQuery(postId, expanded);
   const { guardPublish, handlePublishError, complianceConfirmDialog } =
     useUgcPublishGuard();
@@ -182,6 +208,7 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
   const [draft, setDraft] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [replyTarget, setReplyTarget] = useState<ReplyTarget | null>(null);
+  const [deletingCommentId, setDeletingCommentId] = useState('');
   const appliedDraftRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -251,10 +278,40 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
     setReplyTarget((prev) => (prev?.commentId === target.commentId ? null : target));
   }, []);
 
-  const resolvedCurrentUserAvatar = useResolvedAvatarSrc(currentUserAvatar);
+  const handleDeleteComment = useCallback(
+    (commentId: string) => {
+      if (deletingCommentId) return;
+      requireAuth(() => {
+        void (async () => {
+          setDeletingCommentId(commentId);
+          try {
+            const updated = await deleteCommentAndInvalidate(postId, commentId);
+            onCommentSubmitted?.(updated);
+            void Taro.showToast({
+              title: t('comments.deleteSuccess'),
+              icon: 'success',
+            });
+          } catch (err: unknown) {
+            const message =
+              err instanceof Error && err.message.trim()
+                ? err.message.trim()
+                : t('comments.deleteFailed');
+            void Taro.showToast({ title: message, icon: 'none' });
+          } finally {
+            setDeletingCommentId('');
+          }
+        })();
+      }, 'social');
+    },
+    [deletingCommentId, onCommentSubmitted, postId, t],
+  );
+
+  const composerAvatarKey =
+    currentUserAvatar?.trim() || displayIdentity.avatar?.trim() || '';
+  const resolvedComposerAvatar = useResolvedAvatarSrc(composerAvatarKey);
   const userAvatar = resolveAvatarDisplaySrc(
-    resolvedCurrentUserAvatar,
-    currentUserAvatar,
+    resolvedComposerAvatar,
+    thumbnailImageUrl(composerAvatarKey, IMAGE_SIZE.avatarSm) ?? composerAvatarKey,
     DEFAULT_AVATAR,
   );
   const comments = commentsQuery.data ?? [];
@@ -299,8 +356,10 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
                 isPostAuthor={isPostAuthor}
                 postAuthorName={postAuthorName}
                 postAuthorUserId={postAuthorUserId}
+                postId={postId}
                 replyTargetId={replyTarget?.commentId}
                 onStartReply={startReply}
+                onDeleteComment={handleDeleteComment}
                 t={t}
               />
             ))}

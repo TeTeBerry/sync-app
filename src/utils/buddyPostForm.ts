@@ -1,5 +1,6 @@
 import type { AiBuddyPostFormValues, BuddyPostTagId } from '../types/buddyPost';
 import { BUDDY_POST_TAG_OPTIONS } from '../types/buddyPost';
+import { parseBuddyPostRecruitDisplay } from '../domains/partner-feed/utils/parseBuddyPostRecruitDisplay';
 import {
   boundsToIsoDate,
   formatBuddyPostDateShort,
@@ -78,4 +79,17 @@ export function buildBuddyPostUserSummary(
 ): string {
   const title = activityTitle.trim() || '活动';
   return `发布「${title}」组队帖 · ${buildBuddyPostBody(form)}`;
+}
+
+export function buildRecruitFieldsFromBuddyForm(form: AiBuddyPostFormValues): {
+  recruitStatus: 'open' | 'full';
+  slotsTotal?: number;
+  slotsFilled?: number;
+} {
+  const parsed = parseBuddyPostRecruitDisplay(form.headcount.trim());
+  return {
+    recruitStatus: 'open',
+    ...(parsed.slotsTotal != null ? { slotsTotal: parsed.slotsTotal } : {}),
+    ...(parsed.slotsFilled != null ? { slotsFilled: parsed.slotsFilled } : {}),
+  };
 }

@@ -1,9 +1,11 @@
 import { memo, useMemo } from 'react';
-import { MapPin } from '../../../components/icons';
+import { CircleCheck, MapPin, UserPlus } from '../../../components/icons';
 import {
   PostCardActionBar,
   PostCommentSection,
   PostOwnerDeleteButton,
+  PostOwnerEditButton,
+  PostOwnerRecruitStatusButton,
 } from '../../../components/post';
 import { ContentReportMenuButton } from '../../../components/report';
 import { ImageWithFallback } from '../../../components/ImageWithFallback';
@@ -16,7 +18,7 @@ import { isCurrentUserPostAuthor } from '../../../utils/postOwnership';
 import type { EventDetailPost } from '../../../types/backend';
 import { stripPostBodyContact } from '../../../utils/postBodyContact';
 import { formatPostHandle } from '../utils/eventPostDisplay';
-import { parseBuddyPostRecruitDisplay } from '../utils/parseBuddyPostRecruitDisplay';
+import { resolveBuddyPostRecruitDisplay } from '../utils/parseBuddyPostRecruitDisplay';
 import { Text, View } from '@tarojs/components';
 import { useT } from '@/hooks/useI18n';
 
@@ -31,6 +33,8 @@ export type EventPostCardProps = {
   onApplyJoin: (postId: string) => void;
   onCloseComments: (postId: string) => void;
   onDelete?: (post: EventDetailPost) => void;
+  onEdit?: (post: EventDetailPost) => void;
+  onRecruitStatusToggle?: (post: EventDetailPost) => void;
   onCommentSubmitted?: (updated: Pick<EventDetailPost, 'id' | 'comments'>) => void;
 };
 
@@ -64,6 +68,8 @@ function EventPostCardInner({
   onApplyJoin,
   onCloseComments,
   onDelete,
+  onEdit,
+  onRecruitStatusToggle,
   onCommentSubmitted,
 }: EventPostCardProps) {
   const t = useT();
@@ -72,21 +78,27 @@ function EventPostCardInner({
     () => stripPostBodyContact(post.bodyPreview || post.body || ''),
     [post.bodyPreview, post.body],
   );
-  const recruitDisplay = useMemo(
-    () => parseBuddyPostRecruitDisplay(post.bodyPreview || post.body || ''),
-    [post.bodyPreview, post.body],
-  );
-  const submetaLocation = post.location?.trim() ?? '';
-  const visibleTags = useMemo(
-    () => post.tags?.map((tag) => tag.trim()).filter(Boolean) ?? [],
-    [post.tags],
-  );
-
+  const recruitDisplay = useMemo(() => resolveBuddyPostRecruitDisplay(post), [post]);
+  const departureCity = post.departureCity?.trim() ?? '';
+  const meetingPoint = post.location?.trim() ?? '';
+  const headerCity = departureCity || meetingPoint;
+  const footerVenue =
+    meetingPoint && headerCity && meetingPoint !== headerCity ? meetingPoint : '';
   const isOwn = isCurrentUserPostAuthor(post.name, post.userId);
   const isFull = recruitDisplay.recruitStatus === 'full';
+  const isRecruiting = !isFull;
+  const visibleTags = useMemo(() => {
+    const raw = post.tags?.map((tag) => tag.trim()).filter(Boolean) ?? [];
+    if (!isFull) {
+      return raw;
+    }
+    const withoutTeam = raw.filter((tag) => tag !== '#组队');
+    return withoutTeam.length > 0 ? withoutTeam : ['#已满'];
+  }, [post.tags, isFull]);
   const showApplyCta = !isOwn;
   const slotsTotal = recruitDisplay.slotsTotal;
-  const slotsFilled = recruitDisplay.slotsFilled ?? 0;
+  const slotsFilled = recruitDisplay.slotsFilled ?? (slotsTotal != null ? 1 : 0);
+  const showProgress = isRecruiting && slotsTotal != null && slotsTotal > 0;
 
   const postName = isOwn
     ? displayIdentity.name?.trim() || post.name?.trim() || t('common.user')
@@ -116,39 +128,44 @@ function EventPostCardInner({
     onApplyJoin(post.id);
   };
 
-  const progressLabel =
-    slotsTotal != null && recruitDisplay.slotsFilled != null
-      ? t('eventDetail.slotsProgress', {
-          filled: String(slotsFilled),
-          total: String(slotsTotal),
-        })
-      : slotsTotal != null
-        ? t('eventDetail.slotsRecruiting', { total: String(slotsTotal) })
-        : null;
+  const progressLabel = showProgress
+    ? t('eventDetail.slotsProgress', {
+        filled: String(Math.min(slotsFilled, slotsTotal!)),
+        total: String(slotsTotal),
+      })
+    : null;
+
+  const statusLabel = isFull
+    ? t('eventDetail.recruitStatusFull')
+    : t('eventDetail.recruitStatusOpen');
 
   return (
     <View
-      className={['s-event-post', highlighted && 's-event-post--highlight']
+      className={[
+        's-event-post',
+        isRecruiting && 's-event-post--recruiting',
+        isFull && 's-event-post--full',
+        highlighted && 's-event-post--highlight',
+      ]
         .filter(Boolean)
         .join(' ')}
     >
       <View className="s-event-post__header">
-        <View className="s-event-post__avatar-wrap">
+        <View
+          className={[
+            's-event-post__avatar-wrap',
+            isRecruiting && 's-event-post__avatar-wrap--recruiting',
+            isFull && 's-event-post__avatar-wrap--full',
+          ]
+            .filter(Boolean)
+            .join(' ')}
+        >
           <ImageWithFallback
             src={avatarSrc}
             alt={postName}
             imageClassName="s-event-post__avatar"
             placeholderClassName="s-event-post__avatar s-event-post__avatar--placeholder"
             fallback={postName.slice(0, 1)}
-          />
-          <View
-            className={[
-              's-event-post__avatar-badge',
-              isFull
-                ? 's-event-post__avatar-badge--done'
-                : 's-event-post__avatar-badge--recruit',
-            ].join(' ')}
-            aria-hidden
           />
         </View>
         <View className="s-event-post__head-main">
@@ -161,52 +178,89 @@ function EventPostCardInner({
               <View className="s-event-post__submeta">
                 <MapPin size={12} color="#8e8e93" aria-hidden />
                 <Text className="s-event-post__submeta-text">
-                  {submetaLocation ? `${submetaLocation} · ` : ''}
+                  {headerCity ? `${headerCity} · ` : ''}
                   {publishTimeLabel}
                 </Text>
               </View>
             </View>
-            {isOwn && onDelete ? (
+            <View className="s-event-post__head-side">
               <View
-                className="s-event-post__head-actions"
-                onClick={stopClickPropagation}
+                className={[
+                  's-event-post__status-pill',
+                  isFull
+                    ? 's-event-post__status-pill--full'
+                    : 's-event-post__status-pill--open',
+                ].join(' ')}
               >
-                <PostOwnerDeleteButton onDelete={() => onDelete(post)} />
+                {isFull ? (
+                  <CircleCheck size={12} color="#34c759" aria-hidden />
+                ) : (
+                  <View className="s-event-post__status-dot" aria-hidden />
+                )}
+                <Text className="s-event-post__status-text">{statusLabel}</Text>
               </View>
-            ) : !isOwn ? (
-              <View
-                className="s-event-post__head-actions"
-                onClick={stopClickPropagation}
-              >
-                <ContentReportMenuButton
-                  targetType="post"
-                  targetId={post.id}
-                  targetUserId={post.userId}
-                />
-              </View>
-            ) : null}
+              {isOwn && (onDelete || onEdit || onRecruitStatusToggle) ? (
+                <View
+                  className="s-event-post__head-actions"
+                  onClick={stopClickPropagation}
+                >
+                  {onEdit ? (
+                    <PostOwnerEditButton
+                      ariaLabel={t('eventDetail.editPost')}
+                      onEdit={() => onEdit(post)}
+                    />
+                  ) : null}
+                  {onRecruitStatusToggle ? (
+                    <PostOwnerRecruitStatusButton
+                      recruitStatus={recruitDisplay.recruitStatus}
+                      onToggle={() => onRecruitStatusToggle(post)}
+                    />
+                  ) : null}
+                  {onDelete ? (
+                    <PostOwnerDeleteButton onDelete={() => onDelete(post)} />
+                  ) : null}
+                </View>
+              ) : !isOwn ? (
+                <View
+                  className="s-event-post__head-actions"
+                  onClick={stopClickPropagation}
+                >
+                  <ContentReportMenuButton
+                    targetType="post"
+                    targetId={post.id}
+                    targetUserId={post.userId}
+                  />
+                </View>
+              ) : null}
+            </View>
           </View>
         </View>
       </View>
 
       {displayBody ? <Text className="s-event-post__text">{displayBody}</Text> : null}
 
-      {visibleTags.length > 0 || progressLabel ? (
+      {visibleTags.length > 0 || showProgress ? (
         <View className="s-event-post__meta-row">
           {visibleTags.length > 0 ? (
             <View className="s-event-post__content-badges s-content-badges">
               {visibleTags.map((tag) => (
-                <Text key={tag} className="s-event-post__tag">
+                <Text
+                  key={tag}
+                  className={['s-event-post__tag', isFull && 's-event-post__tag--full']
+                    .filter(Boolean)
+                    .join(' ')}
+                >
                   {tag}
                 </Text>
               ))}
             </View>
           ) : null}
-          {progressLabel ? (
-            <View className="s-event-post__progress" aria-label={progressLabel}>
-              {slotsTotal != null && recruitDisplay.slotsFilled != null
-                ? renderProgressDots(slotsTotal, slotsFilled)
-                : null}
+          {showProgress ? (
+            <View
+              className="s-event-post__progress"
+              aria-label={progressLabel ?? undefined}
+            >
+              {renderProgressDots(slotsTotal!, Math.min(slotsFilled, slotsTotal!))}
               <Text className="s-event-post__progress-label">{progressLabel}</Text>
             </View>
           ) : null}
@@ -220,6 +274,7 @@ function EventPostCardInner({
             <PostCardActionBar
               comments={post.comments ?? 0}
               commentsExpanded={commentsExpanded}
+              venueLabel={footerVenue}
               onToggleComments={() =>
                 commentsExpanded ? onCloseComments(post.id) : onOpenComments(post.id)
               }
@@ -234,6 +289,11 @@ function EventPostCardInner({
               disabled={isFull}
               onClick={handleApplyJoin}
             >
+              {isFull ? (
+                <CircleCheck size={16} color="#34c759" aria-hidden />
+              ) : (
+                <UserPlus size={16} color="#fff" aria-hidden />
+              )}
               <Text className="s-event-post__cta-text">
                 {isFull
                   ? t('eventDetail.applyJoinDisabled')
@@ -266,6 +326,11 @@ export const EventPostCard = memo(EventPostCardInner, (prev, next) => {
     prev.post.id === next.post.id &&
     prev.post.body === next.post.body &&
     prev.post.bodyPreview === next.post.bodyPreview &&
+    prev.post.location === next.post.location &&
+    prev.post.departureCity === next.post.departureCity &&
+    prev.post.recruitStatus === next.post.recruitStatus &&
+    prev.post.slotsTotal === next.post.slotsTotal &&
+    prev.post.slotsFilled === next.post.slotsFilled &&
     prev.post.comments === next.post.comments &&
     prev.post.tags === next.post.tags &&
     prev.highlighted === next.highlighted &&

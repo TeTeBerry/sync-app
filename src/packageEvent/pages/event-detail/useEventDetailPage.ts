@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import Taro from '@tarojs/taro';
+import Taro, { useDidShow } from '@tarojs/taro';
 import { useActivityDetailQuery } from '../../../hooks/useSyncApi';
 import { useEventPostsInfiniteQuery } from '../../../hooks/useEventPostsInfiniteQuery';
 import {
@@ -8,7 +8,6 @@ import {
   EVENT_DETAIL_SCROLL_ID,
 } from '@/domains/partner-feed';
 import { useDisplayUserIdentity } from '../../../hooks/useDisplayUserIdentity';
-import { useResolvedAvatarSrc } from '../../../hooks/useResolvedAvatarSrc';
 import { useNavigationStore } from '../../../stores/navigationStore';
 import type { ConfirmDialogOptions } from '../../../hooks/useConfirmDialog';
 import { useEventDetailRoute } from './useEventDetailRoute';
@@ -26,6 +25,7 @@ import {
 import { buildRecruitApplyCommentDraft } from '@/domains/partner-feed/utils/buildRecruitApplyCommentDraft';
 import type { EventDetailPost } from '../../../types/backend';
 import { scrollElementToCenter } from '../../../utils/scrollToCenter';
+import { useOverlayLockStore } from '../../../stores/overlayLockStore';
 import { t } from '@/i18n/translate';
 
 export type UseEventDetailPageOptions = {
@@ -77,7 +77,6 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     initialGuideForm: travelGuideNavIntent?.prefillTravelGuideForm ?? null,
   });
   const displayIdentity = useDisplayUserIdentity();
-  const resolvedCurrentUserAvatar = useResolvedAvatarSrc(displayIdentity.avatar);
 
   const postsQuery = useEventPostsInfiniteQuery(eventId, {
     anchorPostId: highlightPostId || undefined,
@@ -92,6 +91,18 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
         }
       : undefined;
 
+  const scrollPreserve = useEventDetailScrollPreserve();
+  const { frozenTop, scrollFrozen, freezeScroll, unfreezeScroll, getLiveScrollTop } =
+    scrollPreserve;
+
+  const releaseBuddyPostSheetScroll = useCallback(() => {
+    const preservedTop = frozenTop ?? getLiveScrollTop();
+    unfreezeScroll();
+    if (preservedTop > 0) {
+      setScrollTop(preservedTop);
+    }
+  }, [frozenTop, getLiveScrollTop, setScrollTop, unfreezeScroll]);
+
   const templatePost = useEventDetailBuddyPost(eventId, {
     activityTitle,
     activityDate,
@@ -103,11 +114,11 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     prependPost: postsQuery.prependItem,
     replacePost: postsQuery.replaceItem,
     removePost: postsQuery.removeItem,
+    patchPost: postsQuery.patchItem,
+    freezeScroll,
+    releaseScroll: releaseBuddyPostSheetScroll,
     accountRiskEnabled: secondaryReady,
   });
-
-  const scrollPreserve = useEventDetailScrollPreserve();
-  const { frozenTop, scrollFrozen } = scrollPreserve;
 
   const buildApplyCommentDraft = useCallback(
     (post: EventDetailPost) => {
@@ -251,6 +262,15 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
 
   const isPublishing = templatePost.isBuddyPostPublishing;
 
+  const closeBuddyPostSheet = templatePost.closeBuddyPostSheet;
+
+  useDidShow(() => {
+    if (templatePost.buddyPostSheetOpen || travelGuide.guideSheetOpen) {
+      return;
+    }
+    useOverlayLockStore.getState().reset();
+  });
+
   return {
     ...header,
     eventId,
@@ -260,8 +280,10 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     handleScroll,
     templatePublishing: isPublishing,
     handleOpenTemplateSheet: templatePost.openBuddyPostSheet,
+    handleEditPost: templatePost.openEditBuddyPostSheet,
     buddyPostSheetOpen: templatePost.buddyPostSheetOpen,
-    closeBuddyPostSheet: templatePost.closeBuddyPostSheet,
+    isBuddyPostEditing: templatePost.isBuddyPostEditing,
+    closeBuddyPostSheet,
     handleBuddyPostSheetSubmit: templatePost.handleBuddyPostSheetSubmit,
     buddyPostActivityDate: templatePost.buddyPostActivityDate,
     buddyPostActivityTitle: templatePost.buddyPostActivityTitle,
@@ -273,7 +295,7 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     showPostsEnd,
     postsQuery,
     displayUserName: displayIdentity.name,
-    currentUserAvatar: resolvedCurrentUserAvatar,
+    currentUserAvatar: displayIdentity.avatar,
     handleOpenAiGuide,
     activityTitle,
     handleOpenMyItinerary,

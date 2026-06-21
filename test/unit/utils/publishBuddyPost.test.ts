@@ -46,6 +46,8 @@ describe('publishBuddyPostFromForm', () => {
         eventTitle: '风暴电音节',
         location: '上海',
         tags: ['#组队'],
+        recruitStatus: 'open',
+        slotsTotal: 2,
         body: expect.stringMatching(/组队，6\.13-6\.14，上海，2人/),
       }),
     );

@@ -23,7 +23,9 @@ import { OverlayAwareScrollView } from '../../../components/layout/OverlayAwareS
 import { PlatformDisclaimer } from '../../../components/legal/PlatformDisclaimer';
 import { ROUTES } from '../../../utils/route';
 import { Text, View } from '@tarojs/components';
+import { useMemo } from 'react';
 import { useT } from '@/hooks/useI18n';
+import { formatBuddyPostSearchParsedSummary } from '../../../utils/formatBuddyPostSearchParsedSummary';
 import { useAuthSession } from '../../../hooks/useAuthSession';
 
 const EventDetailPage = () => {
@@ -34,6 +36,13 @@ const EventDetailPage = () => {
   });
   const page = useEventDetailPage({ confirm });
   const { loggedIn } = useAuthSession();
+  const searchParsedSummary = useMemo(
+    () =>
+      formatBuddyPostSearchParsedSummary(page.posts.searchParsed, (count) =>
+        t('eventDetail.searchParsedPeople', { count }),
+      ),
+    [page.posts.searchParsed, t],
+  );
 
   if (page.invalidEventId) {
     return <EventDetailFallback variant="invalidId" />;
@@ -64,7 +73,9 @@ const EventDetailPage = () => {
     postsQuery,
     handleOpenAiGuide,
     handleOpenTemplateSheet,
+    handleEditPost,
     buddyPostSheetOpen,
+    isBuddyPostEditing,
     closeBuddyPostSheet,
     handleBuddyPostSheetSubmit,
     buddyPostActivityDate,
@@ -126,6 +137,7 @@ const EventDetailPage = () => {
           enhanced
           showScrollbar={false}
           scrollTop={scrollTop}
+          pinScroll={scrollFrozen}
           scrollWithAnimation={!scrollFrozen}
           lowerThreshold={80}
           onScroll={(event) => handleScroll(event.detail.scrollTop)}
@@ -149,6 +161,11 @@ const EventDetailPage = () => {
             <View id="event-detail-posts" className="s-event-detail__posts">
               {!showHeaderSkeleton ? (
                 <>
+                  <View className="s-event-detail__recruit-head">
+                    <Text className="s-event-detail__recruit-title">
+                      {t('eventDetail.recruitWallTitle')}
+                    </Text>
+                  </View>
                   <EventDetailPostFilterBar
                     cityOptions={posts.postFilterCityOptions}
                     selectedCity={posts.postFilterSelectedCity}
@@ -164,6 +181,7 @@ const EventDetailPage = () => {
                     isSearching={posts.searchLoading}
                     matchedCount={posts.searchMatchedCount}
                     usedLocalFallback={posts.searchUsedLocalFallback}
+                    parsedSummary={searchParsedSummary}
                   />
                 </>
               ) : null}
@@ -171,10 +189,27 @@ const EventDetailPage = () => {
                 <ThemedPageLoader variant="skeleton-event-posts" minHeight={160} />
               ) : !showHeaderSkeleton &&
                 posts.searchActive &&
+                !posts.searchLoading &&
                 posts.totalPostCount === 0 ? (
-                <Text className="s-event-detail__empty">
-                  {t('eventDetail.searchEmpty')}
-                </Text>
+                <View className="s-event-detail__search-empty">
+                  <Text className="s-event-detail__search-empty-title">
+                    {t('eventDetail.searchEmptyTitle')}
+                  </Text>
+                  <Text className="s-event-detail__search-empty-hint">
+                    {t('eventDetail.searchEmptyHint')}
+                  </Text>
+                  <Button
+                    className="s-event-detail__search-empty-btn"
+                    onClick={handleOpenTemplateSheet}
+                  >
+                    <Text className="s-event-detail__search-empty-btn-text">
+                      {t('eventDetail.searchEmptyCta')}
+                    </Text>
+                  </Button>
+                  <Text className="s-event-detail__search-empty-compliance">
+                    {t('eventDetail.searchEmptyCompliance')}
+                  </Text>
+                </View>
               ) : !showHeaderSkeleton && posts.totalPostCount === 0 ? (
                 <Text className="s-event-detail__empty">
                   {t('eventDetail.postsEmpty')}
@@ -192,6 +227,7 @@ const EventDetailPage = () => {
                   onCloseComments={posts.closePostComments}
                   onCommentSubmitted={posts.handleCommentSubmitted}
                   onDelete={posts.handleDeletePost}
+                  onEdit={handleEditPost}
                   hasMore={postsQuery.hasMore}
                   hasMoreLocal={posts.hasMoreVisiblePosts}
                   hiddenLocalCount={posts.hiddenPostCount}
@@ -226,7 +262,9 @@ const EventDetailPage = () => {
           initialValues={buddyPostSheetInitialValues}
           prefillSummaryLines={buddyPostPrefillSummaryLines}
           prefillBannerTitle={buddyPostPrefillBannerTitle}
-          postQuota={buddyPostQuota ?? undefined}
+          sheetTitle={isBuddyPostEditing ? t('eventDetail.editPost') : null}
+          submitLabel={isBuddyPostEditing ? t('eventDetail.saveBuddyPost') : null}
+          postQuota={isBuddyPostEditing ? undefined : (buddyPostQuota ?? undefined)}
           onClose={closeBuddyPostSheet}
           onSubmit={handleBuddyPostSheetSubmit}
         />

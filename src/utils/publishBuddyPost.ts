@@ -1,8 +1,12 @@
-import { createPost } from '../api/sync/posts';
+import { createPost, updatePost } from '../api/sync/posts';
 import type { EventDetailPost } from '../types/backend';
 import type { RecommendedPostCard } from '../types/aiChat';
 import type { AiBuddyPostFormValues } from '../types/buddyPost';
-import { buildBuddyPostBody, buddyPostHashTags } from './buddyPostForm';
+import {
+  buildBuddyPostBody,
+  buddyPostHashTags,
+  buildRecruitFieldsFromBuddyForm,
+} from './buddyPostForm';
 import { eventDetailPostToCard } from './eventPostCard';
 import { assertPostPublishedVisible } from './postPublishFeedback';
 
@@ -18,6 +22,7 @@ export function buildOptimisticBuddyPost(params: {
   const body = buildBuddyPostBody(params.form);
   const hashTags = buddyPostHashTags(params.form.tags);
   const fullBody = hashTags.length ? `${body}\n\n${hashTags.join(' ')}` : body;
+  const recruit = buildRecruitFieldsFromBuddyForm(params.form);
 
   return {
     id: params.pendingId,
@@ -29,6 +34,9 @@ export function buildOptimisticBuddyPost(params: {
     createdAt: new Date().toISOString(),
     body: fullBody,
     tags: hashTags,
+    recruitStatus: recruit.recruitStatus,
+    ...(recruit.slotsTotal != null ? { slotsTotal: recruit.slotsTotal } : {}),
+    ...(recruit.slotsFilled != null ? { slotsFilled: recruit.slotsFilled } : {}),
   };
 }
 
@@ -46,6 +54,7 @@ export async function publishBuddyPostFromForm(params: {
   const body = buildBuddyPostBody(form);
   const hashTags = buddyPostHashTags(form.tags);
   const location = form.location.trim();
+  const recruit = buildRecruitFieldsFromBuddyForm(form);
 
   const post = await createPost({
     body: hashTags.length ? `${body}\n\n${hashTags.join(' ')}` : body,
@@ -54,6 +63,9 @@ export async function publishBuddyPostFromForm(params: {
     ...(location ? { location } : {}),
     tags: hashTags,
     listedInFeed: params.listedInFeed !== false,
+    recruitStatus: recruit.recruitStatus,
+    ...(recruit.slotsTotal != null ? { slotsTotal: recruit.slotsTotal } : {}),
+    ...(recruit.slotsFilled != null ? { slotsFilled: recruit.slotsFilled } : {}),
   });
   assertPostPublishedVisible(post);
 
@@ -64,4 +76,25 @@ export async function publishBuddyPostFromForm(params: {
   });
 
   return { post, card };
+}
+
+export async function updateBuddyPostFromForm(params: {
+  postId: string;
+  form: AiBuddyPostFormValues;
+  recruitStatus?: 'open' | 'full';
+}): Promise<EventDetailPost> {
+  const { form, postId } = params;
+  const body = buildBuddyPostBody(form);
+  const hashTags = buddyPostHashTags(form.tags);
+  const location = form.location.trim();
+  const recruit = buildRecruitFieldsFromBuddyForm(form);
+
+  return updatePost(postId, {
+    body: hashTags.length ? `${body}\n\n${hashTags.join(' ')}` : body,
+    ...(location ? { location } : {}),
+    tags: hashTags,
+    recruitStatus: params.recruitStatus ?? recruit.recruitStatus,
+    ...(recruit.slotsTotal != null ? { slotsTotal: recruit.slotsTotal } : {}),
+    ...(recruit.slotsFilled != null ? { slotsFilled: recruit.slotsFilled } : {}),
+  });
 }

@@ -2,6 +2,7 @@ import Taro from '@tarojs/taro';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { searchBuddyPostsWithAi } from '../../../api/sync/posts';
 import { isLiveApi } from '../../../constants/api';
+import type { BuddyPostSearchParsed } from '../../../types/backend';
 import type { EventDetailPost } from '../../../types/post';
 import {
   filterEventDetailPostsByQuery,
@@ -25,6 +26,7 @@ export function useEventDetailPostSearch({
   const [query, setQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [apiResults, setApiResults] = useState<EventDetailPost[]>([]);
+  const [searchParsed, setSearchParsed] = useState<BuddyPostSearchParsed | null>(null);
   const [isSearching, setIsSearching] = useState(false);
   const [usedLocalFallback, setUsedLocalFallback] = useState(false);
   const requestSeqRef = useRef(0);
@@ -49,6 +51,7 @@ export function useEventDetailPostSearch({
   useEffect(() => {
     if (!debouncedQuery || !useRemoteSearch || activityLegacyId == null) {
       setApiResults([]);
+      setSearchParsed(null);
       setIsSearching(false);
       setUsedLocalFallback(false);
       return;
@@ -57,16 +60,19 @@ export function useEventDetailPostSearch({
     const requestSeq = ++requestSeqRef.current;
     setIsSearching(true);
     setUsedLocalFallback(false);
+    setSearchParsed(null);
 
     void searchBuddyPostsWithAi(debouncedQuery, activityLegacyId)
       .then((result) => {
         if (requestSeq !== requestSeqRef.current) return;
         setApiResults(result.items);
+        setSearchParsed(result.parsed);
         setUsedLocalFallback(false);
       })
       .catch(() => {
         if (requestSeq !== requestSeqRef.current) return;
         setApiResults([]);
+        setSearchParsed(null);
         const fallbackTerms = resolveBuddySearchTerms(trimmedQuery);
         if (!ruleFiltersActive && fallbackTerms.length > 0) {
           setUsedLocalFallback(true);
@@ -122,6 +128,7 @@ export function useEventDetailPostSearch({
     setQuery('');
     setDebouncedQuery('');
     setApiResults([]);
+    setSearchParsed(null);
     setIsSearching(false);
     setUsedLocalFallback(false);
     lastFailToastQueryRef.current = '';
@@ -136,5 +143,6 @@ export function useEventDetailPostSearch({
     matchedPosts,
     matchedCount: matchedPosts?.length ?? 0,
     usedLocalFallback,
+    searchParsed: usedLocalFallback ? null : searchParsed,
   };
 }

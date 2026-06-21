@@ -3,6 +3,7 @@ import type { AiBuddyPostFormValues } from '@/types/buddyPost';
 import {
   buildBuddyPostBody,
   buildBuddyPostUserSummary,
+  buildRecruitFieldsFromBuddyForm,
   buddyPostHashTags,
   defaultBuddyPostForm,
   defaultBuddyPostFormWithTag,
@@ -55,5 +56,22 @@ describe('buddyPostForm', () => {
     expect(summary).toBe(
       '发布「风暴电音节」组队帖 · 组队，6.13-6.14，上海，2人，女生优先',
     );
+  });
+
+  it('buildRecruitFieldsFromBuddyForm maps headcount to slots', () => {
+    expect(buildRecruitFieldsFromBuddyForm(sampleForm)).toEqual({
+      recruitStatus: 'open',
+      slotsTotal: 2,
+    });
+    expect(
+      buildRecruitFieldsFromBuddyForm({
+        ...sampleForm,
+        headcount: '1/3',
+      }),
+    ).toEqual({
+      recruitStatus: 'open',
+      slotsFilled: 1,
+      slotsTotal: 3,
+    });
   });
 });

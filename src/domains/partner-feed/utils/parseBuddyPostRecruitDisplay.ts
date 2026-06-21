@@ -87,3 +87,26 @@ export function parseBuddyPostRecruitDisplay(
 
   return { recruitStatus };
 }
+
+type BuddyPostRecruitSource = {
+  body?: string | null;
+  bodyPreview?: string | null;
+  recruitStatus?: 'open' | 'full';
+  slotsTotal?: number;
+  slotsFilled?: number;
+};
+
+/** Prefer structured post fields; fall back to body parsing (US-Q2-16). */
+export function resolveBuddyPostRecruitDisplay(
+  post: BuddyPostRecruitSource,
+): BuddyPostRecruitDisplay {
+  const parsed = parseBuddyPostRecruitDisplay(
+    post.bodyPreview?.trim() || post.body?.trim() || '',
+  );
+
+  return {
+    recruitStatus: post.recruitStatus ?? parsed.recruitStatus,
+    slotsTotal: post.slotsTotal ?? parsed.slotsTotal,
+    slotsFilled: post.slotsFilled ?? parsed.slotsFilled,
+  };
+}

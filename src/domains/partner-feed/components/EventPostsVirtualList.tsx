@@ -18,6 +18,8 @@ type EventPostsVirtualListProps = {
   onCloseComments: (postId: string) => void;
   onCommentSubmitted?: EventPostCardProps['onCommentSubmitted'];
   onDelete?: EventPostCardProps['onDelete'];
+  onEdit?: EventPostCardProps['onEdit'];
+  onRecruitStatusToggle?: EventPostCardProps['onRecruitStatusToggle'];
   hasMore?: boolean;
   hasMoreLocal?: boolean;
   hiddenLocalCount?: number;
@@ -37,6 +39,8 @@ export function EventPostsVirtualList({
   onCloseComments,
   onCommentSubmitted,
   onDelete,
+  onEdit,
+  onRecruitStatusToggle,
   hasMore = false,
   hasMoreLocal = false,
   hiddenLocalCount = 0,
@@ -89,6 +93,8 @@ export function EventPostsVirtualList({
               onCloseComments={onCloseComments}
               onCommentSubmitted={onCommentSubmitted}
               onDelete={onDelete}
+              onEdit={onEdit}
+              onRecruitStatusToggle={onRecruitStatusToggle}
             />
           </View>
         );

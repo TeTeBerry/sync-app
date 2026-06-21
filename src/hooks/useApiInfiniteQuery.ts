@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { ApiError } from '../utils/apiClient';
 import {
   broadcastCacheData,
   getCacheData,
@@ -155,13 +156,17 @@ export function useApiInfiniteQuery<TItem extends Identifiable>(
         const page = await fetchFirstPage();
         applyPage(page, silent && mergeOnRefresh ? 'merge' : 'replace');
         lastFetchRef.current = Date.now();
-      } catch {
+      } catch (error) {
         if (!silent) {
+          const isUnauthorized =
+            error instanceof ApiError && (error.status === 401 || error.status === 403);
           setIsError(true);
-          setItems([]);
-          setNextCursor(undefined);
-          setHasMore(false);
-          writeCache({ items: [], hasMore: false });
+          if (!isUnauthorized) {
+            setItems([]);
+            setNextCursor(undefined);
+            setHasMore(false);
+            writeCache({ items: [], hasMore: false });
+          }
         }
       } finally {
         if (silent) {
