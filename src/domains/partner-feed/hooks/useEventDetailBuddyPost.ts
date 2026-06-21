@@ -88,21 +88,21 @@ export function useEventDetailBuddyPost(
         skipListRefresh?: boolean;
         listedInFeed?: boolean;
       },
-    ): Promise<boolean> => {
-      if (!Number.isFinite(eventId) || eventId <= 0) return false;
-      if (publishingRef.current) return false;
+    ): Promise<void> => {
+      if (!Number.isFinite(eventId) || eventId <= 0) return;
+      if (publishingRef.current) return;
 
       publishingRef.current = true;
 
       if (!(await guardPublish())) {
         publishingRef.current = false;
-        return false;
+        return;
       }
 
       if (!isApiEnabled()) {
         publishingRef.current = false;
         void Taro.showToast({ title: '请先配置 API 地址', icon: 'none' });
-        return false;
+        return;
       }
 
       const { syncToPostList: _sync, ...form } = payload;
@@ -152,18 +152,16 @@ export function useEventDetailBuddyPost(
           options.replacePost?.(pendingId, post);
         }
         void requestPostEngagementSubscribe();
-        return true;
       } catch (error) {
         if (!submitOptions?.skipListRefresh && listedInFeed) {
           options.removePost?.(pendingId);
         }
         if (await handlePublishError(error)) {
-          return false;
+          return;
         }
         const message = error instanceof Error ? error.message : '发布失败，请稍后重试';
         void Taro.showToast({ title: message, icon: 'none' });
         setSheetOpen(true);
-        return false;
       } finally {
         publishingRef.current = false;
         setIsPublishing(false);
@@ -184,6 +182,13 @@ export function useEventDetailBuddyPost(
     buddyPostActivityDate: options.activityDate,
     buddyPostActivityTitle: options.activityTitle,
     complianceConfirmDialog,
-    buddyPostQuota: sheetPostQuota,
+    buddyPostQuota: sheetPostQuota
+      ? {
+          used: sheetPostQuota.used,
+          max: sheetPostQuota.max,
+          remaining: sheetPostQuota.max - sheetPostQuota.used,
+          atLimit: sheetPostQuota.used >= sheetPostQuota.max,
+        }
+      : undefined,
   };
 }

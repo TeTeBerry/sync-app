@@ -53,6 +53,7 @@ type CommentRowProps = {
   postAuthorUserId?: string;
   replyTargetId?: string;
   onStartReply: (target: ReplyTarget) => void;
+  t: (key: string, params?: Record<string, string | number>) => string;
 };
 
 function CommentRow({
@@ -63,6 +64,7 @@ function CommentRow({
   postAuthorUserId,
   replyTargetId,
   onStartReply,
+  t,
 }: CommentRowProps) {
   const [repliesExpanded, setRepliesExpanded] = useState(false);
   const resolvedAvatar = useResolvedAvatarSrc(comment.avatar);
@@ -138,6 +140,7 @@ function CommentRow({
                 postAuthorName={postAuthorName}
                 postAuthorUserId={postAuthorUserId}
                 onStartReply={onStartReply}
+                t={t}
               />
             ))}
             {hiddenCount > 0 && !repliesExpanded ? (
@@ -227,6 +230,7 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
     postId,
     replyTarget,
     submitting,
+    t,
   ]);
 
   const startReply = useCallback((target: ReplyTarget) => {
@@ -283,6 +287,7 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
                 postAuthorUserId={postAuthorUserId}
                 replyTargetId={replyTarget?.commentId}
                 onStartReply={startReply}
+                t={t}
               />
             ))}
             {hasMoreVisibleComments ? (

@@ -2,7 +2,6 @@ import type { AiBuddyPostFormValues, BuddyPostTagId } from '../types/buddyPost';
 import type { AiGuidePlanFormValues } from '../types/travelGuide';
 import { travelGuideBudgetLabel } from '../types/travelGuide';
 import { defaultBuddyPostForm } from './buddyPostForm';
-import { useT } from '@/hooks/useI18n';
 
 export type TravelGuideBuddyPrefill = {
   form: AiBuddyPostFormValues;

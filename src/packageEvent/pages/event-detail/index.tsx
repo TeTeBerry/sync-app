@@ -48,7 +48,6 @@ const EventDetailPage = () => {
   }
 
   const {
-    eventId,
     highlightPostId,
     title,
     metaLine,

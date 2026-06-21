@@ -249,7 +249,7 @@ export function useTravelPlanPage({
         setIsSaving(false);
       }
     },
-    [activityLegacyId, apiEnabled, resolvedEventMeta, save],
+    [activityLegacyId, apiEnabled, resolvedEventMeta, save, t],
   );
 
   const toggleExpanded = useCallback((id: string) => {
@@ -411,6 +411,7 @@ export function useTravelPlanPage({
       nodes,
       persistPlan,
       userNodes,
+      t,
     ],
   );
 

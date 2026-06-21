@@ -6,26 +6,24 @@ import {
   SUPPORT_FEEDBACK_HINT,
 } from '../../../../constants/supportContact';
 import { ROUTES, go } from '../../../../utils/route';
-import { useT } from '@/hooks/useI18n';
 import { Text, View } from '@tarojs/components';
 
 const FAQ = [
   {
-    q: t('appeal.faq.q1'),
-    a: t('appeal.faq.a1'),
+    q: '为什么账号被限制了？',
+    a: '平台依据内容审核与用户举报对账号采取临时限制。如果你认为这是误判，请按照申诉步骤提交相关信息。',
   },
   {
-    q: t('appeal.faq.q2'),
-    a: t('appeal.faq.a2'),
+    q: '申诉需要提供什么信息？',
+    a: SUPPORT_FEEDBACK_HINT,
   },
   {
-    q: t('appeal.faq.q3'),
-    a: t('appeal.faq.a3'),
+    q: '申诉后多久能收到结果？',
+    a: '我们将在 1–3 个工作日内复核，结果通过站内通知或你留下的联系方式反馈。',
   },
 ] as const;
 
 export function AppealSettings() {
-  const t = useT();
   const openHelp = () => {
     go(`${ROUTES.SETTINGS}?section=help`);
   };

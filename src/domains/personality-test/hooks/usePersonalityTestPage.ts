@@ -113,7 +113,7 @@ export function usePersonalityTestPage() {
       setErrorMessage(resolveLoadError(error, t));
       setPhase('error');
     }
-  }, [applyQuestionSet]);
+  }, [applyQuestionSet, t]);
 
   useEffect(() => {
     let cancelled = false;
@@ -166,7 +166,7 @@ export function usePersonalityTestPage() {
     return () => {
       cancelled = true;
     };
-  }, [loadQuestions, router.params]);
+  }, [loadQuestions, router.params, t]);
 
   useEffect(() => {
     shareRef.current = phase === 'result' && result ? result : null;
@@ -262,7 +262,7 @@ export function usePersonalityTestPage() {
 
       void Taro.showToast({ title: t('personality.nicknameSaved'), icon: 'success' });
     },
-    [],
+    [t],
   );
 
   const loginToSaveNickname = useCallback(() => {
@@ -277,7 +277,7 @@ export function usePersonalityTestPage() {
         void Taro.showToast({ title: t('personality.saveFailed'), icon: 'none' });
       });
     }, 'general');
-  }, [persistNicknameAfterLogin, result]);
+  }, [persistNicknameAfterLogin, result, t]);
 
   const submitAnswers = useCallback(
     async (finalAnswers: PersonalityTestAnswers) => {
@@ -315,6 +315,7 @@ export function usePersonalityTestPage() {
     selectedOptionId,
     submitAnswers,
     totalQuestions,
+    t,
   ]);
 
   const retrySubmit = useCallback(() => {

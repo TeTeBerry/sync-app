@@ -227,7 +227,18 @@ export function AiAssistantChat({
           eventCity={guideEventCity}
           initialValues={buddyPost.sheetInitialValues}
           prefillSummaryLines={buddyPost.sheetPrefillHint}
-          postQuota={buddyPost.sheetPostQuota ?? undefined}
+          postQuota={
+            buddyPost.sheetPostQuota
+              ? {
+                  used: buddyPost.sheetPostQuota.used,
+                  max: buddyPost.sheetPostQuota.max,
+                  remaining:
+                    buddyPost.sheetPostQuota.max - buddyPost.sheetPostQuota.used,
+                  atLimit:
+                    buddyPost.sheetPostQuota.used >= buddyPost.sheetPostQuota.max,
+                }
+              : undefined
+          }
           onClose={buddyPost.closeBuddyPostSheet}
           onSubmit={buddyPost.handleSheetSubmit}
         />

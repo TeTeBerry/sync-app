@@ -116,7 +116,7 @@ export function useMyItineraryPage() {
       }
       return;
     }
-  }, [activityLegacyId, apiEnabled, consumePending, initialPerformanceIntent]);
+  }, [activityLegacyId, apiEnabled, consumePending, initialPerformanceIntent, t]);
 
   useEffect(() => {
     if (!apiEnabled || hydratedFromPendingRef.current) return;
@@ -192,7 +192,7 @@ export function useMyItineraryPage() {
 
   const handleShare = useCallback(() => {
     void Taro.showToast({ title: t('itinerary.shareComingSoon'), icon: 'none' });
-  }, []);
+  }, [t]);
 
   const handleReselect = useCallback(() => {
     if (Number.isFinite(activityLegacyId) && activityLegacyId > 0) {
@@ -255,6 +255,7 @@ export function useMyItineraryPage() {
     save,
     savedQuery,
     selectedDjIds,
+    t,
   ]);
 
   const navFallback =

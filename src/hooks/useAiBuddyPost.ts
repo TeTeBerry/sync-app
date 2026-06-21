@@ -16,7 +16,6 @@ import type {
 } from '../types/buddyPost';
 import type { AiGuidePlanFormValues } from '../types/travelGuide';
 import { travelGuideFormToBuddyPrefill } from '../utils/travelGuideToBuddyPost';
-import { useT } from '@/hooks/useI18n';
 import { isApiEnabled } from '../constants/api';
 import {
   buildBuddyPostUserSummary,

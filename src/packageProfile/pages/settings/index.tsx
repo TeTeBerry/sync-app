@@ -119,8 +119,7 @@ const SettingsPage: React.FC = () => {
 
   useEffect(() => {
     if (!currentUser?.privacyLevel) return;
-    const level =
-      currentUser.privacyLevel === 'friends' ? 'private' : currentUser.privacyLevel;
+    const level = readProfilePrivacyLevel(currentUser.privacyLevel);
     setPrivacyLevel(level);
     setStorePrivacyLevel(level);
     writeProfilePrivacyLevel(level);

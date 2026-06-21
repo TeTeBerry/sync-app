@@ -29,7 +29,7 @@ export type AiGuideResultCardProps = {
 
 function previewHighlights(
   plan: TravelGuidePlan,
-  t: (key: string, params?: Record<string, unknown>) => string,
+  t: (key: string, params?: Record<string, string | number>) => string,
 ): string[] {
   const highlights: string[] = [];
   const transport = plan.transport.lines[0]?.trim();
@@ -117,9 +117,14 @@ export function AiGuideResultCard({
             <Text className="s-ai-guide-result__budget-strip-value">{total.range}</Text>
             {plan.headcount > 1 ? (
               <Text className="s-ai-guide-result__budget-strip-sub">
-                {t('travelPlan.budgetPerPerson', {
-                  amount: travelGuideBudgetPerPersonRange(total.range, plan.headcount),
-                })}
+                {(() => {
+                  const perPerson = travelGuideBudgetPerPersonRange(
+                    total.range || '',
+                    plan.headcount,
+                  );
+                  if (!perPerson) return '';
+                  return t('travelPlan.budgetPerPerson', { amount: perPerson });
+                })()}
               </Text>
             ) : null}
           </View>

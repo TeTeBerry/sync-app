@@ -71,18 +71,21 @@ export function ChatMessageEmbed({
       {showBuddyPostTemplateCta ? (
         <BuddyPostTemplateCta
           disabled={isStreaming}
+          onPress={() => onRunCapability!('buddy_post')}
           onOpenSheet={() => onRunCapability!('buddy_post')}
         />
       ) : null}
       {showTravelGuideSheetCta ? (
         <TravelGuideSheetCta
           disabled={isStreaming}
+          onPress={() => onRunCapability!('travel_guide')}
           onOpenSheet={() => onRunCapability!('travel_guide')}
         />
       ) : null}
       {showItinerarySheetCta ? (
         <ItinerarySheetCta
           disabled={isStreaming}
+          onPress={() => onRunCapability!('itinerary')}
           onOpenSheet={() => onRunCapability!('itinerary')}
         />
       ) : null}

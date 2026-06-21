@@ -158,7 +158,7 @@ export function useAiTravelGuidePage() {
     return () => {
       cancelled = true;
     };
-  }, [guideId, payload, shareSeed]);
+  }, [guideId, payload, shareSeed, t]);
 
   useEffect(() => {
     shareRef.current = resolveTravelGuideShareRef({ guideId, payload });
@@ -208,7 +208,7 @@ export function useAiTravelGuidePage() {
     } finally {
       setSharing(false);
     }
-  }, [payload?.plan, sharing]);
+  }, [payload?.plan, sharing, t]);
 
   const handleRegenerate = useCallback(() => {
     if (!payload) return;

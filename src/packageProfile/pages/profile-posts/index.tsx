@@ -49,8 +49,10 @@ const ProfilePostsPage: React.FC = () => {
         confirmText: '删除',
       });
       if (!ok) return;
-      void deletePostWithFeedback(item.id, {
-        refetchOnFailure: () => postsQuery.refetch(),
+      deletePostWithFeedback(item.id, {
+        refetchOnFailure: async () => {
+          await postsQuery.refetch();
+        },
       });
     },
     [confirm, postsQuery],

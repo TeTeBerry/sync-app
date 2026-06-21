@@ -30,7 +30,7 @@ export function TravelGuideDetailHero({ plan }: TravelGuideDetailHeroProps) {
       : null,
     plan.budgetLabel ? shortTravelGuideBudgetLabel(plan.budgetLabel) : null,
     plan.selfDrive ? t('travelPlan.driveYes') : t('travelPlan.driveNo'),
-  ].filter(Boolean);
+  ].filter(Boolean) as string[];
 
   return (
     <View className="s-travel-guide-detail__hero">

@@ -43,6 +43,7 @@ export function PlaceAutocompleteField({
   hint,
   placesOnly = false,
 }: PlaceAutocompleteFieldProps) {
+  const t = useT();
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [regionCity, setRegionCity] = useState<string | undefined>();
   const [placeSuggestions, setPlaceSuggestions] = useState<
