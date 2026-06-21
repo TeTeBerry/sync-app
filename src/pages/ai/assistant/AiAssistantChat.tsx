@@ -20,6 +20,8 @@ import {
   useAiChatScrollAreaHeight,
 } from './hooks/useAiChatScrollAreaHeight';
 import { AiAssistantChatCollapse } from '../components/AiAssistantChatCollapse';
+import { AI_CHAT_COLLAPSED_PX } from '../components/aiAssistantChatCollapse.util';
+import { useChatCollapseExpanded } from '../components/chatCollapseExpandedContext';
 import { isWeappRuntime } from './aiChatLayout.util';
 
 export type AiAssistantChatProps = UseAiAssistantOrchestratorOptions & {
@@ -113,9 +115,18 @@ const AiAssistantChatMessages = memo(function AiAssistantChatMessages({
   onRunCapability,
   onOpenPersonalityTest,
 }: AiAssistantChatMessagesProps) {
-  const scrollAreaHeight = useAiChatScrollAreaHeight(scrollRemeasureKey, {
-    enabled: !sheetOverlayOpen,
-  });
+  const chatExpanded = useChatCollapseExpanded();
+  const scrollAreaHeight = useAiChatScrollAreaHeight(
+    `${scrollRemeasureKey}:${chatExpanded ? 1 : 0}`,
+    {
+      enabled: !sheetOverlayOpen,
+    },
+  );
+  const resolvedScrollAreaHeight = chatExpanded
+    ? scrollAreaHeight
+    : scrollAreaHeight != null
+      ? Math.min(scrollAreaHeight, AI_CHAT_COLLAPSED_PX)
+      : AI_CHAT_COLLAPSED_PX;
 
   return (
     <View id={AI_CHAT_SCROLL_HOST_ID} className="s-ai-assistant-chat__scroll-host">
@@ -123,7 +134,7 @@ const AiAssistantChatMessages = memo(function AiAssistantChatMessages({
         messages={messages}
         isStreaming={isStreaming}
         isTravelGuideGenerating={isTravelGuideGenerating}
-        scrollAreaHeight={scrollAreaHeight}
+        scrollAreaHeight={resolvedScrollAreaHeight}
         reserveComposerSpace={isWeappRuntime}
         keyboardInset={keyboardInset}
         forceScrollToBottomKey={forceScrollToBottomKey}

@@ -60,4 +60,15 @@ describe('shouldSuppressAutoScrollForMessage', () => {
       }),
     ).toBe(false);
   });
+
+  it('suppresses for welcome message', () => {
+    expect(
+      shouldSuppressAutoScrollForMessage({
+        id: '1',
+        from: 'ai',
+        text: '欢迎',
+        isWelcome: true,
+      }),
+    ).toBe(true);
+  });
 });

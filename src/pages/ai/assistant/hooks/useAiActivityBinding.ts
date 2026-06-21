@@ -9,14 +9,9 @@ export function useAiActivityBinding(options: {
     name?: string;
     activity?: BackendActivity;
   }) => void;
-  scheduleScrollToBottom: () => void;
   onActivityBindingActionsChange?: (actions: ActivityBindingActions | null) => void;
 }) {
-  const {
-    applyActivityBinding,
-    scheduleScrollToBottom,
-    onActivityBindingActionsChange,
-  } = options;
+  const { applyActivityBinding, onActivityBindingActionsChange } = options;
   const [activityPickerOpen, setActivityPickerOpen] = useState(false);
 
   const openActivityPicker = useCallback(() => {
@@ -43,9 +38,8 @@ export function useAiActivityBinding(options: {
         title: `已绑定「${activityName}」`,
         icon: 'none',
       });
-      scheduleScrollToBottom();
     },
-    [applyActivityBinding, scheduleScrollToBottom],
+    [applyActivityBinding],
   );
 
   const handleActivityPicked = useCallback(

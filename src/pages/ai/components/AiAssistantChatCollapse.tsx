@@ -25,18 +25,21 @@ export const AiAssistantChatCollapse: FC<AiAssistantChatCollapseProps> = ({
 }) => {
   const t = useT();
   const collapsible = isChatSectionCollapsible(activityLegacyId);
-  const [expanded, setExpanded] = useState(() =>
-    resolveDefaultChatExpanded(activityLegacyId),
-  );
+  const bindingKey = activityLegacyId ?? 'unbound';
+  const defaultExpanded = resolveDefaultChatExpanded(activityLegacyId);
+  const [bindingRevision, setBindingRevision] = useState(bindingKey);
+  const [userExpanded, setUserExpanded] = useState<boolean | null>(null);
+
+  if (bindingKey !== bindingRevision) {
+    setBindingRevision(bindingKey);
+    setUserExpanded(null);
+  }
+
+  const expanded = userExpanded ?? defaultExpanded;
 
   useEffect(() => {
-    setExpanded(resolveDefaultChatExpanded(activityLegacyId));
-  }, [activityLegacyId]);
-
-  useEffect(() => {
-    if (!collapsible) return;
     onLayoutChange?.();
-  }, [collapsible, expanded, onLayoutChange]);
+  }, [bindingKey, collapsible, expanded, onLayoutChange]);
 
   if (!collapsible) {
     return (
@@ -58,7 +61,10 @@ export const AiAssistantChatCollapse: FC<AiAssistantChatCollapseProps> = ({
           hoverClass="s-ai-assistant-chat-collapse__header--pressed"
           aria-expanded={expanded}
           aria-label={toggleLabel}
-          onClick={() => setExpanded((value) => !value)}
+          onClick={() => {
+            setUserExpanded((value) => !(value ?? defaultExpanded));
+            onLayoutChange?.();
+          }}
         >
           <View className="s-ai-assistant-chat-collapse__header-main">
             <Text className="s-ai-assistant-chat-collapse__title">

@@ -105,9 +105,14 @@ export function useAiAssistantCapabilitySheets(options: {
     if (!onFestivalPlanActionsChange) return;
     onFestivalPlanActionsChange({
       runCapability: capabilityRunner.runCapability,
+      openBuddyPostSheet: buddyPost.openBuddyPostSheetWithTag,
     });
     return () => onFestivalPlanActionsChange(null);
-  }, [capabilityRunner.runCapability, onFestivalPlanActionsChange]);
+  }, [
+    buddyPost.openBuddyPostSheetWithTag,
+    capabilityRunner.runCapability,
+    onFestivalPlanActionsChange,
+  ]);
 
   const composerBusy =
     isStreaming || travelGuide.isGenerating || buddyPost.isPublishing;

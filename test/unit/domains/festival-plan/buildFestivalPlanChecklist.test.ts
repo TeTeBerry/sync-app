@@ -21,7 +21,24 @@ describe('buildFestivalPlanChecklist', () => {
 
     const travelGuide = checklist.tasks.find((task) => task.key === 'travel_guide');
     expect(travelGuide?.done).toBe(true);
-    expect(travelGuide?.trailingLabel).toBe('查看出行攻略');
+    expect(travelGuide?.trailingLabel).toBe('查看攻略');
+  });
+
+  it('shows view labels for completed itinerary and buddy post', () => {
+    const checklist = buildFestivalPlanChecklist({
+      hasTravelGuide: true,
+      hasItinerary: true,
+      itineraryDayCount: 2,
+      hasBuddyPost: true,
+      buddyPostId: 'post-1',
+    });
+
+    expect(
+      checklist.tasks.find((task) => task.key === 'itinerary')?.trailingLabel,
+    ).toBe('查看演出表');
+    expect(
+      checklist.tasks.find((task) => task.key === 'buddy_post')?.trailingLabel,
+    ).toBe('编辑组队帖');
   });
 
   it('shows itinerary day count when done', () => {

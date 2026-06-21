@@ -103,7 +103,6 @@ export function useAiAssistantOrchestrator(options: UseAiAssistantOrchestratorOp
 
   const activityBinding = useAiActivityBinding({
     applyActivityBinding: chat.applyActivityBinding,
-    scheduleScrollToBottom,
     onActivityBindingActionsChange,
   });
 

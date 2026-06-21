@@ -36,6 +36,7 @@ export function useEventDetailFestivalPlan({
           openBuddyPostSheet,
         });
       },
+      openBuddyPostSheet,
     }),
     [openBuddyPostSheet, openItinerary, openTravelGuideSheet],
   );

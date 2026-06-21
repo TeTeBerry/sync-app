@@ -1,6 +1,5 @@
 import { useCallback } from 'react';
-import Taro from '@tarojs/taro';
-import { goAiTravelGuide, goEventDetail, goMyItinerary, ROUTES } from '@/utils/route';
+import { goActivitySchedule, goAiTravelGuide, goEventDetail } from '@/utils/route';
 import type {
   FestivalPlanChecklist,
   FestivalPlanTask,
@@ -24,14 +23,27 @@ export function useFestivalPlanNavigation(
             }
             return;
           case 'itinerary':
-            goMyItinerary(activityLegacyId, checklist?.itinerarySelectedDjIds);
+            goActivitySchedule(activityLegacyId, {
+              hasItinerary: Boolean(checklist?.itineraryDayCount),
+            });
             return;
           case 'buddy_post':
             if (checklist?.buddyPostId) {
-              goEventDetail(activityLegacyId, { postId: checklist.buddyPostId });
-            } else {
-              void Taro.navigateTo({ url: ROUTES.PROFILE_POSTS });
+              goEventDetail(activityLegacyId, {
+                postId: checklist.buddyPostId,
+                focusPosts: true,
+                openBuddyPost: true,
+              });
+              return;
             }
+            if (actions?.openBuddyPostSheet) {
+              actions.openBuddyPostSheet();
+              return;
+            }
+            goEventDetail(activityLegacyId, {
+              focusPosts: true,
+              openBuddyPost: true,
+            });
             return;
         }
         return;
@@ -53,7 +65,7 @@ export function useFestivalPlanNavigation(
       actions,
       activityLegacyId,
       checklist?.buddyPostId,
-      checklist?.itinerarySelectedDjIds,
+      checklist?.itineraryDayCount,
       checklist?.travelGuideId,
     ],
   );

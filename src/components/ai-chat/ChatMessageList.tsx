@@ -88,7 +88,9 @@ export const ChatMessageList = memo(function ChatMessageList({
   useEffect(() => {
     if (!previewCollapsed) return;
     scrollToTop();
-  }, [previewCollapsed, scrollAnchorKey, scrollToTop]);
+    const timer = setTimeout(scrollToTop, 120);
+    return () => clearTimeout(timer);
+  }, [previewCollapsed, scrollAnchorKey, activityLegacyId, scrollToTop]);
 
   const handleScroll = useCallback(
     (event: {

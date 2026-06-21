@@ -34,6 +34,12 @@ export function useHomeFestivalPlanNavigation(activityLegacyId?: number) {
           },
         });
       },
+      openBuddyPostSheet: () => {
+        goEventDetail(activityLegacyId, {
+          openBuddyPost: true,
+          focusPosts: true,
+        });
+      },
     }),
     [activityLegacyId],
   );

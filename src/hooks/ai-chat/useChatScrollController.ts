@@ -48,9 +48,18 @@ export function useChatScrollController(options: {
 
   const scrollToTop = useCallback(() => {
     nearBottomRef.current = false;
-    scrollTopRef.current = 0;
-    setScrollTop(0);
     setScrollIntoView(undefined);
+    scrollTopRef.current = scrollTopRef.current === 0 ? 1 : 0;
+    setScrollTop(scrollTopRef.current);
+
+    if (retryTimerRef.current) {
+      clearTimeout(retryTimerRef.current);
+    }
+    retryTimerRef.current = setTimeout(() => {
+      scrollTopRef.current = 0;
+      setScrollTop(0);
+      retryTimerRef.current = null;
+    }, LAYOUT_RETRY_MS);
   }, []);
 
   const scrollToBottom = useCallback(
