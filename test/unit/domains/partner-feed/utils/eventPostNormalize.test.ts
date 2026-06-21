@@ -33,4 +33,17 @@ describe('normalizeEventPostListItem', () => {
     const { post } = normalizeEventPostListItem(basePost({ comments: 3 }));
     expect(post.comments).toBe(3);
   });
+
+  it('preserves recruit status and slot fields', () => {
+    const { post } = normalizeEventPostListItem(
+      basePost({
+        recruitStatus: 'full',
+        slotsTotal: 3,
+        slotsFilled: 3,
+      }),
+    );
+    expect(post.recruitStatus).toBe('full');
+    expect(post.slotsTotal).toBe(3);
+    expect(post.slotsFilled).toBe(3);
+  });
 });

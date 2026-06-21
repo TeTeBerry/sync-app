@@ -2,6 +2,7 @@ import type { FC } from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Taro from '@tarojs/taro';
 import { Button } from '@/components/ui';
+import { useT } from '@/hooks/useI18n';
 import { resolvePersonalityMediaUrl } from '../utils/resolvePersonalityMedia';
 import { Text, View } from '@tarojs/components';
 
@@ -16,6 +17,7 @@ export const PersonalityAudioPlayer: FC<PersonalityAudioPlayerProps> = ({
   caption,
   disabled = false,
 }) => {
+  const t = useT();
   const audioRef = useRef<Taro.InnerAudioContext | null>(null);
   const [mediaUrl, setMediaUrl] = useState('');
   const [loading, setLoading] = useState(true);
@@ -31,13 +33,13 @@ export const PersonalityAudioPlayer: FC<PersonalityAudioPlayerProps> = ({
       setMediaUrl(url);
       setLoading(false);
       if (!url) {
-        setErrorMessage('音频暂未上传，请稍后再试');
+        setErrorMessage(t('personality.audioNotUploaded'));
       }
     });
     return () => {
       cancelled = true;
     };
-  }, [assetKey]);
+  }, [assetKey, t]);
 
   useEffect(() => {
     if (!mediaUrl || process.env.TARO_ENV === 'h5') {
@@ -56,7 +58,7 @@ export const PersonalityAudioPlayer: FC<PersonalityAudioPlayerProps> = ({
     const onEnded = () => setPlaying(false);
     const onError = () => {
       setPlaying(false);
-      setErrorMessage('音频播放失败');
+      setErrorMessage(t('personality.audioPlaybackFailed'));
     };
 
     audio.onPlay(onPlay);
@@ -74,12 +76,12 @@ export const PersonalityAudioPlayer: FC<PersonalityAudioPlayerProps> = ({
       audio.destroy();
       audioRef.current = null;
     };
-  }, [mediaUrl]);
+  }, [mediaUrl, t]);
 
   const togglePlayback = useCallback(() => {
     const audio = audioRef.current;
     if (!audio || !mediaUrl) {
-      void Taro.showToast({ title: '音频暂不可用', icon: 'none' });
+      void Taro.showToast({ title: t('personality.audioUnavailable'), icon: 'none' });
       return;
     }
     if (playing) {
@@ -87,7 +89,13 @@ export const PersonalityAudioPlayer: FC<PersonalityAudioPlayerProps> = ({
       return;
     }
     audio.play();
-  }, [mediaUrl, playing]);
+  }, [mediaUrl, playing, t]);
+
+  const audioTitle = loading
+    ? t('personality.audioLoading')
+    : playing
+      ? t('personality.audioPlaying')
+      : t('personality.audioPlayClip');
 
   return (
     <View className="s-personality-quiz__audio">
@@ -105,9 +113,7 @@ export const PersonalityAudioPlayer: FC<PersonalityAudioPlayerProps> = ({
           {playing ? '⏸' : '▶️'}
         </Text>
         <View className="s-personality-quiz__audio-copy">
-          <Text className="s-personality-quiz__audio-title">
-            {loading ? '加载音频…' : playing ? '播放中' : '播放片段'}
-          </Text>
+          <Text className="s-personality-quiz__audio-title">{audioTitle}</Text>
           {caption ? (
             <Text className="s-personality-quiz__audio-caption">{caption}</Text>
           ) : null}

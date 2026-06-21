@@ -1,5 +1,6 @@
 import type { FC } from 'react';
 import { Button } from '@/components/ui';
+import { useT } from '@/hooks/useI18n';
 import type { PersonalityQuestion } from '../types';
 import { PersonalityAudioPlayer } from './PersonalityAudioPlayer';
 import { Text, View } from '@tarojs/components';
@@ -27,6 +28,7 @@ export const PersonalityQuestionStep: FC<PersonalityQuestionStepProps> = ({
   onNext,
   submitting = false,
 }) => {
+  const t = useT();
   const isLast = currentIndex >= totalQuestions - 1;
 
   return (
@@ -41,7 +43,10 @@ export const PersonalityQuestionStep: FC<PersonalityQuestionStepProps> = ({
       <View className="s-personality-quiz__step">
         <Text className="s-personality-quiz__step-title">{question.prompt}</Text>
         <Text className="s-personality-quiz__step-badge">
-          第 {currentIndex + 1}/{totalQuestions} 题
+          {t('personality.questionProgress', {
+            current: currentIndex + 1,
+            total: totalQuestions,
+          })}
         </Text>
       </View>
 
@@ -81,7 +86,7 @@ export const PersonalityQuestionStep: FC<PersonalityQuestionStepProps> = ({
             disabled={submitting}
             onClick={onBack}
           >
-            上一题
+            {t('personality.prevQuestion')}
           </Button>
         ) : (
           <View className="s-personality-quiz__action-spacer" />
@@ -91,7 +96,11 @@ export const PersonalityQuestionStep: FC<PersonalityQuestionStepProps> = ({
           disabled={!selectedOptionId || submitting}
           onClick={onNext}
         >
-          {submitting ? '生成结果…' : isLast ? '查看结果' : '下一题'}
+          {submitting
+            ? t('personality.generatingResults')
+            : isLast
+              ? t('personality.viewResults')
+              : t('personality.nextQuestion')}
         </Button>
       </View>
     </View>

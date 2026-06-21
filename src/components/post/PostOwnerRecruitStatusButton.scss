@@ -2,8 +2,8 @@
   padding: 4px 10px;
   margin: 0;
   min-height: 28px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(52, 199, 89, 0.12);
+  border: 1px solid rgba(52, 199, 89, 0.45);
   border-radius: 999px;
   display: inline-flex;
   align-items: center;
@@ -11,17 +11,17 @@
 }
 
 .s-post-owner-recruit--full {
-  background: rgba(255, 100, 103, 0.12);
-  border-color: rgba(255, 100, 103, 0.35);
+  background: rgba(142, 142, 147, 0.14);
+  border-color: rgba(142, 142, 147, 0.28);
 }
 
 .s-post-owner-recruit__text {
   font-size: 11px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.88);
+  color: #34c759;
   line-height: 1.2;
 }
 
 .s-post-owner-recruit--full .s-post-owner-recruit__text {
-  color: #ff9f9f;
+  color: #aeaeb2;
 }

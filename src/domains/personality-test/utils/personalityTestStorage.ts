@@ -7,6 +7,22 @@ import { ensurePersonalityResultIdentity } from './personalityResultIdentity.uti
 const STORAGE_KEY = 'sync.personalityTest.result';
 const ANONYMOUS_STORAGE_USER_ID = '__anonymous__';
 
+const listeners = new Set<() => void>();
+
+/** Subscribe to local personality test result writes (login restore, submit, logout). */
+export function subscribePersonalityTestChange(listener: () => void): () => void {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+}
+
+function notifyPersonalityTestChange(): void {
+  for (const listener of listeners) {
+    listener();
+  }
+}
+
 type StoredPersonalityTestResult = {
   userId: string;
   result: PersonalityTestResult;
@@ -86,6 +102,7 @@ export function savePersonalityTestResult(result: PersonalityTestResult): void {
       userId,
       result,
     } satisfies StoredPersonalityTestResult);
+    notifyPersonalityTestChange();
   } catch {
     // storage full or unavailable
   }
@@ -94,6 +111,7 @@ export function savePersonalityTestResult(result: PersonalityTestResult): void {
 export function clearPersonalityTestResult(): void {
   try {
     Taro.removeStorageSync(STORAGE_KEY);
+    notifyPersonalityTestChange();
   } catch {
     // ignore
   }

@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import Taro from '@tarojs/taro';
 import type { ConfirmDialogOptions } from '../../../hooks/useConfirmDialog';
+import { updatePostRecruit } from '../../../api/sync/posts';
 import { useEventPostsInfiniteQuery } from '../../../hooks/useEventPostsInfiniteQuery';
 import { requireAuth } from '../../../utils/authGate';
 import { deletePostWithFeedback } from '../../../utils/deletePostFeedback';
@@ -20,6 +22,7 @@ import {
 import { useEventDetailPostSearch } from './useEventDetailPostSearch';
 import { useEventDetailPostFilters } from './useEventDetailPostFilters';
 import { filterEventDetailPostsByRules } from '../utils/filterEventDetailPostsByRules';
+import { resolveBuddyPostRecruitDisplay } from '../utils/parseBuddyPostRecruitDisplay';
 import { resolvePersonalityMediaUrls } from '@/domains/personality-test/utils/resolvePersonalityMedia';
 import { t } from '@/i18n/translate';
 
@@ -205,6 +208,47 @@ export function useEventDetailPosts({
     [confirm, postsQuery],
   );
 
+  const handleRecruitStatusToggle = useCallback(
+    (post: EventDetailPost) => {
+      requireAuth(() => {
+        void (async () => {
+          const recruitDisplay = resolveBuddyPostRecruitDisplay(post);
+          const isFull = recruitDisplay.recruitStatus === 'full';
+          const nextStatus = isFull ? 'open' : 'full';
+
+          try {
+            const updated = await updatePostRecruit(post.id, {
+              recruitStatus: nextStatus,
+              ...(nextStatus === 'full' && recruitDisplay.slotsTotal != null
+                ? {
+                    slotsTotal: recruitDisplay.slotsTotal,
+                    slotsFilled:
+                      recruitDisplay.slotsFilled ?? recruitDisplay.slotsTotal,
+                  }
+                : {}),
+            });
+            postsQuery.patchItem(updated);
+            void Taro.showToast({
+              title: t(
+                nextStatus === 'full'
+                  ? 'eventDetail.recruitMarkedFull'
+                  : 'eventDetail.recruitReopened',
+              ),
+              icon: 'success',
+            });
+          } catch (error) {
+            const message =
+              error instanceof Error && error.message.trim()
+                ? error.message.trim()
+                : t('eventDetail.recruitStatusToggleFailed');
+            void Taro.showToast({ title: message, icon: 'none' });
+          }
+        })();
+      }, 'social');
+    },
+    [postsQuery],
+  );
+
   const openPostComments = useCallback(
     (postId: string, options?: OpenPostCommentsOptions) => {
       const index = loadedPostItems.findIndex((item) => item.post.id === postId);
@@ -295,6 +339,7 @@ export function useEventDetailPosts({
     handleScrollToLower,
     scrollToElement,
     handleDeletePost,
+    handleRecruitStatusToggle,
     openPostComments,
     closePostComments,
     openApplyJoinComments,

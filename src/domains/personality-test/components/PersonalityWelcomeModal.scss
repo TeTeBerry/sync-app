@@ -32,7 +32,7 @@ $welcome-muted: #8e8e93;
 
 .s-personality-welcome-modal__title {
   display: block;
-  font-size: 18px;
+  font-size: var(--s-type-lead);
   font-weight: var(--s-fw-bold);
   color: #ffffff;
   line-height: 1.4;
@@ -57,7 +57,7 @@ $welcome-muted: #8e8e93;
 
 .s-personality-welcome-modal__label {
   display: block;
-  font-size: 12px;
+  font-size: var(--s-type-caption);
   font-weight: var(--s-fw-semibold);
   color: $welcome-muted;
   letter-spacing: 0.04em;
@@ -65,7 +65,7 @@ $welcome-muted: #8e8e93;
 
 .s-personality-welcome-modal__nickname {
   display: block;
-  font-size: 20px;
+  font-size: var(--s-type-title);
   font-weight: var(--s-fw-bold);
   color: var(--primary);
   line-height: 1.35;
@@ -74,7 +74,7 @@ $welcome-muted: #8e8e93;
 
 .s-personality-welcome-modal__status {
   display: block;
-  font-size: 16px;
+  font-size: var(--s-type-body);
   font-weight: var(--s-fw-semibold);
   color: #ffffff;
   line-height: 1.4;
@@ -127,7 +127,7 @@ $welcome-muted: #8e8e93;
 }
 
 .s-personality-welcome-modal__cta-label {
-  font-size: 16px;
+  font-size: var(--s-type-body);
   font-weight: var(--s-fw-bold);
   color: var(--primary-foreground);
 }

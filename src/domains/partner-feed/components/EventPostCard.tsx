@@ -1,5 +1,5 @@
 import { memo, useMemo } from 'react';
-import { CircleCheck, MapPin, UserPlus } from '../../../components/icons';
+import { MapPin, UserPlus } from '../../../components/icons';
 import {
   PostCardActionBar,
   PostCommentSection,
@@ -38,23 +38,17 @@ export type EventPostCardProps = {
   onCommentSubmitted?: (updated: Pick<EventDetailPost, 'id' | 'comments'>) => void;
 };
 
-function renderProgressDots(slotsTotal: number, slotsFilled: number) {
-  const dots = [];
-  for (let index = 0; index < slotsTotal; index += 1) {
-    dots.push(
-      <View
-        key={index}
-        className={[
-          's-event-post__progress-dot',
-          index < slotsFilled && 's-event-post__progress-dot--filled',
-        ]
-          .filter(Boolean)
-          .join(' ')}
-        aria-hidden
-      />,
-    );
-  }
-  return dots;
+function renderSlotsMeter(slotsTotal: number, slotsFilled: number) {
+  const filled = Math.min(slotsFilled, slotsTotal);
+  const percent = slotsTotal > 0 ? Math.round((filled / slotsTotal) * 100) : 0;
+
+  return (
+    <View className="s-event-post__slots-meter" aria-hidden>
+      <View className="s-event-post__slots-track">
+        <View className="s-event-post__slots-fill" style={{ width: `${percent}%` }} />
+      </View>
+    </View>
+  );
 }
 
 function EventPostCardInner({
@@ -192,11 +186,15 @@ function EventPostCardInner({
                     : 's-event-post__status-pill--open',
                 ].join(' ')}
               >
-                {isFull ? (
-                  <CircleCheck size={12} color="#34c759" aria-hidden />
-                ) : (
-                  <View className="s-event-post__status-dot" aria-hidden />
-                )}
+                <View
+                  className={[
+                    's-event-post__status-dot',
+                    isFull && 's-event-post__status-dot--muted',
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
+                  aria-hidden
+                />
                 <Text className="s-event-post__status-text">{statusLabel}</Text>
               </View>
               {isOwn && (onDelete || onEdit || onRecruitStatusToggle) ? (
@@ -210,14 +208,14 @@ function EventPostCardInner({
                       onEdit={() => onEdit(post)}
                     />
                   ) : null}
+                  {onDelete ? (
+                    <PostOwnerDeleteButton onDelete={() => onDelete(post)} />
+                  ) : null}
                   {onRecruitStatusToggle ? (
                     <PostOwnerRecruitStatusButton
                       recruitStatus={recruitDisplay.recruitStatus}
                       onToggle={() => onRecruitStatusToggle(post)}
                     />
-                  ) : null}
-                  {onDelete ? (
-                    <PostOwnerDeleteButton onDelete={() => onDelete(post)} />
                   ) : null}
                 </View>
               ) : !isOwn ? (
@@ -257,11 +255,11 @@ function EventPostCardInner({
           ) : null}
           {showProgress ? (
             <View
-              className="s-event-post__progress"
+              className="s-event-post__slots"
               aria-label={progressLabel ?? undefined}
             >
-              {renderProgressDots(slotsTotal!, Math.min(slotsFilled, slotsTotal!))}
-              <Text className="s-event-post__progress-label">{progressLabel}</Text>
+              {renderSlotsMeter(slotsTotal!, Math.min(slotsFilled, slotsTotal!))}
+              <Text className="s-event-post__slots-label">{progressLabel}</Text>
             </View>
           ) : null}
         </View>
@@ -289,11 +287,7 @@ function EventPostCardInner({
               disabled={isFull}
               onClick={handleApplyJoin}
             >
-              {isFull ? (
-                <CircleCheck size={16} color="#34c759" aria-hidden />
-              ) : (
-                <UserPlus size={16} color="#fff" aria-hidden />
-              )}
+              {!isFull ? <UserPlus size={16} color="#fff" aria-hidden /> : null}
               <Text className="s-event-post__cta-text">
                 {isFull
                   ? t('eventDetail.applyJoinDisabled')

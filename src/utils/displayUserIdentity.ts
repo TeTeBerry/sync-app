@@ -1,20 +1,22 @@
 import type { ProfileDisplayUser } from '../components/profile/profileSummaryUtils';
 import { normalizeProfileUserData } from '../components/profile/profileSummaryUtils';
-import type { ProfileSummary } from '../types/backend';
+import type { PersonalityTestResult } from '../domains/personality-test/types';
 import { loadPersonalityTestResult } from '../domains/personality-test/utils/personalityTestStorage';
+import type { ProfileSummary } from '../types/backend';
 
 /** Profile identity shown in UI, including local Raver nickname/avatar overlay. */
 export function applyPersonalityTestIdentity(
   profile: ProfileDisplayUser,
+  localResult?: PersonalityTestResult | null,
 ): ProfileDisplayUser {
-  const localResult = loadPersonalityTestResult();
+  const resolvedResult = localResult ?? loadPersonalityTestResult();
   const next = { ...profile };
 
-  if (localResult?.raverNickname?.trim()) {
-    next.name = localResult.raverNickname.trim();
+  if (resolvedResult?.raverNickname?.trim()) {
+    next.name = resolvedResult.raverNickname.trim();
   }
-  if (localResult?.raverAvatarKey?.trim()) {
-    next.avatar = localResult.raverAvatarKey.trim();
+  if (resolvedResult?.raverAvatarKey?.trim()) {
+    next.avatar = resolvedResult.raverAvatarKey.trim();
   }
 
   return next;

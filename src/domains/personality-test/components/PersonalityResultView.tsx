@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import Taro from '@tarojs/taro';
 import {
   Bookmark,
@@ -37,12 +37,6 @@ type PersonalityResultViewProps = {
   isWeapp?: boolean;
 };
 
-function tierLabel(tier: string): string {
-  if (tier === 'must_see') return '必看';
-  if (tier === 'recommended') return '推荐';
-  return '挑战';
-}
-
 function eventIncludesDj(
   event: PersonalityEventRecommendation,
   djName: string,
@@ -55,17 +49,6 @@ function isUpcomingEvent(event: PersonalityEventRecommendation): boolean {
   return getActivityStatusFromActivity(event.dateLabel, event.name) !== 'ended';
 }
 
-function formatSpiritConnectionLine(
-  entry: { role: 'soul' | 'aligned'; djName: string } | string,
-): string {
-  if (typeof entry === 'string') {
-    return entry.includes('·') ? entry : `本命艺人 · ${entry}`;
-  }
-  return entry.role === 'soul'
-    ? `灵魂共鸣 · ${entry.djName}`
-    : `同频艺人 · ${entry.djName}`;
-}
-
 export const PersonalityResultView: FC<PersonalityResultViewProps> = ({
   result,
   onRestart,
@@ -76,6 +59,28 @@ export const PersonalityResultView: FC<PersonalityResultViewProps> = ({
   const soul = result.recommendations.soulMatch;
   const [similarityDisplay, setSimilarityDisplay] = useState(0);
   const [raverAvatarUrl, setRaverAvatarUrl] = useState('');
+
+  const tierLabel = useCallback(
+    (tier: string): string => {
+      if (tier === 'must_see') return t('personality.mustSee');
+      if (tier === 'recommended') return t('personality.recommended');
+      return t('personality.challenge');
+    },
+    [t],
+  );
+
+  const formatSpiritConnectionLine = useCallback(
+    (entry: { role: 'soul' | 'aligned'; djName: string } | string): string => {
+      if (typeof entry === 'string') {
+        if (entry.includes('·')) return entry;
+        return t('personality.soulArtistLine', { name: entry });
+      }
+      return entry.role === 'soul'
+        ? t('personality.soulResonanceLine', { name: entry.djName })
+        : t('personality.alignedArtistLine', { name: entry.djName });
+    },
+    [t],
+  );
 
   useEffect(() => {
     if (!result.raverAvatarKey?.trim()) {
@@ -161,18 +166,18 @@ export const PersonalityResultView: FC<PersonalityResultViewProps> = ({
       : null;
 
   const djSections = [
-    { title: t('personality.mustSeeSet'), items: result.recommendations.mustSee },
+    { title: t('personality.mustSee'), items: result.recommendations.mustSee },
     {
-      title: t('personality.recommendedSet'),
+      title: t('personality.recommended'),
       items: result.recommendations.recommended,
     },
-    { title: t('personality.challengeStyle'), items: result.recommendations.challenge },
+    { title: t('personality.challenge'), items: result.recommendations.challenge },
   ].filter((section) => section.items.length > 0);
 
   const handlePrefillBuddyPost = () => {
     if (!itineraryTargetEvent) {
       void Taro.showToast({
-        title: t('personality.noRecommendationYet'),
+        title: t('personality.noRecommendation'),
         icon: 'none',
       });
       return;
@@ -188,7 +193,7 @@ export const PersonalityResultView: FC<PersonalityResultViewProps> = ({
   const handleGenerateItinerary = () => {
     if (!itineraryTargetEvent) {
       void Taro.showToast({
-        title: t('personality.noLineupYet'),
+        title: t('personality.noLineup'),
         icon: 'none',
       });
       return;
@@ -208,7 +213,7 @@ export const PersonalityResultView: FC<PersonalityResultViewProps> = ({
     try {
       await savePersonalityPoster(result);
     } catch {
-      void Taro.showToast({ title: '保存失败，请稍后重试', icon: 'none' });
+      void Taro.showToast({ title: t('personality.saveFailed'), icon: 'none' });
     }
   };
 
@@ -216,14 +221,14 @@ export const PersonalityResultView: FC<PersonalityResultViewProps> = ({
     try {
       await sharePersonalityPoster(result);
     } catch {
-      void Taro.showToast({ title: '分享失败，请稍后重试', icon: 'none' });
+      void Taro.showToast({ title: t('personality.shareFailed'), icon: 'none' });
     }
   };
 
   return (
     <View className="s-personality-result">
       <Text className="s-personality-result__celebrate">
-        {t('personality.soulDjIs')}
+        {t('personality.celebrate')}
       </Text>
 
       <View
@@ -263,10 +268,11 @@ export const PersonalityResultView: FC<PersonalityResultViewProps> = ({
                 background: `conic-gradient(${primary.primaryColor} ${similarityDisplay * 3.6}deg, rgba(255,255,255,0.08) 0deg)`,
               }}
             />
+            <View className="s-personality-result__similarity-ring-hole" />
           </View>
           <View className="s-personality-result__similarity-copy">
             <Text className="s-personality-result__similarity-label">
-              {t('personality.similarity')}
+              {t('personality.similarityLabel')}
             </Text>
             <Text
               className="s-personality-result__similarity-value"
@@ -296,7 +302,7 @@ export const PersonalityResultView: FC<PersonalityResultViewProps> = ({
 
       <View className="s-personality-result__card">
         <Text className="s-personality-result__section-title">
-          {t('personality.aiAnalysisTitle')}
+          {t('personality.aiAnalysis')}
         </Text>
         <Text className="s-personality-result__analysis">
           {result.narrative.aiAnalysis}
@@ -306,7 +312,7 @@ export const PersonalityResultView: FC<PersonalityResultViewProps> = ({
       {result.narrative.spiritConnections.length > 0 ? (
         <View className="s-personality-result__card">
           <Text className="s-personality-result__section-title">
-            {t('personality.spiritConnectionTitle')}
+            {t('personality.spiritConnection')}
           </Text>
           <View
             className="s-personality-result__spirit-card"
@@ -327,7 +333,7 @@ export const PersonalityResultView: FC<PersonalityResultViewProps> = ({
       {confirmedSoulEvent ? (
         <View className="s-personality-result__card">
           <Text className="s-personality-result__section-title">
-            {t('personality.lineupAnnouncedTitle')}
+            {t('personality.lineupAnnounced')}
           </Text>
           <View
             className="s-personality-result__live-card"
@@ -344,7 +350,7 @@ export const PersonalityResultView: FC<PersonalityResultViewProps> = ({
       {djSections.length > 0 ? (
         <View className="s-personality-result__card">
           <Text className="s-personality-result__section-title">
-            {t('personality.lineupRecommendationTitle')}
+            {t('personality.lineupRecommendation')}
           </Text>
           <Text className="s-personality-result__section-meta">
             {t('personality.basedOn', { track: soulProfile.signatureTrack })}
@@ -387,7 +393,7 @@ export const PersonalityResultView: FC<PersonalityResultViewProps> = ({
       {lineupEvents.length > 0 ? (
         <View className="s-personality-result__card">
           <Text className="s-personality-result__section-title">
-            {t('personality.lineupAnnouncedTitle')}
+            {t('personality.eventRecommendation')}
           </Text>
           <Text className="s-personality-result__section-meta">
             {t('personality.basedOn', { track: '' })}
@@ -437,7 +443,9 @@ export const PersonalityResultView: FC<PersonalityResultViewProps> = ({
                             includesSoul ? { color: primary.primaryColor } : undefined
                           }
                         >
-                          {includesSoul ? '本命在列' : '阵容官宣'}
+                          {includesSoul
+                            ? t('personality.containsSoulDj')
+                            : t('personality.lineupAnnouncedShort')}
                         </Text>
                       </View>
                     </View>
@@ -464,7 +472,7 @@ export const PersonalityResultView: FC<PersonalityResultViewProps> = ({
                     {event.matchedDjs.length > 0 ? (
                       <View className="s-personality-result__event-dj-block">
                         <Text className="s-personality-result__event-dj-label">
-                          阵容匹配
+                          {t('personality.lineupMatch')}
                         </Text>
                         <View className="s-personality-result__event-dj-chips">
                           {event.matchedDjs.slice(0, 5).map((djName) => {
@@ -513,7 +521,7 @@ export const PersonalityResultView: FC<PersonalityResultViewProps> = ({
 
                     <View className="s-personality-result__event-card-foot">
                       <Text className="s-personality-result__event-card-cta">
-                        查看活动详情
+                        {t('personality.viewEventDetail')}
                       </Text>
                       <ChevronRight size={14} color="#8e8e93" aria-hidden />
                     </View>
@@ -530,10 +538,10 @@ export const PersonalityResultView: FC<PersonalityResultViewProps> = ({
           className="s-personality-result__cta s-personality-result__cta--primary"
           onClick={handlePrefillBuddyPost}
         >
-          预填组队帖
+          {t('personality.prefillBuddyPost')}
         </Button>
         <Button className="s-personality-result__cta" onClick={handleGenerateItinerary}>
-          生成专属行程
+          {t('personality.generateItinerary')}
         </Button>
       </View>
 
@@ -543,23 +551,31 @@ export const PersonalityResultView: FC<PersonalityResultViewProps> = ({
           onClick={() => void handleSavePoster()}
         >
           <Bookmark size={15} color="#fff" />
-          <Text className="s-personality-result__secondary-label">保存本命</Text>
+          <Text className="s-personality-result__secondary-label">
+            {t('personality.saveSoul')}
+          </Text>
         </Button>
         <Button className="s-personality-result__secondary" onClick={onRestart}>
           <RefreshCw size={15} color="#fff" />
-          <Text className="s-personality-result__secondary-label">再测一次</Text>
+          <Text className="s-personality-result__secondary-label">
+            {t('personality.retakeTest')}
+          </Text>
         </Button>
         <Button
           className="s-personality-result__secondary"
           onClick={() => void handleSharePoster()}
         >
           <Share2 size={15} color="#fff" />
-          <Text className="s-personality-result__secondary-label">分享海报</Text>
+          <Text className="s-personality-result__secondary-label">
+            {t('personality.sharePoster')}
+          </Text>
         </Button>
         {isWeapp ? (
           <Button className="s-personality-result__secondary" openType="share">
             <Share2 size={15} color="#fff" />
-            <Text className="s-personality-result__secondary-label">分享给好友</Text>
+            <Text className="s-personality-result__secondary-label">
+              {t('personality.shareWithFriends')}
+            </Text>
           </Button>
         ) : null}
       </View>

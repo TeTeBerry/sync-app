@@ -1,10 +1,9 @@
+import { t } from '@/i18n';
 import type { PersonalityTestCatalog } from '../personalityTestCatalog';
 import { getPersonalityMeta } from '../personalityTestCatalog';
 import type { PersonalityTestResult, RaverPersonalityType } from '../types';
 import { ROUTES } from '@/utils/route';
 import { buildQueryString } from '@/utils/queryString';
-
-const PERSONALITY_TEST_TITLE = '电音人格测试';
 
 const RAVER_PERSONALITY_TYPES: RaverPersonalityType[] = [
   'rager',
@@ -37,7 +36,7 @@ export function buildPersonalityTestShareTitle(
   const label = catalog
     ? getPersonalityMeta(catalog, result.score.primaryType).label
     : result.score.primaryType;
-  return `我是「${label}」型 Raver，测测你的本命 DJ`;
+  return t('personality.shareTitle', { label });
 }
 
 export function buildPersonalityTestSharePath(result: PersonalityTestResult): string {
@@ -99,15 +98,19 @@ export function resolvePersonalityShareTeaser(
   };
 }
 
+function buildShareFallbackTitle(): string {
+  return `${t('personality.raverPersonality')} · ${t('personality.shareFallbackSuffix')}`;
+}
+
 export function buildPersonalityTestShareFallback() {
   return {
-    title: `${PERSONALITY_TEST_TITLE} · 测测你的本命 DJ`,
+    title: buildShareFallbackTitle(),
     path: ROUTES.PERSONALITY_TEST,
   };
 }
 
 export function buildPersonalityTestTimelineFallback() {
   return {
-    title: `${PERSONALITY_TEST_TITLE} · 测测你的本命 DJ`,
+    title: buildShareFallbackTitle(),
   };
 }

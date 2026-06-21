@@ -1,4 +1,5 @@
 import Taro from '@tarojs/taro';
+import { t } from '@/i18n';
 import { shareImageFile } from '@/utils/shareImageFile';
 import {
   ensureWritePhotosAlbumPermission,
@@ -20,7 +21,7 @@ export async function generatePersonalityPoster(
 export async function sharePersonalityPoster(
   result: PersonalityTestResult,
 ): Promise<void> {
-  void Taro.showLoading({ title: '生成海报中…', mask: true });
+  void Taro.showLoading({ title: t('personality.generatingPoster'), mask: true });
   try {
     const path = await generatePersonalityPoster(result, true);
     await shareImageFile(path);
@@ -35,14 +36,14 @@ export async function savePersonalityPoster(
   const allowed = await ensureWritePhotosAlbumPermission();
   if (!allowed) {
     await promptOpenAlbumSettings();
-    throw new Error('未获得相册权限');
+    throw new Error(t('personality.albumPermissionDenied'));
   }
 
-  void Taro.showLoading({ title: '保存海报中…', mask: true });
+  void Taro.showLoading({ title: t('personality.savingPoster'), mask: true });
   try {
     const path = await generatePersonalityPoster(result, false);
     await saveImageToPhotosAlbum(path);
-    void Taro.showToast({ title: '已保存到相册', icon: 'success' });
+    void Taro.showToast({ title: t('personality.posterSaved'), icon: 'success' });
   } finally {
     void Taro.hideLoading();
   }

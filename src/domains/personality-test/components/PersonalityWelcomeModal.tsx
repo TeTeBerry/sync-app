@@ -19,11 +19,13 @@ export function PersonalityWelcomeModal({
   userCount,
   onClose,
   onLoginSave,
-  confirmText = '开始探索',
-  loginSaveText = '去登录保存昵称',
+  confirmText,
+  loginSaveText,
 }: PersonalityWelcomeModalProps) {
   useOverlayLock(open);
   const t = useT();
+  const resolvedConfirmText = confirmText ?? t('personality.welcomeExplore');
+  const resolvedLoginSaveText = loginSaveText ?? t('personality.welcomeLoginSave');
 
   if (!open) {
     return null;
@@ -82,7 +84,7 @@ export function PersonalityWelcomeModal({
               onClick={onLoginSave}
             >
               <Text className="s-personality-welcome-modal__cta-label">
-                {loginSaveText}
+                {resolvedLoginSaveText}
               </Text>
             </View>
           ) : null}
@@ -92,7 +94,7 @@ export function PersonalityWelcomeModal({
             onClick={onClose}
           >
             <Text className="s-personality-welcome-modal__cta-label">
-              {confirmText}
+              {resolvedConfirmText}
             </Text>
           </View>
         </View>

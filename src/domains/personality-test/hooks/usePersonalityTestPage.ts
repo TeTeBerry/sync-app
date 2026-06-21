@@ -41,6 +41,7 @@ import { ROUTES } from '@/utils/route';
 import { ApiError } from '@/utils/apiClient';
 import { isLoggedIn } from '@/utils/authStorage';
 import { requireAuth } from '@/utils/authGate';
+import { labelMatchesKey } from '@/i18n';
 import { useStackPageMainHeight } from '@/hooks/useTabPageMainHeight';
 import { applyScrollTop } from '@/utils/scrollToCenter';
 import { useT } from '@/hooks/useI18n';
@@ -65,6 +66,17 @@ function resolveLoadError(error: unknown, t: (key: string) => string): string {
   return t('personality.loadFailed');
 }
 
+function resolveErrorRequiresLogin(error: unknown, message: string): boolean {
+  if (error instanceof ApiError && error.status === 401) {
+    return true;
+  }
+  return (
+    labelMatchesKey(message, 'personality.loginRequired') ||
+    message.includes('登录') ||
+    message.toLowerCase().includes('sign in')
+  );
+}
+
 export function usePersonalityTestPage() {
   const router = useRouter();
   const mainScrollHeight = useStackPageMainHeight();
@@ -78,6 +90,7 @@ export function usePersonalityTestPage() {
   const [answers, setAnswers] = useState<PersonalityTestAnswers>({});
   const [result, setResult] = useState<PersonalityTestResult | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
+  const [errorRequiresLogin, setErrorRequiresLogin] = useState(false);
   const [shareTeaser, setShareTeaser] = useState<PersonalityTestShareTeaser | null>(
     null,
   );
@@ -100,6 +113,7 @@ export function usePersonalityTestPage() {
   const loadQuestions = useCallback(async () => {
     setPhase('loading');
     setErrorMessage('');
+    setErrorRequiresLogin(false);
     try {
       await loadPersonalityTestCatalog({ force: true });
       const payload: PersonalityTestQuestionsResponse =
@@ -110,7 +124,9 @@ export function usePersonalityTestPage() {
       applyQuestionSet(payload.questions);
       setPhase('quiz');
     } catch (error) {
-      setErrorMessage(resolveLoadError(error, t));
+      const message = resolveLoadError(error, t);
+      setErrorMessage(message);
+      setErrorRequiresLogin(resolveErrorRequiresLogin(error, message));
       setPhase('error');
     }
   }, [applyQuestionSet, t]);
@@ -136,6 +152,7 @@ export function usePersonalityTestPage() {
           return;
         }
         setErrorMessage(t('personality.noTestResult'));
+        setErrorRequiresLogin(false);
         setPhase('error');
         return;
       }
@@ -283,6 +300,7 @@ export function usePersonalityTestPage() {
     async (finalAnswers: PersonalityTestAnswers) => {
       setPhase('submitting');
       setErrorMessage('');
+      setErrorRequiresLogin(false);
       try {
         const next = await submitPersonalityTest(finalAnswers, questionIds);
         applyResult(next);
@@ -292,6 +310,7 @@ export function usePersonalityTestPage() {
             ? error.message.trim()
             : t('personality.submitFailed');
         setErrorMessage(message);
+        setErrorRequiresLogin(resolveErrorRequiresLogin(error, message));
         setPhase('error');
       }
     },
@@ -334,6 +353,7 @@ export function usePersonalityTestPage() {
     setResult(null);
     setShareTeaser(null);
     setErrorMessage('');
+    setErrorRequiresLogin(false);
     setWelcomeModalOpen(false);
     setWelcomeNicknameUsage(null);
     scrollToTop();
@@ -354,6 +374,7 @@ export function usePersonalityTestPage() {
     answers,
     result,
     errorMessage,
+    errorRequiresLogin,
     shareTeaser,
     welcomeModalOpen,
     welcomeNicknameUsage,

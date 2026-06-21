@@ -146,26 +146,22 @@ const EventDetailPage = () => {
           style={scrollHeight != null ? { height: `${scrollHeight}px` } : undefined}
         >
           <View className="s-event-detail__scroll-inner">
-            <EventDetailComposerSection
-              showHeaderSkeleton={showHeaderSkeleton}
-              onAiGuideClick={handleOpenAiGuide}
-              activityTitle={activityTitle}
-              onOpenMyItinerary={handleOpenMyItinerary}
-              onOpenExclusiveItinerary={handleOpenExclusiveItinerary}
-              showFestivalPlan={loggedIn && Boolean(festivalPlanChecklist)}
-              festivalPlanChecklist={festivalPlanChecklist}
-              onFestivalPlanTaskPress={onFestivalPlanTaskPress}
-              travelGuideGenerated={travelGuideGenerated}
-            />
+            {!showHeaderSkeleton ? (
+              <EventDetailComposerSection
+                onAiGuideClick={handleOpenAiGuide}
+                activityTitle={activityTitle}
+                onOpenMyItinerary={handleOpenMyItinerary}
+                onOpenExclusiveItinerary={handleOpenExclusiveItinerary}
+                showFestivalPlan={loggedIn && Boolean(festivalPlanChecklist)}
+                festivalPlanChecklist={festivalPlanChecklist}
+                onFestivalPlanTaskPress={onFestivalPlanTaskPress}
+                travelGuideGenerated={travelGuideGenerated}
+              />
+            ) : null}
 
             <View id="event-detail-posts" className="s-event-detail__posts">
               {!showHeaderSkeleton ? (
                 <>
-                  <View className="s-event-detail__recruit-head">
-                    <Text className="s-event-detail__recruit-title">
-                      {t('eventDetail.recruitWallTitle')}
-                    </Text>
-                  </View>
                   <EventDetailPostFilterBar
                     cityOptions={posts.postFilterCityOptions}
                     selectedCity={posts.postFilterSelectedCity}
@@ -228,6 +224,7 @@ const EventDetailPage = () => {
                   onCommentSubmitted={posts.handleCommentSubmitted}
                   onDelete={posts.handleDeletePost}
                   onEdit={handleEditPost}
+                  onRecruitStatusToggle={posts.handleRecruitStatusToggle}
                   hasMore={postsQuery.hasMore}
                   hasMoreLocal={posts.hasMoreVisiblePosts}
                   hiddenLocalCount={posts.hiddenPostCount}

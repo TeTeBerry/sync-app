@@ -97,9 +97,9 @@ const PersonalityTestPage = () => {
                 onClick={page.retryError}
                 role="button"
               >
-                {page.errorMessage.includes('登录')
+                {page.errorRequiresLogin
                   ? t('personality.loginFirst')
-                  : t('common.clickRetry')}
+                  : t('personality.clickRetry')}
               </Text>
             </View>
           ) : null}

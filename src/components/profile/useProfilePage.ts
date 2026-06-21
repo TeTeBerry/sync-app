@@ -31,7 +31,9 @@ import {
 import { formatBuddyPreferencesSummary } from '../../constants/buddyPreferences';
 import { deriveInterestTag } from './utils';
 import { applyPersonalityTestIdentity } from '../../utils/displayUserIdentity';
+import { restorePersonalityTestResultFromServer } from '@/domains/personality-test/utils/personalityTestStorage';
 import { t } from '@/i18n';
+import { usePersonalityTestResult } from '../../hooks/usePersonalityTestResult';
 import { useStaleBackgroundRefetch } from '../../hooks/useStaleBackgroundRefetch';
 
 export type UseProfilePageOptions = {
@@ -49,6 +51,7 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
 
   const summaryQuery = useProfileSummaryQuery();
   const currentUserQuery = useCurrentUserQuery();
+  const personalityResult = usePersonalityTestResult();
   const { accountRisk } = useAccountRisk();
   const apiEnabled = isLiveApi();
   const { loggedIn, refresh: refreshAuthSession } = useAuthSession();
@@ -56,8 +59,8 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
 
   const profileUserData = useMemo((): ProfileDisplayUser => {
     const base = normalizeProfileUserData((summaryQuery.data ?? {}) as ProfileSummary);
-    return applyPersonalityTestIdentity(base);
-  }, [summaryQuery.data]);
+    return applyPersonalityTestIdentity(base, personalityResult);
+  }, [personalityResult, summaryQuery.data]);
 
   const profileLoading =
     apiEnabled && loggedIn && summaryQuery.isLoading && !summaryQuery.data;
@@ -85,7 +88,9 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
     preloadHotRoutes(ROUTES.PROFILE);
     setNotificationsEnabled(readProfileNotificationsEnabled());
     setPrivacyLevel(readProfilePrivacyLevel());
-    if (apiEnabled && !loggedIn && !shouldSkipAutoLogin()) {
+    if (apiEnabled && loggedIn) {
+      void restorePersonalityTestResultFromServer();
+    } else if (apiEnabled && !loggedIn && !shouldSkipAutoLogin()) {
       void ensureAuth().then((result) => {
         if (result) refreshAuthSession();
       });
