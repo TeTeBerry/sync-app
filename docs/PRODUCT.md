@@ -240,9 +240,10 @@ rg '联系队友|配对成功|平台担保|智能配对|buddy-matching' src/
 
 | 阶段 | 周期 | 重点 |
 |------|------|------|
-| **0–3** | 已完成 | 合规、招募改版、去对话化（US-Q2-22）、活动 Tab 搜索 |
-| **4 MVP** | 当前 | 种子招募帖、AI 找队收口、招募字段、详情 IA、差异化（见 Q2 Sprint 4） |
-| **5 增长** | 验证后 | 人格测试分享、艺人串联；地图 MVP 不下线 |
+| **0–4** | 已完成 | 合规、招募改版、去对话化、AI 找队、招募字段 |
+| **5 上线冲刺** | ～2 周（目标 07-06 前提审） | 种子帖、冒烟提审、可选偏好洞察/Prep Nudge |
+| **6 上线后** | 2～4 周 | Scene Agent 基建（[SCENE-AGENT.md](./SCENE-AGENT.md)）、结构化申请、发帖字段 |
+| **7 增长** | 有数据后 | 人格串联、翻卡、AI 发帖、攻略串联 |
 
 完整 Story 与验收：[Q2-USER-STORIES.md](./Q2-USER-STORIES.md)。
 
@@ -293,4 +294,5 @@ rg '联系队友|配对成功|平台担保|智能配对|buddy-matching' src/
 | 活动搜索 | `pages/events/` · `filterActivitiesForEventsSearch.ts` |
 | Agent 工具 | `sync-app-backend/src/ai/agent/tools/` |
 | 发帖链路 | [POST-LIFECYCLE.md](./POST-LIFECYCLE.md) |
+| 无感 Scene Agent | [SCENE-AGENT.md](./SCENE-AGENT.md) |
 | 路由 | `src/utils/route.ts` |

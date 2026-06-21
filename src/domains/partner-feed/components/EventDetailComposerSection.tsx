@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { ChevronDown, ChevronUp, Flame } from '../../../components/icons';
-import { EventDetailAiTravelGuideCard } from '@/domains/travel-guide/components/EventDetailAiTravelGuideCard';
-import { EventDetailItineraryMenu } from './EventDetailItineraryMenu';
-import { FestivalPlanSummaryBar } from '@/domains/festival-plan/FestivalPlanSummaryBar';
+import { EventDetailPrepActions } from './EventDetailPrepActions';
 import type { FestivalPlanChecklist } from '@/domains/festival-plan/buildFestivalPlanChecklist';
 import type { FestivalPlanTask } from '@/domains/festival-plan/buildFestivalPlanChecklist';
 import { Button, cn } from '../../../components/ui';
@@ -87,7 +85,7 @@ export const EventDetailComposerSection: React.FC<EventDetailComposerSectionProp
           </View>
         </View>
 
-        {hasProgress && !expanded ? (
+        {hasProgress ? (
           <View
             className="s-event-detail-festival-prep__progress-bar"
             aria-label={t('festivalPlan.progressAria', {
@@ -105,25 +103,14 @@ export const EventDetailComposerSection: React.FC<EventDetailComposerSectionProp
 
       {expanded ? (
         <View className="s-event-detail-festival-prep__body">
-          {showFestivalPlan && festivalPlanChecklist && onFestivalPlanTaskPress ? (
-            <View className="s-event-detail__festival-plan">
-              <Text className="s-event-detail__festival-plan-kicker">
-                {t('eventDetail.personalRecord')}
-              </Text>
-              <FestivalPlanSummaryBar
-                checklist={festivalPlanChecklist}
-                onTaskPress={onFestivalPlanTaskPress}
-              />
-            </View>
-          ) : null}
-          <EventDetailAiTravelGuideCard
-            generated={travelGuideGenerated}
-            onClick={onAiGuideClick}
-          />
-          <EventDetailItineraryMenu
-            activityTitle={activityTitle}
+          <EventDetailPrepActions
+            travelGuideGenerated={travelGuideGenerated}
+            checklist={festivalPlanChecklist}
+            showFestivalPlan={showFestivalPlan}
+            onAiGuideClick={onAiGuideClick}
             onOpenMyItinerary={onOpenMyItinerary}
             onOpenExclusiveItinerary={onOpenExclusiveItinerary}
+            onFestivalPlanTaskPress={onFestivalPlanTaskPress}
           />
         </View>
       ) : null}

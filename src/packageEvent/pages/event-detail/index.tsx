@@ -225,10 +225,7 @@ const EventDetailPage = () => {
                   onDelete={posts.handleDeletePost}
                   onEdit={handleEditPost}
                   onRecruitStatusToggle={posts.handleRecruitStatusToggle}
-                  hasMore={postsQuery.hasMore}
-                  hasMoreLocal={posts.hasMoreVisiblePosts}
-                  hiddenLocalCount={posts.hiddenPostCount}
-                  onShowMoreLocal={posts.showMoreVisiblePosts}
+                  onRecruitSlotsAdjust={posts.handleRecruitSlotsAdjust}
                   isLoadingMore={postsQuery.isLoadingMore}
                 />
               ) : null}

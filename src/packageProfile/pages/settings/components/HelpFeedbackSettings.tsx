@@ -1,3 +1,4 @@
+import './HelpFeedbackSettings.scss';
 import Taro from '@tarojs/taro';
 import { useCallback, useMemo, useState } from 'react';
 import { Text, Textarea, View } from '@tarojs/components';
@@ -123,13 +124,16 @@ export function HelpFeedbackSettings() {
         onStartDeletionFeedback={() => openForm({ accountDeletion: true })}
       />
 
-      <View className="s-settings__card s-settings__faq">
-        {faqItems.map((item, idx) => (
-          <View key={idx} className="s-settings__faq-item">
-            <View className="s-settings__faq-q">{item.q}</View>
-            <View className="s-settings__faq-a">{item.a}</View>
-          </View>
-        ))}
+      <View className="s-settings-help__section">
+        <Text className="s-settings-help__section-title">{t('feedback.faqTitle')}</Text>
+        <View className="s-settings__card s-settings-help__faq">
+          {faqItems.map((item, idx) => (
+            <View key={idx} className="s-settings-help__faq-item">
+              <View className="s-settings-help__faq-q">{item.q}</View>
+              <View className="s-settings-help__faq-a">{item.a}</View>
+            </View>
+          ))}
+        </View>
       </View>
 
       {success ? (
@@ -153,7 +157,7 @@ export function HelpFeedbackSettings() {
             {t('feedback.successEmail', { email: SUPPORT_EMAIL })}
           </Text>
           <Button
-            className="s-settings__feedback-btn s-settings-help__success-btn"
+            className="s-settings-help__feedback-btn s-settings-help__success-btn"
             onClick={() => {
               setSuccess(null);
               openForm();
@@ -166,7 +170,7 @@ export function HelpFeedbackSettings() {
 
       <View className="s-settings-help__action">
         {!formOpen ? (
-          <Button className="s-settings__feedback-btn" onClick={() => openForm()}>
+          <Button className="s-settings-help__feedback-btn" onClick={() => openForm()}>
             <Text className="s-btn-label">{t('feedback.submit')}</Text>
           </Button>
         ) : (

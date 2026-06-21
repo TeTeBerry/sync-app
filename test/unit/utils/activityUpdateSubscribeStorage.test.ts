@@ -21,7 +21,6 @@ vi.mock('@/utils/authStorage', () => ({
   getAuthUserId: vi.fn(() => 'user-1'),
 }));
 
-import Taro from '@tarojs/taro';
 import {
   isActivityUpdateSubscribedLocally,
   markActivityUpdateSubscribedLocally,

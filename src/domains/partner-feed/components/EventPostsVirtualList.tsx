@@ -20,10 +20,7 @@ type EventPostsVirtualListProps = {
   onDelete?: EventPostCardProps['onDelete'];
   onEdit?: EventPostCardProps['onEdit'];
   onRecruitStatusToggle?: EventPostCardProps['onRecruitStatusToggle'];
-  hasMore?: boolean;
-  hasMoreLocal?: boolean;
-  hiddenLocalCount?: number;
-  onShowMoreLocal?: () => void;
+  onRecruitSlotsAdjust?: EventPostCardProps['onRecruitSlotsAdjust'];
   isLoadingMore?: boolean;
 };
 
@@ -41,10 +38,7 @@ export function EventPostsVirtualList({
   onDelete,
   onEdit,
   onRecruitStatusToggle,
-  hasMore = false,
-  hasMoreLocal = false,
-  hiddenLocalCount = 0,
-  onShowMoreLocal,
+  onRecruitSlotsAdjust,
   isLoadingMore = false,
 }: EventPostsVirtualListProps) {
   const t = useT();
@@ -95,26 +89,14 @@ export function EventPostsVirtualList({
               onDelete={onDelete}
               onEdit={onEdit}
               onRecruitStatusToggle={onRecruitStatusToggle}
+              onRecruitSlotsAdjust={onRecruitSlotsAdjust}
             />
           </View>
         );
       })}
-      {hasMoreLocal && hiddenLocalCount > 0 ? (
-        <View
-          className="s-event-posts-list__more-local"
-          hoverClass="s-event-posts-list__more-local--pressed"
-          onClick={onShowMoreLocal}
-          role="button"
-        >
-          <Text className="s-event-posts-list__more-local-text">
-            {t('eventDetail.postsShowMore', { count: hiddenLocalCount })}
-          </Text>
-        </View>
-      ) : null}
       {isLoadingMore ? (
         <Text className="s-event-posts-list__loading">{t('common.loading')}</Text>
       ) : null}
-      {!isLoadingMore && !hasMoreLocal && !hasMore && items.length > 0 ? null : null}
     </View>
   );
 }

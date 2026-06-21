@@ -34,7 +34,7 @@ export function AccountDeletionGuide({
         {t('accountDeletion.description')}
       </Text>
 
-      <View className="s-settings__card s-settings-help__deletion-steps">
+      <View className="s-settings__card s-settings-help__deletion-card">
         <Text className="s-settings-help__deletion-step-title">
           {t('accountDeletion.methodsTitle')}
         </Text>
@@ -57,7 +57,7 @@ export function AccountDeletionGuide({
         </View>
       </View>
 
-      <View className="s-settings__card">
+      <View className="s-settings__card s-settings-help__deletion-card">
         <Text className="s-settings-help__deletion-step-title">
           {t('accountDeletion.dataTitle')}
         </Text>

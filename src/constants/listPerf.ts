@@ -12,6 +12,9 @@ export const EVENT_POSTS_SLIDE_BUFFER = 3;
 /** Rough px height per post card for scroll focal estimation. */
 export const EVENT_POST_ESTIMATED_HEIGHT_PX = 320;
 
+/** Prefetch more post cards when scroll focal is within this many items of loaded end. */
+export const EVENT_POSTS_PREFETCH_AHEAD = 2;
+
 /** Comments: initial visible rows before local window growth. */
 export const POST_COMMENTS_INITIAL_RENDER = 8;
 

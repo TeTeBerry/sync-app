@@ -14,6 +14,7 @@ import type {
   TravelGuidePlanReadResult,
 } from '../../types/travelGuide';
 import { ownerQueryParams } from '../requestContext';
+import { t } from '@/i18n';
 
 export type TravelGuidePlaceSuggestion = {
   title: string;
@@ -119,11 +120,11 @@ export async function pollTravelGuideGenerationJob(
       return job.plan;
     }
     if (job.status === 'failed') {
-      throw new Error(job.errorMessage || '攻略生成失败，请稍后重试');
+      throw new Error(job.errorMessage || t('travelPlan.guideGenerationFailed'));
     }
   }
 
-  throw new Error('攻略生成超时，请稍后重试');
+  throw new Error(t('travelPlan.guideGenerationTimeout'));
 }
 
 async function generateTravelGuideViaJob(

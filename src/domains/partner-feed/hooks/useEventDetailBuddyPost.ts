@@ -116,7 +116,7 @@ export function useEventDetailBuddyPost(
         setSheetOpen(true);
       }, 'activity');
     },
-    [eventId, guardPublish, options.activityDate, options.freezeScroll, setSheetOpen],
+    [eventId, guardPublish, options, setSheetOpen],
   );
 
   const handleBuddyPostSheetSubmit = useCallback(

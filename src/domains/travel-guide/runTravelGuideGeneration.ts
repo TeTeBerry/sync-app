@@ -1,6 +1,7 @@
 import Taro from '@tarojs/taro';
 import { generateTravelGuide } from '@/api/sync/travelGuide';
 import { isApiEnabled } from '@/constants/api';
+import { getTravelGuideGeneratingText } from '@/constants/aiCtaLabels';
 import { saveTravelGuideDetail } from '@/domains/travel-guide/utils/travelGuideDetailStorage';
 import type { AiGuidePlanFormValues } from '@/types/travelGuide';
 import { goAiTravelGuide } from '@/utils/route';
@@ -26,7 +27,7 @@ export async function runTravelGuideGeneration(
       return;
     }
 
-    void Taro.showLoading({ title: t('travelPlan.generatingTravelGuide'), mask: true });
+    void Taro.showLoading({ title: getTravelGuideGeneratingText(), mask: true });
     const guideId = createGuideId();
 
     try {

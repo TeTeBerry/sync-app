@@ -97,7 +97,7 @@ export function ensureDefaultMessagesLoaded(): void {
  */
 export async function preloadCommonTranslations(
   locale: AppLocale,
-  priority?: LoadingPriority,
+  _priority?: LoadingPriority,
 ): Promise<void> {
   await loadMessages(locale);
 

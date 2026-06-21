@@ -6,6 +6,7 @@ import {
   PostOwnerDeleteButton,
   PostOwnerEditButton,
   PostOwnerRecruitStatusButton,
+  PostOwnerSlotStep,
 } from '../../../components/post';
 import { ContentReportMenuButton } from '../../../components/report';
 import { ImageWithFallback } from '../../../components/ImageWithFallback';
@@ -35,6 +36,7 @@ export type EventPostCardProps = {
   onDelete?: (post: EventDetailPost) => void;
   onEdit?: (post: EventDetailPost) => void;
   onRecruitStatusToggle?: (post: EventDetailPost) => void;
+  onRecruitSlotsAdjust?: (post: EventDetailPost, delta: -1 | 1) => void;
   onCommentSubmitted?: (updated: Pick<EventDetailPost, 'id' | 'comments'>) => void;
 };
 
@@ -64,6 +66,7 @@ function EventPostCardInner({
   onDelete,
   onEdit,
   onRecruitStatusToggle,
+  onRecruitSlotsAdjust,
   onCommentSubmitted,
 }: EventPostCardProps) {
   const t = useT();
@@ -93,6 +96,10 @@ function EventPostCardInner({
   const slotsTotal = recruitDisplay.slotsTotal;
   const slotsFilled = recruitDisplay.slotsFilled ?? (slotsTotal != null ? 1 : 0);
   const showProgress = isRecruiting && slotsTotal != null && slotsTotal > 0;
+  const displayFilled = showProgress
+    ? Math.min(Math.max(slotsFilled, 1), slotsTotal!)
+    : 0;
+  const showSlotsStepper = isOwn && showProgress && Boolean(onRecruitSlotsAdjust);
 
   const postName = isOwn
     ? displayIdentity.name?.trim() || post.name?.trim() || t('common.user')
@@ -124,10 +131,18 @@ function EventPostCardInner({
 
   const progressLabel = showProgress
     ? t('eventDetail.slotsProgress', {
-        filled: String(Math.min(slotsFilled, slotsTotal!)),
+        filled: String(displayFilled),
         total: String(slotsTotal),
       })
     : null;
+
+  const handleSlotsDecrease = () => {
+    onRecruitSlotsAdjust?.(post, -1);
+  };
+
+  const handleSlotsIncrease = () => {
+    onRecruitSlotsAdjust?.(post, 1);
+  };
 
   const statusLabel = isFull
     ? t('eventDetail.recruitStatusFull')
@@ -257,8 +272,25 @@ function EventPostCardInner({
             <View
               className="s-event-post__slots"
               aria-label={progressLabel ?? undefined}
+              onClick={stopClickPropagation}
             >
-              {renderSlotsMeter(slotsTotal!, Math.min(slotsFilled, slotsTotal!))}
+              <View className="s-event-post__slots-control">
+                {showSlotsStepper ? (
+                  <PostOwnerSlotStep
+                    side="decrease"
+                    disabled={displayFilled <= 1}
+                    onPress={handleSlotsDecrease}
+                  />
+                ) : null}
+                {renderSlotsMeter(slotsTotal!, displayFilled)}
+                {showSlotsStepper ? (
+                  <PostOwnerSlotStep
+                    side="increase"
+                    disabled={displayFilled >= slotsTotal!}
+                    onPress={handleSlotsIncrease}
+                  />
+                ) : null}
+              </View>
               <Text className="s-event-post__slots-label">{progressLabel}</Text>
             </View>
           ) : null}

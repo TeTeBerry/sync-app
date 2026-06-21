@@ -13,6 +13,7 @@ import {
   EVENT_POSTS_MAX_MOUNTED,
   EVENT_POSTS_RENDER_STEP,
   EVENT_POSTS_SLIDE_BUFFER,
+  EVENT_POSTS_PREFETCH_AHEAD,
 } from '../../../constants/listPerf';
 import { useWindowedList } from '../../../hooks/useWindowedList';
 import {
@@ -88,6 +89,7 @@ export function useEventDetailPosts({
     visibleItems: postItems,
     windowStart,
     windowEnd,
+    loadedEnd,
     hiddenCount,
     hasMoreToShow: hasMoreVisiblePosts,
     showMore: showMoreVisiblePosts,
@@ -135,30 +137,50 @@ export function useEventDetailPosts({
     });
   }, [visiblePostIds, highlightPostId]);
 
-  const handleListScroll = useCallback(
-    (scrollTop: number) => {
-      const index = Math.floor(scrollTop / EVENT_POST_ESTIMATED_HEIGHT_PX);
-      setScrollFocalIndex(index);
-    },
-    [setScrollFocalIndex],
-  );
-
-  const handleScrollToLower = useCallback(() => {
+  const loadMorePosts = useCallback(() => {
     if (search.isActive || postFilters.isActive) {
       return;
     }
-    if (hasMoreVisiblePosts) {
+    if (loadedEnd < loadedPostItems.length) {
       showMoreVisiblePosts();
       return;
     }
     void postsQuery.loadMore();
   }, [
-    hasMoreVisiblePosts,
+    loadedEnd,
+    loadedPostItems.length,
     postFilters.isActive,
     search.isActive,
     showMoreVisiblePosts,
     postsQuery,
   ]);
+
+  const handleListScroll = useCallback(
+    (scrollTop: number) => {
+      const index = Math.floor(scrollTop / EVENT_POST_ESTIMATED_HEIGHT_PX);
+      setScrollFocalIndex(index);
+
+      if (search.isActive || postFilters.isActive) {
+        return;
+      }
+      if (
+        loadedEnd < loadedPostItems.length &&
+        index >= Math.max(0, loadedEnd - EVENT_POSTS_PREFETCH_AHEAD)
+      ) {
+        showMoreVisiblePosts();
+      }
+    },
+    [
+      loadedEnd,
+      loadedPostItems.length,
+      postFilters.isActive,
+      search.isActive,
+      setScrollFocalIndex,
+      showMoreVisiblePosts,
+    ],
+  );
+
+  const handleScrollToLower = loadMorePosts;
 
   const scrollToElement = useCallback(
     (elementId: string) => {
@@ -241,6 +263,48 @@ export function useEventDetailPosts({
               error instanceof Error && error.message.trim()
                 ? error.message.trim()
                 : t('eventDetail.recruitStatusToggleFailed');
+            void Taro.showToast({ title: message, icon: 'none' });
+          }
+        })();
+      }, 'social');
+    },
+    [postsQuery],
+  );
+
+  const handleRecruitSlotsAdjust = useCallback(
+    (post: EventDetailPost, delta: -1 | 1) => {
+      requireAuth(() => {
+        void (async () => {
+          const recruitDisplay = resolveBuddyPostRecruitDisplay(post);
+          const slotsTotal = recruitDisplay.slotsTotal;
+          if (slotsTotal == null || slotsTotal <= 0) {
+            return;
+          }
+
+          const currentFilled = Math.min(
+            Math.max(recruitDisplay.slotsFilled ?? 1, 1),
+            slotsTotal,
+          );
+          const nextFilled = Math.min(slotsTotal, Math.max(1, currentFilled + delta));
+          if (nextFilled === currentFilled) {
+            return;
+          }
+
+          try {
+            const updated = await updatePostRecruit(post.id, {
+              recruitStatus:
+                recruitDisplay.recruitStatus === 'full'
+                  ? 'open'
+                  : recruitDisplay.recruitStatus,
+              slotsTotal,
+              slotsFilled: nextFilled,
+            });
+            postsQuery.patchItem(updated);
+          } catch (error) {
+            const message =
+              error instanceof Error && error.message.trim()
+                ? error.message.trim()
+                : t('eventDetail.recruitSlotsAdjustFailed');
             void Taro.showToast({ title: message, icon: 'none' });
           }
         })();
@@ -340,13 +404,13 @@ export function useEventDetailPosts({
     scrollToElement,
     handleDeletePost,
     handleRecruitStatusToggle,
+    handleRecruitSlotsAdjust,
     openPostComments,
     closePostComments,
     openApplyJoinComments,
     getCommentDraft,
     commentDraftByPostId,
     handleCommentSubmitted,
-    showMoreVisiblePosts,
     searchQuery: search.query,
     setSearchQuery: search.setQuery,
     clearSearchQuery: search.clearSearch,

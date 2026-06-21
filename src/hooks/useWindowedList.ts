@@ -59,6 +59,8 @@ export function useWindowedList<T>(
 
   const loadedEnd = Math.min(endLimit, items.length);
 
+  const hasUnloadedItems = loadedEnd < items.length;
+
   const { windowStart, windowEnd } = useMemo(
     () =>
       computeListWindow(slidingWindow, focalIndex, loadedEnd, maxVisible, slideBuffer),
@@ -71,7 +73,7 @@ export function useWindowedList<T>(
   );
 
   const hiddenCount = Math.max(0, items.length - visibleItems.length);
-  const hasMoreToShow = loadedEnd < items.length || hiddenCount > 0;
+  const hasMoreToShow = hasUnloadedItems;
 
   const showMore = useCallback(() => {
     setEndLimit((prev) => {
@@ -113,9 +115,11 @@ export function useWindowedList<T>(
     visibleItems,
     windowStart,
     windowEnd,
+    loadedEnd,
     focalIndex,
     hiddenCount,
     hasMoreToShow,
+    hasUnloadedItems,
     showMore,
     showAll,
     ensureIndexVisible,

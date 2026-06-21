@@ -49,6 +49,7 @@ declare module 'lucide-react-taro/icons/*' {
   export const MessageSquare: LucideIcon;
   export const Minus: LucideIcon;
   export const Music2: LucideIcon;
+  export const Pencil: LucideIcon;
   export const Plane: LucideIcon;
   export const Plus: LucideIcon;
   export const RefreshCw: LucideIcon;
@@ -66,6 +67,7 @@ declare module 'lucide-react-taro/icons/*' {
   export const TrendingUp: LucideIcon;
   export const TriangleAlert: LucideIcon;
   export const User: LucideIcon;
+  export const UserPlus: LucideIcon;
   export const Users: LucideIcon;
   export const Utensils: LucideIcon;
   export const X: LucideIcon;

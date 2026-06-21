@@ -211,9 +211,10 @@ export function useAiTravelGuidePage() {
   }, [payload?.plan, sharing, t]);
 
   const handleRegenerate = useCallback(() => {
-    if (!payload) return;
+    if (!payload?.activityLegacyId) return;
+    const activityLegacyId = payload.activityLegacyId;
     requireAuth(
-      () => goEventDetailTravelGuideSheet(payload.activityLegacyId, payload.form),
+      () => goEventDetailTravelGuideSheet(activityLegacyId, payload.form),
       'ai_assistant',
     );
   }, [payload]);

@@ -6,7 +6,6 @@ import { ProfileCollapsibleSection } from './ProfileCollapsibleSection';
 import type { ProfileActivityItem } from '../../types/backend';
 import { compareActivityDateDesc } from '../../utils/activityStatus';
 import { safeTrim } from '../../utils/safeString';
-import { goEventDetail } from '../../utils/route';
 import { Text, View } from '@tarojs/components';
 import { useT } from '@/hooks/useI18n';
 

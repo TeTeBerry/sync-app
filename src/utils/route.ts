@@ -2,6 +2,7 @@ import Taro from '@tarojs/taro';
 import { useCallback, useEffect, useState } from 'react';
 import { bindActivity } from '../domains/activity-scope';
 import { useNavigationStore } from '../stores/navigationStore';
+import type { NavigationState } from '../stores/navigationStore';
 import type { ExclusiveItineraryNavIntent } from '../stores/types';
 import type { PersonalityBuddyPostPrefill } from '../domains/personality-test/utils/buildPersonalityBuddyPostPrefill';
 import type { AiGuidePlanFormValues } from '../types/travelGuide';
@@ -24,9 +25,9 @@ import { seedActivityDetailFromHomeSignupEvent } from './activityDetailCache';
 import { prefetchEventPostsPage } from '../cache/eventPostsPageCache';
 import { isAuthGated, requireAuth } from './authGate';
 import type { LoginInterceptFeature } from '../stores/loginInterceptStore';
-import { useLoginInterceptStore } from '../stores/loginInterceptStore';
 import { setEventsViewTabIntent } from './eventsTabIntent';
 import { setEventsSearchQuery } from './eventsSearchIntent';
+import { encodeSelectedDjList } from '../domains/performance-itinerary/utils/itineraryBanner';
 
 export const ROUTES = {
   HOME: '/pages/index/index',

@@ -195,29 +195,13 @@
 .s-event-detail-festival-prep__body {
   display: flex;
   flex-direction: column;
-  gap: 10px;
   width: 100%;
-  margin-top: 10px;
-  padding: 12px;
-  border-radius: 16px;
+  margin-top: 8px;
+  padding: 10px 12px 8px;
+  border-radius: 14px;
   background: rgba(255, 255, 255, 0.02);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
   box-sizing: border-box;
-}
-
-.s-event-detail__festival-plan {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  width: 100%;
-}
-
-.s-event-detail__festival-plan-kicker {
-  color: #8e8e93;
-  font-size: var(--s-type-caption);
-  font-weight: var(--s-fw-semibold);
-  line-height: 1.2;
-  letter-spacing: 0.02em;
 }
 
 .s-event-detail__ai-travel-guide {
@@ -317,12 +301,40 @@
     &--guide {
       background: rgba(var(--primary-rgb), 0.14);
     }
+
+    &--buddy {
+      background: rgba(255, 159, 10, 0.14);
+    }
   }
 
   &--guide {
     box-shadow:
       inset 0 0 0 1px rgba(var(--primary-rgb), 0.22),
       0 0 18px rgba(var(--primary-rgb), 0.08);
+  }
+
+  &--buddy {
+    box-shadow: inset 0 0 0 1px rgba(255, 159, 10, 0.2);
+  }
+
+  &--done {
+    opacity: 0.9;
+  }
+
+  &--next {
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 159, 10, 0.34),
+      0 0 16px rgba(255, 159, 10, 0.06);
+  }
+
+  &__status {
+    flex-shrink: 0;
+    width: 20px;
+    font-size: 13px;
+    font-weight: var(--s-fw-bold);
+    line-height: 1;
+    color: #30d158;
+    text-align: center;
   }
 
   &__body {
@@ -684,22 +696,6 @@
   }
 }
 
-.s-event-posts-list__more-local {
-  display: block;
-  padding: 8px 0 4px;
-  text-align: center;
-}
-
-.s-event-posts-list__more-local-text {
-  font-size: var(--s-type-small);
-  line-height: 1.4;
-  color: #8e8e93;
-}
-
-.s-event-posts-list__more-local--pressed {
-  opacity: 0.72;
-}
-
 .s-event-posts-list__loading {
   display: block;
   padding: 8px 0 4px;
@@ -1041,6 +1037,13 @@
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.s-event-post__slots-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
 }
 
 .s-event-post__slots-meter {

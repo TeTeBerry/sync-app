@@ -230,7 +230,7 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
       return;
     }
     travelGuide.openGuideSheet();
-  }, [eventId, festivalPlan.checklist, travelGuide.openGuideSheet]);
+  }, [eventId, festivalPlan.checklist, travelGuide]);
 
   const travelGuideGenerated = useMemo(
     () =>
@@ -256,7 +256,7 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     openGuideOnMount,
     invalidEventId,
     secondaryReady,
-    travelGuide.openGuideSheet,
+    travelGuide,
     travelGuideNavIntent?.prefillTravelGuideForm,
   ]);
 
