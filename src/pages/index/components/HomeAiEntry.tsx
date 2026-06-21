@@ -2,7 +2,8 @@ import './HomeAiEntry.scss';
 import type { FC } from 'react';
 import { Bot, ChevronRight } from '../../../components/icons';
 import { AI_ASSISTANT_DISCLAIMER } from '../../../constants/aiDisclosure';
-import { switchTabTo, ROUTES } from '../../../utils/route';
+import { goPrepTab } from '../../../utils/route';
+import { getActiveActivityLegacyId } from '@/domains/activity-scope';
 import { Text, View } from '@tarojs/components';
 import { useT } from '@/hooks/useI18n';
 
@@ -17,7 +18,7 @@ export const HomeAiEntry: FC = () => {
 
       <View
         className="s-home-ai__card"
-        onClick={() => switchTabTo(ROUTES.AI)}
+        onClick={() => goPrepTab(getActiveActivityLegacyId() ?? undefined)}
         role="button"
         aria-label={t('home.aiEntryTitle')}
       >

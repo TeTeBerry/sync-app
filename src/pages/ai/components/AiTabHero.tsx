@@ -21,15 +21,7 @@ export const AiTabHero: FC<AiTabHeroProps> = ({ navInsets }) => {
           <Sparkles size={20} color="#ffffff" strokeWidth={2.25} />
         </View>
         <View className="s-ai-tab-hero__copy">
-          <View className="s-ai-tab-hero__title-row">
-            <Text className="s-ai-tab-hero__title">{t('ai.assistantTitle')}</Text>
-            <View className="s-ai-tab-hero__badge">
-              <View className="s-ai-tab-hero__online-dot" aria-hidden />
-              <Text className="s-ai-tab-hero__badge-text">
-                {t('ai.assistantOnline')}
-              </Text>
-            </View>
-          </View>
+          <Text className="s-ai-tab-hero__title">{t('ai.assistantTitle')}</Text>
           <Text className="s-ai-tab-hero__tagline">{t('ai.assistantTagline')}</Text>
         </View>
       </View>

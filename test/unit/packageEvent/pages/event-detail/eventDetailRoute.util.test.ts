@@ -17,6 +17,7 @@ describe('eventDetailRoute.util', () => {
       focusPostsOnMount: true,
       openBuddyPostOnMount: true,
       openCommentsOnMount: false,
+      openGuideOnMount: false,
     });
   });
 
@@ -31,6 +32,7 @@ describe('eventDetailRoute.util', () => {
       focusPostsOnMount: false,
       openBuddyPostOnMount: false,
       openCommentsOnMount: true,
+      openGuideOnMount: false,
     });
   });
 
@@ -40,6 +42,7 @@ describe('eventDetailRoute.util', () => {
       focusPostsOnMount: false,
       openBuddyPostOnMount: false,
       openCommentsOnMount: false,
+      openGuideOnMount: false,
     });
   });
 

@@ -22,6 +22,7 @@ import {
   goExclusiveItinerary,
   goMyItinerary,
   goAiTravelGuide,
+  goAiAssistantTravelGuideSheet,
 } from '../../../utils/route';
 import { scrollElementToCenter } from '../../../utils/scrollToCenter';
 import { t } from '@/i18n/translate';
@@ -178,9 +179,16 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     goExclusiveItinerary(eventId);
   }, [assertValidEventId, eventId]);
 
+  const openAiTravelGuideSheet = useCallback(() => {
+    if (!assertValidEventId()) {
+      return;
+    }
+    goAiAssistantTravelGuideSheet(eventId);
+  }, [assertValidEventId, eventId]);
+
   const festivalPlan = useEventDetailFestivalPlan({
     activityLegacyId: eventId,
-    openTravelGuideSheet: travelGuide.openGuideSheet,
+    openTravelGuideSheet: openAiTravelGuideSheet,
     openItinerary: handleOpenExclusiveItinerary,
     openBuddyPostSheet: templatePost.openBuddyPostSheet,
   });
@@ -193,8 +201,8 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
       goAiTravelGuide(guideId);
       return;
     }
-    travelGuide.openGuideSheet();
-  }, [eventId, festivalPlan.checklist, travelGuide]);
+    openAiTravelGuideSheet();
+  }, [eventId, festivalPlan.checklist, openAiTravelGuideSheet]);
 
   const travelGuideGenerated = useMemo(
     () =>
@@ -215,8 +223,8 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
       return;
     }
     guideSheetOpenedRef.current = true;
-    travelGuide.openGuideSheet();
-  }, [openGuideOnMount, invalidEventId, secondaryReady, travelGuide]);
+    openAiTravelGuideSheet();
+  }, [openGuideOnMount, invalidEventId, secondaryReady, openAiTravelGuideSheet]);
 
   const isPublishing = templatePost.isBuddyPostPublishing;
 

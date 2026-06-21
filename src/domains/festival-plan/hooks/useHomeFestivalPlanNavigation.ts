@@ -1,7 +1,11 @@
 import { useCallback, useMemo } from 'react';
 import { runAiCapability } from '@/domains/ai-capability/runAiCapability';
 import type { AiCapability } from '@/domains/ai-capability/types';
-import { goEventDetail, goExclusiveItinerary } from '@/utils/route';
+import {
+  goEventDetail,
+  goExclusiveItinerary,
+  goAiAssistantTravelGuideSheet,
+} from '@/utils/route';
 import { useFestivalPlanSummary } from '../useFestivalPlanSummary';
 import { useFestivalPlanNavigation } from '../useFestivalPlanNavigation';
 import type { FestivalPlanTaskActions } from '../festivalPlanTaskActions';
@@ -17,7 +21,7 @@ export function useHomeFestivalPlanNavigation(activityLegacyId?: number) {
         }
         runAiCapability(capability, {
           openTravelGuideSheet: () => {
-            goEventDetail(activityLegacyId, { openGuide: true });
+            goAiAssistantTravelGuideSheet(activityLegacyId);
           },
           openItinerary: () => {
             goExclusiveItinerary(activityLegacyId);

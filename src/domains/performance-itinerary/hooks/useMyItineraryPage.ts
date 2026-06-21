@@ -192,7 +192,7 @@ export function useMyItineraryPage() {
 
   const handleShare = useCallback(() => {
     void Taro.showToast({ title: t('itinerary.shareComingSoon'), icon: 'none' });
-  }, [t]);
+  }, []);
 
   const handleReselect = useCallback(() => {
     if (Number.isFinite(activityLegacyId) && activityLegacyId > 0) {
@@ -255,7 +255,6 @@ export function useMyItineraryPage() {
     save,
     savedQuery,
     selectedDjIds,
-    t,
   ]);
 
   const navFallback =

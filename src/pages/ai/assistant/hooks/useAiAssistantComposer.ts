@@ -19,6 +19,8 @@ export function useAiAssistantComposer(options: {
   capabilityRunner: CapabilityRunner;
   openPersonalityTest: () => void;
   openActivityPicker: () => void;
+  openLineup: () => void;
+  openSchedule: () => void;
 }) {
   const {
     activityLegacyId,
@@ -30,6 +32,8 @@ export function useAiAssistantComposer(options: {
     capabilityRunner,
     openPersonalityTest,
     openActivityPicker,
+    openLineup,
+    openSchedule,
   } = options;
 
   const [composerResetKey, setComposerResetKey] = useState(0);
@@ -99,6 +103,12 @@ export function useAiAssistantComposer(options: {
           case 'pick_festival_sheet':
             openActivityPicker();
             return;
+          case 'lineup_page':
+            openLineup();
+            return;
+          case 'schedule_page':
+            openSchedule();
+            return;
           default:
             if (capabilityRunner.runFromWelcomeChipAction(capabilityAction, 'chat')) {
               return;
@@ -119,7 +129,9 @@ export function useAiAssistantComposer(options: {
       isStreaming,
       isStreamingRef,
       openActivityPicker,
+      openLineup,
       openPersonalityTest,
+      openSchedule,
       send,
     ],
   );

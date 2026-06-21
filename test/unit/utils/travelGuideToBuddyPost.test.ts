@@ -1,6 +1,19 @@
 import { describe, expect, it } from 'vitest';
 import { travelGuideFormToBuddyPrefill } from '@/utils/travelGuideToBuddyPost';
 
+const mockT = (key: string) =>
+  (
+    ({
+      'travelPlan.budgetEconomy': '经济',
+      'travelPlan.budgetEconomyHint': '青旅/民宿',
+      'travelPlan.budgetStandard': '标准',
+      'travelPlan.budgetStandardHint': '三星',
+      'travelPlan.budgetComfort': '舒适',
+      'travelPlan.budgetComfortHint': '四星',
+      'travelPlan.driveYes': '自驾',
+    }) as Record<string, string>
+  )[key] ?? key;
+
 describe('travelGuideFormToBuddyPrefill', () => {
   it('maps headcount, activity dates, team tag and note without city prefill', () => {
     const { form, summaryLines } = travelGuideFormToBuddyPrefill(
@@ -12,6 +25,7 @@ describe('travelGuideFormToBuddyPrefill', () => {
         selfDrive: true,
       },
       '06/13-14/2026',
+      mockT,
     );
 
     expect(form.dateStart).toBe('2026-06-13');

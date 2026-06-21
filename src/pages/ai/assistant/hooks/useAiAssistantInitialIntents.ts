@@ -4,6 +4,7 @@ import type { AiGuidePlanFormValues } from '../../../../types/travelGuide';
 import type { AiCapability, RunCapabilityOptions } from '@/domains/ai-capability';
 import {
   resolveInitialAutoGuideIntent,
+  resolveInitialCapabilitySheetIntent,
   resolveInitialGuideSheetIntent,
   resolveInitialMessageIntent,
   resolveInitialPrefillGuideIntent,
@@ -17,6 +18,8 @@ type TravelGuideApi = {
 export function useAiAssistantInitialIntents(options: {
   initialMessage?: string | null;
   initialOpenAiGuideSheet?: boolean;
+  initialOpenItinerarySheet?: boolean;
+  initialOpenBuddyPostSheet?: boolean;
   initialPrefillTravelGuideForm?: AiGuidePlanFormValues | null;
   initialAutoRunTravelGuideForm?: AiGuidePlanFormValues | null;
   activityLegacyId?: number;
@@ -29,6 +32,8 @@ export function useAiAssistantInitialIntents(options: {
   const {
     initialMessage,
     initialOpenAiGuideSheet = false,
+    initialOpenItinerarySheet = false,
+    initialOpenBuddyPostSheet = false,
     initialPrefillTravelGuideForm = null,
     initialAutoRunTravelGuideForm = null,
     activityLegacyId,
@@ -41,6 +46,8 @@ export function useAiAssistantInitialIntents(options: {
 
   const initialMessageHandledRef = useRef(false);
   const initialGuideSheetHandledRef = useRef(false);
+  const initialItinerarySheetHandledRef = useRef(false);
+  const initialBuddyPostSheetHandledRef = useRef(false);
   const initialPrefillGuideHandledRef = useRef(false);
   const initialAutoGuideHandledRef = useRef(false);
 
@@ -78,6 +85,52 @@ export function useAiAssistantInitialIntents(options: {
     activityLegacyId,
     initialOpenAiGuideSheet,
     initialPrefillTravelGuideForm,
+    onInitialMessageSent,
+    runCapability,
+  ]);
+
+  useEffect(() => {
+    if (!initialOpenItinerarySheet) {
+      initialItinerarySheetHandledRef.current = false;
+      return;
+    }
+
+    const action = resolveInitialCapabilitySheetIntent({
+      enabled: initialOpenItinerarySheet,
+      activityLegacyId,
+      alreadyHandled: initialItinerarySheetHandledRef.current,
+    });
+    if (action === 'skip') return;
+
+    initialItinerarySheetHandledRef.current = true;
+    onInitialMessageSent?.();
+    runCapability('itinerary', { source: 'deep_link' });
+  }, [
+    activityLegacyId,
+    initialOpenItinerarySheet,
+    onInitialMessageSent,
+    runCapability,
+  ]);
+
+  useEffect(() => {
+    if (!initialOpenBuddyPostSheet) {
+      initialBuddyPostSheetHandledRef.current = false;
+      return;
+    }
+
+    const action = resolveInitialCapabilitySheetIntent({
+      enabled: initialOpenBuddyPostSheet,
+      activityLegacyId,
+      alreadyHandled: initialBuddyPostSheetHandledRef.current,
+    });
+    if (action === 'skip') return;
+
+    initialBuddyPostSheetHandledRef.current = true;
+    onInitialMessageSent?.();
+    runCapability('buddy_post', { source: 'deep_link' });
+  }, [
+    activityLegacyId,
+    initialOpenBuddyPostSheet,
     onInitialMessageSent,
     runCapability,
   ]);

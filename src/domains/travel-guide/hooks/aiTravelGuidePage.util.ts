@@ -1,10 +1,4 @@
 import type { TravelGuideDetailPayload } from '../utils/travelGuideDetailStorage';
-import type { parseTravelGuideFormFromShareQuery } from '../utils/travelGuideWechatShare.util';
-
-type TravelGuideShareSeed = NonNullable<
-  ReturnType<typeof parseTravelGuideFormFromShareQuery>
->;
-
 export const AI_TRAVEL_GUIDE_FOOTER_BASE_PX = 72;
 
 type WindowInfoLike = {
@@ -28,17 +22,6 @@ export function shouldLoadTravelGuideDetail(options: {
   guideId: string;
 }): boolean {
   return Boolean(!options.payload && options.guideId.trim());
-}
-
-/** @deprecated Prefer server fetch first; kept for legacy share fallback tests. */
-export function shouldGenerateTravelGuideFromShare(options: {
-  payload: TravelGuideDetailPayload | null;
-  guideId: string;
-  shareSeed: TravelGuideShareSeed | null;
-}): boolean {
-  return Boolean(
-    !options.payload && options.guideId.trim() && options.shareSeed != null,
-  );
 }
 
 export function resolveTravelGuideShareRef(options: {

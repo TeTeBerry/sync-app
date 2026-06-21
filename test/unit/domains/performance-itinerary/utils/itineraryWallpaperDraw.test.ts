@@ -103,7 +103,7 @@ describe('drawItineraryWallpaper', () => {
       .filter((c) => c.method === 'fillText')
       .map((c) => String(c.args[0]));
 
-    expect(texts).toContain('我的电音时间表');
+    expect(texts).toContain('My festival schedule');
     expect(texts.some((t) => t.includes('风暴电音节'))).toBe(true);
     expect(texts.some((t) => t.includes('深圳站'))).toBe(true);
     expect(texts).toContain('6月13日');

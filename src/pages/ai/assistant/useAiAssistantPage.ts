@@ -17,6 +17,7 @@ import { useFestivalPlanSummary } from '../../../domains/festival-plan/useFestiv
 import { useFestivalPlanNavigation } from '../../../domains/festival-plan/useFestivalPlanNavigation';
 import type { FestivalPlanTaskActions } from '../../../domains/festival-plan/festivalPlanTaskActions';
 import type { ActivityBindingActions } from './activityBindingActions';
+import type { AiTabQuickActionsHandlers } from '../components/aiTabQuickActions.types';
 
 export function useAiAssistantPage() {
   const navInsets = useNavBarInsets();
@@ -30,6 +31,8 @@ export function useAiAssistantPage() {
     return {
       initialMessage: intent?.initialMessage?.trim() ?? null,
       openAiGuideSheet: Boolean(intent?.openAiGuideSheet),
+      openItinerarySheet: Boolean(intent?.openItinerarySheet),
+      openBuddyPostSheet: Boolean(intent?.openBuddyPostSheet),
       prefillTravelGuideForm: intent?.prefillTravelGuideForm ?? null,
       autoRunTravelGuideForm: intent?.autoRunTravelGuideForm ?? null,
     };
@@ -39,6 +42,12 @@ export function useAiAssistantPage() {
   );
   const [pendingOpenAiGuideSheet, setPendingOpenAiGuideSheet] = useState(
     navBoot.openAiGuideSheet,
+  );
+  const [pendingOpenItinerarySheet, setPendingOpenItinerarySheet] = useState(
+    navBoot.openItinerarySheet,
+  );
+  const [pendingOpenBuddyPostSheet, setPendingOpenBuddyPostSheet] = useState(
+    navBoot.openBuddyPostSheet,
   );
   const [pendingPrefillGuideForm, setPendingPrefillGuideForm] = useState(
     navBoot.prefillTravelGuideForm,
@@ -53,6 +62,8 @@ export function useAiAssistantPage() {
     useState<FestivalPlanTaskActions | null>(null);
   const [activityBindingActions, setActivityBindingActions] =
     useState<ActivityBindingActions | null>(null);
+  const [quickActionsHandlers, setQuickActionsHandlers] =
+    useState<AiTabQuickActionsHandlers | null>(null);
 
   const consumeAiAssistantIntent = useNavigationStore(selectConsumeAiAssistantIntent);
   const activityLegacyId =
@@ -108,6 +119,8 @@ export function useAiAssistantPage() {
   const handleInitialMessageSent = useCallback(() => {
     setPendingInitialMessage(null);
     setPendingOpenAiGuideSheet(false);
+    setPendingOpenItinerarySheet(false);
+    setPendingOpenBuddyPostSheet(false);
     setPendingPrefillGuideForm(null);
     setPendingAutoGuideForm(null);
   }, []);
@@ -120,6 +133,12 @@ export function useAiAssistantPage() {
     }
     if (intent.openAiGuideSheet) {
       setPendingOpenAiGuideSheet(true);
+    }
+    if (intent.openItinerarySheet) {
+      setPendingOpenItinerarySheet(true);
+    }
+    if (intent.openBuddyPostSheet) {
+      setPendingOpenBuddyPostSheet(true);
     }
     if (intent.prefillTravelGuideForm) {
       setPendingPrefillGuideForm(intent.prefillTravelGuideForm);
@@ -157,6 +176,8 @@ export function useAiAssistantPage() {
     navInsets,
     pendingInitialMessage,
     pendingOpenAiGuideSheet,
+    pendingOpenItinerarySheet,
+    pendingOpenBuddyPostSheet,
     pendingPrefillGuideForm,
     pendingAutoGuideForm,
     pageShowSeq,
@@ -172,6 +193,8 @@ export function useAiAssistantPage() {
     setFestivalPlanActions,
     activityBindingActions,
     setActivityBindingActions,
+    quickActionsHandlers,
+    setQuickActionsHandlers,
     layoutRemeasureKey,
     handleChromeLayoutChange,
     activityLegacyId,

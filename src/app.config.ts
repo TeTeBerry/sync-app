@@ -50,7 +50,7 @@ export default {
     borderStyle: '@tabBorderStyle',
     list: [
       { pagePath: 'pages/index/index', text: '首页' },
-      { pagePath: 'pages/ai/index', text: 'AI助手' },
+      { pagePath: 'pages/ai/index', text: '准备' },
       { pagePath: 'pages/events/index', text: '活动' },
       { pagePath: 'pages/profile/index', text: '我的' },
     ],

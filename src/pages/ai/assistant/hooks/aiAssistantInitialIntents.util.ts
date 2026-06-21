@@ -76,3 +76,20 @@ export function resolveInitialAutoGuideIntent(options: {
   }
   return options.initialAutoRunTravelGuideForm;
 }
+
+export function resolveInitialCapabilitySheetIntent(options: {
+  enabled: boolean;
+  activityLegacyId?: number;
+  alreadyHandled: boolean;
+}): 'skip' | 'open' {
+  if (!options.enabled) {
+    return 'skip';
+  }
+  if (options.alreadyHandled) {
+    return 'skip';
+  }
+  if (options.activityLegacyId == null || Number.isNaN(options.activityLegacyId)) {
+    return 'skip';
+  }
+  return 'open';
+}

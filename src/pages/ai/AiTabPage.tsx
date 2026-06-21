@@ -9,6 +9,7 @@ import { useEndRouteTransitionOnShow } from '../../hooks/useEndRouteTransitionOn
 import { ROUTES } from '../../utils/route';
 import { AiTabHero } from './components/AiTabHero';
 import { AiTabContextCard } from './components/AiTabContextCard';
+import { AiQuickActions } from './components/AiQuickActions';
 import { View } from '@tarojs/components';
 
 const AiTabPage: FC = () => {
@@ -51,12 +52,24 @@ const AiTabPage: FC = () => {
           }
         />
 
+        {page.showEventContext && page.festivalPlan && page.quickActionsHandlers ? (
+          <AiQuickActions
+            checklist={page.festivalPlan}
+            onLineupPress={page.quickActionsHandlers.openLineup}
+            onSchedulePress={page.quickActionsHandlers.openSchedule}
+            onTaskPress={page.handleFestivalPlanTaskPress}
+            onLayoutChange={page.handleChromeLayoutChange}
+          />
+        ) : null}
+
         <View className="s-ai-assistant__body">
           <View className="s-ai-assistant__panel">
             <ProfileTabErrorBoundary logTag="AiTab">
               <AiAssistantChat
                 initialMessage={page.pendingInitialMessage}
                 initialOpenAiGuideSheet={page.pendingOpenAiGuideSheet}
+                initialOpenItinerarySheet={page.pendingOpenItinerarySheet}
+                initialOpenBuddyPostSheet={page.pendingOpenBuddyPostSheet}
                 initialPrefillTravelGuideForm={page.pendingPrefillGuideForm}
                 initialAutoRunTravelGuideForm={page.pendingAutoGuideForm}
                 pageShowSeq={page.pageShowSeq}
@@ -71,6 +84,12 @@ const AiTabPage: FC = () => {
                 userGender={page.userGender}
                 onFestivalPlanActionsChange={page.setFestivalPlanActions}
                 onActivityBindingActionsChange={page.setActivityBindingActions}
+                onAiQuickActionsChange={page.setQuickActionsHandlers}
+                festivalPlanNextTaskKey={page.festivalPlan?.nextTaskKey}
+                festivalPlanHasItinerary={Boolean(
+                  page.festivalPlan?.tasks.find((task) => task.key === 'itinerary')
+                    ?.done,
+                )}
               />
             </ProfileTabErrorBoundary>
           </View>

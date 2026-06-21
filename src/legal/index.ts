@@ -55,9 +55,6 @@ export function getLegalDocList(locale: AppLocale = DEFAULT_LOCALE): LegalDocume
   }));
 }
 
-/** @deprecated Use getLegalDocList(locale) */
-export const LEGAL_DOC_LIST: LegalDocument[] = getLegalDocList('zh-CN');
-
 export async function loadLegalDocument(
   id: LegalDocId,
   locale: AppLocale = DEFAULT_LOCALE,

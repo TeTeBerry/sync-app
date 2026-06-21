@@ -759,6 +759,8 @@ export type GoAiAssistantOptions = Pick<
   | 'initialMessage'
   | 'activityLegacyId'
   | 'openAiGuideSheet'
+  | 'openItinerarySheet'
+  | 'openBuddyPostSheet'
   | 'prefillTravelGuideForm'
   | 'autoRunTravelGuideForm'
 >;
@@ -766,6 +768,44 @@ export type GoAiAssistantOptions = Pick<
 /** Pre-download AI subpackage (touch / mount). */
 export function warmAiAssistant(): void {
   preloadAiSubpackage();
+}
+
+export function goAiAssistantTravelGuideSheet(activityLegacyId: number) {
+  goAiAssistant({ activityLegacyId, openAiGuideSheet: true });
+}
+
+export function goAiAssistantItinerarySheet(activityLegacyId: number) {
+  goAiAssistant({ activityLegacyId, openItinerarySheet: true });
+}
+
+export function goAiAssistantBuddyPostSheet(activityLegacyId: number) {
+  goAiAssistant({ activityLegacyId, openBuddyPostSheet: true });
+}
+
+/** Browse activity lineup (DJ grid from official schedule). */
+export function goActivityLineup(activityLegacyId: number) {
+  goExclusiveItinerary(activityLegacyId);
+}
+
+/** Open performance schedule — saved itinerary if available, otherwise lineup browser. */
+export function goActivitySchedule(
+  activityLegacyId: number,
+  options?: { hasItinerary?: boolean },
+) {
+  if (options?.hasItinerary) {
+    goMyItinerary(activityLegacyId);
+    return;
+  }
+  goExclusiveItinerary(activityLegacyId);
+}
+
+/** Open Prep tab; binds activity when legacyId is provided. */
+export function goPrepTab(activityLegacyId?: number) {
+  if (activityLegacyId != null && !Number.isNaN(activityLegacyId)) {
+    goAiAssistant({ activityLegacyId });
+    return;
+  }
+  switchTabTo(ROUTES.AI);
 }
 
 export function goAiAssistant(options?: GoAiAssistantOptions) {
@@ -782,6 +822,12 @@ export function goAiAssistant(options?: GoAiAssistantOptions) {
   if (options?.openAiGuideSheet) {
     intent.openAiGuideSheet = true;
   }
+  if (options?.openItinerarySheet) {
+    intent.openItinerarySheet = true;
+  }
+  if (options?.openBuddyPostSheet) {
+    intent.openBuddyPostSheet = true;
+  }
   if (options?.prefillTravelGuideForm) {
     intent.prefillTravelGuideForm = options.prefillTravelGuideForm;
   }
@@ -792,6 +838,8 @@ export function goAiAssistant(options?: GoAiAssistantOptions) {
     intent.initialMessage ||
     intent.activityLegacyId != null ||
     intent.openAiGuideSheet ||
+    intent.openItinerarySheet ||
+    intent.openBuddyPostSheet ||
     intent.prefillTravelGuideForm ||
     intent.autoRunTravelGuideForm
   ) {

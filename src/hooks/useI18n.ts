@@ -1,6 +1,10 @@
 import { useCallback, useMemo, useRef } from 'react';
 import { useLocaleStore } from '@/i18n/localeStore';
-import { translate, type TranslateParams } from '@/i18n/translate';
+import {
+  translate,
+  getTranslationCacheStats,
+  type TranslateParams,
+} from '@/i18n/translate';
 import type { AppLocale } from '@/i18n/types';
 
 // Memoized selectors to avoid unnecessary re-renders
@@ -84,10 +88,7 @@ export function useI18nPerformance() {
 
   return {
     renderCount: renderCount.current,
-    getCacheStats: () =>
-      typeof getTranslationCacheStats === 'function'
-        ? getTranslationCacheStats()
-        : null,
+    getCacheStats: () => getTranslationCacheStats(),
   };
 }
 

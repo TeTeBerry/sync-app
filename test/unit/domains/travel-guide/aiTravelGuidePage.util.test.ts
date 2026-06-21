@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 import {
   computeAiTravelGuideFooterChromePx,
   resolveTravelGuideShareRef,
-  shouldGenerateTravelGuideFromShare,
   shouldLoadTravelGuideDetail,
 } from '@/domains/travel-guide/hooks/aiTravelGuidePage.util';
 import type { TravelGuideDetailPayload } from '@/domains/travel-guide/utils/travelGuideDetailStorage';
@@ -65,23 +64,6 @@ describe('aiTravelGuidePage.util', () => {
       shouldLoadTravelGuideDetail({
         payload,
         guideId: 'guide-1',
-      }),
-    ).toBe(false);
-  });
-
-  it('generates from share only when local payload is absent', () => {
-    expect(
-      shouldGenerateTravelGuideFromShare({
-        payload: null,
-        guideId: 'guide-1',
-        shareSeed: { activityLegacyId: 4, form: payload.form },
-      }),
-    ).toBe(true);
-    expect(
-      shouldGenerateTravelGuideFromShare({
-        payload,
-        guideId: 'guide-1',
-        shareSeed: { activityLegacyId: 4, form: payload.form },
       }),
     ).toBe(false);
   });

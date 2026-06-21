@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   resolveInitialAutoGuideIntent,
+  resolveInitialCapabilitySheetIntent,
   resolveInitialGuideSheetIntent,
   resolveInitialMessageIntent,
   resolveInitialPrefillGuideIntent,
@@ -83,13 +84,23 @@ describe('aiAssistantInitialIntents.util', () => {
     ).toEqual(guideForm);
   });
 
-  it('skips auto-run without activityLegacyId', () => {
+  it('opens capability sheet from deep link when activity is bound', () => {
     expect(
-      resolveInitialAutoGuideIntent({
-        initialAutoRunTravelGuideForm: guideForm,
+      resolveInitialCapabilitySheetIntent({
+        enabled: true,
+        activityLegacyId: 4,
+        alreadyHandled: false,
+      }),
+    ).toBe('open');
+  });
+
+  it('skips capability sheet without activityLegacyId', () => {
+    expect(
+      resolveInitialCapabilitySheetIntent({
+        enabled: true,
         activityLegacyId: undefined,
         alreadyHandled: false,
       }),
-    ).toBeNull();
+    ).toBe('skip');
   });
 });

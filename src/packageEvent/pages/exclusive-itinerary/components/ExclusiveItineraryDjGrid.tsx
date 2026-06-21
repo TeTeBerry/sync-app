@@ -45,16 +45,16 @@ const ExclusiveItineraryDjGrid: React.FC<ExclusiveItineraryDjGridProps> = ({
     <>
       <View className="s-exclusive-itinerary__step">
         <Text className="s-exclusive-itinerary__step-title">
-          {t('personality.step1Title')}
+          {t('itinerary.step1Title')}
         </Text>
         <Text className="s-exclusive-itinerary__step-badge">
-          {t('personality.step1Badge', { count: selectedCount })}
+          {t('itinerary.step1Badge', { count: selectedCount })}
         </Text>
       </View>
 
       <View className="s-exclusive-itinerary__filter-block">
         <Text className="s-exclusive-itinerary__filter-label">
-          {t('personality.stageFilter')}
+          {t('itinerary.stageFilter')}
         </Text>
         <ScrollView
           scrollX
@@ -90,7 +90,7 @@ const ExclusiveItineraryDjGrid: React.FC<ExclusiveItineraryDjGridProps> = ({
 
       <View className="s-exclusive-itinerary__filter-block">
         <Text className="s-exclusive-itinerary__filter-label">
-          {t('personality.genreFilter')}
+          {t('itinerary.genreFilter')}
         </Text>
         <ScrollView
           scrollX
@@ -131,7 +131,7 @@ const ExclusiveItineraryDjGrid: React.FC<ExclusiveItineraryDjGridProps> = ({
             className="s-exclusive-itinerary__search-input"
             type="text"
             value={styleSearchQuery}
-            placeholder={t('personality.searchPlaceholder')}
+            placeholder={t('itinerary.searchPlaceholder')}
             confirmType="search"
             onInput={(e) => onStyleSearchQueryChange(e.detail?.value ?? '')}
           />

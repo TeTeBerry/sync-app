@@ -35,6 +35,7 @@ declare module 'lucide-react-taro/icons/*' {
   export const Clock: LucideIcon;
   export const FileText: LucideIcon;
   export const Flame: LucideIcon;
+  export const Languages: LucideIcon;
   export const House: LucideIcon;
   export const Image: LucideIcon;
   export const Info: LucideIcon;

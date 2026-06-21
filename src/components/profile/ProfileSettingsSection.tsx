@@ -3,7 +3,7 @@ import {
   Bell,
   ChevronRight,
   FileText,
-  Globe,
+  Languages,
   Info,
   LogOut,
   Music2,
@@ -135,7 +135,7 @@ const ProfileSettingsSection: React.FC<ProfileSettingsSectionProps> = ({
         onClick={onOpenLanguage}
       >
         <View className="s-profile__settings-icon s-profile__settings-icon--help">
-          <Globe size={18} color="#b0b0b0" />
+          <Languages size={18} color="#b0b0b0" />
         </View>
         <Text className="s-profile__settings-label">
           {t('profile.settings.language')}

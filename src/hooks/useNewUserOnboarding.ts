@@ -7,7 +7,12 @@ import {
   hasSeenNewUserOnboarding,
   markNewUserOnboardingSeen,
 } from '@/utils/onboardingStorage';
-import { goEventDetail, goEventsListTab, switchTabTo, ROUTES } from '@/utils/route';
+import {
+  goEventDetail,
+  goEventsListTab,
+  goAiAssistantTravelGuideSheet,
+  goPrepTab,
+} from '@/utils/route';
 import { useT } from '@/hooks/useI18n';
 
 export type UseNewUserOnboardingOptions = {
@@ -59,7 +64,13 @@ export function useNewUserOnboarding(options: UseNewUserOnboardingOptions = {}) 
         title: t('onboarding.step2Title'),
         description: t('onboarding.step2Desc'),
         actionLabel: t('onboarding.step2Action'),
-        onAction: () => dismissAnd(() => switchTabTo(ROUTES.AI)),
+        onAction: () => {
+          if (joinLegacyId) {
+            dismissAnd(() => goAiAssistantTravelGuideSheet(joinLegacyId));
+            return;
+          }
+          dismissAnd(() => goPrepTab());
+        },
       },
     ];
   }, [dismissAnd, featuredActivityLegacyId, t]);

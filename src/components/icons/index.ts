@@ -26,7 +26,7 @@ import { CircleCheck as CircleCheckIcon } from 'lucide-react-taro/icons/circle-c
 import { Clock as ClockIcon } from 'lucide-react-taro/icons/clock';
 import { FileText as FileTextIcon } from 'lucide-react-taro/icons/file-text';
 import { Flame as FlameIcon } from 'lucide-react-taro/icons/flame';
-// import { Globe as GlobeIcon } from 'lucide-react-taro/icons/globe';
+import { Languages as LanguagesIcon } from 'lucide-react-taro/icons/languages';
 import { House as HouseIcon } from 'lucide-react-taro/icons/house';
 import { Image as ImageIconBase } from 'lucide-react-taro/icons/image';
 import { Info as InfoIcon } from 'lucide-react-taro/icons/info';
@@ -79,7 +79,7 @@ export const CircleCheck = withDefaultIconColor(CircleCheckIcon);
 export const Clock = withDefaultIconColor(ClockIcon);
 export const FileText = withDefaultIconColor(FileTextIcon);
 export const Flame = withDefaultIconColor(FlameIcon);
-export const Globe = withDefaultIconColor(FlameIcon); // TODO: Fix Globe icon import
+export const Languages = withDefaultIconColor(LanguagesIcon);
 export const House = withDefaultIconColor(HouseIcon);
 export const ImageIcon = withDefaultIconColor(ImageIconBase);
 export const Info = withDefaultIconColor(InfoIcon);
