@@ -11,6 +11,7 @@ import {
   suggestionRegionForKeyword,
   type DepartureSuggestionItem,
 } from '../../utils/travelGuideDepartureSuggestions';
+import { useT } from '@/hooks/useI18n';
 import { Input, ScrollView, Text, View } from '@tarojs/components';
 
 export type PlaceAutocompleteFieldProps = {
@@ -148,7 +149,9 @@ export function PlaceAutocompleteField({
               onTap={() => pickSuggestion(item)}
             >
               <Text className="s-ai-guide-plan-sheet__suggest-title">
-                {item.kind === 'city' ? `${item.label}（城市）` : item.label}
+                {item.kind === 'city'
+                  ? t('ai.placeAutocompleteCity', { label: item.label })
+                  : item.label}
               </Text>
               {item.kind === 'place' && item.address && item.address !== item.label ? (
                 <Text className="s-ai-guide-plan-sheet__suggest-meta s-line-clamp-2">

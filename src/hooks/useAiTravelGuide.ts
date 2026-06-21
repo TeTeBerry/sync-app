@@ -20,10 +20,15 @@ import {
 } from '../utils/aiChatStagedProgress';
 import { isApiEnabled } from '../constants/api';
 import { isAuthGated, requireAuth } from '../utils/authGate';
+import { useT } from '@/hooks/useI18n';
 
-function buildUserSummary(form: AiGuidePlanFormValues, activityTitle: string): string {
-  const budget = travelGuideBudgetLabel(form.budgetTier);
-  const drive = form.selfDrive ? '自驾' : '非自驾';
+function buildUserSummary(
+  form: AiGuidePlanFormValues,
+  activityTitle: string,
+  t: (key: string) => string,
+): string {
+  const budget = travelGuideBudgetLabel(form.budgetTier, t);
+  const drive = form.selfDrive ? t('travelPlan.driveYes') : t('travelPlan.driveNo');
   return `生成「${activityTitle}」${getTravelGuideTitle()}：${form.departure}出发，${form.headcount}人，住${form.accommodationNights}晚，${budget}，${drive}`;
 }
 
@@ -46,6 +51,7 @@ export function useAiTravelGuide(options: {
     onPlanningMessagesShown,
   } = options;
 
+  const t = useT();
   const [sheetOpen, setSheetOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [sheetInitialValues, setSheetInitialValues] =
@@ -56,11 +62,14 @@ export function useAiTravelGuide(options: {
   const openGuideSheet = useCallback(() => {
     requireAuth(() => {
       if (isStreaming || generatingRef.current) {
-        void Taro.showToast({ title: '请等待当前操作完成', icon: 'none' });
+        void Taro.showToast({ title: t('travelPlan.pleaseWait'), icon: 'none' });
         return;
       }
       if (activityLegacyId == null || Number.isNaN(activityLegacyId)) {
-        void Taro.showToast({ title: '请先进入活动后再生成攻略', icon: 'none' });
+        void Taro.showToast({
+          title: t('travelPlan.pleaseEnterActivity'),
+          icon: 'none',
+        });
         return;
       }
       setSheetInitialValues(lastFormRef.current);
@@ -77,7 +86,7 @@ export function useAiTravelGuide(options: {
       if (generatingRef.current) return;
 
       const execute = async () => {
-        const title = activityTitle?.trim() || '本场活动';
+        const title = activityTitle?.trim() || t('ai.thisActivity');
         generatingRef.current = true;
         setIsGenerating(true);
         lastFormRef.current = form;
@@ -87,7 +96,7 @@ export function useAiTravelGuide(options: {
           : {
               id: createMessageId(),
               from: 'user',
-              text: options?.userBubbleText?.trim() || buildUserSummary(form, title),
+              text: options?.userBubbleText?.trim() || buildUserSummary(form, title, t),
             };
         const aiMsgId = createMessageId();
         const planningMsg = withAiChatProgress(
@@ -111,7 +120,7 @@ export function useAiTravelGuide(options: {
 
         try {
           if (!isApiEnabled()) {
-            throw new Error('请先配置 API 地址');
+            throw new Error(t('travelPlan.pleaseConfigureApi'));
           }
 
           const { plan } = await generateTravelGuide(activityLegacyId, {
@@ -128,7 +137,7 @@ export function useAiTravelGuide(options: {
           const doneMsg: ChatUiMessage = {
             id: aiMsgId,
             from: 'ai',
-            text: '已为你生成出行攻略，点击查看完整方案～',
+            text: t('travelPlan.guideGenerated'),
             travelGuide: { guideId, plan, form },
           };
 
@@ -139,7 +148,9 @@ export function useAiTravelGuide(options: {
           Taro.nextTick(() => onPlanningMessagesShown?.());
         } catch (error) {
           const message =
-            error instanceof Error ? error.message : '攻略生成失败，请稍后重试';
+            error instanceof Error
+              ? error.message
+              : t('travelPlan.guideGenerationFailed');
           messagesRef.current = messagesRef.current.map((m) =>
             m.id === aiMsgId ? { ...m, text: message, streaming: false } : m,
           );
@@ -164,6 +175,7 @@ export function useAiTravelGuide(options: {
       messagesRef,
       onPlanningMessagesShown,
       setMessages,
+      t,
     ],
   );
 

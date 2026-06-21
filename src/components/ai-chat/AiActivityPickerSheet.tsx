@@ -8,6 +8,7 @@ import { useOverlayLock } from '../../hooks/useOverlayLock';
 import { useActivitiesQuery } from '../../hooks/sync/activities';
 import { filterActivitiesForPicker } from '../../utils/filterActivitiesForPicker';
 import type { BackendActivity } from '../../types/backend';
+import { useT } from '@/hooks/useI18n';
 import { Input, ScrollView, Text, View } from '@tarojs/components';
 
 function formatActivityMeta(activity: BackendActivity): string {
@@ -35,6 +36,7 @@ export function AiActivityPickerSheet({
   }, [open]);
 
   const items = useMemo(() => filterActivitiesForPicker(data, query), [data, query]);
+  const t = useT();
 
   if (!open) {
     return null;
@@ -63,13 +65,13 @@ export function AiActivityPickerSheet({
               id="ai-activity-picker-title"
               className="s-ai-guide-plan-sheet__title"
             >
-              选择电音节
+              {t('ai.pickFestival')}
             </Text>
           </View>
           <Button
             className="s-ai-guide-plan-sheet__close"
             hoverClass="s-ai-guide-plan-sheet__close--pressed"
-            aria-label="关闭"
+            aria-label={t('common.close')}
             onClick={onClose}
           >
             <X size={18} color="#fff" aria-hidden />
@@ -81,7 +83,7 @@ export function AiActivityPickerSheet({
             className="s-ai-activity-picker-sheet__search"
             type="text"
             value={query}
-            placeholder="搜索活动名称"
+            placeholder={t('ai.pickFestival')}
             confirmType="search"
             onInput={(event) => setQuery(event.detail?.value ?? '')}
           />
@@ -97,11 +99,11 @@ export function AiActivityPickerSheet({
             isLoading={isLoading && !data}
             isError={isError}
             isEmpty={!isLoading && !isError && items.length === 0}
-            loadingText="加载活动中…"
-            errorText="活动列表加载失败"
-            emptyText={query.trim() ? '没有匹配的活动' : '暂无进行中的活动'}
+            loadingText={t('common.loading')}
+            errorText={t('events.loadFailed')}
+            emptyText={query.trim() ? t('events.empty') : t('events.empty')}
             onRetry={() => void refetch()}
-            retryText="重试"
+            retryText={t('common.retry')}
             stateClassName="s-ai-activity-picker-sheet__state"
           >
             <View className="s-ai-activity-picker-sheet__list">

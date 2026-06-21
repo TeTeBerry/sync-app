@@ -28,6 +28,7 @@ import {
 } from '@/utils/route';
 import { buildPersonalityItinerarySelection } from '../utils/buildPersonalityItinerarySelection';
 import { resolvePersonalityMediaUrl } from '../utils/resolvePersonalityMedia';
+import { useT } from '@/hooks/useI18n';
 import { Text, View, Image } from '@tarojs/components';
 
 type PersonalityResultViewProps = {
@@ -70,6 +71,7 @@ export const PersonalityResultView: FC<PersonalityResultViewProps> = ({
   onRestart,
   isWeapp = false,
 }) => {
+  const t = useT();
   const [catalog, setCatalog] = useState(() => getCachedPersonalityTestCatalog());
   const soul = result.recommendations.soulMatch;
   const [similarityDisplay, setSimilarityDisplay] = useState(0);
@@ -140,7 +142,9 @@ export const PersonalityResultView: FC<PersonalityResultViewProps> = ({
   if (!catalog) {
     return (
       <View className="s-personality-result">
-        <Text className="s-personality-result__celebrate">加载结果中…</Text>
+        <Text className="s-personality-result__celebrate">
+          {t('personality.loadingResults')}
+        </Text>
       </View>
     );
   }
@@ -157,15 +161,18 @@ export const PersonalityResultView: FC<PersonalityResultViewProps> = ({
       : null;
 
   const djSections = [
-    { title: '必看 Set', items: result.recommendations.mustSee },
-    { title: '推荐 Set', items: result.recommendations.recommended },
-    { title: '挑战曲风', items: result.recommendations.challenge },
+    { title: t('personality.mustSeeSet'), items: result.recommendations.mustSee },
+    {
+      title: t('personality.recommendedSet'),
+      items: result.recommendations.recommended,
+    },
+    { title: t('personality.challengeStyle'), items: result.recommendations.challenge },
   ].filter((section) => section.items.length > 0);
 
   const handlePrefillBuddyPost = () => {
     if (!itineraryTargetEvent) {
       void Taro.showToast({
-        title: '当前暂无推荐活动，请稍后再试',
+        title: t('personality.noRecommendationYet'),
         icon: 'none',
       });
       return;
@@ -181,7 +188,7 @@ export const PersonalityResultView: FC<PersonalityResultViewProps> = ({
   const handleGenerateItinerary = () => {
     if (!itineraryTargetEvent) {
       void Taro.showToast({
-        title: '当前暂无已官宣阵容的活动，请稍后再试',
+        title: t('personality.noLineupYet'),
         icon: 'none',
       });
       return;
@@ -215,7 +222,9 @@ export const PersonalityResultView: FC<PersonalityResultViewProps> = ({
 
   return (
     <View className="s-personality-result">
-      <Text className="s-personality-result__celebrate">🎉 你的本命 DJ 是…</Text>
+      <Text className="s-personality-result__celebrate">
+        {t('personality.soulDjIs')}
+      </Text>
 
       <View
         className="s-personality-result__hero"
@@ -256,7 +265,9 @@ export const PersonalityResultView: FC<PersonalityResultViewProps> = ({
             />
           </View>
           <View className="s-personality-result__similarity-copy">
-            <Text className="s-personality-result__similarity-label">灵魂相似度</Text>
+            <Text className="s-personality-result__similarity-label">
+              {t('personality.similarity')}
+            </Text>
             <Text
               className="s-personality-result__similarity-value"
               style={{ color: primary.primaryColor }}
@@ -284,7 +295,9 @@ export const PersonalityResultView: FC<PersonalityResultViewProps> = ({
       </View>
 
       <View className="s-personality-result__card">
-        <Text className="s-personality-result__section-title">💬 AI 分析</Text>
+        <Text className="s-personality-result__section-title">
+          {t('personality.aiAnalysisTitle')}
+        </Text>
         <Text className="s-personality-result__analysis">
           {result.narrative.aiAnalysis}
         </Text>
@@ -292,7 +305,9 @@ export const PersonalityResultView: FC<PersonalityResultViewProps> = ({
 
       {result.narrative.spiritConnections.length > 0 ? (
         <View className="s-personality-result__card">
-          <Text className="s-personality-result__section-title">🎵 你们的精神连接</Text>
+          <Text className="s-personality-result__section-title">
+            {t('personality.spiritConnectionTitle')}
+          </Text>
           <View
             className="s-personality-result__spirit-card"
             style={{ borderLeftColor: primary.primaryColor }}
@@ -312,7 +327,7 @@ export const PersonalityResultView: FC<PersonalityResultViewProps> = ({
       {confirmedSoulEvent ? (
         <View className="s-personality-result__card">
           <Text className="s-personality-result__section-title">
-            📍 阵容已官宣 · 你的本命 DJ 在列
+            {t('personality.lineupAnnouncedTitle')}
           </Text>
           <View
             className="s-personality-result__live-card"
@@ -328,9 +343,11 @@ export const PersonalityResultView: FC<PersonalityResultViewProps> = ({
 
       {djSections.length > 0 ? (
         <View className="s-personality-result__card">
-          <Text className="s-personality-result__section-title">阵容推荐</Text>
+          <Text className="s-personality-result__section-title">
+            {t('personality.lineupRecommendationTitle')}
+          </Text>
           <Text className="s-personality-result__section-meta">
-            基于 E/M/S/C 四维匹配 · 灵魂曲目 {soulProfile.signatureTrack}
+            {t('personality.basedOn', { track: soulProfile.signatureTrack })}
           </Text>
 
           {djSections.map((section) => (
@@ -369,9 +386,11 @@ export const PersonalityResultView: FC<PersonalityResultViewProps> = ({
 
       {lineupEvents.length > 0 ? (
         <View className="s-personality-result__card">
-          <Text className="s-personality-result__section-title">🎪 活动推荐</Text>
+          <Text className="s-personality-result__section-title">
+            {t('personality.lineupAnnouncedTitle')}
+          </Text>
           <Text className="s-personality-result__section-meta">
-            已官宣阵容中含你的推荐 DJ
+            {t('personality.basedOn', { track: '' })}
           </Text>
           <View className="s-personality-result__event-list">
             {lineupEvents.map((event) => {

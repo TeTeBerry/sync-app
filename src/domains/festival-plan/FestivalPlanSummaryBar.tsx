@@ -7,6 +7,7 @@ import type {
 } from './buildFestivalPlanChecklist';
 import { resolveFestivalPlanVisibleTasks } from './resolveFestivalPlanVisibleTasks';
 import { Text, View } from '@tarojs/components';
+import { useT } from '@/hooks/useI18n';
 import './FestivalPlanSummaryBar.scss';
 
 /** Checklist card below event context — expanded (px @ 375). */
@@ -28,6 +29,7 @@ export function FestivalPlanSummaryBar({
 }) {
   const { tasks, completedCount, totalCount, nextTaskKey } = checklist;
   const [expanded, setExpanded] = useState(false);
+  const t = useT();
 
   useEffect(() => {
     setExpanded(false);
@@ -57,7 +59,9 @@ export function FestivalPlanSummaryBar({
         aria-expanded={expanded}
         onClick={() => setExpanded((value) => !value)}
       >
-        <Text className="s-festival-plan-summary__title">本场计划</Text>
+        <Text className="s-festival-plan-summary__title">
+          {t('festivalPlan.title')}
+        </Text>
         <View className="s-festival-plan-summary__header-trail">
           <Text className="s-festival-plan-summary__progress">
             {completedCount}/{totalCount}
@@ -73,7 +77,10 @@ export function FestivalPlanSummaryBar({
       {embedded && totalCount > 0 ? (
         <View
           className="s-festival-plan-summary__progress-bar"
-          aria-label={`计划进度 ${completedCount}/${totalCount}`}
+          aria-label={t('festivalPlan.progressAria', {
+            completed: String(completedCount),
+            total: String(totalCount),
+          })}
         >
           <View
             className="s-festival-plan-summary__progress-fill"
@@ -122,13 +129,15 @@ export function FestivalPlanSummaryBar({
 
       {expanded && nextTaskKey ? (
         <Text className="s-festival-plan-summary__hint">
-          下一步：{tasks.find((task) => task.key === nextTaskKey)?.trailingLabel}
+          {t('festivalPlan.nextStep', {
+            label: tasks.find((task) => task.key === nextTaskKey)?.trailingLabel ?? '',
+          })}
         </Text>
       ) : null}
 
       {allComplete ? (
         <Text className="s-festival-plan-summary__hint s-festival-plan-summary__hint--complete">
-          本场准备已完成，祝你玩得开心
+          {t('festivalPlan.allComplete')}
         </Text>
       ) : null}
     </View>

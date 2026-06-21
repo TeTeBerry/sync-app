@@ -30,6 +30,7 @@ import {
   alignTravelPlanNodesYear,
   resolveTravelPlanYearHint,
 } from '../utils/travelPlanYearAlign';
+import { useT } from '@/hooks/useI18n';
 
 type UseTravelPlanPageOptions = {
   activityLegacyId: number | null;
@@ -59,7 +60,10 @@ export function useTravelPlanPage({
   activityLegacyId,
   eventMeta,
 }: UseTravelPlanPageOptions) {
-  const { confirm, confirmDialog } = useConfirmDialog({ cancelText: '取消' });
+  const t = useT();
+  const { confirm, confirmDialog } = useConfirmDialog({
+    cancelText: t('common.cancel'),
+  });
   const apiEnabled =
     isLiveApi() &&
     activityLegacyId != null &&
@@ -238,7 +242,7 @@ export function useTravelPlanPage({
             ? error.message
             : error instanceof Error
               ? error.message
-              : '保存失败，请重试';
+              : t('travelPlan.saveFailed');
         void Taro.showToast({ title: message, icon: 'none' });
         return false;
       } finally {
@@ -356,11 +360,11 @@ export function useTravelPlanPage({
 
       const isActivityNode = target.source === 'activity';
       const accepted = await confirm({
-        title: isActivityNode ? '移除活动行程' : '删除行程节点',
+        title: t(`travelPlan.${isActivityNode ? 'removeActivity' : 'deleteNode'}`),
         message: isActivityNode
-          ? '确定从行程计划中移除这场活动吗？'
-          : '确定要删除这条行程吗？',
-        confirmText: '删除',
+          ? t('travelPlan.removeActivityConfirm')
+          : t('travelPlan.deleteNodeConfirm'),
+        confirmText: t('travelPlan.deleteConfirmText'),
       });
       if (!accepted) {
         return;
@@ -380,7 +384,7 @@ export function useTravelPlanPage({
         if (!ok) {
           setHiddenActivityNodeIds(previousHidden);
         } else {
-          void Taro.showToast({ title: '已移除', icon: 'none' });
+          void Taro.showToast({ title: t('travelPlan.removed'), icon: 'none' });
         }
         return;
       }
@@ -397,7 +401,7 @@ export function useTravelPlanPage({
       if (!ok) {
         setUserNodes(previousUserNodes);
       } else {
-        void Taro.showToast({ title: '已删除', icon: 'none' });
+        void Taro.showToast({ title: t('travelPlan.deleted'), icon: 'none' });
       }
     },
     [

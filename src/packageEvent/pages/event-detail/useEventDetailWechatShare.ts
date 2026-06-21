@@ -7,6 +7,7 @@ import {
   buildEventDetailShareTimeline,
   type EventDetailShareActivity,
 } from '@/domains/activity-share/utils/eventDetailWechatShare.util';
+import { t } from '@/i18n/translate';
 
 type ActivityQuery = ReturnType<typeof useActivityDetailQuery>;
 
@@ -32,7 +33,7 @@ export function useEventDetailWechatShare(options: {
     if (options.eventId > 0) {
       shareRef.current = {
         legacyId: options.eventId,
-        name: '活动详情',
+        name: t('eventDetail.detailTitle'),
       };
       return;
     }
@@ -49,7 +50,7 @@ export function useEventDetailWechatShare(options: {
 
   useShareAppMessage(() => {
     const current = shareRef.current;
-    if (!current?.name || current.name === '活动详情') {
+    if (!current?.name || current.name === t('eventDetail.detailTitle')) {
       return buildEventDetailShareFallback(options.eventId);
     }
     return buildEventDetailShareAppMessage(current);
@@ -57,8 +58,8 @@ export function useEventDetailWechatShare(options: {
 
   useShareTimeline(() => {
     const current = shareRef.current;
-    if (!current?.name || current.name === '活动详情') {
-      return { title: '活动详情' };
+    if (!current?.name || current.name === t('eventDetail.detailTitle')) {
+      return { title: t('eventDetail.detailTitle') };
     }
     return buildEventDetailShareTimeline(current);
   });

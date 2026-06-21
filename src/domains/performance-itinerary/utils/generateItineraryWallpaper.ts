@@ -17,6 +17,8 @@ import {
 export type GenerateItineraryWallpaperInput = {
   days: ItineraryWallpaperDayInput[];
   eventMeta?: string;
+  /** Wallpaper title; defaults to Chinese if omitted. */
+  title?: string;
 };
 
 export class ItineraryWallpaperError extends Error {
@@ -43,6 +45,7 @@ async function renderTempFile(input: GenerateItineraryWallpaperInput): Promise<s
     sections,
     scaleFactor,
     eventMeta,
+    title: input.title,
   };
 
   try {

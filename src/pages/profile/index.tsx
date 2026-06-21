@@ -18,13 +18,17 @@ import ProfileSummarySection from '../../components/profile/ProfileSummarySectio
 import { useProfilePage } from '../../components/profile/useProfilePage';
 import { LoginInterceptHost } from '../../components/auth/LoginInterceptHost';
 import { useConfirmDialog } from '../../hooks/useConfirmDialog';
+import { useT } from '@/hooks/useI18n';
 import { ScrollView, View } from '@tarojs/components';
 
 const Profile: React.FC = () => {
+  const t = useT();
   const navInsets = useNavBarInsets();
   const headerChromePx = navInsets.paddingTop + TAB_PAGE_HEADER_BRAND_PX;
   const mainScrollHeight = useTabPageMainHeight(headerChromePx);
-  const { confirm, confirmDialog } = useConfirmDialog({ cancelText: '取消' });
+  const { confirm, confirmDialog } = useConfirmDialog({
+    cancelText: t('common.cancel'),
+  });
 
   const {
     showGuestProfile,
@@ -70,7 +74,7 @@ const Profile: React.FC = () => {
                   <View className="s-profile__card s-profile__card--loading">
                     <ThemedPageLoader
                       variant="inline"
-                      label="加载个人资料…"
+                      label={t('profile.loading')}
                       minHeight={148}
                     />
                   </View>
@@ -84,17 +88,17 @@ const Profile: React.FC = () => {
                     <ProfileActionCard
                       accent="activities"
                       icon={<Zap size={20} />}
-                      title="我的活动"
+                      title={t('profile.activitiesTitle')}
                       badge={ongoingCount}
-                      subtitle={`${ongoingCount} 个进行中的活动`}
+                      subtitle={t('profile.ongoingActivities', { count: ongoingCount })}
                       onClick={() => go(ROUTES.PROFILE_ACTIVITIES)}
                     />
                     <ProfileActionCard
                       accent="posts"
                       icon={<FileText size={20} />}
-                      title="我的帖子"
+                      title={t('profile.postsTitle')}
                       badge={postsCount}
-                      subtitle={`${postsCount} 条帖子`}
+                      subtitle={t('profile.postCount', { count: postsCount })}
                       onClick={() => go(ROUTES.PROFILE_POSTS)}
                     />
                     <ProfileSettingsSection {...settings} />

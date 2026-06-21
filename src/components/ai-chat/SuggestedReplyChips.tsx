@@ -1,7 +1,6 @@
 import { Button, cn } from '../ui';
+import { useT } from '@/hooks/useI18n';
 import { Text, View } from '@tarojs/components';
-
-const PUBLISH_CONFIRM_REPLY = '确认发布';
 
 export function SuggestedReplyChips({
   replies,
@@ -12,6 +11,9 @@ export function SuggestedReplyChips({
   disabled?: boolean;
   onSelect: (reply: string) => void;
 }) {
+  const t = useT();
+  const PUBLISH_CONFIRM_REPLY = t('ai.publishConfirmReply');
+
   if (!replies?.length) return null;
 
   return (

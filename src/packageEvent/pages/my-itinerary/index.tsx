@@ -21,6 +21,7 @@ import {
   TravelPlanTimeline,
   useTravelPlanPage,
 } from '@/domains/travel-plan';
+import { useT } from '@/hooks/useI18n';
 
 const MyItineraryPage = () => {
   useEndRouteTransitionOnShow();
@@ -29,6 +30,7 @@ const MyItineraryPage = () => {
     activityLegacyId: page.activityLegacyId,
     eventMeta: page.eventMeta,
   });
+  const t = useT();
 
   if (!page.pageKindResolved) {
     return (
@@ -47,7 +49,7 @@ const MyItineraryPage = () => {
       >
         <View className="s-page-with-tabbar__main">
           <PageNavigation
-            title="我的行程计划"
+            title={t('itinerary.travelTitle')}
             meta={travelPlan.pageMeta}
             fallback={page.navFallback}
             trailing={<TravelPlanHeaderAction onAdd={travelPlan.handleAddNode} />}
@@ -101,7 +103,7 @@ const MyItineraryPage = () => {
       />
       <View className="s-page-with-tabbar__main">
         <PageNavigation
-          title="我的电音时间表"
+          title={t('itinerary.title')}
           meta={`Auto Generated · ${page.eventMeta}`}
           fallback={page.navFallback}
           trailing={

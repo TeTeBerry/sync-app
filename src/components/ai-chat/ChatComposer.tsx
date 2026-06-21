@@ -3,6 +3,7 @@ import { Send, Trash2 } from '../../components/icons';
 import { Button, Input, cn } from '../ui';
 import { useAiChatStore } from '../../stores/aiChatStore';
 import { AI_ASSISTANT_DISCLAIMER } from '../../constants/aiDisclosure';
+import { useT } from '@/hooks/useI18n';
 import { Text, View, type InputProps as TaroInputProps } from '@tarojs/components';
 
 function readComposerInputValue(
@@ -30,6 +31,7 @@ export const ChatComposer = memo(function ChatComposer({
   resetKey?: number;
 }) {
   const [input, setInput] = useState('');
+  const t = useT();
 
   useEffect(() => {
     setInput('');
@@ -47,13 +49,13 @@ export const ChatComposer = memo(function ChatComposer({
   const inputPlaceholder = (() => {
     if (conversationFlow === 'collect_post_body') {
       return scopedToActivity && trimmedActivityTitle
-        ? `描述你在「${trimmedActivityTitle}」的组队需求…`
-        : '描述你的组队需求，如出发地、人数、日期…';
+        ? t('ai.composerPlaceholderBound', { title: trimmedActivityTitle })
+        : t('ai.composerPlaceholderUnbound');
     }
     if (scopedToActivity && trimmedActivityTitle) {
-      return `聊聊「${trimmedActivityTitle}」相关问题…`;
+      return t('ai.composerPlaceholderActivity', { title: trimmedActivityTitle });
     }
-    return '说说你想去哪、有什么想了解的…';
+    return t('ai.composerPlaceholderDefault');
   })();
 
   const isComposerDisabled = isStreaming;
@@ -89,7 +91,7 @@ export const ChatComposer = memo(function ChatComposer({
         <Button
           className="s-ai-assistant-chat__clear-btn"
           disabled={clearDisabled}
-          aria-label="清空对话"
+          aria-label={t('ai.clearConversation')}
           onClick={() => void onClearChat?.()}
         >
           <Trash2 size={16} color="#ef4444" />

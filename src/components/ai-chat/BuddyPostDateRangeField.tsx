@@ -1,5 +1,6 @@
 import { CalendarDays } from '../../components/icons';
 import { Picker, Text, View } from '@tarojs/components';
+import { useT } from '@/hooks/useI18n';
 import { displayBuddyPostDate } from './buddyPostSheetDisplayDate';
 
 const BUDDY_PICKER_ICON_COLOR = '#64d2ff';
@@ -17,12 +18,15 @@ export function BuddyPostDateRangeField({
   onDateStartChange,
   onDateEndChange,
 }: BuddyPostDateRangeFieldProps) {
+  const t = useT();
   return (
     <View className="s-ai-guide-plan-sheet__field">
       <View className="s-ai-buddy-post-sheet__field-head">
-        <Text className="s-ai-buddy-post-sheet__label">活动时间</Text>
-        <Text className="s-ai-buddy-post-sheet__field-hint-inline">
-          可选择区间，例如 6月13日-14日
+        <Text className="s-ai-buddy-post-sheet__label">
+          {t('ai.activityDateRange')}
+        </Text>
+        <Text className="s-ai-buddy-post-sheet__field-hint-in-line">
+          {t('ai.activityDateRangeHint')}
         </Text>
       </View>
       <View className="s-ai-buddy-post-sheet__date-row">
@@ -48,7 +52,9 @@ export function BuddyPostDateRangeField({
               </Text>
             </View>
           </Picker>
-          <Text className="s-ai-buddy-post-sheet__picker-caption">开始</Text>
+          <Text className="s-ai-buddy-post-sheet__picker-caption">
+            {t('ai.dateRangeStart')}
+          </Text>
         </View>
         <Text className="s-ai-buddy-post-sheet__date-dash" aria-hidden>
           —
@@ -72,7 +78,9 @@ export function BuddyPostDateRangeField({
               </Text>
             </View>
           </Picker>
-          <Text className="s-ai-buddy-post-sheet__picker-caption">结束</Text>
+          <Text className="s-ai-buddy-post-sheet__picker-caption">
+            {t('ai.dateRangeEnd')}
+          </Text>
         </View>
       </View>
     </View>

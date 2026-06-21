@@ -1,4 +1,5 @@
 import { Button, cn } from '../ui';
+import { useT } from '@/hooks/useI18n';
 import { View } from '@tarojs/components';
 
 export function BuddyPostFeedSyncToggle({
@@ -8,6 +9,7 @@ export function BuddyPostFeedSyncToggle({
   checked: boolean;
   onChange: (next: boolean) => void;
 }) {
+  const t = useT();
   return (
     <Button
       className={cn(
@@ -16,7 +18,7 @@ export function BuddyPostFeedSyncToggle({
       )}
       role="switch"
       aria-checked={checked}
-      aria-label="同步到留言板"
+      aria-label={t('ai.syncToFeed')}
       hoverClass="s-ai-guide-plan-sheet__toggle--pressed"
       onClick={() => onChange(!checked)}
     >

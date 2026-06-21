@@ -82,13 +82,13 @@ export function AiBuddyPostSheet({
               id="ai-buddy-post-sheet-title"
               className="s-ai-guide-plan-sheet__title"
             >
-              留言模板
+              {t('ai.buddyPostSheetTitle')}
             </Text>
           </View>
           <Button
             className="s-ai-guide-plan-sheet__close"
             hoverClass="s-ai-guide-plan-sheet__close--pressed"
-            aria-label="关闭"
+            aria-label={t('ai.close')}
             onClick={onClose}
           >
             <X size={18} color="#fff" aria-hidden />
@@ -116,9 +116,11 @@ export function AiBuddyPostSheet({
           {showSyncToFeedOption ? (
             <View className="s-ai-buddy-post-sheet__sync-row">
               <View className="s-ai-buddy-post-sheet__sync-copy">
-                <Text className="s-ai-buddy-post-sheet__sync-label">同步到留言板</Text>
+                <Text className="s-ai-buddy-post-sheet__sync-label">
+                  {t('ai.syncToFeed')}
+                </Text>
                 <Text className="s-ai-buddy-post-sheet__sync-hint">
-                  关闭后仍会保存，但不会出现在留言板列表
+                  {t('ai.syncToFeedHint')}
                 </Text>
               </View>
               <BuddyPostFeedSyncToggle
@@ -148,7 +150,9 @@ export function AiBuddyPostSheet({
           >
             <Send size={18} color="#fff" aria-hidden />
             <Text className="s-ai-guide-plan-sheet__submit-text">
-              {showSyncToFeedOption ? '保存' : submitLabel?.trim() || '发布组队帖'}
+              {showSyncToFeedOption
+                ? t('ai.save')
+                : submitLabel?.trim() || t('ai.publishBuddyPost')}
             </Text>
           </Button>
         </View>

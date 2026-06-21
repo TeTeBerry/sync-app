@@ -6,24 +6,26 @@ import {
   SUPPORT_FEEDBACK_HINT,
 } from '../../../../constants/supportContact';
 import { ROUTES, go } from '../../../../utils/route';
+import { useT } from '@/hooks/useI18n';
 import { Text, View } from '@tarojs/components';
 
 const FAQ = [
   {
-    q: '为什么会突然被限制互动？',
-    a: '常见原因包括：发布转票/加价出票、站外引流、重复灌水，或被多名用户举报为黄牛。AI 审核也可能误判，可通过下方流程申诉。',
+    q: t('appeal.faq.q1'),
+    a: t('appeal.faq.a1'),
   },
   {
-    q: '限制多久会解除？',
-    a: '限制到期后会自动恢复。具体解禁时间可在个人页或 AI 助手顶部的提示条中查看。',
+    q: t('appeal.faq.q2'),
+    a: t('appeal.faq.a2'),
   },
   {
-    q: '如何申诉误伤？',
-    a: '在帮助与反馈中说明情况并附上相关截图，我们会人工复核。',
+    q: t('appeal.faq.q3'),
+    a: t('appeal.faq.a3'),
   },
 ] as const;
 
 export function AppealSettings() {
+  const t = useT();
   const openHelp = () => {
     go(`${ROUTES.SETTINGS}?section=help`);
   };

@@ -27,6 +27,7 @@ import {
   resolveTravelGuideShareRef,
   shouldLoadTravelGuideDetail,
 } from './aiTravelGuidePage.util';
+import { useT } from '@/hooks/useI18n';
 
 const FOOTER_BASE_PX = 72;
 
@@ -63,6 +64,7 @@ export function useAiTravelGuidePage() {
   const footerChromePx = useMemo(() => resolveFooterChromePx(), []);
   const mainScrollHeight = useStackPageMainHeight(footerChromePx);
   const isWeapp = Taro.getEnv() === Taro.ENV_TYPE.WEAPP;
+  const t = useT();
 
   useEffect(() => {
     setPayload(cachedPayload);
@@ -116,7 +118,7 @@ export function useAiTravelGuidePage() {
         }
 
         if (!shareSeed) {
-          setLoadError('攻略不存在或已过期');
+          setLoadError(t('travelGuide.notFound'));
           return;
         }
 
@@ -126,7 +128,7 @@ export function useAiTravelGuidePage() {
           } catch (error) {
             if (cancelled) return;
             const message =
-              error instanceof Error ? error.message : '攻略加载失败，请稍后重试';
+              error instanceof Error ? error.message : t('travelGuide.loadFailed');
             setLoadError(message);
           }
         };
@@ -145,7 +147,7 @@ export function useAiTravelGuidePage() {
       } catch (error) {
         if (cancelled) return;
         const message =
-          error instanceof Error ? error.message : '攻略加载失败，请稍后重试';
+          error instanceof Error ? error.message : t('travelGuide.loadFailed');
         setLoadError(message);
       } finally {
         if (!cancelled && !deferLoadingStop) setLoading(false);
@@ -200,9 +202,9 @@ export function useAiTravelGuidePage() {
     try {
       const text = buildTravelGuideShareText(payload.plan);
       await Taro.setClipboardData({ data: text });
-      void Taro.showToast({ title: '攻略文案已复制', icon: 'success' });
+      void Taro.showToast({ title: t('travelGuide.copySuccess'), icon: 'success' });
     } catch {
-      void Taro.showToast({ title: '复制失败，请稍后重试', icon: 'none' });
+      void Taro.showToast({ title: t('travelGuide.copyFailed'), icon: 'none' });
     } finally {
       setSharing(false);
     }

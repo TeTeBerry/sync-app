@@ -16,6 +16,7 @@ import type {
 } from '../types/buddyPost';
 import type { AiGuidePlanFormValues } from '../types/travelGuide';
 import { travelGuideFormToBuddyPrefill } from '../utils/travelGuideToBuddyPost';
+import { useT } from '@/hooks/useI18n';
 import { isApiEnabled } from '../constants/api';
 import {
   buildBuddyPostUserSummary,
@@ -28,6 +29,7 @@ import {
 import { useBuddyPostSheetController } from './useBuddyPostSheetController';
 import { publishBuddyPostFromForm } from '../utils/publishBuddyPost';
 import { BUDDY_POST_PUBLISH_SUCCESS_MESSAGE } from '../constants/ugcPublishCompliance';
+import { t } from '@/i18n';
 
 export function useAiBuddyPost(options: {
   activityLegacyId?: number;
@@ -75,11 +77,11 @@ export function useAiBuddyPost(options: {
 
   const tryOpenBuddyPostSheet = useCallback(async () => {
     if (isStreaming || publishingRef.current) {
-      void Taro.showToast({ title: '请等待当前操作完成', icon: 'none' });
+      void Taro.showToast({ title: t('common.pleaseWait'), icon: 'none' });
       return false;
     }
     if (activityLegacyId == null || Number.isNaN(activityLegacyId)) {
-      void Taro.showToast({ title: '请先进入活动后再发帖', icon: 'none' });
+      void Taro.showToast({ title: t('common.pleaseEnterActivity'), icon: 'none' });
       return false;
     }
     return openSheet();
@@ -88,11 +90,11 @@ export function useAiBuddyPost(options: {
   const openBuddyPostSheetWithTag = useCallback(
     (_tagId: BuddyPostTagId = 'team') => {
       if (isStreaming || publishingRef.current) {
-        void Taro.showToast({ title: '请等待当前操作完成', icon: 'none' });
+        void Taro.showToast({ title: t('common.pleaseWait'), icon: 'none' });
         return;
       }
       if (activityLegacyId == null || Number.isNaN(activityLegacyId)) {
-        void Taro.showToast({ title: '请先进入活动后再发帖', icon: 'none' });
+        void Taro.showToast({ title: t('common.pleaseEnterActivity'), icon: 'none' });
         return;
       }
 
@@ -118,20 +120,20 @@ export function useAiBuddyPost(options: {
   const openBuddyPostSheetFromTravelGuide = useCallback(
     (guideForm: AiGuidePlanFormValues) => {
       if (isStreaming || publishingRef.current) {
-        void Taro.showToast({ title: '请等待当前操作完成', icon: 'none' });
+        void Taro.showToast({ title: t('common.pleaseWait'), icon: 'none' });
         return;
       }
       if (activityLegacyId == null || Number.isNaN(activityLegacyId)) {
-        void Taro.showToast({ title: '请先进入活动后再发帖', icon: 'none' });
+        void Taro.showToast({ title: t('common.pleaseEnterActivity'), icon: 'none' });
         return;
       }
-      const prefill = travelGuideFormToBuddyPrefill(guideForm, options.activityDate);
+      const prefill = travelGuideFormToBuddyPrefill(guideForm, options.activityDate, t);
       setSheetInitialValues(prefill.form);
       setSheetPrefillHint(prefill.summaryLines);
       void tryOpenBuddyPostSheet().then((canOpen) => {
         if (!canOpen) return;
         void Taro.showToast({
-          title: '已根据攻略预填，确认后发布',
+          title: t('common.prefillFromGuide'),
           icon: 'none',
           duration: 2000,
         });
@@ -177,7 +179,7 @@ export function useAiBuddyPost(options: {
 
       try {
         if (!isApiEnabled()) {
-          throw new Error('请先配置 API 地址');
+          throw new Error(t('common.pleaseConfigureApi'));
         }
 
         const { card } = await publishBuddyPostFromForm({
@@ -192,9 +194,9 @@ export function useAiBuddyPost(options: {
           id: aiMsgId,
           from: 'ai',
           text: [
-            `已为你发布「${title}」组队帖 ✅`,
+            t('common.postPublished', { title }),
             '',
-            '点击下方卡片可在活动详情页查看。',
+            t('common.viewInEventDetail'),
           ].join('\n'),
           createdPost: card,
         };
@@ -213,12 +215,14 @@ export function useAiBuddyPost(options: {
       } catch (error) {
         if (await handlePublishError(error)) {
           messagesRef.current = messagesRef.current.map((m) =>
-            m.id === aiMsgId ? { ...m, text: '发帖功能已受限', streaming: false } : m,
+            m.id === aiMsgId
+              ? { ...m, text: t('common.postRestricted'), streaming: false }
+              : m,
           );
           setMessages(messagesRef.current);
         } else {
           const message =
-            error instanceof Error ? error.message : '发帖失败，请稍后重试';
+            error instanceof Error ? error.message : t('common.operationFailed');
           messagesRef.current = messagesRef.current.map((m) =>
             m.id === aiMsgId ? { ...m, text: message, streaming: false } : m,
           );

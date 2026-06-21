@@ -13,6 +13,7 @@ import {
   isAccountPublishRestricted,
 } from '../../utils/accountRisk';
 import { ROUTES, go } from '../../utils/route';
+import { useT } from '@/hooks/useI18n';
 import { Text, View } from '@tarojs/components';
 
 export type AccountRiskBannerProps = {
@@ -24,6 +25,7 @@ export const AccountRiskBanner: FC<AccountRiskBannerProps> = ({
   accountRisk,
   className,
 }) => {
+  const t = useT();
   if (!isAccountPublishRestricted(accountRisk)) return null;
 
   const untilLabel = formatAccountRiskUntil(accountRisk?.postBlockedUntil);
@@ -46,8 +48,8 @@ export const AccountRiskBanner: FC<AccountRiskBannerProps> = ({
           {accountRiskStatusTitle(accountRisk)}
         </Text>
         <Text className="s-account-risk-banner__meta">
-          原因：{reasonLabel}
-          {untilLabel ? ` · 预计解禁：${untilLabel}` : ''}
+          {t('accountRisk.reason', { reason: reasonLabel })}
+          {untilLabel ? t('accountRisk.until', { date: untilLabel }) : ''}
         </Text>
         <Text className="s-account-risk-banner__message">
           {getAccountRiskBlockMessage(accountRisk)}
@@ -60,7 +62,9 @@ export const AccountRiskBanner: FC<AccountRiskBannerProps> = ({
           hoverClass="s-account-risk-banner__appeal-btn--pressed"
           onClick={openAppeal}
         >
-          <Text className="s-account-risk-banner__appeal-btn-text">申诉说明</Text>
+          <Text className="s-account-risk-banner__appeal-btn-text">
+            {t('accountRisk.appeal')}
+          </Text>
         </Button>
       </View>
     </View>

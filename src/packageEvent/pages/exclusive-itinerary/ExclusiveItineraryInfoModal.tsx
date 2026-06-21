@@ -2,9 +2,7 @@ import './ExclusiveItineraryInfoModal.scss';
 import { Sparkles, X } from '../../../components/icons';
 import { Text, View } from '@tarojs/components';
 import { useOverlayLock } from '../../../hooks/useOverlayLock';
-
-const DEFAULT_TITLE = '我的电音时间表';
-const DEFAULT_MESSAGE = '选择你喜爱的 DJ，将根据官方演出表自动生成你的电音观演时间表。';
+import { useT } from '@/hooks/useI18n';
 
 export type ExclusiveItineraryInfoModalProps = {
   open: boolean;
@@ -21,13 +19,21 @@ export type ExclusiveItineraryInfoModalProps = {
 export function ExclusiveItineraryInfoModal({
   open,
   onClose,
-  title = DEFAULT_TITLE,
-  message = DEFAULT_MESSAGE,
-  confirmText = '知道了',
+  title,
+  message,
+  confirmText = 'itinerary.infoModalConfirm',
   secondaryCta,
   showIcon = true,
 }: ExclusiveItineraryInfoModalProps) {
   useOverlayLock(open);
+  const t = useT();
+
+  const resolvedTitle = title ?? t('itinerary.infoModalTitle');
+  const resolvedMessage = message ?? t('itinerary.infoModalMessage');
+  const resolvedConfirm =
+    confirmText === 'itinerary.infoModalConfirm'
+      ? t('itinerary.infoModalConfirm')
+      : confirmText;
 
   if (!open) {
     return null;
@@ -44,7 +50,7 @@ export function ExclusiveItineraryInfoModal({
       >
         <View
           className="s-exclusive-itinerary-info-modal__close"
-          aria-label="关闭"
+          aria-label={t('itinerary.close')}
           onClick={onClose}
         >
           <X size={16} color="#8e8e93" aria-hidden />
@@ -68,9 +74,11 @@ export function ExclusiveItineraryInfoModal({
             id="exclusive-itinerary-info-title"
             className="s-exclusive-itinerary-info-modal__title"
           >
-            {title}
+            {resolvedTitle}
           </Text>
-          <Text className="s-exclusive-itinerary-info-modal__message">{message}</Text>
+          <Text className="s-exclusive-itinerary-info-modal__message">
+            {resolvedMessage}
+          </Text>
         </View>
 
         <View
@@ -98,7 +106,7 @@ export function ExclusiveItineraryInfoModal({
             onClick={onClose}
           >
             <Text className="s-exclusive-itinerary-info-modal__cta-label">
-              {confirmText}
+              {resolvedConfirm}
             </Text>
           </View>
         </View>

@@ -28,6 +28,7 @@ import {
 } from '../utils/itineraryBanner';
 import { runSaveItineraryWallpaperFlow } from '../utils/generateItineraryWallpaper';
 import { normalizeItineraryDaysForSave } from '@/types/itinerary';
+import { useT } from '@/hooks/useI18n';
 import { ApiError } from '@/utils/apiClient';
 import type { MyItineraryViewMode } from '../components/MyItineraryToolbar';
 
@@ -81,7 +82,7 @@ export function useMyItineraryPage() {
   const [eventMeta, setEventMeta] = useState('');
   const [viewMode, setViewMode] = useState<MyItineraryViewMode>('timeline');
   const [activeDayId, setActiveDayId] = useState(() => itineraryDays[0]?.id ?? '');
-
+  const t = useT();
   useEffect(() => {
     const fromQuery = parseSelectedDjIds(router.params.selectedDjIds);
     if (fromQuery.length > 0) {
@@ -105,7 +106,7 @@ export function useMyItineraryPage() {
         setItineraryDays(pending.days as ItineraryDay[]);
       } else {
         void Taro.showToast({
-          title: '暂无演出排期，请稍后重试',
+          title: t('itinerary.noPerformanceSchedule'),
           icon: 'none',
         });
       }
@@ -190,7 +191,7 @@ export function useMyItineraryPage() {
     pageKind === 'travel' ? travelScrollHeight : performanceScrollHeight;
 
   const handleShare = useCallback(() => {
-    void Taro.showToast({ title: '分享功能即将上线', icon: 'none' });
+    void Taro.showToast({ title: t('itinerary.shareComingSoon'), icon: 'none' });
   }, []);
 
   const handleReselect = useCallback(() => {
@@ -202,7 +203,7 @@ export function useMyItineraryPage() {
   }, [activityLegacyId]);
 
   const handleSave = useCallback(async () => {
-    void Taro.showLoading({ title: '生成屏保中…', mask: true });
+    void Taro.showLoading({ title: t('itinerary.generatingWallpaper'), mask: true });
 
     const daysForSave = normalizeItineraryDaysForSave(
       itineraryDays as ApiItineraryDay[],
@@ -225,7 +226,7 @@ export function useMyItineraryPage() {
               ? error.message
               : error instanceof Error
                 ? error.message
-                : '保存失败，请重试';
+                : t('itinerary.saveFailed');
           void Taro.showToast({ title: message, icon: 'none' });
           return;
         }
@@ -234,6 +235,7 @@ export function useMyItineraryPage() {
       await runSaveItineraryWallpaperFlow(
         {
           eventMeta,
+          title: t('itinerary.wallpaperTitle'),
           days: daysForSave.map((day) => ({
             dateKey: day.id,
             dateLabel: day.bannerDateLabel,

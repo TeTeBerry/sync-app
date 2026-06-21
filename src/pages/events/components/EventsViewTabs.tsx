@@ -1,6 +1,7 @@
 import type { FC } from 'react';
 import { CalendarDays, List, Map } from '../../../components/icons';
 import { Text, View } from '@tarojs/components';
+import { useT } from '@/hooks/useI18n';
 
 import type { EventsViewTab } from '../../../utils/eventsTabIntent';
 
@@ -8,12 +9,12 @@ export type { EventsViewTab };
 
 const TABS: Array<{
   id: EventsViewTab;
-  label: string;
+  labelKey: string;
   Icon: typeof CalendarDays;
 }> = [
-  { id: 'calendar', label: '日历', Icon: CalendarDays },
-  { id: 'map', label: '地图', Icon: Map },
-  { id: 'list', label: '列表', Icon: List },
+  { id: 'calendar', labelKey: 'events.viewTabs.calendar', Icon: CalendarDays },
+  { id: 'map', labelKey: 'events.viewTabs.map', Icon: Map },
+  { id: 'list', labelKey: 'events.viewTabs.list', Icon: List },
 ];
 
 type EventsViewTabsProps = {
@@ -22,10 +23,12 @@ type EventsViewTabsProps = {
 };
 
 export const EventsViewTabs: FC<EventsViewTabsProps> = ({ activeTab, onChange }) => {
+  const t = useT();
   return (
-    <View className="s-events-view-tabs" role="tablist" aria-label="活动视图">
-      {TABS.map(({ id, label, Icon }) => {
+    <View className="s-events-view-tabs" role="tablist" aria-label={t('events.title')}>
+      {TABS.map(({ id, labelKey, Icon }) => {
         const active = activeTab === id;
+        const label = t(labelKey);
         return (
           <View
             key={id}

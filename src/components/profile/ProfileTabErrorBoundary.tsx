@@ -1,6 +1,7 @@
 import React, { Component, type ErrorInfo, type ReactNode } from 'react';
 import Taro from '@tarojs/taro';
 import { Button } from '../ui';
+import { t } from '@/i18n/translate';
 import { Text, View } from '@tarojs/components';
 
 type Props = {
@@ -36,18 +37,20 @@ export class ProfileTabErrorBoundary extends Component<Props, State> {
     if (this.state.hasError) {
       return (
         <View className="s-profile-error-fallback">
-          <Text className="s-profile-error-fallback__title">页面加载异常</Text>
+          <Text className="s-profile-error-fallback__title">
+            {t('profile.errorTitle')}
+          </Text>
           <Text className="s-profile-error-fallback__hint">
-            请重试；若仍无法打开，可重启小程序
+            {t('profile.errorHint')}
           </Text>
           <Button
             className="s-profile-error-fallback__btn"
             onClick={() => {
               this.handleRetry();
-              void Taro.showToast({ title: '已重试', icon: 'none' });
+              void Taro.showToast({ title: t('profile.retried'), icon: 'none' });
             }}
           >
-            <Text className="s-btn-label">重试</Text>
+            <Text className="s-btn-label">{t('profile.retry')}</Text>
           </Button>
         </View>
       );

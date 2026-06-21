@@ -77,6 +77,7 @@ export interface TravelGuidePlan {
   };
   venueTransport?: { title: string; options: TravelGuideVenueTransportOption[] };
   budget?: { title: string; items: TravelGuideBudgetItem[] };
+  itinerary?: { title: string; days: Array<{ label: string; lines: string[] }> };
 }
 
 export interface GenerateTravelGuideResult {
@@ -102,17 +103,34 @@ export type TravelGuideChatPayload = {
   form: AiGuidePlanFormValues;
 };
 
-export const TRAVEL_GUIDE_BUDGET_OPTIONS: Array<{
+export function getTravelGuideBudgetOptions(t: (key: string) => string): Array<{
   id: TravelGuideBudgetTier;
   label: string;
   hint: string;
-}> = [
-  { id: 'economy', label: '经济', hint: '¥150-300' },
-  { id: 'standard', label: '舒适', hint: '¥300-600' },
-  { id: 'comfort', label: '豪华', hint: '¥600+' },
-];
+}> {
+  return [
+    {
+      id: 'economy',
+      label: t('travelPlan.budgetEconomy'),
+      hint: t('travelPlan.budgetEconomyHint'),
+    },
+    {
+      id: 'standard',
+      label: t('travelPlan.budgetStandard'),
+      hint: t('travelPlan.budgetStandardHint'),
+    },
+    {
+      id: 'comfort',
+      label: t('travelPlan.budgetComfort'),
+      hint: t('travelPlan.budgetComfortHint'),
+    },
+  ];
+}
 
-export function travelGuideBudgetLabel(tier: TravelGuideBudgetTier): string {
-  const opt = TRAVEL_GUIDE_BUDGET_OPTIONS.find((o) => o.id === tier);
+export function travelGuideBudgetLabel(
+  tier: TravelGuideBudgetTier,
+  t: (key: string) => string,
+): string {
+  const opt = getTravelGuideBudgetOptions(t).find((o) => o.id === tier);
   return opt ? `${opt.label}(${opt.hint})` : tier;
 }

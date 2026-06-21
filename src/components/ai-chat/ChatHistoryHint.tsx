@@ -1,5 +1,6 @@
 import { ChevronUp } from '../icons';
 import { Text, View } from '@tarojs/components';
+import { useT } from '@/hooks/useI18n';
 import './ChatHistoryHint.scss';
 
 export type ChatHistoryHintProps = {
@@ -17,17 +18,18 @@ export function ChatHistoryHint({
   hasMoreHistory,
   onPress,
 }: ChatHistoryHintProps) {
+  const t = useT();
   const detail = (() => {
     if (loading) {
-      return { mode: 'loading' as const, text: '正在加载更早消息' };
+      return { mode: 'loading' as const, text: t('common.loadingMore') };
     }
     if (hasHiddenMessages && hiddenCount > 0) {
       return { mode: 'count' as const, count: hiddenCount };
     }
     if (hasHiddenMessages || hasMoreHistory) {
-      return { mode: 'plain' as const, text: '查看更早消息' };
+      return { mode: 'plain' as const, text: t('common.viewMore') };
     }
-    return { mode: 'plain' as const, text: '查看更早消息' };
+    return { mode: 'plain' as const, text: t('common.viewMore') };
   })();
 
   return (
@@ -39,10 +41,10 @@ export function ChatHistoryHint({
       role="button"
       aria-label={
         loading
-          ? '正在加载更早消息'
+          ? t('common.loadingMore')
           : detail.mode === 'count'
-            ? `查看更早的 ${detail.count} 条消息`
-            : '查看更早消息'
+            ? t('common.viewMoreWithCount', { count: detail.count })
+            : t('common.viewMore')
       }
     >
       <View className="s-chat-history-hint__icon" aria-hidden>
@@ -53,12 +55,15 @@ export function ChatHistoryHint({
           <Text className="s-chat-history-hint__loading">{detail.text}</Text>
         ) : (
           <>
-            <Text className="s-chat-history-hint__action">上滑或点击</Text>
+            <Text className="s-chat-history-hint__action">
+              {t('common.swipeUpOrClick')}
+            </Text>
             <Text className="s-chat-history-hint__sep">·</Text>
             {detail.mode === 'count' ? (
               <Text className="s-chat-history-hint__label">
-                还有
-                <Text className="s-chat-history-hint__count">{detail.count}</Text>条
+                {t('common.andMore')}
+                <Text className="s-chat-history-hint__count">{detail.count}</Text>
+                {t('common.viewMore')}
               </Text>
             ) : (
               <Text className="s-chat-history-hint__label">{detail.text}</Text>

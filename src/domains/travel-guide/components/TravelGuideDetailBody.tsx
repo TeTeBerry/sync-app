@@ -1,5 +1,6 @@
 import type { TravelGuidePlan } from '@/types/travelGuide';
 import { Text, View } from '@tarojs/components';
+import { useT } from '@/hooks/useI18n';
 import {
   TravelGuideDetailBulletList,
   TravelGuideDetailNamedItem,
@@ -11,6 +12,7 @@ type TravelGuideDetailBodyProps = {
 };
 
 export function TravelGuideDetailBody({ plan }: TravelGuideDetailBodyProps) {
+  const t = useT();
   const accommodationSchemes = plan.accommodation.schemes ?? [];
   const featuredHotelNames = new Set(accommodationSchemes.map((s) => s.name));
   const moreHotels = plan.accommodation.hotels.filter(
@@ -68,7 +70,7 @@ export function TravelGuideDetailBody({ plan }: TravelGuideDetailBodyProps) {
               </Text>
               {scheme.bookingHint ? (
                 <Text className="s-travel-guide-detail__scheme-hint">
-                  预订 {scheme.bookingHint}
+                  {t('travelGuide.bookingHint')} {scheme.bookingHint}
                 </Text>
               ) : null}
             </View>
@@ -76,7 +78,9 @@ export function TravelGuideDetailBody({ plan }: TravelGuideDetailBodyProps) {
         </View>
         {moreHotels.length ? (
           <View className="s-travel-guide-detail__more-list">
-            <Text className="s-travel-guide-detail__subsection-title">更多备选</Text>
+            <Text className="s-travel-guide-detail__subsection-title">
+              {t('travelGuide.moreOptions')}
+            </Text>
             {moreHotels.map((hotel) => (
               <TravelGuideDetailNamedItem
                 key={hotel.name}
@@ -100,71 +104,52 @@ export function TravelGuideDetailBody({ plan }: TravelGuideDetailBodyProps) {
           : null}
       </TravelGuideDetailSection>
 
+      {plan.itinerary?.days.length ? (
+        <TravelGuideDetailSection title={plan.itinerary.title} accent="itinerary">
+          {plan.itinerary.days.map((day: { label: string; lines: string[] }) => (
+            <View key={day.label} className="s-travel-guide-detail__day">
+              <Text className="s-travel-guide-detail__day-label">{day.label}</Text>
+              <TravelGuideDetailBulletList items={day.lines} />
+            </View>
+          ))}
+        </TravelGuideDetailSection>
+      ) : null}
+
       {plan.budget?.items.length ? (
         <TravelGuideDetailSection title={plan.budget.title} accent="budget">
-          <View className="s-travel-guide-detail__budget-table">
-            {plan.budget.items.map((item) => {
-              const isTotal = item.label.includes('合计');
-              return (
-                <View
-                  key={item.label}
-                  className={
-                    isTotal
-                      ? 's-travel-guide-detail__budget-row s-travel-guide-detail__budget-row--total'
-                      : 's-travel-guide-detail__budget-row'
-                  }
-                >
-                  <View className="s-travel-guide-detail__budget-row-main">
-                    <Text className="s-travel-guide-detail__budget-row-label">
-                      {item.label}
-                    </Text>
-                    <Text className="s-travel-guide-detail__budget-row-value">
-                      {item.range}
-                    </Text>
-                  </View>
-                  {item.note ? (
-                    <Text className="s-travel-guide-detail__budget-row-note">
-                      {item.note}
-                    </Text>
-                  ) : null}
-                </View>
-              );
-            })}
-          </View>
+          <TravelGuideDetailBulletList
+            items={plan.budget.items.map(
+              (item: { label: string; range: string; note?: string }) =>
+                `${item.label}: ${item.range}${item.note ? ` (${item.note})` : ''}`,
+            )}
+          />
         </TravelGuideDetailSection>
       ) : null}
 
-      {plan.parking?.lines.length ? (
-        <TravelGuideDetailSection title={plan.parking.title} accent="venue">
-          <TravelGuideDetailBulletList items={plan.parking.lines} />
-        </TravelGuideDetailSection>
-      ) : null}
-
-      {plan.essentials ? (
+      {plan.essentials?.network.length ? (
         <TravelGuideDetailSection title={plan.essentials.title} accent="essentials">
-          <Text className="s-travel-guide-detail__essentials-group">网络</Text>
+          <Text className="s-travel-guide-detail__subsection-title">
+            {t('travelGuide.network')}
+          </Text>
           <TravelGuideDetailBulletList items={plan.essentials.network} />
-          <Text className="s-travel-guide-detail__essentials-group">支付</Text>
+        </TravelGuideDetailSection>
+      ) : null}
+      {plan.essentials?.payment.length ? (
+        <TravelGuideDetailSection title={plan.essentials.title} accent="essentials">
+          <Text className="s-travel-guide-detail__subsection-title">
+            {t('travelGuide.payment')}
+          </Text>
           <TravelGuideDetailBulletList items={plan.essentials.payment} />
-          <Text className="s-travel-guide-detail__essentials-group">必备 App</Text>
+        </TravelGuideDetailSection>
+      ) : null}
+      {plan.essentials?.apps.length ? (
+        <TravelGuideDetailSection title={plan.essentials.title} accent="essentials">
+          <Text className="s-travel-guide-detail__subsection-title">
+            {t('travelGuide.essentialApps')}
+          </Text>
           <TravelGuideDetailBulletList items={plan.essentials.apps} />
         </TravelGuideDetailSection>
       ) : null}
-
-      <TravelGuideDetailSection title={plan.nightlife.title} accent="nightlife">
-        {plan.nightlife.spots.map((spot) => (
-          <TravelGuideDetailNamedItem
-            key={spot.name}
-            title={spot.name}
-            note={spot.note}
-            reason={spot.reason}
-          />
-        ))}
-      </TravelGuideDetailSection>
-
-      <TravelGuideDetailSection title={plan.tips.title} accent="tips">
-        <TravelGuideDetailBulletList items={plan.tips.items} />
-      </TravelGuideDetailSection>
     </>
   );
 }

@@ -13,7 +13,7 @@ import { Button, cn } from '../ui';
 import { getGenerateTravelGuideCta } from '../../constants/aiCtaLabels';
 import { useOverlayLock } from '../../hooks/useOverlayLock';
 import type { AiGuidePlanFormValues } from '../../types/travelGuide';
-import { TRAVEL_GUIDE_BUDGET_OPTIONS } from '../../types/travelGuide';
+import { getTravelGuideBudgetOptions } from '../../types/travelGuide';
 import { PlaceAutocompleteField } from './PlaceAutocompleteField';
 import { useAiGuidePlanSheetForm } from './useAiGuidePlanSheetForm';
 import { useT } from '@/hooks/useI18n';
@@ -233,7 +233,7 @@ function AiGuidePlanSheetInner({
                 {t('travelPlan.budgetLabel')}
               </Text>
               <View className="s-ai-guide-plan-sheet__budget-row">
-                {TRAVEL_GUIDE_BUDGET_OPTIONS.map((opt) => {
+                {getTravelGuideBudgetOptions(t).map((opt) => {
                   const active = form.budgetTier === opt.id;
                   return (
                     <Button

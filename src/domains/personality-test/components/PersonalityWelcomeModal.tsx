@@ -1,6 +1,7 @@
 import './PersonalityWelcomeModal.scss';
 import { Text, View } from '@tarojs/components';
 import { useOverlayLock } from '@/hooks/useOverlayLock';
+import { useT } from '@/hooks/useI18n';
 
 export type PersonalityWelcomeModalProps = {
   open: boolean;
@@ -22,12 +23,16 @@ export function PersonalityWelcomeModal({
   loginSaveText = '去登录保存昵称',
 }: PersonalityWelcomeModalProps) {
   useOverlayLock(open);
+  const t = useT();
 
   if (!open) {
     return null;
   }
 
-  const usageLabel = userCount == null ? '查询中…' : `已被 ${userCount} 人使用`;
+  const usageLabel =
+    userCount == null
+      ? t('common.loading')
+      : t('personality.usageCount', { count: userCount });
 
   return (
     <View className="s-overlay s-personality-welcome-modal" role="presentation">
@@ -43,16 +48,20 @@ export function PersonalityWelcomeModal({
             id="personality-welcome-title"
             className="s-personality-welcome-modal__title"
           >
-            🎉 欢迎来到 Sync Lab！
+            {t('personality.welcomeTitle')}
           </Text>
 
           <View className="s-personality-welcome-modal__rows">
             <View className="s-personality-welcome-modal__row">
-              <Text className="s-personality-welcome-modal__label">你的昵称</Text>
+              <Text className="s-personality-welcome-modal__label">
+                {t('personality.nicknameLabel')}
+              </Text>
               <Text className="s-personality-welcome-modal__nickname">{nickname}</Text>
             </View>
             <View className="s-personality-welcome-modal__row">
-              <Text className="s-personality-welcome-modal__label">当前状态</Text>
+              <Text className="s-personality-welcome-modal__label">
+                {t('personality.statusLabel')}
+              </Text>
               <Text className="s-personality-welcome-modal__status">{usageLabel}</Text>
             </View>
           </View>

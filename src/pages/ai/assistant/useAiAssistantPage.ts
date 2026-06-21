@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useDidShow } from '@tarojs/taro';
+import { useDidShow, useDidHide } from '@tarojs/taro';
 import { useNavBarInsets } from '../../../hooks/useNavBarInsets';
 import { usePageRouteReady } from '../../../hooks/usePageRouteReady';
 import { useDisplayUserIdentity } from '../../../hooks/useDisplayUserIdentity';
@@ -11,7 +11,7 @@ import {
 } from '../../../stores';
 import { bindActivity, clearActivityScope } from '../../../domains/activity-scope';
 import { resolveAiChatWsUrl } from '../../../constants/api';
-import { isAiChatWsDevLog } from '../../../utils/aiChatWs';
+import { isAiChatWsDevLog, closeAiChatWsConnection } from '../../../utils/aiChatWs';
 import { inferUserGenderFromName } from '../../../utils/inferAuthorGender';
 import { useFestivalPlanSummary } from '../../../domains/festival-plan/useFestivalPlanSummary';
 import { useFestivalPlanNavigation } from '../../../domains/festival-plan/useFestivalPlanNavigation';
@@ -142,6 +142,16 @@ export function useAiAssistantPage() {
     applyAiAssistantIntent();
     setPageShowSeq((n) => n + 1);
   });
+
+  useDidHide(() => {
+    closeAiChatWsConnection('page hidden');
+  });
+
+  useEffect(() => {
+    return () => {
+      closeAiChatWsConnection('component unmount');
+    };
+  }, []);
 
   return {
     navInsets,

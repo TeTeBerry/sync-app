@@ -8,6 +8,8 @@ export type ItineraryWallpaperDrawParams = {
   height: number;
   sections: ItineraryWallpaperSection[];
   eventMeta?: string;
+  /** Wallpaper title (e.g. "My festival schedule"). */
+  title?: string;
   /** Device scale for fonts/spacing; defaults to width / 390. */
   scaleFactor?: number;
 };
@@ -404,6 +406,7 @@ function drawPageHeader(
   layout: WallpaperLayout,
   w: number,
   eventMeta?: string,
+  title?: string,
 ): void {
   const { s, headerTop, compact } = layout;
   const cx = w / 2;
@@ -415,7 +418,7 @@ function drawPageHeader(
   ctx.textBaseline = 'top';
   ctx.fillStyle = WALLPAPER_THEME.textPrimary;
   ctx.font = `700 ${titleSize}px sans-serif`;
-  ctx.fillText('我的电音时间表', cx, y);
+  ctx.fillText(title ?? 'My festival schedule', cx, y);
   y += compact ? 30 * s : 36 * s;
 
   if (layout.showEventMeta && festivalName) {
@@ -646,7 +649,7 @@ export function drawItineraryWallpaper(
   ctx.clearRect(0, 0, w, h);
   drawBackground(ctx, w, h);
 
-  drawPageHeader(ctx, layout, w, eventMeta);
+  drawPageHeader(ctx, layout, w, eventMeta, params.title);
 
   let y = layout.headerBottom;
 

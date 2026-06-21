@@ -10,6 +10,7 @@ import {
   todayCalendarParts,
   type ActivityCalendarFields,
 } from '../../../utils/activityCalendar';
+import { useT } from '@/hooks/useI18n';
 import { Text, View } from '@tarojs/components';
 
 type EventsActivityCalendarProps = {
@@ -29,6 +30,7 @@ export const EventsActivityCalendar: FC<EventsActivityCalendarProps> = ({
   onMonthChange,
   onSelectDay,
 }) => {
+  const t = useT();
   const activityDays = useMemo(() => buildActivityDaySet(activities), [activities]);
   const cells = useMemo(() => buildMonthGrid(year, month), [year, month]);
   const today = todayCalendarParts();
@@ -39,7 +41,7 @@ export const EventsActivityCalendar: FC<EventsActivityCalendarProps> = ({
         <View
           className="s-events-calendar__nav-btn"
           role="button"
-          aria-label="上一月"
+          aria-label={t('events.calendarPrevMonth')}
           onClick={() => {
             const next = shiftCalendarMonth(year, month, -1);
             onMonthChange(next.year, next.month);
@@ -53,7 +55,7 @@ export const EventsActivityCalendar: FC<EventsActivityCalendarProps> = ({
         <View
           className="s-events-calendar__nav-btn"
           role="button"
-          aria-label="下一月"
+          aria-label={t('events.calendarNextMonth')}
           onClick={() => {
             const next = shiftCalendarMonth(year, month, 1);
             onMonthChange(next.year, next.month);
@@ -99,7 +101,7 @@ export const EventsActivityCalendar: FC<EventsActivityCalendarProps> = ({
                 .filter(Boolean)
                 .join(' ')}
               role="button"
-              aria-label={`${month}月${cell.day}日${hasActivity ? '，有活动' : ''}`}
+              aria-label={`${month}月${cell.day}日${hasActivity ? t('events.calendarHasActivity') : ''}`}
               onClick={() => onSelectDay(cell.year, cell.month, cell.day)}
             >
               <Text className="s-events-calendar__day">{cell.day}</Text>

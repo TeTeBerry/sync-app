@@ -9,18 +9,23 @@ import { PersonalityWelcomeModal } from '@/domains/personality-test/components/P
 import { usePersonalityTestPage } from '@/domains/personality-test/hooks/usePersonalityTestPage';
 import { PERSONALITY_POSTER_CANVAS_ID } from '@/domains/personality-test';
 import { LoginInterceptHost } from '../../../components/auth/LoginInterceptHost';
+import { useT } from '@/hooks/useI18n';
 import { Canvas, ScrollView, Text, View } from '@tarojs/components';
 
 const PersonalityTestPage = () => {
   useEndRouteTransitionOnShow();
   const page = usePersonalityTestPage();
+  const t = useT();
   const contentReady =
     page.phase === 'quiz' || page.phase === 'result' || page.phase === 'error';
   usePageRouteReady(contentReady);
 
   return (
     <View data-cmp="PersonalityTest" className="s-personality-test">
-      <PageNavigation title="电音人格测试" fallback={page.navFallback} />
+      <PageNavigation
+        title={t('personality.raverPersonality')}
+        fallback={page.navFallback}
+      />
 
       <ScrollView
         scrollY
@@ -40,29 +45,32 @@ const PersonalityTestPage = () => {
               {page.shareTeaser ? (
                 <View className="s-personality-test__share-teaser">
                   <Text className="s-personality-test__share-teaser-kicker">
-                    好友分享
+                    {t('personality.friendShare')}
                   </Text>
                   <Text className="s-personality-test__share-teaser-title">
-                    你的朋友是 {page.shareTeaser.typeEmoji} {page.shareTeaser.typeLabel}{' '}
-                    型 Raver
+                    {t('personality.friendIs', {
+                      emoji: page.shareTeaser.typeEmoji,
+                      label: page.shareTeaser.typeLabel,
+                    })}
                   </Text>
                   {page.shareTeaser.soulDjName ? (
                     <Text className="s-personality-test__share-teaser-dj">
-                      本命 DJ：{page.shareTeaser.soulDjName}
+                      {t('personality.soulDj', { djName: page.shareTeaser.soulDjName })}
                     </Text>
                   ) : null}
                   <Text className="s-personality-test__share-teaser-cta">
-                    你也来测测自己的本命 DJ
+                    {t('personality.takeTestToo')}
                   </Text>
                 </View>
               ) : null}
               <Text className="s-personality-test__intro-kicker">
-                场景题 · 无标准答案
+                {t('personality.sceneQuestions')}
               </Text>
-              <Text className="s-personality-test__intro-title">电音人格测试</Text>
+              <Text className="s-personality-test__intro-title">
+                {t('personality.raverPersonality')}
+              </Text>
               <Text className="s-personality-test__intro-desc">
-                8 道题测出你的 Raver 人格（每次题目随机），含听感题，再匹配本命 DJ
-                与适合你的电音节活动。
+                {t('personality.testDesc')}
               </Text>
             </View>
           ) : null}
@@ -71,7 +79,9 @@ const PersonalityTestPage = () => {
             <ThemedPageLoader
               variant="spinner"
               label={
-                page.phase === 'submitting' ? 'AI 正在解读你的 Raver DNA…' : '加载题目…'
+                page.phase === 'submitting'
+                  ? t('personality.aiInterpreting')
+                  : t('personality.loadQuestions')
               }
               minHeight={220}
             />
@@ -87,7 +97,9 @@ const PersonalityTestPage = () => {
                 onClick={page.retryError}
                 role="button"
               >
-                {page.errorMessage.includes('登录') ? '去登录' : '点击重试'}
+                {page.errorMessage.includes('登录')
+                  ? t('personality.loginFirst')
+                  : t('common.clickRetry')}
               </Text>
             </View>
           ) : null}

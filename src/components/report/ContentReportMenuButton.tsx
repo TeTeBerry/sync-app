@@ -6,7 +6,8 @@ import {
   useContentReport,
   type ContentReportTarget,
 } from '../../hooks/useContentReport';
-import { REPORT_CATEGORY_OPTIONS } from '../../utils/reportLabels';
+import type { ReportCategory } from '../../types/backend';
+import { useT } from '@/hooks/useI18n';
 
 export type ContentReportMenuButtonProps = ContentReportTarget & {
   className?: string;
@@ -15,17 +16,24 @@ export type ContentReportMenuButtonProps = ContentReportTarget & {
 
 export function ContentReportMenuButton({
   className,
-  ariaLabel = '更多',
+  ariaLabel,
   ...target
 }: ContentReportMenuButtonProps) {
   const { categorySheetOpen, openOverflowMenu, closeCategorySheet, submitCategory } =
     useContentReport(target);
+  const t = useT();
+
+  const reportOptions: Array<{ id: ReportCategory; label: string }> = [
+    { id: 'scalper', label: t('report.categoryScalper') },
+    { id: 'ads', label: t('report.categoryAds') },
+    { id: 'vulgar', label: t('report.categoryVulgar') },
+  ];
 
   return (
     <>
       <Button
         className={['s-content-report-menu', className].filter(Boolean).join(' ')}
-        aria-label={ariaLabel}
+        aria-label={ariaLabel ?? t('common.more')}
         onClick={(event) => {
           event.stopPropagation();
           openOverflowMenu();
@@ -38,10 +46,10 @@ export function ContentReportMenuButton({
 
       <ActionSheet
         open={categorySheetOpen}
-        title="选择举报原因"
-        cancelLabel="取消"
+        title={t('report.title')}
+        cancelLabel={t('common.cancel')}
         onCancel={closeCategorySheet}
-        items={REPORT_CATEGORY_OPTIONS.map((option) => ({
+        items={reportOptions.map((option) => ({
           label: option.label,
           onSelect: () => {
             void submitCategory(option.id);

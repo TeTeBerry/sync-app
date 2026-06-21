@@ -1,6 +1,7 @@
 import './ThemedPageLoader.scss';
 import { Text, View } from '@tarojs/components';
 import { SyncBrandMark } from './SyncBrandMark';
+import { useT } from '@/hooks/useI18n';
 
 export type ThemedPageLoaderVariant =
   | 'spinner'
@@ -162,6 +163,8 @@ export default function ThemedPageLoader({
   className,
   minHeight = 120,
 }: ThemedPageLoaderProps) {
+  const t = useT();
+  const displayLabel = label ?? t('common.loading');
   const rootClass = [
     's-themed-loader',
     overlay ? 's-themed-loader--overlay' : '',
@@ -178,7 +181,7 @@ export default function ThemedPageLoader({
       role="status"
       aria-live="polite"
       aria-busy="true"
-      aria-label={label ?? '加载中'}
+      aria-label={displayLabel}
     >
       {showBrand ? <SyncBrandMark className="s-themed-loader__brand" /> : null}
       {variant === 'skeleton-event' ? <EventDetailSkeleton /> : null}
@@ -187,7 +190,7 @@ export default function ThemedPageLoader({
       {variant === 'skeleton-feed' ? <FeedSkeleton /> : null}
       {variant === 'skeleton-ai-chat' ? <AiChatSkeleton /> : null}
       {variant === 'spinner' || variant === 'inline' ? <PinkSpinner /> : null}
-      {label ? <Text className="s-themed-loader__label">{label}</Text> : null}
+      {label ? <Text className="s-themed-loader__label">{displayLabel}</Text> : null}
     </View>
   );
 }

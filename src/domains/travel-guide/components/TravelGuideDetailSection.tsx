@@ -22,7 +22,8 @@ export type TravelGuideSectionAccent =
   | 'budget'
   | 'essentials'
   | 'nightlife'
-  | 'tips';
+  | 'tips'
+  | 'itinerary';
 
 const SECTION_ICON_COLORS: Record<TravelGuideSectionAccent, string> = {
   default: '#ff69b4',
@@ -35,6 +36,7 @@ const SECTION_ICON_COLORS: Record<TravelGuideSectionAccent, string> = {
   essentials: '#f2f2f7',
   nightlife: '#f2f2f7',
   tips: '#ff69b4',
+  itinerary: '#64d2ff',
 };
 
 function SectionIcon({ accent }: { accent: TravelGuideSectionAccent }) {
@@ -59,6 +61,8 @@ function SectionIcon({ accent }: { accent: TravelGuideSectionAccent }) {
       return <Utensils {...props} />;
     case 'tips':
       return <Sparkles {...props} />;
+    case 'itinerary':
+      return <Plane {...props} />;
     default:
       return <Sparkles {...props} />;
   }

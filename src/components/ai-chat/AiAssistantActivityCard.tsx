@@ -4,6 +4,7 @@ import type { FC } from 'react';
 import type { RecommendedActivityCard } from '../../types/aiChat';
 import { goEventDetail } from '../../utils/route';
 import { Button } from '../ui';
+import { useT } from '@/hooks/useI18n';
 import { Text, View } from '@tarojs/components';
 
 export type AiAssistantActivityCardProps = {
@@ -13,6 +14,7 @@ export type AiAssistantActivityCardProps = {
 export const AiAssistantActivityCard: FC<AiAssistantActivityCardProps> = ({
   activity,
 }) => {
+  const t = useT();
   const handleOpen = () => {
     const id = activity.activityLegacyId;
     if (id != null && !Number.isNaN(id)) {
@@ -36,7 +38,9 @@ export const AiAssistantActivityCard: FC<AiAssistantActivityCardProps> = ({
         </View>
       ) : null}
       <View className="s-ai-assistant-activity-card__cta">
-        <Text className="s-ai-assistant-activity-card__cta-label">进入活动</Text>
+        <Text className="s-ai-assistant-activity-card__cta-label">
+          {t('ai.viewActivity')}
+        </Text>
       </View>
     </Button>
   );

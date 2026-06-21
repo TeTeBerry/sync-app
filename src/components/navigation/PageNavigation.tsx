@@ -2,6 +2,7 @@ import './PageNavigation.scss';
 import React, { useCallback, useRef, type CSSProperties, type ReactNode } from 'react';
 import { ChevronLeft } from '../../components/icons';
 import { Button } from '../ui';
+import { useT } from '@/hooks/useI18n';
 import { Text, View } from '@tarojs/components';
 import { useNavBarInsets, type NavBarInsets } from '../../hooks/useNavBarInsets';
 import { goBack, type RoutePath } from '../../utils/route';
@@ -63,8 +64,9 @@ const PageNavigation: React.FC<PageNavigationProps> = ({
   tone = 'default',
   className,
   style,
-  backAriaLabel = '返回',
+  backAriaLabel,
 }) => {
+  const t = useT();
   const navInsets = useNavBarInsets();
   const insetStyle = tabPageHeaderStyle(navInsets);
   const headerStyle: CSSProperties = {
@@ -104,7 +106,7 @@ const PageNavigation: React.FC<PageNavigationProps> = ({
   const backButton = (
     <Button
       className="s-page-nav__back"
-      aria-label={backAriaLabel}
+      aria-label={backAriaLabel ?? t('common.back')}
       hoverClass="s-page-nav__back--pressed"
       onTap={handleBack}
     >

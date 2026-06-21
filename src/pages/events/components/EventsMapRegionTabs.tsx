@@ -1,4 +1,5 @@
 import type { FC } from 'react';
+import { useT } from '@/hooks/useI18n';
 import { Text, View } from '@tarojs/components';
 import {
   ACTIVITY_MAP_REGION_LABELS,
@@ -17,6 +18,7 @@ export const EventsMapRegionTabs: FC<EventsMapRegionTabsProps> = ({
   activityCount,
   onChange,
 }) => {
+  const t = useT();
   return (
     <View data-cmp="EventsMapRegionTabs" className="s-events-map-region">
       <View className="s-events-map-region__filters">
@@ -42,7 +44,9 @@ export const EventsMapRegionTabs: FC<EventsMapRegionTabsProps> = ({
       </View>
       <View className="s-events-map-region__count">
         <View className="s-events-map-region__count-dot" aria-hidden />
-        <Text className="s-events-map-region__count-text">{`${activityCount} 场活动`}</Text>
+        <Text className="s-events-map-region__count-text">
+          {t('events.upcomingCount', { count: activityCount })}
+        </Text>
       </View>
     </View>
   );

@@ -5,6 +5,7 @@ import type { RecommendedPostCard } from '../types/aiChat';
 import { inferAuthorGenderFromPost } from '../utils/inferAuthorGender';
 import { goEventDetail } from '../utils/route';
 import { Button } from './ui';
+import { useT } from '@/hooks/useI18n';
 import { Image, Text, View } from '@tarojs/components';
 
 export type AiAssistantPostCardProps = {
@@ -17,6 +18,7 @@ export const AiAssistantPostCard: FC<AiAssistantPostCardProps> = ({
   post,
   highlight = false,
 }) => {
+  const t = useT();
   const authorGender = inferAuthorGenderFromPost(post);
   const nameClassName = authorGender
     ? `s-ai-assistant-post-card__name s-ai-assistant-post-card__name--${authorGender}`
@@ -72,7 +74,7 @@ export const AiAssistantPostCard: FC<AiAssistantPostCardProps> = ({
       ) : null}
 
       <View className="s-ai-assistant-post-card__cta">
-        <Text className="s-ai-assistant-post-card__cta-label">查看帖子</Text>
+        <Text className="s-ai-assistant-post-card__cta-label">{t('ai.viewPost')}</Text>
       </View>
     </Button>
   );

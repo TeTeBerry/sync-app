@@ -256,7 +256,10 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
   if (!expanded) return null;
 
   return (
-    <View className="s-post-comments" aria-label="帖子评论">
+    <View
+      className="s-post-comments"
+      aria-label={t('comments.replyTo', { name: '帖子' })}
+    >
       <View
         className={cn(
           's-post-comments__list',

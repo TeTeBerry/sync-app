@@ -43,6 +43,7 @@ import { isLoggedIn } from '@/utils/authStorage';
 import { requireAuth } from '@/utils/authGate';
 import { useStackPageMainHeight } from '@/hooks/useTabPageMainHeight';
 import { applyScrollTop } from '@/utils/scrollToCenter';
+import { useT } from '@/hooks/useI18n';
 
 export type PersonalityTestPhase =
   | 'loading'
@@ -55,13 +56,13 @@ function resolveQuestionIds(questions: PersonalityQuestion[]): string[] {
   return questions.map((question) => question.id);
 }
 
-function resolveLoadError(error: unknown): string {
+function resolveLoadError(error: unknown, t: (key: string) => string): string {
   if (error instanceof ApiError) {
     if (error.status === 404) {
-      return '测试服务暂未上线，请稍后再试';
+      return t('personality.testServiceNotAvailable');
     }
   }
-  return '加载失败，请检查网络后重试';
+  return t('personality.loadFailed');
 }
 
 export function usePersonalityTestPage() {
@@ -83,6 +84,7 @@ export function usePersonalityTestPage() {
   const [welcomeModalOpen, setWelcomeModalOpen] = useState(false);
   const [welcomeNicknameUsage, setWelcomeNicknameUsage] = useState<number | null>(null);
   const [scrollTop, setScrollTop] = useState<number | undefined>(0);
+  const t = useT();
 
   const scrollToTop = useCallback(() => {
     applyScrollTop(setScrollTop, 0);
@@ -108,7 +110,7 @@ export function usePersonalityTestPage() {
       applyQuestionSet(payload.questions);
       setPhase('quiz');
     } catch (error) {
-      setErrorMessage(resolveLoadError(error));
+      setErrorMessage(resolveLoadError(error, t));
       setPhase('error');
     }
   }, [applyQuestionSet]);
@@ -133,7 +135,7 @@ export function usePersonalityTestPage() {
           void loadPersonalityTestCatalog().catch(() => undefined);
           return;
         }
-        setErrorMessage('暂无测试结果，请先完成测试');
+        setErrorMessage(t('personality.noTestResult'));
         setPhase('error');
         return;
       }
@@ -258,7 +260,7 @@ export function usePersonalityTestPage() {
         setWelcomeNicknameUsage(userCount);
       }
 
-      void Taro.showToast({ title: '昵称已保存', icon: 'success' });
+      void Taro.showToast({ title: t('personality.nicknameSaved'), icon: 'success' });
     },
     [],
   );
@@ -272,7 +274,7 @@ export function usePersonalityTestPage() {
     setWelcomeModalOpen(false);
     requireAuth(() => {
       void persistNicknameAfterLogin(current).catch(() => {
-        void Taro.showToast({ title: '保存失败，请稍后重试', icon: 'none' });
+        void Taro.showToast({ title: t('personality.saveFailed'), icon: 'none' });
       });
     }, 'general');
   }, [persistNicknameAfterLogin, result]);
@@ -288,7 +290,7 @@ export function usePersonalityTestPage() {
         const message =
           error instanceof Error && error.message.trim()
             ? error.message.trim()
-            : '提交失败，请稍后重试';
+            : t('personality.submitFailed');
         setErrorMessage(message);
         setPhase('error');
       }
@@ -298,7 +300,7 @@ export function usePersonalityTestPage() {
 
   const goNextQuestion = useCallback(() => {
     if (!currentQuestion || !selectedOptionId) {
-      void Taro.showToast({ title: '请选择一个选项', icon: 'none' });
+      void Taro.showToast({ title: t('personality.pleaseSelectOption'), icon: 'none' });
       return;
     }
     if (currentIndex >= totalQuestions - 1) {

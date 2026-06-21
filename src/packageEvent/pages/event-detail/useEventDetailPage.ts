@@ -24,6 +24,7 @@ import {
   goAiTravelGuide,
 } from '../../../utils/route';
 import { scrollElementToCenter } from '../../../utils/scrollToCenter';
+import { t } from '@/i18n/translate';
 
 export type UseEventDetailPageOptions = {
   confirm: (options: ConfirmDialogOptions) => Promise<boolean>;
@@ -157,7 +158,7 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
 
   const assertValidEventId = useCallback(() => {
     if (!Number.isFinite(eventId) || eventId <= 0) {
-      void Taro.showToast({ title: '活动信息无效', icon: 'none' });
+      void Taro.showToast({ title: t('eventDetail.invalidActivity'), icon: 'none' });
       return false;
     }
     return true;

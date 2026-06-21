@@ -21,6 +21,7 @@ import { useEventDetailPostSearch } from './useEventDetailPostSearch';
 import { useEventDetailPostFilters } from './useEventDetailPostFilters';
 import { filterEventDetailPostsByRules } from '../utils/filterEventDetailPostsByRules';
 import { resolvePersonalityMediaUrls } from '@/domains/personality-test/utils/resolvePersonalityMedia';
+import { t } from '@/i18n/translate';
 
 export const EVENT_DETAIL_SCROLL_ID = 'event-detail-scroll';
 
@@ -179,9 +180,9 @@ export function useEventDetailPosts({
   const handleDeletePost = useCallback(
     async (post: EventDetailPost) => {
       const ok = await confirm({
-        title: '确认删除',
-        message: '删除后无法恢复，确定要删除这条留言吗？',
-        confirmText: '删除',
+        title: t('eventDetail.deleteConfirmTitle'),
+        message: t('eventDetail.deleteConfirmMessage'),
+        confirmText: t('eventDetail.deleteConfirmText'),
       });
       if (!ok) return;
 

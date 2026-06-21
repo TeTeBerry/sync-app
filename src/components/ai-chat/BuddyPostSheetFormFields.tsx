@@ -3,6 +3,7 @@ import { PlaceAutocompleteField } from './PlaceAutocompleteField';
 import { BuddyPostDateRangeField } from './BuddyPostDateRangeField';
 import { Input, Text, Textarea, View } from '@tarojs/components';
 import type { useBuddyPostSheetForm } from './useBuddyPostSheetForm';
+import { useT } from '@/hooks/useI18n';
 
 type BuddyPostSheetFormFieldsProps = {
   form: ReturnType<typeof useBuddyPostSheetForm>;
@@ -19,15 +20,16 @@ export function BuddyPostSheetFormFields({
   prefillSummaryLines = null,
   prefillBannerTitle = null,
 }: BuddyPostSheetFormFieldsProps) {
+  const t = useT();
   return (
     <View className="s-ai-guide-plan-sheet__body">
       {prefillSummaryLines?.length ? (
         <View className="s-ai-buddy-post-sheet__prefill-banner">
           <Text className="s-ai-buddy-post-sheet__prefill-title">
-            {prefillBannerTitle?.trim() || '已从攻略预填'}
+            {prefillBannerTitle?.trim() || t('posts.prefillBannerTitle')}
           </Text>
           <Text className="s-ai-buddy-post-sheet__prefill-desc">
-            {prefillSummaryLines.join(' · ')}。请确认日期、集合点与备注后发布。
+            {t('posts.prefillDesc', { summary: prefillSummaryLines.join(' · ') })}
           </Text>
         </View>
       ) : null}
@@ -40,26 +42,28 @@ export function BuddyPostSheetFormFields({
       />
 
       <PlaceAutocompleteField
-        label="集合点"
+        label={t('posts.locationLabel')}
         labelClassName="s-ai-buddy-post-sheet__label"
-        hint="请填写具体集合点（场馆门口、地铁口、酒店大堂等），不要只写城市名"
+        hint={t('posts.locationHint')}
         value={form.location}
         onChange={form.setLocation}
-        placeholder="如 A 馆北门、XX 地铁站 1 号口"
+        placeholder={t('posts.locationPlaceholder')}
         eventCity={eventCity}
         active={sheetOpen}
         placesOnly
       />
 
       <View className="s-ai-guide-plan-sheet__field">
-        <Text className="s-ai-buddy-post-sheet__label">人数</Text>
+        <Text className="s-ai-buddy-post-sheet__label">
+          {t('posts.headcountLabel')}
+        </Text>
         <View className="s-ai-guide-plan-sheet__input-wrap">
           <Users size={18} className="s-ai-guide-plan-sheet__input-icon" aria-hidden />
           <Input
             className="s-ai-guide-plan-sheet__input"
             type="text"
             value={form.headcount}
-            placeholder="如 2人、2-3人"
+            placeholder={t('posts.headcountPlaceholder')}
             placeholderClass="s-ai-guide-plan-sheet__input-placeholder"
             onInput={(e) => form.setHeadcount(e.detail.value ?? '')}
           />
@@ -67,13 +71,13 @@ export function BuddyPostSheetFormFields({
       </View>
 
       <View className="s-ai-guide-plan-sheet__field s-ai-buddy-post-sheet__field--note">
-        <Text className="s-ai-buddy-post-sheet__label">备注（可选）</Text>
+        <Text className="s-ai-buddy-post-sheet__label">{t('posts.noteLabel')}</Text>
         <View className="s-ai-buddy-post-sheet__textarea-wrap">
           <Textarea
             className="s-ai-buddy-post-sheet__textarea"
             value={form.note}
             maxlength={form.noteMaxLength}
-            placeholder="性别偏好、喜欢音乐风格、其他说明…"
+            placeholder={t('posts.notePlaceholder')}
             placeholderClass="s-ai-guide-plan-sheet__input-placeholder"
             onInput={(e) => form.setNote(e.detail.value ?? '')}
           />

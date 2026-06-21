@@ -2,6 +2,7 @@ import React from 'react';
 import { Check, ChevronDown, Search, X } from '../../../../components/icons';
 import { Button, Input } from '../../../../components/ui';
 import { ScrollView, Text, View } from '@tarojs/components';
+import { useT } from '@/hooks/useI18n';
 import type { ExclusiveItineraryFilterChip } from '../exclusiveItineraryFilters';
 import type { ExclusiveItineraryDj } from '../types';
 import { itineraryDjCardDomId } from '@/domains/performance-itinerary/utils/resolveItineraryDjSelection';
@@ -38,169 +39,145 @@ const ExclusiveItineraryDjGrid: React.FC<ExclusiveItineraryDjGridProps> = ({
   onStyleSearchQueryChange,
   onOpenSortSheet,
   onToggleDj,
-}) => (
-  <>
-    <View className="s-exclusive-itinerary__step">
-      <Text className="s-exclusive-itinerary__step-title">第一步：选择你喜爱的 DJ</Text>
-      <Text className="s-exclusive-itinerary__step-badge">已选 {selectedCount} 位</Text>
-    </View>
-
-    <View className="s-exclusive-itinerary__filter-block">
-      <Text className="s-exclusive-itinerary__filter-label">舞台筛选</Text>
-      <ScrollView
-        scrollX
-        enhanced
-        showScrollbar={false}
-        className="s-exclusive-itinerary__chip-scroll s-scrollbar-none"
-      >
-        <View className="s-exclusive-itinerary__chip-row">
-          {stageOptions.map((stage) => {
-            const active = stageFilter === stage.id;
-            return (
-              <Button
-                key={stage.id}
-                className={[
-                  's-exclusive-itinerary__chip',
-                  active ? 's-exclusive-itinerary__chip--stage-on' : '',
-                ]
-                  .filter(Boolean)
-                  .join(' ')}
-                hoverClass="s-exclusive-itinerary__chip--pressed"
-                onTap={() => onStageFilterChange(stage.id)}
-              >
-                {stage.label}
-              </Button>
-            );
-          })}
-        </View>
-      </ScrollView>
-    </View>
-
-    <View className="s-exclusive-itinerary__filter-block">
-      <Text className="s-exclusive-itinerary__filter-label">音乐风格</Text>
-      <View className="s-exclusive-itinerary__style-search">
-        <Search size={16} color="#8e8e93" aria-hidden />
-        <Input
-          className="s-exclusive-itinerary__style-search-input"
-          placeholder="搜索风格，如 Techno、House、dnb"
-          placeholderClass="s-exclusive-itinerary__style-search-placeholder"
-          value={styleSearchQuery}
-          confirmType="search"
-          onInput={(event) => onStyleSearchQueryChange(event.detail.value)}
-          onConfirm={(event) => onStyleSearchQueryChange(event.detail.value)}
-        />
-        {styleSearchQuery.trim() ? (
-          <View
-            className="s-exclusive-itinerary__style-search-clear"
-            hoverClass="s-exclusive-itinerary__style-search-clear--pressed"
-            hoverStayTime={80}
-            aria-label="清除风格搜索"
-            onClick={() => onStyleSearchQueryChange('')}
-          >
-            <X size={14} color="#8e8e93" aria-hidden />
-          </View>
-        ) : null}
+}) => {
+  const t = useT();
+  return (
+    <>
+      <View className="s-exclusive-itinerary__step">
+        <Text className="s-exclusive-itinerary__step-title">
+          {t('personality.step1Title')}
+        </Text>
+        <Text className="s-exclusive-itinerary__step-badge">
+          {t('personality.step1Badge', { count: selectedCount })}
+        </Text>
       </View>
-      <ScrollView
-        scrollX
-        enhanced
-        showScrollbar={false}
-        className="s-exclusive-itinerary__chip-scroll s-scrollbar-none"
-      >
-        <View className="s-exclusive-itinerary__chip-row">
-          {genreOptions.map((genre) => {
-            const active = genreFilter === genre.id;
-            return (
-              <Button
-                key={genre.id}
-                className={[
-                  's-exclusive-itinerary__chip',
-                  active ? 's-exclusive-itinerary__chip--genre-on' : '',
-                ]
-                  .filter(Boolean)
-                  .join(' ')}
-                hoverClass="s-exclusive-itinerary__chip--pressed"
-                onTap={() => onGenreFilterChange(genre.id)}
-              >
-                {genre.label}
-              </Button>
-            );
-          })}
-        </View>
-      </ScrollView>
-    </View>
 
-    <View className="s-exclusive-itinerary__list-head">
-      <Text className="s-exclusive-itinerary__list-count">
-        共 {filteredDjs.length} 位 DJ
-      </Text>
-      <Button
-        className="s-exclusive-itinerary__sort-btn"
-        hoverClass="s-exclusive-itinerary__sort-btn--pressed"
-        onTap={onOpenSortSheet}
-      >
-        <Text>{sortMode}</Text>
-        <ChevronDown size={14} color="var(--primary)" />
-      </Button>
-    </View>
-
-    <View className="s-exclusive-itinerary__grid">
-      {filteredDjs.map((dj) => {
-        const selectionIndex = selectedIds.indexOf(dj.id);
-        const isSelected = selectionIndex >= 0;
-        const accent = isSelected && selectionIndex % 2 === 1 ? 'purple' : 'pink';
-        const showPurple = isSelected && accent === 'purple';
-        const showPink = isSelected && accent === 'pink';
-
-        return (
-          <View
-            key={dj.id}
-            id={itineraryDjCardDomId(dj.id)}
-            className={[
-              's-exclusive-itinerary__card',
-              showPink ? 's-exclusive-itinerary__card--pink' : '',
-              showPurple ? 's-exclusive-itinerary__card--purple' : '',
-            ]
-              .filter(Boolean)
-              .join(' ')}
-            hoverClass="s-exclusive-itinerary__card--pressed"
-            hoverStartTime={0}
-            hoverStayTime={50}
-            aria-label={`${dj.name}，${dj.genreLabel}`}
-            onClick={() => onToggleDj(dj.id)}
-          >
-            {isSelected ? (
-              <View
-                className={[
-                  's-exclusive-itinerary__check',
-                  's-exclusive-itinerary__check--corner',
-                  showPurple
-                    ? 's-exclusive-itinerary__check--purple'
-                    : 's-exclusive-itinerary__check--pink',
-                ].join(' ')}
-                aria-hidden
-              >
-                <Check size={13} color="#fff" strokeWidth={3} />
-              </View>
-            ) : null}
-            <Text className="s-exclusive-itinerary__name">{dj.name}</Text>
-            <Text
-              className="s-exclusive-itinerary__genre"
-              style={{
-                color: isSelected
-                  ? showPurple
-                    ? '#7b61ff'
-                    : 'var(--primary)'
-                  : dj.genreColor,
-              }}
-            >
-              {dj.genreLabel}
-            </Text>
+      <View className="s-exclusive-itinerary__filter-block">
+        <Text className="s-exclusive-itinerary__filter-label">
+          {t('personality.stageFilter')}
+        </Text>
+        <ScrollView
+          scrollX
+          enhanced
+          showScrollbar={false}
+          className="s-exclusive-itinerary__chip-scroll s-scrollbar-none"
+        >
+          <View className="s-exclusive-itinerary__chip-row">
+            {stageOptions.map((stage) => {
+              const active = stageFilter === stage.id;
+              return (
+                <Button
+                  key={stage.id}
+                  className={[
+                    's-exclusive-itinerary__chip',
+                    active ? 's-exclusive-itinerary__chip--stage-on' : '',
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
+                  hoverClass="s-exclusive-itinerary__chip--pressed"
+                  onClick={() => onStageFilterChange(stage.id)}
+                >
+                  <Text className="s-exclusive-itinerary__chip-text">
+                    {stage.label}
+                  </Text>
+                  {active ? <Check size={14} color="#ffffff" aria-hidden /> : null}
+                </Button>
+              );
+            })}
           </View>
-        );
-      })}
-    </View>
-  </>
-);
+        </ScrollView>
+      </View>
+
+      <View className="s-exclusive-itinerary__filter-block">
+        <Text className="s-exclusive-itinerary__filter-label">
+          {t('personality.genreFilter')}
+        </Text>
+        <ScrollView
+          scrollX
+          enhanced
+          showScrollbar={false}
+          className="s-exclusive-itinerary__chip-scroll s-scrollbar-none"
+        >
+          <View className="s-exclusive-itinerary__chip-row">
+            {genreOptions.map((genre) => {
+              const active = genreFilter === genre.id;
+              return (
+                <Button
+                  key={genre.id}
+                  className={[
+                    's-exclusive-itinerary__chip',
+                    active ? 's-exclusive-itinerary__chip--genre-on' : '',
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
+                  hoverClass="s-exclusive-itinerary__chip--pressed"
+                  onClick={() => onGenreFilterChange(genre.id)}
+                >
+                  <Text className="s-exclusive-itinerary__chip-text">
+                    {genre.label}
+                  </Text>
+                  {active ? <Check size={14} color="#ffffff" aria-hidden /> : null}
+                </Button>
+              );
+            })}
+          </View>
+        </ScrollView>
+      </View>
+
+      <View className="s-exclusive-itinerary__search-row">
+        <View className="s-exclusive-itinerary__search-wrap">
+          <Search size={16} color="#8e8e93" aria-hidden />
+          <Input
+            className="s-exclusive-itinerary__search-input"
+            type="text"
+            value={styleSearchQuery}
+            placeholder={t('personality.searchPlaceholder')}
+            confirmType="search"
+            onInput={(e) => onStyleSearchQueryChange(e.detail?.value ?? '')}
+          />
+          {styleSearchQuery ? (
+            <Button
+              className="s-exclusive-itinerary__search-clear"
+              onClick={() => onStyleSearchQueryChange('')}
+            >
+              <X size={14} color="#8e8e93" />
+            </Button>
+          ) : null}
+        </View>
+        <Button className="s-exclusive-itinerary__sort-btn" onClick={onOpenSortSheet}>
+          <Text className="s-exclusive-itinerary__sort-btn-text">{sortMode}</Text>
+          <ChevronDown size={14} color="#8e8e93" />
+        </Button>
+      </View>
+
+      <View className="s-exclusive-itinerary__dj-grid">
+        {filteredDjs.map((dj) => {
+          const selected = selectedIds.includes(dj.id);
+          const domId = itineraryDjCardDomId(dj.id);
+          return (
+            <Button
+              key={dj.id}
+              id={domId}
+              className={[
+                's-exclusive-itinerary__dj-card',
+                selected ? 's-exclusive-itinerary__dj-card--selected' : '',
+              ]
+                .filter(Boolean)
+                .join(' ')}
+              hoverClass="s-exclusive-itinerary__dj-card--pressed"
+              onClick={() => onToggleDj(dj.id)}
+            >
+              <View className="s-exclusive-itinerary__dj-card-check">
+                {selected ? <Check size={20} color="#64d2ff" /> : null}
+              </View>
+              <Text className="s-exclusive-itinerary__dj-card-name">{dj.name}</Text>
+              <Text className="s-exclusive-itinerary__dj-card-genre">{dj.genre}</Text>
+            </Button>
+          );
+        })}
+      </View>
+    </>
+  );
+};
 
 export default ExclusiveItineraryDjGrid;

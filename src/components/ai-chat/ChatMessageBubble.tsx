@@ -5,6 +5,7 @@ import { PublishConfirmCard } from './PublishConfirmCard';
 import { SuggestedReplyChips } from './SuggestedReplyChips';
 import { AiChatProgressIndicator } from './AiChatProgressIndicator';
 import type { ChatMessageRowPresentation } from './useChatMessageRowPresentation';
+import { useT } from '@/hooks/useI18n';
 import { Text, View } from '@tarojs/components';
 
 type ChatMessageBubbleProps = {
@@ -36,6 +37,7 @@ export function ChatMessageBubble({
     showProgressIndicator,
     showTypingIndicator,
   } = presentation;
+  const t = useT();
 
   return (
     <View
@@ -60,7 +62,7 @@ export function ChatMessageBubble({
       {showProgressIndicator && msg.progressKind ? (
         <AiChatProgressIndicator kind={msg.progressKind} label={msg.text} />
       ) : showTypingIndicator ? (
-        <View className="s-ai-assistant-chat__typing" aria-label="AI 正在思考">
+        <View className="s-ai-assistant-chat__typing" aria-label={t('ai.typing')}>
           <View className="s-ai-assistant-chat__typing-dot" />
           <View className="s-ai-assistant-chat__typing-dot" />
           <View className="s-ai-assistant-chat__typing-dot" />
