@@ -18,6 +18,24 @@ export function getLineupCapabilityLabel(): string {
   return t('ai.lineup');
 }
 
+export function getMyScheduleCapabilityLabel(): string {
+  return t('ai.mySchedule');
+}
+
+/** Labels that open the personal schedule page (browse, not plan tasks). */
+export function isScheduleBrowseReply(label: string): boolean {
+  const trimmed = label.trim();
+  if (!trimmed) return false;
+  if (trimmed === '演出表' || trimmed === '查演出表') return true;
+  if (/^查.*演出表$/.test(trimmed) && trimmed.length <= 12) return true;
+
+  return (
+    labelMatchesKey(trimmed, 'ai.schedule') ||
+    labelMatchesKey(trimmed, 'ai.mySchedule') ||
+    labelMatchesKey(trimmed, 'festivalPlan.viewSchedule')
+  );
+}
+
 export function getTravelGuideCapabilityLabel(): string {
   return getGenerateTravelGuideCta();
 }
@@ -105,6 +123,7 @@ export function buildWelcomeCapabilityChipLabels(
 export function resolveWelcomeCapabilityChipAction(
   label: string,
   activityBound: boolean,
+  hasItinerary = false,
 ): WelcomeCapabilityChipAction | null {
   const trimmed = label.trim();
   if (!trimmed) return null;
@@ -113,7 +132,7 @@ export function resolveWelcomeCapabilityChipAction(
     if (labelMatchesKey(trimmed, 'ai.lineup') || trimmed === '查阵容') {
       return { type: 'lineup_page' };
     }
-    if (labelMatchesKey(trimmed, 'ai.schedule') || trimmed === '演出表') {
+    if (hasItinerary && isScheduleBrowseReply(trimmed)) {
       return { type: 'schedule_page' };
     }
 

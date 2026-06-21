@@ -142,6 +142,7 @@ export function useAiAssistantOrchestrator(options: UseAiAssistantOrchestratorOp
     openActivityPicker: activityBinding.openActivityPicker,
     openLineup,
     openSchedule,
+    festivalPlanHasItinerary,
   });
 
   useAiAssistantInitialIntents({

@@ -11,20 +11,41 @@ const ACTIVITY_UPDATE_TMPL = (
   process.env.TARO_APP_SUBSCRIBE_TMPL_ACTIVITY_UPDATE || ''
 ).trim();
 
+export type SubscribeMessageOutcome =
+  | 'accepted'
+  | 'rejected'
+  | 'unconfigured'
+  | 'unsupported';
+
 function isWeappRuntime(): boolean {
   return Taro.getEnv() === Taro.ENV_TYPE.WEAPP;
 }
 
-async function requestSubscribeMessage(tmplIds: string[]): Promise<void> {
+function resolveTemplateOutcome(
+  result: Record<string, string | undefined> | undefined,
+  templateId: string,
+): SubscribeMessageOutcome {
+  if (!templateId) return 'unconfigured';
+  const status = result?.[templateId];
+  if (status === 'accept') return 'accepted';
+  if (status === 'reject' || status === 'ban' || status === 'filter') {
+    return 'rejected';
+  }
+  return 'rejected';
+}
+
+async function requestSubscribeMessage(
+  tmplIds: string[],
+): Promise<Record<string, string | undefined> | undefined> {
   const uniqueIds = [...new Set(tmplIds.filter(Boolean))];
-  if (!uniqueIds.length) return;
+  if (!uniqueIds.length) return undefined;
 
   try {
-    await Taro.requestSubscribeMessage({
+    return (await Taro.requestSubscribeMessage({
       tmplIds: uniqueIds,
-    } as Taro.requestSubscribeMessage.Option);
+    } as Taro.requestSubscribeMessage.Option)) as Record<string, string | undefined>;
   } catch {
-    // user declined or quota exhausted
+    return undefined;
   }
 }
 
@@ -35,9 +56,12 @@ export async function requestPostEngagementSubscribe(): Promise<void> {
 }
 
 /** Request WeChat subscribe-message consent for activity lineup / schedule updates. */
-export async function requestActivityUpdateSubscribe(): Promise<void> {
-  if (!isWeappRuntime()) return;
-  await requestSubscribeMessage([ACTIVITY_UPDATE_TMPL]);
+export async function requestActivityUpdateSubscribe(): Promise<SubscribeMessageOutcome> {
+  if (!isWeappRuntime()) return 'unsupported';
+  if (!ACTIVITY_UPDATE_TMPL) return 'unconfigured';
+
+  const result = await requestSubscribeMessage([ACTIVITY_UPDATE_TMPL]);
+  return resolveTemplateOutcome(result, ACTIVITY_UPDATE_TMPL);
 }
 
 export function isPostEngagementSubscribeConfigured(): boolean {

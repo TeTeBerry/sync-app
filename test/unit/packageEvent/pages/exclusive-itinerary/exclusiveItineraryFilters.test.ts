@@ -7,6 +7,7 @@ import {
   extractDjStyleTokens,
   filterGenreOptionsBySearch,
   fuzzyStyleTextMatches,
+  resolvePrimaryGenreCategory,
 } from '@/packageEvent/pages/exclusive-itinerary/exclusiveItineraryFilters';
 import { FIXTURE_EXCLUSIVE_DJS } from '../../../../fixtures/itineraryUi.fixture';
 
@@ -19,18 +20,38 @@ describe('extractDjStyleTokens', () => {
   });
 });
 
+describe('resolvePrimaryGenreCategory', () => {
+  it('keeps canonical primary genres', () => {
+    expect(resolvePrimaryGenreCategory('House')).toBe('House');
+    expect(resolvePrimaryGenreCategory('Techno')).toBe('Techno');
+    expect(resolvePrimaryGenreCategory('Drum & Bass')).toBe('Drum & Bass');
+  });
+
+  it('collapses sub-genres into primary buckets', () => {
+    expect(resolvePrimaryGenreCategory('Big Room')).toBe('House');
+    expect(resolvePrimaryGenreCategory('Bass House')).toBe('House');
+    expect(resolvePrimaryGenreCategory('Future Bass')).toBe('Bass');
+    expect(resolvePrimaryGenreCategory('Melodic Techno')).toBe('Techno');
+  });
+});
+
 describe('buildGenreFilterOptions', () => {
-  it('derives category chips from lineup genre field', () => {
+  it('derives primary category chips from lineup genre field', () => {
     const options = buildGenreFilterOptions(FIXTURE_EXCLUSIVE_DJS);
     expect(options[0]).toEqual({ id: 'all', label: '全部风格' });
-    expect(options.map((item) => item.id)).toEqual([
-      'all',
-      'Dubstep',
-      'Future Bass',
-      'House',
-    ]);
+    expect(options.map((item) => item.id)).toEqual(['all', 'Bass', 'Dubstep', 'House']);
     expect(options.map((item) => item.id)).not.toContain('Tech House');
     expect(options.map((item) => item.id)).not.toContain('Brostep');
+  });
+
+  it('aggregates sub-genre artists into primary categories', () => {
+    const options = buildGenreFilterOptions([
+      { genre: 'Big Room' },
+      { genre: 'Bass House' },
+      { genre: 'House' },
+      { genre: 'Techno' },
+    ]);
+    expect(options.map((item) => item.id)).toEqual(['all', 'House', 'Techno']);
   });
 
   it('sorts categories by artist count descending', () => {
@@ -75,7 +96,7 @@ describe('djMatchesStyleSearch', () => {
 });
 
 describe('filterGenreOptionsBySearch', () => {
-  it('narrows category chips to search hits plus all', () => {
+  it('narrows primary category chips to search hits plus all', () => {
     const options = buildGenreFilterOptions([
       { genre: 'House' },
       { genre: 'Techno' },
@@ -87,14 +108,14 @@ describe('filterGenreOptionsBySearch', () => {
 });
 
 describe('djMatchesStyleFilter', () => {
-  it('matches a selected genre category', () => {
+  it('matches a selected primary genre category', () => {
     const dj = {
-      genre: 'House',
+      genre: 'Big Room',
       genreLabel: 'Big Room · Progressive House',
     };
     expect(djMatchesStyleFilter(dj, 'House')).toBe(true);
-    expect(djMatchesStyleFilter(dj, 'Big Room')).toBe(false);
-    expect(djMatchesStyleFilter(dj, 'Progressive House')).toBe(false);
+    expect(djMatchesStyleFilter(dj, 'Big Room')).toBe(true);
+    expect(djMatchesStyleFilter(dj, 'Techno')).toBe(false);
     expect(djMatchesStyleFilter(dj, 'all')).toBe(true);
   });
 });

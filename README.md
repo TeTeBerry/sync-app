@@ -6,14 +6,19 @@ The UI was migrated from a Vite mobile app to **Taro 4 + React**. Styles use **S
 
 ## Product overview
 
+Full feature map (Chinese): [docs/PRODUCT.md](docs/PRODUCT.md). User stories: [docs/Q1-USER-STORIES.md](docs/Q1-USER-STORIES.md).
+
 | Area | Behavior |
 |------|----------|
+| **Positioning** | Free EDM festival info + prep tools + public buddy-post feed (no ticketing, no in-app contact) |
 | **Activity selection** | Entering activity detail or binding an activity silently records interest via `POST /activities/:legacyId/register` — no separate “sign up” button |
-| **Home** | Featured events, “my next event” prep progress (Festival Plan), AI entry |
-| **Events tab** | Calendar, list, map views |
-| **Event detail** | Lineup, posts, AI travel guide card, festival plan checklist |
-| **AI tab** | WebSocket chat, capability sheets (guide / itinerary / buddy post) |
-| **Profile** | Selected activities, posts, settings, personality test |
+| **Home** | Featured events, countdown, “my next event” with Festival Plan progress, post-reply deep links, quick actions, new-user onboarding |
+| **Prep tab** (`准备`) | WebSocket AI chat bound to an activity; capability sheets for travel guide, exclusive itinerary, buddy post; embedded Festival Plan bar |
+| **Events tab** | List, calendar, and catalog artists sub-tabs (map UI exists in code but is **not** wired to the tab bar yet) |
+| **Event detail** | Lineup, buddy-post feed with filters/search, AI travel guide card, Festival Plan checklist, lineup-unpublished subscribe |
+| **Subpackages** | Exclusive itinerary, my itinerary, personality test (Soul DJ), travel guide detail, profile activities/posts, settings, notifications |
+| **Profile** | Account summary, selected activities, posts, settings, legal docs, account-deletion guidance |
+| **Festival Plan** | Three-task prep loop: travel guide → itinerary → buddy post; progress on home, event detail, and prep tab (`domains/festival-plan/`) |
 
 ## Tech stack
 
@@ -170,6 +175,8 @@ Husky + lint-staged on commit.
 
 | Document | Description |
 |----------|-------------|
+| [docs/PRODUCT.md](docs/PRODUCT.md) | Current product features & information architecture |
+| [docs/Q1-USER-STORIES.md](docs/Q1-USER-STORIES.md) | Q1 user stories, compliance scope, backlog |
 | [docs/API.md](docs/API.md) | REST / WebSocket contract |
 | [docs/DATA-LAYER.md](docs/DATA-LAYER.md) | Hooks, caches, auth |
 | [docs/COMPONENT-ARCHITECTURE.md](docs/COMPONENT-ARCHITECTURE.md) | UI layering |

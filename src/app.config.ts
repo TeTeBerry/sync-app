@@ -6,7 +6,7 @@ export default {
   requiredPrivateInfos: ['getLocation'] as const,
   /** 微信「代码质量」要求开启按需注入，见开发者工具 → 代码质量 → 组件 */
   lazyCodeLoading: 'requiredComponents',
-  /** 主包：仅 3 个 Tab，缩小首包体积 */
+  /** 主包：4 个 Tab，缩小首包体积 */
   pages: [
     'pages/index/index',
     'pages/ai/index',

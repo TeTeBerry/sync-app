@@ -1,5 +1,8 @@
 import { labelMatchesKey } from '@/i18n';
-import { isActivityBoundForCapabilities } from './aiAssistantCapabilityDiscovery';
+import {
+  isActivityBoundForCapabilities,
+  isScheduleBrowseReply,
+} from './aiAssistantCapabilityDiscovery';
 
 const CHECKLIST_DUPLICATE_KEYS = [
   'ai.generateTravelGuide',
@@ -50,19 +53,27 @@ export function shouldSuppressPersonalityTestCta(activityLegacyId?: number): boo
 export function filterBoundSuggestedReplies(
   replies: string[] | undefined,
   activityLegacyId?: number,
+  hasItinerary = false,
 ): string[] | undefined {
   if (!isActivityBoundForCapabilities(activityLegacyId) || !replies?.length) {
     return replies;
   }
-  const filtered = replies.filter(
-    (reply) => !isChecklistDuplicateReply(reply) && !isOffPrepReply(reply),
-  );
+  const filtered = replies.filter((reply) => {
+    if (isChecklistDuplicateReply(reply) || isOffPrepReply(reply)) {
+      return false;
+    }
+    if (!hasItinerary && isScheduleBrowseReply(reply)) {
+      return false;
+    }
+    return true;
+  });
   return filtered.length > 0 ? filtered : undefined;
 }
 
 export function filterChecklistDuplicateSuggestedReplies(
   replies: string[] | undefined,
   activityLegacyId?: number,
+  hasItinerary = false,
 ): string[] | undefined {
-  return filterBoundSuggestedReplies(replies, activityLegacyId);
+  return filterBoundSuggestedReplies(replies, activityLegacyId, hasItinerary);
 }

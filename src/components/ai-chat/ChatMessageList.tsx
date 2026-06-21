@@ -25,6 +25,7 @@ export const ChatMessageList = memo(function ChatMessageList({
   hasMoreHistory = false,
   onLoadOlderMessages,
   activityLegacyId,
+  festivalPlanHasItinerary = false,
   userAvatar,
   userName,
   userGender,
@@ -45,6 +46,7 @@ export const ChatMessageList = memo(function ChatMessageList({
   hasMoreHistory?: boolean;
   onLoadOlderMessages?: () => Promise<number>;
   activityLegacyId?: number;
+  festivalPlanHasItinerary?: boolean;
   userAvatar?: string;
   userName: string;
   userGender?: AuthorGender;
@@ -173,6 +175,7 @@ export const ChatMessageList = memo(function ChatMessageList({
             prevMsg={index > 0 ? visibleMessages[index - 1] : undefined}
             isStreaming={isStreaming}
             activityLegacyId={activityLegacyId}
+            festivalPlanHasItinerary={festivalPlanHasItinerary}
             userAvatar={userAvatar}
             userName={userName}
             userGender={userGender}

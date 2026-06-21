@@ -9,6 +9,96 @@ const STAGE_LABELS: Record<string, string> = {
 
 const STYLE_TOKEN_SPLIT = /\s*[·/]\s*/g;
 
+/** Canonical primary categories for festival lineup filters. */
+const PRIMARY_GENRE_LABELS: Record<string, string> = {
+  house: 'House',
+  techno: 'Techno',
+  trance: 'Trance',
+  dubstep: 'Dubstep',
+  'drum & bass': 'Drum & Bass',
+  'drum n bass': 'Drum & Bass',
+  dnb: 'Drum & Bass',
+  hardstyle: 'Hardstyle',
+  bass: 'Bass',
+  trap: 'Bass',
+  'future bass': 'Bass',
+};
+
+/** Sub-genre values stored in `genre` → primary filter bucket. */
+const SUBGENRE_TO_PRIMARY: Record<string, string> = {
+  'bass house': 'House',
+  'big room': 'House',
+  'tech house': 'House',
+  'deep house': 'House',
+  'progressive house': 'House',
+  'electro house': 'House',
+  'afro house': 'House',
+  'melodic house': 'House',
+  'disco house': 'House',
+  'funky house': 'House',
+  'uk garage': 'House',
+  'hard techno': 'Techno',
+  'melodic techno': 'Techno',
+  'industrial techno': 'Techno',
+  'acid techno': 'Techno',
+  'peak time techno': 'Techno',
+  'neo rave': 'Techno',
+  'progressive trance': 'Trance',
+  'uplifting trance': 'Trance',
+  'melodic trance': 'Trance',
+  brostep: 'Dubstep',
+  riddim: 'Dubstep',
+  'jump up': 'Drum & Bass',
+  neurofunk: 'Drum & Bass',
+  rawstyle: 'Hardstyle',
+  'uk hardcore': 'Hardstyle',
+  'happy hardcore': 'Hardstyle',
+};
+
+/** Collapse lineup `genre` to a primary category for per-event filter chips. */
+export function resolvePrimaryGenreCategory(genre: string): string {
+  const trimmed = genre?.trim() ?? '';
+  if (!trimmed || trimmed === '风格待补充') {
+    return '';
+  }
+
+  const key = trimmed.toLowerCase();
+  if (SUBGENRE_TO_PRIMARY[key]) {
+    return SUBGENRE_TO_PRIMARY[key];
+  }
+  if (PRIMARY_GENRE_LABELS[key]) {
+    return PRIMARY_GENRE_LABELS[key];
+  }
+
+  if (key.includes('house') || key.includes('garage')) {
+    return 'House';
+  }
+  if (key.includes('techno') || key.includes('rave')) {
+    return 'Techno';
+  }
+  if (key.includes('trance')) {
+    return 'Trance';
+  }
+  if (key.includes('dubstep') || key.includes('riddim')) {
+    return 'Dubstep';
+  }
+  if (key.includes('hardstyle') || key.includes('hardcore')) {
+    return 'Hardstyle';
+  }
+  if (
+    (key.includes('drum') && key.includes('bass')) ||
+    key.includes('jungle') ||
+    key === 'dnb'
+  ) {
+    return 'Drum & Bass';
+  }
+  if (key.includes('trap') || key.includes('future bass')) {
+    return 'Bass';
+  }
+
+  return trimmed;
+}
+
 export function extractDjStyleTokens(genreLabel?: string): string[] {
   const trimmed = genreLabel?.trim() ?? '';
   if (!trimmed || trimmed === '风格待补充') {
@@ -28,13 +118,13 @@ export function buildGenreFilterOptions(
   const labels = new Map<string, string>();
 
   for (const dj of djs) {
-    const genre = dj.genre?.trim() ?? '';
-    if (!genre || genre === '风格待补充') {
+    const primary = resolvePrimaryGenreCategory(dj.genre);
+    if (!primary) {
       continue;
     }
-    const key = genre.toLowerCase();
+    const key = primary.toLowerCase();
     if (!labels.has(key)) {
-      labels.set(key, genre);
+      labels.set(key, primary);
     }
     counts.set(key, (counts.get(key) ?? 0) + 1);
   }
@@ -114,9 +204,12 @@ export function djMatchesStyleFilter(dj: { genre: string }, styleId: string): bo
     return true;
   }
 
-  const normalized = styleId.trim().toLowerCase();
-  const genre = dj.genre?.trim().toLowerCase() ?? '';
-  return genre === normalized;
+  const selected = resolvePrimaryGenreCategory(styleId);
+  const artistPrimary = resolvePrimaryGenreCategory(dj.genre);
+  if (!selected || !artistPrimary) {
+    return false;
+  }
+  return artistPrimary.toLowerCase() === selected.toLowerCase();
 }
 
 export function djMatchesStyleSearch(

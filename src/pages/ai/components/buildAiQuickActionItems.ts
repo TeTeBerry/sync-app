@@ -10,19 +10,25 @@ export type AiQuickActionItem = {
 export function buildAiQuickActionItems(options: {
   onLineupPress: () => void;
   onSchedulePress: () => void;
+  hasItinerary?: boolean;
 }): AiQuickActionItem[] {
-  const { onLineupPress, onSchedulePress } = options;
+  const { onLineupPress, onSchedulePress, hasItinerary = false } = options;
 
-  return [
+  const items: AiQuickActionItem[] = [
     {
       key: 'lineup',
       label: t('ai.lineup'),
       onPress: onLineupPress,
     },
-    {
-      key: 'schedule',
-      label: t('ai.schedule'),
-      onPress: onSchedulePress,
-    },
   ];
+
+  if (hasItinerary) {
+    items.push({
+      key: 'schedule',
+      label: t('ai.mySchedule'),
+      onPress: onSchedulePress,
+    });
+  }
+
+  return items;
 }

@@ -24,6 +24,7 @@ type UseChatMessageRowPresentationOptions = {
   msg: ChatUiMessage;
   prevMsg?: ChatUiMessage;
   activityLegacyId?: number;
+  festivalPlanHasItinerary?: boolean;
   onRunCapability?: (capability: AiCapability) => void;
   onOpenPersonalityTest?: () => void;
 };
@@ -32,6 +33,7 @@ export function useChatMessageRowPresentation({
   msg,
   prevMsg,
   activityLegacyId,
+  festivalPlanHasItinerary = false,
   onRunCapability,
   onOpenPersonalityTest,
 }: UseChatMessageRowPresentationOptions) {
@@ -59,6 +61,7 @@ export function useChatMessageRowPresentation({
       : (filterBoundSuggestedReplies(
           filterBuddyPostSheetShortcutReplies(msg.suggestedReplies),
           activityLegacyId,
+          festivalPlanHasItinerary,
         ) ?? []);
   const hasSuggestedReplyChips = suggestedReplyChips.length > 0;
   const showBuddyPostTemplateCta =

@@ -84,6 +84,7 @@ type AiAssistantChatMessagesProps = {
   hasMoreHistory: boolean;
   loadOlderMessages?: () => Promise<number>;
   activityLegacyId?: number;
+  festivalPlanHasItinerary?: boolean;
   userAvatar?: string;
   userName: string;
   userGender?: ReturnType<typeof inferUserGenderFromName>;
@@ -106,6 +107,7 @@ const AiAssistantChatMessages = memo(function AiAssistantChatMessages({
   hasMoreHistory,
   loadOlderMessages,
   activityLegacyId,
+  festivalPlanHasItinerary = false,
   userAvatar,
   userName,
   userGender,
@@ -142,6 +144,7 @@ const AiAssistantChatMessages = memo(function AiAssistantChatMessages({
         hasMoreHistory={hasMoreHistory}
         onLoadOlderMessages={loadOlderMessages}
         activityLegacyId={activityLegacyId}
+        festivalPlanHasItinerary={festivalPlanHasItinerary}
         userAvatar={userAvatar}
         userName={userName}
         userGender={userGender}
@@ -186,8 +189,14 @@ export function AiAssistantChat({
     sheetInitialValues: travelGuideSheetInitialValues,
     handleSheetSubmit: handleTravelGuideSheetSubmit,
   } = travelGuide;
-  const { activityLegacyId, activityTitle, userAvatar, userName, pageShowSeq } =
-    orchestratorOptions;
+  const {
+    activityLegacyId,
+    activityTitle,
+    userAvatar,
+    userName,
+    pageShowSeq,
+    festivalPlanHasItinerary = false,
+  } = orchestratorOptions;
 
   const scrollRemeasureKey = `${pageShowSeq ?? 0}:${layoutRemeasureKey}:${accountRisk?.status ?? 'normal'}`;
   const sheetOverlayOpen = travelGuideSheetOpen || buddyPost.sheetOpen;
@@ -229,6 +238,7 @@ export function AiAssistantChat({
           hasMoreHistory={hasMoreHistory}
           loadOlderMessages={loadOlderMessages}
           activityLegacyId={activityLegacyId}
+          festivalPlanHasItinerary={festivalPlanHasItinerary}
           userAvatar={userAvatar}
           userName={userName}
           userGender={userGender}

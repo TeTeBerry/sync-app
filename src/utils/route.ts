@@ -115,6 +115,8 @@ export function resolveTabRouteFromPath(path: string): PreloadTabPath | null {
 const tabRouteListeners = new Set<() => void>();
 /** Tab highlight before `getCurrentPages()` reflects `switchTab` (custom tab bar). */
 let optimisticTabPath: PreloadTabPath | null = null;
+/** Last tab selected — used for packageEvent stack pages (no tab root in route). */
+let lastTabBarPath: PreloadTabPath = ROUTES.HOME;
 
 function notifyTabRouteChange() {
   for (const listener of tabRouteListeners) {
@@ -125,6 +127,7 @@ function notifyTabRouteChange() {
 /** Tab pages call on useDidShow so the custom tab bar stays in sync. */
 export function syncTabBarRoute(tabPath: PreloadTabPath): void {
   optimisticTabPath = tabPath;
+  lastTabBarPath = tabPath;
   notifyTabRouteChange();
 }
 
@@ -142,6 +145,7 @@ function resolveActiveRoutePath(): PreloadTabPath {
   const current = currentRoutePath();
   const tabFromCurrent = resolveTabRouteFromPath(current);
   if (tabFromCurrent) {
+    lastTabBarPath = tabFromCurrent;
     if (optimisticTabPath === tabFromCurrent) {
       optimisticTabPath = null;
     }
@@ -150,7 +154,34 @@ function resolveActiveRoutePath(): PreloadTabPath {
   if (optimisticTabPath) {
     return optimisticTabPath;
   }
-  return resolvePreloadTab(current);
+  return lastTabBarPath;
+}
+
+/** True when the visible page is the tab root (not a subpackage stack page). */
+export function isOnTabRoot(path: RoutePath): boolean {
+  if (!isTabRoute(path)) {
+    return false;
+  }
+  return currentRoutePath() === normalizePath(path);
+}
+
+function clearStuckTabSwitchState(target?: RoutePath) {
+  const normalizedTarget = target ? normalizePath(target) : null;
+  if (
+    optimisticTabPath &&
+    (!normalizedTarget || optimisticTabPath !== normalizedTarget)
+  ) {
+    optimisticTabPath = null;
+    notifyTabRouteChange();
+  }
+  const transition = useNavigationStore.getState().routeTransition;
+  if (
+    transition?.active &&
+    transition.tabTarget &&
+    (!normalizedTarget || transition.tabTarget !== normalizedTarget)
+  ) {
+    endRouteTransition();
+  }
 }
 
 export function subscribeTabRouteChange(listener: () => void): () => void {
@@ -247,9 +278,21 @@ function buildPageUrl(path: RoutePath, query?: Record<string, string>): string {
 function shouldSkipNavigation(url: string): boolean {
   const target = normalizeNavigationUrl(url);
   const current = normalizeNavigationUrl(currentPageUrl());
-  if (current && current === target) {
+  const targetPath = normalizePath(url.split('?')[0] ?? url);
+
+  if (isTabRoute(targetPath as RoutePath)) {
+    // Allow switchTab back to tab root from subpackage stack pages.
+    if (current && current === target) {
+      return true;
+    }
+    // In-flight switch to another tab — honor the new tap (don't debounce away).
+    if (optimisticTabPath && optimisticTabPath !== targetPath) {
+      return false;
+    }
+  } else if (current && current === target) {
     return true;
   }
+
   const now = Date.now();
   if (lastNavUrl === target && now - lastNavAt < NAV_DEBOUNCE_MS) {
     return true;
@@ -449,6 +492,7 @@ export function switchTabTo(url: RoutePath) {
     return;
   }
   if (shouldSkipNavigation(url)) {
+    clearStuckTabSwitchState(url);
     return;
   }
 
@@ -456,6 +500,7 @@ export function switchTabTo(url: RoutePath) {
 
   if (process.env.TARO_ENV !== 'weapp') {
     optimisticTabPath = url;
+    lastTabBarPath = url;
     notifyTabRouteChange();
     reLaunchTo(url);
     return;
@@ -463,6 +508,7 @@ export function switchTabTo(url: RoutePath) {
 
   markNavigationStart(url);
   optimisticTabPath = url;
+  lastTabBarPath = url;
   notifyTabRouteChange();
 
   runSerializedNavigation(

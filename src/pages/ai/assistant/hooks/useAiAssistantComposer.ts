@@ -21,6 +21,7 @@ export function useAiAssistantComposer(options: {
   openActivityPicker: () => void;
   openLineup: () => void;
   openSchedule: () => void;
+  festivalPlanHasItinerary?: boolean;
 }) {
   const {
     activityLegacyId,
@@ -34,6 +35,7 @@ export function useAiAssistantComposer(options: {
     openActivityPicker,
     openLineup,
     openSchedule,
+    festivalPlanHasItinerary = false,
   } = options;
 
   const [composerResetKey, setComposerResetKey] = useState(0);
@@ -86,6 +88,7 @@ export function useAiAssistantComposer(options: {
       const capabilityAction = resolveWelcomeCapabilityChipAction(
         trimmed,
         isActivityBoundForCapabilities(activityLegacyId),
+        festivalPlanHasItinerary,
       );
       if (capabilityAction) {
         switch (capabilityAction.type) {
@@ -126,6 +129,7 @@ export function useAiAssistantComposer(options: {
     [
       activityLegacyId,
       capabilityRunner,
+      festivalPlanHasItinerary,
       isStreaming,
       isStreamingRef,
       openActivityPicker,

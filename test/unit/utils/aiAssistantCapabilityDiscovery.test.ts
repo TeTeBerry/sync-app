@@ -49,7 +49,13 @@ describe('aiAssistantCapabilityDiscovery', () => {
     expect(resolveWelcomeCapabilityChipAction(t('ai.lineup'), true)).toEqual({
       type: 'lineup_page',
     });
-    expect(resolveWelcomeCapabilityChipAction(t('ai.schedule'), true)).toEqual({
+    expect(
+      resolveWelcomeCapabilityChipAction(t('ai.schedule'), true, false),
+    ).toBeNull();
+    expect(resolveWelcomeCapabilityChipAction(t('ai.schedule'), true, true)).toEqual({
+      type: 'schedule_page',
+    });
+    expect(resolveWelcomeCapabilityChipAction(t('ai.mySchedule'), true, true)).toEqual({
       type: 'schedule_page',
     });
     expect(

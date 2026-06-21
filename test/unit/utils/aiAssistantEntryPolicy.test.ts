@@ -50,6 +50,15 @@ describe('aiAssistantEntryPolicy', () => {
     ).toEqual([getGenerateTravelGuideCta()]);
   });
 
+  it('hides schedule browse chips until itinerary exists', () => {
+    expect(
+      filterBoundSuggestedReplies(['查阵容', t('ai.schedule'), '其他问题'], 8, false),
+    ).toEqual(['查阵容', '其他问题']);
+    expect(
+      filterBoundSuggestedReplies(['查阵容', t('ai.mySchedule')], 8, true),
+    ).toEqual(['查阵容', t('ai.mySchedule')]);
+  });
+
   it('filters off-prep suggested replies when bound', () => {
     expect(
       filterBoundSuggestedReplies(

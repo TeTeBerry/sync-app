@@ -18,6 +18,7 @@ const ExclusiveItineraryPage = () => {
   useEndRouteTransitionOnShow();
   const t = useT();
   const {
+    activityLegacyId,
     navFallback,
     mainScrollHeight,
     conflicts,
@@ -92,6 +93,7 @@ const ExclusiveItineraryPage = () => {
         <View className="s-exclusive-itinerary__inner">
           {lineupPending ? (
             <ExclusiveItineraryUnpublishedBanner
+              activityLegacyId={activityLegacyId}
               showEmptyLineup={filteredDjs.length === 0}
             />
           ) : null}

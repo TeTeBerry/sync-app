@@ -9,6 +9,7 @@ import { useNavigationStore } from '@/stores/navigationStore';
 import {
   beginTabRouteTransition,
   endRouteTransition,
+  isOnTabRoot,
   resolveTabRouteFromPath,
   ROUTES,
   subscribeTabRouteChange,
@@ -110,5 +111,28 @@ describe('tab switch loading', () => {
     syncTabBarRoute(ROUTES.PROFILE);
     expect(listener).toHaveBeenCalled();
     unsubscribe();
+  });
+
+  it('isOnTabRoot is false on subpackage stack pages', () => {
+    vi.mocked(Taro.getCurrentPages).mockReturnValue([
+      { route: 'packageEvent/pages/event-detail/index' },
+    ] as never);
+    expect(isOnTabRoot(ROUTES.HOME)).toBe(false);
+    expect(isOnTabRoot(ROUTES.EVENTS)).toBe(false);
+  });
+
+  it('clears stuck optimistic tab when user retaps current tab root during switch', () => {
+    syncTabBarRoute(ROUTES.AI);
+    switchTabTo(ROUTES.HOME);
+    expect(useNavigationStore.getState().routeTransition.active).toBe(false);
+  });
+
+  it('queues a new tab when optimistic path points at another tab', async () => {
+    syncTabBarRoute(ROUTES.AI);
+    switchTabTo(ROUTES.EVENTS);
+    await vi.waitUntil(() => vi.mocked(Taro.switchTab).mock.calls.length > 0);
+    expect(Taro.switchTab).toHaveBeenCalledWith(
+      expect.objectContaining({ url: ROUTES.EVENTS }),
+    );
   });
 });

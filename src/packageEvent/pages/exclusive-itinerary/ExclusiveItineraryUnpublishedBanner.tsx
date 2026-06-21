@@ -1,22 +1,20 @@
 import { Button } from '../../../components/ui';
-import { requireAuth } from '../../../utils/authGate';
-import { requestActivityUpdateSubscribe } from '../../../utils/wechatSubscribeMessage';
 import { Text, View } from '@tarojs/components';
 import { useT } from '@/hooks/useI18n';
+import { useActivityUpdateSubscribeAction } from './useActivityUpdateSubscribeAction';
 
 type ExclusiveItineraryUnpublishedBannerProps = {
+  activityLegacyId?: number;
   showEmptyLineup?: boolean;
 };
 
 export function ExclusiveItineraryUnpublishedBanner({
+  activityLegacyId,
   showEmptyLineup = false,
 }: ExclusiveItineraryUnpublishedBannerProps) {
   const t = useT();
-  const handleSubscribe = () => {
-    requireAuth(() => {
-      void requestActivityUpdateSubscribe();
-    }, 'notification');
-  };
+  const { subscribed, submitting, handleSubscribe } =
+    useActivityUpdateSubscribeAction(activityLegacyId);
 
   return (
     <View className="s-exclusive-itinerary__unpublished">
@@ -30,14 +28,27 @@ export function ExclusiveItineraryUnpublishedBanner({
             })}
       </Text>
       <Text className="s-exclusive-itinerary__unpublished-desc">
-        {t('itinerary.unpublishedBanner.hint')}
+        {subscribed
+          ? t('itinerary.unpublishedBanner.subscribedHint')
+          : t('itinerary.unpublishedBanner.hint')}
       </Text>
       <Button
-        className="s-exclusive-itinerary__unpublished-btn"
+        className={[
+          's-exclusive-itinerary__unpublished-btn',
+          subscribed && 's-exclusive-itinerary__unpublished-btn--subscribed',
+          submitting && 's-exclusive-itinerary__unpublished-btn--loading',
+        ]
+          .filter(Boolean)
+          .join(' ')}
+        disabled={subscribed || submitting}
         onClick={handleSubscribe}
       >
         <Text className="s-exclusive-itinerary__unpublished-btn-text">
-          {t('itinerary.unpublishedBanner.subscribe')}
+          {subscribed
+            ? t('itinerary.unpublishedBanner.subscribed')
+            : submitting
+              ? t('itinerary.unpublishedBanner.subscribing')
+              : t('itinerary.unpublishedBanner.subscribe')}
         </Text>
       </Button>
     </View>

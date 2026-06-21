@@ -358,6 +358,15 @@
     border-radius: 9999px;
     background: rgba(76, 201, 240, 0.16);
     border: 1px solid rgba(76, 201, 240, 0.35);
+
+    &--subscribed {
+      opacity: 0.72;
+      background: rgba(76, 201, 240, 0.08);
+    }
+
+    &--loading {
+      opacity: 0.85;
+    }
   }
 
   &__unpublished-btn-text {

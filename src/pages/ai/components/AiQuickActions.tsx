@@ -9,23 +9,26 @@ import { buildAiQuickActionItems } from './buildAiQuickActionItems';
 type AiQuickActionsProps = {
   onLineupPress: () => void;
   onSchedulePress: () => void;
+  hasItinerary?: boolean;
   onLayoutChange?: () => void;
 };
 
 export const AiQuickActions: FC<AiQuickActionsProps> = ({
   onLineupPress,
   onSchedulePress,
+  hasItinerary = false,
   onLayoutChange,
 }) => {
   const t = useT();
   const items = buildAiQuickActionItems({
     onLineupPress,
     onSchedulePress,
+    hasItinerary,
   });
 
   useEffect(() => {
     onLayoutChange?.();
-  }, [onLayoutChange]);
+  }, [hasItinerary, onLayoutChange]);
 
   return (
     <View className="s-ai-quick-actions" aria-label={t('ai.quickActionsTitle')}>

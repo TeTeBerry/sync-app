@@ -16,6 +16,7 @@ export type ChatMessageRowProps = {
   prevMsg?: ChatUiMessage;
   isStreaming: boolean;
   activityLegacyId?: number;
+  festivalPlanHasItinerary?: boolean;
   userAvatar?: string;
   userName: string;
   userGender?: AuthorGender;
@@ -31,6 +32,7 @@ function ChatMessageRowInner({
   prevMsg,
   isStreaming,
   activityLegacyId,
+  festivalPlanHasItinerary = false,
   userAvatar,
   userName,
   userGender,
@@ -44,6 +46,7 @@ function ChatMessageRowInner({
     msg,
     prevMsg,
     activityLegacyId,
+    festivalPlanHasItinerary,
     onRunCapability,
     onOpenPersonalityTest,
   });

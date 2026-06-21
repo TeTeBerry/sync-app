@@ -56,6 +56,9 @@ const AiTabPage: FC = () => {
           <AiQuickActions
             onLineupPress={page.quickActionsHandlers.openLineup}
             onSchedulePress={page.quickActionsHandlers.openSchedule}
+            hasItinerary={Boolean(
+              page.festivalPlan?.tasks.find((task) => task.key === 'itinerary')?.done,
+            )}
             onLayoutChange={page.handleChromeLayoutChange}
           />
         ) : null}

@@ -8,7 +8,7 @@
 |------|------|------|
 | UI 原语 | `src/components/ui/` | 无业务语义；包装 Taro 原语 + BEM/`cn` |
 | 跨页业务 | `src/components/`（`auth/`、`ai-chat/`、`profile/`、`navigation/` 等） | 多 Tab / 多分包复用的轻量 UI |
-| 活动域 | `src/domains/`（`travel-plan/`、`performance-itinerary/`、`travel-guide/`、`partner-feed/`、`personality-test/`） | 与后端 ActivityExperience 等域对齐的重逻辑 |
+| 活动域 | `src/domains/`（`festival-plan/`、`travel-plan/`、`performance-itinerary/`、`travel-guide/`、`partner-feed/`、`personality-test/`、`activity-scope/`） | 与后端 ActivityExperience 等域对齐的重逻辑 |
 | 页面壳 | `src/pages/**/`、`src/package*/pages/**/` | 路由入口、薄编排 |
 
 ### 依赖方向（必须遵守）
@@ -54,11 +54,17 @@ Barrel 导出分包/活动详情需要的组件与逻辑；仅主 profile 页使
 - 内容：`EventCard`、`ActivityStatusBadge`
 - Barrel：`src/components/event/index.ts`
 
+### Festival Plan（观演准备）
+
+- 目录：`src/domains/festival-plan/`
+- 组件：`FestivalPlanSummaryBar`（首页 / 详情 / 准备 Tab 共用）
+- 逻辑：`useFestivalPlanSummary`、`useFestivalPlanNavigation`、任务定义 `festivalPlanTaskDefs.ts`
+
 ### 活动详情
 
 - 页面：`packageEvent/pages/event-detail/index.tsx`（薄壳：路由编排、组队帖 FAB / sheet）
 - 编排：`useEventDetailPage.ts`
-- 域：`domains/partner-feed/`（活动详情 AI 咨询入口、组队帖流）、`domains/travel-guide/`
+- 域：`domains/partner-feed/`（组队帖流、AI 咨询入口）、`domains/travel-guide/`、`domains/festival-plan/`（准备清单）
 
 ## 决策表
 

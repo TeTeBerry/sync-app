@@ -25,7 +25,7 @@
 | P3-dev | check / husky / CI | ✅ 完成 |
 | AE | 活动域 `domains/` + `@sync/*-contracts` | ✅ 完成 |
 
-**产品约定**：用户进入活动详情或绑定活动即视为「选择」；首页展示热门活动与「我的下一场」准备进度；活动详情提供 AI 咨询、出行攻略与行程入口；无帖流。
+**产品约定**：用户进入活动详情或绑定活动即视为「选择」；首页展示精选活动与「我的下一场」Festival Plan 进度；活动详情含组队帖流、出行攻略卡片与准备清单；准备 Tab（`pages/ai`）为 AI 对话与能力 Sheet 主入口。详见 [PRODUCT.md](./PRODUCT.md)。
 
 **工程**：`npm run check`；pre-commit lint-staged；CI 见 `.github/workflows/ci.yml`；工作区 [`../../CONTRIBUTING.md`](../../CONTRIBUTING.md)。
 
@@ -157,11 +157,14 @@ src/
 ├── utils/chatMessages.ts       patchChatMessage
 ├── components/ai-chat/         消息列表 / 输入 / 攻略卡片
 ├── stores/navigationStore.ts   AI 跳转 activityLegacyId
-├── pages/events/               活动列表
-├── pages/index/                首页精选活动
+├── pages/events/               活动 Tab（列表 / 日历 / 艺人）
+├── pages/ai/                   准备 Tab（AI 对话 + Festival Plan）
+├── pages/index/                首页精选活动 / 我的下一场
 ├── pages/profile/              个人 Tab
-├── domains/partner-feed/       活动详情 AI 咨询 / 行程菜单
+├── domains/festival-plan/      观演准备三件套进度
+├── domains/partner-feed/       活动详情组队帖流 / AI 咨询入口
 ├── domains/travel-guide/       出行攻略
+├── domains/personality-test/   人格测试
 ├── packageEvent/pages/event-detail/
 └── packageAi/pages/ai-assistant/  AiAssistantChat + legacy redirect
 ```

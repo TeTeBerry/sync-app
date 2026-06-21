@@ -45,8 +45,8 @@ npm run verify:bundle
 | 主题 | 约定 |
 |------|------|
 | 图标 | 仅从 `@/components/icons` 引入；新增图标时在 `components/icons/index.ts` 登记 |
-| Canvas | 壁纸/攻略用 `@/utils/offscreenCanvas`；地图页用 `components/event-map/*`（留在 event 分包） |
-| 分包 | 地图 / 独家行程 / 我的行程页面逻辑放在 `packageEvent/pages/*`，勿被主包 `pages/*` 直接 import |
+| Canvas | 壁纸/攻略用 `@/utils/offscreenCanvas`；活动地图用 `pages/events/components/EventsActivityMapTab` + `hooks/useEventsActivityMap`（**已实现但未接入活动 Tab**，勿被主包误引） |
+| 分包 | 独家行程 / 我的行程 / 活动详情等放在 `packageEvent/pages/*`，勿被主包 `pages/*` 直接 import |
 | 活动图资源 | `packageEvent/assets/`（如 storm-logo），勿打进主包 `assets/` |
 
 `config/index.ts` 已开启 `usedExports` + `sideEffects` 以利于 tree-shaking。

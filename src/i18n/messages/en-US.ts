@@ -247,6 +247,7 @@ export const enUS: MessageTree = {
     receiptOcrCta: 'Go to plan page',
     lineup: 'Lineup info',
     schedule: 'Schedule',
+    mySchedule: 'My schedule',
     pickFestival: 'Pick a festival',
     nearEvents: 'Events coming up',
     nearEventsSubmit: 'Show nearby events',
@@ -592,6 +593,15 @@ export const enUS: MessageTree = {
       title: '{{text}}',
       hint: 'Lineup has not been announced yet. Check with the organizer. We do not guarantee announcement timing.',
       subscribe: 'Subscribe to updates',
+      subscribing: 'Subscribing…',
+      subscribed: 'Subscribed',
+      subscribedHint:
+        'You are following this event. Lineup or schedule updates will appear in notifications.',
+      subscribeSuccessWechat: 'Subscribed — we will notify you on WeChat',
+      subscribeSuccessInApp: 'Following this event — check notifications for updates',
+      subscribeRegisterFailed: 'Could not follow this event. Please try again.',
+      subscribeUnconfigured:
+        'WeChat alerts are unavailable right now. Try again later.',
       lineupNotAnnounced: 'Lineup not announced',
       scheduleNotPublished: 'Schedule not published',
     },

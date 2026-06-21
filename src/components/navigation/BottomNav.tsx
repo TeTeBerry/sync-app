@@ -12,6 +12,7 @@ import {
 import type { RoutePath } from '../../utils/route';
 import {
   ROUTES,
+  isOnTabRoot,
   switchTabTo,
   syncTabBarFromCurrentPage,
   useActiveRoutePath,
@@ -31,7 +32,10 @@ function preloadSubpackagesForTab(path: RoutePath) {
 }
 
 function handleTabPress(path: RoutePath, isActive: boolean) {
-  if (isActive) return;
+  // On subpackage stack pages the tab can look active while route is not the tab root.
+  if (isActive && isOnTabRoot(path)) {
+    return;
+  }
   preloadSubpackagesForTab(path);
   switchTabTo(path);
 }
@@ -52,13 +56,14 @@ const BottomNav: React.FC = () => {
       <View className="s-bottom-nav__row">
         {navItems.map((item) => {
           const isActive = activePath === item.path;
+          const isTabRoot = isOnTabRoot(item.path);
           const Icon = item.icon;
           return (
             <Button
               key={item.path}
-              disabled={isActive}
+              disabled={isActive && isTabRoot}
               onTouchStart={() => {
-                if (!isActive) {
+                if (!isActive || !isTabRoot) {
                   preloadSubpackagesForTab(item.path);
                 }
               }}
