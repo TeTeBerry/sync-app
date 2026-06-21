@@ -75,7 +75,7 @@ export const EventsActivityArtistsTab: FC<EventsActivityArtistsTabProps> = ({
       <View className="s-events__artists-grid">
         {artists.map((artist, index) => {
           const thumbSrc = artist.thumbnail
-            ? thumbnailImageUrl(artist.thumbnail, IMAGE_SIZE.avatarMd)
+            ? thumbnailImageUrl(artist.thumbnail, IMAGE_SIZE.avatarMd, 1)
             : undefined;
 
           return (

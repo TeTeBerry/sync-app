@@ -34,13 +34,22 @@ export function isPersonalityAvatarAssetKey(src: string | undefined): boolean {
   return Boolean(src?.trim().startsWith('avatar/'));
 }
 
+/** CloudBase lineup artist avatar object key stored in MongoDB. */
+export function isLineupAvatarAssetKey(src: string | undefined): boolean {
+  return Boolean(src?.trim().startsWith('lineup-avatar/'));
+}
+
 /** ImageWithFallback display `src`: block unresolved cloud references. */
 export function resolveImageWithFallbackDisplaySrc(
   resolvedSrc: string | undefined,
 ): string | undefined {
   const trimmed = resolvedSrc?.trim();
   if (!trimmed) return undefined;
-  if (isCloudStorageFileId(trimmed) || isPersonalityAvatarAssetKey(trimmed)) {
+  if (
+    isCloudStorageFileId(trimmed) ||
+    isPersonalityAvatarAssetKey(trimmed) ||
+    isLineupAvatarAssetKey(trimmed)
+  ) {
     return undefined;
   }
   return trimmed;
@@ -56,7 +65,12 @@ export function resolveAvatarDisplaySrc(
   if (resolved) return resolved;
 
   const raw = rawSrc?.trim();
-  if (!raw || isPersonalityAvatarAssetKey(raw) || isCloudStorageFileId(raw)) {
+  if (
+    !raw ||
+    isPersonalityAvatarAssetKey(raw) ||
+    isLineupAvatarAssetKey(raw) ||
+    isCloudStorageFileId(raw)
+  ) {
     return fallback;
   }
 
@@ -164,6 +178,9 @@ export function thumbnailImageUrl(
     }
 
     const host = url.hostname;
+    if (host.includes('tcb.qcloud.la') || host.includes('qcloud.la')) {
+      return trimmed;
+    }
     if (host.includes('imagekit.io')) {
       if (!url.searchParams.has('tr')) {
         url.searchParams.set('tr', `w-${width},h-${height},c-at_max`);
