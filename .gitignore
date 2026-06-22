@@ -21,6 +21,9 @@ dist-h5
 .env
 .env.production
 
+# Local AI / editor config
+.claude/settings.local.json
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

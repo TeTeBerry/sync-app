@@ -466,11 +466,16 @@ function redirectToSafe(url: string) {
   );
 }
 
+export type SwitchTabOptions = {
+  /** Always invoke switchTab (e.g. home CTA) and resync custom tab bar highlight. */
+  force?: boolean;
+};
+
 /** Tab pages: switchTab keeps tab stacks alive (smoother than reLaunch). */
 /** Open activities tab on the list view (e.g. home 「全部」). */
 export function goEventsListTab() {
   setEventsViewTabIntent('list');
-  switchTabTo(ROUTES.EVENTS);
+  switchTabTo(ROUTES.EVENTS, { force: true });
 }
 
 /** Open activities tab with optional list search prefilled (from home 查节 / example chips). */
@@ -479,33 +484,36 @@ export function goEventsWithSearch(query?: string) {
   if (query?.trim()) {
     setEventsSearchQuery(query.trim());
   }
-  switchTabTo(ROUTES.EVENTS);
+  switchTabTo(ROUTES.EVENTS, { force: true });
 }
 
-export function switchTabTo(url: RoutePath) {
+export function switchTabTo(url: RoutePath, options?: SwitchTabOptions) {
   if (!isTabRoute(url)) {
     reLaunchTo(url);
     return;
   }
-  if (shouldSkipNavigation(url)) {
+  const targetPath = url as PreloadTabPath;
+  if (!options?.force && shouldSkipNavigation(url)) {
     clearStuckTabSwitchState(url);
+    const actualTab = resolveTabRouteFromPath(currentRoutePath());
+    if (actualTab) {
+      syncTabBarRoute(actualTab);
+    }
     return;
   }
 
-  beginTabRouteTransition(url);
+  if (!options?.force || !isOnTabRoot(url)) {
+    beginTabRouteTransition(url);
+  }
 
   if (process.env.TARO_ENV !== 'weapp') {
-    optimisticTabPath = url;
-    lastTabBarPath = url;
-    notifyTabRouteChange();
+    syncTabBarRoute(targetPath);
     reLaunchTo(url);
     return;
   }
 
   markNavigationStart(url);
-  optimisticTabPath = url;
-  lastTabBarPath = url;
-  notifyTabRouteChange();
+  syncTabBarRoute(targetPath);
 
   runSerializedNavigation(
     () =>
@@ -513,7 +521,7 @@ export function switchTabTo(url: RoutePath) {
         Taro.switchTab({
           url,
           success: () => {
-            notifyTabRouteChange();
+            syncTabBarRoute(targetPath);
             resolve();
           },
           fail: () => {

@@ -15,13 +15,9 @@ import { useT } from '@/hooks/useI18n';
 
 export type HomeAiEntryProps = {
   findTeamActivityId?: number;
-  lookupActivityId?: number;
 };
 
-export const HomeAiEntry: FC<HomeAiEntryProps> = ({
-  findTeamActivityId,
-  lookupActivityId,
-}) => {
+export const HomeAiEntry: FC<HomeAiEntryProps> = ({ findTeamActivityId }) => {
   const t = useT();
   const { data: activities } = useActivitiesQuery();
 
@@ -31,11 +27,7 @@ export const HomeAiEntry: FC<HomeAiEntryProps> = ({
   );
 
   const handleLookupFestival = () => {
-    if (lookupActivityId != null) {
-      goEventDetail(lookupActivityId);
-      return;
-    }
-    goEventsWithSearch();
+    goEventsListTab();
   };
 
   const handleExampleQuestion = (key: string) => {

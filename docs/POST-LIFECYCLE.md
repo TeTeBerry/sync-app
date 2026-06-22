@@ -135,7 +135,7 @@ POST /api/posts
 
 - **站内信**：`navigateFromNotification` 对 `comment` / `comment_reply` 跳转活动详情，`postId` + `focusPosts=1` + `openComments=1`（自动滚动并展开评论）
 - **微信订阅消息**：后端 `WechatSubscribeMessageService`（需 `WECHAT_SUBSCRIBE_COMMENT_TEMPLATE_ID`）；用户发帖/评论成功后前端 `requestSubscribeMessage` 授权
-- **首页「我的下一场」**：`GET /api/home` → `myNextEventPostEngagement.unreadReplyCount` 展示「你的组队帖有 N 条新回复」
+- **首页「我的下一场」**：`GET /api/home` → `myNextEventPostEngagement.unreadReplyCount` 展示「你的招募帖有 N 条新公开回复」
 
 ---
 

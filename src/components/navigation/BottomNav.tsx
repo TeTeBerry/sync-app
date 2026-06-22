@@ -28,11 +28,12 @@ function preloadSubpackagesForTab(path: RoutePath) {
 }
 
 function handleTabPress(path: RoutePath, isActive: boolean) {
-  if (isActive && isOnTabRoot(path)) {
+  const onTargetRoot = isOnTabRoot(path);
+  if (isActive && onTargetRoot) {
     return;
   }
   preloadSubpackagesForTab(path);
-  switchTabTo(path);
+  switchTabTo(path, { force: isActive && !onTargetRoot });
 }
 
 const BottomNav: React.FC = () => {

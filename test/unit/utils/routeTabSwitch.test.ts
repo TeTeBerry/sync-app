@@ -127,9 +127,35 @@ describe('tab switch loading', () => {
     expect(useNavigationStore.getState().routeTransition.active).toBe(false);
   });
 
-  it('queues a new tab when optimistic path points at another tab', async () => {
+  it('resyncs tab bar to the visible page when navigation is skipped', () => {
+    const listener = vi.fn();
+    const unsubscribe = subscribeTabRouteChange(listener);
     syncTabBarRoute(ROUTES.EVENTS);
-    switchTabTo(ROUTES.EVENTS);
+    listener.mockClear();
+
+    switchTabTo(ROUTES.HOME);
+
+    expect(Taro.switchTab).not.toHaveBeenCalled();
+    expect(listener).toHaveBeenCalled();
+    unsubscribe();
+  });
+
+  it('forces switchTab for programmatic events navigation even when debounced', async () => {
+    switchTabTo(ROUTES.EVENTS, { force: true });
+    await vi.waitUntil(() => vi.mocked(Taro.switchTab).mock.calls.length > 0);
+    expect(Taro.switchTab).toHaveBeenCalledWith(
+      expect.objectContaining({ url: ROUTES.EVENTS }),
+    );
+
+    vi.mocked(Taro.switchTab).mockClear();
+    switchTabTo(ROUTES.EVENTS, { force: true });
+    await vi.waitUntil(() => vi.mocked(Taro.switchTab).mock.calls.length > 0);
+    expect(Taro.switchTab).toHaveBeenCalled();
+  });
+
+  it('queues switchTab when tab highlight is ahead of the visible page', async () => {
+    syncTabBarRoute(ROUTES.EVENTS);
+    switchTabTo(ROUTES.EVENTS, { force: true });
     await vi.waitUntil(() => vi.mocked(Taro.switchTab).mock.calls.length > 0);
     expect(Taro.switchTab).toHaveBeenCalledWith(
       expect.objectContaining({ url: ROUTES.EVENTS }),

@@ -230,14 +230,6 @@ const Home = () => {
     [nextSelectedEvent?.id, featuredLegacyId],
   );
 
-  const homeLookupActivityId = useMemo(() => {
-    const activeId = getActiveActivityLegacyId();
-    if (activeId != null && !Number.isNaN(activeId)) {
-      return activeId;
-    }
-    return featuredLegacyId;
-  }, [featuredLegacyId]);
-
   const heatLabel =
     activeTeamCount > 0
       ? t('home.heatActive', { count: activeTeamCount })
@@ -298,10 +290,7 @@ const Home = () => {
 
             <HomePersonalityTestEntry />
 
-            <HomeAiEntry
-              findTeamActivityId={homeFindTeamActivityId}
-              lookupActivityId={homeLookupActivityId}
-            />
+            <HomeAiEntry findTeamActivityId={homeFindTeamActivityId} />
 
             <HomeQuickActions />
 
