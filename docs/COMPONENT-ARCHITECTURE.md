@@ -54,7 +54,7 @@ Barrel 导出分包/活动详情需要的组件与逻辑；仅主 profile 页使
 - 内容：`EventCard`、`ActivityStatusBadge`
 - Barrel：`src/components/event/index.ts`
 
-### Festival Plan（观演准备）
+### Festival Plan（出征准备）
 
 - 目录：`src/domains/festival-plan/`
 - 组件：`FestivalPlanSummaryBar`（首页 / 详情 / 准备 Tab 共用）

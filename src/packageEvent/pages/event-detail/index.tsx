@@ -28,6 +28,11 @@ import { useMemo } from 'react';
 import { useT } from '@/hooks/useI18n';
 import { formatBuddyPostSearchParsedSummary } from '../../../utils/formatBuddyPostSearchParsedSummary';
 import { useAuthSession } from '../../../hooks/useAuthSession';
+import { useCurrentUserQuery } from '../../../hooks/useSyncApi';
+import {
+  formatBuddyPreferencesSummary,
+  hasBuddyPreferenceSignal,
+} from '../../../constants/buddyPreferences';
 
 const EventDetailPage = () => {
   useEndRouteTransitionOnShow();
@@ -37,6 +42,7 @@ const EventDetailPage = () => {
   });
   const page = useEventDetailPage({ confirm });
   const { loggedIn } = useAuthSession();
+  const { data: currentUser } = useCurrentUserQuery({ enabled: loggedIn });
   const searchParsedSummary = useMemo(
     () =>
       formatBuddyPostSearchParsedSummary(page.posts.searchParsed, (count) =>
@@ -44,6 +50,13 @@ const EventDetailPage = () => {
       ),
     [page.posts.searchParsed, t],
   );
+  const hasPreferenceSignal = loggedIn && hasBuddyPreferenceSignal(currentUser);
+  const preferenceSummary = useMemo(
+    () => (hasPreferenceSignal ? formatBuddyPreferencesSummary(currentUser) : null),
+    [currentUser, hasPreferenceSignal],
+  );
+  const showPreferenceInsight =
+    hasPreferenceSignal && !page.posts.searchUsedLocalFallback;
 
   if (page.invalidEventId) {
     return <EventDetailFallback variant="invalidId" />;
@@ -84,8 +97,8 @@ const EventDetailPage = () => {
     buddyPostSheetInitialValues,
     buddyPostPrefillSummaryLines,
     buddyPostPrefillBannerTitle,
-    activityTitle,
     handleOpenMyItinerary,
+    handleOpenActivityLineup,
     handleOpenExclusiveItinerary,
     guideSheetOpen,
     closeGuideSheet,
@@ -99,6 +112,8 @@ const EventDetailPage = () => {
     isWeapp,
     festivalPlanChecklist,
     onFestivalPlanTaskPress,
+    prepNudgeUnreadReplyCount,
+    onPrepNudgeAction,
     travelGuideGenerated,
     activity,
   } = page;
@@ -152,7 +167,7 @@ const EventDetailPage = () => {
               <EventDetailInfoSection
                 activity={activity}
                 activityLegacyId={page.eventId}
-                onOpenExclusiveItinerary={handleOpenExclusiveItinerary}
+                onOpenLineup={handleOpenActivityLineup}
               />
             ) : null}
 
@@ -165,25 +180,30 @@ const EventDetailPage = () => {
                 festivalPlanChecklist={festivalPlanChecklist}
                 onFestivalPlanTaskPress={onFestivalPlanTaskPress}
                 travelGuideGenerated={travelGuideGenerated}
+                lineupPublished={activity?.lineupPublished}
+                favorGenres={currentUser?.favorGenres}
+                unreadReplyCount={prepNudgeUnreadReplyCount}
+                onPrepNudgeAction={onPrepNudgeAction}
               />
             ) : null}
 
             <View id="event-detail-posts" className="s-event-detail__posts">
               {!showHeaderSkeleton ? (
-                <Text className="s-event-detail__recruit-kicker">
-                  {t('eventDetail.recruitSectionTitle')}
-                </Text>
-              ) : null}
-              {!showHeaderSkeleton ? (
-                <>
+                <View className="s-event-detail__recruit-panel">
+                  <View className="s-event-detail__recruit-head">
+                    <View className="s-event-detail__recruit-accent" aria-hidden />
+                    <Text className="s-event-detail__recruit-title">
+                      {t('eventDetail.recruitSectionTitle')}
+                    </Text>
+                  </View>
                   <EventDetailPostFilterBar
                     cityOptions={posts.postFilterCityOptions}
                     selectedCity={posts.postFilterSelectedCity}
                     onSelectedCityChange={posts.setPostFilterSelectedCity}
-                    disabled={posts.searchActive}
                     isActive={posts.postFiltersActive}
                     onClear={posts.clearPostFilters}
                   />
+                  <View className="s-event-detail__recruit-divider" aria-hidden />
                   <EventDetailPostSearchBar
                     value={posts.searchQuery}
                     onChange={posts.setSearchQuery}
@@ -192,8 +212,11 @@ const EventDetailPage = () => {
                     matchedCount={posts.searchMatchedCount}
                     usedLocalFallback={posts.searchUsedLocalFallback}
                     parsedSummary={searchParsedSummary}
+                    preferenceSummary={showPreferenceInsight ? preferenceSummary : null}
+                    hasPreferenceRanking={showPreferenceInsight}
+                    travelGuidePrefillHint={posts.travelGuideSearchPrefillHint}
                   />
-                </>
+                </View>
               ) : null}
               {postsLoading ? (
                 <ThemedPageLoader variant="skeleton-event-posts" minHeight={160} />

@@ -39,17 +39,16 @@ describe('buildEventDetailPrepSteps', () => {
 
     expect(steps.map((step) => step.key)).toEqual([
       'travel_guide',
-      'exclusive_itinerary',
       'buddy_post',
+      'exclusive_itinerary',
     ]);
 
     const itinerary = steps.find((step) => step.key === 'exclusive_itinerary');
     expect(itinerary?.actionLabel).toBe('排演出表');
+    expect(itinerary?.isNext).toBe(false);
 
-    itinerary?.onClick();
-    expect(onFestivalPlanTaskPress).toHaveBeenCalledWith(
-      checklist.tasks.find((task) => task.key === 'itinerary'),
-    );
+    const buddyPost = steps.find((step) => step.key === 'buddy_post');
+    expect(buddyPost?.isNext).toBe(true);
   });
 
   it('shows view schedule label when itinerary task is complete', () => {

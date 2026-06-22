@@ -1,6 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { subscribeToActivityUpdates } from '@/utils/subscribeToActivityUpdates';
-import { registerForActivityAndInvalidate } from '@/hooks/sync/activities';
+import {
+  registerForActivityAndInvalidate,
+  optInWechatActivityUpdatesAndInvalidate,
+} from '@/hooks/sync/activities';
 import { markActivityUpdateSubscribedLocally } from '@/utils/activityUpdateSubscribeStorage';
 import { requestActivityUpdateSubscribe } from '@/utils/wechatSubscribeMessage';
 
@@ -18,6 +21,7 @@ vi.mock('@/constants/api', () => ({
 
 vi.mock('@/hooks/sync/activities', () => ({
   registerForActivityAndInvalidate: vi.fn(),
+  optInWechatActivityUpdatesAndInvalidate: vi.fn(),
 }));
 
 vi.mock('@/utils/authStorage', () => ({
@@ -43,6 +47,11 @@ describe('subscribeToActivityUpdates', () => {
       status: 'registered',
       attendees: 1,
     });
+    vi.mocked(optInWechatActivityUpdatesAndInvalidate).mockResolvedValue({
+      ok: true,
+      activityLegacyId: 8,
+      wechatActivityUpdateOptIn: true,
+    });
   });
 
   it('registers activity and marks local state when WeChat accepts', async () => {
@@ -50,6 +59,7 @@ describe('subscribeToActivityUpdates', () => {
 
     await expect(subscribeToActivityUpdates(8)).resolves.toBe('wechat_accepted');
     expect(registerForActivityAndInvalidate).toHaveBeenCalledWith(8);
+    expect(optInWechatActivityUpdatesAndInvalidate).toHaveBeenCalledWith(8);
     expect(markActivityUpdateSubscribedLocally).toHaveBeenCalledWith(8);
     expect(Taro.showToast).toHaveBeenCalledWith(
       expect.objectContaining({ icon: 'success' }),

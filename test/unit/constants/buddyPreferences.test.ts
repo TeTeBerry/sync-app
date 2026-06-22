@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { formatBuddyPreferencesSummary } from '@/constants/buddyPreferences';
+import {
+  formatBuddyPreferencesSummary,
+  hasBuddyPreferenceSignal,
+} from '@/constants/buddyPreferences';
 
 describe('formatBuddyPreferencesSummary', () => {
   it('joins city genres and budget', () => {
@@ -15,5 +18,18 @@ describe('formatBuddyPreferencesSummary', () => {
 
   it('returns placeholder when empty', () => {
     expect(formatBuddyPreferencesSummary({})).toBe('未设置');
+  });
+});
+
+describe('hasBuddyPreferenceSignal', () => {
+  it('returns true when any preference field is set', () => {
+    expect(hasBuddyPreferenceSignal({ city: '上海' })).toBe(true);
+    expect(hasBuddyPreferenceSignal({ favorGenres: ['Techno'] })).toBe(true);
+    expect(hasBuddyPreferenceSignal({ budgetLevel: 'medium' })).toBe(true);
+  });
+
+  it('returns false when no preference fields are set', () => {
+    expect(hasBuddyPreferenceSignal({})).toBe(false);
+    expect(hasBuddyPreferenceSignal(null)).toBe(false);
   });
 });

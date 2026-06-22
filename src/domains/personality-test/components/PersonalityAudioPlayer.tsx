@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import Taro from '@tarojs/taro';
 import { Button } from '@/components/ui';
 import { useT } from '@/hooks/useI18n';
-import { resolvePersonalityMediaUrl } from '../utils/resolvePersonalityMedia';
+import { resolvePersonalityAudioPlaybackSrc } from '../utils/personalityAudioPrefetch';
 import { Text, View } from '@tarojs/components';
 
 type PersonalityAudioPlayerProps = {
@@ -19,7 +19,7 @@ export const PersonalityAudioPlayer: FC<PersonalityAudioPlayerProps> = ({
 }) => {
   const t = useT();
   const audioRef = useRef<Taro.InnerAudioContext | null>(null);
-  const [mediaUrl, setMediaUrl] = useState('');
+  const [playbackSrc, setPlaybackSrc] = useState('');
   const [loading, setLoading] = useState(true);
   const [playing, setPlaying] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -28,27 +28,33 @@ export const PersonalityAudioPlayer: FC<PersonalityAudioPlayerProps> = ({
     let cancelled = false;
     setLoading(true);
     setErrorMessage('');
-    void resolvePersonalityMediaUrl(assetKey).then((url) => {
+    setPlaybackSrc('');
+
+    void resolvePersonalityAudioPlaybackSrc(assetKey).then((src) => {
       if (cancelled) return;
-      setMediaUrl(url);
-      setLoading(false);
-      if (!url) {
+      setPlaybackSrc(src);
+      if (!src) {
+        setLoading(false);
         setErrorMessage(t('personality.audioNotUploaded'));
       }
     });
+
     return () => {
       cancelled = true;
     };
   }, [assetKey, t]);
 
   useEffect(() => {
-    if (!mediaUrl || process.env.TARO_ENV === 'h5') {
+    if (!playbackSrc || process.env.TARO_ENV === 'h5') {
+      if (playbackSrc && process.env.TARO_ENV === 'h5') {
+        setLoading(false);
+      }
       return undefined;
     }
 
     const audio = Taro.createInnerAudioContext();
     audioRef.current = audio;
-    audio.src = mediaUrl;
+    audio.src = playbackSrc;
     audio.autoplay = false;
     audio.obeyMuteSwitch = false;
 
@@ -56,8 +62,10 @@ export const PersonalityAudioPlayer: FC<PersonalityAudioPlayerProps> = ({
     const onPause = () => setPlaying(false);
     const onStop = () => setPlaying(false);
     const onEnded = () => setPlaying(false);
+    const onCanplay = () => setLoading(false);
     const onError = () => {
       setPlaying(false);
+      setLoading(false);
       setErrorMessage(t('personality.audioPlaybackFailed'));
     };
 
@@ -65,6 +73,7 @@ export const PersonalityAudioPlayer: FC<PersonalityAudioPlayerProps> = ({
     audio.onPause(onPause);
     audio.onStop(onStop);
     audio.onEnded(onEnded);
+    audio.onCanplay(onCanplay);
     audio.onError(onError);
 
     return () => {
@@ -72,15 +81,16 @@ export const PersonalityAudioPlayer: FC<PersonalityAudioPlayerProps> = ({
       audio.offPause(onPause);
       audio.offStop(onStop);
       audio.offEnded(onEnded);
+      audio.offCanplay(onCanplay);
       audio.offError(onError);
       audio.destroy();
       audioRef.current = null;
     };
-  }, [mediaUrl, t]);
+  }, [playbackSrc, t]);
 
   const togglePlayback = useCallback(() => {
     const audio = audioRef.current;
-    if (!audio || !mediaUrl) {
+    if (!audio || !playbackSrc) {
       void Taro.showToast({ title: t('personality.audioUnavailable'), icon: 'none' });
       return;
     }
@@ -89,7 +99,7 @@ export const PersonalityAudioPlayer: FC<PersonalityAudioPlayerProps> = ({
       return;
     }
     audio.play();
-  }, [mediaUrl, playing, t]);
+  }, [playbackSrc, playing, t]);
 
   const audioTitle = loading
     ? t('personality.audioLoading')
@@ -106,7 +116,7 @@ export const PersonalityAudioPlayer: FC<PersonalityAudioPlayerProps> = ({
         ]
           .filter(Boolean)
           .join(' ')}
-        disabled={disabled || loading || !mediaUrl}
+        disabled={disabled || loading || !playbackSrc}
         onClick={togglePlayback}
       >
         <Text className="s-personality-quiz__audio-icon" aria-hidden>

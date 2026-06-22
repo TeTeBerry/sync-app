@@ -134,8 +134,8 @@ const ProfileSettingsSection: React.FC<ProfileSettingsSectionProps> = ({
         hoverClass="s-profile__settings-row--pressed"
         onClick={onOpenLanguage}
       >
-        <View className="s-profile__settings-icon s-profile__settings-icon--help">
-          <Languages size={18} color="#b0b0b0" />
+        <View className="s-profile__settings-icon s-profile__settings-icon--language">
+          <Languages size={18} color="#bf5af2" />
         </View>
         <Text className="s-profile__settings-label">
           {t('profile.settings.language')}

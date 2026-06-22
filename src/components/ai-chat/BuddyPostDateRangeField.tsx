@@ -25,7 +25,7 @@ export function BuddyPostDateRangeField({
         <Text className="s-ai-buddy-post-sheet__label">
           {t('ai.activityDateRange')}
         </Text>
-        <Text className="s-ai-buddy-post-sheet__field-hint-in-line">
+        <Text className="s-ai-buddy-post-sheet__field-hint-inline">
           {t('ai.activityDateRangeHint')}
         </Text>
       </View>

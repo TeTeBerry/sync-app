@@ -13,7 +13,7 @@ export const privacyPolicyEn: LegalDocument = {
     {
       title: '1. Information we collect',
       paragraphs: [
-        'Account identifiers from WeChat (e.g. openid), optional nickname and avatar, profile fields you provide, buddy posts and comments, AI messages and uploaded images, itinerary and guide data, personality test results, and device/log data for security.',
+        'Account identifiers from WeChat at sign-in (e.g. openid, and unionid when available). Nickname, avatar, and other profile fields you provide in-app; buddy posts and comments; AI messages and uploaded images; itinerary and guide data; personality test results; and device/log data for security.',
       ],
     },
     {

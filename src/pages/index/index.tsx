@@ -8,7 +8,6 @@ import {
   useFeaturedEvents,
   useHomeSummary,
   useNotificationUnreadCount,
-  useSelectedActivityLegacyIds,
 } from '../../hooks/useSyncApi';
 import { resolveFeaturedEventCountdown } from '../../utils/activityStatus';
 import { requireAuth } from '../../utils/authGate';
@@ -40,7 +39,7 @@ import {
 } from '../../utils/apiMappers';
 import { useAuthSession } from '../../hooks/useAuthSession';
 import { seedActivityDetailFromHomeSignupEvent } from '../../utils/activityDetailCache';
-import { pickNextSelectedEvent } from './utils/pickNextSelectedEvent';
+import { pickNextRegisteredEvent } from './utils/pickNextRegisteredEvent';
 import {
   buildFeaturedEventsKey,
   resolveFeaturedIndexAfterListChange,
@@ -64,7 +63,6 @@ const Home = () => {
   const { data: summary, refetch: refetchHomeSummary } = useHomeSummary();
   const heat = summary?.heat;
   const { items: featuredEvents } = useFeaturedEvents();
-  const selectedLegacyIds = useSelectedActivityLegacyIds();
   const { loggedIn } = useAuthSession();
   const [featuredIndex, setFeaturedIndex] = useState(0);
   const { data: unreadCount = 0, refetch: refetchUnreadCount } =
@@ -155,9 +153,8 @@ const Home = () => {
   const navInsets = useNavBarInsets();
 
   const nextSelectedEvent = useMemo(
-    () =>
-      loggedIn ? pickNextSelectedEvent(summary?.signupEvents, selectedLegacyIds) : null,
-    [loggedIn, summary?.signupEvents, selectedLegacyIds],
+    () => (loggedIn ? pickNextRegisteredEvent(summary?.signupEvents) : null),
+    [loggedIn, summary?.signupEvents],
   );
 
   const homeFestivalPlan = useHomeFestivalPlanNavigation(nextSelectedEvent?.id);

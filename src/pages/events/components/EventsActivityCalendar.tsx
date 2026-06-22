@@ -7,6 +7,7 @@ import {
   formatCalendarMonthLabel,
   isSameCalendarDay,
   shiftCalendarMonth,
+  isCalendarDayBeforeToday,
   todayCalendarParts,
   type ActivityCalendarFields,
 } from '../../../utils/activityCalendar';
@@ -88,6 +89,7 @@ export const EventsActivityCalendar: FC<EventsActivityCalendarProps> = ({
           const hasActivity = activityDays.has(key);
           const isToday = isSameCalendarDay(cell, today);
           const isSelected = selected ? isSameCalendarDay(cell, selected) : false;
+          const isPast = hasActivity && isCalendarDayBeforeToday(cell, today);
 
           return (
             <View
@@ -95,6 +97,7 @@ export const EventsActivityCalendar: FC<EventsActivityCalendarProps> = ({
               className={[
                 's-events-calendar__cell',
                 hasActivity ? 's-events-calendar__cell--event' : '',
+                isPast ? 's-events-calendar__cell--past' : '',
                 isToday ? 's-events-calendar__cell--today' : '',
                 isSelected ? 's-events-calendar__cell--selected' : '',
               ]

@@ -4,6 +4,7 @@ import {
   filterActivitiesByRegion,
   filterActivitiesByTimeChip,
   formatActivityAreaLabel,
+  HOT_CAROUSEL_MIN_COUNT,
   isAsianCatalogActivity,
   selectHotCatalogEvents,
 } from '@/utils/filterActivitiesForEventsCatalog';
@@ -86,13 +87,19 @@ describe('filterActivitiesForEventsCatalog', () => {
     expect(formatActivityAreaLabel({ region: 'overseas' })).toBe('海外');
   });
 
-  it('selectHotCatalogEvents returns asian non-ended events up to limit', () => {
+  it('selectHotCatalogEvents returns only hot asian non-ended events up to limit', () => {
     const now = new Date('2026-06-01T12:00:00.000Z');
     const hot = selectHotCatalogEvents(events, 5, now);
-    expect(hot).toHaveLength(3);
+    expect(hot).toHaveLength(2);
+    expect(hot.every((item) => item.hot === true)).toBe(true);
     expect(hot.every((item) => isAsianCatalogActivity(item))).toBe(true);
-    expect(hot[0].hot).toBe(true);
-    expect(hot.some((item) => item.area === '韩国')).toBe(true);
+    expect(hot.some((item) => item.area === '韩国')).toBe(false);
     expect(hot.some((item) => item.area === '荷兰')).toBe(false);
+  });
+
+  it('hot carousel requires at least HOT_CAROUSEL_MIN_COUNT events', () => {
+    const now = new Date('2026-06-01T12:00:00.000Z');
+    const hot = selectHotCatalogEvents(events, 5, now);
+    expect(hot.length >= HOT_CAROUSEL_MIN_COUNT).toBe(false);
   });
 });

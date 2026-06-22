@@ -12,12 +12,11 @@ describe('buildFestivalPlanChecklist', () => {
 
     expect(checklist.completedCount).toBe(1);
     expect(checklist.totalCount).toBe(3);
-    expect(checklist.nextTaskKey).toBe('itinerary');
+    expect(checklist.nextTaskKey).toBe('buddy_post');
 
-    const itinerary = checklist.tasks.find((task) => task.key === 'itinerary');
-    expect(itinerary?.done).toBe(false);
-    expect(itinerary?.isNext).toBe(true);
-    expect(itinerary?.trailingLabel).toBe('排演出表');
+    const buddyPost = checklist.tasks.find((task) => task.key === 'buddy_post');
+    expect(buddyPost?.done).toBe(false);
+    expect(buddyPost?.isNext).toBe(true);
 
     const travelGuide = checklist.tasks.find((task) => task.key === 'travel_guide');
     expect(travelGuide?.done).toBe(true);

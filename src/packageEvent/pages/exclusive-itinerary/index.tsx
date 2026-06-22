@@ -19,6 +19,7 @@ const ExclusiveItineraryPage = () => {
   const t = useT();
   const {
     activityLegacyId,
+    activityTitle,
     navFallback,
     mainScrollHeight,
     conflicts,
@@ -94,6 +95,7 @@ const ExclusiveItineraryPage = () => {
           {lineupPending ? (
             <ExclusiveItineraryUnpublishedBanner
               activityLegacyId={activityLegacyId}
+              activityTitle={activityTitle}
               showEmptyLineup={filteredDjs.length === 0}
             />
           ) : null}

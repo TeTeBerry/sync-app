@@ -7,7 +7,14 @@ import { TravelPlanReceiptOcrTip } from '@/domains/travel-plan';
 import { useAiTravelGuidePage } from '@/domains/travel-guide/hooks/useAiTravelGuidePage';
 import { useEndRouteTransitionOnShow } from '../../../hooks/useEndRouteTransitionOnShow';
 import { usePageRouteReady } from '../../../hooks/usePageRouteReady';
-import { FileText, RefreshCw, Share2 } from '../../../components/icons';
+import {
+  FileText,
+  ChevronRight,
+  RefreshCw,
+  Share2,
+  Sparkles,
+  Users,
+} from '../../../components/icons';
 import { getRegenerateCta, getTravelGuideTitle } from '../../../constants/aiCtaLabels';
 import { useT } from '@/hooks/useI18n';
 import { AI_TRAVEL_GUIDE_DISCLAIMER } from '../../../constants/aiDisclosure';
@@ -45,6 +52,55 @@ const AiTravelGuidePage = () => {
                 className="s-ai-travel-guide-page__ocr-tip"
                 activityLegacyId={page.activityLegacyId}
               />
+              {page.showRecruitBridge ? (
+                <View className="s-ai-travel-guide-page__recruit-bridge">
+                  <View className="s-ai-travel-guide-page__recruit-bridge-head">
+                    <View className="s-ai-travel-guide-page__recruit-bridge-badge">
+                      <Sparkles
+                        size={11}
+                        color="#ffb340"
+                        strokeWidth={2.25}
+                        aria-hidden
+                      />
+                      <Text className="s-ai-travel-guide-page__recruit-bridge-badge-text s-ai-travel-guide-page__recruit-bridge-badge-text--post">
+                        {t('travelGuide.recruitBridgeKicker')}
+                      </Text>
+                    </View>
+                    <Text className="s-ai-travel-guide-page__recruit-bridge-title">
+                      {t('travelGuide.recruitBridgeTitle')}
+                    </Text>
+                    <Text className="s-ai-travel-guide-page__recruit-bridge-hint">
+                      {t('travelGuide.recruitBridgeHint')}
+                    </Text>
+                  </View>
+
+                  <Button
+                    className="s-ai-travel-guide-page__recruit-action"
+                    hoverClass="s-ai-travel-guide-page__recruit-action--pressed"
+                    onClick={page.handlePrefillRecruitPost}
+                  >
+                    <View
+                      className="s-ai-travel-guide-page__recruit-action-icon s-ai-travel-guide-page__recruit-action-icon--post"
+                      aria-hidden
+                    >
+                      <Users size={17} color="#ffb340" />
+                    </View>
+                    <View className="s-ai-travel-guide-page__recruit-action-main">
+                      <Text className="s-ai-travel-guide-page__recruit-action-title">
+                        {t('travelGuide.postRecruitCta')}
+                      </Text>
+                      <Text className="s-ai-travel-guide-page__recruit-action-sub">
+                        {t('travelGuide.postRecruitSub')}
+                      </Text>
+                    </View>
+                    <ChevronRight size={16} color="#636366" />
+                  </Button>
+
+                  <Text className="s-ai-travel-guide-page__recruit-bridge-footnote">
+                    {t('travelGuide.recruitBridgeFootnote')}
+                  </Text>
+                </View>
+              ) : null}
               <Text className="s-ai-travel-guide-page__disclaimer">
                 {AI_TRAVEL_GUIDE_DISCLAIMER}
               </Text>

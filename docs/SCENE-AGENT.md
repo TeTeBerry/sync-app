@@ -1,6 +1,6 @@
 # Scene Agent · 无感 AI 产品说明
 
-> **定位**：不用线性对话 Tab，把 Agent 能力嵌进用户正在做的场景（找队、发帖、看阵容、观演准备）。  
+> **定位**：不用线性对话 Tab，把 Agent 能力嵌进用户正在做的场景（找队、发帖、看阵容、出征准备）。  
 > **原则**：单次任务、结构化输出、用户可改可拒；合规表述为 **检索 / 生成 / 预填**，非配对撮合。  
 > **关联**：[Q2-USER-STORIES.md](./Q2-USER-STORIES.md)（US-Q2-31～34）· [PRODUCT.md](./PRODUCT.md) · 后端 [orchestration/README.md](../sync-app-backend/src/ai/orchestration/README.md)
 
@@ -38,9 +38,12 @@ US-Q2-22 已移除准备 Tab 与 WS 多轮对话；**能力保留在后端 tools
 | `personalityType` | 人格测试结果 |
 | `festivalPlan` | 攻略 / 行程 / 是否已发招募 |
 | `lineupPublished` | 活动阵容 / timetable 是否已官宣（影响 itinerary 与 prep_nudge 分支） |
+| `raverMode` | `local` \| `nomad` \| `balanced`（影响首页主次、是否展示 prep / 攻略） |
+| `homeCity` | 本地 Hub 默认城市（如上海） |
+| `activityType` | `festival` \| `indoor`（室内详情弱化 itinerary Scene） |
 | `trigger` | `search` · `chip` · `sheet_submit` · `page_enter` |
 
-**时间线原则**：专属时间表通常临近开场才可用；公开组队可在**官宣前**进行。Scene Run 在 `festivalPlan.itinerary` 为空时，应优先使用 `personalityType` / `prefs.favorGenres` 作为找队排序与预填信号，**不要求**用户先完成行程。详见 [PRODUCT.md §2.5](./PRODUCT.md#25-festival-plan观演准备--降优先级)。
+**时间线原则**：专属时间表通常临近开场才可用；公开组队可在**官宣前**进行。Scene Run 在 `festivalPlan.itinerary` 为空时，应优先使用 `personalityType` / `prefs.favorGenres` 作为找队排序与预填信号，**不要求**用户先完成行程。详见 [PRODUCT.md §2.5](./PRODUCT.md#25-festival-plan出征准备--降优先级)。
 
 ### UI Effect 类型（目标契约）
 
@@ -63,12 +66,13 @@ US-Q2-22 已移除准备 Tab 与 WS 多轮对话；**能力保留在后端 tools
 | scene | 页面 | 触发 | 复用能力 | Story |
 |-------|------|------|----------|-------|
 | `recruit_search` | 活动详情招募墙 | 搜索 / Chip | `PostSearchService` · 偏好排序 | Q2-05 · **Q2-27** |
+| `local_hub_recruit_search` | 本地城市 Hub | 顶栏搜索 / Chip | 跨场 `activityLegacyIds[]` 或 city+indoor 检索 | **Q2-39** |
 | `recruit_compose` | 发帖 Sheet | 「AI 帮写」 | LLM 候选文案 | **Q2-28** |
 | `recruit_flip` | 翻招募卡页 | 翻卡 | 帖池加权 shuffle | **Q2-29** |
 | `guide_to_recruit` | 攻略完成 | CTA | `travelGuideFormToBuddyPrefill` | **Q2-30** |
 | `personality_next` | 人格结果 / 分享落地 | 主 CTA · 测完提交 | 偏好同步 + 路由至有种子的招募墙 | **Q2-17** · **Q2-18** |
-| `lineup_dj` | 活动详情阵容 | 点 DJ | `query_dj_info` | **Q2-33** |
-| `prep_nudge` | 观演准备折叠区 | 进详情 | 分阶段规则（阵容是否官宣 · 偏好 · 招募进度）；可选 LLM | **Q2-34** |
+| `lineup_dj` | 活动详情阵容 / **室内 Headliner** | 点 DJ · 「查看艺人介绍」 | `query_dj_info` | **Q2-33** · **Q2-40** |
+| `prep_nudge` | 出征准备折叠区 | 进详情 | 分阶段规则（阵容是否官宣 · 偏好 · 招募进度）；**local/indoor 默认跳过** | **Q2-34** · **Q2-37** |
 | `recruit_filters` | 招募墙 | 进入 / 有偏好 | 动态 Chip | **Q2-32** |
 
 **不做**：全站聊天、跨活动匹配队友、首页招募信息流 Agent。
@@ -97,7 +101,7 @@ US-Q2-22 已移除准备 Tab 与 WS 多轮对话；**能力保留在后端 tools
 
 ## 五、分阶段信号与 Scene 优先级
 
-公开组队与观演准备**不同步**。Prep Nudge / 找队相关 Scene 按下列优先级取信号（均只影响公开帖检索排序或预填，非配对）：
+公开组队与出征准备**不同步**。Prep Nudge / 找队相关 Scene 按下列优先级取信号（均只影响公开帖检索排序或预填，非配对）：
 
 | 用户阶段 | 典型 nudge / effect | 主要信号 |
 |----------|---------------------|----------|
@@ -106,6 +110,7 @@ US-Q2-22 已移除准备 Tab 与 WS 多轮对话；**能力保留在后端 tools
 | 官宣前 · 未发招募 | 「还差：发一条公开招募」 | `festivalPlan.buddy_post` |
 | 有攻略 · 未找队 | 搜索框 `prefill_query`（出发地/人数） | 攻略表单槽位（`guide_to_recruit`） |
 | 阵容未官宣 | 行程项弱化或提示订阅；**不阻塞**找队 | `lineupPublished=false` |
+| **local / indoor** | 不触发 itinerary / 攻略 nudge；找队与艺人介绍优先 | `raverMode=local` 或 `activityType=indoor` |
 | 阵容已官宣 · 无行程 | 「时间表已出，去排你的专属 set」 | `lineupPublished=true` |
 | 已发招募 · 有新回复 | 「你的招募有 N 条新公开回复」 | 通知 / engagement |
 
@@ -127,7 +132,8 @@ US-Q2-22 已移除准备 Tab 与 WS 多轮对话；**能力保留在后端 tools
 |------|------|------------|
 | **上线包** | ～2026-07-06 | 无新 API；**Q2-27** 洞察行 + 偏好次排序；**Q2-34** 规则版 Prep Nudge |
 | **Sprint 6** | 上线后 2～4 周 | **Q2-31** scene-run · **Q2-32** 动态 Chip · **Q2-33** DJ 卡片 |
-| **Sprint 7** | 有互动数据后 | **Q2-17/29/28/30** 人格/翻卡/AI 发帖/攻略串联 |
+| **Sprint 7** | 有互动数据后 | **Q2-17/29/28/30** 人格/翻卡/AI 发帖/攻略串联 · **Q2-39/40** Hub + 室内详情 |
+| **Sprint 8** | 上海验证后 | Hub 跨场 `local_hub_recruit_search` · 多城 indoor seed |
 
 ---
 
@@ -141,3 +147,4 @@ US-Q2-22 已移除准备 Tab 与 WS 多轮对话；**能力保留在后端 tools
 | 前端搜索 | `useEventDetailPostSearch.ts` |
 | 原 client_action 类型 | `shared/chat/client-action.types.ts` |
 | 用户偏好 | `BuddyPreferencesSettings.tsx` · `user-profile-sync.service.ts` |
+| Raver 模式 / Hub | US-Q2-37 · US-Q2-39 · `pages/index/`（待定 Hub 分包） |

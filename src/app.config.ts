@@ -15,6 +15,7 @@ export default {
       pages: [
         'pages/event-detail/index',
         'pages/exclusive-itinerary/index',
+        'pages/activity-lineup/index',
         'pages/my-itinerary/index',
         'pages/personality-test/index',
         'pages/ai-travel-guide/index',

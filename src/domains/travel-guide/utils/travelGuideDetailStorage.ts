@@ -1,5 +1,6 @@
 import Taro from '@tarojs/taro';
 import type { AiGuidePlanFormValues, TravelGuidePlan } from '@/types/travelGuide';
+import { markTravelGuideSearchPrefillPending } from './travelGuideSearchPrefillStorage';
 
 const STORAGE_PREFIX = 'sync:travel-guide-detail:';
 const LATEST_INDEX_PREFIX = 'sync:travel-guide-latest:';
@@ -32,6 +33,7 @@ export function saveTravelGuideDetail(
   Taro.setStorageSync(storageKey(id), record);
   if (payload.activityLegacyId != null && !Number.isNaN(payload.activityLegacyId)) {
     Taro.setStorageSync(latestIndexKey(payload.activityLegacyId), id);
+    markTravelGuideSearchPrefillPending(payload.activityLegacyId, id);
   }
 }
 

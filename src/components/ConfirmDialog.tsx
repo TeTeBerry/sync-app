@@ -11,6 +11,8 @@ export interface ConfirmDialogProps {
   cancelText: string;
   /** Use primary confirm styling; set true only for legacy destructive styling */
   danger?: boolean;
+  /** Pink / purple brand accent on the dialog panel */
+  brand?: boolean;
   onConfirm: () => void;
   onCancel: () => void;
 }
@@ -22,6 +24,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   confirmText,
   cancelText,
   danger = false,
+  brand = false,
   onConfirm,
   onCancel,
 }) => {
@@ -29,7 +32,11 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
 
   return (
     <View
-      className={cn('s-overlay s-confirm-dialog', !open && 's-overlay--off')}
+      className={cn(
+        's-overlay s-confirm-dialog',
+        brand && 's-confirm-dialog--brand',
+        !open && 's-overlay--off',
+      )}
       style={{ zIndex: 'var(--overlay-z-dialog)' }}
       role="presentation"
     >

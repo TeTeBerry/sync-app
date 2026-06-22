@@ -2,6 +2,7 @@ import Taro from '@tarojs/taro';
 import { isApiEnabled } from '@/constants/api';
 import {
   registerForActivityAndInvalidate,
+  optInWechatActivityUpdatesAndInvalidate,
   unregisterForActivityAndInvalidate,
 } from '@/hooks/sync/activities';
 import { t } from '@/i18n';
@@ -72,6 +73,11 @@ export async function subscribeToActivityUpdates(
   const wechatOutcome = await requestActivityUpdateSubscribe();
 
   if (wechatOutcome === 'accepted') {
+    if (isApiEnabled()) {
+      void optInWechatActivityUpdatesAndInvalidate(activityLegacyId).catch(
+        () => undefined,
+      );
+    }
     markActivityUpdateSubscribedLocally(activityLegacyId);
     toastForOutcome('accepted');
     return 'wechat_accepted';

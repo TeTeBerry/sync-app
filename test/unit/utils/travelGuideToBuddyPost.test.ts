@@ -35,11 +35,11 @@ describe('travelGuideFormToBuddyPrefill', () => {
     expect(form.tags).toEqual(['team']);
     expect(form.note).toContain('住2晚');
     expect(form.note).toContain('自驾');
-    expect(summaryLines[0]).toBe('集合点待填写');
+    expect(summaryLines[0]).toBe('出发地待填写');
     expect(summaryLines[1]).toBe('2人');
   });
 
-  it('keeps meeting point empty when departure city is provided', () => {
+  it('keeps departure empty when departure city is provided', () => {
     const { form } = travelGuideFormToBuddyPrefill({
       departure: '',
       departureCity: '杭州',

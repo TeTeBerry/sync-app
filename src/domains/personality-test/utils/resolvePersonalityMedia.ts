@@ -22,6 +22,21 @@ function cacheUrl(cacheKey: string, url: string): void {
   });
 }
 
+export function getCachedPersonalityMediaUrl(source?: string): string {
+  const trimmed = source?.trim();
+  if (!trimmed) return '';
+
+  if (trimmed.startsWith('https://') || trimmed.startsWith('http://')) {
+    return trimmed;
+  }
+
+  const assetKey = normalizeAssetKey(trimmed);
+  if (!assetKey) return '';
+
+  const cacheKey = trimmed.startsWith('cloud://') ? trimmed : assetKey;
+  return readCachedUrl(cacheKey) ?? '';
+}
+
 function normalizeAssetKey(source: string): string {
   const trimmed = source.trim();
   if (trimmed.startsWith('cloud://')) {

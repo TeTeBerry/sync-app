@@ -180,6 +180,26 @@
     background: var(--confirm-dialog-backdrop);
   }
 
+  &--brand {
+    .s-overlay__panel {
+      background:
+        radial-gradient(90% 70% at 100% 0%, rgba(191, 90, 242, 0.14), transparent 55%),
+        radial-gradient(
+          80% 60% at 0% 100%,
+          rgba(var(--primary-rgb), 0.12),
+          transparent 50%
+        ),
+        var(--confirm-dialog-panel);
+      box-shadow:
+        inset 0 0 0 1px rgba(var(--primary-rgb), 0.22),
+        0 24px 48px rgba(0, 0, 0, 0.5);
+    }
+
+    .s-overlay__title {
+      color: #fff;
+    }
+  }
+
   .s-overlay__panel {
     display: flex;
     flex-direction: column;

@@ -1,6 +1,6 @@
 import './events.scss';
 import { useDidShow } from '@tarojs/taro';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { View, Text, ScrollView } from '@tarojs/components';
 import { useT } from '@/hooks/useI18n';
 import { useEndRouteTransitionOnShow } from '../../hooks/useEndRouteTransitionOnShow';
@@ -20,23 +20,18 @@ import {
   STALE_HOME_SUMMARY_MS,
 } from '../../constants/queryCache';
 import { useStaleBackgroundRefetch } from '../../hooks/useStaleBackgroundRefetch';
-import { activityOccursOnDay, todayCalendarParts } from '../../utils/activityCalendar';
 import {
-  compareActivitiesNearestFirst,
-  extractYearFromText,
-  getActivityStatusFromActivity,
-  parseActivityDateRange,
-} from '../../utils/activityStatus';
+  activityOccursOnDay,
+  filterActivitiesInCalendarMonth,
+  todayCalendarParts,
+} from '../../utils/activityCalendar';
+import { getActivityStatusFromActivity } from '../../utils/activityStatus';
 import { EventsPageHeader } from './components/EventsPageHeader';
 import { EventsViewTabs, type EventsViewTab } from './components/EventsViewTabs';
 import { EventsActivityCalendar } from './components/EventsActivityCalendar';
 import { EventsActivityArtistsTab } from './components/EventsActivityArtistsTab';
 import { EventsActivityList } from './components/EventsActivityList';
-import {
-  isFestivalEvent,
-  sortAllEventsByDate,
-  sortFestivalEventsByDate,
-} from './utils/festivalEvents';
+import { sortAllEventsByDate } from './utils/festivalEvents';
 import { consumeEventsViewTabIntent } from '../../utils/eventsTabIntent';
 import { consumeEventsSearchQuery } from '../../utils/eventsSearchIntent';
 import { filterActivitiesForEventsSearch } from '../../utils/filterActivitiesForEventsSearch';
@@ -46,6 +41,7 @@ import { EventsHotCarousel } from './components/EventsHotCarousel';
 import {
   filterActivitiesByRegion,
   filterActivitiesByTimeChip,
+  HOT_CAROUSEL_MIN_COUNT,
   selectHotCatalogEvents,
   type EventsCatalogRegionFilter,
   type EventsCatalogTimeChip,
@@ -66,10 +62,34 @@ const Events: React.FC = () => {
   const { events, isLoading, isError, refetch } = useEventList();
   const { refetch: refetchHomeSummary } = useHomeSummary();
   const [viewTab, setViewTab] = useState<EventsViewTab>('list');
-  const [selectedDay, setSelectedDay] = useState(todayCalendarParts);
+  const [selectedDay, setSelectedDay] = useState<{
+    year: number;
+    month: number;
+    day: number;
+  } | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [regionFilter, setRegionFilter] = useState<EventsCatalogRegionFilter>('all');
   const [timeChip, setTimeChip] = useState<EventsCatalogTimeChip | null>(null);
+  const [calendarMonth, setCalendarMonth] = useState(() => {
+    const today = todayCalendarParts();
+    return { year: today.year, month: today.month };
+  });
+
+  const resetCalendarToCurrentMonth = useCallback(() => {
+    const today = todayCalendarParts();
+    setCalendarMonth({ year: today.year, month: today.month });
+    setSelectedDay(null);
+  }, []);
+
+  const handleViewTabChange = useCallback(
+    (tab: EventsViewTab) => {
+      setViewTab(tab);
+      if (tab === 'calendar') {
+        resetCalendarToCurrentMonth();
+      }
+    },
+    [resetCalendarToCurrentMonth],
+  );
 
   useStaleBackgroundRefetch({
     refetch: refetchHomeSummary,
@@ -89,6 +109,9 @@ const Events: React.FC = () => {
     const tabIntent = consumeEventsViewTabIntent();
     if (tabIntent) {
       setViewTab(tabIntent);
+      if (tabIntent === 'calendar') {
+        resetCalendarToCurrentMonth();
+      }
     }
     const searchIntent = consumeEventsSearchQuery();
     if (searchIntent != null) {
@@ -104,30 +127,6 @@ const Events: React.FC = () => {
       ),
     [events],
   );
-
-  const initialMonth = useMemo(() => {
-    const sorted = [...upcomingEvents].sort(compareActivitiesNearestFirst);
-    const first = sorted[0];
-    if (!first) return todayCalendarParts();
-    const yearHint =
-      extractYearFromText(first.title) ?? String(new Date().getFullYear());
-    const range = parseActivityDateRange(first.date, yearHint);
-    if (!range) return todayCalendarParts();
-    return {
-      year: range.start.getFullYear(),
-      month: range.start.getMonth() + 1,
-      day: range.start.getDate(),
-    };
-  }, [upcomingEvents]);
-
-  const [calendarMonth, setCalendarMonth] = useState(() => ({
-    year: initialMonth.year,
-    month: initialMonth.month,
-  }));
-
-  useEffect(() => {
-    setCalendarMonth({ year: initialMonth.year, month: initialMonth.month });
-  }, [initialMonth.month, initialMonth.year]);
 
   const warmEventDetail = useCallback((event: (typeof events)[number]) => {
     seedActivityDetailFromEventCard(event);
@@ -185,27 +184,60 @@ const Events: React.FC = () => {
     return t('events.catalogEmpty');
   }, [regionFilter, searchQuery, t, timeChip]);
 
-  const regionFilteredFestivalEvents = useMemo(
-    () => sortFestivalEventsByDate(filterActivitiesByRegion(events, regionFilter)),
+  const calendarCatalogEvents = useMemo(
+    () => sortAllEventsByDate(filterActivitiesByRegion(events, regionFilter)),
     [events, regionFilter],
   );
 
   const calendarListEvents = useMemo(() => {
-    const base = regionFilteredEvents
-      .filter(isFestivalEvent)
-      .sort(compareActivitiesNearestFirst);
-    if (!selectedDay) return base;
-    const onDay = base.filter((event) =>
-      activityOccursOnDay(event, selectedDay.year, selectedDay.month, selectedDay.day),
+    if (selectedDay) {
+      return calendarCatalogEvents.filter((event) =>
+        activityOccursOnDay(
+          event,
+          selectedDay.year,
+          selectedDay.month,
+          selectedDay.day,
+        ),
+      );
+    }
+    return filterActivitiesInCalendarMonth(
+      calendarCatalogEvents,
+      calendarMonth.year,
+      calendarMonth.month,
     );
-    return onDay.length > 0 ? onDay : base;
-  }, [regionFilteredEvents, selectedDay]);
+  }, [calendarCatalogEvents, calendarMonth.month, calendarMonth.year, selectedDay]);
+
+  const calendarSectionTitle = useMemo(() => {
+    if (selectedDay) {
+      return t('events.calendarDayTitle', {
+        month: selectedDay.month,
+        day: selectedDay.day,
+      });
+    }
+    return t('events.calendarMonthTitle', {
+      year: calendarMonth.year,
+      month: calendarMonth.month,
+    });
+  }, [calendarMonth.month, calendarMonth.year, selectedDay, t]);
+
+  const calendarEmptyText = useMemo(() => {
+    if (regionFilter !== 'all') {
+      return t('events.catalogEmptyFiltered');
+    }
+    if (selectedDay) {
+      return t('events.calendarEmptyDay');
+    }
+    return t('events.calendarEmptyMonth');
+  }, [regionFilter, selectedDay, t]);
 
   const showHotCarousel =
-    viewTab === 'list' && !searchQuery.trim() && hotCarouselEvents.length > 0;
+    viewTab === 'list' &&
+    !searchQuery.trim() &&
+    hotCarouselEvents.length >= HOT_CAROUSEL_MIN_COUNT;
 
   const handleMonthChange = useCallback((year: number, month: number) => {
     setCalendarMonth({ year, month });
+    setSelectedDay(null);
   }, []);
 
   const handleSelectDay = useCallback((year: number, month: number, day: number) => {
@@ -217,7 +249,9 @@ const Events: React.FC = () => {
     <View className="s-page-shell s-page-with-tabbar">
       <View className="s-page-with-tabbar__main s-events">
         <EventsPageHeader navInsets={navInsets} upcomingCount={upcomingEvents.length} />
-        <EventsSearchBar value={searchQuery} onChange={setSearchQuery} />
+        {viewTab === 'list' ? (
+          <EventsSearchBar value={searchQuery} onChange={setSearchQuery} />
+        ) : null}
         {viewTab !== 'artists' ? (
           <EventsCatalogFilterChips
             region={regionFilter}
@@ -228,7 +262,7 @@ const Events: React.FC = () => {
           />
         ) : null}
         <View className="s-events__view-tabs-wrap">
-          <EventsViewTabs activeTab={viewTab} onChange={setViewTab} />
+          <EventsViewTabs activeTab={viewTab} onChange={handleViewTabChange} />
         </View>
 
         {viewTab === 'artists' ? (
@@ -272,7 +306,7 @@ const Events: React.FC = () => {
               ) : (
                 <>
                   <EventsActivityCalendar
-                    activities={regionFilteredFestivalEvents}
+                    activities={calendarCatalogEvents}
                     year={calendarMonth.year}
                     month={calendarMonth.month}
                     selected={selectedDay}
@@ -282,13 +316,14 @@ const Events: React.FC = () => {
 
                   <View className="s-events__section-head">
                     <Text className="s-events__section-title">
-                      {t('events.recentAll')}
+                      {calendarSectionTitle}
                     </Text>
                   </View>
 
                   <EventsActivityList
                     events={calendarListEvents}
                     isError={isError}
+                    emptyText={calendarEmptyText}
                     onRetry={() => void refetch()}
                     onOpenDetail={openDetail}
                     onWarmDetail={warmEventDetail}

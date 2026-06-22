@@ -186,11 +186,13 @@ export interface EventPostsPage {
 }
 
 export interface BuddyPostSearchParsed {
+  departureCity?: string;
   eventName?: string;
   date?: string;
   genre?: string;
   peopleCount?: string;
   extraKeywords?: string[];
+  preferOpenRecruit?: boolean;
   searchTerms: string[];
 }
 

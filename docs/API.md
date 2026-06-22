@@ -60,8 +60,7 @@ TARO_APP_CLOUD_RUN_SERVICE=sync-backend-prd-xxxx
 
 ### 登录
 
-- 拦截登录（`LoginPromptHero`）：`loginWithWechat({ requireProfile: true })` — 需用户授权昵称头像
-- 静默 `ensureAuth`（`app.tsx` / 个人页）：`loginWithWechat({ requireProfile: false })`
+- 登录（`LoginPromptHero` / `ensureAuth`）：`loginWithWechat()` — 仅 `wx.login` code → 后端 openid，不调用 `getUserProfile`
 - 用户主动退出后：`shouldSkipAutoLogin()` 为真，**不会**自动 `wx.login`
 
 ### 后端前置

@@ -76,3 +76,11 @@ export function formatBuddyPreferencesSummary(
   if (budget) parts.push(budget);
   return parts.length ? parts.join(' · ') : '未设置';
 }
+
+export function hasBuddyPreferenceSignal(
+  user?: Pick<CurrentUser, 'city' | 'favorGenres' | 'budgetLevel'> | null,
+): boolean {
+  return Boolean(
+    user?.city?.trim() || user?.favorGenres?.length || user?.budgetLevel?.trim(),
+  );
+}

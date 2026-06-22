@@ -21,7 +21,7 @@ describe('parseBuddyPostRecruitDisplay', () => {
   });
 
   it('parses simple headcount', () => {
-    expect(parseBuddyPostRecruitDisplay('组队，6.13-6.14，集合点，2人')).toEqual({
+    expect(parseBuddyPostRecruitDisplay('组队，6.13-6.14，上海，2人')).toEqual({
       recruitStatus: 'open',
       slotsTotal: 2,
     });

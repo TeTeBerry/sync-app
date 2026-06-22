@@ -5,6 +5,7 @@ import {
   CLOUD_RUN_SERVICE,
   isWeappCloudRunTransportEnabled,
 } from '../constants/cloud';
+import { ApiAbortError } from './apiAbortError';
 import { taroRequestData } from './apiRequestBody';
 
 /** AI chat WebSocket path on the Nest container (connectContainer `path`). */
@@ -93,7 +94,12 @@ export async function callContainerRequest(
   containerPath: string,
   init: RequestInit,
   timeoutMs: number,
+  signal?: AbortSignal,
 ): Promise<ContainerHttpResponse> {
+  if (signal?.aborted) {
+    throw new ApiAbortError();
+  }
+
   assertCloudRunReady();
 
   const headers = { ...(init.headers as Record<string, string> | undefined) };
@@ -105,17 +111,38 @@ export async function callContainerRequest(
   assertCallContainerPayloadSize(requestData);
 
   try {
-    const result = await Taro.cloud.callContainer({
-      config: { env: CLOUDBASE_ENV_ID },
-      path: containerPath,
-      method,
-      header: {
-        ...headers,
-        'X-WX-SERVICE': CLOUD_RUN_SERVICE,
+    const result = await new Promise<Taro.cloud.CallContainerResult>(
+      (resolve, reject) => {
+        if (signal?.aborted) {
+          reject(new ApiAbortError());
+          return;
+        }
+
+        const onAbort = () => reject(new ApiAbortError());
+        signal?.addEventListener('abort', onAbort, { once: true });
+
+        void Taro.cloud
+          .callContainer({
+            config: { env: CLOUDBASE_ENV_ID },
+            path: containerPath,
+            method,
+            header: {
+              ...headers,
+              'X-WX-SERVICE': CLOUD_RUN_SERVICE,
+            },
+            data: requestData,
+            timeout: effectiveTimeout,
+          })
+          .then((value) => {
+            signal?.removeEventListener('abort', onAbort);
+            resolve(value);
+          })
+          .catch((error) => {
+            signal?.removeEventListener('abort', onAbort);
+            reject(error);
+          });
       },
-      data: requestData,
-      timeout: effectiveTimeout,
-    });
+    );
 
     return {
       ok: result.statusCode >= 200 && result.statusCode < 300,

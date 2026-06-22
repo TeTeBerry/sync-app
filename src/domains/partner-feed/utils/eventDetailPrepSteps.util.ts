@@ -69,6 +69,20 @@ export function buildEventDetailPrepSteps({
     },
   ];
 
+  if (showFestivalPlan && buddyTask) {
+    steps.push({
+      key: 'buddy_post',
+      label: buddyTask.done
+        ? t('festivalPlan.buddyPostDone')
+        : t('festivalPlan.buddyPostTitle'),
+      actionLabel: '',
+      done: buddyTask.done,
+      isNext: buddyTask.isNext,
+      displayOnly: true,
+      onClick: () => {},
+    });
+  }
+
   if (showFestivalPlan && itineraryTask) {
     steps.push({
       key: 'exclusive_itinerary',
@@ -83,20 +97,6 @@ export function buildEventDetailPrepSteps({
         }
         onOpenExclusiveItinerary();
       },
-    });
-  }
-
-  if (showFestivalPlan && buddyTask) {
-    steps.push({
-      key: 'buddy_post',
-      label: buddyTask.done
-        ? t('festivalPlan.buddyPostDone')
-        : t('festivalPlan.buddyPostTitle'),
-      actionLabel: '',
-      done: buddyTask.done,
-      isNext: buddyTask.isNext,
-      displayOnly: true,
-      onClick: () => {},
     });
   }
 

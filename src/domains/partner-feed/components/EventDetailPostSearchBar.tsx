@@ -1,4 +1,4 @@
-import { Search, X } from '../../../components/icons';
+import { Search, Sparkles, X } from '../../../components/icons';
 import { Input } from '../../../components/ui';
 import { Text, View } from '@tarojs/components';
 import { useT } from '@/hooks/useI18n';
@@ -11,6 +11,9 @@ type EventDetailPostSearchBarProps = {
   matchedCount?: number;
   usedLocalFallback?: boolean;
   parsedSummary?: string | null;
+  preferenceSummary?: string | null;
+  hasPreferenceRanking?: boolean;
+  travelGuidePrefillHint?: boolean;
 };
 
 export function EventDetailPostSearchBar({
@@ -21,17 +24,35 @@ export function EventDetailPostSearchBar({
   matchedCount,
   usedLocalFallback = false,
   parsedSummary,
+  preferenceSummary,
+  hasPreferenceRanking = false,
+  travelGuidePrefillHint = false,
 }: EventDetailPostSearchBarProps) {
   const t = useT();
   const showMeta = value.trim().length > 0;
   const parsedLine = parsedSummary?.trim();
+  const insightLine = preferenceSummary?.trim();
+  const showPreferenceRanking =
+    hasPreferenceRanking && !usedLocalFallback && !isSearching;
+  const showPrefillHint = travelGuidePrefillHint && value.trim().length > 0;
 
   return (
     <View className="s-event-detail-post-search">
-      <Text className="s-event-detail-post-search__kicker">
-        {t('eventDetail.aiFindTeamKicker')}
-      </Text>
-      <View className="s-event-detail-post-search__field">
+      <View className="s-event-detail-post-search__head">
+        <View className="s-event-detail-post-search__badge">
+          <Sparkles size={12} color="#64d2ff" strokeWidth={2.25} aria-hidden />
+          <Text className="s-event-detail-post-search__badge-text">
+            {t('eventDetail.aiFindTeamKicker')}
+          </Text>
+        </View>
+      </View>
+      <View
+        className={
+          showPrefillHint
+            ? 's-event-detail-post-search__field s-event-detail-post-search__field--prefilled'
+            : 's-event-detail-post-search__field'
+        }
+      >
         <Search size={16} color="#8e8e93" aria-hidden />
         <Input
           className="s-event-detail-post-search__input"
@@ -52,6 +73,11 @@ export function EventDetailPostSearchBar({
           </View>
         ) : null}
       </View>
+      {showPrefillHint ? (
+        <Text className="s-event-detail-post-search__prefill-hint">
+          {t('eventDetail.searchTravelGuidePrefillHint')}
+        </Text>
+      ) : null}
       {showMeta ? (
         <View className="s-event-detail-post-search__meta-wrap">
           <Text className="s-event-detail-post-search__meta">
@@ -59,8 +85,15 @@ export function EventDetailPostSearchBar({
               ? t('eventDetail.searching')
               : usedLocalFallback
                 ? t('eventDetail.localMatch', { count: matchedCount ?? 0 })
-                : t('eventDetail.matchFound', { count: matchedCount ?? 0 })}
+                : showPreferenceRanking
+                  ? t('eventDetail.matchFoundWithPrefs', { count: matchedCount ?? 0 })
+                  : t('eventDetail.matchFound', { count: matchedCount ?? 0 })}
           </Text>
+          {!isSearching && insightLine ? (
+            <Text className="s-event-detail-post-search__insight">
+              {t('eventDetail.preferenceInsightLabel', { summary: insightLine })}
+            </Text>
+          ) : null}
           {!isSearching && parsedLine ? (
             <Text className="s-event-detail-post-search__parsed">
               {t('eventDetail.searchParsedLabel', { summary: parsedLine })}

@@ -56,7 +56,7 @@ export type WechatProfileInput = {
   avatarUrl?: string;
 };
 
-/** Requires user tap; call from login button handler only. */
+/** Optional WeChat profile sync (not used at login). Call from explicit user action only. */
 export async function getWechatUserProfile(): Promise<WechatProfileInput | null> {
   if (process.env.TARO_ENV !== 'weapp') {
     return null;
@@ -64,7 +64,7 @@ export async function getWechatUserProfile(): Promise<WechatProfileInput | null>
 
   try {
     const res = await Taro.getUserProfile({
-      desc: '用于展示个人主页头像与昵称',
+      desc: '用于更新个人主页头像与昵称',
     });
     const nickName = res.userInfo?.nickName?.trim();
     const avatarUrl = res.userInfo?.avatarUrl?.trim();
@@ -78,23 +78,15 @@ export async function getWechatUserProfile(): Promise<WechatProfileInput | null>
 }
 
 export type LoginWithWechatOptions = {
-  /** When true, prompts getUserProfile and requires nickName (button login). */
-  requireProfile?: boolean;
+  /** Optional profile fields (e.g. explicit profile sync); login uses openid only by default. */
   profile?: WechatProfileInput | null;
 };
 
+/** Sign in via `wx.login` code → backend openid; does not call `getUserProfile`. */
 export async function loginWithWechat(
   options: LoginWithWechatOptions = {},
 ): Promise<AuthLoginResult> {
-  const requireProfile = options.requireProfile ?? false;
-  let profile = options.profile;
-
-  if (process.env.TARO_ENV === 'weapp' && requireProfile && profile === undefined) {
-    profile = await getWechatUserProfile();
-    if (!profile?.nickName?.trim()) {
-      throw new Error('请授权微信头像与昵称后继续登录');
-    }
-  }
+  const profile = options.profile;
 
   const loginRes = await Taro.login();
   const code = loginRes.code?.trim();
@@ -144,7 +136,7 @@ export async function ensureAuth(): Promise<AuthLoginResult | null> {
     loginPromise = (async () => {
       try {
         if (process.env.TARO_ENV === 'weapp') {
-          return await loginWithWechat({ requireProfile: false });
+          return await loginWithWechat();
         }
         return null;
       } finally {

@@ -6,6 +6,7 @@ import {
   useItineraryScheduleQuery,
   useSavedItineraryQuery,
 } from '../../../hooks/useItineraryApi';
+import { useActivityDetailQuery } from '../../../hooks/sync/activities';
 import { useItineraryStore } from '@/domains/performance-itinerary/store';
 import { normalizeItineraryDaysForSave } from '@/types/itinerary';
 import { useStackPageMainHeight } from '../../../hooks/useTabPageMainHeight';
@@ -85,6 +86,11 @@ export function useExclusiveItineraryPage() {
     routeSelection.selectedDjNames.length > 0 ||
     routeSelection.focusDjName.length > 0;
   const scheduleQuery = useItineraryScheduleQuery(apiEnabled ? activityLegacyId : null);
+  const activityQuery = useActivityDetailQuery(
+    apiEnabled && Number.isFinite(activityLegacyId) && activityLegacyId > 0
+      ? activityLegacyId
+      : undefined,
+  );
   const savedQuery = useSavedItineraryQuery(apiEnabled ? activityLegacyId : null);
   const { generate, save } = useItineraryMutations(activityLegacyId ?? 0);
   const setFromGenerateResult = useItineraryStore((s) => s.setFromGenerateResult);
@@ -324,14 +330,14 @@ export function useExclusiveItineraryPage() {
 
   const showConflictBanner = !conflictDismissed && conflicts.length > 0;
 
-  const schedulePublished = scheduleQuery.data?.schedulePublished ?? true;
-  const lineupPending = schedulePublished === false;
+  const lineupPending = activityQuery.data?.lineupPublished === false;
+  const activityTitle = activityQuery.data?.name ?? '';
 
   return {
     activityLegacyId,
+    activityTitle,
     navFallback,
     mainScrollHeight,
-    schedulePublished,
     lineupPending,
     conflicts,
     showConflictBanner,

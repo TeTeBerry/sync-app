@@ -4,9 +4,9 @@
   flex-direction: column;
   min-height: 0;
   overflow: hidden;
-  background-color: var(--background);
+  background-color: #000;
   box-sizing: border-box;
-  color: var(--foreground);
+  color: #fff;
 }
 
 .s-profile__scroll {
@@ -20,13 +20,14 @@
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 12px;
+  gap: 14px;
   width: 100%;
+  min-height: 100%;
   box-sizing: border-box;
-  padding: 4px var(--s-page-gutter) 8px;
+  padding: 6px var(--s-page-gutter) 4px;
 
   > .s-profile__card,
-  > .s-profile__action-card,
+  > .s-profile__actions-group,
   > .s-profile__settings-card,
   > .s-profile-guest {
     align-self: stretch;
@@ -37,11 +38,10 @@
     box-sizing: border-box;
     margin: 0;
   }
-}
 
-.s-profile__scroll-spacer {
-  flex-shrink: 0;
-  height: 16px;
+  > .s-profile__settings-card {
+    margin-top: auto;
+  }
 }
 
 /** Guest profile: no ScrollView — content sits above tab bar without extra scroll padding. */
@@ -55,17 +55,28 @@
 }
 
 .s-profile__card {
-  border-radius: var(--radius-3xl);
-  background: var(--muted);
-  box-shadow: inset 0 0 0 1px var(--border);
-  padding: 18px 16px 0;
+  position: relative;
+  border-radius: 18px;
+  background:
+    radial-gradient(90% 70% at 100% 0%, rgba(191, 90, 242, 0.16), transparent 55%),
+    radial-gradient(
+      80% 60% at 0% 100%,
+      rgba(var(--primary-rgb), 0.14),
+      transparent 50%
+    ),
+    #1a1a1e;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.09),
+    0 12px 32px rgba(0, 0, 0, 0.28);
+  padding: 20px 18px 0;
+  overflow: hidden;
 
   &--loading {
     display: flex;
     align-items: center;
     justify-content: center;
     min-height: 168px;
-    padding-bottom: 18px;
+    padding-bottom: 20px;
   }
 }
 
@@ -88,8 +99,10 @@
   border-radius: 16px;
   object-fit: cover;
   display: block;
-  border: 2px solid var(--primary);
-  box-shadow: 0 0 0 1px rgba(var(--primary-rgb), 0.25);
+  border: 2px solid rgba(var(--primary-rgb), 0.65);
+  box-shadow:
+    0 0 0 1px rgba(var(--primary-rgb), 0.2),
+    0 8px 22px rgba(var(--primary-rgb), 0.24);
 }
 
 .s-profile__online-dot {
@@ -99,8 +112,10 @@
   width: 14px;
   height: 14px;
   border-radius: var(--radius-full);
-  background: #22c55e;
-  box-shadow: 0 0 0 2px var(--muted);
+  background: #30d158;
+  box-shadow:
+    0 0 0 2px #1a1a1e,
+    0 0 10px rgba(48, 209, 88, 0.45);
   z-index: 1;
 }
 
@@ -116,13 +131,14 @@
 .s-profile__name {
   font-size: var(--s-type-title);
   font-weight: var(--s-fw-extrabold);
-  color: var(--foreground);
+  color: #fff;
   line-height: 1.25;
+  letter-spacing: -0.01em;
 }
 
 .s-profile__meta-line {
   font-size: var(--s-type-meta);
-  color: var(--muted-foreground);
+  color: #8e8e93;
   line-height: 1.45;
 }
 
@@ -145,9 +161,11 @@
   line-height: 1.2;
 
   &--primary {
-    background: rgba(var(--primary-rgb), 0.18);
+    background: rgba(var(--primary-rgb), 0.16);
     color: var(--primary);
-    box-shadow: inset 0 0 0 1px rgba(var(--primary-rgb), 0.35);
+    box-shadow:
+      inset 0 0 0 1px rgba(var(--primary-rgb), 0.32),
+      0 4px 12px rgba(var(--primary-rgb), 0.12);
   }
 
   &--verified {
@@ -159,9 +177,9 @@
 
 .s-profile__stats {
   display: flex;
-  margin-top: 16px;
-  padding: 14px 0 16px;
-  border-top: 1px solid var(--border);
+  margin-top: 18px;
+  padding: 16px 0 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .s-profile__stat {
@@ -169,31 +187,73 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
   padding: 2px 4px;
 
   &:not(:last-child) {
-    border-right: 1px solid var(--border);
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
   }
 
-  &--accent .s-profile__stat-value {
+  &--events .s-profile__stat-value {
     color: var(--primary);
+    text-shadow: 0 0 18px rgba(var(--primary-rgb), 0.35);
+  }
+
+  &--posts .s-profile__stat-value {
+    color: var(--secondary);
+    text-shadow: 0 0 18px rgba(var(--secondary-rgb), 0.35);
   }
 }
 
 .s-profile__stat-value {
-  font-size: var(--s-type-title);
+  font-size: 22px;
   font-weight: var(--s-fw-extrabold);
-  color: var(--foreground);
+  color: #fff;
   font-variant-numeric: tabular-nums;
   line-height: 1.1;
 }
 
 .s-profile__stat-label {
   font-size: var(--s-type-caption);
-  color: var(--muted-foreground);
+  color: #8e8e93;
   text-align: center;
   line-height: 1.25;
+}
+
+.s-profile__actions-group {
+  display: flex;
+  flex-direction: column;
+  border-radius: 18px;
+  background:
+    radial-gradient(
+      70% 50% at 100% 0%,
+      rgba(var(--primary-rgb), 0.12),
+      transparent 60%
+    ),
+    radial-gradient(
+      60% 50% at 0% 100%,
+      rgba(var(--secondary-rgb), 0.1),
+      transparent 55%
+    ),
+    #1a1a1e;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.09),
+    0 10px 28px rgba(0, 0, 0, 0.24);
+  overflow: hidden;
+
+  .s-profile__action-card {
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+
+    &:not(:last-child) {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    }
+
+    &--pressed {
+      background: rgba(255, 255, 255, 0.04);
+    }
+  }
 }
 
 .s-profile__action-card {
@@ -202,11 +262,17 @@
   justify-content: flex-start;
   gap: 14px;
   box-sizing: border-box;
-  min-height: 72px;
-  padding: 14px 16px;
-  border-radius: var(--radius-3xl);
-  background: var(--muted);
-  box-shadow: inset 0 0 0 1px var(--border);
+  min-height: 74px;
+  padding: 15px 18px;
+  border-radius: 18px;
+  background:
+    radial-gradient(
+      70% 50% at 100% 0%,
+      rgba(var(--primary-rgb), 0.08),
+      transparent 60%
+    ),
+    #1a1a1e;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.09);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 
@@ -226,14 +292,18 @@
   color: var(--foreground);
 
   &--activities {
-    background: rgba(var(--primary-rgb), 0.2);
-    box-shadow: inset 0 0 0 1px rgba(var(--primary-rgb), 0.35);
+    background: rgba(var(--primary-rgb), 0.18);
+    box-shadow:
+      inset 0 0 0 1px rgba(var(--primary-rgb), 0.34),
+      0 4px 14px rgba(var(--primary-rgb), 0.18);
     color: var(--primary);
   }
 
   &--posts {
-    background: rgba(var(--secondary-rgb), 0.2);
-    box-shadow: inset 0 0 0 1px rgba(var(--secondary-rgb), 0.35);
+    background: rgba(var(--secondary-rgb), 0.18);
+    box-shadow:
+      inset 0 0 0 1px rgba(var(--secondary-rgb), 0.34),
+      0 4px 14px rgba(var(--secondary-rgb), 0.18);
     color: var(--secondary);
   }
 }
@@ -255,7 +325,7 @@
 .s-profile__action-title {
   font-size: var(--s-type-subtitle);
   font-weight: var(--s-fw-bold);
-  color: var(--foreground);
+  color: #fff;
   line-height: 1.25;
 }
 
@@ -272,24 +342,26 @@
   line-height: 1;
 
   &--activities {
-    background: rgba(var(--primary-rgb), 0.22);
+    background: rgba(var(--primary-rgb), 0.2);
     color: var(--primary);
+    box-shadow: inset 0 0 0 1px rgba(var(--primary-rgb), 0.28);
   }
 
   &--posts {
-    background: rgba(var(--secondary-rgb), 0.22);
+    background: rgba(var(--secondary-rgb), 0.2);
     color: var(--secondary);
+    box-shadow: inset 0 0 0 1px rgba(var(--secondary-rgb), 0.28);
   }
 }
 
 .s-profile__action-subtitle {
   font-size: var(--s-type-meta);
-  color: var(--muted-foreground);
+  color: #8e8e93;
   line-height: 1.35;
 }
 
 .s-profile__action-chevron {
-  color: var(--muted-foreground);
+  color: rgba(255, 255, 255, 0.28);
   flex-shrink: 0;
 }
 
@@ -558,6 +630,18 @@
   border-radius: 9999px;
   background: rgba(255, 0, 102, 0.15);
   color: var(--primary);
+
+  &--followed {
+    background: rgba(48, 209, 88, 0.14);
+    color: #5fe07a;
+    box-shadow: inset 0 0 0 1px rgba(48, 209, 88, 0.24);
+  }
+
+  &--attended {
+    background: rgba(255, 255, 255, 0.08);
+    color: #8e8e93;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+  }
 }
 
 .s-profile-activity__meta {
@@ -576,6 +660,41 @@
   svg {
     flex-shrink: 0;
   }
+}
+
+.s-profile-activity__actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 2px;
+}
+
+.s-profile-activity__unfollow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  margin: 0;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: none;
+
+  &::after {
+    display: none;
+    border: 0;
+  }
+
+  &[disabled] {
+    opacity: 0.6;
+  }
+}
+
+.s-profile-activity__unfollow-text {
+  font-size: 11px;
+  font-weight: var(--s-fw-semibold);
+  color: #8e8e93;
+  line-height: 1.2;
 }
 
 .s-profile-post {
@@ -901,9 +1020,14 @@
 }
 
 .s-profile__settings-card {
-  border-radius: var(--radius-3xl);
-  background: var(--muted);
-  box-shadow: inset 0 0 0 1px var(--border);
+  border-radius: 18px;
+  background:
+    radial-gradient(80% 60% at 0% 0%, rgba(34, 197, 94, 0.07), transparent 50%),
+    radial-gradient(70% 50% at 100% 100%, rgba(191, 90, 242, 0.06), transparent 55%),
+    #1a1a1e;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.09),
+    0 10px 28px rgba(0, 0, 0, 0.24);
   overflow: hidden;
 }
 
@@ -923,7 +1047,7 @@
   -webkit-tap-highlight-color: transparent;
 
   &:not(:last-child) {
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
   }
 
   &--pressed {
@@ -932,6 +1056,8 @@
 
   &--logout {
     justify-content: flex-start;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    margin-top: 2px;
   }
 }
 
@@ -964,9 +1090,15 @@
   }
 
   &--help {
-    background: rgba(255, 255, 255, 0.08);
-    box-shadow: inset 0 0 0 1px var(--border);
-    color: var(--muted-foreground);
+    background: rgba(255, 255, 255, 0.07);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+    color: #8e8e93;
+  }
+
+  &--language {
+    background: rgba(191, 90, 242, 0.15);
+    box-shadow: inset 0 0 0 1px rgba(191, 90, 242, 0.3);
+    color: #bf5af2;
   }
 
   &--ban {
@@ -993,7 +1125,7 @@
   min-width: 0;
   font-size: var(--s-type-body-sm);
   font-weight: var(--s-fw-semibold);
-  color: var(--foreground);
+  color: #fff;
   line-height: 1.3;
   text-align: left;
 
@@ -1006,7 +1138,7 @@
 .s-profile__settings-value {
   font-size: var(--s-type-meta);
   font-weight: var(--s-fw-semibold);
-  color: var(--muted-foreground);
+  color: #8e8e93;
   margin-right: 2px;
   flex-shrink: 0;
 
@@ -1027,14 +1159,14 @@
 }
 
 .s-profile__settings-chevron {
-  color: var(--muted-foreground);
+  color: rgba(255, 255, 255, 0.28);
   flex-shrink: 0;
 }
 
 .s-profile-stack {
   min-height: 100vh;
-  background: var(--background);
-  color: var(--foreground);
+  background: #000;
+  color: #fff;
 }
 
 .s-profile-stack__scroll {

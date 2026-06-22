@@ -12,6 +12,9 @@ import {
   CALL_CONTAINER_MAX_BODY_BYTES,
   type ContainerHttpResponse,
 } from './cloudRunTransport';
+import { ApiAbortError, isApiAbortError } from './apiAbortError';
+
+export { ApiAbortError, isApiAbortError } from './apiAbortError';
 
 export class ApiError extends Error {
   constructor(
@@ -82,23 +85,51 @@ async function requestWithTimeout(
   url: string,
   init: RequestInit,
   timeoutMs = DEFAULT_TIMEOUT_MS,
+  signal?: AbortSignal,
 ): Promise<CompatibleResponse> {
+  if (signal?.aborted) {
+    throw new ApiAbortError();
+  }
+
   return new Promise((resolve, reject) => {
-    Taro.request({
+    let settled = false;
+    const requestHolder: { task?: ReturnType<typeof Taro.request> } = {};
+
+    const finish = (fn: () => void) => {
+      if (settled) return;
+      settled = true;
+      signal?.removeEventListener('abort', onAbort);
+      fn();
+    };
+
+    const onAbort = () => {
+      try {
+        requestHolder.task?.abort?.();
+      } catch {
+        // ignore
+      }
+      finish(() => reject(new ApiAbortError()));
+    };
+
+    signal?.addEventListener('abort', onAbort);
+
+    requestHolder.task = Taro.request({
       url,
       method: (init.method || 'GET') as keyof Taro.request.Method,
       header: init.headers as Record<string, string>,
       data: taroRequestData(init),
       timeout: timeoutMs,
       success: (res) => {
-        resolve({
-          ok: res.statusCode >= 200 && res.statusCode < 300,
-          status: res.statusCode,
-          json: async () => res.data,
+        finish(() => {
+          resolve({
+            ok: res.statusCode >= 200 && res.statusCode < 300,
+            status: res.statusCode,
+            json: async () => res.data,
+          });
         });
       },
       fail: (err) => {
-        reject(new Error(err.errMsg || '请求失败'));
+        finish(() => reject(new Error(err.errMsg || '请求失败')));
       },
     });
   });
@@ -109,16 +140,26 @@ async function dispatchRequest(
   params: Record<string, string | undefined> | undefined,
   init: RequestInit,
   timeoutMs: number,
+  signal?: AbortSignal,
 ): Promise<CompatibleResponse> {
+  if (signal?.aborted) {
+    throw new ApiAbortError();
+  }
+
   if (isWeappCloudRunTransportEnabled()) {
     const requestData = taroRequestData(init);
     const bytes = requestData == null ? 0 : JSON.stringify(requestData).length;
     if (bytes > CALL_CONTAINER_MAX_BODY_BYTES && API_BASE_URL.startsWith('http')) {
-      return requestWithTimeout(buildUrl(path, params), init, timeoutMs);
+      return requestWithTimeout(buildUrl(path, params), init, timeoutMs, signal);
     }
-    return callContainerRequest(buildContainerApiPath(path, params), init, timeoutMs);
+    return callContainerRequest(
+      buildContainerApiPath(path, params),
+      init,
+      timeoutMs,
+      signal,
+    );
   }
-  return requestWithTimeout(buildUrl(path, params), init, timeoutMs);
+  return requestWithTimeout(buildUrl(path, params), init, timeoutMs, signal);
 }
 
 async function sleep(ms: number): Promise<void> {
@@ -131,13 +172,26 @@ async function retryFetch(
   init?: ApiFetchInit,
 ): Promise<CompatibleResponse> {
   const { requestInit, timeoutMs, maxRetries } = splitFetchInit(init);
+  const signal = requestInit.signal ?? undefined;
   let lastError: Error | undefined;
 
   for (let attempt = 0; attempt <= maxRetries; attempt += 1) {
+    if (signal?.aborted) {
+      throw new ApiAbortError();
+    }
     try {
-      const response = await dispatchRequest(path, params, requestInit, timeoutMs);
+      const response = await dispatchRequest(
+        path,
+        params,
+        requestInit,
+        timeoutMs,
+        signal,
+      );
       return response;
     } catch (error) {
+      if (isApiAbortError(error)) {
+        throw error;
+      }
       lastError = error instanceof Error ? error : new Error(String(error));
 
       if (attempt < maxRetries) {

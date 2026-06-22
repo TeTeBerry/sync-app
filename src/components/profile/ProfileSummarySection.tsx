@@ -63,11 +63,11 @@ const ProfileSummarySection: React.FC<ProfileSummarySectionProps> = ({
       </View>
 
       <View className="s-profile__stats" aria-label={t('profile.stats')}>
-        <View className="s-profile__stat">
+        <View className="s-profile__stat s-profile__stat--events">
           <Text className="s-profile__stat-value">{user.stats.events}</Text>
           <Text className="s-profile__stat-label">{t('profile.eventsLabel')}</Text>
         </View>
-        <View className="s-profile__stat">
+        <View className="s-profile__stat s-profile__stat--posts">
           <Text className="s-profile__stat-value">{user.stats.posts}</Text>
           <Text className="s-profile__stat-label">{t('profile.postsLabel')}</Text>
         </View>

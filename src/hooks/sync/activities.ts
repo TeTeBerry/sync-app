@@ -6,6 +6,7 @@ import {
   fetchHomeSummary,
   registerForActivity,
   unregisterForActivity,
+  optInWechatActivityUpdates,
 } from '../../api/sync/activities';
 import { isLiveApi } from '../../constants/api';
 import { isLoggedIn } from '../../utils/authStorage';
@@ -237,6 +238,11 @@ export async function registerForActivityAndInvalidate(legacyId: number) {
     }
   }
   return result;
+}
+
+/** Record WeChat subscribe consent for activity update pushes. */
+export async function optInWechatActivityUpdatesAndInvalidate(legacyId: number) {
+  return optInWechatActivityUpdates(legacyId);
 }
 
 /** Remove activity registration and refresh profile/home caches. */

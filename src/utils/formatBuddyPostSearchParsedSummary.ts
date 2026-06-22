@@ -1,6 +1,10 @@
 import type { BuddyPostSearchParsed } from '../types/backend';
 
 function extractDeparturePhrase(parsed: BuddyPostSearchParsed): string | undefined {
+  if (parsed.departureCity?.trim()) {
+    return `${parsed.departureCity.trim()}出发`;
+  }
+
   const keywords = parsed.extraKeywords ?? [];
   const departureKeyword = keywords.find((keyword) => keyword.includes('出发'));
   if (departureKeyword?.trim()) {

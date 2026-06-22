@@ -1,5 +1,5 @@
 import './EventCard.scss';
-import React, { memo, useMemo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { ImageWithFallback } from '../ImageWithFallback';
 import { Button } from '../ui';
 import { Bell, Ticket, Users } from '../../components/icons';
@@ -19,6 +19,8 @@ import { IMAGE_SIZE } from '../../constants/imageSizes';
 import { resolveEventCardLegacyId } from '../../utils/apiMappers';
 import { useRouteTransitionActive } from '../../utils/route';
 import { useT } from '@/hooks/useI18n';
+import { useConfirmDialog } from '@/hooks/useConfirmDialog';
+import { requestUnfollowActivityConfirm } from '@/utils/unfollowActivityConfirm';
 
 interface EventCardProps {
   id?: string;
@@ -54,7 +56,14 @@ const EventCardInner: React.FC<EventCardProps> = ({
   onTeamUpWarmup,
 }) => {
   const t = useT();
+  const { confirm, confirmDialog } = useConfirmDialog({
+    cancelText: t('common.cancel'),
+  });
   const travelGuideCta = getGenerateTravelGuideCta();
+  const activityTitle = useMemo(() => {
+    const trimmed = title?.trim();
+    return trimmed || t('eventCard.activityFallback');
+  }, [title, t]);
   const displayCategory = category || t('eventCard.category');
   const regionLabel = formatActivityAreaLabel({ area, region });
   const lineupBadge =
@@ -64,12 +73,17 @@ const EventCardInner: React.FC<EventCardProps> = ({
         ? t('eventCard.lineupPending')
         : null;
   const legacyId = resolveEventCardLegacyId(id);
+  const confirmUnfollow = useCallback(
+    () => requestUnfollowActivityConfirm(confirm, title),
+    [confirm, title],
+  );
   const {
     subscribed: followed,
     submitting,
     handleSubscribe,
   } = useActivityUpdateSubscribeAction(legacyId ?? undefined, going, {
     toggleable: true,
+    confirmUnfollow,
   });
   const isNavigating = useRouteTransitionActive(legacyId ?? undefined);
   const thumbSrc = thumbnailImageUrl(
@@ -110,118 +124,129 @@ const EventCardInner: React.FC<EventCardProps> = ({
   }
 
   return (
-    <View
-      data-cmp="EventCard"
-      className={['s-event-card', 's-event-card--list', activityStatusCardClass(status)]
-        .filter(Boolean)
-        .join(' ')}
-    >
-      <View className="s-event-card__hero">
-        <ImageWithFallback
-          src={thumbSrc}
-          alt={title}
-          imageClassName="s-event-card__hero-img"
-          placeholderClassName="s-event-card__hero-img s-event-card__hero-img--placeholder"
-          fallback={title.slice(0, 2)}
-        />
-        <View className="s-event-card__hero-scrim" aria-hidden />
+    <>
+      <View
+        data-cmp="EventCard"
+        className={[
+          's-event-card',
+          's-event-card--list',
+          activityStatusCardClass(status),
+        ]
+          .filter(Boolean)
+          .join(' ')}
+      >
+        <View className="s-event-card__hero">
+          <ImageWithFallback
+            src={thumbSrc}
+            alt={title}
+            imageClassName="s-event-card__hero-img"
+            placeholderClassName="s-event-card__hero-img s-event-card__hero-img--placeholder"
+            fallback={title.slice(0, 2)}
+          />
+          <View className="s-event-card__hero-scrim" aria-hidden />
 
-        <View
-          className={[
-            's-event-card__follow-tag',
-            followed && 's-event-card__follow-tag--followed',
-            submitting && 's-event-card__follow-tag--loading',
-          ]
-            .filter(Boolean)
-            .join(' ')}
-          role="button"
-          aria-label={followed ? t('eventCard.unfollow') : t('eventCard.follow')}
-          onTouchStart={(event) => {
-            event.stopPropagation();
-          }}
-          onClick={(event) => {
-            event.stopPropagation();
-            handleSubscribe();
-          }}
-        >
-          {!followed ? <Bell size={12} aria-hidden /> : null}
-          <Text className="s-event-card__follow-tag-text">
-            {submitting
-              ? followed
-                ? t('eventCard.unfollowing')
-                : t('eventCard.following')
-              : followed
-                ? t('eventCard.followed')
-                : t('eventCard.follow')}
-          </Text>
-        </View>
-
-        <View className="s-event-card__hero-copy">
-          <Text className="s-event-card__hero-title">{title}</Text>
-          {heroSubtitle ? (
-            <Text className="s-event-card__hero-subtitle">{heroSubtitle}</Text>
-          ) : null}
-        </View>
-      </View>
-
-      <View className="s-event-card__footer s-event-card__footer--detail">
-        <View className="s-event-card__detail-meta">
-          <View className="s-event-card__joined">
-            <Users size={14} aria-hidden />
-            <Text className="s-event-card__joined-text">{recruitPostsLabel}</Text>
-          </View>
-          <View className="s-event-card__detail-tags">
-            {regionLabel ? (
-              <Text className="s-event-card__detail-tag s-event-card__detail-tag--region">
-                {regionLabel}
-              </Text>
-            ) : null}
-            {lineupBadge ? (
-              <Text
-                className={[
-                  's-event-card__detail-tag',
-                  lineupPublished
-                    ? 's-event-card__detail-tag--lineup-published'
-                    : 's-event-card__detail-tag--lineup-pending',
-                ].join(' ')}
-              >
-                {lineupBadge}
-              </Text>
-            ) : null}
-            <Text className="s-event-card__detail-tag">{displayCategory}</Text>
-            <Text className="s-event-card__detail-tag s-event-card__detail-tag--ai">
-              {t('eventCard.aiTag', { cta: travelGuideCta })}
-            </Text>
-          </View>
-        </View>
-
-        <View className="s-event-card__cta">
-          <Button
+          <View
             className={[
-              's-event-card__team-btn',
-              's-event-card__team-btn--detail',
-              isNavigating ? 's-event-card__team-btn--loading' : '',
+              's-event-card__follow-tag',
+              followed && 's-event-card__follow-tag--followed',
+              submitting && 's-event-card__follow-tag--loading',
             ]
               .filter(Boolean)
               .join(' ')}
-            disabled={isNavigating}
+            role="button"
+            aria-label={
+              followed
+                ? t('eventCard.unfollow', { title: activityTitle })
+                : t('eventCard.follow', { title: activityTitle })
+            }
             onTouchStart={(event) => {
               event.stopPropagation();
-              onTeamUpWarmup?.();
             }}
             onClick={(event) => {
               event.stopPropagation();
-              onTeamUp?.();
+              handleSubscribe();
             }}
           >
-            <Ticket size={15} aria-hidden />
-            <Text className="s-event-card__team-btn-text">
-              {isNavigating ? t('eventCard.opening') : t('eventCard.openDetail')}
+            {!followed ? <Bell size={12} aria-hidden /> : null}
+            <Text className="s-event-card__follow-tag-text">
+              {submitting
+                ? followed
+                  ? t('eventCard.unfollowing')
+                  : t('eventCard.following')
+                : followed
+                  ? t('eventCard.followed', { title: activityTitle })
+                  : t('eventCard.follow', { title: activityTitle })}
             </Text>
-          </Button>
+          </View>
+
+          <View className="s-event-card__hero-copy">
+            <Text className="s-event-card__hero-title">{title}</Text>
+            {heroSubtitle ? (
+              <Text className="s-event-card__hero-subtitle">{heroSubtitle}</Text>
+            ) : null}
+          </View>
+        </View>
+
+        <View className="s-event-card__footer s-event-card__footer--detail">
+          <View className="s-event-card__detail-meta">
+            <View className="s-event-card__joined">
+              <Users size={14} aria-hidden />
+              <Text className="s-event-card__joined-text">{recruitPostsLabel}</Text>
+            </View>
+            <View className="s-event-card__detail-tags">
+              {regionLabel ? (
+                <Text className="s-event-card__detail-tag s-event-card__detail-tag--region">
+                  {regionLabel}
+                </Text>
+              ) : null}
+              {lineupBadge ? (
+                <Text
+                  className={[
+                    's-event-card__detail-tag',
+                    lineupPublished
+                      ? 's-event-card__detail-tag--lineup-published'
+                      : 's-event-card__detail-tag--lineup-pending',
+                  ].join(' ')}
+                >
+                  {lineupBadge}
+                </Text>
+              ) : null}
+              <Text className="s-event-card__detail-tag">{displayCategory}</Text>
+              <Text className="s-event-card__detail-tag s-event-card__detail-tag--ai">
+                {t('eventCard.aiTag', { cta: travelGuideCta })}
+              </Text>
+            </View>
+          </View>
+
+          <View className="s-event-card__cta">
+            <Button
+              className={[
+                's-event-card__team-btn',
+                's-event-card__team-btn--detail',
+                isNavigating ? 's-event-card__team-btn--loading' : '',
+              ]
+                .filter(Boolean)
+                .join(' ')}
+              disabled={isNavigating}
+              onTouchStart={(event) => {
+                event.stopPropagation();
+                onTeamUpWarmup?.();
+              }}
+              onClick={(event) => {
+                event.stopPropagation();
+                onTeamUp?.();
+              }}
+            >
+              <Ticket size={15} aria-hidden />
+              <Text className="s-event-card__team-btn-text">
+                {isNavigating ? t('eventCard.opening') : t('eventCard.openDetail')}
+              </Text>
+            </Button>
+          </View>
         </View>
       </View>
-    </View>
+      {confirmDialog}
+    </>
   );
 };
 

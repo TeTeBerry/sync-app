@@ -8,13 +8,19 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { fetchTravelGuidePlan, generateTravelGuide } from '@/api/sync/travelGuide';
 import { useActivityDetailQuery } from '@/hooks/useSyncApi';
 import { useStackPageMainHeight } from '@/hooks/useTabPageMainHeight';
-import { goEventDetailTravelGuideSheet, ROUTES } from '@/utils/route';
+import {
+  goEventDetailTravelGuideSheet,
+  goEventDetailWithBuddyPostPrefill,
+  ROUTES,
+} from '@/utils/route';
 import { isAuthGated, requireAuth } from '@/utils/authGate';
+import { travelGuideFormToBuddyPrefill } from '@/utils/travelGuideToBuddyPost';
 import {
   loadTravelGuideDetail,
   saveTravelGuideDetail,
   type TravelGuideDetailPayload,
 } from '../utils/travelGuideDetailStorage';
+import { markTravelGuideSearchPrefillPending } from '../utils/travelGuideSearchPrefillStorage';
 import { getTravelGuideTitle } from '@/constants/aiCtaLabels';
 import { buildTravelGuideShareText } from '../utils/travelGuideShareText';
 import {
@@ -69,6 +75,11 @@ export function useAiTravelGuidePage() {
   useEffect(() => {
     setPayload(cachedPayload);
   }, [cachedPayload]);
+
+  useEffect(() => {
+    if (!payload?.activityLegacyId || !guideId) return;
+    markTravelGuideSearchPrefillPending(payload.activityLegacyId, guideId);
+  }, [guideId, payload?.activityLegacyId]);
 
   useEffect(() => {
     if (!shouldLoadTravelGuideDetail({ payload, guideId })) {
@@ -219,6 +230,26 @@ export function useAiTravelGuidePage() {
     );
   }, [payload]);
 
+  const handlePrefillRecruitPost = useCallback(() => {
+    if (!payload?.activityLegacyId || !payload.form) return;
+    const activityLegacyId = payload.activityLegacyId;
+    const prefill = travelGuideFormToBuddyPrefill(
+      payload.form,
+      activityQuery.data?.date,
+      t,
+    );
+    requireAuth(
+      () =>
+        goEventDetailWithBuddyPostPrefill(activityLegacyId, {
+          ...prefill,
+          prefillBannerTitle: t('travelGuide.recruitPrefillBanner'),
+        }),
+      'social',
+    );
+  }, [activityQuery.data?.date, payload, t]);
+
+  const showRecruitBridge = Boolean(payload?.activityLegacyId && payload?.form);
+
   return {
     guideId,
     payload,
@@ -231,5 +262,7 @@ export function useAiTravelGuidePage() {
     isWeapp,
     handleCopyShare,
     handleRegenerate,
+    handlePrefillRecruitPost,
+    showRecruitBridge,
   };
 }

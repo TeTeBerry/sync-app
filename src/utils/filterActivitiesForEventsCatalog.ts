@@ -65,6 +65,8 @@ export function isAsianCatalogActivity(
   return event.region === 'domestic' || event.region === 'hmt';
 }
 
+export const HOT_CAROUSEL_MIN_COUNT = 3;
+
 export function selectHotCatalogEvents(
   events: EventCardUi[],
   limit = 5,
@@ -73,16 +75,11 @@ export function selectHotCatalogEvents(
   return events
     .filter(
       (event) =>
+        event.hot === true &&
         isAsianCatalogActivity(event) &&
         getActivityStatusFromActivity(event.date, event.title, now) !== 'ended',
     )
-    .sort((a, b) => {
-      const hotDiff = Number(Boolean(b.hot)) - Number(Boolean(a.hot));
-      if (hotDiff !== 0) {
-        return hotDiff;
-      }
-      return compareActivitiesNearestFirst(a, b, now);
-    })
+    .sort((a, b) => compareActivitiesNearestFirst(a, b, now))
     .slice(0, limit);
 }
 

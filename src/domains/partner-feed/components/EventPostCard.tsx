@@ -204,7 +204,7 @@ function EventPostCardInner({
                 <View
                   className={[
                     's-event-post__status-dot',
-                    isFull && 's-event-post__status-dot--muted',
+                    isFull && 's-event-post__status-dot--full',
                   ]
                     .filter(Boolean)
                     .join(' ')}

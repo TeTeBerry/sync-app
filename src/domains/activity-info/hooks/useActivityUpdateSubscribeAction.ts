@@ -9,6 +9,8 @@ import {
 type UseActivityUpdateSubscribeActionOptions = {
   /** When false, already-followed state cannot be toggled off (detail banners). */
   toggleable?: boolean;
+  /** When unfollowing, await user confirmation before unregistering. */
+  confirmUnfollow?: () => Promise<boolean>;
 };
 
 export function useActivityUpdateSubscribeAction(
@@ -17,6 +19,7 @@ export function useActivityUpdateSubscribeAction(
   options?: UseActivityUpdateSubscribeActionOptions,
 ) {
   const toggleable = options?.toggleable ?? true;
+  const confirmUnfollow = options?.confirmUnfollow;
   const [subscribed, setSubscribed] = useState(false);
   const [serverFollowing, setServerFollowing] = useState(alreadyFollowing);
   const [submitting, setSubmitting] = useState(false);
@@ -45,33 +48,36 @@ export function useActivityUpdateSubscribeAction(
     }
 
     requireAuth(() => {
-      setSubmitting(true);
-      if (followed) {
-        void unsubscribeFromActivityUpdates(activityLegacyId)
-          .then((result) => {
+      void (async () => {
+        setSubmitting(true);
+        try {
+          if (followed) {
+            if (confirmUnfollow) {
+              const confirmed = await confirmUnfollow();
+              if (!confirmed) {
+                return;
+              }
+            }
+
+            const result = await unsubscribeFromActivityUpdates(activityLegacyId);
             if (result === 'success') {
               setSubscribed(false);
               setServerFollowing(false);
             }
-          })
-          .finally(() => {
-            setSubmitting(false);
-          });
-        return;
-      }
+            return;
+          }
 
-      void subscribeToActivityUpdates(activityLegacyId)
-        .then((result) => {
+          const result = await subscribeToActivityUpdates(activityLegacyId);
           if (result === 'wechat_accepted' || result === 'in_app_only') {
             setSubscribed(true);
             setServerFollowing(true);
           }
-        })
-        .finally(() => {
+        } finally {
           setSubmitting(false);
-        });
+        }
+      })();
     }, 'notification');
-  }, [activityLegacyId, followed, submitting, toggleable]);
+  }, [activityLegacyId, confirmUnfollow, followed, submitting, toggleable]);
 
   return {
     subscribed: followed,

@@ -42,6 +42,7 @@ export type UseEventDetailPostsParams = {
   setScrollTop: (value: number | undefined) => void;
   highlightPostId?: string;
   openCommentsOnMount?: boolean;
+  onTravelGuidePrefillDismiss?: (activityLegacyId: number, guideId: string) => void;
   buildApplyCommentDraft?: (post: EventDetailPost) => string;
 };
 
@@ -52,6 +53,7 @@ export function useEventDetailPosts({
   setScrollTop,
   highlightPostId = '',
   openCommentsOnMount = false,
+  onTravelGuidePrefillDismiss,
   buildApplyCommentDraft,
 }: UseEventDetailPostsParams) {
   const [expandedCommentPostIds, setExpandedCommentPostIds] = useState<Set<string>>(
@@ -72,13 +74,9 @@ export function useEventDetailPosts({
   const search = useEventDetailPostSearch({
     activityLegacyId,
     loadedPosts: ruleFilteredPosts,
-    ruleFiltersActive: postFilters.isActive,
+    ruleFilters: postFilters.filters,
+    onTravelGuidePrefillDismiss,
   });
-
-  useEffect(() => {
-    if (!search.isActive) return;
-    postFilters.clearFilters();
-  }, [search.isActive, postFilters]);
 
   const loadedPostItems = useMemo((): EventPostListItem[] => {
     const source = search.isActive ? (search.matchedPosts ?? []) : ruleFilteredPosts;
@@ -413,12 +411,14 @@ export function useEventDetailPosts({
     handleCommentSubmitted,
     searchQuery: search.query,
     setSearchQuery: search.setQuery,
+    applyTravelGuideSearchPrefill: search.applyTravelGuidePrefill,
     clearSearchQuery: search.clearSearch,
     searchActive: search.isActive,
     searchLoading: search.isSearching,
     searchMatchedCount: search.matchedCount,
     searchUsedLocalFallback: search.usedLocalFallback,
     searchParsed: search.searchParsed,
+    travelGuideSearchPrefillHint: search.travelGuidePrefillHint,
     postFilterCityOptions: postFilters.cityOptions,
     postFilterSelectedCity: postFilters.selectedCity,
     setPostFilterSelectedCity: postFilters.setSelectedCity,

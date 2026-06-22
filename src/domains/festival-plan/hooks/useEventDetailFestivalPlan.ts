@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useDidShow } from '@tarojs/taro';
+import { useFestivalPlanProgressQuery } from '@/hooks/sync/festivalPlanProgress';
 import { useFestivalPlanSummary } from '../useFestivalPlanSummary';
 import { useFestivalPlanNavigation } from '../useFestivalPlanNavigation';
 import { createFestivalPlanTaskActions } from '../festivalPlanRouteHandlers';
@@ -24,6 +25,8 @@ export function useEventDetailFestivalPlan({
   });
 
   const checklist = useFestivalPlanSummary(activityLegacyId, refreshKey);
+  const progressQuery = useFestivalPlanProgressQuery(activityLegacyId);
+  const unreadReplyCount = progressQuery.data?.unreadReplyCount ?? 0;
 
   const actions = useMemo(
     () =>
@@ -43,5 +46,6 @@ export function useEventDetailFestivalPlan({
     checklist,
     onTaskPress,
     allComplete,
+    unreadReplyCount,
   };
 }

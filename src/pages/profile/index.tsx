@@ -85,24 +85,27 @@ const Profile: React.FC = () => {
                       user={profileUserData}
                       interestTag={interestTag}
                     />
-                    <ProfileActionCard
-                      accent="activities"
-                      icon={<Zap size={20} />}
-                      title={t('profile.activitiesTitle')}
-                      badge={ongoingCount}
-                      subtitle={t('profile.ongoingActivities', { count: ongoingCount })}
-                      onClick={() => go(ROUTES.PROFILE_ACTIVITIES)}
-                    />
-                    <ProfileActionCard
-                      accent="posts"
-                      icon={<FileText size={20} />}
-                      title={t('profile.postsTitle')}
-                      badge={postsCount}
-                      subtitle={t('profile.postCount', { count: postsCount })}
-                      onClick={() => go(ROUTES.PROFILE_POSTS)}
-                    />
+                    <View className="s-profile__actions-group">
+                      <ProfileActionCard
+                        accent="activities"
+                        icon={<Zap size={20} />}
+                        title={t('profile.activitiesTitle')}
+                        badge={ongoingCount}
+                        subtitle={t('profile.ongoingActivities', {
+                          count: ongoingCount,
+                        })}
+                        onClick={() => go(ROUTES.PROFILE_ACTIVITIES)}
+                      />
+                      <ProfileActionCard
+                        accent="posts"
+                        icon={<FileText size={20} />}
+                        title={t('profile.postsTitle')}
+                        badge={postsCount}
+                        subtitle={t('profile.postCount', { count: postsCount })}
+                        onClick={() => go(ROUTES.PROFILE_POSTS)}
+                      />
+                    </View>
                     <ProfileSettingsSection {...settings} />
-                    <View className="s-profile__scroll-spacer" />
                   </>
                 )}
               </View>

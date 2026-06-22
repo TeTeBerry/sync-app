@@ -138,3 +138,33 @@ export function activityOccursOnDay(
   const key = activityDayKey(year, month, day);
   return expandActivityToDayKeys(date, activity.title).includes(key);
 }
+
+export function activityOccursInMonth(
+  activity: ActivityCalendarFields,
+  year: number,
+  month: number,
+): boolean {
+  const date = activity.date?.trim();
+  if (!date) return false;
+  return expandActivityToDayKeys(date, activity.title).some((key) => {
+    const parsed = parseActivityDayKey(key);
+    return parsed?.year === year && parsed.month === month;
+  });
+}
+
+export function filterActivitiesInCalendarMonth<T extends ActivityCalendarFields>(
+  activities: T[],
+  year: number,
+  month: number,
+): T[] {
+  return activities.filter((activity) => activityOccursInMonth(activity, year, month));
+}
+
+export function isCalendarDayBeforeToday(
+  day: { year: number; month: number; day: number },
+  today = todayCalendarParts(),
+): boolean {
+  const target = new Date(day.year, day.month - 1, day.day).getTime();
+  const current = new Date(today.year, today.month - 1, today.day).getTime();
+  return target < current;
+}

@@ -7,7 +7,7 @@ import { defaultBuddyPostForm } from '@/utils/buddyPostForm';
 export type PersonalityBuddyPostPrefill = {
   form: AiBuddyPostFormValues;
   summaryLines: string[];
-  bannerTitle: string;
+  prefillBannerTitle: string;
 };
 
 function fallbackDateRange(): Pick<AiBuddyPostFormValues, 'dateStart' | 'dateEnd'> {
@@ -50,6 +50,6 @@ export function buildPersonalityBuddyPostPrefill(
   return {
     form,
     summaryLines,
-    bannerTitle: '人格测试 · 组队预填',
+    prefillBannerTitle: '人格测试 · 组队预填',
   };
 }

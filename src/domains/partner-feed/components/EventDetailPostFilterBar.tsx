@@ -1,11 +1,10 @@
-import { Text, View } from '@tarojs/components';
+import { ScrollView, Text, View } from '@tarojs/components';
 import { useT } from '@/hooks/useI18n';
 
 type EventDetailPostFilterBarProps = {
   cityOptions: string[];
   selectedCity: string;
   onSelectedCityChange: (city: string) => void;
-  disabled?: boolean;
   onClear?: () => void;
   isActive?: boolean;
 };
@@ -14,18 +13,10 @@ export function EventDetailPostFilterBar({
   cityOptions,
   selectedCity,
   onSelectedCityChange,
-  disabled = false,
   onClear,
   isActive = false,
 }: EventDetailPostFilterBarProps) {
   const t = useT();
-  if (disabled) {
-    return (
-      <Text className="s-event-detail-post-filter__hint">
-        {t('eventDetail.filterHint')}
-      </Text>
-    );
-  }
 
   if (cityOptions.length === 0) {
     return null;
@@ -33,11 +24,28 @@ export function EventDetailPostFilterBar({
 
   return (
     <View className="s-event-detail-post-filter">
-      <View className="s-event-detail-post-filter__row">
-        <View
-          className="s-event-detail-post-filter__chips"
-          aria-label={t('eventDetail.filterByCity')}
-        >
+      <View className="s-event-detail-post-filter__head">
+        <Text className="s-event-detail-post-filter__label">
+          {t('eventDetail.filterByCity')}
+        </Text>
+        {isActive && onClear ? (
+          <Text
+            className="s-event-detail-post-filter__clear"
+            onClick={onClear}
+            role="button"
+          >
+            {t('eventDetail.clearFilter')}
+          </Text>
+        ) : null}
+      </View>
+      <ScrollView
+        scrollX
+        enhanced
+        showScrollbar={false}
+        className="s-event-detail-post-filter__scroll s-scrollbar-none"
+        aria-label={t('eventDetail.filterByCity')}
+      >
+        <View className="s-event-detail-post-filter__chips">
           {cityOptions.map((city) => {
             const active = selectedCity === city;
             return (
@@ -58,16 +66,7 @@ export function EventDetailPostFilterBar({
             );
           })}
         </View>
-        {isActive && onClear ? (
-          <Text
-            className="s-event-detail-post-filter__clear"
-            onClick={onClear}
-            role="button"
-          >
-            {t('eventDetail.clearFilter')}
-          </Text>
-        ) : null}
-      </View>
+      </ScrollView>
     </View>
   );
 }

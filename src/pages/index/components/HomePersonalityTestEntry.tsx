@@ -6,6 +6,7 @@ import { AudioWaveform, ChevronRight } from '../../../components/icons';
 import { resolvePersonalityTestSoulDjName } from '@/domains/personality-test';
 import { useAuthSession } from '../../../hooks/useAuthSession';
 import { goPersonalityTest } from '../../../utils/route';
+import { prefetchPersonalityTestAudioMedia } from '@/domains/personality-test/utils/personalityAudioPrefetch';
 import { Text, View } from '@tarojs/components';
 import { useT } from '@/hooks/useI18n';
 
@@ -23,6 +24,7 @@ export const HomePersonalityTestEntry: FC = () => {
 
   useEffect(() => {
     void refreshEntry();
+    prefetchPersonalityTestAudioMedia();
   }, [loggedIn, refreshEntry]);
 
   useDidShow(() => {

@@ -22,6 +22,7 @@ import {
   savePersonalityTestResult,
 } from '@/domains/personality-test/utils/personalityTestStorage';
 import { ensurePersonalityResultIdentity } from '../utils/personalityResultIdentity.util';
+import { invalidateUser } from '@/utils/queryInvalidation';
 import {
   buildPersonalityTestShareAppMessage,
   buildPersonalityTestShareFallback,
@@ -45,6 +46,7 @@ import { labelMatchesKey } from '@/i18n';
 import { useStackPageMainHeight } from '@/hooks/useTabPageMainHeight';
 import { applyScrollTop } from '@/utils/scrollToCenter';
 import { useT } from '@/hooks/useI18n';
+import { prefetchPersonalityQuestionMedia } from '../utils/personalityAudioPrefetch';
 
 export type PersonalityTestPhase =
   | 'loading'
@@ -122,6 +124,7 @@ export function usePersonalityTestPage() {
         throw new Error('empty question set');
       }
       applyQuestionSet(payload.questions);
+      void prefetchPersonalityQuestionMedia(payload.questions);
       setPhase('quiz');
     } catch (error) {
       const message = resolveLoadError(error, t);
@@ -304,6 +307,7 @@ export function usePersonalityTestPage() {
       try {
         const next = await submitPersonalityTest(finalAnswers, questionIds);
         applyResult(next);
+        await invalidateUser();
       } catch (error) {
         const message =
           error instanceof Error && error.message.trim()

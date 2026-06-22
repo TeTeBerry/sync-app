@@ -82,3 +82,11 @@ export function unregisterForActivity(legacyId: number) {
     ownerQueryParams(),
   );
 }
+
+export function optInWechatActivityUpdates(legacyId: number) {
+  return apiPost<{
+    ok: true;
+    activityLegacyId: number;
+    wechatActivityUpdateOptIn: true;
+  }>(`/activities/${legacyId}/register/wechat-updates`, {}, ownerQueryParams());
+}

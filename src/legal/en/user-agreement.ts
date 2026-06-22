@@ -1,7 +1,7 @@
 import { LEGAL_CONSENT_VERSION } from '../constants';
 import type { LegalDocument } from '../types';
 
-export const LEGAL_UPDATED_LABEL_EN = 'June 18, 2026';
+export const LEGAL_UPDATED_LABEL_EN = 'June 23, 2026';
 
 export const userAgreementEn: LegalDocument = {
   id: 'user-agreement',
@@ -21,7 +21,7 @@ export const userAgreementEn: LegalDocument = {
     {
       title: '2. Account',
       paragraphs: [
-        'You may sign in with WeChat authorization. Keep your account secure. We may restrict accounts that violate guidelines or pose risk.',
+        'You may sign in with WeChat authorization. Sign-in uses WeChat account identifiers (e.g. openid) only; display name and avatar come from profile fields you provide in-app. Keep your account secure. We may restrict accounts that violate guidelines or pose risk.',
       ],
     },
     {

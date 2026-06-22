@@ -45,7 +45,7 @@ export function LoginPromptHero({
     setLoggingIn(true);
     try {
       if (process.env.TARO_ENV === 'weapp') {
-        await loginWithWechat({ requireProfile: true });
+        await loginWithWechat();
       } else {
         void Taro.showToast({
           title: t('auth.wechatOnly'),

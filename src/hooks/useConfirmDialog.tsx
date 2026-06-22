@@ -7,6 +7,8 @@ export type ConfirmDialogOptions = {
   confirmText?: string;
   cancelText?: string;
   danger?: boolean;
+  /** Brand pink / purple accent panel (default confirm CTA styling). */
+  brand?: boolean;
 };
 
 type ActiveConfirm = ConfirmDialogOptions & {
@@ -46,6 +48,7 @@ export function useConfirmDialog(defaults?: {
       confirmText={active?.confirmText ?? defaults?.confirmText ?? '确认'}
       cancelText={active?.cancelText ?? defaults?.cancelText ?? '取消'}
       danger={active?.danger}
+      brand={active?.brand}
       onConfirm={() => close(true)}
       onCancel={() => close(false)}
     />

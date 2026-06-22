@@ -5,14 +5,17 @@ import { useActivityUpdateSubscribeAction } from '@/domains/activity-info';
 
 type ExclusiveItineraryUnpublishedBannerProps = {
   activityLegacyId?: number;
+  activityTitle?: string;
   showEmptyLineup?: boolean;
 };
 
 export function ExclusiveItineraryUnpublishedBanner({
   activityLegacyId,
+  activityTitle,
   showEmptyLineup = false,
 }: ExclusiveItineraryUnpublishedBannerProps) {
   const t = useT();
+  const titleLabel = activityTitle?.trim() || t('eventCard.activityFallback');
   const { subscribed, submitting, handleSubscribe } = useActivityUpdateSubscribeAction(
     activityLegacyId,
     false,
@@ -34,7 +37,7 @@ export function ExclusiveItineraryUnpublishedBanner({
       </Text>
       <Text className="s-exclusive-itinerary__unpublished-desc">
         {subscribed
-          ? t('itinerary.unpublishedBanner.subscribedHint')
+          ? t('itinerary.unpublishedBanner.subscribedHint', { title: titleLabel })
           : t('itinerary.unpublishedBanner.hint')}
       </Text>
       <Button
@@ -50,10 +53,10 @@ export function ExclusiveItineraryUnpublishedBanner({
       >
         <Text className="s-exclusive-itinerary__unpublished-btn-text">
           {subscribed
-            ? t('itinerary.unpublishedBanner.subscribed')
+            ? t('itinerary.unpublishedBanner.subscribed', { title: titleLabel })
             : submitting
               ? t('itinerary.unpublishedBanner.subscribing')
-              : t('itinerary.unpublishedBanner.subscribe')}
+              : t('itinerary.unpublishedBanner.subscribe', { title: titleLabel })}
         </Text>
       </Button>
     </View>

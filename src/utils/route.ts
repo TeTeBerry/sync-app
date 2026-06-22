@@ -4,7 +4,8 @@ import { bindActivity } from '../domains/activity-scope';
 import { useNavigationStore } from '../stores/navigationStore';
 import type { NavigationState } from '../stores/navigationStore';
 import type { ExclusiveItineraryNavIntent } from '../stores/types';
-import type { PersonalityBuddyPostPrefill } from '../domains/personality-test/utils/buildPersonalityBuddyPostPrefill';
+import type { BuddyPostSheetPrefill } from './travelGuideToBuddyPost';
+import { prefetchPersonalityTestAudioMedia } from '../domains/personality-test/utils/personalityAudioPrefetch';
 import type { AiGuidePlanFormValues } from '../types/travelGuide';
 import type { BackendActivity, HomeSummary, NotificationMeta } from '../types/backend';
 import { PRELOAD_HOT_ROUTES_MS } from './timing';
@@ -41,6 +42,7 @@ export const ROUTES = {
   AI_ASSISTANT: '/packageAi/pages/ai-assistant/index',
   EVENT_DETAIL: '/packageEvent/pages/event-detail/index',
   EXCLUSIVE_ITINERARY: '/packageEvent/pages/exclusive-itinerary/index',
+  ACTIVITY_LINEUP: '/packageEvent/pages/activity-lineup/index',
   MY_ITINERARY: '/packageEvent/pages/my-itinerary/index',
   PERSONALITY_TEST: '/packageEvent/pages/personality-test/index',
   AI_TRAVEL_GUIDE: '/packageEvent/pages/ai-travel-guide/index',
@@ -645,7 +647,7 @@ export function goEventDetail(
 
 export function goEventDetailWithBuddyPostPrefill(
   eventId: number | string,
-  prefill: PersonalityBuddyPostPrefill,
+  prefill: BuddyPostSheetPrefill,
 ) {
   const legacyId = parseActivityLegacyId(eventId);
   if (legacyId == null) {
@@ -656,7 +658,7 @@ export function goEventDetailWithBuddyPostPrefill(
     activityLegacyId: legacyId,
     initialValues: prefill.form,
     prefillSummaryLines: prefill.summaryLines,
-    prefillBannerTitle: prefill.bannerTitle,
+    prefillBannerTitle: prefill.prefillBannerTitle,
   });
   goEventDetail(legacyId, { openBuddyPost: true, focusPosts: true });
 }
@@ -712,6 +714,21 @@ export function goExclusiveItinerary(
   navigateToSafe(buildPageUrl(ROUTES.EXCLUSIVE_ITINERARY, query));
 }
 
+export function goActivityLineup(activityLegacyId: number) {
+  const legacyId = parseActivityLegacyId(activityLegacyId);
+  if (legacyId == null) {
+    void Taro.showToast({ title: '活动信息无效', icon: 'none' });
+    return;
+  }
+  const query: Record<string, string> = {
+    id: String(legacyId),
+    activityLegacyId: String(legacyId),
+  };
+  bindActivity(legacyId);
+  preloadEventSubpackage();
+  navigateToSafe(buildPageUrl(ROUTES.ACTIVITY_LINEUP, query));
+}
+
 export function goMyItinerary(
   activityLegacyId?: number,
   selectedDjIds?: string[],
@@ -743,6 +760,7 @@ export function goPersonalityTest(options?: { viewResult?: boolean }) {
     query.view = 'result';
   }
   const url = buildPageUrl(ROUTES.PERSONALITY_TEST, query);
+  prefetchPersonalityTestAudioMedia();
   void ensureEventSubpackageLoaded().then(() => navigateToSafe(url));
 }
 
@@ -820,11 +838,6 @@ export function goEventDetailTravelGuideSheet(
 /** @deprecated Use goEventDetail with openBuddyPost */
 export function goEventDetailBuddyPostSheet(activityLegacyId: number) {
   goEventDetail(activityLegacyId, { openBuddyPost: true, focusPosts: true });
-}
-
-/** Browse activity lineup (DJ grid from official schedule). */
-export function goActivityLineup(activityLegacyId: number) {
-  goExclusiveItinerary(activityLegacyId);
 }
 
 /** Open performance schedule — saved itinerary if available, otherwise lineup browser. */

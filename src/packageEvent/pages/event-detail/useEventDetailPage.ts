@@ -15,9 +15,15 @@ import { useEventDetailActivityHeader } from './useEventDetailActivityHeader';
 import { useEventDetailScrollPreserve } from './useEventDetailScrollPreserve';
 import { useEventDetailTravelGuide } from '@/domains/travel-guide';
 import { findLatestTravelGuideForActivity } from '@/domains/travel-guide/utils/travelGuideDetailStorage';
+import {
+  dismissTravelGuideSearchPrefill,
+  shouldApplyTravelGuideSearchPrefill,
+} from '@/domains/travel-guide/utils/travelGuideSearchPrefillStorage';
+import { travelGuideFormToSearchQuery } from '@/utils/travelGuideToBuddyPost';
 import { useEventDetailWechatShare } from './useEventDetailWechatShare';
 import { useEventDetailFestivalPlan } from '@/domains/festival-plan/hooks/useEventDetailFestivalPlan';
 import {
+  goActivityLineup,
   goExclusiveItinerary,
   goMyItinerary,
   goAiTravelGuide,
@@ -27,6 +33,7 @@ import type { EventDetailPost } from '../../../types/backend';
 import { scrollElementToCenter } from '../../../utils/scrollToCenter';
 import { useOverlayLockStore } from '../../../stores/overlayLockStore';
 import { t } from '@/i18n/translate';
+import type { PrepNudgeAction } from '@/domains/partner-feed/utils/eventDetailPlanningHint.util';
 
 export type UseEventDetailPageOptions = {
   confirm: (options: ConfirmDialogOptions) => Promise<boolean>;
@@ -47,6 +54,7 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     invalidEventId,
   } = route;
   const focusPostsScrolledRef = useRef(false);
+  const travelGuidePrefillScrolledRef = useRef(false);
   const buddyPostSheetOpenedRef = useRef(false);
   const guideSheetOpenedRef = useRef(false);
   const buddyPostNavIntent = useMemo(
@@ -90,6 +98,13 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
           prefillBannerTitle: buddyPostNavIntent.prefillBannerTitle,
         }
       : undefined;
+
+  const handleTravelGuidePrefillDismiss = useCallback(
+    (activityLegacyId: number, guideId: string) => {
+      dismissTravelGuideSearchPrefill(activityLegacyId, guideId);
+    },
+    [],
+  );
 
   const scrollPreserve = useEventDetailScrollPreserve();
   const { frozenTop, scrollFrozen, freezeScroll, unfreezeScroll, getLiveScrollTop } =
@@ -144,8 +159,57 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     setScrollTop,
     highlightPostId,
     openCommentsOnMount,
+    onTravelGuidePrefillDismiss: handleTravelGuidePrefillDismiss,
     buildApplyCommentDraft,
   });
+
+  const {
+    searchActive: postsSearchActive,
+    searchQuery: postsSearchQuery,
+    applyTravelGuideSearchPrefill,
+  } = posts;
+
+  const appliedTravelGuidePrefillRef = useRef<string | null>(null);
+
+  const tryApplyTravelGuideSearchPrefill = useCallback(() => {
+    if (!Number.isFinite(eventId) || eventId <= 0 || postsSearchActive) {
+      return false;
+    }
+
+    const latestGuide = findLatestTravelGuideForActivity(eventId);
+    if (!latestGuide?.form) {
+      return false;
+    }
+    if (!shouldApplyTravelGuideSearchPrefill(eventId, latestGuide.guideId)) {
+      return false;
+    }
+    if (appliedTravelGuidePrefillRef.current === latestGuide.guideId) {
+      return false;
+    }
+
+    const searchQuery = travelGuideFormToSearchQuery(
+      latestGuide.form,
+      activityDate,
+      t,
+    ).trim();
+    if (!searchQuery) {
+      return false;
+    }
+    if (postsSearchQuery.trim() === searchQuery) {
+      appliedTravelGuidePrefillRef.current = latestGuide.guideId;
+      return false;
+    }
+
+    applyTravelGuideSearchPrefill(searchQuery, latestGuide.guideId);
+    appliedTravelGuidePrefillRef.current = latestGuide.guideId;
+    return true;
+  }, [
+    activityDate,
+    applyTravelGuideSearchPrefill,
+    eventId,
+    postsSearchActive,
+    postsSearchQuery,
+  ]);
 
   const handleScroll = useCallback(
     (scrollTop: number) => {
@@ -170,6 +234,22 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
       setScrollTop,
     );
   }, [focusPostsOnMount, postsLoading, setScrollTop]);
+
+  useEffect(() => {
+    if (
+      !tryApplyTravelGuideSearchPrefill() ||
+      postsLoading ||
+      travelGuidePrefillScrolledRef.current
+    ) {
+      return;
+    }
+    travelGuidePrefillScrolledRef.current = true;
+    void scrollElementToCenter(
+      `#${EVENT_DETAIL_SCROLL_ID}`,
+      '#event-detail-posts',
+      setScrollTop,
+    );
+  }, [postsLoading, setScrollTop, tryApplyTravelGuideSearchPrefill]);
 
   useEffect(() => {
     if (
@@ -207,6 +287,13 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     goMyItinerary(eventId);
   }, [assertValidEventId, eventId]);
 
+  const handleOpenActivityLineup = useCallback(() => {
+    if (!assertValidEventId()) {
+      return;
+    }
+    goActivityLineup(eventId);
+  }, [assertValidEventId, eventId]);
+
   const handleOpenExclusiveItinerary = useCallback(() => {
     if (!assertValidEventId()) {
       return;
@@ -242,6 +329,63 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
   );
 
   useEffect(() => {
+    if (travelGuideGenerated) {
+      tryApplyTravelGuideSearchPrefill();
+    }
+  }, [travelGuideGenerated, tryApplyTravelGuideSearchPrefill]);
+
+  const handlePrepNudgeAction = useCallback(
+    (action: PrepNudgeAction) => {
+      switch (action.type) {
+        case 'open_post_replies':
+          posts.scrollToElement(action.postId);
+          posts.openPostComments(action.postId);
+          return;
+        case 'open_buddy_post_sheet':
+          templatePost.openBuddyPostSheet();
+          return;
+        case 'scroll_to_recruits':
+          void scrollElementToCenter(
+            `#${EVENT_DETAIL_SCROLL_ID}`,
+            '#event-detail-posts',
+            setScrollTop,
+          );
+          return;
+        case 'open_itinerary':
+          handleOpenExclusiveItinerary();
+          return;
+        case 'open_travel_guide':
+          handleOpenAiGuide();
+          return;
+        case 'festival_plan_task': {
+          const task = festivalPlan.checklist?.tasks.find(
+            (item) => item.key === action.taskKey,
+          );
+          if (task) {
+            festivalPlan.onTaskPress(task);
+          }
+          return;
+        }
+        case 'scroll_to_subscribe':
+          void scrollElementToCenter(
+            `#${EVENT_DETAIL_SCROLL_ID}`,
+            '#event-detail-info',
+            setScrollTop,
+          );
+          return;
+      }
+    },
+    [
+      festivalPlan,
+      handleOpenAiGuide,
+      handleOpenExclusiveItinerary,
+      posts,
+      setScrollTop,
+      templatePost,
+    ],
+  );
+
+  useEffect(() => {
     if (
       !openGuideOnMount ||
       guideSheetOpenedRef.current ||
@@ -269,6 +413,14 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
       return;
     }
     useOverlayLockStore.getState().reset();
+    if (tryApplyTravelGuideSearchPrefill() && !travelGuidePrefillScrolledRef.current) {
+      travelGuidePrefillScrolledRef.current = true;
+      void scrollElementToCenter(
+        `#${EVENT_DETAIL_SCROLL_ID}`,
+        '#event-detail-posts',
+        setScrollTop,
+      );
+    }
   });
 
   return {
@@ -299,6 +451,7 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     handleOpenAiGuide,
     activityTitle,
     handleOpenMyItinerary,
+    handleOpenActivityLineup,
     handleOpenExclusiveItinerary,
     guideSheetOpen: travelGuide.guideSheetOpen,
     closeGuideSheet: travelGuide.closeGuideSheet,
@@ -312,6 +465,8 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     isWeapp: wechatShare.isWeapp,
     festivalPlanChecklist: festivalPlan.checklist,
     onFestivalPlanTaskPress: festivalPlan.onTaskPress,
+    prepNudgeUnreadReplyCount: festivalPlan.unreadReplyCount,
+    onPrepNudgeAction: handlePrepNudgeAction,
     travelGuideGenerated,
     activity: activityQuery.data,
   };

@@ -15,7 +15,7 @@ import { ActivityUpdateSubscribeBanner } from './ActivityUpdateSubscribeBanner';
 export type EventDetailInfoSectionProps = {
   activity?: BackendActivity | null;
   activityLegacyId?: number;
-  onOpenExclusiveItinerary: () => void;
+  onOpenLineup: () => void;
 };
 
 function formatInfoUpdatedAt(value?: string): string | null {
@@ -45,7 +45,7 @@ function statusI18nKey(status: ActivityStatus): string {
 export const EventDetailInfoSection: FC<EventDetailInfoSectionProps> = ({
   activity,
   activityLegacyId,
-  onOpenExclusiveItinerary,
+  onOpenLineup,
 }) => {
   const t = useT();
 
@@ -71,7 +71,11 @@ export const EventDetailInfoSection: FC<EventDetailInfoSectionProps> = ({
   const showSubscribeBanner = activity.lineupPublished === false;
 
   return (
-    <View data-cmp="EventDetailInfoSection" className="s-event-detail-info">
+    <View
+      data-cmp="EventDetailInfoSection"
+      id="event-detail-info"
+      className="s-event-detail-info"
+    >
       <View className="s-event-detail-info__card">
         <View className="s-event-detail-info__head">
           <Text
@@ -97,16 +101,20 @@ export const EventDetailInfoSection: FC<EventDetailInfoSectionProps> = ({
         <Button
           className="s-event-detail-info__cta"
           hoverClass="s-event-detail-info__cta--pressed"
-          onClick={onOpenExclusiveItinerary}
+          onClick={onOpenLineup}
         >
           <Text className="s-event-detail-info__cta-text">
             {t('activityInfo.viewLineupCta')}
           </Text>
-          <ChevronRight size={16} color="#8e8e93" />
+          <ChevronRight size={16} color="#fff" />
         </Button>
 
         {showSubscribeBanner ? (
-          <ActivityUpdateSubscribeBanner activityLegacyId={activityLegacyId} compact />
+          <ActivityUpdateSubscribeBanner
+            activityLegacyId={activityLegacyId}
+            activityTitle={activity.name}
+            compact
+          />
         ) : null}
 
         {activity.infoSource ? (

@@ -73,7 +73,7 @@ describe('buildPersonalityBuddyPostPrefill', () => {
       catalog,
     );
 
-    expect(prefill.bannerTitle).toBe('人格测试 · 组队预填');
+    expect(prefill.prefillBannerTitle).toBe('人格测试 · 组队预填');
     expect(prefill.form.dateStart).toBe('2026-10-03');
     expect(prefill.form.dateEnd).toBe('2026-10-04');
     expect(prefill.form.location).toBe('仁川 Inspire');

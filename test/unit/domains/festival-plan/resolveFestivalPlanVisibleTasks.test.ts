@@ -17,7 +17,7 @@ describe('resolveFestivalPlanVisibleTasks', () => {
     });
 
     expect(visible).toHaveLength(1);
-    expect(visible[0]?.key).toBe('itinerary');
+    expect(visible[0]?.key).toBe('buddy_post');
   });
 
   it('shows all tasks when expanded', () => {

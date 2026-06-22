@@ -1,4 +1,11 @@
-import { apiDelete, apiGet, apiPatch, apiPost } from '../../utils/apiClient';
+import {
+  apiDelete,
+  apiGet,
+  apiPatch,
+  apiPost,
+  LONG_RUNNING_REQUEST_TIMEOUT_MS,
+  type ApiFetchInit,
+} from '../../utils/apiClient';
 import type {
   CreatePostPayload,
   BuddyPostAiSearchResult,
@@ -97,10 +104,19 @@ export function deletePostComment(postId: string, commentId: string) {
   );
 }
 
-export function searchBuddyPostsWithAi(query: string, activityLegacyId: number) {
+export function searchBuddyPostsWithAi(
+  query: string,
+  activityLegacyId: number,
+  init?: ApiFetchInit,
+) {
   return apiPost<BuddyPostAiSearchResult>(
     '/posts/ai-search',
     { query, activityLegacyId },
     ownerQueryParams(),
+    {
+      timeoutMs: LONG_RUNNING_REQUEST_TIMEOUT_MS,
+      maxRetries: 0,
+      ...init,
+    },
   );
 }
