@@ -140,6 +140,7 @@ export async function prefetchToCache<T>(
     request = queryFn()
       .then((result) => {
         globalCache.set(cacheKey, { data: result, timestamp: Date.now() });
+        broadcastCacheData(queryKey);
         return result;
       })
       .finally(() => {
@@ -206,6 +207,7 @@ export function useApiQuery<T>(options: UseApiQueryOptions<T>) {
         const result = await queryFnRef.current();
         const timestamp = Date.now();
         globalCache.set(cacheKey, { data: result, timestamp });
+        broadcastCacheData(queryKey);
         return result;
       };
 

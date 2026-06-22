@@ -1,5 +1,6 @@
 .s-nav-loading-overlay.s-themed-loader--overlay {
-  z-index: 9999;
+  z-index: 9998;
+  bottom: var(--s-tabbar-total);
   background: #000000;
   justify-content: center;
   padding-top: env(safe-area-inset-top, 0px);

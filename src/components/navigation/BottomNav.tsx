@@ -1,7 +1,6 @@
 import './BottomNav.scss';
-import React from 'react';
+import React, { useCallback, useRef } from 'react';
 import { useDidShow } from '@tarojs/taro';
-import { Button } from '../ui';
 import { View, Text } from '@tarojs/components';
 import { CalendarDays, House, User } from '../../components/icons';
 import {
@@ -16,6 +15,7 @@ import {
   syncTabBarFromCurrentPage,
   useActiveRoutePath,
 } from '../../utils/route';
+import { cn } from '../ui';
 import { useT } from '@/hooks/useI18n';
 
 function preloadSubpackagesForTab(path: RoutePath) {
@@ -38,6 +38,16 @@ function handleTabPress(path: RoutePath, isActive: boolean) {
 const BottomNav: React.FC = () => {
   const activePath = useActiveRoutePath();
   const t = useT();
+  const lastPressAtRef = useRef(0);
+
+  const onTabPress = useCallback((path: RoutePath, isActive: boolean) => {
+    const now = Date.now();
+    if (now - lastPressAtRef.current < 80) {
+      return;
+    }
+    lastPressAtRef.current = now;
+    handleTabPress(path, isActive);
+  }, []);
 
   const navItems = [
     { path: ROUTES.HOME, icon: House, label: t('tab.home') },
@@ -50,32 +60,42 @@ const BottomNav: React.FC = () => {
       <View className="s-bottom-nav__row">
         {navItems.map((item) => {
           const isActive = activePath === item.path;
-          const isTabRoot = isOnTabRoot(item.path);
           const Icon = item.icon;
           return (
-            <Button
+            <View
               key={item.path}
-              disabled={isActive && isTabRoot}
+              role="button"
+              aria-label={item.label}
+              aria-current={isActive ? 'page' : undefined}
+              className={cn(
+                's-bottom-nav__item',
+                isActive && 's-bottom-nav__item--active',
+              )}
+              hoverClass="s-bottom-nav__item--pressed"
+              hoverStayTime={70}
               onTouchStart={() => {
-                if (!isActive || !isTabRoot) {
-                  preloadSubpackagesForTab(item.path);
-                }
+                preloadSubpackagesForTab(item.path);
               }}
-              onClick={() => handleTabPress(item.path, isActive)}
-              className="s-bottom-nav__item"
+              onClick={() => onTabPress(item.path, isActive)}
             >
               <Icon
                 size={24}
                 color={isActive ? '#ffffff' : '#888888'}
                 strokeWidth={isActive ? 2.5 : 1.5}
-                className={`s-bottom-nav__icon${isActive ? ' s-bottom-nav__icon--active' : ''}`}
+                className={cn(
+                  's-bottom-nav__icon',
+                  isActive && 's-bottom-nav__icon--active',
+                )}
               />
               <Text
-                className={`s-bottom-nav__label${isActive ? ' s-bottom-nav__label--active' : ''}`}
+                className={cn(
+                  's-bottom-nav__label',
+                  isActive && 's-bottom-nav__label--active',
+                )}
               >
                 {item.label}
               </Text>
-            </Button>
+            </View>
           );
         })}
       </View>

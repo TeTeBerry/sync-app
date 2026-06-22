@@ -44,6 +44,7 @@ import {
   invalidateProfile,
 } from '../../utils/queryInvalidation';
 import { getCacheData, useApiQuery } from '../useApiQuery';
+import { useRefetchOnShowWhenEmpty } from '../useRefetchOnShowWhenEmpty';
 import type { QueryEnableOptions } from './types';
 import type { UpdateCurrentUserPayload } from '../../types/backend';
 import { updateCurrentUser } from '../../api/sync/users';
@@ -54,7 +55,7 @@ export function useActivitiesQuery(options?: QueryEnableOptions) {
   const tabEnabled = options?.enabled ?? true;
   const enabled = isLiveApi() && tabEnabled;
 
-  return useApiQuery({
+  const query = useApiQuery({
     queryKey: ['activities'],
     queryFn: async () => {
       const activities = (await fetchActivities()).map(withCatalogActivityImage);
@@ -65,6 +66,16 @@ export function useActivitiesQuery(options?: QueryEnableOptions) {
     enabled,
     staleTime: STALE_ACTIVITIES_LIST_MS,
   });
+
+  useRefetchOnShowWhenEmpty({
+    data: query.data,
+    isError: query.isError,
+    isLoading: query.isLoading,
+    refetch: query.refetch,
+    enabled,
+  });
+
+  return query;
 }
 
 export function useEventList(options?: QueryEnableOptions) {
@@ -127,6 +138,14 @@ export function useHomeSummary() {
       }
     });
   }, [refetch]);
+
+  useRefetchOnShowWhenEmpty({
+    data: query.data,
+    isError: query.isError,
+    isLoading: query.isLoading,
+    refetch: query.refetch,
+    enabled: isLiveApi(),
+  });
 
   return query;
 }

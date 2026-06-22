@@ -1,4 +1,4 @@
-import { ApiError, apiGet, apiPost } from '../../utils/apiClient';
+import { apiGet, apiPost } from '../../utils/apiClient';
 import { getActivityTypeLabel } from '../../constants/activityType';
 import type {
   ActivityRegistrationResult,
@@ -49,12 +49,15 @@ async function fetchHomeSummaryFromPublicCatalog(): Promise<HomeSummary> {
 
 export async function fetchHomeSummary(): Promise<HomeSummary> {
   try {
-    return await apiGet<HomeSummary>('/home', ownerQueryParams());
-  } catch (error) {
-    if (error instanceof ApiError && (error.status === 401 || error.status === 403)) {
-      return fetchHomeSummaryFromPublicCatalog();
+    return await apiGet<HomeSummary>('/home', ownerQueryParams(), {
+      timeoutMs: 15_000,
+    });
+  } catch (primaryError) {
+    try {
+      return await fetchHomeSummaryFromPublicCatalog();
+    } catch {
+      throw primaryError;
     }
-    throw error;
   }
 }
 

@@ -16,6 +16,15 @@ describe('shouldEndRouteTransitionOnShow', () => {
     expect(shouldEndRouteTransitionOnShow({ active: true }, undefined)).toBe(true);
   });
 
+  it('does not end tab transition from stack pages without own tab', () => {
+    expect(
+      shouldEndRouteTransitionOnShow(
+        { active: true, tabTarget: ROUTES.EVENTS },
+        undefined,
+      ),
+    ).toBe(false);
+  });
+
   it('skips intermediate tab pages while switching to another tab', () => {
     expect(
       shouldEndRouteTransitionOnShow(

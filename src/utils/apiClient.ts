@@ -140,10 +140,6 @@ async function retryFetch(
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error));
 
-      if (lastError.message?.includes('timeout')) {
-        throw new ApiError('请求超时，请检查网络后重试');
-      }
-
       if (attempt < maxRetries) {
         const delay = RETRY_DELAY_MS * 2 ** attempt;
         await sleep(delay);
@@ -151,7 +147,10 @@ async function retryFetch(
     }
   }
 
-  throw new ApiError(lastError?.message || '网络请求失败，请稍后重试');
+  const timeoutMessage = lastError?.message?.includes('timeout')
+    ? '请求超时，请检查网络后重试'
+    : lastError?.message || '网络请求失败，请稍后重试';
+  throw new ApiError(timeoutMessage);
 }
 
 function parseEnvelopeMessage(json: unknown, fallback: string): string {

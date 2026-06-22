@@ -15,12 +15,8 @@ export function shouldEndRouteTransitionOnShow(
   if (!transition.active) {
     return false;
   }
-  if (
-    transition.tabTarget != null &&
-    ownTabPath != null &&
-    transition.tabTarget !== ownTabPath
-  ) {
-    return false;
+  if (transition.tabTarget != null) {
+    return ownTabPath != null && transition.tabTarget === ownTabPath;
   }
   return true;
 }

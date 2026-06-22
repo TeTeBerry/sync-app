@@ -32,6 +32,11 @@
   -webkit-tap-highlight-color: transparent;
   appearance: none;
   box-sizing: border-box;
+
+  &--pressed {
+    opacity: 0.82;
+    transform: scale(0.98);
+  }
 }
 
 .s-bottom-nav__icon {

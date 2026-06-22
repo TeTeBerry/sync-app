@@ -270,8 +270,7 @@ function shouldSkipNavigation(url: string): boolean {
   const targetPath = normalizePath(url.split('?')[0] ?? url);
 
   if (isTabRoute(targetPath as RoutePath)) {
-    // Allow switchTab back to tab root from subpackage stack pages.
-    if (current && current === target) {
+    if (current && current === target && isOnTabRoot(targetPath as RoutePath)) {
       return true;
     }
     // In-flight switch to another tab — honor the new tap (don't debounce away).

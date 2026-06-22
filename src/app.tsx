@@ -25,16 +25,21 @@ export default function App({ children }: PropsWithChildren) {
     useLocaleStore.getState().hydrate();
     initCloudBase();
     if (isLiveApi()) {
-      prefetchCoreQueriesOnLaunch();
-      void ensureAuth()
-        .then(() => {
+      void (async () => {
+        try {
+          await prefetchCoreQueriesOnLaunch();
+        } catch (error) {
+          console.warn('[launch] prefetchCoreQueriesOnLaunch failed:', error);
+        }
+        try {
+          await ensureAuth();
           prefetchProfileIfMissing();
-        })
-        .catch((error) => {
+        } catch (error) {
           const message =
             error instanceof Error ? error.message : t('auth.loginFailed');
           console.warn('[auth] ensureAuth failed:', message);
-        });
+        }
+      })();
     }
     preloadEventSubpackage();
   });

@@ -1,13 +1,28 @@
-import { fetchHomeSummary } from '../api/sync/activities';
+import { fetchActivities, fetchHomeSummary } from '../api/sync/activities';
 import { fetchProfileSummary } from '../api/sync/profile';
 import { isLiveApi } from '../constants/api';
 import { isWeappCloudRunTransportEnabled } from '../constants/cloud';
+import { loadPersonalityTestCatalog } from '../domains/personality-test/personalityTestCatalog';
 import { getCacheData, prefetchToCache } from '../hooks/useApiQuery';
-import { seedActivityDetailsFromHomeSummary } from './activityDetailCache';
-import { withCatalogHomeSummary } from './activityCatalog';
+import {
+  seedActivityDetailsFromHomeSummary,
+  seedActivityDetailsFromList,
+} from './activityDetailCache';
+import { withCatalogActivities, withCatalogHomeSummary } from './activityCatalog';
 import { apiGet } from './apiClient';
 import { isLoggedIn } from './authStorage';
-import { persistHomeSummary, persistProfileSummary } from './homeCacheStorage';
+import {
+  persistActivities,
+  persistHomeSummary,
+  persistProfileSummary,
+} from './homeCacheStorage';
+
+const LAUNCH_PREFETCH_ATTEMPTS = 3;
+const LAUNCH_PREFETCH_RETRY_MS = 400;
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 /** Wake Cloud Run container before user-facing requests (experience build cold start). */
 export async function warmCloudRunContainer(): Promise<void> {
@@ -15,10 +30,26 @@ export async function warmCloudRunContainer(): Promise<void> {
     return;
   }
   try {
-    await apiGet('/health', undefined, { timeoutMs: 8_000, maxRetries: 0 });
+    await apiGet('/health', undefined, { timeoutMs: 12_000, maxRetries: 1 });
   } catch {
-    // Best-effort; first user request may still pay cold-start cost.
+    // Best-effort; retried queries below still run.
   }
+}
+
+async function prefetchQueryWithRetry<T>(
+  queryKey: (string | number | undefined)[],
+  queryFn: () => Promise<T>,
+): Promise<T | undefined> {
+  for (let attempt = 0; attempt < LAUNCH_PREFETCH_ATTEMPTS; attempt += 1) {
+    const result = await prefetchToCache(queryKey, queryFn);
+    if (result !== undefined) {
+      return result;
+    }
+    if (attempt < LAUNCH_PREFETCH_ATTEMPTS - 1) {
+      await sleep(LAUNCH_PREFETCH_RETRY_MS * (attempt + 1));
+    }
+  }
+  return undefined;
 }
 
 function prefetchProfileSummaryIfMissing(): void {
@@ -32,23 +63,40 @@ function prefetchProfileSummaryIfMissing(): void {
   });
 }
 
+async function prefetchHomeSummaryIfMissing(): Promise<void> {
+  if (getCacheData(['home', 'summary'])) {
+    return;
+  }
+  await prefetchQueryWithRetry(['home', 'summary'], async () => {
+    const result = withCatalogHomeSummary(await fetchHomeSummary());
+    persistHomeSummary(result);
+    seedActivityDetailsFromHomeSummary(result);
+    return result;
+  });
+}
+
+async function prefetchActivitiesIfMissing(): Promise<void> {
+  if (getCacheData(['activities'])) {
+    return;
+  }
+  await prefetchQueryWithRetry(['activities'], async () => {
+    const activities = withCatalogActivities(await fetchActivities());
+    persistActivities(activities);
+    seedActivityDetailsFromList(activities);
+    return activities;
+  });
+}
+
 /** Start core GETs during `useLaunch` so tab pages paint from cache sooner. */
-export function prefetchCoreQueriesOnLaunch(): void {
+export async function prefetchCoreQueriesOnLaunch(): Promise<void> {
   if (!isLiveApi()) {
     return;
   }
 
-  void warmCloudRunContainer();
-
-  if (!getCacheData(['home', 'summary'])) {
-    void prefetchToCache(['home', 'summary'], async () => {
-      const result = withCatalogHomeSummary(await fetchHomeSummary());
-      persistHomeSummary(result);
-      seedActivityDetailsFromHomeSummary(result);
-      return result;
-    });
-  }
-
+  await warmCloudRunContainer();
+  await prefetchHomeSummaryIfMissing();
+  await prefetchActivitiesIfMissing();
+  void loadPersonalityTestCatalog().catch(() => undefined);
   prefetchProfileSummaryIfMissing();
 }
 
