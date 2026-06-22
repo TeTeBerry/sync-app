@@ -25,9 +25,12 @@ import {
   filterActivitiesInCalendarMonth,
   todayCalendarParts,
 } from '../../utils/activityCalendar';
-import { getActivityStatusFromActivity } from '../../utils/activityStatus';
+import {
+  getActivityStatusFromActivity,
+  isRecentUpcomingActivity,
+} from '../../utils/activityStatus';
 import { EventsPageHeader } from './components/EventsPageHeader';
-import { EventsViewTabs, type EventsViewTab } from './components/EventsViewTabs';
+import type { EventsViewTab } from './components/EventsViewTabs';
 import { EventsActivityCalendar } from './components/EventsActivityCalendar';
 import { EventsActivityArtistsTab } from './components/EventsActivityArtistsTab';
 import { EventsActivityList } from './components/EventsActivityList';
@@ -35,8 +38,7 @@ import { sortAllEventsByDate } from './utils/festivalEvents';
 import { consumeEventsViewTabIntent } from '../../utils/eventsTabIntent';
 import { consumeEventsSearchQuery } from '../../utils/eventsSearchIntent';
 import { filterActivitiesForEventsSearch } from '../../utils/filterActivitiesForEventsSearch';
-import { EventsSearchBar } from './components/EventsSearchBar';
-import { EventsCatalogFilterChips } from './components/EventsCatalogFilterChips';
+import { EventsCatalogToolbar } from './components/EventsCatalogToolbar';
 import { EventsHotCarousel } from './components/EventsHotCarousel';
 import {
   filterActivitiesByRegion,
@@ -47,8 +49,8 @@ import {
   type EventsCatalogTimeChip,
 } from '../../utils/filterActivitiesForEventsCatalog';
 
-/** Header + search + filters + view tabs (px, design @ 375). */
-const EVENTS_CHROME_PX = 248;
+/** Header + unified catalog toolbar (px, design @ 375). */
+const EVENTS_CHROME_PX = 272;
 
 const Events: React.FC = () => {
   useEndRouteTransitionOnShow(ROUTES.EVENTS);
@@ -125,6 +127,11 @@ const Events: React.FC = () => {
       events.filter(
         (event) => getActivityStatusFromActivity(event.date, event.title) !== 'ended',
       ),
+    [events],
+  );
+
+  const recentUpcomingCount = useMemo(
+    () => events.filter((event) => isRecentUpcomingActivity(event)).length,
     [events],
   );
 
@@ -248,22 +255,17 @@ const Events: React.FC = () => {
   return (
     <View className="s-page-shell s-page-with-tabbar">
       <View className="s-page-with-tabbar__main s-events">
-        <EventsPageHeader navInsets={navInsets} upcomingCount={upcomingEvents.length} />
-        {viewTab === 'list' ? (
-          <EventsSearchBar value={searchQuery} onChange={setSearchQuery} />
-        ) : null}
-        {viewTab !== 'artists' ? (
-          <EventsCatalogFilterChips
-            region={regionFilter}
-            timeChip={timeChip}
-            showTimeChips={viewTab === 'list'}
-            onRegionChange={setRegionFilter}
-            onTimeChipChange={setTimeChip}
-          />
-        ) : null}
-        <View className="s-events__view-tabs-wrap">
-          <EventsViewTabs activeTab={viewTab} onChange={handleViewTabChange} />
-        </View>
+        <EventsPageHeader navInsets={navInsets} upcomingCount={recentUpcomingCount} />
+        <EventsCatalogToolbar
+          viewTab={viewTab}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          region={regionFilter}
+          timeChip={timeChip}
+          onRegionChange={setRegionFilter}
+          onTimeChipChange={setTimeChip}
+          onViewTabChange={handleViewTabChange}
+        />
 
         {viewTab === 'artists' ? (
           <EventsActivityArtistsTab listHeight={listScrollHeight ?? undefined} />

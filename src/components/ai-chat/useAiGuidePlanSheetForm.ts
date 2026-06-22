@@ -1,13 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type {
-  AiGuidePlanFormValues,
-  TravelGuideBudgetTier,
-} from '../../types/travelGuide';
+import type { AiGuidePlanFormValues } from '../../types/travelGuide';
 import { normalizeDepartureForSubmit } from '../../utils/travelGuideDepartureSuggestions';
 
 type UseAiGuidePlanSheetFormOptions = {
   open: boolean;
   defaultNights: number;
+  showSelfDriveOption?: boolean;
   initialValues?: AiGuidePlanFormValues | null;
   onSubmit: (values: AiGuidePlanFormValues) => void;
 };
@@ -15,6 +13,7 @@ type UseAiGuidePlanSheetFormOptions = {
 export function useAiGuidePlanSheetForm({
   open,
   defaultNights,
+  showSelfDriveOption = true,
   initialValues,
   onSubmit,
 }: UseAiGuidePlanSheetFormOptions) {
@@ -23,7 +22,6 @@ export function useAiGuidePlanSheetForm({
   const [departureCity, setDepartureCity] = useState<string | undefined>();
   const [headcount, setHeadcount] = useState(2);
   const [accommodationNights, setAccommodationNights] = useState(defaultNights);
-  const [budgetTier, setBudgetTier] = useState<TravelGuideBudgetTier>('standard');
   const [selfDrive, setSelfDrive] = useState(false);
   const prevOpenRef = useRef(false);
 
@@ -40,8 +38,7 @@ export function useAiGuidePlanSheetForm({
       setDepartureCity(initialValues.departureCity);
       setHeadcount(initialValues.headcount);
       setAccommodationNights(initialValues.accommodationNights);
-      setBudgetTier(initialValues.budgetTier);
-      setSelfDrive(Boolean(initialValues.selfDrive));
+      setSelfDrive(showSelfDriveOption ? Boolean(initialValues.selfDrive) : false);
       return;
     }
 
@@ -49,9 +46,8 @@ export function useAiGuidePlanSheetForm({
     setDepartureCity(undefined);
     setHeadcount(2);
     setAccommodationNights(defaultNights);
-    setBudgetTier('standard');
     setSelfDrive(false);
-  }, [defaultNights, initialValues, open]);
+  }, [defaultNights, initialValues, open, showSelfDriveOption]);
 
   const canSubmit = Boolean(departure.trim());
 
@@ -61,19 +57,18 @@ export function useAiGuidePlanSheetForm({
       departure: normalizeDepartureForSubmit(departure),
       departureCity: departureCity?.trim() || undefined,
       headcount,
-      budgetTier,
-      selfDrive,
+      ...(showSelfDriveOption && selfDrive ? { selfDrive: true } : {}),
       accommodationNights,
     });
   }, [
     accommodationNights,
-    budgetTier,
     canSubmit,
     departure,
     departureCity,
     headcount,
     onSubmit,
     selfDrive,
+    showSelfDriveOption,
   ]);
 
   return {
@@ -82,14 +77,12 @@ export function useAiGuidePlanSheetForm({
     departureCity,
     headcount,
     accommodationNights,
-    budgetTier,
     selfDrive,
     canSubmit,
     setDeparture,
     setDepartureCity,
     setHeadcount,
     setAccommodationNights,
-    setBudgetTier,
     setSelfDrive,
     handleSubmit,
   };

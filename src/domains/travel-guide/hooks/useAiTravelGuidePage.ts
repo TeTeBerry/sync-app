@@ -5,7 +5,11 @@ import Taro, {
   useShareTimeline,
 } from '@tarojs/taro';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { fetchTravelGuidePlan, generateTravelGuide } from '@/api/sync/travelGuide';
+import {
+  fetchTravelGuidePlan,
+  generateTravelGuide,
+  patchTravelGuideBudgetTier,
+} from '@/api/sync/travelGuide';
 import { useActivityDetailQuery } from '@/hooks/useSyncApi';
 import { useStackPageMainHeight } from '@/hooks/useTabPageMainHeight';
 import {
@@ -33,6 +37,7 @@ import {
   resolveTravelGuideShareRef,
   shouldLoadTravelGuideDetail,
 } from './aiTravelGuidePage.util';
+import type { TravelGuideBudgetTier } from '@/types/travelGuide';
 import { useT } from '@/hooks/useI18n';
 
 const FOOTER_BASE_PX = 72;
@@ -58,6 +63,7 @@ export function useAiTravelGuidePage() {
   const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [sharing, setSharing] = useState(false);
+  const [budgetTierUpdating, setBudgetTierUpdating] = useState(false);
   const shareRef = useRef<{
     guideId: string;
     payload: TravelGuideDetailPayload;
@@ -248,6 +254,42 @@ export function useAiTravelGuidePage() {
     );
   }, [activityQuery.data?.date, payload, t]);
 
+  const handleSelectBudgetTier = useCallback(
+    (tier: TravelGuideBudgetTier) => {
+      if (!guideId || !payload || budgetTierUpdating) return;
+      if (payload.form.budgetTier === tier) return;
+
+      const run = async () => {
+        setBudgetTierUpdating(true);
+        void Taro.showLoading({
+          title: t('travelGuide.budgetCompareUpdating'),
+          mask: true,
+        });
+        try {
+          const remote = await patchTravelGuideBudgetTier(guideId, tier);
+          const next: TravelGuideDetailPayload = {
+            plan: remote.plan,
+            form: remote.form,
+            activityLegacyId: remote.activityLegacyId,
+            createdAt: remote.createdAt,
+          };
+          saveTravelGuideDetail(guideId, next);
+          setPayload(next);
+        } catch (error) {
+          const message =
+            error instanceof Error ? error.message : t('travelGuide.loadFailed');
+          void Taro.showToast({ title: message, icon: 'none' });
+        } finally {
+          Taro.hideLoading();
+          setBudgetTierUpdating(false);
+        }
+      };
+
+      requireAuth(() => void run(), 'ai_assistant');
+    },
+    [budgetTierUpdating, guideId, payload, t],
+  );
+
   const showRecruitBridge = Boolean(payload?.activityLegacyId && payload?.form);
 
   return {
@@ -259,10 +301,13 @@ export function useAiTravelGuidePage() {
     mainScrollHeight,
     navFallback: ROUTES.HOME,
     sharing,
+    budgetTierUpdating,
+    selectedBudgetTier: payload?.form.budgetTier,
     isWeapp,
     handleCopyShare,
     handleRegenerate,
     handlePrefillRecruitPost,
+    handleSelectBudgetTier,
     showRecruitBridge,
   };
 }

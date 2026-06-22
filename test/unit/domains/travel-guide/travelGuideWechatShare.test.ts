@@ -63,4 +63,29 @@ describe('travelGuideWechatShare', () => {
     expect(parsed?.activityLegacyId).toBe(5);
     expect(parsed?.form.departure).toBe('上海');
   });
+
+  it('parses share query without budgetTier using standard baseline', () => {
+    const parsed = parseTravelGuideFormFromShareQuery({
+      activityLegacyId: '5',
+      departure: '上海',
+      headcount: '2',
+      accommodationNights: '2',
+      selfDrive: '0',
+    });
+    expect(parsed?.form.departure).toBe('上海');
+    expect(parsed?.form.budgetTier).toBeUndefined();
+  });
+
+  it('omits budgetTier from share path when not selected', () => {
+    const path = buildTravelGuideSharePath('guide-1', {
+      activityLegacyId: 5,
+      form: {
+        departure: '上海',
+        headcount: 2,
+        accommodationNights: 2,
+        selfDrive: false,
+      },
+    });
+    expect(path).not.toContain('budgetTier=');
+  });
 });

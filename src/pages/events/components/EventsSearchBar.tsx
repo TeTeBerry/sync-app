@@ -7,19 +7,32 @@ import { useT } from '@/hooks/useI18n';
 type EventsSearchBarProps = {
   value: string;
   onChange: (value: string) => void;
+  embedded?: boolean;
 };
 
-export const EventsSearchBar: FC<EventsSearchBarProps> = ({ value, onChange }) => {
+export const EventsSearchBar: FC<EventsSearchBarProps> = ({
+  value,
+  onChange,
+  embedded = false,
+}) => {
   const t = useT();
 
   return (
-    <View className="s-events-search" aria-label={t('events.searchAria')}>
-      <Search size={16} color="var(--muted-foreground)" aria-hidden />
+    <View
+      className={['s-events-search', embedded ? 's-events-search--embedded' : '']
+        .filter(Boolean)
+        .join(' ')}
+      aria-label={t('events.searchAria')}
+    >
+      <View className="s-events-search__icon-wrap" aria-hidden>
+        <Search size={15} color="rgba(255, 255, 255, 0.55)" />
+      </View>
       <Input
         className="s-events-search__input"
         type="text"
         value={value}
         placeholder={t('events.searchPlaceholder')}
+        placeholderClass="s-events-search__placeholder"
         confirmType="search"
         onInput={(event) => onChange(event.detail.value)}
       />
@@ -30,7 +43,7 @@ export const EventsSearchBar: FC<EventsSearchBarProps> = ({ value, onChange }) =
           aria-label={t('events.searchClear')}
           onClick={() => onChange('')}
         >
-          <X size={14} color="var(--muted-foreground)" aria-hidden />
+          <X size={13} color="rgba(255, 255, 255, 0.55)" aria-hidden />
         </View>
       ) : null}
     </View>

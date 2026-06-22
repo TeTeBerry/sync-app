@@ -32,7 +32,7 @@ export function buildTravelGuideSharePath(
     guideId: guideId.trim(),
     departure: form.departure,
     headcount: String(form.headcount),
-    budgetTier: form.budgetTier,
+    ...(form.budgetTier ? { budgetTier: form.budgetTier } : {}),
     accommodationNights: String(form.accommodationNights),
     selfDrive: form.selfDrive ? '1' : '0',
   };
@@ -86,14 +86,15 @@ export function parseTravelGuideFormFromShareQuery(
   const activityLegacyId = Number(params.activityLegacyId);
   const departure = params.departure?.trim() ?? '';
   const headcount = Number(params.headcount);
-  const budgetTier = params.budgetTier?.trim() as TravelGuideBudgetTier | undefined;
+  const budgetTier =
+    (params.budgetTier?.trim() as TravelGuideBudgetTier | undefined) ?? 'standard';
   const accommodationNights = Number(params.accommodationNights);
   const selfDrive = params.selfDrive === '1' || params.selfDrive === 'true';
 
   if (!Number.isFinite(activityLegacyId) || activityLegacyId <= 0) return null;
   if (!departure) return null;
   if (!Number.isFinite(headcount) || headcount <= 0) return null;
-  if (!budgetTier || !BUDGET_TIERS.includes(budgetTier)) return null;
+  if (!BUDGET_TIERS.includes(budgetTier)) return null;
   if (!Number.isFinite(accommodationNights) || accommodationNights <= 0) return null;
 
   return {
@@ -102,7 +103,6 @@ export function parseTravelGuideFormFromShareQuery(
       departure,
       departureCity: params.departureCity?.trim() || undefined,
       headcount,
-      budgetTier,
       accommodationNights,
       selfDrive,
     },

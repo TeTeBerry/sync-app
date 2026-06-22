@@ -13,7 +13,6 @@ import { Button, cn } from '../ui';
 import { getGenerateTravelGuideCta } from '../../constants/aiCtaLabels';
 import { useOverlayLock } from '../../hooks/useOverlayLock';
 import type { AiGuidePlanFormValues } from '../../types/travelGuide';
-import { getTravelGuideBudgetOptions } from '../../types/travelGuide';
 import { PlaceAutocompleteField } from './PlaceAutocompleteField';
 import { useAiGuidePlanSheetForm } from './useAiGuidePlanSheetForm';
 import { useT } from '@/hooks/useI18n';
@@ -24,6 +23,8 @@ export type AiGuidePlanSheetProps = {
   defaultNights: number;
   /** Activity host city, used for POI area constraints when departure city is not specified */
   eventCity?: string;
+  /** 海外活动不展示自驾选项 */
+  showSelfDriveOption?: boolean;
   initialValues?: AiGuidePlanFormValues | null;
   onClose: () => void;
   onSubmit: (values: AiGuidePlanFormValues) => void;
@@ -99,6 +100,7 @@ function AiGuidePlanSheetInner({
   open,
   defaultNights,
   eventCity,
+  showSelfDriveOption = true,
   initialValues,
   onClose,
   onSubmit,
@@ -110,15 +112,10 @@ function AiGuidePlanSheetInner({
     open,
     defaultNights,
     initialValues,
+    showSelfDriveOption,
     onSubmit,
   });
-  const {
-    setDeparture,
-    setDepartureCity,
-    setAccommodationNights,
-    setBudgetTier,
-    setSelfDrive,
-  } = form;
+  const { setDeparture, setDepartureCity, setAccommodationNights, setSelfDrive } = form;
 
   const handleDepartureChange = useCallback(
     (value: string) => {
@@ -228,59 +225,36 @@ function AiGuidePlanSheetInner({
               </View>
             </View>
 
-            <View className="s-ai-guide-plan-sheet__field">
-              <Text className="s-ai-guide-plan-sheet__label">
-                {t('travelPlan.budgetLabel')}
-              </Text>
-              <View className="s-ai-guide-plan-sheet__budget-row">
-                {getTravelGuideBudgetOptions(t).map((opt) => {
-                  const active = form.budgetTier === opt.id;
-                  return (
-                    <Button
-                      key={opt.id}
-                      className={cn(
-                        's-ai-guide-plan-sheet__budget',
-                        active && `s-ai-guide-plan-sheet__budget--on-${opt.id}`,
-                      )}
-                      hoverClass="s-ai-guide-plan-sheet__budget--pressed"
-                      onClick={() => setBudgetTier(opt.id)}
-                    >
-                      <Text className="s-ai-guide-plan-sheet__budget-label">
-                        {opt.label}
-                      </Text>
-                      <Text className="s-ai-guide-plan-sheet__budget-hint">
-                        {opt.hint}
-                      </Text>
-                    </Button>
-                  );
-                })}
-              </View>
-            </View>
+            <Text className="s-ai-guide-plan-sheet__budget-hint-note">
+              {t('travelPlan.budgetOptionalHint')}
+            </Text>
 
-            <View className="s-ai-guide-plan-sheet__card s-ai-guide-plan-sheet__card--drive">
-              <View className="s-ai-guide-plan-sheet__card-row">
-                <View className="s-ai-guide-plan-sheet__drive-copy">
-                  <Car
-                    size={18}
-                    className="s-ai-guide-plan-sheet__card-icon"
-                    aria-hidden
-                  />
-                  <View className="s-ai-guide-plan-sheet__drive-text">
-                    <Text className="s-ai-guide-plan-sheet__drive-title">
-                      {t('travelPlan.driveTitle')}
-                    </Text>
-                    <Text className="s-ai-guide-plan-sheet__drive-hint">
-                      {t('travelPlan.driveHint')}
-                    </Text>
+            {showSelfDriveOption ? (
+              <View className="s-ai-guide-plan-sheet__card s-ai-guide-plan-sheet__card--drive">
+                <View className="s-ai-guide-plan-sheet__card-row">
+                  <View className="s-ai-guide-plan-sheet__drive-copy">
+                    <Car
+                      size={18}
+                      className="s-ai-guide-plan-sheet__card-icon"
+                      aria-hidden
+                    />
+                    <View className="s-ai-guide-plan-sheet__drive-text">
+                      <Text className="s-ai-guide-plan-sheet__drive-title">
+                        {t('travelPlan.driveTitle')}
+                      </Text>
+                      <Text className="s-ai-guide-plan-sheet__drive-hint">
+                        {t('travelPlan.driveHint')}
+                      </Text>
+                    </View>
                   </View>
+                  <ThemeToggle
+                    checked={form.selfDrive}
+                    ariaLabel={t('travelPlan.driveYes')}
+                    onChange={setSelfDrive}
+                  />
                 </View>
-                <ThemeToggle
-                  checked={form.selfDrive}
-                  ariaLabel={t('travelPlan.driveYes')}
-                  onChange={setSelfDrive}
-                />
               </View>
-            </View>
+            ) : null}
 
             <View className="s-ai-guide-plan-sheet__field">
               <Text className="s-ai-guide-plan-sheet__label">

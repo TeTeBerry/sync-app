@@ -126,28 +126,35 @@ export function TravelGuideDetailBody({ plan }: TravelGuideDetailBodyProps) {
         </TravelGuideDetailSection>
       ) : null}
 
-      {plan.essentials?.network.length ? (
+      {plan.essentials &&
+      (plan.essentials.network.length ||
+        plan.essentials.payment.length ||
+        plan.essentials.apps.length) ? (
         <TravelGuideDetailSection title={plan.essentials.title} accent="essentials">
-          <Text className="s-travel-guide-detail__subsection-title">
-            {t('travelGuide.network')}
-          </Text>
-          <TravelGuideDetailBulletList items={plan.essentials.network} />
-        </TravelGuideDetailSection>
-      ) : null}
-      {plan.essentials?.payment.length ? (
-        <TravelGuideDetailSection title={plan.essentials.title} accent="essentials">
-          <Text className="s-travel-guide-detail__subsection-title">
-            {t('travelGuide.payment')}
-          </Text>
-          <TravelGuideDetailBulletList items={plan.essentials.payment} />
-        </TravelGuideDetailSection>
-      ) : null}
-      {plan.essentials?.apps.length ? (
-        <TravelGuideDetailSection title={plan.essentials.title} accent="essentials">
-          <Text className="s-travel-guide-detail__subsection-title">
-            {t('travelGuide.essentialApps')}
-          </Text>
-          <TravelGuideDetailBulletList items={plan.essentials.apps} />
+          {plan.essentials.network.length ? (
+            <View className="s-travel-guide-detail__essentials-block">
+              <Text className="s-travel-guide-detail__subsection-title">
+                {t('travelGuide.network')}
+              </Text>
+              <TravelGuideDetailBulletList items={plan.essentials.network} />
+            </View>
+          ) : null}
+          {plan.essentials.payment.length ? (
+            <View className="s-travel-guide-detail__essentials-block">
+              <Text className="s-travel-guide-detail__subsection-title">
+                {t('travelGuide.payment')}
+              </Text>
+              <TravelGuideDetailBulletList items={plan.essentials.payment} />
+            </View>
+          ) : null}
+          {plan.essentials.apps.length ? (
+            <View className="s-travel-guide-detail__essentials-block">
+              <Text className="s-travel-guide-detail__subsection-title">
+                {t('travelGuide.essentialApps')}
+              </Text>
+              <TravelGuideDetailBulletList items={plan.essentials.apps} />
+            </View>
+          ) : null}
         </TravelGuideDetailSection>
       ) : null}
     </>

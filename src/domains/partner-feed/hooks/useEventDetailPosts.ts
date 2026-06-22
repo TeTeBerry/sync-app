@@ -422,6 +422,8 @@ export function useEventDetailPosts({
     postFilterCityOptions: postFilters.cityOptions,
     postFilterSelectedCity: postFilters.selectedCity,
     setPostFilterSelectedCity: postFilters.setSelectedCity,
+    postFilterRecruitingOnly: postFilters.recruitingOnly,
+    setPostFilterRecruitingOnly: postFilters.setRecruitingOnly,
     postFiltersActive: postFilters.isActive,
     clearPostFilters: postFilters.clearFilters,
   };

@@ -12,6 +12,10 @@ export const ACTIVITY_MAP_REGION_LABELS: Record<ActivityMapRegion, string> = {
   hmt: '港澳台',
 };
 
+export function isOverseasActivityRegion(region?: ActivityMapRegion | null): boolean {
+  return region === 'overseas';
+}
+
 /** Fallback GCJ-02 coords when API rows predate map fields. */
 export const ACTIVITY_MAP_COORD_FALLBACK: Record<
   number,

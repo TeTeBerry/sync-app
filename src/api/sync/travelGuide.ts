@@ -2,6 +2,7 @@ import {
   LONG_RUNNING_REQUEST_TIMEOUT_MS,
   ApiError,
   apiGet,
+  apiPatch,
   apiPost,
 } from '../../utils/apiClient';
 import {
@@ -11,6 +12,7 @@ import {
 import type {
   GenerateTravelGuidePayload,
   GenerateTravelGuideResult,
+  TravelGuideBudgetTier,
   TravelGuidePlanReadResult,
 } from '../../types/travelGuide';
 import { ownerQueryParams } from '../requestContext';
@@ -81,6 +83,17 @@ export async function fetchTravelGuidePlan(
     }
     throw error;
   }
+}
+
+export function patchTravelGuideBudgetTier(
+  guideId: string,
+  budgetTier: TravelGuideBudgetTier,
+) {
+  return apiPatch<TravelGuidePlanReadResult>(
+    `/travel-guide/plans/${encodeURIComponent(guideId)}/budget-tier`,
+    { budgetTier },
+    ownerQueryParams(),
+  );
 }
 
 export function generateTravelGuide(

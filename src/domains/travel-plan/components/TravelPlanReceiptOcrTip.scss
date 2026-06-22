@@ -1,8 +1,16 @@
+.s-travel-plan-receipt-ocr-tip-wrap {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+button.s-travel-plan-receipt-ocr-tip,
 .s-travel-plan-receipt-ocr-tip {
   display: flex;
   align-items: center;
+  justify-content: flex-start;
   gap: 10px;
   width: 100%;
+  margin: 0;
   padding: 12px 14px;
   border-radius: 12px;
   background: rgba(191, 90, 242, 0.1);

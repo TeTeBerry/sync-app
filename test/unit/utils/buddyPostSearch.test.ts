@@ -66,4 +66,25 @@ describe('buddyPostSearch', () => {
     const filtered = filterEventDetailPostsByQuery(posts, 'EDC');
     expect(filtered.map((post) => post.id)).toEqual(['match']);
   });
+
+  it('still matches when budget token is missing from post body', () => {
+    const posts = [
+      samplePost({
+        id: 'match',
+        body: '上海出发 12.11-12.13 差 1 人',
+        location: '上海',
+      }),
+      samplePost({
+        id: 'miss',
+        body: '北京出发 12.11-12.13 差 1 人',
+        location: '北京',
+      }),
+    ];
+
+    const filtered = filterEventDetailPostsByQuery(
+      posts,
+      '上海 12.11-12.13 差 1 人 舒适(¥300-600)',
+    );
+    expect(filtered.map((post) => post.id)).toEqual(['match']);
+  });
 });

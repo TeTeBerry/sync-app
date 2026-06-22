@@ -39,19 +39,7 @@ export const EventsActivityList: FC<EventsActivityListProps> = ({
     >
       <View className="s-events__list">
         {events.map((event) => (
-          <View
-            key={event.id}
-            className="s-events__card-wrap"
-            role="button"
-            tabIndex={0}
-            onTouchStart={() => onWarmDetail(event)}
-            onClick={() => onOpenDetail(event.id)}
-            onKeyDown={(e) => {
-              if (e.key !== 'Enter' && e.key !== ' ') return;
-              e.preventDefault();
-              onOpenDetail(event.id);
-            }}
-          >
+          <View key={event.id} className="s-events__card-wrap">
             <EventCard
               id={event.id}
               title={event.title}
@@ -65,6 +53,8 @@ export const EventsActivityList: FC<EventsActivityListProps> = ({
               lineupPublished={event.lineupPublished}
               recruitPostCount={event.recruitPostCount}
               variant="list"
+              onCardPress={() => onOpenDetail(event.id)}
+              onCardPressWarmup={() => onWarmDetail(event)}
               onTeamUp={() => onOpenDetail(event.id)}
               onTeamUpWarmup={() => onWarmDetail(event)}
             />

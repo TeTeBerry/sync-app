@@ -311,6 +311,17 @@
     line-height: 1;
   }
 
+  &__budget-hint-note {
+    display: block;
+    margin: 0 0 12px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.04);
+    font-size: var(--s-type-caption);
+    color: rgba(255, 255, 255, 0.55);
+    line-height: 1.45;
+  }
+
   &__budget-row {
     display: flex;
     flex-direction: row;

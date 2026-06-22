@@ -3,6 +3,7 @@ import PageNavigation from '../../../components/navigation/PageNavigation';
 import ThemedPageLoader from '../../../components/ThemedPageLoader';
 import { Button } from '../../../components/ui';
 import { TravelGuideDetailView } from '@/domains/travel-guide/components/TravelGuideDetailView';
+import { TravelGuideBudgetCompareCards } from '@/domains/travel-guide/components/TravelGuideBudgetCompareCards';
 import { TravelPlanReceiptOcrTip } from '@/domains/travel-plan';
 import { useAiTravelGuidePage } from '@/domains/travel-guide/hooks/useAiTravelGuidePage';
 import { useEndRouteTransitionOnShow } from '../../../hooks/useEndRouteTransitionOnShow';
@@ -47,11 +48,15 @@ const AiTravelGuidePage = () => {
             style={{ height: `${page.mainScrollHeight ?? 480}px` }}
           >
             <View className="s-ai-travel-guide-page__inner">
-              <TravelGuideDetailView plan={page.payload.plan} />
-              <TravelPlanReceiptOcrTip
-                className="s-ai-travel-guide-page__ocr-tip"
-                activityLegacyId={page.activityLegacyId}
+              <TravelGuideBudgetCompareCards
+                headcount={page.payload.plan.headcount}
+                accommodationNights={page.payload.plan.accommodationNights}
+                selectedTier={page.selectedBudgetTier}
+                updating={page.budgetTierUpdating}
+                onSelect={page.handleSelectBudgetTier}
               />
+              <TravelGuideDetailView plan={page.payload.plan} />
+              <TravelPlanReceiptOcrTip activityLegacyId={page.activityLegacyId} />
               {page.showRecruitBridge ? (
                 <View className="s-ai-travel-guide-page__recruit-bridge">
                   <View className="s-ai-travel-guide-page__recruit-bridge-head">

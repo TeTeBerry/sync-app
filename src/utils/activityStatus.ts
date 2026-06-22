@@ -105,6 +105,35 @@ export function getActivityStatusFromActivity(
   return getActivityStatus(date, { yearHint, now });
 }
 
+export const RECENT_UPCOMING_MONTHS = 3;
+
+function addCalendarMonths(base: Date, months: number): Date {
+  const next = new Date(base);
+  next.setMonth(next.getMonth() + months);
+  next.setHours(23, 59, 59, 999);
+  return next;
+}
+
+/** 未结束且开场日在未来 {{RECENT_UPCOMING_MONTHS}} 个月内，用于「x 场近期演出」统计。 */
+export function isRecentUpcomingActivity(
+  event: { date?: string; title?: string },
+  now = new Date(),
+): boolean {
+  if (getActivityStatusFromActivity(event.date, event.title, now) === 'ended') {
+    return false;
+  }
+
+  const yearHint = extractYearFromText(event.title) ?? extractYearFromText(event.date);
+  const parsed = event.date?.trim()
+    ? parseActivityDateRange(event.date, yearHint)
+    : null;
+  if (!parsed) {
+    return false;
+  }
+
+  return parsed.start <= addCalendarMonths(now, RECENT_UPCOMING_MONTHS);
+}
+
 /** True only while the event is within its calendar date range (excludes pre-event 45-day window). */
 export function isActivityOnSite(
   dateStr?: string,

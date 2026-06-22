@@ -34,7 +34,7 @@ export function buildPersonalityBuddyPostPrefill(
   const form: AiBuddyPostFormValues = {
     dateStart: dateSeed.dateStart,
     dateEnd: dateSeed.dateEnd,
-    location: targetEvent.location?.trim() ?? '',
+    location: '',
     headcount: '2',
     tags: ['team'],
     note: noteParts.length ? noteParts.join(' · ') : undefined,

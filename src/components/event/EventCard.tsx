@@ -2,7 +2,7 @@ import './EventCard.scss';
 import React, { memo, useCallback, useMemo } from 'react';
 import { ImageWithFallback } from '../ImageWithFallback';
 import { Button } from '../ui';
-import { Bell, Ticket, Users } from '../../components/icons';
+import { Bell, Check, Ticket, Users } from '../../components/icons';
 import { useActivityUpdateSubscribeAction } from '@/domains/activity-info/hooks/useActivityUpdateSubscribeAction';
 import type { ActivityMapRegion } from '../../constants/activityMapRegion';
 import { formatActivityAreaLabel } from '../../utils/filterActivitiesForEventsCatalog';
@@ -35,6 +35,8 @@ interface EventCardProps {
   area?: string;
   lineupPublished?: boolean;
   recruitPostCount?: number;
+  onCardPress?: () => void;
+  onCardPressWarmup?: () => void;
   onTeamUp?: () => void;
   onTeamUpWarmup?: () => void;
 }
@@ -52,6 +54,8 @@ const EventCardInner: React.FC<EventCardProps> = ({
   area,
   lineupPublished,
   recruitPostCount = 0,
+  onCardPress,
+  onCardPressWarmup,
   onTeamUp,
   onTeamUpWarmup,
 }) => {
@@ -136,19 +140,35 @@ const EventCardInner: React.FC<EventCardProps> = ({
           .join(' ')}
       >
         <View className="s-event-card__hero">
-          <ImageWithFallback
-            src={thumbSrc}
-            alt={title}
-            imageClassName="s-event-card__hero-img"
-            placeholderClassName="s-event-card__hero-img s-event-card__hero-img--placeholder"
-            fallback={title.slice(0, 2)}
-          />
-          <View className="s-event-card__hero-scrim" aria-hidden />
+          <View
+            className="s-event-card__hero-main"
+            onTouchStart={() => onCardPressWarmup?.()}
+            onClick={() => onCardPress?.()}
+          >
+            <ImageWithFallback
+              src={thumbSrc}
+              alt={title}
+              imageClassName="s-event-card__hero-img"
+              placeholderClassName="s-event-card__hero-img s-event-card__hero-img--placeholder"
+              fallback={title.slice(0, 2)}
+            />
+            <View className="s-event-card__hero-scrim" aria-hidden />
+            <View className="s-event-card__hero-copy">
+              <Text className="s-event-card__hero-title">{title}</Text>
+              {heroSubtitle ? (
+                <Text className="s-event-card__hero-subtitle">{heroSubtitle}</Text>
+              ) : null}
+            </View>
+          </View>
 
           <View
             className={[
               's-event-card__follow-tag',
-              followed && 's-event-card__follow-tag--followed',
+              followed
+                ? 's-event-card__follow-tag--followed'
+                : lineupPublished === false
+                  ? 's-event-card__follow-tag--pending-lineup'
+                  : 's-event-card__follow-tag--subscribe',
               submitting && 's-event-card__follow-tag--loading',
             ]
               .filter(Boolean)
@@ -159,36 +179,62 @@ const EventCardInner: React.FC<EventCardProps> = ({
                 ? t('eventCard.unfollow', { title: activityTitle })
                 : t('eventCard.follow', { title: activityTitle })
             }
-            onTouchStart={(event) => {
-              event.stopPropagation();
-            }}
-            onClick={(event) => {
-              event.stopPropagation();
+            onClick={() => {
               handleSubscribe();
             }}
           >
-            {!followed ? <Bell size={12} aria-hidden /> : null}
-            <Text className="s-event-card__follow-tag-text">
-              {submitting
-                ? followed
-                  ? t('eventCard.unfollowing')
-                  : t('eventCard.following')
-                : followed
-                  ? t('eventCard.followed', { title: activityTitle })
-                  : t('eventCard.follow', { title: activityTitle })}
-            </Text>
-          </View>
-
-          <View className="s-event-card__hero-copy">
-            <Text className="s-event-card__hero-title">{title}</Text>
-            {heroSubtitle ? (
-              <Text className="s-event-card__hero-subtitle">{heroSubtitle}</Text>
-            ) : null}
+            <View className="s-event-card__follow-tag-accent" aria-hidden />
+            <View
+              className={[
+                's-event-card__follow-tag-icon',
+                followed && 's-event-card__follow-tag-icon--followed',
+                !followed &&
+                  lineupPublished === false &&
+                  's-event-card__follow-tag-icon--pending-lineup',
+              ]
+                .filter(Boolean)
+                .join(' ')}
+              aria-hidden
+            >
+              {followed ? (
+                <Check size={13} color="var(--secondary)" strokeWidth={2.5} />
+              ) : (
+                <Bell
+                  size={13}
+                  color={
+                    lineupPublished === false ? '#ffd60a' : 'rgba(255, 255, 255, 0.92)'
+                  }
+                  strokeWidth={2.25}
+                />
+              )}
+            </View>
+            <View className="s-event-card__follow-tag-copy">
+              <Text className="s-event-card__follow-tag-kicker">
+                {followed
+                  ? t('eventCard.followedKicker')
+                  : lineupPublished === false
+                    ? t('eventCard.followKickerPending')
+                    : t('eventCard.followKicker')}
+              </Text>
+              <Text className="s-event-card__follow-tag-text">
+                {submitting
+                  ? followed
+                    ? t('eventCard.unfollowing')
+                    : t('eventCard.following')
+                  : followed
+                    ? t('eventCard.followedAction')
+                    : t('eventCard.followAction')}
+              </Text>
+            </View>
           </View>
         </View>
 
         <View className="s-event-card__footer s-event-card__footer--detail">
-          <View className="s-event-card__detail-meta">
+          <View
+            className="s-event-card__detail-meta"
+            onTouchStart={() => onCardPressWarmup?.()}
+            onClick={() => onCardPress?.()}
+          >
             <View className="s-event-card__joined">
               <Users size={14} aria-hidden />
               <Text className="s-event-card__joined-text">{recruitPostsLabel}</Text>

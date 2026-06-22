@@ -120,6 +120,9 @@ export function mapSignupEventToFeaturedEvent(item: SignupEvent): FeaturedEvent 
   };
 }
 
+/** 首页热门轮播最多展示场次数。 */
+export const HOME_FEATURED_EVENTS_LIMIT = 3;
+
 /** 首页热门活动：仅展示亚洲场次；未选择时按开始时间就近；已选择的活动靠前。 */
 export function pickHomeFeaturedEvents(
   signupEvents: SignupEvent[],
@@ -157,5 +160,7 @@ export function pickHomeFeaturedEvents(
     ordered = [...sortNearest(selected), ...sortNearest(rest)];
   }
 
-  return ordered.map((item) => mapSignupEventToFeaturedEvent(item));
+  return ordered
+    .slice(0, HOME_FEATURED_EVENTS_LIMIT)
+    .map((item) => mapSignupEventToFeaturedEvent(item));
 }

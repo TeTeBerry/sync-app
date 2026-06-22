@@ -7,6 +7,7 @@ import {
 
 export function useEventDetailPostFilters(loadedPosts: EventDetailPost[]) {
   const [selectedCity, setSelectedCity] = useState('');
+  const [recruitingOnly, setRecruitingOnly] = useState(false);
 
   const cityOptions = useMemo(
     () => extractDepartureCityOptions(loadedPosts),
@@ -16,20 +17,24 @@ export function useEventDetailPostFilters(loadedPosts: EventDetailPost[]) {
   const filters = useMemo<EventDetailPostRuleFilters>(
     () => ({
       departureCity: selectedCity.trim() || undefined,
+      recruitingOnly: recruitingOnly || undefined,
     }),
-    [selectedCity],
+    [recruitingOnly, selectedCity],
   );
 
-  const isActive = Boolean(filters.departureCity);
+  const isActive = Boolean(filters.departureCity || filters.recruitingOnly);
 
   const clearFilters = useCallback(() => {
     setSelectedCity('');
+    setRecruitingOnly(false);
   }, []);
 
   return {
     cityOptions,
     selectedCity,
     setSelectedCity,
+    recruitingOnly,
+    setRecruitingOnly,
     filters,
     isActive,
     clearFilters,

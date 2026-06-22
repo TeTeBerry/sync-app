@@ -2,7 +2,7 @@
 
 > **当前实现**与**目标形态**合一文档。Q1 交付见 [Q1-USER-STORIES.md](./Q1-USER-STORIES.md)；**Q2 整改与推广主轴**见 [Q2-USER-STORIES.md](./Q2-USER-STORIES.md)。REST/WS 契约见 [API.md](./API.md)。
 
-**最后更新**：2026-06-22
+**最后更新**：2026-06-23
 
 ---
 
@@ -98,7 +98,7 @@ rg '联系队友|配对成功|平台担保|智能配对|buddy-matching' src/
 | Tab | 路由 | 文案 | 当前职责 |
 |-----|------|------|----------|
 | 首页 | `pages/index/index` | 首页 | 精选、我的下一场、**双 CTA（搜节/找队）**、示例 Chip |
-| 活动 | `pages/events/index` | 活动 | 列表 / 日历 / 艺人；**列表 Tab 搜索过滤** |
+| 活动 | `pages/events/index` | 活动 | 列表 / 日历 / 艺人；**列表 Tab 搜索过滤**（艺人串联见 US-Q2-19） |
 | 我的 | `pages/profile/index` | 我的 | 资料、帖、设置 |
 
 底栏：`components/navigation/BottomNav`（3 Tab）。`packageAi/pages/ai-assistant` 遗留深链 → 重定向首页或活动 Tab（带搜索 intent）。
@@ -382,10 +382,37 @@ Story：[US-Q2-39](./Q2-USER-STORIES.md#us-q2-39--本地城市-hub-聚合页-p1-
 |------|------|
 | 列表搜索 | 活动 Tab 搜索框 + 客户端 filter（`filterActivitiesForEventsSearch`） |
 | 目录筛选 | 地区 chip（全部/国内/海外/港澳台）· 时间 chip（即将开始/本月/热门）· 热门横滑（`hot === true`，≥3 场） |
+| **艺人目录** | 活动 Tab 第三子 Tab；按 DJ 反查出场活动 → 活动详情（**US-Q2-19** post-launch） |
 | 详情资讯 | `EventDetailInfoSection`：状态 pill · 类型/地区/更新于 · 来源 · 免责；CTA → `activity-lineup`（US-Q2-36 ✅） |
-| 阵容深页 | `activity-lineup`：演出时间表 / 阵容艺人卡 / 未官宣订阅；专属行程 → `exclusive-itinerary` |
+| 阵容深页 | `activity-lineup`：演出时间表 / 阵容艺人卡 / 未官宣订阅；点 DJ → 艺人半屏（US-Q2-19 / 33）；专属行程 → `exclusive-itinerary` |
 | ~~Agent 对话查节~~ | **已下线**（后端 WS 默认关闭，见 US-Q2-22） |
 | 信任 | US-Q1-04 信息来源（`infoSource` · `infoUpdatedAt`）；未官宣可订阅（`lineupPublished`） |
+
+### 4.1 艺人 Tab（查节第三条入口 · US-Q2-19）
+
+**定位**：「这个艺人今年在 catalog 里哪几场出场」→ 终点仍是 **活动详情 + 公开招募**，不是听歌 App 或交友匹配。
+
+```text
+活动 Tab · 艺人
+├── （Phase C）搜索艺人名 · 曲风 chip · 偏好洞察行（排序，非匹配）
+├── 艺人列表（默认：即将出场优先）
+│     └── 卡片：头像 · 名 · 曲风 · N 场 · 最近一场（可选）
+└── 点击 → ArtistProfileSheet（半屏，与阵容 / 室内局复用）
+      ├── 简介摘要 + 免责
+      ├── （Phase B）代表曲目（曲名，不播完整音频）
+      ├── 出场活动列表 → event-detail
+      └── CTA：查看最近一场 · 公开招募在活动详情
+```
+
+| 阶段 | 范围 |
+|------|------|
+| Phase A | 可点 · 半屏 · 出场活动 → 详情 |
+| Phase B | Discogs / `query_dj_info` 简介（US-Q2-33） |
+| Phase C | 搜索 · 曲风 chip · `favorGenres` 目录加权 |
+
+**合规**：无「配对队友 / 匹配度 / 平台担保」；偏好仅用于目录排序或预填 AI 找队检索。
+
+**现网**：`EventsActivityArtistsTab` + `GET /activities/lineup-artists` 已展示不可点排行榜；串联待 US-Q2-19。
 
 ---
 
@@ -404,6 +431,7 @@ Story：[US-Q2-39](./Q2-USER-STORIES.md#us-q2-39--本地城市-hub-聚合页-p1-
 - 列表 / 日历 / 艺人（**地图组件已实现未挂载**）
 - Q2（US-Q2-13）：顶部搜索框 → **即时过滤活动列表**；0 结果时引导换关键词或浏览全部（无 AI 对话兜底）
 - Q2（US-Q2-36 ✅）：地区 + 时间 chip · 热门横滑 · 卡片地区/阵容 badge · 日历全量展示（默认当前月、过期置灰、点日期过滤）
+- **艺人（US-Q2-19 🔲）**：现网仅排行榜展示；post-launch 可点进半屏 · 出场活动 → 详情
 - **Gap（US-Q2-38）**：类型 Chip（电音节/室内活动）；日历含 indoor — post-launch
 
 ### 首页（目标 · US-Q2-37）

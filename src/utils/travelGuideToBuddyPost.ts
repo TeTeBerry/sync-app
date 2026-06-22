@@ -30,7 +30,9 @@ function buildPrefillNote(
   if (guide.accommodationNights > 0) {
     parts.push(`住${guide.accommodationNights}晚`);
   }
-  parts.push(`${travelGuideBudgetLabel(guide.budgetTier, t)}住宿`);
+  if (guide.budgetTier) {
+    parts.push(`${travelGuideBudgetLabel(guide.budgetTier, t)}住宿`);
+  }
   if (guide.selfDrive) {
     parts.push(t('travelPlan.driveYes'));
   }
@@ -69,9 +71,13 @@ export function travelGuideFormToBuddyPrefill(
   const summaryLines = [
     '出发地待填写',
     headcount ? `${headcount}人` : '人数待补充',
-    guide.accommodationNights > 0
+    guide.accommodationNights > 0 && guide.budgetTier
       ? `住${guide.accommodationNights}晚 · ${travelGuideBudgetLabel(guide.budgetTier, resolveT)}`
-      : travelGuideBudgetLabel(guide.budgetTier, resolveT),
+      : guide.budgetTier
+        ? travelGuideBudgetLabel(guide.budgetTier, resolveT)
+        : guide.accommodationNights > 0
+          ? `住${guide.accommodationNights}晚`
+          : undefined,
     guide.selfDrive ? resolveT('travelPlan.driveYes') : undefined,
   ].filter((line): line is string => Boolean(line));
 
@@ -120,7 +126,7 @@ export function travelGuideFormToSearchQuery(
   const slotsNeeded = resolveRecruitSlotsNeeded(guide.headcount);
   parts.push(`差 ${slotsNeeded} 人`);
 
-  if (t) {
+  if (t && guide.budgetTier) {
     const budget = travelGuideBudgetLabel(guide.budgetTier, t);
     if (budget) {
       parts.push(budget);

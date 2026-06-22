@@ -6,7 +6,7 @@ export type AiGuidePlanFormValues = {
   /** 选 POI 时高德返回的城市/区县，用于地理编码 region（非活动举办城市） */
   departureCity?: string;
   headcount: number;
-  budgetTier: TravelGuideBudgetTier;
+  budgetTier?: TravelGuideBudgetTier;
   selfDrive?: boolean;
   /** 住宿晚数，默认与活动天数一致 */
   accommodationNights: number;
@@ -128,9 +128,10 @@ export function getTravelGuideBudgetOptions(t: (key: string) => string): Array<{
 }
 
 export function travelGuideBudgetLabel(
-  tier: TravelGuideBudgetTier,
+  tier: TravelGuideBudgetTier | undefined,
   t: (key: string) => string,
 ): string {
+  if (!tier) return '';
   const opt = getTravelGuideBudgetOptions(t).find((o) => o.id === tier);
   return opt ? `${opt.label}(${opt.hint})` : tier;
 }

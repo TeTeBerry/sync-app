@@ -8,7 +8,7 @@ describe('unfollowActivityConfirm', () => {
     const options = buildUnfollowActivityConfirmOptions('风暴电音节 深圳站 2026');
 
     expect(options.brand).toBe(true);
-    expect(options.title).toBe('取消加入风暴电音节 深圳站 2026');
+    expect(options.title).toBe('取消订阅风暴电音节 深圳站 2026');
     expect(options.message).toContain('风暴电音节 深圳站 2026');
     expect(options.confirmText).toBe('确认取消');
     expect(options.danger).toBeUndefined();

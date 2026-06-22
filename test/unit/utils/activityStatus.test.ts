@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   compareActivitiesNearestFirst,
   findNearestUpcomingActivity,
+  isRecentUpcomingActivity,
   resolveFeaturedEventCountdown,
 } from '@/utils/activityStatus';
 
@@ -117,5 +118,28 @@ describe('resolveFeaturedEventCountdown', () => {
         date: '2024-07-12',
       }),
     ).toBeNull();
+  });
+});
+
+describe('isRecentUpcomingActivity', () => {
+  it('includes events starting within three months', () => {
+    expect(
+      isRecentUpcomingActivity({ title: 'Soon fest', date: '06/13-14' }, NOW),
+    ).toBe(true);
+    expect(isRecentUpcomingActivity({ title: 'Near fest', date: '08/15' }, NOW)).toBe(
+      true,
+    );
+  });
+
+  it('excludes events starting more than three months away', () => {
+    expect(
+      isRecentUpcomingActivity({ title: 'EDC Thailand', date: '12/18-20' }, NOW),
+    ).toBe(false);
+  });
+
+  it('excludes ended events', () => {
+    expect(
+      isRecentUpcomingActivity({ title: 'Past fest', date: '2024-07-12' }, NOW),
+    ).toBe(false);
   });
 });

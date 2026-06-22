@@ -17,6 +17,7 @@ import {
 import { useEventDetailPage } from './useEventDetailPage';
 import { AiBuddyPostSheet } from '../../../components/ai-chat/AiBuddyPostSheet';
 import { AiGuidePlanSheet } from '../../../components/ai-chat/AiGuidePlanSheet';
+import { isOverseasActivityRegion } from '../../../constants/activityMapRegion';
 import PageNavigation from '../../../components/navigation/PageNavigation';
 import { Button } from '../../../components/ui';
 import { Share2 } from '../../../components/icons';
@@ -200,8 +201,11 @@ const EventDetailPage = () => {
                     cityOptions={posts.postFilterCityOptions}
                     selectedCity={posts.postFilterSelectedCity}
                     onSelectedCityChange={posts.setPostFilterSelectedCity}
+                    recruitingOnly={posts.postFilterRecruitingOnly}
+                    onRecruitingOnlyChange={posts.setPostFilterRecruitingOnly}
                     isActive={posts.postFiltersActive}
                     onClear={posts.clearPostFilters}
+                    disabled={posts.searchActive}
                   />
                   <View className="s-event-detail__recruit-divider" aria-hidden />
                   <EventDetailPostSearchBar
@@ -305,6 +309,7 @@ const EventDetailPage = () => {
           open
           defaultNights={guideDefaultNights}
           eventCity={guideEventCity}
+          showSelfDriveOption={!isOverseasActivityRegion(activity?.region)}
           initialValues={guideSheetInitialValues}
           onClose={closeGuideSheet}
           onSubmit={handleGuideSheetSubmit}

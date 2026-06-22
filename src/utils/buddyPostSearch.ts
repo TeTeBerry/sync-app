@@ -93,13 +93,74 @@ export function resolveBuddySearchTerms(query: string): string[] {
   return tokens.length ? tokens : [trimmed];
 }
 
+const BUDGET_SEARCH_TERM_PATTERN =
+  /^(经济|舒适|豪华|标准|实惠|省钱|高端|奢华)(档|型|预算)?/;
+
+function isBudgetBuddySearchTerm(term: string): boolean {
+  const trimmed = term.trim();
+  if (!trimmed) return false;
+  if (BUDGET_SEARCH_TERM_PATTERN.test(trimmed)) return true;
+  if (/¥\s*\d/.test(trimmed)) return true;
+  if (/\(\s*¥?\d+[-–~]¥?\d+/.test(trimmed)) return true;
+  if (/\/晚/.test(trimmed) && /\d/.test(trimmed)) return true;
+  return false;
+}
+
+function partitionBuddySearchTerms(terms: string[]): {
+  required: string[];
+  soft: string[];
+} {
+  const required: string[] = [];
+  const soft: string[] = [];
+  for (const term of terms) {
+    if (isBudgetBuddySearchTerm(term)) {
+      soft.push(term);
+    } else {
+      required.push(term);
+    }
+  }
+  return { required, soft };
+}
+
+function budgetLabelFromSearchTerm(term: string): string | undefined {
+  const match = term.trim().match(BUDGET_SEARCH_TERM_PATTERN);
+  return match?.[1];
+}
+
+function searchTermMatchesHaystack(haystack: string, term: string): boolean {
+  if (fuzzyTextMatches(haystack, term)) return true;
+  const budgetLabel = budgetLabelFromSearchTerm(term);
+  if (budgetLabel && fuzzyTextMatches(haystack, budgetLabel)) return true;
+  return false;
+}
+
+function countMatchedSearchTerms(post: EventDetailPost, terms: string[]): number {
+  if (!terms.length) return 0;
+  const haystack = buildEventDetailPostSearchText(post);
+  return terms.filter((term) => searchTermMatchesHaystack(haystack, term)).length;
+}
+
 export function eventDetailPostMatchesSearchTerms(
   post: EventDetailPost,
   searchTerms: string[],
 ): boolean {
   if (!searchTerms.length) return true;
-  const haystack = buildEventDetailPostSearchText(post);
-  return searchTerms.every((term) => fuzzyTextMatches(haystack, term));
+
+  const { required, soft } = partitionBuddySearchTerms(searchTerms);
+  if (!required.length && !soft.length) return true;
+
+  const requiredMatched = countMatchedSearchTerms(post, required);
+  const softMatched = countMatchedSearchTerms(post, soft);
+
+  if (required.length > 0 && requiredMatched === required.length) {
+    return true;
+  }
+
+  const totalDimensions = required.length + soft.length;
+  const matchedDimensions = requiredMatched + softMatched;
+  const minMatches = Math.max(1, Math.ceil(totalDimensions * 0.75));
+
+  return matchedDimensions >= minMatches;
 }
 
 export function filterEventDetailPostsByQuery(

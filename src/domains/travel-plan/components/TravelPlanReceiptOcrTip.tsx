@@ -33,24 +33,30 @@ export function TravelPlanReceiptOcrTip({
   };
 
   return (
-    <Button
-      className={['s-travel-plan-receipt-ocr-tip', className].filter(Boolean).join(' ')}
-      disabled={disabled}
-      hoverClass="s-travel-plan-receipt-ocr-tip--pressed"
-      onClick={handleClick}
+    <View
+      className={['s-travel-plan-receipt-ocr-tip-wrap', className]
+        .filter(Boolean)
+        .join(' ')}
     >
-      <View className="s-travel-plan-receipt-ocr-tip__icon" aria-hidden>
-        <ImageIcon size={18} color="#bf5af2" />
-      </View>
-      <View className="s-travel-plan-receipt-ocr-tip__copy">
-        <Text className="s-travel-plan-receipt-ocr-tip__title">
-          {getTravelPlanReceiptOcrTip()}
-        </Text>
-        <Text className="s-travel-plan-receipt-ocr-tip__cta">
-          {getTravelPlanReceiptOcrCta()}
-        </Text>
-      </View>
-      <ChevronRight size={16} color="#bf5af2" aria-hidden />
-    </Button>
+      <Button
+        className="s-travel-plan-receipt-ocr-tip"
+        disabled={disabled}
+        hoverClass="s-travel-plan-receipt-ocr-tip--pressed"
+        onClick={handleClick}
+      >
+        <View className="s-travel-plan-receipt-ocr-tip__icon" aria-hidden>
+          <ImageIcon size={18} color="#bf5af2" />
+        </View>
+        <View className="s-travel-plan-receipt-ocr-tip__copy">
+          <Text className="s-travel-plan-receipt-ocr-tip__title">
+            {getTravelPlanReceiptOcrTip()}
+          </Text>
+          <Text className="s-travel-plan-receipt-ocr-tip__cta">
+            {getTravelPlanReceiptOcrCta()}
+          </Text>
+        </View>
+        <ChevronRight size={16} color="#bf5af2" aria-hidden />
+      </Button>
+    </View>
   );
 }

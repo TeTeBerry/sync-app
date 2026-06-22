@@ -92,8 +92,42 @@ describe('pickHomeFeaturedEvents', () => {
       'EDC Korea',
       'Tomorrowland',
       '风暴电音节',
-      'EDC Thailand',
     ]);
+  });
+
+  it('limits featured carousel to three events', () => {
+    const events = [
+      signupEvent({
+        id: 4,
+        title: '风暴电音节',
+        date: '06/13-14',
+        area: '中国',
+        region: 'domestic',
+      }),
+      signupEvent({
+        id: 8,
+        title: 'EDC Korea',
+        date: '10/03-04',
+        area: '韩国',
+        region: 'overseas',
+      }),
+      signupEvent({
+        id: 5,
+        title: 'EDC Thailand',
+        date: '12/18-20',
+        area: '泰国',
+        region: 'overseas',
+      }),
+      signupEvent({
+        id: 1,
+        title: 'Tomorrowland',
+        date: '12/11-13',
+        area: '泰国',
+        region: 'overseas',
+      }),
+    ];
+
+    expect(pickHomeFeaturedEvents(events, new Set(), NOW)).toHaveLength(3);
   });
 
   it('maps signup fields into featured event shape', () => {
