@@ -24,9 +24,27 @@ function signupEvent(
 describe('pickHomeFeaturedEvents', () => {
   it('orders all active events by nearest start when user has no registrations', () => {
     const events = [
-      signupEvent({ id: 8, title: 'EDC Korea', date: '10/03-04' }),
-      signupEvent({ id: 4, title: '风暴电音节', date: '06/13-14' }),
-      signupEvent({ id: 5, title: 'EDC Thailand', date: '12/18-20' }),
+      signupEvent({
+        id: 8,
+        title: 'EDC Korea',
+        date: '10/03-04',
+        area: '韩国',
+        region: 'overseas',
+      }),
+      signupEvent({
+        id: 4,
+        title: '风暴电音节',
+        date: '06/13-14',
+        area: '中国',
+        region: 'domestic',
+      }),
+      signupEvent({
+        id: 5,
+        title: 'EDC Thailand',
+        date: '12/18-20',
+        area: '泰国',
+        region: 'overseas',
+      }),
     ];
 
     const picked = pickHomeFeaturedEvents(events, new Set(), NOW);
@@ -39,10 +57,34 @@ describe('pickHomeFeaturedEvents', () => {
 
   it('puts registered events first, each group sorted by nearest start', () => {
     const events = [
-      signupEvent({ id: 4, title: '风暴电音节', date: '06/13-14' }),
-      signupEvent({ id: 8, title: 'EDC Korea', date: '10/03-04' }),
-      signupEvent({ id: 5, title: 'EDC Thailand', date: '12/18-20' }),
-      signupEvent({ id: 1, title: 'Tomorrowland', date: '12/11-13' }),
+      signupEvent({
+        id: 4,
+        title: '风暴电音节',
+        date: '06/13-14',
+        area: '中国',
+        region: 'domestic',
+      }),
+      signupEvent({
+        id: 8,
+        title: 'EDC Korea',
+        date: '10/03-04',
+        area: '韩国',
+        region: 'overseas',
+      }),
+      signupEvent({
+        id: 5,
+        title: 'EDC Thailand',
+        date: '12/18-20',
+        area: '泰国',
+        region: 'overseas',
+      }),
+      signupEvent({
+        id: 1,
+        title: 'Tomorrowland',
+        date: '12/11-13',
+        area: '泰国',
+        region: 'overseas',
+      }),
     ];
 
     const picked = pickHomeFeaturedEvents(events, new Set([8, 1]), NOW);
@@ -63,6 +105,8 @@ describe('pickHomeFeaturedEvents', () => {
         hot: true,
         attendees: 120,
         going: true,
+        area: '中国',
+        region: 'domestic',
       }),
     ]);
 
@@ -72,7 +116,36 @@ describe('pickHomeFeaturedEvents', () => {
       venue: 'Shanghai',
       isHot: true,
       going: true,
-      attendeeCount: '120+',
+      attendeeCount: '120',
     });
+  });
+
+  it('excludes non-asian festivals from featured carousel', () => {
+    const events = [
+      signupEvent({
+        id: 2,
+        title: 'Defqon.1',
+        date: '06/25-28',
+        area: '荷兰',
+        region: 'overseas',
+      }),
+      signupEvent({
+        id: 4,
+        title: '风暴电音节',
+        date: '06/13-14',
+        area: '中国',
+        region: 'domestic',
+      }),
+      signupEvent({
+        id: 5,
+        title: 'EDC Thailand',
+        date: '12/18-20',
+        area: '泰国',
+        region: 'overseas',
+      }),
+    ];
+
+    const picked = pickHomeFeaturedEvents(events, new Set(), NOW);
+    expect(picked.map((item) => item.title)).toEqual(['风暴电音节', 'EDC Thailand']);
   });
 });

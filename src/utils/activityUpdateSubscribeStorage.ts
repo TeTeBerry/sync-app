@@ -62,3 +62,20 @@ export function markActivityUpdateSubscribedLocally(activityLegacyId: number): v
 
   writeRecord({ userId, activityLegacyIds });
 }
+
+export function clearActivityUpdateSubscribedLocally(activityLegacyId: number): void {
+  const userId = getAuthUserId();
+  if (!userId || !Number.isFinite(activityLegacyId) || activityLegacyId <= 0) {
+    return;
+  }
+
+  const record = readRecord();
+  if (!record || record.userId !== userId) {
+    return;
+  }
+
+  const activityLegacyIds = record.activityLegacyIds.filter(
+    (id) => id !== activityLegacyId,
+  );
+  writeRecord({ userId, activityLegacyIds });
+}

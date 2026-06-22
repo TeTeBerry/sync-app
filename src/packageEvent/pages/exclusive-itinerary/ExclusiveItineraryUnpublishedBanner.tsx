@@ -13,8 +13,13 @@ export function ExclusiveItineraryUnpublishedBanner({
   showEmptyLineup = false,
 }: ExclusiveItineraryUnpublishedBannerProps) {
   const t = useT();
-  const { subscribed, submitting, handleSubscribe } =
-    useActivityUpdateSubscribeAction(activityLegacyId);
+  const { subscribed, submitting, handleSubscribe } = useActivityUpdateSubscribeAction(
+    activityLegacyId,
+    false,
+    {
+      toggleable: false,
+    },
+  );
 
   return (
     <View className="s-exclusive-itinerary__unpublished">

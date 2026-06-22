@@ -22,6 +22,7 @@ vi.mock('@/utils/authStorage', () => ({
 }));
 
 import {
+  clearActivityUpdateSubscribedLocally,
   isActivityUpdateSubscribedLocally,
   markActivityUpdateSubscribedLocally,
 } from '@/utils/activityUpdateSubscribeStorage';
@@ -39,5 +40,13 @@ describe('activityUpdateSubscribeStorage', () => {
     markActivityUpdateSubscribedLocally(8);
     expect(isActivityUpdateSubscribedLocally(8)).toBe(true);
     expect(isActivityUpdateSubscribedLocally(9)).toBe(false);
+  });
+
+  it('clears subscribed activity for current user', () => {
+    markActivityUpdateSubscribedLocally(8);
+    markActivityUpdateSubscribedLocally(9);
+    clearActivityUpdateSubscribedLocally(8);
+    expect(isActivityUpdateSubscribedLocally(8)).toBe(false);
+    expect(isActivityUpdateSubscribedLocally(9)).toBe(true);
   });
 });

@@ -13,8 +13,13 @@ export function ActivityUpdateSubscribeBanner({
   compact = false,
 }: ActivityUpdateSubscribeBannerProps) {
   const t = useT();
-  const { subscribed, submitting, handleSubscribe } =
-    useActivityUpdateSubscribeAction(activityLegacyId);
+  const { subscribed, submitting, handleSubscribe } = useActivityUpdateSubscribeAction(
+    activityLegacyId,
+    false,
+    {
+      toggleable: false,
+    },
+  );
 
   return (
     <View

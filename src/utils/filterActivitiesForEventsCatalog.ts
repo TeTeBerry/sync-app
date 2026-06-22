@@ -1,4 +1,5 @@
 import type { ActivityMapRegion } from '../constants/activityMapRegion';
+import { ASIAN_ACTIVITY_AREAS } from '../constants/activityArea';
 import { ACTIVITY_MAP_REGION_LABELS } from '../constants/activityMapRegion';
 import type { EventCardUi } from './apiMappers';
 import {
@@ -54,6 +55,16 @@ export function filterActivitiesByTimeChip(
   });
 }
 
+export function isAsianCatalogActivity(
+  event: Pick<EventCardUi, 'area' | 'region'>,
+): boolean {
+  const area = event.area?.trim();
+  if (area) {
+    return ASIAN_ACTIVITY_AREAS.has(area);
+  }
+  return event.region === 'domestic' || event.region === 'hmt';
+}
+
 export function selectHotCatalogEvents(
   events: EventCardUi[],
   limit = 5,
@@ -62,10 +73,16 @@ export function selectHotCatalogEvents(
   return events
     .filter(
       (event) =>
-        event.hot &&
+        isAsianCatalogActivity(event) &&
         getActivityStatusFromActivity(event.date, event.title, now) !== 'ended',
     )
-    .sort(compareActivitiesNearestFirst)
+    .sort((a, b) => {
+      const hotDiff = Number(Boolean(b.hot)) - Number(Boolean(a.hot));
+      if (hotDiff !== 0) {
+        return hotDiff;
+      }
+      return compareActivitiesNearestFirst(a, b, now);
+    })
     .slice(0, limit);
 }
 
@@ -74,4 +91,14 @@ export function formatActivityRegionLabel(region?: ActivityMapRegion): string | 
     return null;
   }
   return ACTIVITY_MAP_REGION_LABELS[region];
+}
+
+export function formatActivityAreaLabel(
+  event: Pick<EventCardUi, 'area' | 'region'>,
+): string | null {
+  const area = event.area?.trim();
+  if (area) {
+    return area;
+  }
+  return formatActivityRegionLabel(event.region);
 }

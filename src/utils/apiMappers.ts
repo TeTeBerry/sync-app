@@ -3,6 +3,7 @@ import type { HomeSummary } from '../types/backend';
 import { resolveCatalogActivityImage } from '../constants/activityCatalogImages';
 import { resolveActivityThumb } from '../constants/activityImages';
 import { getActivityTypeLabel } from '../constants/activityType';
+import { isAsianCatalogActivity } from './filterActivitiesForEventsCatalog';
 import { parseActivityLegacyId } from './activityLegacyId';
 import { compareActivitiesNearestFirst } from './activityStatus';
 import { sanitizeRemoteImageUrl } from './imageUrl';
@@ -17,6 +18,7 @@ export interface EventCardUi {
   latitude?: number;
   longitude?: number;
   region?: ActivityMapRegion;
+  area?: string;
   alias?: string[];
   image: string;
   attendees: number;
@@ -74,6 +76,7 @@ export function mapActivitiesToEvents(
       latitude: activity.latitude,
       longitude: activity.longitude,
       region: activity.region as ActivityMapRegion | undefined,
+      area: activity.area,
       alias: activity.alias,
       image: resolveActivityThumb(
         sanitizeRemoteImageUrl(
@@ -117,12 +120,15 @@ export function mapSignupEventToFeaturedEvent(item: SignupEvent): FeaturedEvent 
   };
 }
 
-/** 首页热门活动：未选择时按开始时间就近；已选择的活动靠前并按开始时间就近，其余活动随后同样按时间排序。 */
+/** 首页热门活动：仅展示亚洲场次；未选择时按开始时间就近；已选择的活动靠前。 */
 export function pickHomeFeaturedEvents(
   signupEvents: SignupEvent[],
   selectedLegacyIds?: Set<number>,
   now?: Date,
 ): FeaturedEvent[] {
+  const asianEvents = signupEvents.filter((event) =>
+    isAsianCatalogActivity({ area: event.area, region: event.region }),
+  );
   const hasSelections = (selectedLegacyIds?.size ?? 0) > 0;
 
   const sortNearest = (items: SignupEvent[]) =>
@@ -136,11 +142,11 @@ export function pickHomeFeaturedEvents(
 
   let ordered: SignupEvent[];
   if (!hasSelections) {
-    ordered = sortNearest(signupEvents);
+    ordered = sortNearest(asianEvents);
   } else {
     const selected: SignupEvent[] = [];
     const rest: SignupEvent[] = [];
-    for (const event of signupEvents) {
+    for (const event of asianEvents) {
       const legacyId = parseActivityLegacyId(event.id);
       if (legacyId != null && selectedLegacyIds!.has(legacyId)) {
         selected.push(event);

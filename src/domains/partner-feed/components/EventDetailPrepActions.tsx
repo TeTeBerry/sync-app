@@ -1,9 +1,4 @@
-import { Calendar, ChevronRight } from '../../../components/icons';
-import {
-  getGenerateTravelGuideCta,
-  getTravelGuideTitle,
-  getViewTravelGuideCta,
-} from '../../../constants/aiCtaLabels';
+import { ChevronRight } from '../../../components/icons';
 import type {
   FestivalPlanChecklist,
   FestivalPlanTask,
@@ -11,6 +6,10 @@ import type {
 import { Button, cn } from '../../../components/ui';
 import { Text, View } from '@tarojs/components';
 import { useT } from '@/hooks/useI18n';
+import {
+  buildEventDetailPrepSteps,
+  type EventDetailPrepStep,
+} from '../utils/eventDetailPrepSteps.util';
 import './EventDetailPrepActions.scss';
 
 type EventDetailPrepActionsProps = {
@@ -18,103 +17,9 @@ type EventDetailPrepActionsProps = {
   checklist?: FestivalPlanChecklist | null;
   showFestivalPlan?: boolean;
   onAiGuideClick: () => void;
-  onOpenMyItinerary: () => void;
   onOpenExclusiveItinerary: () => void;
   onFestivalPlanTaskPress?: (task: FestivalPlanTask) => void;
 };
-
-type PrepStep = {
-  key: string;
-  label: string;
-  actionLabel: string;
-  done: boolean;
-  isNext: boolean;
-  displayOnly?: boolean;
-  onClick: () => void;
-};
-
-function taskFromChecklist(
-  checklist: FestivalPlanChecklist | null | undefined,
-  key: FestivalPlanTask['key'],
-): FestivalPlanTask | undefined {
-  return checklist?.tasks.find((task) => task.key === key);
-}
-
-function buildPlanSteps({
-  travelGuideGenerated = false,
-  checklist,
-  showFestivalPlan = false,
-  onAiGuideClick,
-  onOpenExclusiveItinerary,
-  onFestivalPlanTaskPress,
-  t,
-}: Pick<
-  EventDetailPrepActionsProps,
-  | 'travelGuideGenerated'
-  | 'checklist'
-  | 'showFestivalPlan'
-  | 'onAiGuideClick'
-  | 'onOpenExclusiveItinerary'
-  | 'onFestivalPlanTaskPress'
-> & {
-  t: (key: string, params?: Record<string, string>) => string;
-}): PrepStep[] {
-  const travelTask = taskFromChecklist(checklist, 'travel_guide');
-  const itineraryTask = taskFromChecklist(checklist, 'itinerary');
-  const buddyTask = taskFromChecklist(checklist, 'buddy_post');
-  const travelDone = showFestivalPlan
-    ? Boolean(travelTask?.done)
-    : travelGuideGenerated;
-
-  const steps: PrepStep[] = [
-    {
-      key: 'travel_guide',
-      label: getTravelGuideTitle(),
-      actionLabel: travelDone ? getViewTravelGuideCta() : getGenerateTravelGuideCta(),
-      done: travelDone,
-      isNext: showFestivalPlan ? Boolean(travelTask?.isNext) : false,
-      onClick: () => {
-        if (showFestivalPlan && travelTask && onFestivalPlanTaskPress) {
-          onFestivalPlanTaskPress(travelTask);
-          return;
-        }
-        onAiGuideClick();
-      },
-    },
-    {
-      key: 'exclusive_itinerary',
-      label: t('ai.itineraryTitle'),
-      actionLabel: showFestivalPlan
-        ? (itineraryTask?.trailingLabel ?? t('ai.generateItinerary'))
-        : t('eventDetail.viewEditLineup'),
-      done: showFestivalPlan ? Boolean(itineraryTask?.done) : false,
-      isNext: showFestivalPlan ? Boolean(itineraryTask?.isNext) : false,
-      onClick: () => {
-        if (showFestivalPlan && itineraryTask && onFestivalPlanTaskPress) {
-          onFestivalPlanTaskPress(itineraryTask);
-          return;
-        }
-        onOpenExclusiveItinerary();
-      },
-    },
-  ];
-
-  if (showFestivalPlan && buddyTask) {
-    steps.push({
-      key: 'buddy_post',
-      label: buddyTask.done
-        ? t('festivalPlan.buddyPostDone')
-        : t('festivalPlan.buddyPostTitle'),
-      actionLabel: '',
-      done: buddyTask.done,
-      isNext: buddyTask.isNext,
-      displayOnly: true,
-      onClick: () => {},
-    });
-  }
-
-  return steps;
-}
 
 function PrepStepNode({
   done,
@@ -151,7 +56,7 @@ function PrepStepNode({
   );
 }
 
-function PrepStepRow({ step, isLast }: { step: PrepStep; isLast: boolean }) {
+function PrepStepRow({ step, isLast }: { step: EventDetailPrepStep; isLast: boolean }) {
   const rowClassName = cn(
     's-prep-stepper__row',
     step.done && 's-prep-stepper__row--done',
@@ -204,32 +109,16 @@ function PrepStepRow({ step, isLast }: { step: PrepStep; isLast: boolean }) {
   );
 }
 
-function PrepUtilityLink({ label, onClick }: { label: string; onClick: () => void }) {
-  return (
-    <Button
-      className="s-prep-stepper__utility"
-      hoverClass="s-prep-stepper__utility--pressed"
-      aria-label={label}
-      onClick={onClick}
-    >
-      <Calendar size={14} color="#8e8e93" aria-hidden />
-      <Text className="s-prep-stepper__utility-label">{label}</Text>
-      <ChevronRight size={14} color="#8e8e93" aria-hidden />
-    </Button>
-  );
-}
-
 export function EventDetailPrepActions({
   travelGuideGenerated,
   checklist,
   showFestivalPlan = false,
   onAiGuideClick,
-  onOpenMyItinerary,
   onOpenExclusiveItinerary,
   onFestivalPlanTaskPress,
 }: EventDetailPrepActionsProps) {
   const t = useT();
-  const steps = buildPlanSteps({
+  const steps = buildEventDetailPrepSteps({
     travelGuideGenerated,
     checklist,
     showFestivalPlan,
@@ -265,13 +154,6 @@ export function EventDetailPrepActions({
           ))}
         </View>
       )}
-
-      <View className="s-prep-stepper__divider" aria-hidden />
-
-      <PrepUtilityLink
-        label={t('eventDetail.myItinerary')}
-        onClick={onOpenMyItinerary}
-      />
 
       {allComplete ? (
         <Text className="s-prep-stepper__complete">

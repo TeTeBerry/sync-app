@@ -2,11 +2,10 @@ import './EventCard.scss';
 import React, { memo, useMemo } from 'react';
 import { ImageWithFallback } from '../ImageWithFallback';
 import { Button } from '../ui';
-import { Flame, Ticket, Users } from '../../components/icons';
-import {
-  ACTIVITY_MAP_REGION_LABELS,
-  type ActivityMapRegion,
-} from '../../constants/activityMapRegion';
+import { Bell, Ticket, Users } from '../../components/icons';
+import { useActivityUpdateSubscribeAction } from '@/domains/activity-info/hooks/useActivityUpdateSubscribeAction';
+import type { ActivityMapRegion } from '../../constants/activityMapRegion';
+import { formatActivityAreaLabel } from '../../utils/filterActivitiesForEventsCatalog';
 import { getGenerateTravelGuideCta } from '../../constants/aiCtaLabels';
 import {
   activityStatusCardClass,
@@ -27,10 +26,11 @@ interface EventCardProps {
   date?: string;
   location?: string;
   image?: string;
-  hot?: boolean;
+  going?: boolean;
   variant?: 'default' | 'list';
   category?: string;
   region?: ActivityMapRegion;
+  area?: string;
   lineupPublished?: boolean;
   recruitPostCount?: number;
   onTeamUp?: () => void;
@@ -43,10 +43,11 @@ const EventCardInner: React.FC<EventCardProps> = ({
   date = 'Sat 12/20 at 10:00 PM',
   location = 'The Ave Live',
   image = PLACEHOLDER_EVENT_HERO,
-  hot = false,
+  going = false,
   variant = 'list',
   category = '',
   region,
+  area,
   lineupPublished,
   recruitPostCount = 0,
   onTeamUp,
@@ -55,7 +56,7 @@ const EventCardInner: React.FC<EventCardProps> = ({
   const t = useT();
   const travelGuideCta = getGenerateTravelGuideCta();
   const displayCategory = category || t('eventCard.category');
-  const regionLabel = region ? ACTIVITY_MAP_REGION_LABELS[region] : null;
+  const regionLabel = formatActivityAreaLabel({ area, region });
   const lineupBadge =
     lineupPublished === true
       ? t('eventCard.lineupPublished')
@@ -63,6 +64,13 @@ const EventCardInner: React.FC<EventCardProps> = ({
         ? t('eventCard.lineupPending')
         : null;
   const legacyId = resolveEventCardLegacyId(id);
+  const {
+    subscribed: followed,
+    submitting,
+    handleSubscribe,
+  } = useActivityUpdateSubscribeAction(legacyId ?? undefined, going, {
+    toggleable: true,
+  });
   const isNavigating = useRouteTransitionActive(legacyId ?? undefined);
   const thumbSrc = thumbnailImageUrl(
     image,
@@ -118,12 +126,35 @@ const EventCardInner: React.FC<EventCardProps> = ({
         />
         <View className="s-event-card__hero-scrim" aria-hidden />
 
-        {hot ? (
-          <Text className="s-event-card__hot-tag">
-            <Flame size={12} aria-hidden />
-            {t('common.hot')}
+        <View
+          className={[
+            's-event-card__follow-tag',
+            followed && 's-event-card__follow-tag--followed',
+            submitting && 's-event-card__follow-tag--loading',
+          ]
+            .filter(Boolean)
+            .join(' ')}
+          role="button"
+          aria-label={followed ? t('eventCard.unfollow') : t('eventCard.follow')}
+          onTouchStart={(event) => {
+            event.stopPropagation();
+          }}
+          onClick={(event) => {
+            event.stopPropagation();
+            handleSubscribe();
+          }}
+        >
+          {!followed ? <Bell size={12} aria-hidden /> : null}
+          <Text className="s-event-card__follow-tag-text">
+            {submitting
+              ? followed
+                ? t('eventCard.unfollowing')
+                : t('eventCard.following')
+              : followed
+                ? t('eventCard.followed')
+                : t('eventCard.follow')}
           </Text>
-        ) : null}
+        </View>
 
         <View className="s-event-card__hero-copy">
           <Text className="s-event-card__hero-title">{title}</Text>

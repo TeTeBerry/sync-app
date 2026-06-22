@@ -1,8 +1,14 @@
 import Taro from '@tarojs/taro';
 import { isApiEnabled } from '@/constants/api';
-import { registerForActivityAndInvalidate } from '@/hooks/sync/activities';
+import {
+  registerForActivityAndInvalidate,
+  unregisterForActivityAndInvalidate,
+} from '@/hooks/sync/activities';
 import { t } from '@/i18n';
-import { markActivityUpdateSubscribedLocally } from './activityUpdateSubscribeStorage';
+import {
+  clearActivityUpdateSubscribedLocally,
+  markActivityUpdateSubscribedLocally,
+} from './activityUpdateSubscribeStorage';
 import { isLoggedIn } from './authStorage';
 import {
   isActivityUpdateSubscribeConfigured,
@@ -16,6 +22,12 @@ export type ActivityUpdateSubscribeResult =
   | 'auth_required'
   | 'invalid_activity'
   | 'register_failed';
+
+export type ActivityUpdateUnsubscribeResult =
+  | 'success'
+  | 'auth_required'
+  | 'invalid_activity'
+  | 'unregister_failed';
 
 function toastForOutcome(wechatOutcome: SubscribeMessageOutcome): void {
   if (wechatOutcome === 'accepted') {
@@ -79,4 +91,36 @@ export async function subscribeToActivityUpdates(
   }
 
   return 'register_failed';
+}
+
+/** Clear local follow state and unregister from the activity when possible. */
+export async function unsubscribeFromActivityUpdates(
+  activityLegacyId: number,
+): Promise<ActivityUpdateUnsubscribeResult> {
+  if (!Number.isFinite(activityLegacyId) || activityLegacyId <= 0) {
+    return 'invalid_activity';
+  }
+  if (!isLoggedIn()) {
+    return 'auth_required';
+  }
+
+  clearActivityUpdateSubscribedLocally(activityLegacyId);
+
+  if (isApiEnabled()) {
+    try {
+      await unregisterForActivityAndInvalidate(activityLegacyId);
+    } catch {
+      void Taro.showToast({
+        title: t('eventCard.unfollowFailed'),
+        icon: 'none',
+      });
+      return 'unregister_failed';
+    }
+  }
+
+  void Taro.showToast({
+    title: t('eventCard.unfollowSuccess'),
+    icon: 'none',
+  });
+  return 'success';
 }

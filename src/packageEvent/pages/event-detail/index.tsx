@@ -159,7 +159,6 @@ const EventDetailPage = () => {
             {!showHeaderSkeleton ? (
               <EventDetailComposerSection
                 onAiGuideClick={handleOpenAiGuide}
-                activityTitle={activityTitle}
                 onOpenMyItinerary={handleOpenMyItinerary}
                 onOpenExclusiveItinerary={handleOpenExclusiveItinerary}
                 showFestivalPlan={loggedIn && Boolean(festivalPlanChecklist)}

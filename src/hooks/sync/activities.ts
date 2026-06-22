@@ -5,6 +5,7 @@ import {
   fetchCatalogLineupArtists,
   fetchHomeSummary,
   registerForActivity,
+  unregisterForActivity,
 } from '../../api/sync/activities';
 import { isLiveApi } from '../../constants/api';
 import { isLoggedIn } from '../../utils/authStorage';
@@ -37,6 +38,7 @@ import { persistHomeSummary, persistActivities } from '../../utils/homeCacheStor
 import {
   patchActivitySelectionInCaches,
   patchProfileSummaryOnSelection,
+  patchProfileSummaryOnUnregister,
 } from '../../cache/activityCache';
 import {
   invalidateProfileSummary,
@@ -232,6 +234,27 @@ export async function registerForActivityAndInvalidate(legacyId: number) {
       await invalidateProfileSummary();
     } catch {
       // Selection succeeded; cache refresh is best-effort.
+    }
+  }
+  return result;
+}
+
+/** Remove activity registration and refresh profile/home caches. */
+export async function unregisterForActivityAndInvalidate(legacyId: number) {
+  const result = await unregisterForActivity(legacyId);
+  patchActivitySelectionInCaches({
+    legacyId,
+    attendees: result.attendees,
+    going: false,
+  });
+  if (result.wasRegistered) {
+    const patched = patchProfileSummaryOnUnregister();
+    if (!patched) {
+      try {
+        await invalidateProfileSummary();
+      } catch {
+        // Unregister succeeded; cache refresh is best-effort.
+      }
     }
   }
   return result;

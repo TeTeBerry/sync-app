@@ -23,6 +23,8 @@ export interface BackendActivity {
   latitude?: number;
   longitude?: number;
   region?: 'domestic' | 'overseas' | 'hmt';
+  /** Display area for catalog badges (e.g. 泰国, 日本). */
+  area?: string;
   image?: string;
   /** Catalog type: outdoor festival (`festival`) or indoor EDM (`indoor`). */
   activityType?: 'festival' | 'indoor';
@@ -264,6 +266,8 @@ export interface HomeSummary {
     hot: boolean;
     attendees: number;
     going: boolean;
+    region?: 'domestic' | 'overseas' | 'hmt';
+    area?: string;
   }>;
   myNextEventPostEngagement?: {
     activityLegacyId: number;

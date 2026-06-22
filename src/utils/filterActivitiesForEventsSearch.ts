@@ -11,6 +11,7 @@ function eventSearchHaystack(event: EventCardUi): string {
   return [
     event.title,
     event.location,
+    event.area,
     event.category,
     regionLabel,
     ...(event.alias ?? []),

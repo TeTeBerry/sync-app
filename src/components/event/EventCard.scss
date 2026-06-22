@@ -148,7 +148,7 @@
   color: rgba(255, 255, 255, 0.82);
 }
 
-.s-event-card__hot-tag {
+.s-event-card__follow-tag {
   position: absolute;
   top: 12px;
   right: 12px;
@@ -163,6 +163,20 @@
   font-size: var(--s-type-caption);
   font-weight: var(--s-fw-extrabold);
   box-shadow: 0 4px 14px rgba(255, 0, 102, 0.35);
+
+  &--followed {
+    background: rgba(0, 0, 0, 0.45);
+    box-shadow: none;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+  }
+
+  &--loading {
+    opacity: 0.72;
+  }
+}
+
+.s-event-card__follow-tag-text {
+  line-height: 1;
 }
 
 .s-event-card__hero-copy {

@@ -1,7 +1,7 @@
 import type { FC } from 'react';
 import { ImageWithFallback } from '../../../components/ImageWithFallback';
 import { formatEventHeroMetaLine } from '../../../utils/eventCardDisplay';
-import { formatActivityRegionLabel } from '../../../utils/filterActivitiesForEventsCatalog';
+import { formatActivityAreaLabel } from '../../../utils/filterActivitiesForEventsCatalog';
 import type { EventCardUi } from '../../../utils/apiMappers';
 import { thumbnailImageUrl } from '../../../utils/imageUrl';
 import { IMAGE_SIZE } from '../../../constants/imageSizes';
@@ -38,7 +38,7 @@ export const EventsHotCarousel: FC<EventsHotCarouselProps> = ({
       >
         <View className="s-events-hot-carousel__track">
           {events.map((event) => {
-            const regionLabel = formatActivityRegionLabel(event.region);
+            const regionLabel = formatActivityAreaLabel(event);
             const metaLine = formatEventHeroMetaLine(event.date, event.location);
             const thumbSrc = thumbnailImageUrl(event.image, IMAGE_SIZE.eventCardList);
 

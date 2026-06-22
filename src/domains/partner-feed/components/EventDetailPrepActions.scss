@@ -23,7 +23,7 @@
   display: flex;
   align-items: stretch;
   gap: 10px;
-  min-height: 40px;
+  min-height: 44px;
 }
 
 .s-prep-stepper__track {
@@ -31,29 +31,34 @@
   flex-direction: column;
   align-items: center;
   flex-shrink: 0;
-  width: 18px;
-  padding-top: 10px;
+  width: 16px;
+  padding-top: 11px;
 }
 
 .s-prep-stepper__node {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 14px;
-  height: 14px;
+  width: 8px;
+  height: 8px;
   border-radius: 9999px;
   box-sizing: border-box;
   flex-shrink: 0;
 
   &--done {
-    background: linear-gradient(135deg, #ff9f0a, #ffd60a);
-    box-shadow: 0 0 0 2px rgba(255, 159, 10, 0.2);
+    width: 8px;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.38);
+    border: none;
+    box-shadow: none;
   }
 
   &--next {
-    background: rgba(255, 159, 10, 0.16);
-    border: 2px solid #ff9f0a;
-    box-shadow: 0 0 10px rgba(255, 159, 10, 0.28);
+    width: 8px;
+    height: 8px;
+    background: #fff;
+    border: none;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.14);
   }
 
   &--pending {
@@ -63,22 +68,18 @@
 }
 
 .s-prep-stepper__node-check {
-  font-size: 9px;
-  font-weight: var(--s-fw-bold);
-  line-height: 1;
-  color: #1a1208;
+  display: none;
 }
 
 .s-prep-stepper__line {
   flex: 1;
-  width: 2px;
+  width: 1px;
   min-height: 18px;
-  margin: 3px 0 1px;
-  border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.1);
+  margin: 4px 0 2px;
+  background: rgba(255, 255, 255, 0.12);
 
   &--done {
-    background: linear-gradient(180deg, #ff9f0a, rgba(255, 159, 10, 0.35));
+    background: rgba(255, 255, 255, 0.28);
   }
 }
 
@@ -88,11 +89,11 @@
   gap: 8px;
   flex: 1;
   min-width: 0;
-  min-height: 40px;
+  min-height: 44px;
   margin: 0;
-  padding: 6px 4px 6px 0;
+  padding: 8px 0;
   border: none;
-  border-radius: 10px;
+  border-radius: 0;
   background: transparent;
   text-align: left;
   -webkit-tap-highlight-color: transparent;
@@ -103,39 +104,43 @@
   }
 
   &--next {
-    background: rgba(255, 159, 10, 0.08);
-    box-shadow: inset 0 0 0 1px rgba(255, 159, 10, 0.18);
-    padding-left: 8px;
-    padding-right: 6px;
+    .s-prep-stepper__label {
+      color: #fff;
+    }
+
+    .s-prep-stepper__action {
+      color: rgba(255, 255, 255, 0.88);
+    }
   }
 
   &--done {
-    opacity: 0.88;
+    .s-prep-stepper__label {
+      color: rgba(255, 255, 255, 0.56);
+    }
   }
 
   &--static {
-    cursor: default;
     pointer-events: none;
   }
 
   &--pressed {
-    opacity: 0.82;
+    opacity: 0.72;
   }
 }
 
 .s-prep-stepper__label {
   flex: 1;
   min-width: 0;
-  font-size: 13px;
-  font-weight: var(--s-fw-semibold);
-  color: #ffffff;
+  font-size: 15px;
+  font-weight: var(--s-fw-medium);
+  color: rgba(255, 255, 255, 0.92);
   line-height: 1.25;
 }
 
 .s-prep-stepper__action {
   flex-shrink: 0;
-  max-width: 46%;
-  font-size: 12px;
+  max-width: 48%;
+  font-size: 13px;
   font-weight: var(--s-fw-medium);
   color: #8e8e93;
   line-height: 1.2;
@@ -145,61 +150,23 @@
   text-overflow: ellipsis;
 
   &--next {
-    color: #ffbf5a;
-    font-weight: var(--s-fw-bold);
+    color: #fff;
+    font-weight: var(--s-fw-semibold);
   }
 }
 
 .s-prep-stepper__chevron {
   flex-shrink: 0;
-  opacity: 0.7;
-}
-
-.s-prep-stepper__divider {
-  height: 1px;
-  margin: 6px 0 4px;
-  background: rgba(255, 255, 255, 0.06);
-}
-
-.s-prep-stepper__utility {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-  min-height: 34px;
-  margin: 0;
-  padding: 4px 4px 4px 0;
-  border: none;
-  border-radius: 8px;
-  background: transparent;
-  text-align: left;
-  -webkit-tap-highlight-color: transparent;
-
-  &::after {
-    display: none;
-    border: 0;
-  }
-
-  &--pressed {
-    opacity: 0.82;
-  }
-}
-
-.s-prep-stepper__utility-label {
-  flex: 1;
-  min-width: 0;
-  font-size: 12px;
-  font-weight: var(--s-fw-medium);
-  color: #8e8e93;
-  line-height: 1.25;
+  opacity: 0.45;
 }
 
 .s-prep-stepper__complete {
-  margin-top: 6px;
-  padding: 0 2px;
-  font-size: 11px;
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 13px;
   font-weight: var(--s-fw-medium);
-  line-height: 1.35;
-  color: rgba(255, 159, 10, 0.78);
-  text-align: center;
+  line-height: 1.4;
+  color: #8e8e93;
+  text-align: left;
 }

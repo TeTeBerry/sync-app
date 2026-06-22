@@ -125,3 +125,29 @@ export function patchProfileSummaryOnSelection(options: {
 
   return patched;
 }
+
+/** Optimistically decrement profile event count when unregistering. */
+export function patchProfileSummaryOnUnregister(): boolean {
+  let patched = false;
+  setCacheData<ProfileSummary>(['profile', 'summary'], (prev) => {
+    if (!prev) return prev;
+    patched = true;
+    return {
+      ...prev,
+      stats: {
+        ...prev.stats,
+        events: Math.max(0, (prev.stats.events ?? 0) - 1),
+      },
+    };
+  });
+
+  if (patched) {
+    broadcastCacheData(['profile', 'summary']);
+    const summary = getCacheData<ProfileSummary>(['profile', 'summary']);
+    if (summary) {
+      persistProfileSummary(summary);
+    }
+  }
+
+  return patched;
+}

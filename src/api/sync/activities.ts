@@ -1,7 +1,8 @@
-import { apiGet, apiPost } from '../../utils/apiClient';
+import { apiDelete, apiGet, apiPost } from '../../utils/apiClient';
 import { getActivityTypeLabel } from '../../constants/activityType';
 import type {
   ActivityRegistrationResult,
+  ActivityUnregisterResult,
   BackendActivity,
   CatalogLineupArtist,
   HomeSummary,
@@ -31,6 +32,8 @@ function buildHomeSummaryFromCatalog(activities: BackendActivity[]): HomeSummary
     hot: Boolean(item.hot),
     attendees: item.attendees ?? 0,
     going: false,
+    region: item.region,
+    area: item.area,
   }));
 
   const people = activities.reduce((sum, item) => sum + (item.attendees ?? 0), 0);
@@ -69,6 +72,13 @@ export function registerForActivity(legacyId: number) {
   return apiPost<ActivityRegistrationResult>(
     `/activities/${legacyId}/register`,
     {},
+    ownerQueryParams(),
+  );
+}
+
+export function unregisterForActivity(legacyId: number) {
+  return apiDelete<ActivityUnregisterResult>(
+    `/activities/${legacyId}/register`,
     ownerQueryParams(),
   );
 }

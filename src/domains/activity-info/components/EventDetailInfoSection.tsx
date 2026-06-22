@@ -3,7 +3,7 @@ import { ChevronRight } from '@/components/icons';
 import { Button } from '@/components/ui';
 import type { BackendActivity } from '@/types/backend';
 import { formatEventHeroMetaLine } from '@/utils/eventCardDisplay';
-import { formatActivityRegionLabel } from '@/utils/filterActivitiesForEventsCatalog';
+import { formatActivityAreaLabel } from '@/utils/filterActivitiesForEventsCatalog';
 import {
   getActivityStatusFromActivity,
   type ActivityStatus,
@@ -55,7 +55,7 @@ export const EventDetailInfoSection: FC<EventDetailInfoSectionProps> = ({
 
   const status = getActivityStatusFromActivity(activity.date, activity.name);
   const metaLine = formatEventHeroMetaLine(activity.date, activity.location);
-  const regionLabel = formatActivityRegionLabel(activity.region);
+  const regionLabel = formatActivityAreaLabel(activity);
   const updatedAt = formatInfoUpdatedAt(activity.infoUpdatedAt);
   const categoryLabel =
     activity.activityType === 'indoor'
@@ -102,7 +102,7 @@ export const EventDetailInfoSection: FC<EventDetailInfoSectionProps> = ({
           <Text className="s-event-detail-info__cta-text">
             {t('activityInfo.viewLineupCta')}
           </Text>
-          <ChevronRight size={16} color="#fff" />
+          <ChevronRight size={16} color="#8e8e93" />
         </Button>
 
         {showSubscribeBanner ? (
