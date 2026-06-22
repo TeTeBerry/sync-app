@@ -3,16 +3,17 @@ import React, { memo, useMemo } from 'react';
 import { ImageWithFallback } from '../ImageWithFallback';
 import { Button } from '../ui';
 import { Flame, Ticket, Users } from '../../components/icons';
+import {
+  ACTIVITY_MAP_REGION_LABELS,
+  type ActivityMapRegion,
+} from '../../constants/activityMapRegion';
 import { getGenerateTravelGuideCta } from '../../constants/aiCtaLabels';
 import {
   activityStatusCardClass,
   getActivityStatusFromActivity,
 } from '../../utils/activityStatus';
 import { Text, View } from '@tarojs/components';
-import {
-  deriveEventCardStats,
-  formatEventHeroMetaLine,
-} from '../../utils/eventCardDisplay';
+import { formatEventHeroMetaLine } from '../../utils/eventCardDisplay';
 import { PLACEHOLDER_EVENT_HERO } from '../../constants/remoteImages';
 import { thumbnailImageUrl } from '../../utils/imageUrl';
 import { IMAGE_SIZE } from '../../constants/imageSizes';
@@ -26,10 +27,12 @@ interface EventCardProps {
   date?: string;
   location?: string;
   image?: string;
-  attendees?: number;
   hot?: boolean;
   variant?: 'default' | 'list';
   category?: string;
+  region?: ActivityMapRegion;
+  lineupPublished?: boolean;
+  recruitPostCount?: number;
   onTeamUp?: () => void;
   onTeamUpWarmup?: () => void;
 }
@@ -40,16 +43,25 @@ const EventCardInner: React.FC<EventCardProps> = ({
   date = 'Sat 12/20 at 10:00 PM',
   location = 'The Ave Live',
   image = PLACEHOLDER_EVENT_HERO,
-  attendees = 0,
   hot = false,
   variant = 'list',
   category = '',
+  region,
+  lineupPublished,
+  recruitPostCount = 0,
   onTeamUp,
   onTeamUpWarmup,
 }) => {
   const t = useT();
   const travelGuideCta = getGenerateTravelGuideCta();
   const displayCategory = category || t('eventCard.category');
+  const regionLabel = region ? ACTIVITY_MAP_REGION_LABELS[region] : null;
+  const lineupBadge =
+    lineupPublished === true
+      ? t('eventCard.lineupPublished')
+      : lineupPublished === false
+        ? t('eventCard.lineupPending')
+        : null;
   const legacyId = resolveEventCardLegacyId(id);
   const isNavigating = useRouteTransitionActive(legacyId ?? undefined);
   const thumbSrc = thumbnailImageUrl(
@@ -61,7 +73,10 @@ const EventCardInner: React.FC<EventCardProps> = ({
     () => formatEventHeroMetaLine(date, location),
     [date, location],
   );
-  const stats = useMemo(() => deriveEventCardStats(attendees), [attendees]);
+  const recruitPostsLabel =
+    recruitPostCount > 0
+      ? t('common.teamPosts', { count: recruitPostCount })
+      : t('common.teamPostsEmpty');
 
   if (variant !== 'list') {
     return (
@@ -122,11 +137,26 @@ const EventCardInner: React.FC<EventCardProps> = ({
         <View className="s-event-card__detail-meta">
           <View className="s-event-card__joined">
             <Users size={14} aria-hidden />
-            <Text className="s-event-card__joined-text">
-              {t('common.teamPosts', { count: stats.teamPostCount })}
-            </Text>
+            <Text className="s-event-card__joined-text">{recruitPostsLabel}</Text>
           </View>
           <View className="s-event-card__detail-tags">
+            {regionLabel ? (
+              <Text className="s-event-card__detail-tag s-event-card__detail-tag--region">
+                {regionLabel}
+              </Text>
+            ) : null}
+            {lineupBadge ? (
+              <Text
+                className={[
+                  's-event-card__detail-tag',
+                  lineupPublished
+                    ? 's-event-card__detail-tag--lineup-published'
+                    : 's-event-card__detail-tag--lineup-pending',
+                ].join(' ')}
+              >
+                {lineupBadge}
+              </Text>
+            ) : null}
             <Text className="s-event-card__detail-tag">{displayCategory}</Text>
             <Text className="s-event-card__detail-tag s-event-card__detail-tag--ai">
               {t('eventCard.aiTag', { cta: travelGuideCta })}

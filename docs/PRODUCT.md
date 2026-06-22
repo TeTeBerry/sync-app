@@ -108,9 +108,9 @@ rg '联系队友|配对成功|平台担保|智能配对|buddy-matching' src/
 | 分包 | 页面 | 说明 |
 |------|------|------|
 | `packageEvent` | `event-detail` | **组队招募墙（Q2 主战场）**、阵容、攻略、准备清单（折叠） |
-| | `exclusive-itinerary` | 专属时间表 |
+| | `exclusive-itinerary` | 专属时间表（依赖官宣；未出时可订阅，不阻塞找队） |
 | | `my-itinerary` | 已生成行程 |
-| | `personality-test` | 人格测试 → 推荐节 → 找队/发招募 |
+| | `personality-test` | 人格测试 → 同步曲风偏好 → 找队/发招募（官宣前可用） |
 | | `ai-travel-guide` | 出行攻略详情 |
 | `packageProfile` | `profile-activities` / `profile-posts` / `settings` / `legal-document` / `notifications` | 同现网 |
 
@@ -140,7 +140,7 @@ rg '联系队友|配对成功|平台担保|智能配对|buddy-matching' src/
 
 ### 2.5 Festival Plan（观演准备 · 降优先级）
 
-三项**个人准备记录**（非平台承诺）：攻略 → 行程 → 发招募。
+三项**个人准备记录**（非平台承诺）。UI checklist 固定展示顺序为 `攻略 → 行程 → 发招募`（见 `festivalPlanTaskDefs.ts`），但 **展示顺序 ≠ 推荐完成顺序**——见下节时间线。
 
 | 任务 | Q2 统一跳转 |
 |------|-------------|
@@ -150,7 +150,68 @@ rg '联系队友|配对成功|平台担保|智能配对|buddy-matching' src/
 
 进度条展示：**首页「我的下一场」+ 活动详情折叠区**。
 
----
+#### 真实时间线 vs Checklist 顺序
+
+专属时间表依赖**主办方官宣阵容 / 发布 timetable**，通常临近开场才可用；公开组队招募往往在**官宣前**就已发生。产品叙事与 Prep Nudge（US-Q2-34）按阶段推荐，**不强制**「先完成行程再找队」。
+
+| 阶段 | 距离开场 | 用户典型行为 | 平台可用信号 / 能力 |
+|------|----------|--------------|---------------------|
+| **早鸟 / 官宣前** | 数周～数月 | 找同行、发招募、聊风格/暗号 | **人格测试**（曲风 `favorGenres`）· AI 找队 · 招募墙 · 翻招募卡 |
+| **有出行意向** | 不定 | 规划交通住宿 | **出行攻略**（出发地/预算 → 预填找队或发帖，US-Q2-30） |
+| **官宣后 / 临行前** | 临近开场 | 排 set、对 timetable | **专属时间表**（阵容未出时展示订阅，**不阻塞**找队） |
+
+**早期找队信号优先级**（均用于公开帖检索次排序或预填，非配对撮合）：
+
+| 信号 | 何时可用 | 找队用途 |
+|------|----------|----------|
+| 人格测试 | 随时（约 5 分钟） | 同步 `favorGenres`、发帖预填、翻卡加权（US-Q2-27 / 17 / 29） |
+| 设置页偏好 | 用户手改后 | 同左；覆盖人格默认值 |
+| 出行攻略 | 填表 / 选预算档后 | 出发地、预算预填搜索与发帖（US-Q2-30 / 35） |
+| 专属时间表 | 官宣后 | 个人观演准备为主；对找队为弱信号 |
+
+**对用户的一句话**：阵容和时间表往往临近才公布，但找队友可以更早开始；测人格或浏览公开招募即可，系统用你自愿填的偏好帮你**检索和排序公开帖**；等官方时间表出来后再排专属行程。
+
+### 2.6 冷启动（双轨）
+
+上线初期同时跑两条互补轨道，避免「空城」或「无新用户」：
+
+| 轨道 | 目标 | 负责 | Story |
+|------|------|------|-------|
+| **种子招募帖** | 热门活动招募墙有可见内容 | 运营发帖 | US-Q2-21 |
+| **人格测试微信裂变** | 低成本拉新 + 沉淀曲风偏好（`favorGenres`） | 产品 / 增长 | US-Q2-18 · 17 · 27 |
+
+#### 人格裂变漏斗（微信分享）
+
+```text
+A 测完 → 分享小程序卡片 / 海报（现网 `onShareAppMessage` 已有）
+  → B 点开（落地页展示 A 的类型 teaser：share=1 · primaryType · soulDjId）
+  → B 自己完成测试 + 登录提交
+  → 写入 favorGenres（类型 genreTags → US-Q2-27，待接）
+  → 主 CTA 进有种子的活动招募墙 / 预填发招募（US-Q2-17）
+```
+
+**重要**：分享链接只携带**分享者**的类型用于 teaser；**新用户偏好**须在该用户**自己测完并提交**后才写入，点开未测完不算拿到偏好。
+
+#### 现网 vs 待收口
+
+| 能力 | 状态 |
+|------|------|
+| 微信卡片 / 朋友圈分享、分享 path、好友 teaser | ✅ 已有（`personalityWechatShare.util.ts`） |
+| 保存 / 分享海报 | ✅ 已有 |
+| 首页人格测试入口 | ✅ `HomePersonalityTestEntry` |
+| 测完写 `favorGenres` | 🔲 US-Q2-27 |
+| 结果页主 CTA → 招募墙转化 | 🔲 US-Q2-17 |
+| 分享卡片视觉与合规终检 | 🔲 US-Q2-18（承接 US-Q1-16） |
+
+#### 裂变文案合规
+
+| ✅ 可用 | ❌ 禁止 |
+|---------|---------|
+| 测测你的本命 DJ / Raver 人格 | 测测你的搭子、缘分队友 |
+| 我是「XX 型」Raver（分享标题现网） | 匹配度、配对成功 |
+| 找同风格公开招募（测完 CTA） | 智能匹配最佳队友 |
+
+**代码**：`personalityWechatShare.util.ts` · `PersonalityResultView.tsx` · `usePersonalityTestPage.ts` · `personality-types.ts`（`genreTags`）
 
 ## 三、组队招募（Q2 核心改版）
 
@@ -187,10 +248,11 @@ rg '联系队友|配对成功|平台担保|智能配对|buddy-matching' src/
 | 入口 | 实现 |
 |------|------|
 | 活动详情招募区 | **已有**：帖列表上方 `EventDetailPostSearchBar` + 城市 chip；`POST /posts/ai-search`；结果替换列表 |
+| 人格测试 → 找队 | 结果页主 CTA 进招募墙 / 预填发帖；测完同步曲风偏好（US-Q2-17 / 27） |
 | ~~准备 Tab 对话~~ | **已移除**（US-Q2-22） |
-| Q2 待优化 | 文案改为「AI 找队」、公开招募表述、无结果引导发招募、（可选）展示解析条件 |
+| Q2 待优化 | 洞察行「已参考你的偏好」、无结果引导发招募、Prep Nudge 分阶段推荐（US-Q2-34） |
 
-后端：`PostSearchService` · `BuddyPostSearchParseService` · 关键词相关性优先排序，再结合用户资料（城市/曲风偏好）作次要排序；非付费匹配。
+后端：`PostSearchService` · `BuddyPostSearchParseService` · **关键词相关性优先**，再结合用户资料（城市 / 曲风偏好，含人格测试写入的 `favorGenres`）作**次要排序**；非付费匹配。官宣前无行程时，**人格偏好是早期找队的主要可用信号**（见 §2.5）。
 
 ### 3.4 评论与互动
 
@@ -241,9 +303,9 @@ rg '联系队友|配对成功|平台担保|智能配对|buddy-matching' src/
 | 阶段 | 周期 | 重点 |
 |------|------|------|
 | **0–4** | 已完成 | 合规、招募改版、去对话化、AI 找队、招募字段 |
-| **5 上线冲刺** | ～2 周（目标 07-06 前提审） | 种子帖、冒烟提审、可选偏好洞察/Prep Nudge |
+| **5 上线冲刺** | ～2 周（目标 07-06 前提审） | 种子帖、冒烟提审、可选偏好洞察/Prep Nudge；**人格分享链路现网可用**，转化收口见 17/27 |
 | **6 上线后** | 2～4 周 | Scene Agent 基建（[SCENE-AGENT.md](./SCENE-AGENT.md)）、结构化申请、发帖字段 |
-| **7 增长** | 有数据后 | 人格串联、翻卡、AI 发帖、攻略串联 |
+| **7 增长** | 有数据后 | 人格裂变转化收口（17/18/27/29）、翻卡、AI 发帖、攻略串联 |
 
 完整 Story 与验收：[Q2-USER-STORIES.md](./Q2-USER-STORIES.md)。
 
@@ -258,6 +320,8 @@ rg '联系队友|配对成功|平台担保|智能配对|buddy-matching' src/
 | 发招募转化 | 浏览招募墙后发帖率 |
 | 活动搜索使用 | 活动 Tab 搜索 / 首页 Chip CTR |
 | 查节 → 选活动 | 搜索后进详情或 register 率 |
+| **人格裂变** | 分享次数 · 分享落地 UV · 落地→测完率 · 测完→进招募墙率 |
+| **偏好沉淀** | 测完且已写 `favorGenres` 的用户占比（US-Q2-27） |
 | 合规 | 类目/资质驳回 0；联系方式拦截正常 |
 
 ---
@@ -290,7 +354,7 @@ rg '联系队友|配对成功|平台担保|智能配对|buddy-matching' src/
 | 后端 AI 搜索 | `sync-app-backend/.../post-search.service.ts` |
 | Festival Plan | `src/domains/festival-plan/` |
 | 出行攻略 | `src/domains/travel-guide/` |
-| 人格测试 | `src/domains/personality-test/` |
+| 人格测试 / 微信分享 | `domains/personality-test/` · `personalityWechatShare.util.ts` |
 | 活动搜索 | `pages/events/` · `filterActivitiesForEventsSearch.ts` |
 | Agent 工具 | `sync-app-backend/src/ai/agent/tools/` |
 | 发帖链路 | [POST-LIFECYCLE.md](./POST-LIFECYCLE.md) |

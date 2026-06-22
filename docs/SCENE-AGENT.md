@@ -37,7 +37,10 @@ US-Q2-22 已移除准备 Tab 与 WS 多轮对话；**能力保留在后端 tools
 | `prefs` | 设置 · 攻略 · 发帖 · 人格（US-Q2-27） |
 | `personalityType` | 人格测试结果 |
 | `festivalPlan` | 攻略 / 行程 / 是否已发招募 |
+| `lineupPublished` | 活动阵容 / timetable 是否已官宣（影响 itinerary 与 prep_nudge 分支） |
 | `trigger` | `search` · `chip` · `sheet_submit` · `page_enter` |
+
+**时间线原则**：专属时间表通常临近开场才可用；公开组队可在**官宣前**进行。Scene Run 在 `festivalPlan.itinerary` 为空时，应优先使用 `personalityType` / `prefs.favorGenres` 作为找队排序与预填信号，**不要求**用户先完成行程。详见 [PRODUCT.md §2.5](./PRODUCT.md#25-festival-plan观演准备--降优先级)。
 
 ### UI Effect 类型（目标契约）
 
@@ -63,9 +66,9 @@ US-Q2-22 已移除准备 Tab 与 WS 多轮对话；**能力保留在后端 tools
 | `recruit_compose` | 发帖 Sheet | 「AI 帮写」 | LLM 候选文案 | **Q2-28** |
 | `recruit_flip` | 翻招募卡页 | 翻卡 | 帖池加权 shuffle | **Q2-29** |
 | `guide_to_recruit` | 攻略完成 | CTA | `travelGuideFormToBuddyPrefill` | **Q2-30** |
-| `personality_next` | 人格结果 | 主 CTA | 偏好同步 + 路由 | **Q2-17** |
+| `personality_next` | 人格结果 / 分享落地 | 主 CTA · 测完提交 | 偏好同步 + 路由至有种子的招募墙 | **Q2-17** · **Q2-18** |
 | `lineup_dj` | 活动详情阵容 | 点 DJ | `query_dj_info` | **Q2-33** |
-| `prep_nudge` | 观演准备折叠区 | 进详情 | Festival Plan 规则 + 可选 LLM | **Q2-34** |
+| `prep_nudge` | 观演准备折叠区 | 进详情 | 分阶段规则（阵容是否官宣 · 偏好 · 招募进度）；可选 LLM | **Q2-34** |
 | `recruit_filters` | 招募墙 | 进入 / 有偏好 | 动态 Chip | **Q2-32** |
 
 **不做**：全站聊天、跨活动匹配队友、首页招募信息流 Agent。
@@ -92,7 +95,23 @@ US-Q2-22 已移除准备 Tab 与 WS 多轮对话；**能力保留在后端 tools
 
 ---
 
-## 五、无感交互五模式
+## 五、分阶段信号与 Scene 优先级
+
+公开组队与观演准备**不同步**。Prep Nudge / 找队相关 Scene 按下列优先级取信号（均只影响公开帖检索排序或预填，非配对）：
+
+| 用户阶段 | 典型 nudge / effect | 主要信号 |
+|----------|---------------------|----------|
+| 官宣前 · 未测人格 | 「去招募墙看看公开招募」 | 无偏好，关键词检索 |
+| 官宣前 · 已测人格 | 「已参考你的 Techno 偏好，去看看公开招募」 | `personalityType` → `favorGenres` |
+| 官宣前 · 未发招募 | 「还差：发一条公开招募」 | `festivalPlan.buddy_post` |
+| 有攻略 · 未找队 | 搜索框 `prefill_query`（出发地/人数） | 攻略表单槽位（`guide_to_recruit`） |
+| 阵容未官宣 | 行程项弱化或提示订阅；**不阻塞**找队 | `lineupPublished=false` |
+| 阵容已官宣 · 无行程 | 「时间表已出，去排你的专属 set」 | `lineupPublished=true` |
+| 已发招募 · 有新回复 | 「你的招募有 N 条新公开回复」 | 通知 / engagement |
+
+---
+
+## 六、无感交互五模式
 
 1. **幽灵预填** — 搜索框/表单灰色建议，点采纳  
 2. **一行洞察** — 列表上方解析摘要，无助手头像  
@@ -102,7 +121,7 @@ US-Q2-22 已移除准备 Tab 与 WS 多轮对话；**能力保留在后端 tools
 
 ---
 
-## 六、排期（与 Q2 Sprint 对齐）
+## 七、排期（与 Q2 Sprint 对齐）
 
 | 阶段 | 时间 | Scene 范围 |
 |------|------|------------|
@@ -112,7 +131,7 @@ US-Q2-22 已移除准备 Tab 与 WS 多轮对话；**能力保留在后端 tools
 
 ---
 
-## 七、代码索引
+## 八、代码索引
 
 | 层 | 路径 |
 |----|------|

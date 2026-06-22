@@ -1,6 +1,6 @@
 import type { PersonalityTestResult, RaverPersonalityType } from '../types';
 
-export const PERSONALITY_NICKNAME_PREFIXES = ['小', '阿', 'Q', '萌', '老'] as const;
+export const PERSONALITY_NICKNAME_PREFIXES = ['小', '阿', 'Q', '萌', '兔'] as const;
 
 export const PERSONALITY_NICKNAME_SUFFIXES = ['酱', '君', '宝', '崽', '儿'] as const;
 

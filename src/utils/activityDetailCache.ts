@@ -24,6 +24,12 @@ function minimalActivity(
     alias: fields.alias,
     damaiProjectId: fields.damaiProjectId,
     externalUrl: fields.externalUrl,
+    region: fields.region,
+    activityType: fields.activityType,
+    lineupPublished: fields.lineupPublished,
+    recruitPostCount: fields.recruitPostCount,
+    infoSource: fields.infoSource,
+    infoUpdatedAt: fields.infoUpdatedAt,
   };
 }
 
@@ -60,6 +66,12 @@ export function seedActivityDetailFromEventCard(event: EventCardUi): void {
       image: event.image,
       hot: event.hot,
       attendees: event.attendees,
+      region: event.region,
+      lineupPublished: event.lineupPublished,
+      recruitPostCount: event.recruitPostCount,
+      infoSource: event.infoSource,
+      infoUpdatedAt: event.infoUpdatedAt,
+      alias: event.alias,
     }),
   );
 }

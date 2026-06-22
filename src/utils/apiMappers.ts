@@ -17,12 +17,16 @@ export interface EventCardUi {
   latitude?: number;
   longitude?: number;
   region?: ActivityMapRegion;
-  distance: string;
+  alias?: string[];
   image: string;
   attendees: number;
   category: string;
   hot: boolean;
   going: boolean;
+  lineupPublished?: boolean;
+  recruitPostCount?: number;
+  infoSource?: string;
+  infoUpdatedAt?: string;
 }
 
 export type FeaturedEvent = {
@@ -70,6 +74,7 @@ export function mapActivitiesToEvents(
       latitude: activity.latitude,
       longitude: activity.longitude,
       region: activity.region as ActivityMapRegion | undefined,
+      alias: activity.alias,
       image: resolveActivityThumb(
         sanitizeRemoteImageUrl(
           resolveCatalogActivityImage(activity.legacyId, activity.image),
@@ -78,8 +83,11 @@ export function mapActivitiesToEvents(
       ),
       hot: Boolean(activity.hot),
       attendees: activity.attendees ?? 0,
-      distance: activity.hot ? '热门' : '',
       category: getActivityTypeLabel(activity.activityType),
+      lineupPublished: activity.lineupPublished,
+      recruitPostCount: activity.recruitPostCount ?? 0,
+      infoSource: activity.infoSource,
+      infoUpdatedAt: activity.infoUpdatedAt,
     }));
 }
 
@@ -101,7 +109,7 @@ export function mapSignupEventToFeaturedEvent(item: SignupEvent): FeaturedEvent 
     category: item.category ?? '',
     isHot,
     distance: item.location ?? '',
-    attendeeCount: `${item.attendees}+`,
+    attendeeCount: String(item.attendees ?? 0),
     remaining: '',
     guests: [],
     image: resolveActivityThumb(remote, 200),

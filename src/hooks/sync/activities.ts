@@ -50,6 +50,7 @@ import type { UpdateCurrentUserPayload } from '../../types/backend';
 import { updateCurrentUser } from '../../api/sync/users';
 import { useProfileActivitiesQuery } from './profile';
 import { buildSelectedActivityLegacyIds } from '../../utils/activitySelection';
+import { parseActivityLegacyId } from '../../utils/activityLegacyId';
 
 export function useActivitiesQuery(options?: QueryEnableOptions) {
   const tabEnabled = options?.enabled ?? true;
@@ -81,11 +82,20 @@ export function useActivitiesQuery(options?: QueryEnableOptions) {
 export function useEventList(options?: QueryEnableOptions) {
   const tabEnabled = options?.enabled ?? true;
   const query = useActivitiesQuery({ enabled: tabEnabled });
+  const selectedLegacyIds = useSelectedActivityLegacyIds();
 
   const events = useMemo((): EventCardUi[] => {
     if (!query.data) return [];
-    return [...mapActivitiesToEvents(query.data)].sort(compareActivitiesNearestFirst);
-  }, [query.data]);
+    return [...mapActivitiesToEvents(query.data)]
+      .map((event) => {
+        const legacyId = parseActivityLegacyId(event.id);
+        return {
+          ...event,
+          going: legacyId != null && selectedLegacyIds.has(legacyId),
+        };
+      })
+      .sort(compareActivitiesNearestFirst);
+  }, [query.data, selectedLegacyIds]);
 
   return {
     events,

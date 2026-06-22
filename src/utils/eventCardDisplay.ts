@@ -69,9 +69,3 @@ export function formatEventHeroSubtitle(title?: string, location?: string): stri
   if (year) return String(year);
   return locationPart ?? '';
 }
-
-/** Display-only stats derived from existing card fields (no API change). */
-export function deriveEventCardStats(attendees: number) {
-  const teamPostCount = Math.max(12, Math.round(attendees * 0.26));
-  return { teamPostCount };
-}

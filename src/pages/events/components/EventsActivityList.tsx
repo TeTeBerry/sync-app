@@ -58,9 +58,11 @@ export const EventsActivityList: FC<EventsActivityListProps> = ({
               date={event.date}
               location={event.location}
               image={event.image}
-              attendees={event.attendees}
               hot={event.hot}
               category={event.category}
+              region={event.region}
+              lineupPublished={event.lineupPublished}
+              recruitPostCount={event.recruitPostCount}
               variant="list"
               onTeamUp={() => onOpenDetail(event.id)}
               onTeamUpWarmup={() => onWarmDetail(event)}

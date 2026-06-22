@@ -313,5 +313,6 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     festivalPlanChecklist: festivalPlan.checklist,
     onFestivalPlanTaskPress: festivalPlan.onTaskPress,
     travelGuideGenerated,
+    activity: activityQuery.data,
   };
 }

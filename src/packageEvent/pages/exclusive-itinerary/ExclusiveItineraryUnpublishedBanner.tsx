@@ -1,7 +1,7 @@
 import { Button } from '../../../components/ui';
 import { Text, View } from '@tarojs/components';
 import { useT } from '@/hooks/useI18n';
-import { useActivityUpdateSubscribeAction } from './useActivityUpdateSubscribeAction';
+import { useActivityUpdateSubscribeAction } from '@/domains/activity-info';
 
 type ExclusiveItineraryUnpublishedBannerProps = {
   activityLegacyId?: number;

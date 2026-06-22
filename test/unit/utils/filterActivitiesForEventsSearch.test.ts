@@ -16,6 +16,7 @@ function event(
     category: partial.category ?? 'Festival',
     hot: false,
     going: false,
+    alias: partial.alias,
   };
 }
 
@@ -41,5 +42,18 @@ describe('filterActivitiesForEventsSearch', () => {
 
   it('expands festival chip aliases', () => {
     expect(filterActivitiesForEventsSearch(events, 'storm')).toEqual([events[1]]);
+  });
+
+  it('filters by activity alias', () => {
+    const withAlias = [
+      ...events,
+      event({
+        title: 'Tomorrowland Thailand',
+        alias: ['tml泰国', '明日世界'],
+      }),
+    ];
+    expect(filterActivitiesForEventsSearch(withAlias, '明日世界')).toEqual([
+      withAlias[3],
+    ]);
   });
 });

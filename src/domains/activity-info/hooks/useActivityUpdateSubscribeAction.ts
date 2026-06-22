@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
-import { requireAuth } from '../../../utils/authGate';
-import { isActivityUpdateSubscribedLocally } from '../../../utils/activityUpdateSubscribeStorage';
-import { subscribeToActivityUpdates } from '../../../utils/subscribeToActivityUpdates';
+import { requireAuth } from '@/utils/authGate';
+import { isActivityUpdateSubscribedLocally } from '@/utils/activityUpdateSubscribeStorage';
+import { subscribeToActivityUpdates } from '@/utils/subscribeToActivityUpdates';
 
 export function useActivityUpdateSubscribeAction(activityLegacyId?: number) {
   const [subscribed, setSubscribed] = useState(false);

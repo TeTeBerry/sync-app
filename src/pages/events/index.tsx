@@ -41,9 +41,18 @@ import { consumeEventsViewTabIntent } from '../../utils/eventsTabIntent';
 import { consumeEventsSearchQuery } from '../../utils/eventsSearchIntent';
 import { filterActivitiesForEventsSearch } from '../../utils/filterActivitiesForEventsSearch';
 import { EventsSearchBar } from './components/EventsSearchBar';
+import { EventsCatalogFilterChips } from './components/EventsCatalogFilterChips';
+import { EventsHotCarousel } from './components/EventsHotCarousel';
+import {
+  filterActivitiesByRegion,
+  filterActivitiesByTimeChip,
+  selectHotCatalogEvents,
+  type EventsCatalogRegionFilter,
+  type EventsCatalogTimeChip,
+} from '../../utils/filterActivitiesForEventsCatalog';
 
-/** Header + search + view tabs (px, design @ 375). */
-const EVENTS_CHROME_PX = 170;
+/** Header + search + filters + view tabs (px, design @ 375). */
+const EVENTS_CHROME_PX = 248;
 
 const Events: React.FC = () => {
   useEndRouteTransitionOnShow(ROUTES.EVENTS);
@@ -59,6 +68,8 @@ const Events: React.FC = () => {
   const [viewTab, setViewTab] = useState<EventsViewTab>('list');
   const [selectedDay, setSelectedDay] = useState(todayCalendarParts);
   const [searchQuery, setSearchQuery] = useState('');
+  const [regionFilter, setRegionFilter] = useState<EventsCatalogRegionFilter>('all');
+  const [timeChip, setTimeChip] = useState<EventsCatalogTimeChip | null>(null);
 
   useStaleBackgroundRefetch({
     refetch: refetchHomeSummary,
@@ -144,27 +155,43 @@ const Events: React.FC = () => {
     [events, warmEventDetail],
   );
 
-  const festivalEvents = useMemo(() => sortFestivalEventsByDate(events), [events]);
-
-  const allEventsByDate = useMemo(
-    () => sortAllEventsByDate(upcomingEvents),
-    [upcomingEvents],
+  const regionFilteredEvents = useMemo(
+    () => filterActivitiesByRegion(upcomingEvents, regionFilter),
+    [regionFilter, upcomingEvents],
   );
 
+  const listPipelineEvents = useMemo(() => {
+    const sorted = sortAllEventsByDate(regionFilteredEvents);
+    return filterActivitiesByTimeChip(sorted, timeChip);
+  }, [regionFilteredEvents, timeChip]);
+
   const filteredListEvents = useMemo(
-    () => filterActivitiesForEventsSearch(allEventsByDate, searchQuery),
-    [allEventsByDate, searchQuery],
+    () => filterActivitiesForEventsSearch(listPipelineEvents, searchQuery),
+    [listPipelineEvents, searchQuery],
+  );
+
+  const hotCarouselEvents = useMemo(
+    () => selectHotCatalogEvents(regionFilteredEvents),
+    [regionFilteredEvents],
   );
 
   const listEmptyText = useMemo(() => {
     if (searchQuery.trim()) {
       return t('events.searchEmpty');
     }
-    return t('events.empty');
-  }, [searchQuery, t]);
+    if (regionFilter !== 'all' || timeChip) {
+      return t('events.catalogEmptyFiltered');
+    }
+    return t('events.catalogEmpty');
+  }, [regionFilter, searchQuery, t, timeChip]);
+
+  const regionFilteredFestivalEvents = useMemo(
+    () => sortFestivalEventsByDate(filterActivitiesByRegion(events, regionFilter)),
+    [events, regionFilter],
+  );
 
   const calendarListEvents = useMemo(() => {
-    const base = upcomingEvents
+    const base = regionFilteredEvents
       .filter(isFestivalEvent)
       .sort(compareActivitiesNearestFirst);
     if (!selectedDay) return base;
@@ -172,7 +199,10 @@ const Events: React.FC = () => {
       activityOccursOnDay(event, selectedDay.year, selectedDay.month, selectedDay.day),
     );
     return onDay.length > 0 ? onDay : base;
-  }, [selectedDay, upcomingEvents]);
+  }, [regionFilteredEvents, selectedDay]);
+
+  const showHotCarousel =
+    viewTab === 'list' && !searchQuery.trim() && hotCarouselEvents.length > 0;
 
   const handleMonthChange = useCallback((year: number, month: number) => {
     setCalendarMonth({ year, month });
@@ -188,6 +218,15 @@ const Events: React.FC = () => {
       <View className="s-page-with-tabbar__main s-events">
         <EventsPageHeader navInsets={navInsets} upcomingCount={upcomingEvents.length} />
         <EventsSearchBar value={searchQuery} onChange={setSearchQuery} />
+        {viewTab !== 'artists' ? (
+          <EventsCatalogFilterChips
+            region={regionFilter}
+            timeChip={timeChip}
+            showTimeChips={viewTab === 'list'}
+            onRegionChange={setRegionFilter}
+            onTimeChipChange={setTimeChip}
+          />
+        ) : null}
         <View className="s-events__view-tabs-wrap">
           <EventsViewTabs activeTab={viewTab} onChange={setViewTab} />
         </View>
@@ -209,6 +248,13 @@ const Events: React.FC = () => {
                 <ThemedPageLoader variant="skeleton-feed" minHeight={280} />
               ) : viewTab === 'list' ? (
                 <>
+                  {showHotCarousel ? (
+                    <EventsHotCarousel
+                      events={hotCarouselEvents}
+                      onOpenDetail={openDetail}
+                      onWarmDetail={warmEventDetail}
+                    />
+                  ) : null}
                   <View className="s-events__section-head s-events__section-head--list">
                     <Text className="s-events__section-title">
                       {t('events.allActivities')}
@@ -226,7 +272,7 @@ const Events: React.FC = () => {
               ) : (
                 <>
                   <EventsActivityCalendar
-                    activities={festivalEvents}
+                    activities={regionFilteredFestivalEvents}
                     year={calendarMonth.year}
                     month={calendarMonth.month}
                     selected={selectedDay}

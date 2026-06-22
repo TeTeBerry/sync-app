@@ -1,23 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import {
-  EDC_THAILAND_2026_IMAGE_URL,
-  EDC_THAILAND_2026_LEGACY_ID,
-  resolveCatalogActivityImage,
-} from '@/constants/activityCatalogImages';
+import { resolveCatalogActivityImage } from '@/constants/activityCatalogImages';
 
 describe('activityCatalogImages', () => {
-  it('overrides EDC Thailand hero image from catalog', () => {
-    expect(
-      resolveCatalogActivityImage(
-        EDC_THAILAND_2026_LEGACY_ID,
-        'https://old.example/poster.jpg',
-      ),
-    ).toBe(EDC_THAILAND_2026_IMAGE_URL);
+  it('returns API image when provided', () => {
+    expect(resolveCatalogActivityImage(5, 'static/activity/edc-thailand.jpg')).toBe(
+      'static/activity/edc-thailand.jpg',
+    );
   });
 
-  it('keeps unknown activity image when no catalog override exists', () => {
-    expect(resolveCatalogActivityImage(4, 'https://storm.example/poster.jpg')).toBe(
-      'https://storm.example/poster.jpg',
-    );
+  it('returns empty string when image is missing', () => {
+    expect(resolveCatalogActivityImage(4, null)).toBe('');
   });
 });

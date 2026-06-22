@@ -1,3 +1,4 @@
+import { ACTIVITY_MAP_REGION_LABELS } from '../constants/activityMapRegion';
 import { HOME_FESTIVAL_SHORTCUT_CHIPS } from '../constants/homeFestivalShortcuts';
 import type { EventCardUi } from './apiMappers';
 
@@ -6,7 +7,16 @@ function normalizeForMatch(text: string): string {
 }
 
 function eventSearchHaystack(event: EventCardUi): string {
-  return [event.title, event.location, event.category].filter(Boolean).join(' ');
+  const regionLabel = event.region ? ACTIVITY_MAP_REGION_LABELS[event.region] : '';
+  return [
+    event.title,
+    event.location,
+    event.category,
+    regionLabel,
+    ...(event.alias ?? []),
+  ]
+    .filter(Boolean)
+    .join(' ');
 }
 
 function expandQueryTerms(query: string): string[] {

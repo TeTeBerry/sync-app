@@ -5,6 +5,7 @@ import ThemedPageLoader from '../../../components/ThemedPageLoader';
 import { useConfirmDialog } from '../../../hooks/useConfirmDialog';
 import { LoginInterceptHost } from '../../../components/auth/LoginInterceptHost';
 import EventDetailFallback from './components/EventDetailFallback';
+import { EventDetailInfoSection } from '@/domains/activity-info';
 import {
   EventDetailComposerSection,
   EventDetailPostSearchBar,
@@ -99,6 +100,7 @@ const EventDetailPage = () => {
     festivalPlanChecklist,
     onFestivalPlanTaskPress,
     travelGuideGenerated,
+    activity,
   } = page;
 
   return (
@@ -147,6 +149,14 @@ const EventDetailPage = () => {
         >
           <View className="s-event-detail__scroll-inner">
             {!showHeaderSkeleton ? (
+              <EventDetailInfoSection
+                activity={activity}
+                activityLegacyId={page.eventId}
+                onOpenExclusiveItinerary={handleOpenExclusiveItinerary}
+              />
+            ) : null}
+
+            {!showHeaderSkeleton ? (
               <EventDetailComposerSection
                 onAiGuideClick={handleOpenAiGuide}
                 activityTitle={activityTitle}
@@ -160,6 +170,11 @@ const EventDetailPage = () => {
             ) : null}
 
             <View id="event-detail-posts" className="s-event-detail__posts">
+              {!showHeaderSkeleton ? (
+                <Text className="s-event-detail__recruit-kicker">
+                  {t('eventDetail.recruitSectionTitle')}
+                </Text>
+              ) : null}
               {!showHeaderSkeleton ? (
                 <>
                   <EventDetailPostFilterBar

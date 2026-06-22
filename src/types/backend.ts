@@ -30,6 +30,10 @@ export interface BackendActivity {
   attendees?: number;
   damaiProjectId?: string;
   externalUrl?: string;
+  infoSource?: string;
+  infoUpdatedAt?: string;
+  lineupPublished?: boolean;
+  recruitPostCount?: number;
 }
 
 export type PrivacyLevel = 'public' | 'private';
