@@ -36,4 +36,20 @@ describe('i18n translate', () => {
     expect(translate('tab.profile', useLocaleStore.getState().locale)).toBe('Me');
     useLocaleStore.setState({ locale: 'zh-CN' });
   });
+
+  it('translate works when global performance is unavailable (WeChat device)', () => {
+    const originalPerformance = globalThis.performance;
+    Object.defineProperty(globalThis, 'performance', {
+      configurable: true,
+      value: undefined,
+    });
+    try {
+      expect(translate('tab.home', 'zh-CN')).toBe('首页');
+    } finally {
+      Object.defineProperty(globalThis, 'performance', {
+        configurable: true,
+        value: originalPerformance,
+      });
+    }
+  });
 });

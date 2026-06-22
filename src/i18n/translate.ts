@@ -11,6 +11,14 @@ import { useLocaleStore } from './localeStore';
 
 ensureDefaultMessagesLoaded();
 
+/** DevTools exposes Web `performance`; WeChat device runtime may not — avoid crashing on `t()`. */
+function readMonotonicTime(): number {
+  if (typeof performance !== 'undefined' && typeof performance.now === 'function') {
+    return performance.now();
+  }
+  return Date.now();
+}
+
 export type TranslateParams = Record<string, string | number>;
 
 interface CacheEntry {
@@ -54,7 +62,7 @@ class TranslationCache {
   }
 
   get(key: string, locale: AppLocale, params?: TranslateParams): string | null {
-    const startTime = performance.now();
+    const startTime = readMonotonicTime();
     this.stats.totalCalls++;
 
     const cacheKey = this.generateKey(key, locale, params);
@@ -64,12 +72,12 @@ class TranslationCache {
       entry.hitCount++;
       entry.timestamp = Date.now();
       this.stats.hits++;
-      this.updateLookupTime(performance.now() - startTime);
+      this.updateLookupTime(readMonotonicTime() - startTime);
       return entry.value;
     }
 
     this.stats.misses++;
-    this.updateLookupTime(performance.now() - startTime);
+    this.updateLookupTime(readMonotonicTime() - startTime);
     return null;
   }
 
