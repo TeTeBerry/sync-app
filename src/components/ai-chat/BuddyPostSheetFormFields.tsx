@@ -58,7 +58,9 @@ export function BuddyPostSheetFormFields({
           {t('posts.headcountLabel')}
         </Text>
         <View className="s-ai-guide-plan-sheet__input-wrap">
-          <Users size={18} className="s-ai-guide-plan-sheet__input-icon" aria-hidden />
+          <View className="s-ai-guide-plan-sheet__input-icon-wrap" aria-hidden>
+            <Users size={16} className="s-ai-guide-plan-sheet__input-icon" />
+          </View>
           <Input
             className="s-ai-guide-plan-sheet__input"
             type="text"

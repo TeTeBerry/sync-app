@@ -4,7 +4,9 @@ import {
   departureDisplayValue,
   departureValueForSubmit,
   eventCityFromLocation,
+  filterLocalDepartureCitySuggestions,
   mapPlaceSuggestionsToDepartureItems,
+  mergeDepartureSuggestionItems,
   normalizeDepartureForSubmit,
   suggestionRegionForKeyword,
 } from '@/utils/travelGuideDepartureSuggestions';
@@ -65,5 +67,22 @@ describe('travelGuideDepartureSuggestions', () => {
       }),
     ).toBe('上海');
     expect(suggestionRegionForKeyword('拼多多', { eventCity: '深圳' })).toBeUndefined();
+  });
+
+  it('filters local city suggestions instantly', () => {
+    expect(filterLocalDepartureCitySuggestions('')).toHaveLength(8);
+    expect(filterLocalDepartureCitySuggestions('上')).toEqual(['上海']);
+    expect(filterLocalDepartureCitySuggestions('深')).toEqual(['深圳']);
+  });
+
+  it('merges local and remote suggestions without duplicates', () => {
+    const merged = mergeDepartureSuggestionItems(
+      [{ label: '上海', kind: 'city', city: '上海', address: '上海' }],
+      [
+        { label: '上海虹桥站', kind: 'place', city: '上海市', address: '闵行区' },
+        { label: '上海', kind: 'city', city: '上海', address: '上海' },
+      ],
+    );
+    expect(merged.map((item) => item.label)).toEqual(['上海', '上海虹桥站']);
   });
 });

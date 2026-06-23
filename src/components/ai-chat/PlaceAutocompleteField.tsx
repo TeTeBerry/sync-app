@@ -7,12 +7,16 @@ import {
 import {
   departureCityFromSuggestion,
   departureDisplayValue,
+  localDepartureCitySuggestionItems,
   mapPlaceSuggestionsToDepartureItems,
+  mergeDepartureSuggestionItems,
   suggestionRegionForKeyword,
   type DepartureSuggestionItem,
 } from '../../utils/travelGuideDepartureSuggestions';
 import { useT } from '@/hooks/useI18n';
 import { Input, ScrollView, Text, View } from '@tarojs/components';
+
+const REMOTE_DEBOUNCE_MS = 150;
 
 export type PlaceAutocompleteFieldProps = {
   value: string;
@@ -46,46 +50,60 @@ export function PlaceAutocompleteField({
   const t = useT();
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [regionCity, setRegionCity] = useState<string | undefined>();
-  const [placeSuggestions, setPlaceSuggestions] = useState<
-    TravelGuidePlaceSuggestion[]
-  >([]);
+  const [remoteSuggestions, setRemoteSuggestions] = useState<DepartureSuggestionItem[]>(
+    [],
+  );
   const pickingSuggestionRef = useRef(false);
+  const remoteRequestIdRef = useRef(0);
+
+  const query = value.trim();
+
+  const localSuggestions = useMemo(
+    () => localDepartureCitySuggestionItems(query),
+    [query],
+  );
 
   useEffect(() => {
     if (!active) {
       setShowSuggestions(false);
-      setPlaceSuggestions([]);
+      setRemoteSuggestions([]);
       setRegionCity(undefined);
     }
   }, [active]);
 
   useEffect(() => {
     if (!active || !showSuggestions) {
-      setPlaceSuggestions([]);
+      setRemoteSuggestions([]);
       return;
     }
-    const q = value.trim();
-    const region = suggestionRegionForKeyword(q, {
+
+    const region = suggestionRegionForKeyword(query, {
       departureCity: regionCity,
       eventCity,
     });
-    const timer = setTimeout(
-      () => {
-        void fetchTravelGuidePlaceSuggestions(q, region)
-          .then((res) => {
-            setPlaceSuggestions(res.data ?? []);
-          })
-          .catch(() => setPlaceSuggestions([]));
-      },
-      q ? 280 : 0,
-    );
+    const requestId = ++remoteRequestIdRef.current;
+    const timer = setTimeout(() => {
+      void fetchTravelGuidePlaceSuggestions(query, region)
+        .then((res) => {
+          if (remoteRequestIdRef.current !== requestId) return;
+          const remote = mapPlaceSuggestionsToDepartureItems(
+            (res.data ?? []) as TravelGuidePlaceSuggestion[],
+          );
+          setRemoteSuggestions(remote);
+        })
+        .catch(() => {
+          if (remoteRequestIdRef.current !== requestId) return;
+          setRemoteSuggestions([]);
+        });
+    }, REMOTE_DEBOUNCE_MS);
+
     return () => clearTimeout(timer);
-  }, [active, eventCity, regionCity, showSuggestions, value]);
+  }, [active, eventCity, query, regionCity, showSuggestions]);
 
   const suggestions = useMemo((): DepartureSuggestionItem[] => {
-    const items = mapPlaceSuggestionsToDepartureItems(placeSuggestions);
-    return placesOnly ? items.filter((item) => item.kind === 'place') : items;
-  }, [placeSuggestions, placesOnly]);
+    const merged = mergeDepartureSuggestionItems(localSuggestions, remoteSuggestions);
+    return placesOnly ? merged.filter((item) => item.kind === 'place') : merged;
+  }, [localSuggestions, placesOnly, remoteSuggestions]);
 
   const pickSuggestion = useCallback(
     (item: DepartureSuggestionItem) => {
@@ -94,7 +112,7 @@ export function PlaceAutocompleteField({
       onChange(departureDisplayValue(item));
       setRegionCity(city);
       onCityChange?.(city);
-      setPlaceSuggestions([]);
+      setRemoteSuggestions([]);
       setShowSuggestions(false);
       setTimeout(() => {
         pickingSuggestionRef.current = false;
@@ -108,7 +126,9 @@ export function PlaceAutocompleteField({
       {label ? <Text className={labelClassName}>{label}</Text> : null}
       {hint ? <Text className="s-ai-guide-plan-sheet__hint">{hint}</Text> : null}
       <View className="s-ai-guide-plan-sheet__input-wrap">
-        <MapPin size={18} className="s-ai-guide-plan-sheet__input-icon" aria-hidden />
+        <View className="s-ai-guide-plan-sheet__input-icon-wrap" aria-hidden>
+          <MapPin size={16} className="s-ai-guide-plan-sheet__input-icon" />
+        </View>
         <Input
           className="s-ai-guide-plan-sheet__input"
           type="text"

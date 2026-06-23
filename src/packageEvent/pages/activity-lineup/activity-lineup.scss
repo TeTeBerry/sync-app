@@ -143,6 +143,10 @@
     font-weight: var(--s-fw-bold);
     color: #fff;
     line-height: 1.3;
+
+    &--interactive {
+      color: var(--primary);
+    }
   }
 
   &__slot-meta {
@@ -351,6 +355,16 @@
     border: 2px solid transparent;
     background: #1c1c1e;
     box-sizing: border-box;
+
+    &--interactive {
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    &--pressed {
+      opacity: 0.88;
+      transform: scale(0.98);
+    }
   }
 
   &__artist-name {

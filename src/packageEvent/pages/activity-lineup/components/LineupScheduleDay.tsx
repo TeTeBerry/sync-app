@@ -7,9 +7,13 @@ import {
 
 type LineupScheduleDayProps = {
   session: LineupSessionGroup;
+  onArtistPress?: (artistId: string) => void;
 };
 
-export const LineupScheduleDay: FC<LineupScheduleDayProps> = ({ session }) => {
+export const LineupScheduleDay: FC<LineupScheduleDayProps> = ({
+  session,
+  onArtistPress,
+}) => {
   return (
     <View className="s-activity-lineup__day">
       <View className="s-activity-lineup__day-head">
@@ -29,7 +33,17 @@ export const LineupScheduleDay: FC<LineupScheduleDayProps> = ({ session }) => {
               {formatLineupTimeRange(performance.startTime, performance.endTime)}
             </Text>
             <View className="s-activity-lineup__slot-body">
-              <Text className="s-activity-lineup__slot-artist">
+              <Text
+                className={[
+                  's-activity-lineup__slot-artist',
+                  onArtistPress ? 's-activity-lineup__slot-artist--interactive' : '',
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+                onClick={
+                  onArtistPress ? () => onArtistPress(performance.artistId) : undefined
+                }
+              >
                 {performance.artistName}
               </Text>
               {performance.stageLabel ? (

@@ -57,6 +57,7 @@ export function fetchTravelGuidePlaceSuggestions(keyword: string, region?: strin
   return apiGet<{ data: TravelGuidePlaceSuggestion[] }>(
     '/travel-guide/place-suggestions',
     params,
+    { timeoutMs: 3_500, maxRetries: 0 },
   );
 }
 

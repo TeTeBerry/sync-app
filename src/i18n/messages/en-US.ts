@@ -154,6 +154,11 @@ export const enUS: MessageTree = {
       closeAria: 'Close artist profile',
       bioPlaceholder:
         'Artist profile is being organized. Browse catalog appearances below.',
+      loadingDjInfo: 'Loading artist info…',
+      disclaimer: 'Information from public sources, for reference only',
+      representativeTracksTitle: 'Representative tracks',
+      bioExpand: 'Show full bio',
+      bioCollapse: 'Show less',
       appearancesTitle: 'Catalog appearances',
       appearancesEmpty: 'No catalog appearances yet',
       loadFailed: 'Failed to load artist profile',

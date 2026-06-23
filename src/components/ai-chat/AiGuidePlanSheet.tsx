@@ -56,7 +56,7 @@ function InlineStepper({
         aria-label={ariaDecrease}
         onClick={() => onChange(Math.max(min, value - 1))}
       >
-        <Minus size={16} color="#fff" aria-hidden />
+        <Minus size={15} color="rgba(255,255,255,0.9)" aria-hidden />
       </Button>
       <Text className="s-ai-guide-plan-sheet__inline-stepper-value">{value}</Text>
       <Button
@@ -66,7 +66,7 @@ function InlineStepper({
         aria-label={ariaIncrease}
         onClick={() => onChange(Math.min(max, value + 1))}
       >
-        <Plus size={16} color="#fff" aria-hidden />
+        <Plus size={15} color="rgba(255,255,255,0.9)" aria-hidden />
       </Button>
     </View>
   );
@@ -163,7 +163,7 @@ function AiGuidePlanSheetInner({
               <Sparkles
                 size={16}
                 className="s-ai-guide-plan-sheet__title-icon-sparkle"
-                color="#ff0066"
+                color="#fff"
                 aria-hidden
               />
             </View>
@@ -204,7 +204,6 @@ function AiGuidePlanSheetInner({
           showScrollbar={false}
           scrollTop={form.scrollTop}
           className="s-ai-guide-plan-sheet__scroll s-scrollbar-none"
-          style={{ flex: 1, height: 0, minHeight: 0 }}
         >
           <View className="s-ai-guide-plan-sheet__body">
             <View className="s-ai-guide-plan-sheet__field">
@@ -214,11 +213,12 @@ function AiGuidePlanSheetInner({
               <View className="s-ai-guide-plan-sheet__card">
                 <View className="s-ai-guide-plan-sheet__card-row">
                   <View className="s-ai-guide-plan-sheet__card-summary">
-                    <Users
-                      size={18}
-                      className="s-ai-guide-plan-sheet__card-icon"
+                    <View
+                      className="s-ai-guide-plan-sheet__icon-badge s-ai-guide-plan-sheet__icon-badge--muted"
                       aria-hidden
-                    />
+                    >
+                      <Users size={16} className="s-ai-guide-plan-sheet__card-icon" />
+                    </View>
                     <Text className="s-ai-guide-plan-sheet__card-summary-text">
                       {form.headcount} {t('travelPlan.headcountUnit')}
                     </Text>
@@ -245,11 +245,12 @@ function AiGuidePlanSheetInner({
               <View className="s-ai-guide-plan-sheet__card s-ai-guide-plan-sheet__card--drive">
                 <View className="s-ai-guide-plan-sheet__card-row">
                   <View className="s-ai-guide-plan-sheet__drive-copy">
-                    <Car
-                      size={18}
-                      className="s-ai-guide-plan-sheet__card-icon"
+                    <View
+                      className="s-ai-guide-plan-sheet__icon-badge s-ai-guide-plan-sheet__icon-badge--muted"
                       aria-hidden
-                    />
+                    >
+                      <Car size={16} className="s-ai-guide-plan-sheet__card-icon" />
+                    </View>
                     <View className="s-ai-guide-plan-sheet__drive-text">
                       <Text className="s-ai-guide-plan-sheet__drive-title">
                         {t('travelPlan.driveTitle')}
@@ -272,11 +273,15 @@ function AiGuidePlanSheetInner({
               <View className="s-ai-guide-plan-sheet__card s-ai-guide-plan-sheet__card--drive">
                 <View className="s-ai-guide-plan-sheet__card-row">
                   <View className="s-ai-guide-plan-sheet__drive-copy">
-                    <BedDouble
-                      size={18}
-                      className="s-ai-guide-plan-sheet__card-icon"
+                    <View
+                      className="s-ai-guide-plan-sheet__icon-badge s-ai-guide-plan-sheet__icon-badge--muted"
                       aria-hidden
-                    />
+                    >
+                      <BedDouble
+                        size={16}
+                        className="s-ai-guide-plan-sheet__card-icon"
+                      />
+                    </View>
                     <View className="s-ai-guide-plan-sheet__drive-text">
                       <Text className="s-ai-guide-plan-sheet__drive-title">
                         {t('travelPlan.accommodationTitle')}
@@ -300,11 +305,15 @@ function AiGuidePlanSheetInner({
                 <View className="s-ai-guide-plan-sheet__card">
                   <View className="s-ai-guide-plan-sheet__card-row">
                     <View className="s-ai-guide-plan-sheet__card-summary">
-                      <BedDouble
-                        size={18}
-                        className="s-ai-guide-plan-sheet__card-icon"
+                      <View
+                        className="s-ai-guide-plan-sheet__icon-badge s-ai-guide-plan-sheet__icon-badge--muted"
                         aria-hidden
-                      />
+                      >
+                        <BedDouble
+                          size={16}
+                          className="s-ai-guide-plan-sheet__card-icon"
+                        />
+                      </View>
                       <Text className="s-ai-guide-plan-sheet__card-summary-text">
                         {form.accommodationNights} {t('travelPlan.nightsUnit')}
                       </Text>
@@ -334,7 +343,7 @@ function AiGuidePlanSheetInner({
             hoverClass={form.canSubmit ? 's-ai-guide-plan-sheet__submit--pressed' : ''}
             onClick={form.handleSubmit}
           >
-            <Sparkles size={18} color="#fff" aria-hidden />
+            <Sparkles size={17} color="#fff" aria-hidden />
             <Text className="s-ai-guide-plan-sheet__submit-text">
               {getGenerateTravelGuideCta()}
             </Text>

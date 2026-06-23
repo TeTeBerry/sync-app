@@ -284,7 +284,7 @@ const EventDetailPage = () => {
 
         {!showHeaderSkeleton ? <PlatformDisclaimer variant="fixed" /> : null}
       </View>
-      {!showHeaderSkeleton ? (
+      {!showHeaderSkeleton && !buddyPostSheetOpen && !guideSheetOpen ? (
         <EventDetailTemplatePostFab
           disabled={templatePublishing}
           onClick={handleOpenTemplateSheet}

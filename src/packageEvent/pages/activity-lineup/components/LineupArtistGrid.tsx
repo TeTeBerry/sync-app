@@ -23,6 +23,7 @@ type LineupArtistGridProps = {
   sortMode: LineupArtistSortMode;
   onSortModeChange?: (mode: LineupArtistSortMode) => void;
   showSoloSort?: boolean;
+  onArtistPress?: (artistId: string) => void;
 };
 
 export const LineupArtistGrid: FC<LineupArtistGridProps> = ({
@@ -30,6 +31,7 @@ export const LineupArtistGrid: FC<LineupArtistGridProps> = ({
   sortMode,
   onSortModeChange,
   showSoloSort = false,
+  onArtistPress,
 }) => {
   const t = useT();
   const [sortSheetOpen, setSortSheetOpen] = useState(false);
@@ -101,7 +103,16 @@ export const LineupArtistGrid: FC<LineupArtistGridProps> = ({
               {group.artists.map((artist) => (
                 <View
                   key={artist.id}
-                  className="s-activity-lineup__artist-card"
+                  className={[
+                    's-activity-lineup__artist-card',
+                    onArtistPress ? 's-activity-lineup__artist-card--interactive' : '',
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
+                  hoverClass={
+                    onArtistPress ? 's-activity-lineup__artist-card--pressed' : ''
+                  }
+                  onClick={onArtistPress ? () => onArtistPress(artist.id) : undefined}
                   style={{
                     borderColor: group.accentColor,
                     boxShadow: `0 0 0 1px ${group.accentColor}33`,

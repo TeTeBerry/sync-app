@@ -1,11 +1,12 @@
 import './activity-lineup.scss';
 import { ScrollView, Text, View } from '@tarojs/components';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useT } from '@/hooks/useI18n';
 import PageNavigation from '../../../components/navigation/PageNavigation';
 import ThemedPageLoader from '../../../components/ThemedPageLoader';
 import { Button } from '../../../components/ui';
 import { ActivityUpdateSubscribeBanner } from '@/domains/activity-info/components/ActivityUpdateSubscribeBanner';
+import { ArtistProfileSheet } from '@/domains/lineup-artist/components/ArtistProfileSheet';
 import { useEndRouteTransitionOnShow } from '../../../hooks/useEndRouteTransitionOnShow';
 import { useMeasuredElementHeight } from '../../../hooks/useMeasuredElementHeight';
 import { goExclusiveItinerary, ROUTES } from '../../../utils/route';
@@ -19,6 +20,7 @@ import { lineupGenreNavDomId } from './utils/scrollLineupSection';
 const ActivityLineupPage = () => {
   useEndRouteTransitionOnShow(ROUTES.ACTIVITY_LINEUP);
   const t = useT();
+  const [selectedArtistId, setSelectedArtistId] = useState<string | null>(null);
 
   const {
     activityLegacyId,
@@ -133,7 +135,11 @@ const ActivityLineupPage = () => {
                     </Text>
                   </View>
                   {sessionGroups.map((session) => (
-                    <LineupScheduleDay key={session.dateKey} session={session} />
+                    <LineupScheduleDay
+                      key={session.dateKey}
+                      session={session}
+                      onArtistPress={setSelectedArtistId}
+                    />
                   ))}
                 </>
               ) : lineupDjs.length > 0 ? (
@@ -151,6 +157,7 @@ const ActivityLineupPage = () => {
                     sortMode={sortMode}
                     onSortModeChange={setSortMode}
                     showSoloSort={!showGenreNav}
+                    onArtistPress={setSelectedArtistId}
                   />
                 </>
               ) : (
@@ -176,6 +183,11 @@ const ActivityLineupPage = () => {
           ) : null}
         </>
       )}
+      <ArtistProfileSheet
+        open={Boolean(selectedArtistId)}
+        artistId={selectedArtistId}
+        onClose={() => setSelectedArtistId(null)}
+      />
     </View>
   );
 };

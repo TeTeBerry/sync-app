@@ -1,5 +1,5 @@
 import './ArtistProfileSheet.scss';
-import { memo, useCallback, useMemo } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { ScrollView, Text, View, Image } from '@tarojs/components';
 import { X } from '../../../components/icons';
 import { Button, cn } from '../../../components/ui';
@@ -22,11 +22,23 @@ export type ArtistProfileSheetProps = {
   open: boolean;
   artistId: string | null;
   onClose: () => void;
+  /** When true, leave room for the main tab bar (events tab only). */
+  reserveTabBarSpace?: boolean;
 };
 
-function ArtistProfileSheetInner({ open, artistId, onClose }: ArtistProfileSheetProps) {
+function ArtistProfileSheetInner({
+  open,
+  artistId,
+  onClose,
+  reserveTabBarSpace = false,
+}: ArtistProfileSheetProps) {
   const t = useT();
+  const [bioExpanded, setBioExpanded] = useState(false);
   useOverlayLock(open);
+
+  useEffect(() => {
+    setBioExpanded(false);
+  }, [artistId, open]);
 
   const enabled = open && Boolean(artistId?.trim());
   const {
@@ -91,12 +103,24 @@ function ArtistProfileSheetInner({ open, artistId, onClose }: ArtistProfileSheet
     : undefined;
   const isLoading = artistLoading || activitiesLoading;
   const isError = artistError || activitiesError;
-  const bioText =
-    artist?.profileSummary?.trim() || t('events.artistProfile.bioPlaceholder');
+  const profileSummary = artist?.profileSummary?.trim();
+  const profileFull = artist?.profileFull?.trim();
+  const hasExpandableBio = Boolean(
+    profileFull && profileSummary && profileFull.length > profileSummary.length,
+  );
+  const bioText = bioExpanded
+    ? profileFull || profileSummary || t('events.artistProfile.bioPlaceholder')
+    : profileSummary || profileFull || t('events.artistProfile.bioPlaceholder');
+  const representativeTracks = artist?.representativeTracks ?? [];
 
   return (
     <View
-      className="s-overlay s-overlay--sheet s-artist-profile-sheet"
+      className={[
+        's-overlay s-overlay--sheet s-artist-profile-sheet',
+        reserveTabBarSpace ? 's-artist-profile-sheet--above-tabbar' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
       catchMove
       role="presentation"
     >
@@ -132,6 +156,9 @@ function ArtistProfileSheetInner({ open, artistId, onClose }: ArtistProfileSheet
 
         {isLoading && !artist ? (
           <View className="s-artist-profile-sheet__loader-wrap">
+            <Text className="s-artist-profile-sheet__loader-text">
+              {t('events.artistProfile.loadingDjInfo')}
+            </Text>
             <ThemedPageLoader variant="skeleton-feed" minHeight={220} />
           </View>
         ) : isError ? (
@@ -188,9 +215,26 @@ function ArtistProfileSheetInner({ open, artistId, onClose }: ArtistProfileSheet
                       {artist.genreLabel}
                     </Text>
                   ) : null}
-                  <Text className="s-artist-profile-sheet__bio s-line-clamp-3">
+                  <Text
+                    className={[
+                      's-artist-profile-sheet__bio',
+                      !bioExpanded && hasExpandableBio ? 's-line-clamp-3' : '',
+                    ]
+                      .filter(Boolean)
+                      .join(' ')}
+                  >
                     {bioText}
                   </Text>
+                  {hasExpandableBio ? (
+                    <Text
+                      className="s-artist-profile-sheet__bio-toggle"
+                      onClick={() => setBioExpanded((value) => !value)}
+                    >
+                      {bioExpanded
+                        ? t('events.artistProfile.bioCollapse')
+                        : t('events.artistProfile.bioExpand')}
+                    </Text>
+                  ) : null}
                 </View>
               </View>
             </View>
@@ -203,6 +247,26 @@ function ArtistProfileSheetInner({ open, artistId, onClose }: ArtistProfileSheet
               style={{ flex: 1, height: 0, minHeight: 0 }}
             >
               <View className="s-artist-profile-sheet__body">
+                {representativeTracks.length ? (
+                  <View className="s-artist-profile-sheet__tracks">
+                    <View className="s-artist-profile-sheet__section-head">
+                      <View className="s-artist-profile-sheet__section-accent" />
+                      <Text className="s-artist-profile-sheet__section-title">
+                        {t('events.artistProfile.representativeTracksTitle')}
+                      </Text>
+                    </View>
+                    <View className="s-artist-profile-sheet__track-list">
+                      {representativeTracks.map((track) => (
+                        <Text
+                          key={track}
+                          className="s-artist-profile-sheet__track-item s-line-clamp-1"
+                        >
+                          {track}
+                        </Text>
+                      ))}
+                    </View>
+                  </View>
+                ) : null}
                 <View className="s-artist-profile-sheet__section-head">
                   <View className="s-artist-profile-sheet__section-accent" />
                   <Text className="s-artist-profile-sheet__section-title">
@@ -255,6 +319,9 @@ function ArtistProfileSheetInner({ open, artistId, onClose }: ArtistProfileSheet
                 {nearestUpcoming
                   ? t('events.artistProfile.recruitHint')
                   : t('events.artistProfile.ctaDisabledHint')}
+              </Text>
+              <Text className="s-artist-profile-sheet__disclaimer">
+                {t('events.artistProfile.disclaimer')}
               </Text>
             </View>
           </>

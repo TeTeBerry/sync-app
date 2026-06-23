@@ -22,6 +22,8 @@ export interface CatalogLineupArtist {
 
 export interface CatalogLineupArtistDetail extends CatalogLineupArtist {
   profileSummary?: string;
+  profileFull?: string;
+  representativeTracks?: string[];
 }
 
 export interface BackendActivity {

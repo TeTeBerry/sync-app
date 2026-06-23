@@ -43,7 +43,6 @@ const ACTIVITY_LOCATION_I18N_IDS: Record<string, string> = {
   '美国·奥兰多 Tinker Field': 'usaOrlandoTinkerField',
   '沙特·利雅得 Boulevard Riyadh': 'saudiRiyadhBoulevard',
   '克罗地亚·斯普利特 Park Mladeži': 'croatiaSplitParkMladezi',
-  '上海（地址待定）': 'shanghaiVenueTbd',
 };
 
 function translateCatalogValue(

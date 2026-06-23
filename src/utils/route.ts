@@ -188,6 +188,8 @@ export function isTabRoute(url: string): url is TabRoutePath {
 
 /** Blocks duplicate taps only; first navigation is never delayed. */
 const NAV_DEBOUNCE_MS = 120;
+/** WeChat mini program page stack limit is 10 — redirect before hitting the cap. */
+const WEAPP_PAGE_STACK_REDIRECT_THRESHOLD = 8;
 
 let navigationChain: Promise<void> = Promise.resolve();
 let isNavigating = false;
@@ -232,6 +234,44 @@ function currentPageUrl(): string {
 
 function currentRoutePath(): string {
   return normalizePath(currentPageUrl());
+}
+
+function currentRoutePathOnly(): string {
+  return normalizePath(currentPageUrl().split('?')[0] ?? currentPageUrl());
+}
+
+function isOnAiTravelGuidePage(): boolean {
+  return currentRoutePathOnly() === normalizePath(ROUTES.AI_TRAVEL_GUIDE);
+}
+
+function isWebviewCountLimitError(err: unknown): boolean {
+  const msg =
+    typeof err === 'object' && err && 'errMsg' in err
+      ? String((err as { errMsg?: string }).errMsg ?? '')
+      : String(err ?? '');
+  return msg.includes('webview count limit');
+}
+
+function shouldRedirectNavigation(url: string): boolean {
+  if (process.env.TARO_ENV !== 'weapp') {
+    return false;
+  }
+  const targetPath = normalizePath(url.split('?')[0] ?? url);
+  if (currentRoutePathOnly() === targetPath) {
+    return true;
+  }
+  return Taro.getCurrentPages().length >= WEAPP_PAGE_STACK_REDIRECT_THRESHOLD;
+}
+
+function openStackPageSafe(
+  url: string,
+  options?: { eventId?: number; replace?: boolean },
+) {
+  if (options?.replace || shouldRedirectNavigation(url)) {
+    redirectToSafe(url);
+    return;
+  }
+  navigateToSafe(url, options);
 }
 
 /** Resolve event-detail id from query params and optional navigation-store fallback. */
@@ -423,7 +463,13 @@ function navigateToSafe(url: string, _options?: { eventId?: number }) {
         Taro.navigateTo({
           url,
           success: () => resolve(),
-          fail: () => {
+          fail: (err) => {
+            if (isWebviewCountLimitError(err)) {
+              lastNavAt = 0;
+              redirectToSafe(url);
+              resolve();
+              return;
+            }
             endRouteTransition();
             void Taro.showToast({ title: '页面打开失败', icon: 'none' });
             resolve();
@@ -616,6 +662,8 @@ export function goEventDetail(
     openBuddyPost?: boolean;
     openComments?: boolean;
     openGuide?: boolean;
+    /** Replace current stack page instead of pushing (e.g. from ai-travel-guide). */
+    replace?: boolean;
   },
 ) {
   const legacyId = parseActivityLegacyId(eventId);
@@ -640,8 +688,10 @@ export function goEventDetail(
   const query = buildEventDetailQuery(legacyId, options);
   prefetchEventPostsPage(legacyId, { anchorPostId: options?.postId });
   preloadEventSubpackage();
-  navigateToSafe(buildPageUrl(ROUTES.EVENT_DETAIL, query), {
+  const url = buildPageUrl(ROUTES.EVENT_DETAIL, query);
+  openStackPageSafe(url, {
     eventId: legacyId,
+    replace: options?.replace || isOnAiTravelGuidePage(),
   });
 }
 
@@ -772,7 +822,7 @@ export function goAiTravelGuide(guideId: string) {
   }
   requireAuth(() => {
     preloadEventSubpackage();
-    navigateToSafe(buildPageUrl(ROUTES.AI_TRAVEL_GUIDE, { guideId: id }));
+    openStackPageSafe(buildPageUrl(ROUTES.AI_TRAVEL_GUIDE, { guideId: id }));
   }, 'ai_assistant');
 }
 

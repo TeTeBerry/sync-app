@@ -3,8 +3,6 @@ import { Picker, Text, View } from '@tarojs/components';
 import { useT } from '@/hooks/useI18n';
 import { displayBuddyPostDate } from './buddyPostSheetDisplayDate';
 
-const BUDDY_PICKER_ICON_COLOR = '#64d2ff';
-
 type BuddyPostDateRangeFieldProps = {
   dateStart: string;
   dateEnd: string;
@@ -41,12 +39,12 @@ export function BuddyPostDateRangeField({
             }}
           >
             <View className="s-ai-buddy-post-sheet__picker">
-              <CalendarDays
-                size={16}
-                color={BUDDY_PICKER_ICON_COLOR}
-                className="s-ai-buddy-post-sheet__picker-icon"
-                aria-hidden
-              />
+              <View className="s-ai-buddy-post-sheet__picker-icon-wrap" aria-hidden>
+                <CalendarDays
+                  size={14}
+                  className="s-ai-buddy-post-sheet__picker-icon"
+                />
+              </View>
               <Text className="s-ai-buddy-post-sheet__picker-value">
                 {displayBuddyPostDate(dateStart)}
               </Text>
@@ -67,12 +65,12 @@ export function BuddyPostDateRangeField({
             onChange={(e) => onDateEndChange(e.detail.value)}
           >
             <View className="s-ai-buddy-post-sheet__picker">
-              <CalendarDays
-                size={16}
-                color={BUDDY_PICKER_ICON_COLOR}
-                className="s-ai-buddy-post-sheet__picker-icon"
-                aria-hidden
-              />
+              <View className="s-ai-buddy-post-sheet__picker-icon-wrap" aria-hidden>
+                <CalendarDays
+                  size={14}
+                  className="s-ai-buddy-post-sheet__picker-icon"
+                />
+              </View>
               <Text className="s-ai-buddy-post-sheet__picker-value">
                 {displayBuddyPostDate(dateEnd)}
               </Text>

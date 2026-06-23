@@ -365,6 +365,7 @@ const Events: React.FC = () => {
         open={selectedArtistId != null}
         artistId={selectedArtistId}
         onClose={() => setSelectedArtistId(null)}
+        reserveTabBarSpace
       />
       <LoginInterceptHost />
       {confirmDialog}

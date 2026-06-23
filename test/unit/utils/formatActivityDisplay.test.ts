@@ -38,10 +38,10 @@ describe('formatActivityDisplay', () => {
     expect(formatActivityLocationLabel('深圳国际会展中心')).toBe(
       'Shenzhen World Exhibition & Convention Center',
     );
-    expect(formatActivityLocationLabel('上海（地址待定）')).toBe(
-      'Shanghai (venue TBD)',
-    );
     useLocaleStore.setState({ locale: 'zh-CN' });
     expect(formatActivityLocationLabel('深圳国际会展中心')).toBe('深圳国际会展中心');
+    expect(formatActivityLocationLabel('上海·外滩大会新址科技展馆')).toBe(
+      '上海·外滩大会新址科技展馆',
+    );
   });
 });

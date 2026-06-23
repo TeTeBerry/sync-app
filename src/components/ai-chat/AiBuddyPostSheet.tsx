@@ -78,7 +78,7 @@ export function AiBuddyPostSheet({
         <View className="s-ai-guide-plan-sheet__top">
           <View className="s-ai-guide-plan-sheet__title-row">
             <View className="s-ai-guide-plan-sheet__title-icon" aria-hidden>
-              <Users size={16} color="#ff0066" aria-hidden />
+              <Users size={16} color="#fff" aria-hidden />
             </View>
             <Text
               id="ai-buddy-post-sheet-title"
@@ -103,7 +103,6 @@ export function AiBuddyPostSheet({
           showScrollbar={false}
           scrollTop={form.scrollTop}
           className="s-ai-guide-plan-sheet__scroll s-scrollbar-none"
-          style={{ flex: 1, height: 0, minHeight: 0 }}
         >
           <BuddyPostSheetFormFields
             form={form}
@@ -150,7 +149,7 @@ export function AiBuddyPostSheet({
             }
             onClick={form.handleSubmit}
           >
-            <Send size={18} color="#fff" aria-hidden />
+            <Send size={17} color="#fff" aria-hidden />
             <Text className="s-ai-guide-plan-sheet__submit-text">
               {showSyncToFeedOption
                 ? t('ai.save')

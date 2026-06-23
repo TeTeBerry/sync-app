@@ -1,4 +1,5 @@
 import type { TravelGuidePlaceSuggestion } from '../api/sync/travelGuide';
+import { TRAVEL_GUIDE_DEPARTURE_CITIES } from '../constants/travelGuideDepartureCities';
 
 export type DepartureSuggestionItem = {
   label: string;
@@ -34,6 +35,50 @@ export function mapPlaceSuggestionsToDepartureItems(
     });
   }
   return rows;
+}
+
+/** 本地城市库即时过滤（与后端 filterTravelGuideCitySuggestions 一致） */
+export function filterLocalDepartureCitySuggestions(
+  query: string,
+  limit = 10,
+): string[] {
+  const q = query.trim();
+  if (!q) {
+    return TRAVEL_GUIDE_DEPARTURE_CITIES.slice(0, Math.min(limit, 8));
+  }
+  return TRAVEL_GUIDE_DEPARTURE_CITIES.filter((city) => city.includes(q)).slice(
+    0,
+    limit,
+  );
+}
+
+export function localDepartureCitySuggestionItems(
+  query: string,
+  limit = 10,
+): DepartureSuggestionItem[] {
+  return filterLocalDepartureCitySuggestions(query, limit).map((city) => ({
+    label: city,
+    kind: 'city',
+    city,
+    address: city,
+  }));
+}
+
+export function mergeDepartureSuggestionItems(
+  local: DepartureSuggestionItem[],
+  remote: DepartureSuggestionItem[],
+  limit = 10,
+): DepartureSuggestionItem[] {
+  const merged: DepartureSuggestionItem[] = [];
+  const seen = new Set<string>();
+  for (const item of [...local, ...remote]) {
+    const key = `${item.kind}:${item.label}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    merged.push(item);
+    if (merged.length >= limit) break;
+  }
+  return merged;
 }
 
 /** 输入框回显：与下拉主标题一致（POI 名称 / 城市名） */
