@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { searchBuddyPostsWithAi } from '../../../api/sync/posts';
 import { isLiveApi } from '../../../constants/api';
 import type { BuddyPostSearchParsed } from '../../../types/backend';
-import type { EventDetailPost } from '../../../types/post';
+import type { EventDetailPost } from '@/types/partner';
 import { ApiError, isApiAbortError } from '../../../utils/apiClient';
 import {
   filterEventDetailPostsByQuery,

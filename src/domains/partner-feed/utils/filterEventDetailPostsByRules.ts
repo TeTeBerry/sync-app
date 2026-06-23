@@ -1,4 +1,4 @@
-import type { EventDetailPost } from '@/types/post';
+import type { EventDetailPost } from '@/types/partner';
 import {
   buildEventDetailPostSearchText,
   fuzzyTextMatches,

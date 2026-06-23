@@ -6,7 +6,7 @@ import { useEventPostsInfiniteQuery } from '../../../hooks/useEventPostsInfinite
 import { requireAuth } from '../../../utils/authGate';
 import { deletePostWithFeedback } from '../../../utils/deletePostFeedback';
 import { scrollElementToCenter } from '../../../utils/scrollToCenter';
-import type { EventDetailPost } from '../../../types/post';
+import type { EventDetailPost } from '@/types/partner';
 import {
   EVENT_POST_ESTIMATED_HEIGHT_PX,
   EVENT_POSTS_INITIAL_RENDER,

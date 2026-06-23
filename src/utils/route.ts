@@ -889,11 +889,6 @@ export function goEventDetailTravelGuideSheet(
   goEventDetail(activityLegacyId, { openGuide: true });
 }
 
-/** @deprecated Use goEventDetail with openBuddyPost */
-export function goEventDetailBuddyPostSheet(activityLegacyId: number) {
-  goEventDetail(activityLegacyId, { openBuddyPost: true, focusPosts: true });
-}
-
 /** Open performance schedule — saved itinerary if available, otherwise lineup browser. */
 export function goActivitySchedule(
   activityLegacyId: number,

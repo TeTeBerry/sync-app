@@ -10,20 +10,16 @@ type ActivityUpdateSubscribeBannerVariant = 'banner' | 'hero';
 type ActivityUpdateSubscribeBannerProps = {
   activityLegacyId?: number;
   activityTitle?: string;
-  /** @deprecated Use `variant="banner"` instead */
-  compact?: boolean;
   variant?: ActivityUpdateSubscribeBannerVariant;
 };
 
 export function ActivityUpdateSubscribeBanner({
   activityLegacyId,
   activityTitle,
-  compact = false,
-  variant,
+  variant = 'banner',
 }: ActivityUpdateSubscribeBannerProps) {
   const t = useT();
-  const resolvedVariant = variant ?? (compact ? 'banner' : 'banner');
-  const isHero = resolvedVariant === 'hero';
+  const isHero = variant === 'hero';
   const titleLabel = activityTitle?.trim() || t('eventCard.activityFallback');
   const { subscribed, submitting, handleSubscribe } = useActivityUpdateSubscribeAction(
     activityLegacyId,

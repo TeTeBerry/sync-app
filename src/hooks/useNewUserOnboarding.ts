@@ -9,7 +9,6 @@ import {
 } from '@/utils/onboardingStorage';
 import {
   goEventDetail,
-  goEventDetailBuddyPostSheet,
   goEventDetailTravelGuideSheet,
   goEventsWithSearch,
 } from '@/utils/route';
@@ -92,7 +91,9 @@ export function useNewUserOnboarding(options: UseNewUserOnboardingOptions = {}) 
           if (!joinLegacyId) {
             return;
           }
-          dismissAnd(() => goEventDetailBuddyPostSheet(joinLegacyId));
+          dismissAnd(() =>
+            goEventDetail(joinLegacyId, { openBuddyPost: true, focusPosts: true }),
+          );
         },
       },
     ];

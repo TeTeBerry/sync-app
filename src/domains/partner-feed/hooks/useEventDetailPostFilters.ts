@@ -1,5 +1,5 @@
 import { useMemo, useState, useCallback } from 'react';
-import type { EventDetailPost } from '@/types/post';
+import type { EventDetailPost } from '@/types/partner';
 import {
   extractDepartureCityOptions,
   type EventDetailPostRuleFilters,

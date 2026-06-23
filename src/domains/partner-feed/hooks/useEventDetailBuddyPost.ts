@@ -1,7 +1,7 @@
 import { useCallback, useRef, useState } from 'react';
 import Taro from '@tarojs/taro';
 import { useBuddyPostSheetController } from '../../../hooks/useBuddyPostSheetController';
-import type { EventDetailPost } from '../../../types/post';
+import type { EventDetailPost } from '@/types/partner';
 import type {
   AiBuddyPostFormValues,
   AiBuddyPostSubmitPayload,

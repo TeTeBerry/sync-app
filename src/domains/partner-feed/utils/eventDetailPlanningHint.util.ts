@@ -156,12 +156,3 @@ export function resolvePrepNudge({
     accent: false,
   };
 }
-
-/** @deprecated Use resolvePrepNudge for US-Q2-34 prep nudge rules. */
-export function resolvePrepCollapsedHint(params: {
-  showFestivalPlan: boolean;
-  checklist?: FestivalPlanChecklist | null;
-  t: TranslateFn;
-}): string {
-  return resolvePrepNudge(params).text;
-}

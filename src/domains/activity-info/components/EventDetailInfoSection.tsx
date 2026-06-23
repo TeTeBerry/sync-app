@@ -113,7 +113,6 @@ export const EventDetailInfoSection: FC<EventDetailInfoSectionProps> = ({
           <ActivityUpdateSubscribeBanner
             activityLegacyId={activityLegacyId}
             activityTitle={activity.name}
-            compact
           />
         ) : null}
 

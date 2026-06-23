@@ -5,7 +5,7 @@ import {
   pickInlineDepartureCities,
   rankDepartureCitiesByPostCount,
 } from '@/domains/partner-feed/utils/filterEventDetailPostsByRules';
-import type { EventDetailPost } from '@/types/post';
+import type { EventDetailPost } from '@/types/partner';
 
 function makePost(
   partial: Partial<EventDetailPost> & Pick<EventDetailPost, 'id'>,

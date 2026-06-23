@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { normalizeEventPostListItem } from '@/domains/partner-feed/utils/eventPostNormalize';
-import type { EventDetailPost } from '@/types/post';
+import type { EventDetailPost } from '@/types/partner';
 
 function basePost(overrides: Partial<EventDetailPost> = {}): EventDetailPost {
   return {
