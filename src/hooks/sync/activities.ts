@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef } from 'react';
 import {
   fetchActivities,
   fetchActivityByLegacyId,
+  fetchActivitiesByLineupArtistId,
+  fetchCatalogLineupArtistDetail,
   fetchCatalogLineupArtists,
   fetchHomeSummary,
   registerForActivity,
@@ -115,6 +117,39 @@ export function useCatalogLineupArtists(options?: QueryEnableOptions) {
     queryKey: ['activities', 'lineup-artists'],
     queryFn: fetchCatalogLineupArtists,
     enabled: isLiveApi() && tabEnabled,
+    staleTime: STALE_ACTIVITIES_LIST_MS,
+  });
+}
+
+export function useCatalogLineupArtistDetail(
+  artistId: string | null | undefined,
+  options?: QueryEnableOptions,
+) {
+  const tabEnabled = options?.enabled ?? true;
+  const id = artistId?.trim() ?? '';
+
+  return useApiQuery({
+    queryKey: ['artists', 'detail', id],
+    queryFn: () => fetchCatalogLineupArtistDetail(id),
+    enabled: isLiveApi() && tabEnabled && id.length > 0,
+    staleTime: STALE_ACTIVITIES_LIST_MS,
+  });
+}
+
+export function useLineupArtistActivities(
+  lineupArtistId: string | null | undefined,
+  options?: QueryEnableOptions,
+) {
+  const tabEnabled = options?.enabled ?? true;
+  const id = lineupArtistId?.trim() ?? '';
+
+  return useApiQuery({
+    queryKey: ['activities', 'by-lineup-artist', id],
+    queryFn: async () => {
+      const activities = await fetchActivitiesByLineupArtistId(id);
+      return activities.map(withCatalogActivityImage);
+    },
+    enabled: isLiveApi() && tabEnabled && id.length > 0,
     staleTime: STALE_ACTIVITIES_LIST_MS,
   });
 }

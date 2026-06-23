@@ -2,9 +2,9 @@
 
 > **定位**：不用线性对话 Tab，把 Agent 能力嵌进用户正在做的场景（找队、发帖、看阵容、出征准备）。  
 > **原则**：单次任务、结构化输出、用户可改可拒；合规表述为 **检索 / 生成 / 预填**，非配对撮合。  
-> **关联**：[Q2-USER-STORIES.md](./Q2-USER-STORIES.md)（US-Q2-31～34）· [PRODUCT.md](./PRODUCT.md) · 后端 [orchestration/README.md](../sync-app-backend/src/ai/orchestration/README.md)
+> **关联**：[Q2-USER-STORIES.md](./Q2-USER-STORIES.md)（US-Q2-31～34 · **41～48**）· [PRODUCT.md](./PRODUCT.md) · 后端 [orchestration/README.md](../sync-app-backend/src/ai/orchestration/README.md)
 
-**最后更新**：2026-06-22
+**最后更新**：2026-06-23
 
 ---
 
@@ -74,8 +74,16 @@ US-Q2-22 已移除准备 Tab 与 WS 多轮对话；**能力保留在后端 tools
 | `lineup_dj` | 活动详情阵容 / **室内 Headliner** | 点 DJ · 「查看艺人介绍」 | `query_dj_info` | **Q2-33** · **Q2-40** |
 | `prep_nudge` | 出征准备折叠区 | 进详情 | 分阶段规则（阵容是否官宣 · 偏好 · 招募进度）；**local/indoor 默认跳过** | **Q2-34** · **Q2-37** |
 | `recruit_filters` | 招募墙 | 进入 / 有偏好 | 动态 Chip | **Q2-32** |
+| `recruit_apply_compose` | 活动详情评论区 | 「申请加入」展开 | LLM 公开评论草稿 | **Q2-44** |
+| `lineup_picks` | `activity-lineup` | 阵容官宣后进页 | `favorGenres` + 阵容 · `itinerary-schedule` | **Q2-43** |
+| `festival_recommend` | 人格结果 / nomad 首页 | 测完 / 进入 | catalog 规则排序 + LLM 解释 | **Q2-42** |
+| `festival_story` | 活动详情资讯区 | 展开「关于这场节」 | 结构化字段 ± LLM 摘要 | **Q2-41** |
+| `events_nl_search` | 活动 Tab | 搜索提交 | `buddy-post-search` 式解析 → filter | **Q2-45** |
+| `festival_compare` | 活动 Tab / 详情 | 用户选对比 | 规则表 + 少量 LLM | **Q2-46** |
+| `lineup_announce_hint` | 活动详情资讯区 | `lineupPublished=false` | **规则** insight_line | **Q2-47** |
+| `guide_survival` | 攻略完成 / Prep 区 | 攻略生成后 | 节别模板卡（签证/天气/换汇） | **Q2-48** |
 
-**不做**：全站聊天、跨活动匹配队友、首页招募信息流 Agent。
+**不做**：全站聊天、跨活动匹配队友、首页招募信息流 Agent、AI 自动代发评论/发帖（须用户选草稿确认）。
 
 ---
 
@@ -96,6 +104,14 @@ US-Q2-22 已移除准备 Tab 与 WS 多轮对话；**能力保留在后端 tools
 - 响应：`effects[]` · `disclaimer?`
 
 上线包 **不阻塞** 于该 API：可用现有 REST + 前端 effect 映射先行（见 Q2 Sprint 5）。
+
+### 实现分层（L0 / L1 / L2）
+
+| 层级 | 何时用 | Scene 示例 |
+|------|--------|------------|
+| **L0 规则** | 能不调 LLM 就不调 | `prep_nudge` · `lineup_announce_hint`（Q2-47） |
+| **L1 单轮** | `scene-run` 一次请求 + effects | `recruit_compose` · `recruit_apply_compose` · `festival_story` |
+| **L2 长任务** | 独立 REST + 进度 | `travel-guide/generate` · 行程优化（`itinerary-schedule.service.ts`） |
 
 ---
 
@@ -131,9 +147,9 @@ US-Q2-22 已移除准备 Tab 与 WS 多轮对话；**能力保留在后端 tools
 | 阶段 | 时间 | Scene 范围 |
 |------|------|------------|
 | **上线包** | ～2026-07-06 | 无新 API；**Q2-27** 洞察行 + 偏好次排序；**Q2-34** 规则版 Prep Nudge |
-| **Sprint 6** | 上线后 2～4 周 | **Q2-31** scene-run · **Q2-32** 动态 Chip · **Q2-33** DJ 卡片 |
-| **Sprint 7** | 有互动数据后 | **Q2-17/29/28/30** 人格/翻卡/AI 发帖/攻略串联 · **Q2-39/40** Hub + 室内详情 |
-| **Sprint 8** | 上海验证后 | Hub 跨场 `local_hub_recruit_search` · 多城 indoor seed |
+| **Sprint 6** | 上线后 2～4 周 | **Q2-31** scene-run · **Q2-32** 动态 Chip · **Q2-33** DJ 卡片 · **Q2-43** 必看 set · **Q2-44** 申请评论 AI · **Q2-47** 官宣规律 |
+| **Sprint 7** | 有互动数据后 | **Q2-17/29/28/30** 人格/翻卡/AI 发帖/攻略串联 · **Q2-39/40** Hub + 室内 · **Q2-41** 节故事 · **Q2-42** 哪场适合我 · **Q2-48** 生存指南 |
+| **Sprint 8** | 上海验证后 | Hub 跨场 `local_hub_recruit_search` · 多城 indoor seed · **Q2-45** NL 搜节 · **Q2-46** 双节对比 |
 
 ---
 
@@ -148,3 +164,4 @@ US-Q2-22 已移除准备 Tab 与 WS 多轮对话；**能力保留在后端 tools
 | 原 client_action 类型 | `shared/chat/client-action.types.ts` |
 | 用户偏好 | `BuddyPreferencesSettings.tsx` · `user-profile-sync.service.ts` |
 | Raver 模式 / Hub | US-Q2-37 · US-Q2-39 · `pages/index/`（待定 Hub 分包） |
+| 行程优化 | `itinerary-schedule.service.ts` · US-Q2-43 |

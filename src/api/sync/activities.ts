@@ -5,6 +5,7 @@ import type {
   ActivityUnregisterResult,
   BackendActivity,
   CatalogLineupArtist,
+  CatalogLineupArtistDetail,
   HomeSummary,
 } from '../../types/backend';
 import { ownerQueryParams } from '../requestContext';
@@ -15,6 +16,14 @@ export function fetchActivities() {
 
 export function fetchCatalogLineupArtists() {
   return apiGet<CatalogLineupArtist[]>('/activities/lineup-artists');
+}
+
+export function fetchCatalogLineupArtistDetail(id: string) {
+  return apiGet<CatalogLineupArtistDetail>(`/artists/${encodeURIComponent(id)}`);
+}
+
+export function fetchActivitiesByLineupArtistId(lineupArtistId: string) {
+  return apiGet<BackendActivity[]>('/activities', { lineupArtistId });
 }
 
 export function resolveActivityByKeyword(keyword: string) {

@@ -33,6 +33,7 @@ import { EventsPageHeader } from './components/EventsPageHeader';
 import type { EventsViewTab } from './components/EventsViewTabs';
 import { EventsActivityCalendar } from './components/EventsActivityCalendar';
 import { EventsActivityArtistsTab } from './components/EventsActivityArtistsTab';
+import { ArtistProfileSheet } from '../../domains/lineup-artist/components/ArtistProfileSheet';
 import { EventsActivityList } from './components/EventsActivityList';
 import { sortAllEventsByDate } from './utils/festivalEvents';
 import { consumeEventsViewTabIntent } from '../../utils/eventsTabIntent';
@@ -72,6 +73,7 @@ const Events: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [regionFilter, setRegionFilter] = useState<EventsCatalogRegionFilter>('all');
   const [timeChip, setTimeChip] = useState<EventsCatalogTimeChip | null>(null);
+  const [selectedArtistId, setSelectedArtistId] = useState<string | null>(null);
   const [calendarMonth, setCalendarMonth] = useState(() => {
     const today = todayCalendarParts();
     return { year: today.year, month: today.month };
@@ -268,7 +270,10 @@ const Events: React.FC = () => {
         />
 
         {viewTab === 'artists' ? (
-          <EventsActivityArtistsTab listHeight={listScrollHeight ?? undefined} />
+          <EventsActivityArtistsTab
+            listHeight={listScrollHeight ?? undefined}
+            onOpenArtist={setSelectedArtistId}
+          />
         ) : (
           <ScrollView
             scrollY
@@ -336,6 +341,11 @@ const Events: React.FC = () => {
           </ScrollView>
         )}
       </View>
+      <ArtistProfileSheet
+        open={selectedArtistId != null}
+        artistId={selectedArtistId}
+        onClose={() => setSelectedArtistId(null)}
+      />
     </View>
   );
 };

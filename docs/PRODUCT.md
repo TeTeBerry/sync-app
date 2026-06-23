@@ -2,7 +2,7 @@
 
 > **当前实现**与**目标形态**合一文档。Q1 交付见 [Q1-USER-STORIES.md](./Q1-USER-STORIES.md)；**Q2 整改与推广主轴**见 [Q2-USER-STORIES.md](./Q2-USER-STORIES.md)。REST/WS 契约见 [API.md](./API.md)。
 
-**最后更新**：2026-06-23
+**最后更新**：2026-06-23（§1.5 国际化 · §4.2 节故事 · §8.1 AI 增强路线图）
 
 ---
 
@@ -88,6 +88,22 @@ rg '联系队友|配对成功|平台担保|智能配对|buddy-matching' src/
 ```
 
 应无命中（docs 历史描述除外）。
+
+### 1.5 国际化与用户体系（合规 · 2026-06）
+
+**结论**：同一 OPC + ICP 备案 + 微信小程序 → **一套用户体系**（`openid` 单表），**不拆**中外籍两套用户管理。
+
+| 做法 | 合规 |
+|------|------|
+| `preferredLocale`（`zh-CN` / `en-US`）+ 双语法律文档 | ✅ 产品分层，非法律分层 |
+| `homeCity` · `raverMode` 等产品字段 | ✅ 同表扩展 |
+| 同意时记录 `legalConsent.version` + **locale**（建议服务端留证） | ✅ 推荐 |
+| 英文隐私政策与中文版 **实质等价**（权利义务对齐） | ✅ 在沪外国人可读 |
+| 两套 User 表 / 两个小程序 / 外籍数据存境外 | ❌ 义务不减；境外存储触发 PIPL 跨境合规 |
+
+上海外国人若使用本小程序，通常仍有微信账号 → 与境内用户相同 PIPL + 微信内容安全路径。GDPR 等域外规则若适用，应在**同一系统**补齐删除/导出权利，而非拆库。
+
+**代码**：`src/i18n/` · `src/legal/en/` · `user.schema.ts` · `legalConsentStorage.ts`
 
 ---
 
@@ -363,6 +379,7 @@ Story：[US-Q2-39](./Q2-USER-STORIES.md#us-q2-39--本地城市-hub-聚合页-p1-
 | 人格测试 → 找队 | 结果页主 CTA 进招募墙 / 预填发帖；测完同步曲风偏好（US-Q2-17 / 27） |
 | ~~准备 Tab 对话~~ | **已移除**（US-Q2-22） |
 | Q2 待优化 | 洞察行「已参考你的偏好」、无结果引导发招募、Prep Nudge 分阶段推荐（US-Q2-34） |
+| **申请加入评论 AI**（post-launch） | 「申请加入」展开评论区时横滑 2～3 条公开评论草稿（**US-Q2-44**） |
 
 后端：`PostSearchService` · `BuddyPostSearchParseService` · **关键词相关性优先**，再结合用户资料（城市 / 曲风偏好，含人格测试写入的 `favorGenres`）作**次要排序**；非付费匹配。官宣前无行程时，**人格偏好是早期找队的主要可用信号**（见 §2.5）。
 
@@ -387,6 +404,12 @@ Story：[US-Q2-39](./Q2-USER-STORIES.md#us-q2-39--本地城市-hub-聚合页-p1-
 | 阵容深页 | `activity-lineup`：演出时间表 / 阵容艺人卡 / 未官宣订阅；点 DJ → 艺人半屏（US-Q2-19 / 33）；专属行程 → `exclusive-itinerary` |
 | ~~Agent 对话查节~~ | **已下线**（后端 WS 默认关闭，见 US-Q2-22） |
 | 信任 | US-Q1-04 信息来源（`infoSource` · `infoUpdatedAt`）；未官宣可订阅（`lineupPublished`） |
+| **节故事**（post-launch） | 详情资讯区折叠「关于这场节」：起源 · 里程碑 · 曲风气质；`infoSource` + 免责（**US-Q2-41**） |
+| **哪场节适合我**（post-launch） | 人格 + 偏好 + 档期 → 推荐活动卡 + `insight_line`（**US-Q2-42**；非匹配队友） |
+| **自然语言搜节**（post-launch） | 活动 Tab：「7 月欧洲 techno」→ 解析 filter（**US-Q2-45**） |
+| **双节对比**（post-launch） | 结构化对比卡（地点/曲风/预算档/签证提示）（**US-Q2-46**） |
+
+详情资讯区分三层：**事实**（时间地点来源）· **阵容**（`activity-lineup`）· **叙事**（节故事，默认折叠，不挡招募墙首屏）。
 
 ### 4.1 艺人 Tab（查节第三条入口 · US-Q2-19）
 
@@ -455,9 +478,9 @@ Story：[US-Q2-39](./Q2-USER-STORIES.md#us-q2-39--本地城市-hub-聚合页-p1-
 |------|------|------|
 | **0–4** | 已完成 | 合规、招募改版、去对话化、AI 找队、招募字段 |
 | **5 上线冲刺** | ～2 周（目标 07-06 前提审） | 种子帖、冒烟提审、可选偏好洞察/Prep Nudge；**全球节讯目录 ✅**；人格分享链路现网可用，转化收口见 17/27 |
-| **6 上线后** | 2～4 周 | Scene Agent 基建、结构化申请、**Raver 模式 + 室内 catalog** |
-| **7 增长** | 有数据后 | 本地 Hub、人格裂变、翻卡、AI 发帖 |
-| **8 本地深化** | 上海验证后 | 深圳/香港 city、跨场 AI 找队、艺人 Tab 串联 |
+| **6 上线后** | 2～4 周 | Scene Agent 基建、结构化申请、**Raver + 室内 catalog**；**阵容必看 set（Q2-43）** · **申请评论 AI（Q2-44）** · 官宣规律洞察（Q2-47） |
+| **7 增长** | 有数据后 | 本地 Hub、人格裂变、翻卡、AI 发帖；**哪场节适合我（Q2-42）** · **节故事 MVP（Q2-41）** · 生存指南（Q2-48） |
+| **8 本地深化** | 上海验证后 | 跨场 AI 找队、多城 seed；**NL 搜节（Q2-45）** · **双节对比（Q2-46）** · 艺人 Tab 串联 |
 
 完整 Story 与验收：[Q2-USER-STORIES.md](./Q2-USER-STORIES.md)。
 
@@ -475,11 +498,37 @@ Story：[US-Q2-39](./Q2-USER-STORIES.md#us-q2-39--本地城市-hub-聚合页-p1-
 | **人格裂变** | 分享次数 · 分享落地 UV · 落地→测完率 · 测完→进招募墙率 |
 | **偏好沉淀** | 测完且已写 `favorGenres` 的用户占比（US-Q2-27） |
 | **本地 Hub**（上线后） | local 用户 Hub 进入率 · Hub→发招募 / 申请加入转化（US-Q2-39） |
+| **节故事**（上线后） | 故事展开率 · 展开者 register / AI 找队率 vs 未展开（US-Q2-41） |
+| **申请评论 AI**（上线后） | 使用草稿的用户「申请加入→发评论」转化率（US-Q2-44） |
 | 合规 | 类目/资质驳回 0；联系方式拦截正常 |
 
 ---
 
 ## 八、待办与决策项
+
+### 8.1 Scene AI 增强路线图（无感 Agent · 2026-06）
+
+> 原则：**不恢复对话 Tab**；AI 嵌在用户正在做的场景，产出可点击 effect。详见 [SCENE-AGENT.md](./SCENE-AGENT.md)。
+
+| 层级 | 说明 | 示例 |
+|------|------|------|
+| **L0 规则** | 不调 LLM | Prep Nudge、官宣往年规律（Q2-47） |
+| **L1 单轮 scene-run** | 单次 LLM + effects | 帮写帖/评论、节故事摘要、DJ 解读 |
+| **L2 长任务 REST** | 独立进度 | 攻略生成、行程优化（`itinerary-schedule.service.ts`） |
+
+| 吸引主轴 | Scene / Story | Sprint | 核心 effect |
+|----------|---------------|--------|-------------|
+| **查节** | `festival_recommend` · Q2-42 | 7 | 活动卡 + insight_line |
+| **查节** | `festival_story` · Q2-41 | 7 | inline_card（折叠） |
+| **查节** | `events_nl_search` · Q2-45 | 8 | prefill_query + 过滤列表 |
+| **查节** | `festival_compare` · Q2-46 | 8 | inline_card 对比表 |
+| **找队** | `recruit_apply_compose` · Q2-44 | 6 | candidates 公开评论草稿 |
+| **找队** | 已有 recruit_* | 5～7 | 搜帖 / 帮写 / 翻卡 / Chip |
+| **准备/粘性** | `lineup_picks` · Q2-43 | 6 | 高亮 DJ → open_sheet 行程 |
+| **准备** | `guide_survival` · Q2-48 | 7 | 攻略后节别生存指南卡 |
+| **资讯** | `lineup_announce_hint` · Q2-47 | 6 | insight_line（规则） |
+
+**明确不做**：全站聊天、匹配度/最佳搭子、AI 自动代发（须用户选草稿确认）、付费 AI、塔罗抽队友。
 
 ### 自 Q1 延续
 
@@ -492,7 +541,7 @@ Story：[US-Q2-39](./Q2-USER-STORIES.md#us-q2-39--本地城市-hub-聚合页-p1-
 
 ### 本地趣味功能（合规 · Sprint 7～8）
 
-翻招募卡（US-Q2-29）· AI 暗号候选 · Hub「今晚 N 场 · M 条招募」· 艺人卡 + 曲目 · 招募海报 · 曲风 Chip — **不做**匹配/塔罗/站内私信。
+翻招募卡（US-Q2-29）· AI 暗号候选 · 申请评论草稿（US-Q2-44）· 节故事 hook（US-Q2-41）· Hub「今晚 N 场 · M 条招募」· 艺人卡 + 曲目 · 招募海报 · 曲风 Chip — **不做**匹配/塔罗/站内私信。
 
 ### 明确不做（Q2）
 

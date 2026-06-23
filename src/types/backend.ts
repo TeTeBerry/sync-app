@@ -4,12 +4,24 @@ export interface ApiResponse<T> {
   data: T;
 }
 
+export interface CatalogLineupArtistNextActivity {
+  legacyId: number;
+  name: string;
+  date: string;
+  area?: string;
+}
+
 export interface CatalogLineupArtist {
   id: string;
   name: string;
   genreLabel: string;
   activityCount: number;
   thumbnail?: string;
+  nextActivity?: CatalogLineupArtistNextActivity;
+}
+
+export interface CatalogLineupArtistDetail extends CatalogLineupArtist {
+  profileSummary?: string;
 }
 
 export interface BackendActivity {

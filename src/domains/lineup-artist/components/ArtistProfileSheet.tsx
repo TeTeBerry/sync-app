@@ -1,0 +1,267 @@
+import './ArtistProfileSheet.scss';
+import { memo, useCallback, useMemo } from 'react';
+import { ScrollView, Text, View, Image } from '@tarojs/components';
+import { X } from '../../../components/icons';
+import { Button, cn } from '../../../components/ui';
+import { ImageWithFallback } from '../../../components/ImageWithFallback';
+import ThemedPageLoader from '../../../components/ThemedPageLoader';
+import { useT } from '@/hooks/useI18n';
+import { useOverlayLock } from '../../../hooks/useOverlayLock';
+import {
+  useCatalogLineupArtistDetail,
+  useLineupArtistActivities,
+} from '../../../hooks/useSyncApi';
+import { IMAGE_SIZE } from '../../../constants/imageSizes';
+import { thumbnailImageUrl } from '../../../utils/imageUrl';
+import { goEventDetail } from '../../../utils/route';
+import { compareActivitiesNearestFirst } from '../../../utils/activityStatus';
+import { pickNearestUpcomingActivity } from '../utils/pickNearestUpcomingActivity';
+import { ArtistActivityRow } from './ArtistActivityRow';
+
+export type ArtistProfileSheetProps = {
+  open: boolean;
+  artistId: string | null;
+  onClose: () => void;
+};
+
+function ArtistProfileSheetInner({ open, artistId, onClose }: ArtistProfileSheetProps) {
+  const t = useT();
+  useOverlayLock(open);
+
+  const enabled = open && Boolean(artistId?.trim());
+  const {
+    data: artist,
+    isLoading: artistLoading,
+    isError: artistError,
+    refetch: refetchArtist,
+  } = useCatalogLineupArtistDetail(artistId, { enabled });
+  const {
+    data: activities,
+    isLoading: activitiesLoading,
+    isError: activitiesError,
+    refetch: refetchActivities,
+  } = useLineupArtistActivities(artistId, { enabled });
+
+  const sortedActivities = useMemo(() => {
+    if (!activities?.length) {
+      return [];
+    }
+    return [...activities].sort((a, b) =>
+      compareActivitiesNearestFirst(
+        { date: a.date, title: a.name },
+        { date: b.date, title: b.name },
+      ),
+    );
+  }, [activities]);
+
+  const nearestUpcoming = useMemo(
+    () => pickNearestUpcomingActivity(sortedActivities),
+    [sortedActivities],
+  );
+
+  const handleOpenActivity = useCallback(
+    (legacyId: number) => {
+      onClose();
+      goEventDetail(legacyId);
+    },
+    [onClose],
+  );
+
+  const handleOpenNearest = useCallback(() => {
+    if (!nearestUpcoming?.legacyId) {
+      return;
+    }
+    handleOpenActivity(nearestUpcoming.legacyId);
+  }, [handleOpenActivity, nearestUpcoming?.legacyId]);
+
+  const handleRetry = useCallback(() => {
+    void refetchArtist();
+    void refetchActivities();
+  }, [refetchActivities, refetchArtist]);
+
+  if (!open || !artistId) {
+    return null;
+  }
+
+  const thumbSrc = artist?.thumbnail
+    ? thumbnailImageUrl(artist.thumbnail, IMAGE_SIZE.avatarMd, 1)
+    : undefined;
+  const heroBackdropSrc = artist?.thumbnail
+    ? thumbnailImageUrl(artist.thumbnail, IMAGE_SIZE.listThumb, 1)
+    : undefined;
+  const isLoading = artistLoading || activitiesLoading;
+  const isError = artistError || activitiesError;
+  const bioText =
+    artist?.profileSummary?.trim() || t('events.artistProfile.bioPlaceholder');
+
+  return (
+    <View
+      className="s-overlay s-overlay--sheet s-artist-profile-sheet"
+      catchMove
+      role="presentation"
+    >
+      <View className="s-overlay__backdrop" onClick={onClose} />
+      <View
+        className="s-overlay__panel s-artist-profile-sheet__panel"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="artist-profile-sheet-title"
+        onClick={(event) => event.stopPropagation?.()}
+      >
+        <View className="s-artist-profile-sheet__handle" aria-hidden />
+        <View className="s-artist-profile-sheet__top">
+          <Text
+            id="artist-profile-sheet-title"
+            className="s-artist-profile-sheet__heading"
+          >
+            {t('events.artistProfile.title')}
+          </Text>
+          <Button
+            className="s-artist-profile-sheet__close"
+            plain
+            hoverClass="s-artist-profile-sheet__close--pressed"
+            aria-label={t('events.artistProfile.closeAria')}
+            onClick={(event) => {
+              event.stopPropagation?.();
+              onClose();
+            }}
+          >
+            <X size={22} color="#fff" aria-hidden />
+          </Button>
+        </View>
+
+        {isLoading && !artist ? (
+          <View className="s-artist-profile-sheet__loader-wrap">
+            <ThemedPageLoader variant="skeleton-feed" minHeight={220} />
+          </View>
+        ) : isError ? (
+          <View className="s-artist-profile-sheet__state">
+            <Text className="s-artist-profile-sheet__state-text">
+              {t('events.artistProfile.loadFailed')}
+            </Text>
+            <Text
+              className="s-artist-profile-sheet__state-action"
+              onClick={handleRetry}
+            >
+              {t('common.retry')}
+            </Text>
+          </View>
+        ) : (
+          <>
+            <View className="s-artist-profile-sheet__hero">
+              {heroBackdropSrc ? (
+                <View className="s-artist-profile-sheet__hero-backdrop" aria-hidden>
+                  <Image
+                    src={heroBackdropSrc}
+                    className="s-artist-profile-sheet__hero-backdrop-img"
+                    mode="aspectFill"
+                  />
+                  <View className="s-artist-profile-sheet__hero-backdrop-scrim" />
+                </View>
+              ) : null}
+              <View className="s-artist-profile-sheet__hero-glow" aria-hidden />
+              <View className="s-artist-profile-sheet__header">
+                <View className="s-artist-profile-sheet__avatar-stage">
+                  <View className="s-artist-profile-sheet__avatar-glow" aria-hidden />
+                  <ImageWithFallback
+                    src={thumbSrc}
+                    alt={artist?.name ?? ''}
+                    wrapperClassName="s-artist-profile-sheet__avatar"
+                    imageClassName="s-artist-profile-sheet__avatar-img"
+                    fallbackWrapperClassName="s-artist-profile-sheet__avatar s-artist-profile-sheet__avatar--fallback"
+                    fallback={artist?.name?.slice(0, 2) ?? ''}
+                  />
+                </View>
+                <View className="s-artist-profile-sheet__identity">
+                  <View className="s-artist-profile-sheet__name-row">
+                    <Text className="s-artist-profile-sheet__name">{artist?.name}</Text>
+                    {artist?.activityCount != null ? (
+                      <Text className="s-artist-profile-sheet__count-pill">
+                        {t('events.artistActivityCount', {
+                          count: artist.activityCount,
+                        })}
+                      </Text>
+                    ) : null}
+                  </View>
+                  {artist?.genreLabel ? (
+                    <Text className="s-artist-profile-sheet__genre">
+                      {artist.genreLabel}
+                    </Text>
+                  ) : null}
+                  <Text className="s-artist-profile-sheet__bio s-line-clamp-3">
+                    {bioText}
+                  </Text>
+                </View>
+              </View>
+            </View>
+
+            <ScrollView
+              scrollY
+              enhanced
+              showScrollbar={false}
+              className="s-artist-profile-sheet__scroll s-scrollbar-none"
+              style={{ flex: 1, height: 0, minHeight: 0 }}
+            >
+              <View className="s-artist-profile-sheet__body">
+                <View className="s-artist-profile-sheet__section-head">
+                  <View className="s-artist-profile-sheet__section-accent" />
+                  <Text className="s-artist-profile-sheet__section-title">
+                    {t('events.artistProfile.appearancesTitle')}
+                  </Text>
+                  {sortedActivities.length ? (
+                    <View className="s-artist-profile-sheet__section-count">
+                      <Text className="s-artist-profile-sheet__section-count-text">
+                        {sortedActivities.length}
+                      </Text>
+                    </View>
+                  ) : null}
+                </View>
+                {sortedActivities.length ? (
+                  <View className="s-artist-profile-sheet__activities">
+                    {sortedActivities.map((activity, index) => (
+                      <ArtistActivityRow
+                        key={activity.legacyId}
+                        activity={activity}
+                        highlight={index === 0 && Boolean(nearestUpcoming)}
+                        onPress={() => handleOpenActivity(activity.legacyId)}
+                      />
+                    ))}
+                  </View>
+                ) : (
+                  <Text className="s-artist-profile-sheet__empty">
+                    {t('events.artistProfile.appearancesEmpty')}
+                  </Text>
+                )}
+              </View>
+            </ScrollView>
+
+            <View className="s-artist-profile-sheet__footer">
+              <Button
+                className={cn(
+                  's-artist-profile-sheet__cta',
+                  !nearestUpcoming && 's-artist-profile-sheet__cta--disabled',
+                )}
+                disabled={!nearestUpcoming}
+                hoverClass={
+                  nearestUpcoming ? 's-artist-profile-sheet__cta--pressed' : ''
+                }
+                onClick={handleOpenNearest}
+              >
+                <Text className="s-artist-profile-sheet__cta-text">
+                  {t('events.artistProfile.ctaNearest')}
+                </Text>
+              </Button>
+              <Text className="s-artist-profile-sheet__cta-hint">
+                {nearestUpcoming
+                  ? t('events.artistProfile.recruitHint')
+                  : t('events.artistProfile.ctaDisabledHint')}
+              </Text>
+            </View>
+          </>
+        )}
+      </View>
+    </View>
+  );
+}
+
+export const ArtistProfileSheet = memo(ArtistProfileSheetInner);
