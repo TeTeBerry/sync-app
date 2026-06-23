@@ -35,7 +35,7 @@
 | 12 | US-ARCH-11 | Monorepo + `@sync/contracts` 正式包 | P2 | L | FULL | ✅ |
 | 13 | US-ARCH-12 | 共享契约：`activity` + `notification` + `profile` | P2 | L | FULL | ✅ |
 | 14 | US-ARCH-13 | Controller 路由风格统一 | P2 | S | BE | ✅ |
-| 15 | US-ARCH-14 | AI 模块 port 化（对齐 Partner 模式） | P2 | L | BE | 🔲 |
+| 15 | US-ARCH-14 | AI 模块 port 化（对齐 Partner 模式） | P2 | L | BE | ✅ |
 | 16 | US-ARCH-15 | 评估 TanStack Query 迁移 | P3 | M | FE | ⏸ |
 | 17 | US-ARCH-16 | OpenAPI / JSON Schema | P3 | M | BE | ⏸ |
 | 18 | US-ARCH-17 | E2E / Smoke 黄金路径进 CI | P3 | M | FULL | 🔲 |
@@ -67,7 +67,7 @@
 | US-ARCH-11 | Monorepo contracts 包 | P2 | ✅ |
 | US-ARCH-12 | 契约扩展 activity/notification | P2 | ✅ |
 | US-ARCH-13 | 路由风格统一 | P2 | ✅ |
-| US-ARCH-14 | AI port 化 | P2 | 🔲 |
+| US-ARCH-14 | AI port 化 | P2 | ✅ |
 | US-ARCH-15 | TanStack Query 评估 | P3 | ⏸ |
 | US-ARCH-16 | OpenAPI | P3 | ⏸ |
 | US-ARCH-17 | E2E Smoke CI | P3 | 🔲 |
@@ -433,6 +433,7 @@
 **验收标准**
 
 - [x] `TravelGuideController` 改为 `@Controller('activities/:legacyId/travel-guide')`（或归入 `ActivityExperience` 子路由文档约定）
+- [x] `FestivalPlanController` 改为 `@Controller('activities/:legacyId/festival-plan-progress')` + `@Get()`（URL 不变）
 - [x] 路径与 [API.md](./API.md) 一致；**无 breaking change**（或版本说明 + 前端同步）
 - [x] `smoke:api` 通过
 
@@ -444,7 +445,7 @@
 
 ---
 
-### US-ARCH-14 · AI 模块 port 化（对齐 Partner 模式） P2 · L · BE · 🔲
+### US-ARCH-14 · AI 模块 port 化（对齐 Partner 模式） P2 · L · BE · ✅
 
 **Story**  
 作为后端开发，我希望 AI agent 工具通过 port 调用业务域，以便 handler 单测可 mock、不拉整条 Partner/TravelGuide 链。
@@ -454,14 +455,14 @@
 
 **验收标准**
 
-- [ ] 定义 port（示例）：
+- [x] 定义 port（示例）：
   - `IPostWritePort` / `IPostQueryPort`
   - `ITravelGuidePort`
   - `IItineraryPort`
-- [ ] `ai/agent/tools/*` 与 `orchestration/handlers/*` 仅注入 port
-- [ ] adapters module 在 `AppModule` 层绑定实现
-- [ ] 至少 2 个 handler 单测改为 mock port（如 `agent-turn.handler`、`dj-info-turn.handler`）
-- [ ] `docs/ARCHITECTURE.md` AI 节更新
+- [x] `ai/agent/tools/*` 与 `orchestration/handlers/*` 仅注入 port
+- [x] adapters module 在 `AppModule` 层绑定实现
+- [x] 至少 2 个 handler 单测改为 mock port（如 `agent-turn.handler`、`dj-info-turn.handler`）
+- [x] `docs/ARCHITECTURE.md` AI 节更新
 
 **技术提示**
 
@@ -635,7 +636,7 @@ arch(be): remove post migrations from onModuleInit [US-ARCH-03]
 |------|------|
 | 2026-06-23 | 初版：18 条 Story，P0～P3 排序 |
 | 2026-06-23 | **+US-ARCH-19** 观演资料包离线缓存；**US-ARCH-05** 扩为四层缓存分层；产品优先级：阵容/时间表 > 招募帖 |
-| 2026-06-24 | **US-ARCH-12** activity/notification/profile 契约包；**US-ARCH-13** TravelGuide 路由风格统一 |
+| 2026-06-24 | **US-ARCH-12** activity/notification/profile 契约包；**US-ARCH-13** TravelGuide + FestivalPlan 路由风格统一；**US-ARCH-14** AI port 化（Partner/Itinerary/TravelGuide） |
 
 ---
 
