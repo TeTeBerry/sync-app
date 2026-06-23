@@ -10,6 +10,14 @@ const travelPlanContractsPath = path.resolve(
   __dirname,
   '../../sync-app-backend/src/shared/travel-plan/index.ts',
 );
+const travelGuideContractsPath = path.resolve(
+  __dirname,
+  '../../sync-app-backend/src/shared/travel-guide/index.ts',
+);
+const partnerContractsPath = path.resolve(
+  __dirname,
+  '../../sync-app-backend/src/shared/partner/index.ts',
+);
 const itineraryContractsPath = path.resolve(
   __dirname,
   '../../sync-app-backend/src/shared/itinerary/index.ts',
@@ -39,6 +47,8 @@ export default defineConfig({
   alias: {
     '@sync/chat-contracts': chatContractsPath,
     '@sync/travel-plan-contracts': travelPlanContractsPath,
+    '@sync/travel-guide-contracts': travelGuideContractsPath,
+    '@sync/partner-contracts': partnerContractsPath,
     '@sync/itinerary-contracts': itineraryContractsPath,
     '@sync/festival-plan-contracts': festivalPlanContractsPath,
     /** After @sync/* — bare `@` must not shadow `@sync/…` contract aliases. */

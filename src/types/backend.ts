@@ -174,100 +174,21 @@ export interface ProfileActivityItem {
   activityLegacyId: string;
 }
 
-export interface ProfilePostItem {
-  id: string;
-  title: string;
-  content?: string;
-  contentPreview?: string;
-  date: string;
-  activityLegacyId?: number;
-}
-
-export interface ProfilePostsPage {
-  items: ProfilePostItem[];
-  nextCursor?: string;
-  hasMore: boolean;
-}
-
-export interface ProfilePostsPage {
-  items: ProfilePostItem[];
-  nextCursor?: string;
-  hasMore: boolean;
-}
-
-export interface EventPostsPage {
-  items: EventDetailPost[];
-  nextCursor?: string;
-  hasMore: boolean;
-}
-
-export interface BuddyPostSearchParsed {
-  departureCity?: string;
-  eventName?: string;
-  date?: string;
-  genre?: string;
-  peopleCount?: string;
-  extraKeywords?: string[];
-  preferOpenRecruit?: boolean;
-  searchTerms: string[];
-}
-
-export interface BuddyPostAiSearchResult {
-  parsed: BuddyPostSearchParsed;
-  items: EventDetailPost[];
-  totalMatched: number;
-  totalScanned: number;
-}
-
-export interface EventDetailPost {
-  id: string;
-  userId?: string;
-  name: string;
-  handle?: string;
-  location: string;
-  departureCity?: string;
-  createdAt?: string;
-  body?: string;
-  bodyPreview?: string;
-  tags: string[];
-  avatar: string;
-  comments?: number;
-  /** Present on create when moderation hides the post from public feeds. */
-  status?: 'active' | 'hidden';
-  moderationReason?: string;
-  recruitStatus?: 'open' | 'full';
-  slotsTotal?: number;
-  slotsFilled?: number;
-}
-
-export interface PostCommentItem {
-  id: string;
-  userId: string;
-  authorName: string;
-  avatar: string;
-  body: string;
-  time: string;
-  replies?: PostCommentItem[];
-}
-
-export interface PostCommentsPage {
-  items: PostCommentItem[];
-  hasMore: boolean;
-  nextCursor?: string;
-}
-
-export interface CreatePostPayload {
-  body: string;
-  activityLegacyId?: number;
-  eventTitle?: string;
-  location?: string;
-  tags?: string[];
-  /** Default true. False = stored but hidden from activity/popular feeds. */
-  listedInFeed?: boolean;
-  recruitStatus?: 'open' | 'full';
-  slotsTotal?: number;
-  slotsFilled?: number;
-}
+export type {
+  BuddyPostAiSearchResult,
+  BuddyPostSearchParsed,
+  CreatePostPayload,
+  DeletePostResult,
+  EventDetailPost,
+  EventPostsPage,
+  PostCommentItem,
+  PostCommentMutationResult,
+  PostCommentsPage,
+  ProfilePostItem,
+  ProfilePostsPage,
+  UpdatePostPayload,
+  UpdatePostRecruitPayload,
+} from './partner';
 
 export interface HomeSummary {
   heat: {

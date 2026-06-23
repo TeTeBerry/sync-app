@@ -1,10 +1,8 @@
 import './TravelGuideBudgetCompareCards.scss';
 import { Button, cn } from '@/components/ui';
 import { Check, Sparkles } from '@/components/icons';
-import {
-  getTravelGuideBudgetOptions,
-  type TravelGuideBudgetTier,
-} from '@/types/travelGuide';
+import { getTravelGuideBudgetOptions } from '../utils/travelGuideBudgetLabels';
+import type { TravelGuideBudgetTier } from '@/types/travelGuide';
 import { buildTravelGuideTierCompareEstimates } from '../utils/travelGuideBudgetCompare.util';
 import { useT } from '@/hooks/useI18n';
 import { Text, View } from '@tarojs/components';

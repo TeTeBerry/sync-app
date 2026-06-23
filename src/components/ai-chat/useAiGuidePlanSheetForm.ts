@@ -43,13 +43,10 @@ export function useAiGuidePlanSheetForm({
       setDeparture(initialValues.departure);
       setDepartureCity(initialValues.departureCity);
       setHeadcount(initialValues.headcount);
-      setAccommodationNights(
-        initialValues.accommodationNights > 0
-          ? initialValues.accommodationNights
-          : defaultNights,
-      );
+      const nights = initialValues.accommodationNights ?? defaultNights;
+      setAccommodationNights(nights > 0 ? nights : defaultNights);
       setNeedsAccommodation(
-        showAccommodationOption ? initialValues.accommodationNights > 0 : true,
+        showAccommodationOption ? (initialValues.accommodationNights ?? 0) > 0 : true,
       );
       setSelfDrive(showSelfDriveOption ? Boolean(initialValues.selfDrive) : false);
       return;

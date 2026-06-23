@@ -1,6 +1,6 @@
 import type { AiBuddyPostFormValues, BuddyPostTagId } from '../types/buddyPost';
 import type { AiGuidePlanFormValues } from '../types/travelGuide';
-import { travelGuideBudgetLabel } from '../types/travelGuide';
+import { travelGuideBudgetLabel } from '@/domains/travel-guide/utils/travelGuideBudgetLabels';
 import { defaultBuddyPostForm } from './buddyPostForm';
 import {
   formatBuddyPostDateShort,
@@ -27,8 +27,9 @@ function buildPrefillNote(
   t: (key: string) => string,
 ): string | undefined {
   const parts: string[] = [];
-  if (guide.accommodationNights > 0) {
-    parts.push(`住${guide.accommodationNights}晚`);
+  const nights = guide.accommodationNights ?? 0;
+  if (nights > 0) {
+    parts.push(`住${nights}晚`);
   }
   if (guide.budgetTier) {
     parts.push(`${travelGuideBudgetLabel(guide.budgetTier, t)}住宿`);
@@ -68,15 +69,16 @@ export function travelGuideFormToBuddyPrefill(
     note: buildPrefillNote(guide, resolveT),
   };
 
+  const nights = guide.accommodationNights ?? 0;
   const summaryLines = [
     '出发地待填写',
     headcount ? `${headcount}人` : '人数待补充',
-    guide.accommodationNights > 0 && guide.budgetTier
-      ? `住${guide.accommodationNights}晚 · ${travelGuideBudgetLabel(guide.budgetTier, resolveT)}`
+    nights > 0 && guide.budgetTier
+      ? `住${nights}晚 · ${travelGuideBudgetLabel(guide.budgetTier, resolveT)}`
       : guide.budgetTier
         ? travelGuideBudgetLabel(guide.budgetTier, resolveT)
-        : guide.accommodationNights > 0
-          ? `住${guide.accommodationNights}晚`
+        : nights > 0
+          ? `住${nights}晚`
           : undefined,
     guide.selfDrive ? resolveT('travelPlan.driveYes') : undefined,
   ].filter((line): line is string => Boolean(line));

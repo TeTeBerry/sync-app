@@ -19,6 +19,12 @@
       "@sync/travel-plan-contracts": [
         "../sync-app-backend/src/shared/travel-plan/index.ts"
       ],
+      "@sync/travel-guide-contracts": [
+        "../sync-app-backend/src/shared/travel-guide/index.ts"
+      ],
+      "@sync/partner-contracts": [
+        "../sync-app-backend/src/shared/partner/index.ts"
+      ],
       "@sync/itinerary-contracts": [
         "../sync-app-backend/src/shared/itinerary/index.ts"
       ],

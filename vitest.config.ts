@@ -23,6 +23,14 @@ export default defineConfig({
         __dirname,
         '../sync-app-backend/src/shared/travel-plan/index.ts',
       ),
+      '@sync/travel-guide-contracts': path.resolve(
+        __dirname,
+        '../sync-app-backend/src/shared/travel-guide/index.ts',
+      ),
+      '@sync/partner-contracts': path.resolve(
+        __dirname,
+        '../sync-app-backend/src/shared/partner/index.ts',
+      ),
       '@sync/itinerary-contracts': path.resolve(
         __dirname,
         '../sync-app-backend/src/shared/itinerary/index.ts',

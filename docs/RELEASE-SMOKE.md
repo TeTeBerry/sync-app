@@ -44,10 +44,11 @@
 - [x] （**US-Q2-49**）**S2O / WDJF / Ultra Japan** 生成攻略不 503（Hot Path Phase B 已收口）
 - [x] （**US-Q2-49**）未支持境外场（如 TML 比利时）详情出征准备显示「筹备中」，不裸 503
 - [ ] 境外场攻略酒店 `bookingHint` 含 Agoda/Booking 等（非平台代订）
+- [ ] （**US-Q2-52**）行程记账：拍小票或手动记一笔 → 分摊 Sheet 选 **4 人** → 保存 → StatsBar 显示人均 → **复制分摊摘要**（含「试算仅供参考」）→ 刷新后分摊字段仍在
 
 ## 合规文案
 
-- [ ] `rg '联系队友|配对成功|平台担保|智能配对|buddy-matching' sync-app/src/` 无命中
+- [ ] `rg '联系队友|配对成功|平台担保|智能配对|buddy-matching|AA收款|代付|向队友收|组队账单' sync-app/src/` 无命中
 - [ ] 首页/详情底部 `platformDisclaimer` 常驻
 - [ ] AI 相关入口有「仅供参考」类 disclaimer
 

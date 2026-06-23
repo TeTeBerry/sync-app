@@ -78,3 +78,17 @@ PR 若主包上涨 >50 KB，请在 PR 说明原因并更新上表（可选）。
 约定：
 
 - 勿在 `useEventDetailBuddyPost` / `useEventDetailTravelGuide` 内重复 `useActivityDetailQuery`；活动元数据由 `useEventDetailPage` 注入。
+
+## 离线观演资料（产品 · US-ARCH-19）
+
+> 代码包预下载见 `app.config.ts` `preloadRule`；以下为 **业务数据** 离线策略。
+
+| 场景 | 策略 |
+|------|------|
+| 阵容 / 演出时间表 / 专属行程 | **P0 持久化**（按 `activityLegacyId` 资料包） |
+| 活动资讯、已生成攻略 | **P1 持久化**（资讯可并入资料包；攻略已有 `travelGuideDetailStorage`） |
+| 首页 / 活动 catalog | 现网 `homeCacheStorage` 24h |
+| 公开招募帖 / 评论 | **不持久化**（内存 `staleTime` 仅弱网减请求）；无网时招募区提示需联网 |
+| 发帖 / 评论 / AI 找队 | 必须在线 |
+
+现场弱网验收（规划）：Wi‑Fi 打开 `activity-lineup` → 飞行模式 → 仍可查看已缓存阵容/时间表。

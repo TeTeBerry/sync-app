@@ -7,11 +7,15 @@ import {
   type ApiFetchInit,
 } from '../../utils/apiClient';
 import type {
-  CreatePostPayload,
   BuddyPostAiSearchResult,
+  CreatePostPayload,
+  DeletePostResult,
   EventDetailPost,
   EventPostsPage,
+  PostCommentMutationResult,
   PostCommentsPage,
+  UpdatePostPayload,
+  UpdatePostRecruitPayload,
 } from '../../types/backend';
 import { mergeOwnerQueryParams, ownerQueryParams } from '../requestContext';
 
@@ -39,28 +43,12 @@ export function createPost(payload: CreatePostPayload) {
 }
 
 export function deletePost(postId: string) {
-  return apiDelete<{ ok: true }>(`/posts/${postId}`, ownerQueryParams());
+  return apiDelete<DeletePostResult>(`/posts/${postId}`, ownerQueryParams());
 }
-
-export type UpdatePostPayload = {
-  body: string;
-  location?: string;
-  departureCity?: string;
-  tags?: string[];
-  recruitStatus?: 'open' | 'full';
-  slotsTotal?: number;
-  slotsFilled?: number;
-};
 
 export function updatePost(postId: string, payload: UpdatePostPayload) {
   return apiPatch<EventDetailPost>(`/posts/${postId}`, payload, ownerQueryParams());
 }
-
-export type UpdatePostRecruitPayload = {
-  recruitStatus: 'open' | 'full';
-  slotsTotal?: number;
-  slotsFilled?: number;
-};
 
 export function updatePostRecruit(postId: string, payload: UpdatePostRecruitPayload) {
   return apiPatch<EventDetailPost>(
@@ -90,7 +78,7 @@ export function fetchPostComments(postId: string, options?: FetchPostCommentsOpt
 }
 
 export function addPostComment(postId: string, body: string, parentCommentId?: string) {
-  return apiPost<{ id: string; comments: number }>(
+  return apiPost<PostCommentMutationResult>(
     `/posts/${postId}/comments`,
     { body, ...(parentCommentId ? { parentCommentId } : {}) },
     ownerQueryParams(),
@@ -98,7 +86,7 @@ export function addPostComment(postId: string, body: string, parentCommentId?: s
 }
 
 export function deletePostComment(postId: string, commentId: string) {
-  return apiDelete<{ id: string; comments: number }>(
+  return apiDelete<PostCommentMutationResult>(
     `/posts/${postId}/comments/${commentId}`,
     ownerQueryParams(),
   );

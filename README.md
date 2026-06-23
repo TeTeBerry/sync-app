@@ -157,6 +157,8 @@ TypeScript aliases resolve to backend shared types (do not duplicate in `types/b
 | `@sync/festival-plan-contracts` | `sync-app-backend/src/shared/festival-plan/` |
 | `@sync/itinerary-contracts` | `sync-app-backend/src/shared/itinerary/` |
 | `@sync/travel-plan-contracts` | `sync-app-backend/src/shared/travel-plan/` |
+| `@sync/travel-guide-contracts` | `sync-app-backend/src/shared/travel-guide/` |
+| `@sync/partner-contracts` | `sync-app-backend/src/shared/partner/` |
 
 After changing contracts: run `npm run check` in both repos.
 

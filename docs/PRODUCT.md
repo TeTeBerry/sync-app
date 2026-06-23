@@ -168,6 +168,8 @@ rg '联系队友|配对成功|平台担保|智能配对|buddy-matching' src/
 | `itinerary` | `exclusive-itinerary` |
 | `buddy_post` | 活动详情发**招募帖** |
 
+**行程记账 · 人均试算（US-Q2-52 · P0 · W2）**：`my-itinerary` 小票 OCR / 手动记一笔 → **分摊 Sheet**（2～8 人统一均分，可关 = 仅个人）→ StatsBar 展示 **预计花费 + 人均** → **复制分摊摘要** 到微信线下结算。默认人数来自攻略 `headcount`（US-Q2-30/35）。**不经手资金、不代收代付、不绑招募队友**；完整 AA 账本 / 最小转账路径见上线后。
+
 进度条展示：**首页「我的下一场」+ 活动详情折叠区**。
 
 #### 真实时间线
@@ -480,7 +482,8 @@ Story：[US-Q2-39](./Q2-USER-STORIES.md#us-q2-39--本地城市-hub-聚合页-p1-
 
 ### 工程
 
-- 分包预加载、详情缓存、AI 超时 60s · 见 [BUNDLE-SIZE.md](./BUNDLE-SIZE.md)
+- 分包预加载、详情 seed 缓存、AI 超时 60s · 见 [BUNDLE-SIZE.md](./BUNDLE-SIZE.md)
+- **观演资料包离线（规划）**：按活动持久化阵容 / 时间表 / 专属行程；招募帖在线优先 · [ARCH-REFACTOR-STORIES.md US-ARCH-19](./ARCH-REFACTOR-STORIES.md#us-arch-19--观演资料包离线缓存阵容时间表优先-p1--m--fe--)
 
 ---
 

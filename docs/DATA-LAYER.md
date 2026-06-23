@@ -91,6 +91,8 @@ REST 与自定义 `useApiQuery` 缓存的分层约定；身份为 **JWT Bearer**
 |-------|----------|----------------|
 | `@sync/chat-contracts` | `shared/chat/` | `types/aiChat.ts`, `types/conversationState.ts` |
 | `@sync/travel-plan-contracts` | `shared/travel-plan/` | `types/travelPlan.ts` |
+| `@sync/travel-guide-contracts` | `shared/travel-guide/` | `types/travelGuide.ts` |
+| `@sync/partner-contracts` | `shared/partner/` | `types/partner.ts` |
 | `@sync/itinerary-contracts` | `shared/itinerary/` | `types/itinerary.ts` |
 | `@sync/festival-plan-contracts` | `shared/festival-plan/` | `types/festivalPlan.ts` |
 
@@ -129,3 +131,50 @@ types/conversationState  →  @sync/chat-contracts  →  sync-app-backend/shared
 ```
 
 `hooks/sync` **不得** import `pages/**`。
+
+## 缓存分层
+
+> **产品优先级（2026-06）**：现场弱网时，**阵容 / 演出时间表 / 专属行程** 比 **公开招募帖** 更值得持久化离线。实现 Story：**US-ARCH-19**；职责收口：**US-ARCH-05**。
+
+### 四层职责
+
+| 层 | 机制 | 典型数据 | 持久化 | 无网可读 |
+|----|------|----------|--------|----------|
+| **1 · Server state** | `useApiQuery` / `useApiInfiniteQuery` 内存 `globalCache` | 活动详情、帖列表、通知 | 否（进程内） | 仅当内存仍有且上次请求成功 |
+| **2 · Prefetch seed** | `activityDetailCache` · `eventPostsPageCache` · `prefetchToCache` | 列表→详情 header、帖首屏 | 否 | 同层 1 |
+| **3 · Persistent offline** | `Taro.setStorageSync` + envelope（`savedAt`） | 见下表 | 是 | 是（在 TTL 内） |
+| **4 · UI / draft** | Zustand · 表单草稿 | 导航 intent、overlay、发帖草稿 | 部分 | 不适用 |
+
+`staleTime` 常量：[`constants/queryCache.ts`](../src/constants/queryCache.ts)（90～120s，减少弱网重复请求，**不**等于离线包）。
+
+### 层 3 现网与规划
+
+| 数据 | 模块 | TTL / 说明 |
+|------|------|------------|
+| 首页 summary | `homeCacheStorage` | 24h · 启动 `hydrateAppCachesFromStorage` |
+| 活动列表 catalog | `homeCacheStorage` | 24h · 同上 |
+| 个人摘要 | `homeCacheStorage` | 24h · 登出清除 |
+| 出行攻略 | `travelGuideDetailStorage` | 按 guideId / 活动最新索引 |
+| 人格测试结果 | `personalityTestStorage` | 长期 · 拉服务端失败 fallback |
+| **观演资料包（规划）** | **US-ARCH-19** `activityPerformanceBundleStorage` | 按 `activityLegacyId` · 阵容 + timetable + 专属行程 + 资讯 |
+
+### 观演资料包（US-ARCH-19 · 按活动）
+
+**写入时机**：Wi‑Fi 下用户打开已选活动详情，且阵容/行程 API 成功。  
+**包内优先级**：专属行程 → 演出时间表 → 阵容网格 → 活动资讯 → 已有攻略。  
+**明确不写入**：招募帖列表、评论、通知、AI 找队结果（时效 + 产品权重低）。  
+**无网降级**：资料包命中则阵容/行程只读；招募区文案「需联网查看最新公开招募」。
+
+### 微信小程序代码包（平台层）
+
+与业务 storage 无关，但影响弱网首屏：
+
+- 微信自动缓存已下载的**主包/分包代码**
+- [`app.config.ts`](../src/app.config.ts) `preloadRule`：Tab 在 **Wi‑Fi** 预下 `packageEvent` / `packageProfile`
+- 详见 [BUNDLE-SIZE.md](./BUNDLE-SIZE.md)
+
+### Invalidate 约定
+
+- `invalidateCache(['activities'])` 应级联考虑 `activityDetailCache` seed 与（未来）资料包 `savedAt`
+- 登出：`clearHomeCachesOnLogout` · 不清匿名人格缓存策略见 `personalityTestStorage`
+- 阵容官宣推送落地：应 bump 对应活动资料包版本或 `clear(activityLegacyId)`

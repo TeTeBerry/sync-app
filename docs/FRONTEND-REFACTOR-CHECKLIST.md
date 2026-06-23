@@ -83,6 +83,8 @@
 - [x] [`hooks/sync/`](src/hooks/sync/) — Query hooks 按域拆分；`useSyncApi.ts` barrel
 - [x] [DATA-LAYER.md](./DATA-LAYER.md) — REST vs WS 身份表
 - [x] `constants/queryCache.ts` — staleTime 分层
+- [x] **详情种子**：`seedActivityDetailsFromHomeSummary` + `goEventDetail` 补种缓存
+- [ ] **观演资料包**：阵容/时间表/行程按活动持久化（**US-ARCH-19**）；招募帖不持久化 · [DATA-LAYER.md §缓存分层](./DATA-LAYER.md#缓存分层)
 
 ### 性能 ✅
 

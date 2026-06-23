@@ -3,4 +3,4 @@ export type {
   EventDetailPost,
   EventPostsPage,
   ProfilePostItem,
-} from './backend';
+} from './partner';

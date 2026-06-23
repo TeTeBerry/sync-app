@@ -13,29 +13,18 @@ import type {
   GenerateTravelGuidePayload,
   GenerateTravelGuideResult,
   TravelGuideBudgetTier,
+  TravelGuideGenerationJobResult,
+  TravelGuidePlaceSuggestion,
   TravelGuidePlanReadResult,
 } from '../../types/travelGuide';
 import { ownerQueryParams } from '../requestContext';
 import { t } from '@/i18n';
 
-export type TravelGuidePlaceSuggestion = {
-  title: string;
-  address: string;
-  city?: string;
-};
-
-export type TravelGuideGenerationJobStatus =
-  | 'pending'
-  | 'running'
-  | 'completed'
-  | 'failed';
-
-export type TravelGuideGenerationJobResult = {
-  jobId: string;
-  status: TravelGuideGenerationJobStatus;
-  plan?: GenerateTravelGuideResult['plan'];
-  errorMessage?: string;
-};
+export type {
+  TravelGuidePlaceSuggestion,
+  TravelGuideGenerationJobStatus,
+  TravelGuideGenerationJobResult,
+} from '../../types/travelGuide';
 
 const TRAVEL_GUIDE_POLL_MAX_ATTEMPTS = 60;
 
