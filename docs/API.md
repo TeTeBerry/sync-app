@@ -248,7 +248,8 @@ X-Activity-Id: 4          # 可选，活动 legacyId（REST + AI WebSocket upgra
 | PATCH | `/api/notifications/:id/read` | 单条已读 |
 | PATCH | `/api/notifications/read-all` | 全部已读 |
 | POST | `/api/auth/logout` | 退出登录（Bearer）；吊销其它设备 JWT |
-| POST | `/api/activities/:legacyId/travel-guide/generate` | AI 出行攻略（出发地、人数、预算档、是否自驾等；POI/路线来自高德） |
+| POST | `/api/activities/:legacyId/travel-guide/generate` | AI 出行攻略（出发地、人数、预算档、是否自驾等） |
+| | | **境内**：POI/路线来自 **高德**；**境外（含日韩）**：Hot Path 精选 POI（US-Q2-49），动态检索见 US-Q2-50 |
 | GET | `/api/travel-guide/place-suggestions` | 出发地输入提示（高德 inputtips + 本地城市库） |
 
 后端地图链路见 `sync-app-backend/docs/TRAVEL_GUIDE_MAP.md`；需配置 `AMAP_KEY`。

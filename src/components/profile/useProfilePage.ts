@@ -1,5 +1,5 @@
 import Taro, { useDidShow } from '@tarojs/taro';
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { isLiveApi } from '../../constants/api';
 import { useAccountRisk } from '../../hooks/useAccountRisk';
 import { useCurrentUserQuery, useProfileSummaryQuery } from '../../hooks/useSyncApi';
@@ -15,7 +15,7 @@ import {
   readProfileNotificationsEnabled,
   readProfilePrivacyLevel,
 } from '../../utils/profileStorage';
-import { go, preloadHotRoutes, ROUTES } from '../../utils/route';
+import { go, preloadHotRoutes, ROUTES, goPersonalityTest } from '../../utils/route';
 import { persistUserName } from '../../utils/session';
 import type { ProfileSummary } from '../../types/backend';
 import type { ProfileSettingsSectionProps } from './ProfileSettingsSection';
@@ -35,6 +35,11 @@ import { restorePersonalityTestResultFromServer } from '@/domains/personality-te
 import { t } from '@/i18n';
 import { usePersonalityTestResult } from '../../hooks/usePersonalityTestResult';
 import { useStaleBackgroundRefetch } from '../../hooks/useStaleBackgroundRefetch';
+import { getResolvedAuthUserId } from '../../utils/authStorage';
+import {
+  dismissProfilePersonalityNudge,
+  isProfilePersonalityNudgeDismissed,
+} from './utils/profilePersonalityNudgeStorage';
 
 export type UseProfilePageOptions = {
   confirm: (options: ConfirmDialogOptions) => Promise<boolean>;
@@ -52,6 +57,11 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
   const summaryQuery = useProfileSummaryQuery();
   const currentUserQuery = useCurrentUserQuery();
   const personalityResult = usePersonalityTestResult();
+  const authUserId = getResolvedAuthUserId();
+  const personalityCompleted = Boolean(personalityResult?.score?.primaryType);
+  const [personalityNudgeDismissed, setPersonalityNudgeDismissed] = useState(() =>
+    authUserId ? isProfilePersonalityNudgeDismissed(authUserId) : false,
+  );
   const { accountRisk } = useAccountRisk();
   const apiEnabled = isLiveApi();
   const { loggedIn, refresh: refreshAuthSession } = useAuthSession();
@@ -68,6 +78,16 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
   const ongoingCount = profileUserData.stats.events;
   const postsCount = profileUserData.stats.posts;
   const interestTag = deriveInterestTag(profileUserData.bio);
+  const showPersonalityNudge =
+    loggedIn && !personalityCompleted && !personalityNudgeDismissed;
+  const activitiesSubtitle =
+    ongoingCount > 0
+      ? t('profile.ongoingActivities', { count: ongoingCount })
+      : t('profile.noActivitiesYet');
+  const postsSubtitle =
+    postsCount > 0
+      ? t('profile.postCount', { count: postsCount })
+      : t('profile.noPostsYet');
 
   useEndRouteTransitionOnShow(ROUTES.PROFILE);
 
@@ -96,6 +116,14 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
       });
     }
   });
+
+  useEffect(() => {
+    if (!authUserId) {
+      setPersonalityNudgeDismissed(false);
+      return;
+    }
+    setPersonalityNudgeDismissed(isProfilePersonalityNudgeDismissed(authUserId));
+  }, [authUserId]);
 
   useEffect(() => {
     persistUserName(profileUserData.name);
@@ -128,6 +156,17 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
       void summaryQuery.refetch();
     }
   }, [apiEnabled, loggedIn, summaryQuery]);
+
+  const handleDismissPersonalityNudge = useCallback(() => {
+    if (authUserId) {
+      dismissProfilePersonalityNudge(authUserId);
+    }
+    setPersonalityNudgeDismissed(true);
+  }, [authUserId]);
+
+  const handleStartPersonalityTest = useCallback(() => {
+    goPersonalityTest();
+  }, []);
 
   const handleLogout = useCallback(async () => {
     const ok = await confirm({
@@ -176,10 +215,15 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
     interestTag,
     ongoingCount,
     postsCount,
+    activitiesSubtitle,
+    postsSubtitle,
+    showPersonalityNudge,
     accountRisk,
     settings,
     handleAuthLoggedIn,
     handleProfileRetry,
+    handleDismissPersonalityNudge,
+    handleStartPersonalityTest,
     openSettings,
   };
 }

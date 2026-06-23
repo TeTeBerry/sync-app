@@ -1,4 +1,5 @@
 import { extractYearFromText } from './activityStatus';
+import { formatActivityLocationLabel } from './formatActivityDisplay';
 
 export function formatEventDateBadge(date?: string): {
   primary: string;
@@ -53,7 +54,7 @@ export function formatEventFullDate(date?: string, title?: string): string {
 
 export function formatEventHeroMetaLine(date?: string, location?: string): string {
   const datePart = date?.trim() ?? '';
-  const locationPart = location?.trim() ?? '';
+  const locationPart = formatActivityLocationLabel(location);
   if (datePart && locationPart) {
     return `${datePart} · ${locationPart}`;
   }
@@ -62,7 +63,10 @@ export function formatEventHeroMetaLine(date?: string, location?: string): strin
 
 export function formatEventHeroSubtitle(title?: string, location?: string): string {
   const year = extractYearFromText(title);
-  const locationPart = location?.split(/[·,，]/)[0]?.trim();
+  const locationPart = formatActivityLocationLabel(location)
+    .split(/[·,，]/)
+    .find((segment) => segment.trim())
+    ?.trim();
   if (locationPart && year) {
     return `${locationPart} ${year}`;
   }

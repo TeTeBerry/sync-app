@@ -309,6 +309,17 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
   });
 
   const handleOpenAiGuide = useCallback(() => {
+    if (
+      activityQuery.data?.travelGuideSupported === false &&
+      !findLatestTravelGuideForActivity(eventId)?.guideId &&
+      !festivalPlan.checklist?.travelGuideId
+    ) {
+      void Taro.showToast({
+        title: t('travelGuide.preparingToast'),
+        icon: 'none',
+      });
+      return;
+    }
     const guideId =
       festivalPlan.checklist?.travelGuideId?.trim() ||
       findLatestTravelGuideForActivity(eventId)?.guideId;
@@ -317,7 +328,12 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
       return;
     }
     travelGuide.openGuideSheet();
-  }, [eventId, festivalPlan.checklist, travelGuide]);
+  }, [
+    eventId,
+    festivalPlan.checklist,
+    activityQuery.data?.travelGuideSupported,
+    travelGuide,
+  ]);
 
   const travelGuideGenerated = useMemo(
     () =>

@@ -22,6 +22,9 @@ import { useT } from '@/hooks/useI18n';
 import { useConfirmDialog } from '@/hooks/useConfirmDialog';
 import { requestUnfollowActivityConfirm } from '@/utils/unfollowActivityConfirm';
 
+/** Matches `--secondary`; lucide icons need literal colors in mini program data URLs. */
+const FOLLOWED_ICON_COLOR = '#4cc9f0';
+
 interface EventCardProps {
   id?: string;
   title?: string;
@@ -39,6 +42,8 @@ interface EventCardProps {
   onCardPressWarmup?: () => void;
   onTeamUp?: () => void;
   onTeamUpWarmup?: () => void;
+  /** Page-level confirm (required when card is inside scroll-view). */
+  onConfirmUnfollow?: (title: string) => Promise<boolean>;
 }
 
 const EventCardInner: React.FC<EventCardProps> = ({
@@ -58,9 +63,10 @@ const EventCardInner: React.FC<EventCardProps> = ({
   onCardPressWarmup,
   onTeamUp,
   onTeamUpWarmup,
+  onConfirmUnfollow,
 }) => {
   const t = useT();
-  const { confirm, confirmDialog } = useConfirmDialog({
+  const internalConfirm = useConfirmDialog({
     cancelText: t('common.cancel'),
   });
   const travelGuideCta = getGenerateTravelGuideCta();
@@ -78,8 +84,11 @@ const EventCardInner: React.FC<EventCardProps> = ({
         : null;
   const legacyId = resolveEventCardLegacyId(id);
   const confirmUnfollow = useCallback(
-    () => requestUnfollowActivityConfirm(confirm, title),
-    [confirm, title],
+    () =>
+      onConfirmUnfollow
+        ? onConfirmUnfollow(title)
+        : requestUnfollowActivityConfirm(internalConfirm.confirm, title),
+    [internalConfirm.confirm, onConfirmUnfollow, title],
   );
   const {
     subscribed: followed,
@@ -161,7 +170,7 @@ const EventCardInner: React.FC<EventCardProps> = ({
             </View>
           </View>
 
-          <View
+          <Button
             className={[
               's-event-card__follow-tag',
               followed
@@ -173,13 +182,16 @@ const EventCardInner: React.FC<EventCardProps> = ({
             ]
               .filter(Boolean)
               .join(' ')}
-            role="button"
+            plain
+            hoverClass="s-event-card__follow-tag--pressed"
+            disabled={submitting}
             aria-label={
               followed
                 ? t('eventCard.unfollow', { title: activityTitle })
                 : t('eventCard.follow', { title: activityTitle })
             }
-            onClick={() => {
+            onClick={(event) => {
+              event.stopPropagation?.();
               handleSubscribe();
             }}
           >
@@ -197,7 +209,7 @@ const EventCardInner: React.FC<EventCardProps> = ({
               aria-hidden
             >
               {followed ? (
-                <Check size={13} color="var(--secondary)" strokeWidth={2.5} />
+                <Check size={13} color={FOLLOWED_ICON_COLOR} strokeWidth={2.5} />
               ) : (
                 <Bell
                   size={13}
@@ -226,7 +238,7 @@ const EventCardInner: React.FC<EventCardProps> = ({
                     : t('eventCard.followAction')}
               </Text>
             </View>
-          </View>
+          </Button>
         </View>
 
         <View className="s-event-card__footer s-event-card__footer--detail">
@@ -291,7 +303,7 @@ const EventCardInner: React.FC<EventCardProps> = ({
           </View>
         </View>
       </View>
-      {confirmDialog}
+      {!onConfirmUnfollow ? internalConfirm.confirmDialog : null}
     </>
   );
 };

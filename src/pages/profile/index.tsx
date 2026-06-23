@@ -15,6 +15,7 @@ import ProfileActionCard from '../../components/profile/ProfileActionCard';
 import ProfileSettingsSection from '../../components/profile/ProfileSettingsSection';
 import { AccountRiskBanner } from '../../components/account-risk/AccountRiskBanner';
 import ProfileSummarySection from '../../components/profile/ProfileSummarySection';
+import ProfilePersonalityNudgeCard from '../../components/profile/ProfilePersonalityNudgeCard';
 import { useProfilePage } from '../../components/profile/useProfilePage';
 import { LoginInterceptHost } from '../../components/auth/LoginInterceptHost';
 import { useConfirmDialog } from '../../hooks/useConfirmDialog';
@@ -37,10 +38,15 @@ const Profile: React.FC = () => {
     interestTag,
     ongoingCount,
     postsCount,
+    activitiesSubtitle,
+    postsSubtitle,
+    showPersonalityNudge,
     accountRisk,
     settings,
     handleAuthLoggedIn,
     handleProfileRetry,
+    handleDismissPersonalityNudge,
+    handleStartPersonalityTest,
   } = useProfilePage({ confirm });
 
   return (
@@ -85,15 +91,19 @@ const Profile: React.FC = () => {
                       user={profileUserData}
                       interestTag={interestTag}
                     />
+                    {showPersonalityNudge ? (
+                      <ProfilePersonalityNudgeCard
+                        onStart={handleStartPersonalityTest}
+                        onDismiss={handleDismissPersonalityNudge}
+                      />
+                    ) : null}
                     <View className="s-profile__actions-group">
                       <ProfileActionCard
                         accent="activities"
                         icon={<Zap size={20} />}
                         title={t('profile.activitiesTitle')}
                         badge={ongoingCount}
-                        subtitle={t('profile.ongoingActivities', {
-                          count: ongoingCount,
-                        })}
+                        subtitle={activitiesSubtitle}
                         onClick={() => go(ROUTES.PROFILE_ACTIVITIES)}
                       />
                       <ProfileActionCard
@@ -101,7 +111,7 @@ const Profile: React.FC = () => {
                         icon={<FileText size={20} />}
                         title={t('profile.postsTitle')}
                         badge={postsCount}
-                        subtitle={t('profile.postCount', { count: postsCount })}
+                        subtitle={postsSubtitle}
                         onClick={() => go(ROUTES.PROFILE_POSTS)}
                       />
                     </View>

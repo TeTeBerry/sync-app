@@ -48,6 +48,8 @@ export interface BackendActivity {
   infoUpdatedAt?: string;
   lineupPublished?: boolean;
   recruitPostCount?: number;
+  /** false = overseas field without Hot Path; hide generate CTA */
+  travelGuideSupported?: boolean;
 }
 
 export type PrivacyLevel = 'public' | 'private';

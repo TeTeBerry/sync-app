@@ -40,19 +40,20 @@ export function useConfirmDialog(defaults?: {
     });
   }, []);
 
-  const confirmDialog = (
-    <ConfirmDialog
-      open={active != null}
-      title={active?.title ?? ''}
-      message={active?.message ?? ''}
-      confirmText={active?.confirmText ?? defaults?.confirmText ?? '确认'}
-      cancelText={active?.cancelText ?? defaults?.cancelText ?? '取消'}
-      danger={active?.danger}
-      brand={active?.brand}
-      onConfirm={() => close(true)}
-      onCancel={() => close(false)}
-    />
-  );
+  const confirmDialog =
+    active != null ? (
+      <ConfirmDialog
+        open
+        title={active.title}
+        message={active.message}
+        confirmText={active.confirmText ?? defaults?.confirmText ?? '确认'}
+        cancelText={active.cancelText ?? defaults?.cancelText ?? '取消'}
+        danger={active.danger}
+        brand={active.brand}
+        onConfirm={() => close(true)}
+        onCancel={() => close(false)}
+      />
+    ) : null;
 
   return { confirm, confirmDialog };
 }

@@ -1,4 +1,7 @@
-import { ACTIVITY_MAP_REGION_LABELS } from '../constants/activityMapRegion';
+import {
+  formatActivityAreaLabel,
+  formatActivityRegionLabel,
+} from './formatActivityDisplay';
 import { HOME_FESTIVAL_SHORTCUT_CHIPS } from '../constants/homeFestivalShortcuts';
 import type { EventCardUi } from './apiMappers';
 
@@ -7,11 +10,15 @@ function normalizeForMatch(text: string): string {
 }
 
 function eventSearchHaystack(event: EventCardUi): string {
-  const regionLabel = event.region ? ACTIVITY_MAP_REGION_LABELS[event.region] : '';
+  const regionLabel = event.region ? formatActivityRegionLabel(event.region) : '';
+  const areaLabel = event.area
+    ? formatActivityAreaLabel({ area: event.area, region: event.region })
+    : '';
   return [
     event.title,
     event.location,
     event.area,
+    areaLabel,
     event.category,
     regionLabel,
     ...(event.alias ?? []),

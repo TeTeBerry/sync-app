@@ -1,10 +1,7 @@
 import type { FC } from 'react';
 import { Text, View } from '@tarojs/components';
 import { useT } from '@/hooks/useI18n';
-import {
-  ACTIVITY_MAP_REGION_LABELS,
-  ACTIVITY_MAP_REGIONS,
-} from '../../../constants/activityMapRegion';
+import { ACTIVITY_MAP_REGIONS } from '../../../constants/activityMapRegion';
 import type {
   EventsCatalogRegionFilter,
   EventsCatalogTimeChip,
@@ -17,6 +14,7 @@ type EventsCatalogFilterChipsProps = {
   timeChip: EventsCatalogTimeChip | null;
   showTimeChips?: boolean;
   embedded?: boolean;
+  compact?: boolean;
   onRegionChange: (region: EventsCatalogRegionFilter) => void;
   onTimeChipChange: (chip: EventsCatalogTimeChip | null) => void;
 };
@@ -62,6 +60,7 @@ export const EventsCatalogFilterChips: FC<EventsCatalogFilterChipsProps> = ({
   timeChip,
   showTimeChips = true,
   embedded = false,
+  compact = false,
   onRegionChange,
   onTimeChipChange,
 }) => {
@@ -77,14 +76,17 @@ export const EventsCatalogFilterChips: FC<EventsCatalogFilterChipsProps> = ({
       className={[
         's-events-catalog-filters',
         embedded ? 's-events-catalog-filters--embedded' : '',
+        compact ? 's-events-catalog-filters--compact' : '',
       ]
         .filter(Boolean)
         .join(' ')}
     >
       <View className="s-events-catalog-filters__group">
-        <Text className="s-events-catalog-filters__label">
-          {t('events.catalogFilters.regionLabel')}
-        </Text>
+        {!compact ? (
+          <Text className="s-events-catalog-filters__label">
+            {t('events.catalogFilters.regionLabel')}
+          </Text>
+        ) : null}
         <View className="s-events-catalog-filters__row">
           <FilterChip
             active={region === 'all'}
@@ -95,7 +97,7 @@ export const EventsCatalogFilterChips: FC<EventsCatalogFilterChipsProps> = ({
             <FilterChip
               key={item}
               active={region === item}
-              label={ACTIVITY_MAP_REGION_LABELS[item]}
+              label={t(`activity.mapRegions.${item}`)}
               onClick={() => onRegionChange(item)}
             />
           ))}
@@ -104,9 +106,11 @@ export const EventsCatalogFilterChips: FC<EventsCatalogFilterChipsProps> = ({
 
       {showTimeChips ? (
         <View className="s-events-catalog-filters__group">
-          <Text className="s-events-catalog-filters__label">
-            {t('events.catalogFilters.timeLabel')}
-          </Text>
+          {!compact ? (
+            <Text className="s-events-catalog-filters__label">
+              {t('events.catalogFilters.timeLabel')}
+            </Text>
+          ) : null}
           <View className="s-events-catalog-filters__row">
             {TIME_CHIPS.map((chip) => (
               <FilterChip

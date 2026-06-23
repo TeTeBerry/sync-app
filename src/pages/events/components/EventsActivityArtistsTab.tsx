@@ -1,14 +1,32 @@
 import type { FC } from 'react';
-import { useCallback } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { ScrollView, Text, View, Image } from '@tarojs/components';
 import { useT } from '@/hooks/useI18n';
 import { ImageWithFallback } from '../../../components/ImageWithFallback';
 import ThemedPageLoader from '../../../components/ThemedPageLoader';
-import { useCatalogLineupArtists } from '../../../hooks/useSyncApi';
+import {
+  useCatalogLineupArtists,
+  useCurrentUserQuery,
+} from '../../../hooks/useSyncApi';
 import { IMAGE_SIZE } from '../../../constants/imageSizes';
 import { thumbnailImageUrl } from '../../../utils/imageUrl';
+import { filterCatalogLineupArtists } from '../../../utils/filterCatalogLineupArtists';
+import {
+  buildCatalogArtistGenreChips,
+  sortCatalogLineupArtistsByGenrePreference,
+} from '../../../utils/catalogLineupArtistGenres';
+import { EventsSearchBar } from './EventsSearchBar';
+import { EventsArtistGenreChips } from './EventsArtistGenreChips';
 
-const MAX_VISIBLE_GENRE_CHIPS = 4;
+function getPrimaryGenreLabel(genreLabel: string): string | null {
+  const trimmed = genreLabel.trim();
+  if (!trimmed || trimmed === '风格待补充') {
+    return null;
+  }
+
+  const [primary] = splitArtistGenreChips(trimmed);
+  return primary ?? null;
+}
 
 function splitArtistGenreChips(genreLabel: string): string[] {
   const parts = genreLabel
@@ -29,7 +47,35 @@ export const EventsActivityArtistsTab: FC<EventsActivityArtistsTabProps> = ({
   onOpenArtist,
 }) => {
   const t = useT();
+  const [artistSearchQuery, setArtistSearchQuery] = useState('');
+  const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
   const { data: artists, isLoading, isError, refetch } = useCatalogLineupArtists();
+  const { data: currentUser } = useCurrentUserQuery();
+  const favorGenres = currentUser?.favorGenres;
+
+  const genreChips = useMemo(
+    () => buildCatalogArtistGenreChips(artists ?? []),
+    [artists],
+  );
+
+  const rankedArtists = useMemo(
+    () => sortCatalogLineupArtistsByGenrePreference(artists ?? [], favorGenres),
+    [artists, favorGenres],
+  );
+
+  const filteredArtists = useMemo(
+    () =>
+      filterCatalogLineupArtists(
+        rankedArtists,
+        artistSearchQuery,
+        selectedGenre,
+        favorGenres,
+      ),
+    [rankedArtists, artistSearchQuery, selectedGenre, favorGenres],
+  );
+
+  const hasActiveFilters = Boolean(artistSearchQuery.trim() || selectedGenre);
+  const showGenrePreferenceInsight = Boolean(favorGenres?.length) && !hasActiveFilters;
 
   const handleOpenArtist = useCallback(
     (artistId: string) => {
@@ -86,126 +132,156 @@ export const EventsActivityArtistsTab: FC<EventsActivityArtistsTabProps> = ({
   }
 
   return (
-    <>
+    <View
+      className="s-events__main s-events__main--artists"
+      style={listHeight != null ? { height: `${listHeight}px` } : undefined}
+    >
+      <View className="s-events__artists-toolbar">
+        <EventsSearchBar
+          embedded
+          compact
+          value={artistSearchQuery}
+          onChange={setArtistSearchQuery}
+          placeholder={t('events.artistsSearchPlaceholder')}
+          ariaLabel={t('events.artistsSearchAria')}
+        />
+        <EventsArtistGenreChips
+          chips={genreChips}
+          selectedGenre={selectedGenre}
+          onGenreChange={setSelectedGenre}
+        />
+        {showGenrePreferenceInsight ? (
+          <Text className="s-events__artists-preference-insight">
+            {t('events.artistsGenrePreferenceInsight')}
+          </Text>
+        ) : null}
+      </View>
       <ScrollView
         scrollY
         enhanced
         showScrollbar={false}
-        className="s-events__main s-events__main--artists s-scrollbar-none"
-        style={listHeight != null ? { height: `${listHeight}px` } : undefined}
+        className="s-events__artists-scroll s-scrollbar-none"
       >
-        <View className="s-events__artists-grid">
-          {artists.map((artist, index) => {
-            const thumbSrc = artist.thumbnail
-              ? thumbnailImageUrl(artist.thumbnail, IMAGE_SIZE.avatarMd, 1)
-              : undefined;
-            const backdropSrc = artist.thumbnail
-              ? thumbnailImageUrl(artist.thumbnail, IMAGE_SIZE.listThumb, 1)
-              : undefined;
-            const rankTier = index < 3 ? index + 1 : 0;
-            const genreChips = artist.genreLabel
-              ? splitArtistGenreChips(artist.genreLabel)
-              : [];
-            const visibleGenreChips = genreChips.slice(0, MAX_VISIBLE_GENRE_CHIPS);
-            const hiddenGenreCount = genreChips.length - visibleGenreChips.length;
+        {filteredArtists.length ? (
+          <View className="s-events__artists-grid">
+            {filteredArtists.map((artist) => {
+              const originalIndex =
+                rankedArtists.findIndex((item) => item.id === artist.id) ?? -1;
+              const rankTier =
+                !hasActiveFilters && originalIndex >= 0 && originalIndex < 3
+                  ? originalIndex + 1
+                  : 0;
+              const thumbSrc = artist.thumbnail
+                ? thumbnailImageUrl(artist.thumbnail, IMAGE_SIZE.avatarMd, 1)
+                : undefined;
+              const backdropSrc = artist.thumbnail
+                ? thumbnailImageUrl(artist.thumbnail, IMAGE_SIZE.listThumb, 1)
+                : undefined;
+              const primaryGenre = artist.genreLabel
+                ? getPrimaryGenreLabel(artist.genreLabel)
+                : null;
 
-            return (
-              <View
-                key={artist.id}
-                className={[
-                  's-events__artist-card',
-                  rankTier > 0 ? `s-events__artist-card--rank-${rankTier}` : '',
-                ]
-                  .filter(Boolean)
-                  .join(' ')}
-                hoverClass="s-events__artist-card--pressed"
-                onClick={() => handleOpenArtist(artist.id)}
-              >
-                {backdropSrc ? (
-                  <View className="s-events__artist-card-backdrop" aria-hidden>
-                    <Image
-                      src={backdropSrc}
-                      className="s-events__artist-card-backdrop-img"
-                      mode="aspectFill"
-                    />
-                    <View
-                      className={[
-                        's-events__artist-card-backdrop-scrim',
-                        rankTier > 0
-                          ? `s-events__artist-card-backdrop-scrim--rank-${rankTier}`
-                          : '',
-                      ]
-                        .filter(Boolean)
-                        .join(' ')}
-                    />
-                  </View>
-                ) : null}
-                <View className="s-events__artist-avatar-stage">
-                  <View className="s-events__artist-avatar-glow" aria-hidden />
-                  <View className="s-events__artist-avatar-wrap">
-                    <ImageWithFallback
-                      src={thumbSrc}
-                      alt={artist.name}
-                      wrapperClassName="s-events__artist-avatar"
-                      imageClassName="s-events__artist-avatar-img"
-                      fallbackWrapperClassName="s-events__artist-avatar s-events__artist-avatar--fallback"
-                      fallback={artist.name.slice(0, 2)}
-                    />
-                  </View>
-                </View>
-                <View className="s-events__artist-info">
-                  <Text className="s-events__artist-name s-line-clamp-2">
-                    {artist.name}
-                  </Text>
-                  {visibleGenreChips.length ? (
-                    <View className="s-events__artist-genres">
-                      {visibleGenreChips.map((chip, chipIndex) => (
-                        <View
-                          key={`${chip}-${chipIndex}`}
-                          className="s-events__artist-genre-chip"
-                        >
-                          <Text className="s-events__artist-genre-chip-text">
-                            {chip}
-                          </Text>
-                        </View>
-                      ))}
-                      {hiddenGenreCount > 0 ? (
-                        <View className="s-events__artist-genre-chip s-events__artist-genre-chip--more">
-                          <Text className="s-events__artist-genre-chip-text">
-                            {t('events.artistGenreMore', {
-                              count: hiddenGenreCount,
-                            })}
-                          </Text>
-                        </View>
-                      ) : null}
+              return (
+                <View
+                  key={artist.id}
+                  className={[
+                    's-events__artist-card',
+                    rankTier > 0 ? `s-events__artist-card--rank-${rankTier}` : '',
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
+                  hoverClass="s-events__artist-card--pressed"
+                  onClick={() => handleOpenArtist(artist.id)}
+                >
+                  {backdropSrc ? (
+                    <View className="s-events__artist-card-backdrop" aria-hidden>
+                      <Image
+                        src={backdropSrc}
+                        className="s-events__artist-card-backdrop-img"
+                        mode="aspectFill"
+                      />
+                      <View
+                        className={[
+                          's-events__artist-card-backdrop-scrim',
+                          rankTier > 0
+                            ? `s-events__artist-card-backdrop-scrim--rank-${rankTier}`
+                            : '',
+                        ]
+                          .filter(Boolean)
+                          .join(' ')}
+                      />
                     </View>
                   ) : null}
-                  <View className="s-events__artist-stats">
-                    <Text className="s-events__artist-count">
-                      {t('events.artistActivityCount', {
-                        count: artist.activityCount,
-                      })}
-                    </Text>
+                  <View className="s-events__artist-avatar-stage">
+                    <View className="s-events__artist-avatar-glow" aria-hidden />
+                    <View className="s-events__artist-avatar-wrap">
+                      <ImageWithFallback
+                        src={thumbSrc}
+                        alt={artist.name}
+                        wrapperClassName="s-events__artist-avatar"
+                        imageClassName="s-events__artist-avatar-img"
+                        fallbackWrapperClassName="s-events__artist-avatar s-events__artist-avatar--fallback"
+                        fallback={artist.name.slice(0, 2)}
+                      />
+                    </View>
                   </View>
+                  <View className="s-events__artist-info">
+                    <Text className="s-events__artist-name s-line-clamp-2">
+                      {artist.name}
+                    </Text>
+                    {primaryGenre ? (
+                      <View className="s-events__artist-genres">
+                        <View className="s-events__artist-genre-chip">
+                          <Text className="s-events__artist-genre-chip-text s-line-clamp-1">
+                            {primaryGenre}
+                          </Text>
+                        </View>
+                      </View>
+                    ) : null}
+                    <View className="s-events__artist-stats">
+                      <Text className="s-events__artist-count">
+                        {t('events.artistActivityCount', {
+                          count: artist.activityCount,
+                        })}
+                      </Text>
+                    </View>
+                  </View>
+                  {artist.nextActivity ? (
+                    <View className="s-events__artist-next-strip">
+                      <Text className="s-events__artist-next-kicker">
+                        {t('events.artistNextKicker')}
+                      </Text>
+                      <Text className="s-events__artist-next-value s-line-clamp-1">
+                        {artist.nextActivity.name}
+                      </Text>
+                      <Text className="s-events__artist-next-date">
+                        {artist.nextActivity.date}
+                      </Text>
+                    </View>
+                  ) : null}
                 </View>
-                {artist.nextActivity ? (
-                  <View className="s-events__artist-next-strip">
-                    <Text className="s-events__artist-next-kicker">
-                      {t('events.artistNextKicker')}
-                    </Text>
-                    <Text className="s-events__artist-next-value s-line-clamp-1">
-                      {artist.nextActivity.name}
-                    </Text>
-                    <Text className="s-events__artist-next-date">
-                      {artist.nextActivity.date}
-                    </Text>
-                  </View>
-                ) : null}
-              </View>
-            );
-          })}
-        </View>
+              );
+            })}
+          </View>
+        ) : (
+          <View className="s-events__artists-state s-events__artists-state--search">
+            <Text className="s-events__artists-state-text">
+              {artistSearchQuery.trim() && selectedGenre
+                ? t('events.artistsFilterEmpty')
+                : selectedGenre
+                  ? t('events.artistsGenreFilterEmpty')
+                  : t('events.artistsSearchEmpty')}
+            </Text>
+            <Text className="s-events__artists-state-hint">
+              {artistSearchQuery.trim() && selectedGenre
+                ? t('events.artistsFilterEmptyHint')
+                : selectedGenre
+                  ? t('events.artistsGenreFilterEmptyHint')
+                  : t('events.artistsSearchEmptyHint')}
+            </Text>
+          </View>
+        )}
       </ScrollView>
-    </>
+    </View>
   );
 };

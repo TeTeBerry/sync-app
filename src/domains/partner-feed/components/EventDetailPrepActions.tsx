@@ -14,6 +14,7 @@ import './EventDetailPrepActions.scss';
 
 type EventDetailPrepActionsProps = {
   travelGuideGenerated?: boolean;
+  travelGuideSupported?: boolean;
   checklist?: FestivalPlanChecklist | null;
   showFestivalPlan?: boolean;
   onAiGuideClick: () => void;
@@ -111,6 +112,7 @@ function PrepStepRow({ step, isLast }: { step: EventDetailPrepStep; isLast: bool
 
 export function EventDetailPrepActions({
   travelGuideGenerated,
+  travelGuideSupported = true,
   checklist,
   showFestivalPlan = false,
   onAiGuideClick,
@@ -120,6 +122,7 @@ export function EventDetailPrepActions({
   const t = useT();
   const steps = buildEventDetailPrepSteps({
     travelGuideGenerated,
+    travelGuideSupported,
     checklist,
     showFestivalPlan,
     onAiGuideClick,

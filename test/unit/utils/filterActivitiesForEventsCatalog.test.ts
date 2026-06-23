@@ -1,4 +1,6 @@
-import { describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
+import { loadMessages } from '@/i18n/messages';
+import { useLocaleStore } from '@/i18n/localeStore';
 import type { EventCardUi } from '@/utils/apiMappers';
 import {
   filterActivitiesByRegion,
@@ -29,6 +31,11 @@ function event(
 }
 
 describe('filterActivitiesForEventsCatalog', () => {
+  beforeAll(async () => {
+    await loadMessages('zh-CN');
+    useLocaleStore.setState({ locale: 'zh-CN' });
+  });
+
   const events = [
     event({
       id: '1',

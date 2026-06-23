@@ -22,7 +22,7 @@ function signupEvent(
 }
 
 describe('pickHomeFeaturedEvents', () => {
-  it('orders all active events by nearest start when user has no registrations', () => {
+  it('orders china and thailand events by nearest start when user has no registrations', () => {
     const events = [
       signupEvent({
         id: 8,
@@ -48,14 +48,10 @@ describe('pickHomeFeaturedEvents', () => {
     ];
 
     const picked = pickHomeFeaturedEvents(events, new Set(), NOW);
-    expect(picked.map((item) => item.title)).toEqual([
-      '风暴电音节',
-      'EDC Korea',
-      'EDC Thailand',
-    ]);
+    expect(picked.map((item) => item.title)).toEqual(['风暴电音节', 'EDC Thailand']);
   });
 
-  it('puts registered events first, each group sorted by nearest start', () => {
+  it('puts registered china/thailand events first, each group sorted by nearest start', () => {
     const events = [
       signupEvent({
         id: 4,
@@ -87,11 +83,11 @@ describe('pickHomeFeaturedEvents', () => {
       }),
     ];
 
-    const picked = pickHomeFeaturedEvents(events, new Set([8, 1]), NOW);
+    const picked = pickHomeFeaturedEvents(events, new Set([1, 8]), NOW);
     expect(picked.map((item) => item.title)).toEqual([
-      'EDC Korea',
       'Tomorrowland',
       '风暴电音节',
+      'EDC Thailand',
     ]);
   });
 
@@ -154,13 +150,20 @@ describe('pickHomeFeaturedEvents', () => {
     });
   });
 
-  it('excludes non-asian festivals from featured carousel', () => {
+  it('excludes festivals outside china and thailand from featured carousel', () => {
     const events = [
       signupEvent({
         id: 2,
         title: 'Defqon.1',
         date: '06/25-28',
         area: '荷兰',
+        region: 'overseas',
+      }),
+      signupEvent({
+        id: 3,
+        title: 'EDC Korea',
+        date: '10/03-04',
+        area: '韩国',
         region: 'overseas',
       }),
       signupEvent({

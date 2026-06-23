@@ -25,6 +25,7 @@ export type EventDetailComposerSectionProps = {
   onFestivalPlanTaskPress?: (task: FestivalPlanTask) => void;
   showFestivalPlan?: boolean;
   travelGuideGenerated?: boolean;
+  travelGuideSupported?: boolean;
   lineupPublished?: boolean;
   favorGenres?: string[];
   unreadReplyCount?: number;
@@ -39,6 +40,7 @@ export const EventDetailComposerSection: React.FC<EventDetailComposerSectionProp
   onFestivalPlanTaskPress,
   showFestivalPlan = false,
   travelGuideGenerated = false,
+  travelGuideSupported = true,
   lineupPublished,
   favorGenres,
   unreadReplyCount = 0,
@@ -173,6 +175,7 @@ export const EventDetailComposerSection: React.FC<EventDetailComposerSectionProp
           <View className="s-event-detail-planning__expand">
             <EventDetailPrepActions
               travelGuideGenerated={travelGuideGenerated}
+              travelGuideSupported={travelGuideSupported}
               checklist={festivalPlanChecklist}
               showFestivalPlan={showFestivalPlan}
               onAiGuideClick={onAiGuideClick}

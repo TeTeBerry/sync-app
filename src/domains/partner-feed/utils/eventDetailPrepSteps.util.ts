@@ -20,6 +20,8 @@ export type EventDetailPrepStep = {
 
 export type BuildEventDetailPrepStepsInput = {
   travelGuideGenerated?: boolean;
+  /** When false, show「筹备中」instead of generate CTA (unsupported overseas field). */
+  travelGuideSupported?: boolean;
   checklist?: FestivalPlanChecklist | null;
   showFestivalPlan?: boolean;
   onAiGuideClick: () => void;
@@ -38,6 +40,7 @@ function taskFromChecklist(
 /** Lineup browsing lives on the info card CTA; prep only tracks personal tasks. */
 export function buildEventDetailPrepSteps({
   travelGuideGenerated = false,
+  travelGuideSupported = true,
   checklist,
   showFestivalPlan = false,
   onAiGuideClick,
@@ -51,22 +54,35 @@ export function buildEventDetailPrepSteps({
   const travelDone = showFestivalPlan
     ? Boolean(travelTask?.done)
     : travelGuideGenerated;
+  const travelPreparing = travelGuideSupported === false && !travelDone;
 
   const steps: EventDetailPrepStep[] = [
-    {
-      key: 'travel_guide',
-      label: getTravelGuideTitle(),
-      actionLabel: travelDone ? getViewTravelGuideCta() : getGenerateTravelGuideCta(),
-      done: travelDone,
-      isNext: showFestivalPlan ? Boolean(travelTask?.isNext) : false,
-      onClick: () => {
-        if (showFestivalPlan && travelTask && onFestivalPlanTaskPress) {
-          onFestivalPlanTaskPress(travelTask);
-          return;
+    travelPreparing
+      ? {
+          key: 'travel_guide',
+          label: getTravelGuideTitle(),
+          actionLabel: t('ai.travelGuidePreparing'),
+          done: false,
+          isNext: false,
+          displayOnly: true,
+          onClick: () => {},
         }
-        onAiGuideClick();
-      },
-    },
+      : {
+          key: 'travel_guide',
+          label: getTravelGuideTitle(),
+          actionLabel: travelDone
+            ? getViewTravelGuideCta()
+            : getGenerateTravelGuideCta(),
+          done: travelDone,
+          isNext: showFestivalPlan ? Boolean(travelTask?.isNext) : false,
+          onClick: () => {
+            if (showFestivalPlan && travelTask && onFestivalPlanTaskPress) {
+              onFestivalPlanTaskPress(travelTask);
+              return;
+            }
+            onAiGuideClick();
+          },
+        },
   ];
 
   if (showFestivalPlan && buddyTask) {

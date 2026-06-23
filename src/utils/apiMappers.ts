@@ -3,7 +3,7 @@ import type { HomeSummary } from '../types/backend';
 import { resolveCatalogActivityImage } from '../constants/activityCatalogImages';
 import { resolveActivityThumb } from '../constants/activityImages';
 import { getActivityTypeLabel } from '../constants/activityType';
-import { isAsianCatalogActivity } from './filterActivitiesForEventsCatalog';
+import { isHomeFeaturedCatalogActivity } from './filterActivitiesForEventsCatalog';
 import { parseActivityLegacyId } from './activityLegacyId';
 import { compareActivitiesNearestFirst } from './activityStatus';
 import { sanitizeRemoteImageUrl } from './imageUrl';
@@ -123,14 +123,14 @@ export function mapSignupEventToFeaturedEvent(item: SignupEvent): FeaturedEvent 
 /** 首页热门轮播最多展示场次数。 */
 export const HOME_FEATURED_EVENTS_LIMIT = 3;
 
-/** 首页热门活动：仅展示亚洲场次；未选择时按开始时间就近；已选择的活动靠前。 */
+/** 首页热门活动：仅展示泰国 / 中国场次；未选择时按开始时间就近；已选择的活动靠前。 */
 export function pickHomeFeaturedEvents(
   signupEvents: SignupEvent[],
   selectedLegacyIds?: Set<number>,
   now?: Date,
 ): FeaturedEvent[] {
-  const asianEvents = signupEvents.filter((event) =>
-    isAsianCatalogActivity({ area: event.area, region: event.region }),
+  const featuredPool = signupEvents.filter((event) =>
+    isHomeFeaturedCatalogActivity({ area: event.area, region: event.region }),
   );
   const hasSelections = (selectedLegacyIds?.size ?? 0) > 0;
 
@@ -145,11 +145,11 @@ export function pickHomeFeaturedEvents(
 
   let ordered: SignupEvent[];
   if (!hasSelections) {
-    ordered = sortNearest(asianEvents);
+    ordered = sortNearest(featuredPool);
   } else {
     const selected: SignupEvent[] = [];
     const rest: SignupEvent[] = [];
-    for (const event of asianEvents) {
+    for (const event of featuredPool) {
       const legacyId = parseActivityLegacyId(event.id);
       if (legacyId != null && selectedLegacyIds!.has(legacyId)) {
         selected.push(event);

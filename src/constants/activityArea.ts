@@ -13,3 +13,12 @@ export const ASIAN_ACTIVITY_AREAS = new Set([
   '中国澳门',
   '中国台湾',
 ]);
+
+/** Home featured carousel: Thailand + China catalog only. */
+export const HOME_FEATURED_ACTIVITY_AREAS = new Set([
+  '中国',
+  '泰国',
+  '中国香港',
+  '中国澳门',
+  '中国台湾',
+]);

@@ -1,7 +1,13 @@
 import type { ActivityMapRegion } from '../constants/activityMapRegion';
-import { ASIAN_ACTIVITY_AREAS } from '../constants/activityArea';
-import { ACTIVITY_MAP_REGION_LABELS } from '../constants/activityMapRegion';
+import {
+  ASIAN_ACTIVITY_AREAS,
+  HOME_FEATURED_ACTIVITY_AREAS,
+} from '../constants/activityArea';
 import type { EventCardUi } from './apiMappers';
+export {
+  formatActivityAreaLabel,
+  formatActivityRegionLabel,
+} from './formatActivityDisplay';
 import {
   compareActivitiesNearestFirst,
   getActivityStatusFromActivity,
@@ -65,6 +71,17 @@ export function isAsianCatalogActivity(
   return event.region === 'domestic' || event.region === 'hmt';
 }
 
+/** Home「热门亚洲电音节」：仅泰国 + 中国（含港澳台 catalog 地区）。 */
+export function isHomeFeaturedCatalogActivity(
+  event: Pick<EventCardUi, 'area' | 'region'>,
+): boolean {
+  const area = event.area?.trim();
+  if (area) {
+    return HOME_FEATURED_ACTIVITY_AREAS.has(area);
+  }
+  return event.region === 'domestic';
+}
+
 export const HOT_CAROUSEL_MIN_COUNT = 3;
 
 export function selectHotCatalogEvents(
@@ -81,21 +98,4 @@ export function selectHotCatalogEvents(
     )
     .sort((a, b) => compareActivitiesNearestFirst(a, b, now))
     .slice(0, limit);
-}
-
-export function formatActivityRegionLabel(region?: ActivityMapRegion): string | null {
-  if (!region) {
-    return null;
-  }
-  return ACTIVITY_MAP_REGION_LABELS[region];
-}
-
-export function formatActivityAreaLabel(
-  event: Pick<EventCardUi, 'area' | 'region'>,
-): string | null {
-  const area = event.area?.trim();
-  if (area) {
-    return area;
-  }
-  return formatActivityRegionLabel(event.region);
 }

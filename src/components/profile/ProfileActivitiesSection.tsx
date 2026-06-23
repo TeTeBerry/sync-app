@@ -1,14 +1,17 @@
 import React, { useMemo } from 'react';
-import { Calendar, MapPin, Ticket } from '../../components/icons';
+import { Bell, Calendar, MapPin, Ticket, X } from '../../components/icons';
 import { ImageWithFallback } from '../ImageWithFallback';
 import { MetaRow } from '../MetaRow';
-import { Button } from '../ui';
 import { ProfileCollapsibleSection } from './ProfileCollapsibleSection';
 import type { ProfileActivityItem } from '../../types/backend';
 import { compareActivityDateDesc } from '../../utils/activityStatus';
 import { safeTrim } from '../../utils/safeString';
+import { formatActivityLocationLabel } from '../../utils/formatActivityDisplay';
 import { Text, View } from '@tarojs/components';
 import { useT } from '@/hooks/useI18n';
+
+/** Matches `--secondary`; lucide icons need literal colors in mini program data URLs. */
+const ALERT_ICON_COLOR = '#4cc9f0';
 
 function activityTitleFallback(title: unknown, fallback: string): string {
   const trimmed = safeTrim(title);
@@ -78,25 +81,47 @@ const ProfileActivityCard: React.FC<ProfileActivityCardProps> = ({
             className="s-profile-activity__meta-item"
             icon={<MapPin size={12} />}
           >
-            {item.location}
+            {formatActivityLocationLabel(item.location)}
           </MetaRow>
         </View>
 
         {onUnfollow && item.status !== 'attended' ? (
-          <View className="s-profile-activity__actions" onClick={stopPropagation}>
-            <Button
-              className="s-profile-activity__unfollow"
-              disabled={unfollowing}
-              onClick={() => onUnfollow(item.activityLegacyId, item.title)}
+          <View className="s-profile-activity__subscribe-row" onClick={stopPropagation}>
+            <View className="s-profile-activity__subscribe-status" aria-hidden>
+              <View className="s-profile-activity__subscribe-status-icon">
+                <Bell size={12} color={ALERT_ICON_COLOR} strokeWidth={2.25} />
+              </View>
+              <Text className="s-profile-activity__subscribe-status-text">
+                {t('profile.activities.updateAlertsOn')}
+              </Text>
+            </View>
+            <View
+              className={[
+                's-profile-activity__unfollow',
+                unfollowing && 's-profile-activity__unfollow--loading',
+              ]
+                .filter(Boolean)
+                .join(' ')}
+              hoverClass={unfollowing ? '' : 's-profile-activity__unfollow--pressed'}
+              role="button"
+              aria-disabled={unfollowing}
+              aria-label={t('eventCard.unfollow', {
+                title: item.title?.trim() || t('eventCard.activityFallback'),
+              })}
+              onClick={() => {
+                if (unfollowing) {
+                  return;
+                }
+                onUnfollow(item.activityLegacyId, item.title);
+              }}
             >
+              <X size={12} color="#8e8e93" strokeWidth={2.25} />
               <Text className="s-profile-activity__unfollow-text">
                 {unfollowing
                   ? t('eventCard.unfollowing')
-                  : t('eventCard.unfollow', {
-                      title: item.title?.trim() || t('eventCard.activityFallback'),
-                    })}
+                  : t('eventCard.unfollowAction')}
               </Text>
-            </Button>
+            </View>
           </View>
         ) : null}
       </View>

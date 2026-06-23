@@ -34,13 +34,17 @@ import type { EventsViewTab } from './components/EventsViewTabs';
 import { EventsActivityCalendar } from './components/EventsActivityCalendar';
 import { EventsActivityArtistsTab } from './components/EventsActivityArtistsTab';
 import { ArtistProfileSheet } from '../../domains/lineup-artist/components/ArtistProfileSheet';
+import { LoginInterceptHost } from '../../components/auth/LoginInterceptHost';
 import { EventsActivityList } from './components/EventsActivityList';
 import { sortAllEventsByDate } from './utils/festivalEvents';
 import { consumeEventsViewTabIntent } from '../../utils/eventsTabIntent';
 import { consumeEventsSearchQuery } from '../../utils/eventsSearchIntent';
 import { filterActivitiesForEventsSearch } from '../../utils/filterActivitiesForEventsSearch';
 import { EventsCatalogToolbar } from './components/EventsCatalogToolbar';
+import { EventsViewTabs } from './components/EventsViewTabs';
 import { EventsHotCarousel } from './components/EventsHotCarousel';
+import { useConfirmDialog } from '../../hooks/useConfirmDialog';
+import { requestUnfollowActivityConfirm } from '../../utils/unfollowActivityConfirm';
 import {
   filterActivitiesByRegion,
   filterActivitiesByTimeChip,
@@ -50,14 +54,17 @@ import {
   type EventsCatalogTimeChip,
 } from '../../utils/filterActivitiesForEventsCatalog';
 
-/** Header + unified catalog toolbar (px, design @ 375). */
-const EVENTS_CHROME_PX = 272;
+/** Header + sticky view tabs only (px, design @ 375). Search/filters scroll with content. */
+const EVENTS_CHROME_PX = 96;
 
 const Events: React.FC = () => {
   useEndRouteTransitionOnShow(ROUTES.EVENTS);
   const t = useT();
 
   const navInsets = useNavBarInsets();
+  const { confirm, confirmDialog } = useConfirmDialog({
+    cancelText: t('common.cancel'),
+  });
   const listScrollHeight = useTabPageMainHeight(
     EVENTS_CHROME_PX + navInsets.paddingTop,
   );
@@ -254,20 +261,18 @@ const Events: React.FC = () => {
     setCalendarMonth({ year, month });
   }, []);
 
+  const confirmUnfollow = useCallback(
+    (title: string) => requestUnfollowActivityConfirm(confirm, title),
+    [confirm],
+  );
+
   return (
     <View className="s-page-shell s-page-with-tabbar">
       <View className="s-page-with-tabbar__main s-events">
         <EventsPageHeader navInsets={navInsets} upcomingCount={recentUpcomingCount} />
-        <EventsCatalogToolbar
-          viewTab={viewTab}
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          region={regionFilter}
-          timeChip={timeChip}
-          onRegionChange={setRegionFilter}
-          onTimeChipChange={setTimeChip}
-          onViewTabChange={handleViewTabChange}
-        />
+        <View className="s-events__sticky-tabs">
+          <EventsViewTabs activeTab={viewTab} onChange={handleViewTabChange} />
+        </View>
 
         {viewTab === 'artists' ? (
           <EventsActivityArtistsTab
@@ -287,54 +292,69 @@ const Events: React.FC = () => {
             <View className="s-events__scroll-inner">
               {isLoading ? (
                 <ThemedPageLoader variant="skeleton-feed" minHeight={280} />
-              ) : viewTab === 'list' ? (
-                <>
-                  {showHotCarousel ? (
-                    <EventsHotCarousel
-                      events={hotCarouselEvents}
-                      onOpenDetail={openDetail}
-                      onWarmDetail={warmEventDetail}
-                    />
-                  ) : null}
-                  <View className="s-events__section-head s-events__section-head--list">
-                    <Text className="s-events__section-title">
-                      {t('events.allActivities')}
-                    </Text>
-                  </View>
-                  <EventsActivityList
-                    events={filteredListEvents}
-                    isError={isError}
-                    emptyText={listEmptyText}
-                    onRetry={() => void refetch()}
-                    onOpenDetail={openDetail}
-                    onWarmDetail={warmEventDetail}
-                  />
-                </>
               ) : (
                 <>
-                  <EventsActivityCalendar
-                    activities={calendarCatalogEvents}
-                    year={calendarMonth.year}
-                    month={calendarMonth.month}
-                    selected={selectedDay}
-                    onMonthChange={handleMonthChange}
-                    onSelectDay={handleSelectDay}
+                  <EventsCatalogToolbar
+                    viewTab={viewTab}
+                    searchQuery={searchQuery}
+                    onSearchChange={setSearchQuery}
+                    region={regionFilter}
+                    timeChip={timeChip}
+                    onRegionChange={setRegionFilter}
+                    onTimeChipChange={setTimeChip}
                   />
+                  {viewTab === 'list' ? (
+                    <>
+                      {showHotCarousel ? (
+                        <EventsHotCarousel
+                          events={hotCarouselEvents}
+                          onOpenDetail={openDetail}
+                          onWarmDetail={warmEventDetail}
+                        />
+                      ) : null}
+                      <View className="s-events__section-head s-events__section-head--list">
+                        <Text className="s-events__section-title">
+                          {t('events.allActivities')}
+                        </Text>
+                      </View>
+                      <EventsActivityList
+                        events={filteredListEvents}
+                        isError={isError}
+                        emptyText={listEmptyText}
+                        onRetry={() => void refetch()}
+                        onOpenDetail={openDetail}
+                        onWarmDetail={warmEventDetail}
+                        onConfirmUnfollow={confirmUnfollow}
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <EventsActivityCalendar
+                        activities={calendarCatalogEvents}
+                        year={calendarMonth.year}
+                        month={calendarMonth.month}
+                        selected={selectedDay}
+                        onMonthChange={handleMonthChange}
+                        onSelectDay={handleSelectDay}
+                      />
 
-                  <View className="s-events__section-head">
-                    <Text className="s-events__section-title">
-                      {calendarSectionTitle}
-                    </Text>
-                  </View>
+                      <View className="s-events__section-head">
+                        <Text className="s-events__section-title">
+                          {calendarSectionTitle}
+                        </Text>
+                      </View>
 
-                  <EventsActivityList
-                    events={calendarListEvents}
-                    isError={isError}
-                    emptyText={calendarEmptyText}
-                    onRetry={() => void refetch()}
-                    onOpenDetail={openDetail}
-                    onWarmDetail={warmEventDetail}
-                  />
+                      <EventsActivityList
+                        events={calendarListEvents}
+                        isError={isError}
+                        emptyText={calendarEmptyText}
+                        onRetry={() => void refetch()}
+                        onOpenDetail={openDetail}
+                        onWarmDetail={warmEventDetail}
+                        onConfirmUnfollow={confirmUnfollow}
+                      />
+                    </>
+                  )}
                 </>
               )}
             </View>
@@ -346,6 +366,8 @@ const Events: React.FC = () => {
         artistId={selectedArtistId}
         onClose={() => setSelectedArtistId(null)}
       />
+      <LoginInterceptHost />
+      {confirmDialog}
     </View>
   );
 };

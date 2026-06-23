@@ -8,6 +8,7 @@ import {
   getActivityStatusFromActivity,
 } from '../../../utils/activityStatus';
 import { formatActivityCategoryLabel } from '../../../utils/activityCategory';
+import { formatActivityLocationLabel } from '../../../utils/formatActivityDisplay';
 import {
   resolveFeaturedEventLegacyId,
   type FeaturedEvent,
@@ -141,7 +142,7 @@ function HomeFeaturedEventCard({
 }) {
   const t = useT();
   const status = getActivityStatusFromActivity(event.date, event.title);
-  const venue = event.venue?.trim() ?? '';
+  const venue = formatActivityLocationLabel(event.venue);
   const legacyId = resolveFeaturedEventLegacyId(event);
   const heroSrc =
     featuredPostImageUrl(event.image, IMAGE_SIZE.featuredHero) ??
@@ -197,13 +198,9 @@ function HomeFeaturedEventCard({
       <View className="s-home-showcase-card__body">
         <Text className="s-home-showcase-card__event-title">{event.title}</Text>
         <View className="s-home-showcase-card__meta-line">
-          <Text className="s-home-showcase-card__date">{event.date}</Text>
-          {venue ? (
-            <>
-              <Text className="s-home-showcase-card__at">at</Text>
-              <Text className="s-home-showcase-card__venue">{venue}</Text>
-            </>
-          ) : null}
+          <Text className="s-home-showcase-card__date">
+            {venue ? `${event.date} · ${venue}` : event.date}
+          </Text>
         </View>
       </View>
 

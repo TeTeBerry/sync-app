@@ -1,6 +1,13 @@
 .s-events-toolbar {
   padding: 0 16px 12px;
   box-sizing: border-box;
+
+  &--scroll {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 4px 16px 10px;
+  }
 }
 
 .s-events-toolbar__panel {

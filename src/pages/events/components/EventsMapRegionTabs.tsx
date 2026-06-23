@@ -2,7 +2,6 @@ import type { FC } from 'react';
 import { useT } from '@/hooks/useI18n';
 import { Text, View } from '@tarojs/components';
 import {
-  ACTIVITY_MAP_REGION_LABELS,
   ACTIVITY_MAP_REGIONS,
   type ActivityMapRegion,
 } from '../../../constants/activityMapRegion';
@@ -36,7 +35,7 @@ export const EventsMapRegionTabs: FC<EventsMapRegionTabsProps> = ({
               onClick={() => onChange(region)}
             >
               <Text className="s-events-map-region__chip-text">
-                {ACTIVITY_MAP_REGION_LABELS[region]}
+                {t(`activity.mapRegions.${region}`)}
               </Text>
             </View>
           );

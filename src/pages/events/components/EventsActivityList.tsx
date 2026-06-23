@@ -12,6 +12,7 @@ type EventsActivityListProps = {
   onRetry: () => void;
   onOpenDetail: (legacyId: string) => void;
   onWarmDetail: (event: EventCardUi) => void;
+  onConfirmUnfollow?: (title: string) => Promise<boolean>;
 };
 
 export const EventsActivityList: FC<EventsActivityListProps> = ({
@@ -21,6 +22,7 @@ export const EventsActivityList: FC<EventsActivityListProps> = ({
   onRetry,
   onOpenDetail,
   onWarmDetail,
+  onConfirmUnfollow,
 }) => {
   const t = useT();
   const finalEmptyText = emptyText ?? t('events.empty');
@@ -57,6 +59,7 @@ export const EventsActivityList: FC<EventsActivityListProps> = ({
               onCardPressWarmup={() => onWarmDetail(event)}
               onTeamUp={() => onOpenDetail(event.id)}
               onTeamUpWarmup={() => onWarmDetail(event)}
+              onConfirmUnfollow={onConfirmUnfollow}
             />
           </View>
         ))}

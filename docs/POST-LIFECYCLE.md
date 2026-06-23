@@ -194,3 +194,71 @@ cd sync-app-backend && CI=true npm test -- --watchman=false --testPathPattern="b
 - [ ] 生产实例 `NODE_ENV=production`，启动日志**无** `Dev mock buddy posts for TML Thailand`
 - [ ] 生产活动详情帖 API 返回列表中**无** `userId` 以 `demo-mock-tml-` 开头的帖子
 - [ ] 本地需关闭 mock 时：`.env` 设 `DISABLE_DEV_MOCK_POSTS=true` 后重启后端
+
+---
+
+## 十二、运营种子招募帖（生产冷启动 · US-Q2-21）
+
+热门活动招募墙在上线初期需有可见结构化示例帖，避免「空城」。生产环境**不**使用 §十一 dev mock，改由运维**手动**执行种子脚本或运营账号在小程序发帖。
+
+### 与 dev mock 对比
+
+| 项 | §十一 dev mock | §十二 运营种子 |
+|----|----------------|----------------|
+| 触发 | 后端启动 `OnModuleInit`（非 production） | 手动 `npm run db:seed-ops-buddy-posts` |
+| `userId` 前缀 | `demo-mock-tml-` | `ops-seed-` |
+| 适用环境 | 本地 / staging 联调 | **生产**（及 staging 预演） |
+| 覆盖活动 | 仅 `legacyId=1` | `1` · `4` · `5` · `16`（共 10 帖） |
+
+### 覆盖活动与帖数
+
+| legacyId | 活动 | 招募中 | 已满 |
+|----------|------|--------|------|
+| 1 | Tomorrowland Thailand 2026 | 2 | 1 |
+| 4 | 风暴电音节 深圳站 2026 | 2 | 1 |
+| 5 | EDC Thailand 2026 | 2 | 0 |
+| 16 | The Magic Of Tomorrowland 上海 2026 | 2 | 0 |
+
+帖子字段与 US-Q2-16 一致：`recruitStatus` · `slotsTotal` · `slotsFilled`；正文格式同 §一模板（`组队，日期，出发地，人数，备注`），无联系方式。
+
+实现：`sync-app-backend/src/modules/partner/data/ops-seed-buddy-posts.util.ts`
+
+### 执行（运维）
+
+```bash
+cd sync-app-backend
+
+# 预览（不写库）
+MONGODB_URI='<目标库连接串>' npm run db:seed-ops-buddy-posts -- --dry-run
+
+# 幂等 upsert（可重复执行）
+MONGODB_URI='<目标库连接串>' npm run db:seed-ops-buddy-posts
+```
+
+- **必须**显式设置 `MONGODB_URI`（或 `MONGO_URI`），脚本拒绝默认 localhost
+- 按 `{ userId, activityLegacyId }` upsert，同 slot 重复执行会覆盖正文
+- 种子作者为虚拟 `ops-seed-*` 账号，**无法**登录小程序维护；已满状态在数据定义中预设
+
+### 验收
+
+MongoDB / Compass：
+
+```js
+db.posts.countDocuments({ userId: /^ops-seed-/, activityLegacyId: 1 })
+db.posts.countDocuments({ userId: /^ops-seed-/, activityLegacyId: 4 })
+// … 5、16 同理，各应 ≥ 2
+```
+
+REST（无需登录）：
+
+```bash
+curl -s "$API_BASE/api/posts?activityLegacyId=1&limit=10" | jq '.items | length'
+```
+
+- [ ] 生产无 `demo-mock-tml-` 前缀帖（§十一）
+- [ ] `legacyId` 1 / 4 / 5 / 16 详情招募墙各有可见 `ops-seed-` 帖
+- [ ] 招募卡展示招募中/已满与人数进度
+
+### 补量
+
+脚本种子为冷启动基线。后续可由运营账号在活动详情 FAB 按 §一模板手动发帖；或扩展 `ops-seed-buddy-posts.util.ts` 后重新 upsert。

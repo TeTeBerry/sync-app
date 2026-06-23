@@ -51,6 +51,19 @@ describe('buildEventDetailPrepSteps', () => {
     expect(buddyPost?.isNext).toBe(true);
   });
 
+  it('shows preparing label when travel guide is unsupported', () => {
+    const steps = buildEventDetailPrepSteps({
+      travelGuideSupported: false,
+      onAiGuideClick: vi.fn(),
+      onOpenExclusiveItinerary: vi.fn(),
+      t,
+    });
+
+    const travel = steps.find((step) => step.key === 'travel_guide');
+    expect(travel?.actionLabel).toBe('ai.travelGuidePreparing');
+    expect(travel?.displayOnly).toBe(true);
+  });
+
   it('shows view schedule label when itinerary task is complete', () => {
     const checklist = buildFestivalPlanChecklist({
       hasTravelGuide: true,

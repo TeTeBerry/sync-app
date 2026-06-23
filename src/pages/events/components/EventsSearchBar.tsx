@@ -8,30 +8,40 @@ type EventsSearchBarProps = {
   value: string;
   onChange: (value: string) => void;
   embedded?: boolean;
+  compact?: boolean;
+  placeholder?: string;
+  ariaLabel?: string;
 };
 
 export const EventsSearchBar: FC<EventsSearchBarProps> = ({
   value,
   onChange,
   embedded = false,
+  compact = false,
+  placeholder,
+  ariaLabel,
 }) => {
   const t = useT();
 
   return (
     <View
-      className={['s-events-search', embedded ? 's-events-search--embedded' : '']
+      className={[
+        's-events-search',
+        embedded ? 's-events-search--embedded' : '',
+        compact ? 's-events-search--compact' : '',
+      ]
         .filter(Boolean)
         .join(' ')}
-      aria-label={t('events.searchAria')}
+      aria-label={ariaLabel ?? t('events.searchAria')}
     >
       <View className="s-events-search__icon-wrap" aria-hidden>
-        <Search size={15} color="rgba(255, 255, 255, 0.55)" />
+        <Search size={compact ? 14 : 15} color="rgba(255, 255, 255, 0.55)" />
       </View>
       <Input
         className="s-events-search__input"
         type="text"
         value={value}
-        placeholder={t('events.searchPlaceholder')}
+        placeholder={placeholder ?? t('events.searchPlaceholder')}
         placeholderClass="s-events-search__placeholder"
         confirmType="search"
         onInput={(event) => onChange(event.detail.value)}

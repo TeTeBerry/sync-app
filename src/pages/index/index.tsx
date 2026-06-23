@@ -112,14 +112,24 @@ const Home = () => {
     return resolveFeaturedEventCountdown(event);
   }, [featuredEvents, featuredIndex]);
 
+  const featuredEvent = featuredEvents[featuredIndex] ?? null;
+
   const featuredLegacyId = useMemo(() => {
-    const event = featuredEvents[featuredIndex];
-    if (!event) return undefined;
-    return resolveFeaturedEventLegacyId(event) ?? undefined;
-  }, [featuredEvents, featuredIndex]);
+    if (!featuredEvent) {
+      return undefined;
+    }
+    return resolveFeaturedEventLegacyId(featuredEvent) ?? undefined;
+  }, [featuredEvent]);
+
+  const handleNextFeaturedEvent = useCallback(() => {
+    if (featuredEvents.length <= 1) {
+      return;
+    }
+    setFeaturedIndex((prev) => (prev + 1) % featuredEvents.length);
+  }, [featuredEvents.length]);
 
   const { onboardingOpen, onboardingSteps, dismissOnboarding } = useNewUserOnboarding({
-    featuredActivityLegacyId: featuredLegacyId,
+    featuredEvent,
   });
 
   const handleNotification = useCallback(() => {
@@ -303,6 +313,9 @@ const Home = () => {
       <NewUserOnboardingSheet
         open={onboardingOpen}
         steps={onboardingSteps}
+        featuredEvent={featuredEvent}
+        featuredEventCount={featuredEvents.length}
+        onNextFeaturedEvent={handleNextFeaturedEvent}
         onDismiss={dismissOnboarding}
       />
       <LoginInterceptHost />

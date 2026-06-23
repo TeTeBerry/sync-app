@@ -181,6 +181,7 @@ const EventDetailPage = () => {
                 festivalPlanChecklist={festivalPlanChecklist}
                 onFestivalPlanTaskPress={onFestivalPlanTaskPress}
                 travelGuideGenerated={travelGuideGenerated}
+                travelGuideSupported={activity?.travelGuideSupported}
                 lineupPublished={activity?.lineupPublished}
                 favorGenres={currentUser?.favorGenres}
                 unreadReplyCount={prepNudgeUnreadReplyCount}

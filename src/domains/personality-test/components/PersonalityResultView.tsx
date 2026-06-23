@@ -29,6 +29,7 @@ import {
 import { buildPersonalityItinerarySelection } from '../utils/buildPersonalityItinerarySelection';
 import { resolvePersonalityMediaUrl } from '../utils/resolvePersonalityMedia';
 import { useT } from '@/hooks/useI18n';
+import { formatActivityLocationLabel } from '@/utils/formatActivityDisplay';
 import { Text, View, Image } from '@tarojs/components';
 
 type PersonalityResultViewProps = {
@@ -463,7 +464,7 @@ export const PersonalityResultView: FC<PersonalityResultViewProps> = ({
                         <View className="s-personality-result__event-detail">
                           <MapPin size={13} color="#8e8e93" aria-hidden />
                           <Text className="s-personality-result__event-detail-text">
-                            {event.location}
+                            {formatActivityLocationLabel(event.location)}
                           </Text>
                         </View>
                       ) : null}

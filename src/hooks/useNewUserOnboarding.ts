@@ -11,17 +11,17 @@ import {
   goEventDetail,
   goEventDetailBuddyPostSheet,
   goEventDetailTravelGuideSheet,
-  goEventsListTab,
   goEventsWithSearch,
 } from '@/utils/route';
+import { resolveFeaturedEventLegacyId, type FeaturedEvent } from '@/utils/apiMappers';
 import { useT } from '@/hooks/useI18n';
 
 export type UseNewUserOnboardingOptions = {
-  featuredActivityLegacyId?: number;
+  featuredEvent?: FeaturedEvent | null;
 };
 
 export function useNewUserOnboarding(options: UseNewUserOnboardingOptions = {}) {
-  const { featuredActivityLegacyId } = options;
+  const { featuredEvent } = options;
   const t = useT();
   const [open, setOpen] = useState(false);
 
@@ -37,12 +37,14 @@ export function useNewUserOnboarding(options: UseNewUserOnboardingOptions = {}) 
   }, []);
 
   const steps = useMemo((): NewUserOnboardingStep[] => {
-    const joinLegacyId =
-      featuredActivityLegacyId != null &&
-      Number.isFinite(featuredActivityLegacyId) &&
-      featuredActivityLegacyId > 0
-        ? featuredActivityLegacyId
-        : undefined;
+    const joinLegacyId = (() => {
+      if (!featuredEvent) {
+        return undefined;
+      }
+      const legacyId = resolveFeaturedEventLegacyId(featuredEvent);
+      return legacyId != null && legacyId > 0 ? legacyId : undefined;
+    })();
+    const eventName = featuredEvent?.title?.trim() || '';
 
     return [
       {
@@ -51,7 +53,7 @@ export function useNewUserOnboarding(options: UseNewUserOnboardingOptions = {}) 
           ? t('onboarding.step1Desc')
           : t('onboarding.step1DescBrowse'),
         actionLabel: joinLegacyId
-          ? t('onboarding.step1ActionFeatured')
+          ? t('onboarding.step1ActionFeatured', { eventName })
           : t('onboarding.step1ActionList'),
         onAction: () => {
           if (joinLegacyId) {
@@ -63,30 +65,38 @@ export function useNewUserOnboarding(options: UseNewUserOnboardingOptions = {}) 
       },
       {
         title: t('onboarding.step2Title'),
-        description: t('onboarding.step2Desc'),
-        actionLabel: t('onboarding.step2Action'),
+        description: joinLegacyId
+          ? t('onboarding.step2Desc', { eventName })
+          : t('onboarding.step2DescBrowse'),
+        actionLabel: joinLegacyId
+          ? t('onboarding.step2ActionAnchored', { eventName })
+          : t('onboarding.stepNeedsEvent'),
+        disabled: !joinLegacyId,
         onAction: () => {
-          if (joinLegacyId) {
-            dismissAnd(() => goEventDetailTravelGuideSheet(joinLegacyId));
+          if (!joinLegacyId) {
             return;
           }
-          dismissAnd(() => goEventsListTab());
+          dismissAnd(() => goEventDetailTravelGuideSheet(joinLegacyId));
         },
       },
       {
         title: t('onboarding.step3Title'),
-        description: t('onboarding.step3Desc'),
-        actionLabel: t('onboarding.step3Action'),
+        description: joinLegacyId
+          ? t('onboarding.step3Desc', { eventName })
+          : t('onboarding.step3DescBrowse'),
+        actionLabel: joinLegacyId
+          ? t('onboarding.step3ActionAnchored', { eventName })
+          : t('onboarding.stepNeedsEvent'),
+        disabled: !joinLegacyId,
         onAction: () => {
-          if (joinLegacyId) {
-            dismissAnd(() => goEventDetailBuddyPostSheet(joinLegacyId));
+          if (!joinLegacyId) {
             return;
           }
-          dismissAnd(() => goEventsListTab());
+          dismissAnd(() => goEventDetailBuddyPostSheet(joinLegacyId));
         },
       },
     ];
-  }, [dismissAnd, featuredActivityLegacyId, t]);
+  }, [dismissAnd, featuredEvent, t]);
 
   const evaluateOnShow = useCallback(() => {
     if (!isLoggedIn() || !hasLegalConsent() || hasSeenNewUserOnboarding()) {

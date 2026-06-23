@@ -9,6 +9,8 @@
   box-sizing: border-box;
 
   &__scroll {
+    position: relative;
+    z-index: 1;
     flex: 1;
     min-height: 0;
     width: 100%;
@@ -19,7 +21,7 @@
     display: flex;
     flex-direction: column;
     min-height: 100%;
-    padding: 0 var(--s-page-gutter) 24px;
+    padding: 8px var(--s-page-gutter) 24px;
     box-sizing: border-box;
   }
 
@@ -151,6 +153,189 @@
     line-height: 1.35;
   }
 
+  &__lineup {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  &__genre-nav {
+    position: relative;
+    z-index: 20;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 4px var(--s-page-gutter) 12px;
+    background: #000;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.55);
+    box-sizing: border-box;
+  }
+
+  &__genre-chip-scroll {
+    width: 100%;
+    white-space: nowrap;
+    background: #000;
+  }
+
+  &__genre-nav-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+
+    &--solo {
+      margin-bottom: 2px;
+    }
+  }
+
+  &__genre-nav-label {
+    flex: 1;
+    min-width: 0;
+    font-size: var(--s-type-small);
+    color: #8e8e93;
+    line-height: 1.2;
+  }
+
+  &__list-count {
+    flex: 1;
+    min-width: 0;
+    font-size: var(--s-type-small);
+    color: #8e8e93;
+    line-height: 1.2;
+  }
+
+  &__sort-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+    min-height: 28px;
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: var(--primary);
+    font-size: var(--s-type-small);
+    font-weight: var(--s-fw-semibold);
+    line-height: 1.2;
+
+    &::after {
+      display: none;
+      border: 0;
+    }
+
+    &--pressed {
+      opacity: 0.82;
+    }
+  }
+
+  &__sort-btn-text {
+    color: var(--primary);
+    font-size: var(--s-type-small);
+    font-weight: var(--s-fw-semibold);
+    line-height: 1.2;
+  }
+
+  &__genre-chip-row {
+    display: inline-flex;
+    flex-wrap: nowrap;
+    gap: 8px;
+    padding-right: var(--s-page-gutter);
+  }
+
+  &__genre-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    flex-shrink: 0;
+    min-height: 32px;
+    padding: 6px 12px;
+    margin: 0;
+    border-radius: var(--radius-full);
+    border: none;
+    background: #2c2c2e;
+    color: #fff;
+    font-size: var(--s-type-small);
+    font-weight: var(--s-fw-semibold);
+    line-height: 1.2;
+    box-sizing: border-box;
+
+    &::after {
+      display: none;
+      border: 0;
+    }
+
+    &--pressed {
+      opacity: 0.82;
+    }
+
+    &--active {
+      color: #fff;
+    }
+  }
+
+  &__genre-chip-label {
+    color: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    line-height: inherit;
+  }
+
+  &__genre-chip-count {
+    min-width: 18px;
+    padding: 1px 5px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    color: inherit;
+    font-size: 11px;
+    font-weight: var(--s-fw-bold);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.2;
+    text-align: center;
+  }
+
+  &__genre-chip--active &__genre-chip-count {
+    background: rgba(255, 255, 255, 0.22);
+  }
+
+  &__genre-section + &__genre-section {
+    margin-top: 2px;
+  }
+
+  &__genre-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  &__genre-accent {
+    width: 3px;
+    height: 16px;
+    border-radius: 999px;
+    flex-shrink: 0;
+  }
+
+  &__genre-title {
+    flex: 1;
+    min-width: 0;
+    font-size: 15px;
+    font-weight: var(--s-fw-bold);
+    color: #fff;
+    line-height: 1.25;
+  }
+
+  &__genre-count {
+    flex-shrink: 0;
+    font-size: var(--s-type-meta);
+    font-weight: var(--s-fw-medium);
+    color: #8e8e93;
+    line-height: 1.2;
+  }
+
   &__artist-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -166,16 +351,6 @@
     border: 2px solid transparent;
     background: #1c1c1e;
     box-sizing: border-box;
-
-    &--pink {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 1px rgba(var(--primary-rgb), 0.15);
-    }
-
-    &--purple {
-      border-color: #7b61ff;
-      box-shadow: 0 0 0 1px rgba(123, 97, 255, 0.2);
-    }
   }
 
   &__artist-name {

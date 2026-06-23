@@ -8,6 +8,7 @@ import type {
   FestivalPlanTask,
 } from '@/domains/festival-plan/useFestivalPlanSummary';
 import { useT } from '@/hooks/useI18n';
+import { formatActivityLocationLabel } from '@/utils/formatActivityDisplay';
 import { Text, View } from '@tarojs/components';
 
 type HomeMyNextEventProps = {
@@ -39,7 +40,7 @@ export const HomeMyNextEvent: FC<HomeMyNextEventProps> = ({
   onNextTaskPress,
 }) => {
   const t = useT();
-  const venue = event.location?.trim() ?? '';
+  const venue = formatActivityLocationLabel(event.location);
   const unreadReplyCount = postEngagement?.unreadReplyCount ?? 0;
   const showReplyHint = unreadReplyCount > 0 && Boolean(onOpenPostReplies);
   const nextTask =
