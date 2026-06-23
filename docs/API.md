@@ -7,6 +7,21 @@
 
 ---
 
+## Schema 来源
+
+| 资源 | 路径 / 命令 |
+|------|-------------|
+| **机器可读契约** | [`sync-app-backend/openapi/openapi.json`](../sync-app-backend/openapi/openapi.json) |
+| **Swagger UI**（非 production） | `http://localhost:3000/api/docs` |
+| **生成** | `cd sync-app-backend && npm run openapi:generate` |
+| **CI 校验** | `npm run openapi:check` — controller/DTO 变更须 regenerate，否则 CI fail |
+
+P0 路由（auth、activities、posts、travel-guide）已覆盖 OpenAPI schema。响应体经 `TransformInterceptor` 包装为 `{ code, message, data }`；OpenAPI 中 `data` 字段为业务 payload。
+
+**与本文档关系**：`API.md` 为人读概览与示例；字段细节、request/response schema 以 OpenAPI 为准。TypeScript 类型另见 `@sync/*-contracts` 包。
+
+---
+
 ## 鉴权概览
 
 **已登录**：

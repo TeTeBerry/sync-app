@@ -36,8 +36,8 @@
 | 13 | US-ARCH-12 | 共享契约：`activity` + `notification` + `profile` | P2 | L | FULL | ✅ |
 | 14 | US-ARCH-13 | Controller 路由风格统一 | P2 | S | BE | ✅ |
 | 15 | US-ARCH-14 | AI 模块 port 化（对齐 Partner 模式） | P2 | L | BE | ✅ |
-| 16 | US-ARCH-15 | 评估 TanStack Query 迁移 | P3 | M | FE | ⏸ |
-| 17 | US-ARCH-16 | OpenAPI / JSON Schema | P3 | M | BE | ⏸ |
+| 16 | US-ARCH-15 | 评估 TanStack Query 迁移 | P3 | M | FE | ✅ |
+| 17 | US-ARCH-16 | OpenAPI / JSON Schema | P3 | M | BE | ✅ |
 | 18 | US-ARCH-17 | E2E / Smoke 黄金路径进 CI | P3 | M | FULL | 🔲 |
 | 19 | US-ARCH-18 | AI 可观测性（结构化 trace + APM） | P3 | M | BE | ⏸ |
 
@@ -68,8 +68,8 @@
 | US-ARCH-12 | 契约扩展 activity/notification | P2 | ✅ |
 | US-ARCH-13 | 路由风格统一 | P2 | ✅ |
 | US-ARCH-14 | AI port 化 | P2 | ✅ |
-| US-ARCH-15 | TanStack Query 评估 | P3 | ⏸ |
-| US-ARCH-16 | OpenAPI | P3 | ⏸ |
+| US-ARCH-15 | TanStack Query 评估 | P3 | ✅ |
+| US-ARCH-16 | OpenAPI | P3 | ✅ |
 | US-ARCH-17 | E2E Smoke CI | P3 | 🔲 |
 | US-ARCH-18 | AI 可观测性 | P3 | ⏸ |
 
@@ -526,7 +526,7 @@
 
 ## Epic G · 长期演进（P3）
 
-### US-ARCH-15 · 评估 TanStack Query 迁移 P3 · M · FE · ⏸
+### US-ARCH-15 · 评估 TanStack Query 迁移 P3 · M · FE · ✅
 
 **Story**  
 作为前端负责人，我希望评估自研 `useApiQuery` 与 TanStack Query 的取舍，以便在维护成本与包体之间做数据驱动决策。
@@ -535,16 +535,16 @@
 
 **验收标准**
 
-- [ ] Spike 文档：`docs/spikes/tanstack-query-weapp.md`
-- [ ] 测量：`build:weapp:size` 前后对比（引入 @tanstack/react-query）
-- [ ] 试点 1 个低风险域（如 `notifications`）POC
-- [ ] 决策：**迁移 / 保持自研 / 混合** 之一，团队确认
+- [x] Spike 文档：`docs/spikes/tanstack-query-weapp.md`
+- [x] 测量：`build:weapp:size` 前后对比（引入 @tanstack/react-query）
+- [x] 试点 1 个低风险域（如 `notifications`）POC
+- [x] 决策：**迁移 / 保持自研 / 混合** 之一，团队确认
 
 **依赖**：US-ARCH-05 缓存规范先稳定
 
 ---
 
-### US-ARCH-16 · OpenAPI / JSON Schema P3 · M · BE · ⏸
+### US-ARCH-16 · OpenAPI / JSON Schema P3 · M · BE · ✅
 
 **Story**  
 作为全栈开发，我希望 REST API 有机器可读契约，以便减少手工维护 API.md 的漂移。
@@ -553,9 +553,9 @@
 
 **验收标准**
 
-- [ ] `@nestjs/swagger` 或 hand-written JSON Schema 覆盖 P0 路由（auth、activities、posts、travel-guide）
-- [ ] CI 校验 schema 与 controller 同步（或 swagger diff）
-- [ ] [API.md](./API.md) 注明 schema 来源
+- [x] `@nestjs/swagger` 或 hand-written JSON Schema 覆盖 P0 路由（auth、activities、posts、travel-guide）
+- [x] CI 校验 schema 与 controller 同步（或 swagger diff）
+- [x] [API.md](./API.md) 注明 schema 来源
 
 **依赖**：US-ARCH-12 类型稳定后更易生成
 
@@ -636,7 +636,7 @@ arch(be): remove post migrations from onModuleInit [US-ARCH-03]
 |------|------|
 | 2026-06-23 | 初版：18 条 Story，P0～P3 排序 |
 | 2026-06-23 | **+US-ARCH-19** 观演资料包离线缓存；**US-ARCH-05** 扩为四层缓存分层；产品优先级：阵容/时间表 > 招募帖 |
-| 2026-06-24 | **US-ARCH-12** activity/notification/profile 契约包；**US-ARCH-13** TravelGuide + FestivalPlan 路由风格统一；**US-ARCH-14** AI port 化（Partner/Itinerary/TravelGuide） |
+| 2026-06-24 | **US-ARCH-15** TanStack Query spike（包体 + notifications POC 评估，决策：混合）；**US-ARCH-16** OpenAPI P0 路由 + CI `openapi:check` + API.md schema 来源 |
 
 ---
 
