@@ -38,15 +38,18 @@ Full feature map (Chinese): [docs/PRODUCT.md](docs/PRODUCT.md). User stories: [d
 
 ## Quick start
 
+Monorepo layout (`sync-app` + `sync-app-backend` as siblings under `sync/`):
+
 ```bash
-cd sync-app
-npm install
+cd sync
+corepack enable
+pnpm install
 
 # Terminal 1 — backend
-cd ../sync-app-backend && npm run dev:all
+cd sync-app-backend && pnpm run dev:all
 
 # Terminal 2 — mini program (development mode → local .env)
-npm run dev:weapp
+cd sync-app && pnpm run dev:weapp
 ```
 
 Open **WeChat DevTools** and import the **`sync-app` repo root** (folder with `project.config.json`).  
@@ -149,18 +152,18 @@ Optional Barlow font: place `Barlow-Regular_2.ttf` in `src/static/fonts/` and ad
 
 ## Shared contracts with backend
 
-TypeScript aliases resolve to backend shared types (do not duplicate in `types/backend.ts`):
+TypeScript workspace packages (`@sync/*-contracts` in `sync-app-backend/packages/`):
 
-| Alias | Backend source |
+| Alias | Package path |
 |-------|----------------|
-| `@sync/chat-contracts` | `sync-app-backend/src/shared/chat/` |
-| `@sync/festival-plan-contracts` | `sync-app-backend/src/shared/festival-plan/` |
-| `@sync/itinerary-contracts` | `sync-app-backend/src/shared/itinerary/` |
-| `@sync/travel-plan-contracts` | `sync-app-backend/src/shared/travel-plan/` |
-| `@sync/travel-guide-contracts` | `sync-app-backend/src/shared/travel-guide/` |
-| `@sync/partner-contracts` | `sync-app-backend/src/shared/partner/` |
+| `@sync/chat-contracts` | `sync-app-backend/packages/chat-contracts/` |
+| `@sync/festival-plan-contracts` | `sync-app-backend/packages/festival-plan-contracts/` |
+| `@sync/itinerary-contracts` | `sync-app-backend/packages/itinerary-contracts/` |
+| `@sync/travel-plan-contracts` | `sync-app-backend/packages/travel-plan-contracts/` |
+| `@sync/travel-guide-contracts` | `sync-app-backend/packages/travel-guide-contracts/` |
+| `@sync/partner-contracts` | `sync-app-backend/packages/partner-contracts/` |
 
-After changing contracts: run `npm run check` in both repos.
+After changing contracts: run `pnpm -r check` from the `sync/` repo root (or `pnpm run check` in each app).
 
 ## Quality assurance
 
@@ -168,7 +171,7 @@ After changing contracts: run `npm run check` in both repos.
 npm run check
 ```
 
-CI (`.github/workflows/ci.yml`) runs `check` + `build:weapp:size` on PRs and `main` (checks out sibling `sync-app-backend` for contract paths).
+CI runs `check` + `build:weapp:size` on PRs and `main`. Prefer the monorepo root workflow (`sync/.github/workflows/ci.yml`) with `pnpm -r check`; per-repo workflows remain for standalone clones.
 
 Husky + lint-staged on commit.
 

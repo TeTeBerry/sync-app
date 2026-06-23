@@ -4,106 +4,30 @@ export interface ApiResponse<T> {
   data: T;
 }
 
-export interface CatalogLineupArtistNextActivity {
-  legacyId: number;
-  name: string;
-  date: string;
-  area?: string;
-}
+export type {
+  ActivityRegistrationResult,
+  ActivityUnregisterResult,
+  BackendActivity,
+  CatalogLineupArtist,
+  CatalogLineupArtistDetail,
+  CatalogLineupArtistNextActivity,
+} from './activity';
 
-export interface CatalogLineupArtist {
-  id: string;
-  name: string;
-  genreLabel: string;
-  activityCount: number;
-  thumbnail?: string;
-  nextActivity?: CatalogLineupArtistNextActivity;
-}
-
-export interface CatalogLineupArtistDetail extends CatalogLineupArtist {
-  profileSummary?: string;
-  profileFull?: string;
-  representativeTracks?: string[];
-}
-
-export interface BackendActivity {
-  _id: string;
-  legacyId: number;
-  name: string;
-  code: string;
-  alias?: string[];
-  date?: string;
-  location?: string;
-  latitude?: number;
-  longitude?: number;
-  region?: 'domestic' | 'overseas' | 'hmt';
-  /** Display area for catalog badges (e.g. 泰国, 日本). */
-  area?: string;
-  image?: string;
-  /** Catalog type: outdoor festival (`festival`) or indoor EDM (`indoor`). */
-  activityType?: 'festival' | 'indoor';
-  hot?: boolean;
-  attendees?: number;
-  damaiProjectId?: string;
-  externalUrl?: string;
-  infoSource?: string;
-  infoUpdatedAt?: string;
-  lineupPublished?: boolean;
-  recruitPostCount?: number;
-  /** false = overseas field without Hot Path; hide generate CTA */
-  travelGuideSupported?: boolean;
-}
-
-export type PrivacyLevel = 'public' | 'private';
+export type {
+  AccountRiskPublicStatus,
+  AccountRiskReasonCode,
+  AccountRiskStatus,
+  AuthLoginResult,
+  CurrentUser,
+  PrivacyLevel,
+  ProfileActivityItem,
+  ProfileSummary,
+  UpdateCurrentUserPayload,
+} from './profile';
 
 export type ReportCategory = 'ads' | 'scalper' | 'vulgar';
 
 export type ReportTargetType = 'post' | 'user' | 'comment';
-
-export type AccountRiskStatus = 'normal' | 'restricted' | 'banned';
-
-export type AccountRiskReasonCode = 'scalper' | 'content' | 'reports';
-
-export interface AccountRiskPublicStatus {
-  status: AccountRiskStatus;
-  postBlockedUntil?: string;
-  message?: string;
-  reasonCode?: AccountRiskReasonCode;
-  appealHint?: string;
-}
-
-export interface CurrentUser {
-  id: string;
-  name: string;
-  handle: string;
-  location: string;
-  bio: string;
-  avatar: string;
-  city?: string;
-  favorGenres?: string[];
-  budgetLevel?: string;
-  notificationsEnabled?: boolean;
-  privacyLevel?: PrivacyLevel;
-  accountRisk?: AccountRiskPublicStatus;
-}
-
-export interface AuthLoginResult {
-  accessToken: string;
-  user: CurrentUser;
-}
-
-export interface UpdateCurrentUserPayload {
-  name?: string;
-  handle?: string;
-  location?: string;
-  bio?: string;
-  avatar?: string;
-  city?: string;
-  favorGenres?: string[];
-  budgetLevel?: string;
-  notificationsEnabled?: boolean;
-  privacyLevel?: PrivacyLevel;
-}
 
 export interface ReportPayload {
   targetType: ReportTargetType;
@@ -135,43 +59,6 @@ export interface ReportStatusResult {
   category?: ReportCategory;
   createdAt?: string;
   reviewStatus?: ReportReviewStatus;
-}
-
-export interface ActivityRegistrationResult {
-  ok: true;
-  activityLegacyId: number;
-  status: 'registered';
-  alreadyRegistered?: boolean;
-  attendees: number;
-}
-
-export interface ActivityUnregisterResult {
-  ok: true;
-  activityLegacyId: number;
-  wasRegistered?: boolean;
-  attendees: number;
-}
-
-export interface ProfileSummary {
-  name: string;
-  handle: string;
-  location: string;
-  bio: string;
-  avatar: string;
-  stats: {
-    events: number;
-    posts: number;
-  };
-}
-
-export interface ProfileActivityItem {
-  id: string;
-  title: string;
-  date: string;
-  location: string;
-  image: string;
-  status: 'registered' | 'attended';
-  activityLegacyId: string;
 }
 
 export type {
@@ -215,45 +102,13 @@ export interface HomeSummary {
   } | null;
 }
 
-export type NotificationType = 'general' | 'interaction' | 'system';
-
-/** In-app notification tab grouping (matches backend NotificationCategory). */
-export type NotificationCategory = 'system' | 'general';
-
-export type NotificationInteractionType =
-  | 'like'
-  | 'comment'
-  | 'comment_reply'
-  | 'activity'
-  | 'activity_update'
-  | 'post_rejected'
-  | 'post_hidden';
-
-export interface NotificationMeta {
-  activityLegacyId?: number;
-  postId?: string;
-  /** Tab grouping; should match type (see notificationDisplay.getNotificationCategory). */
-  category?: NotificationCategory;
-  type?: NotificationInteractionType;
-  actorUserId?: string;
-  actorUserName?: string;
-  displayEventName?: string;
-  templateKey?: string;
-  templateParams?: Record<string, string>;
-  rejectionReason?: string;
-  parentCommentId?: string;
-}
-
-export interface AppNotification {
-  id: string;
-  userId: string;
-  type: NotificationType;
-  title: string;
-  body: string;
-  read: boolean;
-  meta?: NotificationMeta;
-  createdAt: string;
-}
+export type {
+  AppNotification,
+  NotificationCategory,
+  NotificationInteractionType,
+  NotificationMeta,
+  NotificationType,
+} from './notification';
 
 export type {
   GenerateItineraryPayload,

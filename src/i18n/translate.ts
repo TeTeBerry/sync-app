@@ -178,7 +178,8 @@ export function translate(
 
   // If not in cache, compute the value
   const path = key.split('.');
-  let value = resolvePath(messageTreeFor(locale) ?? {}, path);
+  const localeMessages = messageTreeFor(locale);
+  let value = resolvePath(localeMessages ?? {}, path);
 
   if (value == null) {
     const fallback = resolvePath(messageTreeFor(DEFAULT_LOCALE) ?? {}, path);
@@ -187,6 +188,10 @@ export function translate(
       return key;
     }
     value = interpolate(fallback, params);
+    // Target bundle still loading: show default-locale text but do not cache under target locale.
+    if (locale !== DEFAULT_LOCALE && !localeMessages) {
+      return value;
+    }
   } else {
     value = interpolate(value, params);
   }

@@ -1,5 +1,5 @@
 /**
- * Canonical: `sync-app-backend/src/shared/itinerary/index.ts`
+ * Canonical: `@sync/itinerary-contracts` (workspace package)
  * Do not duplicate shapes here — re-export only.
  */
 export type {

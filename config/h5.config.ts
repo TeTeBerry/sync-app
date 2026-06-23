@@ -1,6 +1,6 @@
 import path from 'node:path';
 
-const backendSharedPath = path.resolve(__dirname, '../../sync-app-backend/src/shared');
+const contractPackagesPath = path.resolve(__dirname, '../node_modules/@sync');
 
 /**
  * Optional H5 dev/build profile — not a release target (see sync-app/README.md).
@@ -8,7 +8,7 @@ const backendSharedPath = path.resolve(__dirname, '../../sync-app-backend/src/sh
  */
 export const h5Config = {
   compile: {
-    include: [backendSharedPath],
+    include: [contractPackagesPath],
   },
   outputRoot: 'dist-h5',
   publicPath: '/',

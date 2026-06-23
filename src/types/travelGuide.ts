@@ -1,5 +1,5 @@
 /**
- * Canonical: `sync-app-backend/src/shared/travel-guide/index.ts`
+ * Canonical: `@sync/travel-guide-contracts` (workspace package)
  * Do not duplicate shapes here — re-export only.
  */
 export type {

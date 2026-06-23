@@ -236,16 +236,16 @@ X-Activity-Id: 4          # 可选，活动 legacyId（REST + AI WebSocket upgra
 | 方法 | 路径 | 说明 |
 |------|------|------|
 | GET | `/api/home` | 首页聚合（热度、`signupEvents`） |
-| GET | `/api/activities` | 活动列表（当前 catalog legacyId：`1` TML、`4` 风暴、`5` EDC Thailand） |
-| GET | `/api/activities/resolve?keyword=` | 活动关键词解析（按 code / 名称 / 别名查找） |
-| GET | `/api/activities/:legacyId` | 活动详情 |
-| GET | `/api/profile` | 个人资料摘要 |
-| GET | `/api/profile/activities` | 我的活动（已选择） |
-| GET/PATCH | `/api/users/me` | 当前用户资料（Query 身份） |
-| POST/DELETE | `/api/activities/:legacyId/register` | 记录 / 取消活动选择（前端进入详情或绑定时自动 POST） |
-| GET | `/api/notifications` | 通知列表 |
+| GET | `/api/activities` | 活动列表（`BackendActivity[]`；catalog legacyId：`1` TML、`4` 风暴、`5` EDC Thailand） |
+| GET | `/api/activities/resolve?keyword=` | 活动关键词解析（按 code / 名称 / 别名查找；`BackendActivity`） |
+| GET | `/api/activities/:legacyId` | 活动详情（`BackendActivity`） |
+| GET | `/api/profile` | 个人资料摘要（`ProfileSummary`） |
+| GET | `/api/profile/activities` | 我的活动（已选择；`ProfileActivityItem[]`） |
+| GET/PATCH | `/api/users/me` | 当前用户资料（`CurrentUser`） |
+| POST/DELETE | `/api/activities/:legacyId/register` | 记录 / 取消活动选择（`ActivityRegistrationResult` / `ActivityUnregisterResult`） |
+| GET | `/api/notifications` | 通知列表（`AppNotification[]`） |
 | GET | `/api/notifications/unread-count` | 未读数 |
-| PATCH | `/api/notifications/:id/read` | 单条已读 |
+| PATCH | `/api/notifications/:id/read` | 单条已读（`AppNotification`） |
 | PATCH | `/api/notifications/read-all` | 全部已读 |
 | POST | `/api/auth/logout` | 退出登录（Bearer）；吊销其它设备 JWT |
 | POST | `/api/activities/:legacyId/travel-guide/generate` | AI 出行攻略（出发地、人数、预算档、是否自驾等） |
@@ -280,9 +280,9 @@ X-Activity-Id: 4          # 可选，活动 legacyId（REST + AI WebSocket upgra
 
 | 方法 | 路径 | 说明 |
 |------|------|------|
-| GET | `/api/notifications` | 通知列表 |
+| GET | `/api/notifications` | 通知列表（`AppNotification[]`） |
 | GET | `/api/notifications/unread-count` | 未读数 |
-| PATCH | `/api/notifications/:id/read` | 单条已读 |
+| PATCH | `/api/notifications/:id/read` | 单条已读（`AppNotification`） |
 | PATCH | `/api/notifications/read-all` | 全部已读 |
 | DELETE | `/api/notifications/:id` | 删除单条（若实现） |
 

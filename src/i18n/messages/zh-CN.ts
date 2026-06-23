@@ -820,6 +820,17 @@ export const zhCN: MessageTree = {
   },
   itinerary: {
     title: '我的电音时间表',
+    banner: {
+      titleWithDjs: '已根据你选择的 {{count}} 位 DJ 生成电音时间表',
+      titleDefault: '你的电音时间表已生成',
+      coverDays: '覆盖 {{days}}',
+    },
+    selectDjFirstTitle: '请先选择 DJ',
+    selectDjFirstMessage: '勾选至少一位 DJ 后，即可生成你的专属观演行程。',
+    scheduleUnpublishedModalTitle: '时间表尚未发布',
+    scheduleUnpublishedModalMessage:
+      '官方演出时间表尚未公布，请耐心等待。当前可先浏览阵容并预选 DJ。',
+    generateFailed: '行程生成失败，请稍后重试',
     step1Title: '第一步：选择你喜爱的 DJ',
     step1Badge: '已选 {{count}} 位',
     stageFilter: '舞台筛选',

@@ -11,7 +11,7 @@ import {
   goEventsWithSearch,
 } from '../../../utils/route';
 import { Text, View } from '@tarojs/components';
-import { useT } from '@/hooks/useI18n';
+import { useT, useLocale } from '@/hooks/useI18n';
 
 export type HomeAiEntryProps = {
   findTeamActivityId?: number;
@@ -19,12 +19,13 @@ export type HomeAiEntryProps = {
 
 export const HomeAiEntry: FC<HomeAiEntryProps> = ({ findTeamActivityId }) => {
   const t = useT();
+  const locale = useLocale();
   const { data: activities } = useActivitiesQuery();
 
-  const exampleQuestions = useMemo(
-    () => buildHomeFestivalExampleQuestions(activities),
-    [activities],
-  );
+  const exampleQuestions = useMemo(() => {
+    void locale;
+    return buildHomeFestivalExampleQuestions(activities);
+  }, [activities, locale]);
 
   const handleLookupFestival = () => {
     goEventsListTab();

@@ -31,6 +31,7 @@ import { HelpFeedbackSettings } from './components/HelpFeedbackSettings';
 import { getLegalDocList } from '../../../legal';
 import { goLegalDocument } from '../../../utils/legalRoute';
 import { useI18n } from '@/hooks/useI18n';
+import { translate } from '@/i18n/translate';
 import type { AppLocale } from '@/i18n/types';
 
 type SettingsSection =
@@ -168,11 +169,17 @@ const SettingsPage: React.FC = () => {
   );
 
   const selectLocale = useCallback(
-    (next: AppLocale) => {
-      setLocale(next);
-      void Taro.showToast({ title: t('common.save'), icon: 'success' });
+    async (next: AppLocale) => {
+      if (next === locale) {
+        return;
+      }
+      await setLocale(next);
+      void Taro.showToast({
+        title: translate('common.save', next),
+        icon: 'success',
+      });
     },
-    [setLocale, t],
+    [locale, setLocale, t],
   );
 
   const privacyOptions: PrivacyLevel[] = ['public', 'private'];

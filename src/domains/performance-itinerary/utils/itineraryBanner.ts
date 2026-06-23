@@ -1,3 +1,5 @@
+import { t } from '@/i18n';
+import { useLocaleStore } from '@/i18n/localeStore';
 import type { ItineraryDay } from '../types/myItineraryUi';
 
 export function parseSelectedDjIds(raw?: string): string[] {
@@ -68,12 +70,15 @@ export function buildItineraryBannerCopy(input: {
     input.selectedDjIds.length > 0 ? input.selectedDjIds.length : names.length;
 
   const title =
-    count > 0 ? `已根据你选择的 ${count} 位 DJ 生成电音时间表` : '你的电音时间表已生成';
+    count > 0
+      ? t('itinerary.banner.titleWithDjs', { count })
+      : t('itinerary.banner.titleDefault');
 
   const namesLine = names.length > 0 ? names.join(' · ') : '';
+  const daysSeparator = useLocaleStore.getState().locale === 'en-US' ? ', ' : '、';
   const daysLine =
     input.dayLabels.length > 1
-      ? `覆盖 ${input.dayLabels.join('、')}`
+      ? t('itinerary.banner.coverDays', { days: input.dayLabels.join(daysSeparator) })
       : (input.dayLabels[0] ?? '');
 
   const subtitle = [namesLine, input.eventMeta.trim(), daysLine]

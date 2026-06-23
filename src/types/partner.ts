@@ -1,5 +1,5 @@
 /**
- * Canonical: `sync-app-backend/src/shared/partner/index.ts`
+ * Canonical: `@sync/partner-contracts` (workspace package)
  * Do not duplicate shapes here — re-export only.
  */
 export type {

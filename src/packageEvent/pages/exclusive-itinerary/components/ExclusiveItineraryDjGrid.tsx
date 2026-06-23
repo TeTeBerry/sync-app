@@ -5,6 +5,7 @@ import { ScrollView, Text, View } from '@tarojs/components';
 import { useT } from '@/hooks/useI18n';
 import type { ExclusiveItineraryFilterChip } from '../exclusiveItineraryFilters';
 import type { ExclusiveItineraryDj } from '../types';
+import type { LineupArtistSortMode } from '../../activity-lineup/utils/sortLineupArtists';
 import { itineraryDjCardDomId } from '@/domains/performance-itinerary/utils/resolveItineraryDjSelection';
 
 export type ExclusiveItineraryDjGridProps = {
@@ -14,7 +15,7 @@ export type ExclusiveItineraryDjGridProps = {
   styleSearchQuery: string;
   stageOptions: ExclusiveItineraryFilterChip[];
   genreOptions: ExclusiveItineraryFilterChip[];
-  sortMode: string;
+  sortMode: LineupArtistSortMode;
   filteredDjs: ExclusiveItineraryDj[];
   selectedIds: string[];
   onStageFilterChange: (stageId: string) => void;
@@ -41,6 +42,10 @@ const ExclusiveItineraryDjGrid: React.FC<ExclusiveItineraryDjGridProps> = ({
   onToggleDj,
 }) => {
   const t = useT();
+  const sortModeLabel =
+    sortMode === 'name'
+      ? t('activityLineup.sortByName')
+      : t('activityLineup.sortByPopularity');
 
   return (
     <>
@@ -153,7 +158,7 @@ const ExclusiveItineraryDjGrid: React.FC<ExclusiveItineraryDjGridProps> = ({
           hoverClass="s-exclusive-itinerary__sort-btn--pressed"
           onTap={onOpenSortSheet}
         >
-          <Text>{sortMode}</Text>
+          <Text>{sortModeLabel}</Text>
           <ChevronDown size={14} color="var(--primary)" />
         </Button>
       </View>

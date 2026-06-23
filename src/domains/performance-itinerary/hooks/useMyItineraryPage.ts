@@ -30,7 +30,7 @@ import {
 } from '../utils/itineraryBanner';
 import { runSaveItineraryWallpaperFlow } from '../utils/generateItineraryWallpaper';
 import { normalizeItineraryDaysForSave } from '@/types/itinerary';
-import { useT } from '@/hooks/useI18n';
+import { useT, useLocale } from '@/hooks/useI18n';
 import { ApiError } from '@/utils/apiClient';
 import type { MyItineraryViewMode } from '../components/MyItineraryToolbar';
 
@@ -102,6 +102,7 @@ export function useMyItineraryPage() {
   const [viewMode, setViewMode] = useState<MyItineraryViewMode>('timeline');
   const [activeDayId, setActiveDayId] = useState(() => itineraryDays[0]?.id ?? '');
   const t = useT();
+  const locale = useLocale();
   useEffect(() => {
     const fromQuery = parseSelectedDjIds(router.params.selectedDjIds);
     if (fromQuery.length > 0) {
@@ -193,17 +194,23 @@ export function useMyItineraryPage() {
     [djCatalog, selectedDjIds],
   );
 
-  const bannerCopy = useMemo(
-    () =>
-      buildItineraryBannerCopy({
-        selectedDjIds,
-        selectedDjNames,
-        itineraryArtistNames,
-        eventMeta,
-        dayLabels: itineraryDays.map((day) => day.bannerDateLabel),
-      }),
-    [eventMeta, itineraryArtistNames, itineraryDays, selectedDjIds, selectedDjNames],
-  );
+  const bannerCopy = useMemo(() => {
+    void locale;
+    return buildItineraryBannerCopy({
+      selectedDjIds,
+      selectedDjNames,
+      itineraryArtistNames,
+      eventMeta,
+      dayLabels: itineraryDays.map((day) => day.bannerDateLabel),
+    });
+  }, [
+    eventMeta,
+    itineraryArtistNames,
+    itineraryDays,
+    locale,
+    selectedDjIds,
+    selectedDjNames,
+  ]);
 
   useEffect(() => {
     if (!itineraryDays.some((d) => d.id === activeDayId)) {

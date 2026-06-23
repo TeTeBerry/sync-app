@@ -35,10 +35,12 @@ import { readExclusiveItineraryRouteSelection } from './readExclusiveItineraryRo
 import type { ExclusiveItineraryDj } from './types';
 import { detectItineraryConflicts } from './itineraryConflict.util';
 import type { ItineraryConflict } from '../../../types/backend';
+import type { LineupArtistSortMode } from '../activity-lineup/utils/sortLineupArtists';
+import { useT } from '@/hooks/useI18n';
 
 const CTA_FOOTER_BASE_PX = 74;
-const SORT_OPTIONS = ['按人气排序', '按名字排序'] as const;
-export type ExclusiveSortMode = (typeof SORT_OPTIONS)[number];
+const SORT_MODES: LineupArtistSortMode[] = ['popularity', 'name'];
+export type ExclusiveSortMode = LineupArtistSortMode;
 
 function djMatchesStage(dj: ExclusiveItineraryDj, stageId: string): boolean {
   if (stageId === 'all') {
@@ -48,6 +50,7 @@ function djMatchesStage(dj: ExclusiveItineraryDj, stageId: string): boolean {
 }
 
 export function useExclusiveItineraryPage() {
+  const t = useT();
   const router = useRouter();
   const activeActivityLegacyId = useNavigationStore(selectActiveActivityLegacyId);
 
@@ -63,7 +66,7 @@ export function useExclusiveItineraryPage() {
   const [stageFilter, setStageFilter] = useState('all');
   const [genreFilter, setGenreFilter] = useState('all');
   const [styleSearchQuery, setStyleSearchQuery] = useState('');
-  const [sortMode, setSortMode] = useState<ExclusiveSortMode>('按人气排序');
+  const [sortMode, setSortMode] = useState<ExclusiveSortMode>('popularity');
   const [selectedIds, setSelectedIds] = useState<string[]>(
     () => routeSelection.selectedDjIds,
   );
@@ -227,7 +230,7 @@ export function useExclusiveItineraryPage() {
         djMatchesStyleSearch(dj, styleSearchQuery),
     );
     const sorted = [...list];
-    if (sortMode === '按名字排序') {
+    if (sortMode === 'name') {
       sorted.sort((a, b) => a.name.localeCompare(b.name, 'zh'));
     } else {
       sorted.sort((a, b) => b.popularity - a.popularity);
@@ -287,15 +290,15 @@ export function useExclusiveItineraryPage() {
   const handleGenerate = useCallback(async () => {
     if (selectedIds.length === 0) {
       setHintModal({
-        title: '请先选择 DJ',
-        message: '勾选至少一位 DJ 后，即可生成你的专属观演行程。',
+        title: t('itinerary.selectDjFirstTitle'),
+        message: t('itinerary.selectDjFirstMessage'),
       });
       return;
     }
     if (scheduleQuery.data?.schedulePublished === false) {
       setHintModal({
-        title: '时间表尚未发布',
-        message: '官方演出时间表尚未公布，请耐心等待。当前可先浏览阵容并预选 DJ。',
+        title: t('itinerary.scheduleUnpublishedModalTitle'),
+        message: t('itinerary.scheduleUnpublishedModalMessage'),
       });
       return;
     }
@@ -316,7 +319,7 @@ export function useExclusiveItineraryPage() {
       goMyItinerary(activityLegacyId, selectedIds);
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : '行程生成失败，请稍后重试';
+        error instanceof Error ? error.message : t('itinerary.generateFailed');
       void Taro.showToast({ title: message, icon: 'none' });
     } finally {
       setGenerating(false);
@@ -328,19 +331,23 @@ export function useExclusiveItineraryPage() {
     scheduleQuery.data?.schedulePublished,
     selectedIds,
     setFromGenerateResult,
+    t,
   ]);
 
   const sortSheetItems = useMemo(
     () =>
-      SORT_OPTIONS.map((option) => ({
-        label: option,
-        active: sortMode === option,
+      SORT_MODES.map((mode) => ({
+        label:
+          mode === 'name'
+            ? t('activityLineup.sortByName')
+            : t('activityLineup.sortByPopularity'),
+        active: sortMode === mode,
         onSelect: () => {
-          setSortMode(option);
+          setSortMode(mode);
           setSortSheetOpen(false);
         },
       })),
-    [sortMode],
+    [sortMode, t],
   );
 
   const navFallback =

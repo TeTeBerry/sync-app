@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type { AppLocale } from './types';
+import { DEFAULT_LOCALE } from './types';
 import {
   readStoredLocale,
   writeStoredLocale,
@@ -84,38 +85,36 @@ type LocaleState = {
 };
 
 export const useLocaleStore = create<LocaleState>((set, get) => ({
-  // Initial state - detect browser language if available
-  locale: typeof navigator !== 'undefined' ? detectBrowserLanguage() : 'zh-CN',
+  // Stay on default until hydrate loads the preferred bundle (avoids en-US without messages).
+  locale: DEFAULT_LOCALE,
   hydrated: false,
   status: 'loading',
   error: null,
-  messagesReady: false,
+  messagesReady: true,
   isChangingLocale: false,
 
   // Hydration from persistent storage with browser language detection
   hydrate: () => {
     try {
-      // Get the preferred locale based on stored preference or browser language
       const preferredLocale = getPreferredLocale();
 
       set({
-        locale: preferredLocale,
         status: 'loading',
         error: null,
-        messagesReady: preferredLocale === 'zh-CN',
       });
 
-      // Load messages for the preferred locale
       void loadMessages(preferredLocale)
-        .then(() => {
+        .then(async () => {
+          const { clearTranslationCache } = await import('./translate');
+          clearTranslationCache();
           set({
+            locale: preferredLocale,
             hydrated: true,
             status: 'loaded',
             messagesReady: true,
             error: null,
           });
 
-          // If browser language differs from stored preference, log a suggestion
           const storedLocale = readStoredLocale();
           if (storedLocale !== preferredLocale && storedLocale !== 'zh-CN') {
             console.log(
@@ -126,10 +125,11 @@ export const useLocaleStore = create<LocaleState>((set, get) => ({
         .catch((error) => {
           console.error('Failed to load messages:', error);
           set({
+            locale: DEFAULT_LOCALE,
             hydrated: true,
             status: 'error',
             error: error.message,
-            messagesReady: preferredLocale === 'zh-CN', // Default language still works
+            messagesReady: true,
           });
         });
     } catch (error) {
@@ -146,26 +146,20 @@ export const useLocaleStore = create<LocaleState>((set, get) => ({
   // Set locale with better error handling and batching
   setLocale: async (locale) => {
     const { startLocaleChange, finishLocaleChange, setError } = get();
+    const previousLocale = get().locale;
 
     try {
       startLocaleChange();
       setError(null);
-
-      // Write to storage
       writeStoredLocale(locale);
 
-      // Update state immediately for UI feedback
-      set({
-        locale,
-        status: 'loading',
-        messagesReady: locale === 'zh-CN',
-      });
-
-      // Load messages
       await loadMessages(locale);
 
-      // Update final state
+      const { clearTranslationCache } = await import('./translate');
+      clearTranslationCache();
+
       set({
+        locale,
         status: 'loaded',
         messagesReady: true,
         error: null,
@@ -176,13 +170,11 @@ export const useLocaleStore = create<LocaleState>((set, get) => ({
         error instanceof Error ? error.message : 'Failed to change language';
       setError(errorMessage);
 
-      // Revert to previous locale on error
-      const currentLocale = get().locale;
-      writeStoredLocale(currentLocale);
+      writeStoredLocale(previousLocale);
       set({
-        locale: currentLocale,
+        locale: previousLocale,
         status: 'loaded',
-        messagesReady: currentLocale === 'zh-CN',
+        messagesReady: true,
       });
     } finally {
       finishLocaleChange();

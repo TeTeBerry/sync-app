@@ -1,5 +1,12 @@
 import path from 'node:path';
+import { createRequire } from 'node:module';
 import { defineConfig } from 'vitest/config';
+
+const require = createRequire(import.meta.url);
+
+function resolveContractEntry(name: string): string {
+  return require.resolve(name);
+}
 
 /** Mirrors Taro compile-time flags so `@tarojs/*` can load in Vitest. */
 const taroCompileFlags = {
@@ -15,29 +22,22 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src'),
-      '@sync/chat-contracts': path.resolve(
-        __dirname,
-        '../sync-app-backend/src/shared/chat/index.ts',
+      '@sync/activity-contracts': resolveContractEntry('@sync/activity-contracts'),
+      '@sync/chat-contracts': resolveContractEntry('@sync/chat-contracts'),
+      '@sync/travel-plan-contracts': resolveContractEntry(
+        '@sync/travel-plan-contracts',
       ),
-      '@sync/travel-plan-contracts': path.resolve(
-        __dirname,
-        '../sync-app-backend/src/shared/travel-plan/index.ts',
+      '@sync/profile-contracts': resolveContractEntry('@sync/profile-contracts'),
+      '@sync/travel-guide-contracts': resolveContractEntry(
+        '@sync/travel-guide-contracts',
       ),
-      '@sync/travel-guide-contracts': path.resolve(
-        __dirname,
-        '../sync-app-backend/src/shared/travel-guide/index.ts',
+      '@sync/notification-contracts': resolveContractEntry(
+        '@sync/notification-contracts',
       ),
-      '@sync/partner-contracts': path.resolve(
-        __dirname,
-        '../sync-app-backend/src/shared/partner/index.ts',
-      ),
-      '@sync/itinerary-contracts': path.resolve(
-        __dirname,
-        '../sync-app-backend/src/shared/itinerary/index.ts',
-      ),
-      '@sync/festival-plan-contracts': path.resolve(
-        __dirname,
-        '../sync-app-backend/src/shared/festival-plan/index.ts',
+      '@sync/partner-contracts': resolveContractEntry('@sync/partner-contracts'),
+      '@sync/itinerary-contracts': resolveContractEntry('@sync/itinerary-contracts'),
+      '@sync/festival-plan-contracts': resolveContractEntry(
+        '@sync/festival-plan-contracts',
       ),
     },
   },

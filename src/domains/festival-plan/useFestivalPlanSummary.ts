@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useLocale } from '@/hooks/useI18n';
 import { useFestivalPlanProgressQuery } from '@/hooks/sync/festivalPlanProgress';
 import { useItineraryStore } from '@/domains/performance-itinerary/store';
 import { findLatestTravelGuideForActivity } from '@/domains/travel-guide/utils/travelGuideDetailStorage';
@@ -20,6 +21,7 @@ export function useFestivalPlanSummary(
 ): FestivalPlanChecklist | null {
   const progressQuery = useFestivalPlanProgressQuery(activityLegacyId);
   const pendingItinerary = useItineraryStore((state) => state.pending);
+  const locale = useLocale();
 
   return useMemo(() => {
     if (activityLegacyId == null || Number.isNaN(activityLegacyId)) {
@@ -27,6 +29,7 @@ export function useFestivalPlanSummary(
     }
 
     void refreshKey;
+    void locale;
 
     const storedGuide = findLatestTravelGuideForActivity(activityLegacyId);
     const localTravelGuideId = storedGuide?.guideId;
@@ -50,5 +53,5 @@ export function useFestivalPlanSummary(
         itinerarySelectedDjIds: localItinerarySelectedDjIds,
       }),
     );
-  }, [activityLegacyId, pendingItinerary, progressQuery.data, refreshKey]);
+  }, [activityLegacyId, locale, pendingItinerary, progressQuery.data, refreshKey]);
 }

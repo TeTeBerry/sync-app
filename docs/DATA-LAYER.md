@@ -89,23 +89,26 @@ REST 与自定义 `useApiQuery` 缓存的分层约定；身份为 **JWT Bearer**
 
 | Alias | 后端真源 | 前端 re-export |
 |-------|----------|----------------|
-| `@sync/chat-contracts` | `shared/chat/` | `types/aiChat.ts`, `types/conversationState.ts` |
-| `@sync/travel-plan-contracts` | `shared/travel-plan/` | `types/travelPlan.ts` |
-| `@sync/travel-guide-contracts` | `shared/travel-guide/` | `types/travelGuide.ts` |
-| `@sync/partner-contracts` | `shared/partner/` | `types/partner.ts` |
-| `@sync/itinerary-contracts` | `shared/itinerary/` | `types/itinerary.ts` |
-| `@sync/festival-plan-contracts` | `shared/festival-plan/` | `types/festivalPlan.ts` |
+| `@sync/activity-contracts` | `sync-app-backend/packages/activity-contracts/` | `types/activity.ts` |
+| `@sync/chat-contracts` | `sync-app-backend/packages/chat-contracts/` | `types/aiChat.ts` |
+| `@sync/profile-contracts` | `sync-app-backend/packages/profile-contracts/` | `types/profile.ts` |
+| `@sync/travel-plan-contracts` | `sync-app-backend/packages/travel-plan-contracts/` | `types/travelPlan.ts` |
+| `@sync/travel-guide-contracts` | `sync-app-backend/packages/travel-guide-contracts/` | `types/travelGuide.ts` |
+| `@sync/notification-contracts` | `sync-app-backend/packages/notification-contracts/` | `types/notification.ts` |
+| `@sync/partner-contracts` | `sync-app-backend/packages/partner-contracts/` | `types/partner.ts` |
+| `@sync/itinerary-contracts` | `sync-app-backend/packages/itinerary-contracts/` | `types/itinerary.ts` |
+| `@sync/festival-plan-contracts` | `sync-app-backend/packages/festival-plan-contracts/` | `types/festivalPlan.ts` |
 
 ### Chat 契约
 
 `ConversationState`、`AiStreamEvent`、`ChatMessage`、推荐卡片类型：
 
-- 后端真源：`sync-app-backend/src/shared/chat/`（`index.ts` 统一导出）
-- 前端：`import … from '@sync/chat-contracts'`（`conversationState.ts` / `aiChat.ts` 仅 re-export）
+- 后端真源：`sync-app-backend/packages/chat-contracts/`（`index.ts` 统一导出）
+- 前端：`import … from '@sync/chat-contracts'`（`types/aiChat.ts` 等仅 re-export）
 - 契约测试（`sync-app-backend/test/contract/`）：
   - `chat-conversation-state.contract.spec.ts` — `ConversationState` 各 flow
   - `chat-ai-stream-event.contract.spec.ts` — `AiStreamEvent` 各帧类型
-  - `chat-frontend-reexports.contract.spec.ts` — 前端仅 re-export（需同级 `sync-app` 目录，否则 skip）
+  - `chat-frontend-reexports.contract.spec.ts` — 前端仅 re-export + workspace 包导出
 
 ## 身份命名对照
 
@@ -127,7 +130,7 @@ REST/WS 发请求用 `getAuthHeaders()` / `buildAiChatWsSendActor()`；勿与后
 ```text
 pages / components  →  hooks/sync  →  api/sync  →  apiClient
                                     ↘ requestContext → session / authStorage
-types/conversationState  →  @sync/chat-contracts  →  sync-app-backend/shared/chat
+types/aiChat.ts  →  @sync/chat-contracts  →  sync-app-backend/packages/chat-contracts
 ```
 
 `hooks/sync` **不得** import `pages/**`。

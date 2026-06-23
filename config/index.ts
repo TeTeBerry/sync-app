@@ -1,34 +1,26 @@
 import path from 'node:path';
+import { createRequire } from 'node:module';
 import { defineConfig } from '@tarojs/cli';
 import { h5Config } from './h5.config';
 
-const chatContractsPath = path.resolve(
-  __dirname,
-  '../../sync-app-backend/src/shared/chat/index.ts',
-);
-const travelPlanContractsPath = path.resolve(
-  __dirname,
-  '../../sync-app-backend/src/shared/travel-plan/index.ts',
-);
-const travelGuideContractsPath = path.resolve(
-  __dirname,
-  '../../sync-app-backend/src/shared/travel-guide/index.ts',
-);
-const partnerContractsPath = path.resolve(
-  __dirname,
-  '../../sync-app-backend/src/shared/partner/index.ts',
-);
-const itineraryContractsPath = path.resolve(
-  __dirname,
-  '../../sync-app-backend/src/shared/itinerary/index.ts',
-);
-const festivalPlanContractsPath = path.resolve(
-  __dirname,
-  '../../sync-app-backend/src/shared/festival-plan/index.ts',
-);
+const require = createRequire(import.meta.url);
+
+function resolveContractEntry(name: string): string {
+  return require.resolve(name);
+}
+
+const activityContractsPath = resolveContractEntry('@sync/activity-contracts');
+const chatContractsPath = resolveContractEntry('@sync/chat-contracts');
+const travelPlanContractsPath = resolveContractEntry('@sync/travel-plan-contracts');
+const profileContractsPath = resolveContractEntry('@sync/profile-contracts');
+const travelGuideContractsPath = resolveContractEntry('@sync/travel-guide-contracts');
+const notificationContractsPath = resolveContractEntry('@sync/notification-contracts');
+const partnerContractsPath = resolveContractEntry('@sync/partner-contracts');
+const itineraryContractsPath = resolveContractEntry('@sync/itinerary-contracts');
+const festivalPlanContractsPath = resolveContractEntry('@sync/festival-plan-contracts');
 const srcPath = path.resolve(__dirname, '../src');
-/** @sync/*-contracts aliases point here; must be babel-included for weapp/h5. */
-const backendSharedPath = path.resolve(__dirname, '../../sync-app-backend/src/shared');
+/** Workspace @sync/*-contracts packages; must be babel-included for weapp/h5. */
+const contractPackagesPath = path.resolve(__dirname, '../node_modules/@sync');
 
 /**
  * Primary target: WeChat mini program (weapp). Design draft: 375px logical width.
@@ -45,9 +37,12 @@ if (process.env.TARO_ENV === 'weapp') {
 // https://docs.taro.zone/docs/config-detail
 export default defineConfig({
   alias: {
+    '@sync/activity-contracts': activityContractsPath,
     '@sync/chat-contracts': chatContractsPath,
     '@sync/travel-plan-contracts': travelPlanContractsPath,
+    '@sync/profile-contracts': profileContractsPath,
     '@sync/travel-guide-contracts': travelGuideContractsPath,
+    '@sync/notification-contracts': notificationContractsPath,
     '@sync/partner-contracts': partnerContractsPath,
     '@sync/itinerary-contracts': itineraryContractsPath,
     '@sync/festival-plan-contracts': festivalPlanContractsPath,
@@ -79,7 +74,7 @@ export default defineConfig({
   framework: 'react',
   mini: {
     compile: {
-      include: [backendSharedPath],
+      include: [contractPackagesPath],
     },
     // @ts-expect-error outputRoot is valid in Taro weapp build
     outputRoot: 'dist-weapp',

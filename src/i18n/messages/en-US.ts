@@ -838,6 +838,18 @@ export const enUS: MessageTree = {
   },
   itinerary: {
     title: 'My festival schedule',
+    banner: {
+      titleWithDjs: 'Built your schedule from {{count}} selected DJs',
+      titleDefault: 'Your festival schedule is ready',
+      coverDays: 'Covers {{days}}',
+    },
+    selectDjFirstTitle: 'Select DJs first',
+    selectDjFirstMessage:
+      'Pick at least one DJ to generate your personal festival schedule.',
+    scheduleUnpublishedModalTitle: 'Schedule not published',
+    scheduleUnpublishedModalMessage:
+      'The official timetable is not out yet. Browse the lineup and pre-select DJs while you wait.',
+    generateFailed: 'Could not generate schedule. Please try again.',
     step1Title: 'Step 1: Choose your favorite DJs',
     step1Badge: '{{count}} selected',
     stageFilter: 'Stage filter',

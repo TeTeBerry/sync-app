@@ -32,7 +32,7 @@ import { formatBuddyPreferencesSummary } from '../../constants/buddyPreferences'
 import { deriveInterestTag } from './utils';
 import { applyPersonalityTestIdentity } from '../../utils/displayUserIdentity';
 import { restorePersonalityTestResultFromServer } from '@/domains/personality-test/utils/personalityTestStorage';
-import { t } from '@/i18n';
+import { useT } from '@/hooks/useI18n';
 import { usePersonalityTestResult } from '../../hooks/usePersonalityTestResult';
 import { useStaleBackgroundRefetch } from '../../hooks/useStaleBackgroundRefetch';
 import { getResolvedAuthUserId } from '../../utils/authStorage';
@@ -46,6 +46,7 @@ export type UseProfilePageOptions = {
 };
 
 export function useProfilePage({ confirm }: UseProfilePageOptions) {
+  const t = useT();
   const notificationsEnabled = useProfilePageStore(
     (state) => state.notificationsEnabled,
   );
@@ -178,7 +179,7 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
     await logout();
     refreshAuthSession();
     void Taro.showToast({ title: t('profile.logout.done'), icon: 'success' });
-  }, [confirm, refreshAuthSession]);
+  }, [confirm, refreshAuthSession, t]);
 
   const buddyPreferencesSummary = formatBuddyPreferencesSummary(
     currentUserQuery.data ?? null,

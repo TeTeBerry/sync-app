@@ -51,6 +51,15 @@
     ]
   },
   "dependencies": {
+    "@sync/activity-contracts": "workspace:*",
+    "@sync/chat-contracts": "workspace:*",
+    "@sync/festival-plan-contracts": "workspace:*",
+    "@sync/itinerary-contracts": "workspace:*",
+    "@sync/notification-contracts": "workspace:*",
+    "@sync/partner-contracts": "workspace:*",
+    "@sync/profile-contracts": "workspace:*",
+    "@sync/travel-guide-contracts": "workspace:*",
+    "@sync/travel-plan-contracts": "workspace:*",
     "@babel/runtime": "^7.27.6",
     "@tarojs/components": "4.2.0",
     "@tarojs/helper": "4.2.0",

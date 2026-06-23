@@ -30,11 +30,11 @@
 | 7 | US-ARCH-06 | 拆分 `useEventDetailPage` | P1 | M | FE | ✅ |
 | 8 | US-ARCH-07 | 拆分 `itinerary-schedule.service` | P1 | M | BE | ✅ |
 | 9 | US-ARCH-08 | 拆分 `travel-guide-generation.service` | P1 | M | BE | ✅ |
-| 10 | US-ARCH-09 | 静态 seed / Hot Path 数据外置 | P1 | S | BE | 🔲 |
-| 11 | US-ARCH-10 | 打破 `ActivityModule` ↔ `ItineraryModule` 循环依赖 | P2 | M | BE | 🔲 |
-| 12 | US-ARCH-11 | Monorepo + `@sync/contracts` 正式包 | P2 | L | FULL | 🔲 |
-| 13 | US-ARCH-12 | 共享契约：`activity` + `notification` + `profile` | P2 | L | FULL | 🔲 |
-| 14 | US-ARCH-13 | Controller 路由风格统一 | P2 | S | BE | 🔲 |
+| 10 | US-ARCH-09 | 静态 seed / Hot Path 数据外置 | P1 | S | BE | ✅ |
+| 11 | US-ARCH-10 | 打破 `ActivityModule` ↔ `ItineraryModule` 循环依赖 | P2 | M | BE | ✅ |
+| 12 | US-ARCH-11 | Monorepo + `@sync/contracts` 正式包 | P2 | L | FULL | ✅ |
+| 13 | US-ARCH-12 | 共享契约：`activity` + `notification` + `profile` | P2 | L | FULL | ✅ |
+| 14 | US-ARCH-13 | Controller 路由风格统一 | P2 | S | BE | ✅ |
 | 15 | US-ARCH-14 | AI 模块 port 化（对齐 Partner 模式） | P2 | L | BE | 🔲 |
 | 16 | US-ARCH-15 | 评估 TanStack Query 迁移 | P3 | M | FE | ⏸ |
 | 17 | US-ARCH-16 | OpenAPI / JSON Schema | P3 | M | BE | ⏸ |
@@ -62,11 +62,11 @@
 | US-ARCH-06 | 拆分 useEventDetailPage | P1 | ✅ |
 | US-ARCH-07 | 拆分 itinerary-schedule | P1 | ✅ |
 | US-ARCH-08 | 拆分 travel-guide-generation | P1 | ✅ |
-| US-ARCH-09 | 静态数据外置 | P1 | 🔲 |
-| US-ARCH-10 | 打破 Activity↔Itinerary 循环 | P2 | 🔲 |
-| US-ARCH-11 | Monorepo contracts 包 | P2 | 🔲 |
-| US-ARCH-12 | 契约扩展 activity/notification | P2 | 🔲 |
-| US-ARCH-13 | 路由风格统一 | P2 | 🔲 |
+| US-ARCH-09 | 静态数据外置 | P1 | ✅ |
+| US-ARCH-10 | 打破 Activity↔Itinerary 循环 | P2 | ✅ |
+| US-ARCH-11 | Monorepo contracts 包 | P2 | ✅ |
+| US-ARCH-12 | 契约扩展 activity/notification | P2 | ✅ |
+| US-ARCH-13 | 路由风格统一 | P2 | ✅ |
 | US-ARCH-14 | AI port 化 | P2 | 🔲 |
 | US-ARCH-15 | TanStack Query 评估 | P3 | ⏸ |
 | US-ARCH-16 | OpenAPI | P3 | ⏸ |
@@ -376,7 +376,7 @@
 
 ---
 
-### US-ARCH-09 · 静态 seed / Hot Path 数据外置 P1 · S · BE · 🔲
+### US-ARCH-09 · 静态 seed / Hot Path 数据外置 P1 · S · BE · ✅
 
 **Story**  
 作为后端开发，我希望大块静态 POI/场馆数据不在 `src/modules` 业务目录里，以便 IDE 性能与 code review 可聚焦逻辑。
@@ -398,7 +398,7 @@
 
 ## Epic E · 模块边界与依赖（P2）
 
-### US-ARCH-10 · 打破 `ActivityModule` ↔ `ItineraryModule` 循环依赖 P2 · M · BE · 🔲
+### US-ARCH-10 · 打破 `ActivityModule` ↔ `ItineraryModule` 循环依赖 P2 · M · BE · ✅
 
 **Story**  
 作为后端开发，我希望活动查询与行程模块无 `forwardRef` 循环，以便新功能依赖方向单一。
@@ -422,7 +422,7 @@
 
 ---
 
-### US-ARCH-13 · Controller 路由风格统一 P2 · S · BE · 🔲
+### US-ARCH-13 · Controller 路由风格统一 P2 · S · BE · ✅
 
 **Story**  
 作为全栈开发，我希望活动域 REST 路径风格一致，以便查 API 文档和写 `api/sync/*` 时不猜 controller。
@@ -432,9 +432,9 @@
 
 **验收标准**
 
-- [ ] `TravelGuideController` 改为 `@Controller('activities/:legacyId/travel-guide')`（或归入 `ActivityExperience` 子路由文档约定）
-- [ ] 路径与 [API.md](./API.md) 一致；**无 breaking change**（或版本说明 + 前端同步）
-- [ ] `smoke:api` 通过
+- [x] `TravelGuideController` 改为 `@Controller('activities/:legacyId/travel-guide')`（或归入 `ActivityExperience` 子路由文档约定）
+- [x] 路径与 [API.md](./API.md) 一致；**无 breaking change**（或版本说明 + 前端同步）
+- [x] `smoke:api` 通过
 
 **技术提示**
 
@@ -473,7 +473,7 @@
 
 ## Epic F · Monorepo 与契约扩展（P2）
 
-### US-ARCH-11 · Monorepo + `@sync/contracts` 正式包 P2 · L · FULL · 🔲
+### US-ARCH-11 · Monorepo + `@sync/contracts` 正式包 P2 · L · FULL · ✅
 
 **Story**  
 作为团队，我希望共享契约不依赖「同级目录 tsconfig alias」，以便 CI 分仓、新人 clone 单个 repo 也能 typecheck。
@@ -504,20 +504,20 @@
 
 ---
 
-### US-ARCH-12 · 共享契约：`activity` + `notification` + `profile` P2 · L · FULL · 🔲
+### US-ARCH-12 · 共享契约：`activity` + `notification` + `profile` P2 · L · FULL · ✅
 
 **Story**  
 作为全栈开发，我希望 `types/backend.ts` 不再堆积手写 DTO，剩余 API 类型逐步迁入 shared。
 
 **验收标准**
 
-- [ ] 分 3 个小 PR（或 3 个子 Story）：
+- [x] 分 3 个小 PR（或 3 个子 Story）：
   - `shared/activity/` — `BackendActivity`、registration 等
   - `shared/notification/` — `AppNotification`、meta
   - `shared/profile/` — `ProfileSummary`、`ProfilePostItem` 等
-- [ ] `types/backend.ts` 仅保留：`ApiResponse<T>`、少量 BFF 聚合、re-export
-- [ ] 每域 1 个 contract test
-- [ ] [API.md](./API.md) 交叉引用 shared 类型名
+- [x] `types/backend.ts` 仅保留：`ApiResponse<T>`、少量 BFF 聚合、re-export
+- [x] 每域 1 个 contract test
+- [x] [API.md](./API.md) 交叉引用 shared 类型名
 
 **依赖**：US-ARCH-11（建议在 monorepo 落地后做，避免迁两次）
 
@@ -617,7 +617,7 @@
 | 包体门禁 | [BUNDLE-SIZE.md](./BUNDLE-SIZE.md) | verify:bundle、size:weapp |
 | 后端模块图 | `sync-app-backend/docs/ARCHITECTURE.md` | ActivityExperience、AiTurnPipeline |
 | Partner 分层范例 | `modules/partner/README.md` | ports + application |
-| 已有 shared 契约 | `shared/chat`、`travel-plan`、`itinerary`、`festival-plan` | 迁移模板 |
+| 已有 shared 契约 | `shared/chat`、`travel-plan`、`itinerary`、`festival-plan`、`activity`、`notification`、`profile` | 迁移模板 |
 | 离线观演资料包 | **US-ARCH-19** · [DATA-LAYER.md §缓存分层](./DATA-LAYER.md#缓存分层) | 阵容/时间表/行程优先；招募帖不持久化 |
 
 ## 附录 B · PR 命名建议
@@ -635,6 +635,7 @@ arch(be): remove post migrations from onModuleInit [US-ARCH-03]
 |------|------|
 | 2026-06-23 | 初版：18 条 Story，P0～P3 排序 |
 | 2026-06-23 | **+US-ARCH-19** 观演资料包离线缓存；**US-ARCH-05** 扩为四层缓存分层；产品优先级：阵容/时间表 > 招募帖 |
+| 2026-06-24 | **US-ARCH-12** activity/notification/profile 契约包；**US-ARCH-13** TravelGuide 路由风格统一 |
 
 ---
 
