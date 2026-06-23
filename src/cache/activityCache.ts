@@ -5,7 +5,10 @@ import {
   setCacheData,
   setCacheDataByKey,
 } from '../hooks/useApiQuery';
-import { persistHomeSummary, persistProfileSummary } from '../utils/homeCacheStorage';
+import {
+  afterHomeSummaryCommitted,
+  persistProfileSummary,
+} from '../utils/homeCacheStorage';
 import type { BackendActivity, HomeSummary, ProfileSummary } from '../types/backend';
 
 export type ActivitySelectionPatch = {
@@ -70,6 +73,7 @@ function patchActivityDetailCaches(legacyId: number, attendees?: number): void {
     if (!activity) return;
     setCacheDataByKey(key, { ...activity, attendees });
   });
+  broadcastCacheData(['activities', 'detail', legacyId]);
 }
 
 /** Sync activity selection across home + activity list caches without a home refetch. */
@@ -90,7 +94,7 @@ export function patchActivitySelectionInCaches(patch: ActivitySelectionPatch): v
 
   const summary = getCacheData<HomeSummary>(['home', 'summary']);
   if (summary) {
-    persistHomeSummary(summary);
+    afterHomeSummaryCommitted(summary);
   }
 }
 

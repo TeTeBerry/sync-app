@@ -6,7 +6,7 @@ import {
   buildEventDetailShareFallback,
   buildEventDetailShareTimeline,
   type EventDetailShareActivity,
-} from '@/domains/activity-share/utils/eventDetailWechatShare.util';
+} from '@/domains/activity-share';
 import { t } from '@/i18n/translate';
 
 type ActivityQuery = ReturnType<typeof useActivityDetailQuery>;

@@ -5,17 +5,13 @@ import { isWeappCloudRunTransportEnabled } from '../constants/cloud';
 import { loadPersonalityTestCatalog } from '../domains/personality-test/personalityTestCatalog';
 import { getCacheData, prefetchToCache } from '../hooks/useApiQuery';
 import {
-  seedActivityDetailsFromHomeSummary,
-  seedActivityDetailsFromList,
-} from './activityDetailCache';
+  afterActivitiesListCommitted,
+  afterHomeSummaryCommitted,
+  persistProfileSummary,
+} from './homeCacheStorage';
 import { withCatalogActivities, withCatalogHomeSummary } from './activityCatalog';
 import { apiGet } from './apiClient';
 import { isLoggedIn } from './authStorage';
-import {
-  persistActivities,
-  persistHomeSummary,
-  persistProfileSummary,
-} from './homeCacheStorage';
 
 const LAUNCH_PREFETCH_ATTEMPTS = 3;
 const LAUNCH_PREFETCH_RETRY_MS = 400;
@@ -69,8 +65,7 @@ async function prefetchHomeSummaryIfMissing(): Promise<void> {
   }
   await prefetchQueryWithRetry(['home', 'summary'], async () => {
     const result = withCatalogHomeSummary(await fetchHomeSummary());
-    persistHomeSummary(result);
-    seedActivityDetailsFromHomeSummary(result);
+    afterHomeSummaryCommitted(result);
     return result;
   });
 }
@@ -81,8 +76,7 @@ async function prefetchActivitiesIfMissing(): Promise<void> {
   }
   await prefetchQueryWithRetry(['activities'], async () => {
     const activities = withCatalogActivities(await fetchActivities());
-    persistActivities(activities);
-    seedActivityDetailsFromList(activities);
+    afterActivitiesListCommitted(activities);
     return activities;
   });
 }

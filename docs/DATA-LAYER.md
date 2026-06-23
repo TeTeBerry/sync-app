@@ -134,7 +134,7 @@ types/conversationState  →  @sync/chat-contracts  →  sync-app-backend/shared
 
 ## 缓存分层
 
-> **产品优先级（2026-06）**：现场弱网时，**阵容 / 演出时间表 / 专属行程** 比 **公开招募帖** 更值得持久化离线。实现 Story：**US-ARCH-19**；职责收口：**US-ARCH-05**。
+> **产品优先级（2026-06）**：现场弱网时，**阵容 / 演出时间表 / 专属行程** 比 **公开招募帖** 更值得持久化离线。实现：**US-ARCH-19** `activityPerformanceBundleStorage`；职责收口：**US-ARCH-05**。
 
 ### 四层职责
 
@@ -147,7 +147,21 @@ types/conversationState  →  @sync/chat-contracts  →  sync-app-backend/shared
 
 `staleTime` 常量：[`constants/queryCache.ts`](../src/constants/queryCache.ts)（90～120s，减少弱网重复请求，**不**等于离线包）。
 
-### 层 3 现网与规划
+### 写入职责（谁写哪一层）
+
+| 场景 | 内存 Layer 1 | Layer 2 seed | Layer 3 storage |
+|------|--------------|--------------|-----------------|
+| `useHomeSummary` / launch prefetch 拉取成功 | `useApiQuery` queryFn 返回值自动写入 | `afterHomeSummaryCommitted` → `seedActivityDetailsFromHomeSummary` | 同上 helper → `persistHomeSummary` |
+| `useActivitiesQuery` / launch prefetch | `useApiQuery` 自动写入 | `afterActivitiesListCommitted` → `seedActivityDetailsFromList` | `persistActivities` |
+| 冷启动 | `hydrateAppCachesFromStorage` → `setCacheDataByKey` | hydrate 时同步 seed 详情 | 读 Taro envelope |
+| 乐观选活动 | `patchActivitySelectionInCaches` → `setCacheData` | — | `afterHomeSummaryCommitted` |
+| 列表卡片 / `goEventDetail` 点击 | — | `seedActivityDetailFromEventCard` 等 | — |
+
+**单点规则**：fetch 后的 storage + detail seed 只通过 `afterHomeSummaryCommitted` / `afterActivitiesListCommitted`；勿在 hook queryFn 与 `appLaunchPrefetch` 各写一遍。
+
+**招募帖**：仅 Layer 1（`useApiInfiniteQuery`）+ Layer 2 可选短 TTL（`eventPostsPageCache`）；**默认不写入** Layer 3。无网时组队区展示「需联网查看最新公开招募」。
+
+### 层 3 现网
 
 | 数据 | 模块 | TTL / 说明 |
 |------|------|------------|
@@ -156,14 +170,14 @@ types/conversationState  →  @sync/chat-contracts  →  sync-app-backend/shared
 | 个人摘要 | `homeCacheStorage` | 24h · 登出清除 |
 | 出行攻略 | `travelGuideDetailStorage` | 按 guideId / 活动最新索引 |
 | 人格测试结果 | `personalityTestStorage` | 长期 · 拉服务端失败 fallback |
-| **观演资料包（规划）** | **US-ARCH-19** `activityPerformanceBundleStorage` | 按 `activityLegacyId` · 阵容 + timetable + 专属行程 + 资讯 |
+| 观演资料包 | `activityPerformanceBundleStorage` | 7d · LRU 5 场 · `hydrateActivityPerformanceBundlesFromStorage` |
 
-### 观演资料包（US-ARCH-19 · 按活动）
+### 观演资料包（按活动）
 
-**写入时机**：Wi‑Fi 下用户打开已选活动详情，且阵容/行程 API 成功。  
-**包内优先级**：专属行程 → 演出时间表 → 阵容网格 → 活动资讯 → 已有攻略。  
+**写入时机**：Wi‑Fi 下（`networkPreference.isWifiPreferredForPrefetch`）用户打开活动详情 / 阵容 / 专属行程，且对应 API 成功 → `useActivityPerformanceBundleWriter` → `commitActivityPerformanceBundle`。  
+**包内优先级**：专属行程 → 演出时间表 → 阵容网格 → 活动资讯。  
 **明确不写入**：招募帖列表、评论、通知、AI 找队结果（时效 + 产品权重低）。  
-**无网降级**：资料包命中则阵容/行程只读；招募区文案「需联网查看最新公开招募」。
+**无网降级**：资料包命中则阵容/行程只读 + `PerformanceBundleStaleBanner`；招募区文案「公开招募需联网查看」。
 
 ### 微信小程序代码包（平台层）
 
@@ -175,6 +189,8 @@ types/conversationState  →  @sync/chat-contracts  →  sync-app-backend/shared
 
 ### Invalidate 约定
 
-- `invalidateCache(['activities'])` 应级联考虑 `activityDetailCache` seed 与（未来）资料包 `savedAt`
-- 登出：`clearHomeCachesOnLogout` · 不清匿名人格缓存策略见 `personalityTestStorage`
+- **`invalidateActivities()`**（[`queryInvalidation.ts`](../src/utils/queryInvalidation.ts)）→ `invalidateCache(['activities'])`：清除 `activities|*` 与 `activities|detail|*` prefetch seed；已挂载 `useActivityDetailQuery` 收到 invalidation 后 background refetch
+- `activityDetailCache` seed 后调用 `broadcastCacheData`，已挂载 detail hook 可同步内存（对齐 `eventPostsPageCache`）
+- `invalidateCache(['activities'])` 级联考虑观演资料包：内存 prefetch 清除；Layer 3 storage **不**随 `invalidateActivities()` 清除，靠有网 refetch 后 `commitActivityPerformanceBundle` 覆盖
+- 登出：`clearHomeCachesOnLogout` → 清 storage + `invalidateHome()` · 不清匿名人格缓存策略见 `personalityTestStorage`
 - 阵容官宣推送落地：应 bump 对应活动资料包版本或 `clear(activityLegacyId)`

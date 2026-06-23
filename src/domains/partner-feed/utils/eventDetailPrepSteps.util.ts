@@ -3,10 +3,7 @@ import {
   getTravelGuideTitle,
   getViewTravelGuideCta,
 } from '@/constants/aiCtaLabels';
-import type {
-  FestivalPlanChecklist,
-  FestivalPlanTask,
-} from '@/domains/festival-plan/buildFestivalPlanChecklist';
+import type { FestivalPlanChecklist, FestivalPlanTask } from '@/domains/festival-plan';
 
 export type EventDetailPrepStep = {
   key: string;

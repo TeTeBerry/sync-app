@@ -7,6 +7,8 @@ import {
   useSavedItineraryQuery,
 } from '../../../hooks/useItineraryApi';
 import { useActivityDetailQuery } from '../../../hooks/sync/activities';
+import { useActivityPerformanceBundleOffline } from '@/hooks/useActivityPerformanceBundleOffline';
+import { useActivityPerformanceBundleWriter } from '@/hooks/useActivityPerformanceBundleWriter';
 import { useItineraryStore } from '@/domains/performance-itinerary/store';
 import { normalizeItineraryDaysForSave } from '@/types/itinerary';
 import { useStackPageMainHeight } from '../../../hooks/useTabPageMainHeight';
@@ -92,6 +94,24 @@ export function useExclusiveItineraryPage() {
       : undefined,
   );
   const savedQuery = useSavedItineraryQuery(apiEnabled ? activityLegacyId : null);
+  const queryFailed =
+    scheduleQuery.isError || activityQuery.isError || savedQuery.isError;
+  const offline = useActivityPerformanceBundleOffline(activityLegacyId, {
+    queryFailed,
+  });
+  const scheduleData = scheduleQuery.data ?? offline.bundle?.schedule;
+
+  useActivityPerformanceBundleWriter(
+    apiEnabled && Number.isFinite(activityLegacyId) && activityLegacyId > 0
+      ? activityLegacyId
+      : undefined,
+    {
+      activity: activityQuery.data,
+      schedule: scheduleQuery.data,
+      savedItinerary: savedQuery.data,
+    },
+  );
+
   const { generate, save } = useItineraryMutations(activityLegacyId ?? 0);
   const setFromGenerateResult = useItineraryStore((s) => s.setFromGenerateResult);
 
@@ -120,14 +140,17 @@ export function useExclusiveItineraryPage() {
   ]);
 
   const djCatalog = useMemo(
-    (): ExclusiveItineraryDj[] =>
-      (scheduleQuery.data?.djs ?? []).map(mapItineraryDjFromApi),
-    [scheduleQuery.data?.djs],
+    (): ExclusiveItineraryDj[] => (scheduleData?.djs ?? []).map(mapItineraryDjFromApi),
+    [scheduleData?.djs],
   );
 
-  const djListLoading = scheduleQuery.isLoading && djCatalog.length === 0;
+  const djListLoading =
+    scheduleQuery.isLoading && djCatalog.length === 0 && !offline.isOfflineBundle;
   const djListError =
-    scheduleQuery.isError && !scheduleQuery.isLoading && djCatalog.length === 0;
+    scheduleQuery.isError &&
+    !scheduleQuery.isLoading &&
+    djCatalog.length === 0 &&
+    !offline.isOfflineBundle;
 
   const stageOptions = useMemo(() => buildStageFilterOptions(djCatalog), [djCatalog]);
 
@@ -179,11 +202,8 @@ export function useExclusiveItineraryPage() {
   }, [genreFilter, genreOptions]);
 
   const conflicts: ItineraryConflict[] = useMemo(() => {
-    return detectItineraryConflicts(
-      scheduleQuery.data?.performances ?? [],
-      selectedIds,
-    );
-  }, [scheduleQuery.data?.performances, selectedIds]);
+    return detectItineraryConflicts(scheduleData?.performances ?? [], selectedIds);
+  }, [scheduleData?.performances, selectedIds]);
 
   const footerChromePx = useMemo(() => {
     try {
@@ -330,8 +350,10 @@ export function useExclusiveItineraryPage() {
 
   const showConflictBanner = !conflictDismissed && conflicts.length > 0;
 
-  const lineupPending = activityQuery.data?.lineupPublished === false;
-  const activityTitle = activityQuery.data?.name ?? '';
+  const lineupPending =
+    (activityQuery.data ?? offline.bundle?.activity)?.lineupPublished === false;
+  const activityTitle =
+    activityQuery.data?.name ?? offline.bundle?.activity?.name ?? '';
 
   return {
     activityLegacyId,
@@ -369,5 +391,7 @@ export function useExclusiveItineraryPage() {
     skipDjSelectionPending,
     refetchDjList: scheduleQuery.refetch,
     scrollIntoViewId,
+    isOfflineBundle: offline.isOfflineBundle,
+    bundleSavedAt: offline.bundleSavedAt,
   };
 }

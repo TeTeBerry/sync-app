@@ -33,7 +33,7 @@ import { EventsPageHeader } from './components/EventsPageHeader';
 import type { EventsViewTab } from './components/EventsViewTabs';
 import { EventsActivityCalendar } from './components/EventsActivityCalendar';
 import { EventsActivityArtistsTab } from './components/EventsActivityArtistsTab';
-import { ArtistProfileSheet } from '../../domains/lineup-artist/components/ArtistProfileSheet';
+import { ArtistProfileSheet } from '@/domains/lineup-artist';
 import { LoginInterceptHost } from '../../components/auth/LoginInterceptHost';
 import { EventsActivityList } from './components/EventsActivityList';
 import { sortAllEventsByDate } from './utils/festivalEvents';

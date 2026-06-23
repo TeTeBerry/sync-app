@@ -1,7 +1,9 @@
 import './utils/abortControllerPolyfill';
 import { hydrateAppCachesFromStorage } from './utils/homeCacheStorage';
+import { hydrateActivityPerformanceBundlesFromStorage } from './utils/activityPerformanceBundleStorage';
 
 hydrateAppCachesFromStorage();
+hydrateActivityPerformanceBundlesFromStorage();
 
 import './app.scss';
 import { useLaunch } from '@tarojs/taro';

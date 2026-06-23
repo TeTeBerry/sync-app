@@ -3,10 +3,12 @@ import type { FC } from 'react';
 import { useCallback, useEffect, useState } from 'react';
 import { useDidShow } from '@tarojs/taro';
 import { AudioWaveform, ChevronRight } from '../../../components/icons';
-import { resolvePersonalityTestSoulDjName } from '@/domains/personality-test';
+import {
+  prefetchPersonalityTestAudioMedia,
+  resolvePersonalityTestSoulDjName,
+} from '@/domains/personality-test';
 import { useAuthSession } from '../../../hooks/useAuthSession';
 import { goPersonalityTest } from '../../../utils/route';
-import { prefetchPersonalityTestAudioMedia } from '@/domains/personality-test/utils/personalityAudioPrefetch';
 import { Text, View } from '@tarojs/components';
 import { useT } from '@/hooks/useI18n';
 

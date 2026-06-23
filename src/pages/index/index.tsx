@@ -45,7 +45,7 @@ import {
   resolveFeaturedIndexAfterListChange,
 } from './utils/homeFeaturedIndex';
 import { resolveHomeFindTeamActivityId } from './utils/resolveHomeActivityId';
-import { useHomeFestivalPlanNavigation } from '@/domains/festival-plan/hooks/useHomeFestivalPlanNavigation';
+import { useHomeFestivalPlanNavigation } from '@/domains/festival-plan';
 import { getActiveActivityLegacyId } from '@/domains/activity-scope';
 import { useNavBarInsets } from '../../hooks/useNavBarInsets';
 import { useEndRouteTransitionOnShow } from '../../hooks/useEndRouteTransitionOnShow';

@@ -101,11 +101,23 @@ export function persistHomeSummary(data: HomeSummary): void {
   writeEnvelope(SUMMARY_STORAGE_KEY, data);
 }
 
+/** After home summary is in globalCache — persist offline + seed detail prefetch. */
+export function afterHomeSummaryCommitted(summary: HomeSummary): void {
+  persistHomeSummary(summary);
+  seedActivityDetailsFromHomeSummary(summary);
+}
+
 export function persistActivities(data: BackendActivity[]): void {
   if (!isLiveApi() || !data.length) {
     return;
   }
   writeEnvelope(ACTIVITIES_STORAGE_KEY, data);
+}
+
+/** After activities list is in globalCache — persist offline + seed detail prefetch. */
+export function afterActivitiesListCommitted(activities: BackendActivity[]): void {
+  persistActivities(activities);
+  seedActivityDetailsFromList(activities);
 }
 
 export function persistProfileSummary(data: ProfileSummary): void {

@@ -15,10 +15,6 @@ import { isLoggedIn } from '../../utils/authStorage';
 import { subscribeAuthSessionChange } from '../../utils/authSession';
 import type { BackendActivity } from '../../types/backend';
 import {
-  seedActivityDetailsFromHomeSummary,
-  seedActivityDetailsFromList,
-} from '../../utils/activityDetailCache';
-import {
   STALE_ACTIVITIES_LIST_MS,
   STALE_ACTIVITY_DETAIL_MS,
   STALE_HOME_SUMMARY_MS,
@@ -37,7 +33,10 @@ import {
   withCatalogActivityImage,
   withCatalogHomeSummary,
 } from '../../utils/activityCatalog';
-import { persistHomeSummary, persistActivities } from '../../utils/homeCacheStorage';
+import {
+  afterActivitiesListCommitted,
+  afterHomeSummaryCommitted,
+} from '../../utils/homeCacheStorage';
 import {
   patchActivitySelectionInCaches,
   patchProfileSummaryOnSelection,
@@ -65,8 +64,7 @@ export function useActivitiesQuery(options?: QueryEnableOptions) {
     queryKey: ['activities'],
     queryFn: async () => {
       const activities = (await fetchActivities()).map(withCatalogActivityImage);
-      seedActivityDetailsFromList(activities);
-      persistActivities(activities);
+      afterActivitiesListCommitted(activities);
       return activities;
     },
     enabled,
@@ -159,8 +157,7 @@ export function useHomeSummary() {
     queryKey: ['home', 'summary'],
     queryFn: async () => {
       const result = withCatalogHomeSummary(await fetchHomeSummary());
-      persistHomeSummary(result);
-      seedActivityDetailsFromHomeSummary(result);
+      afterHomeSummaryCommitted(result);
       return result;
     },
     enabled: isLiveApi(),

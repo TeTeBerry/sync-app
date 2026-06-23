@@ -7,8 +7,7 @@ import {
   Sparkles,
 } from '../../../components/icons';
 import { EventDetailPrepActions } from './EventDetailPrepActions';
-import type { FestivalPlanChecklist } from '@/domains/festival-plan/buildFestivalPlanChecklist';
-import type { FestivalPlanTask } from '@/domains/festival-plan/buildFestivalPlanChecklist';
+import type { FestivalPlanChecklist, FestivalPlanTask } from '@/domains/festival-plan';
 import { Button, cn } from '../../../components/ui';
 import { Text, View } from '@tarojs/components';
 import { useT } from '@/hooks/useI18n';

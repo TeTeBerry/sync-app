@@ -2,6 +2,8 @@ import Taro, { useRouter } from '@tarojs/taro';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { isLiveApi } from '@/constants/api';
 import { useActivityDetailQuery } from '@/hooks/useSyncApi';
+import { useActivityPerformanceBundleOffline } from '@/hooks/useActivityPerformanceBundleOffline';
+import { useActivityPerformanceBundleWriter } from '@/hooks/useActivityPerformanceBundleWriter';
 import {
   useItineraryMutations,
   useItineraryScheduleQuery,
@@ -66,6 +68,23 @@ export function useMyItineraryPage() {
   const savedQuery = useSavedItineraryQuery(
     apiEnabled && Number.isFinite(activityLegacyId) ? activityLegacyId : null,
   );
+  const queryFailed =
+    scheduleQuery.isError || activityQuery.isError || savedQuery.isError;
+  const offline = useActivityPerformanceBundleOffline(activityLegacyId, {
+    queryFailed,
+  });
+
+  useActivityPerformanceBundleWriter(
+    apiEnabled && Number.isFinite(activityLegacyId) && activityLegacyId > 0
+      ? activityLegacyId
+      : undefined,
+    {
+      activity: activityQuery.data,
+      schedule: scheduleQuery.data,
+      savedItinerary: savedQuery.data,
+    },
+  );
+
   const { save } = useItineraryMutations(activityLegacyId ?? 0);
   const hydratedFromPendingRef = useRef(false);
   const initialPerformanceIntent =
@@ -124,11 +143,11 @@ export function useMyItineraryPage() {
       setPageKindResolved(true);
       return;
     }
-    if (savedQuery.isLoading) return;
+    if (savedQuery.isLoading && !offline.isOfflineBundle) return;
 
     setPageKindResolved(true);
 
-    const saved = savedQuery.data;
+    const saved = savedQuery.data ?? offline.bundle?.savedItinerary;
     if (!saved?.saved || !saved.days?.length) return;
 
     setPageKind('performance');
@@ -139,17 +158,29 @@ export function useMyItineraryPage() {
     if (saved.selectedDjIds?.length) {
       setSelectedDjIds(saved.selectedDjIds);
     }
-  }, [activityLegacyId, apiEnabled, savedQuery.data, savedQuery.isLoading]);
+  }, [
+    activityLegacyId,
+    apiEnabled,
+    offline.bundle?.savedItinerary,
+    offline.isOfflineBundle,
+    savedQuery.data,
+    savedQuery.isLoading,
+  ]);
 
   useEffect(() => {
     if (activityQuery.data?.name) {
       setEventMeta(activityQuery.data.name);
+    } else if (offline.bundle?.activity?.name) {
+      setEventMeta(offline.bundle.activity.name);
     }
-  }, [activityQuery.data?.name]);
+  }, [activityQuery.data?.name, offline.bundle?.activity?.name]);
 
   const djCatalog = useMemo(
-    (): DjNameEntry[] => (scheduleQuery.data?.djs ?? []).map(mapApiDjToNameEntry),
-    [scheduleQuery.data?.djs],
+    (): DjNameEntry[] =>
+      (scheduleQuery.data?.djs ?? offline.bundle?.schedule?.djs ?? []).map(
+        mapApiDjToNameEntry,
+      ),
+    [offline.bundle?.schedule?.djs, scheduleQuery.data?.djs],
   );
 
   const itineraryArtistNames = useMemo(
@@ -281,5 +312,7 @@ export function useMyItineraryPage() {
     handleReselect,
     handleSave,
     navFallback,
+    isOfflineBundle: offline.isOfflineBundle,
+    bundleSavedAt: offline.bundleSavedAt,
   };
 }

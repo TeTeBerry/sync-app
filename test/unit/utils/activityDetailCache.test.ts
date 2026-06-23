@@ -1,5 +1,6 @@
-import { describe, expect, it } from 'vitest';
-import { getCacheData } from '@/hooks/useApiQuery';
+import { describe, expect, it, vi } from 'vitest';
+import { getCacheData, onCacheDataUpdated } from '@/hooks/useApiQuery';
+import { invalidateActivities } from '@/utils/queryInvalidation';
 import {
   seedActivityDetailCache,
   seedActivityDetailFromEventCard,
@@ -91,5 +92,39 @@ describe('activityDetailCache', () => {
     ]);
     expect(cached?.name).toBe('After');
     expect(cached?.date).toBe('Tomorrow');
+  });
+
+  it('invalidateActivities clears prefetch seed for detail queries', () => {
+    seedActivityDetailFromEventCard({
+      id: '55',
+      title: 'Invalidate Fest',
+      date: 'Sat 1/1',
+      location: 'Shanghai',
+      distance: '',
+      image: '',
+      attendees: 0,
+      category: '',
+      hot: false,
+      going: false,
+    });
+    expect(getCacheData(['activities', 'detail', 55])).toBeDefined();
+
+    invalidateActivities();
+    expect(getCacheData(['activities', 'detail', 55])).toBeUndefined();
+  });
+
+  it('broadcasts cache updates when seeding detail cache', () => {
+    const listener = vi.fn();
+    const unsubscribe = onCacheDataUpdated('activities|detail|88', listener);
+
+    seedActivityDetailCache({
+      _id: '88',
+      legacyId: 88,
+      code: '88',
+      name: 'Broadcast Fest',
+    });
+
+    expect(listener).toHaveBeenCalled();
+    unsubscribe();
   });
 });

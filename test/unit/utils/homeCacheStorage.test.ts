@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import Taro from '@tarojs/taro';
 import {
   HOME_CACHE_MAX_AGE_MS,
+  afterHomeSummaryCommitted,
   hydrateAppCachesFromStorage,
   persistActivities,
   persistHomeSummary,
@@ -43,6 +44,7 @@ describe('homeCacheStorage', () => {
     vi.mocked(Taro.getStorageSync).mockReturnValue('');
     vi.mocked(Taro.setStorageSync).mockClear();
     invalidateCache(['home']);
+    invalidateCache(['activities']);
   });
 
   it('persists and hydrates home summary', () => {
@@ -90,5 +92,13 @@ describe('homeCacheStorage', () => {
 
     hydrateAppCachesFromStorage();
     expect(getCacheData<HomeSummary>(['home', 'summary'])).toBeUndefined();
+  });
+
+  it('afterHomeSummaryCommitted persists storage and seeds detail prefetch', () => {
+    afterHomeSummaryCommitted(mockSummary);
+    expect(Taro.setStorageSync).toHaveBeenCalled();
+    expect(getCacheData<{ name: string }>(['activities', 'detail', 1])?.name).toBe(
+      'Test Fest',
+    );
   });
 });

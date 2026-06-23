@@ -1,4 +1,9 @@
-import { setCacheData } from '../hooks/useApiQuery';
+/**
+ * Layer 2 prefetch seed — writes the same keys as `useActivityDetailQuery`
+ * (`['activities', 'detail', legacyId]`). Not a separate store; data lives in
+ * `useApiQuery` globalCache. Call `invalidateActivities()` to clear seeds.
+ */
+import { broadcastCacheData, setCacheData } from '../hooks/useApiQuery';
 import type { BackendActivity, HomeSummary } from '../types/backend';
 import type { EventCardUi, FeaturedEvent } from './apiMappers';
 import { parseActivityLegacyId } from './activityLegacyId';
@@ -46,6 +51,7 @@ export function seedActivityDetailCache(activity: BackendActivity): void {
     }
     return { ...prev, ...activity, legacyId };
   });
+  broadcastCacheData([...detailQueryKey(legacyId)]);
 }
 
 export function seedActivityDetailsFromList(activities: BackendActivity[]): void {

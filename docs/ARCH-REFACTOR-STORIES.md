@@ -24,12 +24,12 @@
 | 1 | US-ARCH-01 | 共享契约：`travel-guide` | P0 | M | FULL | ✅ |
 | 2 | US-ARCH-02 | 共享契约：`partner`（posts / comments） | P0 | M | FULL | ✅ |
 | 3 | US-ARCH-03 | 迁移脚本移出 `onModuleInit` | P0 | S | BE | ✅ |
-| 4 | US-ARCH-04 | `domains/` barrel 补齐 + 主包 import 规范 | P0 | S | FE | 🔲 |
-| 5 | US-ARCH-05 | 缓存分层职责文档 + 去双写 | P0 | S | FE | 🔲 |
-| 6 | US-ARCH-19 | 观演资料包离线缓存（阵容/时间表优先） | P1 | M | FE | 🔲 |
-| 7 | US-ARCH-06 | 拆分 `useEventDetailPage` | P1 | M | FE | 🔲 |
-| 8 | US-ARCH-07 | 拆分 `itinerary-schedule.service` | P1 | M | BE | 🔲 |
-| 9 | US-ARCH-08 | 拆分 `travel-guide-generation.service` | P1 | M | BE | 🔲 |
+| 4 | US-ARCH-04 | `domains/` barrel 补齐 + 主包 import 规范 | P0 | S | FE | ✅ |
+| 5 | US-ARCH-05 | 缓存分层职责文档 + 去双写 | P0 | S | FE | ✅ |
+| 6 | US-ARCH-19 | 观演资料包离线缓存（阵容/时间表优先） | P1 | M | FE | ✅ |
+| 7 | US-ARCH-06 | 拆分 `useEventDetailPage` | P1 | M | FE | ✅ |
+| 8 | US-ARCH-07 | 拆分 `itinerary-schedule.service` | P1 | M | BE | ✅ |
+| 9 | US-ARCH-08 | 拆分 `travel-guide-generation.service` | P1 | M | BE | ✅ |
 | 10 | US-ARCH-09 | 静态 seed / Hot Path 数据外置 | P1 | S | BE | 🔲 |
 | 11 | US-ARCH-10 | 打破 `ActivityModule` ↔ `ItineraryModule` 循环依赖 | P2 | M | BE | 🔲 |
 | 12 | US-ARCH-11 | Monorepo + `@sync/contracts` 正式包 | P2 | L | FULL | 🔲 |
@@ -56,12 +56,12 @@
 | US-ARCH-01 | 共享契约：travel-guide | P0 | ✅ |
 | US-ARCH-02 | 共享契约：partner | P0 | ✅ |
 | US-ARCH-03 | 迁移移出 onModuleInit | P0 | ✅ |
-| US-ARCH-04 | domains barrel | P0 | 🔲 |
-| US-ARCH-05 | 缓存分层 + 去双写 | P0 | 🔲 |
-| US-ARCH-19 | 观演资料包离线缓存 | P1 | 🔲 |
-| US-ARCH-06 | 拆分 useEventDetailPage | P1 | 🔲 |
-| US-ARCH-07 | 拆分 itinerary-schedule | P1 | 🔲 |
-| US-ARCH-08 | 拆分 travel-guide-generation | P1 | 🔲 |
+| US-ARCH-04 | domains barrel | P0 | ✅ |
+| US-ARCH-05 | 缓存分层 + 去双写 | P0 | ✅ |
+| US-ARCH-19 | 观演资料包离线缓存 | P1 | ✅ |
+| US-ARCH-06 | 拆分 useEventDetailPage | P1 | ✅ |
+| US-ARCH-07 | 拆分 itinerary-schedule | P1 | ✅ |
+| US-ARCH-08 | 拆分 travel-guide-generation | P1 | ✅ |
 | US-ARCH-09 | 静态数据外置 | P1 | 🔲 |
 | US-ARCH-10 | 打破 Activity↔Itinerary 循环 | P2 | 🔲 |
 | US-ARCH-11 | Monorepo contracts 包 | P2 | 🔲 |
@@ -173,7 +173,7 @@
 
 ## Epic C · 前端域收敛（P0～P1）
 
-### US-ARCH-04 · `domains/` barrel 补齐 + 主包 import 规范 P0 · S · FE · 🔲
+### US-ARCH-04 · `domains/` barrel 补齐 + 主包 import 规范 P0 · S · FE · ✅
 
 **Story**  
 作为前端开发，我希望每个活动域有统一 barrel 出口，以便主包/分包 import 路径一致、避免 deep import。
@@ -184,10 +184,10 @@
 
 **验收标准**
 
-- [ ] 新增 `domains/festival-plan/index.ts`、`domains/lineup-artist/index.ts`（按需 `activity-share`）
-- [ ] 主包 `pages/index/*` 改为从 barrel import（如 `@/domains/festival-plan`）
-- [ ] [COMPONENT-ARCHITECTURE.md](./COMPONENT-ARCHITECTURE.md) 补充：**主包只允许** domain 的 hook/util/轻量组件，禁止 wallpaper/canvas/分包页面实现
-- [ ] `npm run verify:bundle` 仍通过
+- [x] 新增 `domains/festival-plan/index.ts`、`domains/lineup-artist/index.ts`（按需 `activity-share`）
+- [x] 主包 `pages/index/*` 改为从 barrel import（如 `@/domains/festival-plan`）
+- [x] [COMPONENT-ARCHITECTURE.md](./COMPONENT-ARCHITECTURE.md) 补充：**主包只允许** domain 的 hook/util/轻量组件，禁止 wallpaper/canvas/分包页面实现
+- [x] `npm run verify:bundle` 仍通过
 
 **技术提示**
 
@@ -198,7 +198,7 @@
 
 ---
 
-### US-ARCH-05 · 缓存分层职责文档 + 去双写 P0 · S · FE · 🔲
+### US-ARCH-05 · 缓存分层职责文档 + 去双写 P0 · S · FE · ✅
 
 **Story**  
 作为前端开发，我希望服务端数据的缓存策略唯一清晰，以便不出现首页/详情各缓存一份导致 stale，且离线观演资料与组队帖分层明确。
@@ -209,15 +209,15 @@
 
 **验收标准**
 
-- [ ] [DATA-LAYER.md](./DATA-LAYER.md) 增加「缓存分层」专节（四层）：
+- [x] [DATA-LAYER.md](./DATA-LAYER.md) 增加「缓存分层」专节（四层）：
   1. **Server state（内存）** → `useApiQuery` / `useApiInfiniteQuery`（在线请求唯一来源；`staleTime` 见 `queryCache.ts`）
   2. **Prefetch seed（内存）** → `activityDetailCache`、`eventPostsPageCache`（列表/首页预热详情与帖首屏，须可 invalidate）
-  3. **Persistent offline** → `homeCacheStorage`（全站 catalog 24h）、`travelGuideDetailStorage`、人格/偏好等；**US-ARCH-19** 扩展 **按活动观演资料包**
+  3. **Persistent offline** → `homeCacheStorage`（全站 catalog 24h）、`travelGuideDetailStorage`、人格/偏好等；**`activityPerformanceBundleStorage`** 按活动观演资料包
   4. **UI / draft** → Zustand（navigation、overlay、itinerary pending）、发帖草稿等
-- [ ] 文档写明：**招募帖默认不持久化**（仅内存 + 短 TTL 可选）；组队区无网时降级文案
-- [ ] 梳理并 **去掉** 至少一处重复：例如 `homeCacheStorage` 与 `useHomeSummary` cache 双写（保留一种）
-- [ ] `activityDetailCache` 明确为 prefetch 层：写入后必须能 invalidate 到 `useActivityDetailQuery`
-- [ ] 补 1 条单测或注释说明 invalidate 路径
+- [x] 文档写明：**招募帖默认不持久化**（仅内存 + 短 TTL 可选）；组队区无网时降级文案
+- [x] 梳理并 **去掉** 至少一处重复：例如 `homeCacheStorage` 与 `useHomeSummary` cache 双写（保留一种）
+- [x] `activityDetailCache` 明确为 prefetch 层：写入后必须能 invalidate 到 `useActivityDetailQuery`
+- [x] 补 1 条单测或注释说明 invalidate 路径
 
 **技术提示**
 
@@ -229,7 +229,7 @@
 
 ---
 
-### US-ARCH-19 · 观演资料包离线缓存（阵容/时间表优先） P1 · M · FE · 🔲
+### US-ARCH-19 · 观演资料包离线缓存（阵容/时间表优先） P1 · M · FE · ✅
 
 **Story**  
 作为已选某场活动的用户，我希望在 **Wi‑Fi 下自动准备好本场观演资料**，在场馆弱网或无网时仍能查看 **阵容、演出时间表、我的专属行程** 与活动资讯，而不依赖实时拉取招募帖。
@@ -258,25 +258,25 @@
 
 **验收标准 — 写入与恢复**
 
-- [ ] 新模块 `activityPerformanceBundleStorage`（或等价）：`save` / `load` / `clear(activityLegacyId)` · envelope 含 `savedAt` · `activityLegacyId`
-- [ ] Wi‑Fi 下（`getNetworkType` 或沿用 `preloadRule` 时机）：用户 **bind / 打开活动详情** 且阵容或行程 API 成功后 **静默写入** 资料包
-- [ ] 冷启动 / 无网：`load` 命中则 `activity-lineup` · `exclusive-itinerary` · 详情资讯区 **可只读展示**，不白屏
-- [ ] 有网：后台 `refetch` 成功后更新资料包与 `savedAt`
+- [x] 新模块 `activityPerformanceBundleStorage`（或等价）：`save` / `load` / `clear(activityLegacyId)` · envelope 含 `savedAt` · `activityLegacyId`
+- [x] Wi‑Fi 下（`getNetworkType` 或沿用 `preloadRule` 时机）：用户 **bind / 打开活动详情** 且阵容或行程 API 成功后 **静默写入** 资料包
+- [x] 冷启动 / 无网：`load` 命中则 `activity-lineup` · `exclusive-itinerary` · 详情资讯区 **可只读展示**，不白屏
+- [x] 有网：后台 `refetch` 成功后更新资料包与 `savedAt`
 - [ ] 失效：阵容官宣订阅通知落地 · 用户切换活动 · 手动「刷新本场资料」（可选）
 
 **验收标准 — UI 降级**
 
-- [ ] 无网且无资料包：阵容/行程页明确错误 + 「请连接网络后重试」
-- [ ] 无网有资料包：顶栏或页脚 **「离线资料 · 更新于 …」**；禁止暗示招募帖为最新
-- [ ] 活动详情招募区：无网时 **不** 展示过期帖冒充在线；文案「公开招募需联网查看」
-- [ ] 无「离线模式」全局开关；不挡 Q2 提审合规 grep
+- [x] 无网且无资料包：阵容/行程页明确错误 + 「请连接网络后重试」
+- [x] 无网有资料包：顶栏或页脚 **「本场观演资料 · 更新于 …」**；禁止暗示招募帖为最新
+- [x] 活动详情招募区：无网时 **不** 展示过期帖冒充在线；文案「公开招募需联网查看」
+- [x] 无「离线模式」全局开关；不挡 Q2 提审合规 grep
 
 **验收标准 — 工程**
 
-- [ ] 单测：save/load 往返 · TTL（建议 7 天或随活动 `ended` 清理）· 超 storage 时 LRU 按活动数
-- [ ] 与 `useApiQuery` 集成：hydrate 时 `setCacheData` 预热对应 queryKey
-- [ ] [RELEASE-SMOKE.md](./RELEASE-SMOKE.md) 增 1 条：Wi‑Fi 打开阵容 → 飞行模式 → 仍可看缓存
-- [ ] 不新增主包 >30KB（JSON 数据走 storage，代码放 `packageEvent` 或 `utils/`）
+- [x] 单测：save/load 往返 · TTL（建议 7 天或随活动 `ended` 清理）· 超 storage 时 LRU 按活动数
+- [x] 与 `useApiQuery` 集成：hydrate 时 `setCacheData` 预热对应 queryKey
+- [x] [RELEASE-SMOKE.md](./RELEASE-SMOKE.md) 增 1 条：Wi‑Fi 打开阵容 → 飞行模式 → 仍可看缓存
+- [x] 不新增主包 >30KB（JSON 数据走 storage，代码放 `packageEvent` 或 `utils/`）
 
 **明确不做**
 
@@ -297,7 +297,7 @@
 
 ---
 
-### US-ARCH-06 · 拆分 `useEventDetailPage` P1 · M · FE · 🔲
+### US-ARCH-06 · 拆分 `useEventDetailPage` P1 · M · FE · ✅
 
 **Story**  
 作为前端开发，我希望活动详情页编排 hook 保持薄壳，以便改招募墙时不碰攻略/Festival Plan 逻辑。
@@ -327,7 +327,7 @@
 
 ## Epic D · 热点 Service 拆分（P1）
 
-### US-ARCH-07 · 拆分 `itinerary-schedule.service` P1 · M · BE · 🔲
+### US-ARCH-07 · 拆分 `itinerary-schedule.service` P1 · M · BE · ✅
 
 **Story**  
 作为后端开发，我希望行程/catalog 逻辑按职责拆分，以便阵容、冲突检测、艺人 profile 可独立测试与演进。
@@ -354,7 +354,7 @@
 
 ---
 
-### US-ARCH-08 · 拆分 `travel-guide-generation.service` P1 · M · BE · 🔲
+### US-ARCH-08 · 拆分 `travel-guide-generation.service` P1 · M · BE · ✅
 
 **Story**  
 作为后端开发，我希望攻略生成 pipeline（POI → LLM 润色 → 缓存）分层清晰，以便 Q2 境外 Hot Path 与 prompt 迭代互不影响。

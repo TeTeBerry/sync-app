@@ -87,6 +87,7 @@ const EventDetailPage = () => {
     templatePublishing,
     posts,
     postsLoading,
+    recruitRequiresNetwork,
     showPostsEnd,
     postsQuery,
     handleOpenAiGuide,
@@ -201,32 +202,42 @@ const EventDetailPage = () => {
                       {t('eventDetail.recruitSectionTitle')}
                     </Text>
                   </View>
-                  <EventDetailPostFilterBar
-                    cityOptions={posts.postFilterCityOptions}
-                    selectedCity={posts.postFilterSelectedCity}
-                    onSelectedCityChange={posts.setPostFilterSelectedCity}
-                    recruitingOnly={posts.postFilterRecruitingOnly}
-                    onRecruitingOnlyChange={posts.setPostFilterRecruitingOnly}
-                    isActive={posts.postFiltersActive}
-                    onClear={posts.clearPostFilters}
-                    disabled={posts.searchActive}
-                  />
-                  <View className="s-event-detail__recruit-divider" aria-hidden />
-                  <EventDetailPostSearchBar
-                    value={posts.searchQuery}
-                    onChange={posts.setSearchQuery}
-                    onClear={posts.clearSearchQuery}
-                    isSearching={posts.searchLoading}
-                    matchedCount={posts.searchMatchedCount}
-                    usedLocalFallback={posts.searchUsedLocalFallback}
-                    parsedSummary={searchParsedSummary}
-                    preferenceSummary={showPreferenceInsight ? preferenceSummary : null}
-                    hasPreferenceRanking={showPreferenceInsight}
-                    travelGuidePrefillHint={posts.travelGuideSearchPrefillHint}
-                  />
+                  {!recruitRequiresNetwork ? (
+                    <>
+                      <EventDetailPostFilterBar
+                        cityOptions={posts.postFilterCityOptions}
+                        selectedCity={posts.postFilterSelectedCity}
+                        onSelectedCityChange={posts.setPostFilterSelectedCity}
+                        recruitingOnly={posts.postFilterRecruitingOnly}
+                        onRecruitingOnlyChange={posts.setPostFilterRecruitingOnly}
+                        isActive={posts.postFiltersActive}
+                        onClear={posts.clearPostFilters}
+                        disabled={posts.searchActive}
+                      />
+                      <View className="s-event-detail__recruit-divider" aria-hidden />
+                      <EventDetailPostSearchBar
+                        value={posts.searchQuery}
+                        onChange={posts.setSearchQuery}
+                        onClear={posts.clearSearchQuery}
+                        isSearching={posts.searchLoading}
+                        matchedCount={posts.searchMatchedCount}
+                        usedLocalFallback={posts.searchUsedLocalFallback}
+                        parsedSummary={searchParsedSummary}
+                        preferenceSummary={
+                          showPreferenceInsight ? preferenceSummary : null
+                        }
+                        hasPreferenceRanking={showPreferenceInsight}
+                        travelGuidePrefillHint={posts.travelGuideSearchPrefillHint}
+                      />
+                    </>
+                  ) : null}
                 </View>
               ) : null}
-              {postsLoading ? (
+              {recruitRequiresNetwork && !showHeaderSkeleton ? (
+                <Text className="s-event-detail__recruit-offline">
+                  {t('eventDetail.recruitRequiresNetwork')}
+                </Text>
+              ) : postsLoading ? (
                 <ThemedPageLoader variant="skeleton-event-posts" minHeight={160} />
               ) : !showHeaderSkeleton &&
                 posts.searchActive &&

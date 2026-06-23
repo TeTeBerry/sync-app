@@ -5,7 +5,7 @@ import { useNavigationStore } from '../stores/navigationStore';
 import type { NavigationState } from '../stores/navigationStore';
 import type { ExclusiveItineraryNavIntent } from '../stores/types';
 import type { BuddyPostSheetPrefill } from './travelGuideToBuddyPost';
-import { prefetchPersonalityTestAudioMedia } from '../domains/personality-test/utils/personalityAudioPrefetch';
+import { prefetchPersonalityTestAudioMedia } from '../domains/personality-test';
 import type { AiGuidePlanFormValues } from '../types/travelGuide';
 import type { BackendActivity, HomeSummary, NotificationMeta } from '../types/backend';
 import { PRELOAD_HOT_ROUTES_MS } from './timing';

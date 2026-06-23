@@ -12,6 +12,7 @@ import { ExclusiveItineraryConflictBanner } from './ExclusiveItineraryConflictBa
 import ExclusiveItineraryDjGrid from './components/ExclusiveItineraryDjGrid';
 import ExclusiveItineraryFooter from './components/ExclusiveItineraryFooter';
 import { ExclusiveItineraryUnpublishedBanner } from './ExclusiveItineraryUnpublishedBanner';
+import { PerformanceBundleStaleBanner } from '@/domains/activity-info/components/PerformanceBundleStaleBanner';
 import { useExclusiveItineraryPage } from './useExclusiveItineraryPage';
 
 const ExclusiveItineraryPage = () => {
@@ -53,6 +54,8 @@ const ExclusiveItineraryPage = () => {
     scrollIntoViewId,
     skipDjSelectionPending,
     lineupPending,
+    isOfflineBundle,
+    bundleSavedAt,
   } = useExclusiveItineraryPage();
 
   if (skipDjSelectionPending) {
@@ -92,6 +95,10 @@ const ExclusiveItineraryPage = () => {
         }
       >
         <View className="s-exclusive-itinerary__inner">
+          {isOfflineBundle && bundleSavedAt != null ? (
+            <PerformanceBundleStaleBanner savedAt={bundleSavedAt} />
+          ) : null}
+
           {lineupPending ? (
             <ExclusiveItineraryUnpublishedBanner
               activityLegacyId={activityLegacyId}

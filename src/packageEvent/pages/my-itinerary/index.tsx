@@ -21,6 +21,7 @@ import {
   TravelPlanTimeline,
   useTravelPlanPage,
 } from '@/domains/travel-plan';
+import { PerformanceBundleStaleBanner } from '@/domains/activity-info/components/PerformanceBundleStaleBanner';
 import { useT } from '@/hooks/useI18n';
 
 const MyItineraryPage = () => {
@@ -135,6 +136,10 @@ const MyItineraryPage = () => {
           }
         >
           <View className="s-my-itinerary__inner">
+            {page.isOfflineBundle && page.bundleSavedAt != null ? (
+              <PerformanceBundleStaleBanner savedAt={page.bundleSavedAt} />
+            ) : null}
+
             <View className="s-my-itinerary__banner">
               <View className="s-my-itinerary__banner-icon" aria-hidden>
                 <Sparkles size={20} color="var(--primary)" />

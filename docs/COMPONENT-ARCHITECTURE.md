@@ -8,7 +8,7 @@
 |------|------|------|
 | UI 原语 | `src/components/ui/` | 无业务语义；包装 Taro 原语 + BEM/`cn` |
 | 跨页业务 | `src/components/`（`auth/`、`ai-chat/`、`profile/`、`navigation/` 等） | 多 Tab / 多分包复用的轻量 UI |
-| 活动域 | `src/domains/`（`festival-plan/`、`travel-plan/`、`performance-itinerary/`、`travel-guide/`、`partner-feed/`、`personality-test/`、`activity-scope/`） | 与后端 ActivityExperience 等域对齐的重逻辑 |
+| 活动域 | `src/domains/`（`festival-plan/`、`lineup-artist/`、`activity-share/`、`travel-plan/`、`performance-itinerary/`、`travel-guide/`、`partner-feed/`、`personality-test/`、`activity-scope/`） | 与后端 ActivityExperience 等域对齐的重逻辑 |
 | 页面壳 | `src/pages/**/`、`src/package*/pages/**/` | 路由入口、薄编排 |
 
 ### 依赖方向（必须遵守）
@@ -21,6 +21,23 @@ pages / package pages  →  domains/*  →  components/*  →  components/ui
 主包 Tab **不得**直接 import `domains/*` 内重组件（见 `scripts/verify-bundle-boundaries.mjs`）。
 
 - `components/**` **不得** import `pages/**` 或 `package*/pages/**`
+
+### 主包 import 规范
+
+主包 Tab（`pages/index`、`pages/events`、`pages/profile`）、导航壳（`components/navigation`）及 `verify:bundle` 列出的主包文件，引用活动域能力时 **必须** 走 barrel：
+
+```ts
+import { useHomeFestivalPlanNavigation } from '@/domains/festival-plan';
+import { ArtistProfileSheet } from '@/domains/lineup-artist';
+```
+
+| 允许 | 禁止 |
+|------|------|
+| domain hook（`useFestivalPlanSummary` 等） | `packageEvent/**`、`packageAi/**` 分包页面实现 |
+| util / 纯函数（分享 builder、任务定义） | wallpaper / canvas 生成（`itineraryWallpaper*`） |
+| 轻量展示组件（`FestivalPlanSummaryBar`、`ArtistProfileSheet`） | deep import（`@/domains/foo/hooks/...`） |
+
+每个域对外 API 集中在 `src/domains/<domain>/index.ts`；单测可继续直引子模块。门禁：`npm run verify:bundle`。
 
 ## 类型
 
@@ -57,13 +74,32 @@ Barrel 导出分包/活动详情需要的组件与逻辑；仅主 profile 页使
 ### Festival Plan（出征准备）
 
 - 目录：`src/domains/festival-plan/`
+- Barrel：`src/domains/festival-plan/index.ts`
 - 组件：`FestivalPlanSummaryBar`（首页 / 详情 / 准备 Tab 共用）
 - 逻辑：`useFestivalPlanSummary`、`useFestivalPlanNavigation`、任务定义 `festivalPlanTaskDefs.ts`
+
+### Lineup Artist（阵容艺人）
+
+- 目录：`src/domains/lineup-artist/`
+- Barrel：`src/domains/lineup-artist/index.ts`
+- 组件：`ArtistProfileSheet`（活动 Tab / 阵容页共用）
+
+### Activity Share（微信分享）
+
+- 目录：`src/domains/activity-share/`
+- Barrel：`src/domains/activity-share/index.ts`
+- 工具：`buildEventDetailShareAppMessage` 等（活动详情 `onShareAppMessage`）
 
 ### 活动详情
 
 - 页面：`packageEvent/pages/event-detail/index.tsx`（薄壳：路由编排、组队帖 FAB / sheet）
-- 编排：`useEventDetailPage.ts`
+- 编排：`useEventDetailPage.ts`（<150 行，组合 section hooks）
+- Section hooks（`packageEvent/pages/event-detail/`）：
+  - `useEventDetailPostsSection` — 招募墙、buddy post sheet、攻略搜索预填
+  - `useEventDetailTravelGuideSection` + `useEventDetailTravelGuideActions` — 攻略 sheet、AI 攻略跳转
+  - `useEventDetailFestivalPlanSection` — 准备清单（包装域 hook）
+  - `useEventDetailPrepNavigation` + `useEventDetailItineraryNavigation` — 阵容/行程跳转、prep nudge 分发
+- 已有：`useEventDetailRoute`、`useEventDetailActivityHeader`、`useEventDetailScrollPreserve`、`useEventDetailWechatShare`
 - 域：`domains/partner-feed/`（组队帖流、AI 咨询入口）、`domains/travel-guide/`、`domains/festival-plan/`（准备清单）
 
 ## 决策表

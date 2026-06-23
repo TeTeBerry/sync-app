@@ -1,6 +1,8 @@
 import Taro, { useRouter } from '@tarojs/taro';
 import { useMemo } from 'react';
 import { useActivityDetailQuery } from '@/hooks/sync/activities';
+import { useActivityPerformanceBundleOffline } from '@/hooks/useActivityPerformanceBundleOffline';
+import { useActivityPerformanceBundleWriter } from '@/hooks/useActivityPerformanceBundleWriter';
 import { useItineraryScheduleQuery } from '@/hooks/useItineraryApi';
 import { useStackPageMainHeight } from '@/hooks/useTabPageMainHeight';
 import { isLiveApi } from '@/constants/api';
@@ -42,9 +44,20 @@ export function useActivityLineupPage() {
   );
   const scheduleQuery = useItineraryScheduleQuery(apiEnabled ? activityLegacyId : null);
 
-  const schedule = scheduleQuery.data;
+  const queryFailed = activityQuery.isError || scheduleQuery.isError;
+  const offline = useActivityPerformanceBundleOffline(activityLegacyId, {
+    queryFailed,
+  });
+
+  const activity = activityQuery.data ?? offline.bundle?.activity ?? undefined;
+  const schedule = scheduleQuery.data ?? offline.bundle?.schedule;
   const schedulePublished = schedule?.schedulePublished === true;
-  const lineupPublished = activityQuery.data?.lineupPublished !== false;
+  const lineupPublished = activity?.lineupPublished !== false;
+
+  useActivityPerformanceBundleWriter(apiEnabled ? activityLegacyId : undefined, {
+    activity: activityQuery.data,
+    schedule: scheduleQuery.data,
+  });
 
   const sessionGroups = useMemo<LineupSessionGroup[]>(() => {
     if (!schedule?.schedulePublished) {
@@ -58,7 +71,7 @@ export function useActivityLineupPage() {
     return [...djs].sort((a, b) => b.popularity - a.popularity);
   }, [schedule?.djs]);
 
-  const pageTitle = activityQuery.data?.name ?? schedule?.eventMeta ?? '';
+  const pageTitle = activity?.name ?? schedule?.eventMeta ?? '';
   const showFooterCta = schedulePublished && sessionGroups.length > 0;
   const footerChromePx = useMemo(() => resolveFooterChromePx(), []);
   const mainScrollHeight = useStackPageMainHeight(showFooterCta ? footerChromePx : 0);
@@ -78,8 +91,13 @@ export function useActivityLineupPage() {
     sessionGroups,
     lineupDjs,
     showFooterCta,
-    loading: apiEnabled && (activityQuery.isLoading || scheduleQuery.isLoading),
-    error: scheduleQuery.isError,
+    loading:
+      apiEnabled &&
+      !offline.isOfflineBundle &&
+      (activityQuery.isLoading || scheduleQuery.isLoading),
+    error: queryFailed && !offline.isOfflineBundle,
+    isOfflineBundle: offline.isOfflineBundle,
+    bundleSavedAt: offline.bundleSavedAt,
     refetch: scheduleQuery.refetch,
   };
 }

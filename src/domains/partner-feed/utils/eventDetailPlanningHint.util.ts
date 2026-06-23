@@ -1,5 +1,7 @@
-import type { FestivalPlanChecklist } from '@/domains/festival-plan/buildFestivalPlanChecklist';
-import type { FestivalPlanTaskKey } from '@/domains/festival-plan/festivalPlanTaskDefs';
+import type {
+  FestivalPlanChecklist,
+  FestivalPlanTaskKey,
+} from '@/domains/festival-plan';
 
 export type PrepNudgeAction =
   | { type: 'open_post_replies'; postId: string }

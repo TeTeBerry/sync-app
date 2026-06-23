@@ -1,12 +1,14 @@
 import './activity-lineup.scss';
 import { ScrollView, Text, View } from '@tarojs/components';
 import { useMemo, useState } from 'react';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import { useT } from '@/hooks/useI18n';
 import PageNavigation from '../../../components/navigation/PageNavigation';
 import ThemedPageLoader from '../../../components/ThemedPageLoader';
 import { Button } from '../../../components/ui';
 import { ActivityUpdateSubscribeBanner } from '@/domains/activity-info/components/ActivityUpdateSubscribeBanner';
-import { ArtistProfileSheet } from '@/domains/lineup-artist/components/ArtistProfileSheet';
+import { PerformanceBundleStaleBanner } from '@/domains/activity-info/components/PerformanceBundleStaleBanner';
+import { ArtistProfileSheet } from '@/domains/lineup-artist';
 import { useEndRouteTransitionOnShow } from '../../../hooks/useEndRouteTransitionOnShow';
 import { useMeasuredElementHeight } from '../../../hooks/useMeasuredElementHeight';
 import { goExclusiveItinerary, ROUTES } from '../../../utils/route';
@@ -20,6 +22,7 @@ import { lineupGenreNavDomId } from './utils/scrollLineupSection';
 const ActivityLineupPage = () => {
   useEndRouteTransitionOnShow(ROUTES.ACTIVITY_LINEUP);
   const t = useT();
+  const { isConnected } = useNetworkStatus();
   const [selectedArtistId, setSelectedArtistId] = useState<string | null>(null);
 
   const {
@@ -34,6 +37,8 @@ const ActivityLineupPage = () => {
     showFooterCta,
     loading,
     error,
+    isOfflineBundle,
+    bundleSavedAt,
     refetch,
   } = useActivityLineupPage();
 
@@ -87,10 +92,13 @@ const ActivityLineupPage = () => {
           onClick={() => void refetch()}
           role="button"
         >
-          {t('activityLineup.loadFailed')}
+          {t(isConnected ? 'activityLineup.loadFailed' : 'activityLineup.offlineRetry')}
         </View>
       ) : (
         <>
+          {isOfflineBundle && bundleSavedAt != null ? (
+            <PerformanceBundleStaleBanner savedAt={bundleSavedAt} />
+          ) : null}
           {showLineupGrid && showGenreNav ? (
             <LineupGenreNav
               artists={lineupDjs}

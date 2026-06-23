@@ -62,3 +62,5 @@ export {
   buildPersonalityBuddyPostPrefill,
   type PersonalityBuddyPostPrefill,
 } from './utils/buildPersonalityBuddyPostPrefill';
+
+export { prefetchPersonalityTestAudioMedia } from './utils/personalityAudioPrefetch';

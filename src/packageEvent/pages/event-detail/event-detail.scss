@@ -1730,12 +1730,19 @@
   font-size: var(--s-type-small);
 }
 
-.s-event-detail__empty {
+.s-event-detail__empty,
+.s-event-detail__recruit-offline {
   padding: 24px 16px;
   text-align: center;
   color: #8e8e93;
   font-size: var(--s-type-caption);
   line-height: 1.45;
+}
+
+.s-event-detail__empty {
+  padding: 48px 16px;
+  text-align: center;
+  color: #8e8e93;
 }
 
 .s-event-detail__fallback {

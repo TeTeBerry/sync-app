@@ -3,10 +3,7 @@ import type { FC } from 'react';
 import { CalendarDays, ChevronRight, MessageCircle } from '../../../components/icons';
 import { Button } from '../../../components/ui';
 import type { HomeSummary } from '../../../types/backend';
-import type {
-  FestivalPlanChecklist,
-  FestivalPlanTask,
-} from '@/domains/festival-plan/useFestivalPlanSummary';
+import type { FestivalPlanChecklist, FestivalPlanTask } from '@/domains/festival-plan';
 import { useT } from '@/hooks/useI18n';
 import { formatActivityLocationLabel } from '@/utils/formatActivityDisplay';
 import { Text, View } from '@tarojs/components';

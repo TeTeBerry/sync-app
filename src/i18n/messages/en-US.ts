@@ -526,6 +526,9 @@ export const enUS: MessageTree = {
     unpublishedFeatureLineup: 'Lineup drop',
     unpublishedFeatureSchedule: 'Set times',
   },
+  performanceBundle: {
+    staleBanner: 'Cached event info · updated {{time}} · follow on-site announcements',
+  },
   activityLineup: {
     title: 'Lineup & schedule',
     scheduleTitle: 'Timetable',
@@ -543,6 +546,7 @@ export const enUS: MessageTree = {
     artistColumn: 'Artist',
     buildItineraryCta: 'Build my personal set',
     loadFailed: 'Failed to load lineup. Tap to retry',
+    offlineRetry: 'Connect to the network and try again',
     empty: 'No lineup available',
   },
   onboarding: {
@@ -613,6 +617,7 @@ export const enUS: MessageTree = {
     festivalPrepHint: 'Guide · set schedule · recruit',
     festivalPrepHintGuest: 'Travel guide · set schedule',
     recruitSectionTitle: 'Public recruit',
+    recruitRequiresNetwork: 'Public recruit posts require a network connection',
     loadFailed: 'Failed to load event info',
     retry: 'Retry',
     notFound: 'Event not found',

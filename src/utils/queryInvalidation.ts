@@ -35,6 +35,11 @@ export function invalidateHome() {
   invalidateCache(['home']);
 }
 
+/** 失效活动列表与详情查询（含 prefetch seed）；Layer 3 观演资料包靠 refetch 后覆盖，不随此清除 */
+export function invalidateActivities() {
+  invalidateCache(['activities']);
+}
+
 /** 失效所有帖子及关联查询 */
 export function invalidateAllPosts() {
   invalidateCache(['posts']);

@@ -514,6 +514,9 @@ export const zhCN: MessageTree = {
     unpublishedFeatureLineup: '阵容更新',
     unpublishedFeatureSchedule: '时间表发布',
   },
+  performanceBundle: {
+    staleBanner: '本场观演资料 · 更新于 {{time}} · 以现场公告为准',
+  },
   activityLineup: {
     title: '阵容与时间表',
     scheduleTitle: '演出时间表',
@@ -531,6 +534,7 @@ export const zhCN: MessageTree = {
     artistColumn: '艺人',
     buildItineraryCta: '生成我的专属行程',
     loadFailed: '阵容加载失败，点击重试',
+    offlineRetry: '请连接网络后重试',
     empty: '暂无阵容信息',
   },
   onboarding: {
@@ -597,6 +601,7 @@ export const zhCN: MessageTree = {
     festivalPrepHint: '攻略 · 演出表 · 招募',
     festivalPrepHintGuest: '出行攻略 · 演出表',
     recruitSectionTitle: '公开招募',
+    recruitRequiresNetwork: '公开招募需联网查看',
     loadFailed: '活动信息加载失败',
     retry: '重试',
     notFound: '活动不存在',
