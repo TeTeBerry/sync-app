@@ -3,11 +3,20 @@ import { AI_TRAVEL_GUIDE_DISCLAIMER } from '@/constants/aiDisclosure';
 import type { TravelGuidePlan } from '@/types/travelGuide';
 
 export function buildTravelGuideShareText(plan: TravelGuidePlan): string {
+  const tripMeta = [
+    `${plan.departure}出发`,
+    `${plan.headcount}人`,
+    plan.accommodationNights > 0 ? `住${plan.accommodationNights}晚` : null,
+    plan.accommodationNights > 0 && plan.budgetLabel ? plan.budgetLabel : null,
+  ]
+    .filter(Boolean)
+    .join(' · ');
+
   const lines: string[] = [
     `【${plan.activityName}】${getTravelGuideTitle()}`,
     `📅 ${plan.eventDates}`,
     `📍 ${plan.venue}`,
-    `🚩 ${plan.departure}出发 · ${plan.headcount}人 · 住${plan.accommodationNights}晚 · ${plan.budgetLabel}`,
+    `🚩 ${tripMeta}`,
     '',
   ];
 
@@ -34,27 +43,31 @@ export function buildTravelGuideShareText(plan: TravelGuidePlan): string {
   lines.push('');
 
   const schemes = plan.accommodation.schemes;
-  if (schemes?.length) {
-    lines.push(`▸ ${plan.accommodation.title}`);
-    for (const scheme of schemes) {
-      lines.push(`  · ${scheme.label}：${scheme.name}`);
-      lines.push(`    ${scheme.reason}`);
+  const hasAccommodation =
+    Boolean(schemes?.length) || plan.accommodation.hotels.length > 0;
+  if (hasAccommodation) {
+    if (schemes?.length) {
+      lines.push(`▸ ${plan.accommodation.title}`);
+      for (const scheme of schemes) {
+        lines.push(`  · ${scheme.label}：${scheme.name}`);
+        lines.push(`    ${scheme.reason}`);
+      }
+      const featured = new Set(schemes.map((s) => s.name));
+      for (const hotel of plan.accommodation.hotels.filter(
+        (h) => !featured.has(h.name),
+      )) {
+        lines.push(`  · 备选：${hotel.name}`);
+        if (hotel.reason) lines.push(`    ${hotel.reason}`);
+      }
+    } else {
+      lines.push(`▸ ${plan.accommodation.title}`);
+      for (const hotel of plan.accommodation.hotels.slice(0, 6)) {
+        lines.push(`  · ${hotel.name}：${hotel.note}`);
+        if (hotel.reason) lines.push(`    ${hotel.reason}`);
+      }
     }
-    const featured = new Set(schemes.map((s) => s.name));
-    for (const hotel of plan.accommodation.hotels.filter(
-      (h) => !featured.has(h.name),
-    )) {
-      lines.push(`  · 备选：${hotel.name}`);
-      if (hotel.reason) lines.push(`    ${hotel.reason}`);
-    }
-  } else {
-    lines.push(`▸ ${plan.accommodation.title}`);
-    for (const hotel of plan.accommodation.hotels.slice(0, 6)) {
-      lines.push(`  · ${hotel.name}：${hotel.note}`);
-      if (hotel.reason) lines.push(`    ${hotel.reason}`);
-    }
+    lines.push('');
   }
-  lines.push('');
 
   if (plan.nightlife.spots.length) {
     lines.push(`▸ ${plan.nightlife.title}`);

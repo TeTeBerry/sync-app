@@ -825,11 +825,15 @@ export function goProfile() {
 export function goEventDetailTravelGuideSheet(
   activityLegacyId: number,
   prefill?: AiGuidePlanFormValues,
+  regenerateGuideId?: string,
 ) {
   if (prefill) {
     useNavigationStore.getState().setEventDetailTravelGuideIntent({
       activityLegacyId,
       prefillTravelGuideForm: prefill,
+      ...(regenerateGuideId?.trim()
+        ? { regenerateGuideId: regenerateGuideId.trim() }
+        : {}),
     });
   }
   goEventDetail(activityLegacyId, { openGuide: true });

@@ -15,6 +15,7 @@ function createGuideId(): string {
 export async function runTravelGuideGeneration(
   activityLegacyId: number,
   form: AiGuidePlanFormValues,
+  guideId?: string,
 ): Promise<void> {
   if (!Number.isFinite(activityLegacyId) || activityLegacyId <= 0) {
     void Taro.showToast({ title: t('travelPlan.pleaseEnterActivity'), icon: 'none' });
@@ -28,19 +29,19 @@ export async function runTravelGuideGeneration(
     }
 
     void Taro.showLoading({ title: getTravelGuideGeneratingText(), mask: true });
-    const guideId = createGuideId();
+    const resolvedGuideId = guideId?.trim() || createGuideId();
 
     try {
       const { plan } = await generateTravelGuide(activityLegacyId, {
         ...form,
-        guideId,
+        guideId: resolvedGuideId,
       });
-      saveTravelGuideDetail(guideId, {
+      saveTravelGuideDetail(resolvedGuideId, {
         plan,
         form,
         activityLegacyId,
       });
-      goAiTravelGuide(guideId);
+      goAiTravelGuide(resolvedGuideId);
     } catch (error) {
       const message =
         error instanceof Error ? error.message : t('travelPlan.guideGenerationFailed');

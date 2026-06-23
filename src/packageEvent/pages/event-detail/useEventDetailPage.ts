@@ -83,6 +83,7 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     activityDate,
     activityLocation,
     initialGuideForm: travelGuideNavIntent?.prefillTravelGuideForm ?? null,
+    regenerateGuideId: travelGuideNavIntent?.regenerateGuideId ?? null,
   });
   const displayIdentity = useDisplayUserIdentity();
 

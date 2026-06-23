@@ -228,13 +228,13 @@ export function useAiTravelGuidePage() {
   }, [payload?.plan, sharing, t]);
 
   const handleRegenerate = useCallback(() => {
-    if (!payload?.activityLegacyId) return;
+    if (!payload?.activityLegacyId || !guideId) return;
     const activityLegacyId = payload.activityLegacyId;
     requireAuth(
-      () => goEventDetailTravelGuideSheet(activityLegacyId, payload.form),
+      () => goEventDetailTravelGuideSheet(activityLegacyId, payload.form, guideId),
       'ai_assistant',
     );
-  }, [payload]);
+  }, [guideId, payload]);
 
   const handlePrefillRecruitPost = useCallback(() => {
     if (!payload?.activityLegacyId || !payload.form) return;

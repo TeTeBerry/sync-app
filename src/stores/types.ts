@@ -4,6 +4,8 @@ import type { AiGuidePlanFormValues } from '../types/travelGuide';
 export type EventDetailTravelGuideNavIntent = {
   activityLegacyId: number;
   prefillTravelGuideForm: AiGuidePlanFormValues;
+  /** 重新生成时沿用原攻略 ID，更新而非新建 */
+  regenerateGuideId?: string;
 };
 
 export type ExclusiveItineraryNavIntent = {

@@ -48,13 +48,15 @@ const AiTravelGuidePage = () => {
             style={{ height: `${page.mainScrollHeight ?? 480}px` }}
           >
             <View className="s-ai-travel-guide-page__inner">
-              <TravelGuideBudgetCompareCards
-                headcount={page.payload.plan.headcount}
-                accommodationNights={page.payload.plan.accommodationNights}
-                selectedTier={page.selectedBudgetTier}
-                updating={page.budgetTierUpdating}
-                onSelect={page.handleSelectBudgetTier}
-              />
+              {page.payload.plan.accommodationNights > 0 ? (
+                <TravelGuideBudgetCompareCards
+                  headcount={page.payload.plan.headcount}
+                  accommodationNights={page.payload.plan.accommodationNights}
+                  selectedTier={page.selectedBudgetTier}
+                  updating={page.budgetTierUpdating}
+                  onSelect={page.handleSelectBudgetTier}
+                />
+              ) : null}
               <TravelGuideDetailView plan={page.payload.plan} />
               <TravelPlanReceiptOcrTip activityLegacyId={page.activityLegacyId} />
               {page.showRecruitBridge ? (

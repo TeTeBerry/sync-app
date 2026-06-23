@@ -17,7 +17,10 @@ import {
 import { useEventDetailPage } from './useEventDetailPage';
 import { AiBuddyPostSheet } from '../../../components/ai-chat/AiBuddyPostSheet';
 import { AiGuidePlanSheet } from '../../../components/ai-chat/AiGuidePlanSheet';
-import { isOverseasActivityRegion } from '../../../constants/activityMapRegion';
+import {
+  isDomesticActivityRegion,
+  isOverseasActivityRegion,
+} from '../../../constants/activityMapRegion';
 import PageNavigation from '../../../components/navigation/PageNavigation';
 import { Button } from '../../../components/ui';
 import { Share2 } from '../../../components/icons';
@@ -311,6 +314,7 @@ const EventDetailPage = () => {
           defaultNights={guideDefaultNights}
           eventCity={guideEventCity}
           showSelfDriveOption={!isOverseasActivityRegion(activity?.region)}
+          showAccommodationOption={isDomesticActivityRegion(activity?.region)}
           initialValues={guideSheetInitialValues}
           onClose={closeGuideSheet}
           onSubmit={handleGuideSheetSubmit}

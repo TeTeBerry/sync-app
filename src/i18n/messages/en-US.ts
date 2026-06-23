@@ -756,6 +756,7 @@ export const enUS: MessageTree = {
     driveHint: 'Affects route recommendations',
     driveYes: 'Self-drive',
     driveNo: 'Transit',
+    accommodationTitle: 'Need accommodation',
     nightsLabel: 'Nights',
     nightsUnit: 'nights',
     decreaseAria: 'Decrease',

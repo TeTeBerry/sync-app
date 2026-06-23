@@ -25,6 +25,8 @@ export type AiGuidePlanSheetProps = {
   eventCity?: string;
   /** 海外活动不展示自驾选项 */
   showSelfDriveOption?: boolean;
+  /** 国内活动展示「是否住宿」开关，关闭时不生成住宿方案 */
+  showAccommodationOption?: boolean;
   initialValues?: AiGuidePlanFormValues | null;
   onClose: () => void;
   onSubmit: (values: AiGuidePlanFormValues) => void;
@@ -101,6 +103,7 @@ function AiGuidePlanSheetInner({
   defaultNights,
   eventCity,
   showSelfDriveOption = true,
+  showAccommodationOption = false,
   initialValues,
   onClose,
   onSubmit,
@@ -113,9 +116,16 @@ function AiGuidePlanSheetInner({
     defaultNights,
     initialValues,
     showSelfDriveOption,
+    showAccommodationOption,
     onSubmit,
   });
-  const { setDeparture, setDepartureCity, setAccommodationNights, setSelfDrive } = form;
+  const {
+    setDeparture,
+    setDepartureCity,
+    setAccommodationNights,
+    setNeedsAccommodation,
+    setSelfDrive,
+  } = form;
 
   const handleDepartureChange = useCallback(
     (value: string) => {
@@ -225,9 +235,11 @@ function AiGuidePlanSheetInner({
               </View>
             </View>
 
-            <Text className="s-ai-guide-plan-sheet__budget-hint-note">
-              {t('travelPlan.budgetOptionalHint')}
-            </Text>
+            {!showAccommodationOption || form.needsAccommodation ? (
+              <Text className="s-ai-guide-plan-sheet__budget-hint-note">
+                {t('travelPlan.budgetOptionalHint')}
+              </Text>
+            ) : null}
 
             {showSelfDriveOption ? (
               <View className="s-ai-guide-plan-sheet__card s-ai-guide-plan-sheet__card--drive">
@@ -256,33 +268,59 @@ function AiGuidePlanSheetInner({
               </View>
             ) : null}
 
-            <View className="s-ai-guide-plan-sheet__field">
-              <Text className="s-ai-guide-plan-sheet__label">
-                {t('travelPlan.nightsLabel')}
-              </Text>
-              <View className="s-ai-guide-plan-sheet__card">
+            {showAccommodationOption ? (
+              <View className="s-ai-guide-plan-sheet__card s-ai-guide-plan-sheet__card--drive">
                 <View className="s-ai-guide-plan-sheet__card-row">
-                  <View className="s-ai-guide-plan-sheet__card-summary">
+                  <View className="s-ai-guide-plan-sheet__drive-copy">
                     <BedDouble
                       size={18}
                       className="s-ai-guide-plan-sheet__card-icon"
                       aria-hidden
                     />
-                    <Text className="s-ai-guide-plan-sheet__card-summary-text">
-                      {form.accommodationNights} {t('travelPlan.nightsUnit')}
-                    </Text>
+                    <View className="s-ai-guide-plan-sheet__drive-text">
+                      <Text className="s-ai-guide-plan-sheet__drive-title">
+                        {t('travelPlan.accommodationTitle')}
+                      </Text>
+                    </View>
                   </View>
-                  <InlineStepper
-                    value={form.accommodationNights}
-                    min={1}
-                    max={7}
-                    onChange={setAccommodationNights}
-                    ariaDecrease={t('travelPlan.decreaseAria')}
-                    ariaIncrease={t('travelPlan.increaseAria')}
+                  <ThemeToggle
+                    checked={form.needsAccommodation}
+                    ariaLabel={t('travelPlan.accommodationTitle')}
+                    onChange={setNeedsAccommodation}
                   />
                 </View>
               </View>
-            </View>
+            ) : null}
+
+            {!showAccommodationOption || form.needsAccommodation ? (
+              <View className="s-ai-guide-plan-sheet__field">
+                <Text className="s-ai-guide-plan-sheet__label">
+                  {t('travelPlan.nightsLabel')}
+                </Text>
+                <View className="s-ai-guide-plan-sheet__card">
+                  <View className="s-ai-guide-plan-sheet__card-row">
+                    <View className="s-ai-guide-plan-sheet__card-summary">
+                      <BedDouble
+                        size={18}
+                        className="s-ai-guide-plan-sheet__card-icon"
+                        aria-hidden
+                      />
+                      <Text className="s-ai-guide-plan-sheet__card-summary-text">
+                        {form.accommodationNights} {t('travelPlan.nightsUnit')}
+                      </Text>
+                    </View>
+                    <InlineStepper
+                      value={form.accommodationNights}
+                      min={1}
+                      max={7}
+                      onChange={setAccommodationNights}
+                      ariaDecrease={t('travelPlan.decreaseAria')}
+                      ariaIncrease={t('travelPlan.increaseAria')}
+                    />
+                  </View>
+                </View>
+              </View>
+            ) : null}
           </View>
         </ScrollView>
 

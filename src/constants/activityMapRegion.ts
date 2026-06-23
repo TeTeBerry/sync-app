@@ -16,6 +16,10 @@ export function isOverseasActivityRegion(region?: ActivityMapRegion | null): boo
   return region === 'overseas';
 }
 
+export function isDomesticActivityRegion(region?: ActivityMapRegion | null): boolean {
+  return region === 'domestic';
+}
+
 /** Fallback GCJ-02 coords when API rows predate map fields. */
 export const ACTIVITY_MAP_COORD_FALLBACK: Record<
   number,

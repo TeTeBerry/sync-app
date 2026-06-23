@@ -28,7 +28,9 @@ export function TravelGuideDetailHero({ plan }: TravelGuideDetailHeroProps) {
     plan.accommodationNights > 0
       ? `${t('travelPlan.nightsLabel', { count: plan.accommodationNights })}`
       : null,
-    plan.budgetLabel ? shortTravelGuideBudgetLabel(plan.budgetLabel) : null,
+    plan.accommodationNights > 0 && plan.budgetLabel
+      ? shortTravelGuideBudgetLabel(plan.budgetLabel)
+      : null,
     plan.selfDrive ? t('travelPlan.driveYes') : t('travelPlan.driveNo'),
   ].filter(Boolean) as string[];
 

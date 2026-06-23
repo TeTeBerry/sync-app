@@ -734,6 +734,7 @@ export const zhCN: MessageTree = {
     driveHint: '影响交通路线推荐',
     driveYes: '自驾',
     driveNo: '公交',
+    accommodationTitle: '是否住宿',
     nightsLabel: '住宿天数',
     pleaseWait: '请等待当前操作完成',
     pleaseEnterActivity: '请先进入活动后再生成攻略',

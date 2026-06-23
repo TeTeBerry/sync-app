@@ -18,6 +18,8 @@ export function TravelGuideDetailBody({ plan }: TravelGuideDetailBodyProps) {
   const moreHotels = plan.accommodation.hotels.filter(
     (hotel) => !featuredHotelNames.has(hotel.name),
   );
+  const showAccommodation =
+    accommodationSchemes.length > 0 || plan.accommodation.hotels.length > 0;
 
   return (
     <>
@@ -56,53 +58,59 @@ export function TravelGuideDetailBody({ plan }: TravelGuideDetailBodyProps) {
         </TravelGuideDetailSection>
       ) : null}
 
-      <TravelGuideDetailSection title={plan.accommodation.title} accent="hotel">
-        <View className="s-travel-guide-detail__scheme-grid">
-          {accommodationSchemes.map((scheme) => (
-            <View key={scheme.label} className="s-travel-guide-detail__scheme">
-              <Text className="s-travel-guide-detail__scheme-label">
-                {scheme.label}
-              </Text>
-              <Text className="s-travel-guide-detail__scheme-name">{scheme.name}</Text>
-              <Text className="s-travel-guide-detail__scheme-note">{scheme.note}</Text>
-              <Text className="s-travel-guide-detail__scheme-reason">
-                {scheme.reason}
-              </Text>
-              {scheme.bookingHint ? (
-                <Text className="s-travel-guide-detail__scheme-hint">
-                  {t('travelGuide.bookingHint')} {scheme.bookingHint}
+      {showAccommodation ? (
+        <TravelGuideDetailSection title={plan.accommodation.title} accent="hotel">
+          <View className="s-travel-guide-detail__scheme-grid">
+            {accommodationSchemes.map((scheme) => (
+              <View key={scheme.label} className="s-travel-guide-detail__scheme">
+                <Text className="s-travel-guide-detail__scheme-label">
+                  {scheme.label}
                 </Text>
-              ) : null}
-            </View>
-          ))}
-        </View>
-        {moreHotels.length ? (
-          <View className="s-travel-guide-detail__more-list">
-            <Text className="s-travel-guide-detail__subsection-title">
-              {t('travelGuide.moreOptions')}
-            </Text>
-            {moreHotels.map((hotel) => (
-              <TravelGuideDetailNamedItem
-                key={hotel.name}
-                title={hotel.name}
-                note={hotel.note}
-                reason={hotel.reason}
-                bookingHint={hotel.bookingHint}
-              />
+                <Text className="s-travel-guide-detail__scheme-name">
+                  {scheme.name}
+                </Text>
+                <Text className="s-travel-guide-detail__scheme-note">
+                  {scheme.note}
+                </Text>
+                <Text className="s-travel-guide-detail__scheme-reason">
+                  {scheme.reason}
+                </Text>
+                {scheme.bookingHint ? (
+                  <Text className="s-travel-guide-detail__scheme-hint">
+                    {t('travelGuide.bookingHint')} {scheme.bookingHint}
+                  </Text>
+                ) : null}
+              </View>
             ))}
           </View>
-        ) : null}
-        {!accommodationSchemes.length
-          ? plan.accommodation.hotels.map((hotel) => (
-              <TravelGuideDetailNamedItem
-                key={hotel.name}
-                title={hotel.name}
-                note={hotel.note}
-                reason={hotel.reason}
-              />
-            ))
-          : null}
-      </TravelGuideDetailSection>
+          {moreHotels.length ? (
+            <View className="s-travel-guide-detail__more-list">
+              <Text className="s-travel-guide-detail__subsection-title">
+                {t('travelGuide.moreOptions')}
+              </Text>
+              {moreHotels.map((hotel) => (
+                <TravelGuideDetailNamedItem
+                  key={hotel.name}
+                  title={hotel.name}
+                  note={hotel.note}
+                  reason={hotel.reason}
+                  bookingHint={hotel.bookingHint}
+                />
+              ))}
+            </View>
+          ) : null}
+          {!accommodationSchemes.length
+            ? plan.accommodation.hotels.map((hotel) => (
+                <TravelGuideDetailNamedItem
+                  key={hotel.name}
+                  title={hotel.name}
+                  note={hotel.note}
+                  reason={hotel.reason}
+                />
+              ))
+            : null}
+        </TravelGuideDetailSection>
+      ) : null}
 
       {plan.itinerary?.days.length ? (
         <TravelGuideDetailSection title={plan.itinerary.title} accent="itinerary">
