@@ -38,7 +38,7 @@
 | 15 | US-ARCH-14 | AI 模块 port 化（对齐 Partner 模式） | P2 | L | BE | ✅ |
 | 16 | US-ARCH-15 | 评估 TanStack Query 迁移 | P3 | M | FE | ✅ |
 | 17 | US-ARCH-16 | OpenAPI / JSON Schema | P3 | M | BE | ✅ |
-| 18 | US-ARCH-17 | E2E / Smoke 黄金路径进 CI | P3 | M | FULL | 🔲 |
+| 18 | US-ARCH-17 | E2E / Smoke 黄金路径进 CI | P3 | M | FULL | ✅ |
 | 19 | US-ARCH-18 | AI 可观测性（结构化 trace + APM） | P3 | M | BE | ⏸ |
 
 ### Q2 并行时的最小路径
@@ -70,7 +70,7 @@
 | US-ARCH-14 | AI port 化 | P2 | ✅ |
 | US-ARCH-15 | TanStack Query 评估 | P3 | ✅ |
 | US-ARCH-16 | OpenAPI | P3 | ✅ |
-| US-ARCH-17 | E2E Smoke CI | P3 | 🔲 |
+| US-ARCH-17 | E2E Smoke CI | P3 | ✅ |
 | US-ARCH-18 | AI 可观测性 | P3 | ⏸ |
 
 **通用验收（每条 Story）**
@@ -561,21 +561,21 @@
 
 ---
 
-### US-ARCH-17 · E2E / Smoke 黄金路径进 CI P3 · M · FULL · 🔲
+### US-ARCH-17 · E2E / Smoke 黄金路径进 CI P3 · M · FULL · ✅
 
 **Story**  
 作为发布负责人，我希望 CI 在 merge 前跑通核心用户路径，以便架构重构不 silent break 主流程。
 
 **验收标准**
 
-- [ ] 扩展 `sync-app-backend` 现有 `smoke:api`、`smoke:ws` 为套件：
+- [x] 扩展 `sync-app-backend` 现有 `smoke:api`、`smoke:ws` 为套件：
   1. health
   2. 活动列表 / 详情
   3. 帖子列表（种子活动）
   4. travel-guide generate-async 轮询（可 mock LLM）
   5. AI WS 一轮 ping（若 `AI_CHAT_WS_ENABLED`）
-- [ ] GitHub Actions job：`infra:up` → `smoke:api:wait`（或 testcontainers）
-- [ ] [RELEASE-SMOKE.md](./RELEASE-SMOKE.md) 对齐
+- [x] GitHub Actions job：`infra:up` → `smoke:api:wait`（或 testcontainers）
+- [x] [RELEASE-SMOKE.md](./RELEASE-SMOKE.md) 对齐
 
 **依赖**：无（可与 P0 并行，越早越好）
 
@@ -636,7 +636,7 @@ arch(be): remove post migrations from onModuleInit [US-ARCH-03]
 |------|------|
 | 2026-06-23 | 初版：18 条 Story，P0～P3 排序 |
 | 2026-06-23 | **+US-ARCH-19** 观演资料包离线缓存；**US-ARCH-05** 扩为四层缓存分层；产品优先级：阵容/时间表 > 招募帖 |
-| 2026-06-24 | **US-ARCH-15** TanStack Query spike（包体 + notifications POC 评估，决策：混合）；**US-ARCH-16** OpenAPI P0 路由 + CI `openapi:check` + API.md schema 来源 |
+| 2026-06-24 | **US-ARCH-17** 黄金路径 smoke（`smoke:golden` / `smoke:suite`）+ CI `smoke` job + RELEASE-SMOKE 对齐 |
 
 ---
 

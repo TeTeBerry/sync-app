@@ -9,7 +9,31 @@
 - [ ] 上传包不含 `*.map`
 - [ ] 后端 `GET /api/health` 正常（目标环境 `NODE_ENV=production`）
 - [ ] 生产无 dev mock 帖（`userId` 非 `demo-mock-tml-` 前缀，见 `POST-LIFECYCLE.md` §十一）
-- [ ] （可选）`cd sync-app-backend && npm run smoke:api`
+- [ ] CI 黄金路径：`sync-app-backend` PR 合并前 `smoke` job 通过（见下文）
+
+## CI 黄金路径（自动化 · US-ARCH-17）
+
+`sync-app-backend` GitHub Actions **`smoke`** job（`main` PR / push）在 Mongo + Redis 上启动 API 后跑 `npm run smoke:suite:wait`：
+
+| 步骤 | 覆盖 |
+|------|------|
+| health | `GET /api/health` |
+| 活动 | 列表 + 详情（`legacyId=4`） |
+| 招募帖 | `ops-seed-` 种子帖列表 |
+| 攻略 | `POST …/travel-guide/generate-async` → 轮询 job 至 `completed`（Hot Path，无真实 LLM） |
+| AI WS | JWT 一轮 `smoke ping`（`AI_CHAT_WS_ENABLED=true`） |
+
+**本地复现**（需 Docker Mongo/Redis）：
+
+```bash
+cd sync-app-backend
+npm run infra:up && npm run wait:mongo
+MONGODB_URI=mongodb://127.0.0.1:27017/sync-dev npm run db:seed-ops-buddy-posts
+npm run build && AMAP_KEY=ci-smoke-placeholder AI_CHAT_WS_ENABLED=true node dist/src/main &
+SMOKE_USER_ID=smoke-golden-user npm run smoke:suite:wait
+```
+
+发版前可选跑全量 REST：`npm run smoke:api:wait`（比 golden 多 itinerary / travel-plan / notifications 等）。
 
 ## 导航与主路径（3 Tab · 无准备 Tab）
 
