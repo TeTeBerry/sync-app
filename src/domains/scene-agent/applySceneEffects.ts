@@ -1,4 +1,9 @@
-import type { InsightLineVariant, SceneEffect } from '@sync/scene-contracts';
+import type {
+  InsightLineVariant,
+  KnowledgeCardPayload,
+  SceneEffect,
+  EventsActivitySearchParsed,
+} from '@sync/scene-contracts';
 import type { BuddyPostSearchParsed } from '@/types/backend';
 import type { EventDetailPost } from '@/types/partner';
 
@@ -15,16 +20,26 @@ export type SceneReorderPostsResult = {
   parsed?: BuddyPostSearchParsed;
 };
 
+export type SceneFilterActivitiesResult = {
+  activityLegacyIds: number[];
+  totalMatched: number;
+  parsed?: EventsActivitySearchParsed;
+};
+
 export type SceneEffectHandlers = {
   onInsightLine?: (line: SceneInsightLine) => void;
   onReorderPosts?: (result: SceneReorderPostsResult) => void;
   onPrefillQuery?: (query: string, source?: string) => void;
+  onKnowledgeCard?: (card: KnowledgeCardPayload) => void;
+  onFilterActivities?: (result: SceneFilterActivitiesResult) => void;
 };
 
 export type ApplySceneEffectsResult = {
   insightLines: SceneInsightLine[];
   reorderPosts: SceneReorderPostsResult | null;
   prefillQuery: string | null;
+  knowledgeCard: KnowledgeCardPayload | null;
+  filterActivities: SceneFilterActivitiesResult | null;
 };
 
 export function applySceneEffects(
@@ -34,6 +49,8 @@ export function applySceneEffects(
   const insightLines: SceneInsightLine[] = [];
   let reorderPosts: SceneReorderPostsResult | null = null;
   let prefillQuery: string | null = null;
+  let knowledgeCard: KnowledgeCardPayload | null = null;
+  let filterActivities: SceneFilterActivitiesResult | null = null;
 
   for (const effect of effects ?? []) {
     switch (effect.type) {
@@ -62,12 +79,32 @@ export function applySceneEffects(
         handlers.onPrefillQuery?.(effect.query, effect.source);
         break;
       }
+      case 'knowledge_card': {
+        knowledgeCard = effect.card;
+        handlers.onKnowledgeCard?.(effect.card);
+        break;
+      }
+      case 'filter_activities': {
+        filterActivities = {
+          activityLegacyIds: effect.activityLegacyIds,
+          totalMatched: effect.totalMatched,
+          parsed: effect.parsed,
+        };
+        handlers.onFilterActivities?.(filterActivities);
+        break;
+      }
       default:
         break;
     }
   }
 
-  return { insightLines, reorderPosts, prefillQuery };
+  return {
+    insightLines,
+    reorderPosts,
+    prefillQuery,
+    knowledgeCard,
+    filterActivities,
+  };
 }
 
 export function findSceneInsightLine(

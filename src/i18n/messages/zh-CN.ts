@@ -182,6 +182,26 @@ export const zhCN: MessageTree = {
     searchEmpty: '没有匹配的活动，换个关键词或浏览全部活动',
     searchAria: '搜索电音节',
     searchClear: '清除搜索',
+    searchMode: {
+      keyword: '搜活动',
+      knowledge: '问电音',
+    },
+    knowledge: {
+      kicker: 'AI 资讯',
+      searchPlaceholder: '如：7 月欧洲 techno、韩国签证',
+      parsedLabel: '检索条件：{{summary}}',
+      loading: '正在整理电音节资讯…',
+      searching: '正在检索相关活动…',
+      searchEmpty: '暂未找到匹配活动，可换种问法或浏览全部',
+      sources: '来源：{{sources}}',
+      disclaimer: '仅供参考，以主办方与公开资料为准；不卖票、不撮合组队',
+      aiGenerated: 'AI 整理',
+      fallbackTitle: '电音节资讯',
+      fallbackBody: '输入自然语言问题，获取活动库摘要与相关场次。',
+      fallbackSource: 'SYNC 活动库',
+      offlineMatched: '已在本地活动库匹配到 {{count}} 场，可点击下方活动查看详情。',
+      offlineFallback: '网络暂不可用，已改用关键词在本地活动库检索。',
+    },
   },
   profile: {
     guest: {

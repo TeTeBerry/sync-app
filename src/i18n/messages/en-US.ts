@@ -190,6 +190,30 @@ export const enUS: MessageTree = {
     searchEmpty: 'No matching events. Try another keyword or browse all',
     searchAria: 'Search festivals',
     searchClear: 'Clear search',
+    searchMode: {
+      keyword: 'Search',
+      knowledge: 'Ask',
+    },
+    knowledge: {
+      kicker: 'AI intel',
+      searchPlaceholder: 'e.g. July Europe techno, Korea visa tips',
+      parsedLabel: 'Filters: {{summary}}',
+      loading: 'Summarizing festival intel…',
+      searching: 'Searching related events…',
+      searchEmpty: 'No matching events. Try another question or browse all',
+      sources: 'Sources: {{sources}}',
+      disclaimer:
+        'For reference only; confirm with organizers. No ticketing or buddy matching',
+      aiGenerated: 'AI summary',
+      fallbackTitle: 'Festival intel',
+      fallbackBody:
+        'Ask in natural language to get catalog summaries and related events.',
+      fallbackSource: 'SYNC catalog',
+      offlineMatched:
+        'Matched {{count}} local event(s). Tap an event below for details.',
+      offlineFallback:
+        'Network unavailable. Falling back to keyword search in the local catalog.',
+    },
   },
   profile: {
     guest: {
