@@ -38,14 +38,6 @@ export function EventDetailPostSearchBar({
 
   return (
     <View className="s-event-detail-post-search">
-      <View className="s-event-detail-post-search__head">
-        <View className="s-event-detail-post-search__badge">
-          <Sparkles size={12} color="#64d2ff" strokeWidth={2.25} aria-hidden />
-          <Text className="s-event-detail-post-search__badge-text">
-            {t('eventDetail.aiFindTeamKicker')}
-          </Text>
-        </View>
-      </View>
       <View
         className={
           showPrefillHint
@@ -53,7 +45,14 @@ export function EventDetailPostSearchBar({
             : 's-event-detail-post-search__field'
         }
       >
-        <Search size={16} color="#8e8e93" aria-hidden />
+        <View className="s-event-detail-post-search__badge" aria-hidden>
+          <Sparkles size={11} color="#64d2ff" strokeWidth={2.25} />
+          <Text className="s-event-detail-post-search__badge-text">
+            {t('eventDetail.aiFindTeamKicker')}
+          </Text>
+        </View>
+        <View className="s-event-detail-post-search__field-divider" aria-hidden />
+        <Search size={15} color="#8e8e93" aria-hidden />
         <Input
           className="s-event-detail-post-search__input"
           value={value}

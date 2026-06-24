@@ -1,4 +1,5 @@
 import Taro from '@tarojs/taro';
+import { hideThemedLoading, showThemedLoading } from '@/utils/themedLoading';
 import { t } from '@/i18n';
 import { shareImageFile } from '@/utils/shareImageFile';
 import {
@@ -21,12 +22,12 @@ export async function generatePersonalityPoster(
 export async function sharePersonalityPoster(
   result: PersonalityTestResult,
 ): Promise<void> {
-  void Taro.showLoading({ title: t('personality.generatingPoster'), mask: true });
+  showThemedLoading({ title: t('personality.generatingPoster'), mask: true });
   try {
     const path = await generatePersonalityPoster(result, true);
     await shareImageFile(path);
   } finally {
-    void Taro.hideLoading();
+    hideThemedLoading();
   }
 }
 
@@ -39,12 +40,12 @@ export async function savePersonalityPoster(
     throw new Error(t('personality.albumPermissionDenied'));
   }
 
-  void Taro.showLoading({ title: t('personality.savingPoster'), mask: true });
+  showThemedLoading({ title: t('personality.savingPoster'), mask: true });
   try {
     const path = await generatePersonalityPoster(result, false);
     await saveImageToPhotosAlbum(path);
     void Taro.showToast({ title: t('personality.posterSaved'), icon: 'success' });
   } finally {
-    void Taro.hideLoading();
+    hideThemedLoading();
   }
 }

@@ -4,6 +4,7 @@ import Taro, {
   useShareAppMessage,
   useShareTimeline,
 } from '@tarojs/taro';
+import { hideThemedLoading, showThemedLoading } from '@/utils/themedLoading';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   fetchTravelGuidePlan,
@@ -261,7 +262,7 @@ export function useAiTravelGuidePage() {
 
       const run = async () => {
         setBudgetTierUpdating(true);
-        void Taro.showLoading({
+        showThemedLoading({
           title: t('travelGuide.budgetCompareUpdating'),
           mask: true,
         });
@@ -280,7 +281,7 @@ export function useAiTravelGuidePage() {
             error instanceof Error ? error.message : t('travelGuide.loadFailed');
           void Taro.showToast({ title: message, icon: 'none' });
         } finally {
-          Taro.hideLoading();
+          hideThemedLoading();
           setBudgetTierUpdating(false);
         }
       };

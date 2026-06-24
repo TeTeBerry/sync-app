@@ -136,12 +136,13 @@ export const enUS: MessageTree = {
     artistsSearchAria: 'Search artists',
     artistsSearchEmpty: 'No artists found',
     artistsSearchEmptyHint: 'Try another keyword, or clear search to browse all',
-    artistsGenreAria: 'Filter artists by genre',
-    artistsGenreFilterEmpty: 'No artists in this genre',
+    artistsGenreAria: 'Filter artists by primary genre',
+    artistsGenreFilterEmpty: 'No artists in this primary genre',
     artistsGenreFilterEmptyHint:
-      'Try another genre, or tap the selected chip again to clear',
+      'Try another primary genre, or tap the selected chip again to clear',
     artistsFilterEmpty: 'No artists match your filters',
-    artistsFilterEmptyHint: 'Adjust search or genre filters, or clear all filters',
+    artistsFilterEmptyHint:
+      'Adjust search or primary genre filters, or clear all filters',
     artistsGenrePreferenceInsight:
       'Public catalog sorted with your genre preferences in mind',
     artistsLoadFailed: 'Failed to load artists',
@@ -156,7 +157,7 @@ export const enUS: MessageTree = {
         'Artist profile is being organized. Browse catalog appearances below.',
       loadingDjInfo: 'Loading artist info…',
       disclaimer: 'Information from public sources, for reference only',
-      representativeTracksTitle: 'Representative tracks',
+      representativeTracksTitle: 'Recent releases',
       bioExpand: 'Show full bio',
       bioCollapse: 'Show less',
       appearancesTitle: 'Catalog appearances',

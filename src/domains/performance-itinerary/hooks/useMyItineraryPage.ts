@@ -1,4 +1,5 @@
 import Taro, { useRouter } from '@tarojs/taro';
+import { hideThemedLoading, showThemedLoading } from '@/utils/themedLoading';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { isLiveApi } from '@/constants/api';
 import { useActivityDetailQuery } from '@/hooks/useSyncApi';
@@ -241,7 +242,7 @@ export function useMyItineraryPage() {
   }, [activityLegacyId]);
 
   const handleSave = useCallback(async () => {
-    void Taro.showLoading({ title: t('itinerary.generatingWallpaper'), mask: true });
+    showThemedLoading({ title: t('itinerary.generatingWallpaper'), mask: true });
 
     const daysForSave = normalizeItineraryDaysForSave(
       itineraryDays as ApiItineraryDay[],
@@ -283,7 +284,7 @@ export function useMyItineraryPage() {
         { serverSaved, manageLoading: false },
       );
     } finally {
-      void Taro.hideLoading();
+      hideThemedLoading();
     }
   }, [
     activityLegacyId,

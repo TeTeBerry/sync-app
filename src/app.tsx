@@ -13,6 +13,7 @@ import { View } from '@tarojs/components';
 import { LucideTaroProvider } from './components/icons';
 import type { PropsWithChildren } from 'react';
 import NavigationLoadingOverlay from './components/navigation/NavigationLoadingOverlay';
+import ThemedLoadingModal from './components/ThemedLoadingModal';
 import { preloadEventSubpackage } from './utils/subpackagePreload';
 import { initCloudBase } from './utils/cloudInit';
 import {
@@ -51,6 +52,7 @@ export default function App({ children }: PropsWithChildren) {
       <View className="s-app-shell">
         <View className="s-app-shell__viewport">{children}</View>
         <NavigationLoadingOverlay />
+        <ThemedLoadingModal />
       </View>
     </LucideTaroProvider>
   );

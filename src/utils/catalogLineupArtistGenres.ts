@@ -1,4 +1,7 @@
-import { resolvePrimaryGenreCategory } from '@/packageEvent/pages/exclusive-itinerary/exclusiveItineraryFilters';
+import {
+  extractDjStyleTokens,
+  resolvePrimaryGenreCategory,
+} from '@/packageEvent/pages/exclusive-itinerary/exclusiveItineraryFilters';
 import type { CatalogLineupArtist } from '../types/backend';
 
 export type CatalogArtistGenreChip = {
@@ -8,6 +11,35 @@ export type CatalogArtistGenreChip = {
 };
 
 const GENRE_TOKEN_SPLIT = /\s*[·•|/]\s*/;
+
+/** Primary filter bucket — uses seed `genre`, else first token of `genreLabel`. */
+export function resolveCatalogArtistPrimaryGenre(
+  artist: Pick<CatalogLineupArtist, 'genre' | 'genreLabel'>,
+): string {
+  const genre = artist.genre?.trim() ?? '';
+  if (genre && genre !== '风格待补充') {
+    return resolvePrimaryGenreCategory(genre);
+  }
+
+  const trimmed = artist.genreLabel?.trim() ?? '';
+  if (!trimmed || trimmed === '风格待补充') {
+    return '';
+  }
+
+  const [firstToken] = extractDjStyleTokens(trimmed);
+  return firstToken ? resolvePrimaryGenreCategory(firstToken) : '';
+}
+
+/** Card label — prefer seed `genre` verbatim (e.g. Future Bass), else resolved bucket. */
+export function getCatalogArtistPrimaryGenreLabel(
+  artist: Pick<CatalogLineupArtist, 'genre' | 'genreLabel'>,
+): string {
+  const genre = artist.genre?.trim() ?? '';
+  if (genre && genre !== '风格待补充') {
+    return genre;
+  }
+  return resolveCatalogArtistPrimaryGenre(artist);
+}
 
 export function extractCatalogArtistGenreTokens(genreLabel: string): string[] {
   const trimmed = genreLabel?.trim() ?? '';
@@ -95,7 +127,7 @@ export function catalogArtistMatchesGenreChip(
     return true;
   }
 
-  const artistPrimary = resolvePrimaryGenreCategory(artist.genreLabel);
+  const artistPrimary = resolveCatalogArtistPrimaryGenre(artist);
   const selected = resolvePrimaryGenreCategory(genreChip);
   if (!artistPrimary || !selected) {
     return false;
@@ -112,7 +144,7 @@ export function buildCatalogArtistGenreChips(
   const labels = new Map<string, string>();
 
   for (const artist of artists) {
-    const primary = resolvePrimaryGenreCategory(artist.genreLabel);
+    const primary = resolveCatalogArtistPrimaryGenre(artist);
     if (!primary) {
       continue;
     }

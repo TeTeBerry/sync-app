@@ -15,6 +15,7 @@ import { IMAGE_SIZE } from '../../../constants/imageSizes';
 import { thumbnailImageUrl } from '../../../utils/imageUrl';
 import { goEventDetail } from '../../../utils/route';
 import { compareActivitiesNearestFirst } from '../../../utils/activityStatus';
+import { getCatalogArtistPrimaryGenreLabel } from '../../../utils/catalogLineupArtistGenres';
 import { pickNearestUpcomingActivity } from '../utils/pickNearestUpcomingActivity';
 import { ArtistActivityRow } from './ArtistActivityRow';
 
@@ -112,6 +113,7 @@ function ArtistProfileSheetInner({
     ? profileFull || profileSummary || t('events.artistProfile.bioPlaceholder')
     : profileSummary || profileFull || t('events.artistProfile.bioPlaceholder');
   const representativeTracks = artist?.representativeTracks ?? [];
+  const primaryGenre = artist ? getCatalogArtistPrimaryGenreLabel(artist) : '';
 
   return (
     <View
@@ -210,9 +212,13 @@ function ArtistProfileSheetInner({
                       </Text>
                     ) : null}
                   </View>
-                  {artist?.genreLabel ? (
+                  {artist?.genreLabel && artist.genreLabel !== '风格待补充' ? (
                     <Text className="s-artist-profile-sheet__genre">
                       {artist.genreLabel}
+                    </Text>
+                  ) : primaryGenre ? (
+                    <Text className="s-artist-profile-sheet__genre">
+                      {primaryGenre}
                     </Text>
                   ) : null}
                   <Text
@@ -247,26 +253,6 @@ function ArtistProfileSheetInner({
               style={{ flex: 1, height: 0, minHeight: 0 }}
             >
               <View className="s-artist-profile-sheet__body">
-                {representativeTracks.length ? (
-                  <View className="s-artist-profile-sheet__tracks">
-                    <View className="s-artist-profile-sheet__section-head">
-                      <View className="s-artist-profile-sheet__section-accent" />
-                      <Text className="s-artist-profile-sheet__section-title">
-                        {t('events.artistProfile.representativeTracksTitle')}
-                      </Text>
-                    </View>
-                    <View className="s-artist-profile-sheet__track-list">
-                      {representativeTracks.map((track) => (
-                        <Text
-                          key={track}
-                          className="s-artist-profile-sheet__track-item s-line-clamp-1"
-                        >
-                          {track}
-                        </Text>
-                      ))}
-                    </View>
-                  </View>
-                ) : null}
                 <View className="s-artist-profile-sheet__section-head">
                   <View className="s-artist-profile-sheet__section-accent" />
                   <Text className="s-artist-profile-sheet__section-title">
@@ -296,6 +282,26 @@ function ArtistProfileSheetInner({
                     {t('events.artistProfile.appearancesEmpty')}
                   </Text>
                 )}
+                {representativeTracks.length ? (
+                  <View className="s-artist-profile-sheet__tracks">
+                    <View className="s-artist-profile-sheet__section-head">
+                      <View className="s-artist-profile-sheet__section-accent" />
+                      <Text className="s-artist-profile-sheet__section-title">
+                        {t('events.artistProfile.representativeTracksTitle')}
+                      </Text>
+                    </View>
+                    <View className="s-artist-profile-sheet__track-list">
+                      {representativeTracks.map((track) => (
+                        <Text
+                          key={track}
+                          className="s-artist-profile-sheet__track-item s-line-clamp-1"
+                        >
+                          {track}
+                        </Text>
+                      ))}
+                    </View>
+                  </View>
+                ) : null}
               </View>
             </ScrollView>
 

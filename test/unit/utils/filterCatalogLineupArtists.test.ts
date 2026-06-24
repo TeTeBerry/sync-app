@@ -3,6 +3,7 @@ import type { CatalogLineupArtist } from '@/types/backend';
 import {
   buildCatalogArtistGenreChips,
   catalogArtistMatchesGenreChip,
+  getCatalogArtistPrimaryGenreLabel,
   scoreCatalogArtistGenrePreference,
   sortCatalogLineupArtistsByGenrePreference,
 } from '@/utils/catalogLineupArtistGenres';
@@ -14,6 +15,8 @@ function artist(
   return {
     id: partial.id ?? partial.name.toLowerCase().replace(/\s+/g, '-'),
     name: partial.name,
+    genre:
+      partial.genre ?? partial.genreLabel?.split(/\s*[·/]\s*/)[0]?.trim() ?? 'House',
     genreLabel: partial.genreLabel ?? 'House',
     activityCount: partial.activityCount ?? 1,
     thumbnail: partial.thumbnail ?? 'https://example.com/a.jpg',
@@ -22,21 +25,50 @@ function artist(
 
 describe('catalogLineupArtistGenres', () => {
   const artists = [
-    artist({ name: 'AFROJACK', genreLabel: 'Big Room · Dutch House' }),
-    artist({ name: 'CHARLOTTE DE WITTE', genreLabel: 'Techno · Peak Time' }),
-    artist({ name: 'VINI VICI', genreLabel: 'Psytrance · Progressive' }),
+    artist({
+      name: 'AFROJACK',
+      genre: 'House',
+      genreLabel: 'Big Room · Dutch House',
+    }),
+    artist({
+      name: 'CHARLOTTE DE WITTE',
+      genre: 'Techno',
+      genreLabel: 'Techno · Peak Time',
+    }),
+    artist({
+      name: 'VINI VICI',
+      genre: 'Trance',
+      genreLabel: 'Psytrance · Progressive',
+    }),
   ];
 
-  it('matches artists by primary genre bucket', () => {
+  it('matches artists by primary genre bucket from seed genre field', () => {
     expect(catalogArtistMatchesGenreChip(artists[0], 'House')).toBe(true);
     expect(catalogArtistMatchesGenreChip(artists[1], 'Techno')).toBe(true);
     expect(catalogArtistMatchesGenreChip(artists[0], 'Techno')).toBe(false);
+    expect(catalogArtistMatchesGenreChip(artists[2], 'Trance')).toBe(true);
+    expect(catalogArtistMatchesGenreChip(artists[2], 'House')).toBe(false);
+  });
+
+  it('prefers seed genre over misleading Discogs genreLabel tokens', () => {
+    const marshmello = artist({
+      name: 'MARSHMELLO',
+      genre: 'Future Bass',
+      genreLabel: 'Future Bass · Melodic Trap · Future House · Electro Pop',
+    });
+    expect(getCatalogArtistPrimaryGenreLabel(marshmello)).toBe('Future Bass');
+    expect(catalogArtistMatchesGenreChip(marshmello, 'Bass')).toBe(true);
+    expect(catalogArtistMatchesGenreChip(marshmello, 'Breakbeat')).toBe(false);
   });
 
   it('builds genre chips sorted by artist count', () => {
     const chips = buildCatalogArtistGenreChips([
       ...artists,
-      artist({ name: 'MARTIN GARRIX', genreLabel: 'Progressive House' }),
+      artist({
+        name: 'MARTIN GARRIX',
+        genre: 'House',
+        genreLabel: 'Progressive House',
+      }),
     ]);
 
     expect(chips.map((chip) => chip.label)).toEqual(['House', 'Techno', 'Trance']);
@@ -58,10 +90,26 @@ describe('catalogLineupArtistGenres', () => {
 
 describe('filterCatalogLineupArtists', () => {
   const artists = [
-    artist({ name: 'MARTIN GARRIX', genreLabel: 'Big Room · Progressive House' }),
-    artist({ name: 'AFROJACK', genreLabel: 'Big Room · Dutch House' }),
-    artist({ name: 'DIMITRI VEGAS & LIKE MIKE', genreLabel: 'Electro House' }),
-    artist({ name: 'VINI VICI', genreLabel: 'Psytrance · Progressive' }),
+    artist({
+      name: 'MARTIN GARRIX',
+      genre: 'House',
+      genreLabel: 'Big Room · Progressive House',
+    }),
+    artist({
+      name: 'AFROJACK',
+      genre: 'House',
+      genreLabel: 'Big Room · Dutch House',
+    }),
+    artist({
+      name: 'DIMITRI VEGAS & LIKE MIKE',
+      genre: 'House',
+      genreLabel: 'Electro House',
+    }),
+    artist({
+      name: 'VINI VICI',
+      genre: 'Trance',
+      genreLabel: 'Psytrance · Progressive',
+    }),
   ];
 
   it('returns all artists when query is empty', () => {

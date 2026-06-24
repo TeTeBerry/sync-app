@@ -6,7 +6,7 @@ export const FIXTURE_EXCLUSIVE_DJS: ExclusiveItineraryDj[] = [
     id: 'marshmello',
     name: 'MARSHMELLO',
     genre: 'Future Bass',
-    genreLabel: 'Trap · Dubstep · Pop · Future Bass',
+    genreLabel: 'Future Bass · Melodic Trap · Future House · Electro Pop',
     stage: 'main',
     popularity: 98,
     avatarSeed: 'marshmello',

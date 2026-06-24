@@ -1,4 +1,5 @@
 import Taro from '@tarojs/taro';
+import { hideThemedLoading, showThemedLoading } from '@/utils/themedLoading';
 import {
   ensureWritePhotosAlbumPermission,
   promptOpenAlbumSettings,
@@ -87,7 +88,7 @@ export async function generateAndSaveItineraryWallpaper(
 export type RunSaveItineraryWallpaperOptions = {
   /** Server itinerary already persisted — show partial success if wallpaper skipped. */
   serverSaved?: boolean;
-  /** When false, caller owns showLoading/hideLoading (e.g. save + wallpaper in one tap). */
+  /** When false, caller owns showThemedLoading/hideThemedLoading (e.g. save + wallpaper in one tap). */
   manageLoading?: boolean;
 };
 
@@ -97,7 +98,7 @@ export async function runSaveItineraryWallpaperFlow(
 ): Promise<void> {
   const manageLoading = options?.manageLoading !== false;
   if (manageLoading) {
-    void Taro.showLoading({ title: '生成屏保中…', mask: true });
+    showThemedLoading({ title: '生成屏保中…', mask: true });
   }
   try {
     await generateAndSaveItineraryWallpaper(input);
@@ -132,7 +133,7 @@ export async function runSaveItineraryWallpaperFlow(
     });
   } finally {
     if (manageLoading) {
-      void Taro.hideLoading();
+      hideThemedLoading();
     }
   }
 }

@@ -13,8 +13,6 @@ type EventDetailPostFilterBarProps = {
   onSelectedCityChange: (city: string) => void;
   recruitingOnly: boolean;
   onRecruitingOnlyChange: (next: boolean) => void;
-  onClear?: () => void;
-  isActive?: boolean;
   disabled?: boolean;
 };
 
@@ -24,8 +22,6 @@ export function EventDetailPostFilterBar({
   onSelectedCityChange,
   recruitingOnly,
   onRecruitingOnlyChange,
-  onClear,
-  isActive = false,
   disabled = false,
 }: EventDetailPostFilterBarProps) {
   const t = useT();
@@ -54,11 +50,6 @@ export function EventDetailPostFilterBar({
   const handleCityClick = (city: string, active: boolean) => {
     if (disabled) return;
     onSelectedCityChange(active ? '' : city);
-  };
-
-  const handleClear = () => {
-    if (disabled) return;
-    onClear?.();
   };
 
   const handleOpenCitySheet = () => {
@@ -97,31 +88,14 @@ export function EventDetailPostFilterBar({
 
   return (
     <View className="s-event-detail-post-filter">
-      <View className="s-event-detail-post-filter__head">
-        <Text className="s-event-detail-post-filter__label">
-          {t('eventDetail.filterSection')}
-        </Text>
-        {isActive && onClear ? (
-          <Text
-            className={[
-              's-event-detail-post-filter__clear',
-              disabled && 's-event-detail-post-filter__clear--disabled',
-            ]
-              .filter(Boolean)
-              .join(' ')}
-            onClick={handleClear}
-            role="button"
-          >
-            {t('eventDetail.clearFilter')}
-          </Text>
-        ) : null}
-      </View>
-
-      <View className="s-event-detail-post-filter__row">
-        <Text className="s-event-detail-post-filter__row-label">
-          {t('eventDetail.filterStatus')}
-        </Text>
-        <View className="s-event-detail-post-filter__row-chips">
+      <ScrollView
+        scrollX
+        enhanced
+        showScrollbar={false}
+        className="s-event-detail-post-filter__scroll s-scrollbar-none"
+        aria-label={t('eventDetail.filterSection')}
+      >
+        <View className="s-event-detail-post-filter__chips">
           <View
             className={chipClassName(recruitingOnly)}
             onClick={handleRecruitingOnlyClick}
@@ -132,23 +106,8 @@ export function EventDetailPostFilterBar({
               {t('eventDetail.filterRecruitingOnly')}
             </Text>
           </View>
-        </View>
-      </View>
-
-      {showCityRow ? (
-        <View className="s-event-detail-post-filter__row">
-          <Text className="s-event-detail-post-filter__row-label">
-            {t('eventDetail.filterDepartureCity')}
-          </Text>
-          <ScrollView
-            scrollX
-            enhanced
-            showScrollbar={false}
-            className="s-event-detail-post-filter__scroll s-scrollbar-none"
-            aria-label={t('eventDetail.filterDepartureCity')}
-          >
-            <View className="s-event-detail-post-filter__chips">
-              {inlineCities.map((city) => {
+          {showCityRow
+            ? inlineCities.map((city) => {
                 const active = selectedCity === city;
                 return (
                   <View
@@ -163,23 +122,22 @@ export function EventDetailPostFilterBar({
                     </Text>
                   </View>
                 );
-              })}
-              {hasOverflow ? (
-                <View
-                  className={chipClassName(moreChipActive, 'more')}
-                  onClick={handleOpenCitySheet}
-                  role="button"
-                  aria-pressed={moreChipActive}
-                >
-                  <Text className="s-event-detail-post-filter__chip-text">
-                    {t('eventDetail.filterCityMore')}
-                  </Text>
-                </View>
-              ) : null}
+              })
+            : null}
+          {showCityRow && hasOverflow ? (
+            <View
+              className={chipClassName(moreChipActive, 'more')}
+              onClick={handleOpenCitySheet}
+              role="button"
+              aria-pressed={moreChipActive}
+            >
+              <Text className="s-event-detail-post-filter__chip-text">
+                {t('eventDetail.filterCityMore')}
+              </Text>
             </View>
-          </ScrollView>
+          ) : null}
         </View>
-      ) : null}
+      </ScrollView>
 
       <ActionSheet
         open={citySheetOpen}

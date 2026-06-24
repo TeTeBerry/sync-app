@@ -1,4 +1,5 @@
 import Taro from '@tarojs/taro';
+import { hideThemedLoading, showThemedLoading } from '@/utils/themedLoading';
 import { generateTravelGuide } from '@/api/sync/travelGuide';
 import { isApiEnabled } from '@/constants/api';
 import { getTravelGuideGeneratingText } from '@/constants/aiCtaLabels';
@@ -28,7 +29,7 @@ export async function runTravelGuideGeneration(
       return;
     }
 
-    void Taro.showLoading({ title: getTravelGuideGeneratingText(), mask: true });
+    showThemedLoading({ title: getTravelGuideGeneratingText(), mask: true });
     const resolvedGuideId = guideId?.trim() || createGuideId();
 
     try {
@@ -47,7 +48,7 @@ export async function runTravelGuideGeneration(
         error instanceof Error ? error.message : t('travelPlan.guideGenerationFailed');
       void Taro.showToast({ title: message, icon: 'none' });
     } finally {
-      Taro.hideLoading();
+      hideThemedLoading();
     }
   };
 

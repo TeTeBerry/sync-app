@@ -30,6 +30,7 @@ import {
 } from '../utils/travelPlanReceiptRecognize';
 import { shouldMergeTransportForms } from '../utils/travelPlanTransportBills';
 import Taro from '@tarojs/taro';
+import { hideThemedLoading, showThemedLoading } from '@/utils/themedLoading';
 import { TravelPlanAddSheetSegment } from './TravelPlanAddSheetSegment';
 import { ScrollView, Text, View } from '@tarojs/components';
 
@@ -148,7 +149,7 @@ export function TravelPlanAddSheet({
 
       setOcrStatus('loading');
       setOcrMessage('');
-      void Taro.showLoading({ title: '识别中…', mask: true });
+      showThemedLoading({ title: '识别中…', mask: true });
 
       try {
         if (!isLiveApi()) {
@@ -208,7 +209,7 @@ export function TravelPlanAddSheet({
                 : '识别失败，请稍后重试';
         void Taro.showToast({ title: message, icon: 'none' });
       } finally {
-        void Taro.hideLoading();
+        hideThemedLoading();
       }
     })();
   }, [activityLegacyId, category, ocrStatus, resetOcrState]);

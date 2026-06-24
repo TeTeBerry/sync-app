@@ -201,6 +201,15 @@ const EventDetailPage = () => {
                     <Text className="s-event-detail__recruit-title">
                       {t('eventDetail.recruitSectionTitle')}
                     </Text>
+                    {posts.postFiltersActive && !posts.searchActive ? (
+                      <Text
+                        className="s-event-detail__recruit-clear"
+                        onClick={posts.clearPostFilters}
+                        role="button"
+                      >
+                        {t('eventDetail.clearFilter')}
+                      </Text>
+                    ) : null}
                   </View>
                   {!recruitRequiresNetwork ? (
                     <>
@@ -210,11 +219,8 @@ const EventDetailPage = () => {
                         onSelectedCityChange={posts.setPostFilterSelectedCity}
                         recruitingOnly={posts.postFilterRecruitingOnly}
                         onRecruitingOnlyChange={posts.setPostFilterRecruitingOnly}
-                        isActive={posts.postFiltersActive}
-                        onClear={posts.clearPostFilters}
                         disabled={posts.searchActive}
                       />
-                      <View className="s-event-detail__recruit-divider" aria-hidden />
                       <EventDetailPostSearchBar
                         value={posts.searchQuery}
                         onChange={posts.setSearchQuery}

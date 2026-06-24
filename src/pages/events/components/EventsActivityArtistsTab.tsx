@@ -13,29 +13,11 @@ import { thumbnailImageUrl } from '../../../utils/imageUrl';
 import { filterCatalogLineupArtists } from '../../../utils/filterCatalogLineupArtists';
 import {
   buildCatalogArtistGenreChips,
+  getCatalogArtistPrimaryGenreLabel,
   sortCatalogLineupArtistsByGenrePreference,
 } from '../../../utils/catalogLineupArtistGenres';
 import { EventsSearchBar } from './EventsSearchBar';
 import { EventsArtistGenreChips } from './EventsArtistGenreChips';
-
-function getPrimaryGenreLabel(genreLabel: string): string | null {
-  const trimmed = genreLabel.trim();
-  if (!trimmed || trimmed === '风格待补充') {
-    return null;
-  }
-
-  const [primary] = splitArtistGenreChips(trimmed);
-  return primary ?? null;
-}
-
-function splitArtistGenreChips(genreLabel: string): string[] {
-  const parts = genreLabel
-    .split(/\s*[·•|/]\s*/)
-    .map((part) => part.trim())
-    .filter(Boolean);
-
-  return parts.length ? parts : [genreLabel.trim()].filter(Boolean);
-}
 
 type EventsActivityArtistsTabProps = {
   listHeight?: number;
@@ -177,9 +159,7 @@ export const EventsActivityArtistsTab: FC<EventsActivityArtistsTabProps> = ({
               const backdropSrc = artist.thumbnail
                 ? thumbnailImageUrl(artist.thumbnail, IMAGE_SIZE.listThumb, 1)
                 : undefined;
-              const primaryGenre = artist.genreLabel
-                ? getPrimaryGenreLabel(artist.genreLabel)
-                : null;
+              const primaryGenre = getCatalogArtistPrimaryGenreLabel(artist) || null;
 
               return (
                 <View
