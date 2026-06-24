@@ -1,5 +1,5 @@
 import Taro from '@tarojs/taro';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { runScene } from '@/api/sync/sceneRun';
 import { isLiveApi } from '@/constants/api';
 import { applySceneEffects } from '@/domains/scene-agent/applySceneEffects';
@@ -209,30 +209,14 @@ export function useEventsSearch(events: EventCardUi[]) {
     usedLocalFallback,
   ]);
 
-  const clearSearch = useCallback(() => {
-    requestSeqRef.current += 1;
-    setQuery('');
-    setDebouncedQuery('');
-    setIsAiSearchActive(false);
-    setKnowledgeCard(null);
-    setParsedInsight(null);
-    setFilterLegacyIds(null);
-    setIsSearching(false);
-    setUsedLocalFallback(false);
-    lastFailToastQueryRef.current = '';
-  }, []);
-
   return {
     query,
     setQuery,
-    clearSearch,
     isActive,
     filteredEvents,
-    localFilteredEvents,
     knowledgeCard,
     parsedInsight,
     isSearching: isAiSearchActive && isSearching,
-    usedLocalFallback,
     isAiSearchActive,
   };
 }

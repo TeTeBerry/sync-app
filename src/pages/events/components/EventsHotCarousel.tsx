@@ -27,9 +27,9 @@ export const EventsHotCarousel: FC<EventsHotCarouselProps> = ({
 
   return (
     <View data-cmp="EventsHotCarousel" className="s-events-hot-carousel">
-      <Text className="s-events-hot-carousel__title">
-        {t('events.hotCarouselTitle')}
-      </Text>
+      <View className="s-events-hot-carousel__title">
+        <Text>{t('events.hotCarouselTitle')}</Text>
+      </View>
       <ScrollView
         scrollX
         enhanced

@@ -7,8 +7,6 @@ export type {
   BuddyPostComposeHints,
   BuddyPostComposeCandidate,
   BuddyPostComposeCandidateStyle,
-  BuddyPostAiComposeResult,
-  BuddyPostAiSearchResult,
   BuddyPostSearchParsed,
   CreatePostCommentPayload,
   CreatePostPayload,

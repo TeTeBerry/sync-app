@@ -337,6 +337,8 @@ const Events: React.FC = () => {
                     onSearchChange={eventsSearch.setQuery}
                     region={regionFilter}
                     timeChip={timeChip}
+                    aiActive={eventsSearch.isAiSearchActive}
+                    isSearching={eventsSearch.isSearching}
                     onRegionChange={setRegionFilter}
                     onTimeChipChange={setTimeChip}
                   />
@@ -359,9 +361,9 @@ const Events: React.FC = () => {
                         />
                       ) : null}
                       <View className="s-events__section-head s-events__section-head--list">
-                        <Text className="s-events__section-title">
-                          {t('events.allActivities')}
-                        </Text>
+                        <View className="s-events__section-title">
+                          <Text>{t('events.allActivities')}</Text>
+                        </View>
                       </View>
                       <EventsActivityList
                         events={filteredListEvents}
@@ -385,9 +387,9 @@ const Events: React.FC = () => {
                       />
 
                       <View className="s-events__section-head">
-                        <Text className="s-events__section-title">
-                          {calendarSectionTitle}
-                        </Text>
+                        <View className="s-events__section-title">
+                          <Text>{calendarSectionTitle}</Text>
+                        </View>
                       </View>
 
                       <EventsActivityList

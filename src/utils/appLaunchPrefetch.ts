@@ -1,4 +1,8 @@
-import { fetchActivities, fetchHomeSummary } from '../api/sync/activities';
+import {
+  fetchActivities,
+  fetchCatalogLineupArtists,
+  fetchHomeSummary,
+} from '../api/sync/activities';
 import { fetchProfileSummary } from '../api/sync/profile';
 import { isLiveApi } from '../constants/api';
 import { isWeappCloudRunTransportEnabled } from '../constants/cloud';
@@ -81,6 +85,16 @@ async function prefetchActivitiesIfMissing(): Promise<void> {
   });
 }
 
+async function prefetchLineupArtistsIfMissing(): Promise<void> {
+  if (getCacheData(['activities', 'lineup-artists'])) {
+    return;
+  }
+  await prefetchQueryWithRetry(
+    ['activities', 'lineup-artists'],
+    fetchCatalogLineupArtists,
+  );
+}
+
 /** Start core GETs during `useLaunch` so tab pages paint from cache sooner. */
 export async function prefetchCoreQueriesOnLaunch(): Promise<void> {
   if (!isLiveApi()) {
@@ -90,6 +104,7 @@ export async function prefetchCoreQueriesOnLaunch(): Promise<void> {
   await warmCloudRunContainer();
   await prefetchHomeSummaryIfMissing();
   await prefetchActivitiesIfMissing();
+  void prefetchLineupArtistsIfMissing();
   void loadPersonalityTestCatalog().catch(() => undefined);
   prefetchProfileSummaryIfMissing();
 }

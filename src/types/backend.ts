@@ -62,8 +62,6 @@ export interface ReportStatusResult {
 }
 
 export type {
-  BuddyPostAiComposeResult,
-  BuddyPostAiSearchResult,
   BuddyPostComposeCandidate,
   BuddyPostComposeHints,
   BuddyPostSearchParsed,

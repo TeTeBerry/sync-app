@@ -10,7 +10,6 @@ function resolveContractEntry(name: string): string {
 }
 
 const activityContractsPath = resolveContractEntry('@sync/activity-contracts');
-const chatContractsPath = resolveContractEntry('@sync/chat-contracts');
 const travelPlanContractsPath = resolveContractEntry('@sync/travel-plan-contracts');
 const profileContractsPath = resolveContractEntry('@sync/profile-contracts');
 const travelGuideContractsPath = resolveContractEntry('@sync/travel-guide-contracts');
@@ -42,7 +41,6 @@ if (process.env.TARO_ENV === 'weapp') {
 export default defineConfig({
   alias: {
     '@sync/activity-contracts': activityContractsPath,
-    '@sync/chat-contracts': chatContractsPath,
     '@sync/travel-plan-contracts': travelPlanContractsPath,
     '@sync/profile-contracts': profileContractsPath,
     '@sync/travel-guide-contracts': travelGuideContractsPath,

@@ -19,15 +19,17 @@ export const EventsPageHeader: FC<EventsPageHeaderProps> = ({
       className="s-events-header"
       style={tabPageHeaderStyle(navInsets, { paddingRightGutterPx: 0 })}
     >
-      <Text className="s-events-header__title">{t('events.title')}</Text>
-      <View
-        className="s-events-header__pill"
-        aria-label={t('events.upcomingCount', { count: upcomingCount })}
-      >
-        <View className="s-events-header__dot" aria-hidden />
-        <Text className="s-events-header__pill-text">
-          {t('events.upcomingCount', { count: upcomingCount })}
-        </Text>
+      <View className="s-events-header__copy">
+        <Text className="s-events-header__title">{t('events.title')}</Text>
+        {upcomingCount > 0 ? (
+          <View
+            className="s-events-header__subtitle"
+            aria-label={t('events.upcomingCount', { count: upcomingCount })}
+          >
+            <View className="s-events-header__subtitle-dot" aria-hidden />
+            <Text>{t('events.upcomingCount', { count: upcomingCount })}</Text>
+          </View>
+        ) : null}
       </View>
     </View>
   );

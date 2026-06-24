@@ -19,24 +19,13 @@ const TABS: Array<{
 
 type EventsViewTabsProps = {
   activeTab: EventsViewTab;
-  embedded?: boolean;
   onChange: (tab: EventsViewTab) => void;
 };
 
-export const EventsViewTabs: FC<EventsViewTabsProps> = ({
-  activeTab,
-  embedded = false,
-  onChange,
-}) => {
+export const EventsViewTabs: FC<EventsViewTabsProps> = ({ activeTab, onChange }) => {
   const t = useT();
   return (
-    <View
-      className={['s-events-view-tabs', embedded ? 's-events-view-tabs--embedded' : '']
-        .filter(Boolean)
-        .join(' ')}
-      role="tablist"
-      aria-label={t('events.title')}
-    >
+    <View className="s-events-view-tabs" role="tablist" aria-label={t('events.title')}>
       {TABS.map(({ id, labelKey, Icon }) => {
         const active = activeTab === id;
         const label = t(labelKey);
@@ -55,7 +44,7 @@ export const EventsViewTabs: FC<EventsViewTabsProps> = ({
           >
             <Icon
               size={15}
-              color={active ? '#000' : 'rgba(255, 255, 255, 0.42)'}
+              color={active ? '#ffffff' : 'rgba(255, 255, 255, 0.42)'}
               aria-hidden
             />
             <Text className="s-events-view-tabs__label">{label}</Text>

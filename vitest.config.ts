@@ -23,7 +23,6 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, 'src'),
       '@sync/activity-contracts': resolveContractEntry('@sync/activity-contracts'),
-      '@sync/chat-contracts': resolveContractEntry('@sync/chat-contracts'),
       '@sync/travel-plan-contracts': resolveContractEntry(
         '@sync/travel-plan-contracts',
       ),

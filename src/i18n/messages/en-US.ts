@@ -187,7 +187,7 @@ export const enUS: MessageTree = {
       map: 'Map',
       artists: 'Artists',
     },
-    searchPlaceholder: 'Search festivals, locations, or ask naturally',
+    searchPlaceholder: 'Festival, city, or month',
     searchEmpty: 'No matching events. Try another keyword or browse all',
     searchAria: 'Search festivals',
     searchClear: 'Clear search',
@@ -201,6 +201,7 @@ export const enUS: MessageTree = {
       disclaimer:
         'For reference only; confirm with organizers. No ticketing or buddy matching',
       aiGenerated: 'AI summary',
+      quickJump: 'Quick jump',
       fallbackTitle: 'Festival intel',
       fallbackBody:
         'Ask in natural language to get catalog summaries and related events.',

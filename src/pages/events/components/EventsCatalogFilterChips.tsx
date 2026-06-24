@@ -15,6 +15,7 @@ type EventsCatalogFilterChipsProps = {
   showTimeChips?: boolean;
   embedded?: boolean;
   compact?: boolean;
+  singleRow?: boolean;
   onRegionChange: (region: EventsCatalogRegionFilter) => void;
   onTimeChipChange: (chip: EventsCatalogTimeChip | null) => void;
 };
@@ -58,6 +59,7 @@ export const EventsCatalogFilterChips: FC<EventsCatalogFilterChipsProps> = ({
   showTimeChips = true,
   embedded = false,
   compact = false,
+  singleRow = false,
   onRegionChange,
   onTimeChipChange,
 }) => {
@@ -67,6 +69,35 @@ export const EventsCatalogFilterChips: FC<EventsCatalogFilterChipsProps> = ({
     onTimeChipChange(timeChip === chip ? null : chip);
   };
 
+  const regionChips = (
+    <>
+      <FilterChip
+        active={region === 'all'}
+        label={t('events.catalogFilters.regionAll')}
+        onClick={() => onRegionChange('all')}
+      />
+      {ACTIVITY_MAP_REGIONS.map((item) => (
+        <FilterChip
+          key={item}
+          active={region === item}
+          label={t(`activity.mapRegions.${item}`)}
+          onClick={() => onRegionChange(item)}
+        />
+      ))}
+    </>
+  );
+
+  const timeChipRow = showTimeChips
+    ? TIME_CHIPS.map((chip) => (
+        <FilterChip
+          key={chip}
+          active={timeChip === chip}
+          label={t(`events.catalogFilters.time.${chip}`)}
+          onClick={() => handleTimeChipClick(chip)}
+        />
+      ))
+    : null;
+
   return (
     <View
       data-cmp="EventsCatalogFilterChips"
@@ -74,52 +105,43 @@ export const EventsCatalogFilterChips: FC<EventsCatalogFilterChipsProps> = ({
         's-events-catalog-filters',
         embedded ? 's-events-catalog-filters--embedded' : '',
         compact ? 's-events-catalog-filters--compact' : '',
+        singleRow ? 's-events-catalog-filters--single-row' : '',
       ]
         .filter(Boolean)
         .join(' ')}
     >
-      <View className="s-events-catalog-filters__group">
-        {!compact ? (
-          <Text className="s-events-catalog-filters__label">
-            {t('events.catalogFilters.regionLabel')}
-          </Text>
-        ) : null}
-        <View className="s-events-catalog-filters__row">
-          <FilterChip
-            active={region === 'all'}
-            label={t('events.catalogFilters.regionAll')}
-            onClick={() => onRegionChange('all')}
-          />
-          {ACTIVITY_MAP_REGIONS.map((item) => (
-            <FilterChip
-              key={item}
-              active={region === item}
-              label={t(`activity.mapRegions.${item}`)}
-              onClick={() => onRegionChange(item)}
-            />
-          ))}
-        </View>
-      </View>
-
-      {showTimeChips ? (
-        <View className="s-events-catalog-filters__group">
-          {!compact ? (
-            <Text className="s-events-catalog-filters__label">
-              {t('events.catalogFilters.timeLabel')}
-            </Text>
+      {singleRow ? (
+        <View className="s-events-catalog-filters__scroll s-scrollbar-none">
+          <View className="s-events-catalog-filters__row">{regionChips}</View>
+          {showTimeChips ? (
+            <>
+              <View className="s-events-catalog-filters__sep" aria-hidden />
+              <View className="s-events-catalog-filters__row">{timeChipRow}</View>
+            </>
           ) : null}
-          <View className="s-events-catalog-filters__row">
-            {TIME_CHIPS.map((chip) => (
-              <FilterChip
-                key={chip}
-                active={timeChip === chip}
-                label={t(`events.catalogFilters.time.${chip}`)}
-                onClick={() => handleTimeChipClick(chip)}
-              />
-            ))}
-          </View>
         </View>
-      ) : null}
+      ) : (
+        <>
+          <View className="s-events-catalog-filters__group">
+            {!compact ? (
+              <Text className="s-events-catalog-filters__label">
+                {t('events.catalogFilters.regionLabel')}
+              </Text>
+            ) : null}
+            <View className="s-events-catalog-filters__row">{regionChips}</View>
+          </View>
+          {showTimeChips ? (
+            <View className="s-events-catalog-filters__group">
+              {!compact ? (
+                <Text className="s-events-catalog-filters__label">
+                  {t('events.catalogFilters.timeLabel')}
+                </Text>
+              ) : null}
+              <View className="s-events-catalog-filters__row">{timeChipRow}</View>
+            </View>
+          ) : null}
+        </>
+      )}
     </View>
   );
 };

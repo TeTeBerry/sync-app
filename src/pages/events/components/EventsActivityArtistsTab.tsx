@@ -120,8 +120,6 @@ export const EventsActivityArtistsTab: FC<EventsActivityArtistsTabProps> = ({
     >
       <View className="s-events__artists-toolbar">
         <EventsSearchBar
-          embedded
-          compact
           value={artistSearchQuery}
           onChange={setArtistSearchQuery}
           placeholder={t('events.artistsSearchPlaceholder')}

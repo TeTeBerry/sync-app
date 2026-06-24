@@ -1,4 +1,5 @@
 import { apiDelete, apiGet, apiPost } from '../../utils/apiClient';
+import { LONG_RUNNING_REQUEST_TIMEOUT_MS } from '../../utils/apiClient';
 import { getActivityTypeLabel } from '../../constants/activityType';
 import type {
   ActivityRegistrationResult,
@@ -15,7 +16,9 @@ export function fetchActivities() {
 }
 
 export function fetchCatalogLineupArtists() {
-  return apiGet<CatalogLineupArtist[]>('/activities/lineup-artists');
+  return apiGet<CatalogLineupArtist[]>('/activities/lineup-artists', undefined, {
+    timeoutMs: LONG_RUNNING_REQUEST_TIMEOUT_MS,
+  });
 }
 
 export function fetchCatalogLineupArtistDetail(id: string) {
@@ -24,10 +27,6 @@ export function fetchCatalogLineupArtistDetail(id: string) {
 
 export function fetchActivitiesByLineupArtistId(lineupArtistId: string) {
   return apiGet<BackendActivity[]>('/activities', { lineupArtistId });
-}
-
-export function resolveActivityByKeyword(keyword: string) {
-  return apiGet<BackendActivity | null>('/activities/resolve', { keyword });
 }
 
 function buildHomeSummaryFromCatalog(activities: BackendActivity[]): HomeSummary {

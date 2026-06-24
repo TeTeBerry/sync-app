@@ -3,7 +3,6 @@ export default {
   /** 微信 DarkMode：window / tabBar / 页面背景随系统深浅色切换 */
   darkmode: true,
   themeLocation: 'theme.json',
-  requiredPrivateInfos: ['getLocation'] as const,
   /** 微信「代码质量」要求开启按需注入，见开发者工具 → 代码质量 → 组件 */
   lazyCodeLoading: 'requiredComponents',
   /** 主包：3 个 Tab */
@@ -65,9 +64,6 @@ export default {
     uploadFile: 60000,
   },
   permission: {
-    'scope.userLocation': {
-      desc: '你的位置信息将用于活动地图定位',
-    },
     'scope.writePhotosAlbum': {
       desc: '保存行程屏保图片到你的相册',
     },

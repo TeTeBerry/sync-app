@@ -25,10 +25,6 @@ const MAIN_PACKAGE_GLOBS = [
   'components/post',
   'components/event',
   'components/auth',
-  'utils/activityMapMarkers.ts',
-  'utils/activityMapRoutePlan.ts',
-  'utils/tencentMap.ts',
-  'utils/tencentMapRoutePlan.ts',
 ];
 
 /** Path segments that pull heavy event subpackage / canvas into main chunk */

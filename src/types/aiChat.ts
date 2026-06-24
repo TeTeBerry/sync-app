@@ -1,5 +1,5 @@
-/** Re-exports for post cards and shared chat contracts (non-chat UI). */
+/** Re-exports for buddy-post publish cards (legacy path name). */
 export type {
   RecommendedPostAuthorGender,
   RecommendedPostCard,
-} from '@sync/chat-contracts';
+} from '@sync/partner-contracts';

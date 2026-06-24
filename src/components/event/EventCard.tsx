@@ -2,11 +2,10 @@ import './EventCard.scss';
 import React, { memo, useCallback, useMemo } from 'react';
 import { ImageWithFallback } from '../ImageWithFallback';
 import { Button } from '../ui';
-import { Bell, Check, Ticket, Users } from '../../components/icons';
+import { Bell, Check, ChevronRight, Users } from '../../components/icons';
 import { useActivityUpdateSubscribeAction } from '@/domains/activity-info/hooks/useActivityUpdateSubscribeAction';
 import type { ActivityMapRegion } from '../../constants/activityMapRegion';
 import { formatActivityAreaLabel } from '../../utils/filterActivitiesForEventsCatalog';
-import { getGenerateTravelGuideCta } from '../../constants/aiCtaLabels';
 import {
   activityStatusCardClass,
   getActivityStatusFromActivity,
@@ -22,6 +21,8 @@ import { useT } from '@/hooks/useI18n';
 import { useConfirmDialog } from '@/hooks/useConfirmDialog';
 import { requestUnfollowActivityConfirm } from '@/utils/unfollowActivityConfirm';
 
+/** Matches `--primary`; lucide icons need literal colors in mini program data URLs. */
+const PRIMARY_ICON_COLOR = '#ff0066';
 /** Matches `--secondary`; lucide icons need literal colors in mini program data URLs. */
 const FOLLOWED_ICON_COLOR = '#4cc9f0';
 
@@ -32,7 +33,6 @@ interface EventCardProps {
   location?: string;
   image?: string;
   going?: boolean;
-  variant?: 'default' | 'list';
   category?: string;
   region?: ActivityMapRegion;
   area?: string;
@@ -53,7 +53,6 @@ const EventCardInner: React.FC<EventCardProps> = ({
   location = 'The Ave Live',
   image = PLACEHOLDER_EVENT_HERO,
   going = false,
-  variant = 'list',
   category = '',
   region,
   area,
@@ -69,7 +68,6 @@ const EventCardInner: React.FC<EventCardProps> = ({
   const internalConfirm = useConfirmDialog({
     cancelText: t('common.cancel'),
   });
-  const travelGuideCta = getGenerateTravelGuideCta();
   const activityTitle = useMemo(() => {
     const trimmed = title?.trim();
     return trimmed || t('eventCard.activityFallback');
@@ -99,10 +97,7 @@ const EventCardInner: React.FC<EventCardProps> = ({
     confirmUnfollow,
   });
   const isNavigating = useRouteTransitionActive(legacyId ?? undefined);
-  const thumbSrc = thumbnailImageUrl(
-    image,
-    variant === 'list' ? IMAGE_SIZE.eventCardList : IMAGE_SIZE.eventCardDefault,
-  );
+  const thumbSrc = thumbnailImageUrl(image, IMAGE_SIZE.eventCardList);
   const status = getActivityStatusFromActivity(date, title);
   const heroSubtitle = useMemo(
     () => formatEventHeroMetaLine(date, location),
@@ -112,29 +107,6 @@ const EventCardInner: React.FC<EventCardProps> = ({
     recruitPostCount > 0
       ? t('common.teamPosts', { count: recruitPostCount })
       : t('common.teamPostsEmpty');
-
-  if (variant !== 'list') {
-    return (
-      <View
-        data-cmp="EventCard"
-        className={['s-event-card', activityStatusCardClass(status)]
-          .filter(Boolean)
-          .join(' ')}
-      >
-        <ImageWithFallback
-          src={thumbSrc}
-          alt={title}
-          imageClassName="s-event-card__img"
-          placeholderClassName="s-event-card__img s-event-card__img--placeholder"
-          fallback={title.slice(0, 2)}
-        />
-        <View className="s-event-card__body">
-          <Text className="s-event-card__title">{title}</Text>
-          <Text className="s-event-card__date s-line-clamp-1">{date}</Text>
-        </View>
-      </View>
-    );
-  }
 
   return (
     <>
@@ -172,18 +144,18 @@ const EventCardInner: React.FC<EventCardProps> = ({
 
           <Button
             className={[
-              's-event-card__follow-tag',
+              's-event-card__follow-btn',
               followed
-                ? 's-event-card__follow-tag--followed'
+                ? 's-event-card__follow-btn--followed'
                 : lineupPublished === false
-                  ? 's-event-card__follow-tag--pending-lineup'
-                  : 's-event-card__follow-tag--subscribe',
-              submitting && 's-event-card__follow-tag--loading',
+                  ? 's-event-card__follow-btn--pending-lineup'
+                  : 's-event-card__follow-btn--subscribe',
+              submitting && 's-event-card__follow-btn--loading',
             ]
               .filter(Boolean)
               .join(' ')}
             plain
-            hoverClass="s-event-card__follow-tag--pressed"
+            hoverClass="s-event-card__follow-btn--pressed"
             disabled={submitting}
             aria-label={
               followed
@@ -195,49 +167,15 @@ const EventCardInner: React.FC<EventCardProps> = ({
               handleSubscribe();
             }}
           >
-            <View className="s-event-card__follow-tag-accent" aria-hidden />
-            <View
-              className={[
-                's-event-card__follow-tag-icon',
-                followed && 's-event-card__follow-tag-icon--followed',
-                !followed &&
-                  lineupPublished === false &&
-                  's-event-card__follow-tag-icon--pending-lineup',
-              ]
-                .filter(Boolean)
-                .join(' ')}
-              aria-hidden
-            >
-              {followed ? (
-                <Check size={13} color={FOLLOWED_ICON_COLOR} strokeWidth={2.5} />
-              ) : (
-                <Bell
-                  size={13}
-                  color={
-                    lineupPublished === false ? '#ffd60a' : 'rgba(255, 255, 255, 0.92)'
-                  }
-                  strokeWidth={2.25}
-                />
-              )}
-            </View>
-            <View className="s-event-card__follow-tag-copy">
-              <Text className="s-event-card__follow-tag-kicker">
-                {followed
-                  ? t('eventCard.followedKicker')
-                  : lineupPublished === false
-                    ? t('eventCard.followKickerPending')
-                    : t('eventCard.followKicker')}
-              </Text>
-              <Text className="s-event-card__follow-tag-text">
-                {submitting
-                  ? followed
-                    ? t('eventCard.unfollowing')
-                    : t('eventCard.following')
-                  : followed
-                    ? t('eventCard.followedAction')
-                    : t('eventCard.followAction')}
-              </Text>
-            </View>
+            {followed ? (
+              <Check size={15} color={FOLLOWED_ICON_COLOR} strokeWidth={2.5} />
+            ) : (
+              <Bell
+                size={15}
+                color={lineupPublished === false ? '#ffd60a' : PRIMARY_ICON_COLOR}
+                strokeWidth={2.25}
+              />
+            )}
           </Button>
         </View>
 
@@ -270,9 +208,6 @@ const EventCardInner: React.FC<EventCardProps> = ({
                 </Text>
               ) : null}
               <Text className="s-event-card__detail-tag">{displayCategory}</Text>
-              <Text className="s-event-card__detail-tag s-event-card__detail-tag--ai">
-                {t('eventCard.aiTag', { cta: travelGuideCta })}
-              </Text>
             </View>
           </View>
 
@@ -295,10 +230,10 @@ const EventCardInner: React.FC<EventCardProps> = ({
                 onTeamUp?.();
               }}
             >
-              <Ticket size={15} aria-hidden />
               <Text className="s-event-card__team-btn-text">
                 {isNavigating ? t('eventCard.opening') : t('eventCard.openDetail')}
               </Text>
+              <ChevronRight size={14} color="#ff0066" aria-hidden />
             </Button>
           </View>
         </View>

@@ -15,6 +15,8 @@ type EventsCatalogToolbarProps = {
   onSearchChange: (value: string) => void;
   region: EventsCatalogRegionFilter;
   timeChip: EventsCatalogTimeChip | null;
+  aiActive?: boolean;
+  isSearching?: boolean;
   onRegionChange: (region: EventsCatalogRegionFilter) => void;
   onTimeChipChange: (chip: EventsCatalogTimeChip | null) => void;
 };
@@ -25,6 +27,8 @@ export const EventsCatalogToolbar: FC<EventsCatalogToolbarProps> = ({
   onSearchChange,
   region,
   timeChip,
+  aiActive = false,
+  isSearching = false,
   onRegionChange,
   onTimeChipChange,
 }) => {
@@ -32,21 +36,19 @@ export const EventsCatalogToolbar: FC<EventsCatalogToolbarProps> = ({
   const showTimeChips = viewTab === 'list';
 
   return (
-    <View
-      className="s-events-toolbar s-events-toolbar--scroll"
-      data-cmp="EventsCatalogToolbar"
-    >
+    <View className="s-events-toolbar" data-cmp="EventsCatalogToolbar">
       {showSearch ? (
         <EventsSearchBar
-          embedded
-          compact
           value={searchQuery}
           onChange={onSearchChange}
+          aiActive={aiActive}
+          isSearching={isSearching}
         />
       ) : null}
       <EventsCatalogFilterChips
         embedded
         compact
+        singleRow={showSearch}
         region={region}
         timeChip={timeChip}
         showTimeChips={showTimeChips}
