@@ -8,19 +8,6 @@ import {
 import { ApiAbortError } from './apiAbortError';
 import { taroRequestData } from './apiRequestBody';
 
-/** AI chat WebSocket path on the Nest container (connectContainer `path`). */
-export const AI_CHAT_WS_CONTAINER_PATH = '/api/ai/chat/ws';
-
-type ConnectContainerCloud = {
-  connectContainer: (params: {
-    config: { env: string };
-    service: string;
-    path: string;
-    header?: Record<string, string>;
-    timeout?: number;
-  }) => Promise<{ socketTask: Taro.SocketTask }>;
-};
-
 export function buildContainerApiPath(
   path: string,
   params?: Record<string, string | undefined>,
@@ -159,64 +146,4 @@ export async function callContainerRequest(
     }
     throw new Error(message || '请求失败');
   }
-}
-
-export async function connectContainerSocket(
-  path: string,
-  headers?: Record<string, string>,
-  timeoutMs = 12_000,
-): Promise<Taro.SocketTask> {
-  assertCloudRunReady();
-
-  const connectContainer = (Taro.cloud as unknown as ConnectContainerCloud)
-    .connectContainer;
-  if (!connectContainer) {
-    throw new Error(
-      '当前基础库不支持 connectContainer，请将基础库最低版本设为 2.23.0+',
-    );
-  }
-
-  const { socketTask } = await connectContainer({
-    config: { env: CLOUDBASE_ENV_ID },
-    service: CLOUD_RUN_SERVICE,
-    path,
-    header: headers,
-    timeout: timeoutMs,
-  });
-
-  return new Promise((resolve, reject) => {
-    let settled = false;
-
-    const fail = (message: string) => {
-      if (settled) return;
-      settled = true;
-      clearTimeout(timer);
-      reject(new Error(message));
-    };
-
-    const timer = setTimeout(() => {
-      fail('WebSocket 连接超时');
-      try {
-        socketTask.close({ code: 1000, reason: 'connect timeout' });
-      } catch {
-        // ignore
-      }
-    }, timeoutMs);
-
-    const onOpen = () => {
-      if (settled) return;
-      settled = true;
-      clearTimeout(timer);
-      resolve(socketTask);
-    };
-
-    if (typeof socketTask.onOpen === 'function') {
-      socketTask.onOpen(onOpen);
-      socketTask.onError((err) => fail(err.errMsg || 'WebSocket 连接失败'));
-      return;
-    }
-
-    Taro.onSocketOpen(onOpen);
-    Taro.onSocketError((err) => fail(err.errMsg || 'WebSocket 连接失败'));
-  });
 }

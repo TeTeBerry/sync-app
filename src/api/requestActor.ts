@@ -44,28 +44,6 @@ export function getClientSessionIdentity(): ClientSessionIdentity {
   };
 }
 
-/** WebSocket `send` body identity — JWT on upgrade; anonymous uses body fields. */
-export function buildAiChatWsSendActor(): {
-  userId?: string;
-  userName?: string;
-  userPhone?: string;
-} {
-  const identity = getClientSessionIdentity();
-  const phoneField = identity.userPhone.trim()
-    ? { userPhone: identity.userPhone.trim() }
-    : {};
-
-  if (identity.isAuthenticated) {
-    return phoneField;
-  }
-
-  return {
-    userId: identity.userId,
-    userName: identity.displayName,
-    ...phoneField,
-  };
-}
-
 export function useClientSessionIdentity(): ClientSessionIdentity {
   const [revision, setRevision] = useState(0);
 

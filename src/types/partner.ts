@@ -3,7 +3,6 @@
  * Do not duplicate shapes here — re-export only.
  */
 export type {
-  AiSearchPostsPayload,
   AiComposePostsPayload,
   BuddyPostComposeHints,
   BuddyPostComposeCandidate,

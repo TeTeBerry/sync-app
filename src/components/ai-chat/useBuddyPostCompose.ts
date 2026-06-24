@@ -1,7 +1,8 @@
 import { useCallback, useState } from 'react';
 import Taro from '@tarojs/taro';
 import type { AiComposePostsPayload } from '@/types/partner';
-import { composeBuddyPostCandidates } from '@/api/sync/posts';
+import { runScene } from '@/api/sync/sceneRun';
+import { applySceneEffects } from '@/domains/scene-agent/applySceneEffects';
 import type { BuddyPostComposeCandidate } from '@/types/partner';
 import { t } from '@/i18n/translate';
 
@@ -31,15 +32,25 @@ export function useBuddyPostCompose({ activityLegacyId }: UseBuddyPostComposeOpt
 
       setLoading(true);
       try {
-        const result = await composeBuddyPostCandidates({
+        const response = await runScene({
+          scene: 'recruit_compose',
           activityLegacyId,
-          ...payload,
-          regenerate: options?.regenerate === true,
+          context: {
+            trigger: 'sheet_submit',
+            dateStart: payload.dateStart,
+            dateEnd: payload.dateEnd,
+            location: payload.location,
+            headcount: payload.headcount,
+            ...(payload.composeHints ? { composeHints: payload.composeHints } : {}),
+            ...(options?.regenerate === true ? { regenerate: true } : {}),
+          },
         });
-        setCandidates(result.candidates);
-        setDisclaimer(result.disclaimer);
-        if (result.candidates.length === 1) {
-          setSelectedId(result.candidates[0]!.id);
+        const applied = applySceneEffects(response.effects);
+        const candidates = applied.candidates?.items ?? [];
+        setCandidates(candidates);
+        setDisclaimer(response.disclaimer?.trim() || null);
+        if (candidates.length === 1) {
+          setSelectedId(candidates[0]!.id);
         } else {
           setSelectedId(null);
         }

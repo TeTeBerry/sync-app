@@ -1,15 +1,5 @@
-import {
-  apiDelete,
-  apiGet,
-  apiPatch,
-  apiPost,
-  LONG_RUNNING_REQUEST_TIMEOUT_MS,
-  type ApiFetchInit,
-} from '../../utils/apiClient';
+import { apiDelete, apiGet, apiPatch, apiPost } from '../../utils/apiClient';
 import type {
-  AiComposePostsPayload,
-  BuddyPostAiComposeResult,
-  BuddyPostAiSearchResult,
   CreatePostPayload,
   DeletePostResult,
   EventDetailPost,
@@ -91,43 +81,5 @@ export function deletePostComment(postId: string, commentId: string) {
   return apiDelete<PostCommentMutationResult>(
     `/posts/${postId}/comments/${commentId}`,
     ownerQueryParams(),
-  );
-}
-
-export function composeBuddyPostCandidates(
-  payload: AiComposePostsPayload,
-  init?: ApiFetchInit,
-) {
-  return apiPost<BuddyPostAiComposeResult>(
-    '/posts/ai-compose',
-    payload,
-    ownerQueryParams(),
-    {
-      timeoutMs: LONG_RUNNING_REQUEST_TIMEOUT_MS,
-      maxRetries: 0,
-      ...init,
-    },
-  );
-}
-
-export function searchBuddyPostsWithAi(
-  query: string,
-  activityLegacyId: number,
-  init?: ApiFetchInit,
-  options?: { applyPreferenceRank?: boolean },
-) {
-  return apiPost<BuddyPostAiSearchResult>(
-    '/posts/ai-search',
-    {
-      query,
-      activityLegacyId,
-      ...(options?.applyPreferenceRank === false ? { applyPreferenceRank: false } : {}),
-    },
-    ownerQueryParams(),
-    {
-      timeoutMs: LONG_RUNNING_REQUEST_TIMEOUT_MS,
-      maxRetries: 0,
-      ...init,
-    },
   );
 }

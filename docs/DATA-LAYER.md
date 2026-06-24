@@ -12,14 +12,13 @@ REST 与自定义 `useApiQuery` 缓存的分层约定；身份为 **JWT Bearer**
 | [`utils/session.ts`](../src/utils/session.ts)           | `getClientUserId()` / `getClientUserName()` — JWT-aware 展示名 |
 | [`utils/auth.ts`](../src/utils/auth.ts)                 | `loginWithWechat` / `ensureAuth` / `logout`（`POST /auth/logout` 吊销 JWT） |
 
-### REST vs WebSocket
+### REST 身份
 
 | 通道 | 有 Bearer | 无 token |
 |------|-----------|----------|
 | **REST** | `JwtAuthGuard` 设置 `req.actor` | 受保护路由 401；`@Public()` 可访问 |
-| **AI WebSocket** | Upgrade `Authorization: Bearer`；`send` body **可不传** `userId`/`userName` | body 须 `userId`；可选 `userName` / `userPhone` |
 
-无效 JWT：请求头含 **非空 Bearer** 但校验失败 → REST **401**（`登录已过期，请重新登录`）；WS 在 `connect`/`send` 时返回同文案 `error` 帧并关闭连接。
+无效 JWT：请求头含 **非空 Bearer** 但校验失败 → REST **401**（`登录已过期，请重新登录`）。
 
 辅助函数：
 
@@ -27,16 +26,7 @@ REST 与自定义 `useApiQuery` 缓存的分层约定；身份为 **JWT Bearer**
 - `mergeOwnerQueryParams(extra)` — 合并 limit/cursor 等业务 Query
 - `resolveRequestUserId()` — React Query `queryKey` 中的用户维度
 - `notificationQueryParams()` — 通知 API：恒为 `undefined`（身份走 Bearer）
-- `buildAiChatWsSendActor()` — [`api/requestActor.ts`](../src/api/requestActor.ts)：已登录 WS `send` 仅传 `userPhone`（如有）；未登录传 `userId`/`userName`
 - `getClientSessionIdentity()` / `useClientSessionIdentity()` — 前端会话身份（勿与后端 `RequestActor` 混用）
-
-### AI WebSocket 可靠性
-
-| 层级 | 模块 | 说明 |
-|------|------|------|
-| 连接重试 | `utils/aiChatWs/pool.ts` | 建连失败最多 2 次，指数退避 |
-| 整轮重试 | `utils/aiChatWs/stream.ts` | 零事件传输失败再试 1 轮；有部分 `delta` 不自动重发 |
-| 历史恢复 | `api/sync/chat.ts` + `useChatSession` | `GET /chat/sessions/:id`；`sessionId` 持久化 |
 
 ## REST 按域拆分
 
@@ -78,8 +68,7 @@ REST 与自定义 `useApiQuery` 缓存的分层约定；身份为 **JWT Bearer**
 - [x] `ownerQueryParams()` — 恒为 `{}`；身份仅走 Bearer Header
 - [x] `apiClient` / `uploadImage`（`wx.cloud.uploadFile` → `cloud://` fileID）— 401 清 session + 后端 `message` toast
 - [x] `logout()` — `POST /auth/logout` + 清本地 session
-- [x] AI WebSocket JWT actor（upgrade Bearer；`buildAiChatWsSendActor`）
-- [x] 无效 Bearer → REST 401 + WS error；`api/requestActor.ts` + `useClientSessionIdentity`
+- [x] 无效 Bearer → REST 401；`api/requestActor.ts` + `useClientSessionIdentity`
 
 后续（可选）：地图他人帖 `GET /profile/posts`（需后端 actor/owner 分离，前端暂不排）。
 
@@ -119,11 +108,11 @@ REST 与自定义 `useApiQuery` 缓存的分层约定；身份为 **JWT Bearer**
 | `displayName` | `displayName` |
 | `resolvedUserId` | （无，由后端 JWT 解析） |
 
-REST/WS 发请求用 `getAuthHeaders()` / `buildAiChatWsSendActor()`；勿与后端 actor 类型混用。
+REST 发请求用 `getAuthHeaders()`；勿与后端 actor 类型混用。
 
 ## 活动上下文 Header
 
-`X-Activity-Id: <legacyId>`：REST 由 `ActivityContextMiddleware` 写入 `req.scopedActivityLegacyId`；AI WebSocket 在 upgrade 与 `send` body 合并。Profile 等接口 Query `activityLegacyId` 可与 Header 并存，Query 优先。
+`X-Activity-Id: <legacyId>`：REST 由 `ActivityContextMiddleware` 写入 `req.scopedActivityLegacyId`。Profile 等接口 Query `activityLegacyId` 可与 Header 并存，Query 优先。
 
 ## 依赖方向
 

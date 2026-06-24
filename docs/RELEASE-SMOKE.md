@@ -21,7 +21,7 @@
 | 活动 | 列表 + 详情（`legacyId=4`） |
 | 招募帖 | `ops-seed-` 种子帖列表 |
 | 攻略 | `POST …/travel-guide/generate-async` → 轮询 job 至 `completed`（Hot Path，无真实 LLM） |
-| AI WS | JWT 一轮 `smoke ping`（`AI_CHAT_WS_ENABLED=true`） |
+| Scene AI | `POST /ai/scene-run`（`recruit_search` 轻量 case） |
 
 **本地复现**（需 Docker Mongo/Redis）：
 
@@ -29,7 +29,7 @@
 cd sync-app-backend
 npm run infra:up && npm run wait:mongo
 MONGODB_URI=mongodb://127.0.0.1:27017/sync-dev npm run db:seed-ops-buddy-posts
-npm run build && AMAP_KEY=ci-smoke-placeholder AI_CHAT_WS_ENABLED=true node dist/src/main &
+npm run build && AMAP_KEY=ci-smoke-placeholder node dist/src/main &
 SMOKE_USER_ID=smoke-golden-user npm run smoke:suite:wait
 ```
 
@@ -98,4 +98,3 @@ SMOKE_USER_ID=smoke-golden-user npm run smoke:suite:wait
 
 - [ ] 活动详情 AI 找队：输入「上海 techno」→ `POST /api/ai/scene-run`（`scene=recruit_search`）返回 `reorder_posts` + `insight_line`
 - [ ] 失败时仍回退本地关键词筛选（与现网一致）
-- [ ] `POST /posts/ai-search` 仍可用（向后兼容）

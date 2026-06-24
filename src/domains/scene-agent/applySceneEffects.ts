@@ -4,6 +4,7 @@ import type {
   SceneEffect,
   EventsActivitySearchParsed,
 } from '@sync/scene-contracts';
+import type { BuddyPostComposeCandidate } from '@/types/partner';
 import type { BuddyPostSearchParsed } from '@/types/backend';
 import type { EventDetailPost } from '@/types/partner';
 
@@ -26,12 +27,18 @@ export type SceneFilterActivitiesResult = {
   parsed?: EventsActivitySearchParsed;
 };
 
+export type SceneCandidatesResult = {
+  items: BuddyPostComposeCandidate[];
+  aiGenerated: true;
+};
+
 export type SceneEffectHandlers = {
   onInsightLine?: (line: SceneInsightLine) => void;
   onReorderPosts?: (result: SceneReorderPostsResult) => void;
   onPrefillQuery?: (query: string, source?: string) => void;
   onKnowledgeCard?: (card: KnowledgeCardPayload) => void;
   onFilterActivities?: (result: SceneFilterActivitiesResult) => void;
+  onCandidates?: (result: SceneCandidatesResult) => void;
 };
 
 export type ApplySceneEffectsResult = {
@@ -40,6 +47,7 @@ export type ApplySceneEffectsResult = {
   prefillQuery: string | null;
   knowledgeCard: KnowledgeCardPayload | null;
   filterActivities: SceneFilterActivitiesResult | null;
+  candidates: SceneCandidatesResult | null;
 };
 
 export function applySceneEffects(
@@ -51,6 +59,7 @@ export function applySceneEffects(
   let prefillQuery: string | null = null;
   let knowledgeCard: KnowledgeCardPayload | null = null;
   let filterActivities: SceneFilterActivitiesResult | null = null;
+  let candidates: SceneCandidatesResult | null = null;
 
   for (const effect of effects ?? []) {
     switch (effect.type) {
@@ -93,6 +102,14 @@ export function applySceneEffects(
         handlers.onFilterActivities?.(filterActivities);
         break;
       }
+      case 'candidates': {
+        candidates = {
+          items: effect.items,
+          aiGenerated: effect.aiGenerated,
+        };
+        handlers.onCandidates?.(candidates);
+        break;
+      }
       default:
         break;
     }
@@ -104,6 +121,7 @@ export function applySceneEffects(
     prefillQuery,
     knowledgeCard,
     filterActivities,
+    candidates,
   };
 }
 

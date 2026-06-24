@@ -83,4 +83,23 @@ describe('applySceneEffects', () => {
     expect(result.knowledgeCard?.title).toBe('电音节资讯');
     expect(result.filterActivities?.activityLegacyIds).toEqual([3]);
   });
+
+  it('dispatches recruit_compose candidates effect', () => {
+    const onCandidates = vi.fn();
+    const effects: SceneEffect[] = [
+      {
+        type: 'candidates',
+        items: [{ id: 'c1', text: '口号：Techno 小队', style: 'slogan' }],
+        aiGenerated: true,
+      },
+    ];
+
+    const result = applySceneEffects(effects, { onCandidates });
+
+    expect(onCandidates).toHaveBeenCalledWith({
+      items: [{ id: 'c1', text: '口号：Techno 小队', style: 'slogan' }],
+      aiGenerated: true,
+    });
+    expect(result.candidates?.items).toHaveLength(1);
+  });
 });

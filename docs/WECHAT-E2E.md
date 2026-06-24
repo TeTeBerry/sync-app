@@ -1,16 +1,15 @@
 # 微信小程序 E2E 验收
 
-> 自动化：`sync-app-backend` 的 `npm run smoke:ws`（REST + AI WebSocket）。  
+> 自动化：`sync-app-backend` 的 `npm run smoke:suite:wait`（黄金路径 REST + Scene AI）。  
 > 本文档为**人工**真机/开发者工具清单。  
 > 对照：[API.md](./API.md#微信小程序) · [FRONTEND-REFACTOR-CHECKLIST.md](./FRONTEND-REFACTOR-CHECKLIST.md)
 
-## 自动化 smoke（已通过）
+## 自动化 smoke（CI）
 
 | 项 | 说明 |
 |----|------|
-| 日期 | 2026-06-07 |
-| 命令 | `cd sync-app-backend && npm run dev:all`（或已有实例）→ `npm run smoke:ws` |
-| 覆盖 | REST 健康检查、AI WebSocket upgrade（Bearer JWT）、`connected` + `auth: "jwt"`、无效 token 返回登录过期 |
+| 命令 | `cd sync-app-backend && npm run smoke:suite:wait` |
+| 覆盖 | REST 健康检查、活动/招募帖、出行攻略 async、Scene AI（`recruit_search`） |
 | 环境 | 本地 `http://localhost:3000/api`；`SMOKE_API_BASE` 可覆盖 |
 
 真机 / 体验版 HTTPS 合法域名配置完成后，再补跑下文 **6 步人工清单**。
@@ -20,9 +19,9 @@
 | 项 | 要求 |
 |----|------|
 | `TARO_APP_API_BASE_URL` | HTTPS 业务 API（公众平台 request 合法域名） |
-| `TARO_APP_AI_CHAT_WS_URL` | `wss://…/api/ai/chat/ws`（socket 合法域名） |
+| `TARO_APP_CLOUDBASE_ENV_ID` / `TARO_APP_CLOUD_RUN_SERVICE` | 云托管 callContainer（生产） |
 | `WECHAT_MINI_APP_ID` / `WECHAT_MINI_APP_SECRET` | 已配置；`POST /api/auth/wechat` 可用 |
-| 本地联调 | 开发者工具勾选 **不校验合法域名** 时可用 `http://` / `ws://` 局域网 |
+| 本地联调 | 开发者工具勾选 **不校验合法域名** 时可用 `http://` 局域网 |
 | 真机 / 体验版 | ICP 备案 + HTTPS 合法域名（见 [API.md](./API.md#微信小程序)） |
 
 ## 流程
@@ -31,11 +30,8 @@
 2. **拦截登录** — 活动/个人页 `LoginPromptHero` → 授权昵称头像 → Bearer 写入 storage
 3. **登录** — `loginWithWechat()` 仅 `wx.login` → openid，不弹 `getUserProfile`（按钮登录与 `ensureAuth` 一致）
 4. **通知** — 打开通知列表；抓包确认请求仅含 Bearer（无 Query `userId`）
-5. **AI 对话** — 进入 AI 助手发一条消息：
-   - WS upgrade 含 `Authorization`
-   - `send` body **无** `userId`/`userName`（已登录）
-   - 收到 `connected` 且 `auth: "jwt"`（dev 日志）
-6. **401 / 过期** — 将 storage 中 token 改为无效值 → 任意 REST 或 AI 发消息 → toast「登录已过期」且 session 清空
+5. **Scene AI** — 活动详情招募区 AI 找队：输入关键词 → `POST /api/ai/scene-run`（`scene=recruit_search`）返回排序结果
+6. **401 / 过期** — 将 storage 中 token 改为无效值 → 任意 REST → toast「登录已过期」且 session 清空
 
 ## 订阅消息（评论 / 活动更新）
 
@@ -71,9 +67,8 @@
 | 现象 | 检查 |
 |------|------|
 | REST 仍带 `userId=` Query | 是否真有 Bearer；`hasAuthenticatedRequest()` |
-| AI「缺少用户身份」 | upgrade 是否带 Bearer；B1 `buildAiChatWsSendActor` |
-| WS 立即 error 登录过期 | token 无效（B2）；重新微信登录 |
-| 无法连接 WS | 合法域名、`wss://`、路径 `/api/ai/chat/ws` |
+| Scene AI 401 | token 无效；重新微信登录 |
+| callContainer 失败 | `TARO_APP_CLOUDBASE_ENV_ID` / `TARO_APP_CLOUD_RUN_SERVICE`；基础库 ≥ 2.23.0 |
 
 ## Checklist 勾选
 

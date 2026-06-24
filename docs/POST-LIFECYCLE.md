@@ -11,8 +11,7 @@
 | 入口 | 组件 / Hook | 说明 |
 |------|-------------|------|
 | 活动详情 · 模板发帖 | `useEventDetailBuddyPost` + `EventDetailTemplatePostFab` | 右下角「+」打开 `AiBuddyPostSheet`，提交后 `publishBuddyPostFromForm` |
-| AI 助手 | `useAiBuddyPost` | 对话收集槽位或表单，`runPublish` → 同一 `publishBuddyPostFromForm` |
-| AI WebSocket | 后端 `create-post-from-chat` | 与 REST 共用 `PostWriteService.createPost` |
+| AI 帮写（Sheet） | `useBuddyPostCompose` | `POST /api/ai/scene-run`（`scene=recruit_compose`）生成候选文案 |
 
 活动详情 **无** 独立自由文本留言 composer；留言区展示的是结构化 **模板帖**（组队）。
 
@@ -115,7 +114,7 @@ POST /api/posts
 | 删帖 | DELETE | `/posts/:id` |
 | 评论列表 | GET | `/posts/:id/comments` |
 | 发表评论 | POST | `/posts/:id/comments` |
-| AI 搭伴检索 | POST | `/posts/ai-search` |
+| AI 搭伴检索 | POST | `/api/ai/scene-run`（`scene=recruit_search`） |
 
 **已移除**（勿再对接）：`PATCH /posts/:id`、`POST /posts/:id/like`、`GET /posts/:id/navigation-target`
 

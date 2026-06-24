@@ -82,7 +82,6 @@ Enable **“Do not verify valid domain names”** for local API / WebSocket.
 
 ```env
 TARO_APP_API_BASE_URL=http://127.0.0.1:3000/api
-TARO_APP_AI_CHAT_WS_URL=ws://127.0.0.1:3000/api/ai/chat/ws
 ```
 
 Do **not** set `TARO_APP_CLOUD_RUN_SERVICE` when pointing at local Nest. For device debugging, replace `127.0.0.1` with your LAN IP.
@@ -93,10 +92,9 @@ Do **not** set `TARO_APP_CLOUD_RUN_SERVICE` when pointing at local Nest. For dev
 TARO_APP_CLOUDBASE_ENV_ID=sync-prd-xxxx
 TARO_APP_CLOUD_RUN_SERVICE=sync-backend-prd-xxxx
 TARO_APP_API_BASE_URL=https://sync-backend-prd-xxxx.sh.run.tcloudbase.com/api
-TARO_APP_AI_CHAT_WS_URL=wss://sync-backend-prd-xxxx.sh.run.tcloudbase.com/api/ai/chat/ws
 ```
 
-REST uses `wx.cloud.callContainer`; AI WebSocket uses `wx.cloud.connectContainer` ([`src/utils/cloudRunTransport.ts`](src/utils/cloudRunTransport.ts)). Requires base library ≥ 2.23.0. No need to whitelist `sh.run.tcloudbase.com` as request/socket domain.
+REST uses `wx.cloud.callContainer` ([`src/utils/cloudRunTransport.ts`](src/utils/cloudRunTransport.ts)). Requires base library ≥ 2.23.0. No need to whitelist `sh.run.tcloudbase.com` as request domain.
 
 If `TARO_APP_API_BASE_URL` is unset, the app uses mocks and does not call the backend.
 

@@ -28,9 +28,6 @@ declare module '*.webp' {
 declare namespace NodeJS {
   interface ProcessEnv {
     TARO_APP_API_BASE_URL?: string;
-    /** Full WebSocket URL; defaults to ws(s) derived from API_BASE_URL + /ai/chat/ws */
-    TARO_APP_WS_URL?: string;
-    TARO_APP_AI_CHAT_WS_URL?: string;
     /** 腾讯位置服务 key（地图组件等） */
     TARO_APP_QQ_MAP_KEY?: string;
     TARO_APP_QQ_MAP_LAYER_STYLE?: string;

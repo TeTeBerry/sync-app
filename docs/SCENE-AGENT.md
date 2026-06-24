@@ -91,10 +91,9 @@ US-Q2-22 已移除准备 Tab 与 WS 多轮对话；**能力保留在后端 tools
 
 | 现网 | Scene 演进 |
 |------|------------|
-| `POST /posts/ai-search` | 保留兼容；**Q2-31** 活动详情已切 `scene=recruit_search` |
+| ~~`POST /posts/ai-search`~~ | 已移除；活动详情用 `scene=recruit_search` |
+| ~~`POST /posts/ai-compose`~~ | 已移除；发帖 Sheet 用 `scene=recruit_compose` |
 | `POST …/travel-guide/generate` | 长任务独立 REST + 进度，不塞进 scene-run |
-| WS `client_action` | 前端已无消费者；改为 REST `effects.open_sheet` |
-| `ReadOnlyTurnHandler` | 阵容/演出表等 **规则快路径**，能不调 LLM 就不调 |
 
 ### Scene Run API（US-Q2-31 ✅）
 
@@ -103,9 +102,13 @@ US-Q2-22 已移除准备 Tab 与 WS 多轮对话；**能力保留在后端 tools
 - 请求：`scene` · `intent?` · `activityLegacyId?` · `input?` · `context?`
 - 响应：`effects[]` · `disclaimer?`
 
-**首期 handler**：`recruit_search` → `insight_line`（`variant: parsed | preference`）+ `reorder_posts`（含 `items` · `parsed` · `totalMatched`）
+**handler**：`recruit_search` · `recruit_compose` · `events_knowledge_search`
 
-`POST /posts/ai-search` 仍保留向后兼容；活动详情 AI 找队已走 scene-run。
+- `recruit_search` → `insight_line` + `reorder_posts`
+- `recruit_compose` → `candidates` + `disclaimer`（发帖 Sheet AI 帮写）
+- `events_knowledge_search` → `knowledge_card` + `filter_activities`
+
+活动详情 AI 找队、发帖帮写、活动 Tab 搜节均走 `POST /api/ai/scene-run`。
 
 ### 实现分层（L0 / L1 / L2）
 

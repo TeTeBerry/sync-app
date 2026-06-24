@@ -21,7 +21,7 @@ vi.mock('@/utils/session', () => ({
   getClientUserPhone: () => mockGetClientUserPhone(),
 }));
 
-import { buildAiChatWsSendActor, getClientSessionIdentity } from '@/api/requestActor';
+import { getClientSessionIdentity } from '@/api/requestActor';
 
 describe('requestActor', () => {
   beforeEach(() => {
@@ -40,16 +40,14 @@ describe('requestActor', () => {
     });
   });
 
-  it('buildAiChatWsSendActor includes userId and userName when not authenticated', () => {
-    expect(buildAiChatWsSendActor()).toEqual({
-      userId: 'session-id',
-      userName: 'Guest User',
-    });
-  });
-
-  it('buildAiChatWsSendActor omits userId and userName when authenticated', () => {
+  it('getClientSessionIdentity reflects authenticated session', () => {
     mockHasAuthenticatedRequest.mockReturnValue(true);
     mockGetClientUserPhone.mockReturnValue('13800138000');
-    expect(buildAiChatWsSendActor()).toEqual({ userPhone: '13800138000' });
+    expect(getClientSessionIdentity()).toEqual({
+      isAuthenticated: true,
+      userId: 'session-id',
+      displayName: 'Guest User',
+      userPhone: '13800138000',
+    });
   });
 });
