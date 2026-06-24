@@ -29,7 +29,8 @@ export function getWallpaperCanvasSize(
     const windowWidth = win.windowWidth ?? sys.windowWidth ?? 390;
     const screenHeight =
       win.screenHeight ?? win.windowHeight ?? sys.windowHeight ?? 844;
-    const pixelRatio = Math.min(3, win.pixelRatio ?? sys.pixelRatio ?? 2);
+    // Cap at 2× — lock-screen export does not need 3×; halves pixel count on Pro devices.
+    const pixelRatio = Math.min(2, win.pixelRatio ?? sys.pixelRatio ?? 2);
 
     const scaleFactor = windowWidth / 390;
     const width = Math.min(1080, Math.max(720, Math.round(windowWidth * pixelRatio)));
@@ -68,6 +69,25 @@ export function createOffscreenWallpaperCanvas(
   return createOffscreenCanvas(width, height) as WallpaperCanvas | null;
 }
 
+type CanvasWithRaf = WallpaperCanvas & {
+  requestAnimationFrame?: (callback: () => void) => number;
+};
+
+/** WeChat canvas 2d must finish painting before canvasToTempFilePath. */
+export function flushCanvas2dDraw(canvas: CanvasWithRaf): Promise<void> {
+  return new Promise((resolve) => {
+    if (typeof canvas.requestAnimationFrame === 'function') {
+      canvas.requestAnimationFrame(() => resolve());
+      return;
+    }
+    if (typeof requestAnimationFrame === 'function') {
+      requestAnimationFrame(() => resolve());
+      return;
+    }
+    setTimeout(resolve, 32);
+  });
+}
+
 export function exportWallpaperCanvasToTempFile(
   canvas: WallpaperCanvas,
   width: number,
@@ -83,7 +103,8 @@ export function exportWallpaperCanvasToTempFile(
       height,
       destWidth: width,
       destHeight: height,
-      fileType: 'png',
+      fileType: 'jpg',
+      quality: 0.92,
       success: (res) => {
         if (res.tempFilePath) {
           resolve(res.tempFilePath);
@@ -106,6 +127,7 @@ export async function renderWallpaperToOffscreenTempFile(
     throw new Error('offscreen canvas unsupported');
   }
   paintWallpaper(canvas, params);
+  await flushCanvas2dDraw(canvas);
   return exportWallpaperCanvasToTempFile(canvas, params.width, params.height);
 }
 
@@ -144,16 +166,17 @@ export async function renderWallpaperToPageCanvasTempFile(
     throw new Error('page canvas node not found');
   }
 
-  const dpr = Math.min(2, Taro.getWindowInfo().pixelRatio ?? 2);
-  node.width = Math.round(params.width * dpr);
-  node.height = Math.round(params.height * dpr);
+  // params.width/height are already physical pixels — do not multiply DPR again.
+  node.width = params.width;
+  node.height = params.height;
 
   const ctx = node.getContext('2d');
   if (!ctx) {
     throw new Error('canvas 2d context unavailable');
   }
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
   drawItineraryWallpaper(ctx, params);
+  await flushCanvas2dDraw(node);
 
   return exportWallpaperCanvasToTempFile(node, params.width, params.height);
 }

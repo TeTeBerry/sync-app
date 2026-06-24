@@ -15,7 +15,8 @@ import { unsubscribeFromActivityUpdates } from '../../../utils/subscribeToActivi
 import { useConfirmDialog } from '../../../hooks/useConfirmDialog';
 import { requestUnfollowActivityConfirm } from '../../../utils/unfollowActivityConfirm';
 import { useT } from '@/hooks/useI18n';
-import { ScrollView, View } from '@tarojs/components';
+import { View } from '@tarojs/components';
+import { OverlayAwareScrollView } from '../../../components/layout/OverlayAwareScrollView';
 
 const ProfileActivitiesPage: React.FC = () => {
   useEndRouteTransitionOnShow();
@@ -66,7 +67,7 @@ const ProfileActivitiesPage: React.FC = () => {
     <View data-cmp="ProfileActivitiesPage" className="s-profile-stack">
       <PageNavigation title="我的活动" fallback={ROUTES.PROFILE} tone="surface" />
 
-      <ScrollView
+      <OverlayAwareScrollView
         scrollY
         enhanced
         showScrollbar={false}
@@ -88,7 +89,7 @@ const ProfileActivitiesPage: React.FC = () => {
             />
           )}
         </View>
-      </ScrollView>
+      </OverlayAwareScrollView>
 
       {confirmDialog}
     </View>

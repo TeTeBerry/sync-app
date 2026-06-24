@@ -13,6 +13,9 @@ type EventDetailPostFilterBarProps = {
   onSelectedCityChange: (city: string) => void;
   recruitingOnly: boolean;
   onRecruitingOnlyChange: (next: boolean) => void;
+  showPreferenceSort?: boolean;
+  preferenceSortEnabled?: boolean;
+  onPreferenceSortEnabledChange?: (next: boolean) => void;
   disabled?: boolean;
 };
 
@@ -22,6 +25,9 @@ export function EventDetailPostFilterBar({
   onSelectedCityChange,
   recruitingOnly,
   onRecruitingOnlyChange,
+  showPreferenceSort = false,
+  preferenceSortEnabled = false,
+  onPreferenceSortEnabledChange,
   disabled = false,
 }: EventDetailPostFilterBarProps) {
   const t = useT();
@@ -45,6 +51,11 @@ export function EventDetailPostFilterBar({
   const handleRecruitingOnlyClick = () => {
     if (disabled) return;
     onRecruitingOnlyChange(!recruitingOnly);
+  };
+
+  const handlePreferenceSortClick = () => {
+    if (disabled || !onPreferenceSortEnabledChange) return;
+    onPreferenceSortEnabledChange(!preferenceSortEnabled);
   };
 
   const handleCityClick = (city: string, active: boolean) => {
@@ -106,6 +117,18 @@ export function EventDetailPostFilterBar({
               {t('eventDetail.filterRecruitingOnly')}
             </Text>
           </View>
+          {showPreferenceSort ? (
+            <View
+              className={chipClassName(preferenceSortEnabled)}
+              onClick={handlePreferenceSortClick}
+              role="button"
+              aria-pressed={preferenceSortEnabled}
+            >
+              <Text className="s-event-detail-post-filter__chip-text">
+                {t('eventDetail.filterPreferenceSort')}
+              </Text>
+            </View>
+          ) : null}
           {showCityRow
             ? inlineCities.map((city) => {
                 const active = selectedCity === city;

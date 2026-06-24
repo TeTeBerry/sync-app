@@ -40,11 +40,12 @@ SMOKE_USER_ID=smoke-golden-user npm run smoke:suite:wait
 - [ ] 四个入口可切换：**首页 / 活动 / 我的**（底栏 3 Tab）
 - [ ] 活动 Tab：列表 / 日历 / 艺人子视图可切换
 - [ ] 首页双 CTA：查节 → 活动 Tab 搜索；找队 → 活动详情招募区（或活动列表）
-- [ ] 进入活动详情：首屏为资讯 + **AI 找队搜索** + 组队招募列表（出征准备在折叠区）
+- [ ] 进入活动详情：首屏为资讯 + **AI 找队搜索** + 组队招募列表（出发准备在折叠区）
 
 ## 找队闭环（上线成败线）
 
 - [ ] 热门活动详情有可见招募帖（`legacyId` 1/4/5/16 各有 `ops-seed-` 种子帖，见 `POST-LIFECYCLE.md` §十二 · US-Q2-21）
+- [ ] （**US-Q2-53**）官宣活动详情 → **投必看 Set** → 选 ≤3 位 DJ → 结果页 TOP 榜 → 分享卡片 → 好友落地 teaser → 投完 **去招募墙找同行**（`focusPosts=1` 滚动到位）
 - [ ] 招募卡展示：招募中/已满、人数进度（有 `slotsTotal` 时）
 - [ ] AI 找队：输入示例句 → 结果「找到 N 条合适的公开招募」+ 解析一行
 - [ ] 搜索无结果：引导发招募（FAB / Sheet）
@@ -56,19 +57,20 @@ SMOKE_USER_ID=smoke-golden-user npm run smoke:suite:wait
 ## 发帖与 UGC
 
 - [ ] FAB 发招募：模板帖成功出现在列表
+- [ ] （**US-Q2-28**）新建招募帖：填字段 → **AI 帮写** → 选候选/自定义备注 → **预览组队卡** → 确认发布；生成页与预览页可见「AI 生成，仅供参考」
 - [ ] 发帖/评论无联系方式；触发拦截时有提示
 - [ ] 删自己的帖成功
 
-## 出征准备（折叠区 · 非主 CTA）
+## 出发准备（折叠区 · 非主 CTA）
 
 - [ ] Festival Plan 进度可展开；攻略 Sheet / 行程分包可打开
 - [x] （US-Q2-35）生成攻略可不选预算；结果页三档对比卡点选后住宿区与 `budgetLevel` 更新
 - [x] Prep Nudge 文案为规则建议，非「匹配」（US-Q2-34）
 - [ ] （**US-Q2-49**）**EDC Korea** 详情 → 生成攻略（出发地「上海」）→ 200 · 含住宿方案/交通文案 · 三档预算可点选
 - [x] （**US-Q2-49**）**S2O / WDJF / Ultra Japan** 生成攻略不 503（Hot Path Phase B 已收口）
-- [x] （**US-Q2-49**）未支持境外场（如 TML 比利时）详情出征准备显示「筹备中」，不裸 503
+- [x] （**US-Q2-49**）未支持境外场（如 TML 比利时）详情出发准备显示「筹备中」，不裸 503
 - [ ] 境外场攻略酒店 `bookingHint` 含 Agoda/Booking 等（非平台代订）
-- [ ] （**US-Q2-52**）行程记账：拍小票或手动记一笔 → 分摊 Sheet 选 **4 人** → 保存 → StatsBar 显示人均 → **复制分摊摘要**（含「试算仅供参考」）→ 刷新后分摊字段仍在
+- [x] （**US-Q2-52**）行程记账：拍小票或手动记一笔 → 分摊 Sheet 选 **4 人** → 保存 → StatsBar 显示人均 → **复制分摊摘要**（含「试算仅供参考」）→ 刷新后分摊字段仍在
 
 ## 合规文案
 
@@ -91,4 +93,9 @@ SMOKE_USER_ID=smoke-golden-user npm run smoke:suite:wait
 
 - 准备 Tab / AI 多轮对话 WebSocket
 - 全站招募帖流 / 首页帖子广场
-- Scene Agent `scene-run` API（上线后 US-Q2-31）
+
+## Scene Agent（US-Q2-31）
+
+- [ ] 活动详情 AI 找队：输入「上海 techno」→ `POST /api/ai/scene-run`（`scene=recruit_search`）返回 `reorder_posts` + `insight_line`
+- [ ] 失败时仍回退本地关键词筛选（与现网一致）
+- [ ] `POST /posts/ai-search` 仍可用（向后兼容）

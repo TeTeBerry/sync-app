@@ -43,6 +43,17 @@ function mapApiDjToNameEntry(dj: ItineraryDj): DjNameEntry {
   return { id: dj.id, name: dj.name };
 }
 
+function parseHeadcountFromQuery(value?: string): number | null {
+  if (!value?.trim()) {
+    return null;
+  }
+  const parsed = Number(value.trim());
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    return null;
+  }
+  return Math.round(parsed);
+}
+
 export function useMyItineraryPage() {
   const router = useRouter();
   const navInsets = useNavBarInsets();
@@ -51,6 +62,11 @@ export function useMyItineraryPage() {
   const activityLegacyId = useMemo(
     () => resolveEventDetailIdFromQuery(router.params, activeActivityLegacyId),
     [activeActivityLegacyId, router.params],
+  );
+
+  const queryHeadcount = useMemo(
+    () => parseHeadcountFromQuery(router.params.headcount),
+    [router.params.headcount],
   );
 
   const [selectedDjIds, setSelectedDjIds] = useState<string[]>(() =>
@@ -88,6 +104,7 @@ export function useMyItineraryPage() {
 
   const { save } = useItineraryMutations(activityLegacyId ?? 0);
   const hydratedFromPendingRef = useRef(false);
+  const wallpaperBusyRef = useRef(false);
   const initialPerformanceIntent =
     parseSelectedDjIds(router.params.selectedDjIds).length > 0;
 
@@ -140,7 +157,8 @@ export function useMyItineraryPage() {
   }, [activityLegacyId, apiEnabled, consumePending, initialPerformanceIntent, t]);
 
   useEffect(() => {
-    if (!apiEnabled || hydratedFromPendingRef.current) return;
+    if (!apiEnabled || hydratedFromPendingRef.current || wallpaperBusyRef.current)
+      return;
     if (!Number.isFinite(activityLegacyId) || activityLegacyId <= 0) {
       setPageKindResolved(true);
       return;
@@ -243,6 +261,7 @@ export function useMyItineraryPage() {
 
   const handleSave = useCallback(async () => {
     showThemedLoading({ title: t('itinerary.generatingWallpaper'), mask: true });
+    wallpaperBusyRef.current = true;
 
     const daysForSave = normalizeItineraryDaysForSave(
       itineraryDays as ApiItineraryDay[],
@@ -257,7 +276,6 @@ export function useMyItineraryPage() {
             days: daysForSave,
             selectedDjIds,
           });
-          void savedQuery.refetch();
           serverSaved = true;
         } catch (error) {
           const message =
@@ -284,7 +302,11 @@ export function useMyItineraryPage() {
         { serverSaved, manageLoading: false },
       );
     } finally {
+      wallpaperBusyRef.current = false;
       hideThemedLoading();
+      if (serverSaved) {
+        void savedQuery.refetch();
+      }
     }
   }, [
     activityLegacyId,
@@ -309,6 +331,7 @@ export function useMyItineraryPage() {
     pageKindResolved,
     activityLegacyId,
     eventMeta,
+    queryHeadcount,
     bannerCopy,
     itineraryDays,
     viewMode,

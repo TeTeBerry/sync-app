@@ -1,3 +1,5 @@
+import type { ActivityMapRegion } from '@/constants/activityMapRegion';
+import { shouldShowTravelGuideSelfDriveOption } from '@/constants/activityMapRegion';
 import type { TravelGuidePlan } from '@/types/travelGuide';
 import {
   findTravelGuideTotalBudgetItem,
@@ -12,15 +14,21 @@ import { useT } from '@/hooks/useI18n';
 
 type TravelGuideDetailHeroProps = {
   plan: TravelGuidePlan;
+  activityRegion?: ActivityMapRegion | null;
 };
 
-export function TravelGuideDetailHero({ plan }: TravelGuideDetailHeroProps) {
+export function TravelGuideDetailHero({
+  plan,
+  activityRegion,
+}: TravelGuideDetailHeroProps) {
   useT();
   const t = useT();
   const totalBudget = findTravelGuideTotalBudgetItem(plan);
   const perPerson = totalBudget
     ? travelGuideBudgetPerPersonRange(totalBudget.range, plan.headcount)
     : null;
+
+  const showSelfDriveChip = shouldShowTravelGuideSelfDriveOption(activityRegion);
 
   const chips = [
     plan.departure ? `${plan.departure}${t('travelPlan.departureLabel')}` : null,
@@ -31,7 +39,11 @@ export function TravelGuideDetailHero({ plan }: TravelGuideDetailHeroProps) {
     plan.accommodationNights > 0 && plan.budgetLabel
       ? shortTravelGuideBudgetLabel(plan.budgetLabel)
       : null,
-    plan.selfDrive ? t('travelPlan.driveYes') : t('travelPlan.driveNo'),
+    showSelfDriveChip
+      ? plan.selfDrive
+        ? t('travelPlan.driveYes')
+        : t('travelPlan.driveNo')
+      : null,
   ].filter(Boolean) as string[];
 
   return (

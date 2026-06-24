@@ -25,6 +25,8 @@ import { useEventDetailPostFilters } from './useEventDetailPostFilters';
 import { filterEventDetailPostsByRules } from '../utils/filterEventDetailPostsByRules';
 import { resolveBuddyPostRecruitDisplay } from '../utils/parseBuddyPostRecruitDisplay';
 import { resolvePersonalityMediaUrls } from '@/domains/personality-test/utils/resolvePersonalityMedia';
+import type { CurrentUser } from '../../../types/backend';
+import { sortEventDetailPostsByPreference } from '../utils/buddyPostPreferenceMatch';
 import { t } from '@/i18n/translate';
 
 export type OpenPostCommentsOptions = {
@@ -44,6 +46,7 @@ export type UseEventDetailPostsParams = {
   openCommentsOnMount?: boolean;
   onTravelGuidePrefillDismiss?: (activityLegacyId: number, guideId: string) => void;
   buildApplyCommentDraft?: (post: EventDetailPost) => string;
+  currentUser?: CurrentUser | null;
 };
 
 export function useEventDetailPosts({
@@ -55,6 +58,7 @@ export function useEventDetailPosts({
   openCommentsOnMount = false,
   onTravelGuidePrefillDismiss,
   buildApplyCommentDraft,
+  currentUser,
 }: UseEventDetailPostsParams) {
   const [expandedCommentPostIds, setExpandedCommentPostIds] = useState<Set<string>>(
     () => new Set(),
@@ -64,24 +68,46 @@ export function useEventDetailPosts({
   >({});
   const autoOpenedCommentsRef = useRef<string | null>(null);
 
-  const postFilters = useEventDetailPostFilters(postsQuery.items);
+  const postFilters = useEventDetailPostFilters(postsQuery.items, currentUser);
 
   const ruleFilteredPosts = useMemo(
     () => filterEventDetailPostsByRules(postsQuery.items, postFilters.filters),
     [postFilters.filters, postsQuery.items],
   );
 
+  const matchProfile = useMemo(
+    () =>
+      currentUser
+        ? {
+            city: currentUser.city,
+            favorGenres: currentUser.favorGenres,
+            budgetLevel: currentUser.budgetLevel,
+          }
+        : null,
+    [currentUser],
+  );
+
+  const preferenceSortedPosts = useMemo(() => {
+    if (!postFilters.preferenceSortEnabled || !matchProfile) {
+      return ruleFilteredPosts;
+    }
+    return sortEventDetailPostsByPreference(ruleFilteredPosts, matchProfile);
+  }, [matchProfile, postFilters.preferenceSortEnabled, ruleFilteredPosts]);
+
   const search = useEventDetailPostSearch({
     activityLegacyId,
-    loadedPosts: ruleFilteredPosts,
+    loadedPosts: preferenceSortedPosts,
     ruleFilters: postFilters.filters,
     onTravelGuidePrefillDismiss,
+    applyPreferenceRank: postFilters.preferenceSortEnabled,
   });
 
   const loadedPostItems = useMemo((): EventPostListItem[] => {
-    const source = search.isActive ? (search.matchedPosts ?? []) : ruleFilteredPosts;
+    const source = search.isActive
+      ? (search.matchedPosts ?? [])
+      : preferenceSortedPosts;
     return normalizeEventPostList(source);
-  }, [ruleFilteredPosts, search.isActive, search.matchedPosts]);
+  }, [preferenceSortedPosts, search.isActive, search.matchedPosts]);
 
   const {
     visibleItems: postItems,
@@ -104,7 +130,12 @@ export function useEventDetailPosts({
 
   useEffect(() => {
     resetWindow();
-  }, [search.isActive, postFilters.isActive, resetWindow]);
+  }, [
+    search.isActive,
+    postFilters.isActive,
+    postFilters.preferenceSortEnabled,
+    resetWindow,
+  ]);
 
   useEffect(() => {
     const avatarKeys = loadedPostItems
@@ -418,6 +449,8 @@ export function useEventDetailPosts({
     searchMatchedCount: search.matchedCount,
     searchUsedLocalFallback: search.usedLocalFallback,
     searchParsed: search.searchParsed,
+    searchSceneParsedInsight: search.sceneParsedInsight,
+    searchScenePreferenceInsight: search.scenePreferenceInsight,
     travelGuideSearchPrefillHint: search.travelGuidePrefillHint,
     postFilterCityOptions: postFilters.cityOptions,
     postFilterSelectedCity: postFilters.selectedCity,
@@ -426,5 +459,9 @@ export function useEventDetailPosts({
     setPostFilterRecruitingOnly: postFilters.setRecruitingOnly,
     postFiltersActive: postFilters.isActive,
     clearPostFilters: postFilters.clearFilters,
+    postFilterPreferenceSortEnabled: postFilters.preferenceSortEnabled,
+    setPostFilterPreferenceSortEnabled: postFilters.setPreferenceSortEnabled,
+    postFilterShowPreferenceSort: postFilters.hasPreferenceSignal,
+    preferenceSortEnabled: postFilters.preferenceSortEnabled,
   };
 }

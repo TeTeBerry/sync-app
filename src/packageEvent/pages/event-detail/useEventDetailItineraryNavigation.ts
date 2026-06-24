@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 import Taro from '@tarojs/taro';
+import { findLatestTravelGuideForActivity } from '@/domains/travel-guide/utils/travelGuideDetailStorage';
 import {
   goActivityLineup,
   goExclusiveItinerary,
@@ -20,7 +21,11 @@ export function useEventDetailItineraryNavigation(eventId: number) {
     if (!assertValidEventId()) {
       return;
     }
-    goMyItinerary(eventId);
+    const guideHeadcount = findLatestTravelGuideForActivity(eventId)?.form.headcount;
+    goMyItinerary(eventId, undefined, {
+      headcount:
+        guideHeadcount != null && guideHeadcount > 0 ? guideHeadcount : undefined,
+    });
   }, [assertValidEventId, eventId]);
 
   const handleOpenActivityLineup = useCallback(() => {

@@ -91,6 +91,7 @@ export function useActivityLineupPage() {
     sessionGroups,
     lineupDjs,
     showFooterCta,
+    activity,
     loading:
       apiEnabled &&
       !offline.isOfflineBundle &&

@@ -39,6 +39,10 @@ export default defineConfig({
       '@sync/festival-plan-contracts': resolveContractEntry(
         '@sync/festival-plan-contracts',
       ),
+      '@sync/scene-contracts': path.resolve(
+        __dirname,
+        'node_modules/@sync/scene-contracts/index.ts',
+      ),
     },
   },
   define: Object.fromEntries(

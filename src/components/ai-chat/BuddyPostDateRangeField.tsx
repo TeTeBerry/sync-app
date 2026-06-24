@@ -18,7 +18,7 @@ export function BuddyPostDateRangeField({
 }: BuddyPostDateRangeFieldProps) {
   const t = useT();
   return (
-    <View className="s-ai-guide-plan-sheet__field">
+    <View className="s-ai-guide-plan-sheet__field s-ai-buddy-post-sheet__field--activity-time">
       <View className="s-ai-buddy-post-sheet__field-head">
         <Text className="s-ai-buddy-post-sheet__label">
           {t('ai.activityDateRange')}

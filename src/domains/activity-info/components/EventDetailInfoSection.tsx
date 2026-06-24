@@ -1,14 +1,18 @@
 import type { FC } from 'react';
-import { ChevronRight } from '@/components/icons';
+import { ChevronRight, Music2 } from '@/components/icons';
+import { ImageWithFallback } from '@/components/ImageWithFallback';
 import { Button } from '@/components/ui';
 import type { BackendActivity } from '@/types/backend';
+import { PLACEHOLDER_EVENT_HERO } from '@/constants/remoteImages';
+import { IMAGE_SIZE } from '@/constants/imageSizes';
 import { formatEventHeroMetaLine } from '@/utils/eventCardDisplay';
-import { formatActivityAreaLabel } from '@/utils/filterActivitiesForEventsCatalog';
+import { thumbnailImageUrl } from '@/utils/imageUrl';
 import {
   getActivityStatusFromActivity,
   type ActivityStatus,
 } from '@/utils/activityStatus';
 import { Text, View } from '@tarojs/components';
+import { useMemo } from 'react';
 import { useT } from '@/hooks/useI18n';
 import { ActivityUpdateSubscribeBanner } from './ActivityUpdateSubscribeBanner';
 
@@ -48,6 +52,10 @@ export const EventDetailInfoSection: FC<EventDetailInfoSectionProps> = ({
   onOpenLineup,
 }) => {
   const t = useT();
+  const heroFallback = useMemo(() => {
+    const name = activity?.name?.trim() ?? '';
+    return name.slice(0, 2) || t('eventCard.activityFallback').slice(0, 2);
+  }, [activity?.name, t]);
 
   if (!activity) {
     return null;
@@ -55,18 +63,11 @@ export const EventDetailInfoSection: FC<EventDetailInfoSectionProps> = ({
 
   const status = getActivityStatusFromActivity(activity.date, activity.name);
   const metaLine = formatEventHeroMetaLine(activity.date, activity.location);
-  const regionLabel = formatActivityAreaLabel(activity);
   const updatedAt = formatInfoUpdatedAt(activity.infoUpdatedAt);
-  const categoryLabel =
-    activity.activityType === 'indoor'
-      ? t('activityInfo.typeIndoor')
-      : t('activityInfo.typeFestival');
-
-  const summaryParts = [
-    categoryLabel,
-    regionLabel,
-    updatedAt ? t('activityInfo.updatedAt', { date: updatedAt }) : null,
-  ].filter(Boolean);
+  const heroSrc = thumbnailImageUrl(
+    activity.image?.trim() || PLACEHOLDER_EVENT_HERO,
+    IMAGE_SIZE.featuredHero,
+  );
 
   const showSubscribeBanner = activity.lineupPublished === false;
 
@@ -76,56 +77,82 @@ export const EventDetailInfoSection: FC<EventDetailInfoSectionProps> = ({
       id="event-detail-info"
       className="s-event-detail-info"
     >
-      <View className="s-event-detail-info__card">
-        <View className="s-event-detail-info__head">
-          <Text
+      <View className="s-event-detail-info__stack">
+        <View className="s-event-detail-info__hero">
+          <View className="s-event-detail-info__hero-media" aria-hidden>
+            <ImageWithFallback
+              src={heroSrc}
+              alt=""
+              imageClassName="s-event-detail-info__hero-img"
+              placeholderClassName="s-event-detail-info__hero-img s-event-detail-info__hero-img--placeholder"
+              fallback={heroFallback}
+              priority
+              placeholderUntilLoaded
+            />
+          </View>
+          <View className="s-event-detail-info__hero-scrim" aria-hidden />
+          <View className="s-event-detail-info__hero-content">
+            <Text className="s-event-detail-info__title">{activity.name}</Text>
+            {metaLine ? (
+              <Text className="s-event-detail-info__subtitle">{metaLine}</Text>
+            ) : null}
+          </View>
+        </View>
+
+        <View className="s-event-detail-info__status-wrap">
+          <View
             className={[
               's-event-detail-info__status',
               `s-event-detail-info__status--${status}`,
             ].join(' ')}
           >
-            {t(statusI18nKey(status))}
-          </Text>
+            <View className="s-event-detail-info__status-icon" aria-hidden />
+            <Text className="s-event-detail-info__status-text">
+              {t(statusI18nKey(status))}
+            </Text>
+          </View>
         </View>
 
-        {metaLine ? (
-          <Text className="s-event-detail-info__meta">{metaLine}</Text>
-        ) : null}
-
-        {summaryParts.length > 0 ? (
-          <Text className="s-event-detail-info__summary">
-            {summaryParts.join(' · ')}
-          </Text>
-        ) : null}
-
         <Button
-          className="s-event-detail-info__cta"
-          hoverClass="s-event-detail-info__cta--pressed"
+          className="s-event-detail-info__nav"
+          hoverClass="s-event-detail-info__nav--pressed"
           onClick={onOpenLineup}
         >
-          <Text className="s-event-detail-info__cta-text">
+          <View className="s-event-detail-info__nav-icon" aria-hidden>
+            <Music2 size={16} color="rgba(255, 45, 120, 1)" strokeWidth={2.25} />
+          </View>
+          <Text className="s-event-detail-info__nav-text">
             {t('activityInfo.viewLineupCta')}
           </Text>
-          <ChevronRight size={16} color="#fff" />
-        </Button>
-
-        {showSubscribeBanner ? (
-          <ActivityUpdateSubscribeBanner
-            activityLegacyId={activityLegacyId}
-            activityTitle={activity.name}
+          <ChevronRight
+            className="s-event-detail-info__nav-chevron"
+            size={14}
+            color="rgba(136, 136, 136, 1)"
           />
-        ) : null}
-
-        {activity.infoSource ? (
-          <Text className="s-event-detail-info__source">
-            {t('activityInfo.source', { source: activity.infoSource })}
-          </Text>
-        ) : null}
-
-        <Text className="s-event-detail-info__disclaimer">
-          {t('activityInfo.disclaimer')}
-        </Text>
+        </Button>
       </View>
+
+      {showSubscribeBanner ? (
+        <ActivityUpdateSubscribeBanner
+          activityLegacyId={activityLegacyId}
+          activityTitle={activity.name}
+        />
+      ) : null}
+
+      {activity.infoSource ? (
+        <Text className="s-event-detail-info__source">
+          {t('activityInfo.source', { source: activity.infoSource })}
+          {updatedAt ? ` · ${t('activityInfo.updatedAt', { date: updatedAt })}` : ''}
+        </Text>
+      ) : updatedAt ? (
+        <Text className="s-event-detail-info__source">
+          {t('activityInfo.updatedAt', { date: updatedAt })}
+        </Text>
+      ) : null}
+
+      <Text className="s-event-detail-info__disclaimer">
+        {t('activityInfo.disclaimer')}
+      </Text>
     </View>
   );
 };

@@ -13,11 +13,7 @@ import {
 } from '@/api/sync/travelGuide';
 import { useActivityDetailQuery } from '@/hooks/useSyncApi';
 import { useStackPageMainHeight } from '@/hooks/useTabPageMainHeight';
-import {
-  goEventDetailTravelGuideSheet,
-  goEventDetailWithBuddyPostPrefill,
-  ROUTES,
-} from '@/utils/route';
+import { goEventDetailWithBuddyPostPrefill, ROUTES } from '@/utils/route';
 import { isAuthGated, requireAuth } from '@/utils/authGate';
 import { travelGuideFormToBuddyPrefill } from '@/utils/travelGuideToBuddyPost';
 import {
@@ -26,7 +22,16 @@ import {
   type TravelGuideDetailPayload,
 } from '../utils/travelGuideDetailStorage';
 import { markTravelGuideSearchPrefillPending } from '../utils/travelGuideSearchPrefillStorage';
-import { getTravelGuideTitle } from '@/constants/aiCtaLabels';
+import {
+  getTravelGuideGeneratingText,
+  getTravelGuideTitle,
+} from '@/constants/aiCtaLabels';
+import {
+  isDomesticActivityRegion,
+  shouldShowTravelGuideSelfDriveOption,
+} from '@/constants/activityMapRegion';
+import { parseActivityDayCount } from '@/utils/parseActivityDayCount';
+import { eventCityFromLocation } from '@/utils/travelGuideDepartureSuggestions';
 import { buildTravelGuideShareText } from '../utils/travelGuideShareText';
 import {
   buildTravelGuideShareAppMessage,
@@ -38,7 +43,7 @@ import {
   resolveTravelGuideShareRef,
   shouldLoadTravelGuideDetail,
 } from './aiTravelGuidePage.util';
-import type { TravelGuideBudgetTier } from '@/types/travelGuide';
+import type { AiGuidePlanFormValues, TravelGuideBudgetTier } from '@/types/travelGuide';
 import { useT } from '@/hooks/useI18n';
 
 const FOOTER_BASE_PX = 72;
@@ -65,6 +70,7 @@ export function useAiTravelGuidePage() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [sharing, setSharing] = useState(false);
   const [budgetTierUpdating, setBudgetTierUpdating] = useState(false);
+  const [guideSheetOpen, setGuideSheetOpen] = useState(false);
   const shareRef = useRef<{
     guideId: string;
     payload: TravelGuideDetailPayload;
@@ -228,14 +234,66 @@ export function useAiTravelGuidePage() {
     }
   }, [payload?.plan, sharing, t]);
 
+  const guideDefaultNights = useMemo(
+    () => parseActivityDayCount(activityQuery.data?.date),
+    [activityQuery.data?.date],
+  );
+  const guideEventCity = useMemo(
+    () => eventCityFromLocation(activityQuery.data?.location),
+    [activityQuery.data?.location],
+  );
+  const guideShowSelfDriveOption = shouldShowTravelGuideSelfDriveOption(
+    activityQuery.data?.region,
+  );
+  const guideShowAccommodationOption = isDomesticActivityRegion(
+    activityQuery.data?.region,
+  );
+
   const handleRegenerate = useCallback(() => {
     if (!payload?.activityLegacyId || !guideId) return;
-    const activityLegacyId = payload.activityLegacyId;
-    requireAuth(
-      () => goEventDetailTravelGuideSheet(activityLegacyId, payload.form, guideId),
-      'ai_assistant',
-    );
-  }, [guideId, payload]);
+    requireAuth(() => setGuideSheetOpen(true), 'ai_assistant');
+  }, [guideId, payload?.activityLegacyId]);
+
+  const closeGuideSheet = useCallback(() => {
+    setGuideSheetOpen(false);
+  }, []);
+
+  const handleGuideSheetSubmit = useCallback(
+    (form: AiGuidePlanFormValues) => {
+      if (!payload?.activityLegacyId || !guideId) return;
+      const activityLegacyId = payload.activityLegacyId;
+      setGuideSheetOpen(false);
+
+      const run = async () => {
+        showThemedLoading({ title: getTravelGuideGeneratingText(), mask: true });
+        try {
+          const { plan } = await generateTravelGuide(activityLegacyId, {
+            ...form,
+            guideId,
+          });
+          const next: TravelGuideDetailPayload = {
+            plan,
+            form,
+            activityLegacyId,
+            createdAt: new Date().toISOString(),
+          };
+          saveTravelGuideDetail(guideId, next);
+          setPayload(next);
+        } catch (error) {
+          const message =
+            error instanceof Error
+              ? error.message
+              : t('travelPlan.guideGenerationFailed');
+          void Taro.showToast({ title: message, icon: 'none' });
+        } finally {
+          hideThemedLoading();
+        }
+      };
+
+      requireAuth(() => void run(), 'ai_assistant');
+    },
+    [guideId, payload?.activityLegacyId, t],
+  );
 
   const handlePrefillRecruitPost = useCallback(() => {
     if (!payload?.activityLegacyId || !payload.form) return;
@@ -310,5 +368,14 @@ export function useAiTravelGuidePage() {
     handlePrefillRecruitPost,
     handleSelectBudgetTier,
     showRecruitBridge,
+    guideSheetOpen,
+    closeGuideSheet,
+    handleGuideSheetSubmit,
+    guideDefaultNights,
+    guideEventCity,
+    guideShowSelfDriveOption,
+    guideShowAccommodationOption,
+    activityRegion: activityQuery.data?.region,
+    guideSheetInitialValues: payload?.form ?? null,
   };
 }

@@ -12,4 +12,9 @@ export type {
   CatalogLineupArtist,
   CatalogLineupArtistDetail,
   CatalogLineupArtistNextActivity,
+  SetVoteLeaderboardEntry,
+  SetVoteLeaderboardResult,
+  SetVoteMeResult,
+  SetVotePick,
+  SetVoteSubmitResult,
 } from '@sync/activity-contracts';

@@ -17,11 +17,15 @@ describe('travelPlanApiMapper', () => {
       detail: '含双早',
       price: 760,
       confirmed: true,
+      splitEnabled: true,
+      splitCount: 4,
     };
 
     const node = travelPlanNodeFromSavedPayload(payload, 'user');
     expect(node.source).toBe('user');
     expect(node.timeLabel).toBe('06/13–06/15');
+    expect(node.splitEnabled).toBe(true);
+    expect(node.splitCount).toBe(4);
     expect(travelPlanNodeToPayload(node)).toEqual(payload);
   });
 });

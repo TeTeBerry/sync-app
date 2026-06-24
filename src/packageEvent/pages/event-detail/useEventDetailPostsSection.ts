@@ -7,6 +7,7 @@ import {
   EVENT_DETAIL_SCROLL_ID,
 } from '@/domains/partner-feed';
 import { useDisplayUserIdentity } from '../../../hooks/useDisplayUserIdentity';
+import { useCurrentUserQuery } from '../../../hooks/useSyncApi';
 import { findLatestTravelGuideForActivity } from '@/domains/travel-guide/utils/travelGuideDetailStorage';
 import {
   dismissTravelGuideSearchPrefill,
@@ -68,6 +69,7 @@ export function useEventDetailPostsSection({
   const appliedTravelGuidePrefillRef = useRef<string | null>(null);
 
   const displayIdentity = useDisplayUserIdentity();
+  const { data: currentUser } = useCurrentUserQuery();
 
   const postsQuery = useEventPostsInfiniteQuery(eventId, {
     anchorPostId: highlightPostId || undefined,
@@ -140,6 +142,7 @@ export function useEventDetailPostsSection({
     openCommentsOnMount,
     onTravelGuidePrefillDismiss: handleTravelGuidePrefillDismiss,
     buildApplyCommentDraft,
+    currentUser,
   });
 
   const {

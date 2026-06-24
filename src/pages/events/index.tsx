@@ -1,7 +1,8 @@
 import './events.scss';
 import { useDidShow } from '@tarojs/taro';
 import React, { useCallback, useMemo, useState } from 'react';
-import { View, Text, ScrollView } from '@tarojs/components';
+import { View, Text } from '@tarojs/components';
+import { OverlayAwareScrollView } from '../../components/layout/OverlayAwareScrollView';
 import { useT } from '@/hooks/useI18n';
 import { useEndRouteTransitionOnShow } from '../../hooks/useEndRouteTransitionOnShow';
 import { useNavBarInsets } from '../../hooks/useNavBarInsets';
@@ -280,7 +281,7 @@ const Events: React.FC = () => {
             onOpenArtist={setSelectedArtistId}
           />
         ) : (
-          <ScrollView
+          <OverlayAwareScrollView
             scrollY
             enhanced
             showScrollbar={false}
@@ -358,7 +359,7 @@ const Events: React.FC = () => {
                 </>
               )}
             </View>
-          </ScrollView>
+          </OverlayAwareScrollView>
         )}
       </View>
       <ArtistProfileSheet

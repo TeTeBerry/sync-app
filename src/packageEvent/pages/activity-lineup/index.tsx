@@ -1,23 +1,32 @@
 import './activity-lineup.scss';
-import { ScrollView, Text, View } from '@tarojs/components';
-import { useMemo, useState } from 'react';
+import { Canvas, ScrollView, Text, View } from '@tarojs/components';
+import { useCallback, useMemo, useState } from 'react';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import { useT } from '@/hooks/useI18n';
 import PageNavigation from '../../../components/navigation/PageNavigation';
 import ThemedPageLoader from '../../../components/ThemedPageLoader';
+import { LoginInterceptHost } from '../../../components/auth/LoginInterceptHost';
 import { Button } from '../../../components/ui';
 import { ActivityUpdateSubscribeBanner } from '@/domains/activity-info/components/ActivityUpdateSubscribeBanner';
 import { PerformanceBundleStaleBanner } from '@/domains/activity-info/components/PerformanceBundleStaleBanner';
 import { ArtistProfileSheet } from '@/domains/lineup-artist';
+import { SET_VOTE_POSTER_CANVAS_ID } from '@/domains/set-vote/utils/setVotePosterCanvas';
 import { useEndRouteTransitionOnShow } from '../../../hooks/useEndRouteTransitionOnShow';
 import { useMeasuredElementHeight } from '../../../hooks/useMeasuredElementHeight';
 import { goExclusiveItinerary, ROUTES } from '../../../utils/route';
 import { LineupArtistGrid } from './components/LineupArtistGrid';
 import { LineupGenreNav } from './components/LineupGenreNav';
 import { LineupScheduleDay } from './components/LineupScheduleDay';
+import { LineupSetVoteResults } from './components/LineupSetVoteResults';
+import { LineupSetVoteShareTeaser } from './components/LineupSetVoteShareTeaser';
+import { LineupSetVoteSubmitBar } from './components/LineupSetVoteSubmitBar';
+import { LineupSetVoteToolbar } from './components/LineupSetVoteToolbar';
 import { useActivityLineupPage } from './useActivityLineupPage';
+import { useLineupSetVote } from './hooks/useLineupSetVote';
 import { useLineupGenreNavigation } from './useLineupGenreNavigation';
 import { lineupGenreNavDomId } from './utils/scrollLineupSection';
+
+const SET_VOTE_SUBMIT_BAR_PX = 108;
 
 const ActivityLineupPage = () => {
   useEndRouteTransitionOnShow(ROUTES.ACTIVITY_LINEUP);
@@ -39,8 +48,17 @@ const ActivityLineupPage = () => {
     error,
     isOfflineBundle,
     bundleSavedAt,
+    activity,
     refetch,
   } = useActivityLineupPage();
+
+  const setVote = useLineupSetVote({
+    activityLegacyId,
+    lineupPublished,
+    activityName: pageTitle,
+    activityDate: activity?.date,
+    lineupDjs,
+  });
 
   const showLineupGrid = lineupPublished && !schedulePublished && lineupDjs.length > 0;
   const {
@@ -59,16 +77,36 @@ const ActivityLineupPage = () => {
     fallbackHeight: 88,
   });
 
+  const voteSubmitBarPx = setVote.showSubmitBar ? SET_VOTE_SUBMIT_BAR_PX : 0;
+
   const lineupScrollHeight = useMemo(() => {
     if (mainScrollHeight == null) {
       return undefined;
     }
-    if (!showLineupGrid || !showGenreNav) {
-      return mainScrollHeight;
+    let height = mainScrollHeight - voteSubmitBarPx;
+    if (showLineupGrid && showGenreNav) {
+      const navHeight = measuredGenreNavHeight ?? 88;
+      height -= navHeight;
     }
-    const navHeight = measuredGenreNavHeight ?? 88;
-    return Math.max(0, mainScrollHeight - navHeight);
-  }, [mainScrollHeight, measuredGenreNavHeight, showGenreNav, showLineupGrid]);
+    return Math.max(0, height);
+  }, [
+    mainScrollHeight,
+    measuredGenreNavHeight,
+    showGenreNav,
+    showLineupGrid,
+    voteSubmitBarPx,
+  ]);
+
+  const handleArtistPress = useCallback(
+    (artistId: string) => {
+      if (setVote.voteModeEnabled) {
+        setVote.onToggleDj(artistId);
+        return;
+      }
+      setSelectedArtistId(artistId);
+    },
+    [setVote],
+  );
 
   const handleOpenExclusiveItinerary = () => {
     if (!Number.isFinite(activityLegacyId) || activityLegacyId <= 0) {
@@ -99,6 +137,15 @@ const ActivityLineupPage = () => {
           {isOfflineBundle && bundleSavedAt != null ? (
             <PerformanceBundleStaleBanner savedAt={bundleSavedAt} />
           ) : null}
+
+          <LineupSetVoteToolbar
+            enabled={setVote.enabled}
+            voteModeEnabled={setVote.voteModeEnabled}
+            selectedCount={setVote.selectedIds.length}
+            maxSelection={setVote.maxSelection}
+            onVoteModeChange={setVote.onVoteModeChange}
+          />
+
           {showLineupGrid && showGenreNav ? (
             <LineupGenreNav
               artists={lineupDjs}
@@ -124,6 +171,27 @@ const ActivityLineupPage = () => {
             }
           >
             <View className="s-activity-lineup__inner">
+              {setVote.showShareTeaser && setVote.shareTeaser ? (
+                <LineupSetVoteShareTeaser
+                  activityName={setVote.shareTeaser.activityName}
+                  voterPickNames={setVote.shareTeaser.voterPickNames}
+                  topEntries={setVote.shareTeaser.topEntries}
+                  onStartVote={setVote.onStartFromTeaser}
+                />
+              ) : null}
+
+              {setVote.showResults ? (
+                <LineupSetVoteResults
+                  picks={setVote.picks}
+                  entries={setVote.entries}
+                  totalVoters={setVote.totalVoters}
+                  revoteAllowedToday={setVote.revoteAllowedToday}
+                  isWeapp={setVote.isWeapp}
+                  onEditPicks={setVote.onEditPicks}
+                  onSharePoster={setVote.onSharePoster}
+                />
+              ) : null}
+
               {!lineupPublished ? (
                 <View className="s-activity-lineup__subscribe">
                   <ActivityUpdateSubscribeBanner
@@ -146,7 +214,9 @@ const ActivityLineupPage = () => {
                     <LineupScheduleDay
                       key={session.dateKey}
                       session={session}
-                      onArtistPress={setSelectedArtistId}
+                      onArtistPress={handleArtistPress}
+                      voteMode={setVote.voteModeEnabled}
+                      selectedArtistIds={setVote.selectedIds}
                     />
                   ))}
                 </>
@@ -157,7 +227,9 @@ const ActivityLineupPage = () => {
                       {t('activityLineup.lineupTitle')}
                     </Text>
                     <Text className="s-activity-lineup__card-hint">
-                      {t('activityLineup.lineupHint')}
+                      {setVote.voteModeEnabled
+                        ? t('activityLineup.lineupVoteHint')
+                        : t('activityLineup.lineupHint')}
                     </Text>
                   </View>
                   <LineupArtistGrid
@@ -165,7 +237,10 @@ const ActivityLineupPage = () => {
                     sortMode={sortMode}
                     onSortModeChange={setSortMode}
                     showSoloSort={!showGenreNav}
-                    onArtistPress={setSelectedArtistId}
+                    onArtistPress={handleArtistPress}
+                    voteMode={setVote.voteModeEnabled}
+                    selectedArtistIds={setVote.selectedIds}
+                    voteCountByArtistId={setVote.voteCountByArtistId}
                   />
                 </>
               ) : (
@@ -176,8 +251,25 @@ const ActivityLineupPage = () => {
             </View>
           </ScrollView>
 
+          <LineupSetVoteSubmitBar
+            visible={setVote.showSubmitBar}
+            submitting={setVote.submitting}
+            syncGenres={setVote.syncGenres}
+            onSyncGenresChange={setVote.onSyncGenresChange}
+            onSubmit={setVote.onSubmit}
+          />
+
           {showFooterCta ? (
-            <View className="s-activity-lineup__footer">
+            <View
+              className="s-activity-lineup__footer"
+              style={
+                voteSubmitBarPx > 0
+                  ? {
+                      paddingBottom: `calc(12px + env(safe-area-inset-bottom, 0px) + ${voteSubmitBarPx}px)`,
+                    }
+                  : undefined
+              }
+            >
               <Button
                 className="s-activity-lineup__footer-btn"
                 hoverClass="s-activity-lineup__footer-btn--pressed"
@@ -191,11 +283,19 @@ const ActivityLineupPage = () => {
           ) : null}
         </>
       )}
+
       <ArtistProfileSheet
-        open={Boolean(selectedArtistId)}
+        open={Boolean(selectedArtistId) && !setVote.voteModeEnabled}
         artistId={selectedArtistId}
         onClose={() => setSelectedArtistId(null)}
       />
+
+      <Canvas
+        type="2d"
+        id={SET_VOTE_POSTER_CANVAS_ID}
+        className="s-activity-lineup__vote-poster-canvas"
+      />
+      <LoginInterceptHost />
     </View>
   );
 };

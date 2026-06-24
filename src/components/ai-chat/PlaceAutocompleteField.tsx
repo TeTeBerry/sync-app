@@ -127,7 +127,11 @@ export function PlaceAutocompleteField({
       {hint ? <Text className="s-ai-guide-plan-sheet__hint">{hint}</Text> : null}
       <View className="s-ai-guide-plan-sheet__input-wrap">
         <View className="s-ai-guide-plan-sheet__input-icon-wrap" aria-hidden>
-          <MapPin size={16} className="s-ai-guide-plan-sheet__input-icon" />
+          <MapPin
+            size={16}
+            className="s-ai-guide-plan-sheet__input-icon"
+            color="#4cc9f0"
+          />
         </View>
         <Input
           className="s-ai-guide-plan-sheet__input"

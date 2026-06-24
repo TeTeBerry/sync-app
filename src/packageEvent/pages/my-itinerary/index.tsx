@@ -17,6 +17,7 @@ import {
 import {
   TravelPlanAddSheet,
   TravelPlanHeaderAction,
+  TravelPlanSplitSheet,
   TravelPlanStatsBar,
   TravelPlanTimeline,
   useTravelPlanPage,
@@ -30,6 +31,7 @@ const MyItineraryPage = () => {
   const travelPlan = useTravelPlanPage({
     activityLegacyId: page.activityLegacyId,
     eventMeta: page.eventMeta,
+    queryHeadcount: page.queryHeadcount,
   });
   const t = useT();
 
@@ -68,13 +70,21 @@ const MyItineraryPage = () => {
             }
           >
             <View className="s-travel-plan__inner">
-              <TravelPlanStatsBar stats={travelPlan.stats} />
+              <TravelPlanStatsBar
+                stats={travelPlan.stats}
+                copyingSplitSummary={travelPlan.copyingSplitSummary}
+                onSplitCountChange={travelPlan.handleSplitCountChange}
+                onCopySplitSummary={travelPlan.handleCopySplitSummary}
+              />
               <TravelPlanTimeline
                 nodes={travelPlan.nodes}
+                pageSplitCount={travelPlan.splitCount}
                 expandedId={travelPlan.expandedId}
                 onToggleExpanded={travelPlan.toggleExpanded}
                 onAddNode={travelPlan.handleAddNode}
+                onEditNode={travelPlan.handleEditNode}
                 onDeleteNode={travelPlan.handleDeleteNode}
+                onNodeSplitChange={travelPlan.handleNodeSplitChange}
                 onUpdatePrice={travelPlan.handleUpdateNodePrice}
               />
             </View>
@@ -83,9 +93,20 @@ const MyItineraryPage = () => {
 
         <TravelPlanAddSheet
           open={travelPlan.addSheetOpen}
+          mode={travelPlan.addSheetMode}
           activityLegacyId={page.activityLegacyId}
+          initialValues={travelPlan.editSheetInitialValues ?? undefined}
           onClose={travelPlan.closeAddSheet}
           onSubmit={travelPlan.handleSaveNode}
+        />
+
+        <TravelPlanSplitSheet
+          open={travelPlan.splitSheetOpen}
+          defaultSplitCount={travelPlan.pendingSplitCount}
+          defaultSplitEnabled={travelPlan.pendingSplitEnabled}
+          totalAmount={travelPlan.pendingSplitAmount}
+          onClose={travelPlan.closeSplitSheet}
+          onConfirm={travelPlan.handleSplitConfirm}
         />
 
         {travelPlan.confirmDialog}

@@ -155,4 +155,15 @@ describe('travel guide navigation', () => {
     );
     expect(navigateTo).not.toHaveBeenCalled();
   });
+
+  it('goMyItinerary passes headcount query when provided', async () => {
+    const { goMyItinerary } = await import('@/utils/route');
+    goMyItinerary(42, undefined, { headcount: 4 });
+    await Promise.resolve();
+    expect(navigateTo).toHaveBeenCalledWith(
+      expect.objectContaining({
+        url: expect.stringContaining('headcount=4'),
+      }),
+    );
+  });
 });

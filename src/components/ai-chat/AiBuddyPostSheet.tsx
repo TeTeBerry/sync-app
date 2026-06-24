@@ -1,6 +1,7 @@
 import './AiGuidePlanSheet.scss';
 import './AiBuddyPostSheet.scss';
-import { Send, Users, X } from '../../components/icons';
+import { useCallback, useMemo } from 'react';
+import { ChevronLeft, Send, Users, X } from '../../components/icons';
 import { Button, cn } from '../ui';
 import { useOverlayLock } from '../../hooks/useOverlayLock';
 import type {
@@ -8,14 +9,23 @@ import type {
   AiBuddyPostSubmitPayload,
 } from '../../types/buddyPost';
 import { buildBuddyPostQuotaHint } from '../../utils/buddyPostQuota';
+import { buildBuddyPostComposeHints } from '@/utils/buildBuddyPostComposeHints';
+import { buildOptimisticBuddyPost } from '@/utils/publishBuddyPost';
+import { useDisplayUserIdentity } from '@/hooks/useDisplayUserIdentity';
 import { BuddyPostFeedSyncToggle } from './BuddyPostFeedSyncToggle';
 import { BuddyPostSheetFormFields } from './BuddyPostSheetFormFields';
+import { BuddyPostComposeStep } from './BuddyPostComposeStep';
+import { BuddyPostPreviewStep } from './BuddyPostPreviewStep';
 import { useBuddyPostSheetForm } from './useBuddyPostSheetForm';
+import { useBuddyPostSheetWizard } from './useBuddyPostSheetWizard';
+import { useBuddyPostCompose } from './useBuddyPostCompose';
 import { ScrollView, Text, View } from '@tarojs/components';
 import { useT } from '@/hooks/useI18n';
 
 export type AiBuddyPostSheetProps = {
   open: boolean;
+  mode?: 'create' | 'edit';
+  activityLegacyId?: number;
   activityDate?: string;
   activityTitle?: string;
   /** Activity host city — biases location POI suggestions. */
@@ -35,8 +45,10 @@ export type AiBuddyPostSheetProps = {
 
 export function AiBuddyPostSheet({
   open,
+  mode = 'create',
+  activityLegacyId,
   activityDate,
-  activityTitle: _activityTitle,
+  activityTitle,
   eventCity,
   initialValues,
   prefillSummaryLines = null,
@@ -50,6 +62,9 @@ export function AiBuddyPostSheet({
 }: AiBuddyPostSheetProps) {
   const t = useT();
   useOverlayLock(open);
+  const displayIdentity = useDisplayUserIdentity();
+  const wizard = useBuddyPostSheetWizard({ open, mode });
+  const compose = useBuddyPostCompose({ activityLegacyId });
 
   const form = useBuddyPostSheetForm({
     open,
@@ -58,6 +73,125 @@ export function AiBuddyPostSheet({
     showSyncToFeedOption,
     onSubmit,
   });
+
+  const composeHints = useMemo(
+    () =>
+      buildBuddyPostComposeHints({
+        prefillBannerTitle,
+        prefillSummaryLines,
+        note: form.note,
+      }),
+    [form.note, prefillBannerTitle, prefillSummaryLines],
+  );
+
+  const previewPost = useMemo(() => {
+    if (!wizard.isWizard || wizard.step !== 'preview') {
+      return null;
+    }
+    return buildOptimisticBuddyPost({
+      pendingId: 'preview',
+      form: {
+        dateStart: form.dateStart,
+        dateEnd: form.dateEnd,
+        location: form.location,
+        headcount: form.headcount,
+        tags: ['team'],
+        note: form.note.trim() || undefined,
+      },
+      authorName: displayIdentity.name?.trim() || t('common.user'),
+      authorAvatar: displayIdentity.avatar,
+      authorHandle: displayIdentity.handle,
+      location: form.location.trim(),
+    });
+  }, [
+    displayIdentity.avatar,
+    displayIdentity.handle,
+    displayIdentity.name,
+    form.dateEnd,
+    form.dateStart,
+    form.headcount,
+    form.location,
+    form.note,
+    t,
+    wizard.isWizard,
+    wizard.step,
+  ]);
+
+  const handleGenerate = useCallback(async () => {
+    await compose.generate({
+      dateStart: form.dateStart,
+      dateEnd: form.dateEnd,
+      location: form.location.trim(),
+      headcount: form.headcount.trim(),
+      composeHints,
+    });
+  }, [
+    compose,
+    composeHints,
+    form.dateEnd,
+    form.dateStart,
+    form.headcount,
+    form.location,
+  ]);
+
+  const handleRegenerate = useCallback(async () => {
+    await compose.generate(
+      {
+        dateStart: form.dateStart,
+        dateEnd: form.dateEnd,
+        location: form.location.trim(),
+        headcount: form.headcount.trim(),
+        composeHints,
+      },
+      { regenerate: true },
+    );
+  }, [
+    compose,
+    composeHints,
+    form.dateEnd,
+    form.dateStart,
+    form.headcount,
+    form.location,
+  ]);
+
+  const handlePrimaryAction = useCallback(async () => {
+    if (!wizard.isWizard) {
+      await form.handleSubmit();
+      return;
+    }
+    if (wizard.step === 'form') {
+      wizard.goNext();
+      return;
+    }
+    if (wizard.step === 'compose') {
+      wizard.goNext();
+      return;
+    }
+    await form.handleSubmit();
+  }, [form, wizard]);
+
+  const primaryDisabled =
+    wizard.step === 'form'
+      ? !form.canSubmit || form.isSubmitting
+      : wizard.step === 'compose'
+        ? form.isSubmitting
+        : !form.canSubmit || form.isSubmitting;
+
+  const primaryLabel = !wizard.isWizard
+    ? showSyncToFeedOption
+      ? t('ai.save')
+      : submitLabel?.trim() || t('ai.publishBuddyPost')
+    : wizard.step === 'preview'
+      ? submitLabel?.trim() || t('posts.confirmPublish')
+      : t('posts.nextStep');
+
+  const resolvedSheetTitle =
+    sheetTitle?.trim() ||
+    (wizard.isWizard && wizard.step === 'compose'
+      ? t('posts.composeTitle')
+      : wizard.isWizard && wizard.step === 'preview'
+        ? t('posts.previewTitle')
+        : t('ai.buddyPostSheetTitle'));
 
   if (!open) return null;
 
@@ -77,14 +211,25 @@ export function AiBuddyPostSheet({
         <View className="s-ai-guide-plan-sheet__handle" aria-hidden />
         <View className="s-ai-guide-plan-sheet__top">
           <View className="s-ai-guide-plan-sheet__title-row">
-            <View className="s-ai-guide-plan-sheet__title-icon" aria-hidden>
-              <Users size={16} color="#fff" aria-hidden />
-            </View>
+            {wizard.isWizard && wizard.step !== 'form' ? (
+              <Button
+                className="s-ai-buddy-post-sheet__back"
+                hoverClass="s-ai-buddy-post-sheet__back--pressed"
+                aria-label={t('common.back')}
+                onClick={wizard.goBack}
+              >
+                <ChevronLeft size={18} color="#fff" aria-hidden />
+              </Button>
+            ) : (
+              <View className="s-ai-guide-plan-sheet__title-icon" aria-hidden>
+                <Users size={16} aria-hidden />
+              </View>
+            )}
             <Text
               id="ai-buddy-post-sheet-title"
               className="s-ai-guide-plan-sheet__title"
             >
-              {sheetTitle?.trim() || t('ai.buddyPostSheetTitle')}
+              {resolvedSheetTitle}
             </Text>
           </View>
           <Button
@@ -97,6 +242,22 @@ export function AiBuddyPostSheet({
           </Button>
         </View>
 
+        {wizard.isWizard ? (
+          <View className="s-ai-buddy-post-sheet__steps" aria-hidden>
+            {(['form', 'compose', 'preview'] as const).map((item, index) => (
+              <View
+                key={item}
+                className={cn(
+                  's-ai-buddy-post-sheet__step',
+                  wizard.step === item && 's-ai-buddy-post-sheet__step--active',
+                  (['form', 'compose', 'preview'] as const).indexOf(wizard.step) >
+                    index && 's-ai-buddy-post-sheet__step--done',
+                )}
+              />
+            ))}
+          </View>
+        ) : null}
+
         <ScrollView
           scrollY
           enhanced
@@ -104,13 +265,33 @@ export function AiBuddyPostSheet({
           scrollTop={form.scrollTop}
           className="s-ai-guide-plan-sheet__scroll s-scrollbar-none"
         >
-          <BuddyPostSheetFormFields
-            form={form}
-            eventCity={eventCity}
-            sheetOpen={open}
-            prefillSummaryLines={prefillSummaryLines}
-            prefillBannerTitle={prefillBannerTitle}
-          />
+          {!wizard.isWizard || wizard.step === 'form' ? (
+            <BuddyPostSheetFormFields
+              form={form}
+              eventCity={eventCity}
+              sheetOpen={open}
+              prefillSummaryLines={prefillSummaryLines}
+              prefillBannerTitle={prefillBannerTitle}
+              hideNote={wizard.isWizard}
+            />
+          ) : null}
+          {wizard.isWizard && wizard.step === 'compose' ? (
+            <BuddyPostComposeStep
+              note={form.note}
+              noteMaxLength={form.noteMaxLength}
+              candidates={compose.candidates}
+              disclaimer={compose.disclaimer}
+              selectedId={compose.selectedId}
+              loading={compose.loading}
+              onNoteChange={form.setNote}
+              onSelectCandidate={compose.setSelectedId}
+              onGenerate={handleGenerate}
+              onRegenerate={handleRegenerate}
+            />
+          ) : null}
+          {wizard.isWizard && wizard.step === 'preview' && previewPost ? (
+            <BuddyPostPreviewStep post={previewPost} activityTitle={activityTitle} />
+          ) : null}
         </ScrollView>
 
         <View className="s-ai-guide-plan-sheet__footer">
@@ -138,23 +319,16 @@ export function AiBuddyPostSheet({
           <Button
             className={cn(
               's-ai-guide-plan-sheet__submit',
-              (!form.canSubmit || form.isSubmitting) &&
-                's-ai-guide-plan-sheet__submit--disabled',
+              primaryDisabled && 's-ai-guide-plan-sheet__submit--disabled',
             )}
-            disabled={!form.canSubmit || form.isSubmitting}
+            disabled={primaryDisabled}
             hoverClass={
-              form.canSubmit && !form.isSubmitting
-                ? 's-ai-guide-plan-sheet__submit--pressed'
-                : ''
+              !primaryDisabled ? 's-ai-guide-plan-sheet__submit--pressed' : ''
             }
-            onClick={form.handleSubmit}
+            onClick={handlePrimaryAction}
           >
             <Send size={17} color="#fff" aria-hidden />
-            <Text className="s-ai-guide-plan-sheet__submit-text">
-              {showSyncToFeedOption
-                ? t('ai.save')
-                : submitLabel?.trim() || t('ai.publishBuddyPost')}
-            </Text>
+            <Text className="s-ai-guide-plan-sheet__submit-text">{primaryLabel}</Text>
           </Button>
         </View>
       </View>

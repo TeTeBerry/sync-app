@@ -68,7 +68,7 @@ US-Q2-22 已移除准备 Tab 与 WS 多轮对话；**能力保留在后端 tools
 | `recruit_search` | 活动详情招募墙 | 搜索 / Chip | `PostSearchService` · 偏好排序 | Q2-05 · **Q2-27** |
 | `local_hub_recruit_search` | 本地城市 Hub | 顶栏搜索 / Chip | 跨场 `activityLegacyIds[]` 或 city+indoor 检索 | **Q2-39** |
 | `recruit_compose` | 发帖 Sheet | 「AI 帮写」 | LLM 候选文案 | **Q2-28** |
-| `recruit_flip` | 翻招募卡页 | 翻卡 | 帖池加权 shuffle | **Q2-29** |
+| `recruit_flip` | 翻招募卡页 | 翻卡 | 帖池加权 shuffle | **Q2-29** ⏸ |
 | `guide_to_recruit` | 攻略完成 | CTA | `travelGuideFormToBuddyPrefill` | **Q2-30** |
 | `personality_next` | 人格结果 / 分享落地 | 主 CTA · 测完提交 | 偏好同步 + 路由至有种子的招募墙 | **Q2-17** · **Q2-18** |
 | `lineup_dj` | 活动详情阵容 / **室内 Headliner** | 点 DJ · 「查看艺人介绍」 | `query_dj_info` | **Q2-33** · **Q2-40** |
@@ -91,19 +91,21 @@ US-Q2-22 已移除准备 Tab 与 WS 多轮对话；**能力保留在后端 tools
 
 | 现网 | Scene 演进 |
 |------|------------|
-| `POST /posts/ai-search` | 首期保留；**Q2-31** 可包一层 `scene=recruit_search` |
+| `POST /posts/ai-search` | 保留兼容；**Q2-31** 活动详情已切 `scene=recruit_search` |
 | `POST …/travel-guide/generate` | 长任务独立 REST + 进度，不塞进 scene-run |
 | WS `client_action` | 前端已无消费者；改为 REST `effects.open_sheet` |
 | `ReadOnlyTurnHandler` | 阵容/演出表等 **规则快路径**，能不调 LLM 就不调 |
 
-### 建议 API（上线后实现）
+### Scene Run API（US-Q2-31 ✅）
 
 `POST /api/ai/scene-run`
 
-- 请求：`scene` · `intent` · `activityLegacyId?` · `input` · `context?`
+- 请求：`scene` · `intent?` · `activityLegacyId?` · `input?` · `context?`
 - 响应：`effects[]` · `disclaimer?`
 
-上线包 **不阻塞** 于该 API：可用现有 REST + 前端 effect 映射先行（见 Q2 Sprint 5）。
+**首期 handler**：`recruit_search` → `insight_line`（`variant: parsed | preference`）+ `reorder_posts`（含 `items` · `parsed` · `totalMatched`）
+
+`POST /posts/ai-search` 仍保留向后兼容；活动详情 AI 找队已走 scene-run。
 
 ### 实现分层（L0 / L1 / L2）
 
@@ -147,8 +149,8 @@ US-Q2-22 已移除准备 Tab 与 WS 多轮对话；**能力保留在后端 tools
 | 阶段 | 时间 | Scene 范围 |
 |------|------|------------|
 | **上线包** | ～2026-07-06 | 无新 API；**Q2-27** 洞察行 + 偏好次排序；**Q2-34** 规则版 Prep Nudge |
-| **Sprint 6** | 上线后 2～4 周 | **Q2-31** scene-run · **Q2-32** 动态 Chip · **Q2-33** DJ 卡片 · **Q2-43** 必看 set · **Q2-44** 申请评论 AI · **Q2-47** 官宣规律 |
-| **Sprint 7** | 有互动数据后 | **Q2-17/29/28/30** 人格/翻卡/AI 发帖/攻略串联 · **Q2-39/40** Hub + 室内 · **Q2-41** 节故事 · **Q2-42** 哪场适合我 · **Q2-48** 生存指南 |
+| **Sprint 6** | 上线后 2～4 周 | **Q2-31** scene-run ✅ · **Q2-32** 动态 Chip · **Q2-33** DJ 卡片 · **Q2-43** 必看 set · **Q2-44** 申请评论 AI · **Q2-47** 官宣规律 |
+| **Sprint 7** | 有互动数据后 | **Q2-17/28/30** 人格/AI 发帖/攻略串联 · **Q2-29** 翻卡（帖量门槛）· **Q2-39/40** Hub + 室内 · **Q2-41** 节故事 · **Q2-42** 哪场适合我 · **Q2-48** 生存指南 |
 | **Sprint 8** | 上海验证后 | Hub 跨场 `local_hub_recruit_search` · 多城 indoor seed · **Q2-45** NL 搜节 · **Q2-46** 双节对比 |
 
 ---
@@ -157,6 +159,8 @@ US-Q2-22 已移除准备 Tab 与 WS 多轮对话；**能力保留在后端 tools
 
 | 层 | 路径 |
 |----|------|
+| Scene 契约 | `sync-app-backend/packages/scene-contracts/` |
+| Scene 运行时 | `sync-app-backend/src/ai/scene/` · `sync-app/src/domains/scene-agent/` |
 | Agent 工具 | `sync-app-backend/src/ai/agent/tools/` |
 | 编排 | `sync-app-backend/src/ai/orchestration/` |
 | AI 找队 | `post-search.service.ts` · `buddy-post-search.util.ts` |

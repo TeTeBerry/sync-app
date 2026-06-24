@@ -33,6 +33,7 @@ import Taro from '@tarojs/taro';
 import { hideThemedLoading, showThemedLoading } from '@/utils/themedLoading';
 import { TravelPlanAddSheetSegment } from './TravelPlanAddSheetSegment';
 import { ScrollView, Text, View } from '@tarojs/components';
+import { useT } from '@/hooks/useI18n';
 
 /** Lucide `color` must be a concrete value — CSS variables are invalid in WeChat. */
 const THEME_PRIMARY = '#ff0066';
@@ -52,18 +53,24 @@ type OcrStatus = 'idle' | 'loading' | 'success';
 
 export type TravelPlanAddSheetProps = {
   open: boolean;
+  mode?: 'add' | 'edit';
   activityLegacyId: number | null;
+  initialValues?: TravelPlanAddFormValues[];
   onClose: () => void;
   onSubmit: (values: TravelPlanAddFormValues[]) => void;
 };
 
 export function TravelPlanAddSheet({
   open,
+  mode = 'add',
   activityLegacyId,
+  initialValues,
   onClose,
   onSubmit,
 }: TravelPlanAddSheetProps) {
   useOverlayLock(open);
+  const t = useT();
+  const isEditMode = mode === 'edit';
 
   const [category, setCategory] = useState<TravelPlanAddFormCategory>('hotel');
   const [formSegments, setFormSegments] = useState<TravelPlanAddFormValues[]>([
@@ -74,12 +81,17 @@ export function TravelPlanAddSheet({
 
   useEffect(() => {
     if (open) {
-      setCategory('hotel');
-      setFormSegments([createEmptyTravelPlanAddForm('hotel')]);
+      if (isEditMode && initialValues?.length) {
+        setFormSegments(initialValues);
+        setCategory(initialValues[0]?.category ?? 'hotel');
+      } else {
+        setCategory('hotel');
+        setFormSegments([createEmptyTravelPlanAddForm('hotel')]);
+      }
       setOcrStatus('idle');
       setOcrMessage('');
     }
-  }, [open]);
+  }, [initialValues, isEditMode, open]);
 
   const canSubmit = useMemo(
     () => formSegments.every((segment) => segment.title.trim().length > 0),
@@ -250,12 +262,12 @@ export function TravelPlanAddSheet({
             id="travel-plan-add-sheet-title"
             className="s-travel-plan-add-sheet__title"
           >
-            添加行程节点
+            {isEditMode ? t('travelPlan.editNodeTitle') : t('travelPlan.addNodeTitle')}
           </Text>
           <Button
             className="s-travel-plan-add-sheet__close"
             hoverClass="s-travel-plan-add-sheet__close--pressed"
-            aria-label="关闭"
+            aria-label={t('travelPlan.closeAria')}
             onClick={onClose}
           >
             <X size={18} color="#fff" aria-hidden />
@@ -270,81 +282,85 @@ export function TravelPlanAddSheet({
           style={{ flex: 1, height: 0, minHeight: 0 }}
         >
           <View className="s-travel-plan-add-sheet__body">
-            <View
-              className={cn(
-                's-travel-plan-add-sheet__ocr',
-                ocrStatus === 'success' && 's-travel-plan-add-sheet__ocr--success',
-              )}
-            >
-              <View className="s-travel-plan-add-sheet__ocr-icon" aria-hidden>
-                <ScanLine
-                  size={20}
-                  color={ocrStatus === 'success' ? '#30d158' : '#bf5af2'}
-                />
-              </View>
-              <View className="s-travel-plan-add-sheet__ocr-copy">
-                <Text className="s-travel-plan-add-sheet__ocr-title">截图识别</Text>
-                <Text className="s-travel-plan-add-sheet__ocr-sub">
-                  上传票务 / 订单截图，AI 自动填入信息
-                </Text>
-              </View>
-              <Button
-                className={cn(
-                  's-travel-plan-add-sheet__ocr-btn',
-                  ocrStatus === 'loading' &&
-                    's-travel-plan-add-sheet__ocr-btn--loading',
-                  ocrStatus === 'success' &&
-                    's-travel-plan-add-sheet__ocr-btn--success',
-                )}
-                hoverClass={
-                  ocrStatus === 'idle'
-                    ? 's-travel-plan-add-sheet__ocr-btn--pressed'
-                    : ''
-                }
-                disabled={ocrStatus === 'loading'}
-                onClick={handleUploadScreenshot}
-              >
-                {ocrStatus === 'loading' ? (
-                  <View
-                    className="s-travel-plan-add-sheet__ocr-btn-spinner"
-                    aria-hidden
-                  />
-                ) : ocrStatus === 'success' ? (
-                  <CircleCheck size={14} color="#30d158" aria-hidden />
-                ) : (
-                  <ImageIcon size={14} color="#bf5af2" aria-hidden />
-                )}
-                <Text
+            {!isEditMode ? (
+              <>
+                <View
                   className={cn(
-                    's-travel-plan-add-sheet__ocr-btn-label',
-                    ocrStatus === 'loading' &&
-                      's-travel-plan-add-sheet__ocr-btn-label--loading',
-                    ocrStatus === 'success' &&
-                      's-travel-plan-add-sheet__ocr-btn-label--success',
+                    's-travel-plan-add-sheet__ocr',
+                    ocrStatus === 'success' && 's-travel-plan-add-sheet__ocr--success',
                   )}
                 >
-                  {ocrStatus === 'loading'
-                    ? '识别中'
-                    : ocrStatus === 'success'
-                      ? '已填入'
-                      : '上传截图'}
-                </Text>
-              </Button>
-            </View>
-            {ocrStatus === 'success' && ocrMessage ? (
-              <View className="s-travel-plan-add-sheet__ocr-hint">
-                <Sparkles size={14} color="#30d158" aria-hidden />
-                <View className="s-travel-plan-add-sheet__ocr-hint-copy">
-                  <Text className="s-travel-plan-add-sheet__ocr-hint-label">
-                    {ocrMessage}
-                  </Text>
-                  {batchMode ? (
-                    <Text className="s-travel-plan-add-sheet__ocr-hint-sub">
-                      已填入 {formSegments.length} 项，可修改每条类型并向下滚动编辑
+                  <View className="s-travel-plan-add-sheet__ocr-icon" aria-hidden>
+                    <ScanLine
+                      size={20}
+                      color={ocrStatus === 'success' ? '#30d158' : '#bf5af2'}
+                    />
+                  </View>
+                  <View className="s-travel-plan-add-sheet__ocr-copy">
+                    <Text className="s-travel-plan-add-sheet__ocr-title">截图识别</Text>
+                    <Text className="s-travel-plan-add-sheet__ocr-sub">
+                      上传票务 / 订单截图，AI 自动填入信息
                     </Text>
-                  ) : null}
+                  </View>
+                  <Button
+                    className={cn(
+                      's-travel-plan-add-sheet__ocr-btn',
+                      ocrStatus === 'loading' &&
+                        's-travel-plan-add-sheet__ocr-btn--loading',
+                      ocrStatus === 'success' &&
+                        's-travel-plan-add-sheet__ocr-btn--success',
+                    )}
+                    hoverClass={
+                      ocrStatus === 'idle'
+                        ? 's-travel-plan-add-sheet__ocr-btn--pressed'
+                        : ''
+                    }
+                    disabled={ocrStatus === 'loading'}
+                    onClick={handleUploadScreenshot}
+                  >
+                    {ocrStatus === 'loading' ? (
+                      <View
+                        className="s-travel-plan-add-sheet__ocr-btn-spinner"
+                        aria-hidden
+                      />
+                    ) : ocrStatus === 'success' ? (
+                      <CircleCheck size={14} color="#30d158" aria-hidden />
+                    ) : (
+                      <ImageIcon size={14} color="#bf5af2" aria-hidden />
+                    )}
+                    <Text
+                      className={cn(
+                        's-travel-plan-add-sheet__ocr-btn-label',
+                        ocrStatus === 'loading' &&
+                          's-travel-plan-add-sheet__ocr-btn-label--loading',
+                        ocrStatus === 'success' &&
+                          's-travel-plan-add-sheet__ocr-btn-label--success',
+                      )}
+                    >
+                      {ocrStatus === 'loading'
+                        ? '识别中'
+                        : ocrStatus === 'success'
+                          ? '已填入'
+                          : '上传截图'}
+                    </Text>
+                  </Button>
                 </View>
-              </View>
+                {ocrStatus === 'success' && ocrMessage ? (
+                  <View className="s-travel-plan-add-sheet__ocr-hint">
+                    <Sparkles size={14} color="#30d158" aria-hidden />
+                    <View className="s-travel-plan-add-sheet__ocr-hint-copy">
+                      <Text className="s-travel-plan-add-sheet__ocr-hint-label">
+                        {ocrMessage}
+                      </Text>
+                      {batchMode ? (
+                        <Text className="s-travel-plan-add-sheet__ocr-hint-sub">
+                          已填入 {formSegments.length} 项，可修改每条类型并向下滚动编辑
+                        </Text>
+                      ) : null}
+                    </View>
+                  </View>
+                ) : null}
+              </>
             ) : null}
 
             <Text className="s-travel-plan-add-sheet__label">
@@ -407,7 +423,13 @@ export function TravelPlanAddSheet({
                 onClick={handleSubmit}
               >
                 <Text className="s-travel-plan-add-sheet__submit-label">
-                  {batchMode ? `保存 ${formSegments.length} 项` : '保存行程'}
+                  {isEditMode
+                    ? t('travelPlan.editNodeSubmit')
+                    : batchMode
+                      ? t('travelPlan.addNodeSubmitBatch', {
+                          count: formSegments.length,
+                        })
+                      : t('travelPlan.addNodeSubmit')}
                 </Text>
               </Button>
             </View>

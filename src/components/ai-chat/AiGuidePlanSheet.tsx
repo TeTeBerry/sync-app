@@ -18,6 +18,11 @@ import { useAiGuidePlanSheetForm } from './useAiGuidePlanSheetForm';
 import { useT } from '@/hooks/useI18n';
 import { ScrollView, Text, View } from '@tarojs/components';
 
+/** Matches `--secondary`; lucide icons need literal colors in mini program data URLs. */
+const SECONDARY_ICON_COLOR = '#4cc9f0';
+/** Matches `--primary`; lucide icons need literal colors in mini program data URLs. */
+const PRIMARY_ICON_COLOR = '#ff0066';
+
 export type AiGuidePlanSheetProps = {
   open: boolean;
   defaultNights: number;
@@ -56,7 +61,7 @@ function InlineStepper({
         aria-label={ariaDecrease}
         onClick={() => onChange(Math.max(min, value - 1))}
       >
-        <Minus size={15} color="rgba(255,255,255,0.9)" aria-hidden />
+        <Minus size={15} color={PRIMARY_ICON_COLOR} aria-hidden />
       </Button>
       <Text className="s-ai-guide-plan-sheet__inline-stepper-value">{value}</Text>
       <Button
@@ -66,7 +71,7 @@ function InlineStepper({
         aria-label={ariaIncrease}
         onClick={() => onChange(Math.min(max, value + 1))}
       >
-        <Plus size={15} color="rgba(255,255,255,0.9)" aria-hidden />
+        <Plus size={15} color={PRIMARY_ICON_COLOR} aria-hidden />
       </Button>
     </View>
   );
@@ -163,7 +168,7 @@ function AiGuidePlanSheetInner({
               <Sparkles
                 size={16}
                 className="s-ai-guide-plan-sheet__title-icon-sparkle"
-                color="#fff"
+                color={SECONDARY_ICON_COLOR}
                 aria-hidden
               />
             </View>
@@ -213,11 +218,12 @@ function AiGuidePlanSheetInner({
               <View className="s-ai-guide-plan-sheet__card">
                 <View className="s-ai-guide-plan-sheet__card-row">
                   <View className="s-ai-guide-plan-sheet__card-summary">
-                    <View
-                      className="s-ai-guide-plan-sheet__icon-badge s-ai-guide-plan-sheet__icon-badge--muted"
-                      aria-hidden
-                    >
-                      <Users size={16} className="s-ai-guide-plan-sheet__card-icon" />
+                    <View className="s-ai-guide-plan-sheet__icon-badge" aria-hidden>
+                      <Users
+                        size={16}
+                        className="s-ai-guide-plan-sheet__card-icon"
+                        color={SECONDARY_ICON_COLOR}
+                      />
                     </View>
                     <Text className="s-ai-guide-plan-sheet__card-summary-text">
                       {form.headcount} {t('travelPlan.headcountUnit')}
@@ -245,11 +251,12 @@ function AiGuidePlanSheetInner({
               <View className="s-ai-guide-plan-sheet__card s-ai-guide-plan-sheet__card--drive">
                 <View className="s-ai-guide-plan-sheet__card-row">
                   <View className="s-ai-guide-plan-sheet__drive-copy">
-                    <View
-                      className="s-ai-guide-plan-sheet__icon-badge s-ai-guide-plan-sheet__icon-badge--muted"
-                      aria-hidden
-                    >
-                      <Car size={16} className="s-ai-guide-plan-sheet__card-icon" />
+                    <View className="s-ai-guide-plan-sheet__icon-badge" aria-hidden>
+                      <Car
+                        size={16}
+                        className="s-ai-guide-plan-sheet__card-icon"
+                        color={SECONDARY_ICON_COLOR}
+                      />
                     </View>
                     <View className="s-ai-guide-plan-sheet__drive-text">
                       <Text className="s-ai-guide-plan-sheet__drive-title">
@@ -273,13 +280,11 @@ function AiGuidePlanSheetInner({
               <View className="s-ai-guide-plan-sheet__card s-ai-guide-plan-sheet__card--drive">
                 <View className="s-ai-guide-plan-sheet__card-row">
                   <View className="s-ai-guide-plan-sheet__drive-copy">
-                    <View
-                      className="s-ai-guide-plan-sheet__icon-badge s-ai-guide-plan-sheet__icon-badge--muted"
-                      aria-hidden
-                    >
+                    <View className="s-ai-guide-plan-sheet__icon-badge" aria-hidden>
                       <BedDouble
                         size={16}
                         className="s-ai-guide-plan-sheet__card-icon"
+                        color={SECONDARY_ICON_COLOR}
                       />
                     </View>
                     <View className="s-ai-guide-plan-sheet__drive-text">
@@ -305,13 +310,11 @@ function AiGuidePlanSheetInner({
                 <View className="s-ai-guide-plan-sheet__card">
                   <View className="s-ai-guide-plan-sheet__card-row">
                     <View className="s-ai-guide-plan-sheet__card-summary">
-                      <View
-                        className="s-ai-guide-plan-sheet__icon-badge s-ai-guide-plan-sheet__icon-badge--muted"
-                        aria-hidden
-                      >
+                      <View className="s-ai-guide-plan-sheet__icon-badge" aria-hidden>
                         <BedDouble
                           size={16}
                           className="s-ai-guide-plan-sheet__card-icon"
+                          color={SECONDARY_ICON_COLOR}
                         />
                       </View>
                       <Text className="s-ai-guide-plan-sheet__card-summary-text">

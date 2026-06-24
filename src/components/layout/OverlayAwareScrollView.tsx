@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useIsOverlayLocked } from '../../hooks/useOverlayLock';
 import { ScrollView, type ScrollViewProps } from '@tarojs/components';
 
@@ -21,29 +21,61 @@ export function OverlayAwareScrollView({
   const scrollLocked = overlayLocked || pinScroll;
   const liveScrollRef = useRef(0);
   const pinnedScrollRef = useRef<number | null>(null);
+  const pendingRestoreRef = useRef<number | null>(null);
   const prevLockedRef = useRef(false);
+  const [restoreScrollTop, setRestoreScrollTop] = useState<number | undefined>();
 
-  if (scrollLocked && !prevLockedRef.current) {
+  const enteringLock = scrollLocked && !prevLockedRef.current;
+  const leavingLock = !scrollLocked && prevLockedRef.current;
+
+  if (enteringLock) {
     pinnedScrollRef.current =
       liveScrollRef.current ||
-      (typeof controlledScrollTop === 'number' ? controlledScrollTop : 0);
-  } else if (!scrollLocked && prevLockedRef.current) {
-    pinnedScrollRef.current = null;
+      (restoreScrollTop ??
+        (typeof controlledScrollTop === 'number' ? controlledScrollTop : 0));
   }
+
+  if (leavingLock && pinnedScrollRef.current != null) {
+    const preserved = pinnedScrollRef.current;
+    pinnedScrollRef.current = null;
+    if (preserved > 0 && controlledScrollTop === undefined) {
+      pendingRestoreRef.current = preserved;
+    }
+  }
+
   prevLockedRef.current = scrollLocked;
+
+  useLayoutEffect(() => {
+    const top = pendingRestoreRef.current;
+    if (top == null) {
+      return;
+    }
+    pendingRestoreRef.current = null;
+    setRestoreScrollTop(undefined);
+    const timer = setTimeout(() => setRestoreScrollTop(top), 0);
+    return () => clearTimeout(timer);
+  }, [scrollLocked]);
+
+  useEffect(() => {
+    if (typeof controlledScrollTop === 'number') {
+      setRestoreScrollTop(undefined);
+    }
+  }, [controlledScrollTop]);
 
   const handleScroll = useCallback(
     (event: Parameters<NonNullable<ScrollViewProps['onScroll']>>[0]) => {
       liveScrollRef.current = event.detail.scrollTop;
+      if (restoreScrollTop != null && !scrollLocked) {
+        setRestoreScrollTop(undefined);
+      }
       onScroll?.(event);
     },
-    [onScroll],
+    [onScroll, restoreScrollTop, scrollLocked],
   );
 
-  const resolvedScrollTop =
-    scrollLocked && pinnedScrollRef.current != null
-      ? pinnedScrollRef.current
-      : controlledScrollTop;
+  const resolvedScrollTop = scrollLocked
+    ? (pinnedScrollRef.current ?? liveScrollRef.current)
+    : (controlledScrollTop ?? restoreScrollTop);
 
   return (
     <ScrollView

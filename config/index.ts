@@ -18,6 +18,10 @@ const notificationContractsPath = resolveContractEntry('@sync/notification-contr
 const partnerContractsPath = resolveContractEntry('@sync/partner-contracts');
 const itineraryContractsPath = resolveContractEntry('@sync/itinerary-contracts');
 const festivalPlanContractsPath = resolveContractEntry('@sync/festival-plan-contracts');
+const sceneContractsPath = path.resolve(
+  __dirname,
+  '../node_modules/@sync/scene-contracts/index.ts',
+);
 const srcPath = path.resolve(__dirname, '../src');
 /** Workspace @sync/*-contracts packages; must be babel-included for weapp/h5. */
 const contractPackagesPath = path.resolve(__dirname, '../node_modules/@sync');
@@ -46,6 +50,7 @@ export default defineConfig({
     '@sync/partner-contracts': partnerContractsPath,
     '@sync/itinerary-contracts': itineraryContractsPath,
     '@sync/festival-plan-contracts': festivalPlanContractsPath,
+    '@sync/scene-contracts': sceneContractsPath,
     /** After @sync/* — bare `@` must not shadow `@sync/…` contract aliases. */
     '@': srcPath,
   },

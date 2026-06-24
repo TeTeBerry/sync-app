@@ -20,6 +20,13 @@ export function isDomesticActivityRegion(region?: ActivityMapRegion | null): boo
   return region === 'domestic';
 }
 
+/** 出行攻略表单与摘要中的「是否自驾」仅对国内活动有意义。 */
+export function shouldShowTravelGuideSelfDriveOption(
+  region?: ActivityMapRegion | null,
+): boolean {
+  return isDomesticActivityRegion(region);
+}
+
 /** Fallback GCJ-02 coords when API rows predate map fields. */
 export const ACTIVITY_MAP_COORD_FALLBACK: Record<
   number,

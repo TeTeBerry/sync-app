@@ -15,6 +15,7 @@ import {
   resolvePrepNudge,
   type PrepNudgeAction,
 } from '../utils/eventDetailPlanningHint.util';
+import { resolveFestivalPrepCollapsedHint } from '../utils/resolveFestivalPrepCollapsedHint';
 
 export type EventDetailComposerSectionProps = {
   onAiGuideClick: () => void;
@@ -68,16 +69,28 @@ export const EventDetailComposerSection: React.FC<EventDetailComposerSectionProp
       unreadReplyCount,
     ],
   );
+  const guidePrepHint = useMemo(
+    () =>
+      resolveFestivalPrepCollapsedHint({
+        travelGuideGenerated,
+        travelGuideSupported,
+        t,
+      }),
+    [t, travelGuideGenerated, travelGuideSupported],
+  );
   const showAccentHint = prepNudge.accent && !expanded;
-  const collapsedHint = expanded ? t('eventDetail.festivalPrepHint') : prepNudge.text;
-  const hintActionable = !expanded && Boolean(prepNudge.action && onPrepNudgeAction);
+  const nudgeActionable =
+    !expanded && Boolean(prepNudge.action && onPrepNudgeAction && prepNudge.accent);
+  const guideHintActionable = !expanded && guidePrepHint.actionable && !nudgeActionable;
+  const collapsedHint = expanded
+    ? t('eventDetail.festivalPrepHint')
+    : nudgeActionable
+      ? prepNudge.text
+      : guidePrepHint.text;
+  const hintActionable = nudgeActionable || guideHintActionable;
 
   return (
     <View data-cmp="EventDetailPlanning" className="s-event-detail-planning">
-      <Text className="s-event-detail-planning__section-title">
-        {t('eventDetail.planningSectionKicker')}
-      </Text>
-
       <View
         className={cn(
           's-event-detail-planning__group',
@@ -94,7 +107,7 @@ export const EventDetailComposerSection: React.FC<EventDetailComposerSectionProp
             className="s-event-detail-planning__icon s-event-detail-planning__icon--travel"
             aria-hidden
           >
-            <Plane size={17} color="#5ac8fa" />
+            <Plane size={15} color="#5ac8fa" />
           </View>
           <View className="s-event-detail-planning__row-main">
             <Text className="s-event-detail-planning__row-title">
@@ -104,7 +117,7 @@ export const EventDetailComposerSection: React.FC<EventDetailComposerSectionProp
               {t('eventDetail.myItinerarySubtitle')}
             </Text>
           </View>
-          <ChevronRight size={16} color="#8e8e93" />
+          <ChevronRight size={14} color="#8e8e93" />
         </Button>
 
         <View className="s-event-detail-planning__hairline" aria-hidden />
@@ -119,7 +132,7 @@ export const EventDetailComposerSection: React.FC<EventDetailComposerSectionProp
             className="s-event-detail-planning__icon s-event-detail-planning__icon--prep"
             aria-hidden
           >
-            <Sparkles size={17} color="#ffb340" />
+            <Sparkles size={15} color="#ffb340" />
           </View>
           <View className="s-event-detail-planning__row-main">
             <Text className="s-event-detail-planning__row-title">
@@ -135,8 +148,12 @@ export const EventDetailComposerSection: React.FC<EventDetailComposerSectionProp
                 hoverClass="s-event-detail-planning__row-sub--action-pressed"
                 onClick={(event) => {
                   event.stopPropagation();
-                  if (prepNudge.action) {
+                  if (nudgeActionable && prepNudge.action) {
                     onPrepNudgeAction?.(prepNudge.action);
+                    return;
+                  }
+                  if (guideHintActionable) {
+                    onAiGuideClick();
                   }
                 }}
               >
@@ -163,9 +180,9 @@ export const EventDetailComposerSection: React.FC<EventDetailComposerSectionProp
               </View>
             ) : null}
             {expanded ? (
-              <ChevronUp size={16} color="#8e8e93" />
+              <ChevronUp size={14} color="#8e8e93" />
             ) : (
-              <ChevronDown size={16} color="#8e8e93" />
+              <ChevronDown size={14} color="#8e8e93" />
             )}
           </View>
         </Button>

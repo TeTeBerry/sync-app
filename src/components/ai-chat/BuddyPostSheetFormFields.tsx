@@ -11,6 +11,7 @@ type BuddyPostSheetFormFieldsProps = {
   sheetOpen: boolean;
   prefillSummaryLines?: string[] | null;
   prefillBannerTitle?: string | null;
+  hideNote?: boolean;
 };
 
 export function BuddyPostSheetFormFields({
@@ -19,6 +20,7 @@ export function BuddyPostSheetFormFields({
   sheetOpen,
   prefillSummaryLines = null,
   prefillBannerTitle = null,
+  hideNote = false,
 }: BuddyPostSheetFormFieldsProps) {
   const t = useT();
   return (
@@ -72,22 +74,29 @@ export function BuddyPostSheetFormFields({
         </View>
       </View>
 
-      <View className="s-ai-guide-plan-sheet__field s-ai-buddy-post-sheet__field--note">
-        <Text className="s-ai-buddy-post-sheet__label">{t('posts.noteLabel')}</Text>
-        <View className="s-ai-buddy-post-sheet__textarea-wrap">
-          <Textarea
-            className="s-ai-buddy-post-sheet__textarea"
-            value={form.note}
-            maxlength={form.noteMaxLength}
-            placeholder={t('posts.notePlaceholder')}
-            placeholderClass="s-ai-guide-plan-sheet__input-placeholder"
-            onInput={(e) => form.setNote(e.detail.value ?? '')}
-          />
-          <Text className="s-ai-buddy-post-sheet__note-count" aria-hidden>
-            {form.note.length}/{form.noteMaxLength}
-          </Text>
+      {!hideNote ? (
+        <View className="s-ai-guide-plan-sheet__field s-ai-buddy-post-sheet__field--note">
+          <View className="s-ai-buddy-post-sheet__label-row">
+            <Text className="s-ai-buddy-post-sheet__label">{t('posts.noteLabel')}</Text>
+            <Text className="s-ai-buddy-post-sheet__optional-tag">
+              {t('posts.noteOptional')}
+            </Text>
+          </View>
+          <View className="s-ai-buddy-post-sheet__textarea-wrap">
+            <Textarea
+              className="s-ai-buddy-post-sheet__textarea"
+              value={form.note}
+              maxlength={form.noteMaxLength}
+              placeholder={t('posts.notePlaceholder')}
+              placeholderClass="s-ai-guide-plan-sheet__input-placeholder"
+              onInput={(e) => form.setNote(e.detail.value ?? '')}
+            />
+            <Text className="s-ai-buddy-post-sheet__note-count" aria-hidden>
+              {form.note.length}/{form.noteMaxLength}
+            </Text>
+          </View>
         </View>
-      </View>
+      ) : null}
     </View>
   );
 }

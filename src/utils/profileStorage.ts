@@ -3,6 +3,7 @@ import Taro from '@tarojs/taro';
 export const PROFILE_STORAGE_KEYS = {
   notifications: 'profile.notificationsEnabled',
   privacy: 'profile.privacyLevel',
+  preferenceSortEnabled: 'profile.preferenceSortEnabled',
 } as const;
 
 export type ProfilePrivacyLevel = 'public' | 'private';
@@ -48,4 +49,18 @@ export function writeProfileNotificationsEnabled(value: boolean): void {
 
 export function writeProfilePrivacyLevel(value: ProfilePrivacyLevel): void {
   Taro.setStorageSync(PROFILE_STORAGE_KEYS.privacy, value);
+}
+
+export function readProfilePreferenceSortEnabled(fallback = true): boolean {
+  try {
+    const raw = Taro.getStorageSync(PROFILE_STORAGE_KEYS.preferenceSortEnabled);
+    if (raw === '' || raw == null) return fallback;
+    return Boolean(raw);
+  } catch {
+    return fallback;
+  }
+}
+
+export function writeProfilePreferenceSortEnabled(value: boolean): void {
+  Taro.setStorageSync(PROFILE_STORAGE_KEYS.preferenceSortEnabled, value);
 }

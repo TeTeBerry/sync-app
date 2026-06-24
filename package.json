@@ -59,6 +59,7 @@
     "@sync/notification-contracts": "workspace:*",
     "@sync/partner-contracts": "workspace:*",
     "@sync/profile-contracts": "workspace:*",
+    "@sync/scene-contracts": "workspace:*",
     "@sync/travel-guide-contracts": "workspace:*",
     "@sync/travel-plan-contracts": "workspace:*",
     "@tarojs/components": "4.2.0",

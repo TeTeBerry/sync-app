@@ -163,7 +163,7 @@ src/
 ├── pages/ai/                   准备 Tab（AI 对话 + Festival Plan）
 ├── pages/index/                首页精选活动 / 我的下一场
 ├── pages/profile/              个人 Tab
-├── domains/festival-plan/      出征准备三件套进度
+├── domains/festival-plan/      出发准备三件套进度
 ├── domains/partner-feed/       活动详情组队帖流 / AI 咨询入口
 ├── domains/travel-guide/       出行攻略
 ├── domains/personality-test/   人格测试

@@ -1,10 +1,15 @@
 import Taro from '@tarojs/taro';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { searchBuddyPostsWithAi } from '../../../api/sync/posts';
+import { runScene } from '../../../api/sync/sceneRun';
 import { isLiveApi } from '../../../constants/api';
 import type { BuddyPostSearchParsed } from '../../../types/backend';
 import type { EventDetailPost } from '@/types/partner';
 import { ApiError, isApiAbortError } from '../../../utils/apiClient';
+import {
+  applySceneEffects,
+  findSceneInsightLine,
+  type SceneInsightLine,
+} from '../../scene-agent/applySceneEffects';
 import {
   filterEventDetailPostsByQuery,
   resolveBuddySearchTerms,
@@ -31,6 +36,7 @@ export type UseEventDetailPostSearchParams = {
   loadedPosts: EventDetailPost[];
   ruleFilters?: EventDetailPostRuleFilters;
   onTravelGuidePrefillDismiss?: (activityLegacyId: number, guideId: string) => void;
+  applyPreferenceRank?: boolean;
 };
 
 export function useEventDetailPostSearch({
@@ -38,11 +44,13 @@ export function useEventDetailPostSearch({
   loadedPosts,
   ruleFilters = {},
   onTravelGuidePrefillDismiss,
+  applyPreferenceRank = true,
 }: UseEventDetailPostSearchParams) {
   const [query, setQueryState] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [apiResults, setApiResults] = useState<EventDetailPost[]>([]);
   const [searchParsed, setSearchParsed] = useState<BuddyPostSearchParsed | null>(null);
+  const [sceneInsightLines, setSceneInsightLines] = useState<SceneInsightLine[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [usedLocalFallback, setUsedLocalFallback] = useState(false);
   const [travelGuidePrefillHint, setTravelGuidePrefillHint] = useState(false);
@@ -100,6 +108,7 @@ export function useEventDetailPostSearch({
     if (!debouncedQuery || !useRemoteSearch || activityLegacyId == null) {
       setApiResults([]);
       setSearchParsed(null);
+      setSceneInsightLines([]);
       setIsSearching(false);
       setUsedLocalFallback(false);
       return;
@@ -110,14 +119,27 @@ export function useEventDetailPostSearch({
     setIsSearching(true);
     setUsedLocalFallback(false);
     setSearchParsed(null);
+    setSceneInsightLines([]);
 
-    void searchBuddyPostsWithAi(debouncedQuery, activityLegacyId, {
-      signal: controller.signal,
-    })
-      .then((result) => {
+    void runScene(
+      {
+        scene: 'recruit_search',
+        intent: 'search',
+        activityLegacyId,
+        input: debouncedQuery,
+        context: {
+          trigger: 'search',
+          applyPreferenceRank,
+        },
+      },
+      { signal: controller.signal },
+    )
+      .then((response) => {
         if (requestSeq !== requestSeqRef.current) return;
-        setApiResults(result.items);
-        setSearchParsed(result.parsed);
+        const applied = applySceneEffects(response.effects);
+        setSceneInsightLines(applied.insightLines);
+        setApiResults(applied.reorderPosts?.items ?? []);
+        setSearchParsed(applied.reorderPosts?.parsed ?? null);
         setUsedLocalFallback(false);
       })
       .catch((error) => {
@@ -126,6 +148,7 @@ export function useEventDetailPostSearch({
 
         setApiResults([]);
         setSearchParsed(null);
+        setSceneInsightLines([]);
         const fallbackTerms = resolveBuddySearchTerms(debouncedQuery);
         if (fallbackTerms.length > 0) {
           setUsedLocalFallback(true);
@@ -153,7 +176,7 @@ export function useEventDetailPostSearch({
     return () => {
       controller.abort();
     };
-  }, [activityLegacyId, debouncedQuery, useRemoteSearch]);
+  }, [activityLegacyId, applyPreferenceRank, debouncedQuery, useRemoteSearch]);
 
   const matchedPosts = useMemo(() => {
     if (!isActive) return null;
@@ -200,6 +223,7 @@ export function useEventDetailPostSearch({
     setDebouncedQuery('');
     setApiResults([]);
     setSearchParsed(null);
+    setSceneInsightLines([]);
     setIsSearching(false);
     setUsedLocalFallback(false);
     lastFailToastQueryRef.current = '';
@@ -216,6 +240,12 @@ export function useEventDetailPostSearch({
     matchedCount: matchedPosts?.length ?? 0,
     usedLocalFallback,
     searchParsed: usedLocalFallback ? null : searchParsed,
+    sceneParsedInsight: usedLocalFallback
+      ? null
+      : findSceneInsightLine(sceneInsightLines, 'parsed'),
+    scenePreferenceInsight: usedLocalFallback
+      ? null
+      : findSceneInsightLine(sceneInsightLines, 'preference'),
     travelGuidePrefillHint,
   };
 }

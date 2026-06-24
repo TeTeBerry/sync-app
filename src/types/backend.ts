@@ -62,8 +62,12 @@ export interface ReportStatusResult {
 }
 
 export type {
+  BuddyPostAiComposeResult,
   BuddyPostAiSearchResult,
+  BuddyPostComposeCandidate,
+  BuddyPostComposeHints,
   BuddyPostSearchParsed,
+  AiComposePostsPayload,
   CreatePostPayload,
   DeletePostResult,
   EventDetailPost,
@@ -140,3 +144,13 @@ export type {
   TravelPlanReceiptRecognizeJobResult,
   TravelPlanReceiptRecognizeJobStatus,
 } from './travelPlan';
+
+export type {
+  InsightLineVariant,
+  SceneContext,
+  SceneEffect,
+  SceneId,
+  SceneRunRequest,
+  SceneRunResponse,
+  SceneTrigger,
+} from '@sync/scene-contracts';

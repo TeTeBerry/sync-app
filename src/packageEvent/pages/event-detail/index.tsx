@@ -19,7 +19,7 @@ import { AiBuddyPostSheet } from '../../../components/ai-chat/AiBuddyPostSheet';
 import { AiGuidePlanSheet } from '../../../components/ai-chat/AiGuidePlanSheet';
 import {
   isDomesticActivityRegion,
-  isOverseasActivityRegion,
+  shouldShowTravelGuideSelfDriveOption,
 } from '../../../constants/activityMapRegion';
 import PageNavigation from '../../../components/navigation/PageNavigation';
 import { Button } from '../../../components/ui';
@@ -47,20 +47,25 @@ const EventDetailPage = () => {
   const page = useEventDetailPage({ confirm });
   const { loggedIn } = useAuthSession();
   const { data: currentUser } = useCurrentUserQuery({ enabled: loggedIn });
-  const searchParsedSummary = useMemo(
-    () =>
-      formatBuddyPostSearchParsedSummary(page.posts.searchParsed, (count) =>
-        t('eventDetail.searchParsedPeople', { count }),
-      ),
-    [page.posts.searchParsed, t],
-  );
+  const searchParsedSummary = useMemo(() => {
+    if (page.posts.searchSceneParsedInsight) {
+      return page.posts.searchSceneParsedInsight;
+    }
+    return formatBuddyPostSearchParsedSummary(page.posts.searchParsed, (count) =>
+      t('eventDetail.searchParsedPeople', { count }),
+    );
+  }, [page.posts.searchParsed, page.posts.searchSceneParsedInsight, t]);
   const hasPreferenceSignal = loggedIn && hasBuddyPreferenceSignal(currentUser);
   const preferenceSummary = useMemo(
     () => (hasPreferenceSignal ? formatBuddyPreferencesSummary(currentUser) : null),
     [currentUser, hasPreferenceSignal],
   );
+  const activePreferenceSummary =
+    page.posts.searchScenePreferenceInsight ?? preferenceSummary;
   const showPreferenceInsight =
-    hasPreferenceSignal && !page.posts.searchUsedLocalFallback;
+    Boolean(activePreferenceSummary) &&
+    page.posts.preferenceSortEnabled &&
+    !page.posts.searchUsedLocalFallback;
 
   if (page.invalidEventId) {
     return <EventDetailFallback variant="invalidId" />;
@@ -219,6 +224,13 @@ const EventDetailPage = () => {
                         onSelectedCityChange={posts.setPostFilterSelectedCity}
                         recruitingOnly={posts.postFilterRecruitingOnly}
                         onRecruitingOnlyChange={posts.setPostFilterRecruitingOnly}
+                        showPreferenceSort={
+                          loggedIn && posts.postFilterShowPreferenceSort
+                        }
+                        preferenceSortEnabled={posts.postFilterPreferenceSortEnabled}
+                        onPreferenceSortEnabledChange={
+                          posts.setPostFilterPreferenceSortEnabled
+                        }
                         disabled={posts.searchActive}
                       />
                       <EventDetailPostSearchBar
@@ -230,7 +242,7 @@ const EventDetailPage = () => {
                         usedLocalFallback={posts.searchUsedLocalFallback}
                         parsedSummary={searchParsedSummary}
                         preferenceSummary={
-                          showPreferenceInsight ? preferenceSummary : null
+                          showPreferenceInsight ? activePreferenceSummary : null
                         }
                         hasPreferenceRanking={showPreferenceInsight}
                         travelGuidePrefillHint={posts.travelGuideSearchPrefillHint}
@@ -312,6 +324,8 @@ const EventDetailPage = () => {
       {buddyPostSheetOpen ? (
         <AiBuddyPostSheet
           open
+          mode={isBuddyPostEditing ? 'edit' : 'create'}
+          activityLegacyId={page.eventId}
           activityDate={buddyPostActivityDate}
           activityTitle={buddyPostActivityTitle}
           eventCity={guideEventCity}
@@ -330,7 +344,7 @@ const EventDetailPage = () => {
           open
           defaultNights={guideDefaultNights}
           eventCity={guideEventCity}
-          showSelfDriveOption={!isOverseasActivityRegion(activity?.region)}
+          showSelfDriveOption={shouldShowTravelGuideSelfDriveOption(activity?.region)}
           showAccommodationOption={isDomesticActivityRegion(activity?.region)}
           initialValues={guideSheetInitialValues}
           onClose={closeGuideSheet}

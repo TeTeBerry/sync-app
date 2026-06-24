@@ -45,6 +45,7 @@ export const ROUTES = {
   ACTIVITY_LINEUP: '/packageEvent/pages/activity-lineup/index',
   MY_ITINERARY: '/packageEvent/pages/my-itinerary/index',
   PERSONALITY_TEST: '/packageEvent/pages/personality-test/index',
+  SET_VOTE: '/packageEvent/pages/set-vote/index',
   AI_TRAVEL_GUIDE: '/packageEvent/pages/ai-travel-guide/index',
   NOTIFICATIONS: '/packageProfile/pages/notifications/index',
 } as const;
@@ -67,6 +68,7 @@ const PRELOAD_PAGE_ROUTES_BY_TAB: Record<PreloadTabPath, RoutePath[]> = {
     ROUTES.EVENT_DETAIL,
     ROUTES.NOTIFICATIONS,
     ROUTES.PERSONALITY_TEST,
+    ROUTES.ACTIVITY_LINEUP,
     ROUTES.AI_TRAVEL_GUIDE,
   ],
   [ROUTES.EVENTS]: [ROUTES.EVENT_DETAIL],
@@ -782,7 +784,7 @@ export function goActivityLineup(activityLegacyId: number) {
 export function goMyItinerary(
   activityLegacyId?: number,
   selectedDjIds?: string[],
-  options?: { replace?: boolean },
+  options?: { replace?: boolean; headcount?: number },
 ) {
   const query: Record<string, string> = {};
   const legacyId = parseActivityLegacyId(activityLegacyId);
@@ -794,6 +796,13 @@ export function goMyItinerary(
   const ids = selectedDjIds?.map((id) => id.trim()).filter(Boolean) ?? [];
   if (ids.length > 0) {
     query.selectedDjIds = encodeSelectedDjList(ids);
+  }
+  if (
+    options?.headcount != null &&
+    Number.isFinite(options.headcount) &&
+    options.headcount > 0
+  ) {
+    query.headcount = String(Math.round(options.headcount));
   }
   preloadEventSubpackage();
   const url = buildPageUrl(ROUTES.MY_ITINERARY, query);
@@ -812,6 +821,30 @@ export function goPersonalityTest(options?: { viewResult?: boolean }) {
   const url = buildPageUrl(ROUTES.PERSONALITY_TEST, query);
   prefetchPersonalityTestAudioMedia();
   void ensureEventSubpackageLoaded().then(() => navigateToSafe(url));
+}
+
+export function goSetVote(
+  activityLegacyId: number | string,
+  options?: { sharePicks?: string[] },
+) {
+  const legacyId = parseActivityLegacyId(activityLegacyId);
+  if (legacyId == null) {
+    void Taro.showToast({ title: '活动信息无效', icon: 'none' });
+    return;
+  }
+  const query: Record<string, string> = {
+    id: String(legacyId),
+    activityLegacyId: String(legacyId),
+    voteMode: '1',
+  };
+  if (options?.sharePicks?.length) {
+    query.share = '1';
+    query.voterPicks = encodeSelectedDjList(options.sharePicks);
+  }
+  bindActivity(legacyId);
+  preloadEventSubpackage();
+  const url = buildPageUrl(ROUTES.ACTIVITY_LINEUP, query);
+  openStackPageSafe(url, { eventId: legacyId });
 }
 
 export function goAiTravelGuide(guideId: string) {

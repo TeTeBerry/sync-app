@@ -4,6 +4,11 @@
  */
 export type {
   AiSearchPostsPayload,
+  AiComposePostsPayload,
+  BuddyPostComposeHints,
+  BuddyPostComposeCandidate,
+  BuddyPostComposeCandidateStyle,
+  BuddyPostAiComposeResult,
   BuddyPostAiSearchResult,
   BuddyPostSearchParsed,
   CreatePostCommentPayload,

@@ -15,4 +15,7 @@ export type TravelPlanNode = ContractTravelPlanNode & {
 export type TravelPlanStats = {
   nodeCount: number;
   estimatedCost: number;
+  splitCount: number;
+  splitEligibleCost: number;
+  estimatedPerPerson: number | null;
 };

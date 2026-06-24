@@ -21,6 +21,8 @@ export function travelPlanNodeToPayload(node: TravelPlanNode): TravelPlanNodePay
     confirmed: true,
     ...(node.diningBills?.length ? { diningBills: node.diningBills } : {}),
     ...(node.transportBills?.length ? { transportBills: node.transportBills } : {}),
+    ...(node.splitEnabled ? { splitEnabled: true } : {}),
+    ...(node.splitCount != null ? { splitCount: node.splitCount } : {}),
   };
 }
 
@@ -53,6 +55,8 @@ function travelPlanNodeFromPayload(payload: TravelPlanNodePayload): TravelPlanNo
     ...(payload.transportBills?.length
       ? { transportBills: payload.transportBills }
       : {}),
+    ...(payload.splitEnabled ? { splitEnabled: true } : {}),
+    ...(payload.splitCount != null ? { splitCount: payload.splitCount } : {}),
   };
 }
 

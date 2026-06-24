@@ -12,12 +12,14 @@ import { useT } from '@/hooks/useI18n';
 
 export type TravelPlanReceiptOcrTipProps = {
   activityLegacyId?: number;
+  headcount?: number;
   disabled?: boolean;
   className?: string;
 };
 
 export function TravelPlanReceiptOcrTip({
   activityLegacyId,
+  headcount,
   disabled = false,
   className,
 }: TravelPlanReceiptOcrTipProps) {
@@ -29,7 +31,9 @@ export function TravelPlanReceiptOcrTip({
       void Taro.showToast({ title: t('common.pleaseSelectEvent'), icon: 'none' });
       return;
     }
-    goMyItinerary(activityLegacyId);
+    goMyItinerary(activityLegacyId, undefined, {
+      headcount: headcount != null && headcount > 0 ? headcount : undefined,
+    });
   };
 
   return (

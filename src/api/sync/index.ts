@@ -7,5 +7,7 @@ export * from './itinerary';
 export * from './travelGuide';
 export * from './travelPlan';
 export * from './personalityTest';
+export * from './setVote';
+export * from './sceneRun';
 export * from './festivalPlanProgress';
 export * from './reports';

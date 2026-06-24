@@ -9,6 +9,10 @@ import {
 } from '../../../../hooks/useSyncApi';
 import { saveEncryptedProfileSnapshot } from '../../../../utils/profileSnapshotStorage';
 import {
+  readProfilePreferenceSortEnabled,
+  writeProfilePreferenceSortEnabled,
+} from '../../../../utils/profileStorage';
+import {
   BUDDY_BUDGET_OPTIONS,
   BUDDY_DEPARTURE_CITIES,
   BUDDY_GENRE_OPTIONS,
@@ -16,16 +20,21 @@ import {
   normalizeBuddyBudgetLevel,
   type BuddyBudgetLevel,
 } from '../../../../constants/buddyPreferences';
+import { useT } from '../../../../hooks/useI18n';
 import { Input, Text, View } from '@tarojs/components';
 
 const MAX_GENRES = 6;
 
 export function BuddyPreferencesSettings() {
+  const t = useT();
   const { data: currentUser } = useCurrentUserQuery();
   const [city, setCity] = useState('');
   const [customCity, setCustomCity] = useState('');
   const [genres, setGenres] = useState<string[]>([]);
   const [budgetLevel, setBudgetLevel] = useState<BuddyBudgetLevel | ''>('');
+  const [preferenceSortEnabled, setPreferenceSortEnabled] = useState(() =>
+    readProfilePreferenceSortEnabled(),
+  );
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
 
@@ -42,6 +51,14 @@ export function BuddyPreferencesSettings() {
   }, [currentUser]);
 
   const markDirty = useCallback(() => setDirty(true), []);
+
+  const togglePreferenceSort = useCallback(() => {
+    setPreferenceSortEnabled((prev) => {
+      const next = !prev;
+      writeProfilePreferenceSortEnabled(next);
+      return next;
+    });
+  }, []);
 
   const toggleGenre = useCallback(
     (genre: string) => {
@@ -99,11 +116,36 @@ export function BuddyPreferencesSettings() {
   return (
     <View className="s-match-prefs">
       <View className="s-match-prefs__banner">
-        <Text className="s-match-prefs__banner-title">用于行程辅助与 AI 推荐</Text>
+        <Text className="s-match-prefs__banner-title">
+          {t('settings.buddyPrefsBannerTitle')}
+        </Text>
         <Text className="s-match-prefs__banner-desc">
-          生成攻略时会自动补充画像；此处可手动校正，让 AI 更了解你的出行偏好。
+          {t('settings.buddyPrefsBannerDesc')}
         </Text>
         <Text className="s-match-prefs__banner-preview">当前：{preview}</Text>
+      </View>
+
+      <View className="s-settings__card s-match-prefs__section">
+        <View className="s-settings__row">
+          <View>
+            <View className="s-settings__row-label">
+              {t('settings.buddyPrefsRecruitSortToggle')}
+            </View>
+            <View className="s-settings__row-desc">
+              {t('settings.buddyPrefsRecruitSortDesc')}
+            </View>
+          </View>
+          <Button
+            role="switch"
+            aria-checked={preferenceSortEnabled}
+            className={`s-settings__toggle${
+              preferenceSortEnabled ? ' s-settings__toggle--on' : ''
+            }`}
+            onClick={togglePreferenceSort}
+          >
+            <Text className="s-settings__toggle-knob" />
+          </Button>
+        </View>
       </View>
 
       <View className="s-settings__card s-match-prefs__section">

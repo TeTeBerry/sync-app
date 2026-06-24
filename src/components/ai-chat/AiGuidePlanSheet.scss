@@ -1,6 +1,10 @@
 @use '../../styles/chat' as chat;
 
 .s-ai-guide-plan-sheet {
+  --guide-plan-surface: #1e1e1e;
+  --guide-plan-border: #2c2c2c;
+  --guide-plan-bg: #121212;
+
   z-index: calc(var(--overlay-z-sheet) + 2);
 
   &.s-overlay--sheet {
@@ -20,14 +24,15 @@
     padding: 0;
     background:
       radial-gradient(
-        90% 50% at 100% 0%,
-        rgba(var(--primary-rgb), 0.08),
-        transparent 52%
+        90% 55% at 50% 0%,
+        rgba(var(--secondary-rgb), 0.1) 0%,
+        rgba(var(--secondary-rgb), 0.03) 45%,
+        transparent 72%
       ),
-      #121214;
+      var(--guide-plan-bg);
     border-radius: 20px 20px 0 0;
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      inset 0 1px 0 rgba(255, 255, 255, 0.04),
       0 -12px 48px rgba(0, 0, 0, 0.55);
     display: flex;
     flex-direction: column;
@@ -67,12 +72,13 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(var(--primary-rgb), 0.14);
-    border: 1px solid rgba(var(--primary-rgb), 0.28);
+    background: rgba(var(--secondary-rgb), 0.14);
+    border: 1px solid rgba(var(--secondary-rgb), 0.35);
+    color: var(--secondary);
   }
 
   &__title-icon-sparkle {
-    color: var(--primary);
+    color: var(--secondary);
   }
 
   &__title {
@@ -89,9 +95,9 @@
     font-weight: var(--s-fw-bold);
     letter-spacing: 0.04em;
     text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.88);
-    background: rgba(var(--primary-rgb), 0.14);
-    border: 1px solid rgba(var(--primary-rgb), 0.28);
+    color: rgba(255, 255, 255, 0.72);
+    background: rgba(var(--secondary-rgb), 0.1);
+    border: 1px solid rgba(var(--secondary-rgb), 0.22);
     line-height: 1.2;
   }
 
@@ -146,10 +152,10 @@
   }
 
   &__label {
-    font-size: var(--s-type-caption);
+    font-size: var(--s-type-body-sm);
     font-weight: var(--s-fw-semibold);
-    color: rgba(255, 255, 255, 0.72);
-    line-height: 1.3;
+    color: rgba(255, 255, 255, 0.92);
+    line-height: 1.35;
     letter-spacing: 0.01em;
   }
 
@@ -157,7 +163,7 @@
     display: block;
     margin-top: 4px;
     font-size: 11px;
-    color: rgba(255, 255, 255, 0.38);
+    color: var(--muted-foreground);
     line-height: 1.45;
   }
 
@@ -168,14 +174,10 @@
     gap: 10px;
     min-height: 52px;
     padding: 0 14px;
-    border-radius: 16px;
-    background: linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.055) 0%,
-      rgba(255, 255, 255, 0.02) 100%
-    );
-    border: 1px solid rgba(255, 255, 255, 0.09);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    border-radius: 14px;
+    background: var(--guide-plan-surface);
+    border: 1px solid var(--guide-plan-border);
+    box-shadow: none;
     box-sizing: border-box;
   }
 
@@ -188,13 +190,13 @@
     align-items: center;
     justify-content: center;
     border-radius: 8px;
-    background: rgba(var(--primary-rgb), 0.12);
-    border: 1px solid rgba(var(--primary-rgb), 0.22);
+    background: rgba(var(--secondary-rgb), 0.12);
+    border: 1px solid rgba(var(--secondary-rgb), 0.25);
   }
 
   &__input-icon {
     flex-shrink: 0;
-    color: var(--primary);
+    color: var(--secondary);
   }
 
   &__input {
@@ -211,7 +213,7 @@
   }
 
   &__input-placeholder {
-    color: rgba(255, 255, 255, 0.35);
+    color: var(--muted-foreground);
     font-size: var(--s-type-small);
   }
 
@@ -219,11 +221,9 @@
     margin-top: 8px;
     max-height: 200px;
     border-radius: 14px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(18, 18, 20, 0.96);
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.05),
-      0 8px 24px rgba(0, 0, 0, 0.35);
+    border: 1px solid var(--guide-plan-border);
+    background: rgba(18, 18, 18, 0.96);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
     overflow: hidden;
     box-sizing: border-box;
   }
@@ -247,7 +247,7 @@
     }
 
     &--pressed {
-      background: rgba(var(--primary-rgb), 0.12);
+      background: rgba(var(--secondary-rgb), 0.12);
     }
   }
 
@@ -259,21 +259,17 @@
 
   &__suggest-meta {
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.45);
+    color: var(--muted-foreground);
     line-height: 1.35;
     width: 100%;
   }
 
   &__card {
     padding: 14px 16px;
-    border-radius: 16px;
-    background: linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.055) 0%,
-      rgba(255, 255, 255, 0.02) 100%
-    );
-    border: 1px solid rgba(255, 255, 255, 0.09);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    border-radius: 14px;
+    background: var(--guide-plan-surface);
+    border: 1px solid var(--guide-plan-border);
+    box-shadow: none;
     box-sizing: border-box;
 
     &--drive {
@@ -299,12 +295,7 @@
 
   &__card-icon {
     flex-shrink: 0;
-    color: rgba(255, 255, 255, 0.82);
-  }
-
-  &__icon-badge--muted {
-    background: rgba(255, 255, 255, 0.06);
-    border-color: rgba(255, 255, 255, 0.08);
+    color: var(--secondary);
   }
 
   &__card-summary-text {
@@ -340,12 +331,13 @@
     }
 
     &:not(:disabled) {
-      border-color: rgba(var(--primary-rgb), 0.28);
-      background: rgba(var(--primary-rgb), 0.1);
+      border-color: rgba(var(--primary-rgb), 0.45);
+      background: rgba(var(--primary-rgb), 0.14);
+      color: var(--primary);
     }
 
     &--pressed {
-      background: rgba(var(--primary-rgb), 0.22);
+      background: rgba(var(--primary-rgb), 0.24);
     }
   }
 
@@ -361,12 +353,17 @@
   &__budget-hint-note {
     display: block;
     margin: -4px 0 0;
-    padding: 10px 12px;
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.07);
+    padding: 12px 14px;
+    border-radius: 14px;
+    background: linear-gradient(
+      135deg,
+      rgba(var(--secondary-rgb), 0.14) 0%,
+      rgba(var(--secondary-rgb), 0.06) 100%
+    );
+    border: 1px solid rgba(var(--secondary-rgb), 0.28);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
     font-size: var(--s-type-caption);
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--muted-foreground);
     line-height: 1.45;
   }
 
@@ -478,7 +475,7 @@
 
   &__drive-hint {
     font-size: var(--s-type-caption);
-    color: rgba(255, 255, 255, 0.42);
+    color: var(--muted-foreground);
     line-height: 1.35;
   }
 

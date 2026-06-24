@@ -18,6 +18,7 @@ export default {
         'pages/activity-lineup/index',
         'pages/my-itinerary/index',
         'pages/personality-test/index',
+        'pages/set-vote/index',
         'pages/ai-travel-guide/index',
       ],
     },

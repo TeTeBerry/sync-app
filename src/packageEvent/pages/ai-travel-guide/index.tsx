@@ -17,6 +17,7 @@ import {
   Users,
 } from '../../../components/icons';
 import { getRegenerateCta, getTravelGuideTitle } from '../../../constants/aiCtaLabels';
+import { AiGuidePlanSheet } from '../../../components/ai-chat/AiGuidePlanSheet';
 import { useT } from '@/hooks/useI18n';
 import { AI_TRAVEL_GUIDE_DISCLAIMER } from '../../../constants/aiDisclosure';
 import { LoginInterceptHost } from '../../../components/auth/LoginInterceptHost';
@@ -57,8 +58,14 @@ const AiTravelGuidePage = () => {
                   onSelect={page.handleSelectBudgetTier}
                 />
               ) : null}
-              <TravelGuideDetailView plan={page.payload.plan} />
-              <TravelPlanReceiptOcrTip activityLegacyId={page.activityLegacyId} />
+              <TravelGuideDetailView
+                plan={page.payload.plan}
+                activityRegion={page.activityRegion}
+              />
+              <TravelPlanReceiptOcrTip
+                activityLegacyId={page.activityLegacyId}
+                headcount={page.payload.plan.headcount}
+              />
               {page.showRecruitBridge ? (
                 <View className="s-ai-travel-guide-page__recruit-bridge">
                   <View className="s-ai-travel-guide-page__recruit-bridge-head">
@@ -160,6 +167,18 @@ const AiTravelGuidePage = () => {
           </Text>
         </View>
       )}
+      {page.guideSheetOpen ? (
+        <AiGuidePlanSheet
+          open
+          defaultNights={page.guideDefaultNights}
+          eventCity={page.guideEventCity}
+          showSelfDriveOption={page.guideShowSelfDriveOption}
+          showAccommodationOption={page.guideShowAccommodationOption}
+          initialValues={page.guideSheetInitialValues}
+          onClose={page.closeGuideSheet}
+          onSubmit={page.handleGuideSheetSubmit}
+        />
+      ) : null}
       <LoginInterceptHost />
     </View>
   );

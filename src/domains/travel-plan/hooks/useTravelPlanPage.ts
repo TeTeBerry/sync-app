@@ -1,6 +1,7 @@
 import Taro from '@tarojs/taro';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { isLiveApi } from '@/constants/api';
+import { findLatestTravelGuideForActivity } from '@/domains/travel-guide/utils/travelGuideDetailStorage';
 import { useItineraryScheduleQuery } from '@/hooks/useItineraryApi';
 import { useActivityDetailQuery } from '@/hooks/useSyncApi';
 import { useConfirmDialog } from '@/hooks/useConfirmDialog';
@@ -30,11 +31,25 @@ import {
   alignTravelPlanNodesYear,
   resolveTravelPlanYearHint,
 } from '../utils/travelPlanYearAlign';
+import {
+  buildTravelPlanSplitSummaryText,
+  clampSplitCount,
+  filterSplitEnabledNodes,
+  resolveDefaultSplitCount,
+} from '../utils/travelPlanSplit.util';
+import type { TravelPlanSplitConfirmValues } from '../components/TravelPlanSplitSheet';
 import { useT } from '@/hooks/useI18n';
+import {
+  isEditableTravelPlanNode,
+  rebuildTravelPlanNodesForEdit,
+  replaceTravelPlanNodeInList,
+  travelPlanNodeToAddFormValues,
+} from '../utils/travelPlanNodeEdit.util';
 
 type UseTravelPlanPageOptions = {
   activityLegacyId: number | null;
   eventMeta?: string;
+  queryHeadcount?: number | null;
 };
 
 function buildFallbackActivityNodes(input: {
@@ -56,9 +71,31 @@ function buildFallbackActivityNodes(input: {
   return applyActivityNodeOverrides(nodes, {}, input.activityPriceOverrides ?? {});
 }
 
+function sumPendingNodeAmount(nodes: TravelPlanNode[]): number {
+  return nodes.reduce((sum, node) => sum + (node.price ?? 0), 0);
+}
+
+function applySplitFieldsToNodes(
+  nodes: TravelPlanNode[],
+  split: TravelPlanSplitConfirmValues,
+): TravelPlanNode[] {
+  return nodes.map((node) => {
+    const next: TravelPlanNode = { ...node };
+    if (split.splitEnabled) {
+      next.splitEnabled = true;
+      next.splitCount = clampSplitCount(split.splitCount);
+    } else {
+      delete next.splitEnabled;
+      delete next.splitCount;
+    }
+    return next;
+  });
+}
+
 export function useTravelPlanPage({
   activityLegacyId,
   eventMeta,
+  queryHeadcount,
 }: UseTravelPlanPageOptions) {
   const t = useT();
   const { confirm, confirmDialog } = useConfirmDialog({
@@ -92,15 +129,42 @@ export function useTravelPlanPage({
     [activityQuery.data?.date, resolvedEventMeta],
   );
 
+  const guideHeadcount = useMemo(() => {
+    if (activityLegacyId == null || !Number.isFinite(activityLegacyId)) {
+      return null;
+    }
+    return findLatestTravelGuideForActivity(activityLegacyId)?.form.headcount ?? null;
+  }, [activityLegacyId]);
+
   const [apiActivityNodes, setApiActivityNodes] = useState<TravelPlanNode[]>([]);
   const [userNodes, setUserNodes] = useState<TravelPlanNode[]>([]);
   const [activityPriceOverrides, setActivityPriceOverrides] = useState<
     Record<string, number>
   >({});
   const [hiddenActivityNodeIds, setHiddenActivityNodeIds] = useState<string[]>([]);
+  const [splitCount, setSplitCount] = useState(() =>
+    resolveDefaultSplitCount({
+      queryHeadcount,
+      guideHeadcount,
+    }),
+  );
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [addSheetOpen, setAddSheetOpen] = useState(false);
+  const [splitSheetOpen, setSplitSheetOpen] = useState(false);
+  const [pendingAddNodes, setPendingAddNodes] = useState<TravelPlanNode[]>([]);
+  const [editingNodeId, setEditingNodeId] = useState<string | null>(null);
+  const [addSheetMode, setAddSheetMode] = useState<'add' | 'edit'>('add');
+  const [editSheetInitialValues, setEditSheetInitialValues] = useState<
+    TravelPlanAddFormValues[] | null
+  >(null);
+  const [pendingEditNodeId, setPendingEditNodeId] = useState<string | null>(null);
+  const [pendingSplitDefaults, setPendingSplitDefaults] = useState<{
+    splitEnabled: boolean;
+    splitCount: number;
+  } | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [copyingSplitSummary, setCopyingSplitSummary] = useState(false);
+  const splitCountInitializedRef = useRef(false);
 
   const effectiveActivityLegacyId =
     activityLegacyId != null &&
@@ -145,7 +209,14 @@ export function useTravelPlanPage({
     setActivityPriceOverrides({});
     setHiddenActivityNodeIds([]);
     setExpandedId(null);
-  }, [activityLegacyId, apiEnabled]);
+    setSplitCount(
+      resolveDefaultSplitCount({
+        queryHeadcount,
+        guideHeadcount,
+      }),
+    );
+    splitCountInitializedRef.current = false;
+  }, [activityLegacyId, apiEnabled, guideHeadcount, queryHeadcount]);
 
   useEffect(() => {
     if (!apiEnabled) {
@@ -176,9 +247,22 @@ export function useTravelPlanPage({
     setUserNodes(sortTravelPlanNodes(nextUserNodes));
     setActivityPriceOverrides(saved?.activityPriceOverrides ?? {});
     setHiddenActivityNodeIds(saved?.hiddenActivityNodeIds ?? []);
+
+    if (!splitCountInitializedRef.current) {
+      setSplitCount(
+        resolveDefaultSplitCount({
+          queryHeadcount,
+          savedSplitCount: saved?.splitCount,
+          guideHeadcount,
+        }),
+      );
+      splitCountInitializedRef.current = true;
+    }
   }, [
     activityQuery.data?.date,
     apiEnabled,
+    guideHeadcount,
+    queryHeadcount,
     resolvedEventMeta,
     savedQuery.data,
     savedQuery.isLoading,
@@ -210,13 +294,22 @@ export function useTravelPlanPage({
     return `${title} · ${dateRangeLabel}`;
   }, [dateRangeLabel, resolvedEventMeta]);
 
-  const stats = useMemo(() => computeTravelPlanStats(nodes), [nodes]);
+  const stats = useMemo(
+    () => computeTravelPlanStats(nodes, splitCount),
+    [nodes, splitCount],
+  );
+
+  const pendingSplitAmount = useMemo(
+    () => sumPendingNodeAmount(pendingAddNodes),
+    [pendingAddNodes],
+  );
 
   const persistPlan = useCallback(
     async (
       nextUserNodes: TravelPlanNode[],
       nextActivityPriceOverrides: Record<string, number>,
       nextHiddenActivityNodeIds: string[],
+      nextSplitCount: number,
     ) => {
       if (!apiEnabled || activityLegacyId == null) {
         return true;
@@ -233,6 +326,7 @@ export function useTravelPlanPage({
             hiddenActivityNodeIds: normalizeHiddenActivityNodeIds(
               nextHiddenActivityNodeIds,
             ),
+            splitCount: clampSplitCount(nextSplitCount),
           }),
         );
         return true;
@@ -257,42 +351,212 @@ export function useTravelPlanPage({
   }, []);
 
   const handleAddNode = useCallback(() => {
+    setEditingNodeId(null);
+    setEditSheetInitialValues(null);
+    setAddSheetMode('add');
     setAddSheetOpen(true);
   }, []);
 
   const closeAddSheet = useCallback(() => {
     setAddSheetOpen(false);
+    setEditingNodeId(null);
+    setEditSheetInitialValues(null);
+    setAddSheetMode('add');
   }, []);
 
+  const closeSplitSheet = useCallback(() => {
+    setSplitSheetOpen(false);
+    setPendingAddNodes([]);
+    setPendingEditNodeId(null);
+    setPendingSplitDefaults(null);
+  }, []);
+
+  const handleEditNode = useCallback(
+    (id: string) => {
+      const target = userNodes.find((node) => node.id === id);
+      if (!target || !isEditableTravelPlanNode(target)) {
+        return;
+      }
+      setEditingNodeId(id);
+      setAddSheetMode('edit');
+      setEditSheetInitialValues(travelPlanNodeToAddFormValues(target));
+      setAddSheetOpen(true);
+    },
+    [userNodes],
+  );
+
   const handleSaveNode = useCallback(
-    async (values: TravelPlanAddFormValues[]) => {
+    (values: TravelPlanAddFormValues[]) => {
       const sortedValues = sortTravelPlanAddFormValues(values);
-      const nodes = alignTravelPlanNodesYear(
+
+      if (editingNodeId) {
+        const existingNode = userNodes.find((node) => node.id === editingNodeId);
+        const rebuiltNodes = alignTravelPlanNodesYear(
+          rebuildTravelPlanNodesForEdit(editingNodeId, sortedValues),
+          activityYearHint,
+        );
+        setPendingEditNodeId(editingNodeId);
+        setPendingAddNodes(rebuiltNodes);
+        setPendingSplitDefaults({
+          splitEnabled: existingNode?.splitEnabled ?? true,
+          splitCount: clampSplitCount(existingNode?.splitCount ?? splitCount),
+        });
+        setAddSheetOpen(false);
+        setEditingNodeId(null);
+        setEditSheetInitialValues(null);
+        setSplitSheetOpen(true);
+        return;
+      }
+
+      const createdNodes = alignTravelPlanNodesYear(
         createTravelPlanNodesFromFormValues(sortedValues),
         activityYearHint,
       );
-      const nextUserNodes = sortTravelPlanNodes([...userNodes, ...nodes]);
+      setPendingEditNodeId(null);
+      setPendingSplitDefaults(null);
+      setPendingAddNodes(createdNodes);
+      setAddSheetOpen(false);
+      setSplitSheetOpen(true);
+    },
+    [activityYearHint, editingNodeId, splitCount, userNodes],
+  );
+
+  const handleSplitConfirm = useCallback(
+    async (split: TravelPlanSplitConfirmValues) => {
+      if (pendingAddNodes.length === 0) {
+        setSplitSheetOpen(false);
+        return;
+      }
+
+      const nextSplitCount = clampSplitCount(split.splitCount);
+      setSplitCount(nextSplitCount);
+
+      const nodesWithSplit = applySplitFieldsToNodes(pendingAddNodes, {
+        ...split,
+        splitCount: nextSplitCount,
+      });
+
+      const nextUserNodes = pendingEditNodeId
+        ? sortTravelPlanNodes(
+            replaceTravelPlanNodeInList(userNodes, pendingEditNodeId, nodesWithSplit),
+          )
+        : sortTravelPlanNodes([...userNodes, ...nodesWithSplit]);
+
       const previousUserNodes = userNodes;
+      const previousSplitCount = splitCount;
+      const focusId =
+        nodesWithSplit[nodesWithSplit.length - 1]?.id ?? pendingEditNodeId ?? null;
+
       setUserNodes(nextUserNodes);
-      setExpandedId(nodes[nodes.length - 1]?.id ?? null);
+      setExpandedId(focusId);
+      setSplitSheetOpen(false);
+      setPendingAddNodes([]);
+      setPendingEditNodeId(null);
+      setPendingSplitDefaults(null);
 
       const ok = await persistPlan(
         nextUserNodes,
         activityPriceOverrides,
         hiddenActivityNodeIds,
+        nextSplitCount,
       );
       if (!ok) {
         setUserNodes(previousUserNodes);
+        setSplitCount(previousSplitCount);
         setExpandedId(null);
       }
     },
     [
       activityPriceOverrides,
-      activityYearHint,
       hiddenActivityNodeIds,
+      pendingAddNodes,
+      pendingEditNodeId,
       persistPlan,
+      splitCount,
       userNodes,
     ],
+  );
+
+  const handleSplitCountChange = useCallback(
+    async (nextCount: number) => {
+      const normalized = clampSplitCount(nextCount);
+      const previous = splitCount;
+      setSplitCount(normalized);
+
+      const ok = await persistPlan(
+        userNodes,
+        activityPriceOverrides,
+        hiddenActivityNodeIds,
+        normalized,
+      );
+      if (!ok) {
+        setSplitCount(previous);
+      }
+    },
+    [activityPriceOverrides, hiddenActivityNodeIds, persistPlan, splitCount, userNodes],
+  );
+
+  const handleCopySplitSummary = useCallback(async () => {
+    if (copyingSplitSummary) {
+      return;
+    }
+    const splitNodes = filterSplitEnabledNodes(nodes);
+    if (splitNodes.length === 0) {
+      void Taro.showToast({ title: t('travelPlan.copySplitEmpty'), icon: 'none' });
+      return;
+    }
+    setCopyingSplitSummary(true);
+    try {
+      const text = buildTravelPlanSplitSummaryText({
+        eventName: resolvedEventMeta,
+        nodes,
+        splitCount,
+        disclaimer: t('travelPlan.splitSummaryDisclaimer'),
+      });
+      await Taro.setClipboardData({ data: text });
+      void Taro.showToast({ title: t('travelPlan.copySplitSuccess'), icon: 'success' });
+    } catch {
+      void Taro.showToast({ title: t('travelPlan.copySplitFailed'), icon: 'none' });
+    } finally {
+      setCopyingSplitSummary(false);
+    }
+  }, [copyingSplitSummary, nodes, resolvedEventMeta, splitCount, t]);
+
+  const handleNodeSplitChange = useCallback(
+    async (id: string, input: { splitEnabled: boolean; splitCount: number }) => {
+      const target = userNodes.find((node) => node.id === id);
+      if (!target || !isEditableTravelPlanNode(target)) {
+        return;
+      }
+
+      const nextUserNodes = userNodes.map((node) => {
+        if (node.id !== id) {
+          return node;
+        }
+        const updated: TravelPlanNode = { ...node };
+        if (input.splitEnabled) {
+          updated.splitEnabled = true;
+          updated.splitCount = clampSplitCount(input.splitCount);
+        } else {
+          delete updated.splitEnabled;
+          delete updated.splitCount;
+        }
+        return updated;
+      });
+      const previousUserNodes = userNodes;
+      setUserNodes(nextUserNodes);
+
+      const ok = await persistPlan(
+        nextUserNodes,
+        activityPriceOverrides,
+        hiddenActivityNodeIds,
+        splitCount,
+      );
+      if (!ok) {
+        setUserNodes(previousUserNodes);
+      }
+    },
+    [activityPriceOverrides, hiddenActivityNodeIds, persistPlan, splitCount, userNodes],
   );
 
   const handleUpdateNodePrice = useCallback(
@@ -311,7 +575,12 @@ export function useTravelPlanPage({
         const previousOverrides = activityPriceOverrides;
         setActivityPriceOverrides(nextOverrides);
 
-        const ok = await persistPlan(userNodes, nextOverrides, hiddenActivityNodeIds);
+        const ok = await persistPlan(
+          userNodes,
+          nextOverrides,
+          hiddenActivityNodeIds,
+          splitCount,
+        );
         if (!ok) {
           setActivityPriceOverrides(previousOverrides);
         }
@@ -337,6 +606,7 @@ export function useTravelPlanPage({
         nextUserNodes,
         activityPriceOverrides,
         hiddenActivityNodeIds,
+        splitCount,
       );
       if (!ok) {
         setUserNodes(previousUserNodes);
@@ -347,6 +617,7 @@ export function useTravelPlanPage({
       activityPriceOverrides,
       hiddenActivityNodeIds,
       persistPlan,
+      splitCount,
       userNodes,
     ],
   );
@@ -380,7 +651,12 @@ export function useTravelPlanPage({
         const previousHidden = hiddenActivityNodeIds;
         setHiddenActivityNodeIds(nextHidden);
 
-        const ok = await persistPlan(userNodes, activityPriceOverrides, nextHidden);
+        const ok = await persistPlan(
+          userNodes,
+          activityPriceOverrides,
+          nextHidden,
+          splitCount,
+        );
         if (!ok) {
           setHiddenActivityNodeIds(previousHidden);
         } else {
@@ -397,6 +673,7 @@ export function useTravelPlanPage({
         nextUserNodes,
         activityPriceOverrides,
         hiddenActivityNodeIds,
+        splitCount,
       );
       if (!ok) {
         setUserNodes(previousUserNodes);
@@ -410,6 +687,7 @@ export function useTravelPlanPage({
       hiddenActivityNodeIds,
       nodes,
       persistPlan,
+      splitCount,
       userNodes,
       t,
     ],
@@ -419,17 +697,31 @@ export function useTravelPlanPage({
     pageMeta,
     nodes,
     stats,
+    splitCount,
     expandedId,
     isLoading:
       apiEnabled &&
       (savedQuery.isLoading || savedQuery.data === undefined) &&
       !savedQuery.isError,
     isSaving,
+    copyingSplitSummary,
     toggleExpanded,
     addSheetOpen,
+    addSheetMode,
+    editSheetInitialValues,
+    splitSheetOpen,
+    pendingSplitAmount,
+    pendingSplitEnabled: pendingSplitDefaults?.splitEnabled ?? true,
+    pendingSplitCount: pendingSplitDefaults?.splitCount ?? splitCount,
     handleAddNode,
     closeAddSheet,
+    closeSplitSheet,
+    handleEditNode,
     handleSaveNode,
+    handleSplitConfirm,
+    handleSplitCountChange,
+    handleCopySplitSummary,
+    handleNodeSplitChange,
     handleDeleteNode,
     handleUpdateNodePrice,
     confirmDialog,
