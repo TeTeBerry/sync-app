@@ -11,6 +11,7 @@ export {
 import {
   compareActivitiesNearestFirst,
   getActivityStatusFromActivity,
+  isRecentUpcomingActivity,
   parseActivityDateRange,
 } from './activityStatus';
 
@@ -84,17 +85,14 @@ export function isHomeFeaturedCatalogActivity(
 
 export const HOT_CAROUSEL_MIN_COUNT = 3;
 
-export function selectHotCatalogEvents(
+export function selectRecentAsianCatalogEvents(
   events: EventCardUi[],
   limit = 5,
   now = new Date(),
 ): EventCardUi[] {
   return events
     .filter(
-      (event) =>
-        event.hot === true &&
-        isAsianCatalogActivity(event) &&
-        getActivityStatusFromActivity(event.date, event.title, now) !== 'ended',
+      (event) => isAsianCatalogActivity(event) && isRecentUpcomingActivity(event, now),
     )
     .sort((a, b) => compareActivitiesNearestFirst(a, b, now))
     .slice(0, limit);

@@ -129,7 +129,10 @@ async function requestWithTimeout(
         });
       },
       fail: (err) => {
-        finish(() => reject(new Error(err.errMsg || '请求失败')));
+        const errMsg = err.errMsg || '请求失败';
+        finish(() => {
+          reject(isApiAbortError({ errMsg }) ? new ApiAbortError() : new Error(errMsg));
+        });
       },
     });
   });

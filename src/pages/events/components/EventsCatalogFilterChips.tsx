@@ -38,9 +38,6 @@ function FilterChip({
         .join(' ')}
       onClick={onClick}
     >
-      {active ? (
-        <View className="s-events-catalog-filters__chip-accent" aria-hidden />
-      ) : null}
       <Text
         className={[
           's-events-catalog-filters__chip-text',

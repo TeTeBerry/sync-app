@@ -13,10 +13,42 @@ function normalizeArtistSearchKey(text: string): string {
     .replace(/[^a-z0-9]/g, '');
 }
 
+function normalizeChineseSearchKey(text: string): string {
+  return text.trim().toLowerCase();
+}
+
+function matchChineseAliases(
+  aliases: string[] | undefined,
+  query: string,
+): { score: number; position: number; nameLength: number } | null {
+  const normalizedQuery = normalizeChineseSearchKey(query);
+  if (!normalizedQuery || !aliases?.length) {
+    return null;
+  }
+
+  for (const alias of aliases) {
+    const aliasKey = normalizeChineseSearchKey(alias);
+    if (aliasKey === normalizedQuery) {
+      return { score: 100, position: 0, nameLength: aliasKey.length };
+    }
+    const position = aliasKey.indexOf(normalizedQuery);
+    if (position >= 0) {
+      return { score: 90, position, nameLength: aliasKey.length };
+    }
+  }
+
+  return null;
+}
+
 function artistMatchMeta(
   artist: CatalogLineupArtist,
   query: string,
 ): { score: number; position: number; nameLength: number } {
+  const aliasMatch = matchChineseAliases(artist.chineseAliases, query);
+  if (aliasMatch) {
+    return aliasMatch;
+  }
+
   const normalizedQuery = normalizeArtistSearchKey(query);
   if (!normalizedQuery) {
     return {

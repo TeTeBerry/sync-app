@@ -8,7 +8,7 @@ import {
   formatActivityAreaLabel,
   HOT_CAROUSEL_MIN_COUNT,
   isAsianCatalogActivity,
-  selectHotCatalogEvents,
+  selectRecentAsianCatalogEvents,
 } from '@/utils/filterActivitiesForEventsCatalog';
 
 function event(
@@ -94,19 +94,38 @@ describe('filterActivitiesForEventsCatalog', () => {
     expect(formatActivityAreaLabel({ region: 'overseas' })).toBe('海外');
   });
 
-  it('selectHotCatalogEvents returns only hot asian non-ended events up to limit', () => {
+  it('selectRecentAsianCatalogEvents returns recent upcoming asian events sorted by date', () => {
     const now = new Date('2026-06-01T12:00:00.000Z');
-    const hot = selectHotCatalogEvents(events, 5, now);
-    expect(hot).toHaveLength(2);
-    expect(hot.every((item) => item.hot === true)).toBe(true);
-    expect(hot.every((item) => isAsianCatalogActivity(item))).toBe(true);
-    expect(hot.some((item) => item.area === '韩国')).toBe(false);
-    expect(hot.some((item) => item.area === '荷兰')).toBe(false);
+    const recent = selectRecentAsianCatalogEvents(events, 5, now);
+    expect(recent).toHaveLength(2);
+    expect(recent.every((item) => isAsianCatalogActivity(item))).toBe(true);
+    expect(recent.some((item) => item.area === '韩国')).toBe(false);
+    expect(recent.some((item) => item.area === '荷兰')).toBe(false);
+    expect(recent[0]?.title).toBe('EDC Thailand');
+    expect(recent[1]?.title).toBe('Storm');
   });
 
-  it('hot carousel requires at least HOT_CAROUSEL_MIN_COUNT events', () => {
+  it('selectRecentAsianCatalogEvents includes non-hot asian events within recent window', () => {
     const now = new Date('2026-06-01T12:00:00.000Z');
-    const hot = selectHotCatalogEvents(events, 5, now);
-    expect(hot.length >= HOT_CAROUSEL_MIN_COUNT).toBe(false);
+    const withKorea = [
+      ...events,
+      event({
+        id: '9',
+        title: 'Ultra Korea',
+        region: 'overseas',
+        area: '韩国',
+        hot: false,
+        date: '07/10-11',
+      }),
+    ];
+    const recent = selectRecentAsianCatalogEvents(withKorea, 5, now);
+    expect(recent.some((item) => item.title === 'Ultra Korea')).toBe(true);
+    expect(recent.some((item) => item.hot === false)).toBe(true);
+  });
+
+  it('recent carousel requires at least HOT_CAROUSEL_MIN_COUNT events', () => {
+    const now = new Date('2026-06-01T12:00:00.000Z');
+    const recent = selectRecentAsianCatalogEvents(events, 5, now);
+    expect(recent.length >= HOT_CAROUSEL_MIN_COUNT).toBe(false);
   });
 });

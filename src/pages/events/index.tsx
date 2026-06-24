@@ -40,19 +40,18 @@ import { EventsActivityList } from './components/EventsActivityList';
 import { sortAllEventsByDate } from './utils/festivalEvents';
 import { consumeEventsViewTabIntent } from '../../utils/eventsTabIntent';
 import { consumeEventsSearchQuery } from '../../utils/eventsSearchIntent';
-import { filterActivitiesForEventsSearch } from '../../utils/filterActivitiesForEventsSearch';
 import { EventsCatalogToolbar } from './components/EventsCatalogToolbar';
 import { EventsViewTabs } from './components/EventsViewTabs';
 import { EventsHotCarousel } from './components/EventsHotCarousel';
 import { EventsKnowledgeCard } from '@/domains/events-search/components/EventsKnowledgeCard';
-import { useEventsKnowledgeSearch } from '@/domains/events-search/hooks/useEventsKnowledgeSearch';
+import { useEventsSearch } from '@/domains/events-search/hooks/useEventsSearch';
 import { useConfirmDialog } from '../../hooks/useConfirmDialog';
 import { requestUnfollowActivityConfirm } from '../../utils/unfollowActivityConfirm';
 import {
   filterActivitiesByRegion,
   filterActivitiesByTimeChip,
   HOT_CAROUSEL_MIN_COUNT,
-  selectHotCatalogEvents,
+  selectRecentAsianCatalogEvents,
   type EventsCatalogRegionFilter,
   type EventsCatalogTimeChip,
 } from '../../utils/filterActivitiesForEventsCatalog';
@@ -80,7 +79,6 @@ const Events: React.FC = () => {
     month: number;
     day: number;
   } | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
   const pendingSearchIntentRef = React.useRef<string | null>(null);
   const [regionFilter, setRegionFilter] = useState<EventsCatalogRegionFilter>('all');
   const [timeChip, setTimeChip] = useState<EventsCatalogTimeChip | null>(null);
@@ -184,84 +182,33 @@ const Events: React.FC = () => {
     return filterActivitiesByTimeChip(sorted, timeChip);
   }, [regionFilteredEvents, timeChip]);
 
-  const knowledgeSearch = useEventsKnowledgeSearch(listPipelineEvents);
+  const eventsSearch = useEventsSearch(listPipelineEvents);
 
   React.useEffect(() => {
     const pending = pendingSearchIntentRef.current;
     if (!pending) return;
     pendingSearchIntentRef.current = null;
-    knowledgeSearch.setMode('knowledge');
-    knowledgeSearch.setQuery(pending);
-  }, [knowledgeSearch.setMode, knowledgeSearch.setQuery]);
-
-  const activeSearchQuery =
-    knowledgeSearch.mode === 'knowledge' ? knowledgeSearch.query : searchQuery;
-  const handleSearchQueryChange = useCallback(
-    (value: string) => {
-      if (knowledgeSearch.mode === 'knowledge') {
-        knowledgeSearch.setQuery(value);
-        return;
-      }
-      setSearchQuery(value);
-    },
-    [knowledgeSearch],
-  );
-  const handleSearchModeChange = useCallback(
-    (mode: 'keyword' | 'knowledge') => {
-      const currentValue =
-        knowledgeSearch.mode === 'knowledge' ? knowledgeSearch.query : searchQuery;
-      knowledgeSearch.setMode(mode);
-      if (mode === 'knowledge') {
-        knowledgeSearch.setQuery(currentValue);
-        setSearchQuery('');
-      } else {
-        setSearchQuery(currentValue);
-        knowledgeSearch.setQuery('');
-      }
-    },
-    [knowledgeSearch, searchQuery],
-  );
-
-  const keywordFilteredEvents = useMemo(
-    () => filterActivitiesForEventsSearch(listPipelineEvents, searchQuery),
-    [listPipelineEvents, searchQuery],
-  );
+    eventsSearch.setQuery(pending);
+  }, [eventsSearch.setQuery]);
 
   const filteredListEvents = useMemo(() => {
-    if (knowledgeSearch.mode !== 'knowledge' || !knowledgeSearch.query.trim()) {
-      return keywordFilteredEvents;
+    if (eventsSearch.filteredEvents != null) {
+      return eventsSearch.filteredEvents;
     }
-    if (knowledgeSearch.isSearching) {
-      return [];
-    }
-    if (knowledgeSearch.usedLocalFallback) {
-      return filterActivitiesForEventsSearch(listPipelineEvents, knowledgeSearch.query);
-    }
-    if (knowledgeSearch.filteredEvents != null) {
-      return knowledgeSearch.filteredEvents;
-    }
-    return keywordFilteredEvents;
-  }, [
-    keywordFilteredEvents,
-    knowledgeSearch.filteredEvents,
-    knowledgeSearch.isSearching,
-    knowledgeSearch.mode,
-    knowledgeSearch.query,
-    knowledgeSearch.usedLocalFallback,
-    listPipelineEvents,
-  ]);
+    return listPipelineEvents;
+  }, [eventsSearch.filteredEvents, listPipelineEvents]);
 
   const hotCarouselEvents = useMemo(
-    () => selectHotCatalogEvents(regionFilteredEvents),
+    () => selectRecentAsianCatalogEvents(regionFilteredEvents),
     [regionFilteredEvents],
   );
 
   const listEmptyText = useMemo(() => {
-    if (activeSearchQuery.trim()) {
-      if (knowledgeSearch.mode === 'knowledge' && knowledgeSearch.isSearching) {
+    if (eventsSearch.isActive) {
+      if (eventsSearch.isAiSearchActive && eventsSearch.isSearching) {
         return t('events.knowledge.searching');
       }
-      return knowledgeSearch.mode === 'knowledge'
+      return eventsSearch.isAiSearchActive
         ? t('events.knowledge.searchEmpty')
         : t('events.searchEmpty');
     }
@@ -270,20 +217,29 @@ const Events: React.FC = () => {
     }
     return t('events.catalogEmpty');
   }, [
-    activeSearchQuery,
-    knowledgeSearch.isSearching,
-    knowledgeSearch.mode,
+    eventsSearch.isActive,
+    eventsSearch.isAiSearchActive,
+    eventsSearch.isSearching,
     regionFilter,
     t,
     timeChip,
   ]);
 
-  const showKnowledgeCard =
-    knowledgeSearch.mode === 'knowledge' && activeSearchQuery.trim().length > 0;
+  const knowledgeCardFallback = useMemo(
+    () => ({
+      title: t('events.knowledge.fallbackTitle'),
+      sections: [{ body: t('events.knowledge.fallbackBody') }],
+      sources: [t('events.knowledge.fallbackSource')],
+      aiGenerated: false as const,
+    }),
+    [t],
+  );
+
+  const showKnowledgeCard = eventsSearch.isAiSearchActive;
 
   const showHotCarousel =
     viewTab === 'list' &&
-    !activeSearchQuery.trim() &&
+    !eventsSearch.isActive &&
     hotCarouselEvents.length >= HOT_CAROUSEL_MIN_COUNT;
 
   const calendarCatalogEvents = useMemo(
@@ -377,10 +333,8 @@ const Events: React.FC = () => {
                 <>
                   <EventsCatalogToolbar
                     viewTab={viewTab}
-                    searchQuery={activeSearchQuery}
-                    onSearchChange={handleSearchQueryChange}
-                    searchMode={knowledgeSearch.mode}
-                    onSearchModeChange={handleSearchModeChange}
+                    searchQuery={eventsSearch.query}
+                    onSearchChange={eventsSearch.setQuery}
                     region={regionFilter}
                     timeChip={timeChip}
                     onRegionChange={setRegionFilter}
@@ -390,24 +344,10 @@ const Events: React.FC = () => {
                     <>
                       {showKnowledgeCard ? (
                         <EventsKnowledgeCard
-                          card={
-                            knowledgeSearch.knowledgeCard ?? {
-                              title: t('events.knowledge.fallbackTitle'),
-                              sections: [
-                                {
-                                  body: knowledgeSearch.isSearching
-                                    ? t('events.knowledge.loading')
-                                    : t('events.knowledge.fallbackBody'),
-                                },
-                              ],
-                              sources: [t('events.knowledge.fallbackSource')],
-                              aiGenerated: false,
-                            }
-                          }
-                          parsedInsight={knowledgeSearch.parsedInsight}
+                          card={eventsSearch.knowledgeCard ?? knowledgeCardFallback}
+                          parsedInsight={eventsSearch.parsedInsight}
                           isLoading={
-                            knowledgeSearch.isSearching &&
-                            !knowledgeSearch.knowledgeCard
+                            eventsSearch.isSearching && !eventsSearch.knowledgeCard
                           }
                         />
                       ) : null}

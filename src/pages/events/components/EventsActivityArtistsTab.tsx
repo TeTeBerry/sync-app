@@ -160,6 +160,7 @@ export const EventsActivityArtistsTab: FC<EventsActivityArtistsTabProps> = ({
                 ? thumbnailImageUrl(artist.thumbnail, IMAGE_SIZE.listThumb, 1)
                 : undefined;
               const primaryGenre = getCatalogArtistPrimaryGenreLabel(artist) || null;
+              const chineseAliases = artist.chineseAliases ?? [];
 
               return (
                 <View
@@ -209,6 +210,11 @@ export const EventsActivityArtistsTab: FC<EventsActivityArtistsTabProps> = ({
                     <Text className="s-events__artist-name s-line-clamp-2">
                       {artist.name}
                     </Text>
+                    {chineseAliases.length ? (
+                      <Text className="s-events__artist-aliases s-line-clamp-1">
+                        {chineseAliases.join('、')}
+                      </Text>
+                    ) : null}
                     {primaryGenre ? (
                       <View className="s-events__artist-genres">
                         <View className="s-events__artist-genre-chip">

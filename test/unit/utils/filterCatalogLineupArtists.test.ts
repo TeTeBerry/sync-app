@@ -20,6 +20,7 @@ function artist(
     genreLabel: partial.genreLabel ?? 'House',
     activityCount: partial.activityCount ?? 1,
     thumbnail: partial.thumbnail ?? 'https://example.com/a.jpg',
+    ...partial,
   };
 }
 
@@ -168,5 +169,21 @@ describe('filterCatalogLineupArtists', () => {
       'MARSH',
       'MARTIN GARRIX',
     ]);
+  });
+
+  it('filters by Chinese nickname aliases', () => {
+    const list = [
+      artist({
+        name: 'MARTIN GARRIX',
+        chineseAliases: ['小马丁'],
+      }),
+      artist({
+        name: 'MARSHMELLO',
+        chineseAliases: ['棉花糖', '老棉'],
+      }),
+    ];
+
+    expect(filterCatalogLineupArtists(list, '小马丁')).toEqual([list[0]]);
+    expect(filterCatalogLineupArtists(list, '老棉')).toEqual([list[1]]);
   });
 });

@@ -114,6 +114,7 @@ function ArtistProfileSheetInner({
     : profileSummary || profileFull || t('events.artistProfile.bioPlaceholder');
   const representativeTracks = artist?.representativeTracks ?? [];
   const primaryGenre = artist ? getCatalogArtistPrimaryGenreLabel(artist) : '';
+  const chineseAliases = artist?.chineseAliases ?? [];
 
   return (
     <View
@@ -219,6 +220,12 @@ function ArtistProfileSheetInner({
                   ) : primaryGenre ? (
                     <Text className="s-artist-profile-sheet__genre">
                       {primaryGenre}
+                    </Text>
+                  ) : null}
+                  {chineseAliases.length ? (
+                    <Text className="s-artist-profile-sheet__aliases">
+                      {t('events.artistProfile.aliasesLabel')}：
+                      {chineseAliases.join('、')}
                     </Text>
                   ) : null}
                   <Text

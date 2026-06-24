@@ -118,7 +118,7 @@ export const enUS: MessageTree = {
     catalogEmpty: 'No festival listings yet. Check back soon',
     catalogEmptyFiltered:
       'No events match these filters. Try another region or clear filters',
-    hotCarouselTitle: 'Hot global festivals',
+    hotCarouselTitle: 'Recent Asian festivals',
     catalogFilters: {
       regionLabel: 'Region',
       timeLabel: 'Time',
@@ -160,6 +160,7 @@ export const enUS: MessageTree = {
       representativeTracksTitle: 'Recent releases',
       bioExpand: 'Show full bio',
       bioCollapse: 'Show less',
+      aliasesLabel: 'Also known as',
       appearancesTitle: 'Catalog appearances',
       appearancesEmpty: 'No catalog appearances yet',
       loadFailed: 'Failed to load artist profile',
@@ -186,17 +187,12 @@ export const enUS: MessageTree = {
       map: 'Map',
       artists: 'Artists',
     },
-    searchPlaceholder: 'Search festivals, locations',
+    searchPlaceholder: 'Search festivals, locations, or ask naturally',
     searchEmpty: 'No matching events. Try another keyword or browse all',
     searchAria: 'Search festivals',
     searchClear: 'Clear search',
-    searchMode: {
-      keyword: 'Search',
-      knowledge: 'Ask',
-    },
     knowledge: {
       kicker: 'AI intel',
-      searchPlaceholder: 'e.g. July Europe techno, Korea visa tips',
       parsedLabel: 'Filters: {{summary}}',
       loading: 'Summarizing festival intel…',
       searching: 'Searching related events…',

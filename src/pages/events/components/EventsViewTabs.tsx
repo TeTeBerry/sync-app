@@ -55,7 +55,7 @@ export const EventsViewTabs: FC<EventsViewTabsProps> = ({
           >
             <Icon
               size={15}
-              color={active ? '#ffffff' : 'rgba(255, 255, 255, 0.42)'}
+              color={active ? '#000' : 'rgba(255, 255, 255, 0.42)'}
               aria-hidden
             />
             <Text className="s-events-view-tabs__label">{label}</Text>
