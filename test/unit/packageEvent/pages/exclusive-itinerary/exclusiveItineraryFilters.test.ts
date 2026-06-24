@@ -128,4 +128,18 @@ describe('buildStageFilterOptions', () => {
       { id: 'main', label: '主舞台' },
     ]);
   });
+
+  it('shows festival stage labels from API stageLabel', () => {
+    const options = buildStageFilterOptions([
+      { stage: 'blue', stageLabel: 'Blue' },
+      { stage: 'red', stageLabel: 'Red' },
+      { stage: 'magenta', stageLabel: 'Magenta' },
+    ]);
+    expect(options.map((item) => item.label)).toEqual([
+      '全部舞台',
+      'Blue',
+      'Magenta',
+      'Red',
+    ]);
+  });
 });

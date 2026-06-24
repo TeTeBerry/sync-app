@@ -256,25 +256,30 @@ export function filterGenreOptionsBySearch(
 }
 
 export function buildStageFilterOptions(
-  djs: Array<{ stage: string }>,
+  djs: Array<{ stage: string; stageLabel?: string }>,
 ): ExclusiveItineraryFilterChip[] {
-  const stages = new Set<string>();
+  const stageLabels = new Map<string, string>();
   for (const dj of djs) {
     const stage = dj.stage?.trim();
-    if (stage) stages.add(stage);
+    if (!stage) {
+      continue;
+    }
+    if (!stageLabels.has(stage)) {
+      stageLabels.set(stage, dj.stageLabel?.trim() || STAGE_LABELS[stage] || stage);
+    }
   }
 
-  const ordered = [...stages].sort((a, b) => {
+  const ordered = [...stageLabels.keys()].sort((a, b) => {
     if (a === 'main') return -1;
     if (b === 'main') return 1;
-    return a.localeCompare(b, 'en');
+    return (stageLabels.get(a) ?? a).localeCompare(stageLabels.get(b) ?? b, 'en');
   });
 
   return [
     { id: 'all', label: '全部舞台' },
     ...ordered.map((stage) => ({
       id: stage,
-      label: STAGE_LABELS[stage] ?? stage,
+      label: stageLabels.get(stage) ?? stage,
     })),
   ];
 }
