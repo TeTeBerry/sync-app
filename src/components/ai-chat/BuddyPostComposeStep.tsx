@@ -1,9 +1,30 @@
-import { Sparkles } from '../../components/icons';
+import { RefreshCw, Sparkles } from '../../components/icons';
 import { Button, cn } from '../ui';
 import { BUDDY_POST_AI_DISCLAIMER } from '@/constants/aiDisclosure';
 import type { BuddyPostComposeCandidate } from '@/types/partner';
-import { ScrollView, Text, Textarea, View } from '@tarojs/components';
+import { Text, Textarea, View } from '@tarojs/components';
 import { useT } from '@/hooks/useI18n';
+
+function formatCandidateText(
+  candidate: BuddyPostComposeCandidate,
+  styleCodeLabel: string,
+  styleSloganLabel: string,
+): string {
+  const label =
+    candidate.style === 'code'
+      ? styleCodeLabel
+      : candidate.style === 'slogan'
+        ? styleSloganLabel
+        : null;
+  if (!label) return candidate.text;
+  if (
+    candidate.text.startsWith(`${label}:`) ||
+    candidate.text.startsWith(`${label}：`)
+  ) {
+    return candidate.text;
+  }
+  return `${label}: ${candidate.text}`;
+}
 
 type BuddyPostComposeStepProps = {
   note: string;
@@ -31,7 +52,9 @@ export function BuddyPostComposeStep({
   onRegenerate,
 }: BuddyPostComposeStepProps) {
   const t = useT();
-  const showDisclaimer = Boolean(candidates.length || disclaimer);
+  const styleCodeLabel = t('posts.composeStyleCode');
+  const styleSloganLabel = t('posts.composeStyleSlogan');
+  const canRegenerate = candidates.length > 0 && !loading;
 
   const handleSelect = (candidate: BuddyPostComposeCandidate) => {
     onSelectCandidate(candidate.id);
@@ -49,11 +72,12 @@ export function BuddyPostComposeStep({
         </Text>
       </View>
 
-      {showDisclaimer ? (
-        <Text className="s-ai-buddy-post-sheet__ai-disclaimer">
+      <View className="s-ai-buddy-post-sheet__compose-ai-field" aria-hidden>
+        <Sparkles size={15} color="var(--primary)" aria-hidden />
+        <Text className="s-ai-buddy-post-sheet__compose-ai-field-text">
           {disclaimer?.trim() || BUDDY_POST_AI_DISCLAIMER}
         </Text>
-      ) : null}
+      </View>
 
       <View className="s-ai-buddy-post-sheet__compose-actions">
         <Button
@@ -65,63 +89,63 @@ export function BuddyPostComposeStep({
           hoverClass={loading ? '' : 's-ai-buddy-post-sheet__compose-btn--pressed'}
           onClick={onGenerate}
         >
-          <Sparkles size={15} aria-hidden />
+          <Sparkles size={15} color="#fff" aria-hidden />
           <Text className="s-ai-buddy-post-sheet__compose-btn-text">
             {loading ? t('posts.composeGenerating') : t('posts.composeGenerate')}
           </Text>
         </Button>
-        {candidates.length ? (
-          <Button
-            className={cn(
-              's-ai-buddy-post-sheet__compose-btn s-ai-buddy-post-sheet__compose-btn--ghost',
-              loading && 's-ai-buddy-post-sheet__compose-btn--disabled',
-            )}
-            disabled={loading}
-            hoverClass={loading ? '' : 's-ai-buddy-post-sheet__compose-btn--pressed'}
-            onClick={onRegenerate}
-          >
-            <Text className="s-ai-buddy-post-sheet__compose-btn-text">
-              {t('posts.composeRegenerate')}
-            </Text>
-          </Button>
-        ) : null}
+        <Button
+          className={cn(
+            's-ai-buddy-post-sheet__compose-btn s-ai-buddy-post-sheet__compose-btn--ghost',
+            !canRegenerate && 's-ai-buddy-post-sheet__compose-btn--disabled',
+          )}
+          disabled={!canRegenerate}
+          hoverClass={
+            canRegenerate ? 's-ai-buddy-post-sheet__compose-btn--pressed' : ''
+          }
+          onClick={onRegenerate}
+        >
+          <RefreshCw size={14} color="#fff" aria-hidden />
+          <Text className="s-ai-buddy-post-sheet__compose-btn-text">
+            {t('posts.composeRegenerate')}
+          </Text>
+        </Button>
       </View>
 
       {candidates.length ? (
-        <ScrollView
-          scrollX
-          enhanced
-          showScrollbar={false}
-          className="s-ai-buddy-post-sheet__candidate-scroll s-scrollbar-none"
-        >
-          <View className="s-ai-buddy-post-sheet__candidate-row">
-            {candidates.map((candidate) => {
-              const selected = selectedId === candidate.id;
-              return (
-                <Button
-                  key={candidate.id}
-                  className={cn(
-                    's-ai-buddy-post-sheet__candidate',
-                    selected && 's-ai-buddy-post-sheet__candidate--selected',
-                  )}
-                  hoverClass="s-ai-buddy-post-sheet__candidate--pressed"
-                  onClick={() => handleSelect(candidate)}
-                >
-                  {candidate.style ? (
-                    <Text className="s-ai-buddy-post-sheet__candidate-tag">
-                      {candidate.style === 'code'
-                        ? t('posts.composeStyleCode')
-                        : t('posts.composeStyleSlogan')}
-                    </Text>
-                  ) : null}
-                  <Text className="s-ai-buddy-post-sheet__candidate-text">
-                    {candidate.text}
+        <View className="s-ai-buddy-post-sheet__candidate-grid">
+          {candidates.map((candidate) => {
+            const selected = selectedId === candidate.id;
+            return (
+              <Button
+                key={candidate.id}
+                className={cn(
+                  's-ai-buddy-post-sheet__candidate',
+                  selected && 's-ai-buddy-post-sheet__candidate--selected',
+                )}
+                hoverClass="s-ai-buddy-post-sheet__candidate--pressed"
+                onClick={() => handleSelect(candidate)}
+              >
+                {candidate.style ? (
+                  <Text
+                    className={cn(
+                      's-ai-buddy-post-sheet__candidate-tag',
+                      candidate.style === 'code' &&
+                        's-ai-buddy-post-sheet__candidate-tag--code',
+                      candidate.style === 'slogan' &&
+                        's-ai-buddy-post-sheet__candidate-tag--slogan',
+                    )}
+                  >
+                    {candidate.style === 'code' ? styleCodeLabel : styleSloganLabel}
                   </Text>
-                </Button>
-              );
-            })}
-          </View>
-        </ScrollView>
+                ) : null}
+                <Text className="s-ai-buddy-post-sheet__candidate-text">
+                  {formatCandidateText(candidate, styleCodeLabel, styleSloganLabel)}
+                </Text>
+              </Button>
+            );
+          })}
+        </View>
       ) : null}
 
       <View className="s-ai-guide-plan-sheet__field s-ai-buddy-post-sheet__field--note">

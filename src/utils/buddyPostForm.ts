@@ -14,6 +14,20 @@ export function formatBuddyPostHeadcount(raw: string): string {
   return `${trimmed}人`;
 }
 
+/** 发帖正文/地点字段展示用：上海 → 上海出发 */
+export function formatBuddyPostDeparture(raw: string): string {
+  const trimmed = raw.trim();
+  if (!trimmed) return '';
+  return trimmed.endsWith('出发') ? trimmed : `${trimmed}出发`;
+}
+
+/** 编辑回填表单时去掉尾部「出发」 */
+export function stripBuddyPostDepartureSuffix(raw: string): string {
+  const trimmed = raw.trim();
+  if (!trimmed) return '';
+  return trimmed.endsWith('出发') ? trimmed.slice(0, -2) : trimmed;
+}
+
 function buddyPostIntentPhrases(tags: BuddyPostTagId[]): string {
   const phrases = BUDDY_POST_TAG_OPTIONS.filter((opt) => tags.includes(opt.id)).map(
     (opt) => opt.intentPhrase,
@@ -52,7 +66,7 @@ export function buildBuddyPostBody(form: AiBuddyPostFormValues): string {
   const parts = [
     buddyPostIntentPhrases(form.tags),
     formatBuddyPostDateShort(form.dateStart, form.dateEnd),
-    form.location.trim(),
+    formatBuddyPostDeparture(form.location),
     formatBuddyPostHeadcount(form.headcount),
   ].filter(Boolean);
 

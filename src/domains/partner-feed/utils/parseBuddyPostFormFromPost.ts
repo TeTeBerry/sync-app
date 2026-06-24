@@ -2,7 +2,10 @@ import type { AiBuddyPostFormValues, BuddyPostTagId } from '@/types/buddyPost';
 import type { EventDetailPost } from '@/types/backend';
 import { BUDDY_POST_TAG_OPTIONS } from '@/types/buddyPost';
 import { boundsToIsoDate, parseActivityDateBounds } from '@/utils/activityDateBounds';
-import { defaultBuddyPostForm } from '@/utils/buddyPostForm';
+import {
+  defaultBuddyPostForm,
+  stripBuddyPostDepartureSuffix,
+} from '@/utils/buddyPostForm';
 import { stripPostBodyContact } from '@/utils/postBodyContact';
 
 function pad2(value: number): string {
@@ -115,6 +118,7 @@ export function parseBuddyPostFormFromPost(
   if (!location && segments[2]) {
     location = segments[2];
   }
+  location = stripBuddyPostDepartureSuffix(location);
 
   if (segments[3]) {
     headcount = segments[3];

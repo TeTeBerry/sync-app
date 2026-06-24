@@ -28,10 +28,10 @@ const t = (key: string, params?: Record<string, string | number>) => {
     return '本场准备已完成';
   }
   if (key === 'eventDetail.festivalPrepHint') {
-    return '攻略 · 演出表 · 招募';
+    return '攻略 · 时间表 · 招募';
   }
   if (key === 'eventDetail.festivalPrepHintGuest') {
-    return '出行攻略 · 演出表';
+    return '出行攻略 · 时间表';
   }
   return key;
 };
@@ -185,6 +185,6 @@ describe('resolvePrepNudge', () => {
         checklist: null,
         t,
       }).text,
-    ).toBe('出行攻略 · 演出表');
+    ).toBe('出行攻略 · 时间表');
   });
 });

@@ -44,11 +44,11 @@ describe('publishBuddyPostFromForm', () => {
       expect.objectContaining({
         activityLegacyId: 9,
         eventTitle: '风暴电音节',
-        location: '上海',
+        location: '上海出发',
         tags: ['#组队'],
         recruitStatus: 'open',
         slotsTotal: 2,
-        body: expect.stringMatching(/组队，6\.13-6\.14，上海，2人/),
+        body: expect.stringMatching(/组队，6\.13-6\.14，上海出发，2人/),
       }),
     );
     expect(card.postId).toBe('post-1');

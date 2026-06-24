@@ -2,7 +2,7 @@
 export const LABEL_ALIASES: Record<string, readonly string[]> = {
   'ai.generateTravelGuide': ['生成出行攻略', 'Generate travel guide'],
   'ai.generateItinerary': [
-    '排演出表',
+    '排时间表',
     '排专属行程',
     '生成专属行程',
     'Build set schedule',
@@ -10,9 +10,9 @@ export const LABEL_ALIASES: Record<string, readonly string[]> = {
   'ai.buddyPost': ['组队发帖', 'Post buddy thread'],
   'ai.startPersonalityTest': ['开始人格测试', 'Start persona test'],
   'ai.lineup': ['查阵容', 'Lineup info'],
-  'ai.schedule': ['演出表', 'Schedule'],
-  'ai.mySchedule': ['我的演出表', 'My schedule'],
-  'festivalPlan.viewSchedule': ['查看演出表', 'View schedule'],
+  'ai.schedule': ['时间表', 'Schedule'],
+  'ai.mySchedule': ['我的时间表', 'My schedule'],
+  'festivalPlan.viewSchedule': ['查看时间表', 'View schedule'],
   'ai.pickFestival': ['选一场电音节', 'Pick a festival'],
   'ai.nearEvents': ['最近有什么活动', 'Events coming up'],
   'ai.nearEventsSubmit': ['查最近活动', 'Show nearby events'],

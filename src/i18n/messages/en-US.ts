@@ -931,14 +931,14 @@ export const enUS: MessageTree = {
     unpublishedBanner: {
       title: '{{text}}',
       hint: 'Lineup has not been announced yet. Check with the organizer. We do not guarantee announcement timing.',
-      subscribe: 'Join {{title}}',
-      subscribing: 'Joining…',
-      subscribed: 'Joined {{title}}',
+      subscribe: 'Subscribe to {{title}}',
+      subscribing: 'Subscribing…',
+      subscribed: 'Subscribed to {{title}}',
       subscribedHint:
-        'Joined {{title}}. Lineup or schedule updates will appear in notifications.',
-      subscribeSuccessWechat: 'Joined — we will notify you on WeChat',
-      subscribeSuccessInApp: 'Joined — check notifications for updates',
-      subscribeRegisterFailed: 'Could not join. Please try again.',
+        'Subscribed to {{title}}. Lineup or schedule updates will appear in notifications.',
+      subscribeSuccessWechat: 'Subscribed — we will notify you on WeChat',
+      subscribeSuccessInApp: 'Subscribed — check notifications for updates',
+      subscribeRegisterFailed: 'Could not subscribe. Please try again.',
       subscribeUnconfigured:
         'WeChat alerts are unavailable right now. Try again later.',
       lineupNotAnnounced: 'Lineup not announced',

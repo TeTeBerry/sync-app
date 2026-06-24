@@ -1,7 +1,9 @@
 import './AiGuidePlanSheet.scss';
 import './AiBuddyPostSheet.scss';
 import { useCallback, useMemo } from 'react';
-import { ChevronLeft, Send, Users, X } from '../../components/icons';
+import { ChevronLeft, Send, Sparkles, Users, X } from '../../components/icons';
+
+const COMPOSE_HEADER_ICON_COLOR = '#4cc9f0';
 import { Button, cn } from '../ui';
 import { useOverlayLock } from '../../hooks/useOverlayLock';
 import type {
@@ -211,7 +213,16 @@ export function AiBuddyPostSheet({
         <View className="s-ai-guide-plan-sheet__handle" aria-hidden />
         <View className="s-ai-guide-plan-sheet__top">
           <View className="s-ai-guide-plan-sheet__title-row">
-            {wizard.isWizard && wizard.step !== 'form' ? (
+            {wizard.isWizard && wizard.step === 'compose' ? (
+              <View className="s-ai-guide-plan-sheet__title-icon" aria-hidden>
+                <Sparkles
+                  size={16}
+                  className="s-ai-guide-plan-sheet__title-icon-sparkle"
+                  color={COMPOSE_HEADER_ICON_COLOR}
+                  aria-hidden
+                />
+              </View>
+            ) : wizard.isWizard && wizard.step !== 'form' ? (
               <Button
                 className="s-ai-buddy-post-sheet__back"
                 hoverClass="s-ai-buddy-post-sheet__back--pressed"

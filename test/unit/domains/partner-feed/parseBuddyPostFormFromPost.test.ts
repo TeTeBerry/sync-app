@@ -57,4 +57,18 @@ describe('parseBuddyPostFormFromPost', () => {
 
     expect(form?.headcount).toBe('1/3');
   });
+
+  it('strips trailing 出发 when loading location for edit', () => {
+    const form = parseBuddyPostFormFromPost(
+      {
+        body: '组队，10.17-10.18，南京雨花口腔医院出发，2人',
+        location: '南京雨花口腔医院出发',
+        tags: ['#组队'],
+        slotsTotal: 2,
+      },
+      '10/17-18/2026',
+    );
+
+    expect(form?.location).toBe('南京雨花口腔医院');
+  });
 });

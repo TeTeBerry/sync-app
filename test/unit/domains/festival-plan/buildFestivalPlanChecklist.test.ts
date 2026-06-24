@@ -34,7 +34,7 @@ describe('buildFestivalPlanChecklist', () => {
 
     expect(
       checklist.tasks.find((task) => task.key === 'itinerary')?.trailingLabel,
-    ).toBe('查看演出表');
+    ).toBe('查看时间表');
     expect(
       checklist.tasks.find((task) => task.key === 'buddy_post')?.trailingLabel,
     ).toBe('编辑组队帖');

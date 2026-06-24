@@ -6,6 +6,7 @@ import {
   buildBuddyPostBody,
   buddyPostHashTags,
   buildRecruitFieldsFromBuddyForm,
+  formatBuddyPostDeparture,
 } from './buddyPostForm';
 import { eventDetailPostToCard } from './eventPostCard';
 import { assertPostPublishedVisible } from './postPublishFeedback';
@@ -30,7 +31,7 @@ export function buildOptimisticBuddyPost(params: {
     name: params.authorName,
     handle: params.authorHandle?.trim() || undefined,
     avatar: params.authorAvatar?.trim() || '',
-    location: params.location?.trim() || params.form.location.trim(),
+    location: formatBuddyPostDeparture(params.location ?? params.form.location),
     createdAt: new Date().toISOString(),
     body: fullBody,
     tags: hashTags,
@@ -53,7 +54,7 @@ export async function publishBuddyPostFromForm(params: {
   const title = activityTitle.trim() || '本场活动';
   const body = buildBuddyPostBody(form);
   const hashTags = buddyPostHashTags(form.tags);
-  const location = form.location.trim();
+  const location = formatBuddyPostDeparture(form.location);
   const recruit = buildRecruitFieldsFromBuddyForm(form);
 
   const post = await createPost({
@@ -86,7 +87,7 @@ export async function updateBuddyPostFromForm(params: {
   const { form, postId } = params;
   const body = buildBuddyPostBody(form);
   const hashTags = buddyPostHashTags(form.tags);
-  const location = form.location.trim();
+  const location = formatBuddyPostDeparture(form.location);
   const recruit = buildRecruitFieldsFromBuddyForm(form);
 
   return updatePost(postId, {
