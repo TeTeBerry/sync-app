@@ -39,7 +39,11 @@ export const EventsHotCarousel: FC<EventsHotCarouselProps> = ({
           {events.map((event) => {
             const regionLabel = formatActivityAreaLabel(event);
             const metaLine = formatEventHeroMetaLine(event.date, event.location);
-            const thumbSrc = thumbnailImageUrl(event.image, IMAGE_SIZE.eventCardList);
+            const thumbSrc = thumbnailImageUrl(
+              event.image,
+              IMAGE_SIZE.eventCardHotCarousel,
+              0.6,
+            );
 
             return (
               <View

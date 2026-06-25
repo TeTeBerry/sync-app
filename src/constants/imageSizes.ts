@@ -1,10 +1,20 @@
-/** Standard thumbnail widths for remote image CDN params. */
+/**
+ * Remote image request widths (logical CSS px × ~2 for retina).
+ * Apply at display time via `thumbnailImageUrl` — do not bake into mapped API data.
+ */
 export const IMAGE_SIZE = {
-  avatarSm: 48,
-  avatarMd: 80,
-  listThumb: 200,
+  avatarSm: 96,
+  avatarMd: 160,
+  listThumb: 240,
   postImage: 400,
-  featuredHero: 720,
-  eventCardList: 200,
-  eventCardDefault: 320,
+  /** Full-width hero: home showcase, event detail, list EventCard hero. */
+  featuredHero: 750,
+  eventCardHero: 750,
+  /** Hot carousel tile (~200 CSS px wide). */
+  eventCardHotCarousel: 420,
+  /** Small square thumb (~56–92 CSS px). */
+  eventCardCompact: 192,
+  /** @deprecated use eventCardHero / eventCardCompact — kept for grep migration */
+  eventCardList: 750,
+  eventCardDefault: 192,
 } as const;

@@ -61,7 +61,7 @@ describe('thumbnailImageUrl tencent cos', () => {
     const { thumbnailImageUrl } = await import('@/utils/imageUrl');
     const url = 'https://636c-sync-prd.tcb.qcloud.la/ugc/posts/u1/a.jpg';
     expect(thumbnailImageUrl(url, 200)).toBe(
-      'https://636c-sync-prd.tcb.qcloud.la/ugc/posts/u1/a.jpg?imageView2/2/w/200/h/150/q/85',
+      'https://636c-sync-prd.tcb.qcloud.la/ugc/posts/u1/a.jpg?imageView2/2/w/200/h/150/q/90',
     );
   });
 
@@ -70,7 +70,7 @@ describe('thumbnailImageUrl tencent cos', () => {
     const url =
       'https://syncapp-1304288643.cos.ap-shanghai.myqcloud.com/uploads/posts/u1/a.jpg';
     expect(thumbnailImageUrl(url, 200)).toBe(
-      'https://syncapp-1304288643.cos.ap-shanghai.myqcloud.com/uploads/posts/u1/a.jpg?imageView2/2/w/200/h/150/q/85',
+      'https://syncapp-1304288643.cos.ap-shanghai.myqcloud.com/uploads/posts/u1/a.jpg?imageView2/2/w/200/h/150/q/90',
     );
   });
 

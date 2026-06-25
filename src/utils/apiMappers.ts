@@ -1,7 +1,6 @@
 import type { ActivityMapRegion } from '../constants/activityMapRegion';
 import type { HomeSummary } from '../types/backend';
 import { resolveCatalogActivityImage } from '../constants/activityCatalogImages';
-import { resolveActivityThumb } from '../constants/activityImages';
 import { getActivityTypeLabel } from '../constants/activityType';
 import { isHomeFeaturedCatalogActivity } from './filterActivitiesForEventsCatalog';
 import { parseActivityLegacyId } from './activityLegacyId';
@@ -78,12 +77,10 @@ export function mapActivitiesToEvents(
       region: activity.region as ActivityMapRegion | undefined,
       area: activity.area,
       alias: activity.alias,
-      image: resolveActivityThumb(
+      image:
         sanitizeRemoteImageUrl(
           resolveCatalogActivityImage(activity.legacyId, activity.image),
         ) ?? resolveCatalogActivityImage(activity.legacyId, activity.image),
-        200,
-      ),
       hot: Boolean(activity.hot),
       attendees: activity.attendees ?? 0,
       category: getActivityTypeLabel(activity.activityType),
@@ -115,7 +112,7 @@ export function mapSignupEventToFeaturedEvent(item: SignupEvent): FeaturedEvent 
     attendeeCount: String(item.attendees ?? 0),
     remaining: '',
     guests: [],
-    image: resolveActivityThumb(remote, 200),
+    image: remote,
     going: item.going,
   };
 }

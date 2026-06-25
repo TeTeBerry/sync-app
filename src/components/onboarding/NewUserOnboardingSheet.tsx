@@ -48,7 +48,7 @@ export function NewUserOnboardingSheet({
     : '';
   const heroSrc = featuredEvent
     ? (featuredPostImageUrl(featuredEvent.image, IMAGE_SIZE.featuredHero) ??
-      thumbnailImageUrl(featuredEvent.image, 240) ??
+      thumbnailImageUrl(featuredEvent.image, IMAGE_SIZE.featuredHero) ??
       featuredEvent.image)
     : undefined;
   const showPickAnother = featuredEventCount > 1 && Boolean(onNextFeaturedEvent);

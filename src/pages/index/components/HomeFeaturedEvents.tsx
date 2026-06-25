@@ -146,7 +146,7 @@ function HomeFeaturedEventCard({
   const legacyId = resolveFeaturedEventLegacyId(event);
   const heroSrc =
     featuredPostImageUrl(event.image, IMAGE_SIZE.featuredHero) ??
-    thumbnailImageUrl(event.image, 480) ??
+    thumbnailImageUrl(event.image, IMAGE_SIZE.featuredHero, 10 / 16) ??
     event.image;
   const categoryLabel = formatActivityCategoryLabel(event.category);
 

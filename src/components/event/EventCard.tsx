@@ -102,7 +102,8 @@ const EventCardInner: React.FC<EventCardProps> = ({
   const isNavigating = useRouteTransitionActive(legacyId ?? undefined);
   const thumbSrc = thumbnailImageUrl(
     image,
-    variant === 'list' ? IMAGE_SIZE.eventCardList : IMAGE_SIZE.eventCardDefault,
+    variant === 'list' ? IMAGE_SIZE.eventCardHero : IMAGE_SIZE.eventCardCompact,
+    variant === 'list' ? 0.5 : 1,
   );
   const status = getActivityStatusFromActivity(date, title);
   const heroSubtitle = useMemo(

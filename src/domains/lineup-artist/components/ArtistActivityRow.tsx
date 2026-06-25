@@ -43,7 +43,8 @@ export const ArtistActivityRow: FC<ArtistActivityRowProps> = ({
         : null;
   const thumbSrc = thumbnailImageUrl(
     activity.image ?? PLACEHOLDER_EVENT_HERO,
-    IMAGE_SIZE.eventCardList,
+    IMAGE_SIZE.eventCardCompact,
+    1,
   );
 
   return (

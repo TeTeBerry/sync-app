@@ -168,7 +168,7 @@ function appendTencentCosThumbnail(url: URL, width: number, height: number): str
     return url.toString();
   }
 
-  const rule = `imageView2/2/w/${width}/h/${height}/q/85`;
+  const rule = `imageView2/2/w/${width}/h/${height}/q/90`;
   url.search = search ? `?${search}&${rule}` : `?${rule}`;
   return url.toString();
 }
