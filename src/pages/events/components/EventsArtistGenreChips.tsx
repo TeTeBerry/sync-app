@@ -1,5 +1,6 @@
 import type { FC } from 'react';
-import { ScrollView, Text, View } from '@tarojs/components';
+import { ScrollView, View } from '@tarojs/components';
+import { Chip, ChipRow } from '@/components/ui';
 import { useT } from '@/hooks/useI18n';
 import type { CatalogArtistGenreChip } from '../../../utils/catalogLineupArtistGenres';
 
@@ -8,39 +9,6 @@ type EventsArtistGenreChipsProps = {
   selectedGenre: string | null;
   onGenreChange: (genre: string | null) => void;
 };
-
-function GenreChip({
-  active,
-  label,
-  onClick,
-}: {
-  active: boolean;
-  label: string;
-  onClick: () => void;
-}) {
-  return (
-    <View
-      className={[
-        's-events-catalog-filters__chip',
-        active ? 's-events-catalog-filters__chip--active' : '',
-      ]
-        .filter(Boolean)
-        .join(' ')}
-      onClick={onClick}
-    >
-      <Text
-        className={[
-          's-events-catalog-filters__chip-text',
-          active ? 's-events-catalog-filters__chip-text--active' : '',
-        ]
-          .filter(Boolean)
-          .join(' ')}
-      >
-        {label}
-      </Text>
-    </View>
-  );
-}
 
 export const EventsArtistGenreChips: FC<EventsArtistGenreChipsProps> = ({
   chips,
@@ -68,16 +36,16 @@ export const EventsArtistGenreChips: FC<EventsArtistGenreChipsProps> = ({
         showScrollbar={false}
         className="s-events__artists-genre-chips-scroll s-scrollbar-none"
       >
-        <View className="s-events-catalog-filters__row s-events__artists-genre-chips-row">
+        <ChipRow className="s-events__artists-genre-chips-row">
           {chips.map((chip) => (
-            <GenreChip
+            <Chip
               key={chip.id}
               active={selectedGenre === chip.id}
               label={chip.label}
               onClick={() => handleGenreClick(chip.id)}
             />
           ))}
-        </View>
+        </ChipRow>
       </ScrollView>
     </View>
   );

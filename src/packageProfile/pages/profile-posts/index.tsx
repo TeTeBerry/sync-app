@@ -1,6 +1,7 @@
 import '../../../components/profile/profile.scss';
-import Taro, { useDidShow } from '@tarojs/taro';
+import { useDidShow } from '@tarojs/taro';
 import React, { useCallback } from 'react';
+import { showAppToast } from '@/utils/appToast';
 import { PageTabBarChrome } from '../../../components/navigation/BottomNav';
 import PageNavigation, {
   stackPageNavChromePx,
@@ -35,7 +36,7 @@ const ProfilePostsPage: React.FC = () => {
   const handleSelectPost = useCallback((item: ProfilePostItem) => {
     const activityLegacyId = item.activityLegacyId;
     if (activityLegacyId == null || Number.isNaN(activityLegacyId)) {
-      void Taro.showToast({ title: '无法打开该帖子所属活动', icon: 'none' });
+      showAppToast('profilePosts.invalidActivity', { icon: 'none' });
       return;
     }
     goEventDetail(activityLegacyId, { postId: item.id });

@@ -1,5 +1,4 @@
 import './HelpFeedbackSettings.scss';
-import Taro from '@tarojs/taro';
 import { useCallback, useMemo, useState } from 'react';
 import { Text, Textarea, View } from '@tarojs/components';
 import { Button } from '../../../../components/ui';
@@ -10,6 +9,7 @@ import { isLoggedIn } from '../../../../utils/authStorage';
 import { useOverlayLock } from '../../../../hooks/useOverlayLock';
 import { SUPPORT_EMAIL } from '../../../../constants/supportContact';
 import { AccountDeletionGuide } from '@/packageProfile/pages/settings/components/AccountDeletionGuide';
+import { showAppToast } from '@/utils/appToast';
 
 const CONTENT_MIN = 5;
 const CONTENT_MAX = 1000;
@@ -58,7 +58,7 @@ export function HelpFeedbackSettings() {
         setFormOpen(true);
         return;
       }
-      void Taro.showToast({ title: t('auth.feedbackLoginRequired'), icon: 'none' });
+      showAppToast('auth.feedbackLoginRequired', { icon: 'none' });
     },
     [t],
   );
@@ -73,15 +73,15 @@ export function HelpFeedbackSettings() {
   const handleSubmit = useCallback(async () => {
     const trimmed = content.trim();
     if (trimmed.length < CONTENT_MIN) {
-      void Taro.showToast({
-        title: t('feedback.minLengthError', { min: CONTENT_MIN }),
+      showAppToast('feedback.minLengthError', {
+        params: { min: CONTENT_MIN },
         icon: 'none',
       });
       return;
     }
 
     if (isLiveApi() && !isLoggedIn()) {
-      void Taro.showToast({ title: t('auth.feedbackLoginRequired'), icon: 'none' });
+      showAppToast('auth.feedbackLoginRequired', { icon: 'none' });
       return;
     }
 
@@ -112,7 +112,7 @@ export function HelpFeedbackSettings() {
       setFormOpen(false);
       setDeletionPrefill(false);
     } catch {
-      void Taro.showToast({ title: t('common.requestFailed'), icon: 'none' });
+      showAppToast('common.requestFailed', { icon: 'none' });
     } finally {
       setSubmitting(false);
     }

@@ -11,6 +11,7 @@ import { loginWithWechat } from '../../utils/auth';
 import { hasLegalConsent, writeLegalConsent } from '../../utils/legalConsentStorage';
 import { switchTabTo, ROUTES } from '../../utils/route';
 import { useT } from '@/hooks/useI18n';
+import { showAppToast } from '@/utils/appToast';
 
 export type LoginPromptHeroProps = {
   className?: string;
@@ -30,15 +31,12 @@ export function LoginPromptHero({
 
   const handleLogin = useCallback(async () => {
     if (!legalAccepted) {
-      void Taro.showToast({
-        title: t('auth.acceptLegalToast'),
-        icon: 'none',
-      });
+      showAppToast('auth.acceptLegalToast', { icon: 'none' });
       return;
     }
 
     if (!isLiveApi()) {
-      void Taro.showToast({ title: t('auth.configureApi'), icon: 'none' });
+      showAppToast('auth.configureApi', { icon: 'none' });
       return;
     }
 
@@ -47,21 +45,18 @@ export function LoginPromptHero({
       if (process.env.TARO_ENV === 'weapp') {
         await loginWithWechat();
       } else {
-        void Taro.showToast({
-          title: t('auth.wechatOnly'),
-          icon: 'none',
-        });
+        showAppToast('auth.wechatOnly', { icon: 'none' });
         return;
       }
       writeLegalConsent();
       onLoggedIn?.();
-      void Taro.showToast({ title: t('auth.loginSuccess'), icon: 'success' });
+      showAppToast('auth.loginSuccess', { icon: 'success' });
     } catch (error) {
       const message =
         error instanceof Error && error.message.trim()
           ? error.message
           : t('auth.loginFailed');
-      void Taro.showToast({ title: message, icon: 'none' });
+      showAppToast(message, { raw: true, icon: 'none' });
     } finally {
       setLoggingIn(false);
     }

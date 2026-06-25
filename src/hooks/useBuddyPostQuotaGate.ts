@@ -1,11 +1,11 @@
 import { useCallback, useState } from 'react';
-import Taro from '@tarojs/taro';
 import { useProfilePostsQuery } from './sync/profile';
 import {
   buildBuddyPostLimitToast,
   resolveBuddyPostQuota,
   type BuddyPostQuota,
 } from '../utils/buddyPostQuota';
+import { showAppToast } from '@/utils/appToast';
 
 export type BuddyPostSheetQuota = Pick<BuddyPostQuota, 'used' | 'max'>;
 
@@ -35,8 +35,8 @@ export function useBuddyPostQuotaGate(options: {
 
     if (quota.atLimit) {
       setSheetPostQuota(null);
-      void Taro.showToast({
-        title: buildBuddyPostLimitToast(options.activityTitle ?? '', quota.max),
+      showAppToast(buildBuddyPostLimitToast(options.activityTitle ?? '', quota.max), {
+        raw: true,
         icon: 'none',
         duration: 3500,
       });

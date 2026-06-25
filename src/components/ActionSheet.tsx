@@ -1,9 +1,6 @@
-import './ActionSheet.scss';
 import React from 'react';
-import { useOverlayLock } from '../hooks/useOverlayLock';
-import { cn } from './ui';
-import { Button } from './ui';
-import { Text, View } from '@tarojs/components';
+import { cn, Button, Sheet } from './ui';
+import { Text } from '@tarojs/components';
 
 export interface ActionSheetItem {
   label: string;
@@ -29,38 +26,32 @@ const ActionSheet: React.FC<ActionSheetProps> = ({
   onCancel,
   overlayClassName,
 }) => {
-  useOverlayLock(open);
-
   return (
-    <View
-      className={cn(
-        's-overlay s-overlay--sheet',
-        overlayClassName,
-        !open && 's-overlay--off',
-      )}
-      role="presentation"
+    <Sheet
+      open={open}
+      onClose={onCancel}
+      overlayClassName={overlayClassName}
+      panelRole="menu"
+      ariaHidden={!open}
     >
-      <View className="s-overlay__backdrop" onClick={onCancel} />
-      <View className="s-overlay__panel" role="menu" aria-hidden={!open}>
-        {title ? <Text className="s-overlay-sheet__title">{title}</Text> : null}
-        {items.map((item) => (
-          <Button
-            key={item.label}
-            role="menuitem"
-            className={cn(
-              's-overlay-sheet__item',
-              item.active && 's-overlay-sheet__item--active',
-            )}
-            onClick={item.onSelect}
-          >
-            <Text className="s-btn-label">{item.label}</Text>
-          </Button>
-        ))}
-        <Button className="s-overlay-sheet__cancel" onClick={onCancel}>
-          <Text className="s-btn-label">{cancelLabel}</Text>
+      {title ? <Text className="s-overlay-sheet__title">{title}</Text> : null}
+      {items.map((item) => (
+        <Button
+          key={item.label}
+          role="menuitem"
+          className={cn(
+            's-overlay-sheet__item',
+            item.active && 's-overlay-sheet__item--active',
+          )}
+          onClick={item.onSelect}
+        >
+          <Text className="s-btn-label">{item.label}</Text>
         </Button>
-      </View>
-    </View>
+      ))}
+      <Button className="s-overlay-sheet__cancel" onClick={onCancel}>
+        <Text className="s-btn-label">{cancelLabel}</Text>
+      </Button>
+    </Sheet>
   );
 };
 

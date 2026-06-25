@@ -45,6 +45,7 @@ import {
 } from './aiTravelGuidePage.util';
 import type { AiGuidePlanFormValues, TravelGuideBudgetTier } from '@/types/travelGuide';
 import { useT } from '@/hooks/useI18n';
+import { showAppToast } from '@/utils/appToast';
 
 const FOOTER_BASE_PX = 72;
 
@@ -226,9 +227,9 @@ export function useAiTravelGuidePage() {
     try {
       const text = buildTravelGuideShareText(payload.plan);
       await Taro.setClipboardData({ data: text });
-      void Taro.showToast({ title: t('travelGuide.copySuccess'), icon: 'success' });
+      showAppToast('travelGuide.copySuccess', { icon: 'success' });
     } catch {
-      void Taro.showToast({ title: t('travelGuide.copyFailed'), icon: 'none' });
+      showAppToast('travelGuide.copyFailed', { icon: 'none' });
     } finally {
       setSharing(false);
     }
@@ -284,7 +285,7 @@ export function useAiTravelGuidePage() {
             error instanceof Error
               ? error.message
               : t('travelPlan.guideGenerationFailed');
-          void Taro.showToast({ title: message, icon: 'none' });
+          showAppToast(message, { raw: true, icon: 'none' });
         } finally {
           hideThemedLoading();
         }
@@ -337,7 +338,7 @@ export function useAiTravelGuidePage() {
         } catch (error) {
           const message =
             error instanceof Error ? error.message : t('travelGuide.loadFailed');
-          void Taro.showToast({ title: message, icon: 'none' });
+          showAppToast(message, { raw: true, icon: 'none' });
         } finally {
           hideThemedLoading();
           setBudgetTierUpdating(false);

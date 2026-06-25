@@ -1,5 +1,5 @@
-import Taro from '@tarojs/taro';
 import { hideThemedLoading, showThemedLoading } from '@/utils/themedLoading';
+import { t } from '@/i18n';
 import {
   ensureWritePhotosAlbumPermission,
   promptOpenAlbumSettings,
@@ -14,6 +14,7 @@ import {
   renderWallpaperToOffscreenTempFile,
   renderWallpaperToPageCanvasTempFile,
 } from './itineraryWallpaperCanvas';
+import { showAppToast } from '@/utils/appToast';
 
 export type GenerateItineraryWallpaperInput = {
   days: ItineraryWallpaperDayInput[];
@@ -98,39 +99,40 @@ export async function runSaveItineraryWallpaperFlow(
 ): Promise<void> {
   const manageLoading = options?.manageLoading !== false;
   if (manageLoading) {
-    showThemedLoading({ title: '生成屏保中…', mask: true });
+    showThemedLoading({ title: t('itinerary.generatingWallpaper'), mask: true });
   }
   try {
     await generateAndSaveItineraryWallpaper(input);
-    void Taro.showToast({
-      title: options?.serverSaved ? '行程已保存，屏保已存入相册' : '已保存到相册',
-      icon: 'success',
-    });
+    showAppToast(
+      options?.serverSaved
+        ? 'itinerary.wallpaperSavedWithItinerary'
+        : 'itinerary.wallpaperSavedToAlbum',
+      { icon: 'success' },
+    );
   } catch (error) {
     if (error instanceof ItineraryWallpaperError) {
       if (error.code === 'permission') {
-        void Taro.showToast({
-          title: options?.serverSaved
-            ? '行程已保存，需相册权限才能保存屏保'
-            : '需要相册权限才能保存',
-          icon: 'none',
-        });
+        showAppToast(
+          options?.serverSaved
+            ? 'itinerary.wallpaperPermissionWithItinerary'
+            : 'itinerary.wallpaperPermission',
+          { icon: 'none' },
+        );
         return;
       }
       if (error.code === 'empty' && options?.serverSaved) {
-        void Taro.showToast({
-          title: '行程已保存，当前时间轴无法生成屏保',
-          icon: 'none',
-        });
+        showAppToast('itinerary.wallpaperEmptyWithItinerary', { icon: 'none' });
         return;
       }
-      void Taro.showToast({ title: error.message, icon: 'none' });
+      showAppToast(error.message, { raw: true, icon: 'none' });
       return;
     }
-    void Taro.showToast({
-      title: options?.serverSaved ? '行程已保存，屏保生成失败' : '保存失败，请稍后重试',
-      icon: 'none',
-    });
+    showAppToast(
+      options?.serverSaved
+        ? 'itinerary.wallpaperSaveFailedWithItinerary'
+        : 'common.requestFailed',
+      { icon: 'none' },
+    );
   } finally {
     if (manageLoading) {
       hideThemedLoading();

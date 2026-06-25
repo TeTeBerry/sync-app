@@ -6,7 +6,7 @@
 
 | 层级 | 路径 | 用途 |
 |------|------|------|
-| UI 原语 | `src/components/ui/` | 无业务语义；包装 Taro 原语 + BEM/`cn` |
+| UI 原语 | `src/components/ui/` | 无业务语义；包装 Taro 原语 + BEM/`cn`（`Button`、`Input`、`Sheet`、`Callout`、`Chip`） |
 | 跨页业务 | `src/components/`（`auth/`、`ai-chat/`、`profile/`、`navigation/` 等） | 多 Tab / 多分包复用的轻量 UI |
 | 活动域 | `src/domains/`（`festival-plan/`、`lineup-artist/`、`activity-share/`、`travel-plan/`、`performance-itinerary/`、`travel-guide/`、`partner-feed/`、`personality-test/`、`activity-scope/`） | 与后端 ActivityExperience 等域对齐的重逻辑 |
 | 页面壳 | `src/pages/**/`、`src/package*/pages/**/` | 路由入口、薄编排 |
@@ -18,13 +18,13 @@ pages / package pages  →  domains/*  →  components/*  →  components/ui
 @sync/*-contracts、types/*  ← 任意层（类型不反向依赖 pages）
 ```
 
-主包 Tab **不得**直接 import `domains/*` 内重组件（见 `scripts/verify-bundle-boundaries.mjs`）。
+主包 Tab 与分包页 **不得** deep import `domains/*` 子路径（见 `scripts/verify-bundle-boundaries.mjs`）。
 
 - `components/**` **不得** import `pages/**` 或 `package*/pages/**`
 
-### 主包 import 规范
+### 主包 / 分包 import 规范
 
-主包 Tab（`pages/index`、`pages/events`、`pages/profile`）、导航壳（`components/navigation`）及 `verify:bundle` 列出的主包文件，引用活动域能力时 **必须** 走 barrel：
+主包 Tab（`pages/index`、`pages/events`、`pages/profile`）、导航壳（`components/navigation`）、分包页（`packageEvent/**`、`packageProfile/**`）及 `verify:bundle` 列出的主包文件，引用活动域能力时 **必须** 走 barrel：
 
 ```ts
 import { useHomeFestivalPlanNavigation } from '@/domains/festival-plan';
@@ -140,6 +140,16 @@ import { Button } from '@/components/ui';
 
 - 不要改 BEM class 名；必要时用 `block` + `element` + `modifiers`（见 `Button` 的 JSDoc）
 - 图标按钮、tab 按钮、清空按钮均属业务 UI，仍应走 `components/ui`
+
+## UI 原语（Sheet / Callout / Chip）
+
+| 组件 | 用途 |
+|------|------|
+| `Sheet` | 底部半屏 overlay 壳：`useOverlayLock`、backdrop、`s-overlay--sheet`。`ActionSheet`、`LoginInterceptSheet` 等应优先复用 |
+| `Callout` | 状态/警告条：`variant` = `info` / `warning` / `stale` / `success`；可选 `title`、`action` |
+| `Chip` + `ChipRow` | 可点选筛选 pill；活动 Tab 地区/曲风 chip 等 |
+
+Toast 文案应走 `showAppToast('common.xxx')` 或 `showAppToast(message, 'none')`（[`utils/appToast.ts`](../src/utils/appToast.ts)），避免散落 `Taro.showToast` 硬编码。
 
 ## 相关文档
 

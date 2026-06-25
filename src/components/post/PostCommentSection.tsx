@@ -33,6 +33,7 @@ import { PostOwnerDeleteButton } from './PostOwnerDeleteButton';
 import { ContentReportMenuButton } from '../report';
 import { Image, Text, View } from '@tarojs/components';
 import { useT } from '@/hooks/useI18n';
+import { showAppToast } from '@/utils/appToast';
 
 const DEFAULT_AVATAR = PLACEHOLDER_AVATAR;
 
@@ -230,7 +231,7 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
 
     const contactError = getUgcContactValidationError(body);
     if (contactError) {
-      void Taro.showToast({ title: contactError, icon: 'none' });
+      showAppToast(contactError, { raw: true, icon: 'none' });
       return;
     }
 
@@ -247,7 +248,7 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
           setDraft('');
           setReplyTarget(null);
           onCommentSubmitted?.(updated);
-          void Taro.showToast({ title: t('comments.submitSuccess'), icon: 'success' });
+          showAppToast('comments.submitSuccess', { icon: 'success' });
           void requestPostEngagementSubscribe();
         } catch (err: unknown) {
           if (await handlePublishError(err)) return;
@@ -255,7 +256,7 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
             err instanceof Error && err.message.trim()
               ? err.message.trim()
               : t('comments.submitFailed');
-          void Taro.showToast({ title: message, icon: 'none' });
+          showAppToast(message, { raw: true, icon: 'none' });
         } finally {
           setSubmitting(false);
         }
@@ -287,16 +288,13 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
           try {
             const updated = await deleteCommentAndInvalidate(postId, commentId);
             onCommentSubmitted?.(updated);
-            void Taro.showToast({
-              title: t('comments.deleteSuccess'),
-              icon: 'success',
-            });
+            showAppToast('comments.deleteSuccess', { icon: 'success' });
           } catch (err: unknown) {
             const message =
               err instanceof Error && err.message.trim()
                 ? err.message.trim()
                 : t('comments.deleteFailed');
-            void Taro.showToast({ title: message, icon: 'none' });
+            showAppToast(message, { raw: true, icon: 'none' });
           } finally {
             setDeletingCommentId('');
           }

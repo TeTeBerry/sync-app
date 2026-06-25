@@ -17,3 +17,5 @@ export {
   normalizeEventPostList,
   normalizeEventPostListItem,
 } from './utils/eventPostNormalize';
+export { buildRecruitApplyCommentDraft } from './utils/buildRecruitApplyCommentDraft';
+export type { PrepNudgeAction } from './utils/eventDetailPlanningHint.util';

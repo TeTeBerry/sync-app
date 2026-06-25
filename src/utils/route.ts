@@ -1,5 +1,6 @@
 import Taro from '@tarojs/taro';
 import { useCallback, useEffect, useState } from 'react';
+import { showAppToast } from './appToast';
 import { bindActivity } from '../domains/activity-scope';
 import { useNavigationStore } from '../stores/navigationStore';
 import type { NavigationState } from '../stores/navigationStore';
@@ -29,6 +30,7 @@ import type { LoginInterceptFeature } from '../stores/loginInterceptStore';
 import { setEventsViewTabIntent } from './eventsTabIntent';
 import { setEventsSearchQuery } from './eventsSearchIntent';
 import { encodeSelectedDjList } from '../domains/performance-itinerary/utils/itineraryBanner';
+import { PRELOAD_PAGE_ROUTES_BY_TAB, type PreloadTabPath } from './routePreload.config';
 
 export const ROUTES = {
   HOME: '/pages/index/index',
@@ -58,22 +60,7 @@ const TAB_ROUTE_PATHS = new Set<RoutePath>([
   ROUTES.PROFILE,
 ]);
 
-type PreloadTabPath = typeof ROUTES.HOME | typeof ROUTES.EVENTS | typeof ROUTES.PROFILE;
-
 export type TabRoutePath = PreloadTabPath;
-
-/** Stack pages per tab; event/profile subpackages preload on tab switch */
-const PRELOAD_PAGE_ROUTES_BY_TAB: Record<PreloadTabPath, RoutePath[]> = {
-  [ROUTES.HOME]: [
-    ROUTES.EVENT_DETAIL,
-    ROUTES.NOTIFICATIONS,
-    ROUTES.PERSONALITY_TEST,
-    ROUTES.ACTIVITY_LINEUP,
-    ROUTES.AI_TRAVEL_GUIDE,
-  ],
-  [ROUTES.EVENTS]: [ROUTES.EVENT_DETAIL],
-  [ROUTES.PROFILE]: [ROUTES.NOTIFICATIONS],
-};
 
 function preloadSubpackagesForTab(tab: PreloadTabPath): void {
   preloadEventSubpackage();
@@ -473,7 +460,7 @@ function navigateToSafe(url: string, _options?: { eventId?: number }) {
               return;
             }
             endRouteTransition();
-            void Taro.showToast({ title: '页面打开失败', icon: 'none' });
+            showAppToast('common.pageOpenFailed');
             resolve();
           },
           complete: () => {
@@ -505,7 +492,7 @@ function redirectToSafe(url: string) {
           success: () => resolve(),
           fail: () => {
             endRouteTransition();
-            void Taro.showToast({ title: '页面打开失败', icon: 'none' });
+            showAppToast('common.pageOpenFailed');
             resolve();
           },
           complete: () => {
@@ -670,7 +657,7 @@ export function goEventDetail(
 ) {
   const legacyId = parseActivityLegacyId(eventId);
   if (legacyId == null) {
-    void Taro.showToast({ title: '活动信息无效', icon: 'none' });
+    showAppToast('common.invalidActivity');
     return;
   }
   const activities = getCacheData<BackendActivity[]>(['activities']);
@@ -703,7 +690,7 @@ export function goEventDetailWithBuddyPostPrefill(
 ) {
   const legacyId = parseActivityLegacyId(eventId);
   if (legacyId == null) {
-    void Taro.showToast({ title: '活动信息无效', icon: 'none' });
+    showAppToast('common.invalidActivity');
     return;
   }
   useNavigationStore.getState().setEventDetailBuddyPostIntent({
@@ -727,7 +714,7 @@ export function goExclusiveItinerary(
 ) {
   const legacyId = parseActivityLegacyId(activityLegacyId);
   if (legacyId == null) {
-    void Taro.showToast({ title: '活动信息无效', icon: 'none' });
+    showAppToast('common.invalidActivity');
     return;
   }
   const query: Record<string, string> = {
@@ -769,7 +756,7 @@ export function goExclusiveItinerary(
 export function goActivityLineup(activityLegacyId: number) {
   const legacyId = parseActivityLegacyId(activityLegacyId);
   if (legacyId == null) {
-    void Taro.showToast({ title: '活动信息无效', icon: 'none' });
+    showAppToast('common.invalidActivity');
     return;
   }
   const query: Record<string, string> = {
@@ -829,7 +816,7 @@ export function goSetVote(
 ) {
   const legacyId = parseActivityLegacyId(activityLegacyId);
   if (legacyId == null) {
-    void Taro.showToast({ title: '活动信息无效', icon: 'none' });
+    showAppToast('common.invalidActivity');
     return;
   }
   const query: Record<string, string> = {
@@ -850,7 +837,7 @@ export function goSetVote(
 export function goAiTravelGuide(guideId: string) {
   const id = guideId.trim();
   if (!id) {
-    void Taro.showToast({ title: '攻略信息无效', icon: 'none' });
+    showAppToast('common.invalidGuide');
     return;
   }
   requireAuth(() => {

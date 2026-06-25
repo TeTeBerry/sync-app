@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import { memo, useCallback, type FC } from 'react';
 import { EventCard } from '../../../components/event';
 import { ListState } from '../../../components/ListState';
 import type { EventCardUi } from '../../../utils/apiMappers';
@@ -14,6 +14,50 @@ type EventsActivityListProps = {
   onWarmDetail: (event: EventCardUi) => void;
   onConfirmUnfollow?: (title: string) => Promise<boolean>;
 };
+
+type EventsActivityListRowProps = {
+  event: EventCardUi;
+  onOpenDetail: (legacyId: string) => void;
+  onWarmDetail: (event: EventCardUi) => void;
+  onConfirmUnfollow?: (title: string) => Promise<boolean>;
+};
+
+const EventsActivityListRow = memo(function EventsActivityListRow({
+  event,
+  onOpenDetail,
+  onWarmDetail,
+  onConfirmUnfollow,
+}: EventsActivityListRowProps) {
+  const handleOpen = useCallback(
+    () => onOpenDetail(event.id),
+    [event.id, onOpenDetail],
+  );
+  const handleWarm = useCallback(() => onWarmDetail(event), [event, onWarmDetail]);
+
+  return (
+    <View className="s-events__card-wrap">
+      <EventCard
+        id={event.id}
+        title={event.title}
+        date={event.date}
+        location={event.location}
+        image={event.image}
+        going={event.going}
+        category={event.category}
+        region={event.region}
+        area={event.area}
+        lineupPublished={event.lineupPublished}
+        recruitPostCount={event.recruitPostCount}
+        variant="list"
+        onCardPress={handleOpen}
+        onCardPressWarmup={handleWarm}
+        onTeamUp={handleOpen}
+        onTeamUpWarmup={handleWarm}
+        onConfirmUnfollow={onConfirmUnfollow}
+      />
+    </View>
+  );
+});
 
 export const EventsActivityList: FC<EventsActivityListProps> = ({
   events,
@@ -41,26 +85,13 @@ export const EventsActivityList: FC<EventsActivityListProps> = ({
     >
       <View className="s-events__list">
         {events.map((event) => (
-          <View key={event.id} className="s-events__card-wrap">
-            <EventCard
-              id={event.id}
-              title={event.title}
-              date={event.date}
-              location={event.location}
-              image={event.image}
-              going={event.going}
-              category={event.category}
-              region={event.region}
-              area={event.area}
-              lineupPublished={event.lineupPublished}
-              recruitPostCount={event.recruitPostCount}
-              onCardPress={() => onOpenDetail(event.id)}
-              onCardPressWarmup={() => onWarmDetail(event)}
-              onTeamUp={() => onOpenDetail(event.id)}
-              onTeamUpWarmup={() => onWarmDetail(event)}
-              onConfirmUnfollow={onConfirmUnfollow}
-            />
-          </View>
+          <EventsActivityListRow
+            key={event.id}
+            event={event}
+            onOpenDetail={onOpenDetail}
+            onWarmDetail={onWarmDetail}
+            onConfirmUnfollow={onConfirmUnfollow}
+          />
         ))}
       </View>
     </ListState>

@@ -41,8 +41,6 @@ vi.mock('@/utils/subpackagePreload', () => ({
   preloadEventSubpackage: vi.fn(),
   ensureEventSubpackageLoaded: vi.fn(() => Promise.resolve()),
   preloadProfileSubpackage: vi.fn(),
-  preloadAiSubpackage: vi.fn(),
-  preloadStackSubpackages: vi.fn(),
 }));
 
 vi.mock('@/hooks/useApiQuery', () => ({

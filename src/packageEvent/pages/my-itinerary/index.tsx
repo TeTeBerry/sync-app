@@ -22,7 +22,7 @@ import {
   TravelPlanTimeline,
   useTravelPlanPage,
 } from '@/domains/travel-plan';
-import { PerformanceBundleStaleBanner } from '@/domains/activity-info/components/PerformanceBundleStaleBanner';
+import { PerformanceBundleStaleBanner } from '@/domains/activity-info';
 import { useT } from '@/hooks/useI18n';
 
 const MyItineraryPage = () => {

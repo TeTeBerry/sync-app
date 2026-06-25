@@ -152,6 +152,27 @@ export function sanitizeRemoteImageUrl(src: string | undefined): string | undefi
 }
 
 /** Resize remote list thumbnails when the CDN supports path or query params. */
+export function isTencentCosImageHost(hostname: string): boolean {
+  const host = hostname.toLowerCase();
+  return (
+    host.endsWith('.myqcloud.com') ||
+    host.endsWith('.file.myqcloud.com') ||
+    host.endsWith('.tcb.qcloud.la') ||
+    host.endsWith('.qcloud.la')
+  );
+}
+
+function appendTencentCosThumbnail(url: URL, width: number, height: number): string {
+  const search = url.search.slice(1);
+  if (search.includes('imageView2') || search.includes('imageMogr2')) {
+    return url.toString();
+  }
+
+  const rule = `imageView2/2/w/${width}/h/${height}/q/85`;
+  url.search = search ? `?${search}&${rule}` : `?${rule}`;
+  return url.toString();
+}
+
 export function thumbnailImageUrl(
   src: string | undefined,
   width = 240,
@@ -173,14 +194,15 @@ export function thumbnailImageUrl(
       }
     }
 
+    const host = url.hostname;
+    if (isTencentCosImageHost(host)) {
+      return appendTencentCosThumbnail(url, width, height);
+    }
+
     if (url.pathname.includes('/uploads/')) {
       return trimmed;
     }
 
-    const host = url.hostname;
-    if (host.includes('tcb.qcloud.la') || host.includes('qcloud.la')) {
-      return trimmed;
-    }
     if (host.includes('imagekit.io')) {
       if (!url.searchParams.has('tr')) {
         url.searchParams.set('tr', `w-${width},h-${height},c-at_max`);

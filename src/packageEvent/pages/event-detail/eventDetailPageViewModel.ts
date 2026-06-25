@@ -1,6 +1,6 @@
 import type { useEventDetailActivityHeader } from './useEventDetailActivityHeader';
 import type { useEventDetailPostsSection } from './useEventDetailPostsSection';
-import type { useEventDetailTravelGuide } from '@/domains/travel-guide/hooks/useEventDetailTravelGuide';
+import type { useEventDetailTravelGuide } from '@/domains/travel-guide';
 import type { useEventDetailFestivalPlanSection } from './useEventDetailFestivalPlanSection';
 import type { useEventDetailItineraryNavigation } from './useEventDetailItineraryNavigation';
 import type { useEventDetailPrepNavigation } from './useEventDetailPrepNavigation';

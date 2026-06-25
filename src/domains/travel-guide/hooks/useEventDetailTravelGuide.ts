@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
-import Taro from '@tarojs/taro';
+import { showAppToast } from '@/utils/appToast';
 import { runTravelGuideGeneration } from '@/domains/travel-guide/runTravelGuideGeneration';
 import { parseActivityDayCount } from '@/utils/parseActivityDayCount';
 import { eventCityFromLocation } from '@/utils/travelGuideDepartureSuggestions';
@@ -45,7 +45,7 @@ export function useEventDetailTravelGuide({
     (prefill?: AiGuidePlanFormValues | null, guideId?: string | null) => {
       requireAuth(() => {
         if (!Number.isFinite(eventId) || eventId <= 0) {
-          void Taro.showToast({ title: '活动信息无效', icon: 'none' });
+          showAppToast('common.invalidActivity');
           return;
         }
         if (prefill) {

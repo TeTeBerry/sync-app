@@ -7,6 +7,7 @@ import {
 } from '../../../../constants/supportContact';
 import { ROUTES, go } from '../../../../utils/route';
 import { Text, View } from '@tarojs/components';
+import { showAppToast } from '@/utils/appToast';
 
 const FAQ = [
   {
@@ -32,7 +33,7 @@ export function AppealSettings() {
     void Taro.setClipboardData({
       data: SUPPORT_EMAIL,
       success: () => {
-        void Taro.showToast({ title: '邮箱已复制', icon: 'success' });
+        showAppToast('settings.emailCopied', { icon: 'success' });
       },
     });
   };

@@ -1,4 +1,3 @@
-import Taro from '@tarojs/taro';
 import { hideThemedLoading, showThemedLoading } from '@/utils/themedLoading';
 import { generateTravelGuide } from '@/api/sync/travelGuide';
 import { isApiEnabled } from '@/constants/api';
@@ -8,6 +7,7 @@ import type { AiGuidePlanFormValues } from '@/types/travelGuide';
 import { goAiTravelGuide } from '@/utils/route';
 import { requireAuth } from '@/utils/authGate';
 import { t } from '@/i18n';
+import { showAppToast } from '@/utils/appToast';
 
 function createGuideId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
@@ -19,13 +19,13 @@ export async function runTravelGuideGeneration(
   guideId?: string,
 ): Promise<void> {
   if (!Number.isFinite(activityLegacyId) || activityLegacyId <= 0) {
-    void Taro.showToast({ title: t('travelPlan.pleaseEnterActivity'), icon: 'none' });
+    showAppToast('travelPlan.pleaseEnterActivity', { icon: 'none' });
     return;
   }
 
   const execute = async () => {
     if (!isApiEnabled()) {
-      void Taro.showToast({ title: t('travelPlan.pleaseConfigureApi'), icon: 'none' });
+      showAppToast('travelPlan.pleaseConfigureApi', { icon: 'none' });
       return;
     }
 
@@ -46,7 +46,7 @@ export async function runTravelGuideGeneration(
     } catch (error) {
       const message =
         error instanceof Error ? error.message : t('travelPlan.guideGenerationFailed');
-      void Taro.showToast({ title: message, icon: 'none' });
+      showAppToast(message, { raw: true, icon: 'none' });
     } finally {
       hideThemedLoading();
     }

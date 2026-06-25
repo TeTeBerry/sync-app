@@ -64,3 +64,8 @@ export {
 } from './utils/buildPersonalityBuddyPostPrefill';
 
 export { prefetchPersonalityTestAudioMedia } from './utils/personalityAudioPrefetch';
+
+export { PersonalityQuestionStep } from './components/PersonalityQuestionStep';
+export { PersonalityResultView } from './components/PersonalityResultView';
+export { PersonalityWelcomeModal } from './components/PersonalityWelcomeModal';
+export { usePersonalityTestPage } from './hooks/usePersonalityTestPage';

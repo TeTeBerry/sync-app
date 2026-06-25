@@ -48,10 +48,36 @@ describe('thumbnailImageUrl uploads', () => {
     vi.unstubAllEnvs();
   });
 
-  it('does not append resize query params to user upload URLs', async () => {
+  it('does not append resize query params to local user upload URLs', async () => {
     vi.stubEnv('TARO_APP_API_BASE_URL', 'http://192.168.1.7:3000/api');
     const { thumbnailImageUrl } = await import('@/utils/imageUrl');
     const url = 'http://192.168.1.7:3000/uploads/a.jpg';
+    expect(thumbnailImageUrl(url, 200)).toBe(url);
+  });
+});
+
+describe('thumbnailImageUrl tencent cos', () => {
+  it('appends imageView2 for CloudBase temp URLs', async () => {
+    const { thumbnailImageUrl } = await import('@/utils/imageUrl');
+    const url = 'https://636c-sync-prd.tcb.qcloud.la/ugc/posts/u1/a.jpg';
+    expect(thumbnailImageUrl(url, 200)).toBe(
+      'https://636c-sync-prd.tcb.qcloud.la/ugc/posts/u1/a.jpg?imageView2/2/w/200/h/150/q/85',
+    );
+  });
+
+  it('appends imageView2 for COS bucket URLs', async () => {
+    const { thumbnailImageUrl } = await import('@/utils/imageUrl');
+    const url =
+      'https://syncapp-1304288643.cos.ap-shanghai.myqcloud.com/uploads/posts/u1/a.jpg';
+    expect(thumbnailImageUrl(url, 200)).toBe(
+      'https://syncapp-1304288643.cos.ap-shanghai.myqcloud.com/uploads/posts/u1/a.jpg?imageView2/2/w/200/h/150/q/85',
+    );
+  });
+
+  it('skips URLs that already have image processing rules', async () => {
+    const { thumbnailImageUrl } = await import('@/utils/imageUrl');
+    const url =
+      'https://636c-sync-prd.tcb.qcloud.la/ugc/posts/u1/a.jpg?imageView2/2/w/120/h/90';
     expect(thumbnailImageUrl(url, 200)).toBe(url);
   });
 });

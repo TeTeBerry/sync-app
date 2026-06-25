@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from 'react';
-import Taro from '@tarojs/taro';
+import { showAppToast } from '@/utils/appToast';
 import { useBuddyPostSheetController } from '../../../hooks/useBuddyPostSheetController';
 import type { EventDetailPost } from '@/types/partner';
 import type {
@@ -17,8 +17,7 @@ import { isApiEnabled } from '../../../constants/api';
 import { getClientUserId } from '../../../utils/session';
 import { BUDDY_POST_PUBLISH_SUCCESS_MESSAGE } from '../../../constants/ugcPublishCompliance';
 import { useOverlayLockStore } from '../../../stores/overlayLockStore';
-import { requireAuth } from '../../../utils/authGate';
-import { t } from '@/i18n/translate';
+import { requireAuth } from '@/utils/authGate';
 
 export type EventDetailBuddyPostPrefillOptions = {
   initialValues: AiBuddyPostFormValues;
@@ -75,7 +74,7 @@ export function useEventDetailBuddyPost(
     authScope: 'activity',
     onBeforeOpen: options.freezeScroll,
     onInvalidActivity: () => {
-      void Taro.showToast({ title: '活动信息无效', icon: 'none' });
+      showAppToast('common.invalidActivity');
     },
   });
 
@@ -104,7 +103,7 @@ export function useEventDetailBuddyPost(
 
         const initialValues = parseBuddyPostFormFromPost(post, options.activityDate);
         if (!initialValues) {
-          void Taro.showToast({ title: '活动日期无效，暂无法编辑', icon: 'none' });
+          showAppToast('eventDetail.buddyPostInvalidDate');
           return;
         }
 
@@ -140,7 +139,7 @@ export function useEventDetailBuddyPost(
 
       if (!isApiEnabled()) {
         publishingRef.current = false;
-        void Taro.showToast({ title: '请先配置 API 地址', icon: 'none' });
+        showAppToast('common.pleaseConfigureApi');
         return;
       }
 
@@ -168,17 +167,14 @@ export function useEventDetailBuddyPost(
             recruitStatus: postBeingEdited.recruitStatus,
           });
           options.patchPost?.(updated);
-          void Taro.showToast({
-            title: t('eventDetail.buddyPostUpdated'),
-            icon: 'success',
-          });
+          showAppToast('eventDetail.buddyPostUpdated', { icon: 'success' });
         } catch (error) {
           if (await handlePublishError(error)) {
             return;
           }
           const message =
             error instanceof Error ? error.message : '更新失败，请稍后重试';
-          void Taro.showToast({ title: message, icon: 'none' });
+          showAppToast(message);
           options.freezeScroll?.();
           setEditingPost(postBeingEdited);
           setSheetInitialValues(form);
@@ -204,8 +200,8 @@ export function useEventDetailBuddyPost(
       }
 
       if (!submitOptions?.quiet) {
-        void Taro.showToast({
-          title: BUDDY_POST_PUBLISH_SUCCESS_MESSAGE,
+        showAppToast(BUDDY_POST_PUBLISH_SUCCESS_MESSAGE, {
+          raw: true,
           icon: 'success',
           duration: 3000,
         });
@@ -233,7 +229,7 @@ export function useEventDetailBuddyPost(
           return;
         }
         const message = error instanceof Error ? error.message : '发布失败，请稍后重试';
-        void Taro.showToast({ title: message, icon: 'none' });
+        showAppToast(message);
         options.freezeScroll?.();
         setSheetOpen(true);
       } finally {

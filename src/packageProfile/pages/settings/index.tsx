@@ -31,8 +31,8 @@ import { HelpFeedbackSettings } from './components/HelpFeedbackSettings';
 import { getLegalDocList } from '../../../legal';
 import { goLegalDocument } from '../../../utils/legalRoute';
 import { useI18n } from '@/hooks/useI18n';
-import { translate } from '@/i18n/translate';
 import type { AppLocale } from '@/i18n/types';
+import { showAppToast } from '@/utils/appToast';
 
 type SettingsSection =
   | 'notifications'
@@ -106,7 +106,7 @@ const SettingsPage: React.FC = () => {
   useEffect(() => {
     if (!isLiveApi()) return;
     if ((section === 'buddy-prefs' || section === 'appeal') && !isLoggedIn()) {
-      void Taro.showToast({ title: t('common.loginRequired'), icon: 'none' });
+      showAppToast('common.loginRequired', { icon: 'none' });
       void Taro.navigateBack();
     }
   }, [section, t]);
@@ -159,10 +159,10 @@ const SettingsPage: React.FC = () => {
       writeProfilePrivacyLevel(level);
       void updateCurrentUserAndInvalidate({ privacyLevel: level })
         .then(() => {
-          void Taro.showToast({ title: t('common.save'), icon: 'success' });
+          showAppToast('common.save', { icon: 'success' });
         })
         .catch(() => {
-          void Taro.showToast({ title: t('common.requestFailed'), icon: 'none' });
+          showAppToast('common.requestFailed', { icon: 'none' });
         });
     },
     [setStorePrivacyLevel, t],
@@ -174,10 +174,7 @@ const SettingsPage: React.FC = () => {
         return;
       }
       await setLocale(next);
-      void Taro.showToast({
-        title: translate('common.save', next),
-        icon: 'success',
-      });
+      showAppToast('common.save', { icon: 'success' });
     },
     [locale, setLocale, t],
   );

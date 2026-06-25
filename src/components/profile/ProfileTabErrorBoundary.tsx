@@ -3,6 +3,7 @@ import Taro from '@tarojs/taro';
 import { Button } from '../ui';
 import { t } from '@/i18n/translate';
 import { Text, View } from '@tarojs/components';
+import { showAppToast } from '@/utils/appToast';
 
 type Props = {
   children: ReactNode;
@@ -47,7 +48,7 @@ export class ProfileTabErrorBoundary extends Component<Props, State> {
             className="s-profile-error-fallback__btn"
             onClick={() => {
               this.handleRetry();
-              void Taro.showToast({ title: t('profile.retried'), icon: 'none' });
+              showAppToast('profile.retried', { icon: 'none' });
             }}
           >
             <Text className="s-btn-label">{t('profile.retry')}</Text>

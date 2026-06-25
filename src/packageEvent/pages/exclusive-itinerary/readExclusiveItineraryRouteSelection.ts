@@ -1,6 +1,6 @@
 import type { RouterInfo } from '@tarojs/taro';
 import { useNavigationStore } from '../../../stores';
-import { parseSelectedDjList } from '@/domains/performance-itinerary/utils/itineraryBanner';
+import { parseSelectedDjList } from '@/domains/performance-itinerary';
 import { resolveEventDetailIdFromQuery } from '../../../utils/route';
 
 export type ExclusiveItineraryRouteSelection = {

@@ -1,8 +1,9 @@
-import Taro from '@tarojs/taro';
 import type { BackendActivity } from '@/types/backend';
+import { t } from '@/i18n';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { seedActivityDetailCache } from '@/utils/activityDetailCache';
 import { registerActivityOnSelectSilently } from '@/utils/registerActivityOnSelect';
+import { showAppToast } from '@/utils/appToast';
 
 export const ACTIVITY_SCOPE_HEADER = 'X-Activity-Id';
 
@@ -46,8 +47,10 @@ export function bindActivity(
 
   if (options.showToast) {
     const title =
-      options.activityName?.trim() || options.activity?.name?.trim() || '本场活动';
-    void Taro.showToast({ title: `已绑定「${title}」`, icon: 'none' });
+      options.activityName?.trim() ||
+      options.activity?.name?.trim() ||
+      t('activityScope.defaultTitle');
+    showAppToast('activityScope.bound', { params: { title }, icon: 'none' });
   }
 
   registerActivityOnSelectSilently(normalized);

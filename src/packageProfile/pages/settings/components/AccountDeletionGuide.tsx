@@ -3,6 +3,7 @@ import { Text, View } from '@tarojs/components';
 import { Button } from '../../../../components/ui';
 import { useT } from '@/hooks/useI18n';
 import { SUPPORT_EMAIL } from '../../../../constants/supportContact';
+import { showAppToast } from '@/utils/appToast';
 
 type AccountDeletionGuideProps = {
   onStartDeletionFeedback: () => void;
@@ -17,10 +18,7 @@ export function AccountDeletionGuide({
     void Taro.setClipboardData({
       data: SUPPORT_EMAIL,
       success: () => {
-        void Taro.showToast({
-          title: t('accountDeletion.emailCopied'),
-          icon: 'success',
-        });
+        showAppToast('accountDeletion.emailCopied', { icon: 'success' });
       },
     });
   };

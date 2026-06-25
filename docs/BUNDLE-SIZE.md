@@ -18,6 +18,8 @@ npm run verify:bundle
 
 - 禁止在 `src/components/icons` 之外 `import 'lucide-react-taro'`（统一走 `@/components/icons`）
 - 禁止主包 Tab 相关目录 import 地图绘制、行程壁纸、分包页面实现等重模块
+- 禁止主包 Tab / `components/event|navigation|auth` 深引 `@/domains/*/hooks|components|utils/*`（须走 `@/domains/<domain>` barrel）
+- 禁止分包 `packageEvent/**`、`packageProfile/**` 深引 `@/domains/*/hooks|components|utils/*`（同样须走 barrel；分包不拦 canvas/wallpaper 等同包内模块）
 
 已并入 `npm run check`。
 

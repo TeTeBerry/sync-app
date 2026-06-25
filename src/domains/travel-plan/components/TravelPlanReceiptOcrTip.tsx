@@ -1,5 +1,4 @@
 import './TravelPlanReceiptOcrTip.scss';
-import Taro from '@tarojs/taro';
 import {
   getTravelPlanReceiptOcrCta,
   getTravelPlanReceiptOcrTip,
@@ -8,7 +7,7 @@ import { goMyItinerary } from '@/utils/route';
 import { ChevronRight, ImageIcon } from '@/components/icons';
 import { Button } from '@/components/ui';
 import { Text, View } from '@tarojs/components';
-import { useT } from '@/hooks/useI18n';
+import { showAppToast } from '@/utils/appToast';
 
 export type TravelPlanReceiptOcrTipProps = {
   activityLegacyId?: number;
@@ -23,12 +22,10 @@ export function TravelPlanReceiptOcrTip({
   disabled = false,
   className,
 }: TravelPlanReceiptOcrTipProps) {
-  const t = useT();
-
   const handleClick = () => {
     if (disabled) return;
     if (activityLegacyId == null || Number.isNaN(activityLegacyId)) {
-      void Taro.showToast({ title: t('common.pleaseSelectEvent'), icon: 'none' });
+      showAppToast('common.pleaseSelectEvent', { icon: 'none' });
       return;
     }
     goMyItinerary(activityLegacyId, undefined, {

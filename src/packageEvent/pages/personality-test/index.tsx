@@ -3,11 +3,13 @@ import PageNavigation from '../../../components/navigation/PageNavigation';
 import ThemedPageLoader from '../../../components/ThemedPageLoader';
 import { useEndRouteTransitionOnShow } from '../../../hooks/useEndRouteTransitionOnShow';
 import { usePageRouteReady } from '../../../hooks/usePageRouteReady';
-import { PersonalityQuestionStep } from '@/domains/personality-test/components/PersonalityQuestionStep';
-import { PersonalityResultView } from '@/domains/personality-test/components/PersonalityResultView';
-import { PersonalityWelcomeModal } from '@/domains/personality-test/components/PersonalityWelcomeModal';
-import { usePersonalityTestPage } from '@/domains/personality-test/hooks/usePersonalityTestPage';
-import { PERSONALITY_POSTER_CANVAS_ID } from '@/domains/personality-test';
+import {
+  PERSONALITY_POSTER_CANVAS_ID,
+  PersonalityQuestionStep,
+  PersonalityResultView,
+  PersonalityWelcomeModal,
+  usePersonalityTestPage,
+} from '@/domains/personality-test';
 import { LoginInterceptHost } from '../../../components/auth/LoginInterceptHost';
 import { useT } from '@/hooks/useI18n';
 import { Canvas, ScrollView, Text, View } from '@tarojs/components';

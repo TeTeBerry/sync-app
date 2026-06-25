@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import Taro from '@tarojs/taro';
-import { useEventDetailTravelGuide } from '@/domains/travel-guide';
-import { findLatestTravelGuideForActivity } from '@/domains/travel-guide/utils/travelGuideDetailStorage';
+import {
+  findLatestTravelGuideForActivity,
+  useEventDetailTravelGuide,
+} from '@/domains/travel-guide';
 import { goAiTravelGuide } from '../../../utils/route';
-import { t } from '@/i18n/translate';
+import { showAppToast } from '@/utils/appToast';
 import type { EventDetailTravelGuideNavIntent } from '../../../stores/types';
 
 export type UseEventDetailTravelGuideSectionOptions = {
@@ -76,10 +77,7 @@ export function useEventDetailTravelGuideActions({
       !findLatestTravelGuideForActivity(eventId)?.guideId &&
       !festivalPlanTravelGuideId
     ) {
-      void Taro.showToast({
-        title: t('travelGuide.preparingToast'),
-        icon: 'none',
-      });
+      showAppToast('travelGuide.preparingToast', { icon: 'none' });
       return;
     }
     const guideId =

@@ -12,7 +12,7 @@ import { ExclusiveItineraryConflictBanner } from './ExclusiveItineraryConflictBa
 import ExclusiveItineraryDjGrid from './components/ExclusiveItineraryDjGrid';
 import ExclusiveItineraryFooter from './components/ExclusiveItineraryFooter';
 import { ExclusiveItineraryUnpublishedBanner } from './ExclusiveItineraryUnpublishedBanner';
-import { PerformanceBundleStaleBanner } from '@/domains/activity-info/components/PerformanceBundleStaleBanner';
+import { PerformanceBundleStaleBanner } from '@/domains/activity-info';
 import { useExclusiveItineraryPage } from './useExclusiveItineraryPage';
 
 const ExclusiveItineraryPage = () => {

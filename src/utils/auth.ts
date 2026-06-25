@@ -17,7 +17,7 @@ import {
   shouldSkipAutoLogin,
 } from './authStorage';
 import { notifyAuthSessionChange } from './authSession';
-import { clearHomeCachesOnLogout } from './homeCacheStorage';
+import { clearSessionCaches } from './homeCacheStorage';
 import {
   clearPersonalityTestResult,
   restorePersonalityTestResultFromServer,
@@ -158,7 +158,7 @@ export async function logout(): Promise<void> {
       // Always clear local session even when revoke fails (offline / expired token).
     }
   }
-  clearHomeCachesOnLogout();
+  clearSessionCaches();
   clearPersonalityTestResult();
   clearAuth();
 }

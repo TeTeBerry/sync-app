@@ -1,4 +1,5 @@
 import Taro from '@tarojs/taro';
+import { showAppToast } from '@/utils/appToast';
 
 const ALBUM_SCOPE = 'scope.writePhotosAlbum';
 
@@ -56,11 +57,7 @@ async function offerShareFallback(filePath: string): Promise<void> {
 
   if (tapIndex === 0) {
     await saveImageFileToAlbum(filePath);
-    void Taro.showToast({
-      title: '已保存到相册，可从相册发送给好友',
-      icon: 'none',
-      duration: 2800,
-    });
+    showAppToast('share.savedToAlbum', { icon: 'none', duration: 2800 });
     return;
   }
 

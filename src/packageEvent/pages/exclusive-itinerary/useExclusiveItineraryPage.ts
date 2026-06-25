@@ -9,7 +9,7 @@ import {
 import { useActivityDetailQuery } from '../../../hooks/sync/activities';
 import { useActivityPerformanceBundleOffline } from '@/hooks/useActivityPerformanceBundleOffline';
 import { useActivityPerformanceBundleWriter } from '@/hooks/useActivityPerformanceBundleWriter';
-import { useItineraryStore } from '@/domains/performance-itinerary/store';
+import { useItineraryStore } from '@/domains/performance-itinerary';
 import { normalizeItineraryDaysForSave } from '@/types/itinerary';
 import { useStackPageMainHeight } from '../../../hooks/useTabPageMainHeight';
 import {
@@ -26,17 +26,18 @@ import {
   filterGenreOptionsBySearch,
   isValidFilterId,
 } from './exclusiveItineraryFilters';
-import { mapItineraryDjFromApi } from '@/domains/performance-itinerary/utils/mapItineraryDj';
 import {
   itineraryDjCardDomId,
+  mapItineraryDjFromApi,
   resolveItineraryDjSelection,
-} from '@/domains/performance-itinerary/utils/resolveItineraryDjSelection';
+} from '@/domains/performance-itinerary';
 import { readExclusiveItineraryRouteSelection } from './readExclusiveItineraryRouteSelection';
 import type { ExclusiveItineraryDj } from './types';
 import { detectItineraryConflicts } from './itineraryConflict.util';
 import type { ItineraryConflict } from '../../../types/backend';
 import type { LineupArtistSortMode } from '../activity-lineup/utils/sortLineupArtists';
 import { useT } from '@/hooks/useI18n';
+import { showAppToast } from '@/utils/appToast';
 
 const CTA_FOOTER_BASE_PX = 74;
 const SORT_MODES: LineupArtistSortMode[] = ['popularity', 'name'];
@@ -320,7 +321,7 @@ export function useExclusiveItineraryPage() {
     } catch (error) {
       const message =
         error instanceof Error ? error.message : t('itinerary.generateFailed');
-      void Taro.showToast({ title: message, icon: 'none' });
+      showAppToast(message, { raw: true, icon: 'none' });
     } finally {
       setGenerating(false);
     }

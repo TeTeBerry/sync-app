@@ -10,6 +10,7 @@ import {
 import { loadPersonalityTestCatalog } from '../personalityTestCatalog';
 import type { PersonalityTestResult } from '../types';
 import { renderPersonalityPosterToTempFile } from './personalityPosterCanvas';
+import { showAppToast } from '@/utils/appToast';
 
 export async function generatePersonalityPoster(
   result: PersonalityTestResult,
@@ -44,7 +45,7 @@ export async function savePersonalityPoster(
   try {
     const path = await generatePersonalityPoster(result, false);
     await saveImageToPhotosAlbum(path);
-    void Taro.showToast({ title: t('personality.posterSaved'), icon: 'success' });
+    showAppToast('personality.posterSaved', { icon: 'success' });
   } finally {
     hideThemedLoading();
   }

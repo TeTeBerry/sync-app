@@ -40,6 +40,7 @@ import {
   dismissProfilePersonalityNudge,
   isProfilePersonalityNudgeDismissed,
 } from './utils/profilePersonalityNudgeStorage';
+import { showAppToast } from '@/utils/appToast';
 
 export type UseProfilePageOptions = {
   confirm: (options: ConfirmDialogOptions) => Promise<boolean>;
@@ -178,7 +179,7 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
     if (!ok) return;
     await logout();
     refreshAuthSession();
-    void Taro.showToast({ title: t('profile.logout.done'), icon: 'success' });
+    showAppToast('profile.logout.done', { icon: 'success' });
   }, [confirm, refreshAuthSession, t]);
 
   const buddyPreferencesSummary = formatBuddyPreferencesSummary(

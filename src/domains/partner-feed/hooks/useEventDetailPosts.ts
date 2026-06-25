@@ -28,6 +28,7 @@ import { resolvePersonalityMediaUrls } from '@/domains/personality-test/utils/re
 import type { CurrentUser } from '../../../types/backend';
 import { sortEventDetailPostsByPreference } from '../utils/buddyPostPreferenceMatch';
 import { t } from '@/i18n/translate';
+import { showAppToast } from '@/utils/appToast';
 
 export type OpenPostCommentsOptions = {
   draft?: string;
@@ -279,20 +280,18 @@ export function useEventDetailPosts({
                 : {}),
             });
             postsQuery.patchItem(updated);
-            void Taro.showToast({
-              title: t(
-                nextStatus === 'full'
-                  ? 'eventDetail.recruitMarkedFull'
-                  : 'eventDetail.recruitReopened',
-              ),
-              icon: 'success',
-            });
+            showAppToast(
+              nextStatus === 'full'
+                ? 'eventDetail.recruitMarkedFull'
+                : 'eventDetail.recruitReopened',
+              { icon: 'success' },
+            );
           } catch (error) {
             const message =
               error instanceof Error && error.message.trim()
                 ? error.message.trim()
                 : t('eventDetail.recruitStatusToggleFailed');
-            void Taro.showToast({ title: message, icon: 'none' });
+            showAppToast(message, { raw: true, icon: 'none' });
           }
         })();
       }, 'social');
@@ -334,7 +333,7 @@ export function useEventDetailPosts({
               error instanceof Error && error.message.trim()
                 ? error.message.trim()
                 : t('eventDetail.recruitSlotsAdjustFailed');
-            void Taro.showToast({ title: message, icon: 'none' });
+            showAppToast(message, { raw: true, icon: 'none' });
           }
         })();
       }, 'social');

@@ -1,0 +1,47 @@
+@use '../../styles/variables' as *;
+
+.s-chip {
+  flex-shrink: 0;
+  padding: 7px 13px;
+  border-radius: var(--radius-full);
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background 0.16s ease,
+    border-color 0.16s ease,
+    transform 0.12s ease;
+
+  &--sm {
+    padding: 6px 11px;
+  }
+
+  &--active {
+    background: rgba(var(--primary-rgb), 0.12);
+    border-color: rgba(var(--primary-rgb), 0.42);
+  }
+
+  &:active {
+    transform: scale(0.97);
+  }
+
+  &__label {
+    font-size: 12px;
+    font-weight: var(--s-fw-medium);
+    color: rgba(255, 255, 255, 0.48);
+    line-height: 1;
+
+    &--active {
+      color: var(--primary);
+      font-weight: var(--s-fw-bold);
+    }
+  }
+}
+
+.s-chip-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}

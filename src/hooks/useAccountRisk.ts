@@ -1,4 +1,3 @@
-import Taro from '@tarojs/taro';
 import { useCallback } from 'react';
 import {
   accountRiskApiErrorMessage,
@@ -8,6 +7,7 @@ import {
 } from '../utils/accountRisk';
 import type { QueryEnableOptions } from './sync/types';
 import { useCurrentUserQuery } from './sync/profile';
+import { showAppToast } from '@/utils/appToast';
 
 export function useAccountRisk(options?: QueryEnableOptions) {
   const query = useCurrentUserQuery(options);
@@ -16,8 +16,8 @@ export function useAccountRisk(options?: QueryEnableOptions) {
 
   const guardPublish = useCallback(async (): Promise<boolean> => {
     if (!isPublishRestricted) return true;
-    void Taro.showToast({
-      title: getAccountRiskBlockMessage(accountRisk),
+    showAppToast(getAccountRiskBlockMessage(accountRisk), {
+      raw: true,
       icon: 'none',
       duration: 3500,
     });
@@ -25,8 +25,8 @@ export function useAccountRisk(options?: QueryEnableOptions) {
   }, [accountRisk, isPublishRestricted]);
 
   const showPublishBlockedToast = useCallback(() => {
-    void Taro.showToast({
-      title: getAccountRiskBlockMessage(accountRisk),
+    showAppToast(getAccountRiskBlockMessage(accountRisk), {
+      raw: true,
       icon: 'none',
       duration: 3500,
     });
@@ -40,8 +40,8 @@ export function useAccountRisk(options?: QueryEnableOptions) {
       const handled = await handleAccountRiskApiError(error);
       if (handled) {
         void query.refetch();
-        void Taro.showToast({
-          title: accountRiskApiErrorMessage(error),
+        showAppToast(accountRiskApiErrorMessage(error), {
+          raw: true,
           icon: 'none',
           duration: 3500,
         });

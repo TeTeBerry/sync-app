@@ -1,8 +1,9 @@
-import Taro from '@tarojs/taro';
 import { clearPersonalityTestResult } from '@/domains/personality-test/utils/personalityTestStorage';
 import { clearAuthStorage, markSkipAutoLogin } from '../utils/authStorage';
 import { notifyAuthSessionChange } from '../utils/authSession';
+import { clearSessionCaches } from '../utils/homeCacheStorage';
 import { clearClientUserCache } from '../utils/session';
+import { showAppToast } from '@/utils/appToast';
 
 let handlingUnauthorized = false;
 
@@ -13,15 +14,18 @@ export function handleApiUnauthorized(message?: string): void {
   }
   handlingUnauthorized = true;
   try {
+    clearSessionCaches();
     clearAuthStorage();
     markSkipAutoLogin();
     clearPersonalityTestResult();
     clearClientUserCache();
     notifyAuthSessionChange();
-    void Taro.showToast({
-      title: message?.trim() || '登录已过期，请重新登录',
-      icon: 'none',
-    });
+    const trimmed = message?.trim();
+    if (trimmed) {
+      showAppToast(trimmed, { raw: true, icon: 'none' });
+    } else {
+      showAppToast('common.sessionExpired', { icon: 'none' });
+    }
   } finally {
     handlingUnauthorized = false;
   }

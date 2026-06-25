@@ -47,6 +47,7 @@ import { useStackPageMainHeight } from '@/hooks/useTabPageMainHeight';
 import { applyScrollTop } from '@/utils/scrollToCenter';
 import { useT } from '@/hooks/useI18n';
 import { prefetchPersonalityQuestionMedia } from '../utils/personalityAudioPrefetch';
+import { showAppToast } from '@/utils/appToast';
 
 export type PersonalityTestPhase =
   | 'loading'
@@ -280,7 +281,7 @@ export function usePersonalityTestPage() {
         setWelcomeNicknameUsage(userCount);
       }
 
-      void Taro.showToast({ title: t('personality.nicknameSaved'), icon: 'success' });
+      showAppToast('personality.nicknameSaved', { icon: 'success' });
     },
     [t],
   );
@@ -294,7 +295,7 @@ export function usePersonalityTestPage() {
     setWelcomeModalOpen(false);
     requireAuth(() => {
       void persistNicknameAfterLogin(current).catch(() => {
-        void Taro.showToast({ title: t('personality.saveFailed'), icon: 'none' });
+        showAppToast('personality.saveFailed', { icon: 'none' });
       });
     }, 'general');
   }, [persistNicknameAfterLogin, result, t]);
@@ -323,7 +324,7 @@ export function usePersonalityTestPage() {
 
   const goNextQuestion = useCallback(() => {
     if (!currentQuestion || !selectedOptionId) {
-      void Taro.showToast({ title: t('personality.pleaseSelectOption'), icon: 'none' });
+      showAppToast('personality.pleaseSelectOption', { icon: 'none' });
       return;
     }
     if (currentIndex >= totalQuestions - 1) {

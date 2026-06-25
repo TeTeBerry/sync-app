@@ -31,6 +31,7 @@ import { resolvePersonalityMediaUrl } from '../utils/resolvePersonalityMedia';
 import { useT } from '@/hooks/useI18n';
 import { formatActivityLocationLabel } from '@/utils/formatActivityDisplay';
 import { Text, View, Image } from '@tarojs/components';
+import { showAppToast } from '@/utils/appToast';
 
 type PersonalityResultViewProps = {
   result: PersonalityTestResult;
@@ -177,10 +178,7 @@ export const PersonalityResultView: FC<PersonalityResultViewProps> = ({
 
   const handlePrefillBuddyPost = () => {
     if (!itineraryTargetEvent) {
-      void Taro.showToast({
-        title: t('personality.noRecommendation'),
-        icon: 'none',
-      });
+      showAppToast('personality.noRecommendation', { icon: 'none' });
       return;
     }
     const prefill = buildPersonalityBuddyPostPrefill(
@@ -193,10 +191,7 @@ export const PersonalityResultView: FC<PersonalityResultViewProps> = ({
 
   const handleGenerateItinerary = () => {
     if (!itineraryTargetEvent) {
-      void Taro.showToast({
-        title: t('personality.noLineup'),
-        icon: 'none',
-      });
+      showAppToast('personality.noLineup', { icon: 'none' });
       return;
     }
     const selection = buildPersonalityItinerarySelection(result, itineraryTargetEvent);
@@ -214,7 +209,7 @@ export const PersonalityResultView: FC<PersonalityResultViewProps> = ({
     try {
       await savePersonalityPoster(result);
     } catch {
-      void Taro.showToast({ title: t('personality.saveFailed'), icon: 'none' });
+      showAppToast('personality.saveFailed', { icon: 'none' });
     }
   };
 
@@ -222,7 +217,7 @@ export const PersonalityResultView: FC<PersonalityResultViewProps> = ({
     try {
       await sharePersonalityPoster(result);
     } catch {
-      void Taro.showToast({ title: t('personality.shareFailed'), icon: 'none' });
+      showAppToast('personality.shareFailed', { icon: 'none' });
     }
   };
 

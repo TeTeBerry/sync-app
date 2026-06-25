@@ -36,6 +36,9 @@ const FORBIDDEN_IN_MAIN = [
   /domains\/performance-itinerary\/utils\/generateItineraryWallpaper/,
 ];
 
+const DOMAIN_DEEP_IMPORT_IN_MAIN =
+  /@\/domains\/[^'"]+\/(hooks|components|utils)\/[^'"]+['"]/;
+
 function walkTsFiles(dir, files = []) {
   if (!fs.existsSync(dir)) return files;
   for (const name of fs.readdirSync(dir)) {
@@ -57,6 +60,11 @@ function rel(file) {
 
 function isUnderIcons(file) {
   return file.startsWith(ICONS_DIR + path.sep);
+}
+
+function isSubpackageFile(file) {
+  const r = rel(file).replace(/\\/g, '/');
+  return r.startsWith('src/packageEvent/') || r.startsWith('src/packageProfile/');
 }
 
 function isMainPackageFile(file) {
@@ -82,18 +90,27 @@ for (const file of walkTsFiles(SRC)) {
     );
   }
 
-  if (!isMainPackageFile(file)) {
+  if (!isMainPackageFile(file) && !isSubpackageFile(file)) {
     continue;
   }
 
   const code = content.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
 
-  for (const pattern of FORBIDDEN_IN_MAIN) {
-    if (pattern.test(code)) {
-      errors.push(
-        `${rel(file)}: main-package file must not import heavy event submodule (${pattern})`,
-      );
+  if (isMainPackageFile(file)) {
+    for (const pattern of FORBIDDEN_IN_MAIN) {
+      if (pattern.test(code)) {
+        errors.push(
+          `${rel(file)}: main-package file must not import heavy event submodule (${pattern})`,
+        );
+      }
     }
+  }
+
+  if (DOMAIN_DEEP_IMPORT_IN_MAIN.test(code)) {
+    const scope = isSubpackageFile(file) ? 'subpackage' : 'main-package';
+    errors.push(
+      `${rel(file)}: ${scope} file must import domains via @/domains/<domain> barrel (no hooks/components/utils deep paths)`,
+    );
   }
 }
 
@@ -106,4 +123,4 @@ if (errors.length > 0) {
   process.exit(1);
 }
 
-console.log('[verify:bundle] Lucide barrel + main-package import boundaries OK');
+console.log('[verify:bundle] Lucide barrel + main/subpackage import boundaries OK');

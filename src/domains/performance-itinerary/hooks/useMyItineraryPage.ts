@@ -34,6 +34,7 @@ import { normalizeItineraryDaysForSave } from '@/types/itinerary';
 import { useT, useLocale } from '@/hooks/useI18n';
 import { ApiError } from '@/utils/apiClient';
 import type { MyItineraryViewMode } from '../components/MyItineraryToolbar';
+import { showAppToast } from '@/utils/appToast';
 
 /** 8px pad + 48px btn + 8px pad — matches .s-my-itinerary__footer */
 const FOOTER_BASE_PX = 64;
@@ -143,10 +144,7 @@ export function useMyItineraryPage() {
       if (pending.days.length > 0) {
         setItineraryDays(pending.days as ItineraryDay[]);
       } else {
-        void Taro.showToast({
-          title: t('itinerary.noPerformanceSchedule'),
-          icon: 'none',
-        });
+        showAppToast('itinerary.noPerformanceSchedule', { icon: 'none' });
       }
       setEventMeta(pending.eventMeta);
       if (pending.selectedDjIds.length > 0) {
@@ -248,7 +246,7 @@ export function useMyItineraryPage() {
     pageKind === 'travel' ? travelScrollHeight : performanceScrollHeight;
 
   const handleShare = useCallback(() => {
-    void Taro.showToast({ title: t('itinerary.shareComingSoon'), icon: 'none' });
+    showAppToast('itinerary.shareComingSoon', { icon: 'none' });
   }, [t]);
 
   const handleReselect = useCallback(() => {
@@ -284,7 +282,7 @@ export function useMyItineraryPage() {
               : error instanceof Error
                 ? error.message
                 : t('itinerary.saveFailed');
-          void Taro.showToast({ title: message, icon: 'none' });
+          showAppToast(message, { raw: true, icon: 'none' });
           return;
         }
       }

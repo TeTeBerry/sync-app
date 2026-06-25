@@ -15,8 +15,8 @@ import {
   EVENT_DETAIL_SCROLL_ID,
 } from '@/domains/partner-feed';
 import { useEventDetailPage } from './useEventDetailPage';
-import { AiBuddyPostSheet } from '../../../components/ai-chat/AiBuddyPostSheet';
-import { AiGuidePlanSheet } from '../../../components/ai-chat/AiGuidePlanSheet';
+import { LazyAiBuddyPostSheet } from '../../../components/ai-chat/LazyAiBuddyPostSheet';
+import { LazyAiGuidePlanSheet } from '../../../components/ai-chat/LazyAiGuidePlanSheet';
 import {
   isDomesticActivityRegion,
   shouldShowTravelGuideSelfDriveOption,
@@ -322,7 +322,7 @@ const EventDetailPage = () => {
       {confirmDialog}
       <LoginInterceptHost />
       {buddyPostSheetOpen ? (
-        <AiBuddyPostSheet
+        <LazyAiBuddyPostSheet
           open
           mode={isBuddyPostEditing ? 'edit' : 'create'}
           activityLegacyId={page.eventId}
@@ -340,7 +340,7 @@ const EventDetailPage = () => {
         />
       ) : null}
       {guideSheetOpen ? (
-        <AiGuidePlanSheet
+        <LazyAiGuidePlanSheet
           open
           defaultNights={guideDefaultNights}
           eventCity={guideEventCity}

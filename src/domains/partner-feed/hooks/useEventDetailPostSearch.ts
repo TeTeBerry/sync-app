@@ -18,10 +18,9 @@ import {
   filterEventDetailPostsByRules,
   type EventDetailPostRuleFilters,
 } from '../utils/filterEventDetailPostsByRules';
+import { showAppToast } from '@/utils/appToast';
 
 const SEARCH_DEBOUNCE_MS = 600;
-const SEARCH_FAIL_TOAST = '搜索暂时不可用，请用关键词筛选或稍后再试';
-
 function isSearchRateLimited(error: unknown): boolean {
   return (
     error instanceof ApiError &&
@@ -161,8 +160,7 @@ export function useEventDetailPostSearch({
           lastFailToastQueryRef.current !== debouncedQuery
         ) {
           lastFailToastQueryRef.current = debouncedQuery;
-          void Taro.showToast({
-            title: SEARCH_FAIL_TOAST,
+          showAppToast('eventDetail.buddySearchFailed', {
             icon: 'none',
             duration: 3000,
           });

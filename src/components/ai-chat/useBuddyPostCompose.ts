@@ -2,9 +2,10 @@ import { useCallback, useState } from 'react';
 import Taro from '@tarojs/taro';
 import type { AiComposePostsPayload } from '@/types/partner';
 import { runScene } from '@/api/sync/sceneRun';
-import { applySceneEffects } from '@/domains/scene-agent/applySceneEffects';
+import { applySceneEffects } from '@/domains/scene-agent';
 import type { BuddyPostComposeCandidate } from '@/types/partner';
 import { t } from '@/i18n/translate';
+import { showAppToast } from '@/utils/appToast';
 
 type UseBuddyPostComposeOptions = {
   activityLegacyId?: number;
@@ -26,7 +27,7 @@ export function useBuddyPostCompose({ activityLegacyId }: UseBuddyPostComposeOpt
         !Number.isFinite(activityLegacyId) ||
         activityLegacyId <= 0
       ) {
-        void Taro.showToast({ title: t('posts.composeInvalidActivity'), icon: 'none' });
+        showAppToast('posts.composeInvalidActivity', { icon: 'none' });
         return false;
       }
 
@@ -56,7 +57,7 @@ export function useBuddyPostCompose({ activityLegacyId }: UseBuddyPostComposeOpt
         }
         return true;
       } catch {
-        void Taro.showToast({ title: t('posts.composeFailed'), icon: 'none' });
+        showAppToast('posts.composeFailed', { icon: 'none' });
         return false;
       } finally {
         setLoading(false);

@@ -1,4 +1,4 @@
-import Taro, { useRouter, useShareAppMessage, useShareTimeline } from '@tarojs/taro';
+import { useRouter, useShareAppMessage, useShareTimeline } from '@tarojs/taro';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   fetchMySetVote,
@@ -11,25 +11,22 @@ import { requireAuth } from '@/utils/authGate';
 import { isLoggedIn } from '@/utils/authStorage';
 import { goEventDetail, goEventDetailWithBuddyPostPrefill } from '@/utils/route';
 import type { SetVoteLeaderboardEntry, SetVotePick } from '@/types/activity';
-import { buildSetVoteBuddyPostPrefill } from '@/domains/set-vote/utils/buildSetVoteBuddyPostPrefill';
-import { logSetVoteEvent } from '@/domains/set-vote/utils/setVoteAnalytics';
 import {
-  MAX_SET_VOTE_SELECTION,
-  toggleSetVoteSelection,
-} from '@/domains/set-vote/utils/setVoteSelection';
-import {
+  buildSetVoteBuddyPostPrefill,
   buildSetVoteShareAppMessage,
   buildSetVoteShareTimeline,
+  logSetVoteEvent,
+  MAX_SET_VOTE_SELECTION,
   parseSetVoteShareQuery,
   resolveSetVoteShareTeaser,
-  type SetVoteShareTeaser,
-} from '@/domains/set-vote/utils/setVoteWechatShare.util';
-import {
   saveSetVotePoster,
   shareSetVotePoster,
-} from '@/domains/set-vote/utils/setVotePosterShare';
+  toggleSetVoteSelection,
+  type SetVoteShareTeaser,
+} from '@/domains/set-vote';
 import { isWeappRuntime } from '@/utils/isWeappRuntime';
 import type { ItineraryDj } from '@/types/itinerary';
+import { showAppToast } from '@/utils/appToast';
 
 function pickIdsEqual(a: string[], b: string[]): boolean {
   if (a.length !== b.length) return false;
@@ -240,8 +237,8 @@ export function useLineupSetVote(options: {
           MAX_SET_VOTE_SELECTION,
         );
         if (rejected) {
-          void Taro.showToast({
-            title: t('setVote.maxSelection', { max: MAX_SET_VOTE_SELECTION }),
+          showAppToast('setVote.maxSelection', {
+            params: { max: MAX_SET_VOTE_SELECTION },
             icon: 'none',
           });
         }
@@ -253,7 +250,7 @@ export function useLineupSetVote(options: {
 
   const performSubmit = useCallback(async () => {
     if (!activityLegacyId || selectedIds.length < 1) {
-      void Taro.showToast({ title: t('setVote.pickAtLeastOne'), icon: 'none' });
+      showAppToast('setVote.pickAtLeastOne', { icon: 'none' });
       return;
     }
 
@@ -267,7 +264,7 @@ export function useLineupSetVote(options: {
       setRevoteAllowedToday(result.revoteAllowedToday !== false);
       await loadLeaderboard();
       setShowShareTeaser(false);
-      void Taro.showToast({ title: t('setVote.submitSuccess'), icon: 'success' });
+      showAppToast('setVote.submitSuccess', { icon: 'success' });
       logSetVoteEvent('set_vote_submit', {
         activityId: activityLegacyId,
         pickCount: result.picks.length,
@@ -282,7 +279,7 @@ export function useLineupSetVote(options: {
           : error instanceof ApiError && error.message
             ? error.message
             : t('setVote.submitFailed');
-      void Taro.showToast({ title: message, icon: 'none' });
+      showAppToast(message, { raw: true, icon: 'none' });
     } finally {
       setSubmitting(false);
     }
@@ -302,7 +299,7 @@ export function useLineupSetVote(options: {
 
   const handleEditPicks = useCallback(() => {
     if (revoteAllowedToday === false) {
-      void Taro.showToast({ title: t('setVote.revoteLimit'), icon: 'none' });
+      showAppToast('setVote.revoteLimit', { icon: 'none' });
       return;
     }
     setSelectedIds(submittedIds);
@@ -333,7 +330,7 @@ export function useLineupSetVote(options: {
         topEntries: entries,
       });
     } catch {
-      void Taro.showToast({ title: t('setVote.shareFailed'), icon: 'none' });
+      showAppToast('setVote.shareFailed', { icon: 'none' });
     }
   }, [activityLegacyId, activityName, entries, picks, t]);
 
@@ -346,7 +343,7 @@ export function useLineupSetVote(options: {
         topEntries: entries,
       });
     } catch {
-      void Taro.showToast({ title: t('setVote.shareFailed'), icon: 'none' });
+      showAppToast('setVote.shareFailed', { icon: 'none' });
     }
   }, [activityName, entries, picks, t]);
 

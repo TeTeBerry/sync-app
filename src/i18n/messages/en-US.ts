@@ -36,10 +36,17 @@ export const enUS: MessageTree = {
     pleaseEnterActivity: 'Please enter an event first',
     operationFailed: 'Operation failed. Please try again later.',
     pleaseConfigureApi: 'Please configure the API address first',
+    pageOpenFailed: 'Could not open page',
+    invalidActivity: 'Invalid event',
+    invalidGuide: 'Invalid travel guide',
+    contentNotApproved: 'Content was not approved and is not shown publicly',
+    deleted: 'Deleted',
+    deleteFailed: 'Delete failed. Please try again later.',
     postPublished: 'Recruit post published · public info only ✅',
     viewInEventDetail: 'Tap the card below to view in event details.',
     postRestricted: 'Posting is currently restricted',
     prefillFromGuide: 'Prefilled from guide. Confirm to publish.',
+    sessionExpired: 'Session expired. Please sign in again.',
   },
   tab: {
     home: 'Home',
@@ -210,6 +217,8 @@ export const enUS: MessageTree = {
         'Matched {{count}} local event(s). Tap an event below for details.',
       offlineFallback:
         'Network unavailable. Falling back to keyword search in the local catalog.',
+      searchFailed:
+        'AI intel is temporarily unavailable. Try keyword filters or check back later.',
     },
   },
   profile: {
@@ -278,6 +287,9 @@ export const enUS: MessageTree = {
     },
     posts: 'My posts',
   },
+  profilePosts: {
+    invalidActivity: 'Cannot open the event for this post',
+  },
   settings: {
     notifications: 'Notifications',
     privacy: 'Privacy',
@@ -303,6 +315,8 @@ export const enUS: MessageTree = {
     buddyPrefsRecruitSortToggle: 'Sort public recruits by my preferences',
     buddyPrefsRecruitSortDesc:
       'Reorders posts only — nothing is hidden or filtered out',
+    emailCopied: 'Email copied',
+    maxGenres: 'Select up to {{count}} genres',
   },
   legal: {
     consentPrefix: 'I have read and agree to the',
@@ -672,6 +686,7 @@ export const enUS: MessageTree = {
     templatePost: 'Publish recruit',
     editPost: 'Edit buddy post',
     buddyPostUpdated: 'Buddy post updated',
+    buddyPostInvalidDate: 'Invalid event date; cannot edit yet',
     saveBuddyPost: 'Save changes',
     recruitStatusOpen: 'Recruiting',
     recruitStatusFull: 'Full',
@@ -680,6 +695,8 @@ export const enUS: MessageTree = {
     recruitMarkedFull: 'Marked as full',
     recruitReopened: 'Recruitment reopened',
     recruitStatusToggleFailed: 'Failed to update status',
+    buddySearchFailed:
+      'Search is temporarily unavailable. Try keyword filters or check back later.',
     recruitSlotsAdjustFailed: 'Failed to update headcount',
     decreaseSlots: 'Decrease joined count',
     increaseSlots: 'Increase joined count',
@@ -741,6 +758,7 @@ export const enUS: MessageTree = {
       'Report submitted ({{category}}). We have taken action. Thank you for your feedback.',
     submitSuccessPending:
       "Report submitted ({{category}}). We have received it and are reviewing manually. You won't be notified separately. Thank you for your feedback.",
+    statusFetchFailed: 'Could not load report status',
   },
   appeal: {
     title: 'Appeal explanation',
@@ -866,6 +884,22 @@ export const enUS: MessageTree = {
     guideGenerationFailed: 'Guide generation failed. Please try again later.',
     guideGenerationTimeout: 'Guide generation timed out. Please try again later.',
     pleaseConfigureApi: 'Please configure the API address first',
+    addSheet: {
+      types: {
+        transport: 'Transport',
+        hotel: 'Stay',
+        dining: 'Dining',
+        event: 'Other',
+      },
+      activityLoading: 'Loading event info…',
+      configureApi: 'Please configure the API address',
+      ocrRecognizing: 'Recognizing…',
+      ocrFailed: 'Could not recognize. Please fill in manually',
+      imageTooLarge: 'Image too large. Use a smaller screenshot',
+      recognizeFailed: 'Recognition failed. Please try again later',
+      fillTitle: 'Please enter a title',
+      fillAllTitles: 'Please enter a title for each segment',
+    },
   },
   feedback: {
     faqTitle: 'FAQ',
@@ -915,6 +949,13 @@ export const enUS: MessageTree = {
     dataHint:
       'Full details in Legal → Privacy Policy → Data retention and your rights.',
     emailCopied: 'Email copied',
+  },
+  activityScope: {
+    bound: 'Bound to "{{title}}"',
+    defaultTitle: 'This event',
+  },
+  share: {
+    savedToAlbum: 'Saved to album — share from your photos app',
   },
   itinerary: {
     title: 'My festival schedule',
@@ -969,6 +1010,14 @@ export const enUS: MessageTree = {
     shareComingSoon: 'Sharing feature coming soon',
     generatingWallpaper: 'Generating wallpaper…',
     saveFailed: 'Save failed. Please retry.',
+    wallpaperSavedWithItinerary: 'Itinerary saved and wallpaper saved to album',
+    wallpaperSavedToAlbum: 'Saved to album',
+    wallpaperPermissionWithItinerary:
+      'Itinerary saved — album permission required to save wallpaper',
+    wallpaperPermission: 'Album permission required to save',
+    wallpaperEmptyWithItinerary:
+      'Itinerary saved — current timeline cannot generate wallpaper',
+    wallpaperSaveFailedWithItinerary: 'Itinerary saved — wallpaper generation failed',
   },
   travelGuide: {
     loading: 'Loading guide…',

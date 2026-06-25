@@ -2,7 +2,7 @@ import Taro from '@tarojs/taro';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { runScene } from '@/api/sync/sceneRun';
 import { isLiveApi } from '@/constants/api';
-import { applySceneEffects } from '@/domains/scene-agent/applySceneEffects';
+import { applySceneEffects } from '@/domains/scene-agent';
 import { shouldTriggerEventsAiSearch } from '@/domains/events-search/utils/shouldTriggerEventsAiSearch';
 import { useLocale, useT } from '@/hooks/useI18n';
 import type { KnowledgeCardPayload } from '@sync/scene-contracts';
@@ -10,10 +10,9 @@ import { ApiError, isApiAbortError } from '@/utils/apiClient';
 import type { EventCardUi } from '@/utils/apiMappers';
 import { resolveEventCardLegacyId } from '@/utils/apiMappers';
 import { filterActivitiesForEventsSearch } from '@/utils/filterActivitiesForEventsSearch';
+import { showAppToast } from '@/utils/appToast';
 
 const SEARCH_DEBOUNCE_MS = 600;
-const SEARCH_FAIL_TOAST = 'AI 资讯暂时不可用，请用关键词筛选或稍后再试';
-
 function isSearchRateLimited(error: unknown): boolean {
   return (
     error instanceof ApiError &&
@@ -150,7 +149,7 @@ export function useEventsSearch(events: EventCardUi[]) {
           !isSearchRateLimited(error)
         ) {
           lastFailToastQueryRef.current = query;
-          Taro.showToast({ title: SEARCH_FAIL_TOAST, icon: 'none' });
+          showAppToast('events.knowledge.searchFailed', { icon: 'none' });
         }
       })
       .finally(() => {

@@ -1,5 +1,5 @@
-import Taro from '@tarojs/taro';
 import { deletePostAndInvalidate } from '../hooks/useSyncApi';
+import { showAppToast } from './appToast';
 
 type DeletePostFeedbackOptions = {
   onRemoved?: () => void;
@@ -13,10 +13,10 @@ export async function deletePostWithFeedback(
   try {
     await deletePostAndInvalidate(postId);
     options?.onRemoved?.();
-    void Taro.showToast({ title: '已删除', icon: 'success' });
+    showAppToast('common.deleted', { icon: 'success' });
     return true;
   } catch {
-    void Taro.showToast({ title: '删除失败，请稍后重试', icon: 'none' });
+    showAppToast('common.deleteFailed');
     try {
       await options?.refetchOnFailure?.();
     } catch {

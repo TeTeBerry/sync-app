@@ -6,7 +6,7 @@ import { useT } from '@/hooks/useI18n';
 import type { ExclusiveItineraryFilterChip } from '../exclusiveItineraryFilters';
 import type { ExclusiveItineraryDj } from '../types';
 import type { LineupArtistSortMode } from '../../activity-lineup/utils/sortLineupArtists';
-import { itineraryDjCardDomId } from '@/domains/performance-itinerary/utils/resolveItineraryDjSelection';
+import { itineraryDjCardDomId } from '@/domains/performance-itinerary';
 
 export type ExclusiveItineraryDjGridProps = {
   selectedCount: number;

@@ -36,10 +36,17 @@ export const zhCN: MessageTree = {
     pleaseEnterActivity: '请先进入活动',
     operationFailed: '操作失败，请稍后重试',
     pleaseConfigureApi: '请先配置 API 地址',
+    pageOpenFailed: '页面打开失败',
+    invalidActivity: '活动信息无效',
+    invalidGuide: '攻略信息无效',
+    contentNotApproved: '内容未通过审核，未公开展示',
+    deleted: '已删除',
+    deleteFailed: '删除失败，请稍后重试',
     postPublished: '招募帖已发布 · 公开信息展示 ✅',
     viewInEventDetail: '点击下方卡片可在活动详情页查看。',
     postRestricted: '发帖功能已受限',
     prefillFromGuide: '已根据攻略预填，确认后发布',
+    sessionExpired: '登录已过期，请重新登录',
   },
   tab: {
     home: '首页',
@@ -198,6 +205,7 @@ export const zhCN: MessageTree = {
       fallbackSource: 'SYNC 活动库',
       offlineMatched: '已在本地活动库匹配到 {{count}} 场，可点击下方活动查看详情。',
       offlineFallback: '网络暂不可用，已改用关键词在本地活动库检索。',
+      searchFailed: 'AI 资讯暂时不可用，请用关键词筛选或稍后再试',
     },
   },
   profile: {
@@ -265,6 +273,9 @@ export const zhCN: MessageTree = {
     },
     posts: '我的帖子',
   },
+  profilePosts: {
+    invalidActivity: '无法打开该帖子所属活动',
+  },
   settings: {
     notifications: '消息通知',
     privacy: '隐私设置',
@@ -289,6 +300,8 @@ export const zhCN: MessageTree = {
       '偏好会影响同活动下公开招募的展示顺序；人格测试与出行攻略会自动补充，此处可随时修改。',
     buddyPrefsRecruitSortToggle: '按我的偏好排序公开招募',
     buddyPrefsRecruitSortDesc: '仅调整展示顺序，不会过滤或隐藏帖子',
+    emailCopied: '邮箱已复制',
+    maxGenres: '最多选择 {{count}} 种曲风',
   },
   legal: {
     consentPrefix: '我已阅读并同意',
@@ -649,6 +662,7 @@ export const zhCN: MessageTree = {
     templatePost: '发招募',
     editPost: '编辑组队帖',
     buddyPostUpdated: '组队帖已更新',
+    buddyPostInvalidDate: '活动日期无效，暂无法编辑',
     saveBuddyPost: '保存修改',
     recruitStatusOpen: '招募中',
     recruitStatusFull: '已满',
@@ -657,6 +671,7 @@ export const zhCN: MessageTree = {
     recruitMarkedFull: '已标为已满',
     recruitReopened: '已重新开放招募',
     recruitStatusToggleFailed: '状态更新失败',
+    buddySearchFailed: '搜索暂时不可用，请用关键词筛选或稍后再试',
     recruitSlotsAdjustFailed: '人数更新失败',
     decreaseSlots: '减少已加入人数',
     increaseSlots: '增加已加入人数',
@@ -718,6 +733,7 @@ export const zhCN: MessageTree = {
       '举报已提交（{{category}}）。我们已采取限制措施，感谢你的反馈。',
     submitSuccessPending:
       '举报已提交（{{category}}）。我们已受理，处理中并将进行人工复核。处理结果不会单独通知，感谢你的反馈。',
+    statusFetchFailed: '无法获取举报状态',
   },
   appeal: {
     title: '误伤申诉说明',
@@ -844,6 +860,22 @@ export const zhCN: MessageTree = {
     splitNodeConfirm: '确认分摊',
     splitNodeDisable: '不参与分摊',
     copySplitEmpty: '暂无参与分摊的节点',
+    addSheet: {
+      types: {
+        transport: '交通',
+        hotel: '住宿',
+        dining: '餐饮',
+        event: '其他',
+      },
+      activityLoading: '活动信息加载中',
+      configureApi: '请配置 API 地址',
+      ocrRecognizing: '识别中…',
+      ocrFailed: '未能识别，请手动填写',
+      imageTooLarge: '图片过大，请换一张更小的截图',
+      recognizeFailed: '识别失败，请稍后重试',
+      fillTitle: '请填写标题',
+      fillAllTitles: '请填写每段标题',
+    },
   },
   feedback: {
     faqTitle: '常见问题',
@@ -890,6 +922,13 @@ export const zhCN: MessageTree = {
     },
     dataHint: '完整说明见「法律与协议 → 隐私政策」中关于存储期限与你的权利。',
     emailCopied: '邮箱已复制',
+  },
+  activityScope: {
+    bound: '已绑定「{{title}}」',
+    defaultTitle: '本场活动',
+  },
+  share: {
+    savedToAlbum: '已保存到相册，可从相册发送给好友',
   },
   itinerary: {
     title: '我的电音时间表',
@@ -940,6 +979,12 @@ export const zhCN: MessageTree = {
     shareComingSoon: '分享功能即将上线',
     generatingWallpaper: '生成屏保中…',
     saveFailed: '保存失败，请重试',
+    wallpaperSavedWithItinerary: '行程已保存，屏保已存入相册',
+    wallpaperSavedToAlbum: '已保存到相册',
+    wallpaperPermissionWithItinerary: '行程已保存，需相册权限才能保存屏保',
+    wallpaperPermission: '需要相册权限才能保存',
+    wallpaperEmptyWithItinerary: '行程已保存，当前时间轴无法生成屏保',
+    wallpaperSaveFailedWithItinerary: '行程已保存，屏保生成失败',
   },
   travelGuide: {
     loading: '正在加载攻略…',

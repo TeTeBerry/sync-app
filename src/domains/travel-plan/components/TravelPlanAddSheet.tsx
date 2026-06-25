@@ -29,7 +29,7 @@ import {
   resolveRecognizedTravelPlanForms,
 } from '../utils/travelPlanReceiptRecognize';
 import { shouldMergeTransportForms } from '../utils/travelPlanTransportBills';
-import Taro from '@tarojs/taro';
+import { showAppToast } from '@/utils/appToast';
 import { hideThemedLoading, showThemedLoading } from '@/utils/themedLoading';
 import { TravelPlanAddSheetSegment } from './TravelPlanAddSheetSegment';
 import { ScrollView, Text, View } from '@tarojs/components';
@@ -38,15 +38,15 @@ import { useT } from '@/hooks/useI18n';
 /** Lucide `color` must be a concrete value — CSS variables are invalid in WeChat. */
 const THEME_PRIMARY = '#ff0066';
 
-const TYPE_OPTIONS: Array<{
+const TYPE_OPTION_META: Array<{
   id: TravelPlanAddFormCategory;
-  label: string;
+  labelKey: `travelPlan.addSheet.types.${TravelPlanAddFormCategory}`;
   Icon: typeof Car;
 }> = [
-  { id: 'transport', label: '交通', Icon: Car },
-  { id: 'hotel', label: '住宿', Icon: BedDouble },
-  { id: 'dining', label: '餐饮', Icon: Utensils },
-  { id: 'event', label: '其他', Icon: Ticket },
+  { id: 'transport', labelKey: 'travelPlan.addSheet.types.transport', Icon: Car },
+  { id: 'hotel', labelKey: 'travelPlan.addSheet.types.hotel', Icon: BedDouble },
+  { id: 'dining', labelKey: 'travelPlan.addSheet.types.dining', Icon: Utensils },
+  { id: 'event', labelKey: 'travelPlan.addSheet.types.event', Icon: Ticket },
 ];
 
 type OcrStatus = 'idle' | 'loading' | 'success';
@@ -150,7 +150,7 @@ export function TravelPlanAddSheet({
 
     void (async () => {
       if (!activityLegacyId) {
-        void Taro.showToast({ title: '活动信息加载中', icon: 'none' });
+        showAppToast('travelPlan.addSheet.activityLoading');
         return;
       }
 
@@ -161,12 +161,12 @@ export function TravelPlanAddSheet({
 
       setOcrStatus('loading');
       setOcrMessage('');
-      showThemedLoading({ title: '识别中…', mask: true });
+      showThemedLoading({ title: t('travelPlan.addSheet.ocrRecognizing'), mask: true });
 
       try {
         if (!isLiveApi()) {
           resetOcrState();
-          void Taro.showToast({ title: '请配置 API 地址', icon: 'none' });
+          showAppToast('travelPlan.addSheet.configureApi');
           return;
         }
 
@@ -205,21 +205,18 @@ export function TravelPlanAddSheet({
         }
 
         resetOcrState();
-        void Taro.showToast({
-          title: result.message ?? '未能识别，请手动填写',
-          icon: 'none',
-        });
+        showAppToast(result.message ?? t('travelPlan.addSheet.ocrFailed'));
       } catch (error) {
         resetOcrState();
         const message =
           error instanceof ChatImageTooLargeError
-            ? '图片过大，请换一张更小的截图'
+            ? t('travelPlan.addSheet.imageTooLarge')
             : error instanceof ApiError
               ? error.message
               : error instanceof Error
                 ? error.message
-                : '识别失败，请稍后重试';
-        void Taro.showToast({ title: message, icon: 'none' });
+                : t('travelPlan.addSheet.recognizeFailed');
+        showAppToast(message);
       } finally {
         hideThemedLoading();
       }
@@ -228,10 +225,11 @@ export function TravelPlanAddSheet({
 
   const handleSubmit = useCallback(() => {
     if (!canSubmit) {
-      void Taro.showToast({
-        title: formSegments.length > 1 ? '请填写每段标题' : '请填写标题',
-        icon: 'none',
-      });
+      showAppToast(
+        formSegments.length > 1
+          ? t('travelPlan.addSheet.fillAllTitles')
+          : t('travelPlan.addSheet.fillTitle'),
+      );
       return;
     }
     onSubmit(sortTravelPlanAddFormValues(formSegments));
@@ -367,8 +365,9 @@ export function TravelPlanAddSheet({
               {batchMode ? '默认识别类型' : '类型'}
             </Text>
             <View className="s-travel-plan-add-sheet__types">
-              {TYPE_OPTIONS.map(({ id, label, Icon }) => {
+              {TYPE_OPTION_META.map(({ id, labelKey, Icon }) => {
                 const active = category === id;
+                const label = t(labelKey);
                 return (
                   <Button
                     key={id}

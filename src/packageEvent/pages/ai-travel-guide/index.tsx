@@ -2,10 +2,12 @@ import './ai-travel-guide.scss';
 import PageNavigation from '../../../components/navigation/PageNavigation';
 import ThemedPageLoader from '../../../components/ThemedPageLoader';
 import { Button } from '../../../components/ui';
-import { TravelGuideDetailView } from '@/domains/travel-guide/components/TravelGuideDetailView';
-import { TravelGuideBudgetCompareCards } from '@/domains/travel-guide/components/TravelGuideBudgetCompareCards';
+import {
+  TravelGuideBudgetCompareCards,
+  TravelGuideDetailView,
+  useAiTravelGuidePage,
+} from '@/domains/travel-guide';
 import { TravelPlanReceiptOcrTip } from '@/domains/travel-plan';
-import { useAiTravelGuidePage } from '@/domains/travel-guide/hooks/useAiTravelGuidePage';
 import { useEndRouteTransitionOnShow } from '../../../hooks/useEndRouteTransitionOnShow';
 import { usePageRouteReady } from '../../../hooks/usePageRouteReady';
 import {
@@ -17,7 +19,7 @@ import {
   Users,
 } from '../../../components/icons';
 import { getRegenerateCta, getTravelGuideTitle } from '../../../constants/aiCtaLabels';
-import { AiGuidePlanSheet } from '../../../components/ai-chat/AiGuidePlanSheet';
+import { LazyAiGuidePlanSheet } from '../../../components/ai-chat/LazyAiGuidePlanSheet';
 import { useT } from '@/hooks/useI18n';
 import { AI_TRAVEL_GUIDE_DISCLAIMER } from '../../../constants/aiDisclosure';
 import { LoginInterceptHost } from '../../../components/auth/LoginInterceptHost';
@@ -168,7 +170,7 @@ const AiTravelGuidePage = () => {
         </View>
       )}
       {page.guideSheetOpen ? (
-        <AiGuidePlanSheet
+        <LazyAiGuidePlanSheet
           open
           defaultNights={page.guideDefaultNights}
           eventCity={page.guideEventCity}

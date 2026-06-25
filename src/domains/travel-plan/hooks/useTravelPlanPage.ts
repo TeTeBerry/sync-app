@@ -45,6 +45,7 @@ import {
   replaceTravelPlanNodeInList,
   travelPlanNodeToAddFormValues,
 } from '../utils/travelPlanNodeEdit.util';
+import { showAppToast } from '@/utils/appToast';
 
 type UseTravelPlanPageOptions = {
   activityLegacyId: number | null;
@@ -337,7 +338,7 @@ export function useTravelPlanPage({
             : error instanceof Error
               ? error.message
               : t('travelPlan.saveFailed');
-        void Taro.showToast({ title: message, icon: 'none' });
+        showAppToast(message, { raw: true, icon: 'none' });
         return false;
       } finally {
         setIsSaving(false);
@@ -502,7 +503,7 @@ export function useTravelPlanPage({
     }
     const splitNodes = filterSplitEnabledNodes(nodes);
     if (splitNodes.length === 0) {
-      void Taro.showToast({ title: t('travelPlan.copySplitEmpty'), icon: 'none' });
+      showAppToast('travelPlan.copySplitEmpty', { icon: 'none' });
       return;
     }
     setCopyingSplitSummary(true);
@@ -514,9 +515,9 @@ export function useTravelPlanPage({
         disclaimer: t('travelPlan.splitSummaryDisclaimer'),
       });
       await Taro.setClipboardData({ data: text });
-      void Taro.showToast({ title: t('travelPlan.copySplitSuccess'), icon: 'success' });
+      showAppToast('travelPlan.copySplitSuccess', { icon: 'success' });
     } catch {
-      void Taro.showToast({ title: t('travelPlan.copySplitFailed'), icon: 'none' });
+      showAppToast('travelPlan.copySplitFailed', { icon: 'none' });
     } finally {
       setCopyingSplitSummary(false);
     }
@@ -660,7 +661,7 @@ export function useTravelPlanPage({
         if (!ok) {
           setHiddenActivityNodeIds(previousHidden);
         } else {
-          void Taro.showToast({ title: t('travelPlan.removed'), icon: 'none' });
+          showAppToast('travelPlan.removed', { icon: 'none' });
         }
         return;
       }
@@ -678,7 +679,7 @@ export function useTravelPlanPage({
       if (!ok) {
         setUserNodes(previousUserNodes);
       } else {
-        void Taro.showToast({ title: t('travelPlan.deleted'), icon: 'none' });
+        showAppToast('travelPlan.deleted', { icon: 'none' });
       }
     },
     [

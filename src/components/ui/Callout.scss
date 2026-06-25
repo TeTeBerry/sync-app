@@ -1,0 +1,47 @@
+@use '../../styles/variables' as *;
+
+.s-callout {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: var(--radius-lg);
+  border: 1px solid transparent;
+
+  &--info {
+    background: rgba(var(--secondary-rgb), 0.1);
+    border-color: rgba(var(--secondary-rgb), 0.28);
+  }
+
+  &--warning {
+    background: rgba(255, 107, 107, 0.12);
+    border-color: rgba(255, 107, 107, 0.28);
+  }
+
+  &--stale {
+    background: rgba(255, 214, 10, 0.12);
+    border-color: rgba(255, 214, 10, 0.28);
+  }
+
+  &--success {
+    background: rgba(var(--primary-rgb), 0.1);
+    border-color: rgba(var(--primary-rgb), 0.28);
+  }
+
+  &__title {
+    font-size: var(--s-type-small);
+    font-weight: var(--s-fw-semibold);
+    color: var(--foreground);
+    line-height: 1.35;
+  }
+
+  &__body {
+    font-size: 12px;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.82);
+  }
+
+  &__action {
+    margin-top: 4px;
+  }
+}

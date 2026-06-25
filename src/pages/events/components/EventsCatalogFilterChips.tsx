@@ -1,5 +1,6 @@
 import type { FC } from 'react';
 import { Text, View } from '@tarojs/components';
+import { Chip, ChipRow } from '@/components/ui';
 import { useT } from '@/hooks/useI18n';
 import { ACTIVITY_MAP_REGIONS } from '../../../constants/activityMapRegion';
 import type {
@@ -20,39 +21,6 @@ type EventsCatalogFilterChipsProps = {
   onTimeChipChange: (chip: EventsCatalogTimeChip | null) => void;
 };
 
-function FilterChip({
-  active,
-  label,
-  onClick,
-}: {
-  active: boolean;
-  label: string;
-  onClick: () => void;
-}) {
-  return (
-    <View
-      className={[
-        's-events-catalog-filters__chip',
-        active ? 's-events-catalog-filters__chip--active' : '',
-      ]
-        .filter(Boolean)
-        .join(' ')}
-      onClick={onClick}
-    >
-      <Text
-        className={[
-          's-events-catalog-filters__chip-text',
-          active ? 's-events-catalog-filters__chip-text--active' : '',
-        ]
-          .filter(Boolean)
-          .join(' ')}
-      >
-        {label}
-      </Text>
-    </View>
-  );
-}
-
 export const EventsCatalogFilterChips: FC<EventsCatalogFilterChipsProps> = ({
   region,
   timeChip,
@@ -64,6 +32,7 @@ export const EventsCatalogFilterChips: FC<EventsCatalogFilterChipsProps> = ({
   onTimeChipChange,
 }) => {
   const t = useT();
+  const chipSize = compact ? 'sm' : 'md';
 
   const handleTimeChipClick = (chip: EventsCatalogTimeChip) => {
     onTimeChipChange(timeChip === chip ? null : chip);
@@ -71,15 +40,17 @@ export const EventsCatalogFilterChips: FC<EventsCatalogFilterChipsProps> = ({
 
   const regionChips = (
     <>
-      <FilterChip
+      <Chip
         active={region === 'all'}
+        size={chipSize}
         label={t('events.catalogFilters.regionAll')}
         onClick={() => onRegionChange('all')}
       />
       {ACTIVITY_MAP_REGIONS.map((item) => (
-        <FilterChip
+        <Chip
           key={item}
           active={region === item}
+          size={chipSize}
           label={t(`activity.mapRegions.${item}`)}
           onClick={() => onRegionChange(item)}
         />
@@ -89,9 +60,10 @@ export const EventsCatalogFilterChips: FC<EventsCatalogFilterChipsProps> = ({
 
   const timeChipRow = showTimeChips
     ? TIME_CHIPS.map((chip) => (
-        <FilterChip
+        <Chip
           key={chip}
           active={timeChip === chip}
+          size={chipSize}
           label={t(`events.catalogFilters.time.${chip}`)}
           onClick={() => handleTimeChipClick(chip)}
         />
@@ -112,11 +84,11 @@ export const EventsCatalogFilterChips: FC<EventsCatalogFilterChipsProps> = ({
     >
       {singleRow ? (
         <View className="s-events-catalog-filters__scroll s-scrollbar-none">
-          <View className="s-events-catalog-filters__row">{regionChips}</View>
+          <ChipRow className="s-events-catalog-filters__row">{regionChips}</ChipRow>
           {showTimeChips ? (
             <>
               <View className="s-events-catalog-filters__sep" aria-hidden />
-              <View className="s-events-catalog-filters__row">{timeChipRow}</View>
+              <ChipRow className="s-events-catalog-filters__row">{timeChipRow}</ChipRow>
             </>
           ) : null}
         </View>
@@ -128,7 +100,7 @@ export const EventsCatalogFilterChips: FC<EventsCatalogFilterChipsProps> = ({
                 {t('events.catalogFilters.regionLabel')}
               </Text>
             ) : null}
-            <View className="s-events-catalog-filters__row">{regionChips}</View>
+            <ChipRow className="s-events-catalog-filters__row">{regionChips}</ChipRow>
           </View>
           {showTimeChips ? (
             <View className="s-events-catalog-filters__group">
@@ -137,7 +109,7 @@ export const EventsCatalogFilterChips: FC<EventsCatalogFilterChipsProps> = ({
                   {t('events.catalogFilters.timeLabel')}
                 </Text>
               ) : null}
-              <View className="s-events-catalog-filters__row">{timeChipRow}</View>
+              <ChipRow className="s-events-catalog-filters__row">{timeChipRow}</ChipRow>
             </View>
           ) : null}
         </>

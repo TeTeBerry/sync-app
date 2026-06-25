@@ -32,7 +32,6 @@ export const EventsHotCarousel: FC<EventsHotCarouselProps> = ({
       </View>
       <ScrollView
         scrollX
-        enhanced
         showScrollbar={false}
         className="s-events-hot-carousel__scroll"
       >

@@ -2,19 +2,19 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDidShow } from '@tarojs/taro';
 import { useEventPostsInfiniteQuery } from '../../../hooks/useEventPostsInfiniteQuery';
 import {
-  useEventDetailPosts,
-  useEventDetailBuddyPost,
+  buildRecruitApplyCommentDraft,
   EVENT_DETAIL_SCROLL_ID,
+  useEventDetailBuddyPost,
+  useEventDetailPosts,
 } from '@/domains/partner-feed';
-import { useDisplayUserIdentity } from '../../../hooks/useDisplayUserIdentity';
-import { useCurrentUserQuery } from '../../../hooks/useSyncApi';
-import { findLatestTravelGuideForActivity } from '@/domains/travel-guide/utils/travelGuideDetailStorage';
 import {
   dismissTravelGuideSearchPrefill,
+  findLatestTravelGuideForActivity,
   shouldApplyTravelGuideSearchPrefill,
-} from '@/domains/travel-guide/utils/travelGuideSearchPrefillStorage';
+} from '@/domains/travel-guide';
+import { useDisplayUserIdentity } from '../../../hooks/useDisplayUserIdentity';
+import { useCurrentUserQuery } from '../../../hooks/useSyncApi';
 import { travelGuideFormToSearchQuery } from '@/utils/travelGuideToBuddyPost';
-import { buildRecruitApplyCommentDraft } from '@/domains/partner-feed/utils/buildRecruitApplyCommentDraft';
 import type { EventDetailPost } from '../../../types/backend';
 import { scrollElementToCenter } from '../../../utils/scrollToCenter';
 import { useOverlayLockStore } from '../../../stores/overlayLockStore';

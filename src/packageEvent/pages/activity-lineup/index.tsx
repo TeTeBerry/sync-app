@@ -7,10 +7,12 @@ import PageNavigation from '../../../components/navigation/PageNavigation';
 import ThemedPageLoader from '../../../components/ThemedPageLoader';
 import { LoginInterceptHost } from '../../../components/auth/LoginInterceptHost';
 import { Button } from '../../../components/ui';
-import { ActivityUpdateSubscribeBanner } from '@/domains/activity-info/components/ActivityUpdateSubscribeBanner';
-import { PerformanceBundleStaleBanner } from '@/domains/activity-info/components/PerformanceBundleStaleBanner';
-import { ArtistProfileSheet } from '@/domains/lineup-artist';
-import { SET_VOTE_POSTER_CANVAS_ID } from '@/domains/set-vote/utils/setVotePosterCanvas';
+import {
+  ActivityUpdateSubscribeBanner,
+  PerformanceBundleStaleBanner,
+} from '@/domains/activity-info';
+import { LazyArtistProfileSheet } from '@/domains/lineup-artist';
+import { SET_VOTE_POSTER_CANVAS_ID } from '@/domains/set-vote';
 import { useEndRouteTransitionOnShow } from '../../../hooks/useEndRouteTransitionOnShow';
 import { useMeasuredElementHeight } from '../../../hooks/useMeasuredElementHeight';
 import { goExclusiveItinerary, ROUTES } from '../../../utils/route';
@@ -284,7 +286,7 @@ const ActivityLineupPage = () => {
         </>
       )}
 
-      <ArtistProfileSheet
+      <LazyArtistProfileSheet
         open={Boolean(selectedArtistId) && !setVote.voteModeEnabled}
         artistId={selectedArtistId}
         onClose={() => setSelectedArtistId(null)}

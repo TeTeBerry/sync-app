@@ -8,6 +8,8 @@ import {
   buildReportedStatusMessage,
   buildReportSubmitSuccessMessage,
 } from '../utils/reportLabels';
+import { showAppToast } from '@/utils/appToast';
+import { t } from '@/i18n';
 
 export type ContentReportTarget = {
   targetType: ReportTargetType;
@@ -40,8 +42,8 @@ export function useContentReport(target: ContentReportTarget) {
       }
       setCategorySheetOpen(true);
     } catch (error) {
-      void Taro.showToast({
-        title: getApiErrorMessage(error, '无法获取举报状态'),
+      showAppToast(getApiErrorMessage(error, t('report.statusFetchFailed')), {
+        raw: true,
         icon: 'none',
       });
     }
@@ -104,7 +106,7 @@ export function useContentReport(target: ContentReportTarget) {
           }
           return;
         }
-        void Taro.showToast({ title: message, icon: 'none' });
+        showAppToast(message, { raw: true, icon: 'none' });
       } finally {
         setSubmitting(false);
       }

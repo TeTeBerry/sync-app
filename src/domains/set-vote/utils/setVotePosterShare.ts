@@ -9,6 +9,7 @@ import {
 } from '@/domains/performance-itinerary/utils/itineraryWallpaperAlbum';
 import type { SetVoteLeaderboardEntry, SetVotePick } from '@/types/activity';
 import { renderSetVotePosterToTempFile } from './setVotePosterCanvas';
+import { showAppToast } from '@/utils/appToast';
 
 export async function shareSetVotePoster(input: {
   activityName: string;
@@ -39,7 +40,7 @@ export async function saveSetVotePoster(input: {
   try {
     const path = await renderSetVotePosterToTempFile(input);
     await saveImageToPhotosAlbum(path);
-    void Taro.showToast({ title: t('setVote.posterSaved'), icon: 'success' });
+    showAppToast('setVote.posterSaved', { icon: 'success' });
   } finally {
     hideThemedLoading();
   }

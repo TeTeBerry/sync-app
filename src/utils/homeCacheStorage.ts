@@ -1,6 +1,7 @@
 import Taro from '@tarojs/taro';
 import {
   broadcastCacheData,
+  clearAllApiCache,
   getCacheKey,
   setCacheData,
   setCacheDataByKey,
@@ -11,7 +12,6 @@ import {
   seedActivityDetailsFromHomeSummary,
 } from './activityDetailCache';
 import { withCatalogActivities, withCatalogHomeSummary } from './activityCatalog';
-import { invalidateHome } from './queryInvalidation';
 import type { BackendActivity, HomeSummary, ProfileSummary } from '../types/backend';
 
 export const HOME_CACHE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
@@ -144,6 +144,14 @@ export function clearPersistedProfileSummary(): void {
   }
 }
 
+export function clearPersistedActivitiesList(): void {
+  try {
+    Taro.removeStorageSync(ACTIVITIES_STORAGE_KEY);
+  } catch {
+    // storage unavailable
+  }
+}
+
 /** Reset cached `going` flags on home summary after logout. */
 export function resetHomeSummaryGoingFlagsInCache(): void {
   setCacheData<HomeSummary>(['home', 'summary'], (prev) => {
@@ -160,10 +168,10 @@ export function resetHomeSummaryGoingFlagsInCache(): void {
   broadcastCacheData(['home', 'summary']);
 }
 
-/** Clear persisted + in-memory home caches on logout (keeps `auth.ts` free of hook imports). */
-export function clearHomeCachesOnLogout(): void {
+/** Clear in-memory query cache + offline persisted lists on logout / 401. */
+export function clearSessionCaches(): void {
+  clearAllApiCache();
   clearPersistedHomeSummary();
   clearPersistedProfileSummary();
-  resetHomeSummaryGoingFlagsInCache();
-  invalidateHome();
+  clearPersistedActivitiesList();
 }

@@ -1,11 +1,9 @@
-import Taro from '@tarojs/taro';
 import { isApiEnabled } from '@/constants/api';
 import {
   registerForActivityAndInvalidate,
   optInWechatActivityUpdatesAndInvalidate,
   unregisterForActivityAndInvalidate,
 } from '@/hooks/sync/activities';
-import { t } from '@/i18n';
 import {
   clearActivityUpdateSubscribedLocally,
   markActivityUpdateSubscribedLocally,
@@ -16,6 +14,7 @@ import {
   requestActivityUpdateSubscribe,
   type SubscribeMessageOutcome,
 } from './wechatSubscribeMessage';
+import { showAppToast } from '@/utils/appToast';
 
 export type ActivityUpdateSubscribeResult =
   | 'wechat_accepted'
@@ -32,17 +31,13 @@ export type ActivityUpdateUnsubscribeResult =
 
 function toastForOutcome(wechatOutcome: SubscribeMessageOutcome): void {
   if (wechatOutcome === 'accepted') {
-    void Taro.showToast({
-      title: t('itinerary.unpublishedBanner.subscribeSuccessWechat'),
+    showAppToast('itinerary.unpublishedBanner.subscribeSuccessWechat', {
       icon: 'success',
     });
     return;
   }
 
-  void Taro.showToast({
-    title: t('itinerary.unpublishedBanner.subscribeSuccessInApp'),
-    icon: 'none',
-  });
+  showAppToast('itinerary.unpublishedBanner.subscribeSuccessInApp', { icon: 'none' });
 }
 
 /** Register for the activity and request lineup/schedule update notifications. */
@@ -62,8 +57,7 @@ export async function subscribeToActivityUpdates(
       await registerForActivityAndInvalidate(activityLegacyId);
       registered = true;
     } catch {
-      void Taro.showToast({
-        title: t('itinerary.unpublishedBanner.subscribeRegisterFailed'),
+      showAppToast('itinerary.unpublishedBanner.subscribeRegisterFailed', {
         icon: 'none',
       });
       return 'register_failed';
@@ -90,10 +84,7 @@ export async function subscribeToActivityUpdates(
   }
 
   if (!isActivityUpdateSubscribeConfigured()) {
-    void Taro.showToast({
-      title: t('itinerary.unpublishedBanner.subscribeUnconfigured'),
-      icon: 'none',
-    });
+    showAppToast('itinerary.unpublishedBanner.subscribeUnconfigured', { icon: 'none' });
   }
 
   return 'register_failed';
@@ -116,17 +107,11 @@ export async function unsubscribeFromActivityUpdates(
     try {
       await unregisterForActivityAndInvalidate(activityLegacyId);
     } catch {
-      void Taro.showToast({
-        title: t('eventCard.unfollowFailed'),
-        icon: 'none',
-      });
+      showAppToast('eventCard.unfollowFailed', { icon: 'none' });
       return 'unregister_failed';
     }
   }
 
-  void Taro.showToast({
-    title: t('eventCard.unfollowSuccess'),
-    icon: 'none',
-  });
+  showAppToast('eventCard.unfollowSuccess', { icon: 'none' });
   return 'success';
 }

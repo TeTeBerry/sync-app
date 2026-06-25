@@ -51,9 +51,7 @@ export function OverlayAwareScrollView({
       return;
     }
     pendingRestoreRef.current = null;
-    setRestoreScrollTop(undefined);
-    const timer = setTimeout(() => setRestoreScrollTop(top), 0);
-    return () => clearTimeout(timer);
+    setRestoreScrollTop(top);
   }, [scrollLocked]);
 
   useEffect(() => {
@@ -77,11 +75,14 @@ export function OverlayAwareScrollView({
     ? (pinnedScrollRef.current ?? liveScrollRef.current)
     : (controlledScrollTop ?? restoreScrollTop);
 
+  const scrollTopProps =
+    typeof resolvedScrollTop === 'number' ? { scrollTop: resolvedScrollTop } : {};
+
   return (
     <ScrollView
       {...rest}
+      {...scrollTopProps}
       scrollY={scrollY && !scrollLocked}
-      scrollTop={resolvedScrollTop}
       scrollWithAnimation={scrollLocked ? false : scrollWithAnimation}
       onScroll={handleScroll}
     />

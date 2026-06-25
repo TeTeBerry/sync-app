@@ -1,5 +1,4 @@
 import './MatchPreferencesSettings.scss';
-import Taro from '@tarojs/taro';
 import { useCallback, useEffect, useState } from 'react';
 import { Check } from '../../../../components/icons';
 import { Button } from '../../../../components/ui';
@@ -22,6 +21,7 @@ import {
 } from '../../../../constants/buddyPreferences';
 import { useT } from '../../../../hooks/useI18n';
 import { Input, Text, View } from '@tarojs/components';
+import { showAppToast } from '@/utils/appToast';
 
 const MAX_GENRES = 6;
 
@@ -68,8 +68,8 @@ export function BuddyPreferencesSettings() {
           return prev.filter((g) => g !== genre);
         }
         if (prev.length >= MAX_GENRES) {
-          void Taro.showToast({
-            title: `最多选择 ${MAX_GENRES} 种曲风`,
+          showAppToast('settings.maxGenres', {
+            params: { count: MAX_GENRES },
             icon: 'none',
           });
           return prev;
@@ -99,9 +99,9 @@ export function BuddyPreferencesSettings() {
         notificationsEnabled: currentUser?.notificationsEnabled,
       });
       setDirty(false);
-      void Taro.showToast({ title: '已保存', icon: 'success' });
+      showAppToast('common.save', { icon: 'success' });
     } catch {
-      void Taro.showToast({ title: '保存失败，请稍后重试', icon: 'none' });
+      showAppToast('common.requestFailed', { icon: 'none' });
     } finally {
       setSaving(false);
     }

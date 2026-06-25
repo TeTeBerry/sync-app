@@ -1,17 +1,16 @@
 import { useCallback } from 'react';
-import Taro from '@tarojs/taro';
-import { findLatestTravelGuideForActivity } from '@/domains/travel-guide/utils/travelGuideDetailStorage';
+import { findLatestTravelGuideForActivity } from '@/domains/travel-guide';
 import {
   goActivityLineup,
   goExclusiveItinerary,
   goMyItinerary,
 } from '../../../utils/route';
-import { t } from '@/i18n/translate';
+import { showAppToast } from '@/utils/appToast';
 
 export function useEventDetailItineraryNavigation(eventId: number) {
   const assertValidEventId = useCallback(() => {
     if (!Number.isFinite(eventId) || eventId <= 0) {
-      void Taro.showToast({ title: t('eventDetail.invalidActivity'), icon: 'none' });
+      showAppToast('eventDetail.invalidActivity', { icon: 'none' });
       return false;
     }
     return true;

@@ -1,6 +1,6 @@
 import Taro from '@tarojs/taro';
 
-type SubpackageName = 'event' | 'profile' | 'ai';
+type SubpackageName = 'event' | 'profile';
 
 const subpackagePromises = new Map<SubpackageName, Promise<void>>();
 
@@ -40,17 +40,7 @@ export function preloadProfileSubpackage(): void {
   void loadSubpackage('profile');
 }
 
-export function preloadAiSubpackage(): void {
-  void loadSubpackage('ai');
-}
-
 /** Wait until the event subpackage is downloaded before navigateTo. */
 export function ensureEventSubpackageLoaded(): Promise<void> {
   return loadSubpackage('event');
-}
-
-/** Warm stack subpackages after main tabs settle. */
-export function preloadHotSubpackages(): void {
-  preloadEventSubpackage();
-  preloadProfileSubpackage();
 }

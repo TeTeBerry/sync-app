@@ -1,10 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { requireAuth } from '@/utils/authGate';
 import { isActivityUpdateSubscribedLocally } from '@/utils/activityUpdateSubscribeStorage';
-import {
-  subscribeToActivityUpdates,
-  unsubscribeFromActivityUpdates,
-} from '@/utils/subscribeToActivityUpdates';
+import { runActivitySubscribeToggle } from '../utils/runActivitySubscribeToggle';
 
 type UseActivityUpdateSubscribeActionOptions = {
   /** When false, already-followed state cannot be toggled off (detail banners). */
@@ -51,26 +48,18 @@ export function useActivityUpdateSubscribeAction(
       void (async () => {
         setSubmitting(true);
         try {
-          if (followed) {
-            if (confirmUnfollow) {
-              const confirmed = await confirmUnfollow();
-              if (!confirmed) {
-                return;
-              }
-            }
-
-            const result = await unsubscribeFromActivityUpdates(activityLegacyId);
-            if (result === 'success') {
-              setSubscribed(false);
-              setServerFollowing(false);
-            }
-            return;
-          }
-
-          const result = await subscribeToActivityUpdates(activityLegacyId);
-          if (result === 'wechat_accepted' || result === 'in_app_only') {
+          const result = await runActivitySubscribeToggle({
+            activityLegacyId,
+            followed,
+            toggleable,
+            confirmUnfollow,
+          });
+          if (result.kind === 'subscribed') {
             setSubscribed(true);
             setServerFollowing(true);
+          } else if (result.kind === 'unsubscribed') {
+            setSubscribed(false);
+            setServerFollowing(false);
           }
         } finally {
           setSubmitting(false);

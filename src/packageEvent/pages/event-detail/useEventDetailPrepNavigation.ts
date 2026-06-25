@@ -1,7 +1,6 @@
 import { useCallback } from 'react';
 import { scrollElementToCenter } from '../../../utils/scrollToCenter';
-import { EVENT_DETAIL_SCROLL_ID } from '@/domains/partner-feed';
-import type { PrepNudgeAction } from '@/domains/partner-feed/utils/eventDetailPlanningHint.util';
+import { EVENT_DETAIL_SCROLL_ID, type PrepNudgeAction } from '@/domains/partner-feed';
 import type { FestivalPlanChecklist, FestivalPlanTask } from '@/domains/festival-plan';
 
 export type UseEventDetailPrepNavigationOptions = {

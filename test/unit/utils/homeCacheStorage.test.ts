@@ -3,17 +3,20 @@ import Taro from '@tarojs/taro';
 import {
   HOME_CACHE_MAX_AGE_MS,
   afterHomeSummaryCommitted,
+  clearSessionCaches,
   hydrateAppCachesFromStorage,
   persistActivities,
   persistHomeSummary,
+  persistProfileSummary,
 } from '@/utils/homeCacheStorage';
 import { getCacheData, invalidateCache } from '@/hooks/useApiQuery';
-import type { BackendActivity, HomeSummary } from '@/types/backend';
+import type { BackendActivity, HomeSummary, ProfileSummary } from '@/types/backend';
 
 vi.mock('@tarojs/taro', () => ({
   default: {
     getStorageSync: vi.fn(),
     setStorageSync: vi.fn(),
+    removeStorageSync: vi.fn(),
   },
 }));
 
@@ -40,22 +43,27 @@ const mockSummary: HomeSummary = {
 };
 
 describe('homeCacheStorage', () => {
+  const storage = new Map<string, string>();
+
   beforeEach(() => {
-    vi.mocked(Taro.getStorageSync).mockReturnValue('');
-    vi.mocked(Taro.setStorageSync).mockClear();
+    storage.clear();
+    vi.mocked(Taro.getStorageSync).mockImplementation(
+      (key: string) => storage.get(key) ?? '',
+    );
+    vi.mocked(Taro.setStorageSync).mockImplementation((key: string, value: string) => {
+      storage.set(key, value);
+    });
+    vi.mocked(Taro.removeStorageSync).mockImplementation((key: string) => {
+      storage.delete(key);
+    });
     invalidateCache(['home']);
     invalidateCache(['activities']);
+    invalidateCache(['profile']);
   });
 
   it('persists and hydrates home summary', () => {
     persistHomeSummary(mockSummary);
     expect(Taro.setStorageSync).toHaveBeenCalled();
-
-    const stored = vi.mocked(Taro.setStorageSync).mock.calls[0]?.[1] as string;
-    vi.mocked(Taro.getStorageSync).mockImplementation((key: string) => {
-      if (key === 'sync:home:summary:v2') return stored;
-      return '';
-    });
 
     hydrateAppCachesFromStorage();
     expect(getCacheData<HomeSummary>(['home', 'summary'])).toEqual(mockSummary);
@@ -71,11 +79,6 @@ describe('homeCacheStorage', () => {
       },
     ];
     persistActivities(activities);
-    const stored = vi.mocked(Taro.setStorageSync).mock.calls.at(-1)?.[1] as string;
-    vi.mocked(Taro.getStorageSync).mockImplementation((key: string) => {
-      if (key === 'sync:activities:list:v1') return stored;
-      return '';
-    });
 
     hydrateAppCachesFromStorage();
     expect(getCacheData<BackendActivity[]>(['activities'])).toEqual([
@@ -100,5 +103,37 @@ describe('homeCacheStorage', () => {
     expect(getCacheData<{ name: string }>(['activities', 'detail', 1])?.name).toBe(
       'Test Fest',
     );
+  });
+
+  it('clearSessionCaches wipes in-memory query cache and persisted storage keys', () => {
+    persistHomeSummary(mockSummary);
+    persistActivities([
+      {
+        _id: 'a1',
+        legacyId: 1,
+        code: '1',
+        name: 'Fest',
+      },
+    ]);
+    persistProfileSummary({
+      userId: 'u1',
+      name: 'Berry',
+      postCount: 0,
+      activityCount: 0,
+    } satisfies ProfileSummary);
+    hydrateAppCachesFromStorage();
+
+    expect(getCacheData<HomeSummary>(['home', 'summary'])).toBeDefined();
+    expect(getCacheData<BackendActivity[]>(['activities'])).toBeDefined();
+    expect(getCacheData<ProfileSummary>(['profile', 'summary'])).toBeDefined();
+
+    clearSessionCaches();
+
+    expect(getCacheData<HomeSummary>(['home', 'summary'])).toBeUndefined();
+    expect(getCacheData<BackendActivity[]>(['activities'])).toBeUndefined();
+    expect(getCacheData<ProfileSummary>(['profile', 'summary'])).toBeUndefined();
+    expect(Taro.removeStorageSync).toHaveBeenCalledWith('sync:home:summary:v2');
+    expect(Taro.removeStorageSync).toHaveBeenCalledWith('sync:activities:list:v1');
+    expect(Taro.removeStorageSync).toHaveBeenCalledWith('sync:profile:summary:v1');
   });
 });

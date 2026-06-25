@@ -5,6 +5,7 @@ import { Button } from '@/components/ui';
 import { useT } from '@/hooks/useI18n';
 import { resolvePersonalityAudioPlaybackSrc } from '../utils/personalityAudioPrefetch';
 import { Text, View } from '@tarojs/components';
+import { showAppToast } from '@/utils/appToast';
 
 type PersonalityAudioPlayerProps = {
   assetKey: string;
@@ -91,7 +92,7 @@ export const PersonalityAudioPlayer: FC<PersonalityAudioPlayerProps> = ({
   const togglePlayback = useCallback(() => {
     const audio = audioRef.current;
     if (!audio || !playbackSrc) {
-      void Taro.showToast({ title: t('personality.audioUnavailable'), icon: 'none' });
+      showAppToast('personality.audioUnavailable', { icon: 'none' });
       return;
     }
     if (playing) {

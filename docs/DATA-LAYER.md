@@ -158,7 +158,7 @@ types/aiChat.ts  →  @sync/chat-contracts  →  sync-app-backend/packages/chat-
 | 数据 | 模块 | TTL / 说明 |
 |------|------|------------|
 | 首页 summary | `homeCacheStorage` | 24h · 启动 `hydrateAppCachesFromStorage` |
-| 活动列表 catalog | `homeCacheStorage` | 24h · 同上 |
+| 活动列表 catalog | `homeCacheStorage` | 24h · 同上 · 登出 / 401 清除 |
 | 个人摘要 | `homeCacheStorage` | 24h · 登出清除 |
 | 出行攻略 | `travelGuideDetailStorage` | 按 guideId / 活动最新索引 |
 | 人格测试结果 | `personalityTestStorage` | 长期 · 拉服务端失败 fallback |
@@ -184,5 +184,5 @@ types/aiChat.ts  →  @sync/chat-contracts  →  sync-app-backend/packages/chat-
 - **`invalidateActivities()`**（[`queryInvalidation.ts`](../src/utils/queryInvalidation.ts)）→ `invalidateCache(['activities'])`：清除 `activities|*` 与 `activities|detail|*` prefetch seed；已挂载 `useActivityDetailQuery` 收到 invalidation 后 background refetch
 - `activityDetailCache` seed 后调用 `broadcastCacheData`，已挂载 detail hook 可同步内存（对齐 `eventPostsPageCache`）
 - `invalidateCache(['activities'])` 级联考虑观演资料包：内存 prefetch 清除；Layer 3 storage **不**随 `invalidateActivities()` 清除，靠有网 refetch 后 `commitActivityPerformanceBundle` 覆盖
-- 登出：`clearHomeCachesOnLogout` → 清 storage + `invalidateHome()` · 不清匿名人格缓存策略见 `personalityTestStorage`
+- 登出 / 401：`clearSessionCaches()`（[`homeCacheStorage.ts`](../src/utils/homeCacheStorage.ts)）→ `clearAllApiCache()` + 清除 home / activities / profile 离线 storage · 不清匿名人格缓存策略见 `personalityTestStorage`
 - 阵容官宣推送落地：应 bump 对应活动资料包版本或 `clear(activityLegacyId)`
