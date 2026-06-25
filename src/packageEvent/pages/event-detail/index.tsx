@@ -182,27 +182,24 @@ const EventDetailPage = () => {
             ) : null}
 
             {!showHeaderSkeleton ? (
-              <EventDetailComposerSection
-                onAiGuideClick={handleOpenAiGuide}
-                onOpenMyItinerary={handleOpenMyItinerary}
-                onOpenExclusiveItinerary={handleOpenExclusiveItinerary}
-                showFestivalPlan={loggedIn && Boolean(festivalPlanChecklist)}
-                festivalPlanChecklist={festivalPlanChecklist}
-                onFestivalPlanTaskPress={onFestivalPlanTaskPress}
-                travelGuideGenerated={travelGuideGenerated}
-                travelGuideSupported={activity?.travelGuideSupported}
-                lineupPublished={activity?.lineupPublished}
-                favorGenres={currentUser?.favorGenres}
-                unreadReplyCount={prepNudgeUnreadReplyCount}
-                onPrepNudgeAction={onPrepNudgeAction}
-              />
-            ) : null}
+              <View className="s-event-detail-hub">
+                <EventDetailComposerSection
+                  onAiGuideClick={handleOpenAiGuide}
+                  onOpenMyItinerary={handleOpenMyItinerary}
+                  onOpenExclusiveItinerary={handleOpenExclusiveItinerary}
+                  showFestivalPlan={loggedIn && Boolean(festivalPlanChecklist)}
+                  festivalPlanChecklist={festivalPlanChecklist}
+                  onFestivalPlanTaskPress={onFestivalPlanTaskPress}
+                  travelGuideGenerated={travelGuideGenerated}
+                  travelGuideSupported={activity?.travelGuideSupported}
+                  lineupPublished={activity?.lineupPublished}
+                  favorGenres={currentUser?.favorGenres}
+                  unreadReplyCount={prepNudgeUnreadReplyCount}
+                  onPrepNudgeAction={onPrepNudgeAction}
+                />
 
-            <View id="event-detail-posts" className="s-event-detail__posts">
-              {!showHeaderSkeleton ? (
-                <View className="s-event-detail__recruit-panel">
+                <View className="s-event-detail-recruit">
                   <View className="s-event-detail__recruit-head">
-                    <View className="s-event-detail__recruit-accent" aria-hidden />
                     <Text className="s-event-detail__recruit-title">
                       {t('eventDetail.recruitSectionTitle')}
                     </Text>
@@ -216,8 +213,12 @@ const EventDetailPage = () => {
                       </Text>
                     ) : null}
                   </View>
-                  {!recruitRequiresNetwork ? (
-                    <>
+                  {recruitRequiresNetwork ? (
+                    <Text className="s-event-detail__recruit-offline s-event-detail__recruit-offline--inline">
+                      {t('eventDetail.recruitRequiresNetwork')}
+                    </Text>
+                  ) : (
+                    <View className="s-event-detail-recruit__panel">
                       <EventDetailPostFilterBar
                         cityOptions={posts.postFilterCityOptions}
                         selectedCity={posts.postFilterSelectedCity}
@@ -247,15 +248,14 @@ const EventDetailPage = () => {
                         hasPreferenceRanking={showPreferenceInsight}
                         travelGuidePrefillHint={posts.travelGuideSearchPrefillHint}
                       />
-                    </>
-                  ) : null}
+                    </View>
+                  )}
                 </View>
-              ) : null}
-              {recruitRequiresNetwork && !showHeaderSkeleton ? (
-                <Text className="s-event-detail__recruit-offline">
-                  {t('eventDetail.recruitRequiresNetwork')}
-                </Text>
-              ) : postsLoading ? (
+              </View>
+            ) : null}
+
+            <View id="event-detail-posts" className="s-event-detail__posts">
+              {postsLoading ? (
                 <ThemedPageLoader variant="skeleton-event-posts" minHeight={160} />
               ) : !showHeaderSkeleton &&
                 posts.searchActive &&

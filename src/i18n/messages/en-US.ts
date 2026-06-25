@@ -659,6 +659,7 @@ export const enUS: MessageTree = {
     searchTravelGuidePrefillHint:
       'Prefilled from your travel guide — edit before searching',
     personalRecord: 'Personal preparation record',
+    planningSectionTitle: 'Travel & prep',
     festivalPrepSection: 'Festival prep',
     festivalPrepHint: 'Guide · set schedule · recruit',
     festivalPrepHintGuest: 'Travel guide · set schedule',

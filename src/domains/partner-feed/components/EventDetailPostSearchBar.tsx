@@ -46,13 +46,13 @@ export function EventDetailPostSearchBar({
         }
       >
         <View className="s-event-detail-post-search__badge" aria-hidden>
-          <Sparkles size={11} color="#64d2ff" strokeWidth={2.25} />
+          <Sparkles size={10} color="#ff0066" strokeWidth={2.25} />
           <Text className="s-event-detail-post-search__badge-text">
             {t('eventDetail.aiFindTeamKicker')}
           </Text>
         </View>
         <View className="s-event-detail-post-search__field-divider" aria-hidden />
-        <Search size={15} color="#8e8e93" aria-hidden />
+        <Search size={14} color="#8e8e93" aria-hidden />
         <Input
           className="s-event-detail-post-search__input"
           value={value}

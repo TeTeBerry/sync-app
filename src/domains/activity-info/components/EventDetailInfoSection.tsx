@@ -97,39 +97,40 @@ export const EventDetailInfoSection: FC<EventDetailInfoSectionProps> = ({
               <Text className="s-event-detail-info__subtitle">{metaLine}</Text>
             ) : null}
           </View>
+          <View className="s-event-detail-info__status-wrap">
+            <View
+              className={[
+                's-event-detail-info__status',
+                `s-event-detail-info__status--${status}`,
+              ].join(' ')}
+            >
+              <View className="s-event-detail-info__status-icon" aria-hidden />
+              <Text className="s-event-detail-info__status-text">
+                {t(statusI18nKey(status))}
+              </Text>
+            </View>
+          </View>
         </View>
 
-        <View className="s-event-detail-info__status-wrap">
-          <View
-            className={[
-              's-event-detail-info__status',
-              `s-event-detail-info__status--${status}`,
-            ].join(' ')}
+        <View className="s-event-detail-info__meta-card">
+          <Button
+            className="s-event-detail-info__nav"
+            hoverClass="s-event-detail-info__nav--pressed"
+            onClick={onOpenLineup}
           >
-            <View className="s-event-detail-info__status-icon" aria-hidden />
-            <Text className="s-event-detail-info__status-text">
-              {t(statusI18nKey(status))}
+            <View className="s-event-detail-info__nav-icon" aria-hidden>
+              <Music2 size={16} color="#4cc9f0" strokeWidth={2.25} />
+            </View>
+            <Text className="s-event-detail-info__nav-text">
+              {t('activityInfo.viewLineupCta')}
             </Text>
-          </View>
+            <ChevronRight
+              className="s-event-detail-info__nav-chevron"
+              size={15}
+              color="#636366"
+            />
+          </Button>
         </View>
-
-        <Button
-          className="s-event-detail-info__nav"
-          hoverClass="s-event-detail-info__nav--pressed"
-          onClick={onOpenLineup}
-        >
-          <View className="s-event-detail-info__nav-icon" aria-hidden>
-            <Music2 size={16} color="rgba(255, 45, 120, 1)" strokeWidth={2.25} />
-          </View>
-          <Text className="s-event-detail-info__nav-text">
-            {t('activityInfo.viewLineupCta')}
-          </Text>
-          <ChevronRight
-            className="s-event-detail-info__nav-chevron"
-            size={14}
-            color="rgba(136, 136, 136, 1)"
-          />
-        </Button>
       </View>
 
       {showSubscribeBanner ? (

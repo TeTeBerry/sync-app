@@ -17,6 +17,9 @@ import {
 } from '../utils/eventDetailPlanningHint.util';
 import { resolveFestivalPrepCollapsedHint } from '../utils/resolveFestivalPrepCollapsedHint';
 
+const PLANNING_ICON_TRAVEL = '#4cc9f0';
+const PLANNING_ICON_PREP = '#ff0066';
+
 export type EventDetailComposerSectionProps = {
   onAiGuideClick: () => void;
   onOpenMyItinerary: () => void;
@@ -88,13 +91,17 @@ export const EventDetailComposerSection: React.FC<EventDetailComposerSectionProp
       ? prepNudge.text
       : guidePrepHint.text;
   const hintActionable = nudgeActionable || guideHintActionable;
+  const showPrepSubtitle = expanded || (hintActionable && collapsedHint);
 
   return (
     <View data-cmp="EventDetailPlanning" className="s-event-detail-planning">
+      <Text className="s-event-detail-planning__section-title">
+        {t('eventDetail.planningSectionTitle')}
+      </Text>
       <View
         className={cn(
-          's-event-detail-planning__group',
-          expanded && 's-event-detail-planning__group--expanded',
+          's-event-detail-planning__card',
+          expanded && 's-event-detail-planning__card--expanded',
         )}
       >
         <Button
@@ -107,7 +114,7 @@ export const EventDetailComposerSection: React.FC<EventDetailComposerSectionProp
             className="s-event-detail-planning__icon s-event-detail-planning__icon--travel"
             aria-hidden
           >
-            <Plane size={15} color="#5ac8fa" />
+            <Plane size={16} color={PLANNING_ICON_TRAVEL} />
           </View>
           <View className="s-event-detail-planning__row-main">
             <Text className="s-event-detail-planning__row-title">
@@ -117,10 +124,8 @@ export const EventDetailComposerSection: React.FC<EventDetailComposerSectionProp
               {t('eventDetail.myItinerarySubtitle')}
             </Text>
           </View>
-          <ChevronRight size={14} color="#8e8e93" />
+          <ChevronRight size={16} color="#8e8e93" />
         </Button>
-
-        <View className="s-event-detail-planning__hairline" aria-hidden />
 
         <Button
           className="s-event-detail-planning__row s-event-detail-planning__row--prep"
@@ -132,43 +137,45 @@ export const EventDetailComposerSection: React.FC<EventDetailComposerSectionProp
             className="s-event-detail-planning__icon s-event-detail-planning__icon--prep"
             aria-hidden
           >
-            <Sparkles size={15} color="#ffb340" />
+            <Sparkles size={16} color={PLANNING_ICON_PREP} />
           </View>
           <View className="s-event-detail-planning__row-main">
             <Text className="s-event-detail-planning__row-title">
               {t('eventDetail.festivalPrepSection')}
             </Text>
-            {hintActionable ? (
-              <Button
-                className={cn(
-                  's-event-detail-planning__row-sub',
-                  's-event-detail-planning__row-sub--action',
-                  showAccentHint && 's-event-detail-planning__row-sub--accent',
-                )}
-                hoverClass="s-event-detail-planning__row-sub--action-pressed"
-                onClick={(event) => {
-                  event.stopPropagation();
-                  if (nudgeActionable && prepNudge.action) {
-                    onPrepNudgeAction?.(prepNudge.action);
-                    return;
-                  }
-                  if (guideHintActionable) {
-                    onAiGuideClick();
-                  }
-                }}
-              >
-                {collapsedHint}
-              </Button>
-            ) : (
-              <Text
-                className={cn(
-                  's-event-detail-planning__row-sub',
-                  showAccentHint && 's-event-detail-planning__row-sub--accent',
-                )}
-              >
-                {collapsedHint}
-              </Text>
-            )}
+            {showPrepSubtitle ? (
+              hintActionable ? (
+                <Button
+                  className={cn(
+                    's-event-detail-planning__row-sub',
+                    's-event-detail-planning__row-sub--action',
+                    showAccentHint && 's-event-detail-planning__row-sub--accent',
+                  )}
+                  hoverClass="s-event-detail-planning__row-sub--action-pressed"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    if (nudgeActionable && prepNudge.action) {
+                      onPrepNudgeAction?.(prepNudge.action);
+                      return;
+                    }
+                    if (guideHintActionable) {
+                      onAiGuideClick();
+                    }
+                  }}
+                >
+                  {collapsedHint}
+                </Button>
+              ) : (
+                <Text
+                  className={cn(
+                    's-event-detail-planning__row-sub',
+                    showAccentHint && 's-event-detail-planning__row-sub--accent',
+                  )}
+                >
+                  {collapsedHint}
+                </Text>
+              )
+            ) : null}
           </View>
           <View className="s-event-detail-planning__row-trail">
             {hasProgress ? (
@@ -180,9 +187,9 @@ export const EventDetailComposerSection: React.FC<EventDetailComposerSectionProp
               </View>
             ) : null}
             {expanded ? (
-              <ChevronUp size={14} color="#8e8e93" />
+              <ChevronUp size={16} color="#8e8e93" />
             ) : (
-              <ChevronDown size={14} color="#8e8e93" />
+              <ChevronDown size={16} color="#8e8e93" />
             )}
           </View>
         </Button>
