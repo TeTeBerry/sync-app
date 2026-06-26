@@ -4,6 +4,7 @@ import { CalendarDays, ChevronRight, MessageCircle } from '../../../components/i
 import { Button } from '../../../components/ui';
 import type { HomeSummary } from '../../../types/backend';
 import type { FestivalPlanChecklist, FestivalPlanTask } from '@/domains/festival-plan';
+import { PLURR_RESPONSIBILITY_TOTAL } from '@/domains/festival-plan/plurResponsibilityChecklist';
 import { useT } from '@/hooks/useI18n';
 import { formatActivityLocationLabel } from '@/utils/formatActivityDisplay';
 import { Text, View } from '@tarojs/components';
@@ -17,6 +18,7 @@ type HomeMyNextEventProps = {
   onOpenPostReplies?: () => void;
   onFestivalPlanPress?: () => void;
   onNextTaskPress?: (task: FestivalPlanTask) => void;
+  plurrCheckedCount?: number;
 };
 
 function formatReplyHint(
@@ -35,6 +37,7 @@ export const HomeMyNextEvent: FC<HomeMyNextEventProps> = ({
   onOpenPostReplies,
   onFestivalPlanPress,
   onNextTaskPress,
+  plurrCheckedCount = 0,
 }) => {
   const t = useT();
   const venue = formatActivityLocationLabel(event.location);
@@ -49,6 +52,8 @@ export const HomeMyNextEvent: FC<HomeMyNextEventProps> = ({
     festivalPlan != null && festivalPlan.totalCount > 0
       ? Math.round((festivalPlan.completedCount / festivalPlan.totalCount) * 100)
       : 0;
+
+  const showPlurrProgress = plurrCheckedCount > 0;
 
   const handleProgressPress = () => {
     if (nextTask && onNextTaskPress) {
@@ -108,6 +113,14 @@ export const HomeMyNextEvent: FC<HomeMyNextEventProps> = ({
             {nextTask ? (
               <Text className="s-home-next__plan-progress-next">
                 {nextTask.trailingLabel}
+              </Text>
+            ) : null}
+            {showPlurrProgress ? (
+              <Text className="s-home-next__plan-plurr">
+                {t('festivalPlan.plurrProgress', {
+                  checked: plurrCheckedCount,
+                  total: PLURR_RESPONSIBILITY_TOTAL,
+                })}
               </Text>
             ) : null}
           </View>

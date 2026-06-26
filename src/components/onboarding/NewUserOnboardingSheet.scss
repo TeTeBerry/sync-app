@@ -151,6 +151,11 @@
   border-radius: 14px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.06);
+
+  &--highlight {
+    border-color: rgba(76, 201, 240, 0.45);
+    box-shadow: 0 0 0 1px rgba(76, 201, 240, 0.12);
+  }
 }
 
 .s-new-user-onboarding__step-head {
@@ -200,16 +205,42 @@
   &--disabled {
     opacity: 0.45;
   }
+
+  &--secondary {
+    margin-top: 8px;
+    background: transparent;
+    border-color: transparent;
+    padding-top: 4px;
+    padding-bottom: 4px;
+  }
+
+  &--secondary-pressed {
+    opacity: 0.75;
+  }
 }
 
 .s-new-user-onboarding__step-cta-label {
   color: #4cc9f0;
   font-size: var(--s-type-caption);
   font-weight: var(--s-fw-semibold);
+
+  &--secondary {
+    color: #8e8e93;
+    font-weight: var(--s-fw-medium);
+  }
 }
 
 .s-new-user-onboarding__foot {
   padding: 8px 20px 16px;
+}
+
+.s-new-user-onboarding__plur-hint {
+  display: block;
+  text-align: center;
+  font-size: 11px;
+  color: #636366;
+  line-height: 1.4;
+  margin-bottom: 4px;
 }
 
 .s-new-user-onboarding__skip {

@@ -1,4 +1,24 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+
+vi.mock('@/i18n', () => ({
+  t: vi.fn((key: string, params?: Record<string, string>) => {
+    if (key === 'setVote.shareTitle' && params?.activityName) {
+      return `${params.activityName} · 我投了这 3 场 Set，你呢？`;
+    }
+    return key;
+  }),
+}));
+
+vi.mock('@/utils/plurShareImage.util', () => ({
+  buildPlurPeaceShareImageUrl: () => 'peace-share-cover',
+}));
+
+vi.mock('@/utils/route', () => ({
+  ROUTES: {
+    ACTIVITY_LINEUP: '/packageEvent/pages/activity-lineup/index',
+  },
+}));
+
 import {
   buildSetVoteShareAppMessage,
   buildSetVoteSharePath,
@@ -35,6 +55,8 @@ describe('setVoteWechatShare.util', () => {
       voterPicks: ['dj-snake'],
     });
     expect(message.title).toContain('EDC Korea');
+    expect(message.title).toContain('你呢');
     expect(message.path).toContain('activityLegacyId=8');
+    expect(message.imageUrl).toBeTruthy();
   });
 });

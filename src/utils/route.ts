@@ -40,6 +40,7 @@ export const ROUTES = {
   PROFILE_POSTS: '/packageProfile/pages/profile-posts/index',
   SETTINGS: '/packageProfile/pages/settings/index',
   LEGAL_DOCUMENT: '/packageProfile/pages/legal-document/index',
+  PLUR_FILM_WEBVIEW: '/packageProfile/pages/plur-film-webview/index',
   /** Legacy subpackage deep link — redirects to home. */
   AI_ASSISTANT: '/packageAi/pages/ai-assistant/index',
   EVENT_DETAIL: '/packageEvent/pages/event-detail/index',

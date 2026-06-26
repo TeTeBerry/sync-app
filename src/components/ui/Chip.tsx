@@ -10,12 +10,14 @@ export type ChipProps = {
   active?: boolean;
   size?: ChipSize;
   className?: string;
+  disabled?: boolean;
   onClick: () => void;
 };
 
 export const Chip: FC<ChipProps> = ({
   label,
   active = false,
+  disabled = false,
   size = 'md',
   className,
   onClick,
@@ -26,9 +28,10 @@ export const Chip: FC<ChipProps> = ({
         's-chip',
         size === 'sm' && 's-chip--sm',
         active && 's-chip--active',
+        disabled && 's-chip--disabled',
         className,
       )}
-      onClick={onClick}
+      onClick={disabled ? undefined : onClick}
     >
       <Text className={cn('s-chip__label', active && 's-chip__label--active')}>
         {label}

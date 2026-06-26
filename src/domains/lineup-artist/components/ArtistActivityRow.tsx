@@ -4,11 +4,10 @@ import { Text, View } from '@tarojs/components';
 import { ChevronRight } from '../../../components/icons';
 import { ImageWithFallback } from '../../../components/ImageWithFallback';
 import { useT } from '@/hooks/useI18n';
-import { IMAGE_SIZE } from '../../../constants/imageSizes';
 import { PLACEHOLDER_EVENT_HERO } from '../../../constants/remoteImages';
 import type { BackendActivity } from '../../../types/backend';
 import { formatActivityAreaLabel } from '../../../utils/filterActivitiesForEventsCatalog';
-import { thumbnailImageUrl } from '../../../utils/imageUrl';
+import { activityCoverImageUrl } from '../../../utils/imageUrl';
 
 export type ArtistActivityRowProps = {
   activity: BackendActivity;
@@ -41,11 +40,9 @@ export const ArtistActivityRow: FC<ArtistActivityRowProps> = ({
       : activity.lineupPublished === false
         ? t('eventCard.lineupPending')
         : null;
-  const thumbSrc = thumbnailImageUrl(
-    activity.image ?? PLACEHOLDER_EVENT_HERO,
-    IMAGE_SIZE.eventCardCompact,
-    1,
-  );
+  const thumbSrc =
+    activityCoverImageUrl(activity.image ?? PLACEHOLDER_EVENT_HERO) ??
+    PLACEHOLDER_EVENT_HERO;
 
   return (
     <View

@@ -56,6 +56,14 @@ describe('thumbnailImageUrl uploads', () => {
   });
 });
 
+describe('activityCoverImageUrl', () => {
+  it('returns COS URL without imageView2 resize', async () => {
+    const { activityCoverImageUrl } = await import('@/utils/imageUrl');
+    const url = 'https://636c-sync-prd.tcb.qcloud.la/static/activity/tml.png';
+    expect(activityCoverImageUrl(url)).toBe(url);
+  });
+});
+
 describe('thumbnailImageUrl tencent cos', () => {
   it('appends imageView2 for CloudBase temp URLs', async () => {
     const { thumbnailImageUrl } = await import('@/utils/imageUrl');

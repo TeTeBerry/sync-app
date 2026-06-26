@@ -7,6 +7,7 @@ import { fetchProfileSummary } from '../api/sync/profile';
 import { isLiveApi } from '../constants/api';
 import { isWeappCloudRunTransportEnabled } from '../constants/cloud';
 import { loadPersonalityTestCatalog } from '../domains/personality-test/personalityTestCatalog';
+import { prefetchPlurPeaceCoverMedia } from './plurShareImage.util';
 import { getCacheData, prefetchToCache } from '../hooks/useApiQuery';
 import {
   afterActivitiesListCommitted,
@@ -106,6 +107,7 @@ export async function prefetchCoreQueriesOnLaunch(): Promise<void> {
   await prefetchActivitiesIfMissing();
   void prefetchLineupArtistsIfMissing();
   void loadPersonalityTestCatalog().catch(() => undefined);
+  prefetchPlurPeaceCoverMedia();
   prefetchProfileSummaryIfMissing();
 }
 

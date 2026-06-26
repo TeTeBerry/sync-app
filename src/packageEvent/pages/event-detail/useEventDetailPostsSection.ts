@@ -128,6 +128,7 @@ export function useEventDetailPostsSection({
               headcount: latestGuide.form.headcount,
             }
           : undefined,
+        t,
       });
     },
     [displayIdentity.location, eventId],

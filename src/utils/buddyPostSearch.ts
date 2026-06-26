@@ -1,4 +1,10 @@
 import type { EventDetailPost } from '../types/backend';
+import {
+  isRecruitUnityTagId,
+  recruitUnityTagSearchHaystackLabels,
+  resolveUnityTagsFromSearchText,
+  type RecruitUnityTagId,
+} from '@sync/partner-contracts';
 
 const SEARCH_STOP_WORDS = new Set([
   '找',
@@ -64,9 +70,28 @@ export function buildEventDetailPostSearchText(post: EventDetailPost): string {
     'departureCity' in post && typeof post.departureCity === 'string'
       ? post.departureCity
       : '';
-  return [post.body, post.location, departureCity, post.createdAt, ...(post.tags ?? [])]
+  const unityLabels = recruitUnityTagSearchHaystackLabels(
+    (post.recruitUnityTags ?? []).filter(isRecruitUnityTagId),
+  );
+  return [
+    post.body,
+    post.location,
+    departureCity,
+    post.createdAt,
+    ...(post.tags ?? []),
+    ...unityLabels,
+  ]
     .filter((part) => typeof part === 'string' && part.trim())
     .join(' ');
+}
+
+function eventDetailPostMatchesUnityTags(
+  post: EventDetailPost,
+  unityTags: RecruitUnityTagId[] | undefined,
+): boolean {
+  if (!unityTags?.length) return true;
+  const postTags = (post.recruitUnityTags ?? []).filter(isRecruitUnityTagId);
+  return unityTags.every((tag) => postTags.includes(tag));
 }
 
 export function tokenizeBuddySearchQuery(query: string): string[] {
@@ -143,8 +168,13 @@ function countMatchedSearchTerms(post: EventDetailPost, terms: string[]): number
 export function eventDetailPostMatchesSearchTerms(
   post: EventDetailPost,
   searchTerms: string[],
+  unityTags?: RecruitUnityTagId[],
 ): boolean {
-  if (!searchTerms.length) return true;
+  if (!eventDetailPostMatchesUnityTags(post, unityTags)) return false;
+
+  if (!searchTerms.length) {
+    return Boolean(unityTags?.length);
+  }
 
   const { required, soft } = partitionBuddySearchTerms(searchTerms);
   if (!required.length && !soft.length) return true;
@@ -167,7 +197,10 @@ export function filterEventDetailPostsByQuery(
   posts: EventDetailPost[],
   query: string,
 ): EventDetailPost[] {
+  const unityTags = resolveUnityTagsFromSearchText(query);
   const searchTerms = resolveBuddySearchTerms(query);
-  if (!searchTerms.length) return posts;
-  return posts.filter((post) => eventDetailPostMatchesSearchTerms(post, searchTerms));
+  if (!searchTerms.length && !unityTags.length) return posts;
+  return posts.filter((post) =>
+    eventDetailPostMatchesSearchTerms(post, searchTerms, unityTags),
+  );
 }

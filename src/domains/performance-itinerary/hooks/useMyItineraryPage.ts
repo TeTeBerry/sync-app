@@ -1,6 +1,13 @@
 import Taro, { useRouter } from '@tarojs/taro';
 import { hideThemedLoading, showThemedLoading } from '@/utils/themedLoading';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { isLiveApi } from '@/constants/api';
 import { useActivityDetailQuery } from '@/hooks/useSyncApi';
 import { useActivityPerformanceBundleOffline } from '@/hooks/useActivityPerformanceBundleOffline';
@@ -106,6 +113,7 @@ export function useMyItineraryPage() {
   const { save } = useItineraryMutations(activityLegacyId ?? 0);
   const hydratedFromPendingRef = useRef(false);
   const wallpaperBusyRef = useRef(false);
+  const resolvedActivityRef = useRef<number | null>(null);
   const initialPerformanceIntent =
     parseSelectedDjIds(router.params.selectedDjIds).length > 0;
 
@@ -120,6 +128,7 @@ export function useMyItineraryPage() {
   const [eventMeta, setEventMeta] = useState('');
   const [viewMode, setViewMode] = useState<MyItineraryViewMode>('timeline');
   const [activeDayId, setActiveDayId] = useState(() => itineraryDays[0]?.id ?? '');
+  const [wallpaperSaving, setWallpaperSaving] = useState(false);
   const t = useT();
   const locale = useLocale();
   useEffect(() => {
@@ -129,34 +138,44 @@ export function useMyItineraryPage() {
     }
   }, [router.params.selectedDjIds]);
 
-  useEffect(() => {
-    hydratedFromPendingRef.current = false;
-    if (!initialPerformanceIntent && apiEnabled) {
-      setPageKindResolved(false);
+  useLayoutEffect(() => {
+    if (!Number.isFinite(activityLegacyId) || activityLegacyId <= 0) {
+      return;
     }
-    if (!Number.isFinite(activityLegacyId) || activityLegacyId <= 0) return;
+
+    const activityChanged = resolvedActivityRef.current !== activityLegacyId;
+    if (activityChanged) {
+      const previousActivity = resolvedActivityRef.current;
+      resolvedActivityRef.current = activityLegacyId;
+      hydratedFromPendingRef.current = false;
+      if (previousActivity != null && !initialPerformanceIntent && apiEnabled) {
+        setPageKindResolved(false);
+      }
+    }
+
+    if (hydratedFromPendingRef.current) return;
 
     const pending = consumePending(activityLegacyId);
-    if (pending) {
-      hydratedFromPendingRef.current = true;
-      setPageKind('performance');
-      setPageKindResolved(true);
-      if (pending.days.length > 0) {
-        setItineraryDays(pending.days as ItineraryDay[]);
-      } else {
-        showAppToast('itinerary.noPerformanceSchedule', { icon: 'none' });
-      }
-      setEventMeta(pending.eventMeta);
-      if (pending.selectedDjIds.length > 0) {
-        setSelectedDjIds(pending.selectedDjIds);
-      }
-      return;
+    if (!pending) return;
+
+    hydratedFromPendingRef.current = true;
+    setPageKind('performance');
+    setPageKindResolved(true);
+    if (pending.days.length > 0) {
+      setItineraryDays(pending.days as ItineraryDay[]);
+    } else {
+      showAppToast('itinerary.noPerformanceSchedule', { icon: 'none' });
     }
-  }, [activityLegacyId, apiEnabled, consumePending, initialPerformanceIntent, t]);
+    setEventMeta(pending.eventMeta);
+    if (pending.selectedDjIds.length > 0) {
+      setSelectedDjIds(pending.selectedDjIds);
+    }
+  }, [activityLegacyId, apiEnabled, consumePending, initialPerformanceIntent]);
 
   useEffect(() => {
-    if (!apiEnabled || hydratedFromPendingRef.current || wallpaperBusyRef.current)
+    if (!apiEnabled || hydratedFromPendingRef.current || wallpaperBusyRef.current) {
       return;
+    }
     if (!Number.isFinite(activityLegacyId) || activityLegacyId <= 0) {
       setPageKindResolved(true);
       return;
@@ -258,8 +277,11 @@ export function useMyItineraryPage() {
   }, [activityLegacyId]);
 
   const handleSave = useCallback(async () => {
-    showThemedLoading({ title: t('itinerary.generatingWallpaper'), mask: true });
+    if (wallpaperBusyRef.current) return;
+
     wallpaperBusyRef.current = true;
+    setWallpaperSaving(true);
+    showThemedLoading({ title: t('itinerary.generatingWallpaper'), mask: true });
 
     const daysForSave = normalizeItineraryDaysForSave(
       itineraryDays as ApiItineraryDay[],
@@ -301,6 +323,7 @@ export function useMyItineraryPage() {
       );
     } finally {
       wallpaperBusyRef.current = false;
+      setWallpaperSaving(false);
       hideThemedLoading();
       if (serverSaved) {
         void savedQuery.refetch();
@@ -340,6 +363,7 @@ export function useMyItineraryPage() {
     handleShare,
     handleReselect,
     handleSave,
+    wallpaperSaving,
     navFallback,
     isOfflineBundle: offline.isOfflineBundle,
     bundleSavedAt: offline.bundleSavedAt,

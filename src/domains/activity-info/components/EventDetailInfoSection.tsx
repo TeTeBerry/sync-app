@@ -4,9 +4,8 @@ import { ImageWithFallback } from '@/components/ImageWithFallback';
 import { Button } from '@/components/ui';
 import type { BackendActivity } from '@/types/backend';
 import { PLACEHOLDER_EVENT_HERO } from '@/constants/remoteImages';
-import { IMAGE_SIZE } from '@/constants/imageSizes';
 import { formatEventHeroMetaLine } from '@/utils/eventCardDisplay';
-import { thumbnailImageUrl } from '@/utils/imageUrl';
+import { activityCoverImageUrl } from '@/utils/imageUrl';
 import {
   getActivityStatusFromActivity,
   type ActivityStatus,
@@ -14,6 +13,7 @@ import {
 import { Text, View } from '@tarojs/components';
 import { useMemo } from 'react';
 import { useT } from '@/hooks/useI18n';
+import './EventDetailInfoSection.scss';
 import { ActivityUpdateSubscribeBanner } from './ActivityUpdateSubscribeBanner';
 
 export type EventDetailInfoSectionProps = {
@@ -64,12 +64,11 @@ export const EventDetailInfoSection: FC<EventDetailInfoSectionProps> = ({
   const status = getActivityStatusFromActivity(activity.date, activity.name);
   const metaLine = formatEventHeroMetaLine(activity.date, activity.location);
   const updatedAt = formatInfoUpdatedAt(activity.infoUpdatedAt);
-  const heroSrc = thumbnailImageUrl(
-    activity.image?.trim() || PLACEHOLDER_EVENT_HERO,
-    IMAGE_SIZE.featuredHero,
-  );
+  const heroSrc =
+    activityCoverImageUrl(activity.image?.trim() || PLACEHOLDER_EVENT_HERO) ??
+    PLACEHOLDER_EVENT_HERO;
 
-  const showSubscribeBanner = activity.lineupPublished === false;
+  const showSubscribeBanner = activity.lineupPublished !== true;
 
   return (
     <View
@@ -112,33 +111,36 @@ export const EventDetailInfoSection: FC<EventDetailInfoSectionProps> = ({
           </View>
         </View>
 
-        <View className="s-event-detail-info__meta-card">
-          <Button
-            className="s-event-detail-info__nav"
-            hoverClass="s-event-detail-info__nav--pressed"
-            onClick={onOpenLineup}
-          >
-            <View className="s-event-detail-info__nav-icon" aria-hidden>
-              <Music2 size={16} color="#4cc9f0" strokeWidth={2.25} />
-            </View>
-            <Text className="s-event-detail-info__nav-text">
-              {t('activityInfo.viewLineupCta')}
-            </Text>
-            <ChevronRight
-              className="s-event-detail-info__nav-chevron"
-              size={15}
-              color="#636366"
+        <View className="s-event-detail-info__meta-group">
+          <View className="s-event-detail-info__meta-card">
+            <Button
+              className="s-event-detail-info__nav"
+              hoverClass="s-event-detail-info__nav--pressed"
+              onClick={onOpenLineup}
+            >
+              <View className="s-event-detail-info__nav-icon" aria-hidden>
+                <Music2 size={16} color="#4cc9f0" strokeWidth={2.25} />
+              </View>
+              <Text className="s-event-detail-info__nav-text">
+                {t('activityInfo.viewLineupCta')}
+              </Text>
+              <ChevronRight
+                className="s-event-detail-info__nav-chevron"
+                size={15}
+                color="#636366"
+              />
+            </Button>
+          </View>
+
+          {showSubscribeBanner ? (
+            <ActivityUpdateSubscribeBanner
+              activityLegacyId={activityLegacyId}
+              activityTitle={activity.name}
+              style={{ marginTop: 8 }}
             />
-          </Button>
+          ) : null}
         </View>
       </View>
-
-      {showSubscribeBanner ? (
-        <ActivityUpdateSubscribeBanner
-          activityLegacyId={activityLegacyId}
-          activityTitle={activity.name}
-        />
-      ) : null}
 
       {activity.infoSource ? (
         <Text className="s-event-detail-info__source">

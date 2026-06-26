@@ -1,5 +1,9 @@
 import type { AiBuddyPostFormValues, BuddyPostTagId } from '@/types/buddyPost';
 import type { EventDetailPost } from '@/types/backend';
+import {
+  isRecruitUnityTagId,
+  normalizeRecruitUnityTags,
+} from '@sync/partner-contracts';
 import { BUDDY_POST_TAG_OPTIONS } from '@/types/buddyPost';
 import { boundsToIsoDate, parseActivityDateBounds } from '@/utils/activityDateBounds';
 import {
@@ -79,7 +83,13 @@ function resolveHeadcountFromPost(
 export function parseBuddyPostFormFromPost(
   post: Pick<
     EventDetailPost,
-    'body' | 'bodyPreview' | 'location' | 'tags' | 'slotsTotal' | 'slotsFilled'
+    | 'body'
+    | 'bodyPreview'
+    | 'location'
+    | 'tags'
+    | 'slotsTotal'
+    | 'slotsFilled'
+    | 'recruitUnityTags'
   >,
   activityDate?: string,
 ): AiBuddyPostFormValues | null {
@@ -131,6 +141,9 @@ export function parseBuddyPostFormFromPost(
     location,
     headcount,
     tags: resolveTagsFromPost(post),
+    recruitUnityTags: normalizeRecruitUnityTags(
+      (post.recruitUnityTags ?? []).filter(isRecruitUnityTagId),
+    ),
     note,
   };
 }

@@ -66,6 +66,7 @@ export function travelGuideFormToBuddyPrefill(
     location: '',
     headcount,
     tags: suggestBuddyTags(),
+    recruitUnityTags: [],
     note: buildPrefillNote(guide, resolveT),
   };
 

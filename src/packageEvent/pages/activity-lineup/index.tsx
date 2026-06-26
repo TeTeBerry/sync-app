@@ -57,6 +57,7 @@ const ActivityLineupPage = () => {
   const setVote = useLineupSetVote({
     activityLegacyId,
     lineupPublished,
+    schedulePublished,
     activityName: pageTitle,
     activityDate: activity?.date,
     lineupDjs,
@@ -101,7 +102,7 @@ const ActivityLineupPage = () => {
 
   const handleArtistPress = useCallback(
     (artistId: string) => {
-      if (setVote.voteModeEnabled) {
+      if (setVote.enabled && setVote.voteModeEnabled) {
         setVote.onToggleDj(artistId);
         return;
       }
@@ -217,8 +218,6 @@ const ActivityLineupPage = () => {
                       key={session.dateKey}
                       session={session}
                       onArtistPress={handleArtistPress}
-                      voteMode={setVote.voteModeEnabled}
-                      selectedArtistIds={setVote.selectedIds}
                     />
                   ))}
                 </>

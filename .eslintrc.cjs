@@ -10,7 +10,7 @@ module.exports = {
     ecmaVersion: 'latest',
     sourceType: 'module',
     ecmaFeatures: { jsx: true },
-    project: ['./tsconfig.eslint.json'],
+    project: ['./tsconfig.eslint.json', './h5/plur-film/tsconfig.eslint.json'],
     tsconfigRootDir: __dirname,
   },
   plugins: ['@typescript-eslint', 'react', 'react-hooks'],
@@ -69,6 +69,13 @@ module.exports = {
     ],
   },
   overrides: [
+    {
+      files: ['h5/plur-film/**/*.{ts,tsx}'],
+      rules: {
+        'no-restricted-imports': 'off',
+        'react-hooks/exhaustive-deps': 'off',
+      },
+    },
     {
       files: ['src/**/*.{ts,tsx}'],
       excludedFiles: ['src/utils/appToast.ts'],

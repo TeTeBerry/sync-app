@@ -11,8 +11,10 @@ import {
   EventDetailPostSearchBar,
   EventDetailPostFilterBar,
   EventDetailTemplatePostFab,
+  EventDetailUnityIndex,
   EventPostsVirtualList,
   EVENT_DETAIL_SCROLL_ID,
+  resolveUnityRecruitCount,
 } from '@/domains/partner-feed';
 import { useEventDetailPage } from './useEventDetailPage';
 import { LazyAiBuddyPostSheet } from '../../../components/ai-chat/LazyAiBuddyPostSheet';
@@ -66,6 +68,16 @@ const EventDetailPage = () => {
     Boolean(activePreferenceSummary) &&
     page.posts.preferenceSortEnabled &&
     !page.posts.searchUsedLocalFallback;
+
+  const unityRecruitCount = useMemo(() => {
+    if (!page.activity) return null;
+    return resolveUnityRecruitCount(
+      page.activity.recruitPostCount,
+      page.postsQuery.items.length,
+      !page.postsLoading,
+      page.postsQuery.hasMore,
+    );
+  }, [page.activity, page.postsLoading, page.postsQuery.items.length]);
 
   if (page.invalidEventId) {
     return <EventDetailFallback variant="invalidId" />;
@@ -196,6 +208,7 @@ const EventDetailPage = () => {
                   favorGenres={currentUser?.favorGenres}
                   unreadReplyCount={prepNudgeUnreadReplyCount}
                   onPrepNudgeAction={onPrepNudgeAction}
+                  activityLegacyId={page.eventId}
                 />
 
                 <View className="s-event-detail-recruit">
@@ -213,6 +226,13 @@ const EventDetailPage = () => {
                       </Text>
                     ) : null}
                   </View>
+                  {unityRecruitCount != null && !recruitRequiresNetwork ? (
+                    <EventDetailUnityIndex
+                      recruitCount={unityRecruitCount}
+                      registerCount={activity?.attendees ?? 0}
+                      onPostRecruit={handleOpenTemplateSheet}
+                    />
+                  ) : null}
                   {recruitRequiresNetwork ? (
                     <Text className="s-event-detail__recruit-offline s-event-detail__recruit-offline--inline">
                       {t('eventDetail.recruitRequiresNetwork')}

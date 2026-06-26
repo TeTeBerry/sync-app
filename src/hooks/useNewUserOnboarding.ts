@@ -1,12 +1,6 @@
-import { useCallback, useMemo, useState } from 'react';
-import { useDidShow } from '@tarojs/taro';
+import { useCallback, useMemo } from 'react';
 import { type NewUserOnboardingStep } from '@/components/onboarding/NewUserOnboardingSheet';
-import { isLoggedIn } from '@/utils/authStorage';
-import { hasLegalConsent } from '@/utils/legalConsentStorage';
-import {
-  hasSeenNewUserOnboarding,
-  markNewUserOnboardingSeen,
-} from '@/utils/onboardingStorage';
+import { markNewUserOnboardingSeen } from '@/utils/onboardingStorage';
 import {
   goEventDetail,
   goEventDetailTravelGuideSheet,
@@ -17,23 +11,27 @@ import { useT } from '@/hooks/useI18n';
 
 export type UseNewUserOnboardingOptions = {
   featuredEvent?: FeaturedEvent | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 };
 
-export function useNewUserOnboarding(options: UseNewUserOnboardingOptions = {}) {
-  const { featuredEvent } = options;
+export function useNewUserOnboarding(options: UseNewUserOnboardingOptions) {
+  const { featuredEvent, open, onOpenChange } = options;
   const t = useT();
-  const [open, setOpen] = useState(false);
 
   const dismiss = useCallback(() => {
     markNewUserOnboardingSeen();
-    setOpen(false);
-  }, []);
+    onOpenChange(false);
+  }, [onOpenChange]);
 
-  const dismissAnd = useCallback((action: () => void) => {
-    markNewUserOnboardingSeen();
-    setOpen(false);
-    action();
-  }, []);
+  const dismissAnd = useCallback(
+    (action: () => void) => {
+      markNewUserOnboardingSeen();
+      onOpenChange(false);
+      action();
+    },
+    [onOpenChange],
+  );
 
   const steps = useMemo((): NewUserOnboardingStep[] => {
     const joinLegacyId = (() => {
@@ -68,15 +66,28 @@ export function useNewUserOnboarding(options: UseNewUserOnboardingOptions = {}) 
           ? t('onboarding.step2Desc', { eventName })
           : t('onboarding.step2DescBrowse'),
         actionLabel: joinLegacyId
-          ? t('onboarding.step2ActionAnchored', { eventName })
+          ? t('onboarding.step2ActionBrowse', { eventName })
           : t('onboarding.stepNeedsEvent'),
+        secondaryActionLabel: joinLegacyId
+          ? t('onboarding.step2ActionPost')
+          : undefined,
         disabled: !joinLegacyId,
         onAction: () => {
           if (!joinLegacyId) {
             return;
           }
-          dismissAnd(() => goEventDetailTravelGuideSheet(joinLegacyId));
+          dismissAnd(() => goEventDetail(joinLegacyId, { focusPosts: true }));
         },
+        onSecondaryAction: joinLegacyId
+          ? () => {
+              dismissAnd(() =>
+                goEventDetail(joinLegacyId, {
+                  openBuddyPost: true,
+                  focusPosts: true,
+                }),
+              );
+            }
+          : undefined,
       },
       {
         title: t('onboarding.step3Title'),
@@ -91,25 +102,11 @@ export function useNewUserOnboarding(options: UseNewUserOnboardingOptions = {}) 
           if (!joinLegacyId) {
             return;
           }
-          dismissAnd(() =>
-            goEventDetail(joinLegacyId, { openBuddyPost: true, focusPosts: true }),
-          );
+          dismissAnd(() => goEventDetailTravelGuideSheet(joinLegacyId));
         },
       },
     ];
   }, [dismissAnd, featuredEvent, t]);
-
-  const evaluateOnShow = useCallback(() => {
-    if (!isLoggedIn() || !hasLegalConsent() || hasSeenNewUserOnboarding()) {
-      setOpen(false);
-      return;
-    }
-    setOpen(true);
-  }, []);
-
-  useDidShow(() => {
-    evaluateOnShow();
-  });
 
   return {
     onboardingOpen: open,

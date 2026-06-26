@@ -2,6 +2,7 @@ import React from 'react';
 import { Bookmark, List, Map, RotateCcw } from '@/components/icons';
 import { Button } from '@/components/ui';
 import { Text, View } from '@tarojs/components';
+import { useT } from '@/hooks/useI18n';
 
 export type MyItineraryViewMode = 'timeline' | 'map';
 
@@ -47,28 +48,51 @@ export const MyItinerarySegment: React.FC<MyItinerarySegmentProps> = ({
 export type MyItineraryFooterProps = {
   onReselect: () => void;
   onSave: () => void;
+  saving?: boolean;
 };
 
 export const MyItineraryFooter: React.FC<MyItineraryFooterProps> = ({
   onReselect,
   onSave,
-}) => (
-  <View className="s-my-itinerary__footer">
-    <Button
-      className="s-my-itinerary__footer-btn s-my-itinerary__footer-btn--secondary"
-      hoverClass="s-my-itinerary__footer-btn--pressed"
-      onTap={onReselect}
-    >
-      <RotateCcw size={16} color="#fff" aria-hidden />
-      <Text>重新选择</Text>
-    </Button>
-    <Button
-      className="s-my-itinerary__footer-btn s-my-itinerary__footer-btn--primary"
-      hoverClass="s-my-itinerary__footer-btn--pressed"
-      onTap={onSave}
-    >
-      <Bookmark size={16} color="#fff" aria-hidden />
-      <Text>生成屏保</Text>
-    </Button>
-  </View>
-);
+  saving = false,
+}) => {
+  const t = useT();
+
+  return (
+    <View className="s-my-itinerary__footer">
+      <Button
+        className="s-my-itinerary__footer-btn s-my-itinerary__footer-btn--secondary"
+        hoverClass={saving ? '' : 's-my-itinerary__footer-btn--pressed'}
+        disabled={saving}
+        onTap={onReselect}
+      >
+        <RotateCcw size={16} color="#fff" aria-hidden />
+        <Text>重新选择</Text>
+      </Button>
+      <Button
+        className={[
+          's-my-itinerary__footer-btn',
+          's-my-itinerary__footer-btn--primary',
+          saving ? 's-my-itinerary__footer-btn--loading' : '',
+        ]
+          .filter(Boolean)
+          .join(' ')}
+        hoverClass={saving ? '' : 's-my-itinerary__footer-btn--pressed'}
+        disabled={saving}
+        onTap={onSave}
+        aria-busy={saving}
+      >
+        {saving ? (
+          <View className="s-my-itinerary__footer-btn-spinner" aria-hidden />
+        ) : (
+          <Bookmark size={16} color="#fff" aria-hidden />
+        )}
+        <Text>
+          {saving
+            ? t('itinerary.generatingWallpaper')
+            : t('itinerary.generateWallpaper')}
+        </Text>
+      </Button>
+    </View>
+  );
+};

@@ -16,6 +16,7 @@ const LEGAL_DOC_IDS: LegalDocId[] = [
   'user-agreement',
   'privacy-policy',
   'community-guidelines',
+  'plur-culture',
 ];
 
 type LegalDocLoader = () => Promise<LegalDocument>;
@@ -28,6 +29,7 @@ const LEGAL_LOADERS: Record<AppLocale, Record<LegalDocId, LegalDocLoader>> = {
       import('./privacy-policy').then((module) => module.privacyPolicy),
     'community-guidelines': () =>
       import('./community-guidelines').then((module) => module.communityGuidelines),
+    'plur-culture': () => import('./plur-culture').then((module) => module.plurCulture),
   },
   'en-US': {
     'user-agreement': () =>
@@ -38,6 +40,8 @@ const LEGAL_LOADERS: Record<AppLocale, Record<LegalDocId, LegalDocLoader>> = {
       import('./en/community-guidelines').then(
         (module) => module.communityGuidelinesEn,
       ),
+    'plur-culture': () =>
+      import('./en/plur-culture').then((module) => module.plurCultureEn),
   },
 };
 

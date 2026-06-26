@@ -187,7 +187,11 @@ const MyItineraryPage = () => {
           </View>
         </ScrollView>
 
-        <MyItineraryFooter onReselect={page.handleReselect} onSave={page.handleSave} />
+        <MyItineraryFooter
+          onReselect={page.handleReselect}
+          onSave={page.handleSave}
+          saving={page.wallpaperSaving}
+        />
       </View>
 
       <PageTabBarChrome />

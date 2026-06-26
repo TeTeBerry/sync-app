@@ -1,3 +1,5 @@
+import type { RecruitUnityTagId } from '@sync/partner-contracts';
+
 /** 留言类型固定为组队 */
 export type BuddyPostTagId = 'team';
 
@@ -10,6 +12,7 @@ export type AiBuddyPostFormValues = {
   /** 文本输入，如「2人」「2-3人」「1/3」 */
   headcount: string;
   tags: BuddyPostTagId[];
+  recruitUnityTags: RecruitUnityTagId[];
   note?: string;
 };
 

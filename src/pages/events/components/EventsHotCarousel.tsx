@@ -3,8 +3,7 @@ import { ImageWithFallback } from '../../../components/ImageWithFallback';
 import { formatEventHeroMetaLine } from '../../../utils/eventCardDisplay';
 import { formatActivityAreaLabel } from '../../../utils/filterActivitiesForEventsCatalog';
 import type { EventCardUi } from '../../../utils/apiMappers';
-import { thumbnailImageUrl } from '../../../utils/imageUrl';
-import { IMAGE_SIZE } from '../../../constants/imageSizes';
+import { activityCoverImageUrl } from '../../../utils/imageUrl';
 import { ScrollView, Text, View } from '@tarojs/components';
 import { useT } from '@/hooks/useI18n';
 
@@ -39,11 +38,7 @@ export const EventsHotCarousel: FC<EventsHotCarouselProps> = ({
           {events.map((event) => {
             const regionLabel = formatActivityAreaLabel(event);
             const metaLine = formatEventHeroMetaLine(event.date, event.location);
-            const thumbSrc = thumbnailImageUrl(
-              event.image,
-              IMAGE_SIZE.eventCardHotCarousel,
-              0.6,
-            );
+            const thumbSrc = activityCoverImageUrl(event.image) ?? event.image;
 
             return (
               <View

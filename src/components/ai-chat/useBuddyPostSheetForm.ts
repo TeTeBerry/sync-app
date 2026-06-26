@@ -3,6 +3,8 @@ import type {
   AiBuddyPostFormValues,
   AiBuddyPostSubmitPayload,
 } from '../../types/buddyPost';
+import type { RecruitUnityTagId } from '@sync/partner-contracts';
+import { MAX_RECRUIT_UNITY_TAGS } from '@sync/partner-contracts';
 import { defaultBuddyPostForm } from '../../utils/buddyPostForm';
 
 const NOTE_MAX_LENGTH = 120;
@@ -30,6 +32,7 @@ export function useBuddyPostSheetForm({
   const [location, setLocation] = useState('');
   const [headcount, setHeadcount] = useState('');
   const [note, setNote] = useState('');
+  const [recruitUnityTags, setRecruitUnityTags] = useState<RecruitUnityTagId[]>([]);
   const [syncToPostList, setSyncToPostList] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const submittingRef = useRef(false);
@@ -51,6 +54,7 @@ export function useBuddyPostSheetForm({
       setLocation(seed.location);
       setHeadcount(seed.headcount);
       setNote(seed.note ?? '');
+      setRecruitUnityTags(seed.recruitUnityTags ?? []);
       return;
     }
     const today = new Date();
@@ -60,7 +64,18 @@ export function useBuddyPostSheetForm({
     setLocation('');
     setHeadcount('');
     setNote('');
+    setRecruitUnityTags([]);
   }, [defaults, initialValues, open]);
+
+  const toggleRecruitUnityTag = useCallback((tagId: RecruitUnityTagId) => {
+    setRecruitUnityTags((prev) => {
+      if (prev.includes(tagId)) {
+        return prev.filter((id) => id !== tagId);
+      }
+      if (prev.length >= MAX_RECRUIT_UNITY_TAGS) return prev;
+      return [...prev, tagId];
+    });
+  }, []);
 
   const canSubmit =
     Boolean(dateStart && dateEnd && location.trim() && headcount.trim()) &&
@@ -78,6 +93,7 @@ export function useBuddyPostSheetForm({
           location: location.trim(),
           headcount: headcount.trim(),
           tags: ['team'],
+          recruitUnityTags,
           note: note.trim() || undefined,
           ...(showSyncToFeedOption ? { syncToPostList } : {}),
         }),
@@ -93,6 +109,7 @@ export function useBuddyPostSheetForm({
     headcount,
     location,
     note,
+    recruitUnityTags,
     onSubmit,
     showSyncToFeedOption,
     syncToPostList,
@@ -105,6 +122,7 @@ export function useBuddyPostSheetForm({
     location,
     headcount,
     note,
+    recruitUnityTags,
     syncToPostList,
     noteMaxLength: NOTE_MAX_LENGTH,
     canSubmit,
@@ -114,6 +132,8 @@ export function useBuddyPostSheetForm({
     setLocation,
     setHeadcount,
     setNote,
+    setRecruitUnityTags,
+    toggleRecruitUnityTag,
     setSyncToPostList,
     handleSubmit,
   };

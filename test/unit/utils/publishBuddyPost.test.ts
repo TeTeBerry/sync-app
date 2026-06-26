@@ -29,6 +29,7 @@ describe('publishBuddyPostFromForm', () => {
       location: '上海',
       headcount: '2人',
       tags: ['team'],
+      recruitUnityTags: ['welcome_newbie', 'multi_day'],
       note: '',
     };
 
@@ -48,6 +49,7 @@ describe('publishBuddyPostFromForm', () => {
         tags: ['#组队'],
         recruitStatus: 'open',
         slotsTotal: 2,
+        recruitUnityTags: ['welcome_newbie', 'multi_day'],
         body: expect.stringMatching(/组队，6\.13-6\.14，上海出发，2人/),
       }),
     );

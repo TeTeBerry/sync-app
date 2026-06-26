@@ -138,6 +138,7 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
         | 'privacy'
         | 'help'
         | 'legal'
+        | 'about'
         | 'buddy-prefs'
         | 'appeal'
         | 'language',
@@ -206,6 +207,7 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
       requireAuth(() => openSettings('appeal'), 'general');
     },
     onOpenHelp: () => openSettings('help'),
+    onOpenAbout: () => openSettings('about'),
     onOpenLegal: () => openSettings('legal'),
     onLogout: handleLogout,
   };

@@ -13,7 +13,7 @@ import {
   resolveFeaturedEventLegacyId,
   type FeaturedEvent,
 } from '../../../utils/apiMappers';
-import { featuredPostImageUrl, thumbnailImageUrl } from '../../../utils/imageUrl';
+import { activityCoverImageUrl, thumbnailImageUrl } from '../../../utils/imageUrl';
 import { IMAGE_SIZE } from '../../../constants/imageSizes';
 import { goEventsListTab } from '../../../utils/route';
 import { Image, Swiper, SwiperItem, Text, View } from '@tarojs/components';
@@ -144,10 +144,7 @@ function HomeFeaturedEventCard({
   const status = getActivityStatusFromActivity(event.date, event.title);
   const venue = formatActivityLocationLabel(event.venue);
   const legacyId = resolveFeaturedEventLegacyId(event);
-  const heroSrc =
-    featuredPostImageUrl(event.image, IMAGE_SIZE.featuredHero) ??
-    thumbnailImageUrl(event.image, IMAGE_SIZE.featuredHero, 10 / 16) ??
-    event.image;
+  const heroSrc = activityCoverImageUrl(event.image) ?? event.image;
   const categoryLabel = formatActivityCategoryLabel(event.category);
 
   const handlePreload = () => {

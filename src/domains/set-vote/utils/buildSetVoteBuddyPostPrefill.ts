@@ -24,6 +24,7 @@ export function buildSetVoteBuddyPostPrefill(
     location: '',
     headcount: '2',
     tags: ['team'],
+    recruitUnityTags: [],
     note,
   };
 

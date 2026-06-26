@@ -7,6 +7,8 @@
   },
   "scripts": {
     "dev:h5": "taro build --type h5 --watch",
+    "dev:plur-film": "npm run build --prefix h5/plur-film",
+    "dev:plur-film:https": "node scripts/dev-plur-film-https.mjs",
     "predev:weapp": "node scripts/sync-weapp-project-config.mjs",
     "dev:weapp": "taro build --type weapp --watch --mode development",
     "preprd:weapp": "node scripts/sync-weapp-project-config.mjs",
@@ -20,7 +22,7 @@
     "verify:bundle": "node scripts/verify-bundle-boundaries.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "typecheck:test": "tsc -p test/tsconfig.json --noEmit",
-    "lint": "eslint \"src/**/*.{ts,tsx}\" \"config/**/*.{ts,js}\" \"test/**/*.{ts,tsx}\" vitest.config.ts",
+    "lint": "eslint \"src/**/*.{ts,tsx}\" \"config/**/*.{ts,js}\" \"test/**/*.{ts,tsx}\" \"h5/plur-film/**/*.{ts,tsx}\" vitest.config.ts",
     "lint:fix": "npm run lint -- --fix",
     "format": "prettier --write \"src/**/*.{ts,tsx,scss}\" \"config/**/*.{ts,js}\" \"test/**/*.{ts,tsx}\" \"vitest.config.ts\"",
     "format:check": "prettier --check \"src/**/*.{ts,tsx,scss}\" \"config/**/*.{ts,js}\" \"test/**/*.{ts,tsx}\" \"vitest.config.ts\"",

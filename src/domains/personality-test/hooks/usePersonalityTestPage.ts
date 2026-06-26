@@ -27,7 +27,6 @@ import {
   buildPersonalityTestShareAppMessage,
   buildPersonalityTestShareFallback,
   buildPersonalityTestShareTimeline,
-  buildPersonalityTestShareTitle,
   buildPersonalityTestTimelineFallback,
   parsePersonalityTestShareQuery,
   resolvePersonalityShareTeaser,
@@ -216,10 +215,7 @@ export function usePersonalityTestPage() {
       return buildPersonalityTestShareFallback();
     }
     const catalog = getCachedPersonalityTestCatalog();
-    return {
-      title: buildPersonalityTestShareTitle(current, catalog),
-      path: buildPersonalityTestShareAppMessage(current).path,
-    };
+    return buildPersonalityTestShareAppMessage(current, catalog);
   });
 
   useShareTimeline(() => {
@@ -227,7 +223,8 @@ export function usePersonalityTestPage() {
     if (!current) {
       return buildPersonalityTestTimelineFallback();
     }
-    return buildPersonalityTestShareTimeline(current);
+    const catalog = getCachedPersonalityTestCatalog();
+    return buildPersonalityTestShareTimeline(current, catalog);
   });
 
   const currentQuestion = questions[currentIndex];

@@ -34,6 +34,10 @@ import { ContentReportMenuButton } from '../report';
 import { Image, Text, View } from '@tarojs/components';
 import { useT } from '@/hooks/useI18n';
 import { showAppToast } from '@/utils/appToast';
+import {
+  isPlurRespectConfirmed,
+  setPlurRespectConfirmed,
+} from '@/utils/plurRespectConfirm.storage';
 
 const DEFAULT_AVATAR = PLACEHOLDER_AVATAR;
 
@@ -208,6 +212,9 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
   const isPostAuthor = isCurrentUserPostAuthor(postAuthorName, postAuthorUserId);
   const [draft, setDraft] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [respectConfirmed, setRespectConfirmed] = useState(() =>
+    showApplyJoinHint ? isPlurRespectConfirmed() : false,
+  );
   const [replyTarget, setReplyTarget] = useState<ReplyTarget | null>(null);
   const [deletingCommentId, setDeletingCommentId] = useState('');
   const appliedDraftRef = useRef<string | null>(null);
@@ -221,6 +228,19 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
     appliedDraftRef.current = nextDraft;
   }, [expanded, initialCommentDraft]);
 
+  useEffect(() => {
+    if (!showApplyJoinHint) return;
+    setRespectConfirmed(isPlurRespectConfirmed());
+  }, [showApplyJoinHint]);
+
+  const handleRespectToggle = useCallback(() => {
+    setRespectConfirmed((prev) => {
+      const next = !prev;
+      setPlurRespectConfirmed(next);
+      return next;
+    });
+  }, []);
+
   const placeholder = replyTarget
     ? t('comments.replyTo', { name: replyTarget.authorName })
     : t('comments.placeholder');
@@ -232,6 +252,11 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
     const contactError = getUgcContactValidationError(body);
     if (contactError) {
       showAppToast(contactError, { raw: true, icon: 'none' });
+      return;
+    }
+
+    if (showApplyJoinHint && !respectConfirmed) {
+      showAppToast('plur.respectConfirm.requiredToast', { icon: 'none' });
       return;
     }
 
@@ -271,6 +296,8 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
     onCommentSubmitted,
     postId,
     replyTarget,
+    respectConfirmed,
+    showApplyJoinHint,
     submitting,
     t,
   ]);
@@ -402,6 +429,25 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
         <Text className="s-post-comments__apply-hint">
           {t('eventDetail.applyJoinPublicHint')}
         </Text>
+      ) : null}
+
+      {showApplyJoinHint ? (
+        <View
+          className="s-post-comments__respect-row"
+          onClick={handleRespectToggle}
+          role="checkbox"
+          aria-checked={respectConfirmed}
+        >
+          <View
+            className={cn(
+              's-post-comments__respect-check',
+              respectConfirmed && 's-post-comments__respect-check--on',
+            )}
+          />
+          <Text className="s-post-comments__respect-label">
+            {t('plur.respectConfirm.label')}
+          </Text>
+        </View>
       ) : null}
 
       <View className="s-post-comments__composer">

@@ -44,7 +44,7 @@ describe('buildEventDetailPrepSteps', () => {
     ]);
 
     const itinerary = steps.find((step) => step.key === 'exclusive_itinerary');
-    expect(itinerary?.actionLabel).toBe('排演出表');
+    expect(itinerary?.actionLabel).toBe('排时间表');
     expect(itinerary?.isNext).toBe(false);
 
     const buddyPost = steps.find((step) => step.key === 'buddy_post');

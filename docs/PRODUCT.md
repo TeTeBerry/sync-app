@@ -2,7 +2,7 @@
 
 > **当前实现**与**目标形态**合一文档。Q1 交付见 [Q1-USER-STORIES.md](./Q1-USER-STORIES.md)；**Q2 整改与推广主轴**见 [Q2-USER-STORIES.md](./Q2-USER-STORIES.md)。REST/WS 契约见 [API.md](./API.md)。
 
-**最后更新**：2026-06-24（§2.6 冷启动三轨 · US-Q2-53 Set 票选裂变 · **US-Q2-54** 现场精选）
+**最后更新**：2026-06-26（§1.6 PLUR 全量提审 55～66 · L1/L2/L3 · §2.6 冷启动三轨）
 
 ---
 
@@ -106,6 +106,36 @@ rg '联系队友|配对成功|平台担保|智能配对|buddy-matching' src/
 
 **代码**：`src/i18n/` · `src/legal/en/` · `user.schema.ts` · `legalConsentStorage.ts`
 
+### 1.6 PLUR / PLURR（锐舞文化 · 2026-06-25 · UX 终版 2026-06-26）
+
+**结论**：锐舞文化 **PLUR** + **PLURR** 纳入 Q2 提审包，作为 **找队主轴（Unity）** 的产品化表达。完整方案见 [PLUR-PRODUCT.md](./PLUR-PRODUCT.md)；Story 见 [Q2-USER-STORIES.md § Epic K](./Q2-USER-STORIES.md#epic-k--plurplurr-锐舞文化--上线包)（**US-Q2-55～66**）。
+
+**三层架构**
+
+| 层 | 职责 | Story |
+|----|------|-------|
+| **L1 表达** | PLUR 入口壳 + 四镜头 H5 | 62 · 64 · 65 |
+| **L2 引导** | 3 步筹备 Sheet + 首进编排 | 61 · 66 |
+| **L3 行为** | 规范 / 标签 / 申请 / 指数 / PLURR | 55～60 |
+
+**首进顺序**：L1 入口（可跳过）→ L2 三步引导（可跳过）；**分享落地 bypass** 两者（66）。**首页不放 PLUR Banner / 不自动播视频。**
+
+| 词 | 在 SYNC 的角色 |
+|----|----------------|
+| **Peace** | 规范 + 攻略提示 + 四镜头第一镜 |
+| **Love** | 申请/分享语气 + 四镜头第二镜 |
+| **Unity** | **主轴**：标签、指数、引导 Step 2、四镜头第三镜 |
+| **Respect** | 规范 + 申请确认 + 四镜头第四镜 |
+| **Responsibility** | Festival Plan PLURR 责任清单 |
+
+**合规**：PLUR 不引入信用分、匹配度、虚拟 kandi、点赞或站内私信；Unity 指数仅为**活动级聚合**。
+
+**提审全量包（2026-06-26）**：**US-Q2-55～66 全部在 07-06 提审前完成**，含 **US-Q2-64** 四镜头 H5 与 **US-Q2-65** web-view。D11 冒烟覆盖 L1→64→L2 全链路 + L3 行为层。
+
+**进度（2026-06-26）**：**US-Q2-55**（社区规范 PLUR 四核）· **US-Q2-56**（招募帖 Unity 标签）已验收 ✅；L3 其余项进行中。
+
+**极端砍 scope（仅 buffer 耗尽）**：64 可降为 Peace+Unity 两镜 Lite；65 web-view 仍必交付。详见 [PLUR-PRODUCT.md §七](./PLUR-PRODUCT.md#七story-分期与排期0706-提审前--全量)。
+
 ---
 
 ## 二、信息架构
@@ -172,6 +202,10 @@ rg '联系队友|配对成功|平台担保|智能配对|buddy-matching' src/
 **行程记账 · 人均试算（US-Q2-52 · P0 · W2）**：`my-itinerary` 小票 OCR / 手动记一笔 → **分摊 Sheet**（2～8 人统一均分，可关 = 仅个人）→ StatsBar 展示 **预计花费 + 人均** → **复制分摊摘要** 到微信线下结算。默认人数来自攻略 `headcount`（US-Q2-30/35）。**不经手资金、不代收代付、不绑招募队友**；完整 AA 账本 / 最小转账路径见上线后。
 
 进度条展示：**首页「我的下一场」+ 活动详情折叠区**。
+
+**PLURR 责任清单（US-Q2-59 · ✅）**：在折叠区增加可勾选「行前责任」项（补水、告知亲友、耳塞、散场交通、垃圾随身、照顾同队等），与三步 checklist **并列**，不替换顺序。详见 [PLUR-PRODUCT.md §十一](./PLUR-PRODUCT.md#十一plurr-责任清单项us-q2-59)。
+
+**Peace 攻略提示条（US-Q2-60 · ✅）**：出行攻略详情页顶部 info banner，提示大型现场保持平和；session 内可关闭，不阻塞正文。详见 [PLUR-PRODUCT.md §10.4](./PLUR-PRODUCT.md#104-攻略-peace-条us-q2-60)。
 
 #### 真实时间线
 

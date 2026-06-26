@@ -312,11 +312,15 @@ export function useExclusiveItineraryPage() {
     try {
       const result = await generate({ selectedDjIds: selectedIds });
       setFromGenerateResult(activityLegacyId, selectedIds, result);
-      void save({
-        eventMeta: result.itinerary.eventMeta.trim().slice(0, 200),
-        days: normalizeItineraryDaysForSave(result.itinerary.days),
-        selectedDjIds: selectedIds,
-      }).catch(() => undefined);
+      try {
+        await save({
+          eventMeta: result.itinerary.eventMeta.trim().slice(0, 200),
+          days: normalizeItineraryDaysForSave(result.itinerary.days),
+          selectedDjIds: selectedIds,
+        });
+      } catch {
+        // Wallpaper page still hydrates from pending store when save fails.
+      }
       goMyItinerary(activityLegacyId, selectedIds);
     } catch (error) {
       const message =

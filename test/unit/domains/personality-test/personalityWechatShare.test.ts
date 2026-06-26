@@ -1,5 +1,32 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+
+vi.mock('@/i18n', () => ({
+  t: vi.fn((key: string, params?: Record<string, string>) => {
+    if (key === 'personality.shareTitle' && params?.label) {
+      return `我是「${params.label}」型 Raver — We Are One`;
+    }
+    if (key === 'personality.raverPersonality') {
+      return '电音人格测试';
+    }
+    if (key === 'personality.shareFallbackSuffix') {
+      return '测测你的电音人格 — We Are One';
+    }
+    return key;
+  }),
+}));
+
+vi.mock('@/utils/plurShareImage.util', () => ({
+  buildPlurPeaceShareImageUrl: () => 'peace-share-cover',
+}));
+
+vi.mock('@/utils/route', () => ({
+  ROUTES: {
+    PERSONALITY_TEST: '/packageEvent/pages/personality-test/index',
+  },
+}));
+
 import {
+  buildPersonalityTestShareAppMessage,
   buildPersonalityTestSharePath,
   buildPersonalityTestShareTitle,
   parsePersonalityTestShareQuery,
@@ -50,11 +77,19 @@ function mockResult(
 describe('personalityWechatShare', () => {
   it('builds share title and path with share params', () => {
     const result = mockResult();
-    expect(buildPersonalityTestShareTitle(result)).toContain('vibe_curator');
+    expect(buildPersonalityTestShareTitle(result)).toContain('We Are One');
     const path = buildPersonalityTestSharePath(result);
     expect(path).toContain('share=1');
     expect(path).toContain('primaryType=vibe_curator');
     expect(path).toContain('soulDjId=martin-garrix');
+  });
+
+  it('builds share app message with Peace cover', () => {
+    const result = mockResult();
+    const message = buildPersonalityTestShareAppMessage(result);
+    expect(message.title).toContain('We Are One');
+    expect(message.path).toContain('share=1');
+    expect(message.imageUrl).toBeTruthy();
   });
 
   it('parses valid share query', () => {

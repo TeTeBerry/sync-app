@@ -4,6 +4,8 @@ import React, { useEffect, useState } from 'react';
 import PageNavigation from '../../../components/navigation/PageNavigation';
 import { useEndRouteTransitionOnShow } from '../../../hooks/useEndRouteTransitionOnShow';
 import { useStackPageMainHeight } from '../../../hooks/useTabPageMainHeight';
+import { PlurCultureFooter } from '@/components/plur/PlurCultureFooter';
+import { PlurCultureHero } from '@/components/plur/PlurCultureHero';
 import {
   APP_DISPLAY_NAME,
   LEGAL_CONTACT_EMAIL,
@@ -81,6 +83,7 @@ const LegalDocumentPage: React.FC = () => {
         }
       >
         <View className="s-legal-doc__main">
+          {docId === 'plur-culture' ? <PlurCultureHero /> : null}
           <Text className="s-legal-doc__meta">
             {t('legal.meta', {
               app: APP_DISPLAY_NAME,
@@ -101,6 +104,7 @@ const LegalDocumentPage: React.FC = () => {
               ))}
             </View>
           ))}
+          {docId === 'plur-culture' ? <PlurCultureFooter /> : null}
           <View className="s-legal-doc__footer">
             <Text className="s-legal-doc__footer-text">
               {t('legal.footerOperator', { name: LEGAL_OPERATOR_NAME })}

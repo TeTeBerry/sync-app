@@ -39,8 +39,23 @@ describe('parseBuddyPostFormFromPost', () => {
       location: '上海',
       headcount: '2人',
       tags: ['team'],
+      recruitUnityTags: [],
       note: '女生优先',
     });
+  });
+
+  it('restores recruit unity tags from post metadata', () => {
+    const form = parseBuddyPostFormFromPost(
+      {
+        body: '组队，6.13-6.14，上海，2人',
+        location: '上海',
+        tags: ['#组队'],
+        recruitUnityTags: ['welcome_newbie', 'women_friendly'],
+      },
+      '06/13-14/2026',
+    );
+
+    expect(form?.recruitUnityTags).toEqual(['welcome_newbie', 'women_friendly']);
   });
 
   it('falls back to slots fields when headcount segment is missing', () => {

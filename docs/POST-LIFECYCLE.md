@@ -218,7 +218,7 @@ cd sync-app-backend && CI=true npm test -- --watchman=false --testPathPattern="b
 | 5 | EDC Thailand 2026 | 2 | 0 |
 | 16 | The Magic Of Tomorrowland 上海 2026 | 2 | 0 |
 
-帖子字段与 US-Q2-16 一致：`recruitStatus` · `slotsTotal` · `slotsFilled`；正文格式同 §一模板（`组队，日期，出发地，人数，备注`），无联系方式。
+帖子字段与 US-Q2-16 一致：`recruitStatus` · `slotsTotal` · `slotsFilled`；正文格式同 §一模板（`组队，日期，出发地，人数，备注`），无联系方式。**US-Q2-56**：每条种子帖另带 2～3 个 `recruitUnityTags`（Unity 标签示范）。
 
 实现：`sync-app-backend/src/modules/partner/data/ops-seed-buddy-posts.util.ts`
 

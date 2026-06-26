@@ -87,4 +87,14 @@ describe('buddyPostSearch', () => {
     );
     expect(filtered.map((post) => post.id)).toEqual(['match']);
   });
+
+  it('filters posts by unity tag keywords', () => {
+    const posts = [
+      samplePost({ id: 'match', recruitUnityTags: ['welcome_newbie'] }),
+      samplePost({ id: 'miss', recruitUnityTags: ['women_friendly'] }),
+    ];
+
+    const filtered = filterEventDetailPostsByQuery(posts, '欢迎新手');
+    expect(filtered.map((post) => post.id)).toEqual(['match']);
+  });
 });

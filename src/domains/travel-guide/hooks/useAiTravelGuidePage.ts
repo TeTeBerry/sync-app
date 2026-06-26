@@ -46,6 +46,7 @@ import {
 import type { AiGuidePlanFormValues, TravelGuideBudgetTier } from '@/types/travelGuide';
 import { useT } from '@/hooks/useI18n';
 import { showAppToast } from '@/utils/appToast';
+import { shouldShowPeaceBanner } from '../utils/shouldShowPeaceBanner';
 
 const FOOTER_BASE_PX = 72;
 
@@ -72,6 +73,7 @@ export function useAiTravelGuidePage() {
   const [sharing, setSharing] = useState(false);
   const [budgetTierUpdating, setBudgetTierUpdating] = useState(false);
   const [guideSheetOpen, setGuideSheetOpen] = useState(false);
+  const [peaceBannerDismissed, setPeaceBannerDismissed] = useState(false);
   const shareRef = useRef<{
     guideId: string;
     payload: TravelGuideDetailPayload;
@@ -351,6 +353,11 @@ export function useAiTravelGuidePage() {
   );
 
   const showRecruitBridge = Boolean(payload?.activityLegacyId && payload?.form);
+  const showPeaceBanner = shouldShowPeaceBanner(Boolean(payload), peaceBannerDismissed);
+
+  const handleDismissPeaceBanner = useCallback(() => {
+    setPeaceBannerDismissed(true);
+  }, []);
 
   return {
     guideId,
@@ -369,6 +376,8 @@ export function useAiTravelGuidePage() {
     handlePrefillRecruitPost,
     handleSelectBudgetTier,
     showRecruitBridge,
+    showPeaceBanner,
+    handleDismissPeaceBanner,
     guideSheetOpen,
     closeGuideSheet,
     handleGuideSheetSubmit,

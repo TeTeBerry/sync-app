@@ -7,6 +7,7 @@ import { useResolvedAvatarSrc } from '@/hooks/useResolvedAvatarSrc';
 import { resolveAvatarDisplaySrc, thumbnailImageUrl } from '@/utils/imageUrl';
 import { IMAGE_SIZE } from '@/constants/imageSizes';
 import { stripPostBodyContact } from '@/utils/postBodyContact';
+import { RecruitUnityTagChips } from '@/components/post/RecruitUnityTagChips';
 import { resolveBuddyPostRecruitDisplay } from '@/domains/partner-feed/utils/parseBuddyPostRecruitDisplay';
 import { formatPostHandle } from '@/domains/partner-feed/utils/eventPostDisplay';
 import type { EventDetailPost } from '@/types/backend';
@@ -120,6 +121,8 @@ export function BuddyPostPreviewStep({
         </View>
 
         {displayBody ? <Text className="s-event-post__text">{displayBody}</Text> : null}
+
+        <RecruitUnityTagChips tagIds={post.recruitUnityTags} />
 
         {visibleTags.length > 0 || showProgress ? (
           <View className="s-event-post__meta-row">

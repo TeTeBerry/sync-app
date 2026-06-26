@@ -253,6 +253,7 @@ export const zhCN: MessageTree = {
       notificationsOff: '已关闭',
       privacy: '隐私与安全',
       legal: '法律与协议',
+      about: '关于 SYNC',
       help: '帮助与反馈',
       logout: '退出登录',
       language: '语言',
@@ -314,10 +315,11 @@ export const zhCN: MessageTree = {
       'user-agreement': '用户服务协议',
       'privacy-policy': '隐私政策',
       'community-guidelines': '社区规范',
+      'plur-culture': 'PLUR 文化说明',
     },
     docNotFound: '未找到该文档',
     docTitle: '文档',
-    updatedLabel: '2026年6月18日',
+    updatedLabel: '2026年6月26日',
     meta: '{{app}} · 更新日期：{{date}} · 版本 {{version}}',
     footerOperator: '运营者：{{name}}',
     footerContact: '联系邮箱：{{email}}',
@@ -342,7 +344,7 @@ export const zhCN: MessageTree = {
   },
   ai: {
     generateTravelGuide: '生成出行攻略',
-    generateItinerary: '排演出表',
+    generateItinerary: '排时间表',
     buddyPost: '组队发帖',
     startPersonalityTest: '开始人格测试',
     travelGuideTitle: '出行攻略',
@@ -454,6 +456,7 @@ export const zhCN: MessageTree = {
       scheduleReady: '时间表已出，去排你的专属 set',
       lineupPending: '阵容尚未官宣，可订阅提醒；找队可先浏览公开招募',
     },
+    plurrProgress: '责任 {{checked}}/{{total}}',
   },
   eventCard: {
     category: '电音节',
@@ -577,28 +580,30 @@ export const zhCN: MessageTree = {
     empty: '暂无阵容信息',
   },
   onboarding: {
-    sheetTitle: '3 步开始筹备电音节',
+    sheetTitle: '3 步开始 · 查节找队',
     sheetSubtitle: '免费资讯与工具，平台不销售票务、不提供站内联系或担保。',
     skip: '跳过',
     featuredLabel: '推荐活动',
     pickAnother: '换一场',
+    plurHint: '想了解 PLUR 精神？设置 → 关于 SYNC',
     step1Title: '选一场活动',
     step1Desc:
       '在活动 Tab 浏览电音节，或从上方推荐活动开始。选择后会自动记录你的参与意向。',
     step1DescBrowse: '在活动 Tab 浏览电音节资讯，挑选你想参加的活动。',
     step1ActionFeatured: '查看 {{eventName}}',
     step1ActionList: '去活动列表',
-    step2Title: '生成出行攻略',
-    step2Desc: '在 {{eventName}} 详情页生成交通、住宿与散场参考（AI 内容仅供参考）。',
+    step2Title: 'Unity · 找同行',
+    step2Desc:
+      '在 {{eventName}} 详情浏览公开招募，或发一条让同场 Raver 看见你。We Are One——我们因同一场活动而相聚（平台不撮合、不提供私信）。',
     step2DescBrowse:
-      '选好活动后，在活动详情页生成交通、住宿与散场参考（AI 内容仅供参考）。',
-    step2ActionAnchored: '为 {{eventName}} 生成攻略',
-    step3Title: '发布招募帖',
-    step3Desc:
-      '在 {{eventName}} 下发公开招募帖，填写出发地、人数等信息，寻找同行伙伴（平台不撮合、不提供私信）。',
+      '选好活动后，浏览公开招募或发一条让同场 Raver 看见你。We Are One——我们因同一场活动而相聚（平台不撮合、不提供私信）。',
+    step2ActionBrowse: '浏览招募墙',
+    step2ActionPost: '发招募',
+    step3Title: '生成出行攻略',
+    step3Desc: '在 {{eventName}} 详情页生成交通、住宿与散场参考（AI 内容仅供参考）。',
     step3DescBrowse:
-      '选好活动后，可填写出发地、人数等信息发布公开招募帖（平台不撮合、不提供私信）。',
-    step3ActionAnchored: '为 {{eventName}} 发招募帖',
+      '选好活动后，在活动详情页生成交通、住宿与散场参考（AI 内容仅供参考）。',
+    step3ActionAnchored: '为 {{eventName}} 生成攻略',
     stepNeedsEvent: '需先选活动',
   },
   eventDetail: {
@@ -978,6 +983,7 @@ export const zhCN: MessageTree = {
     },
     noPerformanceSchedule: '暂无演出排期，请稍后重试',
     shareComingSoon: '分享功能即将上线',
+    generateWallpaper: '生成屏保',
     generatingWallpaper: '生成屏保中…',
     saveFailed: '保存失败，请重试',
     wallpaperSavedWithItinerary: '行程已保存，屏保已存入相册',
@@ -1036,6 +1042,28 @@ export const zhCN: MessageTree = {
     soulDj: '灵魂 DJ：{{djName}}',
     similarityLabel: '灵魂相似度',
     aiAnalysis: '💬 AI 分析',
+    analysis: {
+      type: {
+        rager:
+          '你追求极致的能量释放，相信音乐是集体狂欢的催化剂。你不在乎编曲拆解，你在乎 drop 下来的那一刻，全场和你一起甩头的共鸣。',
+        connoisseur:
+          '你把 set 当作完整作品来听，在意制作人的叙事与音色选择。你宁愿错过主舞台 hype，也不愿错过一段真正打动你的 progression。',
+        vibe_curator:
+          '现场对你来说是社交场，音乐是让大家靠近彼此的背景。你记得的不只是 drop，还有霓虹灯下那些一起笑、一起跳的面孔。',
+        zen_raver:
+          '你不抢前排，不追 hype，在人群里保留自己的节奏。你享受的是氛围本身——灯光、风声、和陌生人一起安静听完一首歌的感动。',
+        documentarian:
+          '手机是你的第二双眼，drop 是你的剪辑点。你不只是参与者，也是传播者——把现场能量装进 15 秒，让更多人感受到那一刻。',
+      },
+      blendNote:
+        '你的人格构成约 {{primaryPercent}}% {{primaryLabel}}、{{secondaryPercent}}% {{secondaryLabel}}，现场会同时在意能量与审美。',
+      genreNote: '偏好曲风：{{genres}}。',
+      soulMatch: '与你灵魂最接近的 DJ 是 {{djName}}（匹配度 {{score}}%）。',
+      eventWithSoulDj: '「{{eventName}}」阵容已官宣，含你的本命 DJ {{djName}}。',
+      eventWithDjs: '「{{eventName}}」阵容已官宣，含 {{djs}} 等你偏好的艺人。',
+      eventBrowseMore: '可前往活动页浏览更多场次，阵容公布后会再为你匹配。',
+      djListSeparator: '、',
+    },
     spiritConnection: '🎵 你们的精神连接',
     lineupAnnounced: '📍 阵容已官宣 · 你的本命 DJ 在列',
     lineupRecommendation: '阵容推荐',
@@ -1077,8 +1105,8 @@ export const zhCN: MessageTree = {
     savingPoster: '保存海报中…',
     posterSaved: '已保存到相册',
     albumPermissionDenied: '未获得相册权限',
-    shareTitle: '我是「{{label}}」型 Raver，测测你的本命 DJ',
-    shareFallbackSuffix: '测测你的本命 DJ',
+    shareTitle: '我是「{{label}}」型 Raver — We Are One',
+    shareFallbackSuffix: '测测你的电音人格 — We Are One',
     pendingDraft: '待发布 · 草稿',
     switchToLocal: '已改为本地检索，找到 {{count}} 条公开招募',
     matchFound: '找到 {{count}} 条合适的公开招募',
@@ -1143,7 +1171,7 @@ export const zhCN: MessageTree = {
     editPicks: '再改心愿',
     revoteLimit: '今日改票次数已用完',
     disclaimer: '全场榜为聚合统计，仅供参考；不展示其他用户投票明细。',
-    shareTitle: '{{activityName}} · 我投了这 3 场 Set',
+    shareTitle: '{{activityName}} · 我投了这 3 场 Set，你呢？',
     friendShare: '好友分享',
     friendPicks: 'TA 在 {{activityName}} 投了这些 Set',
     topTeaser: '全场 TOP',
@@ -1157,5 +1185,89 @@ export const zhCN: MessageTree = {
     posterMyPicks: '我的心愿',
     posterTop3: '全场 TOP3',
     posterDisclaimer: '公开招募与资讯平台，不撮合、不售票',
+  },
+  plur: {
+    entry: {
+      title: 'PLUR',
+      tagline: 'Peace · Love · Unity · Respect',
+      watchFilm: '观看 PLUR 短片（约 10s）',
+      skip: '跳过，开始使用',
+      learnMore: '了解 PLUR 是什么',
+    },
+    culturePage: {
+      watchFilm: '观看 PLUR 短片',
+      readGuidelines: '阅读社区规范',
+    },
+    about: {
+      title: '关于 SYNC',
+      spiritHeading: 'PLUR 社区精神',
+      spiritDesc:
+        'SYNC 是电音节资讯与公开招募工具，倡导 PLUR 社区态度——Peace、Love、Unity、Respect；平台不撮合、不售票、不提供站内联系。',
+      watchFilm: '观看 PLUR 短片',
+      readCulture: '阅读说明',
+      version: '版本 {{version}}',
+      versionDevelop: '版本 开发版',
+      versionTrial: '版本 体验版',
+    },
+    applyTemplate: {
+      greeting: '你好，我也去这场，想一起 Rave。',
+      lineWithDeparture: '人数：{{headcount}} 人 · 出发：{{departure}} · 时间可配合。',
+      lineWithoutDeparture: '人数：{{headcount}} 人 · 时间可配合。',
+      publicFooter: '（公开回复，请勿留联系方式）',
+    },
+    respectConfirm: {
+      label: '我了解这是公开回复，不含联系方式，尊重招募方与其他 Raver',
+      requiredToast: '请先确认公开回复规则',
+    },
+    unityIndex: {
+      summary: 'Unity · {{recruitCount}} 条公开招募 · {{registerCount}} 人关注这场',
+      emptyPrefix: '暂无公开招募 · ',
+      emptyCta: '发一条',
+      emptySuffix: '让同场 Raver 看见你',
+    },
+    unityTags: {
+      sectionTitle: 'Unity 标签（可选，最多 3 个）',
+      welcome_newbie: '欢迎新手',
+      women_friendly: '女生友好',
+      multi_day: '多日联票',
+      same_departure: '同出发地优先',
+      pure_rave: '纯 Rave',
+      afterparty_ok: 'Afterparty 随缘',
+      early_bird: '早鸟组队',
+      budget_friendly: '预算友好',
+    },
+    responsibility: {
+      sectionTitle: 'PLURR · 行前责任',
+      disclaimer: '个人备忘，平台不担保现场安全',
+      hydration: {
+        title: '补水 / 电解质',
+        hint: '长时间跳舞容易脱水，随身带水或电解质饮料',
+      },
+      tell_someone: {
+        title: '告知亲友行程',
+        hint: '让家人或朋友知道你去哪场、大概何时回来',
+      },
+      earplugs_shoes: {
+        title: '备耳塞、舒适鞋',
+        hint: '保护听力，穿能站很久的鞋',
+      },
+      exit_plan: {
+        title: '散场交通方案',
+        hint: '提前想好回程路线，避开高峰拥堵',
+      },
+      leave_no_trace: {
+        title: '垃圾随身带走',
+        hint: '现场不乱扔，带走自己的废弃物',
+      },
+      look_out: {
+        title: '照顾同队与身边陌生人（线下）',
+        hint: '留意队友状态，必要时线下求助现场安保或医护',
+      },
+    },
+    peaceBanner: {
+      message:
+        'Peace · 大型现场人多，保持平和：不争抢、不推搡，遇摩擦先退让。仅供参考。',
+      close: '关闭',
+    },
   },
 };

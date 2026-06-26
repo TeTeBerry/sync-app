@@ -17,6 +17,7 @@ import { resolveAvatarDisplaySrc, thumbnailImageUrl } from '../../../utils/image
 import { IMAGE_SIZE } from '../../../constants/imageSizes';
 import { isCurrentUserPostAuthor } from '../../../utils/postOwnership';
 import type { EventDetailPost } from '../../../types/backend';
+import { RecruitUnityTagChips } from '../../../components/post/RecruitUnityTagChips';
 import { stripPostBodyContact } from '../../../utils/postBodyContact';
 import { formatPostHandle } from '../utils/eventPostDisplay';
 import { resolveBuddyPostRecruitDisplay } from '../utils/parseBuddyPostRecruitDisplay';
@@ -251,6 +252,8 @@ function EventPostCardInner({
       </View>
 
       {displayBody ? <Text className="s-event-post__text">{displayBody}</Text> : null}
+
+      <RecruitUnityTagChips tagIds={post.recruitUnityTags} />
 
       {visibleTags.length > 0 || showProgress ? (
         <View className="s-event-post__meta-row">

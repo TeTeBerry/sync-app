@@ -5,6 +5,7 @@ import { Button } from '../../../components/ui';
 import {
   TravelGuideBudgetCompareCards,
   TravelGuideDetailView,
+  TravelGuidePeaceBanner,
   useAiTravelGuidePage,
 } from '@/domains/travel-guide';
 import { TravelPlanReceiptOcrTip } from '@/domains/travel-plan';
@@ -51,6 +52,10 @@ const AiTravelGuidePage = () => {
             style={{ height: `${page.mainScrollHeight ?? 480}px` }}
           >
             <View className="s-ai-travel-guide-page__inner">
+              <TravelGuidePeaceBanner
+                visible={page.showPeaceBanner}
+                onDismiss={page.handleDismissPeaceBanner}
+              />
               {page.payload.plan.accommodationNights > 0 ? (
                 <TravelGuideBudgetCompareCards
                   headcount={page.payload.plan.headcount}

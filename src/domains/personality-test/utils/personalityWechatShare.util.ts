@@ -2,6 +2,7 @@ import { t } from '@/i18n';
 import type { PersonalityTestCatalog } from '../personalityTestCatalog';
 import { getPersonalityMeta } from '../personalityTestCatalog';
 import type { PersonalityTestResult, RaverPersonalityType } from '../types';
+import { buildPlurPeaceShareImageUrl } from '@/utils/plurShareImage.util';
 import { ROUTES } from '@/utils/route';
 import { buildQueryString } from '@/utils/queryString';
 
@@ -50,18 +51,26 @@ export function buildPersonalityTestSharePath(result: PersonalityTestResult): st
   return qs ? `${ROUTES.PERSONALITY_TEST}?${qs}` : ROUTES.PERSONALITY_TEST;
 }
 
-export function buildPersonalityTestShareAppMessage(result: PersonalityTestResult) {
+export function buildPersonalityTestShareAppMessage(
+  result: PersonalityTestResult,
+  catalog?: PersonalityTestCatalog | null,
+) {
   return {
-    title: buildPersonalityTestShareTitle(result),
+    title: buildPersonalityTestShareTitle(result, catalog),
     path: buildPersonalityTestSharePath(result),
+    imageUrl: buildPlurPeaceShareImageUrl(),
   };
 }
 
-export function buildPersonalityTestShareTimeline(result: PersonalityTestResult) {
+export function buildPersonalityTestShareTimeline(
+  result: PersonalityTestResult,
+  catalog?: PersonalityTestCatalog | null,
+) {
   const query = buildPersonalityTestSharePath(result).split('?')[1] ?? '';
   return {
-    title: buildPersonalityTestShareTitle(result),
+    title: buildPersonalityTestShareTitle(result, catalog),
     query,
+    imageUrl: buildPlurPeaceShareImageUrl(),
   };
 }
 
@@ -106,11 +115,13 @@ export function buildPersonalityTestShareFallback() {
   return {
     title: buildShareFallbackTitle(),
     path: ROUTES.PERSONALITY_TEST,
+    imageUrl: buildPlurPeaceShareImageUrl(),
   };
 }
 
 export function buildPersonalityTestTimelineFallback() {
   return {
     title: buildShareFallbackTitle(),
+    imageUrl: buildPlurPeaceShareImageUrl(),
   };
 }

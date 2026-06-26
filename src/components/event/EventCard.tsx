@@ -14,8 +14,7 @@ import {
 import { Text, View } from '@tarojs/components';
 import { formatEventHeroMetaLine } from '../../utils/eventCardDisplay';
 import { PLACEHOLDER_EVENT_HERO } from '../../constants/remoteImages';
-import { thumbnailImageUrl } from '../../utils/imageUrl';
-import { IMAGE_SIZE } from '../../constants/imageSizes';
+import { activityCoverImageUrl } from '../../utils/imageUrl';
 import { resolveEventCardLegacyId } from '../../utils/apiMappers';
 import { useRouteTransitionActive } from '../../utils/route';
 import { useT } from '@/hooks/useI18n';
@@ -100,11 +99,7 @@ const EventCardInner: React.FC<EventCardProps> = ({
     confirmUnfollow,
   });
   const isNavigating = useRouteTransitionActive(legacyId ?? undefined);
-  const thumbSrc = thumbnailImageUrl(
-    image,
-    variant === 'list' ? IMAGE_SIZE.eventCardHero : IMAGE_SIZE.eventCardCompact,
-    variant === 'list' ? 0.5 : 1,
-  );
+  const thumbSrc = activityCoverImageUrl(image) ?? image;
   const status = getActivityStatusFromActivity(date, title);
   const heroSubtitle = useMemo(
     () => formatEventHeroMetaLine(date, location),

@@ -397,6 +397,28 @@
     &--pressed {
       opacity: 0.88;
     }
+
+    &--loading {
+      opacity: 0.92;
+      box-shadow: none;
+    }
+  }
+
+  &__footer-btn-spinner {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.25);
+    border-top-color: #fff;
+    border-radius: 50%;
+    box-sizing: border-box;
+    animation: s-my-itinerary-footer-spin 0.7s linear infinite;
+  }
+
+  @keyframes s-my-itinerary-footer-spin {
+    to {
+      transform: rotate(360deg);
+    }
   }
 
   &__share-btn {

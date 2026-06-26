@@ -1,5 +1,6 @@
 import { t } from '@/i18n';
 import type { SetVoteLeaderboardEntry, SetVotePick } from '@/types/activity';
+import { buildPlurPeaceShareImageUrl } from '@/utils/plurShareImage.util';
 import { ROUTES } from '@/utils/route';
 import { buildQueryString } from '@/utils/queryString';
 import {
@@ -46,6 +47,7 @@ export function buildSetVoteShareAppMessage(input: {
   return {
     title: buildSetVoteShareTitle(input.activityName),
     path: buildSetVoteSharePath(input),
+    imageUrl: buildPlurPeaceShareImageUrl(),
   };
 }
 
@@ -58,6 +60,7 @@ export function buildSetVoteShareTimeline(input: {
   return {
     title: buildSetVoteShareTitle(input.activityName),
     query,
+    imageUrl: buildPlurPeaceShareImageUrl(),
   };
 }
 

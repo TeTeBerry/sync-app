@@ -1,0 +1,14 @@
+.s-event-detail-info__meta-group {
+  display: flex;
+  flex-direction: column;
+  margin: 12px var(--s-page-gutter) 0;
+  box-sizing: border-box;
+}
+
+.s-event-detail-info__meta-group > .s-event-detail-info__meta-card {
+  margin: 0;
+}
+
+.s-event-detail-info__meta-group > .s-activity-update-subscribe--banner {
+  margin-top: 8px;
+}

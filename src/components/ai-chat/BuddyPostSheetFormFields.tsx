@@ -1,6 +1,7 @@
 import { Users } from '../../components/icons';
 import { PlaceAutocompleteField } from './PlaceAutocompleteField';
 import { BuddyPostDateRangeField } from './BuddyPostDateRangeField';
+import { BuddyPostUnityTagsField } from './BuddyPostUnityTagsField';
 import { Input, Text, Textarea, View } from '@tarojs/components';
 import type { useBuddyPostSheetForm } from './useBuddyPostSheetForm';
 import { useT } from '@/hooks/useI18n';
@@ -97,6 +98,11 @@ export function BuddyPostSheetFormFields({
           </View>
         </View>
       ) : null}
+
+      <BuddyPostUnityTagsField
+        selected={form.recruitUnityTags}
+        onToggle={form.toggleRecruitUnityTag}
+      />
     </View>
   );
 }

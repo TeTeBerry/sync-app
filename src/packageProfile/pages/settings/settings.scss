@@ -307,3 +307,77 @@ button[type='default'].s-settings__option {
     opacity: 0.85;
   }
 }
+
+.s-settings__about {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.s-settings__about-card {
+  padding: 16px;
+}
+
+.s-settings__about-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.s-settings__about-heading {
+  font-size: var(--s-type-body);
+  font-weight: var(--s-fw-semibold);
+  color: #fff;
+}
+
+.s-settings__about-desc {
+  font-size: var(--s-type-meta);
+  color: var(--muted-foreground);
+  line-height: 1.5;
+}
+
+.s-settings__about-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.s-settings__about-action {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: var(--radius-full);
+  font-family: var(--fontSans);
+  box-sizing: border-box;
+
+  &--primary {
+    background: var(--primary);
+    color: var(--primary-foreground);
+  }
+
+  &--secondary {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  &--pressed {
+    opacity: 0.88;
+  }
+}
+
+.s-settings__about-action-label {
+  font-size: var(--s-type-body-sm);
+  font-weight: var(--s-fw-semibold);
+  color: inherit;
+  line-height: 1.2;
+}
+
+.s-settings__about-version {
+  display: block;
+  text-align: center;
+  font-size: var(--s-type-meta);
+  color: var(--muted-foreground);
+}

@@ -48,6 +48,7 @@ export function defaultBuddyPostForm(
     location: '',
     headcount: '',
     tags: ['team'],
+    recruitUnityTags: [],
     note: '',
   };
 }

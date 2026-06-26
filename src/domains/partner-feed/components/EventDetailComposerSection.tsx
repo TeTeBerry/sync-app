@@ -6,6 +6,7 @@ import {
   Plane,
   Sparkles,
 } from '../../../components/icons';
+import { EventDetailPlurrChecklist } from './EventDetailPlurrChecklist';
 import { EventDetailPrepActions } from './EventDetailPrepActions';
 import type { FestivalPlanChecklist, FestivalPlanTask } from '@/domains/festival-plan';
 import { Button, cn } from '../../../components/ui';
@@ -33,6 +34,7 @@ export type EventDetailComposerSectionProps = {
   favorGenres?: string[];
   unreadReplyCount?: number;
   onPrepNudgeAction?: (action: PrepNudgeAction) => void;
+  activityLegacyId?: number;
 };
 
 export const EventDetailComposerSection: React.FC<EventDetailComposerSectionProps> = ({
@@ -48,6 +50,7 @@ export const EventDetailComposerSection: React.FC<EventDetailComposerSectionProp
   favorGenres,
   unreadReplyCount = 0,
   onPrepNudgeAction,
+  activityLegacyId,
 }) => {
   const t = useT();
   const [expanded, setExpanded] = useState(false);
@@ -205,6 +208,9 @@ export const EventDetailComposerSection: React.FC<EventDetailComposerSectionProp
               onOpenExclusiveItinerary={onOpenExclusiveItinerary}
               onFestivalPlanTaskPress={onFestivalPlanTaskPress}
             />
+            {activityLegacyId != null && activityLegacyId > 0 ? (
+              <EventDetailPlurrChecklist activityLegacyId={activityLegacyId} />
+            ) : null}
           </View>
         ) : null}
       </View>

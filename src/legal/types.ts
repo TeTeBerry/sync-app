@@ -1,4 +1,8 @@
-export type LegalDocId = 'user-agreement' | 'privacy-policy' | 'community-guidelines';
+export type LegalDocId =
+  | 'user-agreement'
+  | 'privacy-policy'
+  | 'community-guidelines'
+  | 'plur-culture';
 
 export interface LegalSection {
   title: string;

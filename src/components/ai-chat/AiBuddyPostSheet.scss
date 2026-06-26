@@ -593,4 +593,13 @@
     padding: 14px;
     box-sizing: border-box;
   }
+
+  &__unity-tags {
+    margin-top: 4px;
+  }
+
+  &__unity-chip-row {
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
 }

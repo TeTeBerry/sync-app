@@ -173,6 +173,11 @@ function appendTencentCosThumbnail(url: URL, width: number, height: number): str
   return url.toString();
 }
 
+/** Activity/event hero covers — full CDN resolution, no imageView2 resize. */
+export function activityCoverImageUrl(src: string | undefined): string | undefined {
+  return sanitizeRemoteImageUrl(src);
+}
+
 export function thumbnailImageUrl(
   src: string | undefined,
   width = 240,

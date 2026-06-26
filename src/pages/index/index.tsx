@@ -46,12 +46,19 @@ import {
 } from './utils/homeFeaturedIndex';
 import { resolveHomeFindTeamActivityId } from './utils/resolveHomeActivityId';
 import { useHomeFestivalPlanNavigation } from '@/domains/festival-plan';
+import {
+  countPlurrResponsibilityChecked,
+  loadPlurrResponsibility,
+} from '@/utils/plurResponsibility.storage';
 import { getActiveActivityLegacyId } from '@/domains/activity-scope';
 import { useNavBarInsets } from '../../hooks/useNavBarInsets';
 import { useEndRouteTransitionOnShow } from '../../hooks/useEndRouteTransitionOnShow';
 import { OverlayAwareScrollView } from '../../components/layout/OverlayAwareScrollView';
 import { PlatformDisclaimer } from '../../components/legal/PlatformDisclaimer';
 import { NewUserOnboardingSheet } from '../../components/onboarding/NewUserOnboardingSheet';
+import { PlurEntrySheet } from '@/components/plur/PlurEntrySheet';
+import { useFirstRunOrchestrator } from '../../hooks/useFirstRunOrchestrator';
+import { goPlurCulture, goPlurFilmFromEntry } from '@/utils/plurRoute';
 import { useNewUserOnboarding } from '../../hooks/useNewUserOnboarding';
 import { useT } from '@/hooks/useI18n';
 import { View } from '@tarojs/components';
@@ -81,8 +88,11 @@ const Home = () => {
     enabled: isLoggedIn(),
   });
 
+  const [plurrRefreshTick, setPlurrRefreshTick] = useState(0);
+
   useDidShow(() => {
     preloadHotRoutes(ROUTES.HOME);
+    setPlurrRefreshTick((tick) => tick + 1);
   });
 
   const featuredEventsKey = useMemo(
@@ -128,8 +138,32 @@ const Home = () => {
     setFeaturedIndex((prev) => (prev + 1) % featuredEvents.length);
   }, [featuredEvents.length]);
 
-  const { onboardingOpen, onboardingSteps, dismissOnboarding } = useNewUserOnboarding({
+  const {
+    plurEntryOpen,
+    onboardingOpen,
+    highlightStepIndex,
+    setOnboardingOpen,
+    dismissPlurEntry,
+    completePlurEntryWithoutL2,
+  } = useFirstRunOrchestrator();
+
+  const handlePlurWatchFilm = useCallback(() => {
+    completePlurEntryWithoutL2();
+    goPlurFilmFromEntry({
+      from: 'first_visit',
+      activityLegacyId: featuredLegacyId,
+    });
+  }, [completePlurEntryWithoutL2, featuredLegacyId]);
+
+  const handlePlurLearnMore = useCallback(() => {
+    completePlurEntryWithoutL2();
+    goPlurCulture();
+  }, [completePlurEntryWithoutL2]);
+
+  const { onboardingSteps, dismissOnboarding } = useNewUserOnboarding({
     featuredEvent,
+    open: onboardingOpen,
+    onOpenChange: setOnboardingOpen,
   });
 
   const handleNotification = useCallback(() => {
@@ -168,6 +202,13 @@ const Home = () => {
   );
 
   const homeFestivalPlan = useHomeFestivalPlanNavigation(nextSelectedEvent?.id);
+  const plurrCheckedCount = useMemo(() => {
+    const activityLegacyId = nextSelectedEvent?.id;
+    if (activityLegacyId == null || activityLegacyId <= 0) {
+      return 0;
+    }
+    return countPlurrResponsibilityChecked(loadPlurrResponsibility(activityLegacyId));
+  }, [nextSelectedEvent?.id, plurrRefreshTick]);
 
   const openHomeActivity = useCallback(
     (
@@ -279,6 +320,7 @@ const Home = () => {
                 }
                 onFestivalPlanPress={homeFestivalPlan.openFestivalPlanHub}
                 onNextTaskPress={homeFestivalPlan.onTaskPress}
+                plurrCheckedCount={plurrCheckedCount}
               />
             ) : null}
 
@@ -310,11 +352,19 @@ const Home = () => {
         <PlatformDisclaimer variant="fixed" />
       </View>
 
+      <PlurEntrySheet
+        open={plurEntryOpen}
+        onSkip={dismissPlurEntry}
+        onWatchFilm={handlePlurWatchFilm}
+        onLearnMore={handlePlurLearnMore}
+      />
+
       <NewUserOnboardingSheet
         open={onboardingOpen}
         steps={onboardingSteps}
         featuredEvent={featuredEvent}
         featuredEventCount={featuredEvents.length}
+        highlightStepIndex={highlightStepIndex}
         onNextFeaturedEvent={handleNextFeaturedEvent}
         onDismiss={dismissOnboarding}
       />

@@ -4,6 +4,7 @@ export type BuildRecruitApplyCommentDraftInput = {
   post: Pick<EventDetailPost, 'location' | 'departureCity' | 'body' | 'bodyPreview'>;
   userLocation?: string;
   travelGuide?: { departure?: string; headcount?: number };
+  t: (key: string, params?: Record<string, string | number>) => string;
 };
 
 const DEFAULT_HEADCOUNT = 2;
@@ -35,10 +36,15 @@ export function buildRecruitApplyCommentDraft(
 ): string {
   const headcount = resolveHeadcount(input.travelGuide);
   const departure = resolveDeparture(input);
+  const { t } = input;
 
-  if (departure) {
-    return `想加入，${headcount}人，${departure}出发，时间可配合`;
-  }
+  const detailLine = departure
+    ? t('plur.applyTemplate.lineWithDeparture', { headcount, departure })
+    : t('plur.applyTemplate.lineWithoutDeparture', { headcount });
 
-  return '想加入，时间可配合';
+  return [
+    t('plur.applyTemplate.greeting'),
+    detailLine,
+    t('plur.applyTemplate.publicFooter'),
+  ].join('\n');
 }

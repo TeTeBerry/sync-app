@@ -1,6 +1,7 @@
 /**
  * Remote image request widths (logical CSS px × ~2 for retina).
- * Apply at display time via `thumbnailImageUrl` — do not bake into mapped API data.
+ * Activity covers use `activityCoverImageUrl` (full resolution).
+ * Avatars/list thumbs use `thumbnailImageUrl` at display time.
  */
 export const IMAGE_SIZE = {
   avatarSm: 96,

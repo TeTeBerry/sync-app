@@ -1,7 +1,7 @@
 import { LEGAL_CONSENT_VERSION } from '../constants';
 import type { LegalDocument } from '../types';
 
-export const LEGAL_UPDATED_LABEL_EN = 'June 23, 2026';
+export const LEGAL_UPDATED_LABEL_EN = 'June 26, 2026';
 
 export const userAgreementEn: LegalDocument = {
   id: 'user-agreement',

@@ -1,0 +1,26 @@
+{
+  "name": "@sync/plur-film-h5",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -p tsconfig.json --noEmit && vite build && node scripts/fix-wechat-index.mjs",
+    "preview": "vite preview --port 5174 --host",
+    "serve:weapp": "npm run build && vite preview --port 5174 --host",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "export:mp4": "npm run build && node scripts/export-mp4.mjs",
+    "prepare:hosting": "npm run build && node scripts/prepare-hosting.mjs",
+    "deploy:hosting": "node scripts/deploy-hosting.mjs",
+    "check:domain": "node scripts/check-business-domain.mjs"
+  },
+  "dependencies": {
+    "gsap": "^3.13.0"
+  },
+  "devDependencies": {
+    "@cloudbase/cli": "^3.5.8",
+    "playwright": "^1.52.0",
+    "typescript": "~5.9.3",
+    "vite": "^6.3.5"
+  }
+}

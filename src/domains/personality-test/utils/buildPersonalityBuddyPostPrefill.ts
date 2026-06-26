@@ -37,6 +37,7 @@ export function buildPersonalityBuddyPostPrefill(
     location: '',
     headcount: '2',
     tags: ['team'],
+    recruitUnityTags: [],
     note: noteParts.length ? noteParts.join(' · ') : undefined,
   };
 

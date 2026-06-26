@@ -267,6 +267,7 @@ export const enUS: MessageTree = {
       notificationsOff: 'Off',
       privacy: 'Privacy & security',
       legal: 'Legal',
+      about: 'About SYNC',
       help: 'Help & feedback',
       logout: 'Sign out',
       language: 'Language',
@@ -329,10 +330,11 @@ export const enUS: MessageTree = {
       'user-agreement': 'User Agreement',
       'privacy-policy': 'Privacy Policy',
       'community-guidelines': 'Community Guidelines',
+      'plur-culture': 'PLUR Culture',
     },
     docNotFound: 'Document not found',
     docTitle: 'Document',
-    updatedLabel: 'June 18, 2026',
+    updatedLabel: 'June 26, 2026',
     meta: '{{app}} · Updated {{date}} · v{{version}}',
     footerOperator: 'Operator: {{name}}',
     footerContact: 'Contact: {{email}}',
@@ -473,6 +475,7 @@ export const enUS: MessageTree = {
       lineupPending:
         'Lineup not announced yet — subscribe for updates; browse public recruits meanwhile',
     },
+    plurrProgress: 'Responsibility {{checked}}/{{total}}',
   },
   eventCard: {
     category: 'Festival',
@@ -596,30 +599,32 @@ export const enUS: MessageTree = {
     empty: 'No lineup available',
   },
   onboarding: {
-    sheetTitle: '3 steps to plan a festival',
+    sheetTitle: '3 steps · find events & teams',
     sheetSubtitle:
       'Free info and tools. We do not sell tickets or provide in-app contact or guarantees.',
     skip: 'Skip',
     featuredLabel: 'Featured event',
     pickAnother: 'See another',
+    plurHint: 'Curious about PLUR? Settings → About SYNC',
     step1Title: 'Pick an event',
     step1Desc:
       'Browse festivals in Events, or start from the featured event above. Selecting records your interest automatically.',
     step1DescBrowse: 'Browse festivals in Events and pick one you want to attend.',
     step1ActionFeatured: 'View {{eventName}}',
     step1ActionList: 'Browse events',
-    step2Title: 'Generate a travel guide',
+    step2Title: 'Unity · find your crew',
     step2Desc:
-      'On the {{eventName}} detail page, get transport, stay, and exit tips (AI content is for reference).',
+      'On the {{eventName}} detail page, browse public recruit posts or publish one so fellow ravers can see you. We Are One — we gather for the same event (we do not match or provide in-app contact).',
     step2DescBrowse:
-      'After you pick an event, generate transport, stay, and exit tips on its detail page (AI content is for reference).',
-    step2ActionAnchored: 'Travel guide for {{eventName}}',
-    step3Title: 'Publish a recruit post',
+      'After you pick an event, browse public recruit posts or publish one so fellow ravers can see you. We Are One — we gather for the same event (we do not match or provide in-app contact).',
+    step2ActionBrowse: 'Browse recruit wall',
+    step2ActionPost: 'Publish recruit',
+    step3Title: 'Generate a travel guide',
     step3Desc:
-      'Post a public recruit for {{eventName}} with departure, headcount, and plans to find buddies (we do not match or provide in-app contact).',
+      'On the {{eventName}} detail page, get transport, stay, and exit tips (AI content is for reference).',
     step3DescBrowse:
-      'After you pick an event, share departure, headcount, and plans in a public recruit post (we do not match or provide in-app contact).',
-    step3ActionAnchored: 'Recruit post for {{eventName}}',
+      'After you pick an event, generate transport, stay, and exit tips on its detail page (AI content is for reference).',
+    step3ActionAnchored: 'Travel guide for {{eventName}}',
     stepNeedsEvent: 'Pick an event first',
   },
   eventDetail: {
@@ -1009,6 +1014,7 @@ export const enUS: MessageTree = {
     },
     noPerformanceSchedule: 'No performance schedule yet. Please try again later.',
     shareComingSoon: 'Sharing feature coming soon',
+    generateWallpaper: 'Save wallpaper',
     generatingWallpaper: 'Generating wallpaper…',
     saveFailed: 'Save failed. Please retry.',
     wallpaperSavedWithItinerary: 'Itinerary saved and wallpaper saved to album',
@@ -1072,6 +1078,31 @@ export const enUS: MessageTree = {
     soulDj: 'Soul DJ: {{djName}}',
     similarityLabel: 'Soul similarity',
     aiAnalysis: '💬 AI analysis',
+    analysis: {
+      type: {
+        rager:
+          'You chase peak energy and treat music as fuel for collective release. You are not here to dissect arrangements—you are here for the drop when the whole floor moves as one.',
+        connoisseur:
+          'You listen to a set as a complete work, caring about the producer’s narrative and sound design. You would rather miss main-stage hype than miss a progression that truly moves you.',
+        vibe_curator:
+          'The floor is your social stage and music is the backdrop that brings people closer. You remember not only the drops, but the faces laughing and dancing under the lights.',
+        zen_raver:
+          'You do not fight for the rail or chase every hype moment—you keep your own rhythm in the crowd. You are here for the atmosphere: lights, air, and strangers quietly feeling the same song.',
+        documentarian:
+          'Your phone is a second pair of eyes and every drop is an edit point. You are not only in the moment—you capture it in 15 seconds so others can feel it too.',
+      },
+      blendNote:
+        'Your persona is about {{primaryPercent}}% {{primaryLabel}} and {{secondaryPercent}}% {{secondaryLabel}}—on site you care about both energy and taste.',
+      genreNote: 'Preferred genres: {{genres}}.',
+      soulMatch: 'Your closest soul match is {{djName}} ({{score}}% match).',
+      eventWithSoulDj:
+        'The lineup for “{{eventName}}” is out, and your soul DJ {{djName}} is on it.',
+      eventWithDjs:
+        'The lineup for “{{eventName}}” is out, featuring {{djs}} and more artists you will love.',
+      eventBrowseMore:
+        'Browse more events in the catalog—we will match you again when more lineups drop.',
+      djListSeparator: ' and ',
+    },
     spiritConnection: '🎵 Your spiritual connection',
     lineupAnnounced: '📍 Lineup announced · Your soul DJ is in',
     lineupRecommendation: 'Lineup recommendations',
@@ -1113,8 +1144,8 @@ export const enUS: MessageTree = {
     savingPoster: 'Saving poster…',
     posterSaved: 'Saved to album',
     albumPermissionDenied: 'Album permission denied',
-    shareTitle: 'I am a {{label}} Raver — find your soul DJ',
-    shareFallbackSuffix: 'Find your soul DJ',
+    shareTitle: 'I\'m a "{{label}}" Raver — We Are One',
+    shareFallbackSuffix: 'Discover your Raver persona — We Are One',
     pendingDraft: 'Pending · Draft',
     switchToLocal: 'Switched to local search, found {{count}} public recruit posts',
     matchFound: 'Found {{count}} relevant public recruit posts',
@@ -1180,7 +1211,7 @@ export const enUS: MessageTree = {
     editPicks: 'Edit picks',
     revoteLimit: 'Daily edit limit reached',
     disclaimer: 'Board shows aggregated stats only; individual votes are not shown.',
-    shareTitle: '{{activityName}} · My 3 must-see sets',
+    shareTitle: '{{activityName}} · My 3 must-see sets — what about you?',
     friendShare: 'Friend shared',
     friendPicks: 'Their picks for {{activityName}}',
     topTeaser: 'Festival TOP',
@@ -1194,5 +1225,93 @@ export const enUS: MessageTree = {
     posterMyPicks: 'My picks',
     posterTop3: 'TOP 3',
     posterDisclaimer: 'Public recruits & info only — no ticketing or matching',
+  },
+  plur: {
+    entry: {
+      title: 'PLUR',
+      tagline: 'Peace · Love · Unity · Respect',
+      watchFilm: 'Watch PLUR film (~10s)',
+      skip: 'Skip and start',
+      learnMore: 'What is PLUR?',
+    },
+    culturePage: {
+      watchFilm: 'Watch PLUR film',
+      readGuidelines: 'Read community guidelines',
+    },
+    about: {
+      title: 'About SYNC',
+      spiritHeading: 'PLUR community spirit',
+      spiritDesc:
+        'SYNC is a free festival info and public recruit board. We embrace PLUR — Peace, Love, Unity, Respect. We do not match people, sell tickets, or provide in-app contact.',
+      watchFilm: 'Watch PLUR short film',
+      readCulture: 'Read more',
+      version: 'Version {{version}}',
+      versionDevelop: 'Development build',
+      versionTrial: 'Trial build',
+    },
+    applyTemplate: {
+      greeting: "Hi, I'm going too and would love to rave together.",
+      lineWithDeparture:
+        'Party size: {{headcount}} · From: {{departure}} · Flexible on timing.',
+      lineWithoutDeparture: 'Party size: {{headcount}} · Flexible on timing.',
+      publicFooter: '(Public reply — no contact info please.)',
+    },
+    respectConfirm: {
+      label:
+        'I understand this is a public reply with no contact info, and I respect the host and other ravers',
+      requiredToast: 'Please confirm the public reply rules first',
+    },
+    unityIndex: {
+      summary:
+        'Unity · {{recruitCount}} public recruits · {{registerCount}} interested',
+      emptyPrefix: 'No public recruits yet · ',
+      emptyCta: 'Post one',
+      emptySuffix: ' so ravers at this event can see you',
+    },
+    unityTags: {
+      sectionTitle: 'Unity tags (optional, up to 3)',
+      welcome_newbie: 'Welcome newcomers',
+      women_friendly: 'Women-friendly',
+      multi_day: 'Multi-day pass',
+      same_departure: 'Same departure city',
+      pure_rave: 'Pure rave',
+      afterparty_ok: 'Afterparty optional',
+      early_bird: 'Early bird team-up',
+      budget_friendly: 'Budget-friendly',
+    },
+    responsibility: {
+      sectionTitle: 'PLURR · Pre-event checklist',
+      disclaimer:
+        'Personal notes only — the platform does not guarantee on-site safety',
+      hydration: {
+        title: 'Hydration / electrolytes',
+        hint: 'Long sets dehydrate you — bring water or electrolyte drinks',
+      },
+      tell_someone: {
+        title: 'Tell someone your plans',
+        hint: 'Let family or friends know which event and when you expect back',
+      },
+      earplugs_shoes: {
+        title: 'Earplugs & comfortable shoes',
+        hint: 'Protect your hearing and wear shoes you can stand in for hours',
+      },
+      exit_plan: {
+        title: 'Exit / transport plan',
+        hint: 'Plan your ride home before the crowd surge',
+      },
+      leave_no_trace: {
+        title: 'Pack out your trash',
+        hint: 'Take your waste with you — leave no trace on site',
+      },
+      look_out: {
+        title: 'Look out for your crew & others (offline)',
+        hint: 'Check on teammates; seek on-site security or medics offline if needed',
+      },
+    },
+    peaceBanner: {
+      message:
+        'Peace · Large crowds can get tense — stay calm, don’t push or shove, and step back if friction arises. For reference only.',
+      close: 'Dismiss',
+    },
   },
 };

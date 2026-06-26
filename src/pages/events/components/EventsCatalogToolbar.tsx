@@ -48,7 +48,6 @@ export const EventsCatalogToolbar: FC<EventsCatalogToolbarProps> = ({
       <EventsCatalogFilterChips
         embedded
         compact
-        singleRow={showSearch}
         region={region}
         timeChip={timeChip}
         showTimeChips={showTimeChips}

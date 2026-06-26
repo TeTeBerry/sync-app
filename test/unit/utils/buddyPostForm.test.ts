@@ -15,6 +15,7 @@ const sampleForm: AiBuddyPostFormValues = {
   location: '上海',
   headcount: '2人',
   tags: ['team'],
+  recruitUnityTags: [],
   note: '女生优先',
 };
 
@@ -24,6 +25,7 @@ describe('buddyPostForm', () => {
     expect(form?.dateStart).toBe('2026-06-13');
     expect(form?.dateEnd).toBe('2026-06-14');
     expect(form?.tags).toEqual(['team']);
+    expect(form?.recruitUnityTags).toEqual([]);
   });
 
   it('defaultBuddyPostFormWithTag always uses team tag', () => {

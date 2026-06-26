@@ -203,6 +203,38 @@
   line-height: 1.35;
 }
 
+.s-post-comments__respect-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.s-post-comments__respect-check {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  margin-top: 1px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.04);
+  box-sizing: border-box;
+
+  &--on {
+    border-color: #ff0066;
+    background: #ff0066;
+    box-shadow: inset 0 0 0 2px #121218;
+  }
+}
+
+.s-post-comments__respect-label {
+  flex: 1;
+  min-width: 0;
+  color: #8e8e93;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
 .s-post-comments__composer {
   display: flex;
   align-items: center;

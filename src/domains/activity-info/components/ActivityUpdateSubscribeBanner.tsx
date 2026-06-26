@@ -1,7 +1,9 @@
 import './ActivityUpdateSubscribeBanner.scss';
 import { Button } from '@/components/ui';
+import { cn } from '@/components/ui/cn';
 import { Music2 } from '@/components/icons';
 import { Text, View } from '@tarojs/components';
+import type { CSSProperties } from 'react';
 import { useT } from '@/hooks/useI18n';
 import { useActivityUpdateSubscribeAction } from '../hooks/useActivityUpdateSubscribeAction';
 
@@ -11,12 +13,16 @@ type ActivityUpdateSubscribeBannerProps = {
   activityLegacyId?: number;
   activityTitle?: string;
   variant?: ActivityUpdateSubscribeBannerVariant;
+  className?: string;
+  style?: CSSProperties;
 };
 
 export function ActivityUpdateSubscribeBanner({
   activityLegacyId,
   activityTitle,
   variant = 'banner',
+  className,
+  style,
 }: ActivityUpdateSubscribeBannerProps) {
   const t = useT();
   const isHero = variant === 'hero';
@@ -47,12 +53,14 @@ export function ActivityUpdateSubscribeBanner({
 
   return (
     <View
-      className={[
+      className={cn(
         's-activity-update-subscribe',
         isHero
           ? 's-activity-update-subscribe--hero'
           : 's-activity-update-subscribe--banner',
-      ].join(' ')}
+        className,
+      )}
+      style={style}
     >
       {isHero ? (
         <>

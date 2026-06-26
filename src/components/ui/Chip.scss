@@ -22,6 +22,11 @@
     border-color: rgba(var(--primary-rgb), 0.42);
   }
 
+  &--disabled {
+    opacity: 0.38;
+    pointer-events: none;
+  }
+
   &:active {
     transform: scale(0.97);
   }

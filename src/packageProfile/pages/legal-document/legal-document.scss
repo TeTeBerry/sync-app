@@ -81,3 +81,43 @@
   font-size: var(--s-type-body);
   color: var(--muted-foreground);
 }
+
+.s-legal-doc__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+.s-legal-doc__action {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: var(--radius-full);
+  font-family: var(--fontSans);
+  box-sizing: border-box;
+
+  &--primary {
+    background: var(--primary);
+    color: var(--primary-foreground);
+  }
+
+  &--secondary {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  &--pressed {
+    opacity: 0.88;
+  }
+}
+
+.s-legal-doc__action-label {
+  font-size: var(--s-type-body-sm);
+  font-weight: var(--s-fw-semibold);
+  color: inherit;
+  line-height: 1.2;
+}

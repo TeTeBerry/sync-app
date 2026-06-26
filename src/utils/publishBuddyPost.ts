@@ -38,6 +38,9 @@ export function buildOptimisticBuddyPost(params: {
     recruitStatus: recruit.recruitStatus,
     ...(recruit.slotsTotal != null ? { slotsTotal: recruit.slotsTotal } : {}),
     ...(recruit.slotsFilled != null ? { slotsFilled: recruit.slotsFilled } : {}),
+    ...(params.form.recruitUnityTags.length
+      ? { recruitUnityTags: params.form.recruitUnityTags }
+      : {}),
   };
 }
 
@@ -67,6 +70,9 @@ export async function publishBuddyPostFromForm(params: {
     recruitStatus: recruit.recruitStatus,
     ...(recruit.slotsTotal != null ? { slotsTotal: recruit.slotsTotal } : {}),
     ...(recruit.slotsFilled != null ? { slotsFilled: recruit.slotsFilled } : {}),
+    ...(form.recruitUnityTags.length
+      ? { recruitUnityTags: form.recruitUnityTags }
+      : {}),
   });
   assertPostPublishedVisible(post);
 
@@ -97,5 +103,6 @@ export async function updateBuddyPostFromForm(params: {
     recruitStatus: params.recruitStatus ?? recruit.recruitStatus,
     ...(recruit.slotsTotal != null ? { slotsTotal: recruit.slotsTotal } : {}),
     ...(recruit.slotsFilled != null ? { slotsFilled: recruit.slotsFilled } : {}),
+    recruitUnityTags: form.recruitUnityTags,
   });
 }

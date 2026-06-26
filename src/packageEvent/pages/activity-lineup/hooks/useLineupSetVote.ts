@@ -38,14 +38,23 @@ function pickIdsEqual(a: string[], b: string[]): boolean {
 export function useLineupSetVote(options: {
   activityLegacyId: number | undefined;
   lineupPublished: boolean;
+  schedulePublished: boolean;
   activityName: string;
   activityDate?: string;
   lineupDjs: ItineraryDj[];
 }) {
   const t = useT();
   const router = useRouter();
-  const { activityLegacyId, lineupPublished, activityName, activityDate, lineupDjs } =
-    options;
+  const {
+    activityLegacyId,
+    lineupPublished,
+    schedulePublished,
+    activityName,
+    activityDate,
+    lineupDjs,
+  } = options;
+
+  const voteEnabled = lineupPublished && !schedulePublished && lineupDjs.length > 0;
 
   const shareQuery = useMemo(
     () => parseSetVoteShareQuery(router.params),
@@ -58,7 +67,7 @@ export function useLineupSetVote(options: {
   );
 
   const [voteModeEnabled, setVoteModeEnabled] = useState(
-    () => router.params.voteMode === '1' || Boolean(shareQuery),
+    () => voteEnabled && (router.params.voteMode === '1' || Boolean(shareQuery)),
   );
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [picks, setPicks] = useState<SetVotePick[]>([]);
@@ -68,7 +77,9 @@ export function useLineupSetVote(options: {
   const [revoteAllowedToday, setRevoteAllowedToday] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [voteDataLoaded, setVoteDataLoaded] = useState(false);
-  const [showShareTeaser, setShowShareTeaser] = useState(Boolean(shareQuery));
+  const [showShareTeaser, setShowShareTeaser] = useState(
+    () => voteEnabled && Boolean(shareQuery),
+  );
   const [shareTeaser, setShareTeaser] = useState<SetVoteShareTeaser | null>(null);
 
   const shareRef = useRef({
@@ -83,12 +94,25 @@ export function useLineupSetVote(options: {
   const hasSubmitted = picks.length > 0;
   const selectionDirty = !pickIdsEqual(selectedIds, submittedIds);
   const showSubmitBar =
+    voteEnabled &&
     voteModeEnabled &&
     selectedIds.length > 0 &&
     (!hasSubmitted || selectionDirty) &&
     !showShareTeaser;
   const showResults =
-    voteModeEnabled && hasSubmitted && !selectionDirty && !showShareTeaser;
+    voteEnabled &&
+    voteModeEnabled &&
+    hasSubmitted &&
+    !selectionDirty &&
+    !showShareTeaser;
+
+  useEffect(() => {
+    if (!voteEnabled) {
+      setVoteModeEnabled(false);
+      setShowShareTeaser(false);
+      setShareTeaser(null);
+    }
+  }, [voteEnabled]);
 
   const loadLeaderboard = useCallback(async () => {
     if (!activityLegacyId) return null;
@@ -103,7 +127,7 @@ export function useLineupSetVote(options: {
   }, [activityLegacyId]);
 
   useEffect(() => {
-    if (!activityLegacyId || !lineupPublished || openedRef.current) return;
+    if (!activityLegacyId || !voteEnabled || openedRef.current) return;
     openedRef.current = true;
     logSetVoteEvent('set_vote_open', {
       activityId: activityLegacyId,
@@ -112,10 +136,10 @@ export function useLineupSetVote(options: {
     if (shareQuery) {
       logSetVoteEvent('set_vote_share_landing', { activityId: activityLegacyId });
     }
-  }, [activityLegacyId, lineupPublished, shareQuery]);
+  }, [activityLegacyId, voteEnabled, shareQuery]);
 
   useEffect(() => {
-    if (!activityLegacyId || !lineupPublished) {
+    if (!activityLegacyId || !voteEnabled) {
       setVoteDataLoaded(true);
       return;
     }
@@ -170,7 +194,7 @@ export function useLineupSetVote(options: {
     activityLegacyId,
     activityName,
     djNameById,
-    lineupPublished,
+    voteEnabled,
     loadLeaderboard,
     shareQuery,
     showShareTeaser,
@@ -353,7 +377,7 @@ export function useLineupSetVote(options: {
   }, [entries, showResults]);
 
   return {
-    enabled: lineupPublished && lineupDjs.length > 0,
+    enabled: voteEnabled,
     voteModeEnabled,
     voteDataLoaded,
     selectedIds,

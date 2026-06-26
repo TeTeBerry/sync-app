@@ -22,8 +22,10 @@ const sceneContractsPath = path.resolve(
   '../node_modules/@sync/scene-contracts/index.ts',
 );
 const srcPath = path.resolve(__dirname, '../src');
+const staticPath = path.join(srcPath, 'static');
 /** Workspace @sync/*-contracts packages; must be babel-included for weapp/h5. */
 const contractPackagesPath = path.resolve(__dirname, '../node_modules/@sync');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 /**
  * Primary target: WeChat mini program (weapp). Design draft: 375px logical width.
@@ -91,14 +93,37 @@ export default defineConfig({
         silenceDeprecations: ['import'],
       },
     },
+    /** PLUR cover loads from CloudBase — no local bundle images. */
+    imageUrlLoaderOption: {
+      limit: 10240,
+    },
     /** Taro weapp already emits common + per-page chunks; keep vendor sideEffects for tree-shake. */
     webpackChain(chain) {
       chain.optimization.usedExports(true);
       chain.optimization.sideEffects(true);
       // Weapp emits per-page + subpackage chunks; async splitChunks hints are noisy in dev.
       chain.performance.hints(false);
+      chain.plugin('copy-static').use(CopyWebpackPlugin, [
+        {
+          patterns: [
+            {
+              from: staticPath,
+              to: 'static',
+              globOptions: { ignore: ['**/*.md', '**/.DS_Store'] },
+              noErrorOnMissing: true,
+            },
+          ],
+        },
+      ]);
     },
     postcss: {
+      url: {
+        enable: true,
+        config: {
+          /** Remote PLUR cover URLs only; keep small icons inline. */
+          maxSize: 8,
+        },
+      },
       pxtransform: {
         enable: true,
         config: {

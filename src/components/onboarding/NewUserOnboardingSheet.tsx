@@ -3,10 +3,9 @@ import { Text, View } from '@tarojs/components';
 import { ImageWithFallback } from '@/components/ImageWithFallback';
 import { useOverlayLock } from '@/hooks/useOverlayLock';
 import { useT } from '@/hooks/useI18n';
-import { IMAGE_SIZE } from '@/constants/imageSizes';
 import { type FeaturedEvent } from '@/utils/apiMappers';
 import { formatActivityLocationLabel } from '@/utils/formatActivityDisplay';
-import { featuredPostImageUrl, thumbnailImageUrl } from '@/utils/imageUrl';
+import { activityCoverImageUrl } from '@/utils/imageUrl';
 
 export type NewUserOnboardingStep = {
   title: string;
@@ -14,6 +13,8 @@ export type NewUserOnboardingStep = {
   actionLabel: string;
   onAction: () => void;
   disabled?: boolean;
+  secondaryActionLabel?: string;
+  onSecondaryAction?: () => void;
 };
 
 export type NewUserOnboardingSheetProps = {
@@ -21,6 +22,7 @@ export type NewUserOnboardingSheetProps = {
   steps: NewUserOnboardingStep[];
   featuredEvent?: FeaturedEvent | null;
   featuredEventCount?: number;
+  highlightStepIndex?: number;
   onNextFeaturedEvent?: () => void;
   onDismiss: () => void;
 };
@@ -30,6 +32,7 @@ export function NewUserOnboardingSheet({
   steps,
   featuredEvent,
   featuredEventCount = 0,
+  highlightStepIndex,
   onNextFeaturedEvent,
   onDismiss,
 }: NewUserOnboardingSheetProps) {
@@ -47,9 +50,7 @@ export function NewUserOnboardingSheet({
       : featuredEvent.date
     : '';
   const heroSrc = featuredEvent
-    ? (featuredPostImageUrl(featuredEvent.image, IMAGE_SIZE.featuredHero) ??
-      thumbnailImageUrl(featuredEvent.image, IMAGE_SIZE.featuredHero) ??
-      featuredEvent.image)
+    ? (activityCoverImageUrl(featuredEvent.image) ?? featuredEvent.image)
     : undefined;
   const showPickAnother = featuredEventCount > 1 && Boolean(onNextFeaturedEvent);
 
@@ -128,44 +129,87 @@ export function NewUserOnboardingSheet({
           ) : null}
 
           <View className="s-new-user-onboarding__steps">
-            {steps.map((step, index) => (
-              <View key={step.title} className="s-new-user-onboarding__step">
-                <View className="s-new-user-onboarding__step-head">
-                  <Text className="s-new-user-onboarding__step-index">{index + 1}</Text>
-                  <Text className="s-new-user-onboarding__step-title">
-                    {step.title}
-                  </Text>
-                </View>
-                <Text className="s-new-user-onboarding__step-desc">
-                  {step.description}
-                </Text>
+            {steps.map((step, index) => {
+              const stepNumber = index + 1;
+              const isHighlighted = highlightStepIndex === stepNumber;
+              return (
                 <View
+                  key={step.title}
                   className={[
-                    's-new-user-onboarding__step-cta',
-                    step.disabled && 's-new-user-onboarding__step-cta--disabled',
+                    's-new-user-onboarding__step',
+                    isHighlighted && 's-new-user-onboarding__step--highlight',
                   ]
                     .filter(Boolean)
                     .join(' ')}
-                  hoverClass={
-                    step.disabled ? '' : 's-new-user-onboarding__step-cta--pressed'
-                  }
-                  onClick={() => {
-                    if (step.disabled) return;
-                    step.onAction();
-                  }}
-                  role="button"
-                  aria-disabled={step.disabled}
                 >
-                  <Text className="s-new-user-onboarding__step-cta-label">
-                    {step.actionLabel}
+                  <View className="s-new-user-onboarding__step-head">
+                    <Text className="s-new-user-onboarding__step-index">
+                      {stepNumber}
+                    </Text>
+                    <Text className="s-new-user-onboarding__step-title">
+                      {step.title}
+                    </Text>
+                  </View>
+                  <Text className="s-new-user-onboarding__step-desc">
+                    {step.description}
                   </Text>
+                  <View
+                    className={[
+                      's-new-user-onboarding__step-cta',
+                      step.disabled && 's-new-user-onboarding__step-cta--disabled',
+                    ]
+                      .filter(Boolean)
+                      .join(' ')}
+                    hoverClass={
+                      step.disabled ? '' : 's-new-user-onboarding__step-cta--pressed'
+                    }
+                    onClick={() => {
+                      if (step.disabled) return;
+                      step.onAction();
+                    }}
+                    role="button"
+                    aria-disabled={step.disabled}
+                  >
+                    <Text className="s-new-user-onboarding__step-cta-label">
+                      {step.actionLabel}
+                    </Text>
+                  </View>
+                  {step.secondaryActionLabel && step.onSecondaryAction ? (
+                    <View
+                      className={[
+                        's-new-user-onboarding__step-cta',
+                        's-new-user-onboarding__step-cta--secondary',
+                        step.disabled && 's-new-user-onboarding__step-cta--disabled',
+                      ]
+                        .filter(Boolean)
+                        .join(' ')}
+                      hoverClass={
+                        step.disabled
+                          ? ''
+                          : 's-new-user-onboarding__step-cta--secondary-pressed'
+                      }
+                      onClick={() => {
+                        if (step.disabled) return;
+                        step.onSecondaryAction?.();
+                      }}
+                      role="button"
+                      aria-disabled={step.disabled}
+                    >
+                      <Text className="s-new-user-onboarding__step-cta-label s-new-user-onboarding__step-cta-label--secondary">
+                        {step.secondaryActionLabel}
+                      </Text>
+                    </View>
+                  ) : null}
                 </View>
-              </View>
-            ))}
+              );
+            })}
           </View>
         </View>
 
         <View className="s-new-user-onboarding__foot">
+          <Text className="s-new-user-onboarding__plur-hint">
+            {t('onboarding.plurHint')}
+          </Text>
           <View
             className="s-new-user-onboarding__skip"
             hoverClass="s-new-user-onboarding__skip--pressed"

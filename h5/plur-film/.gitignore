@@ -1,0 +1,6 @@
+node_modules
+dist
+export
+hosting-upload
+hosting-root/MP_verify_*.txt
+.DS_Store

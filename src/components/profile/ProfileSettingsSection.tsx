@@ -9,6 +9,7 @@ import {
   Music2,
   Shield,
   ShieldAlert,
+  Sparkles,
 } from '../../components/icons';
 import { Text, View } from '@tarojs/components';
 import { useT } from '@/hooks/useI18n';
@@ -24,6 +25,7 @@ export type ProfileSettingsSectionProps = {
   onOpenLanguage: () => void;
   onOpenAccountAppeal?: () => void;
   onOpenHelp: () => void;
+  onOpenAbout: () => void;
   onOpenLegal: () => void;
   onLogout: () => void;
 };
@@ -39,6 +41,7 @@ const ProfileSettingsSection: React.FC<ProfileSettingsSectionProps> = ({
   onOpenLanguage,
   onOpenAccountAppeal,
   onOpenHelp,
+  onOpenAbout,
   onOpenLegal,
   onLogout,
 }) => {
@@ -140,6 +143,22 @@ const ProfileSettingsSection: React.FC<ProfileSettingsSectionProps> = ({
         <Text className="s-profile__settings-label">
           {t('profile.settings.language')}
         </Text>
+        <ChevronRight
+          size={18}
+          color="#b0b0b0"
+          className="s-profile__settings-chevron"
+        />
+      </View>
+
+      <View
+        className="s-profile__settings-row"
+        hoverClass="s-profile__settings-row--pressed"
+        onClick={onOpenAbout}
+      >
+        <View className="s-profile__settings-icon s-profile__settings-icon--plur">
+          <Sparkles size={18} color="#bf5af2" />
+        </View>
+        <Text className="s-profile__settings-label">{t('profile.settings.about')}</Text>
         <ChevronRight
           size={18}
           color="#b0b0b0"

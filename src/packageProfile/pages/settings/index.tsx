@@ -25,6 +25,7 @@ import { Button } from '../../../components/ui';
 import { ScrollView, Text, View } from '@tarojs/components';
 import { AccountRiskBanner } from '../../../components/account-risk/AccountRiskBanner';
 import { useAccountRisk } from '../../../hooks/useAccountRisk';
+import { AboutSettings } from './components/AboutSettings';
 import { BuddyPreferencesSettings } from './components/BuddyPreferencesSettings';
 import { AppealSettings } from './components/AppealSettings';
 import { HelpFeedbackSettings } from './components/HelpFeedbackSettings';
@@ -39,6 +40,7 @@ type SettingsSection =
   | 'privacy'
   | 'help'
   | 'legal'
+  | 'about'
   | 'buddy-prefs'
   | 'appeal'
   | 'language';
@@ -60,6 +62,7 @@ const SettingsPage: React.FC = () => {
       privacy: t('settings.privacy'),
       help: t('settings.help'),
       legal: t('settings.legal'),
+      about: t('plur.about.title'),
       'buddy-prefs': t('settings.buddyPrefs'),
       appeal: t('settings.appeal'),
       language: t('settings.language'),
@@ -347,6 +350,8 @@ const SettingsPage: React.FC = () => {
             )}
 
             {section === 'help' && <HelpFeedbackSettings />}
+
+            {section === 'about' && <AboutSettings />}
           </View>
         </ScrollView>
       )}

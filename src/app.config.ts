@@ -29,6 +29,7 @@ export default {
         'pages/profile-posts/index',
         'pages/settings/index',
         'pages/legal-document/index',
+        'pages/plur-film-webview/index',
         'pages/notifications/index',
       ],
     },

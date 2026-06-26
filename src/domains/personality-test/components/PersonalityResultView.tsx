@@ -27,8 +27,12 @@ import {
   goExclusiveItinerary,
 } from '@/utils/route';
 import { buildPersonalityItinerarySelection } from '../utils/buildPersonalityItinerarySelection';
+import {
+  buildPersonalityAiAnalysis,
+  resolvePersonalityTypeLabel,
+} from '../utils/buildPersonalityAiAnalysis.util';
 import { resolvePersonalityMediaUrl } from '../utils/resolvePersonalityMedia';
-import { useT } from '@/hooks/useI18n';
+import { useLocale, useT } from '@/hooks/useI18n';
 import { formatActivityLocationLabel } from '@/utils/formatActivityDisplay';
 import { Text, View, Image } from '@tarojs/components';
 import { showAppToast } from '@/utils/appToast';
@@ -57,6 +61,7 @@ export const PersonalityResultView: FC<PersonalityResultViewProps> = ({
   isWeapp = false,
 }) => {
   const t = useT();
+  const locale = useLocale();
   const [catalog, setCatalog] = useState(() => getCachedPersonalityTestCatalog());
   const soul = result.recommendations.soulMatch;
   const [similarityDisplay, setSimilarityDisplay] = useState(0);
@@ -161,10 +166,23 @@ export const PersonalityResultView: FC<PersonalityResultViewProps> = ({
     ? getPersonalityMeta(catalog, result.score.secondaryType)
     : null;
   const soulProfile = getDjSoulProfile(catalog, soul.djId);
+  const primaryLabel = resolvePersonalityTypeLabel(primary, locale);
+  const secondaryLabel = secondary
+    ? resolvePersonalityTypeLabel(secondary, locale)
+    : null;
+  const heroTagline = secondaryLabel
+    ? `${primary.emoji} ${primaryLabel} × ${secondaryLabel}`
+    : `${primary.emoji} ${primaryLabel}`;
+  const aiAnalysis = buildPersonalityAiAnalysis(result, catalog, locale);
 
   const blendLabel =
-    result.score.blendRatio && secondary
-      ? `${result.score.blendRatio.primary}% ${primary.label} + ${result.score.blendRatio.secondary}% ${secondary.label}`
+    result.score.blendRatio && secondary && secondaryLabel
+      ? t('personality.analysis.blendNote', {
+          primaryPercent: result.score.blendRatio.primary,
+          primaryLabel,
+          secondaryPercent: result.score.blendRatio.secondary,
+          secondaryLabel,
+        })
       : null;
 
   const djSections = [
@@ -279,9 +297,7 @@ export const PersonalityResultView: FC<PersonalityResultViewProps> = ({
           </View>
         </View>
 
-        <Text className="s-personality-result__hero-tagline">
-          「{result.narrative.tagline}」
-        </Text>
+        <Text className="s-personality-result__hero-tagline">「{heroTagline}」</Text>
       </View>
 
       <View
@@ -289,7 +305,7 @@ export const PersonalityResultView: FC<PersonalityResultViewProps> = ({
         style={{ borderColor: `${primary.primaryColor}44` }}
       >
         <Text className="s-personality-result__chip-text">
-          {primary.emoji} {primary.label} · {primary.labelEn}
+          {primary.emoji} {primaryLabel}
         </Text>
         {blendLabel ? (
           <Text className="s-personality-result__chip-sub">{blendLabel}</Text>
@@ -300,9 +316,7 @@ export const PersonalityResultView: FC<PersonalityResultViewProps> = ({
         <Text className="s-personality-result__section-title">
           {t('personality.aiAnalysis')}
         </Text>
-        <Text className="s-personality-result__analysis">
-          {result.narrative.aiAnalysis}
-        </Text>
+        <Text className="s-personality-result__analysis">{aiAnalysis}</Text>
       </View>
 
       {result.narrative.spiritConnections.length > 0 ? (
