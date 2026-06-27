@@ -15,7 +15,7 @@ import { IMAGE_SIZE } from '../../../constants/imageSizes';
 import { thumbnailImageUrl } from '../../../utils/imageUrl';
 import { goEventDetail } from '../../../utils/route';
 import { compareActivitiesNearestFirst } from '../../../utils/activityStatus';
-import { getCatalogArtistPrimaryGenreLabel } from '../../../utils/catalogLineupArtistGenres';
+import { getCatalogArtistDisplayGenreLabel } from '../../../utils/catalogLineupArtistGenres';
 import { pickNearestUpcomingActivity } from '../utils/pickNearestUpcomingActivity';
 import { ArtistActivityRow } from './ArtistActivityRow';
 
@@ -113,7 +113,7 @@ function ArtistProfileSheetInner({
     ? profileFull || profileSummary || t('events.artistProfile.bioPlaceholder')
     : profileSummary || profileFull || t('events.artistProfile.bioPlaceholder');
   const representativeTracks = artist?.representativeTracks ?? [];
-  const primaryGenre = artist ? getCatalogArtistPrimaryGenreLabel(artist) : '';
+  const displayGenreLabel = artist ? getCatalogArtistDisplayGenreLabel(artist) : '';
   const chineseAliases = artist?.chineseAliases ?? [];
 
   return (
@@ -213,13 +213,9 @@ function ArtistProfileSheetInner({
                       </Text>
                     ) : null}
                   </View>
-                  {artist?.genreLabel && artist.genreLabel !== '风格待补充' ? (
+                  {displayGenreLabel ? (
                     <Text className="s-artist-profile-sheet__genre">
-                      {artist.genreLabel}
-                    </Text>
-                  ) : primaryGenre ? (
-                    <Text className="s-artist-profile-sheet__genre">
-                      {primaryGenre}
+                      {displayGenreLabel}
                     </Text>
                   ) : null}
                   {chineseAliases.length ? (

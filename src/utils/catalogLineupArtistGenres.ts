@@ -3,6 +3,7 @@ import {
   resolvePrimaryGenreCategory,
 } from '@/packageEvent/pages/exclusive-itinerary/exclusiveItineraryFilters';
 import type { CatalogLineupArtist } from '../types/backend';
+import { sanitizeCatalogGenreTokens } from './catalogGenreNormalize';
 
 export type CatalogArtistGenreChip = {
   id: string;
@@ -10,40 +11,74 @@ export type CatalogArtistGenreChip = {
   count: number;
 };
 
+const GENRE_PLACEHOLDER = '风格待补充';
 const GENRE_TOKEN_SPLIT = /\s*[·•|/]\s*/;
 
-/** Primary filter bucket — uses seed `genre`, else first token of `genreLabel`. */
+function collectRawCatalogArtistGenreTokens(
+  artist: Pick<CatalogLineupArtist, 'genre' | 'genreLabel'>,
+): string[] {
+  const raw: string[] = [];
+  const genre = artist.genre?.trim() ?? '';
+  const genreLabel = artist.genreLabel?.trim() ?? '';
+  if (genre && genre !== GENRE_PLACEHOLDER) {
+    raw.push(genre);
+  }
+  if (genreLabel && genreLabel !== GENRE_PLACEHOLDER) {
+    raw.push(genreLabel);
+  }
+  return raw;
+}
+
+/** Sanitized catalog genre fields for artist tab display and filtering. */
+export function getSanitizedCatalogArtistGenres(
+  artist: Pick<CatalogLineupArtist, 'genre' | 'genreLabel'>,
+): { genre: string; genreLabel: string } {
+  const tokens = sanitizeCatalogGenreTokens(collectRawCatalogArtistGenreTokens(artist));
+  if (!tokens.length) {
+    return { genre: '', genreLabel: '' };
+  }
+
+  return {
+    genre: tokens[0] ?? '',
+    genreLabel: tokens.slice(0, 4).join(' · '),
+  };
+}
+
+/** Primary filter bucket — uses sanitized primary genre token. */
 export function resolveCatalogArtistPrimaryGenre(
   artist: Pick<CatalogLineupArtist, 'genre' | 'genreLabel'>,
 ): string {
-  const genre = artist.genre?.trim() ?? '';
-  if (genre && genre !== '风格待补充') {
+  const { genre, genreLabel } = getSanitizedCatalogArtistGenres(artist);
+  if (genre) {
     return resolvePrimaryGenreCategory(genre);
   }
 
-  const trimmed = artist.genreLabel?.trim() ?? '';
-  if (!trimmed || trimmed === '风格待补充') {
-    return '';
-  }
-
-  const [firstToken] = extractDjStyleTokens(trimmed);
+  const [firstToken] = extractDjStyleTokens(genreLabel);
   return firstToken ? resolvePrimaryGenreCategory(firstToken) : '';
 }
 
-/** Card label — prefer seed `genre` verbatim (e.g. Future Bass), else resolved bucket. */
+/** Card label — sanitized primary genre token (e.g. Future Bass, House). */
 export function getCatalogArtistPrimaryGenreLabel(
   artist: Pick<CatalogLineupArtist, 'genre' | 'genreLabel'>,
 ): string {
-  const genre = artist.genre?.trim() ?? '';
-  if (genre && genre !== '风格待补充') {
+  const { genre } = getSanitizedCatalogArtistGenres(artist);
+  if (genre) {
     return genre;
   }
   return resolveCatalogArtistPrimaryGenre(artist);
 }
 
+/** Profile sheet label — sanitized multi-token genre line. */
+export function getCatalogArtistDisplayGenreLabel(
+  artist: Pick<CatalogLineupArtist, 'genre' | 'genreLabel'>,
+): string {
+  const { genre, genreLabel } = getSanitizedCatalogArtistGenres(artist);
+  return genreLabel || genre || '';
+}
+
 export function extractCatalogArtistGenreTokens(genreLabel: string): string[] {
   const trimmed = genreLabel?.trim() ?? '';
-  if (!trimmed || trimmed === '风格待补充') {
+  if (!trimmed || trimmed === GENRE_PLACEHOLDER) {
     return [];
   }
 
@@ -82,7 +117,9 @@ export function scoreCatalogArtistGenrePreference(
   }
 
   const userSet = new Set(userGenres);
-  const tokens = extractCatalogArtistGenreTokens(artist.genreLabel);
+  const tokens = extractCatalogArtistGenreTokens(
+    getSanitizedCatalogArtistGenres(artist).genreLabel,
+  );
   let hits = 0;
 
   for (const token of tokens) {

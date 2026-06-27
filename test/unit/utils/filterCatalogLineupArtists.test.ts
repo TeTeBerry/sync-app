@@ -3,6 +3,7 @@ import type { CatalogLineupArtist } from '@/types/backend';
 import {
   buildCatalogArtistGenreChips,
   catalogArtistMatchesGenreChip,
+  getCatalogArtistDisplayGenreLabel,
   getCatalogArtistPrimaryGenreLabel,
   scoreCatalogArtistGenrePreference,
   sortCatalogLineupArtistsByGenrePreference,
@@ -60,6 +61,43 @@ describe('catalogLineupArtistGenres', () => {
     expect(getCatalogArtistPrimaryGenreLabel(marshmello)).toBe('Future Bass');
     expect(catalogArtistMatchesGenreChip(marshmello, 'Bass')).toBe(true);
     expect(catalogArtistMatchesGenreChip(marshmello, 'Breakbeat')).toBe(false);
+  });
+
+  it('sanitizes Hermes web-only noise from artist tab genre labels', () => {
+    const tigerDrama = artist({
+      name: 'TIGER DRAMA',
+      genre: 'Web',
+      genreLabel:
+        'Beatport — delivering high-impact energy packed dancefloor presence on mainstage EDM sets',
+    });
+    expect(getCatalogArtistPrimaryGenreLabel(tigerDrama)).toBe('Big Room');
+    expect(getCatalogArtistDisplayGenreLabel(tigerDrama)).toBe('Big Room');
+    expect(catalogArtistMatchesGenreChip(tigerDrama, 'House')).toBe(true);
+    expect(catalogArtistMatchesGenreChip(tigerDrama, 'Techno')).toBe(false);
+
+    const pixzy = artist({
+      name: 'PIXZY',
+      genre: 'Electronic',
+      genreLabel: 'Electronic (bass music · future bass · trap)',
+    });
+    expect(getCatalogArtistPrimaryGenreLabel(pixzy)).toBe('Bass');
+    expect(getCatalogArtistDisplayGenreLabel(pixzy)).toContain('Bass');
+
+    const maysaa = artist({
+      name: 'MAYSAA',
+      genre: 'Web',
+      genreLabel: 'Web',
+    });
+    expect(getCatalogArtistPrimaryGenreLabel(maysaa)).toBe('');
+    expect(getCatalogArtistDisplayGenreLabel(maysaa)).toBe('');
+
+    const xenia = artist({
+      name: 'XENIA DIA',
+      genre: 'DJ',
+      genreLabel: 'DJ · producer',
+    });
+    expect(getCatalogArtistPrimaryGenreLabel(xenia)).toBe('');
+    expect(getCatalogArtistDisplayGenreLabel(xenia)).toBe('');
   });
 
   it('builds genre chips sorted by artist count', () => {
