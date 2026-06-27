@@ -3,6 +3,7 @@ import {
   resolvePrimaryGenreCategory,
 } from '@/packageEvent/pages/exclusive-itinerary/exclusiveItineraryFilters';
 import type { CatalogLineupArtist } from '../types/backend';
+import { buildUserGenreMatchSet } from './buddyMatchProfile';
 import { sanitizeCatalogGenreTokens } from './catalogGenreNormalize';
 
 export type CatalogArtistGenreChip = {
@@ -109,14 +110,11 @@ export function scoreCatalogArtistGenrePreference(
   artist: CatalogLineupArtist,
   favorGenres?: string[] | null,
 ): number {
-  const userGenres = (favorGenres ?? [])
-    .map((genre) => genre.trim().toLowerCase())
-    .filter(Boolean);
-  if (!userGenres.length) {
+  const userSet = buildUserGenreMatchSet(favorGenres);
+  if (!userSet.size) {
     return 0;
   }
 
-  const userSet = new Set(userGenres);
   const tokens = extractCatalogArtistGenreTokens(
     getSanitizedCatalogArtistGenres(artist).genreLabel,
   );

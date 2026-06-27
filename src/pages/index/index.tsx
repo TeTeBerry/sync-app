@@ -296,6 +296,7 @@ const Home = () => {
           enhanced
           showScrollbar={false}
           className="s-home__main s-scrollbar-none"
+          style={{ flex: 1, height: 0, minHeight: 0 }}
         >
           <View className="s-home__scroll-inner">
             <TabPageHeader

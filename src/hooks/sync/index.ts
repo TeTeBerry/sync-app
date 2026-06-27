@@ -3,3 +3,4 @@ export * from './notifications';
 export * from './activities';
 export * from './posts';
 export * from './profile';
+export { useBuddyMatchProfile } from '../useBuddyMatchProfile';

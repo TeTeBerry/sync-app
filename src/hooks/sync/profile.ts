@@ -1,6 +1,9 @@
+import { useRef, useEffect } from 'react';
+import { useDidShow } from '@tarojs/taro';
 import { isLiveApi } from '../../constants/api';
 import { isLoggedIn } from '../../utils/authStorage';
 import { fetchCurrentUser } from '../../api/sync/users';
+import { syncBuddyMatchProfileFromUser } from '../../stores/buddyMatchProfileStore';
 import {
   fetchProfileActivities,
   fetchProfilePosts,
@@ -18,12 +21,27 @@ export function useCurrentUserQuery(options?: QueryEnableOptions) {
   const tabEnabled = options?.enabled ?? true;
   const enabled = profileApiEnabled() && tabEnabled;
 
-  return useApiQuery({
+  const query = useApiQuery({
     queryKey: ['users', 'me'],
     queryFn: fetchCurrentUser,
     enabled,
     staleTime: 60_000,
   });
+
+  const enabledRef = useRef(enabled);
+  enabledRef.current = enabled;
+
+  useEffect(() => {
+    syncBuddyMatchProfileFromUser(query.data);
+  }, [query.data]);
+
+  useDidShow(() => {
+    if (enabledRef.current) {
+      void query.refetch({ background: true });
+    }
+  });
+
+  return query;
 }
 
 export function useProfileSummaryQuery() {

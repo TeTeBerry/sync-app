@@ -28,7 +28,7 @@ import {
   normalizeProfileUserData,
   type ProfileDisplayUser,
 } from './profileSummaryUtils';
-import { formatBuddyPreferencesSummary } from '../../constants/buddyPreferences';
+import { useBuddyMatchProfile } from '../../hooks/useBuddyMatchProfile';
 import { deriveInterestTag } from './utils';
 import { applyPersonalityTestIdentity } from '../../utils/displayUserIdentity';
 import { restorePersonalityTestResultFromServer } from '@/domains/personality-test/utils/personalityTestStorage';
@@ -58,6 +58,7 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
 
   const summaryQuery = useProfileSummaryQuery();
   const currentUserQuery = useCurrentUserQuery();
+  const { preferencesSummary: buddyPreferencesSummary } = useBuddyMatchProfile();
   const personalityResult = usePersonalityTestResult();
   const authUserId = getResolvedAuthUserId();
   const personalityCompleted = Boolean(personalityResult?.score?.primaryType);
@@ -182,10 +183,6 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
     refreshAuthSession();
     showAppToast('profile.logout.done', { icon: 'success' });
   }, [confirm, refreshAuthSession, t]);
-
-  const buddyPreferencesSummary = formatBuddyPreferencesSummary(
-    currentUserQuery.data ?? null,
-  );
 
   const publishRestricted = isAccountPublishRestricted(accountRisk);
   const untilLabel = formatAccountRiskUntil(accountRisk?.postBlockedUntil);

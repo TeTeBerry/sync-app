@@ -5,14 +5,13 @@ import {
   normalizeBuddyBudgetLevel,
   type BuddyBudgetLevel,
 } from '../../../constants/buddyPreferences';
+import { resolvePrimaryGenreCategory } from '@/packageEvent/pages/exclusive-itinerary/exclusiveItineraryFilters';
 import type { EventDetailPost } from '../../../types/backend';
+import {
+  buildUserGenreMatchSet,
+  type BuddyMatchProfile,
+} from '../../../utils/buddyMatchProfile';
 import { buildEventDetailPostSearchText } from '../../../utils/buddyPostSearch';
-
-export type BuddyPostMatchProfile = {
-  city?: string;
-  favorGenres?: string[];
-  budgetLevel?: string;
-};
 
 const BUDGET_LEVEL_TEXT_MARKERS: ReadonlyArray<{
   level: BuddyBudgetLevel;
@@ -117,7 +116,7 @@ function scoreBudgetPreferenceMatch(
 /** Secondary ranking signal from the viewer's saved match profile. */
 export function scoreEventDetailPostPreferenceMatch(
   post: EventDetailPost,
-  profile?: BuddyPostMatchProfile | null,
+  profile?: BuddyMatchProfile | null,
 ): number {
   if (!profile) return 0;
 
@@ -134,12 +133,16 @@ export function scoreEventDetailPostPreferenceMatch(
 
   const postText = buildEventDetailPostSearchText(post);
   const postGenres = extractGenresFromPostText(postText);
-  const userGenres = new Set(
-    (profile.favorGenres ?? []).map((genre) => genre.trim().toLowerCase()),
-  );
+  const userGenres = buildUserGenreMatchSet(profile.favorGenres);
   let genreHits = 0;
   for (const genre of postGenres) {
-    if (userGenres.has(genre.toLowerCase())) {
+    const lower = genre.toLowerCase();
+    if (userGenres.has(lower)) {
+      genreHits += 1;
+      continue;
+    }
+    const primary = resolvePrimaryGenreCategory(genre);
+    if (primary && userGenres.has(primary.toLowerCase())) {
       genreHits += 1;
     }
   }
@@ -163,7 +166,7 @@ function postCreatedAtMs(post: EventDetailPost): number {
 
 export function sortEventDetailPostsByPreference(
   posts: EventDetailPost[],
-  profile?: BuddyPostMatchProfile | null,
+  profile?: BuddyMatchProfile | null,
 ): EventDetailPost[] {
   if (!profile) return posts;
 

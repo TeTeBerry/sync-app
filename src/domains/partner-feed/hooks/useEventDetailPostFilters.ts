@@ -1,23 +1,19 @@
 import { useMemo, useState, useCallback, useEffect } from 'react';
 import type { EventDetailPost } from '@/types/partner';
-import type { CurrentUser } from '../../../types/backend';
-import { hasBuddyPreferenceSignal } from '../../../constants/buddyPreferences';
 import {
   readProfilePreferenceSortEnabled,
   writeProfilePreferenceSortEnabled,
 } from '../../../utils/profileStorage';
+import { useBuddyMatchProfile } from '../../../hooks/useBuddyMatchProfile';
 import {
   extractDepartureCityOptions,
   type EventDetailPostRuleFilters,
 } from '../utils/filterEventDetailPostsByRules';
 
-export function useEventDetailPostFilters(
-  loadedPosts: EventDetailPost[],
-  currentUser?: CurrentUser | null,
-) {
+export function useEventDetailPostFilters(loadedPosts: EventDetailPost[]) {
   const [selectedCity, setSelectedCity] = useState('');
   const [recruitingOnly, setRecruitingOnly] = useState(false);
-  const hasPreferenceSignal = hasBuddyPreferenceSignal(currentUser);
+  const { hasPreferenceSignal } = useBuddyMatchProfile();
   const [preferenceSortEnabled, setPreferenceSortEnabledState] = useState(() =>
     readProfilePreferenceSortEnabled(),
   );
@@ -62,7 +58,6 @@ export function useEventDetailPostFilters(
     filters,
     isActive,
     clearFilters,
-    hasPreferenceSignal,
     preferenceSortEnabled: hasPreferenceSignal && preferenceSortEnabled,
     setPreferenceSortEnabled,
   };

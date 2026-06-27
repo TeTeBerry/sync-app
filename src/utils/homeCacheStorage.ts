@@ -13,6 +13,7 @@ import {
 } from './activityDetailCache';
 import { withCatalogActivities, withCatalogHomeSummary } from './activityCatalog';
 import type { BackendActivity, HomeSummary, ProfileSummary } from '../types/backend';
+import { clearBuddyMatchProfileStore } from '../stores/buddyMatchProfileStore';
 
 export const HOME_CACHE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 
@@ -171,6 +172,7 @@ export function resetHomeSummaryGoingFlagsInCache(): void {
 /** Clear in-memory query cache + offline persisted lists on logout / 401. */
 export function clearSessionCaches(): void {
   clearAllApiCache();
+  clearBuddyMatchProfileStore();
   clearPersistedHomeSummary();
   clearPersistedProfileSummary();
   clearPersistedActivitiesList();

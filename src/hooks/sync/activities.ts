@@ -44,10 +44,15 @@ import {
 } from '../../cache/activityCache';
 import {
   invalidateProfileSummary,
-  invalidateUser,
   invalidateProfile,
 } from '../../utils/queryInvalidation';
-import { getCacheData, useApiQuery } from '../useApiQuery';
+import {
+  broadcastCacheData,
+  getCacheData,
+  setCacheData,
+  useApiQuery,
+} from '../useApiQuery';
+import { syncBuddyMatchProfileFromUser } from '../../stores/buddyMatchProfileStore';
 import { useRefetchOnShowWhenEmpty } from '../useRefetchOnShowWhenEmpty';
 import type { QueryEnableOptions } from './types';
 import type { UpdateCurrentUserPayload } from '../../types/backend';
@@ -306,6 +311,9 @@ export async function updateCurrentUserAndInvalidate(
   payload: UpdateCurrentUserPayload,
 ) {
   const user = await updateCurrentUser(payload);
-  await Promise.all([invalidateUser(), invalidateProfile()]);
+  setCacheData(['users', 'me'], () => user);
+  syncBuddyMatchProfileFromUser(user);
+  broadcastCacheData(['users', 'me']);
+  await invalidateProfile();
   return user;
 }

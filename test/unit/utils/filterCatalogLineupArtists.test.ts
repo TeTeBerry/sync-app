@@ -8,6 +8,7 @@ import {
   scoreCatalogArtistGenrePreference,
   sortCatalogLineupArtistsByGenrePreference,
 } from '@/utils/catalogLineupArtistGenres';
+import { buildUserGenreMatchSet } from '@/utils/buddyMatchProfile';
 import { filterCatalogLineupArtists } from '@/utils/filterCatalogLineupArtists';
 
 function artist(
@@ -124,6 +125,27 @@ describe('catalogLineupArtistGenres', () => {
   it('sorts preference-matching artists ahead of others', () => {
     const sorted = sortCatalogLineupArtistsByGenrePreference(artists, ['Techno']);
     expect(sorted[0]?.name).toBe('CHARLOTTE DE WITTE');
+  });
+
+  it('matches saved sub-genres via primary buckets and drum and bass aliases', () => {
+    const dnbArtist = artist({
+      name: 'SUB FOCUS',
+      genre: 'Drum & Bass',
+      genreLabel: 'Drum & Bass · Neurofunk',
+    });
+    expect(
+      scoreCatalogArtistGenrePreference(dnbArtist, ['Drum and Bass']),
+    ).toBeGreaterThan(0);
+
+    const melodicTechnoArtist = artist({
+      name: 'CHARLOTTE DE WITTE',
+      genre: 'Techno',
+      genreLabel: 'Techno · Peak Time',
+    });
+    expect(
+      scoreCatalogArtistGenrePreference(melodicTechnoArtist, ['Melodic Techno']),
+    ).toBeGreaterThan(0);
+    expect(buildUserGenreMatchSet(['Melodic Techno']).has('techno')).toBe(true);
   });
 });
 

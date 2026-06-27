@@ -25,7 +25,7 @@ import { useEventDetailPostFilters } from './useEventDetailPostFilters';
 import { filterEventDetailPostsByRules } from '../utils/filterEventDetailPostsByRules';
 import { resolveBuddyPostRecruitDisplay } from '../utils/parseBuddyPostRecruitDisplay';
 import { resolvePersonalityMediaUrls } from '@/domains/personality-test/utils/resolvePersonalityMedia';
-import type { CurrentUser } from '../../../types/backend';
+import { useBuddyMatchProfile } from '../../../hooks/useBuddyMatchProfile';
 import { sortEventDetailPostsByPreference } from '../utils/buddyPostPreferenceMatch';
 import { t } from '@/i18n/translate';
 import { showAppToast } from '@/utils/appToast';
@@ -47,7 +47,6 @@ export type UseEventDetailPostsParams = {
   openCommentsOnMount?: boolean;
   onTravelGuidePrefillDismiss?: (activityLegacyId: number, guideId: string) => void;
   buildApplyCommentDraft?: (post: EventDetailPost) => string;
-  currentUser?: CurrentUser | null;
 };
 
 export function useEventDetailPosts({
@@ -59,8 +58,8 @@ export function useEventDetailPosts({
   openCommentsOnMount = false,
   onTravelGuidePrefillDismiss,
   buildApplyCommentDraft,
-  currentUser,
 }: UseEventDetailPostsParams) {
+  const { profile: matchProfile } = useBuddyMatchProfile();
   const [expandedCommentPostIds, setExpandedCommentPostIds] = useState<Set<string>>(
     () => new Set(),
   );
@@ -69,23 +68,11 @@ export function useEventDetailPosts({
   >({});
   const autoOpenedCommentsRef = useRef<string | null>(null);
 
-  const postFilters = useEventDetailPostFilters(postsQuery.items, currentUser);
+  const postFilters = useEventDetailPostFilters(postsQuery.items);
 
   const ruleFilteredPosts = useMemo(
     () => filterEventDetailPostsByRules(postsQuery.items, postFilters.filters),
     [postFilters.filters, postsQuery.items],
-  );
-
-  const matchProfile = useMemo(
-    () =>
-      currentUser
-        ? {
-            city: currentUser.city,
-            favorGenres: currentUser.favorGenres,
-            budgetLevel: currentUser.budgetLevel,
-          }
-        : null,
-    [currentUser],
   );
 
   const preferenceSortedPosts = useMemo(() => {
@@ -460,7 +447,5 @@ export function useEventDetailPosts({
     clearPostFilters: postFilters.clearFilters,
     postFilterPreferenceSortEnabled: postFilters.preferenceSortEnabled,
     setPostFilterPreferenceSortEnabled: postFilters.setPreferenceSortEnabled,
-    postFilterShowPreferenceSort: postFilters.hasPreferenceSignal,
-    preferenceSortEnabled: postFilters.preferenceSortEnabled,
   };
 }

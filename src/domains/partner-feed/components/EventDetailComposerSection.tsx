@@ -17,6 +17,7 @@ import {
   type PrepNudgeAction,
 } from '../utils/eventDetailPlanningHint.util';
 import { resolveFestivalPrepCollapsedHint } from '../utils/resolveFestivalPrepCollapsedHint';
+import { useBuddyMatchProfile } from '../../../hooks/useBuddyMatchProfile';
 
 const PLANNING_ICON_TRAVEL = '#4cc9f0';
 const PLANNING_ICON_PREP = '#ff0066';
@@ -31,7 +32,6 @@ export type EventDetailComposerSectionProps = {
   travelGuideGenerated?: boolean;
   travelGuideSupported?: boolean;
   lineupPublished?: boolean;
-  favorGenres?: string[];
   unreadReplyCount?: number;
   onPrepNudgeAction?: (action: PrepNudgeAction) => void;
   activityLegacyId?: number;
@@ -47,12 +47,12 @@ export const EventDetailComposerSection: React.FC<EventDetailComposerSectionProp
   travelGuideGenerated = false,
   travelGuideSupported = true,
   lineupPublished,
-  favorGenres,
   unreadReplyCount = 0,
   onPrepNudgeAction,
   activityLegacyId,
 }) => {
   const t = useT();
+  const { favorGenres } = useBuddyMatchProfile();
   const [expanded, setExpanded] = useState(false);
   const hasProgress =
     showFestivalPlan && festivalPlanChecklist && festivalPlanChecklist.totalCount > 0;

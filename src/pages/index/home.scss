@@ -6,6 +6,20 @@
   overflow: hidden;
 }
 
+// Reserve space for the pinned legal footer above the tab bar.
+// WeChat ScrollView ignores flex shrink unless height is constrained (height: 0 trick).
+.s-home--with-legal-footer {
+  .s-home__shell {
+    height: 100%;
+  }
+
+  .s-home__main {
+    flex: 1 1 0;
+    height: 0;
+    min-height: 0;
+  }
+}
+
 .s-home__main {
   flex: 1;
   min-height: 0;

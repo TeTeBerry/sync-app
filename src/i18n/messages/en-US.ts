@@ -153,6 +153,8 @@ export const enUS: MessageTree = {
       'Adjust search or primary genre filters, or clear all filters',
     artistsGenrePreferenceInsight:
       'Public catalog sorted with your genre preferences in mind',
+    artistsGenrePreferenceSortAria: 'Sort artists by your genre preferences',
+    artistsAlphabetIndexAria: 'Jump to artists by letter',
     artistsLoadFailed: 'Failed to load artists',
     artistActivityCount: '{{count}} events',
     artistNextActivity: 'Next: {{name}} · {{date}}',
@@ -169,6 +171,8 @@ export const enUS: MessageTree = {
       bioExpand: 'Show full bio',
       bioCollapse: 'Show less',
       aliasesLabel: 'Also known as',
+      comboConnector: 'B2B',
+      comboHint: 'Joint billing — profiles for each artist below',
       appearancesTitle: 'Catalog appearances',
       appearancesEmpty: 'No catalog appearances yet',
       loadFailed: 'Failed to load artist profile',

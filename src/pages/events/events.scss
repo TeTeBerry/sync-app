@@ -516,9 +516,109 @@
   line-height: 1.45;
 }
 
+.s-events__artists-preference-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.s-events__artists-preference-toggle-check {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  background: rgba(255, 255, 255, 0.04);
+  box-sizing: border-box;
+
+  &--on {
+    border-color: rgba(var(--primary-rgb), 0.7);
+    background: rgba(var(--primary-rgb), 0.35);
+    box-shadow: inset 0 0 0 1px rgba(var(--primary-rgb), 0.45);
+  }
+}
+
+.s-events__artists-preference-toggle-label {
+  font-size: var(--s-type-caption);
+  color: rgba(255, 255, 255, 0.42);
+  line-height: 1.45;
+}
+
+.s-events__artists-body {
+  position: relative;
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
 .s-events__artists-scroll {
   flex: 1;
   min-height: 0;
+
+  &--with-index {
+    width: calc(100% - 18px);
+  }
+}
+
+.s-events__artists-sections {
+  padding-bottom: 20px;
+}
+
+.s-events__artists-section + .s-events__artists-section {
+  margin-top: 4px;
+}
+
+.s-events__artists-letter-head {
+  padding: 10px 16px 6px;
+  box-sizing: border-box;
+}
+
+.s-events__artists-letter-head-text {
+  font-size: var(--s-type-meta);
+  font-weight: var(--s-fw-semibold);
+  color: rgba(255, 255, 255, 0.42);
+  letter-spacing: 0.08em;
+}
+
+.s-events__artists-alphabet-index {
+  position: absolute;
+  top: 0;
+  right: 2px;
+  bottom: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  width: 16px;
+  padding: 8px 0;
+  box-sizing: border-box;
+}
+
+.s-events__artists-alphabet-letter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  min-height: 12px;
+  opacity: 0.22;
+
+  &--enabled {
+    opacity: 1;
+  }
+
+  &--active .s-events__artists-alphabet-letter-text {
+    color: var(--primary);
+    font-weight: var(--s-fw-semibold);
+  }
+}
+
+.s-events__artists-alphabet-letter-text {
+  font-size: 9px;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.55);
 }
 
 .s-events__artists-grid {

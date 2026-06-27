@@ -1,21 +1,26 @@
 import type { FC } from 'react';
-import { useCallback, useMemo, useState } from 'react';
-import { ScrollView, Text, View, Image } from '@tarojs/components';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ScrollView, Text, View } from '@tarojs/components';
 import { useT } from '@/hooks/useI18n';
-import { ImageWithFallback } from '../../../components/ImageWithFallback';
 import ThemedPageLoader from '../../../components/ThemedPageLoader';
-import {
-  useCatalogLineupArtists,
-  useCurrentUserQuery,
-} from '../../../hooks/useSyncApi';
+import { useCatalogLineupArtists } from '../../../hooks/useSyncApi';
+import { useBuddyMatchProfile } from '../../../hooks/useBuddyMatchProfile';
 import { IMAGE_SIZE } from '../../../constants/imageSizes';
 import { thumbnailImageUrl } from '../../../utils/imageUrl';
 import { filterCatalogLineupArtists } from '../../../utils/filterCatalogLineupArtists';
 import {
   buildCatalogArtistGenreChips,
-  getCatalogArtistPrimaryGenreLabel,
   sortCatalogLineupArtistsByGenrePreference,
 } from '../../../utils/catalogLineupArtistGenres';
+import {
+  catalogArtistLetterDomId,
+  groupCatalogArtistsByNameLetter,
+  sortCatalogLineupArtistsByName,
+} from '../../../utils/catalogLineupArtistSort';
+import { useCatalogArtistAlphabetNavigation } from '../hooks/useCatalogArtistAlphabetNavigation';
+import { EventsArtistAlphabetIndex } from './EventsArtistAlphabetIndex';
+import { EventsArtistCard } from './EventsArtistCard';
+import { EventsArtistGenrePreferenceToggle } from './EventsArtistGenrePreferenceToggle';
 import { EventsSearchBar } from './EventsSearchBar';
 import { EventsArtistGenreChips } from './EventsArtistGenreChips';
 
@@ -31,39 +36,96 @@ export const EventsActivityArtistsTab: FC<EventsActivityArtistsTabProps> = ({
   const t = useT();
   const [artistSearchQuery, setArtistSearchQuery] = useState('');
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
+  const [preferGenreSort, setPreferGenreSort] = useState(true);
+  const preferenceInitializedRef = useRef(false);
   const { data: artists, isLoading, isError, refetch } = useCatalogLineupArtists();
-  const { data: currentUser } = useCurrentUserQuery();
-  const favorGenres = currentUser?.favorGenres;
+  const { favorGenres } = useBuddyMatchProfile();
+  const canSortByGenrePreference = Boolean(favorGenres?.length);
+  const useGenrePreferenceSort = canSortByGenrePreference && preferGenreSort;
+
+  useEffect(() => {
+    if (preferenceInitializedRef.current || favorGenres === undefined) {
+      return;
+    }
+    setPreferGenreSort(Boolean(favorGenres?.length));
+    preferenceInitializedRef.current = true;
+  }, [favorGenres]);
 
   const genreChips = useMemo(
     () => buildCatalogArtistGenreChips(artists ?? []),
     [artists],
   );
 
-  const rankedArtists = useMemo(
-    () => sortCatalogLineupArtistsByGenrePreference(artists ?? [], favorGenres),
-    [artists, favorGenres],
-  );
+  const sortedArtists = useMemo(() => {
+    const list = artists ?? [];
+    if (useGenrePreferenceSort) {
+      return sortCatalogLineupArtistsByGenrePreference(list, favorGenres);
+    }
+    return sortCatalogLineupArtistsByName(list);
+  }, [artists, favorGenres, useGenrePreferenceSort]);
 
   const filteredArtists = useMemo(
     () =>
       filterCatalogLineupArtists(
-        rankedArtists,
+        sortedArtists,
         artistSearchQuery,
         selectedGenre,
-        favorGenres,
+        useGenrePreferenceSort ? favorGenres : null,
       ),
-    [rankedArtists, artistSearchQuery, selectedGenre, favorGenres],
+    [
+      sortedArtists,
+      artistSearchQuery,
+      selectedGenre,
+      favorGenres,
+      useGenrePreferenceSort,
+    ],
   );
 
+  const alphabetSections = useMemo(
+    () =>
+      useGenrePreferenceSort ? [] : groupCatalogArtistsByNameLetter(filteredArtists),
+    [filteredArtists, useGenrePreferenceSort],
+  );
+
+  const availableLetters = useMemo(
+    () => new Set(alphabetSections.map((section) => section.letter)),
+    [alphabetSections],
+  );
+
+  const showAlphabetIndex = !useGenrePreferenceSort && filteredArtists.length > 0;
   const hasActiveFilters = Boolean(artistSearchQuery.trim() || selectedGenre);
-  const showGenrePreferenceInsight = Boolean(favorGenres?.length) && !hasActiveFilters;
+
+  const { scrollTop, activeLetter, handleLetterTap, handleScroll } =
+    useCatalogArtistAlphabetNavigation(alphabetSections, showAlphabetIndex);
 
   const handleOpenArtist = useCallback(
     (artistId: string) => {
       onOpenArtist(artistId);
     },
     [onOpenArtist],
+  );
+
+  const renderArtistCard = useCallback(
+    (artist: (typeof filteredArtists)[number], rankTier = 0) => {
+      const thumbSrc = artist.thumbnail
+        ? thumbnailImageUrl(artist.thumbnail, IMAGE_SIZE.avatarMd, 1)
+        : undefined;
+      const backdropSrc = artist.thumbnail
+        ? thumbnailImageUrl(artist.thumbnail, IMAGE_SIZE.listThumb, 1)
+        : undefined;
+
+      return (
+        <EventsArtistCard
+          key={artist.id}
+          artist={artist}
+          rankTier={rankTier}
+          thumbSrc={thumbSrc}
+          backdropSrc={backdropSrc}
+          onOpenArtist={handleOpenArtist}
+        />
+      );
+    },
+    [handleOpenArtist],
   );
 
   if (isLoading && !artists?.length) {
@@ -130,142 +192,89 @@ export const EventsActivityArtistsTab: FC<EventsActivityArtistsTabProps> = ({
           selectedGenre={selectedGenre}
           onGenreChange={setSelectedGenre}
         />
-        {showGenrePreferenceInsight ? (
-          <Text className="s-events__artists-preference-insight">
-            {t('events.artistsGenrePreferenceInsight')}
-          </Text>
+        {canSortByGenrePreference && !hasActiveFilters ? (
+          <EventsArtistGenrePreferenceToggle
+            checked={preferGenreSort}
+            onChange={setPreferGenreSort}
+          />
         ) : null}
       </View>
-      <ScrollView
-        scrollY
-        enhanced
-        showScrollbar={false}
-        className="s-events__artists-scroll s-scrollbar-none"
-      >
-        {filteredArtists.length ? (
-          <View className="s-events__artists-grid">
-            {filteredArtists.map((artist) => {
-              const originalIndex =
-                rankedArtists.findIndex((item) => item.id === artist.id) ?? -1;
-              const rankTier =
-                !hasActiveFilters && originalIndex >= 0 && originalIndex < 3
-                  ? originalIndex + 1
-                  : 0;
-              const thumbSrc = artist.thumbnail
-                ? thumbnailImageUrl(artist.thumbnail, IMAGE_SIZE.avatarMd, 1)
-                : undefined;
-              const backdropSrc = artist.thumbnail
-                ? thumbnailImageUrl(artist.thumbnail, IMAGE_SIZE.listThumb, 1)
-                : undefined;
-              const primaryGenre = getCatalogArtistPrimaryGenreLabel(artist) || null;
-              const chineseAliases = artist.chineseAliases ?? [];
-
-              return (
-                <View
-                  key={artist.id}
-                  className={[
-                    's-events__artist-card',
-                    rankTier > 0 ? `s-events__artist-card--rank-${rankTier}` : '',
-                  ]
-                    .filter(Boolean)
-                    .join(' ')}
-                  hoverClass="s-events__artist-card--pressed"
-                  onClick={() => handleOpenArtist(artist.id)}
-                >
-                  {backdropSrc ? (
-                    <View className="s-events__artist-card-backdrop" aria-hidden>
-                      <Image
-                        src={backdropSrc}
-                        className="s-events__artist-card-backdrop-img"
-                        mode="aspectFill"
-                      />
-                      <View
-                        className={[
-                          's-events__artist-card-backdrop-scrim',
-                          rankTier > 0
-                            ? `s-events__artist-card-backdrop-scrim--rank-${rankTier}`
-                            : '',
-                        ]
-                          .filter(Boolean)
-                          .join(' ')}
-                      />
+      <View className="s-events__artists-body">
+        <ScrollView
+          scrollY
+          enhanced
+          showScrollbar={false}
+          scrollWithAnimation
+          scrollTop={scrollTop}
+          onScroll={showAlphabetIndex ? handleScroll : undefined}
+          className={[
+            's-events__artists-scroll',
+            's-scrollbar-none',
+            showAlphabetIndex ? 's-events__artists-scroll--with-index' : '',
+          ]
+            .filter(Boolean)
+            .join(' ')}
+        >
+          {filteredArtists.length ? (
+            useGenrePreferenceSort ? (
+              <View className="s-events__artists-grid">
+                {filteredArtists.map((artist) => {
+                  const originalIndex = sortedArtists.findIndex(
+                    (item) => item.id === artist.id,
+                  );
+                  const rankTier =
+                    !hasActiveFilters && originalIndex >= 0 && originalIndex < 3
+                      ? originalIndex + 1
+                      : 0;
+                  return renderArtistCard(artist, rankTier);
+                })}
+              </View>
+            ) : (
+              <View className="s-events__artists-sections">
+                {alphabetSections.map((section) => (
+                  <View key={section.letter} className="s-events__artists-section">
+                    <View
+                      id={catalogArtistLetterDomId(section.letter)}
+                      className="s-events__artists-letter-head"
+                    >
+                      <Text className="s-events__artists-letter-head-text">
+                        {section.letter}
+                      </Text>
                     </View>
-                  ) : null}
-                  <View className="s-events__artist-avatar-stage">
-                    <View className="s-events__artist-avatar-glow" aria-hidden />
-                    <View className="s-events__artist-avatar-wrap">
-                      <ImageWithFallback
-                        src={thumbSrc}
-                        alt={artist.name}
-                        wrapperClassName="s-events__artist-avatar"
-                        imageClassName="s-events__artist-avatar-img"
-                        fallbackWrapperClassName="s-events__artist-avatar s-events__artist-avatar--fallback"
-                        fallback={artist.name.slice(0, 2)}
-                      />
+                    <View className="s-events__artists-grid">
+                      {section.artists.map((artist) => renderArtistCard(artist))}
                     </View>
                   </View>
-                  <View className="s-events__artist-info">
-                    <Text className="s-events__artist-name s-line-clamp-2">
-                      {artist.name}
-                    </Text>
-                    {chineseAliases.length ? (
-                      <Text className="s-events__artist-aliases s-line-clamp-1">
-                        {chineseAliases.join('、')}
-                      </Text>
-                    ) : null}
-                    {primaryGenre ? (
-                      <View className="s-events__artist-genres">
-                        <View className="s-events__artist-genre-chip">
-                          <Text className="s-events__artist-genre-chip-text s-line-clamp-1">
-                            {primaryGenre}
-                          </Text>
-                        </View>
-                      </View>
-                    ) : null}
-                    <View className="s-events__artist-stats">
-                      <Text className="s-events__artist-count">
-                        {t('events.artistActivityCount', {
-                          count: artist.activityCount,
-                        })}
-                      </Text>
-                    </View>
-                  </View>
-                  {artist.nextActivity ? (
-                    <View className="s-events__artist-next-strip">
-                      <Text className="s-events__artist-next-kicker">
-                        {t('events.artistNextKicker')}
-                      </Text>
-                      <Text className="s-events__artist-next-value s-line-clamp-1">
-                        {artist.nextActivity.name}
-                      </Text>
-                      <Text className="s-events__artist-next-date">
-                        {artist.nextActivity.date}
-                      </Text>
-                    </View>
-                  ) : null}
-                </View>
-              );
-            })}
-          </View>
-        ) : (
-          <View className="s-events__artists-state s-events__artists-state--search">
-            <Text className="s-events__artists-state-text">
-              {artistSearchQuery.trim() && selectedGenre
-                ? t('events.artistsFilterEmpty')
-                : selectedGenre
-                  ? t('events.artistsGenreFilterEmpty')
-                  : t('events.artistsSearchEmpty')}
-            </Text>
-            <Text className="s-events__artists-state-hint">
-              {artistSearchQuery.trim() && selectedGenre
-                ? t('events.artistsFilterEmptyHint')
-                : selectedGenre
-                  ? t('events.artistsGenreFilterEmptyHint')
-                  : t('events.artistsSearchEmptyHint')}
-            </Text>
-          </View>
-        )}
-      </ScrollView>
+                ))}
+              </View>
+            )
+          ) : (
+            <View className="s-events__artists-state s-events__artists-state--search">
+              <Text className="s-events__artists-state-text">
+                {artistSearchQuery.trim() && selectedGenre
+                  ? t('events.artistsFilterEmpty')
+                  : selectedGenre
+                    ? t('events.artistsGenreFilterEmpty')
+                    : t('events.artistsSearchEmpty')}
+              </Text>
+              <Text className="s-events__artists-state-hint">
+                {artistSearchQuery.trim() && selectedGenre
+                  ? t('events.artistsFilterEmptyHint')
+                  : selectedGenre
+                    ? t('events.artistsGenreFilterEmptyHint')
+                    : t('events.artistsSearchEmptyHint')}
+              </Text>
+            </View>
+          )}
+        </ScrollView>
+        {showAlphabetIndex ? (
+          <EventsArtistAlphabetIndex
+            availableLetters={availableLetters}
+            activeLetter={activeLetter}
+            onLetterTap={handleLetterTap}
+          />
+        ) : null}
+      </View>
     </View>
   );
 };

@@ -18,6 +18,7 @@ import { compareActivitiesNearestFirst } from '../../../utils/activityStatus';
 import { getCatalogArtistDisplayGenreLabel } from '../../../utils/catalogLineupArtistGenres';
 import { pickNearestUpcomingActivity } from '../utils/pickNearestUpcomingActivity';
 import { ArtistActivityRow } from './ArtistActivityRow';
+import { ArtistComboMemberCard, ArtistComboProfileHero } from './ArtistComboProfile';
 
 export type ArtistProfileSheetProps = {
   open: boolean;
@@ -115,6 +116,8 @@ function ArtistProfileSheetInner({
   const representativeTracks = artist?.representativeTracks ?? [];
   const displayGenreLabel = artist ? getCatalogArtistDisplayGenreLabel(artist) : '';
   const chineseAliases = artist?.chineseAliases ?? [];
+  const comboMembers =
+    artist?.members && artist.members.length > 1 ? artist.members : null;
 
   return (
     <View
@@ -178,75 +181,86 @@ function ArtistProfileSheetInner({
           </View>
         ) : (
           <>
-            <View className="s-artist-profile-sheet__hero">
-              {heroBackdropSrc ? (
-                <View className="s-artist-profile-sheet__hero-backdrop" aria-hidden>
-                  <Image
-                    src={heroBackdropSrc}
-                    className="s-artist-profile-sheet__hero-backdrop-img"
-                    mode="aspectFill"
-                  />
-                  <View className="s-artist-profile-sheet__hero-backdrop-scrim" />
-                </View>
-              ) : null}
-              <View className="s-artist-profile-sheet__hero-glow" aria-hidden />
-              <View className="s-artist-profile-sheet__header">
-                <View className="s-artist-profile-sheet__avatar-stage">
-                  <View className="s-artist-profile-sheet__avatar-glow" aria-hidden />
-                  <ImageWithFallback
-                    src={thumbSrc}
-                    alt={artist?.name ?? ''}
-                    wrapperClassName="s-artist-profile-sheet__avatar"
-                    imageClassName="s-artist-profile-sheet__avatar-img"
-                    fallbackWrapperClassName="s-artist-profile-sheet__avatar s-artist-profile-sheet__avatar--fallback"
-                    fallback={artist?.name?.slice(0, 2) ?? ''}
-                  />
-                </View>
-                <View className="s-artist-profile-sheet__identity">
-                  <View className="s-artist-profile-sheet__name-row">
-                    <Text className="s-artist-profile-sheet__name">{artist?.name}</Text>
-                    {artist?.activityCount != null ? (
-                      <Text className="s-artist-profile-sheet__count-pill">
-                        {t('events.artistActivityCount', {
-                          count: artist.activityCount,
-                        })}
+            {comboMembers ? (
+              <ArtistComboProfileHero
+                comboName={artist?.name ?? ''}
+                activityCount={artist?.activityCount}
+                members={comboMembers}
+                genreLabel={displayGenreLabel}
+              />
+            ) : (
+              <View className="s-artist-profile-sheet__hero">
+                {heroBackdropSrc ? (
+                  <View className="s-artist-profile-sheet__hero-backdrop" aria-hidden>
+                    <Image
+                      src={heroBackdropSrc}
+                      className="s-artist-profile-sheet__hero-backdrop-img"
+                      mode="aspectFill"
+                    />
+                    <View className="s-artist-profile-sheet__hero-backdrop-scrim" />
+                  </View>
+                ) : null}
+                <View className="s-artist-profile-sheet__hero-glow" aria-hidden />
+                <View className="s-artist-profile-sheet__header">
+                  <View className="s-artist-profile-sheet__avatar-stage">
+                    <View className="s-artist-profile-sheet__avatar-glow" aria-hidden />
+                    <ImageWithFallback
+                      src={thumbSrc}
+                      alt={artist?.name ?? ''}
+                      wrapperClassName="s-artist-profile-sheet__avatar"
+                      imageClassName="s-artist-profile-sheet__avatar-img"
+                      fallbackWrapperClassName="s-artist-profile-sheet__avatar s-artist-profile-sheet__avatar--fallback"
+                      fallback={artist?.name?.slice(0, 2) ?? ''}
+                    />
+                  </View>
+                  <View className="s-artist-profile-sheet__identity">
+                    <View className="s-artist-profile-sheet__name-row">
+                      <Text className="s-artist-profile-sheet__name">
+                        {artist?.name}
+                      </Text>
+                      {artist?.activityCount != null ? (
+                        <Text className="s-artist-profile-sheet__count-pill">
+                          {t('events.artistActivityCount', {
+                            count: artist.activityCount,
+                          })}
+                        </Text>
+                      ) : null}
+                    </View>
+                    {displayGenreLabel ? (
+                      <Text className="s-artist-profile-sheet__genre">
+                        {displayGenreLabel}
+                      </Text>
+                    ) : null}
+                    {chineseAliases.length ? (
+                      <Text className="s-artist-profile-sheet__aliases">
+                        {t('events.artistProfile.aliasesLabel')}：
+                        {chineseAliases.join('、')}
+                      </Text>
+                    ) : null}
+                    <Text
+                      className={[
+                        's-artist-profile-sheet__bio',
+                        !bioExpanded && hasExpandableBio ? 's-line-clamp-3' : '',
+                      ]
+                        .filter(Boolean)
+                        .join(' ')}
+                    >
+                      {bioText}
+                    </Text>
+                    {hasExpandableBio ? (
+                      <Text
+                        className="s-artist-profile-sheet__bio-toggle"
+                        onClick={() => setBioExpanded((value) => !value)}
+                      >
+                        {bioExpanded
+                          ? t('events.artistProfile.bioCollapse')
+                          : t('events.artistProfile.bioExpand')}
                       </Text>
                     ) : null}
                   </View>
-                  {displayGenreLabel ? (
-                    <Text className="s-artist-profile-sheet__genre">
-                      {displayGenreLabel}
-                    </Text>
-                  ) : null}
-                  {chineseAliases.length ? (
-                    <Text className="s-artist-profile-sheet__aliases">
-                      {t('events.artistProfile.aliasesLabel')}：
-                      {chineseAliases.join('、')}
-                    </Text>
-                  ) : null}
-                  <Text
-                    className={[
-                      's-artist-profile-sheet__bio',
-                      !bioExpanded && hasExpandableBio ? 's-line-clamp-3' : '',
-                    ]
-                      .filter(Boolean)
-                      .join(' ')}
-                  >
-                    {bioText}
-                  </Text>
-                  {hasExpandableBio ? (
-                    <Text
-                      className="s-artist-profile-sheet__bio-toggle"
-                      onClick={() => setBioExpanded((value) => !value)}
-                    >
-                      {bioExpanded
-                        ? t('events.artistProfile.bioCollapse')
-                        : t('events.artistProfile.bioExpand')}
-                    </Text>
-                  ) : null}
                 </View>
               </View>
-            </View>
+            )}
 
             <ScrollView
               scrollY
@@ -256,6 +270,13 @@ function ArtistProfileSheetInner({
               style={{ flex: 1, height: 0, minHeight: 0 }}
             >
               <View className="s-artist-profile-sheet__body">
+                {comboMembers ? (
+                  <View className="s-artist-profile-sheet__members">
+                    {comboMembers.map((member) => (
+                      <ArtistComboMemberCard key={member.name} member={member} />
+                    ))}
+                  </View>
+                ) : null}
                 <View className="s-artist-profile-sheet__section-head">
                   <View className="s-artist-profile-sheet__section-accent" />
                   <Text className="s-artist-profile-sheet__section-title">
@@ -285,7 +306,7 @@ function ArtistProfileSheetInner({
                     {t('events.artistProfile.appearancesEmpty')}
                   </Text>
                 )}
-                {representativeTracks.length ? (
+                {!comboMembers && representativeTracks.length ? (
                   <View className="s-artist-profile-sheet__tracks">
                     <View className="s-artist-profile-sheet__section-head">
                       <View className="s-artist-profile-sheet__section-accent" />

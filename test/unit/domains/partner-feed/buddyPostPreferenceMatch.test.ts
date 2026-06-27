@@ -66,4 +66,17 @@ describe('buddyPostPreferenceMatch', () => {
     });
     expect(sorted.map((post) => post.id)).toEqual(['newer', 'older']);
   });
+
+  it('matches drum and bass preferences against dnb post text', () => {
+    const post = samplePost({
+      body: '上海出发 drum and bass 组队',
+      departureCity: '上海',
+    });
+    expect(
+      scoreEventDetailPostPreferenceMatch(post, {
+        city: '上海',
+        favorGenres: ['Drum and Bass'],
+      }),
+    ).toBeGreaterThanOrEqual(65);
+  });
 });

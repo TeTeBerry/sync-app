@@ -10,6 +10,7 @@ export type {
   BackendActivity,
   CatalogLineupArtist,
   CatalogLineupArtistDetail,
+  CatalogLineupArtistMemberDetail,
   CatalogLineupArtistNextActivity,
 } from './activity';
 

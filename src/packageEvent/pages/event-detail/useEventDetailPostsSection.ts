@@ -13,7 +13,6 @@ import {
   shouldApplyTravelGuideSearchPrefill,
 } from '@/domains/travel-guide';
 import { useDisplayUserIdentity } from '../../../hooks/useDisplayUserIdentity';
-import { useCurrentUserQuery } from '../../../hooks/useSyncApi';
 import { travelGuideFormToSearchQuery } from '@/utils/travelGuideToBuddyPost';
 import type { EventDetailPost } from '../../../types/backend';
 import { scrollElementToCenter } from '../../../utils/scrollToCenter';
@@ -69,7 +68,6 @@ export function useEventDetailPostsSection({
   const appliedTravelGuidePrefillRef = useRef<string | null>(null);
 
   const displayIdentity = useDisplayUserIdentity();
-  const { data: currentUser } = useCurrentUserQuery();
 
   const postsQuery = useEventPostsInfiniteQuery(eventId, {
     anchorPostId: highlightPostId || undefined,
@@ -143,7 +141,6 @@ export function useEventDetailPostsSection({
     openCommentsOnMount,
     onTravelGuidePrefillDismiss: handleTravelGuidePrefillDismiss,
     buildApplyCommentDraft,
-    currentUser,
   });
 
   const {

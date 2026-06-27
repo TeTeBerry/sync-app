@@ -34,11 +34,7 @@ import { useMemo } from 'react';
 import { useT } from '@/hooks/useI18n';
 import { formatBuddyPostSearchParsedSummary } from '../../../utils/formatBuddyPostSearchParsedSummary';
 import { useAuthSession } from '../../../hooks/useAuthSession';
-import { useCurrentUserQuery } from '../../../hooks/useSyncApi';
-import {
-  formatBuddyPreferencesSummary,
-  hasBuddyPreferenceSignal,
-} from '../../../constants/buddyPreferences';
+import { useBuddyMatchProfile } from '../../../hooks/useBuddyMatchProfile';
 
 const EventDetailPage = () => {
   useEndRouteTransitionOnShow();
@@ -48,7 +44,7 @@ const EventDetailPage = () => {
   });
   const page = useEventDetailPage({ confirm });
   const { loggedIn } = useAuthSession();
-  const { data: currentUser } = useCurrentUserQuery({ enabled: loggedIn });
+  const { preferencesSummary, hasPreferenceSignal } = useBuddyMatchProfile();
   const searchParsedSummary = useMemo(() => {
     if (page.posts.searchSceneParsedInsight) {
       return page.posts.searchSceneParsedInsight;
@@ -57,16 +53,12 @@ const EventDetailPage = () => {
       t('eventDetail.searchParsedPeople', { count }),
     );
   }, [page.posts.searchParsed, page.posts.searchSceneParsedInsight, t]);
-  const hasPreferenceSignal = loggedIn && hasBuddyPreferenceSignal(currentUser);
-  const preferenceSummary = useMemo(
-    () => (hasPreferenceSignal ? formatBuddyPreferencesSummary(currentUser) : null),
-    [currentUser, hasPreferenceSignal],
-  );
+  const preferenceSummary = loggedIn && hasPreferenceSignal ? preferencesSummary : null;
   const activePreferenceSummary =
     page.posts.searchScenePreferenceInsight ?? preferenceSummary;
   const showPreferenceInsight =
     Boolean(activePreferenceSummary) &&
-    page.posts.preferenceSortEnabled &&
+    page.posts.postFilterPreferenceSortEnabled &&
     !page.posts.searchUsedLocalFallback;
 
   const unityRecruitCount = useMemo(() => {
@@ -205,7 +197,6 @@ const EventDetailPage = () => {
                   travelGuideGenerated={travelGuideGenerated}
                   travelGuideSupported={activity?.travelGuideSupported}
                   lineupPublished={activity?.lineupPublished}
-                  favorGenres={currentUser?.favorGenres}
                   unreadReplyCount={prepNudgeUnreadReplyCount}
                   onPrepNudgeAction={onPrepNudgeAction}
                   activityLegacyId={page.eventId}
@@ -245,9 +236,7 @@ const EventDetailPage = () => {
                         onSelectedCityChange={posts.setPostFilterSelectedCity}
                         recruitingOnly={posts.postFilterRecruitingOnly}
                         onRecruitingOnlyChange={posts.setPostFilterRecruitingOnly}
-                        showPreferenceSort={
-                          loggedIn && posts.postFilterShowPreferenceSort
-                        }
+                        showPreferenceSort={loggedIn && hasPreferenceSignal}
                         preferenceSortEnabled={posts.postFilterPreferenceSortEnabled}
                         onPreferenceSortEnabledChange={
                           posts.setPostFilterPreferenceSortEnabled
