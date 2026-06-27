@@ -103,8 +103,7 @@ export async function prefetchCoreQueriesOnLaunch(): Promise<void> {
   }
 
   await warmCloudRunContainer();
-  await prefetchHomeSummaryIfMissing();
-  await prefetchActivitiesIfMissing();
+  await Promise.all([prefetchHomeSummaryIfMissing(), prefetchActivitiesIfMissing()]);
   void prefetchLineupArtistsIfMissing();
   void loadPersonalityTestCatalog().catch(() => undefined);
   prefetchPlurPeaceCoverMedia();

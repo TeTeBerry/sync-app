@@ -68,6 +68,7 @@ export const enUS: MessageTree = {
     featuredTitle: 'Hot Asian Festivals',
     featuredEmpty: 'No featured events',
     featuredEmptyHint: 'Browse upcoming dates',
+    featuredLoadFailed: 'Failed to load featured events',
     featuredBrowse: 'Browse events',
     quickTitle: 'Quick links',
     quickEvents: 'Browse events',

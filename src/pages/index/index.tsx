@@ -69,7 +69,12 @@ const Home = () => {
 
   const { data: summary, refetch: refetchHomeSummary } = useHomeSummary();
   const heat = summary?.heat;
-  const { items: featuredEvents } = useFeaturedEvents();
+  const {
+    items: featuredEvents,
+    isLoading: featuredLoading,
+    isError: featuredError,
+    refetch: refetchFeaturedEvents,
+  } = useFeaturedEvents();
   const { loggedIn } = useAuthSession();
   const [featuredIndex, setFeaturedIndex] = useState(0);
   const { data: unreadCount = 0, refetch: refetchUnreadCount } =
@@ -331,6 +336,9 @@ const Home = () => {
 
             <HomeFeaturedEvents
               items={featuredEvents}
+              isLoading={featuredLoading}
+              isError={featuredError}
+              onRetry={() => void refetchFeaturedEvents()}
               activeIndex={featuredIndex}
               onActiveIndexChange={setFeaturedIndex}
               onEventClick={openEventDetail}

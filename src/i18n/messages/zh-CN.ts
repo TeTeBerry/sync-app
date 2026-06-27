@@ -67,6 +67,7 @@ export const zhCN: MessageTree = {
     featuredTitle: '热门亚洲电音节',
     featuredEmpty: '暂无精选活动',
     featuredEmptyHint: '去活动页看看近期场次与地图',
+    featuredLoadFailed: '精选活动加载失败',
     featuredBrowse: '浏览近期活动',
     quickTitle: '快捷入口',
     quickEvents: '浏览活动',

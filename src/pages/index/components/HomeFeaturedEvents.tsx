@@ -3,6 +3,7 @@ import { type FC, useEffect, useState } from 'react';
 import { ChevronRight } from '../../../components/icons';
 import { ImageWithFallback } from '../../../components/ImageWithFallback';
 import { Button } from '../../../components/ui';
+import ThemedPageLoader from '../../../components/ThemedPageLoader';
 import {
   activityStatusCardClass,
   getActivityStatusFromActivity,
@@ -21,14 +22,39 @@ import { useT } from '@/hooks/useI18n';
 
 type HomeFeaturedEventsProps = {
   items: FeaturedEvent[];
+  isLoading?: boolean;
+  isError?: boolean;
+  onRetry?: () => void;
   activeIndex?: number;
   onActiveIndexChange?: (index: number) => void;
   onEventClick: (item: FeaturedEvent) => void;
   onEventPreload?: (item: FeaturedEvent) => void;
 };
 
+function HomeFeaturedEventsHeader({ title }: { title: string }) {
+  const t = useT();
+
+  return (
+    <View className="s-home-showcase__head">
+      <Text className="s-home-showcase__title">{title}</Text>
+      <View
+        className="s-home-showcase__all"
+        onClick={() => goEventsListTab()}
+        role="button"
+        aria-label={t('common.viewAllEvents')}
+      >
+        <Text className="s-home-showcase__all-text">{t('common.all')}</Text>
+        <ChevronRight size={14} color="var(--primary)" />
+      </View>
+    </View>
+  );
+}
+
 export const HomeFeaturedEvents: FC<HomeFeaturedEventsProps> = ({
   items,
+  isLoading = false,
+  isError = false,
+  onRetry,
   activeIndex,
   onActiveIndexChange,
   onEventClick,
@@ -52,21 +78,33 @@ export const HomeFeaturedEvents: FC<HomeFeaturedEventsProps> = ({
     }
   };
 
+  if (isLoading && items.length === 0) {
+    return (
+      <View className="s-home-showcase" aria-label={t('home.featuredTitle')}>
+        <HomeFeaturedEventsHeader title={featuredTitle} />
+        <ThemedPageLoader variant="skeleton-feed" minHeight={220} />
+      </View>
+    );
+  }
+
+  if (isError && items.length === 0) {
+    return (
+      <View className="s-home-showcase" aria-label={t('home.featuredTitle')}>
+        <HomeFeaturedEventsHeader title={featuredTitle} />
+        <View className="s-home-showcase__empty-wrap">
+          <Text className="s-home-showcase__empty">{t('home.featuredLoadFailed')}</Text>
+          <Button className="s-home-showcase__empty-btn" onClick={() => onRetry?.()}>
+            <Text className="s-home-showcase__empty-btn-text">{t('common.retry')}</Text>
+          </Button>
+        </View>
+      </View>
+    );
+  }
+
   if (items.length === 0) {
     return (
       <View className="s-home-showcase" aria-label={t('home.featuredTitle')}>
-        <View className="s-home-showcase__head">
-          <Text className="s-home-showcase__title">{featuredTitle}</Text>
-          <View
-            className="s-home-showcase__all"
-            onClick={() => goEventsListTab()}
-            role="button"
-            aria-label={t('common.viewAllEvents')}
-          >
-            <Text className="s-home-showcase__all-text">{t('common.all')}</Text>
-            <ChevronRight size={14} color="var(--primary)" />
-          </View>
-        </View>
+        <HomeFeaturedEventsHeader title={featuredTitle} />
         <View className="s-home-showcase__empty-wrap">
           <Text className="s-home-showcase__empty">{t('home.featuredEmpty')}</Text>
           <Text className="s-home-showcase__empty-hint">
@@ -87,18 +125,7 @@ export const HomeFeaturedEvents: FC<HomeFeaturedEventsProps> = ({
 
   return (
     <View className="s-home-showcase" aria-label={t('home.featuredTitle')}>
-      <View className="s-home-showcase__head">
-        <Text className="s-home-showcase__title">{featuredTitle}</Text>
-        <View
-          className="s-home-showcase__all"
-          onClick={() => goEventsListTab()}
-          role="button"
-          aria-label={t('common.viewAllEvents')}
-        >
-          <Text className="s-home-showcase__all-text">{t('common.all')}</Text>
-          <ChevronRight size={14} color="var(--primary)" />
-        </View>
-      </View>
+      <HomeFeaturedEventsHeader title={featuredTitle} />
 
       <Swiper
         className="s-home-showcase__swiper"

@@ -211,7 +211,7 @@ export function useSelectedActivityLegacyIds() {
 }
 
 export function useFeaturedEvents() {
-  const { data: summary, isLoading } = useHomeSummary();
+  const { data: summary, isLoading, isError, refetch } = useHomeSummary();
   const selectedLegacyIds = useSelectedActivityLegacyIds();
 
   const items = useMemo((): FeaturedEvent[] => {
@@ -222,9 +222,13 @@ export function useFeaturedEvents() {
     return pickHomeFeaturedEvents(active, selectedLegacyIds);
   }, [summary, selectedLegacyIds]);
 
+  const hasSummary = summary !== undefined;
+
   return {
     items,
-    isLoading,
+    isLoading: isLoading && !hasSummary,
+    isError: isError && !hasSummary,
+    refetch,
   };
 }
 
