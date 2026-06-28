@@ -178,6 +178,8 @@ Husky + lint-staged on commit.
 | Document | Description |
 |----------|-------------|
 | [docs/PRODUCT.md](docs/PRODUCT.md) | Product strategy, IA, compliance & code index |
+| [docs/AGENT-ROADMAP.md](docs/AGENT-ROADMAP.md) | **P0** User goals, proactive nudge, open API, WeChat AI entry |
+| [docs/SCENE-AGENT.md](docs/SCENE-AGENT.md) | In-app Scene Agent (L0/L1, no chat tab) |
 | [docs/Q2-USER-STORIES.md](docs/Q2-USER-STORIES.md) | **Q2 roadmap**：AI 查节 / 找队、招募改版、准备 Tab 瘦身 |
 | [docs/Q1-USER-STORIES.md](docs/Q1-USER-STORIES.md) | Q1 user stories (completed baseline) |
 | [docs/API.md](docs/API.md) | REST / WebSocket contract |

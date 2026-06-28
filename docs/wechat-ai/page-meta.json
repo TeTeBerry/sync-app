@@ -1,0 +1,59 @@
+{
+  "pages": [
+    {
+      "path": "pages/index/index",
+      "name": "首页",
+      "description": "精选活动、我的下一场、查电音节与找组队入口"
+    },
+    {
+      "path": "pages/events/index",
+      "name": "活动列表",
+      "description": "浏览与搜索电音节 catalog、日历与艺人"
+    },
+    {
+      "path": "packageEvent/pages/event-detail/index",
+      "name": "活动详情",
+      "description": "查看电音节资讯、阵容、公开组队招募墙、出行攻略与观演准备",
+      "query": {
+        "type": "object",
+        "properties": {
+          "legacyId": {
+            "type": "number",
+            "description": "活动 legacyId"
+          }
+        },
+        "required": ["legacyId"]
+      }
+    },
+    {
+      "path": "packageEvent/pages/activity-lineup/index",
+      "name": "活动阵容",
+      "description": "查看活动官宣阵容与艺人列表",
+      "query": {
+        "type": "object",
+        "properties": {
+          "legacyId": {
+            "type": "number",
+            "description": "活动 legacyId"
+          }
+        },
+        "required": ["legacyId"]
+      }
+    },
+    {
+      "path": "packageEvent/pages/ai-travel-guide/index",
+      "name": "出行攻略",
+      "description": "查看 AI 生成的交通、住宿与离场参考（内容仅供参考）",
+      "query": {
+        "type": "object",
+        "properties": {
+          "legacyId": {
+            "type": "number",
+            "description": "活动 legacyId"
+          }
+        },
+        "required": ["legacyId"]
+      }
+    }
+  ]
+}

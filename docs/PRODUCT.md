@@ -602,6 +602,19 @@ Story：[US-Q2-39](./Q2-USER-STORIES.md#us-q2-39--本地城市-hub-聚合页-p1-
 
 **明确不做**：全站聊天、匹配度/最佳搭子、AI 自动代发（须用户选草稿确认）、付费 AI、塔罗抽队友。
 
+### 8.2 Agent 路线图（用户目标 / 情境推送 / 微信 AI · 2026-06）
+
+> **最高优先级 P0**：用户 Goal + 阵容监控闭环 + 原子能力门面（供后续微信 AI SKILL / MCP 复用）。详见 [AGENT-ROADMAP.md](./AGENT-ROADMAP.md)。
+
+| 层级 | 说明 | 阶段 |
+|------|------|------|
+| **L3 用户目标** | `user_goals` · Scout 变更 → 推送 · 可选招募草稿 | **P0** |
+| **情境推送** | `ProactiveNudgeService` · UserContext 规则 | P1 |
+| **开放读 API** | JSON-LD Event · `.ics` · sync-mcp-server | P1～P2 |
+| **L4 微信 AI** | SKILL 分包 · `wx.openAgent`；P0 仅文档预留 | P0 预留 · P3 内测 |
+
+微信 AI 合规与接入清单：[wechat-ai/AGENTS.md](./wechat-ai/AGENTS.md) · [wechat-ai/CHECKLIST.md](./wechat-ai/CHECKLIST.md)
+
 ### 自 Q1 延续
 
 | ID | 功能 | 状态 |
@@ -640,4 +653,5 @@ Story：[US-Q2-39](./Q2-USER-STORIES.md#us-q2-39--本地城市-hub-聚合页-p1-
 | Agent 工具 | `sync-app-backend/src/ai/agent/tools/` |
 | 发帖链路 | [POST-LIFECYCLE.md](./POST-LIFECYCLE.md) |
 | 无感 Scene Agent | [SCENE-AGENT.md](./SCENE-AGENT.md) |
+| Agent 路线图（P0 Goal / 微信 AI 入口） | [AGENT-ROADMAP.md](./AGENT-ROADMAP.md) · [wechat-ai/](./wechat-ai/) |
 | 路由 | `src/utils/route.ts` |
