@@ -1,6 +1,7 @@
 import type { AiBuddyPostFormValues, BuddyPostTagId } from '../types/buddyPost';
 import type { AiGuidePlanFormValues } from '../types/travelGuide';
 import { travelGuideBudgetLabel } from '@/domains/travel-guide/utils/travelGuideBudgetLabels';
+import { t as defaultT } from '@/i18n';
 import { defaultBuddyPostForm } from './buddyPostForm';
 import {
   formatBuddyPostDateShort,
@@ -24,20 +25,24 @@ function suggestBuddyTags(): BuddyPostTagId[] {
 
 function buildPrefillNote(
   guide: AiGuidePlanFormValues,
-  t: (key: string) => string,
+  resolveT: (key: string, params?: Record<string, string | number>) => string,
 ): string | undefined {
   const parts: string[] = [];
   const nights = guide.accommodationNights ?? 0;
   if (nights > 0) {
-    parts.push(`住${nights}晚`);
+    parts.push(resolveT('travelGuide.stayNightsChip', { count: nights }));
   }
   if (guide.budgetTier) {
-    parts.push(`${travelGuideBudgetLabel(guide.budgetTier, t)}住宿`);
+    parts.push(
+      resolveT('travelGuide.accommodationWithTier', {
+        label: travelGuideBudgetLabel(guide.budgetTier, resolveT),
+      }),
+    );
   }
   if (guide.selfDrive) {
-    parts.push(t('travelPlan.driveYes'));
+    parts.push(resolveT('travelPlan.driveYes'));
   }
-  const note = parts.join('，');
+  const note = parts.join(resolveT('common.listSeparator'));
   return note || undefined;
 }
 
@@ -54,11 +59,11 @@ function fallbackDateRange(): Pick<AiBuddyPostFormValues, 'dateStart' | 'dateEnd
 export function travelGuideFormToBuddyPrefill(
   guide: AiGuidePlanFormValues,
   activityDate?: string,
-  t?: (key: string) => string,
+  t?: (key: string, params?: Record<string, string | number>) => string,
 ): TravelGuideBuddyPrefill {
   const dateSeed = defaultBuddyPostForm(activityDate) ?? fallbackDateRange();
   const headcount = guide.headcount > 0 ? String(guide.headcount) : '';
-  const resolveT = t ?? ((key: string) => key);
+  const resolveT = t ?? defaultT;
 
   const form: AiBuddyPostFormValues = {
     dateStart: dateSeed.dateStart,
@@ -72,14 +77,16 @@ export function travelGuideFormToBuddyPrefill(
 
   const nights = guide.accommodationNights ?? 0;
   const summaryLines = [
-    '出发地待填写',
-    headcount ? `${headcount}人` : '人数待补充',
+    resolveT('travelGuide.departurePending'),
+    headcount
+      ? resolveT('travelGuide.headcountChip', { count: guide.headcount })
+      : resolveT('travelGuide.headcountPending'),
     nights > 0 && guide.budgetTier
-      ? `住${nights}晚 · ${travelGuideBudgetLabel(guide.budgetTier, resolveT)}`
+      ? `${resolveT('travelGuide.stayNightsChip', { count: nights })} · ${travelGuideBudgetLabel(guide.budgetTier, resolveT)}`
       : guide.budgetTier
         ? travelGuideBudgetLabel(guide.budgetTier, resolveT)
         : nights > 0
-          ? `住${nights}晚`
+          ? resolveT('travelGuide.stayNightsChip', { count: nights })
           : undefined,
     guide.selfDrive ? resolveT('travelPlan.driveYes') : undefined,
   ].filter((line): line is string => Boolean(line));
@@ -87,10 +94,20 @@ export function travelGuideFormToBuddyPrefill(
   return { form, summaryLines };
 }
 
-function formatDepartureForSearch(guide: AiGuidePlanFormValues): string | undefined {
+function formatDepartureForSearch(
+  guide: AiGuidePlanFormValues,
+  resolveT: (key: string, params?: Record<string, string | number>) => string,
+): string | undefined {
   const departure = guide.departure?.trim() || guide.departureCity?.trim();
   if (!departure) return undefined;
-  return departure.endsWith('出发') ? departure : `${departure}出发`;
+  const suffix = resolveT('travelGuide.departureSuffix');
+  if (suffix && departure.endsWith(suffix)) {
+    return departure;
+  }
+  if (suffix) {
+    return `${departure}${suffix}`;
+  }
+  return resolveT('travelGuide.departureChip', { departure });
 }
 
 function resolveSearchDateShort(activityDate?: string): string | undefined {
@@ -113,10 +130,11 @@ function resolveRecruitSlotsNeeded(headcount: number): number {
 export function travelGuideFormToSearchQuery(
   guide: AiGuidePlanFormValues,
   activityDate?: string,
-  t?: (key: string) => string,
+  t?: (key: string, params?: Record<string, string | number>) => string,
 ): string {
+  const resolveT = t ?? defaultT;
   const parts: string[] = [];
-  const departure = formatDepartureForSearch(guide);
+  const departure = formatDepartureForSearch(guide, resolveT);
   if (departure) {
     parts.push(departure);
   }
@@ -127,14 +145,14 @@ export function travelGuideFormToSearchQuery(
   }
 
   const slotsNeeded = resolveRecruitSlotsNeeded(guide.headcount);
-  parts.push(`差 ${slotsNeeded} 人`);
+  parts.push(resolveT('travelGuide.searchSlotsNeeded', { count: slotsNeeded }));
 
-  if (t && guide.budgetTier) {
-    const budget = travelGuideBudgetLabel(guide.budgetTier, t);
+  if (guide.budgetTier) {
+    const budget = travelGuideBudgetLabel(guide.budgetTier, resolveT);
     if (budget) {
       parts.push(budget);
     }
   }
 
-  return parts.join('，');
+  return parts.join(resolveT('common.listSeparator'));
 }

@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ScrollView, Text, View } from '@tarojs/components';
 import { useT } from '@/hooks/useI18n';
 import ThemedPageLoader from '../../../components/ThemedPageLoader';
+import { useCurrentUserQuery } from '../../../hooks/sync/profile';
 import { useCatalogLineupArtists } from '../../../hooks/useSyncApi';
 import { useBuddyMatchProfile } from '../../../hooks/useBuddyMatchProfile';
 import { IMAGE_SIZE } from '../../../constants/imageSizes';
@@ -38,6 +39,7 @@ export const EventsActivityArtistsTab: FC<EventsActivityArtistsTabProps> = ({
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
   const [preferGenreSort, setPreferGenreSort] = useState(true);
   const preferenceInitializedRef = useRef(false);
+  useCurrentUserQuery();
   const { data: artists, isLoading, isError, refetch } = useCatalogLineupArtists();
   const { favorGenres } = useBuddyMatchProfile();
   const canSortByGenrePreference = Boolean(favorGenres?.length);

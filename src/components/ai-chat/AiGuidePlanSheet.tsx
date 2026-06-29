@@ -33,6 +33,8 @@ export type AiGuidePlanSheetProps = {
   /** 国内活动展示「是否住宿」开关，关闭时不生成住宿方案 */
   showAccommodationOption?: boolean;
   initialValues?: AiGuidePlanFormValues | null;
+  /** 重新生成时跳过服务端缓存 */
+  forceRegenerate?: boolean;
   onClose: () => void;
   onSubmit: (values: AiGuidePlanFormValues) => void;
 };
@@ -110,6 +112,7 @@ function AiGuidePlanSheetInner({
   showSelfDriveOption = true,
   showAccommodationOption = false,
   initialValues,
+  forceRegenerate = false,
   onClose,
   onSubmit,
 }: AiGuidePlanSheetProps) {
@@ -120,6 +123,7 @@ function AiGuidePlanSheetInner({
     open,
     defaultNights,
     initialValues,
+    forceRegenerate,
     showSelfDriveOption,
     showAccommodationOption,
     onSubmit,

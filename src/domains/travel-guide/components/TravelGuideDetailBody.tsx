@@ -1,18 +1,32 @@
-import type { TravelGuidePlan } from '@/types/travelGuide';
+import type { TravelGuideBudgetTier, TravelGuidePlan } from '@/types/travelGuide';
 import { Text, View } from '@tarojs/components';
 import { useT } from '@/hooks/useI18n';
+import { TravelGuideBudgetList } from './TravelGuideBudgetList';
+import { TravelGuideFlightOffers } from './TravelGuideFlightOffers';
 import {
   TravelGuideDetailBulletList,
   TravelGuideDetailNamedItem,
   TravelGuideDetailSection,
 } from './TravelGuideDetailSection';
+import { filterTransportLinesForFlightOffers } from '../utils/travelGuideFlightSampleLine.util';
+import { resolveTravelGuideBudgetTier } from '../utils/travelGuideBudgetLabels';
 
 type TravelGuideDetailBodyProps = {
   plan: TravelGuidePlan;
+  selectedBudgetTier?: TravelGuideBudgetTier;
 };
 
-export function TravelGuideDetailBody({ plan }: TravelGuideDetailBodyProps) {
+export function TravelGuideDetailBody({
+  plan,
+  selectedBudgetTier,
+}: TravelGuideDetailBodyProps) {
   const t = useT();
+  const resolvedBudgetTier = resolveTravelGuideBudgetTier(selectedBudgetTier);
+  const flightTierQuote = plan.flightByTier?.[resolvedBudgetTier];
+  const transportLines = filterTransportLinesForFlightOffers(
+    plan.transport.lines,
+    plan.transport.flightOffers,
+  );
   const accommodationSchemes = plan.accommodation.schemes ?? [];
   const featuredHotelNames = new Set(accommodationSchemes.map((s) => s.name));
   const moreHotels = plan.accommodation.hotels.filter(
@@ -42,7 +56,17 @@ export function TravelGuideDetailBody({ plan }: TravelGuideDetailBodyProps) {
       ) : null}
 
       <TravelGuideDetailSection title={plan.transport.title} accent="transport">
-        <TravelGuideDetailBulletList items={plan.transport.lines} />
+        {transportLines.length ? (
+          <TravelGuideDetailBulletList items={transportLines} />
+        ) : null}
+        {plan.transport.flightOffers?.length ? (
+          <TravelGuideFlightOffers
+            offers={plan.transport.flightOffers}
+            cabinFallback={flightTierQuote?.cabinFallback}
+            requestedCabinLabel={flightTierQuote?.requestedCabinLabel}
+            actualCabinLabel={flightTierQuote?.cabinLabel}
+          />
+        ) : null}
       </TravelGuideDetailSection>
 
       {plan.venueTransport?.options.length ? (
@@ -125,12 +149,7 @@ export function TravelGuideDetailBody({ plan }: TravelGuideDetailBodyProps) {
 
       {plan.budget?.items.length ? (
         <TravelGuideDetailSection title={plan.budget.title} accent="budget">
-          <TravelGuideDetailBulletList
-            items={plan.budget.items.map(
-              (item: { label: string; range: string; note?: string }) =>
-                `${item.label}: ${item.range}${item.note ? ` (${item.note})` : ''}`,
-            )}
-          />
+          <TravelGuideBudgetList items={plan.budget.items} />
         </TravelGuideDetailSection>
       ) : null}
 

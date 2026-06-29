@@ -1,15 +1,25 @@
 import './TravelGuideBudgetCompareCards.scss';
 import { Button, cn } from '@/components/ui';
 import { Check, Sparkles } from '@/components/icons';
-import { getTravelGuideBudgetOptions } from '../utils/travelGuideBudgetLabels';
-import type { TravelGuideBudgetTier } from '@/types/travelGuide';
-import { buildTravelGuideTierCompareEstimates } from '../utils/travelGuideBudgetCompare.util';
+import {
+  getTravelGuideBudgetOptions,
+  resolveTravelGuideBudgetTier,
+} from '../utils/travelGuideBudgetLabels';
+import type {
+  TravelGuideBudgetTier,
+  TravelGuideBudgetTierSnapshot,
+} from '@/types/travelGuide';
+import {
+  buildTravelGuideTierCompareEstimates,
+  buildTravelGuideTierCompareHints,
+} from '../utils/travelGuideBudgetCompare.util';
 import { useT } from '@/hooks/useI18n';
 import { Text, View } from '@tarojs/components';
 
 type TravelGuideBudgetCompareCardsProps = {
   headcount: number;
   accommodationNights: number;
+  budgetTierSnapshots?: TravelGuideBudgetTierSnapshot[];
   selectedTier?: TravelGuideBudgetTier;
   updating?: boolean;
   onSelect: (tier: TravelGuideBudgetTier) => void;
@@ -20,14 +30,21 @@ const TIER_ORDER: TravelGuideBudgetTier[] = ['economy', 'standard', 'comfort'];
 export function TravelGuideBudgetCompareCards({
   headcount,
   accommodationNights,
+  budgetTierSnapshots,
   selectedTier,
   updating = false,
   onSelect,
 }: TravelGuideBudgetCompareCardsProps) {
   const t = useT();
+  const resolvedSelectedTier = resolveTravelGuideBudgetTier(selectedTier);
   const estimates = buildTravelGuideTierCompareEstimates({
     headcount,
     accommodationNights,
+    budgetTierSnapshots,
+  });
+  const nightlyHints = buildTravelGuideTierCompareHints({
+    budgetTierSnapshots,
+    t,
   });
   const options = getTravelGuideBudgetOptions(t).sort(
     (a, b) => TIER_ORDER.indexOf(a.id) - TIER_ORDER.indexOf(b.id),
@@ -52,8 +69,7 @@ export function TravelGuideBudgetCompareCards({
 
       <View className="s-travel-guide-budget-compare__row">
         {options.map((opt) => {
-          const active = selectedTier === opt.id;
-          const isBaseline = !selectedTier && opt.id === 'standard';
+          const active = resolvedSelectedTier === opt.id;
           return (
             <Button
               key={opt.id}
@@ -61,7 +77,6 @@ export function TravelGuideBudgetCompareCards({
                 's-travel-guide-budget-compare__card',
                 `s-travel-guide-budget-compare__card--${opt.id}`,
                 active && 's-travel-guide-budget-compare__card--active',
-                isBaseline && 's-travel-guide-budget-compare__card--baseline',
                 updating && 's-travel-guide-budget-compare__card--disabled',
               )}
               hoverClass="s-travel-guide-budget-compare__card--pressed"
@@ -76,10 +91,6 @@ export function TravelGuideBudgetCompareCards({
                 <View className="s-travel-guide-budget-compare__card-check" aria-hidden>
                   <Check size={10} color="#fff" strokeWidth={3} />
                 </View>
-              ) : isBaseline ? (
-                <Text className="s-travel-guide-budget-compare__card-baseline">
-                  {t('travelGuide.budgetCompareBaseline')}
-                </Text>
               ) : null}
 
               <Text className="s-travel-guide-budget-compare__card-label">
@@ -87,7 +98,7 @@ export function TravelGuideBudgetCompareCards({
               </Text>
               <View className="s-travel-guide-budget-compare__card-nightly">
                 <Text className="s-travel-guide-budget-compare__card-hint">
-                  {opt.hint}
+                  {nightlyHints[opt.id]}
                 </Text>
                 <Text className="s-travel-guide-budget-compare__card-hint-suffix">
                   {t('travelGuide.budgetComparePerNight')}
@@ -100,7 +111,9 @@ export function TravelGuideBudgetCompareCards({
               />
 
               <Text className="s-travel-guide-budget-compare__card-estimate-label">
-                {t('travelGuide.budgetCompareTripEstimate')}
+                {t('travelGuide.budgetCompareStayTotal', {
+                  nights: accommodationNights,
+                })}
               </Text>
               <Text className="s-travel-guide-budget-compare__card-estimate">
                 {estimates[opt.id]}

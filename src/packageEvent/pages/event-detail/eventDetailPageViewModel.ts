@@ -99,6 +99,7 @@ export function buildEventDetailPageViewModel({
     guideDefaultNights: travelGuide.guideDefaultNights,
     guideEventCity: travelGuide.guideEventCity,
     guideSheetInitialValues: travelGuide.guideSheetInitialValues,
+    guideSheetForceRegenerate: travelGuide.guideSheetForceRegenerate,
     invalidEventId,
     publishComplianceConfirmDialog: templatePost.complianceConfirmDialog,
     buddyPostQuota: templatePost.buddyPostQuota,

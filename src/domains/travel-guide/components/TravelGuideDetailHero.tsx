@@ -21,7 +21,6 @@ export function TravelGuideDetailHero({
   plan,
   activityRegion,
 }: TravelGuideDetailHeroProps) {
-  useT();
   const t = useT();
   const totalBudget = findTravelGuideTotalBudgetItem(plan);
   const perPerson = totalBudget
@@ -31,10 +30,14 @@ export function TravelGuideDetailHero({
   const showSelfDriveChip = shouldShowTravelGuideSelfDriveOption(activityRegion);
 
   const chips = [
-    plan.departure ? `${plan.departure}${t('travelPlan.departureLabel')}` : null,
-    plan.headcount > 0 ? `${plan.headcount}${t('travelPlan.headcountUnit')}` : null,
+    plan.departure
+      ? t('travelGuide.departureChip', { departure: plan.departure })
+      : null,
+    plan.headcount > 0
+      ? t('travelGuide.headcountChip', { count: plan.headcount })
+      : null,
     plan.accommodationNights > 0
-      ? `${t('travelPlan.nightsLabel', { count: plan.accommodationNights })}`
+      ? t('travelGuide.stayNightsChip', { count: plan.accommodationNights })
       : null,
     plan.accommodationNights > 0 && plan.budgetLabel
       ? shortTravelGuideBudgetLabel(plan.budgetLabel)

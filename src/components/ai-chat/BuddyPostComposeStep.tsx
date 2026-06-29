@@ -1,6 +1,6 @@
 import { RefreshCw, Sparkles } from '../../components/icons';
 import { Button, cn } from '../ui';
-import { BUDDY_POST_AI_DISCLAIMER } from '@/constants/aiDisclosure';
+import { getBuddyPostAiDisclaimer } from '@/constants/aiDisclosure';
 import type { BuddyPostComposeCandidate } from '@/types/partner';
 import { Text, Textarea, View } from '@tarojs/components';
 import { useT } from '@/hooks/useI18n';
@@ -75,7 +75,7 @@ export function BuddyPostComposeStep({
       <View className="s-ai-buddy-post-sheet__compose-ai-field" aria-hidden>
         <Sparkles size={15} color="var(--primary)" aria-hidden />
         <Text className="s-ai-buddy-post-sheet__compose-ai-field-text">
-          {disclaimer?.trim() || BUDDY_POST_AI_DISCLAIMER}
+          {disclaimer?.trim() || getBuddyPostAiDisclaimer()}
         </Text>
       </View>
 

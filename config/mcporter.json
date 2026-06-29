@@ -2,6 +2,18 @@
   "mcpServers": {
     "exa": {
       "baseUrl": "https://mcp.exa.ai/mcp"
+    },
+    "RollingGo-Flight": {
+      "baseUrl": "https://mcp.rollinggo.cn/mcp/flight",
+      "headers": {
+        "Authorization": "Bearer ${ROLLINGGO_API_KEY}"
+      }
+    },
+    "RollingGo-Hotel": {
+      "baseUrl": "https://mcp.rollinggo.cn/mcp",
+      "headers": {
+        "Authorization": "Bearer ${ROLLINGGO_API_KEY}"
+      }
     }
   }
 }

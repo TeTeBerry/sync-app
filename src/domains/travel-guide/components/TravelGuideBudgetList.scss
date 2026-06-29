@@ -1,0 +1,66 @@
+.s-travel-guide-budget-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.s-travel-guide-budget-list__item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.s-travel-guide-budget-list__row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.s-travel-guide-budget-list__dot {
+  width: 6px;
+  height: 6px;
+  margin-top: 7px;
+  border-radius: 50%;
+  background: #ff0066;
+  flex-shrink: 0;
+}
+
+.s-travel-guide-budget-list__main {
+  flex: 1;
+  font-size: 14px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.s-travel-guide-budget-list__note {
+  padding-left: 14px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.52);
+}
+
+.s-travel-guide-budget-list__details {
+  padding-left: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.s-travel-guide-budget-list__detail-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.s-travel-guide-budget-list__detail-marker {
+  color: rgba(255, 0, 102, 0.75);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.s-travel-guide-budget-list__detail-text {
+  flex: 1;
+  font-size: 12px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.72);
+}

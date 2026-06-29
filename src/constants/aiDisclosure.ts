@@ -1,9 +1,16 @@
+import { t } from '@/i18n';
+
 /** Shown on AI-generated travel guide UI. */
-export const AI_TRAVEL_GUIDE_DISCLAIMER = '本攻略由AI辅助生成，仅供参考';
+export function getAiTravelGuideDisclaimer(): string {
+  return t('travelGuide.disclaimer');
+}
 
 /** Shown on AI-assisted buddy post compose / preview steps. */
-export const BUDDY_POST_AI_DISCLAIMER = 'AI 生成，仅供参考';
+export function getBuddyPostAiDisclaimer(): string {
+  return t('ai.buddyPostDisclaimer');
+}
 
 /** Shown persistently on the AI assistant tab. */
-export const AI_ASSISTANT_DISCLAIMER =
-  'AI 生成内容仅供参考，不构成专业意见，请自行核实';
+export function getAiAssistantDisclaimer(): string {
+  return t('ai.disclaimer');
+}

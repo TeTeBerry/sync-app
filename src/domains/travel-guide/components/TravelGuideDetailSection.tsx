@@ -11,6 +11,7 @@ import {
   Zap,
 } from '@/components/icons';
 import { Text, View } from '@tarojs/components';
+import { useT } from '@/hooks/useI18n';
 
 export type TravelGuideSectionAccent =
   | 'default'
@@ -119,6 +120,8 @@ export function TravelGuideDetailNamedItem({
   reason?: string;
   bookingHint?: string;
 }) {
+  const t = useT();
+
   return (
     <View className="s-travel-guide-detail__named-item">
       <Text className="s-travel-guide-detail__named-item-title">{title}</Text>
@@ -128,7 +131,7 @@ export function TravelGuideDetailNamedItem({
       ) : null}
       {bookingHint ? (
         <Text className="s-travel-guide-detail__named-item-hint">
-          预订 {bookingHint}
+          {t('travelGuide.bookingHint')} {bookingHint}
         </Text>
       ) : null}
     </View>

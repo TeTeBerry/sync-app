@@ -1,0 +1,184 @@
+.s-travel-guide-gen-loader {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 24px 20px 32px;
+  box-sizing: border-box;
+}
+
+.s-travel-guide-gen-loader__hero {
+  position: relative;
+  width: 88px;
+  height: 88px;
+  margin-bottom: 4px;
+}
+
+.s-travel-guide-gen-loader__ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(
+    from -90deg,
+    rgba(255, 0, 102, 0.95) 0deg,
+    rgba(255, 0, 102, 0.95) var(--gen-progress-deg, 0deg),
+    rgba(255, 255, 255, 0.08) var(--gen-progress-deg, 0deg),
+    rgba(255, 255, 255, 0.08) 360deg
+  );
+  mask: radial-gradient(
+    farthest-side,
+    transparent calc(100% - 5px),
+    #000 calc(100% - 4px)
+  );
+  -webkit-mask: radial-gradient(
+    farthest-side,
+    transparent calc(100% - 5px),
+    #000 calc(100% - 4px)
+  );
+}
+
+.s-travel-guide-gen-loader__ring-fill {
+  display: none;
+}
+
+.s-travel-guide-gen-loader__percent {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: var(--s-fw-semibold);
+  color: #fff;
+  letter-spacing: -0.02em;
+}
+
+.s-travel-guide-gen-loader__title {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.55);
+  letter-spacing: 0.04em;
+}
+
+.s-travel-guide-gen-loader__headline {
+  font-size: 17px;
+  font-weight: var(--s-fw-semibold);
+  color: #fff;
+  text-align: center;
+  line-height: 1.35;
+  min-height: 24px;
+}
+
+.s-travel-guide-gen-loader__bar {
+  width: min(100%, 280px);
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  margin-top: 4px;
+}
+
+.s-travel-guide-gen-loader__bar-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #ff0066, #ff4d94);
+  transition: width 0.45s ease;
+}
+
+.s-travel-guide-gen-loader__steps {
+  width: min(100%, 320px);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 14px 14px 12px;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.28);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  box-sizing: border-box;
+}
+
+.s-travel-guide-gen-loader__step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  opacity: 0.42;
+  transition: opacity 0.25s ease;
+}
+
+.s-travel-guide-gen-loader__step--active,
+.s-travel-guide-gen-loader__step--done {
+  opacity: 1;
+}
+
+.s-travel-guide-gen-loader__step-marker {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.s-travel-guide-gen-loader__step-marker--active {
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 0, 102, 0.55),
+    0 0 12px rgba(255, 0, 102, 0.35);
+  background: rgba(255, 0, 102, 0.12);
+}
+
+.s-travel-guide-gen-loader__step-marker--done {
+  background: rgba(255, 0, 102, 0.18);
+  box-shadow: inset 0 0 0 1px rgba(255, 0, 102, 0.45);
+}
+
+.s-travel-guide-gen-loader__step-check {
+  font-size: 11px;
+  color: #ff4d94;
+  line-height: 1;
+}
+
+.s-travel-guide-gen-loader__step-pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ff0066;
+  animation: s-travel-guide-gen-pulse 1.1s ease-in-out infinite;
+}
+
+.s-travel-guide-gen-loader__step-label {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.82);
+  line-height: 1.35;
+}
+
+.s-travel-guide-gen-loader__step--active .s-travel-guide-gen-loader__step-label {
+  color: #fff;
+  font-weight: var(--s-fw-medium);
+}
+
+.s-travel-guide-gen-loader__hint {
+  margin-top: 4px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.42);
+  text-align: center;
+  line-height: 1.45;
+  max-width: 280px;
+}
+
+@keyframes s-travel-guide-gen-pulse {
+  0%,
+  100% {
+    transform: scale(0.85);
+    opacity: 0.65;
+  }
+
+  50% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}

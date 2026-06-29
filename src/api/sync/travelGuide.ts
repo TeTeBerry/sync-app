@@ -1,41 +1,42 @@
-import {
-  LONG_RUNNING_REQUEST_TIMEOUT_MS,
-  ApiError,
-  apiGet,
-  apiPatch,
-  apiPost,
-} from '../../utils/apiClient';
-import {
-  CLOUD_RUN_MAX_TIMEOUT_MS,
-  isWeappCloudRunTransportEnabled,
-} from '../../constants/cloud';
+import { ApiError, apiGet, apiPatch, apiPost } from '../../utils/apiClient';
+import { CLOUD_RUN_MAX_TIMEOUT_MS } from '../../constants/cloud';
 import type {
   GenerateTravelGuidePayload,
   GenerateTravelGuideResult,
   TravelGuideBudgetTier,
+  TravelGuideGenerationJobProgress,
   TravelGuideGenerationJobResult,
   TravelGuidePlaceSuggestion,
   TravelGuidePlanReadResult,
 } from '../../types/travelGuide';
+import { animateTravelGuideGenerationTail } from '@/domains/travel-guide/utils/travelGuideGenerationProgress.util';
 import { ownerQueryParams } from '../requestContext';
 import { t } from '@/i18n';
 
 export type {
   TravelGuidePlaceSuggestion,
   TravelGuideGenerationJobStatus,
+  TravelGuideGenerationJobProgress,
   TravelGuideGenerationJobResult,
 } from '../../types/travelGuide';
 
 const TRAVEL_GUIDE_POLL_MAX_ATTEMPTS = 60;
 
+function travelGuideGenerationProgressSignature(
+  progress: TravelGuideGenerationJobProgress,
+): string {
+  return `${progress.step}:${progress.percent}`;
+}
+
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-/** Adaptive poll interval — fewer RTTs on long-running jobs. */
+/** Adaptive poll interval — catch fast early steps, backoff on long jobs. */
 function travelGuidePollDelayMs(attempt: number, elapsedMs: number): number {
-  if (attempt < 3) return 1_000;
-  if (elapsedMs < 15_000) return 2_000;
+  if (attempt < 8) return 500;
+  if (attempt < 12) return 1_000;
+  if (elapsedMs < 20_000) return 2_000;
   return 5_000;
 }
 
@@ -89,23 +90,20 @@ export function patchTravelGuideBudgetTier(
 export function generateTravelGuide(
   activityLegacyId: number,
   payload: GenerateTravelGuidePayload,
+  options?: {
+    onProgress?: (progress: TravelGuideGenerationJobProgress) => void;
+  },
 ) {
-  if (isWeappCloudRunTransportEnabled()) {
-    return generateTravelGuideViaJob(activityLegacyId, payload);
-  }
-
-  return apiPost<GenerateTravelGuideResult>(
-    `/activities/${activityLegacyId}/travel-guide/generate`,
-    payload,
-    ownerQueryParams(),
-    { timeoutMs: LONG_RUNNING_REQUEST_TIMEOUT_MS, maxRetries: 0 },
-  );
+  return generateTravelGuideViaJob(activityLegacyId, payload, options?.onProgress);
 }
 
 export async function pollTravelGuideGenerationJob(
   jobId: string,
+  onProgress?: (progress: TravelGuideGenerationJobProgress) => void,
 ): Promise<GenerateTravelGuideResult['plan']> {
   const startedAt = Date.now();
+  let lastProgressSignature: string | undefined;
+  let lastEmittedProgress: TravelGuideGenerationJobProgress | undefined;
 
   for (let attempt = 0; attempt < TRAVEL_GUIDE_POLL_MAX_ATTEMPTS; attempt += 1) {
     if (attempt > 0) {
@@ -119,7 +117,19 @@ export async function pollTravelGuideGenerationJob(
       { timeoutMs: CLOUD_RUN_MAX_TIMEOUT_MS, maxRetries: 0 },
     );
 
+    if (job.progress && onProgress) {
+      const signature = travelGuideGenerationProgressSignature(job.progress);
+      if (signature !== lastProgressSignature) {
+        lastProgressSignature = signature;
+        lastEmittedProgress = job.progress;
+        onProgress(job.progress);
+      }
+    }
+
     if (job.status === 'completed' && job.plan) {
+      if (onProgress) {
+        await animateTravelGuideGenerationTail(lastEmittedProgress, onProgress);
+      }
       return job.plan;
     }
     if (job.status === 'failed') {
@@ -133,6 +143,7 @@ export async function pollTravelGuideGenerationJob(
 async function generateTravelGuideViaJob(
   activityLegacyId: number,
   payload: GenerateTravelGuidePayload,
+  onProgress?: (progress: TravelGuideGenerationJobProgress) => void,
 ): Promise<GenerateTravelGuideResult> {
   const { jobId } = await apiPost<{ jobId: string }>(
     `/activities/${activityLegacyId}/travel-guide/generate-async`,
@@ -141,6 +152,6 @@ async function generateTravelGuideViaJob(
     { timeoutMs: CLOUD_RUN_MAX_TIMEOUT_MS, maxRetries: 0 },
   );
 
-  const plan = await pollTravelGuideGenerationJob(jobId);
+  const plan = await pollTravelGuideGenerationJob(jobId, onProgress);
   return { plan, guideId: payload.guideId };
 }

@@ -4,13 +4,13 @@ import Taro, {
   useShareAppMessage,
   useShareTimeline,
 } from '@tarojs/taro';
-import { hideThemedLoading, showThemedLoading } from '@/utils/themedLoading';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   fetchTravelGuidePlan,
   generateTravelGuide,
   patchTravelGuideBudgetTier,
 } from '@/api/sync/travelGuide';
+import type { TravelGuideGenerationJobProgress } from '@/types/travelGuide';
 import { useActivityDetailQuery } from '@/hooks/useSyncApi';
 import { useStackPageMainHeight } from '@/hooks/useTabPageMainHeight';
 import { goEventDetailWithBuddyPostPrefill, ROUTES } from '@/utils/route';
@@ -22,10 +22,8 @@ import {
   type TravelGuideDetailPayload,
 } from '../utils/travelGuideDetailStorage';
 import { markTravelGuideSearchPrefillPending } from '../utils/travelGuideSearchPrefillStorage';
-import {
-  getTravelGuideGeneratingText,
-  getTravelGuideTitle,
-} from '@/constants/aiCtaLabels';
+import { hideThemedLoading, showThemedLoading } from '@/utils/themedLoading';
+import { getTravelGuideTitle } from '@/constants/aiCtaLabels';
 import {
   isDomesticActivityRegion,
   shouldShowTravelGuideSelfDriveOption,
@@ -36,17 +34,18 @@ import { buildTravelGuideShareText } from '../utils/travelGuideShareText';
 import {
   buildTravelGuideShareAppMessage,
   buildTravelGuideShareTimeline,
+  buildTravelGuideShareQueryKey,
   parseTravelGuideFormFromShareQuery,
 } from '../utils/travelGuideWechatShare.util';
 import {
   computeAiTravelGuideFooterChromePx,
   resolveTravelGuideShareRef,
-  shouldLoadTravelGuideDetail,
 } from './aiTravelGuidePage.util';
 import type { AiGuidePlanFormValues, TravelGuideBudgetTier } from '@/types/travelGuide';
 import { useT } from '@/hooks/useI18n';
 import { showAppToast } from '@/utils/appToast';
 import { shouldShowPeaceBanner } from '../utils/shouldShowPeaceBanner';
+import { resolveTravelGuideBudgetTier } from '../utils/travelGuideBudgetLabels';
 
 const FOOTER_BASE_PX = 72;
 
@@ -61,14 +60,14 @@ function resolveFooterChromePx(): number {
 export function useAiTravelGuidePage() {
   const router = useRouter();
   const guideId = router.params.guideId?.trim() ?? '';
-  const cachedPayload = useMemo(
-    () => (guideId ? loadTravelGuideDetail(guideId) : null),
-    [guideId],
-  );
-  const [payload, setPayload] = useState<TravelGuideDetailPayload | null>(
-    cachedPayload,
+  const [payload, setPayload] = useState<TravelGuideDetailPayload | null>(() =>
+    guideId ? loadTravelGuideDetail(guideId) : null,
   );
   const [loading, setLoading] = useState(false);
+  const [regenerating, setRegenerating] = useState(false);
+  const [generationProgress, setGenerationProgress] =
+    useState<TravelGuideGenerationJobProgress | null>(null);
+  const [shareGenerationDone, setShareGenerationDone] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [sharing, setSharing] = useState(false);
   const [budgetTierUpdating, setBudgetTierUpdating] = useState(false);
@@ -79,7 +78,23 @@ export function useAiTravelGuidePage() {
     payload: TravelGuideDetailPayload;
   } | null>(null);
 
-  const shareSeed = parseTravelGuideFormFromShareQuery(router.params);
+  const shareQueryKey = useMemo(
+    () => buildTravelGuideShareQueryKey(router.params),
+    [router.params],
+  );
+  const shareSeed = useMemo(
+    () => parseTravelGuideFormFromShareQuery(router.params),
+    [shareQueryKey],
+  );
+  const shareGenerationInFlightRef = useRef<string | null>(null);
+  const shareGenerationDoneRef = useRef(shareGenerationDone);
+  shareGenerationDoneRef.current = shareGenerationDone;
+  const shouldGenerateFromShare = Boolean(
+    shareSeed &&
+    guideId &&
+    !shareGenerationDone &&
+    (!payload || shareSeed.forceRegenerate),
+  );
   const activityLegacyId = payload?.activityLegacyId ?? shareSeed?.activityLegacyId;
   const activityQuery = useActivityDetailQuery(activityLegacyId);
 
@@ -89,8 +104,11 @@ export function useAiTravelGuidePage() {
   const t = useT();
 
   useEffect(() => {
-    setPayload(cachedPayload);
-  }, [cachedPayload]);
+    setPayload(guideId ? loadTravelGuideDetail(guideId) : null);
+    setShareGenerationDone(false);
+    shareGenerationDoneRef.current = false;
+    shareGenerationInFlightRef.current = null;
+  }, [guideId]);
 
   useEffect(() => {
     if (!payload?.activityLegacyId || !guideId) return;
@@ -98,35 +116,111 @@ export function useAiTravelGuidePage() {
   }, [guideId, payload?.activityLegacyId]);
 
   useEffect(() => {
-    if (!shouldLoadTravelGuideDetail({ payload, guideId })) {
+    const seed = parseTravelGuideFormFromShareQuery(router.params);
+    if (!seed || !guideId.trim() || shareGenerationDoneRef.current) {
+      return;
+    }
+    const cachedPlan = loadTravelGuideDetail(guideId);
+    if (cachedPlan && !seed.forceRegenerate) {
+      return;
+    }
+
+    const attemptKey = `${guideId}:${shareQueryKey}`;
+    if (shareGenerationInFlightRef.current === attemptKey) {
+      return;
+    }
+    shareGenerationInFlightRef.current = attemptKey;
+
+    let cancelled = false;
+
+    const generateFromShare = async () => {
+      if (seed.forceRegenerate) {
+        setPayload(null);
+      }
+      setLoading(true);
+      setGenerationProgress({ step: 'queued', percent: 2 });
+      setLoadError(null);
+
+      try {
+        const { plan } = await generateTravelGuide(
+          seed.activityLegacyId,
+          {
+            ...seed.form,
+            guideId,
+            ...(seed.forceRegenerate ? { forceRegenerate: true } : {}),
+          },
+          {
+            onProgress: (progress) => {
+              if (!cancelled) {
+                setGenerationProgress(progress);
+              }
+            },
+          },
+        );
+        if (cancelled) {
+          return;
+        }
+
+        const next: TravelGuideDetailPayload = {
+          plan,
+          form: {
+            ...seed.form,
+            budgetTier: resolveTravelGuideBudgetTier(seed.form.budgetTier),
+          },
+          activityLegacyId: seed.activityLegacyId,
+          createdAt: new Date().toISOString(),
+        };
+        saveTravelGuideDetail(guideId, next);
+        setPayload(next);
+        setShareGenerationDone(true);
+        shareGenerationDoneRef.current = true;
+      } catch (error) {
+        if (cancelled) {
+          return;
+        }
+        const message =
+          error instanceof Error ? error.message : t('travelGuide.loadFailed');
+        setLoadError(message);
+        setShareGenerationDone(true);
+        shareGenerationDoneRef.current = true;
+      } finally {
+        if (shareGenerationInFlightRef.current === attemptKey) {
+          shareGenerationInFlightRef.current = null;
+          setLoading(false);
+          setGenerationProgress(null);
+        }
+      }
+    };
+
+    const run = async () => {
+      if (isAuthGated()) {
+        requireAuth(() => {
+          void generateFromShare();
+        }, 'ai_assistant');
+        return;
+      }
+      await generateFromShare();
+    };
+
+    void run();
+    return () => {
+      cancelled = true;
+    };
+  }, [guideId, shareQueryKey]);
+
+  useEffect(() => {
+    if (shouldGenerateFromShare || !guideId.trim()) {
       return;
     }
 
     let cancelled = false;
 
-    const regenerateFromShare = async () => {
-      if (!shareSeed) return;
-
-      const { plan } = await generateTravelGuide(shareSeed.activityLegacyId, {
-        ...shareSeed.form,
-        guideId,
-      });
-      if (cancelled) return;
-
-      const next: TravelGuideDetailPayload = {
-        plan,
-        form: shareSeed.form,
-        activityLegacyId: shareSeed.activityLegacyId,
-        createdAt: new Date().toISOString(),
-      };
-      saveTravelGuideDetail(guideId, next);
-      setPayload(next);
-    };
-
     const loadDetail = async () => {
-      setLoading(true);
       setLoadError(null);
-      let deferLoadingStop = false;
+      const hasLocalCache = Boolean(guideId && loadTravelGuideDetail(guideId));
+      if (!hasLocalCache) {
+        setLoading(true);
+      }
 
       try {
         const remote = await fetchTravelGuidePlan(guideId);
@@ -135,7 +229,10 @@ export function useAiTravelGuidePage() {
         if (remote) {
           const next: TravelGuideDetailPayload = {
             plan: remote.plan,
-            form: remote.form,
+            form: {
+              ...remote.form,
+              budgetTier: resolveTravelGuideBudgetTier(remote.form.budgetTier),
+            },
             activityLegacyId: remote.activityLegacyId,
             createdAt: remote.createdAt,
           };
@@ -144,40 +241,17 @@ export function useAiTravelGuidePage() {
           return;
         }
 
-        if (!shareSeed) {
+        if (!payload) {
           setLoadError(t('travelGuide.notFound'));
-          return;
         }
-
-        const runRegenerate = async () => {
-          try {
-            await regenerateFromShare();
-          } catch (error) {
-            if (cancelled) return;
-            const message =
-              error instanceof Error ? error.message : t('travelGuide.loadFailed');
-            setLoadError(message);
-          }
-        };
-
-        if (isAuthGated()) {
-          deferLoadingStop = true;
-          requireAuth(() => {
-            void runRegenerate().finally(() => {
-              if (!cancelled) setLoading(false);
-            });
-          }, 'ai_assistant');
-          return;
-        }
-
-        await runRegenerate();
       } catch (error) {
         if (cancelled) return;
+        if (payload) return;
         const message =
           error instanceof Error ? error.message : t('travelGuide.loadFailed');
         setLoadError(message);
       } finally {
-        if (!cancelled && !deferLoadingStop) setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
 
@@ -185,7 +259,13 @@ export function useAiTravelGuidePage() {
     return () => {
       cancelled = true;
     };
-  }, [guideId, payload, shareSeed, t]);
+  }, [guideId, shouldGenerateFromShare, t]);
+
+  const showGenerationLoader = Boolean(
+    regenerating ||
+    generationProgress ||
+    (shouldGenerateFromShare && loading && !payload?.plan),
+  );
 
   useEffect(() => {
     shareRef.current = resolveTravelGuideShareRef({ guideId, payload });
@@ -266,17 +346,29 @@ export function useAiTravelGuidePage() {
       if (!payload?.activityLegacyId || !guideId) return;
       const activityLegacyId = payload.activityLegacyId;
       setGuideSheetOpen(false);
+      setPayload(null);
 
       const run = async () => {
-        showThemedLoading({ title: getTravelGuideGeneratingText(), mask: true });
+        setRegenerating(true);
+        setGenerationProgress({ step: 'queued', percent: 2 });
         try {
-          const { plan } = await generateTravelGuide(activityLegacyId, {
-            ...form,
-            guideId,
-          });
+          const { plan } = await generateTravelGuide(
+            activityLegacyId,
+            {
+              ...form,
+              guideId,
+              forceRegenerate: true,
+            },
+            {
+              onProgress: (progress) => setGenerationProgress(progress),
+            },
+          );
           const next: TravelGuideDetailPayload = {
             plan,
-            form,
+            form: {
+              ...form,
+              budgetTier: resolveTravelGuideBudgetTier(form.budgetTier),
+            },
             activityLegacyId,
             createdAt: new Date().toISOString(),
           };
@@ -289,7 +381,8 @@ export function useAiTravelGuidePage() {
               : t('travelPlan.guideGenerationFailed');
           showAppToast(message, { raw: true, icon: 'none' });
         } finally {
-          hideThemedLoading();
+          setRegenerating(false);
+          setGenerationProgress(null);
         }
       };
 
@@ -319,7 +412,7 @@ export function useAiTravelGuidePage() {
   const handleSelectBudgetTier = useCallback(
     (tier: TravelGuideBudgetTier) => {
       if (!guideId || !payload || budgetTierUpdating) return;
-      if (payload.form.budgetTier === tier) return;
+      if (resolveTravelGuideBudgetTier(payload.form.budgetTier) === tier) return;
 
       const run = async () => {
         setBudgetTierUpdating(true);
@@ -364,12 +457,15 @@ export function useAiTravelGuidePage() {
     payload,
     activityLegacyId,
     loading,
+    showGenerationLoader,
+    regenerating,
+    generationProgress,
     loadError,
     mainScrollHeight,
     navFallback: ROUTES.HOME,
     sharing,
     budgetTierUpdating,
-    selectedBudgetTier: payload?.form.budgetTier,
+    selectedBudgetTier: resolveTravelGuideBudgetTier(payload?.form.budgetTier),
     isWeapp,
     handleCopyShare,
     handleRegenerate,

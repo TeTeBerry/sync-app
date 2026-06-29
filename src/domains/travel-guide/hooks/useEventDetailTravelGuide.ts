@@ -83,5 +83,6 @@ export function useEventDetailTravelGuide({
     guideDefaultNights: defaultNights,
     guideEventCity: eventCity,
     guideSheetInitialValues: sheetInitialValues,
+    guideSheetForceRegenerate: Boolean(pendingRegenerateGuideId),
   };
 }

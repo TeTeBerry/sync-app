@@ -53,7 +53,7 @@ describe('aiTravelGuidePage.util', () => {
     ).toBe(72);
   });
 
-  it('loads remote detail when local payload is absent and guide id exists', () => {
+  it('loads remote detail whenever guide id exists', () => {
     expect(
       shouldLoadTravelGuideDetail({
         payload: null,
@@ -65,7 +65,7 @@ describe('aiTravelGuidePage.util', () => {
         payload,
         guideId: 'guide-1',
       }),
-    ).toBe(false);
+    ).toBe(true);
   });
 
   it('builds share ref only when guide id and payload exist', () => {

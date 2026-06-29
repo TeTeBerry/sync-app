@@ -1,5 +1,17 @@
 import type { TravelGuideBudgetTier } from '@/types/travelGuide';
 
+/** 舒适档 — 首次生成与未选档位时的默认基线 */
+export const DEFAULT_TRAVEL_GUIDE_BUDGET_TIER: TravelGuideBudgetTier = 'standard';
+
+export function resolveTravelGuideBudgetTier(
+  tier?: TravelGuideBudgetTier | null,
+): TravelGuideBudgetTier {
+  if (tier === 'economy' || tier === 'standard' || tier === 'comfort') {
+    return tier;
+  }
+  return DEFAULT_TRAVEL_GUIDE_BUDGET_TIER;
+}
+
 export function getTravelGuideBudgetOptions(t: (key: string) => string): Array<{
   id: TravelGuideBudgetTier;
   label: string;

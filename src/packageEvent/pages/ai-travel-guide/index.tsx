@@ -1,10 +1,10 @@
 import './ai-travel-guide.scss';
 import PageNavigation from '../../../components/navigation/PageNavigation';
-import ThemedPageLoader from '../../../components/ThemedPageLoader';
 import { Button } from '../../../components/ui';
 import {
   TravelGuideBudgetCompareCards,
   TravelGuideDetailView,
+  TravelGuideGenerationLoader,
   TravelGuidePeaceBanner,
   useAiTravelGuidePage,
 } from '@/domains/travel-guide';
@@ -22,7 +22,7 @@ import {
 import { getRegenerateCta, getTravelGuideTitle } from '../../../constants/aiCtaLabels';
 import { LazyAiGuidePlanSheet } from '../../../components/ai-chat/LazyAiGuidePlanSheet';
 import { useT } from '@/hooks/useI18n';
-import { AI_TRAVEL_GUIDE_DISCLAIMER } from '../../../constants/aiDisclosure';
+import { getAiTravelGuideDisclaimer } from '../../../constants/aiDisclosure';
 import { LoginInterceptHost } from '../../../components/auth/LoginInterceptHost';
 import { ScrollView, Text, View } from '@tarojs/components';
 
@@ -30,16 +30,15 @@ const AiTravelGuidePage = () => {
   useEndRouteTransitionOnShow();
   const page = useAiTravelGuidePage();
   const t = useT();
-  usePageRouteReady(Boolean(page.payload) && !page.loading);
+  usePageRouteReady(Boolean(page.payload) && !page.showGenerationLoader);
 
   return (
     <View data-cmp="AiTravelGuidePage" className="s-ai-travel-guide-page">
       <PageNavigation title={getTravelGuideTitle()} fallback={page.navFallback} />
 
-      {page.loading ? (
-        <ThemedPageLoader
-          variant="spinner"
-          label={t('travelGuide.loading')}
+      {page.showGenerationLoader ? (
+        <TravelGuideGenerationLoader
+          progress={page.generationProgress}
           minHeight={280}
         />
       ) : page.payload ? (
@@ -60,6 +59,7 @@ const AiTravelGuidePage = () => {
                 <TravelGuideBudgetCompareCards
                   headcount={page.payload.plan.headcount}
                   accommodationNights={page.payload.plan.accommodationNights}
+                  budgetTierSnapshots={page.payload.plan.budgetTierSnapshots}
                   selectedTier={page.selectedBudgetTier}
                   updating={page.budgetTierUpdating}
                   onSelect={page.handleSelectBudgetTier}
@@ -68,6 +68,7 @@ const AiTravelGuidePage = () => {
               <TravelGuideDetailView
                 plan={page.payload.plan}
                 activityRegion={page.activityRegion}
+                selectedBudgetTier={page.selectedBudgetTier}
               />
               <TravelPlanReceiptOcrTip
                 activityLegacyId={page.activityLegacyId}
@@ -123,7 +124,7 @@ const AiTravelGuidePage = () => {
                 </View>
               ) : null}
               <Text className="s-ai-travel-guide-page__disclaimer">
-                {AI_TRAVEL_GUIDE_DISCLAIMER}
+                {getAiTravelGuideDisclaimer()}
               </Text>
             </View>
           </ScrollView>
@@ -164,6 +165,12 @@ const AiTravelGuidePage = () => {
             </Button>
           </View>
         </View>
+      ) : page.loading ? (
+        <View className="s-ai-travel-guide-page__empty">
+          <Text className="s-ai-travel-guide-page__empty-title">
+            {t('travelGuide.loading')}
+          </Text>
+        </View>
       ) : (
         <View className="s-ai-travel-guide-page__empty">
           <Text className="s-ai-travel-guide-page__empty-title">
@@ -182,6 +189,7 @@ const AiTravelGuidePage = () => {
           showSelfDriveOption={page.guideShowSelfDriveOption}
           showAccommodationOption={page.guideShowAccommodationOption}
           initialValues={page.guideSheetInitialValues}
+          forceRegenerate
           onClose={page.closeGuideSheet}
           onSubmit={page.handleGuideSheetSubmit}
         />

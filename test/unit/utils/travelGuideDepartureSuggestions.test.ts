@@ -8,6 +8,7 @@ import {
   mapPlaceSuggestionsToDepartureItems,
   mergeDepartureSuggestionItems,
   normalizeDepartureForSubmit,
+  resolveDepartureCityForSubmit,
   suggestionRegionForKeyword,
 } from '@/utils/travelGuideDepartureSuggestions';
 
@@ -84,5 +85,10 @@ describe('travelGuideDepartureSuggestions', () => {
       ],
     );
     expect(merged.map((item) => item.label)).toEqual(['上海', '上海虹桥站']);
+  });
+
+  it('resolveDepartureCityForSubmit prefers departure anchor over stale city', () => {
+    expect(resolveDepartureCityForSubmit('北京', '上海')).toBe('北京');
+    expect(resolveDepartureCityForSubmit('上海虹桥', '上海')).toBe('上海');
   });
 });

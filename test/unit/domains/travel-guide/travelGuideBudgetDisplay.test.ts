@@ -1,12 +1,17 @@
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import {
   formatTravelGuideBudgetShareLabel,
   travelGuideBudgetBannerTitle,
   travelGuideBudgetPerPersonRange,
   shortTravelGuideBudgetLabel,
 } from '@/domains/travel-guide/utils/travelGuideBudgetDisplay.util';
+import { useLocaleStore } from '@/i18n/localeStore';
 
 describe('travelGuideBudgetDisplay', () => {
+  beforeEach(() => {
+    useLocaleStore.setState({ locale: 'zh-CN' });
+  });
+
   it('derives short budget tier label for hero chips', () => {
     expect(shortTravelGuideBudgetLabel('舒适(¥300-600/晚)')).toBe('舒适');
   });

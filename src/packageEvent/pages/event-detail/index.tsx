@@ -120,6 +120,7 @@ const EventDetailPage = () => {
     guideDefaultNights,
     guideEventCity,
     guideSheetInitialValues,
+    guideSheetForceRegenerate,
     currentUserAvatar,
     publishComplianceConfirmDialog,
     buddyPostQuota,
@@ -356,6 +357,7 @@ const EventDetailPage = () => {
           showSelfDriveOption={shouldShowTravelGuideSelfDriveOption(activity?.region)}
           showAccommodationOption={isDomesticActivityRegion(activity?.region)}
           initialValues={guideSheetInitialValues}
+          forceRegenerate={guideSheetForceRegenerate}
           onClose={closeGuideSheet}
           onSubmit={handleGuideSheetSubmit}
         />

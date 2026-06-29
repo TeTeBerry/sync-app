@@ -847,6 +847,19 @@ export function goAiTravelGuide(guideId: string) {
   }, 'ai_assistant');
 }
 
+/** Open guide page with generation query params — generation runs on the guide page. */
+export function goAiTravelGuideGeneration(path: string) {
+  const url = path.trim();
+  if (!url) {
+    showAppToast('common.invalidGuide');
+    return;
+  }
+  requireAuth(() => {
+    preloadEventSubpackage();
+    openStackPageSafe(url.startsWith('/') ? url : `${ROUTES.AI_TRAVEL_GUIDE}?${url}`);
+  }, 'ai_assistant');
+}
+
 function resolveActivityLegacyId(meta?: NotificationMeta): number | null {
   return parseActivityLegacyId(meta?.activityLegacyId);
 }

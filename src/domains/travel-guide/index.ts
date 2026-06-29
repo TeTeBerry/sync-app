@@ -1,6 +1,7 @@
 export { useEventDetailTravelGuide } from './hooks/useEventDetailTravelGuide';
 export { useAiTravelGuidePage } from './hooks/useAiTravelGuidePage';
 export { EventDetailAiTravelGuideCard } from './components/EventDetailAiTravelGuideCard';
+export { TravelGuideGenerationLoader } from './components/TravelGuideGenerationLoader';
 export { TravelGuideDetailView } from './components/TravelGuideDetailView';
 export { TravelGuideBudgetCompareCards } from './components/TravelGuideBudgetCompareCards';
 export { TravelGuidePeaceBanner } from './components/TravelGuidePeaceBanner';

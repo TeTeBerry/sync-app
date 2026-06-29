@@ -1,18 +1,24 @@
 import { describe, expect, it } from 'vitest';
 import { travelGuideFormToBuddyPrefill } from '@/utils/travelGuideToBuddyPost';
 
-const mockT = (key: string) =>
-  (
-    ({
-      'travelPlan.budgetEconomy': '经济',
-      'travelPlan.budgetEconomyHint': '青旅/民宿',
-      'travelPlan.budgetStandard': '标准',
-      'travelPlan.budgetStandardHint': '三星',
-      'travelPlan.budgetComfort': '舒适',
-      'travelPlan.budgetComfortHint': '四星',
-      'travelPlan.driveYes': '自驾',
-    }) as Record<string, string>
-  )[key] ?? key;
+const mockT = (key: string, params?: Record<string, string | number>) => {
+  const table: Record<string, string> = {
+    'travelPlan.budgetEconomy': '经济',
+    'travelPlan.budgetEconomyHint': '青旅/民宿',
+    'travelPlan.budgetStandard': '标准',
+    'travelPlan.budgetStandardHint': '三星',
+    'travelPlan.budgetComfort': '舒适',
+    'travelPlan.budgetComfortHint': '四星',
+    'travelPlan.driveYes': '自驾',
+    'travelGuide.stayNightsChip': `住${params?.count ?? ''}晚`,
+    'travelGuide.accommodationWithTier': `${params?.label ?? ''}住宿`,
+    'travelGuide.departurePending': '出发地待填写',
+    'travelGuide.headcountChip': `${params?.count ?? ''}人`,
+    'travelGuide.headcountPending': '人数待补充',
+    'common.listSeparator': '，',
+  };
+  return table[key] ?? key;
+};
 
 describe('travelGuideFormToBuddyPrefill', () => {
   it('maps headcount, activity dates, team tag and note without city prefill', () => {

@@ -64,7 +64,21 @@ describe('travelGuideWechatShare', () => {
     expect(parsed?.form.departure).toBe('上海');
   });
 
-  it('parses share query without budgetTier using standard baseline', () => {
+  it('buildTravelGuideShareQueryKey is stable for identical params', async () => {
+    const { buildTravelGuideShareQueryKey } =
+      await import('@/domains/travel-guide/utils/travelGuideWechatShare.util');
+    const params = {
+      guideId: 'g1',
+      activityLegacyId: '5',
+      departure: '上海',
+      headcount: '2',
+    };
+    expect(buildTravelGuideShareQueryKey(params)).toBe(
+      buildTravelGuideShareQueryKey(params),
+    );
+  });
+
+  it('parses share query without budgetTier defaulting to standard', () => {
     const parsed = parseTravelGuideFormFromShareQuery({
       activityLegacyId: '5',
       departure: '上海',
@@ -73,7 +87,7 @@ describe('travelGuideWechatShare', () => {
       selfDrive: '0',
     });
     expect(parsed?.form.departure).toBe('上海');
-    expect(parsed?.form.budgetTier).toBeUndefined();
+    expect(parsed?.form.budgetTier).toBe('standard');
   });
 
   it('omits budgetTier from share path when not selected', () => {

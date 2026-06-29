@@ -21,7 +21,7 @@ export function shouldLoadTravelGuideDetail(options: {
   payload: TravelGuideDetailPayload | null;
   guideId: string;
 }): boolean {
-  return Boolean(!options.payload && options.guideId.trim());
+  return Boolean(options.guideId.trim());
 }
 
 export function resolveTravelGuideShareRef(options: {

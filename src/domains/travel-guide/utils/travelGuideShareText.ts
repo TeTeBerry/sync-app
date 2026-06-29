@@ -1,12 +1,19 @@
 import { getTravelGuideTitle } from '@/constants/aiCtaLabels';
-import { AI_TRAVEL_GUIDE_DISCLAIMER } from '@/constants/aiDisclosure';
+import { getAiTravelGuideDisclaimer } from '@/constants/aiDisclosure';
+import { t } from '@/i18n';
 import type { TravelGuidePlan } from '@/types/travelGuide';
 
 export function buildTravelGuideShareText(plan: TravelGuidePlan): string {
   const tripMeta = [
-    `${plan.departure}出发`,
-    `${plan.headcount}人`,
-    plan.accommodationNights > 0 ? `住${plan.accommodationNights}晚` : null,
+    plan.departure
+      ? t('travelGuide.departureChip', { departure: plan.departure })
+      : null,
+    plan.headcount > 0
+      ? t('travelGuide.headcountChip', { count: plan.headcount })
+      : null,
+    plan.accommodationNights > 0
+      ? t('travelGuide.stayNightsChip', { count: plan.accommodationNights })
+      : null,
     plan.accommodationNights > 0 && plan.budgetLabel ? plan.budgetLabel : null,
   ]
     .filter(Boolean)
@@ -56,7 +63,7 @@ export function buildTravelGuideShareText(plan: TravelGuidePlan): string {
       for (const hotel of plan.accommodation.hotels.filter(
         (h) => !featured.has(h.name),
       )) {
-        lines.push(`  · 备选：${hotel.name}`);
+        lines.push(`  · ${t('travelGuide.shareAlternateHotel', { name: hotel.name })}`);
         if (hotel.reason) lines.push(`    ${hotel.reason}`);
       }
     } else {
@@ -86,8 +93,9 @@ export function buildTravelGuideShareText(plan: TravelGuidePlan): string {
     lines.push('');
   }
 
+  const disclaimer = getAiTravelGuideDisclaimer();
   lines.push(`— Sync · ${getTravelGuideTitle()}`);
   lines.push('');
-  lines.push(AI_TRAVEL_GUIDE_DISCLAIMER);
+  lines.push(disclaimer);
   return lines.join('\n');
 }

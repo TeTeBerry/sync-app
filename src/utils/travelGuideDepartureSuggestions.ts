@@ -129,6 +129,20 @@ function findDepartureCityAnchorInText(query: string): string | undefined {
   return undefined;
 }
 
+export function findDepartureCityAnchor(query: string): string | undefined {
+  const q = query.trim();
+  if (!q) return undefined;
+
+  const exact = TRAVEL_GUIDE_DEPARTURE_CITIES.find((city) => city === q);
+  if (exact) return exact;
+
+  for (const city of TRAVEL_GUIDE_DEPARTURE_CITIES) {
+    if (q.startsWith(city)) return city;
+  }
+
+  return findDepartureCityAnchorInText(q);
+}
+
 export function normalizeDepartureForSubmit(value: string): string {
   const trimmed = value.trim();
   if (!trimmed) return trimmed;
@@ -144,6 +158,29 @@ export function normalizeDepartureForSubmit(value: string): string {
     return normalizeCityLabel(trimmed) ?? trimmed;
   }
   return trimmed;
+}
+
+/**
+ * Align departureCity with departure text on submit.
+ * Fixes stale city anchor when user switches city during regenerate.
+ */
+export function resolveDepartureCityForSubmit(
+  departure: string,
+  departureCity?: string,
+): string | undefined {
+  const normalizedDeparture = normalizeDepartureForSubmit(departure);
+  const anchor = findDepartureCityAnchor(normalizedDeparture);
+  const picked = departureCity?.trim()
+    ? (normalizeCityLabel(departureCity.trim()) ?? departureCity.trim())
+    : undefined;
+
+  if (anchor) {
+    if (!picked || picked === anchor || normalizedDeparture.startsWith(anchor)) {
+      return anchor;
+    }
+  }
+
+  return picked;
 }
 
 function isCitySuggestionRow(item: TravelGuidePlaceSuggestion): boolean {

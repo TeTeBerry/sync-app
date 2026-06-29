@@ -1,6 +1,7 @@
-import { describe, expect, it } from 'vitest';
-import { AI_TRAVEL_GUIDE_DISCLAIMER } from '@/constants/aiDisclosure';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { getAiTravelGuideDisclaimer } from '@/constants/aiDisclosure';
 import { buildTravelGuideShareText } from '@/domains/travel-guide/utils/travelGuideShareText';
+import { useLocaleStore } from '@/i18n/localeStore';
 import type { TravelGuidePlan } from '@/types/travelGuide';
 
 function mockPlan(): TravelGuidePlan {
@@ -21,9 +22,14 @@ function mockPlan(): TravelGuidePlan {
 }
 
 describe('buildTravelGuideShareText', () => {
+  beforeEach(() => {
+    useLocaleStore.setState({ locale: 'zh-CN' });
+  });
+
   it('appends AI travel guide disclaimer at the end', () => {
+    const disclaimer = getAiTravelGuideDisclaimer();
     const text = buildTravelGuideShareText(mockPlan());
-    expect(text).toContain(AI_TRAVEL_GUIDE_DISCLAIMER);
-    expect(text.endsWith(AI_TRAVEL_GUIDE_DISCLAIMER)).toBe(true);
+    expect(text).toContain(disclaimer);
+    expect(text.endsWith(disclaimer)).toBe(true);
   });
 });

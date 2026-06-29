@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { MapPin } from '../../components/icons';
 import { ImageWithFallback } from '../../components/ImageWithFallback';
-import { BUDDY_POST_AI_DISCLAIMER } from '@/constants/aiDisclosure';
+import { getBuddyPostAiDisclaimer } from '@/constants/aiDisclosure';
 import { useDisplayUserIdentity } from '@/hooks/useDisplayUserIdentity';
 import { useResolvedAvatarSrc } from '@/hooks/useResolvedAvatarSrc';
 import { resolveAvatarDisplaySrc, thumbnailImageUrl } from '@/utils/imageUrl';
@@ -76,7 +76,7 @@ export function BuddyPostPreviewStep({
     <View className="s-ai-guide-plan-sheet__body s-ai-buddy-post-sheet__preview">
       <Text className="s-ai-buddy-post-sheet__preview-title">{previewTitle}</Text>
       <Text className="s-ai-buddy-post-sheet__ai-disclaimer">
-        {BUDDY_POST_AI_DISCLAIMER}
+        {getBuddyPostAiDisclaimer()}
       </Text>
       <Text className="s-ai-buddy-post-sheet__preview-hint">
         {t('posts.previewHint')}

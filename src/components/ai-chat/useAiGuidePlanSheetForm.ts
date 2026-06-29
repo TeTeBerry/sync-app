@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { AiGuidePlanFormValues } from '../../types/travelGuide';
-import { normalizeDepartureForSubmit } from '../../utils/travelGuideDepartureSuggestions';
+import {
+  normalizeDepartureForSubmit,
+  resolveDepartureCityForSubmit,
+} from '../../utils/travelGuideDepartureSuggestions';
+import { resolveTravelGuideBudgetTier } from '@/domains/travel-guide/utils/travelGuideBudgetLabels';
 
 type UseAiGuidePlanSheetFormOptions = {
   open: boolean;
@@ -9,6 +13,8 @@ type UseAiGuidePlanSheetFormOptions = {
   /** 国内活动：可选是否住宿，关闭时不生成住宿与酒店预算 */
   showAccommodationOption?: boolean;
   initialValues?: AiGuidePlanFormValues | null;
+  /** 重新生成：跳过服务端缓存并强制完整 pipeline */
+  forceRegenerate?: boolean;
   onSubmit: (values: AiGuidePlanFormValues) => void;
 };
 
@@ -18,6 +24,7 @@ export function useAiGuidePlanSheetForm({
   showSelfDriveOption = true,
   showAccommodationOption = false,
   initialValues,
+  forceRegenerate = false,
   onSubmit,
 }: UseAiGuidePlanSheetFormOptions) {
   const [scrollTop, setScrollTop] = useState(0);
@@ -72,18 +79,23 @@ export function useAiGuidePlanSheetForm({
 
   const handleSubmit = useCallback(() => {
     if (!canSubmit) return;
+    const normalizedDeparture = normalizeDepartureForSubmit(departure);
     onSubmit({
-      departure: normalizeDepartureForSubmit(departure),
-      departureCity: departureCity?.trim() || undefined,
+      departure: normalizedDeparture,
+      departureCity: resolveDepartureCityForSubmit(normalizedDeparture, departureCity),
       headcount,
+      budgetTier: resolveTravelGuideBudgetTier(initialValues?.budgetTier),
       ...(showSelfDriveOption && selfDrive ? { selfDrive: true } : {}),
       accommodationNights: resolvedAccommodationNights,
+      ...(forceRegenerate ? { forceRegenerate: true } : {}),
     });
   }, [
     canSubmit,
     departure,
     departureCity,
+    forceRegenerate,
     headcount,
+    initialValues,
     onSubmit,
     resolvedAccommodationNights,
     selfDrive,

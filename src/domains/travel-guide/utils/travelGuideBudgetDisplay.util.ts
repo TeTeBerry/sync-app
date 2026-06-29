@@ -1,15 +1,24 @@
+import { t } from '@/i18n';
 import type { TravelGuideBudgetItem, TravelGuidePlan } from '@/types/travelGuide';
+
+const TOTAL_BUDGET_LABEL_MARKERS = ['合计', 'total'] as const;
+
+export function isTravelGuideTotalBudgetLabel(label: string): boolean {
+  const normalized = label.trim().toLowerCase();
+  return TOTAL_BUDGET_LABEL_MARKERS.some((marker) =>
+    marker === 'total' ? /\btotal\b/.test(normalized) : label.includes(marker),
+  );
+}
 
 export function findTravelGuideTotalBudgetItem(
   plan: Pick<TravelGuidePlan, 'budget'>,
 ): TravelGuideBudgetItem | undefined {
-  return plan.budget?.items.find((item) => item.label.includes('合计'));
+  return plan.budget?.items.find((item) => isTravelGuideTotalBudgetLabel(item.label));
 }
 
-/** Hero 区预算标题：当前算法为全员/单人全程合计。 */
 export function travelGuideBudgetBannerTitle(headcount: number): string {
-  if (headcount > 1) return '全程预算参考（合计）';
-  return '全程预算参考（单人合计）';
+  if (headcount > 1) return t('travelGuide.budgetTotalBanner');
+  return t('travelGuide.budgetSoloBanner');
 }
 
 function parseRangeNumbers(range: string): [number, number] | null {
@@ -19,7 +28,6 @@ function parseRangeNumbers(range: string): [number, number] | null {
   return [nums[0]!, nums[nums.length - 1]!];
 }
 
-/** 由合计区间推算人均（仅 headcount > 1 时展示）。 */
 export function travelGuideBudgetPerPersonRange(
   totalRange: string,
   headcount: number,
@@ -30,8 +38,10 @@ export function travelGuideBudgetPerPersonRange(
   const [min, max] = parsed;
   const perMin = Math.round(min / headcount);
   const perMax = Math.round(max / headcount);
-  if (perMin === perMax) return `约 ¥${perMin}/人`;
-  return `约 ¥${perMin}–${perMax}/人`;
+  if (perMin === perMax) {
+    return t('travelGuide.budgetPerPersonSingle', { amount: perMin });
+  }
+  return t('travelGuide.budgetPerPersonRange', { min: perMin, max: perMax });
 }
 
 export function formatTravelGuideBudgetShareLabel(
@@ -39,11 +49,16 @@ export function formatTravelGuideBudgetShareLabel(
   headcount: number,
 ): string {
   const perPerson = travelGuideBudgetPerPersonRange(totalRange, headcount);
-  if (perPerson) return `${totalRange}（合计，${perPerson}）`;
-  return `${totalRange}（合计）`;
+  if (perPerson) {
+    return t('travelGuide.budgetShareWithPerPerson', {
+      total: totalRange,
+      perPerson,
+    });
+  }
+  return t('travelGuide.budgetShareTotalOnly', { total: totalRange });
 }
 
-/** Hero / 卡片用短档位名，避免「舒适(¥300-600/晚)」撑破布局。 */
+/** Hero / cards: short tier label before nightly price parenthetical. */
 export function shortTravelGuideBudgetLabel(budgetLabel: string): string {
   const short = budgetLabel.split('(')[0]?.trim();
   return short || budgetLabel;
