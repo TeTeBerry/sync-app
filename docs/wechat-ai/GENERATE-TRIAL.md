@@ -73,10 +73,10 @@ node probe.mjs --project /path/to/sync-app --plan .ai-mode-skills/probe/plan.jso
 
 | 项 | 现网状态 |
 |----|----------|
-| **SKILL.md** | 四个 skill 均已改为官方五段式（能力域定位 / 触发场景 / 不适用 / 前置 / 顺序） |
-| **组件交互** | `event-card` 横版布局 + `api/call`（`getEvent` / `getLineup`）；`recruit-list-card` / `draft-candidates-card` / `prep-status-card` 用 `openDetailPage` 替代 `wx.navigateTo` |
+| **SKILL.md** | 仅保留 `festival-search`、`recruit-discovery` 两个只读 skill |
+| **组件交互** | `event-card` 横版布局 + `api/call`（`getEvent` / `getLineup`）；`recruit-list-card` 用 `openDetailPage` 替代 `wx.navigateTo` |
 | **共享辅助** | `shared/componentModelContext.js` 新增 `sendApiCall` / `openDetailPage` / `sendTextFollowUp` |
-| **接口日志** | 七个 `apis/*.js` 统一 `[ai-mode]` 入口/出口/失败日志 |
+| **接口日志** | 只读 `apis/*.js` 统一 `[ai-mode]` 入口/出口/失败日志 |
 | **request 分层** | 仍用 `shared/callAgentCapability.js`，未拆入各 skill 的 `utils/` |
 
 试验目录 `tools/generate-trial/` 仅作对照，默认不接入 `WECHAT_AI_SKILLS=1` 构建。详见 [SKILL-SKELETON.md](./SKILL-SKELETON.md)。

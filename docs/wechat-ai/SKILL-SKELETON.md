@@ -11,12 +11,10 @@ packageAgentSkills/                    # 独立分包 root
 │   ├── callAgentCapability.js
 │   ├── componentModelContext.js
 │   ├── cardTokens.wxss
-│   ├── searchContext.js
-│   ├── wechatSubscribe.js
 │   └── wechatAiBuildConfig.json       # 构建期 materialize
 ├── festival-search-skill/
 │   ├── SKILL.md
-│   ├── mcp.json                       # setSearchContext · searchFestivals · getEvent · getLineup
+│   ├── mcp.json                       # searchFestivals · getEvent · getLineup
 │   ├── index.js
 │   ├── apis/
 │   └── components/
@@ -25,10 +23,6 @@ packageAgentSkills/                    # 独立分包 root
 │       └── artist-lineup-strip/       # getLineup
 ├── recruit-discovery-skill/
 │   └── components/recruit-list-card/
-├── recruit-draft-skill/
-│   └── components/draft-candidates-card/
-└── festival-prep-skill/
-    └── components/prep-status-card/
 ```
 
 ## app.json 片段
@@ -62,7 +56,7 @@ async function searchPublicRecruits({ activityLegacyId, query, prefs }) {
 1. `# 能力域定位`（一句话）
 2. `## 触发场景`（3–6 条用户原话）
 3. `## 不适用范围`（配对/代发帖等红线）
-4. `## 前置条件`（公开检索免登录；写操作需登录）
+4. `## 前置条件`（公开检索免登录；微信 AI skill 不写入用户数据）
 5. `## 使用顺序`（自然语言描述先后，不列接口名）
 
 ## 组件交互（`api/call` 与半屏）
@@ -77,7 +71,7 @@ async function searchPublicRecruits({ activityLegacyId, query, prefs }) {
 | 用户点选回传模型 | `notifyModelSelection` → `updateModelContext` |
 | 无目标页、仅引导对话 | `sendTextFollowUp` |
 
-示例：`event-compare-strip` 点选 → `getEvent`；`event-card` 分享/地图；`artist-lineup-strip` 横滑艺人。招募/草稿/准备卡 tap → `openDetailPage`。
+示例：`event-compare-strip` 点选 → `getEvent`；`event-card` 分享/地图；`artist-lineup-strip` 横滑艺人；`recruit-list-card` tap → `openDetailPage`。
 
 设计规范见 [DESIGN-SYSTEM.md](./DESIGN-SYSTEM.md)。
 
@@ -88,7 +82,7 @@ async function searchPublicRecruits({ activityLegacyId, query, prefs }) {
 - 四件套：`index.js` / `index.json` / `index.wxml` / **`index.wxss`**（非 scss）
 - 卡片宽高比 4:1～1:1；仅 tap 事件；禁用 `:active` 等伪类（见 [VALIDATE_RULES V005/V006](https://github.com/wechat-miniprogram/ai-mode-skills/blob/master/wxa-skills-validate/references/VALIDATE_RULES.md)）
 - `mcp.json` 中 `components[].relatedPage` 必须以 `/` 开头
-- 发布类操作 **不得** 在卡片内一键完成 → 引导进小程序 Sheet
+- 微信 AI skill 仅保留只读能力；发布、订阅、攻略、收藏、关注等写操作不在 skill 内暴露
 
 ## 校验与调试
 

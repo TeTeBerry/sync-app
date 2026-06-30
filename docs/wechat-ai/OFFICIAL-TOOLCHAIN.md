@@ -62,7 +62,7 @@ npm run validate:wechat-ai
 - 新增一块**尚未手写**的业务（例如「活动阵容投票」「心愿单分享」）
 - 从 `src/packageEvent/pages/event-detail` 等页面**对照源码**补组件样式（`STYLE_MIGRATION.md`）
 
-不适合一次性覆盖现有四个 skill（会与 `AgentCapabilitiesService`、合规文案冲突）。
+不适合一次性覆盖现有只读 skill（会与 `AgentCapabilitiesService`、合规文案冲突）。
 
 在 Cursor 中安装 [wxa-skills-generate/SKILL.md](https://github.com/wechat-miniprogram/ai-mode-skills/blob/master/wxa-skills-generate/SKILL.md) 后示例提示：
 
@@ -79,7 +79,7 @@ npm run validate:wechat-ai
 ```bash
 npm run build:weapp:ai
 # 首次：编辑 tools/ai-mode-skills/wxa-skills-eval/.env 填入 LLM
-npm run eval:wechat-ai          # 默认 3 case，四个 skill
+npm run eval:wechat-ai          # 默认 3 case，只读 skill：festival-search,recruit-discovery
 npm run eval:wechat-ai:serve    # 仅开 Web UI，手动配置后发起
 ```
 

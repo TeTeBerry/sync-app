@@ -1,22 +1,33 @@
 <view class="recruit-list-card card-surface-list card-aspect-16-9" hover-class="card-hover" bindtap="onTap">
   <view class="card-accent-bar" />
+  <view class="recruit-list-card-event search-results-card event-card event-card--embedded card-pad">
+    <image
+      wx:if="{{activityHeroImageUrl}}"
+      class="recruit-list-card-event-cover"
+      src="{{activityHeroImageUrl}}"
+      mode="aspectFill"
+    />
+    <view class="card-col card-body-grow">
+      <text class="card-kicker">EVENT</text>
+      <text class="card-title card-ellipsis-1">{{activityName || '活动招募'}}</text>
+      <text wx:if="{{activityMeta}}" class="card-meta card-ellipsis-1">{{activityMeta}}</text>
+    </view>
+  </view>
   <scroll-view
     scroll-x="true"
-    wx:if="{{filterLabels.length > 0}}"
+    wx:if="{{hasFilterBar}}"
     class="recruit-list-card-chips-scroll"
     enable-flex
   >
     <view class="recruit-list-card-chips-row card-pad">
       <text wx:for="{{filterLabels}}" wx:key="*this" class="card-chip card-chip--ai">{{item}}</text>
+      <text class="card-chip">{{sortLabel}}</text>
     </view>
   </scroll-view>
   <view wx:if="{{isEmpty}}" class="recruit-list-card-empty card-pad">
-    <text class="card-kicker">公开招募</text>
-    <text class="card-title">{{emptyMessage}}</text>
-    <text class="card-meta recruit-list-card-empty-hint">可稍后再来，或让 AI 帮你写一条招募帖</text>
-    <view class="card-cta-pill recruit-list-card-cta" catchtap="onTapDraft">
-      <text class="card-cta-pill-text">写招募帖草稿</text>
-    </view>
+    <text class="recruit-list-card-empty-kicker">公开招募</text>
+    <text class="recruit-list-card-empty-msg">{{emptyMessage}}</text>
+    <text class="recruit-list-card-empty-hint">可点击卡片进入小程序查看完整招募墙</text>
   </view>
   <block wx:else>
     <view class="recruit-list-card-main card-pad">

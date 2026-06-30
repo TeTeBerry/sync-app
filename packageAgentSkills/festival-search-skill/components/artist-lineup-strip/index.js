@@ -11,11 +11,27 @@ function artistInitial(name) {
   return trimmed ? trimmed.charAt(0).toUpperCase() : '?';
 }
 
+function resolveActivity(sc) {
+  const activity = sc.activity || {};
+  return {
+    name:
+      activity.name ||
+      activity.canonicalActivityName ||
+      sc.canonicalActivityName ||
+      sc.activityName ||
+      '',
+    date: activity.date || sc.activityDate || '',
+    location: activity.location || sc.activityLocation || '',
+    heroImageUrl: activity.heroImageUrl || '',
+  };
+}
+
 Component({
   data: {
     activityName: '',
     activityDate: '',
     activityLocation: '',
+    activityHeroImageUrl: '',
     artists: [],
     artistCount: 0,
     moreCount: 0,
@@ -34,12 +50,14 @@ Component({
         }));
         const artistCount = rawArtists.length;
         const activityLegacyId = sc.activityLegacyId;
+        const activity = resolveActivity(sc);
         this._activityLegacyId = activityLegacyId || 0;
 
         this.setData({
-          activityName: sc.activityName || '',
-          activityDate: sc.activityDate || '',
-          activityLocation: sc.activityLocation || '',
+          activityName: activity.name,
+          activityDate: activity.date,
+          activityLocation: activity.location,
+          activityHeroImageUrl: activity.heroImageUrl,
           artists,
           artistCount,
           moreCount: Math.max(0, artistCount - displayLimit),

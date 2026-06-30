@@ -22,6 +22,7 @@ const evalCli = path.join(evalDir, 'cli', 'index.js');
 const envPath = path.join(evalDir, '.env');
 const envExamplePath = path.join(evalDir, '.env.example');
 const materializedEnvPath = path.join(root, 'cli-agent-run', 'eval-llm.env');
+const defaultReadOnlySkills = 'festival-search,recruit-discovery';
 
 const defaultCli =
   process.platform === 'darwin'
@@ -262,10 +263,7 @@ if (
   subcommand === 'run' &&
   !passthrough.some((a) => a === '--skills' || a.startsWith('--skills='))
 ) {
-  args.push(
-    '--skills',
-    'festival-search,recruit-discovery,recruit-draft,festival-prep',
-  );
+  args.push('--skills', defaultReadOnlySkills);
 }
 
 args.push(...passthrough);

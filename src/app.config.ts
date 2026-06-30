@@ -39,16 +39,6 @@ const agentConfig = wechatAiSkills
             description: '检索某场活动的公开组队招募帖（非配对撮合）',
             path: 'packageAgentSkills/recruit-discovery-skill',
           },
-          {
-            name: 'recruit-draft',
-            description: '生成招募帖草稿，须进入小程序确认后发布（非自动发帖）',
-            path: 'packageAgentSkills/recruit-draft-skill',
-          },
-          {
-            name: 'festival-prep',
-            description: '订阅阵容更新、生成出行攻略（AI 内容仅供参考）',
-            path: 'packageAgentSkills/festival-prep-skill',
-          },
         ],
       },
     }

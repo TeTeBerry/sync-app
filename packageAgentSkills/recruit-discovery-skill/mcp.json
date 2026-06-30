@@ -2,7 +2,7 @@
   "apis": [
     {
       "name": "searchPublicRecruits",
-      "description": "检索某场活动的公开组队招募帖（非配对撮合，平台不保证组满）",
+      "description": "检索公开组队招募帖并渲染 recruit-list-card。activityLegacyId 可选——不传时由 query 中的活动名自动查找活动。query 包含活动名+筛选条件（如'泰国tml 组队'），一次调用即可完成活动查找+帖子检索",
       "_meta": {
         "ui": {
           "componentPath": "components/recruit-list-card/index"
@@ -13,25 +13,34 @@
         "properties": {
           "activityLegacyId": {
             "type": "number",
-            "description": "活动 legacyId"
+            "description": "活动 legacyId（可选，不传时自动从 query 解析）"
           },
           "query": {
             "type": "string",
-            "description": "检索条件，如出发地、人数、曲风等"
+            "description": "检索条件，包含活动名和筛选条件，如'泰国tml 组队'、'EDC Korea 上海出发 3人'"
           }
         },
-        "required": ["activityLegacyId", "query"]
+        "required": ["query"]
       },
       "outputSchema": {
         "type": "object",
         "properties": {
+          "activityLegacyId": { "type": "number" },
+          "activityName": { "type": "string" },
+          "canonicalActivityName": { "type": "string" },
+          "activity": { "type": "object" },
           "totalMatched": { "type": "number" },
           "posts": { "type": "array" },
           "filterLabels": {
             "type": "array",
             "items": { "type": "string" }
           },
-          "query": { "type": "string" }
+          "query": { "type": "string" },
+          "activityMismatch": {
+            "type": "string",
+            "description": "当传入的 activityLegacyId 对应活动名与 query 中的品牌关键词不匹配时返回（如用户问EDC但legacyId指向Tomorrowland），此时需告知用户并建议先通过searchFestivals确认活动"
+          },
+          "uiDirectives": { "type": "array" }
         }
       }
     }

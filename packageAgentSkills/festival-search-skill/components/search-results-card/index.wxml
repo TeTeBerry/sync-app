@@ -1,15 +1,13 @@
-<view class="search-results card-surface card-aspect-16-9">
+<view class="search-results-card search-results card-surface card-aspect-16-9">
   <view class="card-accent-bar" />
   <view class="search-results-top card-pad">
     <view class="card-header-row">
       <view class="card-col card-body-grow">
         <text class="card-kicker">{{isCompareMode ? '检索结果' : '电音节资讯'}}</text>
-        <text wx:if="{{isCompareMode}}" class="card-subtitle">电音节对比</text>
         <text
-          wx:elif="{{singleEvent && !singleEvent.heroImageUrl}}"
+          wx:if="{{singleEvent && !singleEvent.heroImageUrl}}"
           class="card-title card-clamp-2"
         >{{singleEvent.name}}</text>
-        <text wx:elif="{{!singleEvent}}" class="card-subtitle">未找到活动</text>
       </view>
       <text wx:if="{{isCompareMode && totalMatched > 0}}" class="card-count-badge">{{totalMatched}} 场</text>
     </view>

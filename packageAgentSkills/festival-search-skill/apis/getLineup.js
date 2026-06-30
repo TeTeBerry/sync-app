@@ -15,7 +15,27 @@ async function getLineup({ activityLegacyId }) {
     return result;
   }
 
-  const data = result.payload;
+  const data = {
+    ...result.payload,
+    canonicalActivityName:
+      result.payload?.canonicalActivityName || result.payload?.activityName,
+    activity: result.payload?.activity || {
+      legacyId: result.payload?.activityLegacyId || activityLegacyId,
+      name: result.payload?.canonicalActivityName || result.payload?.activityName || '',
+      canonicalActivityName:
+        result.payload?.canonicalActivityName || result.payload?.activityName || '',
+      date: result.payload?.activityDate,
+      location: result.payload?.activityLocation,
+    },
+    uiDirectives: result.payload?.uiDirectives || [
+      {
+        type: 'render-card',
+        component: 'artist-lineup-strip',
+        required: true,
+        reason: 'getLineup 后必须渲染阵容横滑卡',
+      },
+    ],
+  };
   const count = data?.artists?.length ?? 0;
   const activityLabel = data?.activityName ? `（${data.activityName}）` : '';
   console.info('[ai-mode] getLineup 出口', data);

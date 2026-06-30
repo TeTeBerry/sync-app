@@ -139,3 +139,9 @@
 .search-results-tile-action {
   margin-top: 12rpx;
 }
+
+@media (prefers-color-scheme: dark) {
+  .search-results-card {
+    color: #ffffff;
+  }
+}

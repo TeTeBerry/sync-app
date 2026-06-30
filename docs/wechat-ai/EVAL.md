@@ -46,8 +46,8 @@ npm run eval:wechat-ai
 默认行为：
 
 - 项目路径：仓库根目录（`miniprogramRoot: dist-weapp/`）
-- 参与 skill：`festival-search`、`recruit-discovery`、`recruit-draft`、`festival-prep`
-- case 数：`3`（正式回归建议每 skill ≥ 30）
+- 参与 skill：`festival-search`、`recruit-discovery`
+- case 数：`3`（正式回归建议每个只读 skill ≥ 30）
 
 启动后会打开 Web UI（默认 `http://localhost:3200`），跑完可在页面或产物目录查看 `eval_report.html`。
 
@@ -70,6 +70,9 @@ npm run eval:wechat-ai:serve
 ```bash
 # 只测活动检索，5 条 case
 npm run eval:wechat-ai -- --skills festival-search --cases 5
+
+# 跑默认只读 skill 集合
+npm run eval:wechat-ai -- --skills festival-search,recruit-discovery --cases 10
 
 # 自定义对话场景（跳过自动探索）
 npm run eval:wechat-ai -- --custom-testcases docs/wechat-ai/eval-cases.sample.json

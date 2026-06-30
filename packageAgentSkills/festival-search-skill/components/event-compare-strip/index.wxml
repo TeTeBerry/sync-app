@@ -4,7 +4,6 @@
     <view class="card-header-row">
       <view class="card-col">
         <text class="card-kicker">检索结果</text>
-        <text class="card-subtitle">电音节对比</text>
       </view>
       <text wx:if="{{totalMatched > 0}}" class="card-count-badge">{{totalMatched}} 场</text>
     </view>

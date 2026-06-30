@@ -74,3 +74,9 @@
 .compare-strip-action {
   margin-top: 12rpx;
 }
+
+@media (prefers-color-scheme: dark) {
+  .compare-strip {
+    color: #ffffff;
+  }
+}

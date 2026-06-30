@@ -34,3 +34,9 @@
 .event-card-more {
   margin-top: 8rpx;
 }
+
+@media (prefers-color-scheme: dark) {
+  .event-card {
+    color: #ffffff;
+  }
+}

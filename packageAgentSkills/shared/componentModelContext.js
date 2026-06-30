@@ -94,10 +94,7 @@ function preloadRelatedDetailPage(componentInstance, componentName, url) {
 function expirePreviousSearchCards(componentInstance, skillRoot) {
   try {
     wx.modelContext.expireAllCards({
-      componentPaths: [
-        `${skillRoot}/components/search-results-card/index`,
-        `${skillRoot}/components/event-compare-strip/index`,
-      ],
+      componentPaths: [`${skillRoot}/components/search-results-card/index`],
       match: 'previous',
     });
   } catch (err) {

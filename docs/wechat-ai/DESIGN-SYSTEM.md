@@ -25,7 +25,7 @@
 | `card-quote-panel` | 招募摘要 / 草稿预览引用区 |
 | `card-info-callout` | 微信授权等提示（青色左边线） |
 
-## 六张卡分工
+## 只读卡片分工
 
 | 组件 | 表面 | 特色 |
 |------|------|------|
@@ -33,9 +33,7 @@
 | `search-results-card` | `card-surface` | 单场资讯 / 多场对比横滑 |
 | `event-compare-strip` | `card-surface` | （保留）竖版海报 tile 横滑 |
 | `artist-lineup-strip` | `card-surface-list` | 艺人头像霓虹描边 |
-| `recruit-list-card` | `card-surface-list` | 引用框 + 空态粉药丸 |
-| `draft-candidates-card` | `card-surface-list` | AI 眉标 + 预览引用框 |
-| `prep-status-card` | `card-surface-list` | 状态 chip + 授权 callout |
+| `recruit-list-card` | `card-surface-list` | 活动摘要 + 招募摘要引用框 |
 
 ## 约束
 

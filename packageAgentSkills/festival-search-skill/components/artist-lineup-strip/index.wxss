@@ -7,7 +7,32 @@
 }
 
 .lineup-strip-header {
-  padding-bottom: 8rpx;
+  padding-bottom: 4rpx;
+}
+
+.lineup-strip-event {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  min-height: 76rpx;
+  padding: 12rpx;
+  border-radius: 20rpx;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2rpx solid rgba(255, 255, 255, 0.08);
+  box-sizing: border-box;
+}
+
+.lineup-strip-event-cover {
+  width: 72rpx;
+  height: 72rpx;
+  margin-right: 14rpx;
+  border-radius: 16rpx;
+  background: rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+}
+
+.lineup-strip-section-head {
+  margin-top: 10rpx;
 }
 
 .lineup-strip-scroll {
@@ -23,7 +48,7 @@
   display: flex;
   flex-direction: row;
   align-items: flex-start;
-  padding: 8rpx 0 12rpx;
+  padding: 4rpx 0 10rpx;
 }
 
 .lineup-strip-artist {
@@ -57,4 +82,10 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+@media (prefers-color-scheme: dark) {
+  .artist-lineup-strip {
+    color: #ffffff;
+  }
 }

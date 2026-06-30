@@ -2,10 +2,9 @@ const {
   requestAgentCapability,
   okResponse,
 } = require('../../shared/callAgentCapability');
-const { getStoredHomeCity } = require('../../shared/searchContext');
 
 async function searchFestivals({ query, homeCity }) {
-  const resolvedHomeCity = (homeCity || getStoredHomeCity() || '').trim();
+  const resolvedHomeCity = String(homeCity || '').trim();
   console.info('[ai-mode] searchFestivals 入口', { query, homeCity: resolvedHomeCity });
   const result = await requestAgentCapability({
     path: '/agent-capabilities/search-festivals',
@@ -18,7 +17,19 @@ async function searchFestivals({ query, homeCity }) {
     return result;
   }
 
-  const data = result.payload;
+  const data = {
+    ...result.payload,
+    canonicalActivityName:
+      result.payload?.canonicalActivityName ||
+      (result.payload?.events?.length === 1
+        ? result.payload.events[0]?.name
+        : undefined),
+    searchSnapshot: result.payload?.searchSnapshot || {
+      totalMatched: result.payload?.totalMatched ?? result.payload?.events?.length ?? 0,
+      events: result.payload?.events || [],
+    },
+    uiDirectives: [],
+  };
   const events = data?.events || [];
   const total = data?.totalMatched ?? events.length;
   const sole = events.length === 1 ? events[0] : null;
