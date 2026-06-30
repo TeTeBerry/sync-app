@@ -6,7 +6,8 @@ import type {
 } from '@/types/travelGuide';
 import { resolveCatalogActivityImage } from '@/constants/activityCatalogImages';
 import { ROUTES } from '@/utils/route';
-import { buildQueryString } from '@/utils/queryString';
+import { buildQueryString, decodeQueryParamValue } from '@/utils/queryString';
+import { normalizeAiGuidePlanFormValues } from '@/utils/normalizeUserProfileText';
 import type { TravelGuideDetailPayload } from './travelGuideDetailStorage';
 import { resolveTravelGuideBudgetTier } from './travelGuideBudgetLabels';
 import {
@@ -115,7 +116,7 @@ export function parseTravelGuideFormFromShareQuery(
   forceRegenerate: boolean;
 } | null {
   const activityLegacyId = Number(params.activityLegacyId);
-  const departure = params.departure?.trim() ?? '';
+  const departure = decodeQueryParamValue(params.departure?.trim() ?? '');
   const headcount = Number(params.headcount);
   const budgetTier = resolveTravelGuideBudgetTier(
     params.budgetTier?.trim() as TravelGuideBudgetTier | undefined,
@@ -137,14 +138,16 @@ export function parseTravelGuideFormFromShareQuery(
   return {
     activityLegacyId,
     forceRegenerate,
-    form: {
+    form: normalizeAiGuidePlanFormValues({
       departure,
-      departureCity: params.departureCity?.trim() || undefined,
+      departureCity: params.departureCity?.trim()
+        ? decodeQueryParamValue(params.departureCity.trim())
+        : undefined,
       headcount,
       budgetTier,
       accommodationNights,
       selfDrive,
       ...(forceRegenerate ? { forceRegenerate: true } : {}),
-    },
+    }),
   };
 }

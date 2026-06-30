@@ -8,6 +8,7 @@ import {
   parseActivityDateBounds,
   boundsToIsoDate,
 } from './activityDateBounds';
+import { formatTravelGuideDepartureLabel } from './travelGuideDepartureSuggestions';
 
 export type TravelGuideBuddyPrefill = {
   form: AiBuddyPostFormValues;
@@ -98,7 +99,11 @@ function formatDepartureForSearch(
   guide: AiGuidePlanFormValues,
   resolveT: (key: string, params?: Record<string, string | number>) => string,
 ): string | undefined {
-  const departure = guide.departure?.trim() || guide.departureCity?.trim();
+  const departure =
+    formatTravelGuideDepartureLabel(guide.departure ?? '') ||
+    (guide.departureCity?.trim()
+      ? formatTravelGuideDepartureLabel(guide.departureCity)
+      : '');
   if (!departure) return undefined;
   const suffix = resolveT('travelGuide.departureSuffix');
   if (suffix && departure.endsWith(suffix)) {

@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Bell, Calendar, MapPin, Ticket, X } from '../../components/icons';
 import { ImageWithFallback } from '../ImageWithFallback';
 import { MetaRow } from '../MetaRow';
@@ -8,7 +8,9 @@ import { compareActivityDateDesc } from '../../utils/activityStatus';
 import { safeTrim } from '../../utils/safeString';
 import { formatActivityLocationLabel } from '../../utils/formatActivityDisplay';
 import { Text, View } from '@tarojs/components';
+import { useActivityUpdateSubscribeAction } from '@/domains/activity-info';
 import { useT } from '@/hooks/useI18n';
+import { parseActivityLegacyId } from '@/utils/activityLegacyId';
 
 /** Matches `--secondary`; lucide icons need literal colors in mini program data URLs. */
 const ALERT_ICON_COLOR = '#4cc9f0';
@@ -23,8 +25,9 @@ type ProfileActivityCardProps = {
   statusText: Record<string, string>;
   eventFallback: string;
   onClick?: (activityLegacyId: string) => void;
-  onUnfollow?: (activityLegacyId: string, eventTitle: string) => void;
-  unfollowing?: boolean;
+  /** When true, show subscribe / unsubscribe controls on upcoming activities. */
+  subscribeControls?: boolean;
+  onConfirmUnfollow?: (eventTitle: string) => Promise<boolean>;
 };
 
 const ProfileActivityCard: React.FC<ProfileActivityCardProps> = ({
@@ -32,11 +35,26 @@ const ProfileActivityCard: React.FC<ProfileActivityCardProps> = ({
   statusText,
   eventFallback,
   onClick,
-  onUnfollow,
-  unfollowing = false,
+  subscribeControls = false,
+  onConfirmUnfollow,
 }) => {
   const t = useT();
+  const legacyId = parseActivityLegacyId(item.activityLegacyId);
+  const activityTitle = item.title?.trim() || t('eventCard.activityFallback');
+  const confirmUnfollow = useCallback(
+    () => onConfirmUnfollow?.(activityTitle) ?? Promise.resolve(false),
+    [activityTitle, onConfirmUnfollow],
+  );
+  const { subscribed, submitting, handleSubscribe } = useActivityUpdateSubscribeAction(
+    legacyId ?? undefined,
+    false,
+    {
+      toggleable: true,
+      confirmUnfollow,
+    },
+  );
   const statusLabel = statusText[item.status as keyof typeof statusText] ?? item.status;
+  const showAlertControls = subscribeControls && item.status !== 'attended';
 
   const stopPropagation = (event: { stopPropagation?: () => void }) => {
     event.stopPropagation?.();
@@ -85,7 +103,7 @@ const ProfileActivityCard: React.FC<ProfileActivityCardProps> = ({
           </MetaRow>
         </View>
 
-        {onUnfollow && item.status !== 'attended' ? (
+        {showAlertControls && subscribed ? (
           <View className="s-profile-activity__subscribe-row" onClick={stopPropagation}>
             <View className="s-profile-activity__subscribe-status" aria-hidden>
               <View className="s-profile-activity__subscribe-status-icon">
@@ -98,28 +116,54 @@ const ProfileActivityCard: React.FC<ProfileActivityCardProps> = ({
             <View
               className={[
                 's-profile-activity__unfollow',
-                unfollowing && 's-profile-activity__unfollow--loading',
+                submitting && 's-profile-activity__unfollow--loading',
               ]
                 .filter(Boolean)
                 .join(' ')}
-              hoverClass={unfollowing ? '' : 's-profile-activity__unfollow--pressed'}
+              hoverClass={submitting ? '' : 's-profile-activity__unfollow--pressed'}
               role="button"
-              aria-disabled={unfollowing}
-              aria-label={t('eventCard.unfollow', {
-                title: item.title?.trim() || t('eventCard.activityFallback'),
-              })}
-              onClick={() => {
-                if (unfollowing) {
-                  return;
-                }
-                onUnfollow(item.activityLegacyId, item.title);
-              }}
+              aria-disabled={submitting}
+              aria-label={t('eventCard.unfollow', { title: activityTitle })}
+              onClick={handleSubscribe}
             >
               <X size={12} color="#8e8e93" strokeWidth={2.25} />
               <Text className="s-profile-activity__unfollow-text">
-                {unfollowing
+                {submitting
                   ? t('eventCard.unfollowing')
                   : t('eventCard.unfollowAction')}
+              </Text>
+            </View>
+          </View>
+        ) : null}
+
+        {showAlertControls && !subscribed ? (
+          <View
+            className="s-profile-activity__subscribe-row s-profile-activity__subscribe-row--prompt"
+            onClick={stopPropagation}
+          >
+            <Text className="s-profile-activity__subscribe-prompt">
+              {t('profile.activities.updateAlertsOffHint')}
+            </Text>
+            <View
+              className={[
+                's-profile-activity__subscribe-cta',
+                submitting && 's-profile-activity__subscribe-cta--loading',
+              ]
+                .filter(Boolean)
+                .join(' ')}
+              hoverClass={
+                submitting ? '' : 's-profile-activity__subscribe-cta--pressed'
+              }
+              role="button"
+              aria-disabled={submitting}
+              aria-label={t('eventCard.follow', { title: activityTitle })}
+              onClick={handleSubscribe}
+            >
+              <Bell size={12} color={ALERT_ICON_COLOR} strokeWidth={2.25} />
+              <Text className="s-profile-activity__subscribe-cta-text">
+                {submitting
+                  ? t('eventCard.following')
+                  : t('profile.activities.resubscribeAction')}
               </Text>
             </View>
           </View>
@@ -134,16 +178,14 @@ export type ProfileActivitiesSectionProps = {
   /** `list` renders all items without collapsible chrome (detail sub-page). */
   mode?: 'collapsible' | 'list';
   onClick?: (activityLegacyId: string) => void;
-  onUnfollow?: (activityLegacyId: string, eventTitle: string) => void;
-  unfollowingId?: string | null;
+  onConfirmUnfollow?: (eventTitle: string) => Promise<boolean>;
 };
 
 const ProfileActivitiesSection: React.FC<ProfileActivitiesSectionProps> = ({
   items,
   mode = 'collapsible',
   onClick,
-  onUnfollow,
-  unfollowingId = null,
+  onConfirmUnfollow,
 }) => {
   const t = useT();
   const sortedItems = useMemo(() => [...items].sort(compareActivityDateDesc), [items]);
@@ -181,8 +223,8 @@ const ProfileActivitiesSection: React.FC<ProfileActivitiesSectionProps> = ({
       statusText={statusText}
       eventFallback={eventFallback}
       onClick={onClick}
-      onUnfollow={mode === 'list' ? onUnfollow : undefined}
-      unfollowing={unfollowingId === item.activityLegacyId}
+      subscribeControls={mode === 'list'}
+      onConfirmUnfollow={mode === 'list' ? onConfirmUnfollow : undefined}
     />
   );
 

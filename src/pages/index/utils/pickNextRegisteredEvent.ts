@@ -1,8 +1,9 @@
-import type { HomeSummary } from '../../../types/backend';
+import type { HomeSummary, ProfileActivityItem } from '../../../types/backend';
 import {
   compareActivitiesNearestFirst,
   getActivityStatusFromActivity,
 } from '../../../utils/activityStatus';
+import { parseActivityLegacyId } from '../../../utils/activityLegacyId';
 
 type HomeActivityEvent = HomeSummary['signupEvents'][number];
 
@@ -32,4 +33,60 @@ export function pickNextRegisteredEvent(
       now,
     ),
   )[0];
+}
+
+/**
+ * Pick next event for logged-in home.
+ * Prefer `registeredLegacyIds` from the global subscription store when hydrated.
+ */
+export function pickNextRegisteredEventForUser(
+  homeEvents: HomeActivityEvent[] | undefined,
+  options?: {
+    registeredLegacyIds?: number[];
+    profileActivities?: ProfileActivityItem[];
+  },
+  now?: Date,
+): HomeActivityEvent | null {
+  const registeredLegacyIds = options?.registeredLegacyIds;
+  if (registeredLegacyIds !== undefined) {
+    if (registeredLegacyIds.length === 0) {
+      return null;
+    }
+
+    const subscribedIds = new Set(registeredLegacyIds);
+    const alignedEvents = homeEvents?.map((event) => ({
+      ...event,
+      going: subscribedIds.has(Number(event.id)),
+    }));
+
+    return pickNextRegisteredEvent(alignedEvents, now);
+  }
+
+  const profileActivities = options?.profileActivities;
+  if (profileActivities !== undefined) {
+    if (profileActivities.length === 0) {
+      return null;
+    }
+
+    const subscribedIds = new Set<number>();
+    for (const item of profileActivities) {
+      const legacyId = parseActivityLegacyId(item.activityLegacyId ?? item.id);
+      if (legacyId != null) {
+        subscribedIds.add(legacyId);
+      }
+    }
+
+    if (subscribedIds.size === 0) {
+      return null;
+    }
+
+    const alignedEvents = homeEvents?.map((event) => ({
+      ...event,
+      going: subscribedIds.has(Number(event.id)),
+    }));
+
+    return pickNextRegisteredEvent(alignedEvents, now);
+  }
+
+  return pickNextRegisteredEvent(homeEvents, now);
 }

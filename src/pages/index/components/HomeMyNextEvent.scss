@@ -71,6 +71,31 @@
   line-height: 1.35;
 }
 
+.s-home-next__status-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.s-home-next__status-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px 4px 8px;
+  border-radius: 9999px;
+  border: 1px solid rgba(76, 201, 240, 0.28);
+  background: rgba(76, 201, 240, 0.1);
+}
+
+.s-home-next__status-tag-text {
+  color: #4cc9f0;
+  font-size: var(--s-type-caption);
+  font-weight: var(--s-fw-semibold);
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+}
+
 .s-home-next__plan-progress {
   margin-bottom: 12px;
   padding: 10px 12px;

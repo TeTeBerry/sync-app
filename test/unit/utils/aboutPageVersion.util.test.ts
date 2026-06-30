@@ -7,7 +7,10 @@ vi.mock('@tarojs/taro', () => ({
 }));
 
 import Taro from '@tarojs/taro';
-import { resolveAboutPageVersionLabel } from '@/utils/aboutPageVersion.util';
+import {
+  resolveAboutPageSyncMetaLabel,
+  resolveAboutPageVersionLabel,
+} from '@/utils/aboutPageVersion.util';
 
 const t = vi.fn((key: string, params?: Record<string, string>) => {
   if (key === 'plur.about.version' && params?.version) {
@@ -46,5 +49,20 @@ describe('resolveAboutPageVersionLabel', () => {
       miniProgram: { version: '', envVersion: 'trial' },
     } as ReturnType<typeof Taro.getAccountInfoSync>);
     expect(resolveAboutPageVersionLabel(t)).toBe('版本 体验版');
+  });
+});
+
+describe('resolveAboutPageSyncMetaLabel', () => {
+  it('formats legal sync meta for about page', () => {
+    const metaT = vi.fn((key: string, params?: Record<string, string>) => {
+      if (key === 'legal.updatedLabel') return '2026年6月26日';
+      if (key === 'legal.meta' && params) {
+        return `${params.app} · 更新日期：${params.date} · 版本 ${params.version}`;
+      }
+      return key;
+    });
+    expect(resolveAboutPageSyncMetaLabel(metaT)).toBe(
+      'SYNC · 更新日期：2026年6月26日 · 版本 2026-06-26.1',
+    );
   });
 });

@@ -17,6 +17,7 @@ import { resolveAvatarDisplaySrc, thumbnailImageUrl } from '../../../utils/image
 import { IMAGE_SIZE } from '../../../constants/imageSizes';
 import { isCurrentUserPostAuthor } from '../../../utils/postOwnership';
 import type { EventDetailPost } from '../../../types/backend';
+import type { BuddyPostComposeCandidate } from '@/types/partner';
 import { RecruitUnityTagChips } from '../../../components/post/RecruitUnityTagChips';
 import { stripPostBodyContact } from '../../../utils/postBodyContact';
 import { formatPostHandle } from '../utils/eventPostDisplay';
@@ -31,9 +32,15 @@ export type EventPostCardProps = {
   commentsExpanded: boolean;
   currentUserAvatar?: string;
   commentDraft?: string;
+  showApplyJoinHint?: boolean;
+  applyComposeLoading?: boolean;
+  applyComposeCandidates?: BuddyPostComposeCandidate[];
+  applyComposeDisclaimer?: string | null;
+  onSelectApplyCandidate?: (text: string) => void;
   onOpenComments: (postId: string) => void;
   onApplyJoin: (postId: string) => void;
   onCloseComments: (postId: string) => void;
+  onComposerFocus?: (postId: string, keyboardHeight?: number) => void;
   onDelete?: (post: EventDetailPost) => void;
   onEdit?: (post: EventDetailPost) => void;
   onRecruitStatusToggle?: (post: EventDetailPost) => void;
@@ -61,9 +68,15 @@ function EventPostCardInner({
   commentsExpanded,
   currentUserAvatar,
   commentDraft,
+  showApplyJoinHint = false,
+  applyComposeLoading = false,
+  applyComposeCandidates,
+  applyComposeDisclaimer,
+  onSelectApplyCandidate,
   onOpenComments,
   onApplyJoin,
   onCloseComments,
+  onComposerFocus,
   onDelete,
   onEdit,
   onRecruitStatusToggle,
@@ -343,7 +356,12 @@ function EventPostCardInner({
           currentUserAvatar={currentUserAvatar}
           onCommentSubmitted={onCommentSubmitted}
           initialCommentDraft={commentDraft}
-          showApplyJoinHint={Boolean(commentDraft?.trim())}
+          showApplyJoinHint={showApplyJoinHint}
+          applyComposeLoading={applyComposeLoading}
+          applyComposeCandidates={applyComposeCandidates}
+          applyComposeDisclaimer={applyComposeDisclaimer}
+          onSelectApplyCandidate={onSelectApplyCandidate}
+          onComposerFocus={onComposerFocus}
         />
       ) : null}
     </View>
@@ -365,6 +383,10 @@ export const EventPostCard = memo(EventPostCardInner, (prev, next) => {
     prev.highlighted === next.highlighted &&
     prev.commentsExpanded === next.commentsExpanded &&
     prev.commentDraft === next.commentDraft &&
+    prev.showApplyJoinHint === next.showApplyJoinHint &&
+    prev.applyComposeLoading === next.applyComposeLoading &&
+    prev.applyComposeCandidates === next.applyComposeCandidates &&
+    prev.applyComposeDisclaimer === next.applyComposeDisclaimer &&
     prev.publishTimeLabel === next.publishTimeLabel &&
     prev.currentUserAvatar === next.currentUserAvatar
   );

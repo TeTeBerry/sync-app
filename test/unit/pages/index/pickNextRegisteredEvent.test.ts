@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import type { HomeSummary } from '@/types/backend';
-import { pickNextRegisteredEvent } from '@/pages/index/utils/pickNextRegisteredEvent';
+import type { HomeSummary, ProfileActivityItem } from '@/types/backend';
+import {
+  pickNextRegisteredEvent,
+  pickNextRegisteredEventForUser,
+} from '@/pages/index/utils/pickNextRegisteredEvent';
 
 type HomeActivityEvent = HomeSummary['signupEvents'][number];
 
@@ -45,5 +48,49 @@ describe('pickNextRegisteredEvent', () => {
     const events = [event(1, '01/01-02', true), event(2, '10/03-04', true)];
 
     expect(pickNextRegisteredEvent(events, now)?.id).toBe(2);
+  });
+
+  it('returns null when registered ids from store are empty despite stale home going', () => {
+    const events = [event(8, '10/03-04', true)];
+
+    expect(
+      pickNextRegisteredEventForUser(events, { registeredLegacyIds: [] }),
+    ).toBeNull();
+  });
+
+  it('uses registered ids from store instead of stale home going flags', () => {
+    const events = [event(8, '06/13-14', true), event(9, '10/03-04', false)];
+
+    expect(
+      pickNextRegisteredEventForUser(events, { registeredLegacyIds: [9] }, now)?.id,
+    ).toBe(9);
+  });
+
+  it('returns null when profile activities are loaded empty despite stale home going', () => {
+    const events = [event(8, '10/03-04', true)];
+    const profileActivities: ProfileActivityItem[] = [];
+
+    expect(
+      pickNextRegisteredEventForUser(events, { profileActivities }, now),
+    ).toBeNull();
+  });
+
+  it('uses profile activities instead of stale home going flags', () => {
+    const events = [event(8, '06/13-14', true), event(9, '10/03-04', false)];
+    const profileActivities: ProfileActivityItem[] = [
+      {
+        id: '9',
+        activityLegacyId: '9',
+        title: 'EDC',
+        date: '10/03-04',
+        location: '',
+        image: '',
+        status: 'registered',
+      },
+    ];
+
+    expect(pickNextRegisteredEventForUser(events, { profileActivities }, now)?.id).toBe(
+      9,
+    );
   });
 });

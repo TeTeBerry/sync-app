@@ -143,4 +143,11 @@ export async function restorePersonalityTestResultFromServer(): Promise<Personal
   return loadPersonalityTestResult();
 }
 
+/** Prefer server-backed result when logged in; otherwise read local storage. */
+export async function resolvePersonalityTestResult(): Promise<PersonalityTestResult | null> {
+  return isLoggedIn()
+    ? restorePersonalityTestResultFromServer()
+    : loadPersonalityTestResult();
+}
+
 export const PERSONALITY_TEST_STORAGE_KEY = STORAGE_KEY;

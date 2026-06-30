@@ -1,8 +1,10 @@
+import { postCommentComposerId } from './postCommentComposerId';
 import './PostCommentSection.scss';
 import Taro from '@tarojs/taro';
 import { useCallback, useEffect, useRef, useState, type FC } from 'react';
 import { ChevronUp, Send } from '../icons';
 import { useUgcPublishGuard } from '../../hooks/useUgcPublishGuard';
+import { useConfirmDialog } from '../../hooks/useConfirmDialog';
 import {
   commentPostAndInvalidate,
   deleteCommentAndInvalidate,
@@ -28,12 +30,14 @@ import {
   isCurrentUserPostAuthor,
 } from '../../utils/postOwnership';
 import type { EventDetailPost, PostCommentItem } from '../../types/backend';
+import type { BuddyPostComposeCandidate } from '@/types/partner';
 import { Button, cn, Input } from '../ui';
 import { PostOwnerDeleteButton } from './PostOwnerDeleteButton';
 import { ContentReportMenuButton } from '../report';
 import { Image, Text, View } from '@tarojs/components';
 import { useT } from '@/hooks/useI18n';
 import { showAppToast } from '@/utils/appToast';
+import { requestDeleteCommentConfirm } from '@/utils/deleteCommentConfirm';
 import {
   isPlurRespectConfirmed,
   setPlurRespectConfirmed,
@@ -51,6 +55,11 @@ export type PostCommentSectionProps = {
   onCommentSubmitted?: (updated: Pick<EventDetailPost, 'id' | 'comments'>) => void;
   initialCommentDraft?: string | null;
   showApplyJoinHint?: boolean;
+  applyComposeLoading?: boolean;
+  applyComposeCandidates?: BuddyPostComposeCandidate[];
+  applyComposeDisclaimer?: string | null;
+  onSelectApplyCandidate?: (text: string) => void;
+  onComposerFocus?: (postId: string, keyboardHeight?: number) => void;
 };
 
 type ReplyTarget = {
@@ -202,10 +211,18 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
   onCommentSubmitted,
   initialCommentDraft,
   showApplyJoinHint = false,
+  applyComposeLoading = false,
+  applyComposeCandidates,
+  applyComposeDisclaimer,
+  onSelectApplyCandidate,
+  onComposerFocus,
 }) => {
   const t = useT();
   const displayIdentity = useDisplayUserIdentity();
   const commentsQuery = usePostCommentsQuery(postId, expanded);
+  const { confirm, confirmDialog } = useConfirmDialog({
+    cancelText: t('common.cancel'),
+  });
   const { guardPublish, handlePublishError, complianceConfirmDialog } =
     useUgcPublishGuard();
   const { hasMore, loadMore, loadingMore } = commentsQuery;
@@ -311,6 +328,8 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
       if (deletingCommentId) return;
       requireAuth(() => {
         void (async () => {
+          const ok = await requestDeleteCommentConfirm(confirm);
+          if (!ok) return;
           setDeletingCommentId(commentId);
           try {
             const updated = await deleteCommentAndInvalidate(postId, commentId);
@@ -328,7 +347,7 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
         })();
       }, 'social');
     },
-    [deletingCommentId, onCommentSubmitted, postId, t],
+    [confirm, deletingCommentId, onCommentSubmitted, postId, t],
   );
 
   const composerAvatarKey =
@@ -352,6 +371,13 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
   const canSend = Boolean(draft.trim()) && !submitting;
   const isEmptyList =
     !commentsQuery.isLoading && !commentsQuery.isError && comments.length === 0;
+
+  const revealComposer = useCallback(
+    (keyboardHeight?: number) => {
+      onComposerFocus?.(postId, keyboardHeight);
+    },
+    [onComposerFocus, postId],
+  );
 
   if (!expanded) return null;
 
@@ -431,6 +457,37 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
         </Text>
       ) : null}
 
+      {showApplyJoinHint && applyComposeLoading ? (
+        <Text className="s-post-comments__status">{t('comments.loading')}</Text>
+      ) : null}
+
+      {showApplyJoinHint &&
+      !applyComposeLoading &&
+      applyComposeCandidates &&
+      applyComposeCandidates.length > 0 ? (
+        <View className="s-post-comments__apply-candidates">
+          {applyComposeDisclaimer ? (
+            <Text className="s-post-comments__apply-disclaimer">
+              {applyComposeDisclaimer}
+            </Text>
+          ) : null}
+          {applyComposeCandidates.map((candidate) => (
+            <Button
+              key={candidate.id}
+              className="s-post-comments__apply-candidate"
+              onClick={() => {
+                onSelectApplyCandidate?.(candidate.text);
+                setDraft(candidate.text);
+              }}
+            >
+              <Text className="s-post-comments__apply-candidate-text">
+                {candidate.text}
+              </Text>
+            </Button>
+          ))}
+        </View>
+      ) : null}
+
       {showApplyJoinHint ? (
         <View
           className="s-post-comments__respect-row"
@@ -450,7 +507,7 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
         </View>
       ) : null}
 
-      <View className="s-post-comments__composer">
+      <View id={postCommentComposerId(postId)} className="s-post-comments__composer">
         <Image
           className="s-post-comments__avatar"
           src={userAvatar}
@@ -469,6 +526,15 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
             placeholder={placeholder}
             confirmType="send"
             adjustPosition={false}
+            holdKeyboard={process.env.TARO_ENV === 'weapp'}
+            alwaysEmbed={process.env.TARO_ENV === 'weapp'}
+            onFocus={() => revealComposer()}
+            onKeyboardHeightChange={(event) => {
+              const height = event.detail.height;
+              if (height > 0) {
+                revealComposer(height);
+              }
+            }}
             onInput={(e) => setDraft(e.detail.value)}
             onConfirm={() => {
               if (canSend) handleSubmit();
@@ -498,6 +564,7 @@ export const PostCommentSection: FC<PostCommentSectionProps> = ({
         <ChevronUp size={14} />
       </Button>
 
+      {confirmDialog}
       {complianceConfirmDialog}
     </View>
   );

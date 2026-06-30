@@ -31,6 +31,7 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     openBuddyPostOnMount,
     openCommentsOnMount,
     openGuideOnMount,
+    artifactId,
     scrollTop: routeScrollTop,
     setScrollTop,
     secondaryReady,
@@ -42,6 +43,10 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
   );
   const travelGuideNavIntent = useMemo(
     () => useNavigationStore.getState().consumeEventDetailTravelGuideIntent(),
+    [],
+  );
+  const searchPrefillNavIntent = useMemo(
+    () => useNavigationStore.getState().consumeEventDetailSearchPrefillIntent(),
     [],
   );
   const activityQuery = useActivityDetailQuery(eventId);
@@ -77,6 +82,7 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     openCommentsOnMount,
     secondaryReady,
     invalidEventId,
+    artifactId,
     activityTitle,
     activityDate,
     isConnected,
@@ -88,6 +94,7 @@ export function useEventDetailPage({ confirm }: UseEventDetailPageOptions) {
     getLiveScrollTop,
     frozenTop,
     buddyPostNavIntent,
+    searchPrefillNavIntent,
   });
   const festivalPlan = useEventDetailFestivalPlanSection({
     activityLegacyId: eventId,

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type {
   EventDetailBuddyPostNavIntent,
+  EventDetailSearchPrefillNavIntent,
   EventDetailTravelGuideNavIntent,
   ExclusiveItineraryNavIntent,
 } from './types';
@@ -15,6 +16,7 @@ export type RouteTransitionState = {
 export interface NavigationState {
   exclusiveItineraryIntent: ExclusiveItineraryNavIntent | null;
   eventDetailBuddyPostIntent: EventDetailBuddyPostNavIntent | null;
+  eventDetailSearchPrefillIntent: EventDetailSearchPrefillNavIntent | null;
   eventDetailTravelGuideIntent: EventDetailTravelGuideNavIntent | null;
   activeActivityLegacyId: number | null;
   routeTransition: RouteTransitionState;
@@ -22,6 +24,10 @@ export interface NavigationState {
   consumeExclusiveItineraryIntent: () => ExclusiveItineraryNavIntent | null;
   setEventDetailBuddyPostIntent: (intent: EventDetailBuddyPostNavIntent | null) => void;
   consumeEventDetailBuddyPostIntent: () => EventDetailBuddyPostNavIntent | null;
+  setEventDetailSearchPrefillIntent: (
+    intent: EventDetailSearchPrefillNavIntent | null,
+  ) => void;
+  consumeEventDetailSearchPrefillIntent: () => EventDetailSearchPrefillNavIntent | null;
   setEventDetailTravelGuideIntent: (
     intent: EventDetailTravelGuideNavIntent | null,
   ) => void;
@@ -34,6 +40,7 @@ export interface NavigationState {
 export const useNavigationStore = create<NavigationState>((set, get) => ({
   exclusiveItineraryIntent: null,
   eventDetailBuddyPostIntent: null,
+  eventDetailSearchPrefillIntent: null,
   eventDetailTravelGuideIntent: null,
   activeActivityLegacyId: null,
   routeTransition: { active: false },
@@ -50,6 +57,14 @@ export const useNavigationStore = create<NavigationState>((set, get) => ({
   consumeEventDetailBuddyPostIntent: () => {
     const intent = get().eventDetailBuddyPostIntent;
     if (intent) set({ eventDetailBuddyPostIntent: null });
+    return intent;
+  },
+
+  setEventDetailSearchPrefillIntent: (intent) =>
+    set({ eventDetailSearchPrefillIntent: intent }),
+  consumeEventDetailSearchPrefillIntent: () => {
+    const intent = get().eventDetailSearchPrefillIntent;
+    if (intent) set({ eventDetailSearchPrefillIntent: null });
     return intent;
   },
 

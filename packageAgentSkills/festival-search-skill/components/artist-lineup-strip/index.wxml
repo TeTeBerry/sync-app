@@ -1,0 +1,50 @@
+<view class="lineup-strip card-surface-list card-aspect-16-9">
+  <view class="card-accent-bar" />
+  <view class="lineup-strip-header card-pad">
+    <view class="card-header-row">
+      <view class="card-col card-body-grow">
+        <text class="card-kicker">LINEUP</text>
+        <text class="card-title card-ellipsis-1">{{activityName || '活动阵容'}}</text>
+        <text wx:if="{{activityDate || activityLocation}}" class="card-meta">
+          {{activityDate}}{{activityDate && activityLocation ? ' · ' : ''}}{{activityLocation}}
+        </text>
+      </view>
+      <text class="card-chip card-chip--ai">{{artistCount}} 位</text>
+    </view>
+  </view>
+  <block wx:if="{{artistCount > 0}}">
+    <scroll-view class="lineup-strip-scroll" scroll-x="true" enable-flex>
+      <view class="lineup-strip-row">
+        <view
+          wx:for="{{artists}}"
+          wx:key="name"
+          class="lineup-strip-artist"
+          hover-class="card-hover"
+          bindtap="onTapArtist"
+          data-name="{{item.name}}"
+          data-image-url="{{item.imageUrl}}"
+        >
+          <image
+            wx:if="{{item.imageUrl}}"
+            class="card-avatar-lg lineup-strip-avatar"
+            src="{{item.imageUrl}}"
+            mode="aspectFill"
+          />
+          <view wx:else class="card-avatar-lg lineup-strip-initial">
+            <text class="card-avatar-initial">{{item.initial}}</text>
+          </view>
+          <text class="lineup-strip-name">{{item.name}}</text>
+        </view>
+      </view>
+    </scroll-view>
+  </block>
+  <block wx:else>
+    <view class="card-pad">
+      <text class="card-body card-text-secondary">阵容尚未公布，可订阅阵容更新提醒。</text>
+    </view>
+  </block>
+  <view class="card-foot-bar-col">
+    <text wx:if="{{moreCount > 0}}" class="card-more">滑动查看更多艺人 · {{moreCount}}+</text>
+    <text class="card-disclaimer">点击艺人可了解更多 · 平台仅提供资讯</text>
+  </view>
+</view>

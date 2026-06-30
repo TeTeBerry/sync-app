@@ -58,6 +58,11 @@ describe('tab switch loading', () => {
       options?.complete?.({ errMsg: 'switchTab:ok' } as never);
       return Promise.resolve({ errMsg: 'switchTab:ok' });
     });
+    vi.mocked(Taro.reLaunch).mockImplementation((options) => {
+      options?.success?.({ errMsg: 'reLaunch:ok' } as never);
+      options?.complete?.({ errMsg: 'reLaunch:ok' } as never);
+      return Promise.resolve({ errMsg: 'reLaunch:ok' });
+    });
   });
 
   afterEach(() => {
@@ -158,5 +163,29 @@ describe('tab switch loading', () => {
     expect(Taro.switchTab).toHaveBeenCalledWith(
       expect.objectContaining({ url: ROUTES.EVENTS }),
     );
+  });
+
+  it('uses reLaunch from subpackage stack pages to skip intermediate tab root', async () => {
+    vi.mocked(Taro.getCurrentPages).mockReturnValue([
+      { route: 'packageEvent/pages/event-detail/index' },
+    ] as never);
+    switchTabTo(ROUTES.PROFILE);
+    await vi.waitUntil(() => vi.mocked(Taro.reLaunch).mock.calls.length > 0);
+    expect(Taro.reLaunch).toHaveBeenCalledWith(
+      expect.objectContaining({ url: ROUTES.PROFILE }),
+    );
+    expect(Taro.switchTab).not.toHaveBeenCalled();
+  });
+
+  it('uses switchTab when already on a tab root page', async () => {
+    vi.mocked(Taro.getCurrentPages).mockReturnValue([
+      { route: 'pages/events/index' },
+    ] as never);
+    switchTabTo(ROUTES.PROFILE);
+    await vi.waitUntil(() => vi.mocked(Taro.switchTab).mock.calls.length > 0);
+    expect(Taro.switchTab).toHaveBeenCalledWith(
+      expect.objectContaining({ url: ROUTES.PROFILE }),
+    );
+    expect(Taro.reLaunch).not.toHaveBeenCalled();
   });
 });

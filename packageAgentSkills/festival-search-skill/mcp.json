@@ -1,0 +1,153 @@
+{
+  "apis": [
+    {
+      "name": "setSearchContext",
+      "description": "记录用户出发城市等检索偏好（不申请定位权限）",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "homeCity": {
+            "type": "string",
+            "description": "出发城市，如上海"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "homeCity": { "type": "string" }
+        }
+      }
+    },
+    {
+      "name": "searchFestivals",
+      "description": "检索电音节活动列表与资讯（免费信息检索，非票务）",
+      "_meta": {
+        "ui": {
+          "componentPath": "components/search-results-card/index"
+        }
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "检索意图，如节名、艺人、时间或地点，例如 EDC Korea"
+          },
+          "homeCity": {
+            "type": "string",
+            "description": "用户出发城市，可选"
+          }
+        },
+        "required": ["query"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "totalMatched": { "type": "number" },
+          "events": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "legacyId": { "type": "number" },
+                "name": { "type": "string" },
+                "date": { "type": "string" },
+                "location": { "type": "string" },
+                "heroImageUrl": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "getEvent",
+      "description": "获取单场电音节活动详情（非票务）",
+      "_meta": {
+        "ui": {
+          "componentPath": "components/event-card/index"
+        }
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "activityLegacyId": {
+            "type": "number",
+            "description": "活动 legacyId"
+          }
+        },
+        "required": ["activityLegacyId"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "legacyId": { "type": "number" },
+          "name": { "type": "string" },
+          "date": { "type": "string" },
+          "location": { "type": "string" },
+          "lineupPublished": { "type": "boolean" },
+          "heroImageUrl": { "type": "string" },
+          "latitude": { "type": "number" },
+          "longitude": { "type": "number" }
+        }
+      }
+    },
+    {
+      "name": "getLineup",
+      "description": "获取活动官宣阵容艺人列表",
+      "_meta": {
+        "ui": {
+          "componentPath": "components/artist-lineup-strip/index"
+        }
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "activityLegacyId": {
+            "type": "number",
+            "description": "活动 legacyId"
+          }
+        },
+        "required": ["activityLegacyId"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "activityLegacyId": { "type": "number" },
+          "activityName": { "type": "string" },
+          "activityDate": { "type": "string" },
+          "activityLocation": { "type": "string" },
+          "artists": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string" },
+                "imageUrl": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "components": [
+    {
+      "path": "components/search-results-card/index",
+      "relatedPage": "/packageEvent/pages/event-detail/index"
+    },
+    {
+      "path": "components/event-compare-strip/index",
+      "relatedPage": "/packageEvent/pages/event-detail/index"
+    },
+    {
+      "path": "components/event-card/index",
+      "relatedPage": "/packageEvent/pages/event-detail/index"
+    },
+    {
+      "path": "components/artist-lineup-strip/index",
+      "relatedPage": "/packageEvent/pages/event-detail/index"
+    }
+  ]
+}

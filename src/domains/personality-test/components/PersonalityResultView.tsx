@@ -555,6 +555,9 @@ export const PersonalityResultView: FC<PersonalityResultViewProps> = ({
         </Button>
       </View>
 
+      <Text className="s-personality-result__poster-hint">
+        {t('personality.savePosterHint')}
+      </Text>
       <View className="s-personality-result__secondary-actions">
         <Button
           className="s-personality-result__secondary"

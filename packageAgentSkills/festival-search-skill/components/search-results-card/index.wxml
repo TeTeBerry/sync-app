@@ -1,0 +1,103 @@
+<view class="search-results card-surface card-aspect-16-9">
+  <view class="card-accent-bar" />
+  <view class="search-results-top card-pad">
+    <view class="card-header-row">
+      <view class="card-col card-body-grow">
+        <text class="card-kicker">{{isCompareMode ? '检索结果' : '电音节资讯'}}</text>
+        <text wx:if="{{isCompareMode}}" class="card-subtitle">电音节对比</text>
+        <text
+          wx:elif="{{singleEvent && !singleEvent.heroImageUrl}}"
+          class="card-title card-clamp-2"
+        >{{singleEvent.name}}</text>
+        <text wx:elif="{{!singleEvent}}" class="card-subtitle">未找到活动</text>
+      </view>
+      <text wx:if="{{isCompareMode && totalMatched > 0}}" class="card-count-badge">{{totalMatched}} 场</text>
+    </view>
+  </view>
+
+  <view wx:if="{{events.length === 0}}" class="card-empty-center">
+    <text class="card-caption">未找到匹配活动</text>
+    <text class="card-meta">试试换个关键词或放宽日期</text>
+  </view>
+
+  <view
+    wx:elif="{{singleEvent && singleEvent.heroImageUrl}}"
+    class="search-results-hero-wrap"
+    hover-class="card-hover"
+    bindtap="onTapSingle"
+  >
+    <image
+      class="search-results-hero"
+      src="{{singleEvent.heroImageUrl}}"
+      mode="aspectFill"
+    />
+    <view class="search-results-hero-scrim" />
+    <view class="search-results-hero-copy card-pad">
+      <text class="search-results-hero-title card-clamp-2">{{singleEvent.name}}</text>
+      <text wx:if="{{singleEvent.date || singleEvent.location}}" class="search-results-hero-meta">
+        {{singleEvent.date}}{{singleEvent.date && singleEvent.location ? ' · ' : ''}}{{singleEvent.location}}
+      </text>
+    </view>
+  </view>
+
+  <view
+    wx:elif="{{singleEvent}}"
+    class="search-results-single card-pad card-row"
+    hover-class="card-hover"
+    bindtap="onTapSingle"
+  >
+    <image
+      wx:if="{{singleEvent.heroImageUrl}}"
+      class="card-cover search-results-cover"
+      src="{{singleEvent.heroImageUrl}}"
+      mode="aspectFill"
+    />
+    <view wx:else class="card-cover search-results-cover card-cover-placeholder">
+      <text class="card-cover-letter">{{singleEvent.initial}}</text>
+    </view>
+    <view class="search-results-body card-col card-body-grow">
+      <text wx:if="{{singleEvent.date || singleEvent.location}}" class="card-meta">
+        {{singleEvent.date}}{{singleEvent.date && singleEvent.location ? ' · ' : ''}}{{singleEvent.location}}
+      </text>
+      <text class="card-small search-results-hint">点击进入活动详情，可查看阵容与观演准备</text>
+    </view>
+  </view>
+
+  <scroll-view wx:else class="search-results-scroll" scroll-x="true" enable-flex>
+    <view class="search-results-row">
+      <view
+        wx:for="{{events}}"
+        wx:key="legacyId"
+        class="search-results-tile card-inner-tile"
+        hover-class="card-hover"
+        bindtap="onTapEvent"
+        data-legacy-id="{{item.legacyId}}"
+        data-name="{{item.name}}"
+      >
+        <image
+          wx:if="{{item.heroImageUrl}}"
+          class="search-results-poster"
+          src="{{item.heroImageUrl}}"
+          mode="aspectFill"
+        />
+        <view wx:else class="search-results-poster search-results-poster--placeholder">
+          <text class="card-cover-letter">{{item.initial}}</text>
+        </view>
+        <view class="search-results-tile-body card-pad-sm">
+          <text class="search-results-tile-name card-ellipsis-1">{{item.name}}</text>
+          <text class="search-results-tile-meta card-ellipsis-1">
+            {{item.date}}{{item.date && item.location ? ' · ' : ''}}{{item.location}}
+          </text>
+          <text class="card-cta-link search-results-tile-action">查看详情 →</text>
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+
+  <view class="card-foot-bar">
+    <text class="card-disclaimer">平台仅提供资讯，不售票</text>
+    <view wx:if="{{singleEvent}}" class="card-cta-pill">
+      <text class="card-cta-pill-text">进入详情</text>
+    </view>
+  </view>
+</view>

@@ -8,13 +8,16 @@ import { formatEventHeroMetaLine } from '@/utils/eventCardDisplay';
 import { activityCoverImageUrl } from '@/utils/imageUrl';
 import {
   getActivityStatusFromActivity,
-  type ActivityStatus,
+  activityStatusI18nKey,
 } from '@/utils/activityStatus';
 import { Text, View } from '@tarojs/components';
 import { useMemo } from 'react';
 import { useT } from '@/hooks/useI18n';
 import './EventDetailInfoSection.scss';
 import { ActivityUpdateSubscribeBanner } from './ActivityUpdateSubscribeBanner';
+import { FestivalStoryCard } from './FestivalStoryCard';
+import { useFestivalStory } from '../hooks/useFestivalStory';
+import { shouldShowLineupSubscribeBanner } from '../utils/resolveLineupPublished';
 
 export type EventDetailInfoSectionProps = {
   activity?: BackendActivity | null;
@@ -36,22 +39,13 @@ function formatInfoUpdatedAt(value?: string): string | null {
   return `${year}-${month}-${day}`;
 }
 
-function statusI18nKey(status: ActivityStatus): string {
-  if (status === 'in_progress') {
-    return 'activityInfo.status.inProgress';
-  }
-  if (status === 'ended') {
-    return 'activityInfo.status.ended';
-  }
-  return 'activityInfo.status.upcoming';
-}
-
 export const EventDetailInfoSection: FC<EventDetailInfoSectionProps> = ({
   activity,
   activityLegacyId,
   onOpenLineup,
 }) => {
   const t = useT();
+  const festivalStory = useFestivalStory(activityLegacyId);
   const heroFallback = useMemo(() => {
     const name = activity?.name?.trim() ?? '';
     return name.slice(0, 2) || t('eventCard.activityFallback').slice(0, 2);
@@ -68,7 +62,10 @@ export const EventDetailInfoSection: FC<EventDetailInfoSectionProps> = ({
     activityCoverImageUrl(activity.image?.trim() || PLACEHOLDER_EVENT_HERO) ??
     PLACEHOLDER_EVENT_HERO;
 
-  const showSubscribeBanner = activity.lineupPublished !== true;
+  const showSubscribeBanner = shouldShowLineupSubscribeBanner(
+    activity,
+    activityLegacyId,
+  );
 
   return (
     <View
@@ -105,7 +102,7 @@ export const EventDetailInfoSection: FC<EventDetailInfoSectionProps> = ({
             >
               <View className="s-event-detail-info__status-icon" aria-hidden />
               <Text className="s-event-detail-info__status-text">
-                {t(statusI18nKey(status))}
+                {t(activityStatusI18nKey(status))}
               </Text>
             </View>
           </View>
@@ -139,6 +136,17 @@ export const EventDetailInfoSection: FC<EventDetailInfoSectionProps> = ({
               style={{ marginTop: 8 }}
             />
           ) : null}
+
+          <FestivalStoryCard
+            activityName={activity.name}
+            expanded={festivalStory.expanded}
+            loading={festivalStory.loading}
+            story={festivalStory.story}
+            disclaimer={festivalStory.disclaimer}
+            error={festivalStory.error}
+            onToggle={festivalStory.toggle}
+            onRegenerate={festivalStory.regenerate}
+          />
         </View>
       </View>
 

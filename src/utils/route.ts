@@ -8,6 +8,7 @@ import type { ExclusiveItineraryNavIntent } from '../stores/types';
 import type { BuddyPostSheetPrefill } from './travelGuideToBuddyPost';
 import { prefetchPersonalityTestAudioMedia } from '../domains/personality-test';
 import type { AiGuidePlanFormValues } from '../types/travelGuide';
+import { normalizeAiGuidePlanFormValues } from './normalizeUserProfileText';
 import type { BackendActivity, HomeSummary, NotificationMeta } from '../types/backend';
 import { PRELOAD_HOT_ROUTES_MS } from './timing';
 import {
@@ -144,6 +145,11 @@ export function isOnTabRoot(path: RoutePath): boolean {
     return false;
   }
   return currentRoutePath() === normalizePath(path);
+}
+
+/** True when the visible page is any bottom-nav tab root. */
+function isOnAnyTabRoot(): boolean {
+  return TAB_ROUTE_PATHS.has(currentRoutePath() as RoutePath);
 }
 
 function clearStuckTabSwitchState(target?: RoutePath) {
@@ -509,7 +515,7 @@ export type SwitchTabOptions = {
   force?: boolean;
 };
 
-/** Tab pages: switchTab keeps tab stacks alive (smoother than reLaunch). */
+/** Tab pages on the root stack use switchTab; subpackage stack pages use reLaunch to avoid flashing the source tab root. */
 /** Open activities tab on the list view (e.g. home 「全部」). */
 export function goEventsListTab() {
   setEventsViewTabIntent('list');
@@ -553,15 +559,38 @@ export function switchTabTo(url: RoutePath, options?: SwitchTabOptions) {
   markNavigationStart(url);
   syncTabBarRoute(targetPath);
 
+  const useReLaunch = !isOnAnyTabRoot();
+
   runSerializedNavigation(
     () =>
       new Promise<void>((resolve) => {
+        const onSuccess = () => {
+          syncTabBarRoute(targetPath);
+          resolve();
+        };
+        const onFail = () => {
+          optimisticTabPath = null;
+          notifyTabRouteChange();
+          endRouteTransition();
+          resolve();
+        };
+        const onComplete = () => {
+          markNavigationEnd();
+        };
+
+        if (useReLaunch) {
+          Taro.reLaunch({
+            url,
+            success: onSuccess,
+            fail: onFail,
+            complete: onComplete,
+          });
+          return;
+        }
+
         Taro.switchTab({
           url,
-          success: () => {
-            syncTabBarRoute(targetPath);
-            resolve();
-          },
+          success: onSuccess,
           fail: () => {
             optimisticTabPath = null;
             notifyTabRouteChange();
@@ -571,9 +600,7 @@ export function switchTabTo(url: RoutePath, options?: SwitchTabOptions) {
               complete: () => resolve(),
             });
           },
-          complete: () => {
-            markNavigationEnd();
-          },
+          complete: onComplete,
         });
       }),
   );
@@ -884,6 +911,30 @@ export async function navigateFromNotification(
     return true;
   }
 
+  if (meta.type === 'proactive_nudge') {
+    const legacyId = resolveActivityLegacyId(meta);
+    if (legacyId == null) return false;
+
+    if (meta.openLineup) {
+      goActivityLineup(legacyId);
+      return true;
+    }
+
+    const prefillQuery = meta.prefillQuery?.trim();
+    if (prefillQuery) {
+      useNavigationStore.getState().setEventDetailSearchPrefillIntent({
+        activityLegacyId: legacyId,
+        searchQuery: prefillQuery,
+      });
+    }
+
+    goEventDetail(legacyId, {
+      focusPosts: meta.focusPosts || undefined,
+      openBuddyPost: meta.openBuddyPost || undefined,
+    });
+    return true;
+  }
+
   const legacyId = resolveActivityLegacyId(meta);
   if (legacyId == null) return false;
 
@@ -914,7 +965,7 @@ export function goEventDetailTravelGuideSheet(
   if (prefill) {
     useNavigationStore.getState().setEventDetailTravelGuideIntent({
       activityLegacyId,
-      prefillTravelGuideForm: prefill,
+      prefillTravelGuideForm: normalizeAiGuidePlanFormValues(prefill),
       ...(regenerateGuideId?.trim()
         ? { regenerateGuideId: regenerateGuideId.trim() }
         : {}),

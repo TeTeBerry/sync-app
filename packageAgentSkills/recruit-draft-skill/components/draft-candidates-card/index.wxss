@@ -1,0 +1,30 @@
+@import '../../../shared/cardTokens.wxss';
+
+.draft-candidates-card {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.draft-candidates-card-inner {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.draft-candidates-card-title {
+  margin-top: 10rpx;
+}
+
+.draft-candidates-card-preview-wrap {
+  margin-top: 16rpx;
+}
+
+.draft-candidates-card-preview {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}

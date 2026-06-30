@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import type { BuddyPostComposeCandidate } from '@/types/partner';
 import type { EventPostListItem } from '../utils/eventPostNormalize';
 import { EventPostCard, type EventPostCardProps } from './EventPostCard';
 import { Text, View } from '@tarojs/components';
@@ -13,9 +14,17 @@ type EventPostsVirtualListProps = {
   expandedCommentPostIds: Set<string>;
   currentUserAvatar?: string;
   getCommentDraft: (postId: string) => string | undefined;
+  getShowApplyJoinHint: (postId: string) => boolean;
+  getApplyComposeLoading: (postId: string) => boolean;
+  getApplyComposeCandidates: (
+    postId: string,
+  ) => BuddyPostComposeCandidate[] | undefined;
+  getApplyComposeDisclaimer: (postId: string) => string | null;
+  onSelectApplyCandidate: (postId: string, text: string) => void;
   onOpenComments: (postId: string) => void;
   onApplyJoin: (postId: string) => void;
   onCloseComments: (postId: string) => void;
+  onComposerFocus?: (postId: string, keyboardHeight?: number) => void;
   onCommentSubmitted?: EventPostCardProps['onCommentSubmitted'];
   onDelete?: EventPostCardProps['onDelete'];
   onEdit?: EventPostCardProps['onEdit'];
@@ -31,9 +40,15 @@ export function EventPostsVirtualList({
   expandedCommentPostIds,
   currentUserAvatar,
   getCommentDraft,
+  getShowApplyJoinHint,
+  getApplyComposeLoading,
+  getApplyComposeCandidates,
+  getApplyComposeDisclaimer,
+  onSelectApplyCandidate,
   onOpenComments,
   onApplyJoin,
   onCloseComments,
+  onComposerFocus,
   onCommentSubmitted,
   onDelete,
   onEdit,
@@ -69,6 +84,7 @@ export function EventPostsVirtualList({
       {items.map((item) => {
         const highlighted = item.post.id === highlightPostId;
         const commentsExpanded = expandedCommentPostIds.has(item.post.id);
+        const postId = item.post.id;
         return (
           <View
             key={item.post.id}
@@ -81,10 +97,16 @@ export function EventPostsVirtualList({
               highlighted={highlighted}
               commentsExpanded={commentsExpanded}
               currentUserAvatar={currentUserAvatar}
-              commentDraft={getCommentDraft(item.post.id)}
+              commentDraft={getCommentDraft(postId)}
+              showApplyJoinHint={getShowApplyJoinHint(postId)}
+              applyComposeLoading={getApplyComposeLoading(postId)}
+              applyComposeCandidates={getApplyComposeCandidates(postId)}
+              applyComposeDisclaimer={getApplyComposeDisclaimer(postId)}
+              onSelectApplyCandidate={(text) => onSelectApplyCandidate(postId, text)}
               onOpenComments={onOpenComments}
               onApplyJoin={onApplyJoin}
               onCloseComments={onCloseComments}
+              onComposerFocus={onComposerFocus}
               onCommentSubmitted={onCommentSubmitted}
               onDelete={onDelete}
               onEdit={onEdit}

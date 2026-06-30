@@ -1,0 +1,8 @@
+{
+  "skills": ["festival-search"],
+  "cases": [
+    { "intent": "查一下泰国 TML 什么时候", "checklist": [] },
+    { "intent": "EDC Korea 阵容出了吗", "checklist": [] },
+    { "intent": "最近有什么电音节", "checklist": [] }
+  ]
+}

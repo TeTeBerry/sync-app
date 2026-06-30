@@ -8,7 +8,10 @@ import {
   useFeaturedEvents,
   useHomeSummary,
   useNotificationUnreadCount,
+  useProfileActivitiesQuery,
 } from '../../hooks/useSyncApi';
+import { hydrateActivitySubscriptionStore } from '@/stores/activitySubscriptionActions';
+import { useActivitySubscriptionStore } from '@/stores/activitySubscriptionStore';
 import { resolveFeaturedEventCountdown } from '../../utils/activityStatus';
 import { requireAuth } from '../../utils/authGate';
 import {
@@ -39,7 +42,7 @@ import {
 } from '../../utils/apiMappers';
 import { useAuthSession } from '../../hooks/useAuthSession';
 import { seedActivityDetailFromHomeSignupEvent } from '../../utils/activityDetailCache';
-import { pickNextRegisteredEvent } from './utils/pickNextRegisteredEvent';
+import { pickNextRegisteredEventForUser } from './utils/pickNextRegisteredEvent';
 import {
   buildFeaturedEventsKey,
   resolveFeaturedIndexAfterListChange,
@@ -68,6 +71,16 @@ const Home = () => {
   const t = useT();
 
   const { data: summary, refetch: refetchHomeSummary } = useHomeSummary();
+  const { loggedIn } = useAuthSession();
+  const { data: profileActivities, refetch: refetchProfileActivities } =
+    useProfileActivitiesQuery({ enabled: loggedIn });
+  const subscriptionHydrated = useActivitySubscriptionStore((state) => state.hydrated);
+  const registeredLegacyIds = useActivitySubscriptionStore(
+    (state) => state.registeredLegacyIds,
+  );
+  const watchLineupGoals = useActivitySubscriptionStore(
+    (state) => state.watchLineupGoals,
+  );
   const heat = summary?.heat;
   const {
     items: featuredEvents,
@@ -75,7 +88,6 @@ const Home = () => {
     isError: featuredError,
     refetch: refetchFeaturedEvents,
   } = useFeaturedEvents();
-  const { loggedIn } = useAuthSession();
   const [featuredIndex, setFeaturedIndex] = useState(0);
   const { data: unreadCount = 0, refetch: refetchUnreadCount } =
     useNotificationUnreadCount();
@@ -98,6 +110,10 @@ const Home = () => {
   useDidShow(() => {
     preloadHotRoutes(ROUTES.HOME);
     setPlurrRefreshTick((tick) => tick + 1);
+    if (loggedIn) {
+      void hydrateActivitySubscriptionStore();
+      void refetchProfileActivities({ background: true });
+    }
   });
 
   const featuredEventsKey = useMemo(
@@ -202,9 +218,34 @@ const Home = () => {
   const navInsets = useNavBarInsets();
 
   const nextSelectedEvent = useMemo(
-    () => (loggedIn ? pickNextRegisteredEvent(summary?.signupEvents) : null),
-    [loggedIn, summary?.signupEvents],
+    () =>
+      loggedIn
+        ? pickNextRegisteredEventForUser(summary?.signupEvents, {
+            registeredLegacyIds: subscriptionHydrated ? registeredLegacyIds : undefined,
+            profileActivities: subscriptionHydrated ? undefined : profileActivities,
+          })
+        : null,
+    [
+      loggedIn,
+      summary?.signupEvents,
+      subscriptionHydrated,
+      registeredLegacyIds,
+      profileActivities,
+    ],
   );
+
+  const homeGoals = useMemo(() => {
+    if (!nextSelectedEvent?.id) {
+      return undefined;
+    }
+    const goals = watchLineupGoals.filter(
+      (goal) => goal.activityLegacyId === nextSelectedEvent.id,
+    );
+    if (!goals.length) {
+      return undefined;
+    }
+    return goals.map((goal) => ({ id: goal.goalId, kind: 'watch_lineup' as const }));
+  }, [nextSelectedEvent?.id, watchLineupGoals]);
 
   const homeFestivalPlan = useHomeFestivalPlanNavigation(nextSelectedEvent?.id);
   const plurrCheckedCount = useMemo(() => {
@@ -317,6 +358,7 @@ const Home = () => {
                 event={nextSelectedEvent}
                 postEngagement={summary?.myNextEventPostEngagement ?? undefined}
                 festivalPlan={homeFestivalPlan.checklist}
+                goals={homeGoals}
                 onViewDetail={handleNextEventView}
                 onOpenPosts={handleNextEventPosts}
                 onOpenPostReplies={

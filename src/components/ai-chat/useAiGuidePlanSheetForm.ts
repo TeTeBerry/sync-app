@@ -5,13 +5,21 @@ import {
   resolveDepartureCityForSubmit,
 } from '../../utils/travelGuideDepartureSuggestions';
 import { resolveTravelGuideBudgetTier } from '@/domains/travel-guide/utils/travelGuideBudgetLabels';
+import { normalizeAiGuidePlanFormValues } from '@/utils/normalizeUserProfileText';
+
+export function resolveGuidePlanAccommodationNights(
+  showDomesticGuideOptions: boolean,
+  needsAccommodation: boolean,
+  accommodationNights: number,
+): number {
+  return showDomesticGuideOptions && !needsAccommodation ? 0 : accommodationNights;
+}
 
 type UseAiGuidePlanSheetFormOptions = {
   open: boolean;
   defaultNights: number;
-  showSelfDriveOption?: boolean;
-  /** 国内活动：可选是否住宿，关闭时不生成住宿与酒店预算 */
-  showAccommodationOption?: boolean;
+  /** 国内活动：展示自驾 / 住宿开关；关闭住宿时不生成酒店与预算 */
+  showDomesticGuideOptions?: boolean;
   initialValues?: AiGuidePlanFormValues | null;
   /** 重新生成：跳过服务端缓存并强制完整 pipeline */
   forceRegenerate?: boolean;
@@ -21,8 +29,7 @@ type UseAiGuidePlanSheetFormOptions = {
 export function useAiGuidePlanSheetForm({
   open,
   defaultNights,
-  showSelfDriveOption = true,
-  showAccommodationOption = false,
+  showDomesticGuideOptions = false,
   initialValues,
   forceRegenerate = false,
   onSubmit,
@@ -32,9 +39,7 @@ export function useAiGuidePlanSheetForm({
   const [departureCity, setDepartureCity] = useState<string | undefined>();
   const [headcount, setHeadcount] = useState(2);
   const [accommodationNights, setAccommodationNights] = useState(defaultNights);
-  const [needsAccommodation, setNeedsAccommodation] = useState(
-    !showAccommodationOption,
-  );
+  const [needsAccommodation, setNeedsAccommodation] = useState(true);
   const [selfDrive, setSelfDrive] = useState(false);
   const prevOpenRef = useRef(false);
 
@@ -47,15 +52,16 @@ export function useAiGuidePlanSheetForm({
 
     setScrollTop(0);
     if (initialValues) {
-      setDeparture(initialValues.departure);
-      setDepartureCity(initialValues.departureCity);
-      setHeadcount(initialValues.headcount);
-      const nights = initialValues.accommodationNights ?? defaultNights;
+      const normalized = normalizeAiGuidePlanFormValues(initialValues);
+      setDeparture(normalized.departure);
+      setDepartureCity(normalized.departureCity);
+      setHeadcount(normalized.headcount);
+      const nights = normalized.accommodationNights ?? defaultNights;
       setAccommodationNights(nights > 0 ? nights : defaultNights);
       setNeedsAccommodation(
-        showAccommodationOption ? (initialValues.accommodationNights ?? 0) > 0 : true,
+        showDomesticGuideOptions ? (normalized.accommodationNights ?? 0) > 0 : true,
       );
-      setSelfDrive(showSelfDriveOption ? Boolean(initialValues.selfDrive) : false);
+      setSelfDrive(showDomesticGuideOptions ? Boolean(normalized.selfDrive) : false);
       return;
     }
 
@@ -63,19 +69,16 @@ export function useAiGuidePlanSheetForm({
     setDepartureCity(undefined);
     setHeadcount(2);
     setAccommodationNights(defaultNights);
-    setNeedsAccommodation(!showAccommodationOption);
+    setNeedsAccommodation(true);
     setSelfDrive(false);
-  }, [
-    defaultNights,
-    initialValues,
-    open,
-    showAccommodationOption,
-    showSelfDriveOption,
-  ]);
+  }, [defaultNights, initialValues, open, showDomesticGuideOptions]);
 
   const canSubmit = Boolean(departure.trim());
-  const resolvedAccommodationNights =
-    showAccommodationOption && !needsAccommodation ? 0 : accommodationNights;
+  const resolvedAccommodationNights = resolveGuidePlanAccommodationNights(
+    showDomesticGuideOptions,
+    needsAccommodation,
+    accommodationNights,
+  );
 
   const handleSubmit = useCallback(() => {
     if (!canSubmit) return;
@@ -85,7 +88,7 @@ export function useAiGuidePlanSheetForm({
       departureCity: resolveDepartureCityForSubmit(normalizedDeparture, departureCity),
       headcount,
       budgetTier: resolveTravelGuideBudgetTier(initialValues?.budgetTier),
-      ...(showSelfDriveOption && selfDrive ? { selfDrive: true } : {}),
+      ...(showDomesticGuideOptions ? { selfDrive: Boolean(selfDrive) } : {}),
       accommodationNights: resolvedAccommodationNights,
       ...(forceRegenerate ? { forceRegenerate: true } : {}),
     });
@@ -99,7 +102,7 @@ export function useAiGuidePlanSheetForm({
     onSubmit,
     resolvedAccommodationNights,
     selfDrive,
-    showSelfDriveOption,
+    showDomesticGuideOptions,
   ]);
 
   return {

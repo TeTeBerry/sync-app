@@ -342,3 +342,29 @@
   font-weight: var(--s-fw-medium);
   cursor: pointer;
 }
+
+.s-post-comments__apply-candidates {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 8px 0 4px;
+}
+
+.s-post-comments__apply-disclaimer {
+  font-size: 12px;
+  color: #8e8e93;
+}
+
+.s-post-comments__apply-candidate {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(76, 201, 240, 0.1);
+  border: 1px solid rgba(76, 201, 240, 0.2);
+}
+
+.s-post-comments__apply-candidate-text {
+  font-size: 13px;
+  color: #e5e5ea;
+  line-height: 1.4;
+  text-align: left;
+}

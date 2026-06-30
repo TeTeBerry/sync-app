@@ -24,7 +24,13 @@ module.exports = {
   settings: {
     react: { version: 'detect' },
   },
-  ignorePatterns: ['dist/', 'dist-*/', 'node_modules/', 'babel.config.js'],
+  ignorePatterns: [
+    'dist/',
+    'dist-*/',
+    'node_modules/',
+    'babel.config.js',
+    'packageAgentSkills/',
+  ],
   rules: {
     'no-unused-vars': 'off',
     '@typescript-eslint/no-unused-vars': [

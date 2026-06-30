@@ -21,3 +21,8 @@ export type EventDetailBuddyPostNavIntent = {
   prefillSummaryLines?: string[];
   prefillBannerTitle?: string;
 };
+
+export type EventDetailSearchPrefillNavIntent = {
+  activityLegacyId: number;
+  searchQuery: string;
+};

@@ -60,6 +60,8 @@ import { updateCurrentUser } from '../../api/sync/users';
 import { useProfileActivitiesQuery } from './profile';
 import { buildSelectedActivityLegacyIds } from '../../utils/activitySelection';
 import { parseActivityLegacyId } from '../../utils/activityLegacyId';
+import { useActivitySubscriptionStore } from '../../stores/activitySubscriptionStore';
+import { resolveLineupPublished } from '@/domains/activity-info/utils/resolveLineupPublished';
 
 export function useActivitiesQuery(options?: QueryEnableOptions) {
   const tabEnabled = options?.enabled ?? true;
@@ -204,15 +206,26 @@ export function useSelectedActivityLegacyIds() {
   const { data: summary } = useHomeSummary();
   const profileActivitiesQuery = useProfileActivitiesQuery();
   const loggedIn = isLoggedIn();
-
-  return useMemo(
-    () =>
-      buildSelectedActivityLegacyIds(
-        loggedIn ? summary?.signupEvents : undefined,
-        loggedIn ? profileActivitiesQuery.data : undefined,
-      ),
-    [loggedIn, summary?.signupEvents, profileActivitiesQuery.data],
+  const subscriptionHydrated = useActivitySubscriptionStore((state) => state.hydrated);
+  const registeredLegacyIds = useActivitySubscriptionStore(
+    (state) => state.registeredLegacyIds,
   );
+
+  return useMemo(() => {
+    if (loggedIn && subscriptionHydrated) {
+      return new Set(registeredLegacyIds);
+    }
+    return buildSelectedActivityLegacyIds(
+      loggedIn ? summary?.signupEvents : undefined,
+      loggedIn ? profileActivitiesQuery.data : undefined,
+    );
+  }, [
+    loggedIn,
+    subscriptionHydrated,
+    registeredLegacyIds,
+    summary?.signupEvents,
+    profileActivitiesQuery.data,
+  ]);
 }
 
 export function useFeaturedEvents() {
@@ -237,6 +250,17 @@ export function useFeaturedEvents() {
   };
 }
 
+function withResolvedLineupPublished(
+  activity: BackendActivity,
+  legacyId: number,
+): BackendActivity {
+  const resolved = resolveLineupPublished(activity, legacyId);
+  if (resolved === undefined || activity.lineupPublished === resolved) {
+    return activity;
+  }
+  return { ...activity, lineupPublished: resolved };
+}
+
 export function useActivityDetailQuery(legacyId?: number) {
   const enabled =
     isLiveApi() && legacyId != null && !Number.isNaN(legacyId) && legacyId > 0;
@@ -244,16 +268,20 @@ export function useActivityDetailQuery(legacyId?: number) {
   return useApiQuery({
     queryKey: ['activities', 'detail', legacyId],
     queryFn: async () => {
-      const result = await fetchActivityByLegacyId(legacyId as number);
+      const id = legacyId as number;
+      const result = await fetchActivityByLegacyId(id);
       if (result != null) {
-        return withCatalogActivityImage(result);
+        return withCatalogActivityImage(withResolvedLineupPublished(result, id));
       }
       const seeded = getCacheData<BackendActivity | null>([
         'activities',
         'detail',
         legacyId,
       ]);
-      return seeded ? withCatalogActivityImage(seeded) : null;
+      if (!seeded) {
+        return null;
+      }
+      return withCatalogActivityImage(withResolvedLineupPublished(seeded, id));
     },
     enabled,
     staleTime: STALE_ACTIVITY_DETAIL_MS,
@@ -305,6 +333,23 @@ export async function unregisterForActivityAndInvalidate(legacyId: number) {
     }
   }
   return result;
+}
+
+/** Replace home summary cache from server (e.g. after unregister). */
+export async function refreshHomeSummaryFromServer() {
+  if (!isLiveApi()) {
+    return undefined;
+  }
+
+  try {
+    const result = withCatalogHomeSummary(await fetchHomeSummary());
+    setCacheData(['home', 'summary'], () => result);
+    afterHomeSummaryCommitted(result);
+    broadcastCacheData(['home', 'summary']);
+    return result;
+  } catch {
+    return undefined;
+  }
 }
 
 export async function updateCurrentUserAndInvalidate(

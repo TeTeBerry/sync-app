@@ -186,8 +186,7 @@ const AiTravelGuidePage = () => {
           open
           defaultNights={page.guideDefaultNights}
           eventCity={page.guideEventCity}
-          showSelfDriveOption={page.guideShowSelfDriveOption}
-          showAccommodationOption={page.guideShowAccommodationOption}
+          showDomesticGuideOptions={page.guideShowDomesticOptions}
           initialValues={page.guideSheetInitialValues}
           forceRegenerate
           onClose={page.closeGuideSheet}

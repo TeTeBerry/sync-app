@@ -91,4 +91,10 @@ describe('travelGuideDepartureSuggestions', () => {
     expect(resolveDepartureCityForSubmit('北京', '上海')).toBe('北京');
     expect(resolveDepartureCityForSubmit('上海虹桥', '上海')).toBe('上海');
   });
+
+  it('decodes percent-encoded departure before submit normalization', () => {
+    expect(
+      normalizeDepartureForSubmit('%E6%85%A7%E6%99%BA%C2%B7%E4%BB%81%E6%81%92'),
+    ).toBe('慧智·仁恒');
+  });
 });

@@ -51,6 +51,18 @@ describe('travelGuideWechatShare', () => {
     expect(path).toContain('departure=%E4%B8%8A%E6%B5%B7');
   });
 
+  it('parses encoded departure from share query', () => {
+    const parsed = parseTravelGuideFormFromShareQuery({
+      activityLegacyId: '16',
+      departure: '%E6%85%A7%E6%99%BA%C2%B7%E4%BB%81%E6%81%92',
+      headcount: '1',
+      accommodationNights: '0',
+      selfDrive: '1',
+    });
+    expect(parsed?.form.departure).toBe('慧智·仁恒');
+    expect(parsed?.form.selfDrive).toBe(true);
+  });
+
   it('parses share query back into generation form', () => {
     const parsed = parseTravelGuideFormFromShareQuery({
       activityLegacyId: '5',

@@ -18,6 +18,23 @@ describe('eventDetailRoute.util', () => {
       openBuddyPostOnMount: true,
       openCommentsOnMount: false,
       openGuideOnMount: false,
+      artifactId: '',
+    });
+  });
+
+  it('parses openBuddySheet and artifactId from query', () => {
+    expect(
+      parseEventDetailRouteFlags({
+        openBuddySheet: '1',
+        artifactId: ' art-1 ',
+      }),
+    ).toEqual({
+      highlightPostId: '',
+      focusPostsOnMount: false,
+      openBuddyPostOnMount: true,
+      openCommentsOnMount: false,
+      openGuideOnMount: false,
+      artifactId: 'art-1',
     });
   });
 
@@ -33,6 +50,7 @@ describe('eventDetailRoute.util', () => {
       openBuddyPostOnMount: false,
       openCommentsOnMount: true,
       openGuideOnMount: false,
+      artifactId: '',
     });
   });
 
@@ -43,6 +61,7 @@ describe('eventDetailRoute.util', () => {
       openBuddyPostOnMount: false,
       openCommentsOnMount: false,
       openGuideOnMount: false,
+      artifactId: '',
     });
   });
 

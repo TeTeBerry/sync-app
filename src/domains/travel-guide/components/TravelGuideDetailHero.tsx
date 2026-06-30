@@ -1,5 +1,5 @@
 import type { ActivityMapRegion } from '@/constants/activityMapRegion';
-import { shouldShowTravelGuideSelfDriveOption } from '@/constants/activityMapRegion';
+import { shouldShowTravelGuideDomesticOptions } from '@/constants/activityMapRegion';
 import type { TravelGuidePlan } from '@/types/travelGuide';
 import {
   findTravelGuideTotalBudgetItem,
@@ -7,6 +7,7 @@ import {
   travelGuideBudgetBannerTitle,
   travelGuideBudgetPerPersonRange,
 } from '@/domains/travel-guide/utils/travelGuideBudgetDisplay.util';
+import { formatTravelGuideDepartureLabel } from '@/utils/travelGuideDepartureSuggestions';
 import { getTravelGuideTitle } from '@/constants/aiCtaLabels';
 import { Map } from '@/components/icons';
 import { Text, View } from '@tarojs/components';
@@ -27,11 +28,13 @@ export function TravelGuideDetailHero({
     ? travelGuideBudgetPerPersonRange(totalBudget.range, plan.headcount)
     : null;
 
-  const showSelfDriveChip = shouldShowTravelGuideSelfDriveOption(activityRegion);
+  const showSelfDriveChip = shouldShowTravelGuideDomesticOptions(activityRegion);
 
   const chips = [
     plan.departure
-      ? t('travelGuide.departureChip', { departure: plan.departure })
+      ? t('travelGuide.departureChip', {
+          departure: formatTravelGuideDepartureLabel(plan.departure),
+        })
       : null,
     plan.headcount > 0
       ? t('travelGuide.headcountChip', { count: plan.headcount })

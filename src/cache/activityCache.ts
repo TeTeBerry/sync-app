@@ -9,7 +9,12 @@ import {
   afterHomeSummaryCommitted,
   persistProfileSummary,
 } from '../utils/homeCacheStorage';
-import type { BackendActivity, HomeSummary, ProfileSummary } from '../types/backend';
+import type {
+  BackendActivity,
+  HomeSummary,
+  ProfileActivityItem,
+  ProfileSummary,
+} from '../types/backend';
 
 export type ActivitySelectionPatch = {
   legacyId: number;
@@ -115,6 +120,7 @@ export function patchProfileSummaryOnSelection(options: {
       stats: {
         ...prev.stats,
         events: (prev.stats.events ?? 0) + 1,
+        ongoingEvents: (prev.stats.ongoingEvents ?? 0) + 1,
       },
     };
   });
@@ -141,6 +147,7 @@ export function patchProfileSummaryOnUnregister(): boolean {
       stats: {
         ...prev.stats,
         events: Math.max(0, (prev.stats.events ?? 0) - 1),
+        ongoingEvents: Math.max(0, (prev.stats.ongoingEvents ?? 0) - 1),
       },
     };
   });
@@ -151,6 +158,64 @@ export function patchProfileSummaryOnUnregister(): boolean {
     if (summary) {
       persistProfileSummary(summary);
     }
+  }
+
+  return patched;
+}
+
+/** Optimistically remove an activity from the profile activities list after unfollow. */
+export function patchProfileActivitiesOnUnregister(activityLegacyId: number): boolean {
+  const id = String(activityLegacyId);
+  let patched = false;
+  setCacheData<ProfileActivityItem[]>(['profile', 'activities'], (prev) => {
+    if (!prev?.length) return prev;
+    const next = prev.filter((item) => item.activityLegacyId !== id && item.id !== id);
+    if (next.length === prev.length) return prev;
+    patched = true;
+    return next;
+  });
+
+  if (patched) {
+    broadcastCacheData(['profile', 'activities']);
+  }
+
+  return patched;
+}
+
+/** Optimistically append an activity to profile list after subscribe/register. */
+export function patchProfileActivitiesOnSubscribe(activityLegacyId: number): boolean {
+  const id = String(activityLegacyId);
+  let patched = false;
+  const catalog = getCacheData<BackendActivity[]>(['activities']);
+  const activity = catalog?.find((item) => item.legacyId === activityLegacyId);
+  const home = getCacheData<HomeSummary>(['home', 'summary']);
+  const homeEvent = home?.signupEvents.find(
+    (event) => Number(event.id) === activityLegacyId,
+  );
+
+  setCacheData<ProfileActivityItem[]>(['profile', 'activities'], (prev) => {
+    const list = prev ?? [];
+    if (list.some((item) => item.activityLegacyId === id || item.id === id)) {
+      return prev;
+    }
+
+    patched = true;
+    return [
+      ...list,
+      {
+        id,
+        activityLegacyId: id,
+        title: activity?.name ?? homeEvent?.title ?? `活动 ${id}`,
+        date: activity?.date ?? homeEvent?.date ?? '',
+        location: activity?.location ?? homeEvent?.location ?? '',
+        image: activity?.image ?? homeEvent?.image ?? '',
+        status: 'registered',
+      },
+    ];
+  });
+
+  if (patched) {
+    broadcastCacheData(['profile', 'activities']);
   }
 
   return patched;

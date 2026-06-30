@@ -14,6 +14,7 @@ import {
 import { withCatalogActivities, withCatalogHomeSummary } from './activityCatalog';
 import type { BackendActivity, HomeSummary, ProfileSummary } from '../types/backend';
 import { clearBuddyMatchProfileStore } from '../stores/buddyMatchProfileStore';
+import { clearActivitySubscriptionStore } from '../stores/activitySubscriptionStore';
 
 export const HOME_CACHE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 
@@ -169,10 +170,47 @@ export function resetHomeSummaryGoingFlagsInCache(): void {
   broadcastCacheData(['home', 'summary']);
 }
 
+/** Keep offline + in-memory home summary in sync after unfollow. */
+export function patchPersistedHomeSummaryGoingFlag(
+  activityLegacyId: number,
+  going: boolean,
+): boolean {
+  const envelope = readEnvelope<HomeSummary>(SUMMARY_STORAGE_KEY);
+  if (!envelope?.data?.signupEvents?.length) {
+    return false;
+  }
+
+  let matched = false;
+  const signupEvents = envelope.data.signupEvents.map((event) => {
+    if (Number(event.id) !== activityLegacyId) {
+      return event;
+    }
+    if (event.going === going) {
+      return event;
+    }
+    matched = true;
+    return { ...event, going };
+  });
+
+  if (!matched) {
+    return false;
+  }
+
+  const next = withCatalogHomeSummary({
+    ...envelope.data,
+    signupEvents,
+  });
+  writeEnvelope(SUMMARY_STORAGE_KEY, next);
+  setCacheDataByKey(getCacheKey(['home', 'summary']), next, Date.now());
+  broadcastCacheData(['home', 'summary']);
+  return true;
+}
+
 /** Clear in-memory query cache + offline persisted lists on logout / 401. */
 export function clearSessionCaches(): void {
   clearAllApiCache();
   clearBuddyMatchProfileStore();
+  clearActivitySubscriptionStore();
   clearPersistedHomeSummary();
   clearPersistedProfileSummary();
   clearPersistedActivitiesList();

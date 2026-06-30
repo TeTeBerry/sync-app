@@ -7,9 +7,16 @@ import {
 } from '@/hooks/useApiQuery';
 import {
   patchActivitySelectionInCaches,
+  patchProfileActivitiesOnSubscribe,
+  patchProfileActivitiesOnUnregister,
   patchProfileSummaryOnSelection,
 } from '@/cache/activityCache';
-import type { BackendActivity, HomeSummary, ProfileSummary } from '@/types/backend';
+import type {
+  BackendActivity,
+  HomeSummary,
+  ProfileActivityItem,
+  ProfileSummary,
+} from '@/types/backend';
 
 const legacyId = 4;
 
@@ -50,7 +57,7 @@ const profileSummary: ProfileSummary = {
   location: '上海',
   bio: '',
   avatar: '',
-  stats: { events: 2, posts: 1 },
+  stats: { events: 2, ongoingEvents: 1, posts: 1 },
 };
 
 describe('activityCache', () => {
@@ -108,6 +115,7 @@ describe('activityCache', () => {
 
     const summary = getCacheData<ProfileSummary>(['profile', 'summary']);
     expect(summary?.stats.events).toBe(3);
+    expect(summary?.stats.ongoingEvents).toBe(2);
   });
 
   it('patchProfileSummaryOnSelection skips stat bump when already registered', () => {
@@ -116,11 +124,64 @@ describe('activityCache', () => {
 
     const summary = getCacheData<ProfileSummary>(['profile', 'summary']);
     expect(summary?.stats.events).toBe(2);
+    expect(summary?.stats.ongoingEvents).toBe(1);
   });
 
   it('patchProfileSummaryOnSelection returns false without cached summary', () => {
     invalidateCache(['profile', 'summary']);
     const patched = patchProfileSummaryOnSelection({ isNewSelection: true });
     expect(patched).toBe(false);
+  });
+
+  it('patchProfileActivitiesOnUnregister removes matching activity', () => {
+    setCacheDataByKey(getCacheKey(['profile', 'activities']), [
+      {
+        id: '8',
+        activityLegacyId: '8',
+        title: 'EDC',
+        date: '2026-08-01',
+        location: '首尔',
+        image: '',
+        status: 'registered',
+      },
+      {
+        id: '4',
+        activityLegacyId: '4',
+        title: '风暴',
+        date: '2026-07-01',
+        location: '上海',
+        image: '',
+        status: 'registered',
+      },
+    ] satisfies ProfileActivityItem[]);
+
+    const patched = patchProfileActivitiesOnUnregister(8);
+    expect(patched).toBe(true);
+
+    const activities = getCacheData<ProfileActivityItem[]>(['profile', 'activities']);
+    expect(activities).toHaveLength(1);
+    expect(activities?.[0]?.activityLegacyId).toBe('4');
+  });
+
+  it('patchProfileActivitiesOnSubscribe appends activity from catalog', () => {
+    invalidateCache(['profile', 'activities']);
+    setCacheDataByKey(getCacheKey(['activities']), [
+      {
+        _id: '8',
+        legacyId: 8,
+        code: 'edc-korea',
+        name: 'EDC Korea 2026',
+        date: '10/03-04',
+        location: '仁川',
+        image: '',
+      },
+    ] satisfies BackendActivity[]);
+
+    const patched = patchProfileActivitiesOnSubscribe(8);
+    expect(patched).toBe(true);
+
+    const activities = getCacheData<ProfileActivityItem[]>(['profile', 'activities']);
+    expect(activities).toHaveLength(1);
+    expect(activities?.[0]?.title).toBe('EDC Korea 2026');
   });
 });

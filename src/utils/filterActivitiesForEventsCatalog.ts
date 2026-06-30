@@ -43,10 +43,10 @@ export function filterActivitiesByTimeChip(
   }
 
   if (chip === 'upcoming') {
-    return events.filter(
-      (event) =>
-        getActivityStatusFromActivity(event.date, event.title, now) === 'not_started',
-    );
+    return events.filter((event) => {
+      const status = getActivityStatusFromActivity(event.date, event.title, now);
+      return status === 'not_started' || status === 'pre_event';
+    });
   }
 
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);

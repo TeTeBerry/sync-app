@@ -23,6 +23,7 @@ export function useEventDetailRoute() {
     openBuddyPostOnMount,
     openCommentsOnMount,
     openGuideOnMount,
+    artifactId,
   } = parseEventDetailRouteFlags(router.params);
   useEffect(() => {
     if (Number.isFinite(eventId) && eventId > 0) {
@@ -40,6 +41,7 @@ export function useEventDetailRoute() {
     openBuddyPostOnMount,
     openCommentsOnMount,
     openGuideOnMount,
+    artifactId,
     scrollTop,
     setScrollTop,
     secondaryReady,

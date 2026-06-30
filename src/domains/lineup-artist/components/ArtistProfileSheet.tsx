@@ -20,10 +20,13 @@ import { pickNearestUpcomingActivity } from '../utils/pickNearestUpcomingActivit
 import { ArtistActivityRow } from './ArtistActivityRow';
 import { ArtistComboMemberCard, ArtistComboProfileHero } from './ArtistComboProfile';
 
+import { useLineupDjBio } from '../hooks/useLineupDjBio';
+
 export type ArtistProfileSheetProps = {
   open: boolean;
   artistId: string | null;
   onClose: () => void;
+  activityLegacyId?: number;
   /** When true, leave room for the main tab bar (events tab only). */
   reserveTabBarSpace?: boolean;
 };
@@ -32,6 +35,7 @@ function ArtistProfileSheetInner({
   open,
   artistId,
   onClose,
+  activityLegacyId,
   reserveTabBarSpace = false,
 }: ArtistProfileSheetProps) {
   const t = useT();
@@ -93,6 +97,23 @@ function ArtistProfileSheetInner({
     void refetchActivities();
   }, [refetchActivities, refetchArtist]);
 
+  const displayGenreLabel = artist ? getCatalogArtistDisplayGenreLabel(artist) : '';
+  const profileSummary = artist?.profileSummary?.trim();
+  const profileFull = artist?.profileFull?.trim();
+  const catalogBio = profileFull || profileSummary || '';
+  const {
+    displayBio,
+    loading: aiBioLoading,
+    disclaimer: aiDisclaimer,
+    aiGenerated,
+  } = useLineupDjBio({
+    activityLegacyId,
+    artistName: artist?.name,
+    genre: displayGenreLabel,
+    catalogBio,
+    enabled: enabled && Boolean(artist),
+  });
+
   if (!open || !artistId) {
     return null;
   }
@@ -105,16 +126,20 @@ function ArtistProfileSheetInner({
     : undefined;
   const isLoading = artistLoading || activitiesLoading;
   const isError = artistError || activitiesError;
-  const profileSummary = artist?.profileSummary?.trim();
-  const profileFull = artist?.profileFull?.trim();
   const hasExpandableBio = Boolean(
-    profileFull && profileSummary && profileFull.length > profileSummary.length,
+    !aiGenerated &&
+    profileFull &&
+    profileSummary &&
+    profileFull.length > profileSummary.length,
   );
   const bioText = bioExpanded
-    ? profileFull || profileSummary || t('events.artistProfile.bioPlaceholder')
-    : profileSummary || profileFull || t('events.artistProfile.bioPlaceholder');
+    ? aiGenerated
+      ? displayBio
+      : profileFull || profileSummary || t('events.artistProfile.bioPlaceholder')
+    : aiGenerated
+      ? displayBio
+      : profileSummary || profileFull || t('events.artistProfile.bioPlaceholder');
   const representativeTracks = artist?.representativeTracks ?? [];
-  const displayGenreLabel = artist ? getCatalogArtistDisplayGenreLabel(artist) : '';
   const chineseAliases = artist?.chineseAliases ?? [];
   const comboMembers =
     artist?.members && artist.members.length > 1 ? artist.members : null;
@@ -245,8 +270,15 @@ function ArtistProfileSheetInner({
                         .filter(Boolean)
                         .join(' ')}
                     >
-                      {bioText}
+                      {aiBioLoading && !displayBio
+                        ? t('events.artistProfile.loadingDjInfo')
+                        : bioText}
                     </Text>
+                    {aiGenerated && aiDisclaimer ? (
+                      <Text className="s-artist-profile-sheet__bio-ai-note">
+                        {aiDisclaimer}
+                      </Text>
+                    ) : null}
                     {hasExpandableBio ? (
                       <Text
                         className="s-artist-profile-sheet__bio-toggle"

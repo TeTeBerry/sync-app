@@ -1,4 +1,8 @@
-import type { DjSoulProfile } from '../types';
+import type {
+  DjSoulProfile,
+  PersonalityTestResult,
+  RaverPersonalityType,
+} from '../types';
 import {
   getDjSoulProfile,
   getPersonalityMeta,
@@ -8,12 +12,16 @@ import {
   PERSONALITY_POSTER_DESIGN,
   PERSONALITY_POSTER_THEME,
 } from '../constants/posterDesign';
-import type { PersonalityTestResult, RaverPersonalityType } from '../types';
+import {
+  drawCanvasCoverImage,
+  drawPosterReadabilityOverlay,
+} from '@/domains/share/utils/posterAiBackground';
 
 export type PersonalityPosterInput = {
   result: PersonalityTestResult;
   teaser: boolean;
   catalog: PersonalityTestCatalog;
+  backgroundImageUrl?: string | null;
 };
 
 function roundRect(
@@ -147,17 +155,27 @@ function drawSymbol(
   ctx.restore();
 }
 
-export function drawPersonalityPoster(
+export async function drawPersonalityPoster(
   ctx: CanvasRenderingContext2D,
   input: PersonalityPosterInput,
-): void {
+  canvas?: HTMLCanvasElement & { createImage?: () => HTMLImageElement },
+): Promise<void> {
   const { width: w, height: h } = PERSONALITY_POSTER_DESIGN;
-  const { result, teaser, catalog } = input;
+  const { result, teaser, catalog, backgroundImageUrl } = input;
   const meta = getPersonalityMeta(catalog, result.score.primaryType);
   const soul = result.recommendations.soulMatch;
   const profile = getDjSoulProfile(catalog, soul.djId);
 
-  drawBackground(ctx, w, h, meta.primaryColor);
+  if (backgroundImageUrl && canvas) {
+    try {
+      await drawCanvasCoverImage(ctx, canvas, backgroundImageUrl, w, h);
+      drawPosterReadabilityOverlay(ctx, w, h);
+    } catch {
+      drawBackground(ctx, w, h, meta.primaryColor);
+    }
+  } else {
+    drawBackground(ctx, w, h, meta.primaryColor);
+  }
 
   drawSymbol(ctx, w / 2, 420, 280, profile, 0.18);
   drawSymbol(ctx, w / 2, 420, 200, profile, 0.55);
@@ -168,7 +186,7 @@ export function drawPersonalityPoster(
   ctx.fillText(`${meta.emoji} ${meta.label}`, w / 2, 620);
 
   ctx.fillStyle = PERSONALITY_POSTER_THEME.textPrimary;
-  ctx.font = '800 44px sans-serif';
+  ctx.font = '800 52px sans-serif';
   ctx.fillText('我的本命 DJ 是', w / 2, 760);
 
   const maskY = 820;

@@ -5,11 +5,13 @@ import {
   drawPersonalityPoster,
   type PersonalityPosterInput,
 } from './personalityPosterDraw';
+import { fetchPosterAiBackgroundUrl } from '@/domains/share/utils/posterAiBackground';
 
 export const PERSONALITY_POSTER_CANVAS_ID = 'sync-personality-poster-canvas';
 
 type PosterCanvas = HTMLCanvasElement & {
   getContext(contextId: '2d'): CanvasRenderingContext2D | null;
+  createImage?: () => HTMLImageElement;
 };
 
 function exportCanvasToTempFile(
@@ -55,6 +57,11 @@ export async function renderPersonalityPosterToTempFile(
     throw new Error('canvas 2d context unavailable');
   }
 
-  drawPersonalityPoster(ctx, input);
+  const backgroundImageUrl = await fetchPosterAiBackgroundUrl({
+    kind: 'personality_test',
+    personalityType: input.result.score.primaryType,
+  });
+
+  await drawPersonalityPoster(ctx, { ...input, backgroundImageUrl }, canvas);
   return exportCanvasToTempFile(canvas, width, height);
 }

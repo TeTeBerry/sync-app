@@ -14,6 +14,7 @@ export const zhCN: MessageTree = {
     notSet: '未设置',
     updatedAt: '更新于 {{date}}',
     openDetail: '进入详情',
+    addToCalendar: '添加到日历',
     opening: '打开中…',
     viewAll: '查看全部',
     viewAllEvents: '查看全部活动',
@@ -62,7 +63,7 @@ export const zhCN: MessageTree = {
     disclaimerAria: '平台声明',
   },
   home: {
-    brandSubtitle: '电音节资讯与公开组队招募；招募支持 AI 筛选',
+    brandSubtitle: 'Peace · Love · Unity · Respect',
     heatActive: '近 {{count}} 人已选择近期活动',
     heatIdle: '近期活动持续更新中',
     featuredTitle: '热门亚洲电音节',
@@ -108,6 +109,7 @@ export const zhCN: MessageTree = {
     viewEvent: '查看活动',
     newReplies: '你的招募帖有 {{count}} 条新公开回复',
     newRepliesMax: '你的招募帖有 99+ 条新公开回复',
+    watchLineupSubscribed: '已订阅阵容提醒',
   },
   countdown: {
     days: '天',
@@ -231,6 +233,7 @@ export const zhCN: MessageTree = {
     postsTitle: '我的帖子',
     ongoingActivities: '{{count}} 个进行中的活动',
     noActivitiesYet: '还没有加入的活动',
+    noOngoingActivities: '暂无进行中的活动',
     postCount: '{{count}} 条帖子',
     noPostsYet: '还没有招募帖',
     personalityNudge: {
@@ -271,6 +274,8 @@ export const zhCN: MessageTree = {
       emptyTitle: '还没有加入的活动',
       emptyHint: '在活动页加入活动后，会显示在这里',
       updateAlertsOn: '更新提醒已开启',
+      updateAlertsOffHint: '阵容或时间表更新时，可开启消息提醒',
+      resubscribeAction: '开启提醒',
       status: {
         upcoming: '即将参加',
         registered: '已加入',
@@ -486,10 +491,9 @@ export const zhCN: MessageTree = {
     unfollowFailed: '取消订阅失败，请稍后重试',
     unfollowConfirmTitle: '取消订阅',
     unfollowConfirmTitleNamed: '取消订阅{{title}}',
-    unfollowConfirmMessage:
-      '取消后将不再收到该活动的阵容或时间表更新，也不会出现在「我的活动」中。',
+    unfollowConfirmMessage: '取消后将不再收到该活动的阵容或时间表更新提醒。',
     unfollowConfirmMessageNamed:
-      '取消订阅「{{title}}」？将不再收到更新提醒，也不会出现在「我的活动」中。',
+      '取消订阅「{{title}}」？将不再收到阵容或时间表更新提醒。',
     unfollowConfirmAction: '确认取消',
     lineupPublished: '已官宣阵容',
     lineupPending: '待官宣阵容',
@@ -544,6 +548,7 @@ export const zhCN: MessageTree = {
   activityInfo: {
     status: {
       upcoming: '即将开始',
+      preEvent: '预热中',
       inProgress: '进行中',
       ended: '已结束',
     },
@@ -558,6 +563,12 @@ export const zhCN: MessageTree = {
     unpublishedBadge: '待官宣',
     unpublishedFeatureLineup: '阵容更新',
     unpublishedFeatureSchedule: '时间表发布',
+    festivalStory: {
+      title: '关于{{name}}',
+      loading: '正在生成摘要…',
+      error: '暂时无法生成，请稍后再试',
+      regenerate: '重新生成',
+    },
   },
   performanceBundle: {
     staleBanner: '本场观演资料 · 更新于 {{time}} · 以现场公告为准',
@@ -615,6 +626,10 @@ export const zhCN: MessageTree = {
   },
   eventDetail: {
     invalidActivity: '活动信息无效',
+    addToCalendar: '添加到日历',
+    addToCalendarSuccess: '已添加到系统日历',
+    addToCalendarFailed: '添加日历失败，请稍后重试',
+    calendarLinkCopied: '日历链接已复制',
     travelGuideSubtitleGenerated: '查看上次生成的交通/住宿/散场方案',
     travelGuideSubtitleNew: '交通 · 住宿 · 散场建议',
     postsShowMore: '还有 {{count}} 条帖子，点击加载',
@@ -656,6 +671,7 @@ export const zhCN: MessageTree = {
     festivalPrepHintGuideGenerated: '已生成出行攻略 · 点此查看',
     festivalPrepHintGuidePreparing: '该场出行攻略筹备中 · 敬请期待',
     recruitSectionTitle: '公开招募',
+    wechatAgentRecruit: '用微信 AI 筛选公开招募',
     recruitRequiresNetwork: '公开招募需联网查看',
     loadFailed: '活动信息加载失败',
     retry: '重试',
@@ -729,6 +745,9 @@ export const zhCN: MessageTree = {
     reportAria: '举报评论',
     deleteSuccess: '评论已删除',
     deleteFailed: '删除失败',
+    deleteConfirmTitle: '删除评论',
+    deleteConfirmMessage: '删除后无法恢复，确定要删除这条评论吗？',
+    deleteConfirmText: '删除',
   },
   report: {
     title: '选择举报原因',
@@ -819,6 +838,7 @@ export const zhCN: MessageTree = {
     driveYes: '自驾',
     driveNo: '公交',
     accommodationTitle: '是否住宿',
+    accommodationHint: '关闭后不生成酒店与住宿预算',
     nightsLabel: '住宿天数',
     pleaseWait: '请等待当前操作完成',
     pleaseEnterActivity: '请先进入活动后再生成攻略',
@@ -1148,7 +1168,8 @@ export const zhCN: MessageTree = {
     savingPoster: '保存海报中…',
     posterSaved: '已保存到相册',
     albumPermissionDenied: '未获得相册权限',
-    shareTitle: '我是「{{label}}」型 Raver — We Are One',
+    shareTitle: '测测你的本命 DJ · {{label}}',
+    savePosterHint: '保存 AI 海报，发小红书/朋友圈',
     shareFallbackSuffix: '测测你的电音人格 — We Are One',
     pendingDraft: '待发布 · 草稿',
     switchToLocal: '已改为本地检索，找到 {{count}} 条公开招募',
@@ -1228,6 +1249,25 @@ export const zhCN: MessageTree = {
     posterMyPicks: '我的心愿',
     posterTop3: '全场 TOP3',
     posterDisclaimer: '公开招募与资讯平台，不撮合、不售票',
+  },
+  recruitPoster: {
+    badge: '公开招募',
+    sectionPublicRecruit: '招募信息',
+    disclaimer: '公开招募 · 非配对 · 不保证组满',
+    save: '保存招募海报',
+    share: '分享到群',
+    generating: '生成海报中…',
+    saved: '已保存到相册',
+    albumPermissionDenied: '未获得相册权限',
+  },
+  countdownPoster: {
+    badge: '倒计时',
+    disclaimer: '公开招募与资讯平台，不撮合、不售票',
+    save: '保存倒计时海报',
+    generating: '生成海报中…',
+    saved: '已保存到相册',
+    saveFailed: '保存失败，请稍后重试',
+    albumPermissionDenied: '未获得相册权限',
   },
   plur: {
     entry: {

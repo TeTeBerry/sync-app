@@ -12,6 +12,7 @@ import { renderSetVotePosterToTempFile } from './setVotePosterCanvas';
 import { showAppToast } from '@/utils/appToast';
 
 export async function shareSetVotePoster(input: {
+  activityLegacyId?: number;
   activityName: string;
   picks: SetVotePick[];
   topEntries: SetVoteLeaderboardEntry[];
@@ -26,6 +27,7 @@ export async function shareSetVotePoster(input: {
 }
 
 export async function saveSetVotePoster(input: {
+  activityLegacyId?: number;
   activityName: string;
   picks: SetVotePick[];
   topEntries: SetVoteLeaderboardEntry[];

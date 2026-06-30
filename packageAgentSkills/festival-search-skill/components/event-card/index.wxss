@@ -1,0 +1,36 @@
+@import '../../../shared/cardTokens.wxss';
+
+.event-card {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.event-card-main {
+  flex: 1;
+  min-height: 0;
+}
+
+.event-card-cover {
+  margin-right: 20rpx;
+}
+
+.event-card-body {
+  justify-content: center;
+}
+
+.event-card-title {
+  margin-top: 6rpx;
+}
+
+.event-card-meta {
+  margin-top: 8rpx;
+}
+
+.event-card-tags {
+  margin-top: 10rpx;
+}
+
+.event-card-more {
+  margin-top: 8rpx;
+}

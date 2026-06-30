@@ -87,6 +87,15 @@ export function useEventDetailPostSearch({
     setTravelGuidePrefillHint(true);
   }, []);
 
+  const applySearchPrefill = useCallback((nextQuery: string) => {
+    const trimmed = nextQuery.trim();
+    if (!trimmed) return;
+    travelGuidePrefillGuideIdRef.current = null;
+    setTravelGuidePrefillHint(false);
+    setQueryState(trimmed);
+    setDebouncedQuery(trimmed);
+  }, []);
+
   const useRemoteSearch =
     isLiveApi() &&
     activityLegacyId != null &&
@@ -231,6 +240,7 @@ export function useEventDetailPostSearch({
     query,
     setQuery,
     applyTravelGuidePrefill,
+    applySearchPrefill,
     clearSearch,
     isActive,
     isSearching: useRemoteSearch && isSearching,

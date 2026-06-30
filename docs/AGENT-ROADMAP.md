@@ -210,14 +210,14 @@ onLineupChanged(activityLegacyId, diff):
 
 ### 3.6 P0 验收标准
 
-- [ ] 用户绑 Tomorrowland → 勾选订阅 + 草稿 → 创建 `user_goals` 记录
-- [ ] Hermes/清库触发 lineup 变更 → 已订阅用户收到站内通知 + 微信订阅消息（已 opt-in）
-- [ ] `lineupPublished: false → true` → changeSummary 含「阵容已官宣」
-- [ ] 勾选草稿的用户 → 收到第二条通知 → 点进 Sheet 见 3 条 AI 候选 → **用户手动选/改/发**
-- [ ] `AgentCapabilitiesService` 单测覆盖 4 个读能力 + `draftRecruitPost` + `subscribeLineupUpdates`
-- [ ] 文档：`docs/wechat-ai/AGENTS.md` 模板 + `page-meta.json` 草案就绪（见 §七）
-- [ ] **无** `publishRecruitPost` 暴露于任何 Agent 路径
-- [ ] grep 合规：`联系队友|配对成功|智能匹配|buddy-matching` 在 agent 相关新增代码中为 0
+- [x] 用户绑 Tomorrowland → 勾选订阅 + 草稿 → 创建 `user_goals` 记录
+- [x] Hermes/清库触发 lineup 变更 → 已订阅用户收到站内通知 + 微信订阅消息（已 opt-in）
+- [x] `lineupPublished: false → true` → changeSummary 含「阵容已官宣」
+- [x] 勾选草稿的用户 → 收到第二条通知 → 点进 Sheet 见 3 条 AI 候选 → **用户手动选/改/发**
+- [x] `AgentCapabilitiesService` 单测覆盖 4 个读能力 + `draftRecruitPost` + `subscribeLineupUpdates`
+- [x] 文档：`docs/wechat-ai/AGENTS.md` 模板 + `page-meta.json` 草案就绪（见 §七）
+- [x] **无** `publishRecruitPost` 暴露于任何 Agent 路径
+- [x] grep 合规：`联系队友|配对成功|智能匹配|buddy-matching` 在 agent 相关新增代码中为 0
 
 ---
 
@@ -225,15 +225,23 @@ onLineupChanged(activityLegacyId, diff):
 
 ### 4.1 Story 清单
 
-| ID | Story |
-|----|-------|
-| US-AG-11 | `UserContextService` 聚合（register · festivalPlan · favorGenres · lineup 状态） |
-| US-AG-12 | `ProactiveNudgeService` cron（L0 规则，不调 LLM） |
-| US-AG-13 | nudge 规则：未发帖 · 攻略未完成 · 阵容刚官宣未看 lineup |
-| US-AG-14 | `GET /api/public/events` JSON-LD + rate limit |
-| US-AG-15 | `GET /api/public/events/:legacyId.ics` 日历导出 |
-| US-AG-16 | 活动详情 / 分享 ·「添加到日历」 |
-| US-AG-17 | 首页「我的下一场」展示 Goal 进度摘要 |
+| ID | Story | 状态 |
+|----|-------|------|
+| US-AG-11 | `UserContextService` 聚合（register · festivalPlan · favorGenres · lineup 状态） | ✅ |
+| US-AG-12 | `ProactiveNudgeService` cron（L0 规则，不调 LLM） | ✅ |
+| US-AG-13 | nudge 规则：未发帖 · 攻略未完成 · 阵容刚官宣未看 lineup | ✅ |
+| US-AG-14 | `GET /api/public/events` JSON-LD + rate limit | ✅ |
+| US-AG-15 | `GET /api/public/events/:legacyId.ics` 日历导出 | ✅ |
+| US-AG-16 | 活动详情 / 分享 ·「添加到日历」 | ✅ |
+| US-AG-17 | 首页「我的下一场」展示 Goal 进度摘要 | ✅ |
+
+#### Scene 补齐（P1 优先 · ✅ 已完成）
+
+| scene | Story | 状态 |
+|-------|-------|------|
+| `recruit_apply_compose` | Q2-44 招募评论区「申请加入」AI 草稿 | ✅ |
+| `lineup_dj` | Q2-33/40 点 DJ 出简介 | ✅ |
+| `festival_story` | Q2-41 活动详情「关于这场节」摘要 | ✅ |
 
 ### 4.2 ProactiveNudge 规则（L0 · 首批）
 

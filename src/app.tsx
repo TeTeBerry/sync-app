@@ -7,8 +7,9 @@ hydrateActivityPerformanceBundlesFromStorage();
 
 import './app.scss';
 import { useLaunch } from '@tarojs/taro';
+import Taro from '@tarojs/taro';
+import { API_BASE_URL, isLiveApi } from './constants/api';
 import { ensureAuth } from './utils/auth';
-import { isLiveApi } from './constants/api';
 import { View } from '@tarojs/components';
 import { LucideTaroProvider } from './components/icons';
 import type { PropsWithChildren } from 'react';
@@ -25,6 +26,12 @@ import { t } from './i18n';
 
 export default function App({ children }: PropsWithChildren) {
   useLaunch(() => {
+    const app = Taro.getApp<{ globalData?: { apiBase?: string } }>();
+    if (app) {
+      app.globalData = app.globalData ?? {};
+      app.globalData.apiBase = API_BASE_URL;
+    }
+    Taro.setStorageSync('sync_api_base', API_BASE_URL);
     useLocaleStore.getState().hydrate();
     initCloudBase();
     if (isLiveApi()) {

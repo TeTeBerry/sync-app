@@ -23,6 +23,9 @@ const sceneContractsPath = path.resolve(
 );
 const srcPath = path.resolve(__dirname, '../src');
 const staticPath = path.join(srcPath, 'static');
+const wechatAiSkills = process.env.WECHAT_AI_SKILLS === '1';
+const packageAgentSkillsPath = path.resolve(__dirname, '../packageAgentSkills');
+const wechatAiDocsPath = path.resolve(__dirname, '../docs/wechat-ai');
 /** Workspace @sync/*-contracts packages; must be babel-included for weapp/h5. */
 const contractPackagesPath = path.resolve(__dirname, '../node_modules/@sync');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
@@ -112,6 +115,27 @@ export default defineConfig({
               globOptions: { ignore: ['**/*.md', '**/.DS_Store'] },
               noErrorOnMissing: true,
             },
+            ...(wechatAiSkills
+              ? [
+                  {
+                    from: packageAgentSkillsPath,
+                    to: 'packageAgentSkills',
+                    globOptions: {
+                      ignore: ['**/.DS_Store', 'pages/**'],
+                    },
+                    noErrorOnMissing: true,
+                  },
+                  {
+                    from: wechatAiDocsPath,
+                    to: 'docs/wechat-ai',
+                    globOptions: {
+                      ignore: ['**/.DS_Store'],
+                      dot: false,
+                    },
+                    noErrorOnMissing: true,
+                  },
+                ]
+              : []),
           ],
         },
       ]);

@@ -8,7 +8,6 @@ import {
   updateCurrentUserAndInvalidate,
   useCurrentUserQuery,
 } from '../../../hooks/useSyncApi';
-import { saveEncryptedProfileSnapshot } from '../../../utils/profileSnapshotStorage';
 import {
   readProfileNotificationsEnabled,
   readProfilePrivacyLevel,
@@ -139,21 +138,9 @@ const SettingsPage: React.FC = () => {
         notificationsEnabled: next,
       }).catch(() => undefined);
 
-      void saveEncryptedProfileSnapshot({
-        notificationsEnabled: next,
-        city: currentUser?.city,
-        favorGenres: currentUser?.favorGenres,
-        budgetLevel: currentUser?.budgetLevel,
-      });
-
       return next;
     });
-  }, [
-    currentUser?.budgetLevel,
-    currentUser?.city,
-    currentUser?.favorGenres,
-    setStoreNotificationsEnabled,
-  ]);
+  }, [setStoreNotificationsEnabled]);
 
   const selectPrivacy = useCallback(
     (level: PrivacyLevel) => {

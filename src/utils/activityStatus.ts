@@ -1,4 +1,4 @@
-export type ActivityStatus = 'not_started' | 'in_progress' | 'ended';
+export type ActivityStatus = 'not_started' | 'pre_event' | 'in_progress' | 'ended';
 
 type ParsedActivityDates = {
   start: Date;
@@ -75,7 +75,7 @@ export function parseActivityDateRange(
   return null;
 }
 
-/** 开场前 1.5 个月（45 天）起视为进行中，便于组队/预热 */
+/** 开场前 45 天起进入预热期（组队/关注），但 UI 仅在 festival 日历日内显示「进行中」。 */
 const PRE_EVENT_WINDOW_MS = 45 * 24 * 60 * 60 * 1000;
 
 export function getActivityStatus(
@@ -89,11 +89,12 @@ export function getActivityStatus(
 
   const now = options?.now ?? new Date();
   if (now > parsed.end) return 'ended';
+  if (now >= parsed.start && now <= parsed.end) return 'in_progress';
 
   const preStart = new Date(parsed.start.getTime() - PRE_EVENT_WINDOW_MS);
-  if (now < preStart) return 'not_started';
+  if (now >= preStart) return 'pre_event';
 
-  return 'in_progress';
+  return 'not_started';
 }
 
 export function getActivityStatusFromActivity(
@@ -152,6 +153,19 @@ export function isActivityOnSite(
 
 export function activityStatusCardClass(status: ActivityStatus): string {
   return status === 'ended' ? 's-activity-card--ended' : '';
+}
+
+export function activityStatusI18nKey(status: ActivityStatus): string {
+  if (status === 'in_progress') {
+    return 'activityInfo.status.inProgress';
+  }
+  if (status === 'pre_event') {
+    return 'activityInfo.status.preEvent';
+  }
+  if (status === 'ended') {
+    return 'activityInfo.status.ended';
+  }
+  return 'activityInfo.status.upcoming';
 }
 
 export function getActivitySortTimestamp(date?: string, title?: string): number {
@@ -270,6 +284,19 @@ export function findNearestUpcomingActivity<T extends ActivityDateFields>(
   }
 
   return nearest ? { ...nearest.item, startAt: nearest.startAt } : null;
+}
+
+/** Whole days until activity show start; null if started or unparseable. */
+export function daysUntilActivityStart(
+  date?: string,
+  title?: string,
+  now = new Date(),
+): number | null {
+  const startAt = resolveActivityCountdownStartAt(date, title);
+  if (!startAt) return null;
+  const diffMs = startAt.getTime() - now.getTime();
+  if (diffMs <= 0) return null;
+  return Math.ceil(diffMs / (24 * 60 * 60 * 1000));
 }
 
 /** Countdown target for a single featured/home activity card. */

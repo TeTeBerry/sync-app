@@ -1,0 +1,34 @@
+<view class="draft-candidates-card card-surface-list card-aspect-16-9" hover-class="card-hover" bindtap="onTap">
+  <view class="card-accent-bar" />
+  <block wx:if="{{isError}}">
+    <view class="draft-candidates-card-inner card-pad">
+      <text class="card-status-chip card-status-chip--error">生成失败</text>
+      <text class="card-error-title draft-candidates-card-title">招募帖草稿未能生成</text>
+      <view class="card-inset-panel draft-candidates-card-preview-wrap">
+        <text class="card-body">{{errorMessage}}</text>
+      </view>
+    </view>
+    <view class="card-foot-bar-col">
+      <text class="card-disclaimer">请进入小程序完成登录后重试</text>
+    </view>
+  </block>
+  <block wx:else>
+    <view class="draft-candidates-card-inner card-pad">
+      <view class="card-header-row">
+        <text class="card-kicker">AI 草稿</text>
+        <text class="card-count-badge">{{candidateCount}} 条候选</text>
+      </view>
+      <text class="card-title draft-candidates-card-title">招募帖预览</text>
+      <view wx:if="{{formSummary}}" class="card-meta draft-candidates-card-meta">{{formSummary}}</view>
+      <view class="card-quote-panel">
+        <text class="card-body draft-candidates-card-preview">{{previewText}}</text>
+      </view>
+    </view>
+    <view class="card-foot-bar">
+      <text class="card-disclaimer">须进入小程序确认后发布</text>
+      <view class="card-cta-pill">
+        <text class="card-cta-pill-text">去确认发布</text>
+      </view>
+    </view>
+  </block>
+</view>

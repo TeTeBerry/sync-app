@@ -1,7 +1,10 @@
 import React, { useMemo } from 'react';
 import { Button } from '@/components/ui';
 import { useT } from '@/hooks/useI18n';
-import { resolveAboutPageVersionLabel } from '@/utils/aboutPageVersion.util';
+import {
+  resolveAboutPageSyncMetaLabel,
+  resolveAboutPageVersionLabel,
+} from '@/utils/aboutPageVersion.util';
 import {
   goPlurCulture,
   goPlurFilmFromEntry,
@@ -13,6 +16,7 @@ export function AboutSettings() {
   const t = useT();
   const showWatchFilm = isPlurFilmH5Available();
   const versionLabel = useMemo(() => resolveAboutPageVersionLabel(t), [t]);
+  const syncMetaLabel = useMemo(() => resolveAboutPageSyncMetaLabel(t), [t]);
 
   return (
     <View className="s-settings__about" data-cmp="AboutSettings">
@@ -46,7 +50,10 @@ export function AboutSettings() {
           </Button>
         </View>
       </View>
-      <Text className="s-settings__about-version">{versionLabel}</Text>
+      <View className="s-settings__about-version-block">
+        <Text className="s-settings__about-version">{versionLabel}</Text>
+        <Text className="s-settings__about-sync-meta">{syncMetaLabel}</Text>
+      </View>
     </View>
   );
 }

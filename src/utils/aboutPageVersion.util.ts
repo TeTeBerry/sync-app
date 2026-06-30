@@ -1,5 +1,6 @@
 import Taro from '@tarojs/taro';
 import type { TranslateParams } from '@/i18n';
+import { APP_DISPLAY_NAME, LEGAL_CONSENT_VERSION } from '@/legal/constants';
 
 type TranslateFn = (key: string, params?: TranslateParams) => string;
 
@@ -18,4 +19,13 @@ export function resolveAboutPageVersionLabel(t: TranslateFn): string {
   } catch {
     return t('plur.about.versionDevelop');
   }
+}
+
+/** App content sync stamp shown under the mini-program build label on About. */
+export function resolveAboutPageSyncMetaLabel(t: TranslateFn): string {
+  return t('legal.meta', {
+    app: APP_DISPLAY_NAME,
+    date: t('legal.updatedLabel'),
+    version: LEGAL_CONSENT_VERSION,
+  });
 }

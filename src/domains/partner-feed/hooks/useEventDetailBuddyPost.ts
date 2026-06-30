@@ -18,6 +18,7 @@ import { getClientUserId } from '../../../utils/session';
 import { BUDDY_POST_PUBLISH_SUCCESS_MESSAGE } from '../../../constants/ugcPublishCompliance';
 import { useOverlayLockStore } from '../../../stores/overlayLockStore';
 import { requireAuth } from '@/utils/authGate';
+import { promptRecruitPostPosterAfterPublish } from '@/domains/share';
 
 export type EventDetailBuddyPostPrefillOptions = {
   initialValues: AiBuddyPostFormValues;
@@ -221,6 +222,14 @@ export function useEventDetailBuddyPost(
           options.replacePost?.(pendingId, post);
         }
         void requestPostEngagementSubscribe();
+
+        if (listedInFeed) {
+          void promptRecruitPostPosterAfterPublish({
+            activityLegacyId: eventId,
+            activityName: title,
+            form,
+          });
+        }
       } catch (error) {
         if (!submitOptions?.skipListRefresh && listedInFeed) {
           options.removePost?.(pendingId);

@@ -1,4 +1,5 @@
 import type { CurrentUser } from '../types/backend';
+import { normalizeUserCity } from '../utils/normalizeUserProfileText';
 
 /** Common departure cities for chip picker. */
 export const BUDDY_DEPARTURE_CITIES = [
@@ -66,7 +67,8 @@ export function formatBuddyPreferencesSummary(
 ): string {
   if (!user) return '未设置';
   const parts: string[] = [];
-  if (user.city?.trim()) parts.push(user.city.trim());
+  const city = normalizeUserCity(user.city);
+  if (city) parts.push(city);
   if (user.favorGenres?.length) {
     const genres = user.favorGenres.slice(0, 2).join('、');
     const more = user.favorGenres.length > 2 ? `等${user.favorGenres.length}种` : '';
@@ -81,6 +83,8 @@ export function hasBuddyPreferenceSignal(
   user?: Pick<CurrentUser, 'city' | 'favorGenres' | 'budgetLevel'> | null,
 ): boolean {
   return Boolean(
-    user?.city?.trim() || user?.favorGenres?.length || user?.budgetLevel?.trim(),
+    normalizeUserCity(user?.city) ||
+    user?.favorGenres?.length ||
+    user?.budgetLevel?.trim(),
   );
 }

@@ -99,6 +99,8 @@ export function seedActivityDetailFromHomeSignupEvent(
       image: event.image,
       hot: event.hot,
       attendees: event.attendees,
+      region: event.region,
+      area: event.area,
     }),
   );
 }

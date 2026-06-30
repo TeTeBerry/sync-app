@@ -1,0 +1,436 @@
+/**
+ * SYNC 微信 AI 原子卡 · 设计 Token
+ * 对齐主包 EventCard 列表卡：层次表面、霓虹描边、底部行动条
+ */
+
+/* ── 表面层级 ── */
+.card-surface {
+  position: relative;
+  background: rgba(28, 28, 30, 0.96);
+  border: 2rpx solid rgba(255, 255, 255, 0.06);
+  border-radius: 32rpx;
+  box-sizing: border-box;
+  box-shadow:
+    inset 0 0 0 1rpx rgba(255, 255, 255, 0.04),
+    0 16rpx 48rpx rgba(0, 0, 0, 0.32);
+  overflow: hidden;
+}
+
+.card-surface-list {
+  position: relative;
+  background: rgba(22, 22, 24, 0.98);
+  border: 2rpx solid rgba(255, 255, 255, 0.07);
+  border-radius: 32rpx;
+  box-sizing: border-box;
+  box-shadow:
+    inset 0 0 0 1rpx rgba(255, 255, 255, 0.04),
+    0 20rpx 56rpx rgba(0, 0, 0, 0.36);
+  overflow: hidden;
+}
+
+.card-accent-bar {
+  height: 4rpx;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 0, 102, 0) 0%,
+    rgba(255, 0, 102, 0.85) 35%,
+    rgba(76, 201, 240, 0.75) 65%,
+    rgba(76, 201, 240, 0) 100%
+  );
+  flex-shrink: 0;
+}
+
+.card-inner-tile {
+  background: rgba(255, 255, 255, 0.05);
+  border: 2rpx solid rgba(255, 255, 255, 0.08);
+  border-radius: 24rpx;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.card-inset-panel {
+  background: rgba(0, 0, 0, 0.28);
+  border: 2rpx solid rgba(255, 255, 255, 0.06);
+  border-radius: 20rpx;
+  box-sizing: border-box;
+}
+
+.card-aspect-16-9 {
+  aspect-ratio: 16/9;
+}
+
+.card-hover {
+  opacity: 0.9;
+}
+
+/* ── 字阶 ── */
+.card-kicker {
+  font-size: 20rpx;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #4cc9f0;
+  line-height: 1.2;
+}
+
+.card-title {
+  font-size: 34rpx;
+  font-weight: 600;
+  line-height: 1.25;
+  color: #ffffff;
+}
+
+.card-subtitle {
+  font-size: 30rpx;
+  font-weight: 600;
+  line-height: 1.3;
+  color: #ffffff;
+}
+
+.card-body {
+  font-size: 28rpx;
+  font-weight: 400;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.card-meta {
+  font-size: 26rpx;
+  font-weight: 400;
+  line-height: 1.35;
+  color: #8e8e93;
+}
+
+.card-small {
+  font-size: 24rpx;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.card-caption {
+  font-size: 22rpx;
+  line-height: 1.35;
+  color: #b0b0b0;
+}
+
+.card-more {
+  font-size: 22rpx;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.card-action {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #ff0066;
+}
+
+.card-text-secondary {
+  font-size: 24rpx;
+  font-weight: 500;
+  line-height: 1.4;
+  color: #4cc9f0;
+}
+
+.card-text-success {
+  font-size: 24rpx;
+  font-weight: 600;
+  color: #30d158;
+}
+
+.card-text-warning {
+  font-size: 24rpx;
+  font-weight: 600;
+  color: #ffd60a;
+}
+
+.card-disclaimer {
+  font-size: 20rpx;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.32);
+}
+
+.card-error-title {
+  font-size: 34rpx;
+  font-weight: 600;
+  color: #ff6467;
+}
+
+/* ── 徽章 / 标签 ── */
+.card-count-badge {
+  padding: 6rpx 14rpx;
+  border-radius: 999rpx;
+  font-size: 20rpx;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.88);
+  background: rgba(255, 255, 255, 0.1);
+  border: 2rpx solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+}
+
+.card-chip {
+  display: inline-block;
+  padding: 8rpx 16rpx;
+  margin-right: 12rpx;
+  border-radius: 999rpx;
+  font-size: 22rpx;
+  font-weight: 600;
+  line-height: 1.2;
+  color: rgba(255, 255, 255, 0.88);
+  background: rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+}
+
+.card-chip--ai {
+  color: #64d2ff;
+  background: rgba(100, 210, 255, 0.14);
+  border: 2rpx solid rgba(100, 210, 255, 0.2);
+}
+
+.card-chip--success {
+  color: #30d158;
+  background: rgba(48, 209, 88, 0.14);
+  border: 2rpx solid rgba(48, 209, 88, 0.22);
+}
+
+.card-chip--warning {
+  color: #ffd60a;
+  background: rgba(255, 214, 10, 0.14);
+  border: 2rpx solid rgba(255, 214, 10, 0.22);
+}
+
+.card-chip--error {
+  color: #ff6467;
+  background: rgba(255, 100, 103, 0.14);
+  border: 2rpx solid rgba(255, 100, 103, 0.22);
+}
+
+.card-status-chip {
+  display: inline-block;
+  padding: 8rpx 18rpx;
+  border-radius: 999rpx;
+  font-size: 24rpx;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+}
+
+.card-status-chip--success {
+  color: #30d158;
+  background: rgba(48, 209, 88, 0.16);
+  border: 2rpx solid rgba(48, 209, 88, 0.28);
+}
+
+.card-status-chip--pending {
+  color: #ffd60a;
+  background: rgba(255, 214, 10, 0.14);
+  border: 2rpx solid rgba(255, 214, 10, 0.28);
+}
+
+.card-status-chip--error {
+  color: #ff6467;
+  background: rgba(255, 100, 103, 0.14);
+  border: 2rpx solid rgba(255, 100, 103, 0.28);
+}
+
+/* ── CTA 药丸（view+text，非 button）── */
+.card-cta-pill {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding: 14rpx 28rpx;
+  border-radius: 999rpx;
+  background: #ff0066;
+  box-shadow: 0 12rpx 32rpx rgba(255, 0, 102, 0.34);
+  flex-shrink: 0;
+}
+
+.card-cta-pill-text {
+  font-size: 26rpx;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.2;
+}
+
+.card-cta-ghost {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding: 10rpx 20rpx;
+  margin-right: 12rpx;
+  border-radius: 999rpx;
+  background: rgba(255, 255, 255, 0.06);
+  border: 2rpx solid rgba(255, 255, 255, 0.12);
+  flex-shrink: 0;
+}
+
+.card-cta-ghost-text {
+  font-size: 24rpx;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.92);
+  line-height: 1.2;
+}
+
+.card-cta-link {
+  font-size: 26rpx;
+  font-weight: 700;
+  color: #ff0066;
+}
+
+/* ── 封面 / 头像 ── */
+.card-cover {
+  width: 168rpx;
+  height: 168rpx;
+  border-radius: 28rpx;
+  flex-shrink: 0;
+  border: 2rpx solid rgba(255, 255, 255, 0.1);
+}
+
+.card-cover-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(
+    145deg,
+    rgba(255, 0, 102, 0.22) 0%,
+    rgba(76, 201, 240, 0.12) 100%
+  );
+}
+
+.card-cover-letter {
+  font-size: 48rpx;
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1;
+}
+
+.card-avatar {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 2rpx solid rgba(255, 255, 255, 0.12);
+}
+
+.card-avatar-lg {
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 3rpx solid rgba(255, 0, 102, 0.35);
+  box-shadow: 0 0 20rpx rgba(255, 0, 102, 0.2);
+}
+
+.card-avatar-initial {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+/* ── 布局 ── */
+.card-row {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+}
+
+.card-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.card-body-grow {
+  flex: 1;
+  min-width: 0;
+}
+
+.card-header-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12rpx;
+}
+
+.card-foot-bar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  padding: 16rpx 24rpx;
+  border-top: 2rpx solid rgba(255, 255, 255, 0.06);
+  background: rgba(0, 0, 0, 0.28);
+  box-sizing: border-box;
+}
+
+.card-foot-bar-col {
+  display: flex;
+  flex-direction: column;
+  margin-top: auto;
+  padding: 16rpx 24rpx;
+  border-top: 2rpx solid rgba(255, 255, 255, 0.06);
+  background: rgba(0, 0, 0, 0.28);
+  box-sizing: border-box;
+}
+
+.card-pad {
+  padding: 24rpx;
+  box-sizing: border-box;
+}
+
+.card-pad-sm {
+  padding: 16rpx;
+  box-sizing: border-box;
+}
+
+.card-actions-row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.card-clamp-2 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.card-ellipsis-1 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card-empty-center {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24rpx;
+}
+
+.card-info-callout {
+  margin-top: 12rpx;
+  padding: 16rpx 18rpx;
+  border-radius: 16rpx;
+  background: rgba(76, 201, 240, 0.08);
+  border-left: 6rpx solid #4cc9f0;
+  box-sizing: border-box;
+}
+
+.card-quote-panel {
+  margin-top: 12rpx;
+  padding: 20rpx;
+  border-radius: 20rpx;
+  background: rgba(255, 255, 255, 0.04);
+  border: 2rpx solid rgba(255, 255, 255, 0.06);
+  box-sizing: border-box;
+}

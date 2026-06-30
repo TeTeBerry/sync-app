@@ -3,6 +3,7 @@ import { fetchSavedTravelPlan, saveTravelPlan } from '@/api/syncApi';
 import { isLiveApi } from '@/constants/api';
 import type { SaveTravelPlanPayload } from '@/types/travelPlan';
 import { invalidateCache, useApiQuery } from '@/hooks/useApiQuery';
+import { refreshMyActivitiesAfterEngagement } from '@/stores/activitySubscriptionActions';
 
 export function useSavedTravelPlanQuery(activityLegacyId: number | null | undefined) {
   const enabled =
@@ -23,6 +24,7 @@ export function useTravelPlanMutations(activityLegacyId: number) {
     async (payload: SaveTravelPlanPayload) => {
       const result = await saveTravelPlan(activityLegacyId, payload);
       invalidateCache(['travel-plan', 'saved', activityLegacyId]);
+      void refreshMyActivitiesAfterEngagement();
       return result;
     },
     [activityLegacyId],

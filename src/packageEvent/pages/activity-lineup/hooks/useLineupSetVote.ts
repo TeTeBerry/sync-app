@@ -10,6 +10,7 @@ import { ApiError } from '@/utils/apiClient';
 import { requireAuth } from '@/utils/authGate';
 import { isLoggedIn } from '@/utils/authStorage';
 import { goEventDetail, goEventDetailWithBuddyPostPrefill } from '@/utils/route';
+import { refreshMyActivitiesAfterEngagement } from '@/stores/activitySubscriptionActions';
 import type { SetVoteLeaderboardEntry, SetVotePick } from '@/types/activity';
 import {
   buildSetVoteBuddyPostPrefill,
@@ -287,6 +288,7 @@ export function useLineupSetVote(options: {
       setTotalVoters(result.totalVoters);
       setRevoteAllowedToday(result.revoteAllowedToday !== false);
       await loadLeaderboard();
+      void refreshMyActivitiesAfterEngagement();
       setShowShareTeaser(false);
       showAppToast('setVote.submitSuccess', { icon: 'success' });
       logSetVoteEvent('set_vote_submit', {
@@ -349,6 +351,7 @@ export function useLineupSetVote(options: {
         channel: 'poster',
       });
       await shareSetVotePoster({
+        activityLegacyId: activityLegacyId ?? undefined,
         activityName,
         picks,
         topEntries: entries,
@@ -362,6 +365,7 @@ export function useLineupSetVote(options: {
     if (!activityName) return;
     try {
       await saveSetVotePoster({
+        activityLegacyId: activityLegacyId ?? undefined,
         activityName,
         picks,
         topEntries: entries,

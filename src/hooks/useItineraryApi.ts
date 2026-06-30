@@ -7,6 +7,7 @@ import {
   saveItinerary,
 } from '../api/syncApi';
 import { isLiveApi } from '../constants/api';
+import { refreshMyActivitiesAfterEngagement } from '../stores/activitySubscriptionActions';
 import type { GenerateItineraryPayload, SaveItineraryPayload } from '../types/backend';
 
 export function useItineraryScheduleQuery(
@@ -59,7 +60,11 @@ export function useItineraryMutations(activityLegacyId: number) {
   );
 
   const save = useCallback(
-    (payload: SaveItineraryPayload) => saveItinerary(activityLegacyId, payload),
+    async (payload: SaveItineraryPayload) => {
+      const result = await saveItinerary(activityLegacyId, payload);
+      void refreshMyActivitiesAfterEngagement();
+      return result;
+    },
     [activityLegacyId],
   );
 

@@ -17,8 +17,7 @@ import {
   loadPersonalityTestCatalog,
 } from '@/domains/personality-test/personalityTestCatalog';
 import {
-  loadPersonalityTestResult,
-  restorePersonalityTestResultFromServer,
+  resolvePersonalityTestResult,
   savePersonalityTestResult,
 } from '@/domains/personality-test/utils/personalityTestStorage';
 import { ensurePersonalityResultIdentity } from '../utils/personalityResultIdentity.util';
@@ -138,10 +137,7 @@ export function usePersonalityTestPage() {
     let cancelled = false;
 
     const init = async () => {
-      let cached = loadPersonalityTestResult();
-      if (!cached && isLoggedIn()) {
-        cached = await restorePersonalityTestResultFromServer();
-      }
+      const cached = await resolvePersonalityTestResult();
 
       if (cancelled) {
         return;

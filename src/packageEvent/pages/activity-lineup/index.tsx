@@ -1,6 +1,7 @@
 import './activity-lineup.scss';
 import { Canvas, ScrollView, Text, View } from '@tarojs/components';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useRouter } from '@tarojs/taro';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import { useT } from '@/hooks/useI18n';
 import PageNavigation from '../../../components/navigation/PageNavigation';
@@ -35,6 +36,14 @@ const ActivityLineupPage = () => {
   const t = useT();
   const { isConnected } = useNetworkStatus();
   const [selectedArtistId, setSelectedArtistId] = useState<string | null>(null);
+
+  const router = useRouter();
+  useEffect(() => {
+    const openArtistId = router.params?.openArtistId;
+    if (openArtistId && typeof openArtistId === 'string' && openArtistId.trim()) {
+      setSelectedArtistId(decodeURIComponent(openArtistId.trim()));
+    }
+  }, []);
 
   const {
     activityLegacyId,
@@ -288,6 +297,7 @@ const ActivityLineupPage = () => {
       <LazyArtistProfileSheet
         open={Boolean(selectedArtistId) && !setVote.voteModeEnabled}
         artistId={selectedArtistId}
+        activityLegacyId={activityLegacyId}
         onClose={() => setSelectedArtistId(null)}
       />
 

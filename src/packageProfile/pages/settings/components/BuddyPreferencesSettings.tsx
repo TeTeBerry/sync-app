@@ -6,7 +6,6 @@ import {
   updateCurrentUserAndInvalidate,
   useCurrentUserQuery,
 } from '../../../../hooks/useSyncApi';
-import { saveEncryptedProfileSnapshot } from '../../../../utils/profileSnapshotStorage';
 import {
   readProfilePreferenceSortEnabled,
   writeProfilePreferenceSortEnabled,
@@ -16,6 +15,7 @@ import {
   BUDDY_DEPARTURE_CITIES,
   BUDDY_GENRE_OPTIONS,
   formatBuddyPreferencesSummary,
+  hasBuddyPreferenceSignal,
   normalizeBuddyBudgetLevel,
   type BuddyBudgetLevel,
 } from '../../../../constants/buddyPreferences';
@@ -92,12 +92,6 @@ export function BuddyPreferencesSettings() {
         budgetLevel: budgetLevel || undefined,
       };
       await updateCurrentUserAndInvalidate(payload);
-      await saveEncryptedProfileSnapshot({
-        city: payload.city,
-        favorGenres: payload.favorGenres,
-        budgetLevel: payload.budgetLevel,
-        notificationsEnabled: currentUser?.notificationsEnabled,
-      });
       setDirty(false);
       showAppToast('common.save', { icon: 'success' });
     } catch {
@@ -105,9 +99,14 @@ export function BuddyPreferencesSettings() {
     } finally {
       setSaving(false);
     }
-  }, [budgetLevel, currentUser?.notificationsEnabled, genres, resolvedCity, saving]);
+  }, [budgetLevel, genres, resolvedCity, saving]);
 
   const preview = formatBuddyPreferencesSummary({
+    city: resolvedCity || undefined,
+    favorGenres: genres,
+    budgetLevel: budgetLevel || undefined,
+  });
+  const hasPreview = hasBuddyPreferenceSignal({
     city: resolvedCity || undefined,
     favorGenres: genres,
     budgetLevel: budgetLevel || undefined,
@@ -122,7 +121,9 @@ export function BuddyPreferencesSettings() {
         <Text className="s-match-prefs__banner-desc">
           {t('settings.buddyPrefsBannerDesc')}
         </Text>
-        <Text className="s-match-prefs__banner-preview">当前：{preview}</Text>
+        {hasPreview ? (
+          <Text className="s-match-prefs__banner-preview">当前：{preview}</Text>
+        ) : null}
       </View>
 
       <View className="s-settings__card s-match-prefs__section">

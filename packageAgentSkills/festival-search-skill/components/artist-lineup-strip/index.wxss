@@ -1,0 +1,60 @@
+@import '../../../shared/cardTokens.wxss';
+
+.lineup-strip {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.lineup-strip-header {
+  padding-bottom: 8rpx;
+}
+
+.lineup-strip-scroll {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  white-space: nowrap;
+  padding: 0 24rpx;
+  box-sizing: border-box;
+}
+
+.lineup-strip-row {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  padding: 8rpx 0 12rpx;
+}
+
+.lineup-strip-artist {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 128rpx;
+  margin-right: 20rpx;
+  flex-shrink: 0;
+}
+
+.lineup-strip-initial {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(
+    145deg,
+    rgba(255, 0, 102, 0.25) 0%,
+    rgba(76, 201, 240, 0.12) 100%
+  );
+}
+
+.lineup-strip-name {
+  margin-top: 10rpx;
+  width: 128rpx;
+  font-size: 22rpx;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.82);
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

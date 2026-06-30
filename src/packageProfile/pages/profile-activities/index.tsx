@@ -1,6 +1,6 @@
 import '../../../components/profile/profile.scss';
 import { useDidShow } from '@tarojs/taro';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import PageNavigation from '../../../components/navigation/PageNavigation';
 import ThemedPageLoader from '../../../components/ThemedPageLoader';
 import { ProfileActivitiesSection } from '../../../components/profile';
@@ -10,8 +10,7 @@ import { invalidateProfileActivities } from '../../../utils/queryInvalidation';
 import { useStackPageMainHeight } from '../../../hooks/useTabPageMainHeight';
 import { goEventDetail, ROUTES } from '../../../utils/route';
 import { useEndRouteTransitionOnShow } from '../../../hooks/useEndRouteTransitionOnShow';
-import { parseActivityLegacyId } from '../../../utils/activityLegacyId';
-import { unsubscribeFromActivityUpdates } from '../../../utils/subscribeToActivityUpdates';
+import { hydrateActivitySubscriptionStore } from '@/stores/activitySubscriptionActions';
 import { useConfirmDialog } from '../../../hooks/useConfirmDialog';
 import { requestUnfollowActivityConfirm } from '../../../utils/unfollowActivityConfirm';
 import { useT } from '@/hooks/useI18n';
@@ -26,7 +25,6 @@ const ProfileActivitiesPage: React.FC = () => {
   const activitiesQuery = useProfileActivitiesQuery();
   const activities = activitiesQuery.data ?? [];
   const loading = activitiesQuery.isLoading && !activitiesQuery.data;
-  const [unfollowingId, setUnfollowingId] = useState<string | null>(null);
   const { confirm, confirmDialog } = useConfirmDialog({
     cancelText: t('common.cancel'),
   });
@@ -34,33 +32,13 @@ const ProfileActivitiesPage: React.FC = () => {
   useDidShow(() => {
     if (apiEnabled) {
       invalidateProfileActivities();
+      void hydrateActivitySubscriptionStore();
     }
   });
 
-  const handleUnfollow = useCallback(
-    async (activityLegacyId: string, eventTitle: string) => {
-      const legacyId = parseActivityLegacyId(activityLegacyId);
-      if (legacyId == null || unfollowingId != null) {
-        return;
-      }
-
-      const confirmed = await requestUnfollowActivityConfirm(confirm, eventTitle);
-      if (!confirmed) {
-        return;
-      }
-
-      setUnfollowingId(activityLegacyId);
-      try {
-        const result = await unsubscribeFromActivityUpdates(legacyId);
-        if (result === 'success') {
-          invalidateProfileActivities();
-          void activitiesQuery.refetch();
-        }
-      } finally {
-        setUnfollowingId(null);
-      }
-    },
-    [activitiesQuery, confirm, unfollowingId],
+  const handleConfirmUnfollow = useCallback(
+    (eventTitle: string) => requestUnfollowActivityConfirm(confirm, eventTitle),
+    [confirm],
   );
 
   return (
@@ -84,8 +62,7 @@ const ProfileActivitiesPage: React.FC = () => {
               items={activities}
               mode="list"
               onClick={(activityLegacyId) => goEventDetail(activityLegacyId)}
-              onUnfollow={handleUnfollow}
-              unfollowingId={unfollowingId}
+              onConfirmUnfollow={handleConfirmUnfollow}
             />
           )}
         </View>

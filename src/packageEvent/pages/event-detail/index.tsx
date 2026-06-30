@@ -5,7 +5,10 @@ import ThemedPageLoader from '../../../components/ThemedPageLoader';
 import { useConfirmDialog } from '../../../hooks/useConfirmDialog';
 import { LoginInterceptHost } from '../../../components/auth/LoginInterceptHost';
 import EventDetailFallback from './components/EventDetailFallback';
-import { EventDetailInfoSection } from '@/domains/activity-info';
+import {
+  EventDetailInfoSection,
+  resolveLineupPublished,
+} from '@/domains/activity-info';
 import {
   EventDetailComposerSection,
   EventDetailPostSearchBar,
@@ -17,15 +20,13 @@ import {
   resolveUnityRecruitCount,
 } from '@/domains/partner-feed';
 import { useEventDetailPage } from './useEventDetailPage';
+import { useEventDetailAddToCalendar } from './useEventDetailAddToCalendar';
 import { LazyAiBuddyPostSheet } from '../../../components/ai-chat/LazyAiBuddyPostSheet';
 import { LazyAiGuidePlanSheet } from '../../../components/ai-chat/LazyAiGuidePlanSheet';
-import {
-  isDomesticActivityRegion,
-  shouldShowTravelGuideSelfDriveOption,
-} from '../../../constants/activityMapRegion';
+import { shouldShowTravelGuideDomesticOptions } from '../../../constants/activityMapRegion';
 import PageNavigation from '../../../components/navigation/PageNavigation';
 import { Button } from '../../../components/ui';
-import { Share2 } from '../../../components/icons';
+import { Share2, Calendar } from '../../../components/icons';
 import { OverlayAwareScrollView } from '../../../components/layout/OverlayAwareScrollView';
 import { PlatformDisclaimer } from '../../../components/legal/PlatformDisclaimer';
 import { ROUTES } from '../../../utils/route';
@@ -35,6 +36,7 @@ import { useT } from '@/hooks/useI18n';
 import { formatBuddyPostSearchParsedSummary } from '../../../utils/formatBuddyPostSearchParsedSummary';
 import { useAuthSession } from '../../../hooks/useAuthSession';
 import { useBuddyMatchProfile } from '../../../hooks/useBuddyMatchProfile';
+import { useWechatAgentEntry } from '../../../hooks/useWechatAgentEntry';
 
 const EventDetailPage = () => {
   useEndRouteTransitionOnShow();
@@ -43,7 +45,14 @@ const EventDetailPage = () => {
     cancelText: t('common.cancel'),
   });
   const page = useEventDetailPage({ confirm });
+  const { handleAddToCalendar } = useEventDetailAddToCalendar({
+    eventId: page.eventId,
+    title: page.activity?.name,
+    date: page.activity?.date,
+    location: page.activity?.location,
+  });
   const { loggedIn } = useAuthSession();
+  const { wechatAgentSupported, openRecruitDiscovery } = useWechatAgentEntry();
   const { preferencesSummary, hasPreferenceSignal } = useBuddyMatchProfile();
   const searchParsedSummary = useMemo(() => {
     if (page.posts.searchSceneParsedInsight) {
@@ -70,6 +79,11 @@ const EventDetailPage = () => {
       page.postsQuery.hasMore,
     );
   }, [page.activity, page.postsLoading, page.postsQuery.items.length]);
+
+  const lineupPublished = useMemo(
+    () => resolveLineupPublished(page.activity, page.eventId),
+    [page.activity, page.eventId],
+  );
 
   if (page.invalidEventId) {
     return <EventDetailFallback variant="invalidId" />;
@@ -152,13 +166,22 @@ const EventDetailPage = () => {
           fallback={ROUTES.EVENTS}
           trailing={
             !showHeaderSkeleton && isWeapp ? (
-              <Button
-                className="s-page-nav__icon-action"
-                aria-label={t('common.openDetail')}
-                openType="share"
-              >
-                <Share2 size={18} color="#fff" />
-              </Button>
+              <>
+                <Button
+                  className="s-page-nav__icon-action"
+                  aria-label={t('eventDetail.addToCalendar')}
+                  onClick={() => void handleAddToCalendar()}
+                >
+                  <Calendar size={18} color="#fff" />
+                </Button>
+                <Button
+                  className="s-page-nav__icon-action"
+                  aria-label={t('common.openDetail')}
+                  openType="share"
+                >
+                  <Share2 size={18} color="#fff" />
+                </Button>
+              </>
             ) : undefined
           }
         />
@@ -197,7 +220,7 @@ const EventDetailPage = () => {
                   onFestivalPlanTaskPress={onFestivalPlanTaskPress}
                   travelGuideGenerated={travelGuideGenerated}
                   travelGuideSupported={activity?.travelGuideSupported}
-                  lineupPublished={activity?.lineupPublished}
+                  lineupPublished={lineupPublished}
                   unreadReplyCount={prepNudgeUnreadReplyCount}
                   onPrepNudgeAction={onPrepNudgeAction}
                   activityLegacyId={page.eventId}
@@ -258,6 +281,17 @@ const EventDetailPage = () => {
                         hasPreferenceRanking={showPreferenceInsight}
                         travelGuidePrefillHint={posts.travelGuideSearchPrefillHint}
                       />
+                      {wechatAgentSupported ? (
+                        <Text
+                          className="s-event-detail__wechat-agent-entry"
+                          onClick={() =>
+                            openRecruitDiscovery(activity?.name ?? title ?? '')
+                          }
+                          role="button"
+                        >
+                          {t('eventDetail.wechatAgentRecruit')}
+                        </Text>
+                      ) : null}
                     </View>
                   )}
                 </View>
@@ -301,10 +335,16 @@ const EventDetailPage = () => {
                   highlightPostId={highlightPostId}
                   expandedCommentPostIds={posts.expandedCommentPostIds}
                   getCommentDraft={posts.getCommentDraft}
+                  getShowApplyJoinHint={posts.getShowApplyJoinHint}
+                  getApplyComposeLoading={posts.getApplyComposeLoading}
+                  getApplyComposeCandidates={posts.getApplyComposeCandidates}
+                  getApplyComposeDisclaimer={posts.getApplyComposeDisclaimer}
+                  onSelectApplyCandidate={posts.selectApplyCandidate}
                   currentUserAvatar={currentUserAvatar}
                   onOpenComments={posts.openPostComments}
                   onApplyJoin={posts.openApplyJoinComments}
                   onCloseComments={posts.closePostComments}
+                  onComposerFocus={posts.ensureComposerVisible}
                   onCommentSubmitted={posts.handleCommentSubmitted}
                   onDelete={posts.handleDeletePost}
                   onEdit={handleEditPost}
@@ -354,8 +394,7 @@ const EventDetailPage = () => {
           open
           defaultNights={guideDefaultNights}
           eventCity={guideEventCity}
-          showSelfDriveOption={shouldShowTravelGuideSelfDriveOption(activity?.region)}
-          showAccommodationOption={isDomesticActivityRegion(activity?.region)}
+          showDomesticGuideOptions={shouldShowTravelGuideDomesticOptions(activity)}
           initialValues={guideSheetInitialValues}
           forceRegenerate={guideSheetForceRegenerate}
           onClose={closeGuideSheet}

@@ -1,0 +1,39 @@
+<view class="recruit-list-card card-surface-list card-aspect-16-9" hover-class="card-hover" bindtap="onTap">
+  <view class="card-accent-bar" />
+  <scroll-view
+    scroll-x="true"
+    wx:if="{{filterLabels.length > 0}}"
+    class="recruit-list-card-chips-scroll"
+    enable-flex
+  >
+    <view class="recruit-list-card-chips-row card-pad">
+      <text wx:for="{{filterLabels}}" wx:key="*this" class="card-chip card-chip--ai">{{item}}</text>
+    </view>
+  </scroll-view>
+  <view wx:if="{{isEmpty}}" class="recruit-list-card-empty card-pad">
+    <text class="card-kicker">公开招募</text>
+    <text class="card-title">{{emptyMessage}}</text>
+    <text class="card-meta recruit-list-card-empty-hint">可稍后再来，或让 AI 帮你写一条招募帖</text>
+    <view class="card-cta-pill recruit-list-card-cta" catchtap="onTapDraft">
+      <text class="card-cta-pill-text">写招募帖草稿</text>
+    </view>
+  </view>
+  <block wx:else>
+    <view class="recruit-list-card-main card-pad">
+      <text class="card-kicker">队友招募</text>
+      <view class="recruit-list-card-header">
+        <image class="card-avatar recruit-list-card-avatar" src="{{post.avatarUrl}}" mode="aspectFill" />
+        <view class="recruit-list-card-meta card-body-grow">
+          <text class="card-subtitle card-ellipsis-1">{{post.nickname}}</text>
+          <view class="card-quote-panel">
+            <text class="card-body recruit-list-card-summary">{{post.summary}}</text>
+          </view>
+        </view>
+      </view>
+      <text wx:if="{{moreCount > 0}}" class="card-more recruit-list-card-more">还有 {{moreCount}} 条招募</text>
+    </view>
+  </block>
+  <view class="card-foot-bar-col">
+    <text class="card-disclaimer">平台不保证组满 · 公开招募</text>
+  </view>
+</view>

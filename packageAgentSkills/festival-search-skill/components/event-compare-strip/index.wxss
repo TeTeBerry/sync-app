@@ -1,0 +1,76 @@
+@import '../../../shared/cardTokens.wxss';
+
+.compare-strip {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.compare-strip-top {
+  padding-bottom: 8rpx;
+}
+
+.compare-strip-scroll {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  white-space: nowrap;
+  padding: 0 24rpx;
+  box-sizing: border-box;
+}
+
+.compare-strip-row {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  padding-bottom: 8rpx;
+}
+
+.compare-strip-item {
+  display: flex;
+  flex-direction: column;
+  width: 280rpx;
+  margin-right: 20rpx;
+  flex-shrink: 0;
+}
+
+.compare-strip-poster {
+  width: 100%;
+  height: 160rpx;
+  flex-shrink: 0;
+}
+
+.compare-strip-poster--placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(
+    160deg,
+    rgba(255, 0, 102, 0.2) 0%,
+    rgba(22, 22, 24, 0.95) 100%
+  );
+}
+
+.compare-strip-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.compare-strip-name {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.compare-strip-meta {
+  margin-top: 6rpx;
+  font-size: 22rpx;
+  color: #8e8e93;
+}
+
+.compare-strip-action {
+  margin-top: 12rpx;
+}

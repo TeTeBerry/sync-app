@@ -1,0 +1,141 @@
+@import '../../../shared/cardTokens.wxss';
+
+.search-results {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.search-results-top {
+  padding-bottom: 8rpx;
+}
+
+.search-results-single {
+  flex: 1;
+  min-height: 0;
+  align-items: center;
+}
+
+.search-results-hero-wrap {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.search-results-hero {
+  width: 100%;
+  height: 100%;
+}
+
+.search-results-hero-scrim {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 70%;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.55) 45%,
+    rgba(0, 0, 0, 0.88) 100%
+  );
+}
+
+.search-results-hero-copy {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.search-results-hero-title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.25;
+}
+
+.search-results-hero-meta {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.search-results-cover {
+  margin-right: 20rpx;
+}
+
+.search-results-body {
+  justify-content: center;
+}
+
+.search-results-hint {
+  margin-top: 10rpx;
+}
+
+.search-results-scroll {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  white-space: nowrap;
+  padding: 0 24rpx;
+  box-sizing: border-box;
+}
+
+.search-results-row {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  padding-bottom: 8rpx;
+}
+
+.search-results-tile {
+  display: flex;
+  flex-direction: column;
+  width: 280rpx;
+  margin-right: 20rpx;
+  flex-shrink: 0;
+}
+
+.search-results-poster {
+  width: 100%;
+  height: 160rpx;
+  flex-shrink: 0;
+}
+
+.search-results-poster--placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(
+    160deg,
+    rgba(255, 0, 102, 0.2) 0%,
+    rgba(22, 22, 24, 0.95) 100%
+  );
+}
+
+.search-results-tile-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.search-results-tile-name {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.search-results-tile-meta {
+  margin-top: 6rpx;
+  font-size: 22rpx;
+  color: #8e8e93;
+}
+
+.search-results-tile-action {
+  margin-top: 12rpx;
+}

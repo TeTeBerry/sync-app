@@ -10,7 +10,7 @@ import {
   fetchProfileSummary,
 } from '../../api/sync/profile';
 import { persistProfileSummary } from '../../utils/homeCacheStorage';
-import { useApiQuery } from '../useApiQuery';
+import { broadcastCacheData, setCacheData, useApiQuery } from '../useApiQuery';
 import type { QueryEnableOptions } from './types';
 
 function profileApiEnabled(): boolean {
@@ -80,4 +80,20 @@ export function useProfilePostsQuery() {
     enabled,
     staleTime: 30_000,
   });
+}
+
+/** Replace profile activities cache from server (e.g. after subscribe). */
+export async function refreshProfileActivitiesFromServer() {
+  if (!profileApiEnabled()) {
+    return undefined;
+  }
+
+  try {
+    const items = await fetchProfileActivities();
+    setCacheData(['profile', 'activities'], () => items);
+    broadcastCacheData(['profile', 'activities']);
+    return items;
+  } catch {
+    return undefined;
+  }
 }

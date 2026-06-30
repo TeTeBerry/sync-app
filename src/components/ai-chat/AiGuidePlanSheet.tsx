@@ -28,10 +28,8 @@ export type AiGuidePlanSheetProps = {
   defaultNights: number;
   /** Activity host city, used for POI area constraints when departure city is not specified */
   eventCity?: string;
-  /** 海外活动不展示自驾选项 */
-  showSelfDriveOption?: boolean;
-  /** 国内活动展示「是否住宿」开关，关闭时不生成住宿方案 */
-  showAccommodationOption?: boolean;
+  /** 国内活动展示自驾 / 住宿开关 */
+  showDomesticGuideOptions?: boolean;
   initialValues?: AiGuidePlanFormValues | null;
   /** 重新生成时跳过服务端缓存 */
   forceRegenerate?: boolean;
@@ -109,8 +107,7 @@ function AiGuidePlanSheetInner({
   open,
   defaultNights,
   eventCity,
-  showSelfDriveOption = true,
-  showAccommodationOption = false,
+  showDomesticGuideOptions = false,
   initialValues,
   forceRegenerate = false,
   onClose,
@@ -124,8 +121,7 @@ function AiGuidePlanSheetInner({
     defaultNights,
     initialValues,
     forceRegenerate,
-    showSelfDriveOption,
-    showAccommodationOption,
+    showDomesticGuideOptions,
     onSubmit,
   });
   const {
@@ -245,13 +241,13 @@ function AiGuidePlanSheetInner({
               </View>
             </View>
 
-            {!showAccommodationOption || form.needsAccommodation ? (
+            {!showDomesticGuideOptions || form.needsAccommodation ? (
               <Text className="s-ai-guide-plan-sheet__budget-hint-note">
                 {t('travelPlan.budgetOptionalHint')}
               </Text>
             ) : null}
 
-            {showSelfDriveOption ? (
+            {showDomesticGuideOptions ? (
               <View className="s-ai-guide-plan-sheet__card s-ai-guide-plan-sheet__card--drive">
                 <View className="s-ai-guide-plan-sheet__card-row">
                   <View className="s-ai-guide-plan-sheet__drive-copy">
@@ -280,7 +276,7 @@ function AiGuidePlanSheetInner({
               </View>
             ) : null}
 
-            {showAccommodationOption ? (
+            {showDomesticGuideOptions ? (
               <View className="s-ai-guide-plan-sheet__card s-ai-guide-plan-sheet__card--drive">
                 <View className="s-ai-guide-plan-sheet__card-row">
                   <View className="s-ai-guide-plan-sheet__drive-copy">
@@ -295,6 +291,9 @@ function AiGuidePlanSheetInner({
                       <Text className="s-ai-guide-plan-sheet__drive-title">
                         {t('travelPlan.accommodationTitle')}
                       </Text>
+                      <Text className="s-ai-guide-plan-sheet__drive-hint">
+                        {t('travelPlan.accommodationHint')}
+                      </Text>
                     </View>
                   </View>
                   <ThemeToggle
@@ -306,7 +305,7 @@ function AiGuidePlanSheetInner({
               </View>
             ) : null}
 
-            {!showAccommodationOption || form.needsAccommodation ? (
+            {!showDomesticGuideOptions || form.needsAccommodation ? (
               <View className="s-ai-guide-plan-sheet__field">
                 <Text className="s-ai-guide-plan-sheet__label">
                   {t('travelPlan.nightsLabel')}

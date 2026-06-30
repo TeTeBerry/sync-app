@@ -1,5 +1,30 @@
 /** WeChat-safe query helpers — do not use URLSearchParams (webpack may bind it incorrectly). */
 
+/** Decode percent-encoded query values (WeChat router.params may leave them encoded). */
+export function decodeQueryParamValue(value: string): string {
+  let current = value.trim().replace(/\+/g, ' ');
+  if (!current) {
+    return current;
+  }
+
+  for (let i = 0; i < 3; i += 1) {
+    if (!/%[0-9A-Fa-f]{2}/.test(current)) {
+      break;
+    }
+    try {
+      const next = decodeURIComponent(current);
+      if (next === current) {
+        break;
+      }
+      current = next;
+    } catch {
+      break;
+    }
+  }
+
+  return current;
+}
+
 export function parseQueryString(raw: string): Record<string, string> {
   const result: Record<string, string> = {};
   const query = raw.replace(/^\?/, '').trim();

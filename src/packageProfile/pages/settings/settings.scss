@@ -375,9 +375,25 @@ button[type='default'].s-settings__option {
   line-height: 1.2;
 }
 
+.s-settings__about-version-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
 .s-settings__about-version {
   display: block;
   text-align: center;
   font-size: var(--s-type-meta);
   color: var(--muted-foreground);
+}
+
+.s-settings__about-sync-meta {
+  display: block;
+  text-align: center;
+  font-size: var(--s-type-meta);
+  color: var(--muted-foreground);
+  line-height: 1.35;
+  opacity: 0.85;
 }

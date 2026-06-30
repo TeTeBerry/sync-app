@@ -58,7 +58,8 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
 
   const summaryQuery = useProfileSummaryQuery();
   const currentUserQuery = useCurrentUserQuery();
-  const { preferencesSummary: buddyPreferencesSummary } = useBuddyMatchProfile();
+  const { preferencesSummary: buddyPreferencesSummary, hasPreferenceSignal } =
+    useBuddyMatchProfile();
   const personalityResult = usePersonalityTestResult();
   const authUserId = getResolvedAuthUserId();
   const personalityCompleted = Boolean(personalityResult?.score?.primaryType);
@@ -78,7 +79,8 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
   const profileLoading =
     apiEnabled && loggedIn && summaryQuery.isLoading && !summaryQuery.data;
 
-  const ongoingCount = profileUserData.stats.events;
+  const ongoingCount = Number(summaryQuery.data?.stats.ongoingEvents) || 0;
+  const totalActivityCount = Number(summaryQuery.data?.stats.events) || 0;
   const postsCount = profileUserData.stats.posts;
   const interestTag = deriveInterestTag(profileUserData.bio);
   const showPersonalityNudge =
@@ -86,7 +88,9 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
   const activitiesSubtitle =
     ongoingCount > 0
       ? t('profile.ongoingActivities', { count: ongoingCount })
-      : t('profile.noActivitiesYet');
+      : totalActivityCount > 0
+        ? t('profile.noOngoingActivities')
+        : t('profile.noActivitiesYet');
   const postsSubtitle =
     postsCount > 0
       ? t('profile.postCount', { count: postsCount })
@@ -189,7 +193,7 @@ export function useProfilePage({ confirm }: UseProfilePageOptions) {
 
   const settings: ProfileSettingsSectionProps = {
     notificationsEnabled,
-    buddyPreferencesSummary,
+    buddyPreferencesSummary: hasPreferenceSignal ? buddyPreferencesSummary : undefined,
     showAccountStatusRow: publishRestricted,
     accountStatusSummary: untilLabel
       ? `${accountRiskStatusTitle(accountRisk)} · ${untilLabel}`

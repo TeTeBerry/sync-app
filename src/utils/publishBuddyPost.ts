@@ -10,6 +10,7 @@ import {
 } from './buddyPostForm';
 import { eventDetailPostToCard } from './eventPostCard';
 import { assertPostPublishedVisible } from './postPublishFeedback';
+import { refreshMyActivitiesAfterEngagement } from '../stores/activitySubscriptionActions';
 
 export function buildOptimisticBuddyPost(params: {
   pendingId: string;
@@ -75,6 +76,7 @@ export async function publishBuddyPostFromForm(params: {
       : {}),
   });
   assertPostPublishedVisible(post);
+  void refreshMyActivitiesAfterEngagement();
 
   const card = eventDetailPostToCard(post, {
     activityLegacyId,

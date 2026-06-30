@@ -12,6 +12,7 @@ import {
   type BuddyMatchProfile,
 } from '../../../utils/buddyMatchProfile';
 import { buildEventDetailPostSearchText } from '../../../utils/buddyPostSearch';
+import { normalizePercentEncodedText } from '../../../utils/normalizePercentEncodedText';
 
 const BUDGET_LEVEL_TEXT_MARKERS: ReadonlyArray<{
   level: BuddyBudgetLevel;
@@ -43,7 +44,8 @@ const BUDGET_PRICE_BAND_MARKERS: ReadonlyArray<{
 function normalizeCityName(value?: string): string | undefined {
   const trimmed = value?.trim();
   if (!trimmed) return undefined;
-  const normalized = trimmed.replace(/(市|省)$/, '');
+  const decoded = normalizePercentEncodedText(trimmed);
+  const normalized = decoded.replace(/(市|省)$/, '');
   for (const city of BUDDY_DEPARTURE_CITIES) {
     if (normalized === city || normalized.includes(city)) {
       return city;

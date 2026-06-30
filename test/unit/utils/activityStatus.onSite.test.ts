@@ -21,10 +21,10 @@ describe('isActivityOnSite', () => {
     expect(isActivityOnSite('06/13-14', 'Fest 2026', after)).toBe(false);
   });
 
-  it('is false in the pre-event 45-day window where status is in_progress', () => {
+  it('is false in the pre-event 45-day window where status is pre_event', () => {
     const preWindow = new Date(2026, 4, 1, 12, 0, 0, 0);
     expect(getActivityStatusFromActivity('06/13-14', 'Fest 2026', preWindow)).toBe(
-      'in_progress',
+      'pre_event',
     );
     expect(isActivityOnSite('06/13-14', 'Fest 2026', preWindow)).toBe(false);
   });

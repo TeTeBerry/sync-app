@@ -17,6 +17,7 @@ import {
 import { withCatalogActivities, withCatalogHomeSummary } from './activityCatalog';
 import { apiGet } from './apiClient';
 import { isLoggedIn } from './authStorage';
+import { hydrateActivitySubscriptionStore } from '../stores/activitySubscriptionActions';
 
 const LAUNCH_PREFETCH_ATTEMPTS = 3;
 const LAUNCH_PREFETCH_RETRY_MS = 400;
@@ -108,9 +109,13 @@ export async function prefetchCoreQueriesOnLaunch(): Promise<void> {
   void loadPersonalityTestCatalog().catch(() => undefined);
   prefetchPlurPeaceCoverMedia();
   prefetchProfileSummaryIfMissing();
+  if (isLoggedIn()) {
+    void hydrateActivitySubscriptionStore();
+  }
 }
 
 /** Call after silent login so profile cache warms without waiting for tab open. */
 export function prefetchProfileIfMissing(): void {
   prefetchProfileSummaryIfMissing();
+  void hydrateActivitySubscriptionStore();
 }

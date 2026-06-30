@@ -44,6 +44,7 @@ export {
 export {
   clearPersonalityTestResult,
   loadPersonalityTestResult,
+  resolvePersonalityTestResult,
   restorePersonalityTestResultFromServer,
   savePersonalityTestResult,
   PERSONALITY_TEST_STORAGE_KEY,

@@ -1,5 +1,6 @@
-import Taro, { useRouter } from '@tarojs/taro';
-import { useMemo } from 'react';
+import Taro, { useDidShow, useRouter } from '@tarojs/taro';
+import { useMemo, useRef } from 'react';
+import { recordActivityEngagement } from '@/api/sync/activityEngagement';
 import { useActivityDetailQuery } from '@/hooks/sync/activities';
 import { useActivityPerformanceBundleOffline } from '@/hooks/useActivityPerformanceBundleOffline';
 import { useActivityPerformanceBundleWriter } from '@/hooks/useActivityPerformanceBundleWriter';
@@ -53,6 +54,23 @@ export function useActivityLineupPage() {
   const schedule = scheduleQuery.data ?? offline.bundle?.schedule;
   const schedulePublished = schedule?.schedulePublished === true;
   const lineupPublished = activity?.lineupPublished !== false;
+
+  const lineupEngagementSentRef = useRef(false);
+  useDidShow(() => {
+    if (
+      !apiEnabled ||
+      !lineupPublished ||
+      !Number.isFinite(activityLegacyId) ||
+      activityLegacyId <= 0 ||
+      lineupEngagementSentRef.current
+    ) {
+      return;
+    }
+    lineupEngagementSentRef.current = true;
+    void recordActivityEngagement(activityLegacyId, 'lineup_viewed').catch(() => {
+      lineupEngagementSentRef.current = false;
+    });
+  });
 
   useActivityPerformanceBundleWriter(apiEnabled ? activityLegacyId : undefined, {
     activity: activityQuery.data,

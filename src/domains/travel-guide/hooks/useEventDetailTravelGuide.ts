@@ -3,6 +3,7 @@ import { showAppToast } from '@/utils/appToast';
 import { runTravelGuideGeneration } from '@/domains/travel-guide/runTravelGuideGeneration';
 import { parseActivityDayCount } from '@/utils/parseActivityDayCount';
 import { eventCityFromLocation } from '@/utils/travelGuideDepartureSuggestions';
+import { normalizeAiGuidePlanFormValues } from '@/utils/normalizeUserProfileText';
 import { requireAuth } from '@/utils/authGate';
 import type { AiGuidePlanFormValues } from '@/types/travelGuide';
 
@@ -26,7 +27,9 @@ export function useEventDetailTravelGuide({
 }: UseEventDetailTravelGuideOptions) {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [sheetInitialValues, setSheetInitialValues] =
-    useState<AiGuidePlanFormValues | null>(initialGuideForm);
+    useState<AiGuidePlanFormValues | null>(() =>
+      initialGuideForm ? normalizeAiGuidePlanFormValues(initialGuideForm) : null,
+    );
   const [pendingRegenerateGuideId, setPendingRegenerateGuideId] = useState<
     string | null
   >(regenerateGuideId);
@@ -49,7 +52,7 @@ export function useEventDetailTravelGuide({
           return;
         }
         if (prefill) {
-          setSheetInitialValues(prefill);
+          setSheetInitialValues(normalizeAiGuidePlanFormValues(prefill));
         }
         if (guideId?.trim()) {
           setPendingRegenerateGuideId(guideId.trim());
@@ -70,7 +73,11 @@ export function useEventDetailTravelGuide({
       const guideId = pendingRegenerateGuideId ?? undefined;
       setSheetOpen(false);
       setPendingRegenerateGuideId(null);
-      void runTravelGuideGeneration(eventId, form, guideId);
+      void runTravelGuideGeneration(
+        eventId,
+        normalizeAiGuidePlanFormValues(form),
+        guideId,
+      );
     },
     [eventId, pendingRegenerateGuideId],
   );

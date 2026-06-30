@@ -1,0 +1,79 @@
+{
+  "apis": [
+    {
+      "name": "subscribeLineupUpdates",
+      "description": "订阅活动阵容更新提醒（需用户授权微信订阅消息）",
+      "_meta": {
+        "ui": {
+          "componentPath": "components/prep-status-card/index"
+        }
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "activityLegacyId": {
+            "type": "number",
+            "description": "活动 legacyId"
+          }
+        },
+        "required": ["activityLegacyId"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "activityLegacyId": { "type": "number" },
+          "goalId": { "type": "string" },
+          "subscribedAt": { "type": "string" },
+          "wechatOutcome": { "type": "string" },
+          "notifyWechat": { "type": "boolean" },
+          "needsWechatAuth": { "type": "boolean" }
+        }
+      }
+    },
+    {
+      "name": "generateTravelGuide",
+      "description": "创建出行攻略生成任务（须用户已明确出发地与人数；AI 内容仅供参考，非购票）",
+      "_meta": {
+        "ui": {
+          "componentPath": "components/prep-status-card/index"
+        }
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "activityLegacyId": {
+            "type": "number",
+            "description": "活动 legacyId"
+          },
+          "formData": {
+            "type": "object",
+            "description": "攻略表单",
+            "properties": {
+              "departure": { "type": "string", "description": "出发地（须来自用户原话或确认，不可猜测）" },
+              "headcount": { "type": "number", "description": "出行人数（须来自用户原话或确认）" },
+              "departureCity": { "type": "string", "description": "出发城市（可选）" }
+            },
+            "required": ["departure", "headcount"]
+          }
+        },
+        "required": ["activityLegacyId", "formData"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "activityLegacyId": { "type": "number" },
+          "jobId": { "type": "string" },
+          "status": { "type": "string" },
+          "departure": { "type": "string" },
+          "headcount": { "type": "number" }
+        }
+      }
+    }
+  ],
+  "components": [
+    {
+      "path": "components/prep-status-card/index",
+      "relatedPage": "/packageEvent/pages/event-detail/index"
+    }
+  ]
+}

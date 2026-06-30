@@ -7,7 +7,6 @@ import { useStackPageMainHeight } from '../../../hooks/useTabPageMainHeight';
 import { PlurCultureFooter } from '@/components/plur/PlurCultureFooter';
 import { PlurCultureHero } from '@/components/plur/PlurCultureHero';
 import {
-  APP_DISPLAY_NAME,
   LEGAL_CONTACT_EMAIL,
   LEGAL_OPERATOR_NAME,
   loadLegalDocument,
@@ -84,13 +83,6 @@ const LegalDocumentPage: React.FC = () => {
       >
         <View className="s-legal-doc__main">
           {docId === 'plur-culture' ? <PlurCultureHero /> : null}
-          <Text className="s-legal-doc__meta">
-            {t('legal.meta', {
-              app: APP_DISPLAY_NAME,
-              date: document.updatedAt,
-              version: document.version,
-            })}
-          </Text>
           {document.preamble ? (
             <Text className="s-legal-doc__preamble">{document.preamble}</Text>
           ) : null}

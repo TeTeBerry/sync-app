@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 vi.mock('@/i18n', () => ({
   t: vi.fn((key: string, params?: Record<string, string>) => {
     if (key === 'personality.shareTitle' && params?.label) {
-      return `我是「${params.label}」型 Raver — We Are One`;
+      return `测测你的本命 DJ · ${params.label}`;
     }
     if (key === 'personality.raverPersonality') {
       return '电音人格测试';
@@ -77,7 +77,7 @@ function mockResult(
 describe('personalityWechatShare', () => {
   it('builds share title and path with share params', () => {
     const result = mockResult();
-    expect(buildPersonalityTestShareTitle(result)).toContain('We Are One');
+    expect(buildPersonalityTestShareTitle(result)).toContain('本命 DJ');
     const path = buildPersonalityTestSharePath(result);
     expect(path).toContain('share=1');
     expect(path).toContain('primaryType=vibe_curator');
@@ -87,7 +87,7 @@ describe('personalityWechatShare', () => {
   it('builds share app message with Peace cover', () => {
     const result = mockResult();
     const message = buildPersonalityTestShareAppMessage(result);
-    expect(message.title).toContain('We Are One');
+    expect(message.title).toContain('本命 DJ');
     expect(message.path).toContain('share=1');
     expect(message.imageUrl).toBeTruthy();
   });

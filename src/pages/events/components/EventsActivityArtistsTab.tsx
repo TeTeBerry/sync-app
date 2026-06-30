@@ -41,17 +41,17 @@ export const EventsActivityArtistsTab: FC<EventsActivityArtistsTabProps> = ({
   const preferenceInitializedRef = useRef(false);
   useCurrentUserQuery();
   const { data: artists, isLoading, isError, refetch } = useCatalogLineupArtists();
-  const { favorGenres } = useBuddyMatchProfile();
-  const canSortByGenrePreference = Boolean(favorGenres?.length);
+  const { favorGenres, hasGenrePreferences, hydrated } = useBuddyMatchProfile();
+  const canSortByGenrePreference = hydrated && hasGenrePreferences;
   const useGenrePreferenceSort = canSortByGenrePreference && preferGenreSort;
 
   useEffect(() => {
-    if (preferenceInitializedRef.current || favorGenres === undefined) {
+    if (!hydrated || preferenceInitializedRef.current) {
       return;
     }
-    setPreferGenreSort(Boolean(favorGenres?.length));
+    setPreferGenreSort(hasGenrePreferences);
     preferenceInitializedRef.current = true;
-  }, [favorGenres]);
+  }, [hasGenrePreferences, hydrated]);
 
   const genreChips = useMemo(
     () => buildCatalogArtistGenreChips(artists ?? []),

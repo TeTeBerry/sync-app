@@ -1,0 +1,71 @@
+@import '../../../shared/cardTokens.wxss';
+
+.recruit-list-card {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.recruit-list-card-header {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  margin-top: 12rpx;
+}
+
+.recruit-list-card-avatar {
+  width: 64rpx;
+  height: 64rpx;
+  margin-right: 16rpx;
+  background: rgba(255, 0, 102, 0.12);
+}
+
+.recruit-list-card-meta {
+  min-width: 0;
+}
+
+.recruit-list-card-summary {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recruit-list-card-chips-scroll {
+  width: 100%;
+  white-space: nowrap;
+}
+
+.recruit-list-card-chips-row {
+  display: flex;
+  flex-direction: row;
+  padding-top: 16rpx;
+  padding-bottom: 0;
+}
+
+.recruit-list-card-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.recruit-list-card-empty-hint {
+  display: block;
+  margin-top: 10rpx;
+}
+
+.recruit-list-card-cta {
+  margin-top: 20rpx;
+  align-self: flex-start;
+}
+
+.recruit-list-card-main {
+  flex: 1;
+  min-height: 0;
+}
+
+.recruit-list-card-more {
+  display: block;
+  margin-top: 12rpx;
+}

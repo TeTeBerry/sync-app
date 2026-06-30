@@ -1,0 +1,52 @@
+<view
+  class="event-card card-surface card-aspect-16-9"
+  hover-class="card-hover"
+  bindtap="onTapCard"
+  data-legacy-id="{{event.legacyId}}"
+  data-name="{{event.name}}"
+>
+  <view class="card-accent-bar" />
+  <view class="event-card-main card-pad card-row">
+    <image
+      wx:if="{{event.heroImageUrl}}"
+      class="card-cover event-card-cover"
+      src="{{event.heroImageUrl}}"
+      mode="aspectFill"
+    />
+    <view wx:else class="card-cover event-card-cover card-cover-placeholder">
+      <text class="card-cover-letter">{{eventInitial}}</text>
+    </view>
+    <view class="event-card-body card-col card-body-grow">
+      <text class="card-kicker">电音节</text>
+      <text class="card-title card-clamp-2 event-card-title">{{event.name}}</text>
+      <text wx:if="{{event.date || event.location}}" class="card-meta event-card-meta">
+        {{event.date}}{{event.date && event.location ? ' · ' : ''}}{{event.location}}
+      </text>
+      <view wx:if="{{event.lineupSummary}}" class="event-card-tags">
+        <text class="card-chip card-chip--success">{{event.lineupSummary}}</text>
+      </view>
+      <text wx:if="{{moreCount > 0}}" class="card-more event-card-more">还有 {{moreCount}} 场可对比</text>
+    </view>
+  </view>
+  <view class="card-foot-bar">
+    <view class="card-actions-row">
+      <view
+        wx:if="{{showShareAction}}"
+        class="card-cta-ghost"
+        catchtap="onTapShare"
+      >
+        <text class="card-cta-ghost-text">分享</text>
+      </view>
+      <view
+        wx:if="{{showMapAction}}"
+        class="card-cta-ghost"
+        catchtap="onTapMap"
+      >
+        <text class="card-cta-ghost-text">场地</text>
+      </view>
+    </view>
+    <view class="card-cta-pill">
+      <text class="card-cta-pill-text">{{showLineupAction ? '查看阵容' : '进入详情'}}</text>
+    </view>
+  </view>
+</view>

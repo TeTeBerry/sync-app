@@ -2,6 +2,11 @@ import Taro from '@tarojs/taro';
 import { createOffscreenCanvas } from '@/utils/offscreenCanvas';
 import { t } from '@/i18n';
 import type { SetVoteLeaderboardEntry, SetVotePick } from '@/types/activity';
+import {
+  drawCanvasCoverImage,
+  drawPosterReadabilityOverlay,
+  fetchPosterAiBackgroundUrl,
+} from '@/domains/share/utils/posterAiBackground';
 
 export const SET_VOTE_POSTER_CANVAS_ID = 'sync-set-vote-poster-canvas';
 
@@ -10,6 +15,7 @@ const HEIGHT = 1200;
 
 type PosterCanvas = HTMLCanvasElement & {
   getContext(contextId: '2d'): CanvasRenderingContext2D | null;
+  createImage?: () => HTMLImageElement;
 };
 
 function exportCanvasToTempFile(
@@ -68,6 +74,7 @@ function wrapText(
 }
 
 export async function renderSetVotePosterToTempFile(input: {
+  activityLegacyId?: number;
   activityName: string;
   picks: SetVotePick[];
   topEntries: SetVoteLeaderboardEntry[];
@@ -84,11 +91,25 @@ export async function renderSetVotePosterToTempFile(input: {
     throw new Error('canvas 2d context unavailable');
   }
 
-  const gradient = ctx.createLinearGradient(0, 0, WIDTH, HEIGHT);
-  gradient.addColorStop(0, '#1a1033');
-  gradient.addColorStop(1, '#0b1020');
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, WIDTH, HEIGHT);
+  const aiBackgroundUrl =
+    input.activityLegacyId && input.activityLegacyId > 0
+      ? await fetchPosterAiBackgroundUrl({
+          kind: 'set_vote',
+          activityLegacyId: input.activityLegacyId,
+          activityName: input.activityName,
+        })
+      : null;
+
+  if (aiBackgroundUrl) {
+    try {
+      await drawCanvasCoverImage(ctx, canvas, aiBackgroundUrl, WIDTH, HEIGHT);
+      drawPosterReadabilityOverlay(ctx, WIDTH, HEIGHT);
+    } catch {
+      drawSetVoteFallbackBackground(ctx);
+    }
+  } else {
+    drawSetVoteFallbackBackground(ctx);
+  }
 
   ctx.fillStyle = '#ffffff';
   ctx.font = 'bold 40px sans-serif';
@@ -132,4 +153,12 @@ export async function renderSetVotePosterToTempFile(input: {
   wrapText(ctx, t('setVote.posterDisclaimer'), 48, y, WIDTH - 96, 30);
 
   return exportCanvasToTempFile(canvas, WIDTH, HEIGHT);
+}
+
+function drawSetVoteFallbackBackground(ctx: CanvasRenderingContext2D): void {
+  const gradient = ctx.createLinearGradient(0, 0, WIDTH, HEIGHT);
+  gradient.addColorStop(0, '#1a1033');
+  gradient.addColorStop(1, '#0b1020');
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, WIDTH, HEIGHT);
 }

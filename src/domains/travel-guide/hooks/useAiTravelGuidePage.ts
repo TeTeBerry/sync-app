@@ -22,11 +22,12 @@ import {
   type TravelGuideDetailPayload,
 } from '../utils/travelGuideDetailStorage';
 import { markTravelGuideSearchPrefillPending } from '../utils/travelGuideSearchPrefillStorage';
+import { refreshMyActivitiesAfterEngagement } from '@/stores/activitySubscriptionActions';
 import { hideThemedLoading, showThemedLoading } from '@/utils/themedLoading';
 import { getTravelGuideTitle } from '@/constants/aiCtaLabels';
 import {
-  isDomesticActivityRegion,
-  shouldShowTravelGuideSelfDriveOption,
+  shouldShowTravelGuideDomesticOptions,
+  resolveActivityMapRegion,
 } from '@/constants/activityMapRegion';
 import { parseActivityDayCount } from '@/utils/parseActivityDayCount';
 import { eventCityFromLocation } from '@/utils/travelGuideDepartureSuggestions';
@@ -46,6 +47,7 @@ import { useT } from '@/hooks/useI18n';
 import { showAppToast } from '@/utils/appToast';
 import { shouldShowPeaceBanner } from '../utils/shouldShowPeaceBanner';
 import { resolveTravelGuideBudgetTier } from '../utils/travelGuideBudgetLabels';
+import { normalizeAiGuidePlanFormValues } from '@/utils/normalizeUserProfileText';
 
 const FOOTER_BASE_PX = 72;
 
@@ -172,6 +174,7 @@ export function useAiTravelGuidePage() {
         };
         saveTravelGuideDetail(guideId, next);
         setPayload(next);
+        void refreshMyActivitiesAfterEngagement();
         setShareGenerationDone(true);
         shareGenerationDoneRef.current = true;
       } catch (error) {
@@ -325,11 +328,8 @@ export function useAiTravelGuidePage() {
     () => eventCityFromLocation(activityQuery.data?.location),
     [activityQuery.data?.location],
   );
-  const guideShowSelfDriveOption = shouldShowTravelGuideSelfDriveOption(
-    activityQuery.data?.region,
-  );
-  const guideShowAccommodationOption = isDomesticActivityRegion(
-    activityQuery.data?.region,
+  const guideShowDomesticOptions = shouldShowTravelGuideDomesticOptions(
+    activityQuery.data,
   );
 
   const handleRegenerate = useCallback(() => {
@@ -355,7 +355,7 @@ export function useAiTravelGuidePage() {
           const { plan } = await generateTravelGuide(
             activityLegacyId,
             {
-              ...form,
+              ...normalizeAiGuidePlanFormValues(form),
               guideId,
               forceRegenerate: true,
             },
@@ -374,6 +374,7 @@ export function useAiTravelGuidePage() {
           };
           saveTravelGuideDetail(guideId, next);
           setPayload(next);
+          void refreshMyActivitiesAfterEngagement();
         } catch (error) {
           const message =
             error instanceof Error
@@ -479,9 +480,10 @@ export function useAiTravelGuidePage() {
     handleGuideSheetSubmit,
     guideDefaultNights,
     guideEventCity,
-    guideShowSelfDriveOption,
-    guideShowAccommodationOption,
-    activityRegion: activityQuery.data?.region,
-    guideSheetInitialValues: payload?.form ?? null,
+    guideShowDomesticOptions,
+    activityRegion: resolveActivityMapRegion(activityQuery.data),
+    guideSheetInitialValues: payload?.form
+      ? normalizeAiGuidePlanFormValues(payload.form)
+      : null,
   };
 }

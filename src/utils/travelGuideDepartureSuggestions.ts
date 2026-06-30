@@ -1,5 +1,6 @@
 import type { TravelGuidePlaceSuggestion } from '../api/sync/travelGuide';
 import { TRAVEL_GUIDE_DEPARTURE_CITIES } from '../constants/travelGuideDepartureCities';
+import { normalizePercentEncodedText } from './normalizePercentEncodedText';
 
 export type DepartureSuggestionItem = {
   label: string;
@@ -143,8 +144,13 @@ export function findDepartureCityAnchor(query: string): string | undefined {
   return findDepartureCityAnchorInText(q);
 }
 
+/** 展示 / 提交前统一解码（修复路由参数或缓存中的 percent-encoding） */
+export function formatTravelGuideDepartureLabel(value: string): string {
+  return normalizePercentEncodedText(value).trim();
+}
+
 export function normalizeDepartureForSubmit(value: string): string {
-  const trimmed = value.trim();
+  const trimmed = formatTravelGuideDepartureLabel(value);
   if (!trimmed) return trimmed;
   const endsWithAdmin =
     trimmed.endsWith('市') ||

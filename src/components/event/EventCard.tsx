@@ -52,7 +52,7 @@ const EventCardInner: React.FC<EventCardProps> = ({
   date = 'Sat 12/20 at 10:00 PM',
   location = 'The Ave Live',
   image = PLACEHOLDER_EVENT_HERO,
-  going = false,
+  going: _going = false,
   variant = 'list',
   category = '',
   region,
@@ -94,7 +94,7 @@ const EventCardInner: React.FC<EventCardProps> = ({
     subscribed: followed,
     submitting,
     handleSubscribe,
-  } = useActivityUpdateSubscribeAction(legacyId ?? undefined, going, {
+  } = useActivityUpdateSubscribeAction(legacyId ?? undefined, false, {
     toggleable: true,
     confirmUnfollow,
   });

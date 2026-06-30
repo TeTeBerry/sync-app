@@ -32,6 +32,20 @@ export type SceneCandidatesResult = {
   aiGenerated: true;
 };
 
+export type SceneDjBioResult = {
+  artistName: string;
+  bio: string;
+  genres: string[];
+  aiGenerated: true;
+};
+
+export type SceneFestivalStoryResult = {
+  title: string;
+  sections: { heading?: string; body: string }[];
+  sources: string[];
+  aiGenerated: true;
+};
+
 export type SceneEffectHandlers = {
   onInsightLine?: (line: SceneInsightLine) => void;
   onReorderPosts?: (result: SceneReorderPostsResult) => void;
@@ -39,6 +53,8 @@ export type SceneEffectHandlers = {
   onKnowledgeCard?: (card: KnowledgeCardPayload) => void;
   onFilterActivities?: (result: SceneFilterActivitiesResult) => void;
   onCandidates?: (result: SceneCandidatesResult) => void;
+  onDjBio?: (result: SceneDjBioResult) => void;
+  onFestivalStory?: (result: SceneFestivalStoryResult) => void;
 };
 
 export type ApplySceneEffectsResult = {
@@ -48,6 +64,8 @@ export type ApplySceneEffectsResult = {
   knowledgeCard: KnowledgeCardPayload | null;
   filterActivities: SceneFilterActivitiesResult | null;
   candidates: SceneCandidatesResult | null;
+  djBio: SceneDjBioResult | null;
+  festivalStory: SceneFestivalStoryResult | null;
 };
 
 export function applySceneEffects(
@@ -60,6 +78,8 @@ export function applySceneEffects(
   let knowledgeCard: KnowledgeCardPayload | null = null;
   let filterActivities: SceneFilterActivitiesResult | null = null;
   let candidates: SceneCandidatesResult | null = null;
+  let djBio: SceneDjBioResult | null = null;
+  let festivalStory: SceneFestivalStoryResult | null = null;
 
   for (const effect of effects ?? []) {
     switch (effect.type) {
@@ -110,6 +130,26 @@ export function applySceneEffects(
         handlers.onCandidates?.(candidates);
         break;
       }
+      case 'dj_bio': {
+        djBio = {
+          artistName: effect.artistName,
+          bio: effect.bio,
+          genres: effect.genres ?? [],
+          aiGenerated: effect.aiGenerated,
+        };
+        handlers.onDjBio?.(djBio);
+        break;
+      }
+      case 'festival_story': {
+        festivalStory = {
+          title: effect.title,
+          sections: effect.sections,
+          sources: effect.sources,
+          aiGenerated: effect.aiGenerated,
+        };
+        handlers.onFestivalStory?.(festivalStory);
+        break;
+      }
       default:
         break;
     }
@@ -122,6 +162,8 @@ export function applySceneEffects(
     knowledgeCard,
     filterActivities,
     candidates,
+    djBio,
+    festivalStory,
   };
 }
 

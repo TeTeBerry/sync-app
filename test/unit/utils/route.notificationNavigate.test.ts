@@ -42,6 +42,7 @@ vi.mock('@/stores/navigationStore', () => ({
       setActiveActivityLegacyId: vi.fn(),
       beginRouteTransition: vi.fn(),
       endRouteTransition: vi.fn(),
+      setEventDetailSearchPrefillIntent: vi.fn(),
     }),
   },
 }));
@@ -97,5 +98,36 @@ describe('navigateFromNotification', () => {
     expect(url).toContain('postId=post-1');
     expect(url).toContain('focusPosts=1');
     expect(url).toContain('openComments=1');
+  });
+
+  it('opens lineup page for proactive nudge with openLineup', async () => {
+    const { navigateFromNotification } = await import('@/utils/route');
+    const opened = await navigateFromNotification({
+      type: 'proactive_nudge',
+      activityLegacyId: 4,
+      nudgeRule: 'N2',
+      openLineup: true,
+    });
+
+    expect(opened).toBe(true);
+    const url = String(vi.mocked(Taro.navigateTo).mock.calls[0]?.[0]?.url ?? '');
+    expect(url).toContain('activity-lineup');
+  });
+
+  it('opens event detail with buddy post sheet for proactive nudge N1', async () => {
+    const { navigateFromNotification } = await import('@/utils/route');
+    const opened = await navigateFromNotification({
+      type: 'proactive_nudge',
+      activityLegacyId: 4,
+      nudgeRule: 'N1',
+      openBuddyPost: true,
+      focusPosts: true,
+    });
+
+    expect(opened).toBe(true);
+    const url = String(vi.mocked(Taro.navigateTo).mock.calls[0]?.[0]?.url ?? '');
+    expect(url).toContain('event-detail');
+    expect(url).toContain('openBuddyPost=1');
+    expect(url).toContain('focusPosts=1');
   });
 });

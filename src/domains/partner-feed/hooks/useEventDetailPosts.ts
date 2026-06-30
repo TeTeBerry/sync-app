@@ -5,8 +5,14 @@ import { updatePostRecruit } from '../../../api/sync/posts';
 import { useEventPostsInfiniteQuery } from '../../../hooks/useEventPostsInfiniteQuery';
 import { requireAuth } from '../../../utils/authGate';
 import { deletePostWithFeedback } from '../../../utils/deletePostFeedback';
-import { scrollElementToCenter } from '../../../utils/scrollToCenter';
+import {
+  scrollElementToCenter,
+  scrollElementToReveal,
+} from '../../../utils/scrollToCenter';
+import { postCommentComposerId } from '../../../components/post/postCommentComposerId';
 import type { EventDetailPost } from '@/types/partner';
+import type { BuddyPostComposeCandidate } from '@/types/partner';
+import type { RecruitApplyComposeResult } from './useRecruitApplyCompose';
 import {
   EVENT_POST_ESTIMATED_HEIGHT_PX,
   EVENT_POSTS_INITIAL_RENDER,
@@ -36,6 +42,16 @@ export type OpenPostCommentsOptions = {
 
 export const EVENT_DETAIL_SCROLL_ID = 'event-detail-scroll';
 
+const TAB_BAR_SCROLL_INSET_PX = 72;
+const COMPOSER_KEYBOARD_PADDING_PX = 16;
+
+function resolveComposerBottomInset(keyboardHeight?: number): number {
+  if (keyboardHeight != null && keyboardHeight > 0) {
+    return keyboardHeight + COMPOSER_KEYBOARD_PADDING_PX;
+  }
+  return TAB_BAR_SCROLL_INSET_PX;
+}
+
 type EventPostsQuery = ReturnType<typeof useEventPostsInfiniteQuery>;
 
 export type UseEventDetailPostsParams = {
@@ -46,7 +62,10 @@ export type UseEventDetailPostsParams = {
   highlightPostId?: string;
   openCommentsOnMount?: boolean;
   onTravelGuidePrefillDismiss?: (activityLegacyId: number, guideId: string) => void;
-  buildApplyCommentDraft?: (post: EventDetailPost) => string;
+  composeApplyJoin?: (
+    post: EventDetailPost,
+  ) => Promise<RecruitApplyComposeResult | null>;
+  buildFallbackApplyDraft?: (post: EventDetailPost) => string;
 };
 
 export function useEventDetailPosts({
@@ -57,14 +76,27 @@ export function useEventDetailPosts({
   highlightPostId = '',
   openCommentsOnMount = false,
   onTravelGuidePrefillDismiss,
-  buildApplyCommentDraft,
+  composeApplyJoin,
+  buildFallbackApplyDraft,
 }: UseEventDetailPostsParams) {
   const { profile: matchProfile } = useBuddyMatchProfile();
   const [expandedCommentPostIds, setExpandedCommentPostIds] = useState<Set<string>>(
     () => new Set(),
   );
+  const [applyJoinHintPostIds, setApplyJoinHintPostIds] = useState<Set<string>>(
+    () => new Set(),
+  );
   const [commentDraftByPostId, setCommentDraftByPostId] = useState<
     Record<string, string>
+  >({});
+  const [applyComposeLoadingByPostId, setApplyComposeLoadingByPostId] = useState<
+    Record<string, boolean>
+  >({});
+  const [applyComposeCandidatesByPostId, setApplyComposeCandidatesByPostId] = useState<
+    Record<string, BuddyPostComposeCandidate[]>
+  >({});
+  const [applyComposeDisclaimerByPostId, setApplyComposeDisclaimerByPostId] = useState<
+    Record<string, string | null>
   >({});
   const autoOpenedCommentsRef = useRef<string | null>(null);
 
@@ -228,6 +260,33 @@ export function useEventDetailPosts({
     [loadedPostItems, ensureIndexVisible, setScrollTop],
   );
 
+  const ensureComposerVisible = useCallback(
+    (postId: string, keyboardHeight?: number) => {
+      const bottomInset = resolveComposerBottomInset(keyboardHeight);
+      const targetSelector = `#${postCommentComposerId(postId)}`;
+      const scrollViewSelector = `#${EVENT_DETAIL_SCROLL_ID}`;
+
+      void scrollElementToReveal(
+        scrollViewSelector,
+        targetSelector,
+        setScrollTop,
+        bottomInset,
+      ).then((revealed) => {
+        if (!revealed) {
+          setTimeout(() => {
+            void scrollElementToReveal(
+              scrollViewSelector,
+              targetSelector,
+              setScrollTop,
+              bottomInset,
+            );
+          }, 150);
+        }
+      });
+    },
+    [setScrollTop],
+  );
+
   const handleDeletePost = useCallback(
     async (post: EventDetailPost) => {
       const ok = await confirm({
@@ -355,7 +414,31 @@ export function useEventDetailPosts({
       next.delete(postId);
       return next;
     });
+    setApplyJoinHintPostIds((prev) => {
+      if (!prev.has(postId)) return prev;
+      const next = new Set(prev);
+      next.delete(postId);
+      return next;
+    });
     setCommentDraftByPostId((prev) => {
+      if (!(postId in prev)) return prev;
+      const next = { ...prev };
+      delete next[postId];
+      return next;
+    });
+    setApplyComposeLoadingByPostId((prev) => {
+      if (!(postId in prev)) return prev;
+      const next = { ...prev };
+      delete next[postId];
+      return next;
+    });
+    setApplyComposeCandidatesByPostId((prev) => {
+      if (!(postId in prev)) return prev;
+      const next = { ...prev };
+      delete next[postId];
+      return next;
+    });
+    setApplyComposeDisclaimerByPostId((prev) => {
       if (!(postId in prev)) return prev;
       const next = { ...prev };
       delete next[postId];
@@ -367,14 +450,53 @@ export function useEventDetailPosts({
     (postId: string) => {
       requireAuth(() => {
         const post = loadedPostItems.find((item) => item.post.id === postId)?.post;
-        if (!post || !buildApplyCommentDraft) {
+        if (!post) {
           openPostComments(postId);
           return;
         }
-        openPostComments(postId, { draft: buildApplyCommentDraft(post) });
+
+        openPostComments(postId);
+        setApplyJoinHintPostIds((prev) => new Set(prev).add(postId));
+        setApplyComposeLoadingByPostId((prev) => ({ ...prev, [postId]: true }));
+
+        void (async () => {
+          let draft = buildFallbackApplyDraft?.(post)?.trim() ?? '';
+          try {
+            const composed = composeApplyJoin ? await composeApplyJoin(post) : null;
+            if (composed?.candidates?.length) {
+              setApplyComposeCandidatesByPostId((prev) => ({
+                ...prev,
+                [postId]: composed.candidates,
+              }));
+              setApplyComposeDisclaimerByPostId((prev) => ({
+                ...prev,
+                [postId]: composed.disclaimer,
+              }));
+              draft = composed.candidates[0]?.text?.trim() || draft;
+            }
+          } catch {
+            // fallback draft below
+          }
+
+          if (draft) {
+            setCommentDraftByPostId((prev) => ({ ...prev, [postId]: draft }));
+          }
+          setApplyComposeLoadingByPostId((prev) => ({ ...prev, [postId]: false }));
+        })();
       }, 'social');
     },
-    [buildApplyCommentDraft, loadedPostItems, openPostComments],
+    [buildFallbackApplyDraft, composeApplyJoin, loadedPostItems, openPostComments],
+  );
+
+  const selectApplyCandidate = useCallback((postId: string, text: string) => {
+    const trimmed = text.trim();
+    if (!trimmed) return;
+    setCommentDraftByPostId((prev) => ({ ...prev, [postId]: trimmed }));
+  }, []);
+
+  const getShowApplyJoinHint = useCallback(
+    (postId: string) => applyJoinHintPostIds.has(postId),
+    [applyJoinHintPostIds],
   );
 
   const getCommentDraft = useCallback(
@@ -400,6 +522,12 @@ export function useEventDetailPosts({
         delete next[updated.id];
         return next;
       });
+      setApplyJoinHintPostIds((prev) => {
+        if (!prev.has(updated.id)) return prev;
+        const next = new Set(prev);
+        next.delete(updated.id);
+        return next;
+      });
       postsQuery.patchItem(updated);
     },
     [postsQuery],
@@ -417,6 +545,7 @@ export function useEventDetailPosts({
     handleListScroll,
     handleScrollToLower,
     scrollToElement,
+    ensureComposerVisible,
     handleDeletePost,
     handleRecruitStatusToggle,
     handleRecruitSlotsAdjust,
@@ -424,11 +553,20 @@ export function useEventDetailPosts({
     closePostComments,
     openApplyJoinComments,
     getCommentDraft,
+    getShowApplyJoinHint,
+    getApplyComposeLoading: (postId: string) =>
+      Boolean(applyComposeLoadingByPostId[postId]),
+    getApplyComposeCandidates: (postId: string) =>
+      applyComposeCandidatesByPostId[postId],
+    getApplyComposeDisclaimer: (postId: string) =>
+      applyComposeDisclaimerByPostId[postId] ?? null,
+    selectApplyCandidate,
     commentDraftByPostId,
     handleCommentSubmitted,
     searchQuery: search.query,
     setSearchQuery: search.setQuery,
     applyTravelGuideSearchPrefill: search.applyTravelGuidePrefill,
+    applySearchPrefill: search.applySearchPrefill,
     clearSearchQuery: search.clearSearch,
     searchActive: search.isActive,
     searchLoading: search.isSearching,

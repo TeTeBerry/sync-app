@@ -17,6 +17,7 @@ import {
 import { useEventList, useHomeSummary } from '@/hooks/useSyncApi';
 import { resolveEventCardLegacyId } from '@/utils/apiMappers';
 import { isLoggedIn } from '@/utils/authStorage';
+import { hydrateActivitySubscriptionStore } from '@/stores/activitySubscriptionActions';
 import {
   STALE_ACTIVITIES_LIST_MS,
   STALE_HOME_SUMMARY_MS,
@@ -110,6 +111,9 @@ export function useEventsPage() {
 
   useDidShow(() => {
     preloadHotRoutes(ROUTES.EVENTS);
+    if (isLoggedIn()) {
+      void hydrateActivitySubscriptionStore();
+    }
     const tabIntent = consumeEventsViewTabIntent();
     if (tabIntent) {
       setViewTab(tabIntent);

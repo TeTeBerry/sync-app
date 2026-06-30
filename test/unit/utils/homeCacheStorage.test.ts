@@ -5,6 +5,7 @@ import {
   afterHomeSummaryCommitted,
   clearSessionCaches,
   hydrateAppCachesFromStorage,
+  patchPersistedHomeSummaryGoingFlag,
   persistActivities,
   persistHomeSummary,
   persistProfileSummary,
@@ -67,6 +68,20 @@ describe('homeCacheStorage', () => {
 
     hydrateAppCachesFromStorage();
     expect(getCacheData<HomeSummary>(['home', 'summary'])).toEqual(mockSummary);
+  });
+
+  it('patchPersistedHomeSummaryGoingFlag updates stored signup event', () => {
+    persistHomeSummary({
+      ...mockSummary,
+      signupEvents: [{ ...mockSummary.signupEvents[0], id: 8, going: true }],
+    });
+    invalidateCache(['home']);
+
+    const patched = patchPersistedHomeSummaryGoingFlag(8, false);
+    expect(patched).toBe(true);
+    expect(getCacheData<HomeSummary>(['home', 'summary'])?.signupEvents[0]?.going).toBe(
+      false,
+    );
   });
 
   it('persists and hydrates activities list', () => {

@@ -1,0 +1,45 @@
+{
+  "apis": [
+    {
+      "name": "searchPublicRecruits",
+      "description": "检索某场活动的公开组队招募帖（非配对撮合，平台不保证组满）",
+      "_meta": {
+        "ui": {
+          "componentPath": "components/recruit-list-card/index"
+        }
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "activityLegacyId": {
+            "type": "number",
+            "description": "活动 legacyId"
+          },
+          "query": {
+            "type": "string",
+            "description": "检索条件，如出发地、人数、曲风等"
+          }
+        },
+        "required": ["activityLegacyId", "query"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "totalMatched": { "type": "number" },
+          "posts": { "type": "array" },
+          "filterLabels": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "query": { "type": "string" }
+        }
+      }
+    }
+  ],
+  "components": [
+    {
+      "path": "components/recruit-list-card/index",
+      "relatedPage": "/packageEvent/pages/event-detail/index"
+    }
+  ]
+}

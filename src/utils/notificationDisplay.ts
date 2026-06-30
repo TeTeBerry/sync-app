@@ -12,6 +12,7 @@ export function categoryFromInteractionType(
 ): NotificationCategory {
   switch (type) {
     case 'activity_update':
+    case 'proactive_nudge':
     case 'post_rejected':
     case 'post_hidden':
     case 'activity':

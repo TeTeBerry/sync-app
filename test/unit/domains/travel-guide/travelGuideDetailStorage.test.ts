@@ -60,6 +60,27 @@ describe('travelGuideDetailStorage', () => {
     expect(loaded?.form.departure).toBe('上海');
   });
 
+  it('decodes encoded departure when loading cached payload', async () => {
+    const { loadTravelGuideDetail } =
+      await import('@/domains/travel-guide/utils/travelGuideDetailStorage');
+
+    storage.set('sync:travel-guide-detail:guide-encoded', {
+      ...samplePayload(),
+      plan: {
+        ...samplePayload().plan,
+        departure: '%E6%85%A7%E6%99%BA%C2%B7%E4%BB%81%E6%81%92',
+      },
+      form: {
+        ...samplePayload().form,
+        departure: '%E6%85%A7%E6%99%BA%C2%B7%E4%BB%81%E6%81%92',
+      },
+    });
+
+    const loaded = loadTravelGuideDetail('guide-encoded');
+    expect(loaded?.plan.departure).toBe('慧智·仁恒');
+    expect(loaded?.form.departure).toBe('慧智·仁恒');
+  });
+
   it('finds latest guide via activity index without scanning all keys', async () => {
     const { saveTravelGuideDetail, findLatestTravelGuideForActivity } =
       await import('@/domains/travel-guide/utils/travelGuideDetailStorage');

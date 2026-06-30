@@ -11,3 +11,5 @@ export * from './setVote';
 export * from './sceneRun';
 export * from './festivalPlanProgress';
 export * from './reports';
+export * from './goals';
+export * from './posterBackground';

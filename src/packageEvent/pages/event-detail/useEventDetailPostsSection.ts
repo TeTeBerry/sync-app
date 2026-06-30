@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDidShow } from '@tarojs/taro';
 import { useEventPostsInfiniteQuery } from '../../../hooks/useEventPostsInfiniteQuery';
 import {
@@ -6,6 +6,7 @@ import {
   EVENT_DETAIL_SCROLL_ID,
   useEventDetailBuddyPost,
   useEventDetailPosts,
+  useRecruitApplyCompose,
 } from '@/domains/partner-feed';
 import {
   dismissTravelGuideSearchPrefill,
@@ -19,7 +20,12 @@ import { scrollElementToCenter } from '../../../utils/scrollToCenter';
 import { useOverlayLockStore } from '../../../stores/overlayLockStore';
 import { t } from '@/i18n/translate';
 import type { ConfirmDialogOptions } from '../../../hooks/useConfirmDialog';
-import type { EventDetailBuddyPostNavIntent } from '../../../stores/types';
+import type {
+  EventDetailBuddyPostNavIntent,
+  EventDetailSearchPrefillNavIntent,
+} from '../../../stores/types';
+import { fetchGoalArtifact } from '../../../api/sync/goals';
+import { isApiEnabled } from '../../../constants/api';
 
 export type UseEventDetailPostsSectionOptions = {
   eventId: number;
@@ -27,6 +33,7 @@ export type UseEventDetailPostsSectionOptions = {
   focusPostsOnMount: boolean;
   openBuddyPostOnMount: boolean;
   openCommentsOnMount: boolean;
+  artifactId?: string;
   secondaryReady: boolean;
   invalidEventId: boolean;
   activityTitle?: string;
@@ -40,6 +47,7 @@ export type UseEventDetailPostsSectionOptions = {
   getLiveScrollTop: () => number;
   frozenTop: number | null;
   buddyPostNavIntent: EventDetailBuddyPostNavIntent | null;
+  searchPrefillNavIntent: EventDetailSearchPrefillNavIntent | null;
 };
 
 export function useEventDetailPostsSection({
@@ -48,6 +56,7 @@ export function useEventDetailPostsSection({
   focusPostsOnMount,
   openBuddyPostOnMount,
   openCommentsOnMount,
+  artifactId,
   secondaryReady,
   invalidEventId,
   activityTitle,
@@ -61,11 +70,16 @@ export function useEventDetailPostsSection({
   getLiveScrollTop,
   frozenTop,
   buddyPostNavIntent,
+  searchPrefillNavIntent,
 }: UseEventDetailPostsSectionOptions) {
   const focusPostsScrolledRef = useRef(false);
   const travelGuidePrefillScrolledRef = useRef(false);
+  const notificationPrefillScrolledRef = useRef(false);
   const buddyPostSheetOpenedRef = useRef(false);
+  const [artifactPrefill, setArtifactPrefill] =
+    useState<EventDetailBuddyPostNavIntent | null>(null);
   const appliedTravelGuidePrefillRef = useRef<string | null>(null);
+  const appliedNotificationPrefillRef = useRef<string | null>(null);
 
   const displayIdentity = useDisplayUserIdentity();
 
@@ -74,13 +88,51 @@ export function useEventDetailPostsSection({
   });
 
   const buddyPostPrefill =
-    buddyPostNavIntent?.activityLegacyId === eventId
+    artifactPrefill ??
+    (buddyPostNavIntent?.activityLegacyId === eventId
       ? {
           initialValues: buddyPostNavIntent.initialValues,
           prefillSummaryLines: buddyPostNavIntent.prefillSummaryLines,
           prefillBannerTitle: buddyPostNavIntent.prefillBannerTitle,
         }
-      : undefined;
+      : undefined);
+
+  useEffect(() => {
+    const trimmed = artifactId?.trim();
+    if (!trimmed || !isApiEnabled() || invalidEventId || !secondaryReady) {
+      return;
+    }
+    let cancelled = false;
+    void (async () => {
+      try {
+        const artifact = await fetchGoalArtifact(trimmed);
+        if (cancelled || !artifact?.payload?.candidates?.length) {
+          return;
+        }
+        const firstCandidate = artifact.payload.candidates[0]?.text?.trim();
+        const today = new Date().toISOString().slice(0, 10);
+        setArtifactPrefill({
+          activityLegacyId: eventId,
+          initialValues: {
+            dateStart: today,
+            dateEnd: today,
+            location: '',
+            headcount: '2',
+            tags: ['team'],
+            recruitUnityTags: [],
+            note: firstCandidate,
+          },
+          prefillBannerTitle: '微信 AI 招募草稿',
+          prefillSummaryLines: firstCandidate ? [firstCandidate] : undefined,
+        });
+      } catch {
+        // ignore — user can still open sheet manually
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [artifactId, eventId, invalidEventId, secondaryReady]);
 
   const handleTravelGuidePrefillDismiss = useCallback(
     (activityLegacyId: number, guideId: string) => {
@@ -114,7 +166,9 @@ export function useEventDetailPostsSection({
     accountRiskEnabled: secondaryReady,
   });
 
-  const buildApplyCommentDraft = useCallback(
+  const { composeApplyDraft } = useRecruitApplyCompose(eventId);
+
+  const buildFallbackApplyDraft = useCallback(
     (post: EventDetailPost) => {
       const latestGuide = findLatestTravelGuideForActivity(eventId);
       return buildRecruitApplyCommentDraft({
@@ -140,14 +194,48 @@ export function useEventDetailPostsSection({
     highlightPostId,
     openCommentsOnMount,
     onTravelGuidePrefillDismiss: handleTravelGuidePrefillDismiss,
-    buildApplyCommentDraft,
+    composeApplyJoin: composeApplyDraft,
+    buildFallbackApplyDraft,
   });
 
   const {
     searchActive: postsSearchActive,
     searchQuery: postsSearchQuery,
     applyTravelGuideSearchPrefill,
+    applySearchPrefill,
   } = posts;
+
+  const tryApplyNotificationSearchPrefill = useCallback(() => {
+    if (
+      !searchPrefillNavIntent ||
+      searchPrefillNavIntent.activityLegacyId !== eventId ||
+      postsSearchActive
+    ) {
+      return false;
+    }
+
+    const searchQuery = searchPrefillNavIntent.searchQuery.trim();
+    if (!searchQuery) {
+      return false;
+    }
+    if (appliedNotificationPrefillRef.current === searchQuery) {
+      return false;
+    }
+    if (postsSearchQuery.trim() === searchQuery) {
+      appliedNotificationPrefillRef.current = searchQuery;
+      return false;
+    }
+
+    applySearchPrefill(searchQuery);
+    appliedNotificationPrefillRef.current = searchQuery;
+    return true;
+  }, [
+    applySearchPrefill,
+    eventId,
+    postsSearchActive,
+    postsSearchQuery,
+    searchPrefillNavIntent,
+  ]);
 
   const tryApplyTravelGuideSearchPrefill = useCallback(() => {
     if (!Number.isFinite(eventId) || eventId <= 0 || postsSearchActive) {
@@ -203,6 +291,22 @@ export function useEventDetailPostsSection({
       setScrollTop,
     );
   }, [focusPostsOnMount, postsLoading, setScrollTop]);
+
+  useEffect(() => {
+    if (
+      !tryApplyNotificationSearchPrefill() ||
+      postsLoading ||
+      notificationPrefillScrolledRef.current
+    ) {
+      return;
+    }
+    notificationPrefillScrolledRef.current = true;
+    void scrollElementToCenter(
+      `#${EVENT_DETAIL_SCROLL_ID}`,
+      '#event-detail-posts',
+      setScrollTop,
+    );
+  }, [postsLoading, setScrollTop, tryApplyNotificationSearchPrefill]);
 
   useEffect(() => {
     if (

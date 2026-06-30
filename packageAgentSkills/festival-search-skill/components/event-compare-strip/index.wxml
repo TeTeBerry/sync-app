@@ -1,0 +1,49 @@
+<view class="compare-strip card-surface card-aspect-16-9">
+  <view class="card-accent-bar" />
+  <view class="compare-strip-top card-pad">
+    <view class="card-header-row">
+      <view class="card-col">
+        <text class="card-kicker">检索结果</text>
+        <text class="card-subtitle">电音节对比</text>
+      </view>
+      <text wx:if="{{totalMatched > 0}}" class="card-count-badge">{{totalMatched}} 场</text>
+    </view>
+  </view>
+  <view wx:if="{{events.length === 0}}" class="card-empty-center">
+    <text class="card-caption">未找到匹配活动</text>
+    <text class="card-meta">试试换个城市或放宽日期</text>
+  </view>
+  <scroll-view wx:else class="compare-strip-scroll" scroll-x="true" enable-flex>
+    <view class="compare-strip-row">
+      <view
+        wx:for="{{events}}"
+        wx:key="legacyId"
+        class="compare-strip-item card-inner-tile"
+        hover-class="card-hover"
+        bindtap="onTapEvent"
+        data-legacy-id="{{item.legacyId}}"
+        data-name="{{item.name}}"
+      >
+        <image
+          wx:if="{{item.heroImageUrl}}"
+          class="compare-strip-poster"
+          src="{{item.heroImageUrl}}"
+          mode="aspectFill"
+        />
+        <view wx:else class="compare-strip-poster compare-strip-poster--placeholder">
+          <text class="card-cover-letter">{{item.initial}}</text>
+        </view>
+        <view class="compare-strip-body card-pad-sm">
+          <text class="compare-strip-name card-ellipsis-1">{{item.name}}</text>
+          <text class="compare-strip-meta card-ellipsis-1">
+            {{item.date}}{{item.date && item.location ? ' · ' : ''}}{{item.location}}
+          </text>
+          <text class="card-cta-link compare-strip-action">查看详情 →</text>
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+  <view class="card-foot-bar-col">
+    <text class="card-disclaimer">平台仅提供资讯，不售票</text>
+  </view>
+</view>

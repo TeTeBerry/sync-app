@@ -850,6 +850,15 @@
   }
 }
 
+.s-personality-result__poster-hint {
+  display: block;
+  margin-bottom: 8px;
+  text-align: center;
+  color: #8e8e93;
+  font-size: var(--s-type-caption);
+  line-height: 1.4;
+}
+
 .s-personality-result__secondary-actions {
   display: flex;
   gap: 8px;

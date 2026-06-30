@@ -62,8 +62,7 @@ export const enUS: MessageTree = {
     disclaimerAria: 'Platform notice',
   },
   home: {
-    brandSubtitle:
-      'Festival info & public crew recruit; AI filtering for recruit posts',
+    brandSubtitle: 'Peace · Love · Unity · Respect',
     heatActive: '{{count}} people recently selected events',
     heatIdle: 'New events updated regularly',
     featuredTitle: 'Hot Asian Festivals',
@@ -111,6 +110,7 @@ export const enUS: MessageTree = {
     viewEvent: 'View event',
     newReplies: '{{count}} new public replies to your recruit post',
     newRepliesMax: '99+ new public replies to your recruit post',
+    watchLineupSubscribed: 'Lineup alerts on',
   },
   countdown: {
     days: 'd',
@@ -244,6 +244,7 @@ export const enUS: MessageTree = {
     postsTitle: 'My posts',
     ongoingActivities: '{{count}} ongoing events',
     noActivitiesYet: 'No joined events yet',
+    noOngoingActivities: 'No ongoing events',
     postCount: '{{count}} posts',
     noPostsYet: 'No recruit posts yet',
     personalityNudge: {
@@ -285,6 +286,8 @@ export const enUS: MessageTree = {
       emptyTitle: 'No joined events yet',
       emptyHint: 'Join an event from the Events tab to see it here',
       updateAlertsOn: 'Update alerts on',
+      updateAlertsOffHint: 'Get notified when lineup or set times are updated',
+      resubscribeAction: 'Turn on alerts',
       status: {
         upcoming: 'Upcoming',
         registered: 'Joined',
@@ -488,6 +491,7 @@ export const enUS: MessageTree = {
     category: 'Festival',
     aiTag: '✨ {{cta}}',
     openDetail: 'View details',
+    addToCalendar: 'Add to calendar',
     opening: 'Opening…',
     activityFallback: 'this event',
     follow: 'Subscribe to {{title}}',
@@ -506,9 +510,9 @@ export const enUS: MessageTree = {
     unfollowConfirmTitle: 'Unsubscribe?',
     unfollowConfirmTitleNamed: 'Unsubscribe from {{title}}?',
     unfollowConfirmMessage:
-      'You will stop receiving lineup and schedule updates, and this event will be removed from My Events.',
+      'You will stop receiving lineup and schedule update alerts for this event.',
     unfollowConfirmMessageNamed:
-      'Unsubscribe from "{{title}}"? You will stop receiving updates and it will be removed from My Events.',
+      'Unsubscribe from "{{title}}"? You will stop receiving lineup and schedule update alerts.',
     unfollowConfirmAction: 'Unsubscribe',
     lineupPublished: 'Lineup published',
     lineupPending: 'Lineup pending',
@@ -563,6 +567,7 @@ export const enUS: MessageTree = {
   activityInfo: {
     status: {
       upcoming: 'Upcoming',
+      preEvent: 'Warm-up',
       inProgress: 'In progress',
       ended: 'Ended',
     },
@@ -577,6 +582,12 @@ export const enUS: MessageTree = {
     unpublishedBadge: 'Pending',
     unpublishedFeatureLineup: 'Lineup drop',
     unpublishedFeatureSchedule: 'Set times',
+    festivalStory: {
+      title: 'About {{name}}',
+      loading: 'Generating summary…',
+      error: 'Could not generate. Try again later.',
+      regenerate: 'Regenerate',
+    },
   },
   performanceBundle: {
     staleBanner: 'Cached event info · updated {{time}} · follow on-site announcements',
@@ -636,6 +647,10 @@ export const enUS: MessageTree = {
   },
   eventDetail: {
     invalidActivity: 'Invalid event',
+    addToCalendar: 'Add to calendar',
+    addToCalendarSuccess: 'Added to your calendar',
+    addToCalendarFailed: 'Could not add to calendar. Try again later.',
+    calendarLinkCopied: 'Calendar link copied',
     travelGuideSubtitleGenerated: 'View your last transport, stay, and exit plan',
     travelGuideSubtitleNew: 'Transport · stay · exit tips',
     postsShowMore: '{{count}} more posts — tap to load',
@@ -679,6 +694,7 @@ export const enUS: MessageTree = {
     festivalPrepHintGuideGenerated: 'Travel guide ready · tap to view',
     festivalPrepHintGuidePreparing: 'Travel guide for this event is coming soon',
     recruitSectionTitle: 'Public recruit',
+    wechatAgentRecruit: 'Filter public recruits with WeChat AI',
     recruitRequiresNetwork: 'Public recruit posts require a network connection',
     loadFailed: 'Failed to load event info',
     retry: 'Retry',
@@ -754,6 +770,10 @@ export const enUS: MessageTree = {
     reportAria: 'Report comment',
     deleteSuccess: 'Comment deleted',
     deleteFailed: 'Failed to delete',
+    deleteConfirmTitle: 'Delete comment',
+    deleteConfirmMessage:
+      'This cannot be undone. Are you sure you want to delete this comment?',
+    deleteConfirmText: 'Delete',
   },
   report: {
     title: 'Report reason',
@@ -849,6 +869,7 @@ export const enUS: MessageTree = {
     driveYes: 'Self-drive',
     driveNo: 'Transit',
     accommodationTitle: 'Need accommodation',
+    accommodationHint: 'Turn off to skip hotels and stay budget',
     nightsLabel: 'Nights',
     nightsUnit: 'nights',
     decreaseAria: 'Decrease',
@@ -1186,7 +1207,8 @@ export const enUS: MessageTree = {
     savingPoster: 'Saving poster…',
     posterSaved: 'Saved to album',
     albumPermissionDenied: 'Album permission denied',
-    shareTitle: 'I\'m a "{{label}}" Raver — We Are One',
+    shareTitle: 'Find your soul DJ · {{label}}',
+    savePosterHint: 'Save your AI poster for Xiaohongshu or Moments',
     shareFallbackSuffix: 'Discover your Raver persona — We Are One',
     pendingDraft: 'Pending · Draft',
     switchToLocal: 'Switched to local search, found {{count}} public recruit posts',
@@ -1267,6 +1289,25 @@ export const enUS: MessageTree = {
     posterMyPicks: 'My picks',
     posterTop3: 'TOP 3',
     posterDisclaimer: 'Public recruits & info only — no ticketing or matching',
+  },
+  recruitPoster: {
+    badge: 'Public recruit',
+    sectionPublicRecruit: 'Recruit details',
+    disclaimer: 'Public recruit · not matching · no guarantee to fill',
+    save: 'Save recruit poster',
+    share: 'Share to group',
+    generating: 'Generating poster…',
+    saved: 'Saved to album',
+    albumPermissionDenied: 'Album permission denied',
+  },
+  countdownPoster: {
+    badge: 'Countdown',
+    disclaimer: 'Public recruits & info only — no ticketing or matching',
+    save: 'Save countdown poster',
+    generating: 'Generating poster…',
+    saved: 'Saved to album',
+    saveFailed: 'Save failed. Please try again.',
+    albumPermissionDenied: 'Album permission denied',
   },
   plur: {
     entry: {

@@ -21,3 +21,4 @@ export {
 export { buildRecruitApplyCommentDraft } from './utils/buildRecruitApplyCommentDraft';
 export { resolveUnityRecruitCount } from './utils/resolveUnityRecruitCount';
 export type { PrepNudgeAction } from './utils/eventDetailPlanningHint.util';
+export { useRecruitApplyCompose } from './hooks/useRecruitApplyCompose';

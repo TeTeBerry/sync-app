@@ -1,18 +1,32 @@
 import './HomeMyNextEvent.scss';
 import type { FC } from 'react';
-import { CalendarDays, ChevronRight, MessageCircle } from '../../../components/icons';
+import {
+  CalendarDays,
+  ChevronRight,
+  MessageCircle,
+  Bell,
+} from '../../../components/icons';
 import { Button } from '../../../components/ui';
 import type { HomeSummary } from '../../../types/backend';
 import type { FestivalPlanChecklist, FestivalPlanTask } from '@/domains/festival-plan';
 import { PLURR_RESPONSIBILITY_TOTAL } from '@/domains/festival-plan/plurResponsibilityChecklist';
 import { useT } from '@/hooks/useI18n';
 import { formatActivityLocationLabel } from '@/utils/formatActivityDisplay';
+import { daysUntilActivityStart } from '@/utils/activityStatus';
+import { saveCountdownPoster } from '@/domains/share';
+import { showAppToast } from '@/utils/appToast';
 import { Text, View } from '@tarojs/components';
+
+type HomeGoalSummary = {
+  id: string;
+  kind: string;
+};
 
 type HomeMyNextEventProps = {
   event: HomeSummary['signupEvents'][number];
   postEngagement?: HomeSummary['myNextEventPostEngagement'];
   festivalPlan?: FestivalPlanChecklist | null;
+  goals?: HomeGoalSummary[];
   onViewDetail: () => void;
   onOpenPosts: () => void;
   onOpenPostReplies?: () => void;
@@ -32,6 +46,7 @@ export const HomeMyNextEvent: FC<HomeMyNextEventProps> = ({
   event,
   postEngagement,
   festivalPlan,
+  goals,
   onViewDetail,
   onOpenPosts,
   onOpenPostReplies,
@@ -54,6 +69,24 @@ export const HomeMyNextEvent: FC<HomeMyNextEventProps> = ({
       : 0;
 
   const showPlurrProgress = plurrCheckedCount > 0;
+  const watchLineupGoals = goals?.filter((goal) => goal.kind === 'watch_lineup') ?? [];
+  const daysUntil = daysUntilActivityStart(event.date, event.title);
+  const showCountdownPoster = daysUntil != null && daysUntil > 0 && daysUntil <= 30;
+
+  const handleSaveCountdownPoster = async () => {
+    if (daysUntil == null) return;
+    try {
+      await saveCountdownPoster({
+        activityLegacyId: event.id,
+        activityName: event.title,
+        activityDate: event.date,
+        activityLocation: venue || undefined,
+        daysUntil,
+      });
+    } catch {
+      showAppToast('countdownPoster.saveFailed', { icon: 'none' });
+    }
+  };
 
   const handleProgressPress = () => {
     if (nextTask && onNextTaskPress) {
@@ -91,6 +124,19 @@ export const HomeMyNextEvent: FC<HomeMyNextEventProps> = ({
           {event.date}
           {venue ? ` · ${venue}` : ''}
         </Text>
+        {watchLineupGoals.length > 0 ? (
+          <View
+            className="s-home-next__status-tags"
+            aria-label={t('home.watchLineupSubscribed')}
+          >
+            <View className="s-home-next__status-tag">
+              <Bell size={12} color="#4cc9f0" strokeWidth={2.25} aria-hidden />
+              <Text className="s-home-next__status-tag-text">
+                {t('home.watchLineupSubscribed')}
+              </Text>
+            </View>
+          </View>
+        ) : null}
       </View>
 
       {showFestivalPlanProgress ? (
@@ -99,15 +145,15 @@ export const HomeMyNextEvent: FC<HomeMyNextEventProps> = ({
           onClick={handleProgressPress}
           role="button"
           aria-label={t('home.progressAria', {
-            completed: festivalPlan.completedCount,
-            total: festivalPlan.totalCount,
+            completed: festivalPlan!.completedCount,
+            total: festivalPlan!.totalCount,
           })}
         >
           <View className="s-home-next__plan-progress-head">
             <Text className="s-home-next__plan-progress-label">
               {t('home.progress', {
-                completed: festivalPlan.completedCount,
-                total: festivalPlan.totalCount,
+                completed: festivalPlan!.completedCount,
+                total: festivalPlan!.totalCount,
               })}
             </Text>
             {nextTask ? (
@@ -149,6 +195,16 @@ export const HomeMyNextEvent: FC<HomeMyNextEventProps> = ({
       ) : null}
 
       <View className="s-home-next__actions">
+        {showCountdownPoster ? (
+          <Button
+            className="s-home-next__btn s-home-next__btn--ghost"
+            onClick={() => void handleSaveCountdownPoster()}
+          >
+            <Text className="s-home-next__btn-text s-home-next__btn-text--ghost">
+              {t('countdownPoster.save')}
+            </Text>
+          </Button>
+        ) : null}
         <Button
           className="s-home-next__btn s-home-next__btn--primary"
           onClick={onOpenPosts}

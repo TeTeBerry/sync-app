@@ -1,5 +1,7 @@
 import Taro from '@tarojs/taro';
 import type { AiGuidePlanFormValues, TravelGuidePlan } from '@/types/travelGuide';
+import { normalizeAiGuidePlanFormValues } from '@/utils/normalizeUserProfileText';
+import { normalizePercentEncodedText } from '@/utils/normalizePercentEncodedText';
 import { markTravelGuideSearchPrefillPending } from './travelGuideSearchPrefillStorage';
 
 const STORAGE_PREFIX = 'sync:travel-guide-detail:';
@@ -20,16 +22,39 @@ function storageKey(guideId: string): string {
   return `${STORAGE_PREFIX}${guideId.trim()}`;
 }
 
+function normalizeTravelGuideForm(form: AiGuidePlanFormValues): AiGuidePlanFormValues {
+  return normalizeAiGuidePlanFormValues(form);
+}
+
+function normalizeTravelGuidePlan(plan: TravelGuidePlan): TravelGuidePlan {
+  const departure = normalizePercentEncodedText(plan.departure).trim();
+  if (departure === plan.departure) {
+    return plan;
+  }
+  return { ...plan, departure };
+}
+
+function normalizeTravelGuideDetailPayload(
+  payload: TravelGuideDetailPayload,
+): TravelGuideDetailPayload {
+  const form = normalizeTravelGuideForm(payload.form);
+  const plan = normalizeTravelGuidePlan(payload.plan);
+  if (form === payload.form && plan === payload.plan) {
+    return payload;
+  }
+  return { ...payload, form, plan };
+}
+
 export function saveTravelGuideDetail(
   guideId: string,
   payload: Omit<TravelGuideDetailPayload, 'createdAt'>,
 ): void {
   const id = guideId.trim();
   if (!id) return;
-  const record: TravelGuideDetailPayload = {
+  const record: TravelGuideDetailPayload = normalizeTravelGuideDetailPayload({
     ...payload,
     createdAt: new Date().toISOString(),
-  };
+  });
   Taro.setStorageSync(storageKey(id), record);
   if (payload.activityLegacyId != null && !Number.isNaN(payload.activityLegacyId)) {
     Taro.setStorageSync(latestIndexKey(payload.activityLegacyId), id);
@@ -47,7 +72,7 @@ export function loadTravelGuideDetail(
       | TravelGuideDetailPayload
       | undefined;
     if (!raw?.plan || !raw.form) return null;
-    return raw;
+    return normalizeTravelGuideDetailPayload(raw);
   } catch {
     return null;
   }

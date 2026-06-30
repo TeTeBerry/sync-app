@@ -7,7 +7,7 @@ import {
 describe('formatBuddyPreferencesSummary', () => {
   it('joins city genres and budget', () => {
     const summary = formatBuddyPreferencesSummary({
-      city: '上海',
+      city: '%E4%B8%8A%E6%B5%B7',
       favorGenres: ['Techno', 'House'],
       budgetLevel: 'medium',
     });

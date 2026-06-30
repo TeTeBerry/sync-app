@@ -2,11 +2,14 @@ import { getTravelGuideTitle } from '@/constants/aiCtaLabels';
 import { getAiTravelGuideDisclaimer } from '@/constants/aiDisclosure';
 import { t } from '@/i18n';
 import type { TravelGuidePlan } from '@/types/travelGuide';
+import { formatTravelGuideDepartureLabel } from '@/utils/travelGuideDepartureSuggestions';
 
 export function buildTravelGuideShareText(plan: TravelGuidePlan): string {
   const tripMeta = [
     plan.departure
-      ? t('travelGuide.departureChip', { departure: plan.departure })
+      ? t('travelGuide.departureChip', {
+          departure: formatTravelGuideDepartureLabel(plan.departure),
+        })
       : null,
     plan.headcount > 0
       ? t('travelGuide.headcountChip', { count: plan.headcount })

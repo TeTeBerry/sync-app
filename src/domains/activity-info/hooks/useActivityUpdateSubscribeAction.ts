@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { requireAuth } from '@/utils/authGate';
-import { isActivityUpdateSubscribedLocally } from '@/utils/activityUpdateSubscribeStorage';
+import { useActivitySubscriptionStore } from '@/stores/activitySubscriptionStore';
 import { runActivitySubscribeToggle } from '../utils/runActivitySubscribeToggle';
 
 type UseActivityUpdateSubscribeActionOptions = {
@@ -17,22 +17,14 @@ export function useActivityUpdateSubscribeAction(
 ) {
   const toggleable = options?.toggleable ?? true;
   const confirmUnfollow = options?.confirmUnfollow;
-  const [subscribed, setSubscribed] = useState(false);
-  const [serverFollowing, setServerFollowing] = useState(alreadyFollowing);
   const [submitting, setSubmitting] = useState(false);
-  const followed = serverFollowing || subscribed;
-
-  useEffect(() => {
-    setServerFollowing(alreadyFollowing);
-  }, [alreadyFollowing]);
-
-  useEffect(() => {
-    if (activityLegacyId == null || Number.isNaN(activityLegacyId)) {
-      setSubscribed(false);
-      return;
-    }
-    setSubscribed(isActivityUpdateSubscribedLocally(activityLegacyId));
-  }, [activityLegacyId]);
+  const hydrated = useActivitySubscriptionStore((state) => state.hydrated);
+  const subscribedToUpdates = useActivitySubscriptionStore((state) =>
+    activityLegacyId != null && !Number.isNaN(activityLegacyId)
+      ? state.hasWatchLineup(activityLegacyId)
+      : false,
+  );
+  const followed = hydrated ? subscribedToUpdates : alreadyFollowing;
 
   const handleSubscribe = useCallback(() => {
     if (
@@ -54,12 +46,8 @@ export function useActivityUpdateSubscribeAction(
             toggleable,
             confirmUnfollow,
           });
-          if (result.kind === 'subscribed') {
-            setSubscribed(true);
-            setServerFollowing(true);
-          } else if (result.kind === 'unsubscribed') {
-            setSubscribed(false);
-            setServerFollowing(false);
+          if (result.kind === 'noop') {
+            return;
           }
         } finally {
           setSubmitting(false);
