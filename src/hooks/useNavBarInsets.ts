@@ -21,9 +21,15 @@ export function useNavBarInsets(): NavBarInsets {
     try {
       const windowInfo = Taro.getWindowInfo();
       const statusBarHeight = windowInfo.statusBarHeight ?? 44;
+      if (process.env.TARO_ENV !== 'weapp') {
+        return {
+          paddingTop: statusBarHeight + TOP_GAP,
+          paddingRight: 16,
+        };
+      }
+
       const windowWidth = windowInfo.windowWidth ?? 375;
       const menuRect = Taro.getMenuButtonBoundingClientRect();
-
       if (menuRect && menuRect.width > 0 && menuRect.top > 0) {
         const capsuleReserve = windowWidth - menuRect.left + 8;
         // Align hero row with capsule top — do not pad to menu bottom (causes huge gap).

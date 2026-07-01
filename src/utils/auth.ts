@@ -162,3 +162,31 @@ export async function logout(): Promise<void> {
   clearPersonalityTestResult();
   clearAuth();
 }
+
+// ── H5 phone + SMS login ──────────────────────────────────
+
+export async function sendSmsCode(phone: string): Promise<{ ok: boolean }> {
+  if (process.env.TARO_ENV !== 'h5') {
+    throw new Error('sendSmsCode is only available on H5');
+  }
+  return apiPost<{ ok: boolean }>('/auth-h5/sms/send', { phone }, undefined, {
+    maxRetries: 0,
+  });
+}
+
+export async function loginWithPhone(
+  phone: string,
+  code: string,
+): Promise<AuthLoginResult> {
+  if (process.env.TARO_ENV !== 'h5') {
+    throw new Error('loginWithPhone is only available on H5');
+  }
+  const result = await apiPost<AuthLoginResult>(
+    '/auth-h5/sms/login',
+    { phone, code },
+    undefined,
+    { maxRetries: 0 },
+  );
+  await saveAuthResult(result);
+  return result;
+}

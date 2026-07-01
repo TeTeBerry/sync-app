@@ -13,23 +13,17 @@ type LocaleStatus = 'loading' | 'loaded' | 'error';
 // Helper function to detect browser language
 function detectBrowserLanguage(): AppLocale {
   try {
-    // Check if navigator.language is available
     if (typeof navigator !== 'undefined' && navigator.language) {
-      const browserLang = navigator.language.toLowerCase();
-
-      // Map browser language codes to supported locales
-      if (browserLang.startsWith('zh') || browserLang.startsWith('cn')) {
+      const lang = navigator.language.toLowerCase();
+      // Chinese → zh-CN; everything else → en-US
+      if (lang.startsWith('zh') || lang.startsWith('cn')) {
         return 'zh-CN';
       }
-      if (browserLang.startsWith('en')) {
-        return 'en-US';
-      }
+      return 'en-US';
     }
   } catch (error) {
     console.warn('Failed to detect browser language:', error);
   }
-
-  // Default fallback
   return 'zh-CN';
 }
 

@@ -43,9 +43,28 @@ export const h5Config = {
       maxAssetSize: (n: number) => void;
     };
     optimization: { splitChunks: (opts: object) => void };
+    resolve: { fallback: Record<string, string | false> };
+    plugin: (name: string) => { use: (plugin: unknown, args?: unknown[]) => void };
   }) {
     chain.performance.maxEntrypointSize(5 * 1024 * 1024);
     chain.performance.maxAssetSize(5 * 1024 * 1024);
+
+    // Webpack 5 no longer polyfills Node.js core modules in browser.
+    // Any require('crypto') / require('path') in dependencies must be stubbed.
+    chain.resolve.fallback = {
+      ...(chain.resolve.fallback as Record<string, string | false> | undefined),
+      crypto: false,
+      fs: false,
+      net: false,
+      tls: false,
+      path: false,
+      stream: false,
+      os: false,
+      http: false,
+      https: false,
+      zlib: false,
+    };
+
     chain.optimization.splitChunks({
       chunks: 'all',
       maxInitialRequests: 25,
@@ -77,6 +96,9 @@ export const h5Config = {
   },
   devServer: {
     historyApiFallback: true,
+    client: {
+      overlay: false,
+    },
     proxy: {
       '/api': {
         target: 'http://localhost:3000',
